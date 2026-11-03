@@ -11,16 +11,22 @@ export const ALLOWED_TTL_MS = 12 * 60 * 60 * 1000
 export const RECHECK_AFTER_MS = 10 * 60 * 1000
 const keyOf = (uid: string) => `praticos.webAccess.${uid}`
 
+/** When the "yes" was saved, or null. A time in the future was not written by us (or the clock moved): invalid. */
+function savedAt(uid: string, now: number): number | null {
+  const saved = Number(readStorage(keyOf(uid)) ?? 0)
+  return Number.isFinite(saved) && saved > 0 && saved <= now ? saved : null
+}
+
 /** A remembered "yes" still valid at `now`. */
 export function rememberedAccess(uid: string, now = Date.now()): boolean {
-  const saved = Number(readStorage(keyOf(uid)) ?? 0)
-  return saved > 0 && now - saved < ALLOWED_TTL_MS
+  const saved = savedAt(uid, now)
+  return saved !== null && now - saved < ALLOWED_TTL_MS
 }
 
 /** Remembered "yes" old enough to confirm again in the background. */
 export function shouldRecheck(uid: string, now = Date.now()): boolean {
-  const saved = Number(readStorage(keyOf(uid)) ?? 0)
-  return now - saved >= RECHECK_AFTER_MS
+  const saved = savedAt(uid, now)
+  return saved === null || now - saved >= RECHECK_AFTER_MS
 }
 
 export function rememberAccess(uid: string, allowed: boolean, now = Date.now()): void {

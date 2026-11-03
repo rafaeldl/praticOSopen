@@ -11,8 +11,11 @@ import { roleHasPermission } from './lib/permissions'
 import { startPrefs } from './lib/prefs'
 import { onSessionHint, startSession } from './lib/session'
 import { router } from './router'
+import { watchForStaleBuild } from './lib/stale-build'
 
 startPrefs()
+// A tab from before a deploy: reload once to get the new chunks.
+watchForStaleBuild((handler) => router.onError(handler))
 // Opening on the list: its query leaves with the session documents, not after them.
 // The screen applies the company's own rules again when it renders.
 onSessionHint(({ uid, companyId, role }) => {

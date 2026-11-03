@@ -21,7 +21,10 @@ const check = (ok, message) => {
 
 // 1. Config: /app goes first and the old rewrites are untouched and in order.
 const rewrites = config.hosting.rewrites.map((rule) => rule.source)
-check(rewrites[0] === '/app' && rewrites[1] === '/app/**', 'rewrites de /app vêm primeiro')
+check(
+  rewrites[0] === '/app' && config.hosting.rewrites[1].regex === '^/app/[^.]*$',
+  'rewrites de /app vêm primeiro, só para caminhos sem extensão',
+)
 for (const source of ['/mcp/**', '/_nuxt/**', '/q/**', '/pro/**', '/admin', '/admin/**', '/api/admin/**', '/api/orders/**']) {
   check(rewrites.includes(source), `rewrite ${source} continua`)
 }
@@ -101,6 +104,11 @@ try {
   } finally {
     await browser.close()
   }
+
+  // A tab from before a deploy asks for an old chunk: 404, never the index cached for a year.
+  const gone = await get('/app/assets/index-ffffffff.js')
+  const goneBody = await gone.text()
+  check(gone.status === 404 && goneBody !== spa, 'asset que não existe dá 404')
 
   const home = await get('/')
   check(home.status === 200 && (await home.text()) === site, '/ continua sendo o site')

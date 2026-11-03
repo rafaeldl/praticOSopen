@@ -7,7 +7,7 @@ import { login } from '../helpers'
 const RUNS = Number(process.env.PERF_RUNS ?? 7)
 /** ADR-001 goal for a first visit. */
 const GOAL_FIRST_VISIT_MS = Number(process.env.PERF_GOAL_MS ?? 1500)
-const STEPS = ['responseEnd', 'session:auth', 'session:token', 'orders:query', 'session:docs', 'list-visible'] as const
+const STEPS = ['responseEnd', 'session:auth', 'session:token', 'orders:query', 'session:docs', 'session:access', 'list-visible'] as const
 
 async function throttle(context: BrowserContext, page: Page) {
   const cdp = await context.newCDPSession(page)
@@ -40,6 +40,7 @@ const summary = (runs: Record<string, number>[]) =>
   Object.fromEntries(STEPS.map((step) => [step, Math.round(p75(runs.map((run) => run[step] as number)))]))
 
 test('lista visível em Fast 4G + CPU 4x', async ({ browser }) => {
+  test.skip(!!process.env.PERF_COLD, 'medida fria roda à parte')
   const setup = await browser.newContext()
   // Perf runs without the Functions emulator (10 thousand triggers would skew the
   // numbers), so the access list answer is the remembered "yes" every allowed
@@ -66,4 +67,35 @@ test('lista visível em Fast 4G + CPU 4x', async ({ browser }) => {
   const result = { firstVisit: summary(first), returnVisit: summary(back) }
   console.log(`list-visible p75 (ms): ${JSON.stringify(result)}; meta ${GOAL_FIRST_VISIT_MS} ms`)
   expect(result.firstVisit['list-visible']).toBeLessThanOrEqual(GOAL_FIRST_VISIT_MS)
+})
+
+// Cold first visit: saved login only. No HTTP or Firestore cache and no
+// remembered access answer, so the start waits for GET /v1/app/web-access.
+// Needs the Functions emulator: PERF_COLD=1 npm run e2e:perf:cold.
+test('primeira visita fria, com a rota web-access', async ({ browser }) => {
+  test.skip(!process.env.PERF_COLD, 'só com PERF_COLD=1 e o emulador de Functions')
+  const setup = await browser.newContext()
+  const setupPage = await setup.newPage()
+  await login(setupPage, 'admin', 'orders')
+  await expect(setupPage.getByTestId('orders-table')).toBeVisible()
+  const saved = await setup.storageState()
+  await setup.close()
+  const state = {
+    ...saved,
+    origins: saved.origins.map((origin) => ({
+      ...origin,
+      localStorage: origin.localStorage.filter((item) => !item.name.startsWith('praticos.webAccess.')),
+    })),
+  }
+
+  const cold: Record<string, number>[] = []
+  for (let run = 0; run < RUNS; run++) {
+    const context = await browser.newContext({ storageState: state })
+    const page = await context.newPage()
+    await throttle(context, page)
+    cold.push(await measure(page))
+    await context.close()
+  }
+  console.log(`list-visible fria p75 (ms): ${JSON.stringify(summary(cold))}`)
+  expect(summary(cold)['list-visible']).toBeGreaterThan(0)
 })

@@ -86,7 +86,7 @@
     ],
     "rewrites": [
       { "source": "/app", "destination": "/app/index.html" },
-      { "source": "/app/**", "destination": "/app/index.html" },
+      { "regex": "^/app/[^.]*$", "destination": "/app/index.html" },
       {
         "source": "/mcp/**",
         "function": { "functionId": "api", "region": "southamerica-east1" }

@@ -72,5 +72,10 @@
   "web.invites.rejected": "Convite recusado",
   "web.nav.unnamedCompany": "Empresa sem nome",
   "web.companyFailed": "Não deu para carregar os dados da empresa. Valores ficam escondidos até carregar.",
-  "web.gallery.openOrder": "Abrir a OS 1 na lista"
+  "web.gallery.openOrder": "Abrir a OS 1 na lista",
+  "web.orders.stale": "Mostrando a última cópia salva neste computador. Os dados podem estar desatualizados.",
+  "web.notAllowed.verifyTitle": "Falta confirmar o seu e-mail",
+  "web.notAllowed.verifyBody": "Abra o e-mail de confirmação que mandamos e toque no link. Depois, volte aqui e toque em \"Tentar de novo\".",
+  "web.notAllowed.resend": "Mandar o e-mail de novo",
+  "web.notAllowed.sent": "E-mail de confirmação enviado"
 }

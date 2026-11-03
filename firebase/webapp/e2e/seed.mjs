@@ -78,7 +78,13 @@ async function seedCompanies() {
 
 async function seedUsers() {
   for (const user of Object.values(USERS)) {
-    await auth.createUser({ uid: user.uid, email: user.email, password: PASSWORD, displayName: user.name, emailVerified: true })
+    await auth.createUser({
+      uid: user.uid,
+      email: user.email,
+      password: PASSWORD,
+      displayName: user.name,
+      emailVerified: user.emailVerified !== false,
+    })
     await db.doc(`users/${user.uid}`).set({
       id: user.uid,
       name: user.name,

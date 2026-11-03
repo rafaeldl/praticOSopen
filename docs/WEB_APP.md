@@ -84,7 +84,17 @@ O web abre só para contas liberadas. `GET /v1/app/web-access` (`firebase/functi
 - O cliente não lê nem grava `config/webApp` (regra do Firestore).
 - A rota tem limite próprio por IP e guarda a leitura do documento por 30 s.
 
-A SPA guarda um "sim" por 12 horas e confere de novo em segundo plano a cada 10 minutos. Um "não" fecha o app na hora. Quem não está na lista vê só a tela "ainda não foi liberado". Isso fecha as telas; os dados continuam protegidos pelas regras e pela API.
+Na SPA:
+
+- Um "sim" fica guardado por 12 horas e é conferido de novo em segundo plano a cada 10 minutos.
+- Um horário no futuro guardado é tratado como inválido.
+- Ao trocar de conta, a resposta começa do zero.
+- Numa falha de rede, só um "sim" ainda válido da mesma conta continua valendo; sem ele, aparece um erro com "Tentar de novo".
+- Um "não" fecha o app na hora.
+
+Quem não está na lista vê só a tela "ainda não foi liberado". Se o que falta é confirmar o e-mail, a tela diz isso e oferece mandar o e-mail de novo. Isso fecha as telas; os dados continuam protegidos pelas regras e pela API.
+
+O documento `config/webApp` não existe até alguém rodar o script. Sem ele, o web fica fechado para todos. O primeiro `--email` cria o documento com `open: false`.
 
 Para liberar alguém (nunca rode sem saber qual projeto):
 
@@ -149,16 +159,20 @@ A rota `/app/dev/components` mostra os componentes base. Existe só nos builds d
 
 ### Deploy
 
+**Ordem:** a Function `api`, com a rota `/v1/app/web-access`, precisa estar no ar **antes** do Hosting com o `/app`. Sem a rota, toda conta cai em "não deu certo" na entrada. O deploy das Functions (`firebase-functions-deploy.yml`) e o do Hosting são workflows separados: no primeiro merge, confirme que o das Functions terminou antes de liberar alguém pelo script.
+
 `firebase-hosting-deploy.yml` compila o site e, em seguida, a SPA (`npm run build:hosting`), que vai para `firebase/hosting/public/app`. O workflow dispara também com mudanças em `firebase/webapp/**`.
 
 `firebase/firebase.json`:
 
 | Caminho | O que faz |
 |---|---|
-| `/app/**` | rewrite para `/app/index.html`, antes dos outros rewrites |
+| `^/app/[^.]*$` | rewrite para `/app/index.html`, antes dos outros rewrites. Só caminhos sem extensão: um asset que não existe (aba aberta antes de um deploy) dá 404, e não o `index.html` |
 | `/app/assets/**` | `Cache-Control: public, max-age=31536000, immutable` |
 | rotas do app e `index.html` | `Cache-Control: no-cache` |
 | `/app/**` | CSP, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` |
+
+Uma aba aberta antes de um deploy pede chunks que já não existem. O app recarrega a página uma vez (`vite:preloadError` e erro de rota lazy, em `lib/stale-build.ts`). Se falhar de novo em menos de um minuto, o erro aparece, sem recarregar em loop.
 
 A CSP libera os dois scripts inline do `index.html` por hash. Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
 
@@ -175,7 +189,9 @@ A configuração de produção fica em `.env.production`: só valores públicos,
 
 ### Desempenho da lista
 
-Fast 4G, CPU 4x, 10 mil OS, p75 de 7 rodadas, `npm run e2e:perf`. Cada passo é uma marca (`performance.mark`):
+Fast 4G, CPU 4x, 10 mil OS, p75 de 7 rodadas, `npm run e2e:perf`. Cada passo é uma marca (`performance.mark`).
+
+**O 1,4 s é de uma visita com login salvo:** sem cache HTTP nem do Firestore, mas com a sessão do Auth e o "sim" da lista de acesso guardados no navegador. É a visita normal de quem já usa o web.
 
 | Caminho tentado | 1ª visita | Volta |
 |---|---|---|
@@ -190,7 +206,19 @@ Na 1ª visita, o tempo se divide assim:
 - até `session:auth`: cerca de 830 ms, entre download, execução com CPU 4x e início do Auth;
 - usuário, empresa e lista no Firestore: cerca de 520 ms, quase todo em idas e voltas da conexão.
 
-O teste falha acima de 1,5 s. O cache persistente é apagado ao sair (`clearFirestoreCache`), porque o computador é compartilhado. O teste roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
+O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
+
+**Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
+
+**Cache persistente:**
+
+- É apagado ao sair pelo botão.
+- É apagado quando a sessão termina de outro jeito: outra aba, token que não renova, conta desativada (`onAuthStateChanged` com `null`).
+- É apagado quando entra outra conta.
+- O dono do cache fica guardado (`praticos.cacheOwner`) até a exclusão dar certo, então uma falha é tentada de novo na próxima carga.
+- Enquanto a exclusão não sai, as leituras ignoram o disco.
+
+**Lista:** disco, páginas e servidor se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se a lista veio do disco e o servidor não respondeu, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
 
 ### Metas e guardas
 

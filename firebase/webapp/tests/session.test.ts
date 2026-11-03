@@ -32,6 +32,7 @@ vi.mock('../src/lib/firebase', () => ({
   authClient: async () => ({ currentUser: user }),
   firestoreClient: async () => ({}),
   clearFirestoreCache: async () => {},
+  cacheState: { trusted: true },
 }))
 
 beforeEach(() => {

@@ -4,7 +4,7 @@
 import { reactive } from 'vue'
 import type { User } from 'firebase/auth'
 import { createApi, type ApiOptions } from './api'
-import { authClient, clearFirestoreCache, firestoreClient } from './firebase'
+import { authClient, cacheState, clearFirestoreCache, firestoreClient } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { readStorage, writeStorage } from './storage'
@@ -43,6 +43,8 @@ export interface SessionState {
   signInError: string | null
   /** The company document could not be read: money stays hidden until it loads. */
   companyFailed: boolean
+  /** Unverified e-mails are never on the access list. */
+  emailVerified: boolean
 }
 
 export const session = reactive<SessionState>({
@@ -59,6 +61,7 @@ export const session = reactive<SessionState>({
   needsCompanyChoice: false,
   signInError: null,
   companyFailed: false,
+  emailVerified: false,
 })
 
 interface UserCompanyEntry {
@@ -98,6 +101,7 @@ async function readDoc<T>(path: string): Promise<T | null> {
  * through `onFresh`. Returning to the app then waits for the disk, not the network.
  */
 async function readDocCacheFirst<T>(path: string, onFresh: (value: T | null) => void): Promise<T | null> {
+  if (!cacheState.trusted) return readDoc<T>(path)
   const [db, { doc, getDocFromCache }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   try {
     const cached = await getDocFromCache(doc(db, path))
@@ -189,6 +193,7 @@ function clear(): void {
     role: null,
     webAccess: 'unknown',
     needsCompanyChoice: false,
+    emailVerified: false,
   })
 }
 
@@ -201,10 +206,12 @@ async function checkWebAccess(uid: string): Promise<void> {
     try {
       const allowed = await fetchWebAccess((path) => api(path, { noCompany: true }))
       rememberAccess(uid, allowed)
+      mark('session:access')
       if (session.uid === uid) session.webAccess = allowed ? 'allowed' : 'denied'
     } catch (error) {
       console.warn('session: web access not checked', error)
-      if (session.uid === uid && session.webAccess !== 'allowed') session.webAccess = 'error'
+      // Only a still valid "yes" of this same account survives a network failure.
+      if (session.uid === uid) session.webAccess = rememberedAccess(uid) ? 'allowed' : 'error'
     }
   }
   if (rememberedAccess(uid)) {
@@ -217,8 +224,14 @@ async function checkWebAccess(uid: string): Promise<void> {
 
 async function hydrate(user: User, forceRefresh = false): Promise<void> {
   session.failed = false
+  // Another account: nothing of the previous one (access answer, cached data) carries over.
+  if (session.uid !== user.uid) {
+    session.webAccess = 'unknown'
+    await clearCacheOfOtherAccount(user.uid)
+  }
   session.uid = user.uid
   session.email = user.email
+  session.emailVerified = user.emailVerified
   try {
     let token = await user.getIdTokenResult(forceRefresh)
     mark('session:token')
@@ -275,6 +288,50 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
   }
 }
 
+// Whose data is in this browser's Firestore cache. Kept until the cache is
+// really gone, so a failed deletion is retried on the next load.
+const CACHE_OWNER_KEY = 'praticos.cacheOwner'
+
+/** The persistent cache belongs to someone other than `uid` (null: nobody signed in). */
+export function cacheNeedsClearing(owner: string | null, uid: string | null): boolean {
+  return !!owner && owner !== uid
+}
+
+async function clearCachedData(): Promise<boolean> {
+  try {
+    await clearFirestoreCache()
+    writeStorage(CACHE_OWNER_KEY, '')
+    return true
+  } catch (error) {
+    console.warn('session: cache not cleared, will retry on next load', error)
+    return false
+  }
+}
+
+async function clearCacheOfOtherAccount(uid: string): Promise<void> {
+  // Owner changes only after the previous one's data is gone, or a failure would forget the retry.
+  if (cacheNeedsClearing(readStorage(CACHE_OWNER_KEY), uid) && !(await clearCachedData())) {
+    cacheState.trusted = false
+    return
+  }
+  cacheState.trusted = true
+  writeStorage(CACHE_OWNER_KEY, uid)
+}
+
+/**
+ * Signed out without the button: another tab, a token that no longer renews, a
+ * disabled account. The data must not stay on this computer.
+ */
+async function endedSession(): Promise<void> {
+  const wasSignedIn = !!session.uid
+  clear()
+  if (cacheNeedsClearing(readStorage(CACHE_OWNER_KEY), null)) {
+    const cleared = await clearCachedData()
+    // A running page holds the old Firestore instance: start over clean.
+    if (cleared && wasSignedIn) location.assign(`${import.meta.env.BASE_URL}login`)
+  }
+}
+
 let started: Promise<void> | undefined
 
 /** Resolves after the first auth answer. Safe to call many times. */
@@ -287,7 +344,7 @@ export function startSession(): Promise<void> {
         mark('session:auth')
         void (async () => {
           if (user) await hydrate(user)
-          else clear()
+          else await endedSession()
           session.ready = true
           resolve()
         })()
@@ -357,6 +414,11 @@ async function finishRedirect(): Promise<void> {
   }
 }
 
+export async function sendVerificationEmail(): Promise<void> {
+  const [auth, { sendEmailVerification }] = await Promise.all([authClient(), import('firebase/auth')])
+  if (auth.currentUser) await sendEmailVerification(auth.currentUser)
+}
+
 export async function sendPasswordReset(email: string): Promise<void> {
   const [auth, { sendPasswordResetEmail }] = await Promise.all([authClient(), import('firebase/auth')])
   await sendPasswordResetEmail(auth, email)
@@ -373,7 +435,7 @@ export async function signOutEverywhere(): Promise<void> {
   const [auth, { signOut }] = await Promise.all([authClient(), import('firebase/auth')])
   await signOut(auth)
   clear()
-  await clearFirestoreCache()
+  await clearCachedData()
   // Firestore cannot be used after its cache is gone: start the page over.
   location.assign(`${import.meta.env.BASE_URL}login`)
 }
@@ -381,7 +443,12 @@ export async function signOutEverywhere(): Promise<void> {
 /** Forces a new token: an accepted invite only reaches the claim on the server. */
 export async function refreshClaims(): Promise<void> {
   const auth = await authClient()
-  if (auth.currentUser) await hydrate(auth.currentUser, true)
+  // reload() brings emailVerified after the person clicked the link in the e-mail.
+  if (auth.currentUser) await auth.currentUser.reload().catch(() => {})
+  if (auth.currentUser) {
+    rememberAccess(auth.currentUser.uid, false)
+    await hydrate(auth.currentUser, true)
+  }
 }
 
 export async function selectCompany(companyId: string): Promise<void> {

@@ -68,12 +68,22 @@ export function firestoreClient(): Promise<Firestore> {
   return firestore
 }
 
-/** Erases this browser's copy of the data. The page must reload afterwards. */
+/**
+ * False while the cache may still hold another account's data (a deletion
+ * failed): reads then skip the disk and go to the server.
+ */
+export const cacheState = { trusted: true }
+
+/**
+ * Erases this browser's copy of the data. Throws when it could not, so the
+ * caller can try again on the next load. The next firestoreClient() call
+ * builds a new, empty instance.
+ */
 export async function clearFirestoreCache(): Promise<void> {
-  if (!firestore) return
-  const [client, { terminate, clearIndexedDbPersistence }] = await Promise.all([firestore, import('firebase/firestore')])
+  const [client, { terminate, clearIndexedDbPersistence }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  firestore = undefined
   await terminate(client)
-  await clearIndexedDbPersistence(client).catch((error) => console.warn('firestore: cache not cleared', error))
+  await clearIndexedDbPersistence(client)
 }
 
 let storage: Promise<FirebaseStorage> | undefined

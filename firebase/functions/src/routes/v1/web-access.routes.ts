@@ -46,6 +46,9 @@ const webAccessLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  // Same key as apiCoreLimiter in index.ts; the emulator has no req.ip.
+  keyGenerator: (req: Request) => req.ip || 'unknown',
+  validate: { ip: false },
   message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later' } },
 });
 

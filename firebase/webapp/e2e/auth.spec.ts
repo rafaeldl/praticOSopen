@@ -135,3 +135,10 @@ test('sair limpa a sessão', async ({ page }) => {
   await page.goto('orders')
   await expect(page).toHaveURL(/login/)
 })
+
+test('na lista, mas sem confirmar o e-mail: a tela diz o que falta', async ({ page }) => {
+  await login(page, 'unverified')
+  await expect(page.getByRole('heading', { level: 1, name: 'Falta confirmar o seu e-mail' })).toBeVisible()
+  await page.getByRole('button', { name: 'Mandar o e-mail de novo' }).click()
+  await expect(page.getByText('E-mail de confirmação enviado')).toBeVisible()
+})

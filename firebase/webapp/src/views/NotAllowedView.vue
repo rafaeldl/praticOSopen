@@ -5,10 +5,23 @@ import { ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import { t } from '@/i18n'
-import { refreshClaims, session, signOutEverywhere } from '@/lib/session'
+import { refreshClaims, sendVerificationEmail, session, signOutEverywhere } from '@/lib/session'
+import { showToast } from '@/lib/toast'
 
 const router = useRouter()
 const busy = ref(false)
+
+async function resend() {
+  busy.value = true
+  try {
+    await sendVerificationEmail()
+    showToast(t('web.notAllowed.sent'))
+  } catch {
+    showToast(t('web.error.generic'))
+  } finally {
+    busy.value = false
+  }
+}
 
 async function retry() {
   busy.value = true
@@ -32,6 +45,11 @@ watchEffect(() => {
         <template v-if="session.webAccess === 'error'">
           <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.error.title') }}</h1>
           <p class="field-error" role="alert">{{ t('web.error.network') }}</p>
+        </template>
+        <template v-else-if="!session.emailVerified">
+          <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.notAllowed.verifyTitle') }}</h1>
+          <p class="muted">{{ t('web.notAllowed.verifyBody') }}</p>
+          <button type="button" class="btn btn--primary btn--wide" :disabled="busy" @click="resend">{{ t('web.notAllowed.resend') }}</button>
         </template>
         <template v-else>
           <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.notAllowed.title') }}</h1>

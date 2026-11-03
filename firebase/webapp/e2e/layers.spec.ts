@@ -155,3 +155,18 @@ test('painel aberto por link de outra tela: fechar fica na lista', async ({ page
   await expect(page).toHaveURL(/\/orders$/)
   await expect(page.getByTestId('orders-table')).toBeVisible()
 })
+
+test('lista do disco sem resposta do servidor avisa que pode estar desatualizada', async ({ page }) => {
+  await login(page, 'admin', 'orders')
+  await expect(page.getByTestId('orders-table').locator('tbody tr')).toHaveCount(30)
+  // The next pages fill the saved copy; then the database goes away.
+  await expect(page.locator('.page-sub')).toHaveText('30 OS')
+  await page.route(/127\.0\.0\.1:18080/, (route) => route.abort())
+  await page.reload()
+  await expect(page.getByTestId('orders-table')).toBeVisible()
+  const warning = page.getByRole('alert').filter({ hasText: 'podem estar desatualizados' })
+  await expect(warning).toBeVisible({ timeout: 20_000 })
+  await page.unroute(/127\.0\.0\.1:18080/)
+  await warning.getByRole('button', { name: 'Tentar de novo' }).click()
+  await expect(warning).toHaveCount(0, { timeout: 20_000 })
+})

@@ -23,6 +23,8 @@ export const USERS = {
   newcomer: { ...user('newcomer', 'Nara Nova'), roles: {} },
   /** Administrator in A, technician in B: switching must re-check the open screen. */
   mixed: { ...user('mixed', 'Mauro Dois Papeis'), roles: { [COMPANY_A]: 'admin', [COMPANY_B]: 'technician' } },
+  /** On the list, but the e-mail was never confirmed: the server says no. */
+  unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
