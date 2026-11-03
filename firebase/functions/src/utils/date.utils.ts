@@ -164,7 +164,7 @@ export function toISOString(date: Date): string {
  * Handles: Firestore Timestamp, serialized timestamp, or ISO string
  */
 export function timestampToDate(
-  timestamp: FirebaseFirestore.Timestamp | { _seconds: number; _nanoseconds: number } | string | undefined
+  timestamp: FirebaseFirestore.Timestamp | { _seconds: number; _nanoseconds: number } | string | null | undefined
 ): Date | undefined {
   if (!timestamp) return undefined;
 

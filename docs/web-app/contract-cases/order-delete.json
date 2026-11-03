@@ -2,9 +2,9 @@
   "version": 2,
   "generatedFrom": "e05d6414",
   "rule": "Quem apaga uma OS: admin sempre; gerente e supervisor em orçamento sem dinheiro; consultor e técnico no orçamento sem dinheiro que criaram. Dinheiro = paidAmount ou transactions.",
-  "runsIn": ["dart", "web"],
+  "runsIn": ["dart", "functions", "web"],
   "sourceOfTruth": ["firebase/firestore.rules allow delete em /orders, orderHasNoMoney", "lib/services/authorization_service.dart canDeleteOrder"],
-  "notInServer": "Não há rota de apagar OS: a regra vale no Firestore. Este arquivo não roda no emulador.",
+  "otherImplementations": ["firebase/functions/src/middleware/app-permission.middleware.ts canDeleteOrder", "firebase/functions/src/services/order-delete.service.ts deleteOrder (DELETE /v1/app/orders/:id)"],
   "cases": [
     {"id":"admin-creator-quote-no-money","given":{"role":"admin","isCreator":true,"status":"quote","hasMoney":false},"expect":{"allowed":true}},
     {"id":"admin-creator-approved-no-money","given":{"role":"admin","isCreator":true,"status":"approved","hasMoney":false},"expect":{"allowed":true}},

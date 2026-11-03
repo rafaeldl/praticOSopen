@@ -120,6 +120,28 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'completed');
   });
 
+  it('situação e pagamento no mesmo evento (PATCH concluindo OS já paga): cada momento uma vez', async () => {
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'quote', payment: null, total: 100, paidAmount: 100 },
+      { status: 'done', payment: 'paid', total: 100, paidAmount: 100 },
+    );
+    // autoIssueInvoice runs only the moment the company chose and never issues
+    // a second nota for the order (invoice.service.test.ts "emitir sozinho").
+    expect(autoIssue.mock.calls).toEqual([['c1', 'o1', 'paid'], ['c1', 'o1', 'completed']]);
+  });
+
+  it('itens tirados até o que foi pago (a API marca paymentSyncedAt): não tenta nota de "paga"', async () => {
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid', total: 150, paidAmount: 100 },
+      { status: 'approved', payment: 'paid', total: 100, paidAmount: 100, paymentSyncedAt: '2026-11-03T10:00:00.000Z' },
+    );
+    expect(autoIssue).not.toHaveBeenCalled();
+  });
+
   it('OS já paga e já concluída salva de novo: não tenta nota', async () => {
     await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', payment: 'paid' }, { status: 'done', payment: 'paid' });
     expect(autoIssue).not.toHaveBeenCalled();

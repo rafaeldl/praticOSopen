@@ -4,10 +4,17 @@
  */
 
 /**
- * Normalize phone number (remove formatting, add country code if needed)
+ * Normalize a phone number to `+<country><number>` (contract phone.json):
+ * - with `+` the number already carries its country: kept as typed;
+ * - without it, [defaultCountryCode] (the company's, Brazil by default) is
+ *   added unless the number already starts with it;
+ * - nothing that looks like a phone (empty, letters) gives ''.
  */
 export function normalizePhone(phone: string, defaultCountryCode = '55'): string {
-  let cleaned = phone.replace(/\D/g, '');
+  const raw = (phone ?? '').trim();
+  let cleaned = raw.replace(/\D/g, '');
+  if (!cleaned) return '';
+  if (raw.startsWith('+')) return '+' + cleaned;
 
   // A Brazilian number with country code has 12 or 13 digits, so a shorter
   // one starting with 55 is in area code (DDD) 55, not country code 55
@@ -21,6 +28,17 @@ export function normalizePhone(phone: string, defaultCountryCode = '55'): string
   }
 
   return '+' + cleaned;
+}
+
+const COUNTRY_DIAL_CODE: Record<string, string> = {
+  BR: '55', US: '1', CA: '1', PT: '351', ES: '34', FR: '33', DE: '49', IT: '39', GB: '44',
+  MX: '52', AR: '54', CO: '57', CL: '56', PE: '51', UY: '598', PY: '595', BO: '591',
+  AO: '244', MZ: '258', AU: '61',
+};
+
+/** Calling code of a company's country (ISO 3166 alpha-2), Brazil when unknown. */
+export function dialCodeOf(country?: string | null): string {
+  return COUNTRY_DIAL_CODE[(country || 'BR').toUpperCase()] ?? '55';
 }
 
 // ============================================================================
@@ -91,14 +109,15 @@ function weekStart(d: Date): Date {
 const COUNTRY_CURRENCY: Record<string, string> = {
   BR: 'BRL', US: 'USD', PT: 'EUR', ES: 'EUR', FR: 'EUR', DE: 'EUR',
   IT: 'EUR', MX: 'MXN', AR: 'ARS', CO: 'COP', CL: 'CLP', GB: 'GBP',
-  CA: 'CAD', AU: 'AUD', PE: 'PEN', UY: 'UYU',
+  CA: 'CAD', AU: 'AUD', PE: 'PEN', UY: 'UYU', PY: 'PYG', BO: 'BOB',
+  AO: 'AOA', MZ: 'MZN',
 };
 
 const COUNTRY_LOCALE: Record<string, string> = {
   BR: 'pt-BR', US: 'en-US', PT: 'pt-PT', ES: 'es-ES', FR: 'fr-FR',
   DE: 'de-DE', IT: 'it-IT', MX: 'es-MX', AR: 'es-AR', CO: 'es-CO',
   CL: 'es-CL', GB: 'en-GB', CA: 'en-CA', AU: 'en-AU', PE: 'es-PE',
-  UY: 'es-UY',
+  UY: 'es-UY', PY: 'es-PY', BO: 'es-BO', AO: 'pt-AO', MZ: 'pt-MZ',
 };
 
 /**

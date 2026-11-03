@@ -224,7 +224,7 @@ describe('write tools routing (real callRoute, real routers)', () => {
     });
     mockOrderService.addServiceToOrderByNumber.mockResolvedValue({ success: true, newTotal: 350 });
     mockOrderService.addProductToOrderByNumber.mockResolvedValue({ success: true, newTotal: 176 });
-    mockOrderService.updateOrder.mockResolvedValue(true);
+    mockOrderService.updateOrder.mockResolvedValue({ id: 'o1' } as never);
 
     mockShareTokenService.getTokensForOrder.mockResolvedValue([activeToken]);
 

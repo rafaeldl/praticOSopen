@@ -13,7 +13,7 @@
     {"id":"positive-half-cent","given":{"value":0.125},"expect":{"rounded":0.13}},
     {"id":"representation-below-half-cent","given":{"value":1.005},"expect":{"rounded":1.0}},
     {"id":"negative-below-half-cent","given":{"value":-0.124},"expect":{"rounded":-0.12}},
-    {"id":"negative-half-cent-goes-away-from-zero","given":{"value":-0.125},"correct":{"rounded":-0.13},"divergesIn":{"functions":{"rounded":-0.12}},"note":"D10: Math.round do JS sobe para zero em -12,5."},
-    {"id":"larger-negative-half-cent","given":{"value":-1.125},"correct":{"rounded":-1.13},"divergesIn":{"functions":{"rounded":-1.12}},"note":"D10."}
+    {"id":"negative-half-cent-goes-away-from-zero","given":{"value":-0.125},"expect":{"rounded":-0.13},"note":"D10: Math.round do JS sobe para zero em -12,5."},
+    {"id":"larger-negative-half-cent","given":{"value":-1.125},"expect":{"rounded":-1.13},"note":"D10."}
   ]
 }
