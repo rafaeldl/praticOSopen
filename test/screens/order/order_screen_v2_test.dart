@@ -2559,7 +2559,16 @@ void main() {
       final store = OrderStore()
         ..streamOrder = ((_, _) => const Stream.empty())
         ..writeOrderFields = (_, _, fields) async => writes.add(fields);
-      await _pump(tester, screen(store), args: {'order': saved()});
+      // As stored: the total already matches the items.
+      await _pump(
+        tester,
+        screen(store),
+        args: {
+          'order': saved()
+            ..total = 0
+            ..createdAt = DateTime(2026, 11, 1),
+        },
+      );
       Global.companyAggr = CompanyAggr()..id = 'c1';
       addTearDown(() => Global.companyAggr = null);
 
