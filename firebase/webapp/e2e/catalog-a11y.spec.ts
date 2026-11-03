@@ -94,6 +94,13 @@ for (const [width, height] of [
       await expect(page.getByTestId(testId)).toBeAttached()
       await expectNoSideScroll(page)
     }
+    // Before the segment's labels arrive the switch says "Produtos": the longer word must not push the page sideways (CI of #520).
+    await page.goto('catalog')
+    await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
+    await expect(page.getByTestId('kind-product')).toHaveText(/\(\d+\)/)
+    await page.getByTestId('kind-product').evaluate((button) => (button.textContent = 'Produtos (5)'))
+    await page.getByTestId('kind-service').evaluate((button) => (button.textContent = 'Serviços (12)'))
+    await expectNoSideScroll(page)
     await page.goto('catalog')
     await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
     await page.getByTestId('new-catalog-item').click()
