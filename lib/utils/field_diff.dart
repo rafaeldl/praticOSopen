@@ -24,3 +24,19 @@ Map<String, dynamic> changedFields(
   }
   return result;
 }
+
+/// Fields the catalog form edits (service and product).
+const catalogEditedFields = ['name', 'value', 'photo', 'customData'];
+
+/// What saving an edited catalog item writes: the edited fields that differ
+/// from [previous] (the item as it was read) and, with a new name, the
+/// search keywords. Never the price when only the name changed, so a price
+/// the web changed meanwhile stays.
+Map<String, dynamic> catalogChangedFields(
+  Map<String, dynamic> previous,
+  Map<String, dynamic> after,
+) {
+  final fields = changedFields(previous, after, only: catalogEditedFields);
+  if (fields.containsKey('name')) fields['keywords'] = after['keywords'];
+  return fields;
+}

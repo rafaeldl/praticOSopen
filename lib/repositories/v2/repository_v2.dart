@@ -131,6 +131,13 @@ abstract class RepositoryV2<T extends BaseAuditCompany?> {
     await tenantRepo.updateItem(companyId, item);
   }
 
+  /// Writes only [fields] of document [id] (`update`).
+  Future<void> writeFields(
+    String companyId,
+    String id,
+    Map<String, dynamic> fields,
+  ) => tenantRepo.writeFields(companyId, id, fields);
+
   /// Remove um documento.
   Future<void> removeItem(String companyId, String? id) async {
     if (id == null) return;

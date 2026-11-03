@@ -51,8 +51,10 @@ mixin _$ServiceStore on _ServiceStore, Store {
   );
 
   @override
-  Future saveService(Service service) {
-    return _$saveServiceAsyncAction.run(() => super.saveService(service));
+  Future saveService(Service service, {Map<String, dynamic>? previous}) {
+    return _$saveServiceAsyncAction.run(
+      () => super.saveService(service, previous: previous),
+    );
   }
 
   late final _$deleteServiceAsyncAction = AsyncAction(

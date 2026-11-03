@@ -227,6 +227,16 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
         .set(toJson(item), SetOptions(merge: true));
   }
 
+  /// Writes only [fields] of document [id] (`update`): what someone else
+  /// wrote in the other fields stays.
+  Future<void> writeFields(
+    String companyId,
+    String id,
+    Map<String, dynamic> fields,
+  ) {
+    return _getCollection(companyId).doc(id).update(fields);
+  }
+
   /// Remove um documento.
   Future<void> removeItem(String companyId, String? id) {
     if (id == null) return Future.value();

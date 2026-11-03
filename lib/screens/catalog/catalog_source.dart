@@ -87,6 +87,10 @@ class CatalogPermissions {
 
 /// Firestore-backed [CatalogSource] (services and products stores).
 class FirestoreCatalogSource implements CatalogSource {
+  FirestoreCatalogSource({ServiceStore? services, ProductStore? products})
+    : _serviceStore = services,
+      _productStore = products;
+
   ServiceStore? _serviceStore;
   ProductStore? _productStore;
   ServiceStore get _services => _serviceStore ??= ServiceStore();
@@ -131,33 +135,57 @@ class FirestoreCatalogSource implements CatalogSource {
     }
   }
 
+  /// The [Service] or [Product] to write, with the item's fields. A saved
+  /// item is copied: its origin stays as it was read, so a save can write
+  /// only what changed ([_previous]). A new one keeps its entity as origin
+  /// (so it keeps the id a photo gave it).
   Object _entity(CatalogKind kind, CatalogItem item) {
+    final origin = item.origin;
     if (kind == CatalogKind.service) {
-      final s = (item.origin as Service?) ?? Service();
+      final s = origin is Service
+          ? (origin.id == null
+                ? origin
+                : (Service.fromJson(origin.toJson())..id = origin.id))
+          : Service();
       s
         ..name = item.name
         ..value = item.value
         ..photo = item.photo
         ..customData = item.customData;
-      return item.origin = s;
+      if (origin is! Service || origin.id == null) item.origin = s;
+      return s;
     }
-    final p = (item.origin as Product?) ?? Product();
+    final p = origin is Product
+        ? (origin.id == null
+              ? origin
+              : (Product.fromJson(origin.toJson())..id = origin.id))
+        : Product();
     p
       ..name = item.name
       ..value = item.value
       ..photo = item.photo
       ..customData = item.customData;
-    return item.origin = p;
+    if (origin is! Product || origin.id == null) item.origin = p;
+    return p;
+  }
+
+  /// The saved item as it was read, to write only what the form changed.
+  static Map<String, dynamic>? _previous(CatalogItem item) {
+    final origin = item.origin;
+    if (origin is Service && origin.id != null) return origin.toJson();
+    if (origin is Product && origin.id != null) return origin.toJson();
+    return null;
   }
 
   @override
   Future<void> save(CatalogKind kind, CatalogItem item) async {
+    final previous = _previous(item);
     final entity = _entity(kind, item);
     if (entity is Service) {
-      await _services.saveService(entity);
+      await _services.saveService(entity, previous: previous);
       item.id = entity.id;
     } else if (entity is Product) {
-      await _products.saveProduct(entity);
+      await _products.saveProduct(entity, previous: previous);
       item.id = entity.id;
     }
   }

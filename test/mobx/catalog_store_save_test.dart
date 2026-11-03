@@ -15,6 +15,7 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
+import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,6 +61,14 @@ class _Customers implements CustomerRepositoryV2 {
 class _Services implements ServiceRepositoryV2 {
   final created = <Service?>[];
   final updated = <Service?>[];
+  final fields = <String, Map<String, dynamic>>{};
+
+  @override
+  Future<void> writeFields(
+    String companyId,
+    String id,
+    Map<String, dynamic> fields,
+  ) async => this.fields[id] = fields;
 
   @override
   Stream<List<Service?>> streamServices(String companyId) => Stream.value([]);
@@ -81,6 +90,14 @@ class _Services implements ServiceRepositoryV2 {
 class _Products implements ProductRepositoryV2 {
   final created = <Product?>[];
   final updated = <Product?>[];
+  final fields = <String, Map<String, dynamic>>{};
+
+  @override
+  Future<void> writeFields(
+    String companyId,
+    String id,
+    Map<String, dynamic> fields,
+  ) async => this.fields[id] = fields;
 
   @override
   Stream<List<Product?>> streamProducts(String companyId) => Stream.value([]);
@@ -198,9 +215,118 @@ void main() {
     expect(repo.created.single?.id, 'draft1');
     expect(service.createdBy?.id, 'u2');
 
-    // A photo on the saved service updates it.
+    // A photo on the saved service writes only the photo and updatedAt.
     await store.uploadServicePhoto(File('b.jpg'), service);
-    expect(repo.updated, hasLength(1));
+    expect(repo.updated, isEmpty);
+    expect(
+      repo.fields['draft1']!.keys.where((k) => k != 'updatedBy'),
+      unorderedEquals(['photo', 'updatedAt']),
+    );
+  });
+
+  test('editing a saved service writes only what changed', () async {
+    final repo = _Services();
+    final store = ServiceStore(
+      repository: repo,
+      userStore: _Users(),
+      photoService: _Photos(),
+    );
+    final service = Service()
+      ..id = 's1'
+      ..name = 'Troca'
+      ..value = 100
+      ..createdAt = createdAt
+      ..createdBy = creator;
+    final previous = service.toJson();
+    // Renamed in the app; the price the web raised meanwhile is not touched.
+    service.name = 'Troca de óleo';
+
+    await store.saveService(service, previous: previous);
+
+    expect(repo.created, isEmpty);
+    final written = repo.fields['s1']!;
+    expect(
+      written.keys,
+      unorderedEquals(['name', 'keywords', 'updatedAt', 'updatedBy']),
+    );
+    expect(written['name'], 'Troca de óleo');
+    expect(written['updatedBy']['id'], 'u2');
+  });
+
+  test('the catalog form saves only the name it changed', () async {
+    final repo = _Services();
+    final source = FirestoreCatalogSource(
+      services: ServiceStore(
+        repository: repo,
+        userStore: _Users(),
+        photoService: _Photos(),
+      ),
+    );
+    // As the list read it.
+    final read = Service()
+      ..id = 's1'
+      ..name = 'Troca'
+      ..value = 100
+      ..createdAt = createdAt
+      ..createdBy = creator;
+    // The form works on a copy of the row, with the same origin.
+    final item = CatalogItem(
+      id: 's1',
+      name: 'Troca de óleo',
+      value: 100,
+      origin: read,
+    );
+
+    await source.save(CatalogKind.service, item);
+
+    expect(repo.created, isEmpty);
+    expect(
+      repo.fields['s1']!.keys.where((k) => k != 'updatedBy'),
+      unorderedEquals(['name', 'keywords', 'updatedAt']),
+    );
+    // What was read stays as it was.
+    expect(read.name, 'Troca');
+  });
+
+  test('saving a saved product without changes writes nothing', () async {
+    final repo = _Products();
+    final store = ProductStore(
+      repository: repo,
+      userStore: _Users(),
+      photoService: _Photos(),
+    );
+    final product = Product()
+      ..id = 'p1'
+      ..name = 'Filtro'
+      ..value = 35;
+
+    await store.saveProduct(product, previous: product.toJson());
+
+    expect(repo.created, isEmpty);
+    expect(repo.fields, isEmpty);
+  });
+
+  test('a price change on a saved product writes the price', () async {
+    final repo = _Products();
+    final store = ProductStore(
+      repository: repo,
+      userStore: _Users(),
+      photoService: _Photos(),
+    );
+    final product = Product()
+      ..id = 'p1'
+      ..name = 'Filtro'
+      ..value = 35;
+    final previous = product.toJson();
+    product.value = 40;
+
+    await store.saveProduct(product, previous: previous);
+
+    expect(
+      repo.fields['p1']!.keys.where((k) => k != 'updatedBy'),
+      unorderedEquals(['value', 'updatedAt']),
+    );
+    expect(repo.fields['p1']!['value'], 40);
   });
 
   test('a photo on a new product writes nothing before ✓', () async {
