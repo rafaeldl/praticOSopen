@@ -61,11 +61,15 @@ abstract class _OrderStore with Store {
   /// ([OrderFieldDiff.snapshotOf]). A save writes only what differs from it.
   Map<String, dynamic>? _savedSnapshot;
 
+  /// Order the snapshot belongs to (null for a new order).
+  String? _savedSnapshotId;
+
   /// Remembers the current order as the saved state (next save writes only
   /// what changes from here).
   @visibleForTesting
   void rememberSaved() {
     _savedSnapshot = order == null ? null : OrderFieldDiff.snapshotOf(order!);
+    _savedSnapshotId = order?.id;
   }
 
   /// Writes the changed fields of an existing order. Replaceable in tests.
@@ -364,6 +368,7 @@ abstract class _OrderStore with Store {
     final local = order;
     if (server == null || local == null || base == null || deferSave) return;
     if (server.id == null || server.id != local.id) return;
+    if (_savedSnapshotId != null && _savedSnapshotId != local.id) return;
     final remote = OrderFieldDiff.snapshotOf(server);
     final current = OrderFieldDiff.snapshotOf(local);
     var adopted = false;
@@ -2080,7 +2085,11 @@ abstract class _OrderStore with Store {
   /// (order never read here), falls back to the full save. A refused write
   /// puts its fields back as unsaved, so the next save retries them.
   Future<void> _saveChangedFields() {
-    final base = _savedSnapshot;
+    // A snapshot of another order (the order was swapped without setOrder)
+    // is no base: fall back to the full save.
+    final base = _savedSnapshotId == null || _savedSnapshotId == order!.id
+        ? _savedSnapshot
+        : null;
     if (base == null) {
       return repository.updateItem(companyId!, order).then((_) {
         rememberSaved();
