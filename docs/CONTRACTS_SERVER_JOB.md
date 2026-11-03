@@ -27,7 +27,7 @@ Firestore:
 ```
 companies/{companyId}                    useContracts, name, country
 companies/{companyId}/orders/{modelo}    isContract: true, contract { ... }
-companies/{companyId}/orders/contract_{hash}   OS gerada pelo servidor
+companies/{companyId}/orders/contract_{modelo}_{AAAAMMDD}   OS gerada (servidor ou app, mesmo id)
 config/contracts                         jobEnabled (chave global do job)
 ```
 
@@ -35,26 +35,26 @@ config/contracts                         jobEnabled (chave global do job)
 
 Para cada empresa com `useContracts == true`, a consulta `isContract == true` traz os modelos. Para cada modelo vencido, uma transação:
 
-1. Lê o modelo e confere de novo: `contract.active == true`, `nextDueDate <= now`, `autoGenerate == true`.
-2. Calcula o id `contract_` + sha256(modelo + vencimento normalizado), 32 caracteres.
+1. Lê o modelo e confere de novo: `contract.active == true`, `nextDueDate <= now`, dia do vencimento até o dia do `endDate` e `autoGenerate == true`.
+2. Calcula o id `contract_{idDoModelo}_{AAAAMMDD}`, o dia do vencimento no fuso da empresa (America/Sao_Paulo enquanto a empresa não tem fuso próprio). O app usa a mesma função (`lib/utils/contract_generation.dart`, PR #513).
 3. Lê a OS desse id. Se não existe, grava a OS.
-4. Atualiza no modelo só `contract.lastGeneratedDate`, `contract.nextDueDate`, `contract.generatedCount` e, se passou do `endDate`, `contract.active = false`.
+4. Atualiza no modelo só `contract.lastGeneratedDate`, `contract.nextDueDate`, `contract.generatedCount` e, se não há próximo vencimento ou ele passa do `endDate`, `contract.active = false`.
 
 O número da OS fica vazio: o gatilho `firestoreUpdateTenantOSNumber` numera, igual à OS do app.
 
 ## Regras de Negócio
 
-Iguais às do app, provadas pelos casos:
+Uma regra só para app e servidor, provada pelos casos (`contract-generation.json`, versão 2):
 
-- **Vence** quando `active == true` e `nextDueDate <= agora`. O `endDate` não entra nessa conta.
+- **Vence** quando `active == true`, `nextDueDate <= agora` e o dia do vencimento não passa do dia do `endDate` (o término conta como incluído).
 - **Gera** só com `autoGenerate == true`. Contrato só de lembrete não cria OS.
 - **OS gerada**: cliente, `device`/`devices`/`deviceIds` (normalizados como `Order.fromJson`), serviços e produtos só com item, descrição, valor, quantidade e total da linha (cai foto e `deviceId` da linha), responsável, `createdBy` e `updatedBy` = autor do modelo, `company` = `{id, name, country}`, situação `quote`, pagamento `unpaid`, `photos: []`, total = soma das linhas sem desconto, `contract = {parentOrderId, parentOrderNumber}`. Endereço, campos extras, datas e desconto do modelo não são copiados.
-- **Próximo vencimento** conta de `lastGeneratedDate = agora`, não do vencimento anterior:
-  - diário e semanal: agora + N dias (mantém a hora da geração);
+- **Próximo vencimento**: `lastGeneratedDate = agora` e o próximo vencimento é o primeiro depois de agora, contando períodos a partir do vencimento gerado:
+  - diário e semanal: + N dias, mantendo a hora do vencimento;
   - mensal e anual: meia-noite, com o dia rolando como o `DateTime` do Dart (31/01 → 03/03; 30/01 → 02/03; 29/02 anual → 01/03). Depois de rolar, o contrato fica no dia novo.
   - frequência desconhecida: próximo vencimento vazio, e o contrato para.
-- **Dias perdidos** não são repostos: app fechado por 3 meses gera uma OS só, e o próximo vencimento vem de hoje. Abrir o app atrasado muda o dia do contrato (vencia dia 15, gerou dia 20, passa a vencer dia 20).
-- **Fim**: passado o `endDate`, gera uma última OS e desliga (`active = false`).
+- **Dias perdidos** não são repostos: app fechado por 3 meses gera uma OS só, nunca uma por abertura. Gerar atrasado não muda o dia do contrato (vencia dia 15, gerou dia 20, continua vencendo dia 15).
+- **Fim**: nada é gerado com vencimento depois do `endDate`. Se o próximo vencimento passa do `endDate`, o contrato desliga (`active = false`).
 - **Perfil (rota)**: precisa de `createOrder` (gerente não gera). Consultor e técnico geram só dos contratos que criaram, como a consulta do app.
 - **Datas**: o app grava hora local sem fuso (`2026-12-03T00:00:00.000`). O servidor lê essas datas como hora de Brasília e grava no mesmo formato. Data com `Z` ou fuso é convertida.
 
@@ -63,7 +63,7 @@ Iguais às do app, provadas pelos casos:
 - Job, rota e retentativa juntos: uma OS. Teste com 20 gerações em paralelo no emulador (`contract-concurrency.emulator.test.ts`).
 - Retentativa do job usa o mesmo horário agendado e não acha nada vencido.
 - Modelo "voltado" por um save antigo da tela (mesmo vencimento de novo): a OS daquele id já existe, então só avança o modelo (`alreadyGenerated`).
-- O job usa o horário agendado porque com a hora real um contrato diário pularia dias: gerado às 02:00:07, ele vence às 02:00:07 do dia seguinte, e o job das 02:00:00 ainda não o veria (teste `a daily contract run a few seconds late`).
+- O próximo vencimento conta do vencimento, não da hora em que o job rodou: um job atrasado alguns segundos não pula o dia seguinte (teste `a daily contract run a few seconds late`).
 
 ## App antigo gerando junto
 
@@ -101,7 +101,8 @@ A rota pode ser usada pelo web desde já: ela tem o mesmo risco que dois celular
 - Proteção opcional contra a OS duplicada do app antigo: um gatilho na criação que encontre a OS do mesmo modelo e vencimento gerada pelo servidor e marque ou apague a do app. Não foi feito: apaga dado criado pelo usuário.
 - Empresas abandonadas com `useContracts` vão passar a receber uma OS por período para sempre. Hoje só gera quem abre o app. Talvez gerar só para empresa com uso recente ou plano ativo.
 - Empresas fora do Brasil: o job roda no horário de Brasília. Para fusos a oeste (ex.: EUA), a OS mensal sai na noite anterior pelo horário local.
-- Regras herdadas do app que talvez não sejam as desejadas: atraso muda o dia do contrato; dia 31 vira dia 3 e fica; uma OS a mais depois do `endDate`; linha perde `deviceId` e foto.
+- Regras herdadas do app que talvez não sejam as desejadas: dia 31 vira dia 3 e fica; linha perde `deviceId` e foto.
+- App com o PR #513 usa o mesmo id e cria a OS em transação, então não duplica com o job. Consultor e técnico não leem OS que ainda não existe: para eles o app relê o modelo no servidor e só gera se ele ainda vence na mesma data.
 
 ## Exemplos de Uso
 
@@ -121,5 +122,5 @@ Testes:
 cd firebase/functions
 npm test                 # casos, serviço e rota (Firestore em memória)
 npm run test:contracts   # concorrência no emulador (também roda em test:rules)
-fvm flutter test test/contract/contract_generation_cases_test.dart
+fvm flutter test test/contract/contract_generation_cases_test.dart   # no PR #513
 ```
