@@ -189,6 +189,10 @@ Tudo fica escondido sem `nfseEnabled` + Asaas conectado (`PaymentSettings.nfseAv
 
 Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`showAppToast`), nunca a mensagem crua.
 
+### Web
+
+O app web (`/app/invoices`) tem a lista do mês, a nota aberta (PDF, XML, cancelar, "Corrigir e emitir") e a folha de emissão, aberta também pelo "…" da OS. Usa as mesmas rotas (`/v1/app/nfse/invoices*`) e lê `invoices` do Firestore, com limite de cima no mês. A configuração continua só no app. Detalhes em `docs/WEB_APP.md`, "Financeiro e notas fiscais".
+
 ### Lista de notas
 
 `NfseInvoiceRepository.watchSince` lê `invoices` por `effectiveDate >= data` (texto `YYYY-MM-DD`): um filtro de intervalo em um campo só usa o índice automático, sem índice composto, e a regra de leitura é a mesma das outras consultas. Status, mês e busca ficam no app (`nfseMonthList`, `nfseMatches`, em `lib/models/nfse.dart`); uma empresa tem dezenas de notas por mês. O mês da nota é o da `effectiveDate`.

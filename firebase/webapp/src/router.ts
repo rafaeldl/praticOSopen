@@ -23,14 +23,19 @@ const withCustomerTexts = <T>(view: () => Promise<T>) => () => Promise.all([view
 const CustomersView = withCustomerTexts(() => import('@/views/customers/CustomersView.vue'))
 const DevicesView = withCustomerTexts(() => import('@/views/customers/DevicesView.vue'))
 const ImportView = withCustomerTexts(() => import('@/views/customers/ImportView.vue'))
-// Financeiro > Receber: its texts are in the orders chunk (components/orders/receive).
-const FinanceView = () => Promise.all([import('@/components/orders/receive/FinanceReceive.vue'), loadOrderTexts()]).then(([m]) => m)
+// Financeiro (fatia 6): its texts in their own chunk; the screens open orders, so the orders' come too.
+const withFinanceTexts = <T>(view: () => Promise<T>) => () => Promise.all([view(), loadTexts('finance'), loadOrderTexts()]).then(([m]) => m)
+const FinanceView = withFinanceTexts(() => import('@/views/finance/FinanceView.vue'))
+// Receber lives with the receive components (orders chunk) and shows the Financeiro's tabs.
+const FinanceReceiveView = withFinanceTexts(() => import('@/components/orders/receive/FinanceReceive.vue'))
+const ReportView = withFinanceTexts(() => import('@/views/finance/ReportView.vue'))
+const InvoicesView = withFinanceTexts(() => import('@/views/finance/InvoicesView.vue'))
 // Agenda opens orders beside it, so it brings their texts too.
 const AgendaView = () => Promise.all([import('@/views/agenda/AgendaView.vue'), loadTexts('agenda'), loadOrderTexts()]).then(([m]) => m)
 // The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
 const CatalogView = withCustomerTexts(() => import('@/views/catalog/CatalogView.vue'))
 const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/CatalogImportView.vue'))
-const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, catalog: CatalogView }
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, invoices: InvoicesView, catalog: CatalogView }
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -84,6 +89,18 @@ export const routes: RouteRecordRaw[] = [
     name: 'catalogImport',
     component: CatalogImportView,
     meta: { access: { kind: 'member', anyOf: ['manageServices', 'manageProducts'] }, title: 'web.nav.catalog' },
+  },
+  {
+    path: '/finance/receive',
+    name: 'financeReceive',
+    component: FinanceReceiveView,
+    meta: { access: { kind: 'member', anyOf: ['viewFinancialReports'] }, title: 'receiveTitle' },
+  },
+  {
+    path: '/finance/report',
+    name: 'financeReport',
+    component: ReportView,
+    meta: { access: { kind: 'member', anyOf: ['viewFinancialReports'] }, title: 'financialReport' },
   },
   {
     path: '/devices',

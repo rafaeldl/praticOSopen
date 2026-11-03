@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -83,6 +83,7 @@ async function seedCompanies() {
       segment: company.segment,
       // Device status and its list column (fatia 03); only the first company.
       ...(id === COMPANY_A ? { useDeviceManagement: true } : {}),
+      ...(company.useFinancial === false ? { useFinancial: false } : {}),
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
       // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..509), like a real counter.
@@ -155,7 +156,12 @@ async function seedCatalog() {
     }
     // Payment links (Asaas pilot) on in company A. The charges themselves are
     // simulated by the tests: no Asaas account exists in the emulator.
-    if (id === COMPANY_A) batch.set(db.doc(`companies/${id}/settings/payments`), { asaasEnabled: true, asaasConnected: true, asaasEnvironment: 'sandbox' })
+    // Notas fiscais (fatia 6) too: on and set up, so the list and "Emitir nota fiscal" show. Asaas itself is simulated.
+    if (id === COMPANY_A) {
+      batch.set(db.doc(`companies/${id}/settings/payments`), {
+        asaasEnabled: true, asaasConnected: true, asaasEnvironment: 'sandbox', nfseEnabled: true, nfseReady: true,
+      })
+    }
     await batch.commit()
   }
 }
@@ -263,6 +269,70 @@ async function seedScenario() {
   await batch.commit()
 }
 
+// Financeiro (fatia 6): a closed month with known numbers, March 2026 in São Paulo.
+// Numbers 9101+ stay far from the counter the tests use.
+async function seedFinance() {
+  const company = { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }
+  const ana = { id: 'fin-ana', name: 'Ana Financeiro' }
+  const bia = { id: 'fin-bia', name: 'Bia Financeiro' }
+  const by = aggr(USERS.admin)
+  const base = (number, extra) => ({
+    number, company, createdBy: by, updatedBy: by, discount: 0, products: [],
+    services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: extra.total }], ...extra,
+  })
+  const orders = {
+    // Paid in March: 200 of service, 100 of parts.
+    'fin-paid': base(9101, {
+      status: 'done', customer: ana, total: 300, paidAmount: 300, payment: 'paid', paid: true,
+      services: [{ service: { id: 'service-2', name: 'Revisão completa' }, value: 200 }],
+      products: [{ product: { id: 'product-1', name: 'Filtro de óleo' }, value: 50, quantity: 2, total: 100 }],
+      transactions: [{ id: 'fin-t1', type: 'payment', amount: 300, paidAt: '2026-03-12T15:00:00.000Z', createdAt: '2026-03-12T15:00:00.000Z', createdBy: by, paymentMethod: 'pix' }],
+      lastPaymentAt: '2026-03-12T15:00:00.000Z',
+      createdAt: '2026-03-10T15:00:00.000Z', updatedAt: '2026-03-12T15:00:00.000Z',
+    }),
+    // Opened in February, paid in March: Recebido of March, Vendido of February.
+    'fin-feb': base(9102, {
+      status: 'done', customer: bia, total: 80, paidAmount: 80, payment: 'paid', paid: true,
+      transactions: [{ id: 'fin-t2', type: 'payment', amount: 80, paidAt: '2026-03-02T15:00:00.000Z', createdAt: '2026-03-02T15:00:00.000Z', createdBy: by }],
+      lastPaymentAt: '2026-03-02T15:00:00.000Z',
+      createdAt: '2026-02-20T15:00:00.000Z', updatedAt: '2026-03-02T15:00:00.000Z',
+    }),
+    // Last day of March, 23:30 in São Paulo, written by the app (no zone): in March.
+    'fin-last-day': base(9103, {
+      status: 'approved', customer: bia, total: 50, paidAmount: 0, payment: 'unpaid', paid: false,
+      createdAt: '2026-03-31T23:30:00.000123', updatedAt: '2026-03-31T23:30:00.000123',
+    }),
+    // Midnight of April 1st in São Paulo: April, not March.
+    'fin-april': base(9104, {
+      status: 'approved', customer: ana, total: 999, paidAmount: 0, payment: 'unpaid', paid: false,
+      createdAt: '2026-04-01T03:00:00.000Z', updatedAt: '2026-04-01T03:00:00.000Z',
+    }),
+    // Quote of March: never in the numbers.
+    'fin-quote': base(9105, {
+      status: 'quote', customer: ana, total: 5000, payment: null, paid: false,
+      createdAt: '2026-03-15T15:00:00.000Z', updatedAt: '2026-03-15T15:00:00.000Z',
+    }),
+  }
+  const batch = db.batch()
+  for (const [id, data] of Object.entries(orders)) batch.set(db.doc(`companies/${COMPANY_A}/orders/${id}`), data)
+
+  // Notas fiscais of this month (the list opens on it).
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  const nota = (extra) => ({
+    customer: { id: 'customer-6', name: 'Cliente 06' }, value: 270, effectiveDate: today,
+    createdBy: by, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), asaasEnvironment: 'sandbox', ...extra,
+  })
+  batch.set(db.doc(`companies/${COMPANY_A}/invoices/nf-ok`), nota({
+    status: 'authorized', number: '4521', orderIds: ['scn-owed'], orders: [{ orderId: 'scn-owed', orderNumber: 504, value: 270 }],
+    pdfUrl: 'https://sandbox.asaas.test/nota-4521.pdf', xmlUrl: 'https://sandbox.asaas.test/nota-4521.xml',
+  }))
+  batch.set(db.doc(`companies/${COMPANY_A}/invoices/nf-refused`), nota({
+    status: 'error', customer: { id: 'customer-7', name: 'Cliente 07' }, value: 50, orderIds: ['scn-quote-old'],
+    orders: [{ orderId: 'scn-quote-old', orderNumber: 505, value: 50 }], statusDescription: 'CEP do cliente é inválido.',
+  }))
+  await batch.commit()
+}
+
 // Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
 async function seedWebAccess() {
   const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
@@ -300,5 +370,8 @@ await seedInvites()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 // The big list measures the list alone; the scenarios are for the screen tests.
-if (orders <= DEFAULT_ORDERS) await seedScenario()
+if (orders <= DEFAULT_ORDERS) {
+  await seedScenario()
+  await seedFinance()
+}
 console.log(`seed: ${Object.keys(USERS).length} usuários, ${orders} OS em ${Date.now() - started} ms`)

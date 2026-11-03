@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "generatedFrom": "9b0702d9",
+  "rule": "Período do relatório: Hoje, Esta semana (domingo a sábado), Este mês e Este ano, andando para trás pelo deslocamento. Os dois dias das pontas entram. 'today' é o dia no fuso da empresa.",
+  "runsIn": ["web"],
+  "sourceOfTruth": ["lib/utils/report_week.dart reportWeek (desde fix/app-defects-batch-2; antes a semana contava blocos de 7 dias desde 1º de janeiro, defeito D2)", "lib/repositories/tenant/tenant_order_repository.dart getOrdersByCustomPeriod"],
+  "otherImplementations": ["firebase/webapp/src/lib/finance/period.ts periodOf"],
+  "cases": [
+    {"id":"day-today","given":{"kind":"day","offset":0,"today":"2026-11-03"},"expect":{"from":"2026-11-03","to":"2026-11-03"}},
+    {"id":"day-before","given":{"kind":"day","offset":-1,"today":"2026-11-01"},"expect":{"from":"2026-10-31","to":"2026-10-31"}},
+    {"id":"week-tuesday","given":{"kind":"week","offset":0,"today":"2026-11-03"},"expect":{"from":"2026-11-01","to":"2026-11-07"},"note":"Terça 03/11/2026: a tela e a busca usam 01/11 a 07/11 (no app antigo a busca ia de 25/10 a 31/10)."},
+    {"id":"week-sunday","given":{"kind":"week","offset":0,"today":"2026-11-01"},"expect":{"from":"2026-11-01","to":"2026-11-07"}},
+    {"id":"week-saturday","given":{"kind":"week","offset":0,"today":"2026-11-07"},"expect":{"from":"2026-11-01","to":"2026-11-07"}},
+    {"id":"week-before","given":{"kind":"week","offset":-1,"today":"2026-11-03"},"expect":{"from":"2026-10-25","to":"2026-10-31"}},
+    {"id":"week-across-years","given":{"kind":"week","offset":0,"today":"2026-01-01"},"expect":{"from":"2025-12-28","to":"2026-01-03"}},
+    {"id":"month-current","given":{"kind":"month","offset":0,"today":"2026-11-03"},"expect":{"from":"2026-11-01","to":"2026-11-30"}},
+    {"id":"month-before-across-years","given":{"kind":"month","offset":-1,"today":"2026-01-15"},"expect":{"from":"2025-12-01","to":"2025-12-31"}},
+    {"id":"month-leap-february","given":{"kind":"month","offset":-1,"today":"2028-03-31"},"expect":{"from":"2028-02-01","to":"2028-02-29"}},
+    {"id":"year-current","given":{"kind":"year","offset":0,"today":"2026-11-03"},"expect":{"from":"2026-01-01","to":"2026-12-31"}},
+    {"id":"year-before","given":{"kind":"year","offset":-2,"today":"2026-11-03"},"expect":{"from":"2024-01-01","to":"2024-12-31"}}
+  ]
+}
