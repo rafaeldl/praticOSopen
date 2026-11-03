@@ -40,6 +40,7 @@ import {
   orderTitle,
   statusText,
   whenText,
+  country,
 } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { formatPhone } from '@/lib/phone'
@@ -49,6 +50,8 @@ import { currentToast, showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
+import * as maintenance from '@/lib/orders/maintenance'
+import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
 import TextDialog from './TextDialog.vue'
 import OrderCustomFields from './OrderCustomFields.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
@@ -99,6 +102,7 @@ type Dialog =
   | { kind: 'addItem' }
   | { kind: 'customer' }
   | { kind: 'address' }
+  | { kind: 'maintenance'; devices: { id: string; name: string }[] }
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share' }
@@ -245,7 +249,35 @@ async function setStatus(status: OrderStatus) {
     dialog.value = { kind: 'pendingForms', count: pendingForms.length, first: (pendingForms[0] as { id: string }).id }
     return
   }
-  await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
+  const was = order.value.status
+  const ok = await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
+  // Done now (the server took it): when is the next maintenance? (device.maintenance.offer)
+  if (ok && status === 'done' && was !== 'done' && order.value) {
+    const devices = await maintenance.devicesToAsk(order.value)
+    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
+  }
+}
+
+const maintenanceChoices = computed<Choice[]>(() => {
+  const today = toIsoDay(new Date())
+  const option = (id: string, label: string, months: number) => ({ id, label, sub: formatMonthYear(fromIsoDay(maintenance.addMonths(today, months)), country()) })
+  return [
+    option('3', t('nextMaintenanceThreeMonths'), 3),
+    option('6', t('nextMaintenanceSixMonths'), 6),
+    option('12', t('nextMaintenanceOneYear'), 12),
+    { id: 'none', label: t('nextMaintenanceNoRepeat') },
+  ]
+})
+
+/** device.maintenance.answer / no-repeat; closing without an answer counts as a refusal and changes nothing. */
+async function answerMaintenance(id: string | null) {
+  const current = dialog.value
+  dialog.value = null
+  if (current?.kind !== 'maintenance') return
+  if (id === null) return maintenance.decline()
+  const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id))
+  if (failed) showToast(t('nextMaintenanceSaveError'))
+  else if (id !== 'none') showToast(t('web.order.maintenanceSaved'))
 }
 
 async function runStep() {
@@ -768,6 +800,14 @@ watch(
   <template v-if="order && access && dialog">
     <ChoiceDialog v-if="dialog.kind === 'menu'" :anchor="menuButton" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
+    <ChoiceDialog
+      v-else-if="dialog.kind === 'maintenance'"
+      :title="t('nextMaintenanceQuestion')"
+      :sub="dialog.devices.map((device) => device.name).join(', ')"
+      :choices="maintenanceChoices"
+      @pick="answerMaintenance"
+      @close="answerMaintenance(null)"
+    />
     <ChoiceDialog v-else-if="dialog.kind === 'assignee'" :title="t('pickerAssigneeTitle')" :choices="teamChoices" @pick="assign" @close="dialog = null" />
     <ConfirmDialog
       v-else-if="dialog.kind === 'cancel'"

@@ -336,6 +336,7 @@
   "web.order.addressRemoved": "Lugar quitado",
   "web.order.moreData": "Más datos",
   "web.order.editMoreData": "Cambiar",
+  "web.order.maintenanceSaved": "Próximo mantenimiento marcado",
   "web.batch.pdf": "PDF",
   "web.charge.create": "Crear enlace de {amount}",
   "web.charge.created": "Enlace de pago listo",
