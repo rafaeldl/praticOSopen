@@ -3,7 +3,7 @@
 // Every write goes through /v1/app/orders; tests check what the server saved.
 import { expect, test, type Page } from '@playwright/test'
 import { makeOrder, readOrder, updateOrderDoc } from './data'
-import { chooseCompany, login, type UserKey } from './helpers'
+import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
 const dialog = (page: Page, name: string | RegExp) => page.getByRole('dialog', { name })
@@ -43,7 +43,7 @@ test('do orçamento ao recebido, pelo botão azul (approve, start, finish, recei
   await expect(status(page)).toHaveText('Aprovado')
   await nextStep(page).click()
   await expect(status(page)).toHaveText('Na oficina')
-  await expect(nextStep(page)).toHaveText('Marcar como pronta')
+  await expect(nextStep(page)).toHaveText('Concluir serviço')
   await nextStep(page).click()
   await expect(status(page)).toHaveText('Concluído')
   await expect(nextStep(page)).toHaveText('Receber R$ 50,00')
@@ -184,8 +184,7 @@ test('supervisor: itens só no orçamento; aprovada fica só leitura; técnico e
   await page.goto(`orders?order=${quote.id}`)
   await expect(panel(page).getByRole('button', { name: 'Adicionar serviço ou peça' })).toBeVisible()
   await page.goto('settings')
-  await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await signOut(page)
   const own = await makeOrder('consultant', { status: 'approved' })
   await openOrder(page, 'consultant', own.id)
   await expect(panel(page).getByRole('button', { name: 'Marcar como parada' })).toHaveCount(0)
@@ -307,8 +306,7 @@ test('OS que não existe ou sem acesso: diz isso, nunca abre vazia (order.route.
   await openOrder(page, 'admin', 'nao-existe')
   await expect(panel(page).getByRole('heading', { name: 'OS não está mais aqui' })).toBeVisible()
   await page.goto('settings')
-  await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await signOut(page)
   await openOrder(page, 'technician', 'scn-late')
   await expect(panel(page).getByRole('heading', { name: 'OS não está mais aqui' })).toBeVisible()
 })

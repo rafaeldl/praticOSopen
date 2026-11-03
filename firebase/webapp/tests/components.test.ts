@@ -64,6 +64,15 @@ describe('MoneyInput', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 
+  test('a value that reads well goes up while typing, so totals follow before blur (usuarios-pr515 #15)', async () => {
+    const wrapper = money(50)
+    await wrapper.get('input').trigger('focus')
+    await wrapper.get('input').setValue('180')
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([180])
+    // The text is not reformatted mid-typing.
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('180')
+  })
+
   test('empty clears, unless required', async () => {
     const wrapper = money(90)
     await wrapper.get('input').setValue('')

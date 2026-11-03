@@ -1,13 +1,21 @@
 import { expect, test, type Page } from '@playwright/test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
-async function auditScreens(page: Page, theme: 'light' | 'dark') {
+// The audit is split in three tests per theme (screens, order screens, components):
+// one test had grown to ~29 s of the 30 s budget on CI, and each axe run adds up.
+type Theme = 'light' | 'dark'
+
+async function start(page: Page, theme: Theme) {
   await page.emulateMedia({ colorScheme: theme })
   await page.goto('login')
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
   await expectNoAxeViolations(page, `login ${theme}`)
   await login(page, 'admin', 'login')
   await setTheme(page, theme)
+}
+
+async function auditScreens(page: Page, theme: Theme) {
+  await start(page, theme)
 
   for (const [path, title] of [
     ['./', 'Início'],
@@ -25,7 +33,10 @@ async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await page.goto('orders?order=order-1')
   await expect(page.getByRole('complementary', { name: 'OS aberta' })).toBeVisible()
   await expectNoAxeViolations(page, `painel ${theme}`)
+}
 
+async function auditOrderScreens(page: Page, theme: Theme) {
+  await start(page, theme)
   // The order screens: open order with money, its menu and dialogs, Nova OS, board, batch.
   await page.goto('./?order=scn-owed')
   const panel = page.getByRole('complementary', { name: 'OS aberta' })
@@ -60,7 +71,10 @@ async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await page.goto('./?f=all')
   await expect(page.getByTestId('orders-table')).toBeVisible()
   await expectNoAxeViolations(page, `todas por mês ${theme}`)
+}
 
+async function auditComponents(page: Page, theme: Theme) {
+  await start(page, theme)
   await page.goto('dev/components')
   await page.getByRole('button', { name: 'Diálogo' }).click()
   await expectNoAxeViolations(page, `diálogo ${theme}`)
@@ -76,13 +90,19 @@ async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await expectNoAxeViolations(page, `paleta ${theme}`)
 }
 
-test('axe: 0 violações no tema claro', async ({ page }) => {
-  await auditScreens(page, 'light')
-})
+for (const [theme, name] of [['light', 'claro'], ['dark', 'escuro']] as const) {
+  test(`axe: 0 violações no tema ${name}: telas`, async ({ page }) => {
+    await auditScreens(page, theme)
+  })
 
-test('axe: 0 violações no tema escuro', async ({ page }) => {
-  await auditScreens(page, 'dark')
-})
+  test(`axe: 0 violações no tema ${name}: OS`, async ({ page }) => {
+    await auditOrderScreens(page, theme)
+  })
+
+  test(`axe: 0 violações no tema ${name}: componentes`, async ({ page }) => {
+    await auditComponents(page, theme)
+  })
+}
 
 test('foco visível nos links da navegação', async ({ page }) => {
   await login(page, 'admin')

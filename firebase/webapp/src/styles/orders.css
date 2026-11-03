@@ -101,7 +101,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .comments { list-style: none; margin: 0 0 0.5rem; padding: 0; }
 .comment { padding: 0.3rem 0; overflow-wrap: anywhere; }
 .comment b { font-weight: 600; }
-.comment-form { display: grid; gap: 0.4rem; }
+/* minmax(0, 1fr): the textarea's own width (20 columns) never pushes the form past a 320 px screen. */
+.comment-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
 .comment-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .comment-row select { flex: 1 1 12rem; width: auto; }
 .kv { display: grid; grid-template-columns: minmax(6rem, auto) minmax(0, 1fr); gap: 0.35rem 0.75rem; margin: 0; align-items: baseline; }
@@ -195,7 +196,7 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 /* Filters cut at the edge of a phone: a fade says there are more to the side. */
 @media (max-width: 40rem) {
-  .toolbar .chips { mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+  .toolbar .chips { mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); padding-inline-end: 2.5rem; }
 }
 @media (forced-colors: active) {
   .grid tbody tr.is-selected td:first-child { border-left: 3px solid Highlight; }

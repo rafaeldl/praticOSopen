@@ -41,6 +41,7 @@ import {
   whenText,
 } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
+import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
 import { currentToast, showToast } from '@/lib/toast'
@@ -112,7 +113,7 @@ const stepLabel = computed(() => {
   if (!value) return ''
   if (value.kind === 'resume') return t('orderHoldResume')
   if (value.kind === 'receive') return t('orderNextStepReceive', { amount: money(value.amount) })
-  return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('orderActionMarkReady')
+  return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('web.order.markDone')
 })
 const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
 
@@ -211,6 +212,11 @@ async function discount(value: { amount: number; clientTransactionId: string }) 
 async function addCatalogItem(item: CatalogItem) {
   dialog.value = null
   await run(() => writes.addItem(order.value!.id, { kind: item.kind, catalogId: item.id }, expected()), t('web.order.itemAdded', { name: item.name }))
+}
+
+async function addFreeItem(name: string) {
+  dialog.value = null
+  await run(() => writes.addItem(order.value!.id, { kind: 'service', description: name }, expected()), t('web.order.itemAdded', { name }))
 }
 
 async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number }) {
@@ -328,14 +334,18 @@ const itemGroups = (query: string): ComboboxGroup[] => {
         right: showsMoney.value ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
       })),
     },
+    // Outside the catalog, named by what was typed (POST /items without catalogId, #516).
+    { items: writes.API_516 && query.trim() ? [{ id: FREE_ITEM, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
   ]
 }
-const pickItem = (picked: ComboboxItem) => {
+const FREE_ITEM = '__free'
+const pickItem = (picked: ComboboxItem, query = '') => {
+  if (picked.id === FREE_ITEM && query.trim()) return void addFreeItem(query.trim())
   const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (item) void addCatalogItem(item)
 }
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { items: search(customers.value, query, (c) => c.phone ?? '').map((c) => ({ id: c.id, label: c.name, sub: c.phone })) },
+  { items: search(customers.value, query, (c) => c.phone ?? '').map((c) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })) },
 ]
 const deviceGroups = (query: string): ComboboxGroup[] => [
   { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },

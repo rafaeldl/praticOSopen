@@ -26,7 +26,16 @@ export function newTransactionId(): string {
   return crypto.randomUUID()
 }
 
+/**
+ * #516 on the server: POST /items without catalogId (an item outside the catalog,
+ * "+ Usar «texto» nesta OS") and `clientOrderId` on POST /orders (a retry after a
+ * network failure returns the order already created). Off until #516 is deployed.
+ */
+export const API_516 = false
+
 export interface NewOrderInput {
+  /** One per Nova OS opened, reused on every retry (sent only with API_516). */
+  clientOrderId?: string
   customerId: string
   deviceId?: string
   services: { serviceId: string; value?: number | null }[]
@@ -37,7 +46,9 @@ export interface NewOrderInput {
 }
 
 export function createOrder(input: NewOrderInput) {
-  return api<{ id: string; number: number; status: OrderStatus }>('/v1/app/orders', { method: 'POST', body: input })
+  const { clientOrderId, ...rest } = input
+  const body = API_516 && clientOrderId ? { ...rest, clientOrderId } : rest
+  return api<{ id: string; number: number; status: OrderStatus }>('/v1/app/orders', { method: 'POST', body })
 }
 
 export function patchOrder(
@@ -57,7 +68,8 @@ export function deleteOrder(id: string) {
 
 export function addItem(
   id: string,
-  item: { kind: 'service' | 'product'; catalogId: string; value?: number | null; quantity?: number; deviceId?: string | null },
+  // Without catalogId (API_516): an item outside the catalog, named by its description.
+  item: { kind: 'service' | 'product'; catalogId?: string; description?: string; value?: number | null; quantity?: number; deviceId?: string | null },
   expectedUpdatedAt?: string | null,
 ) {
   return api<OrderResponse>(`${base(id)}/items`, {

@@ -65,7 +65,7 @@ const loadingMore = ref(false)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const stale = ref(false)
 const firstRun = ref(false)
-const unpaidCount = ref<number | null>(null)
+const unpaid = ref<{ count: number; amount: number } | null>(null)
 let stopSearch: (() => void) | undefined
 const selected = ref<string[]>([])
 const searchEl = ref<HTMLInputElement | null>(null)
@@ -90,11 +90,20 @@ const summary = computed(() => (search.value.trim() ? null : summaryOf(filter.va
 const title = computed(() => t(route.name === 'orders' ? 'orders' : 'home'))
 /** The answer of the screen, right under the title (home.summary.count). */
 const summaryText = computed(() => {
-  // While searching, how many were found.
-  if (search.value.trim()) return t('web.orders.count', { count: visible.value.length })
+  // While searching, how many were found; in Sem receber, how much the ones found owe (one customer's balance).
+  if (search.value.trim()) {
+    const found = summaryOf(filter.value, visible.value, true, now.value)
+    return found?.kind === 'unpaid' ? t('web.orders.unpaidSummary', { count: found.count, amount: money(found.amount) }) : t('web.orders.count', { count: visible.value.length })
+  }
   const value = summary.value
-  if (!value) return ''
-  if (value.kind === 'open') return value.late ? `${t('homeOpenCount', { count: value.open })} · ${t('homeLateCount', { count: value.late })}` : t('homeOpenCount', { count: value.open })
+  // Not all open orders loaded (no count yet): the day still opens with what is left to receive.
+  if (!value) return filter.value === 'open' && unpaid.value?.amount ? t('web.orders.toReceive', { amount: money(unpaid.value.amount) }) : ''
+  if (value.kind === 'open') {
+    // The day opens with what is left to receive too (done orders, outside Em aberto).
+    const parts = [t('homeOpenCount', { count: value.open }), ...(value.late ? [t('homeLateCount', { count: value.late })] : [])]
+    if (unpaid.value?.amount) parts.push(t('web.orders.toReceive', { amount: money(unpaid.value.amount) }))
+    return parts.join(' · ')
+  }
   if (value.kind === 'quotes') return t('homeQuotesWaiting', { count: value.count })
   if (value.kind === 'onHold') return t('homeOnHoldCount', { count: value.count })
   if (value.kind === 'unpaid') return t('web.orders.unpaidSummary', { count: value.count, amount: money(value.amount) })
@@ -159,7 +168,7 @@ async function load() {
     // After the paint: Sem receber count, ⌘K search and the lists of Nova OS (list-extras.ts).
     void import('@/lib/orders/list-extras').then((extras) => {
       if (token !== loadToken) return
-      if (showsMoney) void extras.unpaidCount(ctx).then((count) => (unpaidCount.value = count))
+      if (showsMoney) void extras.unpaidTotals(ctx).then((totals) => (unpaid.value = totals))
       stopSearch?.()
       stopSearch = extras.paletteSearch(() => rows.value, (id) => void panel.open(id), (name) => {
         search.value = name
@@ -395,7 +404,7 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
             :aria-pressed="filter === item"
             @click="choose(item)"
           >
-            {{ FILTER_LABEL[item]() }}<span v-if="item === 'unpaid' && unpaidCount" class="num"> {{ unpaidCount }}</span>
+            {{ FILTER_LABEL[item]() }}<span v-if="item === 'unpaid' && unpaid?.count" class="num"> {{ unpaid.count }}</span>
           </button>
         </div>
         <span class="spacer"></span>

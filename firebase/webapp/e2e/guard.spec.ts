@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { chooseCompany, login, type UserKey } from './helpers'
+import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.
 const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
@@ -42,8 +42,7 @@ test('quem vê valores lê o Firestore; quem não vê usa a projeção da API, s
   await expect(page.getByTestId('orders-table')).toBeVisible()
   await expect(page.getByTestId('orders-table').getByRole('columnheader', { name: 'Total' })).toBeVisible()
   await page.goto('settings')
-  await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await signOut(page)
   const apiList = page.waitForResponse((response) => /\/v1\/app\/orders\?/.test(response.url()))
   await login(page, 'supervisor', 'orders')
   const body = await (await apiList).json()

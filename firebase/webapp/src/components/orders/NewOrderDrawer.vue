@@ -18,6 +18,7 @@ import { createStatuses, type OrderStatus } from '@/lib/orders/model'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { api, can, session } from '@/lib/session'
+import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
@@ -27,6 +28,8 @@ interface Line {
   item: CatalogItem
   value: number | null
   quantity: number
+  /** Outside the catalog ("+ Usar «texto» nesta OS"): added after the order exists, by POST /items without catalogId. */
+  free?: boolean
 }
 
 const router = useRouter()
@@ -111,11 +114,13 @@ async function devicesOf(customerId: string): Promise<Device[]> {
 }
 
 const NEW = '__new'
-/** Item outside the catalog: waits for the API to accept a line without catalogId (FREE_ITEMS). */
-const FREE_ITEMS = false
+/** Item outside the catalog: the API accepts a line without catalogId with #516 (writes.API_516). */
+const FREE_ITEMS = writes.API_516
+/** One per Nova OS opened: a "Salvar" again after a network failure never creates a second order (API_516). */
+const clientOrderId = crypto.randomUUID()
 
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { title: query ? undefined : t('web.newOrder.customers'), items: search(customers.value, query, (c) => c.phone ?? '', 8).map((c) => ({ id: c.id, label: c.name, sub: c.phone })) },
+  { title: query ? undefined : t('web.newOrder.customers'), items: search(customers.value, query, (c) => c.phone ?? '', 8).map((c) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })) },
   // A new customer right here (POST /v1/app/customers): the name, or the phone when only digits were typed.
   // Only once the list is in: an Enter typed before it loads must find the existing customer, never create a copy.
   { items: query.trim() && !loading.value && can('manageCustomers') ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
@@ -201,12 +206,13 @@ const itemGroups = (query: string): ComboboxGroup[] => [
       right: showsMoney ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
     })),
   },
-  { items: FREE_ITEMS && query.trim() ? [{ id: NEW, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
+  { items: FREE_ITEMS && query.trim() && !loading.value ? [{ id: NEW, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
 ]
-function pickItem(picked: ComboboxItem) {
-  const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
+function pickItem(picked: ComboboxItem, query = '') {
+  const free = picked.id === NEW && query.trim() ? { id: '', kind: 'service' as const, name: query.trim(), value: null } : null
+  const item = free ?? catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (!item) return
-  lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: item.value, quantity: 1 }]
+  lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: item.value, quantity: 1, ...(free ? { free: true } : {}) }]
   announce(t('web.order.itemAdded', { name: item.name }))
 }
 
@@ -235,17 +241,24 @@ async function save() {
   try {
     // Own price only when it differs from the catalog (and only who may edit prices).
     const own = (line: Line) => (editPrices && line.value !== line.item.value ? { value: line.value } : {})
+    const catalogLines = lines.value.filter((l) => !l.free)
     const created = await writes.createOrder({
+      clientOrderId,
       customerId: customer.value.id,
       ...(device.value ? { deviceId: device.value.id } : {}),
-      services: lines.value.filter((l) => l.item.kind === 'service').map((l) => ({ serviceId: l.item.id, ...own(l) })),
-      products: lines.value.filter((l) => l.item.kind === 'product').map((l) => ({ productId: l.item.id, quantity: l.quantity, ...own(l) })),
+      services: catalogLines.filter((l) => l.item.kind === 'service').map((l) => ({ serviceId: l.item.id, ...own(l) })),
+      products: catalogLines.filter((l) => l.item.kind === 'product').map((l) => ({ productId: l.item.id, quantity: l.quantity, ...own(l) })),
       status: status.value,
       ...(due.value ? { dueDate: isoOrUndefined(due.value) } : {}),
       ...(visit.value ? { scheduledDate: isoOrUndefined(visit.value) } : {}),
     })
     // The rest after the id: a failure here says what did not stay, the order is already saved.
     const after: Promise<unknown>[] = []
+    // Items outside the catalog, one after the other so they keep their order.
+    const free = lines.value.filter((l) => l.free)
+    if (free.length) {
+      after.push(free.reduce<Promise<unknown>>((chain, line) => chain.then(() => writes.addItem(created.id, { kind: 'service', description: line.item.name, ...own(line) })), Promise.resolve()))
+    }
     if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
     if (request.value.trim()) after.push(writes.addComment(created.id, request.value.trim(), true))
     const results = await Promise.allSettled(after)

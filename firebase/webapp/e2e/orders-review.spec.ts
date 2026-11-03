@@ -2,7 +2,7 @@
 // Each test names the item it covers.
 import { expect, test, type Page } from '@playwright/test'
 import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc } from './data'
-import { login } from './helpers'
+import { login, setTheme } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
 const dialog = (page: Page, name: string | RegExp) => page.getByRole('dialog', { name })
@@ -276,9 +276,12 @@ test.describe('Início (usuários)', () => {
     await expect(panel(page).getByTestId('order-detail')).toBeVisible()
     const more = panel(page).getByRole('button', { name: 'Mais ações' })
     await more.click()
-    const menuBox = await page.getByRole('dialog', { name: 'OS 501' }).boundingBox()
-    const button = await more.boundingBox()
-    expect(Math.abs((menuBox?.y ?? 0) - ((button?.y ?? 0) + (button?.height ?? 0)))).toBeLessThan(12)
+    // Measured after the opening animation: the box sits 4 px under the button.
+    await expect.poll(async () => {
+      const menuBox = await page.getByRole('dialog', { name: 'OS 501' }).boundingBox()
+      const button = await more.boundingBox()
+      return Math.abs((menuBox?.y ?? 0) - ((button?.y ?? 0) + (button?.height ?? 0)))
+    }).toBeLessThan(12)
     await page.getByRole('dialog', { name: 'OS 501' }).getByRole('button', { name: 'Mudar a situação' }).click()
     const labels = await dialog(page, 'Qual a situação?').locator('.opt-main > span:first-child').allTextContents()
     expect(labels).toEqual(['Orçamento', 'Aprovado', 'Na oficina', 'Concluído'])
@@ -298,5 +301,101 @@ test.describe('Início (usuários)', () => {
       return box.top >= 0 && box.bottom <= window.innerHeight
     }).length)
     expect(rowsInView).toBeGreaterThanOrEqual(2)
+  })
+})
+
+test.describe('Rodada 2 (usuários)', () => {
+  test('P2 #7: a Início abre o dia com o que falta receber', async ({ page }) => {
+    await login(page, 'admin')
+    // With every open order loaded: "N em aberto · R$ X para receber"; otherwise only what is left to receive.
+    await expect(page.getByTestId('summary')).toHaveText(/(em aberto.* · )?R\$\s[\d.,]+ para receber$/)
+  })
+
+  test('P1 #5: em Sem receber, buscar o cliente mostra quanto ele deve', async ({ page }) => {
+    await login(page, 'admin')
+    await page.getByRole('button', { name: /^Sem receber/ }).click()
+    await expect(row(page, 504)).toBeVisible()
+    await page.getByRole('searchbox', { name: /Buscar OS/ }).fill('Cliente 06')
+    await expect(page.getByTestId('summary')).toHaveText(/^\d+ para receber · R\$\s[\d.,]+$/)
+    await expect(row(page, 504)).toContainText('falta receber R$ 200,00')
+  })
+
+  test('P2 #10: o próximo passo usa o nome da situação', async ({ page }) => {
+    const order = await makeOrder('admin', { status: 'progress' })
+    await openOrder(page, 'admin', order.id)
+    await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
+  })
+
+  test('P3 #15 e #16: telefone legível na lista de clientes; o total segue o valor enquanto digita', async ({ page }) => {
+    await login(page, 'admin')
+    await page.getByTestId('new-order').click()
+    await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
+    await expect(page.getByRole('option', { name: /^Cliente 01/ })).toContainText('(11) 99000-0001')
+    await page.keyboard.press('Enter')
+    await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Serviço 1')
+    await expect(page.getByRole('option', { name: /^Serviço 1/ })).toBeVisible()
+    await page.keyboard.press('Enter')
+    const price = drawer(page).getByLabel('Valor de Serviço 1')
+    await price.focus()
+    await price.fill('180')
+    await expect(price).toBeFocused()
+    await expect(drawer(page).locator('.drawer-foot')).toContainText('Total R$ 180,00')
+  })
+
+  test('P3 #20: no escuro os controles nativos seguem o tema', async ({ page }) => {
+    await login(page, 'admin')
+    await setTheme(page, 'dark')
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe('dark')
+  })
+})
+
+// #516 (pagamento até o saldo, clientOrderId e item avulso): turn on writes.API_516 and these run.
+test.describe('Depende do #516', () => {
+  test.fixme('P0 #2: serviço fora do catálogo entra na Nova OS e na OS aberta', async ({ page }) => {
+    await login(page, 'admin')
+    await page.getByTestId('new-order').click()
+    await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
+    await expect(page.getByRole('option', { name: /^Cliente 01/ })).toBeVisible()
+    await page.keyboard.press('Enter')
+    await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Troca de óleo')
+    await page.getByRole('option', { name: '+ Usar “Troca de óleo” nesta OS' }).click()
+    await drawer(page).getByLabel('Valor de Troca de óleo').fill('120')
+    await page.keyboard.press('ControlOrMeta+Enter')
+    await expect(panel(page).getByTestId('order-line').filter({ hasText: 'Troca de óleo' })).toHaveCount(1)
+    const id = new URL(page.url()).searchParams.get('order') as string
+    await expect.poll(async () => (await readOrder(id))?.services).toEqual([expect.objectContaining({ service: null, description: 'Troca de óleo', value: 120 })])
+    // On the open order too.
+    await panel(page).getByRole('button', { name: 'Adicionar serviço ou peça' }).click()
+    await dialog(page, 'O que vai ser feito?').getByRole('combobox').fill('Alinhamento')
+    await page.getByRole('option', { name: '+ Usar “Alinhamento” nesta OS' }).click()
+    await expect(panel(page).getByTestId('order-line').filter({ hasText: 'Alinhamento' })).toHaveCount(1)
+  })
+
+  test.fixme('B4: Salvar de novo depois de a rede cair não cria outra OS (clientOrderId)', async ({ page }) => {
+    await login(page, 'admin')
+    let first = true
+    const ids: string[] = []
+    await page.route(/\/v1\/app\/orders$/, async (route) => {
+      ids.push(String(route.request().postDataJSON().clientOrderId))
+      // The server creates the order, but the answer never arrives.
+      const response = await route.fetch()
+      if (first) {
+        first = false
+        await route.abort('internetdisconnected')
+        return
+      }
+      await route.fulfill({ response })
+    })
+    await page.getByTestId('new-order').click()
+    await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 08')
+    await expect(page.getByRole('option', { name: /^Cliente 08/ })).toBeVisible()
+    await page.keyboard.press('Enter')
+    const before = await countOrders('customer.id', 'customer-8')
+    await drawer(page).getByTestId('save-order').click()
+    await expect(drawer(page).getByRole('alert')).toBeVisible()
+    await drawer(page).getByTestId('save-order').click()
+    await expect(panel(page)).toContainText('Cliente 08')
+    expect(new Set(ids).size).toBe(1)
+    expect(await countOrders('customer.id', 'customer-8')).toBe(before + 1)
   })
 })

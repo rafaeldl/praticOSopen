@@ -31,6 +31,12 @@ a.nav-item, a.more-row, .tabbar a, a.btn { text-decoration: none; }
 .btn--apple { background: #000; color: #fff; border-color: #000; }
 .btn--apple:hover { background: #222; }
 :root[data-theme="dark"] .btn--apple { background: #fff; color: #000; border-color: #fff; }
+
+/* Native controls (date picker icon, checkboxes) follow the theme, so they never vanish on dark. */
+:root { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+/* Icons grow with the text size (rem, not px): "…" and "×" never shrink beside a 200% title. */
+.icon-btn svg { width: 1.125rem; height: 1.125rem; }
 .entry-link { justify-self: center; padding: 0.5rem; }
 .entry-terms { text-align: center; }
 .layer-foot--inline { padding: 0.5rem 0 0; border-top: 0; }

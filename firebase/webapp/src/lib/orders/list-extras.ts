@@ -6,6 +6,7 @@ import { t } from '@/i18n'
 import { registerSearcher, type Command } from '@/lib/commands'
 import { loadCatalog, loadCustomers, loadDevices, type Customer } from './catalog'
 import { firestoreClient } from '@/lib/firebase'
+import { roundMoney } from '@/lib/rules/order-rules'
 import type { ListContext } from './data'
 import { deviceSummary, exactFirst, matchesSearch, normalizeOrder, remainingOnRow, type Order } from './model'
 import { orderShort, statusText } from './text'
@@ -38,8 +39,11 @@ export function warmLists(): void {
     .catch(() => {})
 }
 
-export function unpaidCount(ctx: ListContext): Promise<number | null> {
-  return unpaidOrders(ctx).then((list) => (list ? list.length : null))
+/** How many done orders still owe and how much in all (the day opens with it: "R$ 2.151 para receber"). */
+export function unpaidTotals(ctx: ListContext): Promise<{ count: number; amount: number } | null> {
+  return unpaidOrders(ctx).then((list) =>
+    list ? { count: list.length, amount: roundMoney(list.reduce((sum, order) => sum + (remainingOnRow(order) ?? 0), 0)) } : null,
+  )
 }
 
 /** ⌘K finds an order by number (exact first), customer or device, and a customer (opens their orders). */

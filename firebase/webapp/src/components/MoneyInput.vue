@@ -46,6 +46,17 @@ function commit() {
   text.value = formatMoneyInput(value, props.country)
 }
 
+/** While typing, a value that reads well goes up at once (totals follow); the text is only reformatted on blur. */
+function onInput() {
+  const typed = text.value.trim()
+  if (!typed) return
+  const value = parseMoney(typed, props.country)
+  if (value !== null && value >= 0) {
+    invalid.value = false
+    emit('update:modelValue', value)
+  }
+}
+
 function onFocus() {
   focused.value = true
   input.value?.select()
@@ -81,6 +92,7 @@ function onBlur() {
         :aria-invalid="invalid || undefined"
         :aria-describedby="invalid ? errorId : undefined"
         :aria-required="required || undefined"
+        @input="onInput"
         @focus="onFocus"
         @mousedown="keepSelection"
         @blur="onBlur"
