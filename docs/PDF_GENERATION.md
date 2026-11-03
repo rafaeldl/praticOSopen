@@ -165,6 +165,10 @@ Diferente do PDF da OS, os textos vêm do `AppLocalizations` com acentos: `pdfSa
 o que a Helvetica não desenha (fora do Latin-1, como emoji). Pagamentos do Asaas não geram
 recibo aqui (usam o comprovante do próprio Asaas).
 
+## No app web
+
+O web monta o mesmo PDF no navegador (`firebase/webapp/src/lib/pdf/`, com `pdf-lib`), com os mesmos textos (`pdf*` do `.arb`), a mesma regra de valores e o mesmo desenho; também gera várias OS num arquivo. Detalhes e diferenças em `docs/WEB_APP.md`, "Extras de tela grande".
+
 ## Testes
 
 - `test/services/pdf/pdf_main_os_builder_photos_test.dart` — seção de fotos, ausência de

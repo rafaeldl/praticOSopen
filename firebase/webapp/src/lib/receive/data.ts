@@ -2,6 +2,8 @@
 // charges and the customer link. Firestore only reads what the server writes
 // (one-off reads through the REST build, live ones through the full client)
 // and the rules let this person read (charges, settings/payments, unpaid orders).
+import type { MessageKey } from '@/i18n'
+import { ApiError, errorMessageKey } from '@/lib/api'
 import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
 import { api, session } from '@/lib/session'
@@ -102,6 +104,17 @@ export const createCustomerCharge = (customerId: string, body: { orderIds: strin
 
 export const cancelCustomerCharge = (customerId: string, chargeId: string) =>
   api<unknown>(`${customer(customerId)}/charges/${encodeURIComponent(chargeId)}`, { method: 'DELETE' })
+
+/** What to say when a charge is refused (the order screen and the batch say the same). */
+export function chargeErrorKey(error: unknown): MessageKey {
+  if (!(error instanceof ApiError)) return 'web.error.generic' as const
+  if (error.code === 'TAX_ID_REQUIRED' || error.code === 'INVALID_TAX_ID') return 'web.charge.taxIdInvalid' as const
+  if (error.code === 'ASAAS_NOT_CONNECTED' || error.code === 'ASAAS_NOT_ENABLED') return 'web.charge.notConnected' as const
+  if (error.code === 'CUSTOMER_REQUIRED') return 'web.charge.noCustomer' as const
+  if (error.code === 'INSTALLMENTS_IN_PROGRESS' || error.code === 'CHARGE_SUPERSEDED' || error.code === 'PREVIOUS_LINK_CANCELED') return 'web.charge.tryAgainLink' as const
+  if (error.code === 'INVALID_VALUE' || error.code === 'VALUE_EXCEEDS_BALANCE') return 'web.error.paymentExceeds' as const
+  return errorMessageKey(error)
+}
 
 export interface PaymentSettings {
   /** Pilot on for the company and an account connected. */

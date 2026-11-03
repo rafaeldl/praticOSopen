@@ -152,7 +152,7 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 
 **Quadro.** Aba da lista (`?view=board`). Mover o cartão arrastando, pelo botão "…" ou com Shift e seta. Só oferece o que o papel permite.
 
-**Lote.** Selecionar linhas troca a barra de filtros pelas ações: mudar a situação (só as que todas as selecionadas aceitam) e responsável. Cada OS vai pela API; o que o servidor recusa é contado no aviso.
+**Lote.** Selecionar linhas troca a barra de filtros pelas ações: mudar a situação (só as que todas as selecionadas aceitam) e responsável. Cada OS vai pela API; o que o servidor recusa é contado no aviso, com o motivo de cada OS. Criar e Aplicar não repetem em duplo clique.
 
 **Nova OS.** `N`, a paleta ou o "+" da barra no celular. Técnico e gerente não criam (o app tira o técnico em `canCreateOrder`, apesar da matriz de permissões). Cliente, aparelho (o único do cliente entra sozinho; os que ele já trouxe aparecem primeiro), itens com o preço do catálogo, entrega, pedido do cliente e "Mais opções" (situação inicial sem "cancelada", visita, responsável). `Ctrl/⌘ Enter` salva de qualquer campo. Fechar com algo preenchido pergunta (Esc, X, Voltar e recarregar). O pedido do cliente vira o primeiro comentário interno, como no app. As listas são lidas enquanto a pessoa olha a lista, para a gaveta abrir pronta.
 
@@ -300,6 +300,26 @@ Código em `src/views/forms/`, `src/components/forms/` e `src/lib/forms/` (regra
 **Desempenho.** Medido em 2026-11-03: **1.088 ms** na 1ª visita e **704 ms** na volta. O caminho até a lista foi de 132,8 para 132,9 KB (a rota `/checklists` e o seu título no núcleo); as telas e os textos ficam fora do primeiro download.
 
 **Fica para depois.** Câmera (exceção proposta: no computador é arquivo), conferir checklists pendentes no quadro e no lote, campo do segmento para a oferta do checklist.
+
+### Extras de tela grande
+
+Código em `src/lib/pdf/` (PDF), `src/lib/global-search.ts` e `src/components/CommandPalette.vue` (⌘K), `src/components/orders/BatchActions.vue`, `BatchConfirm.vue`, `BatchChargeDialog.vue` e `AiBatchDialog.vue` (lote). Testes: `tests/order-pdf.test.ts` e `e2e/pdf.spec.ts`, `e2e/palette.spec.ts`, `e2e/batch.spec.ts`, `e2e/power-a11y.spec.ts`. Tudo carrega sob demanda; o caminho até a lista só ganhou os textos da paleta e `canOpen` no `router.ts`.
+
+**PDF da OS.** "Ver PDF" no menu "…" da OS e "PDF" na seleção da lista. Monta o arquivo no navegador com `pdf-lib` (e `qrcode-generator` para o QR), carregados só nesse momento (~190 KB gzip). Mesmo desenho do app (`docs/PDF_GENERATION.md`): cabeçalho da empresa em toda página, barra da situação com técnico e datas, cliente e resumo lado a lado, um bloco por aparelho (com "Geral" quando há itens sem aparelho), QR do link da OS, fotos (até 30), termos, assinaturas e uma página por checklist (sim/não, opções marcadas, texto, fotos até 8 por pergunta). Rótulos do segmento e textos dos `.arb` (os mesmos `pdf*` do app), dinheiro e datas pelo país da empresa. Regra de quem recebe igual à do app (`canShareOrderPdf`): quem vê preços, ou todos quando "Valores e cobrança" está desligado; sem `viewPrices` a OS vem da projeção da API e o PDF sai sem resumo, valores e subtotais. Várias OS: um arquivo, cada OS nas suas páginas e numerada por conta própria; OS que não abre fica de fora e o diálogo diz quantas. "Abrir" leva ao visualizador do navegador e "Baixar" salva `OS-186.pdf` (ou `OS-186-190.pdf`). A Helvetica só desenha WinAnsi: o que fica fora ("μ", "ő") sai pela Roboto de reserva do app (`assets/fonts/Roboto-Regular.ttf`), embutida só quando algum texto precisa; ela e o `@pdf-lib/fontkit` baixam só nesse caso. Sem marca d'água: o web não aplica limite de plano (`WEB_PLAN_LIMITS_ENFORCED`).
+
+**Fotos no PDF em produção.** O navegador baixa as fotos do Storage com `fetch`, o que exige CORS no bucket. Sem CORS, as fotos ficam de fora e o PDF diz "Fotos disponíveis no sistema digital" (a regra do app para foto que não baixa). Passo manual do dono, uma vez: `gsutil cors set` no bucket com `GET` para `https://praticos.web.app` e `https://praticos.app`. A CSP já libera `*.googleapis.com` em `connect-src`.
+
+**⌘K de qualquer tela.** Grupos OS, Clientes, Aparelhos (nome do segmento), Catálogo e Ações. OS pelo número em qualquer tela (a leitura da lista, por papel: Firestore para quem vê valores, a API para os outros); clientes, aparelhos e catálogo pela API, já cortados pelo papel no servidor, lidos ao abrir a paleta; preço só para quem vê valores. Ações: "Ir para" cada tela, importações, Checklists, Receber e o relatório. Cada grupo só aparece para quem abre a tela (`canOpen`, a mesma guarda das rotas): o técnico não vê catálogo, Financeiro nem Notas fiscais. O que a tela aberta já tem carregado (lista de OS, clientes) vem primeiro.
+
+**Lote (tela grande).** Mudar a situação, pôr ou tirar o responsável, mandar cobrança, pedir ao assistente, PDF e imprimir. Toda mudança pergunta antes, com o número de OS que vão mudar (concluir deixa de fora a OS com checklist por terminar, como a tela da OS), cada OS com de → para e quantas já estão assim. Cada OS vai pela API com `expectedUpdatedAt`; o que o servidor recusa é contado no aviso. Desfazer volta cada OS ao que era quando o papel permite o caminho de volta; o que alguém mudou depois fica e o aviso diz quantas.
+
+**Cobrança em lote.** Para quem tem `chargeOrder`, com o Asaas ligado e conectado. Um link por cliente: uma OS vira link da OS, várias do mesmo cliente viram um link do cliente. Antes de criar, mostra cada cliente com as OS e o valor que falta, e o que fica de fora e por quê: sem cliente, nada a receber, link já aberto da OS ou do cliente, sem CPF/CNPJ válido no cadastro (essas vão pela OS). O valor segue o Receber (`receivableOf`): concluída com saldo ou em andamento com sinal. Recusa do servidor aparece por cliente, com o motivo. Vencimento hoje + 3. Depois de criar, "Mandar pelo WhatsApp" e "Copiar" por cliente; "Desfazer" cancela os links criados, com confirmação.
+
+**Assistente em várias OS.** Mesma rota da OS aberta (`POST /v1/app/ai/order-assist`), um pedido por OS; nenhuma rota nova, nenhuma flag mudada. Aparece só com `GET /v1/app/ai/status` ligado e todas as OS abertas a mudar itens. Prepara e mostra a lista do que cada OS ganharia, com ✦; nada é gravado antes de "Aplicar em N OS". Só põe itens do catálogo, como na OS aberta: nunca recebe, cancela nem apaga. Até 10 OS por vez; se a cota do mês não cobre a seleção, pede menos OS antes de chamar o modelo, e um `AI_QUOTA_EXCEEDED` no meio para e mostra o que já foi preparado. Desfazer tira o que entrou. No E2E o modelo é simulado com `page.route`.
+
+**Desempenho.** Medido em 2026-11-03: lista em **1.080 ms** na 1ª visita e **702 ms** na volta; JS até a lista 133,8 KB.
+
+**Fica para depois.** Mudar e tirar itens pelo assistente em lote (a rota devolve as mudanças, mas o web só aplica itens novos, como na OS aberta), PDF da nota fiscal, compartilhar o PDF pela folha do sistema (exceção proposta: baixar), lote no celular (sem seleção abaixo de 48 rem) e resultados da paleta com OS por cliente fora da lista.
 
 ### Contratos
 

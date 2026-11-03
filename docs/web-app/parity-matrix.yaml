@@ -3097,9 +3097,9 @@ rows:
   hardware: [pdf_generation]
   data: ["companies/{id}/orders", "companies/{id}", "companies/{id}/customers", "companies/{id}/orders/{id}/forms"]
   web_status: done
-  e2e: firebase/webapp/e2e/order-detail.spec.ts
+  e2e: firebase/webapp/e2e/pdf.spec.ts
   web_exception: null
-  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva. Busca empresa, cliente completo (falhou, usa o resumo da OS) e checklists antes de gerar, com indicador que trava a tela. Não copiar: erro genérico Ocorreu um erro."
+  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva. Busca empresa, cliente completo (falhou, usa o resumo da OS) e checklists antes de gerar, com indicador que trava a tela. Não copiar: erro genérico Ocorreu um erro. Web (extras de tela grande): Ver PDF no menu … monta o PDF no navegador como o do app (lib/pdf/: cabeçalho, situação, cliente e resumo, blocos por aparelho, QR do link, fotos até 30, termos, assinaturas, uma página por checklist), com rótulos do segmento e textos do .arb; valores só com viewPrices e Valores e cobrança ligado; foto que não baixa fica de fora e o PDF diz que há fotos no sistema. Texto fora do Latin-1 (ex.: μ) sai pela Roboto de reserva do app (assets/fonts), embutida só quando aparece; fontkit e a fonte baixam só nesse caso. Imprimir ou salvar PDF continua."
 - id: order.pdf.viewer
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -3113,9 +3113,10 @@ rows:
   feature_flags: ["planLimits:pdfWatermark"]
   hardware: [pdf_generation]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/pdf.spec.ts
   web_exception: null
-  note: "Mesma condição de order.pdf.view."
+  note: "Mesma condição de order.pdf.view. Web: Abrir abre o PDF no visualizador do navegador, em nova aba (link blob:)."
 - id: order.pdf.share
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -3131,6 +3132,7 @@ rows:
   data: []
   web_status: todo
   web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
+  note: "Web: Baixar entrega o arquivo; Mandar para o cliente manda o link."
 - id: order.pdf.close
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -3144,8 +3146,118 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/pdf.spec.ts
   web_exception: null
+  note: "Web: Fechar ou Esc fecha a camada do PDF."
+- id: order.pdf.batch
+  screen: firebase/webapp/src/components/orders/PdfDialog.vue
+  route: "/"
+  action: "PDF de várias OS selecionadas num arquivo só"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["labels:all"]
+  i18n: [pt, en, es]
+  states: [loading, error]
+  feature_flags: []
+  hardware: [pdf_generation, file]
+  data: ["companies/{id}/orders", "companies/{id}", "api:GET /v1/app/orders/{id}", "api:GET /v1/app/customers/{id}", "companies/{id}/orders/{id}/forms"]
+  web_status: done
+  e2e: firebase/webapp/e2e/pdf.spec.ts
+  web_exception: null
+  permission: viewPrices
+  note: "Só web (extra de mesa). Seleção da lista → PDF: cada OS nas suas páginas, numeradas por OS, com a mesma regra de valores do PDF de uma OS (canShareOrderPdf). OS apagada ou sem acesso fica de fora e o diálogo diz quantas. Imprimir várias continua."
+- id: web.search.global
+  screen: firebase/webapp/src/components/CommandPalette.vue
+  route: null
+  action: "Busca global e paleta (⌘K): OS, clientes, aparelhos, catálogo e ações"
+  kind: flow
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["labels:customer._entity_plural", "labels:device._entity_plural"]
+  i18n: [pt, en, es]
+  states: [empty]
+  feature_flags: []
+  hardware: null
+  data: ["api:GET /v1/app/orders?number=", "api:GET /v1/app/customers", "api:GET /v1/app/devices", "api:GET /v1/app/services", "api:GET /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/palette.spec.ts
+  web_exception: null
+  permission: viewOwnOrders
+  note: "Só web (extra de mesa). De qualquer tela: OS pelo número (leitura da lista, por papel), clientes, aparelhos (placa), catálogo (preço só com viewPrices) e Ir para cada tela, em grupos; cada grupo só para quem abre a tela (canOpen, a mesma guarda das rotas): técnico sem catálogo, Financeiro e Notas. A tela aberta acrescenta o que tem carregado. Setas, Enter e Esc."
+- id: home.batch.status
+  screen: firebase/webapp/src/components/orders/BatchActions.vue
+  route: "/"
+  action: "Mudar a situação de várias OS"
+  kind: flow
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["status_labels"]
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: []
+  hardware: null
+  data: ["api:PATCH /v1/app/orders/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/batch.spec.ts
+  web_exception: null
+  permission: viewOwnOrders
+  note: "Só web (extra de mesa). Só as situações que todas as selecionadas aceitam pelo papel. Pergunta antes: Mudar N OS para X?, lista cada OS com de → para e diz quantas já estão assim. Concluir confere os checklists como a tela da OS: OS com checklist por terminar fica de fora e a confirmação diz quantas. Cada OS pela API com expectedUpdatedAt; recusa contada no aviso com o motivo de cada OS. Desfazer volta cada uma à situação anterior quando o papel permite o caminho de volta; o que alguém mudou depois fica e é dito."
+- id: home.batch.assignee
+  screen: firebase/webapp/src/components/orders/BatchActions.vue
+  route: "/"
+  action: "Pôr ou tirar o responsável de várias OS"
+  kind: flow
+  roles: [owner, admin, supervisor, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: []
+  hardware: null
+  data: ["api:PATCH /v1/app/orders/{id}", "api:GET /v1/app/team"]
+  web_status: done
+  e2e: firebase/webapp/e2e/batch.spec.ts
+  web_exception: null
+  permission: viewAllOrders
+  note: "Só web (extra de mesa). Só quando todas aceitam canAssign. Pergunta antes: Pôr Nome como responsável de N OS?, com quem era e quem fica. Desfazer devolve o responsável de antes de cada uma."
+- id: home.batch.charge
+  screen: firebase/webapp/src/components/orders/BatchChargeDialog.vue
+  route: "/"
+  action: "Mandar cobrança de várias OS (um link por cliente)"
+  kind: flow
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, saving, error]
+  feature_flags: ["asaasEnabled", "useFinancial"]
+  hardware: [whatsapp, clipboard]
+  data: ["api:POST /v1/app/orders/{id}/charges", "api:POST /v1/app/customers/{id}/charges", "api:DELETE /v1/app/orders/{id}/charges/{id}", "api:DELETE /v1/app/customers/{id}/charges/{id}", "companies/{id}/orders/{id}/charges"]
+  web_status: done
+  e2e: firebase/webapp/e2e/batch.spec.ts
+  web_exception: null
+  permission: chargeOrder
+  note: "Só web (extra de mesa). Agrupa por cliente: uma OS vira link da OS, várias viram um link do cliente (como na tela do cliente). Antes de criar mostra cada cliente com as OS e o valor e o que fica de fora e por quê (sem cliente, nada a receber pela regra do Receber, ou seja, concluída com saldo ou em andamento com sinal; link já aberto da OS ou do cliente em customerCharges; sem CPF/CNPJ válido no cadastro: mandar pela OS). Recusa do servidor aparece com o motivo, por cliente. Criar e Aplicar não repetem em duplo clique. Vencimento hoje + 3, nunca no passado. Cria pela API e mostra Mandar pelo WhatsApp e Copiar por cliente. Desfazer cancela os links criados, com confirmação."
+- id: home.batch.ai
+  screen: firebase/webapp/src/components/orders/AiBatchDialog.vue
+  route: "/"
+  action: "Pedir ao assistente em várias OS"
+  kind: flow
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, saving, error, limit]
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["api:GET /v1/app/ai/status", "api:POST /v1/app/ai/order-assist", "api:POST /v1/app/orders/{id}/items", "api:DELETE /v1/app/orders/{id}/items/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/batch.spec.ts
+  web_exception: null
+  permission: editOrder
+  note: "Só web (extra de mesa, WEB_APP_DESIGN regra 9). Mesma rota do assistente de uma OS, um pedido por OS (cota mensal); sem rota nova. Só com o assistente ligado e todas as OS abertas a mudar itens (canEditMainFields). Prepara e mostra a lista do que cada OS ganharia (✦); nada é gravado antes de Aplicar em N OS. Só põe itens do catálogo; nunca recebe, cancela nem apaga. Até 10 OS por vez; se a cota do mês não cobre a seleção, pede menos OS antes de chamar. Desfazer tira o que entrou."
 - id: order.nfse.issue-menu
   screen: lib/screens/order/order_screen_v2.dart
   route: null
