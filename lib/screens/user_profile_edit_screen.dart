@@ -70,10 +70,33 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
     setState(() => _saving = true);
     try {
       await (widget.saveUser ?? _userStore.updateUserProfile)(_user!);
-    } finally {
+    } catch (e) {
+      debugPrint('Could not save the profile: $e');
       if (mounted) setState(() => _saving = false);
+      if (mounted) await _showFailure(context.l10n.profileSaveFailed);
+      return;
     }
-    if (mounted) Navigator.pop(context, _user);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    Navigator.pop(context, _user);
+  }
+
+  /// Tells that saving failed; the screen stays with what was typed.
+  Future<void> _showFailure(String message) {
+    final l10n = context.l10n;
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _pickPhoto() async {
@@ -104,10 +127,19 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
         : await photos.pickImageFromGallery();
     if (file == null || !mounted) return;
     setState(() => _uploading = true);
+    String? url;
     try {
-      await (widget.uploadPhoto ?? _userStore.uploadUserPhoto)(file, _user!);
+      url = await (widget.uploadPhoto ?? _userStore.uploadUserPhoto)(
+        file,
+        _user!,
+      );
+    } catch (e) {
+      debugPrint('Could not upload the profile photo: $e');
     } finally {
       if (mounted) setState(() => _uploading = false);
+    }
+    if (url == null && mounted) {
+      await _showFailure(context.l10n.couldNotSendPhoto);
     }
   }
 

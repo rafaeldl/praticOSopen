@@ -46,6 +46,7 @@ Widget _app(
   ContractDirectory directory,
   List<Object?> log, {
   VoidCallback? onNew,
+  bool canCreate = true,
 }) {
   return CupertinoApp(
     locale: const Locale('pt'),
@@ -56,7 +57,11 @@ Widget _app(
       GlobalWidgetsLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
     ],
-    home: ContractListScreen(directory: directory, onNew: onNew),
+    home: ContractListScreen(
+      directory: directory,
+      onNew: onNew,
+      canCreate: canCreate,
+    ),
     onGenerateRoute: (settings) {
       log.add(settings);
       return CupertinoPageRoute<void>(
@@ -159,6 +164,15 @@ void main() {
     expect(opened, 1);
   });
 
+  testWidgets('who cannot create orders gets no "+"', (tester) async {
+    await tester.pumpWidget(
+      _app(_FakeDirectory(Stream.value([])), [], canCreate: false),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('contract_new')), findsNothing);
+    expect(find.text('Novo contrato'), findsNothing);
+  });
+
   testWidgets('back button says "Ajustes"', (tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -172,6 +186,7 @@ void main() {
               CupertinoPageRoute<void>(
                 builder: (_) => ContractListScreen(
                   directory: _FakeDirectory(Stream.value([])),
+                  canCreate: true,
                 ),
               ),
             ),

@@ -27,6 +27,7 @@ Future<void> _pump(
   VoidCallback? onOpenTeam,
   VoidCallback? onOpenChecklists,
   AiStatus ai = AiStatus.off,
+  bool canManage = true,
 }) async {
   final store = SubscriptionStore()..latest = subscription;
   await tester.pumpWidget(
@@ -40,6 +41,7 @@ Future<void> _pump(
           onOpenTeam: onOpenTeam,
           onOpenChecklists: onOpenChecklists,
           loadAiStatus: () async => ai,
+          hasPermission: (_) => canManage,
         ),
       ),
     ),
@@ -135,6 +137,20 @@ void main() {
     expect(forms, 1);
   });
 
+  testWidgets('without the permission the rows open nothing', (tester) async {
+    var opened = 0;
+    await _pump(
+      tester,
+      _starter(),
+      onOpenTeam: () => opened++,
+      onOpenChecklists: () => opened++,
+      canManage: false,
+    );
+    await tester.tap(find.text('Pessoas na equipe'));
+    await tester.tap(find.text('Checklists'));
+    expect(opened, 0);
+  });
+
   testWidgets('a technician is told to ask the administrator', (tester) async {
     PaywallLauncher.roleResolver = () => 'technician';
     await _pump(tester, _starter(users: 3));
@@ -160,9 +176,11 @@ void main() {
             title: 'Oficina do Zé',
             builder: (context) => CupertinoButton(
               child: const Text('open'),
-              onPressed: () => Navigator.of(
-                context,
-              ).push(CupertinoPageRoute(builder: (_) => const PlanScreen())),
+              onPressed: () => Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (_) => PlanScreen(hasPermission: (_) => true),
+                ),
+              ),
             ),
           ),
         ),

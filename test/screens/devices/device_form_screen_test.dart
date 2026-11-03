@@ -16,6 +16,9 @@ Device known(String name, String brand, String category) => Device()
   ..category = category;
 
 class _Harness {
+  _Harness({this.fail = false});
+
+  final bool fail;
   Object? result = 'unset';
   final saved = <Device>[];
 
@@ -41,7 +44,10 @@ class _Harness {
                       device: editing,
                       asSheet: editing == null,
                       loadDevices: () async => devices,
-                      onSave: (d) async => saved.add(d),
+                      onSave: (d) async {
+                        if (fail) throw StateError('permission-denied');
+                        saved.add(d);
+                      },
                     );
                     result = editing == null
                         ? await FormSheet.show<Device>(context, (_) => form)
@@ -108,6 +114,24 @@ void main() {
 
     expect(h.saved.single.name, 'Split LG 12000');
     expect(h.saved.single.serial, isNull);
+  });
+
+  testWidgets('a failed save tells it and keeps the sheet open', (
+    tester,
+  ) async {
+    final h = _Harness(fail: true);
+    await h.open(tester);
+
+    await tester.enterText(find.byType(EditableText).first, 'Split LG 12000');
+    await tester.pump();
+    await tester.tap(_save);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FormSheet), findsOneWidget);
+    expect(h.result, 'unset');
   });
 
   testWidgets('✓ is gray with the hint until the model or plate is filled', (

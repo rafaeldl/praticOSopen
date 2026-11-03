@@ -183,6 +183,59 @@ void main() {
     }
   });
 
+  group('who generates from a contract template', () {
+    Order template(String author) =>
+        Order()..createdBy = (UserAggr()..id = author);
+
+    test('admin and supervisor generate from any template', () {
+      for (final role in [RolesType.admin, RolesType.supervisor]) {
+        expect(
+          canGenerateFromTemplate(
+            role: role,
+            userId: 'me',
+            template: template('boss'),
+          ),
+          isTrue,
+          reason: '$role',
+        );
+      }
+    });
+
+    test('technician and consultant only from their own template', () {
+      for (final role in [RolesType.technician, RolesType.consultant]) {
+        expect(
+          canGenerateFromTemplate(
+            role: role,
+            userId: 'me',
+            template: template('boss'),
+          ),
+          isFalse,
+          reason: '$role on the admin template',
+        );
+        expect(
+          canGenerateFromTemplate(
+            role: role,
+            userId: 'me',
+            template: template('me'),
+          ),
+          isTrue,
+          reason: '$role on their own template',
+        );
+      }
+    });
+
+    test('the manager never generates, not even their own', () {
+      expect(
+        canGenerateFromTemplate(
+          role: RolesType.manager,
+          userId: 'me',
+          template: template('me'),
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('creatorFilterChanges (role arrives late)', () {
     Future<List<OrderScope?>> run(RolesType? initial, List<RolesType?> roles) =>
         AuthorizationService.creatorFilterChanges(

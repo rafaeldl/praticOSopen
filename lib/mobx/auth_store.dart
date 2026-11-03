@@ -209,8 +209,19 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  Future<dynamic> signInWithApple() {
-    return _auth.signInWithApple();
+  Future<dynamic> signInWithApple() async {
+    final user = await _auth.signInWithApple();
+    // The auth listener may have created users/{uid} before Apple's name was
+    // set on the profile: fill it now (creates the document if missing).
+    try {
+      await userStore.createUserIfNotExist(
+        user,
+        initialLocale: localeStore?.deviceLocaleCode,
+      );
+    } catch (e) {
+      debugPrint('AuthStore: could not save the Apple name: $e');
+    }
+    return user;
   }
 
   @action

@@ -155,7 +155,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     try {
       await _collaboratorStore.cancelInvite(invite.id!);
     } catch (e) {
-      _showError(e.toString());
+      _showError(_genericError(e));
       return;
     }
     if (!mounted) return;
@@ -252,7 +252,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       await _collaboratorStore.cancelInvite(invite.id!);
       if (mounted) showAppToast(context, context.l10n.teamInviteCanceled);
     } catch (e) {
-      _showError(e.toString());
+      _showError(_genericError(e));
     }
   }
 
@@ -271,7 +271,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
         } on CollaboratorException catch (e) {
           _showError(_getLocalizedErrorMessage(e.code));
         } catch (e) {
-          _showError(e.toString());
+          _showError(_genericError(e));
         }
       case MemberRemoveChoice():
         _confirmRemove(membership);
@@ -303,7 +303,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
               } on CollaboratorException catch (e) {
                 _showError(_getLocalizedErrorMessage(e.code));
               } catch (e) {
-                _showError(e.toString());
+                _showError(_genericError(e));
               }
             },
             child: Text(l10n.teamRemoveMember),
@@ -333,6 +333,13 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       case CollaboratorErrorCode.requestFailed:
         return context.l10n.teamActionFailed;
     }
+  }
+
+  /// Plain sentence for an unexpected error: the technical text goes to the
+  /// log, never to the screen.
+  String _genericError(Object e) {
+    debugPrint('Team action failed: $e');
+    return context.l10n.saveFailedTryAgain;
   }
 
   void _showError(String message) {
