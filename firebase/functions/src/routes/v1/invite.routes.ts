@@ -110,6 +110,7 @@ router.get(
         data: {
           invites: invites.map((inv: inviteService.Invite) => ({
             token: inv.token,
+            name: inv.name,
             email: inv.email,
             phone: inv.phone,
             role: inv.role,
@@ -180,7 +181,8 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const deleted = await inviteService.cancelInvite(token, userId);
+    // The company was checked above: an owner/admin cancels any of its invites.
+    const deleted = await inviteService.cancelInvite(token, userId, { asManager: isAdmin });
 
     if (!deleted) {
       res.status(400).json({
