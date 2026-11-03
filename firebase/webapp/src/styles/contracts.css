@@ -4,6 +4,8 @@
 
 .contracts-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 0.75rem 1rem 2rem; max-width: 56rem; align-content: start; }
 .contracts-tabs { justify-self: start; max-width: 100%; flex-wrap: wrap; }
+/* A tab wraps to the next line before its word leaves the button (text at 200% on a phone). */
+.contracts-tabs button { min-width: auto; }
 .contracts-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
 .contracts-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; padding: 0.35rem 0; border-bottom: 1px solid var(--color-rule); }
 .contracts-row-main { flex: 1 1 min(14rem, 100%); min-width: 0; display: grid; gap: 0.1rem; text-align: left; min-height: 2.75rem; padding: 0.3rem 0.35rem; }

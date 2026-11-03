@@ -14,12 +14,11 @@ import { can, session } from '@/lib/session'
 import { wallText } from '@/lib/zone'
 import { normalizeContract, type Contract, type ContractPatch } from './model'
 
-const env = import.meta.env
-
+// import.meta.env read in place, so the emulator branch is dropped from production builds.
 function host(): string {
-  return env.VITE_USE_EMULATORS === '1' ? `http://127.0.0.1:${env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080}` : 'https://firestore.googleapis.com'
+  return import.meta.env.VITE_USE_EMULATORS === '1' ? `http://127.0.0.1:${import.meta.env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080}` : 'https://firestore.googleapis.com'
 }
-const root = () => `projects/${env.VITE_FIREBASE_PROJECT_ID}/databases/(default)/documents`
+const root = () => `projects/${import.meta.env.VITE_FIREBASE_PROJECT_ID}/databases/(default)/documents`
 const companyId = () => session.companyId as string
 const orderName = (id: string) => `${root()}/companies/${companyId()}/orders/${id}`
 
