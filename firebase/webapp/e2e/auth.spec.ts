@@ -132,7 +132,11 @@ test('sair limpa a sessão', async ({ page }) => {
   await login(page, 'admin', 'settings')
   await page.getByRole('button', { name: 'Sair' }).click()
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
-  await page.goto('orders')
+  // The guard may redirect to /login while the navigation is still loading,
+  // which aborts goto(); the URL check below is what matters.
+  await page.goto('orders').catch((error: Error) => {
+    if (!error.message.includes('ERR_ABORTED')) throw error
+  })
   await expect(page).toHaveURL(/login/)
 })
 
