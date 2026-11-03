@@ -10643,6 +10643,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para guardar a resposta. Tente de novo.'**
   String get checklistAnswerSaveFailed;
+
+  /// No description provided for @profileSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar o perfil. Tente de novo.'**
+  String get profileSaveFailed;
 }
 
 class _AppLocalizationsDelegate

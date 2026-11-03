@@ -6545,4 +6545,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get checklistAnswerSaveFailed =>
       'Não deu para guardar a resposta. Tente de novo.';
+
+  @override
+  String get profileSaveFailed =>
+      'Não deu para salvar o perfil. Tente de novo.';
 }
