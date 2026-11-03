@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
+App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app` (https://praticos.app/app; ver "Domínios"), código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
 Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists" e a de "Financeiro e notas fiscais" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
@@ -69,15 +69,24 @@ A tela só decide o que mostrar. Quem protege é o servidor e as regras.
 
 Mesmas portas do app (`lib/screens/login.dart`): Google, Apple e "Já tenho conta com e-mail", com senha e "Esqueceu a senha?". Conta nova só por Google ou Apple, como no app. O app não tem entrada por link de e-mail, então o web também não tem.
 
-Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.web.app`, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
+Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.app`, o domínio principal, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
 
-O handler está cadastrado nos consoles (passo manual, feito em 03/11/2026):
+#### Domínios
 
-- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origem `https://praticos.web.app` e retorno `https://praticos.web.app/__/auth/handler`.
-- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.web.app` e `praticos.firebaseapp.com` e os dois handlers.
-- **Firebase Auth**, domínios autorizados: `praticos.web.app` já estava.
+O app web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` (e `praticos.firebaseapp.com`), então `https://praticos.web.app/app` continua abrindo o mesmo build. Diferenças entre os dois:
 
-O `praticos.firebaseapp.com` continua cadastrado nos três, então voltar o `authDomain` para ele funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros.
+- **Entrada:** o `authDomain` é `praticos.app`. Em `praticos.app` o popup e o redirect funcionam em qualquer navegador. Em `praticos.web.app` o popup funciona, mas o redirect de reserva (popup bloqueado) cai em armazenamento entre sites e pode falhar no Safari. Por isso o link que se divulga é o de `praticos.app`.
+- **Sessão:** login, empresa escolhida, cache da lista de acesso e cache do Firestore ficam guardados por origem. Quem entrou em `praticos.web.app` precisa entrar de novo em `praticos.app`, uma vez.
+- **CSP:** `frame-src` libera `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com` (o iframe escondido do Firebase Auth vem do `authDomain`). Tirar `praticos.web.app` e `praticos.firebaseapp.com` só quando o app deixar de ser servido neles.
+- **API e lista de acesso:** não dependem do domínio. O CORS da `api` aceita qualquer origem (`origin: true`; quem protege é o token), e `config/webApp` decide pelo e-mail verificado do token.
+
+O handler está cadastrado nos consoles (passo manual):
+
+- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origens `https://praticos.app` e `https://praticos.web.app`, retornos `https://praticos.app/__/auth/handler` e `https://praticos.web.app/__/auth/handler`.
+- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com` e os handlers de cada um.
+- **Firebase Auth**, domínios autorizados: `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com`.
+
+`praticos.web.app` e `praticos.firebaseapp.com` continuam cadastrados nos três, então voltar o `authDomain` para um deles funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros, de uma entrada em `frame-src` e de trocar `VITE_FIREBASE_AUTH_DOMAIN`.
 
 Quem trabalha em mais de uma empresa escolhe onde entrar (`/app/choose-company`). A escolha fica lembrada neste navegador e pode ser trocada no menu.
 
@@ -99,6 +108,7 @@ O web abre só para contas liberadas. `GET /v1/app/web-access` (`firebase/functi
 - `open: true` libera todo mundo.
 - O cliente não lê nem grava `config/webApp` (regra do Firestore).
 - A rota tem limite próprio por IP e guarda a leitura do documento por 30 s.
+- Não depende do domínio: a mesma lista vale em `praticos.app` e em `praticos.web.app`.
 
 Na SPA:
 
