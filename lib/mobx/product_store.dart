@@ -6,6 +6,9 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:praticos/utils/audit_stamp.dart';
 import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,9 +19,9 @@ part 'product_store.g.dart';
 class ProductStore = _ProductStore with _$ProductStore;
 
 abstract class _ProductStore with Store {
-  final ProductRepositoryV2 repository = ProductRepositoryV2();
-  final UserStore userStore = UserStore();
-  final PhotoService photoService = PhotoService();
+  final ProductRepositoryV2 repository;
+  final UserStore userStore;
+  final PhotoService photoService;
 
   @observable
   ObservableStream<List<Product?>>? productList;
@@ -32,7 +35,13 @@ abstract class _ProductStore with Store {
   /// write must wait for it, or there is no company to write in.
   late final Future<void> _companyLoaded;
 
-  _ProductStore() {
+  _ProductStore({
+    ProductRepositoryV2? repository,
+    UserStore? userStore,
+    PhotoService? photoService,
+  }) : repository = repository ?? ProductRepositoryV2(),
+       userStore = userStore ?? UserStore(),
+       photoService = photoService ?? PhotoService() {
     _companyLoaded = SharedPreferences.getInstance().then((value) {
       companyId = value.getString('companyId');
       retrieveProducts();
@@ -53,14 +62,20 @@ abstract class _ProductStore with Store {
     await _companyLoaded;
     if (companyId == null) return;
     User? user = await (userStore.getSingleUserById());
-    product.createdAt = DateTime.now();
-    product.createdBy = user?.toAggr();
-    product.company = user?.companies![0].company;
-    product.updatedAt = DateTime.now();
-    product.updatedBy = user?.toAggr();
+    final isNew = product.id == null || _draftIds.contains(product.id);
+    stampAudit(product, isNew: isNew, user: user, companyId: companyId!);
     product.keywords = generateKeywords(product.name);
     await repository.createItem(companyId!, product);
+    _draftIds.remove(product.id);
   }
+
+  /// Ids given to products not saved yet (a photo taken before the ✓).
+  final Set<String> _draftIds = {};
+
+  /// New document id, without writing anything. Replaceable in tests.
+  @visibleForTesting
+  String Function() newId = () =>
+      FirebaseFirestore.instance.collection('tmp').doc().id;
 
   @action
   deleteProduct(Product product) async {
@@ -74,8 +89,11 @@ abstract class _ProductStore with Store {
     await _companyLoaded;
     if (companyId == null) return null;
 
+    // A new product gets its id now but is written only on ✓: cancelling
+    // leaves no nameless product behind.
     if (product.id == null) {
-      await saveProduct(product);
+      product.id = newId();
+      _draftIds.add(product.id!);
     }
 
     isUploading = true;
@@ -85,7 +103,9 @@ abstract class _ProductStore with Store {
 
       if (url != null) {
         product.photo = url;
-        await repository.updateItem(companyId!, product);
+        if (!_draftIds.contains(product.id)) {
+          await repository.updateItem(companyId!, product);
+        }
       }
       return url;
     } finally {
