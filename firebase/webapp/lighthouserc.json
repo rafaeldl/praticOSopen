@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "npx vite preview --mode e2e --outDir dist-e2e --port 4184 --strictPort --host 127.0.0.1",
+      "startServerCommand": "node e2e/serve.mjs 4184",
       "startServerReadyPattern": "Local",
       "url": ["http://127.0.0.1:4184/app/login"],
       "numberOfRuns": 3,

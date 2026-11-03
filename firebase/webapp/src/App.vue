@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { locale, t } from '@/i18n'
 import { loadSegmentLabels } from '@/lib/segments'
@@ -7,11 +7,16 @@ import { session } from '@/lib/session'
 import { handleShortcut, registerShortcut } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
 import AppShell from '@/views/AppShell.vue'
+import LoadingState from '@/components/LoadingState.vue'
 import ToastHost from '@/components/ToastHost.vue'
 
 const route = useRoute()
 const router = useRouter()
 const bare = computed(() => route.meta.bare === true)
+// Until the guard answers, the route is unknown: the shell must not flash for
+// someone about to land on the login screen.
+const ready = ref(false)
+void router.isReady().then(() => (ready.value = true))
 
 watchEffect(() => {
   const title = route.meta.title
@@ -42,7 +47,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <RouterView v-if="bare" />
+  <LoadingState v-if="!ready" />
+  <RouterView v-else-if="bare" />
   <AppShell v-else />
   <ToastHost />
   <div class="sr" role="status" aria-live="polite">{{ ui.live }}</div>

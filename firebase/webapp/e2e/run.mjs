@@ -9,6 +9,8 @@ const webapp = resolve(import.meta.dirname, '..')
 const functionsDir = resolve(webapp, '../functions')
 const only = process.env.E2E_ONLY ?? 'auth,firestore,storage,functions'
 const perf = process.argv[2] === 'perf'
+// `serve` leaves the suite up, seeded, for npm run dev.
+const serve = process.argv[2] === 'serve'
 const usesFunctions = only.includes('functions')
 
 function run(command, args, options = {}) {
@@ -21,7 +23,7 @@ if (usesFunctions && !existsSync(resolve(functionsDir, 'lib/index.js'))) {
   process.exit(1)
 }
 
-if (!process.env.E2E_SKIP_BUILD) run('npm', ['run', 'build:e2e'])
+if (!process.env.E2E_SKIP_BUILD && !serve) run('npm', ['run', 'build:e2e'])
 
 // The functions bind secrets at load. Fake values, removed afterwards; a real
 // local file is left alone (it is git-ignored and never read here).
@@ -41,7 +43,14 @@ if (createdSecrets) {
   )
 }
 
-const test = perf ? 'E2E_PERF=1 npx playwright test e2e/perf' : `npx playwright test ${process.env.PW_ARGS ?? ''}`
+const test = serve
+  ? `node -e "setInterval(() => {}, 1 << 30)"`
+  : perf
+    ? 'E2E_PERF=1 npx playwright test e2e/perf'
+    : `npx playwright test ${process.env.PW_ARGS ?? ''}`
+
+// Ctrl+C reaches the emulators too; stay alive to remove the fake secrets.
+process.on('SIGINT', () => {})
 const result = spawnSync(
   'npx',
   [

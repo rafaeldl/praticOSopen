@@ -33,8 +33,14 @@ watchEffect(() => {
     <aside class="entry-side"><AppLogo /></aside>
     <main class="entry-main">
       <div class="entry-box">
-        <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.noCompany.title') }}</h1>
-        <p class="muted">{{ t('web.noCompany.body') }}</p>
+        <template v-if="session.failed">
+          <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.error.title') }}</h1>
+          <p class="field-error" role="alert">{{ t('web.error.generic') }}</p>
+        </template>
+        <template v-else>
+          <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.noCompany.title') }}</h1>
+          <p class="muted">{{ t('web.noCompany.body') }}</p>
+        </template>
         <button type="button" class="btn btn--primary btn--wide" :disabled="busy" @click="check">{{ t('web.noCompany.check') }}</button>
         <button type="button" class="btn btn--wide" @click="leave">{{ t('logout') }}</button>
       </div>

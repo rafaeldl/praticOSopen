@@ -20,7 +20,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: `npx vite preview --mode e2e --outDir dist-e2e --port ${PORT} --strictPort --host 127.0.0.1`,
+    command: `node e2e/serve.mjs ${PORT}`,
     url: `http://127.0.0.1:${PORT}/app/`,
     reuseExistingServer: false,
   },

@@ -22,6 +22,7 @@ test('senha errada explica sem mostrar erro técnico', async ({ page }) => {
 test('sem entrar, URL direta pede login e volta para onde ia', async ({ page }) => {
   await page.goto('customers')
   await expect(page).toHaveURL(/login\?next=\/customers/)
+  await expect(page.locator('.shell')).toHaveCount(0)
   await page.getByLabel('E-mail').fill(USERS.admin.email)
   await page.getByLabel('Senha').fill(PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()

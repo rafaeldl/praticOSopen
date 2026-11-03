@@ -753,6 +753,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/ACCOUNT_DELETION.md` - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
+- `docs/WEB_APP.md` - App web em `firebase/webapp` (Vue + Vite em `/app`): arquitetura, como rodar com o emulador, como adicionar tela
 - `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_APP_DESIGN.md` - Padrão do app web: tokens, mestre-detalhe, teclado
