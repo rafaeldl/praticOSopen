@@ -302,6 +302,13 @@ void main() {
     expect(removed, ['p1', 'p2']);
   });
 
+  test('the queued answer never writes the status', () {
+    final update = FormsService.queuedResponsesUpdate([
+      FormResponse(itemId: 'a', value: true),
+    ], DateTime(2026, 11, 3));
+    expect(update.keys, unorderedEquals(['responses', 'updatedAt']));
+  });
+
   test('offline errors queue the answer; refusals do not', () {
     expect(FormsService.canQueueOffline(TimeoutException('t')), isTrue);
     expect(
@@ -310,12 +317,15 @@ void main() {
       ),
       isTrue,
     );
-    expect(
-      FormsService.canQueueOffline(
-        FirebaseException(plugin: 'cloud_firestore', code: 'permission-denied'),
-      ),
-      isFalse,
-    );
+    for (final code in ['permission-denied', 'aborted', 'not-found']) {
+      expect(
+        FormsService.canQueueOffline(
+          FirebaseException(plugin: 'cloud_firestore', code: code),
+        ),
+        isFalse,
+        reason: code,
+      );
+    }
     expect(FormsService.canQueueOffline(StateError('x')), isFalse);
   });
 

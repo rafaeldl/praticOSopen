@@ -138,18 +138,25 @@ class FormsService {
 
   /// Whether a failed answer transaction can be retried as a queued write:
   /// no connection or no answer in time. Refusals (rules, missing form) are
-  /// real errors.
+  /// real errors, and so is `aborted` (another write on the same checklist,
+  /// exactly when a blind write would be most harmful).
   static bool canQueueOffline(Object error) {
     if (error is TimeoutException) return true;
     if (error is FirebaseException) {
-      return const {
-        'unavailable',
-        'deadline-exceeded',
-        'aborted',
-      }.contains(error.code);
+      return const {'unavailable', 'deadline-exceeded'}.contains(error.code);
     }
     return false;
   }
+
+  /// The queued (offline) write: the responses and `updatedAt`, never the
+  /// status.
+  static Map<String, dynamic> queuedResponsesUpdate(
+    List<FormResponse> responses,
+    DateTime now,
+  ) => {
+    'responses': responses.map((r) => r.toJson()).toList(),
+    'updatedAt': now.toIso8601String(),
+  };
 
   /// Salva a resposta de um item do formulário.
   ///
@@ -157,6 +164,11 @@ class FormsService {
   /// Without connection transactions fail, so with [localResponses] (the
   /// screen's responses, already holding [response]) the answer is queued as
   /// a plain update and reaches the server when the connection comes back.
+  ///
+  /// The queued write never touches `status` (it could reopen a checklist
+  /// another device finished). Responses are one array in the document, so
+  /// it replaces the whole list: if two devices answer the same checklist
+  /// while one is offline, the last to sync wins.
   Future<void> saveResponse(
     String companyId,
     String orderId,
@@ -173,11 +185,7 @@ class FormsService {
       // Not awaited: offline the update completes only once synced.
       unawaited(
         formRef
-            .update({
-              'responses': localResponses.map((r) => r.toJson()).toList(),
-              'status': _statusToString(FormStatus.inProgress),
-              'updatedAt': DateTime.now().toIso8601String(),
-            })
+            .update(queuedResponsesUpdate(localResponses, DateTime.now()))
             .catchError((Object e) {
               debugPrint('Queued checklist answer failed: $e');
             }),
