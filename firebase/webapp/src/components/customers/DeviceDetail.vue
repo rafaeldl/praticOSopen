@@ -28,7 +28,7 @@ import { announce, ui } from '@/lib/ui'
 import DeviceForm from './DeviceForm.vue'
 
 const props = defineProps<{ deviceId: string; devices: DeviceRow[] }>()
-const emit = defineEmits<{ close: []; changed: [] }>()
+const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
 
 const state = ref<'loading' | 'ready' | 'failed' | 'notFound'>('loading')
 const detail = shallowRef<DeviceDetail | null>(null)
@@ -69,7 +69,7 @@ const customFields = computed(() => {
 /** Numbers grouped on reading (98.000), except a year; the saved value does not change. */
 function customText(field: FormField, value: unknown): string {
   if (value === undefined || value === null || value === '') return ''
-  if (field.type === 'date' && typeof value === 'string') return formatDate(value.slice(0, 10), country.value)
+  if (field.type === 'date' && typeof value === 'string') return formatDate(fromIsoDay(value.slice(0, 10)), country.value)
   if (field.type === 'number' && typeof value === 'number') return /year|ano/i.test(field.key) ? String(value) : formatNumber(value, country.value)
   return String(value)
 }
@@ -131,10 +131,8 @@ async function remove() {
   busy.value = true
   try {
     await deleteDevice(device.value.id)
-    dialog.value = null
     showToast(t('web.customers.deleted', { name: title.value }))
-    emit('changed')
-    emit('close')
+    emit('removed')
   } catch (error) {
     dialog.value = null
     showToast(t(errorMessageKey(error)))

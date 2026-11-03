@@ -84,3 +84,29 @@ export async function countOrders(field: string, value: unknown): Promise<number
 export async function readOrder(id: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${COMPANY_A}/orders/${id}`).get()).data()
 }
+
+/** A fresh customer in company A, with a unique name (fatia 03 tests write and run in parallel). */
+export async function makeCustomer(data: Record<string, unknown> = {}): Promise<{ id: string; name: string }> {
+  const id = `c-${randomUUID().slice(0, 8)}`
+  const name = (data.name as string) ?? `Freguês ${id.slice(2)}`
+  await db()
+    .doc(`companies/${COMPANY_A}/customers/${id}`)
+    .set({ name, phone: null, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, createdAt: new Date().toISOString(), createdBy: aggr('owner'), ...data })
+  return { id, name }
+}
+
+/** A fresh device in company A, with a unique serial (three letters and four digits). */
+export async function makeDevice(data: Record<string, unknown> = {}): Promise<{ id: string; name: string; serial: string }> {
+  const id = `d-${randomUUID().slice(0, 8)}`
+  const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
+  const serial = (data.serial as string) ?? `${letters}${Math.floor(1000 + Math.random() * 8999)}`
+  const name = (data.name as string) ?? `Carro ${id.slice(2)}`
+  await db()
+    .doc(`companies/${COMPANY_A}/devices/${id}`)
+    .set({ name, serial, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, createdAt: new Date().toISOString(), createdBy: aggr('owner'), ...data })
+  return { id, name, serial }
+}
+
+export async function readDoc(path: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
+}

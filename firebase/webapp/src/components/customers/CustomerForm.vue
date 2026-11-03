@@ -118,9 +118,9 @@ async function save(skipDuplicate = false) {
   }
 }
 
+/** The parent navigates to the existing customer; that navigation closes this drawer and the warning. */
 function openExisting() {
   const found = duplicate.value
-  duplicate.value = null
   if (!found) return
   allowClose = true
   emit('open', found.id)
@@ -202,7 +202,7 @@ function guard(): boolean {
       </div>
       <div class="drawer-foot">
         <span class="hint" aria-live="polite">{{ !form.name.trim() ? t('customerSaveNeedsName') : '' }}</span>
-        <button type="submit" class="btn btn--primary" :aria-disabled="!canSave" data-testid="save-customer">
+        <button type="submit" class="btn btn--primary" :class="{ 'is-muted': !canSave }" data-testid="save-customer">
           <Check :size="16" aria-hidden="true" />{{ saving ? t('web.newOrder.saving') : t('save') }} <kbd>{{ saveKey }}</kbd>
         </button>
       </div>

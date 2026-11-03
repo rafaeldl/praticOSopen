@@ -18,6 +18,8 @@
 .dir-list .sub { flex-basis: 100%; }
 .dir-order .dir-money { margin-left: auto; }
 
+/* "Salvar" gray until it can save (the app's ✓), still clickable to say what is missing. */
+.btn--primary.is-muted { background: var(--color-paper-2); color: var(--color-ink); border-color: var(--color-control-border, var(--color-neutral)); }
 .form-section { font-size: 0.8125rem; font-weight: 700; margin: 0.5rem 0 0; }
 .choice-set { border: 0; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
 .choice-set .check-row { min-height: 2.75rem; }

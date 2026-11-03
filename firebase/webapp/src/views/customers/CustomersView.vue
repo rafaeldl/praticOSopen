@@ -87,10 +87,23 @@ function startCreate(fromSearch = false) {
 
 /** Saved from the list: the new customer opens at once (customer.list.empty-add). */
 async function onSaved(id: string) {
-  form.value = null
   search.value = ''
+  // The drawer's history entry becomes the new customer: Voltar goes to the list, not to an empty form.
+  await router.replace({ path: '/customers', query: { customer: id } })
+  form.value = null
   await load(true)
-  open(id)
+}
+
+/** Deleted in the panel: back to the list, without the panel and its confirmation. */
+async function onRemoved() {
+  await router.replace({ path: '/customers', query: query.value ? { q: query.value } : {} })
+  await load(true)
+}
+
+/** "Abrir cliente" in the repeated phone warning: the one that already exists. */
+async function onOpenExisting(id: string) {
+  await router.replace({ path: '/customers', query: { customer: id } })
+  form.value = null
 }
 
 function closePanel() {
@@ -265,9 +278,9 @@ onBeforeUnmount(() => {
       </template>
     </div>
     <aside v-if="panelOpen" class="panel" :aria-label="t('customer')">
-      <CustomerDetail :key="panel.value.value ?? ''" :customer-id="panel.value.value as string" :directory="rows" @close="closePanel" @changed="load(true)" />
+      <CustomerDetail :key="panel.value.value ?? ''" :customer-id="panel.value.value as string" :directory="rows" @close="closePanel" @changed="load(true)" @removed="onRemoved" />
     </aside>
   </div>
 
-  <CustomerForm v-if="form" :draft="form.draft" :directory="rows" @saved="onSaved" @open="(id) => { form = null; open(id) }" @close="form = null" />
+  <CustomerForm v-if="form" :draft="form.draft" :directory="rows" @saved="onSaved" @open="onOpenExisting" @close="form = null" />
 </template>

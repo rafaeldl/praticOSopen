@@ -16,7 +16,7 @@ import { locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { deleteCustomer, loadCustomer, type CustomerDetail } from '@/lib/customers/data'
 import { firstName, mapsUrl, type CustomerRow } from '@/lib/customers/model'
-import { formatDate } from '@/lib/format'
+import { formatDate, fromIsoDay } from '@/lib/format'
 import { canCreateOrders } from '@/lib/orders/model'
 import { money, orderShort } from '@/lib/orders/text'
 import { dialable, formatPhone, whatsappNumber } from '@/lib/phone'
@@ -30,7 +30,7 @@ import CustomerForm from './CustomerForm.vue'
 import DeviceForm from './DeviceForm.vue'
 
 const props = defineProps<{ customerId: string; directory: CustomerRow[] }>()
-const emit = defineEmits<{ close: []; changed: [] }>()
+const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
 const router = useRouter()
 
 const state = ref<'loading' | 'ready' | 'failed' | 'notFound'>('loading')
@@ -63,7 +63,7 @@ const customFields = computed(() => {
 
 function customText(field: FormField, value: unknown): string {
   if (value === undefined || value === null || value === '') return ''
-  if (field.type === 'date' && typeof value === 'string') return formatDate(value.slice(0, 10), country.value)
+  if (field.type === 'date' && typeof value === 'string') return formatDate(fromIsoDay(value.slice(0, 10)), country.value)
   if (typeof value === 'boolean') return value ? t('web.yes') : t('web.no')
   return String(value)
 }
@@ -114,11 +114,10 @@ async function remove() {
   try {
     await deleteCustomer(customer.value.id)
     const name = customer.value.name
-    dialog.value = null
     showToast(t('web.customers.deleted', { name }))
     announce(t('web.customers.deleted', { name }))
-    emit('changed')
-    emit('close')
+    // The list takes over: it leaves the customer and the confirmation in one navigation.
+    emit('removed')
   } catch (error) {
     // The app lets this error loose (defect 10): here it says so and nothing changes.
     dialog.value = null
@@ -135,10 +134,10 @@ async function onEdited() {
   emit('changed')
 }
 
-function onDeviceSaved(id: string) {
-  dialog.value = null
+async function onDeviceSaved(id: string) {
   // The new device opens. It is not tied to this customer until it enters an order (no owner field yet).
-  void router.push({ path: '/devices', query: { device: id } })
+  await router.replace({ path: '/devices', query: { device: id } })
+  dialog.value = null
 }
 
 onMounted(load)

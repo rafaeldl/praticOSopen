@@ -80,10 +80,10 @@ async function startEdit(row: DeviceRow) {
 
 async function onSaved(id: string) {
   const isNew = !form.value?.device
+  if (isNew) await router.replace({ path: '/devices', query: { device: id } })
   form.value = null
   showToast(t('web.customers.saved'))
   await load(true)
-  if (isNew) open(id)
 }
 
 async function remove() {
@@ -100,6 +100,11 @@ async function remove() {
     removing.value = null
     showToast(t(errorMessageKey(error)))
   }
+}
+
+async function onRemoved() {
+  await router.replace({ path: '/devices', query: query.value ? { q: query.value } : {} })
+  await load(true)
 }
 
 function closePanel() {
@@ -226,7 +231,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <aside v-if="panelOpen" class="panel" :aria-label="deviceWord">
-      <DeviceDetail :key="panel.value.value ?? ''" :device-id="panel.value.value as string" :devices="rows" @close="closePanel" @changed="load(true)" />
+      <DeviceDetail :key="panel.value.value ?? ''" :device-id="panel.value.value as string" :devices="rows" @close="closePanel" @changed="load(true)" @removed="onRemoved" />
     </aside>
   </div>
 

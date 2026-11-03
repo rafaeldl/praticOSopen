@@ -39,13 +39,29 @@ function rolesClaim(user) {
 
 async function seedSegments() {
   const label = (key, pt, en, es) => ({ key, type: 'label', labels: { 'pt-BR': pt, 'en-US': en, 'es-ES': es } })
-  await db.doc('segments/global').set({ name: 'Global', customFields: [] })
+  // Phone mask by country (as firebase/scripts/seed_segments.js) and the segment form fields of fatia 03.
+  await db.doc('segments/global').set({
+    name: 'Global',
+    customFields: [
+      { key: 'customer.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] }, keyboardType: 'phone' },
+    ],
+  })
   await db.doc('segments/automotive').set({
     name: 'Mecânica',
     customFields: [
       label('device._entity', 'Veículo', 'Vehicle', 'Vehículo'),
       label('device._entity_plural', 'Veículos', 'Vehicles', 'Vehículos'),
       label('status.in_progress', 'Na oficina', 'In the shop', 'En el taller'),
+      {
+        key: 'device.serial', type: 'text', labels: { 'pt-BR': 'Placa', 'en-US': 'License plate', 'es-ES': 'Placa' },
+        masksByCountry: { BR: ['AAA-9999', 'AAA9N99'] }, textCapitalization: 'characters',
+      },
+      {
+        key: 'customer.birthday', type: 'date', labels: { 'pt-BR': 'Aniversário', 'en-US': 'Birthday', 'es-ES': 'Cumpleaños' },
+        section: 'Extra', sectionI18n: { 'pt-BR': 'Mais sobre o cliente', 'en-US': 'More about the customer', 'es-ES': 'Más sobre el cliente' }, order: 1,
+      },
+      { key: 'device.mileage', type: 'number', labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage', 'es-ES': 'Kilometraje' }, min: 0, max: 9999999, order: 1 },
+      { key: 'device.fuel', type: 'select', labels: { 'pt-BR': 'Combustível', 'en-US': 'Fuel', 'es-ES': 'Combustible' }, options: ['Flex', 'Diesel'], order: 2 },
     ],
   })
   await db.doc('segments/electronics').set({
@@ -61,6 +77,8 @@ async function seedCompanies() {
       name: company.name,
       country: company.country,
       segment: company.segment,
+      // Device status and its list column (fatia 03); only the first company.
+      ...(id === COMPANY_A ? { useDeviceManagement: true } : {}),
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
       // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..508), like a real counter.
