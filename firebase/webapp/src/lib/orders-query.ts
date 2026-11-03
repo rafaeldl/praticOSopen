@@ -76,8 +76,12 @@ export function firstOrdersPage(query: OrdersQuery): Promise<OrderRow[]> {
   if (!promise) {
     promise = run(query, FIRST_PAGE)
     pending.set(key, promise)
-    // Only the startup reuses it; later visits read fresh data.
-    promise.finally(() => setTimeout(() => pending.delete(key), 5000)).catch(() => {})
+    // Only the startup reuses it; later visits read fresh data. A failure is
+    // forgotten at once, so "Tentar de novo" asks the server again.
+    promise.then(
+      () => setTimeout(() => pending.delete(key), 5000),
+      () => pending.delete(key),
+    )
   }
   return promise
 }

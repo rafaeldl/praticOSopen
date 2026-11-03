@@ -156,17 +156,17 @@ test('painel aberto por link de outra tela: fechar fica na lista', async ({ page
   await expect(page.getByTestId('orders-table')).toBeVisible()
 })
 
-test('lista do disco sem resposta do servidor avisa que pode estar desatualizada', async ({ page }) => {
+test('lista sem resposta do servidor diz que não carregou e tenta de novo, sem mostrar cópia velha', async ({ page }) => {
   await login(page, 'admin', 'orders?f=all')
   await expect(page.getByTestId('orders-table').locator('tbody tr[data-order]')).toHaveCount(30)
-  // The first page is in the saved copy; then the database goes away.
-  const firestore = new RegExp(`127\\.0\\.0\\.1:${process.env.E2E_FIRESTORE_PORT ?? 18080}`)
-  await page.route(firestore, (route) => route.abort())
+  // The pages come from the server (Firestore REST); a failure is an error with retry, never a saved copy.
+  const pages = new RegExp(`127\\.0\\.0\\.1:${process.env.E2E_FIRESTORE_PORT ?? 18080}/.*:runQuery`)
+  await page.route(pages, (route) => route.abort())
   await page.reload()
-  await expect(page.getByTestId('orders-table')).toBeVisible()
-  const warning = page.getByRole('alert').filter({ hasText: 'podem estar desatualizados' })
-  await expect(warning).toBeVisible({ timeout: 20_000 })
-  await page.unroute(firestore)
-  await warning.getByRole('button', { name: 'Tentar de novo' }).click()
-  await expect(warning).toHaveCount(0, { timeout: 20_000 })
+  const error = page.getByRole('alert').filter({ hasText: 'Não deu para carregar as OS.' })
+  await expect(error).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('orders-table')).toHaveCount(0)
+  await page.unroute(pages)
+  await error.getByRole('button', { name: 'Tentar de novo' }).click()
+  await expect(page.getByTestId('orders-table').locator('tbody tr[data-order]')).toHaveCount(30)
 })
