@@ -207,6 +207,7 @@ npm run ai -- on --project praticos --all --finance on --yes            # liga p
 - Nota automática: o cartão avisa com `paid` quando um **pagamento** zera o saldo, e com `completed` quando a OS vira `done`. Desconto que quita não emite nota (`closedByDiscount` no gatilho), então não avisa. "Desfazer" não cancela a nota e diz isso.
 - **Nova OS:** as ações ficam guardadas e a folha abre depois do ✓, com a OS já criada. Elas não podem entrar junto na criação: o gatilho da nota só olha atualizações, e técnico não cria OS com dinheiro. A tela espera o id por `kAiActionsSaveWait` (6 s). Sem id (offline), fecha como sempre, não grava dinheiro e o aviso pede para registrar depois.
 - "Desfazer" depois do cartão desfaz as ações e também o que a mesma frase pôs na OS.
+- Status recusado pelo servidor: a tela volta ao status anterior, os passos seguintes não rodam e aparece o erro. Sem resposta em `kStatusSaveWait` (offline), conta como mudado. Concluir pelo cartão também oferece a próxima manutenção.
 
 **Eventos** (sem valores): `ai_action_proposed {types}`, `ai_action_confirmed {edited}`, `ai_action_dismissed`, `ai_action_undone`, `ai_action_failed {step}`.
 
@@ -214,13 +215,24 @@ npm run ai -- on --project praticos --all --finance on --yes            # liga p
 
 **Teste com os modelos reais** (`firebase/functions/scripts/ai-finance-eval.ts`, 2026-11-02, duas passadas por frase, prompt e parser reais):
 
+Primeiro prompt:
+
 | Conjunto | Claude Sonnet 5.5 | Claude Haiku 5.5 | Gemini 2.5 Flash |
 |---|---|---|---|
 | Ajuste (98 frases, 15 do bot) | 194/196 | 191/196 | 192/196 |
 | Frases novas (40) | 80/80 | 76/80 | 75/80 |
 | Promessa ou preço virando pagamento | 0 | 3 (só no ajuste) | 8 (3 no ajuste, 5 nas novas) |
 
-Metas da spec: 0 promessa ou preço virando pagamento, 95% de acerto. Só o Sonnet bate. O erro restante dele, "still owes 50" sem ação, é seguro: nada é proposto. As frases do bot ficam fora do repositório, porque vêm de conversas reais.
+Prompt ajustado para os erros do Haiku (promessa com momento futuro, "dia 28", "restou", "fechou"). As 40 frases de antes já tinham sido vistas, então a prova foi em `scripts/ai-finance-eval-final.json`, com 42 frases inéditas e o prompt travado:
+
+| Conjunto | Claude Sonnet 5.5 | Claude Haiku 5.5 |
+|---|---|---|
+| Ajuste (98 frases, 15 do bot) | 196/196 | 195/196 |
+| Frases já vistas (40 + 83 públicas do ajuste) | 246/246 | 246/246 |
+| Inéditas (42) | 79/84 (94,0%) | 82/84 (97,6%) |
+| Promessa ou preço virando pagamento nas inéditas | 1 | 0 |
+
+Metas da spec: 0 promessa ou preço virando pagamento, 95% de acerto. Nas inéditas, só o Haiku bate. A falha do Sonnet foi uma passada de "quedó en deber 90 para el mes que viene", frase ambígua: pode ser dívida que ficou, sem pagamento antes. Os outros erros são seguros: nada foi proposto ou a pessoa digita o valor. A diferença entre os dois é de poucas chamadas, e preço e tempo de resposta não foram comparados. O padrão do servidor segue no Sonnet. As frases do bot ficam fora do repositório, porque vêm de conversas reais.
 
 ```bash
 cd firebase/functions

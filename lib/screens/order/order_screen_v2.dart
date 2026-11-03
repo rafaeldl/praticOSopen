@@ -1845,7 +1845,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     AnalyticsService.logAiEvent('ai_action_confirmed', {
       'edited': confirmed.edited ? 1 : 0,
     });
-    final outcome = await runAiActions(_store, confirmed.plan);
+    final previousStatus = _store.status;
+    final outcome = await runAiActions(
+      _store,
+      confirmed.plan,
+      statusWait: kStatusSaveWait,
+    );
     if (!mounted) return;
     if (outcome.failedStep != null) {
       AnalyticsService.logAiEvent('ai_action_failed', {
@@ -1860,8 +1865,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _note = _actionsNote(outcome, config);
     });
     HapticFeedback.lightImpact();
-    if (outcome.statusAfter != null) {
-      await _offerNotifyCustomer(outcome.statusAfter!);
+    if (outcome.statusAfter case final status?) {
+      if (status == 'done' && previousStatus != 'done') {
+        await _offerMaintenance(_store.order);
+      }
+      await _offerNotifyCustomer(status);
     }
   }
 
@@ -1881,7 +1889,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (outcome.statusAfter case final status?) config.getStatus(status),
     ].join(' · ');
     if (outcome.failedStep == null) return done;
-    final failure = paymentFailureMessage(l10n, _store);
+    final failure = outcome.failedStep == 'status'
+        ? l10n.orderStatusSaveError
+        : paymentFailureMessage(l10n, _store);
     return done.isEmpty ? failure : '$done. $failure';
   }
 
@@ -1897,6 +1907,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _store,
       done,
       canChangeStatus: (status) => _permissions.canChangeStatus(order, status),
+      statusWait: kStatusSaveWait,
     );
     if (!mounted) return;
     if (!ok) {

@@ -10,7 +10,8 @@
  *   --only <prefix,prefix>      only the cases whose id starts with one of these
  *   --out <file.json>           saves every answer
  *
- * Unseen phrases live in ai-finance-eval-holdout.json: tune the prompt on the
+ * Unseen phrases live in ai-finance-eval-holdout.json and, once those were used
+ * for tuning, ai-finance-eval-final.json: tune the prompt on the
  * main set, then run those once (--extra ... --only pt-h,en-h,es-h). The server
  * sends these requests to Claude; Gemini runs here only to compare.
  *

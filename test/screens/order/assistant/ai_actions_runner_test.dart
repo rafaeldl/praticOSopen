@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +27,22 @@ class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   ];
 }
 
+const _wait = Duration(milliseconds: 10);
+
+Future<AiActionsOutcome> _run(OrderStore store, AiActionsPlan plan) =>
+    runAiActions(store, plan, statusWait: _wait);
+
+Future<({bool ok, bool statusKept})> _undo(
+  OrderStore store,
+  AiActionsOutcome outcome, {
+  required bool Function(String status) canChangeStatus,
+}) => undoAiActions(
+  store,
+  outcome,
+  canChangeStatus: canChangeStatus,
+  statusWait: _wait,
+);
+
 class MoneyStore extends OrderStore {
   MoneyStore({double total = 800, this.failPayment = false, String? current}) {
     order = Order()..status = current ?? 'approved';
@@ -35,6 +53,8 @@ class MoneyStore extends OrderStore {
 
   final bool failPayment;
   bool failRemove = false;
+  String? refuseStatus;
+  String? hangStatus;
   final List<String> calls = [];
   int _ids = 0;
 
@@ -72,9 +92,18 @@ class MoneyStore extends OrderStore {
   }
 
   @override
-  // ignore: type_annotate_public_apis
-  setStatus(String? status) {
+  Future<void>? setStatus(String? status) {
     calls.add('status $status');
+    this.status = status;
+    order!.status = status;
+    if (status == refuseStatus) return Future.error(Exception('refused'));
+    if (status == hangStatus) return Completer<void>().future;
+    return null;
+  }
+
+  @override
+  void restoreStatus(String? status) {
+    calls.add('restore $status');
     this.status = status;
     order!.status = status;
   }
@@ -107,7 +136,7 @@ void main() {
 
   test('runs discount, approval, payment and status, in that order', () async {
     final store = MoneyStore(current: 'quote');
-    final outcome = await runAiActions(
+    final outcome = await _run(
       store,
       AiActionsPlan(
         total: 800,
@@ -131,7 +160,7 @@ void main() {
 
   test('"pagou tudo" takes the balance of the moment it saves', () async {
     final store = MoneyStore(total: 950);
-    await runAiActions(
+    await _run(
       store,
       AiActionsPlan(total: 800, payment: _payment(800, all: true)),
     );
@@ -140,7 +169,7 @@ void main() {
 
   test('never above the balance, even if it went down meanwhile', () async {
     final store = MoneyStore(total: 200);
-    final outcome = await runAiActions(
+    final outcome = await _run(
       store,
       AiActionsPlan(total: 800, payment: _payment(300)),
     );
@@ -149,7 +178,7 @@ void main() {
 
   test('a failure stops the steps after it', () async {
     final store = MoneyStore(failPayment: true);
-    final outcome = await runAiActions(
+    final outcome = await _run(
       store,
       AiActionsPlan(total: 800, payment: _payment(300), status: 'done'),
     );
@@ -160,7 +189,7 @@ void main() {
 
   test('keeps what went in before the failure', () async {
     final store = MoneyStore(failPayment: true);
-    final outcome = await runAiActions(
+    final outcome = await _run(
       store,
       AiActionsPlan(total: 800, discount: 100, payment: _payment(300)),
     );
@@ -168,10 +197,45 @@ void main() {
     expect(outcome.changedSomething, isTrue);
   });
 
+  test('a refused approval goes back and takes no payment', () async {
+    final store = MoneyStore(current: 'quote')..refuseStatus = 'approved';
+    final outcome = await _run(
+      store,
+      AiActionsPlan(total: 800, approveFirst: true, payment: _payment(300)),
+    );
+    expect(store.calls, ['status approved', 'restore quote']);
+    expect(store.status, 'quote');
+    expect(outcome.failedStep, 'status');
+    expect(outcome.changedSomething, isFalse);
+  });
+
+  test('a refused status keeps the payment that went in', () async {
+    final store = MoneyStore()..refuseStatus = 'done';
+    final outcome = await _run(
+      store,
+      AiActionsPlan(total: 800, payment: _payment(300), status: 'done'),
+    );
+    expect(store.status, 'approved');
+    expect(outcome.failedStep, 'status');
+    expect(outcome.payment, 300);
+    expect(outcome.statusAfter, isNull);
+  });
+
+  test('offline: no answer from the server counts as changed', () async {
+    final store = MoneyStore()..hangStatus = 'done';
+    final outcome = await _run(
+      store,
+      const AiActionsPlan(total: 800, status: 'done'),
+    );
+    expect(outcome.failedStep, isNull);
+    expect(outcome.statusAfter, 'done');
+    expect(store.status, 'done');
+  });
+
   group('undo', () {
     Future<(MoneyStore, AiActionsOutcome)> ran() async {
       final store = MoneyStore(current: 'quote');
-      final outcome = await runAiActions(
+      final outcome = await _run(
         store,
         AiActionsPlan(
           total: 800,
@@ -186,7 +250,7 @@ void main() {
 
     test('last step first, and the status goes back', () async {
       final (store, outcome) = await ran();
-      final result = await undoAiActions(
+      final result = await _undo(
         store,
         outcome,
         canChangeStatus: (_) => true,
@@ -198,7 +262,7 @@ void main() {
 
     test('no permission: the status stays and it says so', () async {
       final (store, outcome) = await ran();
-      final result = await undoAiActions(
+      final result = await _undo(
         store,
         outcome,
         canChangeStatus: (_) => false,
@@ -208,10 +272,24 @@ void main() {
       expect(store.status, 'approved');
     });
 
+    test('a refused status stops, and a new try picks up from there', () async {
+      final (store, outcome) = await ran();
+      store.refuseStatus = 'quote';
+      final first = await _undo(store, outcome, canChangeStatus: (_) => true);
+      expect(first.ok, isFalse);
+      expect(store.status, 'approved');
+      expect(store.transactions, hasLength(1));
+
+      store.refuseStatus = null;
+      final second = await _undo(store, outcome, canChangeStatus: (_) => true);
+      expect(second.ok, isTrue);
+      expect(store.status, 'quote');
+    });
+
     test('offline: stops, and a new try picks up from there', () async {
       final (store, outcome) = await ran();
       store.failRemove = true;
-      final first = await undoAiActions(
+      final first = await _undo(
         store,
         outcome,
         canChangeStatus: (_) => true,
@@ -220,7 +298,7 @@ void main() {
       expect(store.status, 'approved');
 
       store.failRemove = false;
-      final second = await undoAiActions(
+      final second = await _undo(
         store,
         outcome,
         canChangeStatus: (_) => true,

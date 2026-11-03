@@ -161,20 +161,20 @@ class _MoneyStore extends OrderStore {
   }
 
   @override
-  // ignore: type_annotate_public_apis
-  setStatus(String? status) {
+  Future<void>? setStatus(String? status) {
     this.status = status;
     order!.status = status;
+    return null;
   }
 
   @override
-  // ignore: type_annotate_public_apis
-  createItem({void Function(String orderId)? onCreated}) {
-    if (deferSave || !assignsId) return;
+  Future<void>? createItem({void Function(String orderId)? onCreated}) {
+    if (deferSave || !assignsId) return null;
     if (order!.id == null) {
       order!.id = 'new1';
       onCreated?.call('new1');
     }
+    return null;
   }
 }
 
@@ -609,10 +609,13 @@ void main() {
       Future<AiPhoto?> Function()? capture,
       SpeechListener? speech,
       AssistantRegistration? registration,
+      List<String> statuses = const ['approved', 'progress', 'canceled'],
+      Future<void> Function(BuildContext, Order?)? offerMaintenance,
     }) => OrderScreenV2(
       store: store,
-      permissions: _permissions(),
+      permissions: _permissions(statuses: statuses),
       actions: FakeActions(),
+      offerMaintenance: offerMaintenance,
       catalogSource: source,
       catalogPermissions: _allCatalog,
       mostUsed: () async => const [],
@@ -683,6 +686,32 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('assistant_note_action')));
         await tester.pumpAndSettle();
         expect(store.transactions, isEmpty);
+      });
+
+      testWidgets('finishing through the card asks for the next maintenance', (
+        tester,
+      ) async {
+        final asked = <Order?>[];
+        final store = _MoneyStore();
+        await _pump(
+          tester,
+          assistantScreen(
+            store,
+            FakeAssistant(
+              const AiOrderDraft(actions: AiOrderActions(status: 'done')),
+            ),
+            statuses: const ['done'],
+            offerMaintenance: (_, order) async => asked.add(order),
+          ),
+          args: {'order': saved()},
+        );
+        await tester.pumpAndSettle();
+        await talk(tester);
+
+        await tester.tap(confirm());
+        await tester.pumpAndSettle();
+        expect(store.status, 'done');
+        expect(asked, hasLength(1));
       });
 
       testWidgets('"Agora não" saves nothing and shows no "nothing found" '

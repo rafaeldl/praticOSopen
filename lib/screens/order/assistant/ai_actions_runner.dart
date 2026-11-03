@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/screens/order/assistant/ai_actions_plan.dart';
 import 'package:praticos/screens/payments/order_payment_actions.dart';
@@ -16,20 +19,41 @@ class AiActionsOutcome {
   String? statusBefore;
   String? statusAfter;
 
-  /// 'discount', 'payment' or 'receipt': the step that failed; the ones after
-  /// it did not run.
+  /// 'discount', 'status', 'payment' or 'receipt': the step that failed; the
+  /// ones after it did not run.
   String? failedStep;
 
   bool get changedSomething =>
       discountId != null || paymentId != null || statusAfter != null;
 }
 
+/// False when the server refused the status: it goes back on screen. Offline
+/// nothing answers, and after [wait] the order counts as changed.
+Future<bool> _saveStatus(
+  OrderStore store,
+  String status,
+  Duration wait,
+) async {
+  final previous = store.status;
+  try {
+    await store.setStatus(status)?.timeout(wait);
+    return true;
+  } on TimeoutException {
+    return true;
+  } catch (e) {
+    debugPrint('Could not save the order status: $e');
+    store.restoreStatus(previous);
+    return false;
+  }
+}
+
 /// Runs the confirmed card: discount, approval (a quote takes no payment),
 /// payment and status. Stops at the first failure.
 Future<AiActionsOutcome> runAiActions(
   OrderStore store,
-  AiActionsPlan plan,
-) async {
+  AiActionsPlan plan, {
+  required Duration statusWait,
+}) async {
   final outcome = AiActionsOutcome();
   final discount = plan.discount;
   if (discount != null) {
@@ -41,13 +65,17 @@ Future<AiActionsOutcome> runAiActions(
       ..discount = discount;
   }
 
-  void moveTo(String status) {
-    outcome.statusBefore ??= store.status;
-    store.setStatus(status);
+  Future<bool> moveTo(String status) async {
+    final previous = store.status;
+    if (!await _saveStatus(store, status, statusWait)) return false;
+    outcome.statusBefore ??= previous;
     outcome.statusAfter = status;
+    return true;
   }
 
-  if (plan.approveFirst) moveTo('approved');
+  if (plan.approveFirst && !await moveTo('approved')) {
+    return outcome..failedStep = 'status';
+  }
 
   final payment = plan.payment;
   if (payment != null) {
@@ -72,29 +100,33 @@ Future<AiActionsOutcome> runAiActions(
     if (!receiptOk) return outcome..failedStep = 'receipt';
   }
 
-  if (plan.status != null) moveTo(plan.status!);
+  if (plan.status != null && !await moveTo(plan.status!)) {
+    return outcome..failedStep = 'status';
+  }
   return outcome;
 }
 
-/// "Desfazer" of the card, last step first. A removal needs a connection;
-/// [ok] false leaves the rest in place. The status stays when the user can't
+/// "Desfazer" of the card, last step first. A removal needs a connection and
+/// the server can refuse the status; [ok] false leaves the rest in place. The status stays when the user can't
 /// change it back ([statusKept]).
 Future<({bool ok, bool statusKept})> undoAiActions(
   OrderStore store,
   AiActionsOutcome outcome, {
   required bool Function(String status) canChangeStatus,
+  required Duration statusWait,
 }) async {
   var statusKept = false;
   final before = outcome.statusBefore;
 
-  void restoreStatus() {
-    if (before == null || outcome.statusAfter == null) return;
-    if (canChangeStatus(before)) {
-      store.setStatus(before);
-      outcome.statusAfter = null;
-    } else {
+  Future<bool> restoreStatus() async {
+    if (before == null || outcome.statusAfter == null) return true;
+    if (!canChangeStatus(before)) {
       statusKept = true;
+      return true;
     }
+    if (!await _saveStatus(store, before, statusWait)) return false;
+    outcome.statusAfter = null;
+    return true;
   }
 
   Future<bool> remove(String? id) async {
@@ -107,7 +139,7 @@ Future<({bool ok, bool statusKept})> undoAiActions(
     return (ok: false, statusKept: false);
   }
   outcome.paymentId = null;
-  restoreStatus();
+  if (!await restoreStatus()) return (ok: false, statusKept: false);
   if (!await remove(outcome.discountId)) {
     return (ok: false, statusKept: statusKept);
   }
