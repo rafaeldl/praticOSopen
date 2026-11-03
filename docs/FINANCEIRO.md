@@ -68,6 +68,10 @@ A tela unificada permite:
 - Desconto e "Desfazer" ficam no menu "…"
 - Comprovante compartilhado de outro app: a sheet abre sozinha com o arquivo anexado
 
+#### Pela IA da OS
+
+"Pagou 300 no Pix" e "dá 10% de desconto" abrem o cartão "Confere?". Ele usa as mesmas funções e permissões desta tela e só grava depois de Confirmar. Está atrás da chave `financeActions`, desligada por padrão. Ver `docs/AI_ORDER_ASSIST.md`.
+
 #### Mandar cobrança
 - Com Asaas: botão branco "Mandar cobrança" (`SecondaryButton`), que abre a sheet de cobrança (`CreateChargeScreen`). Sem Asaas: "Mandar link da OS"
 - Boleto não tem botão próprio: o link deixa o cliente escolher Pix, boleto ou cartão

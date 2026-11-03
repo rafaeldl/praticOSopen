@@ -10471,6 +10471,132 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count, plural, =0{Retomada no mesmo dia} =1{Retomada depois de 1 dia parada} other{Retomada depois de {count} dias parada}}'**
   String orderHoldLogResumed(int count);
+
+  /// No description provided for @aiActionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confere?'**
+  String get aiActionsTitle;
+
+  /// No description provided for @aiActionsReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber {amount}'**
+  String aiActionsReceive(String amount);
+
+  /// No description provided for @aiActionsReceiveNoAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber'**
+  String get aiActionsReceiveNoAmount;
+
+  /// No description provided for @aiActionsReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido {amount}'**
+  String aiActionsReceived(String amount);
+
+  /// No description provided for @aiActionsTypeAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'toque para informar o valor'**
+  String get aiActionsTypeAmount;
+
+  /// No description provided for @aiActionsLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta {amount}'**
+  String aiActionsLeft(String amount);
+
+  /// No description provided for @aiActionsPaidOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'quitada'**
+  String get aiActionsPaidOff;
+
+  /// No description provided for @aiActionsDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto de {amount}'**
+  String aiActionsDiscount(String amount);
+
+  /// No description provided for @aiActionsNewTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {amount}'**
+  String aiActionsNewTotal(String amount);
+
+  /// No description provided for @aiActionsMarkAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como {status}'**
+  String aiActionsMarkAs(String status);
+
+  /// No description provided for @aiActionsIssuesNfse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso também emite a nota fiscal.'**
+  String get aiActionsIssuesNfse;
+
+  /// No description provided for @aiActionsCannotReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só quem recebe pagamentos pode registrar isso.'**
+  String get aiActionsCannotReceive;
+
+  /// No description provided for @aiActionsCannotDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só quem cuida do financeiro pode dar desconto.'**
+  String get aiActionsCannotDiscount;
+
+  /// No description provided for @aiActionsOrderCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS está cancelada.'**
+  String get aiActionsOrderCanceled;
+
+  /// No description provided for @aiActionsNothingToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS não tem nada a receber.'**
+  String get aiActionsNothingToReceive;
+
+  /// No description provided for @aiActionsOnlyLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta só {amount}.'**
+  String aiActionsOnlyLeft(String amount);
+
+  /// No description provided for @aiActionsAfterSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao salvar, vou pedir para você conferir.'**
+  String get aiActionsAfterSave;
+
+  /// No description provided for @aiActionsSaving.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvando…'**
+  String get aiActionsSaving;
+
+  /// No description provided for @aiActionsSavedOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS salva. Registre o recebimento quando estiver online.'**
+  String get aiActionsSavedOffline;
+
+  /// No description provided for @aiActionsStatusKept.
+  ///
+  /// In pt, this message translates to:
+  /// **'O status continua {status}.'**
+  String aiActionsStatusKept(String status);
+
+  /// No description provided for @aiActionsNfseStays.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota fiscal continua emitida.'**
+  String get aiActionsNfseStays;
 }
 
 class _AppLocalizationsDelegate

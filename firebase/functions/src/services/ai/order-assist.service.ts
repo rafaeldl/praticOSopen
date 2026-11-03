@@ -130,6 +130,26 @@ const draftOperationSchema = z.object({
   quantity: z.number().finite().positive().nullable().optional(),
 });
 
+/** Money and status actions: what was said, never a calculated amount (spec 2026-11-02-ia-financeiro-os). */
+const paymentActionSchema = z.object({
+  kind: z.enum(['full', 'value', 'percent', 'leaving']),
+  /** Null when no amount was said ("pagou uma parte"): the app asks. */
+  value: z.number().finite().positive().nullable().optional().catch(null),
+  method: z.enum(['pix', 'cash', 'card', 'other']).nullable().optional().catch(null),
+  paidDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional().catch(null),
+});
+
+const discountActionSchema = z.object({
+  kind: z.enum(['value', 'percent']),
+  value: z.number().finite().positive(),
+});
+
+const draftActionsSchema = z.object({
+  payment: paymentActionSchema.nullable().optional().catch(undefined),
+  discount: discountActionSchema.nullable().optional().catch(undefined),
+  status: z.enum(['approved', 'progress', 'done']).nullable().optional().catch(undefined),
+});
+
 export const llmDraftSchema = z.object({
   transcript: optionalText,
   customer: z.object({ name: optionalText, phone: optionalText }).nullable().optional().catch(undefined),
@@ -143,6 +163,7 @@ export const llmDraftSchema = z.object({
   /** When the customer wants it ready: "YYYY-MM-DD", "HH:MM" only when said. */
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().catch(undefined),
   dueTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional().catch(undefined),
+  actions: draftActionsSchema.nullable().optional().catch(undefined),
 });
 
 export type LlmDraft = z.infer<typeof llmDraftSchema>;
@@ -183,6 +204,46 @@ export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
     dueTime: STRING,
   },
   required: ['operations'],
+};
+
+/** [LLM_RESPONSE_SCHEMA] plus `actions`, for companies with `financeActions` on. */
+export const LLM_RESPONSE_SCHEMA_WITH_ACTIONS: Record<string, unknown> = {
+  ...LLM_RESPONSE_SCHEMA,
+  properties: {
+    ...(LLM_RESPONSE_SCHEMA.properties as Record<string, unknown>),
+    actions: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        payment: {
+          type: ['object', 'null'],
+          additionalProperties: false,
+          properties: {
+            kind: { type: 'string', enum: ['full', 'value', 'percent', 'leaving'] },
+            value: { type: ['number', 'null'] },
+            method: { type: ['string', 'null'] },
+            paidDate: { type: ['string', 'null'] },
+          },
+          required: ['kind', 'value', 'method', 'paidDate'],
+        },
+        discount: {
+          type: ['object', 'null'],
+          additionalProperties: false,
+          properties: {
+            kind: { type: 'string', enum: ['value', 'percent'] },
+            value: { type: 'number' },
+          },
+          required: ['kind', 'value'],
+        },
+        // No enum, like method: Claude refuses an enum on a nullable type. The parser checks it.
+        status: { type: ['string', 'null'] },
+      },
+      // Every part required (null when not said): with optional parts Claude
+      // skipped payment and went straight to status on "terminei, pagou 300".
+      required: ['payment', 'discount', 'status'],
+    },
+  },
+  required: [...(LLM_RESPONSE_SCHEMA.required as string[]), 'actions'],
 };
 
 /**
@@ -239,7 +300,37 @@ export function todayLabel(now: Date = new Date(), timeZone = 'America/Sao_Paulo
   return `${date} (${weekday})`;
 }
 
-export function buildSystemPrompt(locale: string, deviceLabel?: string, today: string = todayLabel()): string {
+/** Rules of `actions`. Only companies with `financeActions` on get them. */
+const ACTIONS_PROMPT = [
+  '- actions: only what was said or typed, never read from a photo. A part that was not said is null.',
+  '  One sentence can hold several parts: fill every one that was said ("aprovado, deu 200 de entrada" → status and payment).',
+  '  Never calculate an amount and never add up prices: return what was said.',
+  '  Only what already happened counts. Future ("vai"), wish ("quer"), condition ("se"), question or negation is NOT an action,',
+  '  even with an amount. Words about the future win over any other word in the sentence:',
+  '  "vai pagar", "vai dar 500", "quer pagar 300", "vai ficar devendo 200", "se aprovar paga metade", "paga sexta",',
+  '  "paga na entrega", "tem que pagar", "já pagou?", "não pagou", "ainda não aprovou", "não está aprovado".',
+  '  payment: money that ALREADY came in.',
+  '  A price is never a payment: "óleo 200", "deu 500 o serviço", "tudo deu 800", "ficou em 350" say what it costs.',
+  '  "Deu" is a payment only when the customer handed the money over ("deu 500 de entrada", "o cliente me deu 500").',
+  '  "Óleo 200, já pago" is that line plus payment kind "full".',
+  '  kind "full": it was paid and no amount was said ("pagou tudo", "quitou", "pago", "já foi pago", "pagou o resto",',
+  '  "registra o pagamento"). "Quitou" is only a payment: it says nothing about the status.',
+  '  kind "value": an amount ("recebi 500", value 500). kind "percent": a share ("pagou metade", value 50).',
+  '  kind "leaving": what stays open ("ficou devendo 200", value 200). With "uma parte" and no amount, use kind "value" and value null.',
+  '  method: "pix"; "cash" (dinheiro); "card" (cartão); "other" (transferência, boleto, cheque); otherwise null.',
+  '  paidDate: YYYY-MM-DD only when a past day was said ("pagou ontem"); otherwise null.',
+  '  discount: only when a discount was asked for ("dá 10% de desconto" → kind "percent", value 10; "50 de desconto" →',
+  '  kind "value", value 50). "Cortesia" and "garantia" are not discounts: they stay a line with value 0.',
+  '  Issuing a nota, sending a charge and canceling are not actions: leave all parts null.',
+  '  status: "aprovou", "aprovado" → "approved"; "comecei" → "progress"; "pronto", "terminei", "finaliza", "concluído", "entregue" → "done".',
+];
+
+export function buildSystemPrompt(
+  locale: string,
+  deviceLabel?: string,
+  today: string = todayLabel(),
+  options: { financeActions?: boolean } = {},
+): string {
   const device = deviceLabel || 'device (vehicle, appliance, equipment)';
   return [
     'You help a small service business fill or change a service order (OS) from a photo, a short audio or a text.',
@@ -271,6 +362,7 @@ export function buildSystemPrompt(locale: string, deviceLabel?: string, today: s
     `  Today is ${today}; a weekday means the next one after today. dueTime as HH:MM only when a time was said.`,
     '  Leave both out when no deadline was said, and do not repeat the deadline in notes.',
     '- notes: what the customer asked or the defect (seen in the photo or said), short. Not the deadline.',
+    ...(options.financeActions ? ACTIONS_PROMPT : []),
     `Write names and notes in ${LANGUAGE[locale] ?? LANGUAGE.pt}.`,
   ].join('\n');
 }
@@ -379,6 +471,8 @@ export interface OrderAssistDeps {
   deviceLabel?(companyId: string): Promise<string | undefined>;
   /** This month's use and limit without counting (GET /status), optional. */
   getUsage?(companyId: string, settings: AiSettings | null): Promise<{ used: number; limit: number }>;
+  /** When a nota goes out by itself, with the same conditions as `autoIssueInvoice`; null = never. */
+  nfseAutoIssue?(companyId: string): Promise<NfseAutoIssueMoment | null>;
 }
 
 export interface DraftItem {
@@ -416,6 +510,21 @@ export interface DraftChange {
   description?: string;
 }
 
+export type NfseAutoIssueMoment = 'paid' | 'completed';
+
+/** What the user asked to do with money and status. The app confirms, calculates and saves. */
+export interface DraftActions {
+  payment: {
+    kind: 'full' | 'value' | 'percent' | 'leaving';
+    /** Null when no amount was said; never set for `full`. */
+    value: number | null;
+    method: 'pix' | 'cash' | 'card' | 'other' | null;
+    paidDate: string | null;
+  } | null;
+  discount: { kind: 'value' | 'percent'; value: number } | null;
+  status: 'approved' | 'progress' | 'done' | null;
+}
+
 export interface OrderDraft {
   transcript: string | null;
   customer: { match: CustomerHit | null; guess: { name?: string; phone?: string } | null; alternatives: CustomerHit[] } | null;
@@ -431,6 +540,10 @@ export interface OrderDraft {
   notes: string | null;
   /** "YYYY-MM-DD", or "YYYY-MM-DDTHH:MM" when a time was said. */
   dueDate: string | null;
+  /** Null when nothing was asked or `financeActions` is off. */
+  actions: DraftActions | null;
+  /** Only with [actions], when the company issues notas by itself. */
+  nfseAutoIssue?: NfseAutoIssueMoment;
   usage: { used: number; limit: number };
 }
 
@@ -502,6 +615,25 @@ export function toChanges(operations: LlmDraft['operations'], order: OrderAssist
   });
 }
 
+/** Drops what can't be trusted: an impossible share, a day still to come. */
+export function toActions(actions: LlmDraft['actions'], today: string): DraftActions | null {
+  if (!actions) return null;
+  const said = actions.payment;
+  const validShare = said?.kind !== 'percent' || (said.value ?? 0) <= 100;
+  const payment: DraftActions['payment'] = said
+    ? {
+        kind: said.kind,
+        value: said.kind === 'full' || !validShare ? null : (said.value ?? null),
+        method: said.method ?? null,
+        paidDate: said.paidDate && said.paidDate <= today ? said.paidDate : null,
+      }
+    : null;
+  const asked = actions.discount;
+  const discount = asked && (asked.kind !== 'percent' || asked.value <= 100) ? asked : null;
+  const status = actions.status ?? null;
+  return payment || discount || status ? { payment, discount, status } : null;
+}
+
 async function resolveCustomer(companyId: string, draft: LlmDraft, deps: OrderAssistDeps): Promise<OrderDraft['customer']> {
   const guess = draft.customer?.name || draft.customer?.phone ? { ...draft.customer } : null;
   if (!guess) return null;
@@ -541,6 +673,10 @@ export async function runOrderAssist(
     });
   }
 
+  // A photo alone never gives an action: proof of payment is a later phase.
+  // Text only, on Claude: Gemini failed the eval (promises became payments) and
+  // Claude can't read audio. See docs/AI_ORDER_ASSIST.md.
+  const useActions = settings.financeActions === true && !!input.text && !input.audio;
   let draft: LlmDraft;
   let catalog: CompanyCatalog;
   try {
@@ -551,11 +687,13 @@ export async function runOrderAssist(
       ...(input.audio ? [{ mimeType: input.audio.mimeType, data: input.audio.data }] : []),
     ];
     const raw = await deps.llm.generateJson({
-      systemPrompt: buildSystemPrompt(locale, await deps.deviceLabel?.(companyId)),
+      systemPrompt: buildSystemPrompt(locale, await deps.deviceLabel?.(companyId), undefined, {
+        financeActions: useActions,
+      }),
       userText: buildUserText(input, catalog),
       media,
-      responseSchema: LLM_RESPONSE_SCHEMA,
-      provider: settings.provider,
+      responseSchema: useActions ? LLM_RESPONSE_SCHEMA_WITH_ACTIONS : LLM_RESPONSE_SCHEMA,
+      provider: useActions ? 'claude' : settings.provider,
     });
     draft = parseLlmDraft(raw);
   } catch (error) {
@@ -570,9 +708,11 @@ export async function runOrderAssist(
     throw error;
   }
 
-  const [customer, device] = await Promise.all([
+  const actions = useActions ? toActions(draft.actions, todayLabel().slice(0, 10)) : null;
+  const [customer, device, nfseAutoIssue] = await Promise.all([
     resolveCustomer(companyId, draft, deps),
     resolveDevice(companyId, draft, deps),
+    actions ? deps.nfseAutoIssue?.(companyId) : null,
   ]);
 
   return {
@@ -583,6 +723,8 @@ export async function runOrderAssist(
     changes: toChanges(draft.operations, input.order),
     notes: draft.notes ?? null,
     dueDate: draft.dueDate ? (draft.dueTime ? `${draft.dueDate}T${draft.dueTime}` : draft.dueDate) : null,
+    actions,
+    ...(nfseAutoIssue ? { nfseAutoIssue } : {}),
     usage: { used: reservation.used, limit: reservation.limit },
   };
 }

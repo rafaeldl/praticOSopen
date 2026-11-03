@@ -40,6 +40,7 @@ class OrderChargeController extends ChangeNotifier {
             ? null
             : PaymentSettingsRepository().watch(companyId));
     if (source == null) return;
+    _ready = false;
     _settingsSubscription = safePaymentSettings(source).listen(_onSettings);
   }
 
@@ -59,6 +60,11 @@ class OrderChargeController extends ChangeNotifier {
   /// Whether the payments were already reloaded for this screen.
   bool _reloadedOnOpen = false;
   bool _disposed = false;
+  bool _ready = true;
+
+  /// True once [openCharge] can be trusted: settings read and, in the pilot,
+  /// the charges too.
+  bool get ready => _ready;
 
   /// Company in the Asaas pilot and user allowed to charge.
   bool get enabled => _settings?.asaasEnabled == true;
@@ -96,9 +102,12 @@ class OrderChargeController extends ChangeNotifier {
         // E.g. permission denied by the rules: behave as "no charge".
         onError: (Object _) {
           _charges = const [];
+          _ready = true;
           _notify();
         },
       );
+    } else if (!settings.asaasEnabled) {
+      _ready = true;
     }
     _notify();
   }
@@ -120,6 +129,7 @@ class OrderChargeController extends ChangeNotifier {
         charges.any((c) => chargeSettled(previous[c.id], c));
     _previous = {for (final c in charges) c.id ?? '': c};
     _charges = charges;
+    _ready = true;
     _notify();
     // The webhook booked or reverted payments on the order.
     if (settled && !_disposed) store.reloadPayments();

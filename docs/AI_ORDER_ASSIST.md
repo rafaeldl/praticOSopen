@@ -169,6 +169,68 @@ O erro comum ("tira o óleo e o filtro", com o serviço "Troca de óleo" e a pe�
 
 **Testes:** `src/services/ai/__tests__/fuzzy-match.test.ts` (nomes, sons, marcas, placas, telefones).
 
+## Receber, desconto e status pela voz
+
+Fase 1 (spec `docs/superpowers/specs/2026-11-02-ia-financeiro-os-design.md`). "Pagou tudo no Pix", "deu 500 de entrada", "dá 10% de desconto" e "terminei" viram um cartão "Confere?". Nada de dinheiro ou status é gravado antes do toque em Confirmar.
+
+**Chave própria, desligada por padrão.** `financeActions` em `companies/{id}/settings/ai` ou em `config/ai`, com a mesma lógica de `enabled` (o valor da empresa vence). Desligada, o modelo não recebe as regras nem o campo `actions`, e a resposta vem com `actions: null`.
+
+```bash
+npm run ai -- on --project praticos --company <id> --finance on --yes   # liga para uma empresa
+npm run ai -- on --project praticos --company <id> --finance off --yes  # desliga só isso
+npm run ai -- on --project praticos --all --finance on --yes            # liga para todas
+```
+
+**O modelo não faz conta.** Ele não recebe total, pago nem saldo. Devolve só o que foi dito, e o app calcula com o saldo atual da OS, já com os itens mudados na mesma frase.
+
+| `kind` | Frase | Conta no app |
+|---|---|---|
+| `full` | "pagou tudo" | saldo (recalculado ao gravar) |
+| `value` | "deu 500" | 500 |
+| `percent` | "pagou metade" | saldo × 50% |
+| `leaving` | "ficou devendo 200" | saldo − 200 |
+| sem `value` | "pagou uma parte" | a linha pede o valor |
+
+**App:**
+
+- `lib/screens/order/assistant/ai_actions_plan.dart`: `planAiActions` monta o cartão. É uma função pura, com regras e permissões.
+- `ai_actions_sheet.dart`: a folha. As linhas de dinheiro abrem `ReceivePaymentSheet` e `showReceiveDiscountSheet`.
+- `ai_actions_runner.dart`: executa na ordem desconto, aprovar, pagamento e status. Para na primeira falha. `undoAiActions` desfaz do último para o primeiro.
+- `lib/screens/payments/order_payment_actions.dart`: gravar pagamento e mensagens de erro, compartilhados com a tela de pagamentos.
+
+**Regras:**
+
+- Foto sozinha nunca gera ação: o servidor nem pede `actions` ao modelo.
+- Orçamento não aceita pagamento: o cartão mostra "Marcar como aprovada" junto de "Receber". Quem recebe mas não aprova vê o motivo, e nada é gravado.
+- O status só anda para a frente. Cancelar e voltar para orçamento ficam fora.
+- Valor acima do saldo vira o saldo, com o aviso "Falta só R$ X." Nunca grava a mais.
+- Nota automática: o cartão avisa com `paid` quando um **pagamento** zera o saldo, e com `completed` quando a OS vira `done`. Desconto que quita não emite nota (`closedByDiscount` no gatilho), então não avisa. "Desfazer" não cancela a nota e diz isso.
+- **Nova OS:** as ações ficam guardadas e a folha abre depois do ✓, com a OS já criada. Elas não podem entrar junto na criação: o gatilho da nota só olha atualizações, e técnico não cria OS com dinheiro. A tela espera o id por `kAiActionsSaveWait` (6 s). Sem id (offline), fecha como sempre, não grava dinheiro e o aviso pede para registrar depois.
+- "Desfazer" depois do cartão desfaz as ações e também o que a mesma frase pôs na OS.
+
+**Eventos** (sem valores): `ai_action_proposed {types}`, `ai_action_confirmed {edited}`, `ai_action_dismissed`, `ai_action_undone`, `ai_action_failed {step}`.
+
+**Só texto, sempre no Claude.** Com a chave ligada, o servidor manda o pedido com texto para o Claude, qualquer que seja o provedor da empresa. Áudio não recebe as regras: o Claude não ouve, e o app já manda texto. O motivo está no teste abaixo.
+
+**Teste com os modelos reais** (`firebase/functions/scripts/ai-finance-eval.ts`, 2026-11-02, duas passadas por frase, prompt e parser reais):
+
+| Conjunto | Claude Sonnet 5.5 | Claude Haiku 5.5 | Gemini 2.5 Flash |
+|---|---|---|---|
+| Ajuste (98 frases, 15 do bot) | 194/196 | 191/196 | 192/196 |
+| Frases novas (40) | 80/80 | 76/80 | 75/80 |
+| Promessa ou preço virando pagamento | 0 | 3 (só no ajuste) | 8 (3 no ajuste, 5 nas novas) |
+
+Metas da spec: 0 promessa ou preço virando pagamento, 95% de acerto. Só o Sonnet bate. O erro restante dele, "still owes 50" sem ação, é seguro: nada é proposto. As frases do bot ficam fora do repositório, porque vêm de conversas reais.
+
+```bash
+cd firebase/functions
+GCLOUD_PROJECT=praticos ANTHROPIC_API_KEY=... npx ts-node scripts/ai-finance-eval.ts --providers claude --runs 2
+```
+
+Com ações opcionais no formato de resposta, o Claude pulava `payment` em "terminei, pagou 300" ("aprovado", "quitou" e parecidos). Por isso `payment`, `discount` e `status` são obrigatórios e vêm `null` quando não foram ditos. Rodar o teste de novo ao mudar prompt, formato ou modelo.
+
+Nenhuma empresa tem a chave ligada.
+
 ## Provedores
 
 A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmRequest` (prompt, texto, fotos/áudio e o JSON Schema da resposta) e o `LlmRouter` entrega para o cliente certo:
@@ -190,7 +252,7 @@ O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `f
 ## Regras de Negócio
 
 1. **A IA propõe, o usuário salva.** Na Nova OS nada é gravado até o ✓ do topo; as marcas somem ao salvar. "Desfazer" tira o que a última leitura colocou, volta os valores que ela mudou e põe de volta o que ela tirou.
-2. **Tirar só por pedido.** A IA só tira uma linha quando o usuário pede ("tira…", "remove…"); nunca recebe nem cancela a OS.
+2. **Tirar só por pedido.** A IA só tira uma linha quando o usuário pede ("tira…", "remove…"); nunca cancela a OS, e só recebe depois do cartão de confirmar (ver "Receber, desconto e status pela voz").
 3. **Cada chamada conta**, aplicada ou não. Chamada que falha antes de o modelo responder é devolvida.
 4. **Limite por plano** (spec 2026-10-09 §4.2): Free 10, Starter 150, Pro 400, Business 1.000 por mês. `settings/ai.monthlyLimit` sobrepõe (piloto; `-1` = ilimitado). Mês = mês UTC; mês novo = documento novo, sem job de reset.
 5. **Cota esgotada** → mensagem clara e o fluxo manual continua livre.

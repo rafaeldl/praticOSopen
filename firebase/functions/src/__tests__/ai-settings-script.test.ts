@@ -43,6 +43,20 @@ describe('ai-settings script', () => {
     expect(buildGlobalUpdate(parseArgs(['off', '--all']))).toEqual({ enabledForAll: false });
     expect(buildCompanyUpdate(parseArgs(['on', '--company', 'a', '--limit', '-1']))).toEqual({ enabled: true, monthlyLimit: -1 });
     expect(buildCompanyUpdate(parseArgs(['off', '--company', 'a']))).toEqual({ enabled: false });
-    expect(buildCompanyUpdate(parseArgs(['follow', '--company', 'a']))).toEqual({ enabled: null, provider: null });
+    expect(buildCompanyUpdate(parseArgs(['follow', '--company', 'a']))).toEqual({
+      enabled: null,
+      provider: null,
+      financeActions: null,
+    });
+    expect(buildCompanyUpdate(parseArgs(['on', '--company', 'a', '--finance', 'on']))).toEqual({
+      enabled: true,
+      financeActions: true,
+    });
+    expect(buildGlobalUpdate(parseArgs(['on', '--all', '--finance', 'off']))).toEqual({
+      enabledForAll: true,
+      financeActions: false,
+    });
+    expect(() => parseArgs(['on', '--company', 'a', '--finance', 'maybe'])).toThrow('--finance');
+    expect(() => parseArgs(['off', '--company', 'a', '--finance', 'on'])).toThrow('only go with on');
   });
 });
