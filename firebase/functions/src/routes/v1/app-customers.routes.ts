@@ -76,7 +76,7 @@ const customerBody = {
   customData: customDataSchema,
 };
 const createSchema = z.object({ name: z.string().trim().min(1, 'Name is required').max(200), ...customerBody });
-const updateSchema = z.object({ name: z.string().trim().min(1).max(200).optional(), ...customerBody });
+const updateSchema = z.object({ name: z.string().trim().min(1).max(200).optional(), ...customerBody, version: z.string().min(1).max(64).optional() });
 const importSchema = z.object({
   importId: z.string().regex(/^[A-Za-z0-9-]{8,64}$/),
   customers: z
@@ -102,10 +102,17 @@ router.post('/import', route('Failed to import customers', async (req, res, comp
   let created = 0;
   let existing = 0;
   // One id per line: the same file sent again after a failure finds what is already there.
-  for (const [index, customer] of customers.entries()) {
-    const result = await directory.createCustomer(companyId, customer, createdBy, company, `${importId}-${index}`);
-    if (result.created) created++;
-    else existing++;
+  // 50 at a time: 500 creates one after the other took 10-25 s.
+  for (let start = 0; start < customers.length; start += 50) {
+    const results = await Promise.all(
+      customers.slice(start, start + 50).map((customer, offset) =>
+        directory.createCustomer(companyId, customer, createdBy, company, `${importId}-${start + offset}`),
+      ),
+    );
+    for (const result of results) {
+      if (result.created) created++;
+      else existing++;
+    }
   }
   res.json({ success: true, data: { created, existing } });
 }));
@@ -134,9 +141,10 @@ router.patch('/:id', route('Failed to update customer', async (req, res, company
   if (!(await can(req, res, 'manageCustomers'))) return forbidden(res, "Permission 'manageCustomers' is required");
   const validation = validateInput(updateSchema, req.body);
   if (!validation.success) return void validationError(res, validation.errors);
-  const updated = await directory.updateCustomer(companyId, param(req, 'id'), validation.data, getUserAggr(req));
-  if (!updated) return void notFound(res);
-  res.json({ success: true, data: { id: param(req, 'id'), updated: true } });
+  const { version, ...input } = validation.data;
+  const updated = await directory.updateCustomer(companyId, param(req, 'id'), input, getUserAggr(req), version);
+  if (updated === false) return void notFound(res);
+  res.json({ success: true, data: { id: param(req, 'id'), updated: true, version: updated } });
 }));
 
 router.delete('/:id', route('Failed to delete customer', async (req, res, companyId) => {
