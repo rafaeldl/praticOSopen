@@ -528,9 +528,9 @@ Ver `docs/AUTO_VERSIONING.md` para detalhes completos.
 ### Fluxo de Release
 
 ```
-PR mergeado na master
+PR(s) mergeado(s) na master
         ↓
-auto-version.yml → cria tag v*-rc
+[Manual] Workflow "Auto Version" → cria tag v*-rc
         ↓
 Build + Upload para TestFlight/Internal
         ↓
@@ -554,7 +554,10 @@ bundle exec fastlane beta               # TestFlight (manual)
 ```
 
 ### CI/CD
-- **Push master**: Cria tag `-rc` automaticamente, deploy para teste
+- **Push master**: Publica Functions, Hosting, regras e Cloud Run (por pasta alterada). Não cria RC
+- **Auto Version**: Workflow manual que cria a tag `-rc` e dispara os builds para teste
+- **PRs**: Só checks em Linux (Code Quality, Functions, Web App, Parity, Android quando muda nativo). iOS só à mão
+- **Hook pre-push**: Roda analyze/testes localmente antes do push. Instalar uma vez com `scripts/install-git-hooks.sh`
 - **Promote Release**: Workflow manual para promover RC para produção
 - **Artefatos**: Salvos no GitHub Releases (AAB + IPA)
 
@@ -735,6 +738,7 @@ Antes de finalizar uma feature, verificar:
 ## Documentação Adicional
 
 - `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
+- `docs/CI_BUDGET.md` - Orçamento do GitHub Actions, o que roda onde e hook de pre-push
 - `docs/STORE_LISTING.md` - Ficha das lojas: textos, prints (como gerar, dados demo), conta da revisão e envio sem publicar
 - `docs/APP_TRACKING_TRANSPARENCY.md` - Permissão de rastreamento no iOS (ATT) e exigências da App Review
 - `docs/I18N.md` - Sistema de internacionalização completo
