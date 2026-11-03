@@ -66,6 +66,7 @@ const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue
 // Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
 const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
 // Checklists, after the order shows (their texts are in the orders chunk).
+const PdfDialog = defineAsyncComponent(() => import('./PdfDialog.vue'))
 const OrderForms = defineAsyncComponent(() => import('@/components/forms/OrderForms.vue'))
 
 const props = defineProps<{ orderId: string }>()
@@ -135,6 +136,7 @@ const chargesOn = ref(false)
 /** Notas fiscais on for the company (settings/payments): "Emitir nota fiscal" in the menu, for chargeOrder. */
 const nfseOn = ref(false)
 const issuing = ref(false)
+const pdfOpen = ref(false)
 /** settings/payments still being read: whether there can be a link is not known yet. */
 const chargesPending = ref(false)
 onMounted(() => {
@@ -441,6 +443,8 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
   list.push({ id: 'share', label: t('shareTitle') })
+  // order.pdf.view: the same rule as the app (canShareOrderPdf), values only for who sees them.
+  if (canPrint.value) list.push({ id: 'pdf', label: t('web.order.pdf') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
   // The server decides the rest (already has a nota, no service with value, not set up) and the dialog says why.
   if (nfseOn.value && can('chargeOrder') && o.status !== 'quote' && o.status !== 'canceled') list.push({ id: 'invoice', label: t('nfseIssueAction') })
@@ -460,6 +464,7 @@ function onMenu(id: string) {
   else if (id === 'assignee') void openPicker('assignee')
   else if (id === 'device') void openPicker('device')
   else if (id === 'print') print()
+  else if (id === 'pdf') pdfOpen.value = true
   else if (id === 'invoice') issuing.value = true
   else if (id === 'share') dialog.value = { kind: 'share' }
   else if (id === 'cancel') dialog.value = { kind: 'cancel' }
@@ -693,6 +698,7 @@ watch(
     <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="(item) => chooseCustomer(customers.find((c) => c.id === item.id) as Customer)" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'device'" id="od-device" :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })" :label="deviceLabel()" :groups="deviceGroups" @pick="(item) => addDevice(devices.find((d) => d.id === item.id) as Device)" @close="dialog = null" />
   </template>
+  <PdfDialog v-if="pdfOpen && order" :ids="[order.id]" :numbers="[order.number]" @close="pdfOpen = false" />
   <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
   <OrderPrint v-if="printing && order" :order="order" />
 </template>

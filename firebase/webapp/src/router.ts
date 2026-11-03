@@ -161,6 +161,11 @@ function currentDecision(access: RouteAccess | undefined) {
   })
 }
 
+/** Whether this person may open `path` now (the palette offers only what opens). */
+export function canOpen(path: string): boolean {
+  return currentDecision(router.resolve(path).meta.access) === 'allow'
+}
+
 /**
  * The screen on display after the session changed (company switch, role or
  * values option changed): a screen the new role cannot use goes to the start.
