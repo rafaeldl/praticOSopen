@@ -72,6 +72,8 @@ async function seedSegments() {
       },
       { key: 'device.mileage', type: 'number', labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage', 'es-ES': 'Kilometraje' }, min: 0, max: 9999999, order: 1 },
       { key: 'device.fuel', type: 'select', labels: { 'pt-BR': 'Combustível', 'en-US': 'Fuel', 'es-ES': 'Combustible' }, options: ['Flex', 'Diesel'], order: 2 },
+      // The order's own field (order.custom-fields.view).
+      { key: 'service_order.mileageIn', type: 'number', labels: { 'pt-BR': 'KM na entrada', 'en-US': 'Mileage in', 'es-ES': 'KM a la entrada' }, min: 0, max: 9999999, order: 1 },
       // Catalog (fatia 05): products named by the segment, and one segment field of a service.
       label('product._entity', 'Peça', 'Part', 'Pieza'),
       label('product._entity_plural', 'Peças', 'Parts', 'Piezas'),

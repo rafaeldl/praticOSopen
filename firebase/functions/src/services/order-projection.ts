@@ -111,6 +111,11 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     services,
     products,
     photos: order.photos,
+    // The place and the segment's own fields carry no money (order.address.edit, order.custom-fields.view).
+    address: order.address,
+    latitude: order.latitude,
+    longitude: order.longitude,
+    customData: order.customData,
     status: order.status,
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? null,

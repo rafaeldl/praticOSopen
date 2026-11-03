@@ -49,6 +49,8 @@ import { currentToast, showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
+import TextDialog from './TextDialog.vue'
+import OrderCustomFields from './OrderCustomFields.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import DateDialog from './DateDialog.vue'
 import HoldDialog from './HoldDialog.vue'
@@ -96,6 +98,7 @@ type Dialog =
   | { kind: 'item'; line: OrderLine }
   | { kind: 'addItem' }
   | { kind: 'customer' }
+  | { kind: 'address' }
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share' }
@@ -309,7 +312,7 @@ async function addFreeItem(name: string) {
   await run(() => writes.addItem(order.value!.id, { kind: 'service', description: name }, expected()), t('web.order.itemAdded', { name }))
 }
 
-async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number }) {
+async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number; deviceId?: string | null }) {
   if (!Object.keys(patch).length || !line.id) {
     dialog.value = null
     return
@@ -388,6 +391,20 @@ async function applyCustomer(customer: Customer, dropDevices: boolean) {
   if (!o.address && customer.address) fields.address = customer.address
   if (dropDevices) Object.assign(fields, { device: null, devices: [], deviceIds: [] })
   await run(() => writes.updateOrderFields(o.id, fields), t('web.saved'))
+}
+
+const fieldService = computed(() => !!(session.company as { fieldService?: boolean } | null)?.fieldService)
+
+/**
+ * The place of the order (order.address.edit / remove): a new text drops the
+ * coordinates (they belonged to the customer's address); the same text keeps them.
+ */
+async function saveAddress(text: string | null) {
+  dialog.value = null
+  const o = order.value as Order
+  const next = text?.trim() || null
+  if (next === (o.address ?? null)) return
+  await run(() => writes.updateOrderFields(o.id, { address: next, latitude: null, longitude: null }), next ? t('web.saved') : t('web.order.addressRemoved'))
 }
 
 async function addDevice(device: Device) {
@@ -704,6 +721,8 @@ watch(
         <OrderForms ref="formsRef" :order="order" @forms="(list: { id: string; status: string }[]) => (orderForms = list)" />
         <OrderContract :key="order.id" :order="order" :can-edit="!!access?.canEditMainFields" />
 
+        <OrderCustomFields :order="order" :can-edit="!!access.canEditMainFields" />
+
         <section class="od-sec od-sec--details" aria-labelledby="od-details-title">
           <h3 id="od-details-title">{{ t('details') }}</h3>
           <dl class="kv">
@@ -728,11 +747,15 @@ watch(
                 <span v-else>{{ order.assignedTo?.name }}</span>
               </dd>
             </template>
-            <template v-if="order.address">
+            <template v-if="order.address || (access.canEditMainFields && fieldService)">
               <dt>{{ t('orderAddressLabel') }}</dt>
-              <dd>
-                {{ order.address }}
-                <a class="link" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`" target="_blank" rel="noopener">{{ t('openInMaps') }}</a>
+              <dd class="od-address" data-testid="order-address">
+                <span v-if="order.address">{{ order.address }}</span>
+                <a v-if="order.address" class="link" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`" target="_blank" rel="noopener">{{ t('openInMaps') }}</a>
+                <template v-if="access.canEditMainFields">
+                  <button type="button" class="link" @click="dialog = { kind: 'address' }">{{ order.address ? t('orderAddressChange') : t('web.order.addAddress') }}</button>
+                  <button v-if="order.address" type="button" class="link link--danger" :disabled="busy" @click="saveAddress(null)">{{ t('orderAddressRemove') }}</button>
+                </template>
               </dd>
             </template>
           </dl>
@@ -790,7 +813,15 @@ watch(
     <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
     <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
-    <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
+    <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :devices="order.devices" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
+    <TextDialog
+      v-else-if="dialog.kind === 'address'"
+      :title="t('orderAddressLabel')"
+      :label="t('orderAddressLabel')"
+      :value="order.address ?? ''"
+      @save="saveAddress"
+      @close="dialog = null"
+    />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="pickCustomerItem" @close="dialog = null" />
     <ComboDialog

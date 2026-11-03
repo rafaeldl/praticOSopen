@@ -320,6 +320,16 @@ describe('GET /orders/:id', () => {
     expect(data.services[0]).not.toHaveProperty('value');
   });
 
+  it('quem não vê valores recebe o local e os campos do ramo da OS (sem dinheiro)', async () => {
+    seedOrder('o2', {
+      createdBy: { id: 'tech1', name: 'Téo' },
+      address: 'Rua A, 1', latitude: -27.5, longitude: -48.5, customData: { mileageIn: 1200 },
+    });
+    const res = await call('technician', 'get', `${O}/o2`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ address: 'Rua A, 1', latitude: -27.5, longitude: -48.5, customData: { mileageIn: 1200 } });
+  });
+
   it('dono vê valores, total da linha e transações com id (também as antigas, sem id)', async () => {
     const res = await call('owner', 'get', `${O}/o1`);
     const data = res.body.data;

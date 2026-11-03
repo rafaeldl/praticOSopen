@@ -7,7 +7,8 @@ import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
 import type { Order, OrderPhoto } from '@/lib/orders/model'
-import { uploadPhoto } from '@/lib/orders/writes'
+import { deletePhoto, uploadPhoto } from '@/lib/orders/writes'
+import ConfirmDialog from './ConfirmDialog.vue'
 import { can } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { ui } from '@/lib/ui'
@@ -16,6 +17,26 @@ const props = defineProps<{ order: Order }>()
 const uploading = ref(0)
 const over = ref(false)
 const viewing = ref<OrderPhoto | null>(null)
+const asking = ref(false)
+const deleting = ref(false)
+
+/** order.photo.delete: asks first; the photo leaves the order and the Storage. */
+async function remove() {
+  const photo = viewing.value
+  asking.value = false
+  if (!photo || deleting.value) return
+  deleting.value = true
+  try {
+    await deletePhoto(props.order.id, photo)
+    viewing.value = null
+    showToast(t('web.order.photoDeleted'))
+  } catch (error) {
+    console.warn('photos: delete failed', error)
+    showToast(t('web.order.photoDeleteFailed'))
+  } finally {
+    deleting.value = false
+  }
+}
 const canAttach = computed(() => can('attachPhotos'))
 const canView = computed(() => can('viewPhotos') || canAttach.value)
 
@@ -71,7 +92,21 @@ onBeforeUnmount(() => window.removeEventListener('paste', onPaste))
   <Layer v-if="viewing" kind="dialog" :label="t('orderPhotosSection')" @close="viewing = null">
     <template #default="{ close }">
       <div class="layer-body"><img class="photo-full" :src="viewing.url" :alt="viewing.description || t('orderPhotosSection')" /></div>
-      <div class="layer-foot"><button type="button" class="btn" @click="close()">{{ t('close') }}</button></div>
+      <div class="layer-foot">
+        <button v-if="canAttach" type="button" class="btn btn--ghost btn--danger" :disabled="deleting" @click="asking = true">{{ t('web.order.deletePhoto') }}</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" @click="close()">{{ t('close') }}</button>
+      </div>
     </template>
   </Layer>
+  <ConfirmDialog
+    v-if="asking"
+    :title="t('web.order.deletePhotoTitle')"
+    :body="t('web.order.deletePhotoBody')"
+    :confirm="t('web.order.deletePhoto')"
+    :keep="t('cancel')"
+    danger
+    @confirm="remove"
+    @close="asking = false"
+  />
 </template>
