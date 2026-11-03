@@ -283,7 +283,7 @@
   "web.finance.receiveSub": "Marque o que já foi pago, ou receba de um cliente várias OS de uma vez.",
   "web.finance.seeOrders": "Ver as OS",
   "web.finance.toReceive": "{amount} para receber de {count, plural, =1{1 cliente} other{{count} clientes}}",
-  "web.finance.truncated": "Há mais OS sem receber do que cabe aqui: as mais antigas podem faltar.",
+  "web.finance.truncated": "Há mais OS sem receber do que dá para ler de uma vez: algumas podem faltar aqui.",
   "web.receive.blockedStatus": "{status}: não recebe pagamento. O histórico continua aqui.",
   "web.receive.by": "por {name}",
   "web.receive.confirmMethod": "Forma: {method}. Dia: {date}.",

@@ -43,7 +43,9 @@ test('totais, composição, rankings e OS do período (fin.report.view, composit
   await expect(page.getByTestId('report-orders')).not.toContainText('9105')
   // The order opens beside the list.
   await page.getByTestId('report-order').first().click()
-  await expect(page).toHaveURL(/order=fin-last-day/)
+  await expect(page).toHaveURL(/\/finance\/report\?.*order=fin-last-day/)
+  await expect(page.getByRole('complementary', { name: 'OS aberta' })).toBeVisible()
+  await expect(page.getByTestId('finance-report')).toBeVisible()
 })
 
 test('o último dia do período entra (defeito 60 do app) (fin.report.custom)', async ({ page }) => {
@@ -72,7 +74,12 @@ test('filtro de pagamento: a receber lista também parcial e sem situação; tot
   await expect(page.getByRole('heading', { name: 'OS a receber' })).toBeVisible()
   await expect(page.getByTestId('report-order')).toHaveText([/OS 9103/])
   await expect(page.getByTestId('report-revenue')).toHaveText('R$ 350,00')
+  // Composition and item rankings follow the filter, as in the app (B1 of #525).
+  await expect(page.getByRole('region', { name: 'Serviços que mais venderam' })).not.toContainText('Revisão completa')
+  await expect(page.getByRole('region', { name: 'Peças e produtos que mais venderam' })).toHaveCount(0)
   await page.getByTestId('report-paid').click()
+  await expect(page.getByRole('region', { name: 'Serviços que mais venderam' })).toContainText('Revisão completa')
+  await expect(page.getByRole('region', { name: 'Peças e produtos que mais venderam' })).toContainText('Filtro de óleo')
   await expect(page.getByTestId('report-order')).toHaveText([/OS 9101/])
   await page.getByTestId('report-paid').click()
   await expect(page).not.toHaveURL(/payment=/)

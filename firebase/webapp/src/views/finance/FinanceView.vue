@@ -3,7 +3,7 @@
 // A receber and Em andamento of today. Every number comes from the server
 // (GET /v1/app/finance/summary): nothing is added up in the browser.
 // The month is in the URL (?month=2026-03) and never goes to the future.
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -12,7 +12,7 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import FinanceTabs from '@/components/finance/FinanceTabs.vue'
-import { t } from '@/i18n'
+import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { financeSummary, type FinanceRow, type FinanceSummary } from '@/lib/finance/data'
 import { monthOf, periodOf, shiftMonth } from '@/lib/finance/period'
@@ -21,9 +21,13 @@ import { formatDayMonth } from '@/lib/format'
 import { monthInvoices, nfseSettings } from '@/lib/nfse/data'
 import { monthList } from '@/lib/nfse/model'
 import { country, money, orderShort } from '@/lib/orders/text'
+import { useRoutePanel } from '@/lib/route-layer'
 import { can } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
 import '@/styles/finance.css'
+
+// The order opens beside the list, as in the other screens (B6 of #525).
+const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
 
 type List = 'received' | 'sold' | 'receivable' | 'progress'
 const LISTS: List[] = ['received', 'sold', 'receivable', 'progress']
@@ -142,8 +146,14 @@ const emptyText = computed(() => {
 /** Rótulos "Concluídas"/"Em aberto" only when both groups exist (fin.tab.receivable). */
 const bothGroups = computed(() => !!summary.value?.receivable.debtors.length && !!summary.value?.receivable.deposits.length)
 
+const panel = useRoutePanel('order')
 function openOrder(row: FinanceRow) {
-  void router.push({ path: '/', query: { order: row.id } })
+  void panel.open(row.id)
+}
+/** What changed in the order (received, status) changes the numbers: read again, like the app on return. */
+function closePanel() {
+  panel.close()
+  void load()
 }
 
 // ---------------------------------------------------------------------------
@@ -198,7 +208,9 @@ const reportLink = computed(() => {
     <FinanceTabs />
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :body="failure" :retry="load" />
-    <div v-else-if="summary" class="fin" :aria-busy="busy ? 'true' : 'false'">
+    <div v-else-if="summary" class="workspace fin-work" :class="{ 'has-panel': !!panel.value.value }">
+    <div class="list-pane">
+    <div class="fin" :aria-busy="busy ? 'true' : 'false'">
       <p v-if="summary.truncated" class="list-note" role="note">{{ t('web.fin.truncated') }}</p>
       <div class="fin-cards">
         <section class="fin-group" :aria-labelledby="'fin-g-month'">
@@ -288,6 +300,11 @@ const reportLink = computed(() => {
           </ul>
         </template>
       </section>
+    </div>
+    </div>
+    <aside v-if="panel.value.value" class="panel" :aria-label="t('web.orders.panel')">
+      <OrderDetail :key="panel.value.value" :order-id="panel.value.value" @close="closePanel" />
+    </aside>
     </div>
     <EmptyState v-else :title="t('financialLoadError')" />
   </div>

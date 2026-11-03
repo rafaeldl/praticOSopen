@@ -1,7 +1,8 @@
 /* Financeiro, relatório e notas fiscais. Loaded with the screens that use it. */
 .finance { display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .fin { padding: 0 1.25rem 2rem; display: grid; gap: 1.25rem; align-content: start; }
-.fin[aria-busy="true"] { opacity: 0.6; }
+/* Old numbers while new ones come: a line on top, never faded text (contrast stays). */
+.fin[aria-busy="true"] { cursor: progress; box-shadow: inset 0 2px 0 var(--color-accent); }
 
 .fin-nav { display: flex; gap: 0.25rem; padding: 0 1.25rem 0.75rem; flex-wrap: wrap; }
 .fin-nav-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; color: var(--color-muted); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; }
@@ -44,6 +45,10 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
 /* Long words wrap at 200% and on a phone (the base keeps buttons and status on one line). */
 .finance .btn, .issue .btn { white-space: normal; text-align: center; }
 .finance .status { white-space: normal; }
+
+/* The order beside the list (B6 of #525): no rule above the cards, the list scrolls on its own. */
+.fin-work { border-top: 0; }
+.fin-work .list-pane .fin { padding-top: 0.25rem; }
 
 /* Report */
 .report-tools { padding-top: 0; }

@@ -124,7 +124,7 @@ function openOrder(id: string) {
           <button type="button" class="btn btn--ghost" @click="selected = []">{{ t('clear') }}</button>
         </div>
       </div>
-      <p v-if="truncated" class="list-note">{{ t('web.finance.truncated') }}</p>
+      <p v-if="truncated" class="list-note" role="note">{{ t('web.finance.truncated') }}</p>
       <div class="recv">
         <table class="grid">
           <caption class="sr">{{ title }}</caption>

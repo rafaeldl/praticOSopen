@@ -6426,7 +6426,7 @@ rows:
   e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500). Revisão #518: entram as concluídas com saldo e as abertas com sinal (não copia o P1 do teste do Marcos); lê todas as OS sem pagar em páginas de 500, ordena das mais antigas e avisa se passar de 20.000. Web (fatia 6): lido no servidor (GET /v1/app/finance/receivable, payment unpaid/partial e aprovada sem payment, como o app), não mais até 20.000 OS no navegador. No Resumo, A receber por cliente abre Receber de cliente."
+  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500). Revisão #518: entram as concluídas com saldo e as abertas com sinal (não copia o P1 do teste do Marcos); lê todas as OS sem pagar em páginas de 500, ordena das mais antigas e avisa se passar de 20.000. Web (fatia 6): lido no servidor (GET /v1/app/finance/receivable, payment unpaid/partial e aprovada sem payment, como o app), não mais até 20.000 OS no navegador. No Resumo, A receber por cliente abre Receber de cliente. Acima de 20.000 OS em aberto avisa que algumas podem faltar (ordem dos ids)."
 - id: fin.tab.pick-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6480,7 +6480,7 @@ rows:
   e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Web: Recebido pela data de cada pagamento (paidAt, senão createdAt), OS de qualquer mês (lastPaymentAt); legado sem transação conta no dia da OS. Contrato finance-summary.json."
+  note: "Web: Recebido pela data de cada pagamento (paidAt, senão createdAt), OS de qualquer mês (lastPaymentAt); legado sem transação conta no dia da OS. Contrato finance-summary.json. lastPaymentAt com folga de 14 h (empresa a oeste de Brasília recebendo logo depois da meia-noite do dia 1, revisão do #525, M1)."
 - id: fin.tab.sold
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6552,7 +6552,7 @@ rows:
   e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Abre a OS, não o Receber. Recarrega a aba ao voltar. Web: linha de Em andamento, Recebido, Vendido e sinal abre a OS ao lado da lista."
+  note: "Abre a OS, não o Receber. Recarrega a aba ao voltar. Web: linha de Em andamento, Recebido, Vendido e sinal abre a OS ao lado da lista (?order=), sem sair do Financeiro; fechar relê os números."
 - id: fin.summary.rules
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6678,7 +6678,7 @@ rows:
   e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "A legenda é o filtro (toque liga e desliga): muda títulos, o valor por cliente e reordena o ranking pelo valor filtrado. Sem filtro, a linha do cliente mostra A receber quando há saldo. Não copiar: a lista a receber usa payment == unpaid (some com partial e nulo) enquanto o valor conta tudo que não é paid; contagens e ticket médio saem da lista já filtrada. Web: a receber lista tudo que não está pago (parcial e sem situação também, D5/defeito 58); totais, contagem e média não mudam com o filtro."
+  note: "A legenda é o filtro (toque liga e desliga): muda títulos, o valor por cliente e reordena o ranking pelo valor filtrado. Sem filtro, a linha do cliente mostra A receber quando há saldo. Não copiar: a lista a receber usa payment == unpaid (some com partial e nulo) enquanto o valor conta tudo que não é paid; contagens e ticket médio saem da lista já filtrada. Web: a receber lista tudo que não está pago (parcial e sem situação também, D5/defeito 58); totais, contagem, média e ranking de clientes não mudam com o filtro; composição e rankings de serviços e produtos mudam, como no app."
 - id: fin.report.composition
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6696,7 +6696,7 @@ rows:
   e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Web: some sem serviços nem peças; percentuais pelo país."
+  note: "Web: some sem serviços nem peças; percentuais pelo país; segue o filtro de pagamento, como o app (revisão do #525, B1)."
 - id: fin.report.customer-ranking
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6732,7 +6732,7 @@ rows:
   e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Agrupa por nome (catálogo, depois descrição, depois serviço sem nome). Produtos usam total ou valor × quantidade e somam a quantidade. Não copiar: N itens conta linhas, não quantidade. Web: agrupa por nome e mostra a quantidade (D16)."
+  note: "Agrupa por nome (catálogo, depois descrição, depois serviço sem nome). Produtos usam total ou valor × quantidade e somam a quantidade. Não copiar: N itens conta linhas, não quantidade. Web: agrupa por nome e mostra a quantidade (D16); segue o filtro de pagamento, como o app."
 - id: fin.report.product-ranking
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6750,7 +6750,7 @@ rows:
   e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Web: total da linha ou valor vezes quantidade, com unidades."
+  note: "Web: total da linha ou valor vezes quantidade, com unidades; segue o filtro de pagamento, como o app."
 - id: fin.report.orders
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6768,7 +6768,7 @@ rows:
   e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Ordem por updatedAt. Ponto e texto são do pagamento, não da situação da OS: Pago (verde) só com payment == paid; parcial e nulo viram Pendente (âmbar). Sem nome mostra Cliente. Toque abre /order. Não copiar: não recarrega ao voltar da OS. Web: ponto e texto do pagamento (Pago/Pendente), data no fuso da empresa; a linha abre a OS ao lado."
+  note: "Ordem por updatedAt. Ponto e texto são do pagamento, não da situação da OS: Pago (verde) só com payment == paid; parcial e nulo viram Pendente (âmbar). Sem nome mostra Cliente. Toque abre /order. Não copiar: não recarrega ao voltar da OS. Web: ponto e texto do pagamento (Pago/Pendente), data no fuso da empresa; a linha abre a OS ao lado do relatório."
 - id: fin.report.pdf
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"

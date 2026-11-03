@@ -81,8 +81,13 @@ test('Em andamento e A receber são de hoje; a linha abre a OS (fin.tab.progress
   await expect(list.getByRole('heading')).toHaveText('Em andamento')
   await expect(list.getByTestId('fin-row').filter({ hasText: 'OS 9103' })).toContainText('R$ 50,00')
   await list.getByTestId('fin-row').filter({ hasText: 'OS 9103' }).click()
-  await expect(page).toHaveURL(/order=fin-last-day/)
+  await expect(page).toHaveURL(/\/finance\?.*order=fin-last-day/)
   await expect(page.getByRole('complementary', { name: 'OS aberta' })).toBeVisible()
+  // Beside the list, as in the other screens: the Financeiro stays (B6 of #525).
+  await expect(page.getByTestId('finance-summary')).toBeVisible()
+  await page.getByRole('complementary', { name: 'OS aberta' }).getByRole('button', { name: 'Fechar' }).click()
+  await expect(page).not.toHaveURL(/order=/)
+  await expect(page.getByTestId('fin-list')).toBeVisible()
 
   // A receber: the done order with a balance, by customer; the customer opens "Receber de".
   await page.goto(`${MARCH}&list=receivable`)
@@ -106,6 +111,18 @@ test('Receber lê do servidor, não das OS no navegador (residual do #518)', asy
   await expect(page.getByTestId('finance-receive')).toBeVisible()
   await expect(page.getByTestId('finance-row').filter({ hasText: 'OS 504' })).toContainText('R$ 200,00')
   expect(firestoreOrders).toEqual([])
+})
+
+test('Receber cortado: o aviso diz que algumas OS podem faltar, sem prometer quais (B3 do #525)', async ({ page }) => {
+  await page.route('**/v1/app/finance/receivable**', async (route) => {
+    const response = await route.fetch()
+    const body = await response.json()
+    await route.fulfill({ response, json: { ...body, data: { ...body.data, truncated: true } } })
+  })
+  await openFinance(page, 'admin', 'finance')
+  await page.getByRole('link', { name: 'Receber', exact: true }).click()
+  await expect(page.getByTestId('finance-receive')).toBeVisible()
+  await expect(page.getByRole('note')).toHaveText('Há mais OS sem receber do que dá para ler de uma vez: algumas podem faltar aqui.')
 })
 
 test('Notas fiscais do mês na aba: só a contagem, nunca dinheiro (fin.tab.nfse-row)', async ({ page }) => {

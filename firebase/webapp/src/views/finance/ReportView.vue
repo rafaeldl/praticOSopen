@@ -10,7 +10,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import FinanceTabs from '@/components/finance/FinanceTabs.vue'
-import { t } from '@/i18n'
+import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { financeReport, type FinanceReport, type ReportCustomer } from '@/lib/finance/data'
 import { CSV_TYPE, XLSX_TYPE, download, toCsv, toXlsx, type Cell } from '@/lib/finance/export'
@@ -19,12 +19,14 @@ import { dayText, periodLabel, periodPhrase, today } from '@/lib/finance/text'
 import { countryFormat, formatDate, formatPercent } from '@/lib/format'
 import { country, money, orderShort, statusText } from '@/lib/orders/text'
 import { segmentLabels } from '@/lib/segments'
-import { LAYER_PARAM, withoutParam } from '@/lib/route-layer'
+import { LAYER_PARAM, useRoutePanel, withoutParam } from '@/lib/route-layer'
 import { registerShortcut } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
 import '@/styles/finance.css'
 
 const PeriodDialog = defineAsyncComponent(() => import('@/components/finance/PeriodDialog.vue'))
+// The order opens beside the report, as in the other screens (B6 of #525).
+const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
 
 const route = useRoute()
 const router = useRouter()
@@ -167,8 +169,13 @@ function toggle(section: string) {
 }
 const first = <T,>(list: T[], section: string) => (all(section) ? list : list.slice(0, SHOWN))
 
+const panel = useRoutePanel('order')
 function openOrder(id: string) {
-  void router.push({ path: '/', query: { order: id } })
+  void panel.open(id)
+}
+function closePanel() {
+  panel.close()
+  void load()
 }
 
 // ---------------------------------------------------------------------------
@@ -291,7 +298,9 @@ function exportXlsx() {
 
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :body="failure" :retry="load" />
-    <div v-else-if="report" class="fin report-body" :aria-busy="busy ? 'true' : 'false'">
+    <div v-else-if="report" class="workspace fin-work" :class="{ 'has-panel': !!panel.value.value }">
+    <div class="list-pane">
+    <div class="fin report-body" :aria-busy="busy ? 'true' : 'false'">
       <p v-if="report.truncated" class="list-note" role="note">{{ t('web.fin.truncated') }}</p>
       <p v-if="!report.count" class="muted fin-none" data-testid="report-empty">{{ t('web.report.empty') }}</p>
       <template v-else>
@@ -392,6 +401,11 @@ function exportXlsx() {
           </button>
         </section>
       </template>
+    </div>
+    </div>
+    <aside v-if="panel.value.value" class="panel no-print" :aria-label="t('web.orders.panel')">
+      <OrderDetail :key="panel.value.value" :order-id="panel.value.value" @close="closePanel" />
+    </aside>
     </div>
     <PeriodDialog v-if="picking" :today="todayDay" :initial="custom" @apply="applyDays" @close="closePicker" />
   </div>
