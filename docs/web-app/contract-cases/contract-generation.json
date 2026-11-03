@@ -3,8 +3,7 @@
   "generatedFrom": "e05d6414",
   "rule": "OS de contrato recorrente: o modelo (isContract) gera uma OS quando contract.active == true, contract.nextDueDate <= agora, o dia do vencimento não passa do dia do endDate (o término conta como incluído) e contract.autoGenerate == true. A OS copia cliente, aparelhos, itens (só serviço/produto, descrição, valor, quantidade e total da linha), responsável e autor do modelo, nasce orçamento e não paga, sem número (o gatilho numera). O modelo grava lastGeneratedDate = agora, generatedCount + 1 e, como próximo vencimento, o primeiro depois de agora contando períodos a partir do vencimento gerado: períodos perdidos não são repostos (uma OS só, nunca uma por abertura do app) e o dia do calendário se mantém. Mensal e anual caem à meia-noite e o dia 31 vira o dia 1 a 3 do mês seguinte, como o DateTime do Dart; diário e semanal mantêm a hora do vencimento. Sem próximo vencimento (frequência desconhecida) ou com ele depois do endDate, o contrato desliga.",
   "runsIn": [
-    "dart",
-    "functions"
+    "dart"
   ],
   "sourceOfTruth": [
     "lib/models/order.dart OrderContract (isDueAt, stepFrom, nextDueAfter, advanceAfterGenerating)",
