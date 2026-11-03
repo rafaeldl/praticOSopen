@@ -173,6 +173,14 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 - "Minhas" pede `assignedTo=<uid>` à API: o técnico vê a OS atribuída a ele, criada por qualquer um (regras e índices do #514; na API, `canSeeOrder` e a lista aceitam o técnico atribuído).
 - A Início abre com "R$ X para receber" no resumo; em Sem receber, buscar um cliente mostra quanto ele deve. O próximo passo de "Na oficina" é "Concluir serviço". Telefone do cliente legível, total da Nova OS acompanha o valor enquanto digita, controles nativos seguem o tema escuro.
 
+**Sobras fechadas (feat/webapp-leftovers).**
+- Lista: a placa vem depois do veículo; de 64rem para cima, a coluna "Quando" mostra a visita (com a hora) ou a entrega, em vermelho quando atrasada, e a situação fica só com o nome. Abaixo disso as datas continuam na linha da situação.
+- Seletores (`lib/orders/pickers.ts`): "Recentes" (5 clientes das últimas 50 OS, por `GET /v1/app/orders?limit=50`, então o consultor vê os das OS dele), "Pela placa ou série" a partir de 3 caracteres (escolher traz o dono, cliente da OS mais recente do aparelho, e o veículo juntos) e "Mais usados" no item da Nova OS (`meta.mostUsed` da rota do catálogo, um de cada tipo por vez). Na OS, o nome do veículo abre a troca: ✓ no atual, outro substitui no mesmo lugar e "Nenhum veículo" tira.
+- Tela da OS: "Mais dados" com os campos `service_order.*` do segmento (`OrderCustomFields.vue`; só quem edita a OS muda, com obrigatório, mínimo, máximo e máscara conferidos antes de gravar). Local em Detalhes: "Pôr o local" (com `fieldService`), "Mudar endereço" e "Tirar endereço"; texto novo apaga `latitude` e `longitude`. "Apagar foto" no visualizador, com confirmação: uma transação tira só aquela foto e o arquivo sai do Storage. Com 2 ou mais veículos, "Mudar" no item diz de qual (ou Geral), pela API (`PATCH /items` com `deviceId`).
+- Ao concluir (botão azul ou situação), depois de o servidor aceitar: "Quando é a próxima manutenção?" (`lib/orders/maintenance.ts`), com as regras do app (`docs/DEVICE_NEXT_MAINTENANCE.md`): só com `manageDevices`, OS com veículo e sem contrato, veículos de contrato ativo fora, 3 recusas seguidas param a pergunta (por empresa, neste navegador), "Não repetir" tira só a data que esta OS cumpriu. A data vai por `PUT /v1/app/devices/:id/next-maintenance`.
+- Servidor: a projeção da OS para quem não vê valores (`projectOrder`) passa a levar `address`, `latitude`, `longitude` e `customData` (sem dinheiro).
+- Testes: `e2e/pickers.spec.ts`, `e2e/order-extras.spec.ts`, `e2e/maintenance.spec.ts` e as linhas novas de `e2e/orders-list.spec.ts`.
+
 **Textos.** Os textos usados só por uma funcionalidade vão para um arquivo próprio por idioma (`FEATURES` em `scripts/gen.mjs`): `src/components/orders/` em `generated/i18n/{pt,en,es}-orders.json` e as telas de clientes em `-customers.json`. Cada tela carrega o seu com `loadTexts` antes de aparecer, fora do primeiro download.
 
 **Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts`, `e2e/order-detail.spec.ts` e `e2e/orders-review.spec.ts` (um teste por item da revisão e do teste de usuários), contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
@@ -195,7 +203,9 @@ Código em `src/views/customers/`, `src/components/customers/` e `src/lib/custom
 
 **Uma fonte só.** Permissões pelo contrato gerado; telefone (`lib/phone.ts`) e CPF/CNPJ (`lib/tax-id.ts`) passam pelos casos de contrato `phone.json` e `tax-id.json`, os mesmos do app e do servidor; máscaras e campos vêm do segmento; textos pelos `.arb` e `web_*.json`.
 
-**Fica para depois.** Seletores da OS ("Qual cliente?" com Recentes e placa, "Qual veículo?" com Nenhum), vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho, recebimentos e notas do cliente, contratos do aparelho e a pergunta da próxima manutenção ao concluir a OS.
+**Contratos do aparelho.** A ficha lista os contratos ativos com o aparelho ("OS 12 · Todo mês" e a próxima), lidos pelo REST do Firestore com máscara (sem valores), e cada um abre a OS. Com contrato ativo, a próxima manutenção é a do contrato ("Pelo contrato") e a ficha não pede outra data. Marcar a data na ficha zera as recusas da pergunta ao concluir.
+
+**Fica para depois.** Vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho (a rota `PUT /v1/app/devices/:id` ainda não aceita a foto: precisa da regra do catálogo, com pasta do aparelho, `photoSeen` e apagar o antigo), ✓ por nome+telefone em cliente antigo sem id, e notas do cliente.
 
 ### Catálogo
 
@@ -223,6 +233,10 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 
 **Receber de um cliente em várias OS.** Gaveta "Receber de {nome}", aberta pelo cliente, pela seleção de OS de um mesmo cliente na lista (tela grande) e pelo Financeiro. Lista as OS em aberto (`GET /customers/:id/open-orders`), divide o valor da mais antiga para a mais nova e mostra a divisão e o total antes de gravar; uma confirmação repete os dois. Antes de gravar, relê os saldos: se algo mudou, avisa e não grava. O `receiptId` é gerado ao abrir e renovado quando o saldo muda ou a pessoa muda o que entra: repetir o mesmo pedido depois de a resposta se perder não grava em dobro, e um `RECEIPT_EXISTS` relê os recebimentos e mostra o valor gravado, nunca o digitado. O consultor vê as OS de outra pessoa à parte e desmarcadas.
 
+**Comprovante.** No "Receber", quem tem `attachPhotos` anexa uma imagem ou PDF abaixo de 10 MB (outro tipo ou tamanho é recusado com frase antes de enviar); em "Já recebido", cada pagamento à mão tem "Anexar comprovante", "Trocar comprovante" e "Tirar comprovante" (este com confirmação). O arquivo sobe para `tenants/{empresa}/orders/{os}/payments/{pagamento}/receipt_{ms}.{ext}` com nome novo a cada vez (o servidor apaga o antigo depois de trocar, então os dois nunca dividem o caminho), e só depois vai a chamada (`POST /payments` com `receiptFile`, `PUT` e `DELETE /payments/:id/receipt`). Pagamento do Asaas e parte de recebimento de várias OS não mudam aqui. Gerente vê, não anexa.
+
+**E2E do comprovante.** O emulador do Storage serve `http://127.0.0.1:<porta>`, e o servidor só aceitava `https` do bucket. `validateReceiptFile` (`firebase/functions/src/services/payment-input.ts`) aceita a URL `http` do emulador só quando `FUNCTIONS_EMULATOR=true` e o host é o de `FIREBASE_STORAGE_EMULATOR_HOST`. Em produção nada muda: o Cloud Functions não define `FUNCTIONS_EMULATOR` e só passa `https` do bucket (teste em `services/__tests__/payment-input.test.ts`). Teste: `e2e/proof.spec.ts`.
+
 **Recebimentos.** Na tela do cliente: lista (`GET /customers/:id/receipts`), recibo impresso pelo navegador e "Desfazer recebimento", com confirmação. O recibo não tem "Ainda falta": o recebimento não guarda o saldo daquele dia, e o saldo de hoje mudaria um recibo antigo.
 
 **Cobrança (Asaas).** Quem recebe na OS (o consultor também) vê o link aberto só para ler; com link aberto, Receber deixa de ser o botão azul e avisa que a cobrança se ajusta. Criar, cancelar e gerar link novo só para quem tem `chargeOrder`, com `settings/payments.asaasEnabled` e `asaasConnected`. Na OS: cartão do link aberto (esperando, vencido, parcelas, o que falta fora do link), aviso "A OS mudou de valor" com "Gerar link novo" e "Manter o link" (guardado por cobrança neste navegador), parcelamento cancelado pelo servidor, copiar, mandar de novo e cancelar. "Mandar cobrança" pede valor (sempre em R$), vencimento (hoje + 3, nunca no passado), parcelas (só uma OS) e CPF/CNPJ quando o cadastro não tem um válido. Criar e mandar são um passo só: a folha vira "Mandar pelo WhatsApp" com o link do Asaas. Na gaveta do cliente: um link para várias OS, copiar e cancelar. O link mandado de novo é sempre o do Asaas, na OS e no cliente.
@@ -233,7 +247,7 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 
 **No E2E** o WhatsApp nunca abre (os testes leem o link) e o Asaas é simulado: as rotas de cobrança são respondidas pelo teste, que grava o documento da cobrança como o servidor gravaria. O seed liga `settings/payments` na empresa A.
 
-**Fica para depois.** Anexar e trocar comprovante (o servidor só aceita URL https do bucket e o emulador serve http, então não há E2E possível; `pay.widget.sheet` volta a `in_progress`), "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
+**Fica para depois.** Comprovante do recebimento de várias OS na tela do recibo, "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
 
 ### Agenda
 
@@ -373,7 +387,9 @@ Código em `src/views/settings/`, `src/components/settings/` e `src/lib/settings
 
 **Desempenho.** Medido em 2026-11-03 com a máquina carregada: **1.093 ms** na 1ª visita e **700 ms** na volta. O caminho até a lista foi para 134,6 KB (as rotas novas no `router.ts` e o carregador dos textos); as telas e os textos ficam fora do primeiro download.
 
-**Fica para depois.** Lembretes (locais do aparelho; no web só com Web Push), Avaliações, versão do web no rodapé, compra e gestão de plano (decisão do dono), aceitar o primeiro convite de quem não tem empresa (limitação do servidor, ver Convites).
+**Versão.** O rodapé de Configurações diz "PraticOS web {dia do build} ({commit})", gravado no build (`__WEB_VERSION__` em `vite.config.ts`, pelo `GITHUB_SHA` no CI ou `git rev-parse`).
+
+**Fica para depois.** Lembretes (locais do aparelho; no web só com Web Push), Avaliações, compra e gestão de plano (decisão do dono), aceitar o primeiro convite de quem não tem empresa (limitação do servidor, ver Convites).
 
 ### Histórico do navegador
 
@@ -539,8 +555,8 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, documentos e linha "Nota fiscal" com a situação.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 133,0 de 240 KB desde a fatia do Financeiro (131,3 com a agenda; era 239,1 KB, 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 136,1 de 240 KB com as sobras (coluna Quando e versão). Antes, 133,0 desde a fatia do Financeiro (131,3 com a agenda; era 239,1 KB, 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.
