@@ -3022,5 +3022,6 @@
   "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
   "orderCreateFailedTitle": "Não deu para salvar a OS",
   "orderCreateFailedMessage": "Confira a internet e crie a OS de novo.",
-  "receiveChargeMaybeOpen": "Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido."
+  "receiveChargeMaybeOpen": "Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.",
+  "checklistAnswerSaveFailed": "Não deu para guardar a resposta. Tente de novo."
 }

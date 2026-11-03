@@ -6551,4 +6551,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get receiveChargeMaybeOpen =>
       'Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'No se pudo guardar la respuesta. Inténtalo de nuevo.';
 }

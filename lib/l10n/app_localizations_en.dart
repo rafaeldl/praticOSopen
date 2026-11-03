@@ -6534,4 +6534,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get receiveChargeMaybeOpen =>
       'There may be an open payment link on this work order. Check with whoever handles billing before marking it as received.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'Couldn\'t save the answer. Try again.';
 }

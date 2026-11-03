@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 
@@ -129,12 +132,66 @@ class FormsService {
     return orderForm;
   }
 
-  /// Salva a resposta de um item do formulário
-  Future<void> saveResponse(
-      String companyId, String orderId, String formId, FormResponse response) async {
-    final formRef = _getFormsCollection(companyId, orderId).doc(formId);
+  /// How long the answer transaction may wait for the server before the
+  /// answer is queued as a plain (offline) write.
+  static const Duration responseTransactionTimeout = Duration(seconds: 10);
 
-    return _db.runTransaction((transaction) async {
+  /// Whether a failed answer transaction can be retried as a queued write:
+  /// no connection or no answer in time. Refusals (rules, missing form) are
+  /// real errors.
+  static bool canQueueOffline(Object error) {
+    if (error is TimeoutException) return true;
+    if (error is FirebaseException) {
+      return const {
+        'unavailable',
+        'deadline-exceeded',
+        'aborted',
+      }.contains(error.code);
+    }
+    return false;
+  }
+
+  /// Salva a resposta de um item do formulário.
+  ///
+  /// Online, a transaction merges the answer into the current responses.
+  /// Without connection transactions fail, so with [localResponses] (the
+  /// screen's responses, already holding [response]) the answer is queued as
+  /// a plain update and reaches the server when the connection comes back.
+  Future<void> saveResponse(
+    String companyId,
+    String orderId,
+    String formId,
+    FormResponse response, {
+    List<FormResponse>? localResponses,
+  }) async {
+    final formRef = _getFormsCollection(companyId, orderId).doc(formId);
+    try {
+      await _saveResponseInTransaction(formRef, response);
+    } catch (e) {
+      if (localResponses == null || !canQueueOffline(e)) rethrow;
+      debugPrint('Checklist answer queued offline: $e');
+      // Not awaited: offline the update completes only once synced.
+      unawaited(
+        formRef
+            .update({
+              'responses': localResponses.map((r) => r.toJson()).toList(),
+              'status': _statusToString(FormStatus.inProgress),
+              'updatedAt': DateTime.now().toIso8601String(),
+            })
+            .catchError((Object e) {
+              debugPrint('Queued checklist answer failed: $e');
+            }),
+      );
+    }
+  }
+
+  Future<void> _saveResponseInTransaction(
+    DocumentReference<Map<String, dynamic>> formRef,
+    FormResponse response,
+  ) {
+    return _db.runTransaction(timeout: responseTransactionTimeout, (
+      transaction,
+    ) async {
       final snapshot = await transaction.get(formRef);
       if (!snapshot.exists) return;
 

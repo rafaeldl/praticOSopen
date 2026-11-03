@@ -3,6 +3,7 @@ import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/subscription.dart';
+import 'package:praticos/repositories/tenant/tenant_form_template_repository.dart';
 import 'package:praticos/repositories/v2/form_template_repository_v2.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -222,7 +223,7 @@ abstract class _FormTemplateStore with Store {
       final snapshot = await FirebaseFirestore.instance
           .collection('companies')
           .doc(companyId)
-          .collection('formTemplates')
+          .collection(TenantFormTemplateRepository.collectionName)
           .where('isActive', isEqualTo: true)
           .count()
           .get();

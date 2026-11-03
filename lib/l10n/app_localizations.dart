@@ -10637,6 +10637,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.'**
   String get receiveChargeMaybeOpen;
+
+  /// No description provided for @checklistAnswerSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar a resposta. Tente de novo.'**
+  String get checklistAnswerSaveFailed;
 }
 
 class _AppLocalizationsDelegate
