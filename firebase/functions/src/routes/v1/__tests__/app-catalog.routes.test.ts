@@ -254,13 +254,6 @@ describe('PATCH', () => {
     expect((read('companies/c1/services/s1') as any).photo).toBe(good.url);
   });
 
-  test('tirar a foto apaga os arquivos da pasta do item', async () => {
-    seed('companies/c1/services/s1', { name: 'Troca de óleo', value: 120, photo: 'https://x' });
-    expect((await call('admin', 'patch', `${SV}/s1`, { photo: null })).status).toBe(200);
-    expect((read('companies/c1/services/s1') as any).photo).toBeNull();
-    expect(fakeStorage.deletedPrefixes).toContain('tenants/c1/services/s1/');
-  });
-
   test('inexistente ou de outra empresa: 404; sem permissão: 403', async () => {
     expect((await call('admin', 'patch', `${SV}/z1`, { name: 'X' })).status).toBe(404);
     expect((await call('manager', 'patch', `${SV}/s1`, { name: 'X' })).status).toBe(403);
@@ -359,5 +352,68 @@ describe('POST /prices (preços em lote)', () => {
     seedCompanies({ useFinancial: false });
     expect((await call('admin', 'post', `${SV}/prices`, { changes: [{ id: 's1', from: 120, to: 1 }] })).status).toBe(403);
     expect((read('companies/c1/services/s1') as any).value).toBe(120);
+  });
+});
+
+// ─── Revisão do PR #520 ─────────────────────────────────────────────────────
+describe('revisão #520', () => {
+  test('B1: /prices recusa o mesmo id duas vezes no lote', async () => {
+    const res = await call('admin', 'post', `${SV}/prices`, { changes: [{ id: 's1', from: 120, to: 132 }, { id: 's1', from: 120, to: 150 }] });
+    expect(res.status).toBe(400);
+    expect((read('companies/c1/services/s1') as any).value).toBe(120);
+  });
+
+  test('A1: o lote leva uma chave; repetir com a mesma chave não aplica de novo e a chave fica no item', async () => {
+    const body = { batchId: 'lote-0000-1111', changes: [{ id: 's1', from: 120, to: 132 }] };
+    expect((await call('admin', 'post', `${SV}/prices`, body)).body.data).toEqual({ updated: 1, unchanged: 0 });
+    expect(read('companies/c1/services/s1')).toMatchObject({ value: 132, priceBatchId: 'lote-0000-1111' });
+    expect((await call('admin', 'post', `${SV}/prices`, body)).body.data).toEqual({ updated: 0, unchanged: 1 });
+    expect((read('companies/c1/services/s1') as any).value).toBe(132);
+    expect((await call('admin', 'post', `${SV}/prices`, { batchId: 'x', changes: body.changes })).status).toBe(400);
+  });
+
+  test('B4: importId repetido com outro conteúdo dá 409 e nada é gravado; igual devolve existing', async () => {
+    await call('admin', 'post', `${SV}/import`, { importId: 'imp-44444444', items: [{ name: 'Polimento', value: 200 }] });
+    const other = await call('admin', 'post', `${SV}/import`, { importId: 'imp-44444444', items: [{ name: 'Polimento', value: 250 }, { name: 'Nova' }] });
+    expect(other.status).toBe(409);
+    expect(other.body.error.code).toBe('IMPORT_ID_CONFLICT');
+    expect((read('companies/c1/services/imp-44444444-0') as any).value).toBe(200);
+    expect(read('companies/c1/services/imp-44444444-1')).toBeUndefined();
+    const same = await call('admin', 'post', `${SV}/import`, { importId: 'imp-44444444', items: [{ name: 'Polimento', value: 200 }] });
+    expect(same.body.data).toEqual({ created: 0, existing: 1 });
+  });
+
+  test('M2: tirar a foto apaga só o arquivo do documento, não a pasta', async () => {
+    const current = photoOf('tenants/c1/services/s1/photo.jpg');
+    seed('companies/c1/services/s1', { name: 'Troca de óleo', value: 120, photo: current.url, updatedAt: '2026-10-02T09:00:00.000Z' });
+    const res = await call('admin', 'patch', `${SV}/s1`, { photo: null, photoSeen: current.url, version: '2026-10-02T09:00:00.000Z' });
+    expect(res.status).toBe(200);
+    expect((read('companies/c1/services/s1') as any).photo).toBeNull();
+    expect(fakeStorage.deleted).toEqual(['tenants/c1/services/s1/photo.jpg']);
+    expect(fakeStorage.deletedPrefixes).toEqual([]);
+  });
+
+  test('M2: a foto mudou no app depois que a pessoa viu (sem mudar updatedAt): 409 e nada apagado', async () => {
+    const fresh = photoOf('tenants/c1/services/s1/photo.jpg');
+    seed('companies/c1/services/s1', { name: 'Troca de óleo', value: 120, photo: `${fresh.url}&v=2`, updatedAt: '2026-10-02T09:00:00.000Z' });
+    const res = await call('admin', 'patch', `${SV}/s1`, { photo: null, photoSeen: fresh.url, version: '2026-10-02T09:00:00.000Z' });
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('CATALOG_ITEM_CHANGED');
+    expect((read('companies/c1/services/s1') as any).photo).toBe(`${fresh.url}&v=2`);
+    expect(fakeStorage.deleted).toEqual([]);
+  });
+
+  test('M2: tirar a foto exige a foto vista e confere a versão', async () => {
+    seed('companies/c1/services/s1', { name: 'Troca de óleo', value: 120, photo: 'https://x', updatedAt: '2026-10-02T09:00:00.000Z' });
+    expect((await call('admin', 'patch', `${SV}/s1`, { photo: null })).status).toBe(400);
+    const stale = await call('admin', 'patch', `${SV}/s1`, { photo: null, photoSeen: 'https://x', version: '2026-10-01T09:00:00.000Z' });
+    expect(stale.status).toBe(409);
+    expect((read('companies/c1/services/s1') as any).photo).toBe('https://x');
+  });
+
+  test('B5: id com barra (%2F) é recusado', async () => {
+    expect((await call('admin', 'get', `${SV}/s1%2Fx%2Fy`)).status).toBe(400);
+    expect((await call('admin', 'patch', `${SV}/a%2Fb`, { name: 'X' })).status).toBe(400);
+    expect((await call('admin', 'post', `${SV}/prices`, { changes: [{ id: 'a/b', from: 1, to: 2 }] })).status).toBe(400);
   });
 });

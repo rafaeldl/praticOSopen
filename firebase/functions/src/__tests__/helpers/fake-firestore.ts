@@ -220,6 +220,10 @@ export class FakeFirestore {
   doc(path: string) {
     return new FakeDoc(this, path);
   }
+  /** db.getAll(...refs), outside a transaction. */
+  async getAll(...refs: FakeDoc[]) {
+    return Promise.all(refs.map((ref) => ref.get()));
+  }
   collectionGroup(collectionId: string) {
     return new FakeQuery(this, collectionId, { filters: [], orders: [] }, true);
   }
@@ -337,6 +341,12 @@ export class FakeFirestore {
           const result = await ref.get();
           result.docs.forEach((doc) => remember(doc.ref.path));
           return result;
+        },
+        // Same as Firestore: many documents in one read, in the order asked.
+        getAll: async (...refs: FakeDoc[]) => {
+          if (wrote) throw new Error('Firestore transactions require all reads before writes');
+          refs.forEach((ref) => remember(ref.path));
+          return Promise.all(refs.map((ref) => ref.get()));
         },
         set: (ref: FakeDoc, data: Data, opts?: { merge?: boolean }) =>
           ((wrote = true), ops.push(() => this.write(ref.path, data, opts?.merge ? 'merge' : 'set')), tx),

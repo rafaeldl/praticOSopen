@@ -40,6 +40,8 @@ function route(fallback: string, handler: Handler) {
 }
 
 const param = (req: Request, name: string) => String(req.params[name]);
+/** A document id: never a path (an encoded "/" would point inside another document). */
+const docId = z.string().min(1).max(200).refine((value) => !value.includes('/'), 'Invalid id');
 const validationError = (res: Response, errors: string[]) =>
   res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: errors.join(', ') } });
 const notFound = (res: Response) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Item not found' } });
@@ -54,13 +56,22 @@ const customData = z
   .optional();
 const photo = z.object({ url: z.string().max(2000), storagePath: z.string().max(500) }).nullable().optional();
 const createSchema = z.object({ name, value: price.nullable().optional(), customData });
-const updateSchema = z.object({ name: name.optional(), value: price.nullable().optional(), customData, photo, version: z.string().min(1).max(64).optional() });
+const updateSchema = z
+  .object({ name: name.optional(), value: price.nullable().optional(), customData, photo, photoSeen: z.string().max(2000).nullable().optional(), version: z.string().min(1).max(64).optional() })
+  // Removing the photo says which photo the person saw (review M2); the version, when the item has one, is checked too.
+  .refine((value) => value.photo !== null || value.photoSeen !== undefined, 'Removing the photo needs photoSeen');
 const importSchema = z.object({
   importId: z.string().regex(/^[A-Za-z0-9-]{8,64}$/),
   items: z.array(z.object({ name, value: price.nullable().optional() })).min(1).max(500),
 });
+/** Up to 500: one transaction, so the batch is all or nothing. */
 const pricesSchema = z.object({
-  changes: z.array(z.object({ id: z.string().min(1).max(200), from: price.nullable(), to: price })).min(1).max(500),
+  batchId: z.string().regex(/^[A-Za-z0-9-]{8,64}$/).optional(),
+  changes: z
+    .array(z.object({ id: docId, from: price.nullable(), to: price }))
+    .min(1)
+    .max(500)
+    .refine((list) => new Set(list.map((change) => change.id)).size === list.length, 'Repeated id'),
 });
 
 export function catalogRoutes(kind: catalog.CatalogKind): Router {
@@ -74,6 +85,12 @@ export function catalogRoutes(kind: catalog.CatalogKind): Router {
     return false;
   }
   /** Any write that carries a price (also `null`) needs editPrices: without it the stored price is kept. */
+  /** Bad ids answer 400 before any read. */
+  function badId(req: Request, res: Response): boolean {
+    if (docId.safeParse(param(req, 'id')).success) return false;
+    validationError(res, ['Invalid id']);
+    return true;
+  }
   async function pricesAllowed(req: AuthenticatedRequest, res: Response, sendsPrice: boolean): Promise<boolean> {
     return !sendsPrice || allowed(req, res, 'editPrices');
   }
@@ -96,6 +113,12 @@ export function catalogRoutes(kind: catalog.CatalogKind): Router {
     if (!validation.success) return void validationError(res, validation.errors);
     const { importId, items } = validation.data;
     if (!(await pricesAllowed(req, res, items.some((item) => item.value !== undefined)))) return;
+    // The same importId with other content is another file: nothing is written.
+    const clashes = await catalog.importConflicts(companyId, kind, importId, items);
+    if (clashes.length) {
+      res.status(409).json({ success: false, error: { code: 'IMPORT_ID_CONFLICT', message: 'importId already used for other lines', lines: clashes } });
+      return;
+    }
     const createdBy = getUserAggr(req);
     const company = getCompanyAggr(req);
     let created = 0;
@@ -117,12 +140,12 @@ export function catalogRoutes(kind: catalog.CatalogKind): Router {
     if (!(await allowed(req, res, manage)) || !(await allowed(req, res, 'editPrices'))) return;
     const validation = validateInput(pricesSchema, req.body);
     if (!validation.success) return void validationError(res, validation.errors);
-    const result = await catalog.applyPrices(companyId, kind, validation.data.changes, getUserAggr(req));
+    const result = await catalog.applyPrices(companyId, kind, validation.data.changes, getUserAggr(req), validation.data.batchId);
     res.json({ success: true, data: result });
   }));
 
   router.get('/:id', route('Failed to get item', async (req, res, companyId) => {
-    if (!(await allowed(req, res, view))) return;
+    if (!(await allowed(req, res, view)) || badId(req, res)) return;
     const item = await catalog.catalogItem(companyId, kind, param(req, 'id'), await can(req, res, 'viewPrices'));
     if (!item) return void notFound(res);
     res.json({ success: true, data: item });
@@ -138,20 +161,20 @@ export function catalogRoutes(kind: catalog.CatalogKind): Router {
   }));
 
   router.patch('/:id', route('Failed to update item', async (req, res, companyId) => {
-    if (!(await allowed(req, res, manage))) return;
+    if (!(await allowed(req, res, manage)) || badId(req, res)) return;
     const validation = validateInput(updateSchema, req.body);
     if (!validation.success) return void validationError(res, validation.errors);
-    const { version, ...input } = validation.data;
+    const { version, photoSeen, ...input } = validation.data;
     if (!(await pricesAllowed(req, res, input.value !== undefined))) return;
     const id = param(req, 'id');
     if (input.photo && !catalog.validPhoto(companyId, kind, id, input.photo)) return void validationError(res, ['photo must be a file of this item']);
-    const updated = await catalog.updateItem(companyId, kind, id, input, getUserAggr(req), version);
+    const updated = await catalog.updateItem(companyId, kind, id, input, getUserAggr(req), version, photoSeen ?? undefined);
     if (updated === false) return void notFound(res);
     res.json({ success: true, data: { id, updated: true, version: updated } });
   }));
 
   router.delete('/:id', route('Failed to delete item', async (req, res, companyId) => {
-    if (!(await allowed(req, res, manage))) return;
+    if (!(await allowed(req, res, manage)) || badId(req, res)) return;
     if (!(await catalog.deleteItem(companyId, kind, param(req, 'id')))) return void notFound(res);
     res.json({ success: true, data: { id: param(req, 'id'), deleted: true } });
   }));

@@ -406,7 +406,7 @@ import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 import { globalErrorHandler } from './middleware/error-handler.middleware';
 import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
-import { API_CORS_OPTIONS, createAppLimiters } from './utils/app-rate-limit.utils';
+import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 
 // Routes - API Core v1
 import authRoutes from './routes/v1/auth.routes';
@@ -629,6 +629,8 @@ app.use('/v1/company', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, compan
 app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, analyticsRoutes);
 
 // Bearer token routes (for Flutter app)
+// Prices and customer data: never in the browser cache of a shared computer.
+app.use('/v1/app', noStore);
 // Single mount so the rate limit and token check run once per request.
 app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes);
 // Web app reads and writes of customers and devices (app-*.routes.ts) answer before the generic ones.

@@ -139,6 +139,20 @@ export function validPhoto(companyId: string, kind: CatalogKind, id: string, pho
   return isInsideFolder(photoFolder(companyId, kind, id), photo.storagePath) && storagePathOfUrl(photo.url) === photo.storagePath;
 }
 
+/**
+ * Deletes only the file the document pointed to, inside the item's folder. A
+ * photo the app uploaded meanwhile (same folder) is never taken along (review M2).
+ */
+async function deletePhotoFile(companyId: string, kind: CatalogKind, id: string, storedUrl: unknown): Promise<void> {
+  const path = typeof storedUrl === 'string' ? storagePathOfUrl(storedUrl) : null;
+  if (!path || !isInsideFolder(photoFolder(companyId, kind, id), path)) return;
+  try {
+    await storage.bucket().file(path).delete();
+  } catch (error) {
+    console.warn('catalog: photo file not deleted', (error as Error)?.name);
+  }
+}
+
 async function deletePhotos(companyId: string, kind: CatalogKind, id: string): Promise<void> {
   try {
     await storage.bucket().deleteFiles({ prefix: photoFolder(companyId, kind, id) });
@@ -195,20 +209,46 @@ export async function updateItem(
   input: CatalogInput,
   updatedBy: UserAggr,
   version?: string,
+  /** Removing the photo: the URL the person saw. The app changes the photo without touching updatedAt. */
+  photoSeen?: string,
 ): Promise<string | false> {
   const ref = collectionOf(companyId, kind).doc(id);
+  let removed: unknown = null;
   const result = await db.runTransaction(async (tx) => {
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) return false as const;
-    if (version !== undefined && !versionMatches(snapshot.data()?.updatedAt, version)) {
+    const current = snapshot.data() ?? {};
+    if (version !== undefined && !versionMatches(current.updatedAt, version)) {
       throw new OrderRuleError('CATALOG_ITEM_CHANGED', 409, 'The item changed since it was read');
     }
+    if (input.photo === null && (current.photo ?? null) !== (photoSeen ?? null)) {
+      throw new OrderRuleError('CATALOG_ITEM_CHANGED', 409, 'The photo changed since it was read');
+    }
+    removed = input.photo === null ? current.photo : null;
     const updatedAt = new Date().toISOString();
     tx.update(ref, { ...fields(input), updatedBy, updatedAt });
     return updatedAt;
   });
-  if (result && input.photo === null) await deletePhotos(companyId, kind, id);
+  if (result && removed) await deletePhotoFile(companyId, kind, id, removed);
   return result;
+}
+
+/**
+ * Lines of an import already saved under this importId with other content (an
+ * id reused for a different file): their positions. Same content is a repeat.
+ */
+export async function importConflicts(companyId: string, kind: CatalogKind, importId: string, items: { name: string; value?: number | null }[]): Promise<number[]> {
+  const collection = collectionOf(companyId, kind);
+  const snapshots = await db.getAll(...items.map((_, index) => collection.doc(`${importId}-${index}`)));
+  const out: number[] = [];
+  snapshots.forEach((snapshot, index) => {
+    if (!snapshot.exists) return;
+    const data = snapshot.data() ?? {};
+    const item = items[index] as { name: string; value?: number | null };
+    const sameValue = item.value === undefined || cents(money(data.value)) === cents(item.value === null ? null : roundCents(item.value));
+    if (data.name !== item.name || !sameValue) out.push(index);
+  });
+  return out;
 }
 
 /** Deletes the item and its photo. Orders keep their embedded copy, as in the app. */
@@ -235,11 +275,17 @@ export interface PriceChange {
  * value means someone changed it since: 409 with those ids and nothing written.
  * Compared in cents.
  */
-export async function applyPrices(companyId: string, kind: CatalogKind, changes: PriceChange[], updatedBy: UserAggr): Promise<{ updated: number; unchanged: number }> {
+export async function applyPrices(
+  companyId: string,
+  kind: CatalogKind,
+  changes: PriceChange[],
+  updatedBy: UserAggr,
+  batchId?: string,
+): Promise<{ updated: number; unchanged: number }> {
   const collection = collectionOf(companyId, kind);
   return db.runTransaction(async (tx) => {
-    const snapshots: FirebaseFirestore.DocumentSnapshot[] = [];
-    for (const change of changes) snapshots.push(await tx.get(collection.doc(change.id)));
+    // One read for the whole batch (up to 500): shorter transaction, fewer retries.
+    const snapshots = await tx.getAll(...changes.map((change) => collection.doc(change.id)));
     const conflicts: string[] = [];
     const writes: { ref: FirebaseFirestore.DocumentReference; value: number }[] = [];
     let unchanged = 0;
@@ -256,7 +302,7 @@ export async function applyPrices(companyId: string, kind: CatalogKind, changes:
       throw new OrderRuleError('CATALOG_ITEM_CHANGED', 409, 'Some prices changed since they were read', { ids: conflicts });
     }
     const updatedAt = new Date().toISOString();
-    for (const write of writes) tx.update(write.ref, { value: write.value, updatedBy, updatedAt });
+    for (const write of writes) tx.update(write.ref, { value: write.value, updatedBy, updatedAt, ...(batchId ? { priceBatchId: batchId } : {}) });
     return { updated: writes.length, unchanged };
   });
 }
