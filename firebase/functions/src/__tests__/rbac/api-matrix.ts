@@ -22,6 +22,8 @@ const MEMBERS: ApiRole[] = [...API_ROLES];
 const ADMINS: ApiRole[] = ['owner', 'admin'];
 const FINANCIAL: ApiRole[] = ['owner', 'admin', 'manager'];
 const SEE_ALL_ORDERS: ApiRole[] = ['owner', 'admin', 'manager', 'supervisor'];
+const RECEIVERS: ApiRole[] = ['owner', 'admin', 'manager', 'consultant'];
+const ASSIGNERS: ApiRole[] = ['owner', 'admin', 'supervisor'];
 
 export type CompanyKey = 'c1' | 'nofin';
 
@@ -30,7 +32,12 @@ export interface ApiCase {
   area: string;
   title: string;
   method: 'get' | 'post' | 'patch' | 'put' | 'delete';
-  /** Full path as mounted in index.ts. `o1` is an order created by someone else (not assigned). */
+  /**
+   * Full path as mounted in index.ts. `o1` is an approved order created by
+   * someone else (line `l1`, payment `t1`, discount `d1`), `quote_1` a quote
+   * of someone else without money, `done_1` a done order; `r1` a receipt of
+   * customer `cust1` registered by someone else (seeded in rbac-api.test.ts).
+   */
   path: string;
   body?: Record<string, unknown>;
   /** Company of the request (X-Company-ID). Default 'c1'. 'nofin' has useFinancial: false. */
@@ -49,14 +56,17 @@ const O = '/v1/app/orders';
 const CU = '/v1/app/customers';
 const NF = '/v1/app/nfse';
 
-const receipt = { receiptId: 'r1', paidAt: '2026-10-20', allocations: [{ orderId: 'o1', amount: 10 }] };
+const receipt = { receiptId: 'r9', paidAt: '2026-10-20', allocations: [{ orderId: 'o1', amount: 10 }] };
+const orderFile = { url: 'https://firebasestorage.googleapis.com/f', storagePath: 'tenants/c1/orders/o1/payments/t1/f.jpg', contentType: 'image/jpeg' };
+const receiptFile = { url: 'https://firebasestorage.googleapis.com/r', storagePath: 'tenants/c1/receipts/r1/f.pdf', contentType: 'application/pdf' };
 
 export const API_CASES: ApiCase[] = [
   // ─── OS ────────────────────────────────────────────────────────────────
   {
-    id: 'orders.list', area: 'OS', title: 'listar todas as OS (com total)',
+    // Consultant and technician get the orders they created (orders.routes.test.ts checks the filter).
+    id: 'orders.list', area: 'OS', title: 'listar OS (todas, ou as que criou)',
     method: 'get', path: O,
-    allow: SEE_ALL_ORDERS, permission: 'viewAllOrders',
+    allow: MEMBERS,
   },
   {
     id: 'orders.get.others', area: 'OS', title: 'abrir OS de outra pessoa (com valores)',
@@ -69,8 +79,38 @@ export const API_CASES: ApiCase[] = [
     allow: ['owner', 'admin', 'supervisor', 'consultant', 'technician'], permission: 'createOrder',
   },
   {
-    id: 'orders.update.others', area: 'OS', title: 'mudar situação/responsável de OS de outra pessoa',
-    method: 'patch', path: `${O}/o1`, body: { status: 'progress', assignedTo: 'tech1' },
+    id: 'orders.update.others', area: 'OS', title: 'mudar situação de OS de outra pessoa',
+    method: 'patch', path: `${O}/o1`, body: { status: 'progress' },
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.assign', area: 'OS', title: 'escolher o responsável da OS',
+    method: 'patch', path: `${O}/o1`, body: { assignedTo: 'tech1' },
+    allow: ASSIGNERS, permission: 'assignOrder',
+  },
+  {
+    id: 'orders.dates.approved', area: 'OS', title: 'mudar a data de OS aprovada de outra pessoa',
+    method: 'patch', path: `${O}/o1`, body: { scheduledDate: '2026-11-04T10:00:00.000Z' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.delete.quote', area: 'OS', title: 'apagar orçamento de outra pessoa sem dinheiro',
+    method: 'delete', path: `${O}/quote_1`,
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.delete.approved', area: 'OS', title: 'apagar OS aprovada com dinheiro',
+    method: 'delete', path: `${O}/o1`,
+    allow: ADMINS,
+  },
+  {
+    id: 'orders.hold.mark', area: 'OS', title: 'marcar OS como parada',
+    method: 'post', path: `${O}/o1/hold`, body: { reason: 'part' },
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.hold.resume', area: 'OS', title: 'retomar OS parada',
+    method: 'delete', path: `${O}/o1/hold`,
     allow: SEE_ALL_ORDERS,
   },
   {
@@ -114,14 +154,75 @@ export const API_CASES: ApiCase[] = [
     allow: FINANCIAL, permission: 'editPrices',
   },
   {
-    id: 'orders.payment', area: 'OS', title: 'lançar pagamento na OS',
-    method: 'post', path: `${O}/o1/payments`, body: { amount: 10 },
-    allow: FINANCIAL, permission: 'chargeOrder',
+    id: 'orders.items.add', area: 'OS', title: 'pôr item em OS aprovada',
+    method: 'post', path: `${O}/o1/items`, body: { kind: 'service', catalogId: 's1' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.items.price', area: 'OS', title: 'pôr item com valor próprio',
+    method: 'post', path: `${O}/o1/items`, body: { kind: 'product', catalogId: 'p1', quantity: 1, value: 5 },
+    allow: FINANCIAL, permission: 'editPrices',
+  },
+  {
+    id: 'orders.items.note', area: 'OS', title: 'mudar a observação de item de OS aprovada',
+    method: 'patch', path: `${O}/o1/items/l1`, body: { description: 'Com cera' },
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.items.editPrice', area: 'OS', title: 'mudar o valor de um item',
+    method: 'patch', path: `${O}/o1/items/l1`, body: { value: 90 },
+    allow: FINANCIAL, permission: 'editPrices',
+  },
+  {
+    id: 'orders.items.remove', area: 'OS', title: 'tirar item de OS aprovada',
+    method: 'delete', path: `${O}/o1/items/l1`,
+    allow: FINANCIAL,
+  },
+  {
+    // Who receives: financial access, or the consultant on their own order (canReceiveOnOrder).
+    id: 'orders.payment', area: 'OS', title: 'lançar pagamento na OS de outra pessoa',
+    method: 'post', path: `${O}/o1/payments`, body: { amount: 10, paymentMethod: 'pix', receiptFile: orderFile },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.payment.remove', area: 'OS', title: 'tirar pagamento da OS',
+    method: 'delete', path: `${O}/o1/payments/t1`,
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.payment.markPaid', area: 'OS', title: 'marcar a OS como paga',
+    method: 'post', path: `${O}/o1/payments/mark-paid`, body: {},
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.payment.reset', area: 'OS', title: 'zerar pagamentos da OS',
+    method: 'post', path: `${O}/o1/payments/reset`, body: {},
+    allow: FINANCIAL, permission: 'viewFinancialReports',
+  },
+  {
+    id: 'orders.payment.receipt', area: 'OS', title: 'anexar comprovante ao pagamento',
+    method: 'put', path: `${O}/o1/payments/t1/receipt`, body: { receiptFile: orderFile },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.payment.receiptRemove', area: 'OS', title: 'tirar comprovante do pagamento',
+    method: 'delete', path: `${O}/o1/payments/t1/receipt`,
+    allow: FINANCIAL,
   },
   {
     id: 'orders.discount', area: 'OS', title: 'dar desconto na OS',
-    method: 'post', path: `${O}/o1/payments`, body: { amount: 10, type: 'discount' },
-    allow: FINANCIAL, permission: 'chargeOrder',
+    method: 'post', path: `${O}/o1/discounts`, body: { amount: 10 },
+    allow: FINANCIAL, permission: 'viewFinancialReports',
+  },
+  {
+    id: 'orders.discount.remove', area: 'OS', title: 'tirar um desconto da OS',
+    method: 'delete', path: `${O}/o1/discounts/d1`,
+    allow: FINANCIAL, permission: 'viewFinancialReports',
+  },
+  {
+    id: 'orders.discount.removeAll', area: 'OS', title: 'tirar todo o desconto da OS',
+    method: 'delete', path: `${O}/o1/discounts`,
+    allow: FINANCIAL, permission: 'viewFinancialReports',
   },
 
   // ─── Link do cliente ───────────────────────────────────────────────────
@@ -172,7 +273,28 @@ export const API_CASES: ApiCase[] = [
   {
     id: 'customers.openOrders', area: 'Financeiro', title: 'ver OS em aberto do cliente para receber',
     method: 'get', path: `${CU}/cust1/open-orders`,
-    allow: ['owner', 'admin', 'manager', 'consultant'],
+    allow: RECEIVERS,
+  },
+  {
+    // The consultant sees only the receipts they registered (orders.routes.test.ts).
+    id: 'customers.receipts.list', area: 'Financeiro', title: 'ver recibos do cliente',
+    method: 'get', path: `${CU}/cust1/receipts`,
+    allow: RECEIVERS,
+  },
+  {
+    id: 'customers.receipts.cancel', area: 'Financeiro', title: 'desfazer recibo de outra pessoa',
+    method: 'post', path: `${CU}/cust1/receipts/r1/cancel`, body: {},
+    allow: FINANCIAL,
+  },
+  {
+    id: 'customers.receipts.file', area: 'Financeiro', title: 'anexar comprovante ao recibo de outra pessoa',
+    method: 'put', path: `${CU}/cust1/receipts/r1/file`, body: { receiptFile },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'customers.receipts.fileRemove', area: 'Financeiro', title: 'tirar comprovante do recibo de outra pessoa',
+    method: 'delete', path: `${CU}/cust1/receipts/r1/file`,
+    allow: FINANCIAL,
   },
   {
     id: 'nfse.invoice.preview', area: 'Cobrança', title: 'prévia da nota fiscal',
@@ -214,6 +336,26 @@ export const API_CASES: ApiCase[] = [
   {
     id: 'nofin.customers.receipt', area: 'Sem valores', title: 'registrar recebimento com valores desligados',
     method: 'post', path: `${CU}/cust1/receipts`, body: receipt, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.orders.discount', area: 'Sem valores', title: 'dar desconto com valores desligados',
+    method: 'post', path: `${O}/o1/discounts`, body: { amount: 10 }, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.orders.markPaid', area: 'Sem valores', title: 'marcar como paga com valores desligados',
+    method: 'post', path: `${O}/o1/payments/mark-paid`, body: {}, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.orders.price', area: 'Sem valores', title: 'pôr item com valor próprio com valores desligados',
+    method: 'post', path: `${O}/o1/items`, body: { kind: 'service', catalogId: 's1', value: 5 }, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.customers.receipts', area: 'Sem valores', title: 'ver recibos com valores desligados',
+    method: 'get', path: `${CU}/cust1/receipts`, company: 'nofin',
     allow: [],
   },
 

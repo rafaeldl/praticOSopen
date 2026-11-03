@@ -1,0 +1,34 @@
+/**
+ * Refusals of the order write rules, mapped to HTTP by the routes
+ * (routes/v1/orders.routes.ts `sendOrderError`). Thrown inside Firestore
+ * transactions, so nothing is written when one is raised.
+ */
+export type OrderErrorCode =
+  | 'INSUFFICIENT_PERMISSIONS'
+  | 'VALIDATION_ERROR'
+  | 'NOT_FOUND'
+  | 'ORDER_CHANGED'
+  | 'ITEM_NOT_FOUND'
+  | 'TRANSACTION_NOT_FOUND'
+  | 'ASAAS_LOCKED'
+  | 'RECEIPT_SHARE'
+  | 'INVALID_DEVICE'
+  | 'INVALID_ASSIGNEE'
+  | 'INVALID_CURSOR'
+  | 'UNSUPPORTED_QUERY'
+  | 'HOLD_NOT_ALLOWED';
+
+export class OrderRuleError extends Error {
+  constructor(
+    readonly code: OrderErrorCode,
+    readonly httpStatus: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'OrderRuleError';
+  }
+}
+
+export function forbiddenOrder(message = 'Not allowed on this order'): OrderRuleError {
+  return new OrderRuleError('INSUFFICIENT_PERMISSIONS', 403, message);
+}

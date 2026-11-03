@@ -55,9 +55,8 @@ function asaasCustomerMapRef(companyId: string, customerId: string) {
     .doc(customerId);
 }
 
-export function roundMoney(value: number): number {
-  return Math.round(value * 100) / 100;
-}
+import { roundMoney } from '../../utils/money';
+export { roundMoney };
 
 /** YYYY-MM-DD of `now` in America/Sao_Paulo */
 export function todayInSaoPaulo(now: Date = new Date()): string {

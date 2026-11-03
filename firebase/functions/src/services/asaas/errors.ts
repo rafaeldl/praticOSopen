@@ -46,7 +46,11 @@ export type AsaasErrorCode =
   | 'INVOICE_NOT_CANCELABLE'
   | 'CANCEL_NOT_SUPPORTED'
   | 'INVALID_EFFECTIVE_DATE'
-  | 'INVALID_FISCAL_INFO';
+  | 'INVALID_FISCAL_INFO'
+  | 'RECEIPT_NOT_FOUND'
+  | 'RECEIPT_CANCELED'
+  | 'ASAAS_LOCKED'
+  | 'FORBIDDEN';
 
 const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   ASAAS_NOT_ENABLED: 403,
@@ -90,6 +94,10 @@ const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   CANCEL_NOT_SUPPORTED: 409,
   INVALID_EFFECTIVE_DATE: 400,
   INVALID_FISCAL_INFO: 400,
+  RECEIPT_NOT_FOUND: 404,
+  RECEIPT_CANCELED: 409,
+  ASAAS_LOCKED: 409,
+  FORBIDDEN: 403,
 };
 
 export class AsaasServiceError extends Error {

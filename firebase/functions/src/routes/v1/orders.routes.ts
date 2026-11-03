@@ -1,541 +1,541 @@
 /**
- * Orders Routes
- * CRUD endpoints for order management
+ * Orders Routes (/v1/orders with an API key, /v1/app/orders with a Firebase
+ * ID token). The web app writes money, status and items here, so there is a
+ * single version of the rules (docs/WEB_API.md):
+ *
+ * - every write that reads the order runs in a Firestore transaction and the
+ *   permission is checked again on the fresh order (`guard`);
+ * - totals are computed here from the items; a client never sends one;
+ * - `expectedUpdatedAt` (optional) refuses a write over a newer save (409);
+ * - responses carry no money for who lacks `viewPrices` (order-projection.ts).
+ *
+ * The Flutter app does not call these routes (only `share` and `charges`,
+ * mounted next to them), so they can change without breaking installed apps.
  */
 
-import { Router, Response } from 'express';
-import { AuthenticatedRequest, OrderStatus } from '../../models/types';
+import { Router, Request, Response } from 'express';
+import { AuthenticatedRequest, Order, OrderStatus } from '../../models/types';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import {
   can,
+  canChangeOrderHold,
   canChangeOrderStatus,
   canCreateOrderWithStatus,
+  canDeleteOrder,
+  canEditOrderMainFields,
+  canGiveDiscount,
+  canReceiveOnOrder,
+  canRemoveOrderHold,
+  canSeeOrder,
+  companyUsesFinancial,
   forbidden,
-  requireAppPermission,
   requireOrderAccess,
-  requireOrderItemsEditable,
 } from '../../middleware/app-permission.middleware';
 import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
+import * as financeService from '../../services/order-finance.service';
+import * as catalogService from '../../services/catalog.service';
+import { deleteOrder } from '../../services/order-delete.service';
+import { removeOrderHold, setOrderHold } from '../../services/order-hold.service';
+import { memberAggr } from '../../services/membership.service';
+import { projectOrder, projectOrderSummary } from '../../services/order-projection';
+import { forbiddenOrder, OrderRuleError } from '../../services/order-errors';
+import { toHttpError } from '../../services/asaas/errors';
 import {
   validateInput,
   createOrderSchema,
   updateOrderSchema,
   addOrderServiceSchema,
   addOrderProductSchema,
-  addPaymentSchema,
-  paginationSchema,
+  addOrderItemSchema,
+  updateOrderItemSchema,
+  receivePaymentSchema,
+  discountSchema,
+  markPaidSchema,
+  orderHoldSchema,
+  receiptFileSchema,
+  listOrdersQuerySchema,
 } from '../../utils/validation.utils';
-import { timestampToDate } from '../../utils/date.utils';
+import { z } from 'zod';
 
 const router: Router = Router();
 
-/**
- * GET /api/v1/orders
- * List orders with optional filtering
- */
-router.get('/', requireAppPermission('viewAllOrders'), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
+// ============================================================================
+// Helpers
+// ============================================================================
+
+type Handler = (req: AuthenticatedRequest, res: Response, companyId: string) => Promise<void>;
+
+/** Company from the auth context, errors in the API format. */
+function route(fallback: string, handler: Handler) {
+  return async (req: Request, res: Response): Promise<void> => {
+    const authReq = req as AuthenticatedRequest;
+    const companyId = authReq.auth?.companyId ?? authReq.userContext?.companyId;
     if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context required' } });
       return;
     }
+    try {
+      await handler(authReq, res, companyId);
+    } catch (error) {
+      sendOrderError(res, error, fallback);
+    }
+  };
+}
 
-    // Validate pagination params
-    const paginationResult = validateInput(paginationSchema, req.query);
-    const pagination = paginationResult.success ? paginationResult.data : { limit: 20, offset: 0 };
-
-    const showPrices = await can(req, res, 'viewPrices');
-    const result = await orderService.listOrders(companyId, {
-      status: req.query.status as OrderStatus,
-      customerId: req.query.customerId as string,
-      deviceId: req.query.deviceId as string,
-      assignedTo: req.query.assignedTo as string,
-      startDate: req.query.startDate as string,
-      endDate: req.query.endDate as string,
-      limit: pagination.limit,
-      offset: pagination.offset,
-    });
-
-    res.json({
-      success: true,
-      data: result.data.map((o) => ({
-        id: o.id,
-        number: o.number,
-        customer: o.customer,
-        device: o.device,
-        status: o.status,
-        total: showPrices ? o.total : undefined,
-        dueDate: timestampToDate(o.dueDate)?.toISOString(),
-        createdAt: timestampToDate(o.createdAt)?.toISOString(),
-      })),
-      pagination: {
-        total: result.total,
-        limit: pagination.limit,
-        offset: pagination.offset,
-        hasMore: result.hasMore,
-      },
-    });
-  } catch (error) {
-    console.error('List orders error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to list orders' },
-    });
+export function sendOrderError(res: Response, error: unknown, fallback: string): void {
+  if (error instanceof OrderRuleError) {
+    res.status(error.httpStatus).json({ success: false, error: { code: error.code, message: error.message } });
+    return;
   }
-});
+  const http = toHttpError(error, fallback);
+  if (http.status === 500) console.error(`${fallback}:`, (error as Error)?.name, (error as Error)?.message);
+  res.status(http.status).json(http.body);
+}
+
+function param(req: Request, name: string): string {
+  const raw = req.params[name];
+  return String(Array.isArray(raw) ? raw[0] : raw);
+}
+
+function notFound(res: Response, message = 'Order not found'): void {
+  res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message } });
+}
+
+function validationError(res: Response, errors: string[]): void {
+  res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: errors.join(', ') } });
+}
+
+/** Body, or the query string for DELETE (some proxies drop a DELETE body). */
+function expectedUpdatedAtOf(req: Request): string | undefined {
+  const raw = (req.body as { expectedUpdatedAt?: unknown } | undefined)?.expectedUpdatedAt ?? req.query.expectedUpdatedAt;
+  if (raw === undefined) return undefined;
+  const parsed = z.string().datetime({ offset: true }).safeParse(raw);
+  if (!parsed.success) throw new OrderRuleError('VALIDATION_ERROR', 400, 'expectedUpdatedAt must be an ISO date-time');
+  return parsed.data;
+}
+
+const showPricesOf = (req: AuthenticatedRequest, res: Response) => can(req, res, 'viewPrices');
+
+/** Guard: the user sees the order (same as firestore.rules read). */
+const seeGuard = (req: AuthenticatedRequest) => (order: Order) => {
+  if (!canSeeOrder(req, order)) throw forbiddenOrder();
+};
+
+/** Guard: items and main fields (supervisor and technician only on quotes). */
+const mainFieldsGuard = (req: AuthenticatedRequest) => (order: Order) => {
+  if (!canEditOrderMainFields(req, order)) throw forbiddenOrder();
+};
+
+/** Guard: register money received ("Receber"). */
+async function receiveGuard(req: AuthenticatedRequest, res: Response) {
+  const useFinancial = await companyUsesFinancial(req, res);
+  return (order: Order) => {
+    if (!canReceiveOnOrder(req, order, useFinancial)) throw forbiddenOrder('Not allowed to receive on this order');
+  };
+}
+
+/** Guard: discounts and money of others (financial access) on an order the user sees. */
+async function financialGuard(req: AuthenticatedRequest, res: Response) {
+  const allowed = canGiveDiscount(req, await companyUsesFinancial(req, res));
+  return (order: Order) => {
+    if (!allowed || !canSeeOrder(req, order)) throw forbiddenOrder('Financial access is required');
+  };
+}
+
+async function sendOrder(req: AuthenticatedRequest, res: Response, order: Order, extra: Record<string, unknown> = {}, status = 200) {
+  res.status(status).json({ success: true, data: { ...extra, order: projectOrder(order, await showPricesOf(req, res)) } });
+}
+
+// ============================================================================
+// Read
+// ============================================================================
 
 /**
- * GET /api/v1/orders/:id
- * Get a single order by ID
+ * GET /orders
+ * Every order for who has `viewAllOrders`; consultant and technician get the
+ * ones they created (same as firestore.rules). Cursor pagination.
  */
-router.get('/:id', requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
+router.get('/', route('Failed to list orders', async (req, res, companyId) => {
+  const seesAll = await can(req, res, 'viewAllOrders');
+  const seesOwn = (await can(req, res, 'viewOwnOrders')) || (await can(req, res, 'viewAssignedOrders'));
+  if (!seesAll && !seesOwn) return forbidden(res, 'Not allowed to list orders');
+
+  const validation = validateInput(listOrdersQuerySchema, req.query);
+  if (!validation.success) return validationError(res, validation.errors);
+  const query = validation.data;
+
+  const showPrices = await showPricesOf(req, res);
+  const result = await orderService.listOrders(companyId, {
+    status: query.status as OrderStatus[] | undefined,
+    customerId: query.customerId,
+    deviceId: query.deviceId,
+    assignedTo: query.assignedTo,
+    createdById: seesAll ? undefined : req.userContext?.userId,
+    startDate: query.startDate,
+    endDate: query.endDate,
+    limit: query.limit,
+    offset: query.offset,
+    cursor: query.cursor,
+    sort: query.sort,
+    direction: query.direction,
+  });
+
+  res.json({
+    success: true,
+    data: result.data.map((o) => projectOrderSummary(o, showPrices)),
+    pagination: {
+      limit: query.limit,
+      ...(query.offset !== undefined ? { offset: query.offset } : {}),
+      ...(result.total !== undefined ? { total: result.total } : {}),
+      hasMore: result.hasMore,
+      nextCursor: result.nextCursor ?? null,
+    },
+  });
+}));
+
+/** GET /orders/:id */
+router.get('/:id', requireOrderAccess(), route('Failed to get order', async (req, res, companyId) => {
+  const order = await orderService.getOrder(companyId, param(req, 'id'));
+  if (!order) return notFound(res);
+  res.json({ success: true, data: projectOrder(order, await showPricesOf(req, res)) });
+}));
+
+// ============================================================================
+// Create, update, delete
+// ============================================================================
+
+/** POST /orders */
+router.post('/', route('Failed to create order', async (req, res, companyId) => {
+  if (!(await can(req, res, 'createOrder'))) return forbidden(res, "Permission 'createOrder' is required");
+
+  const validation = validateInput(createOrderSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+
+  if (!canCreateOrderWithStatus(req, validation.data.status ?? 'quote')) {
+    return forbidden(res, 'Status not allowed on a new order');
+  }
+  const ownPrice = [...(validation.data.services ?? []), ...(validation.data.products ?? [])]
+    .some((item) => item.value !== undefined || ('total' in item && item.total !== undefined));
+  if (ownPrice && !(await can(req, res, 'editPrices'))) return forbidden(res, "Permission 'editPrices' is required");
+
+  const { customerId, deviceId, deviceIds, ...orderData } = validation.data;
+  const customer = await customerService.getCustomer(companyId, customerId);
+  if (!customer) return notFound(res, 'Customer not found');
+
+  const ids = [...new Set([...(deviceId ? [deviceId] : []), ...(deviceIds ?? [])])];
+  const devices = [];
+  for (const id of ids) {
+    const device = await deviceService.getDevice(companyId, id);
+    if (!device) return notFound(res, 'Device not found');
+    devices.push(deviceService.toDeviceAggr(device));
+  }
+
+  const result = await orderService.createOrder(
+    companyId,
+    {
+      ...orderData,
+      customerId,
+      customer: customerService.toCustomerAggr(customer),
+      deviceId: devices[0]?.id,
+      device: devices[0],
+      devices,
+    },
+    getUserAggr(req),
+    getCompanyAggr(req),
+  );
+
+  res.status(201).json({ success: true, data: { id: result.id, number: result.number, status: result.status } });
+}));
+
+/**
+ * PATCH /orders/:id
+ * Status (flow per role), dates (main fields: supervisor and technician only
+ * on quotes), assignee (`assignOrder`, name taken from the member).
+ */
+router.patch('/:id', requireOrderAccess(), route('Failed to update order', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const validation = validateInput(updateOrderSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const { status, dueDate, scheduledDate, assignedTo, expectedUpdatedAt } = validation.data;
+
+  let assignee: { id: string; name: string } | null | undefined;
+  if (assignedTo !== undefined) {
+    if (!(await can(req, res, 'assignOrder'))) return forbidden(res, "Permission 'assignOrder' is required");
+    assignee = assignedTo === null ? null : await memberAggr(companyId, assignedTo);
+    if (assignee === null && assignedTo !== null) {
+      throw new OrderRuleError('INVALID_ASSIGNEE', 400, 'The assignee is not a member of the company');
     }
+  }
 
-    const order = await orderService.getOrder(companyId, String(req.params.id));
-
-    if (!order) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Order not found' },
-      });
-      return;
-    }
-
-    // Without viewPrices (technician, supervisor, or values turned off) no amounts
-    const showPrices = await can(req, res, 'viewPrices');
-    const remainingBalance = showPrices ? orderService.calculateRemainingBalance(order) : undefined;
-    const withoutValue = <T extends object>(items: T[] | undefined, aggr: 'service' | 'product') =>
-      showPrices ? items : items?.map((item) => {
-        const copy = { ...item } as Record<string, unknown>;
-        delete copy.value;
-        if (copy[aggr]) {
-          const inner = { ...(copy[aggr] as Record<string, unknown>) };
-          delete inner.value;
-          copy[aggr] = inner;
+  const updated = await orderService.updateOrder(
+    companyId,
+    param(req, 'id'),
+    { status, dueDate, scheduledDate, assignedTo: assignee },
+    getUserAggr(req),
+    {
+      expectedUpdatedAt,
+      guard: (order) => {
+        if (!canSeeOrder(req, order)) throw forbiddenOrder();
+        if (status !== undefined && !canChangeOrderStatus(req, order, status)) throw forbiddenOrder('Status change not allowed');
+        if ((dueDate !== undefined || scheduledDate !== undefined) && !canEditOrderMainFields(req, order)) {
+          throw forbiddenOrder('Dates of this order cannot be changed');
         }
-        return copy;
-      });
-
-    res.json({
-      success: true,
-      data: {
-        id: order.id,
-        number: order.number,
-        customer: order.customer,
-        device: order.device,
-        services: withoutValue(order.services, 'service'),
-        products: withoutValue(order.products, 'product'),
-        status: order.status,
-        total: showPrices ? order.total : undefined,
-        discount: showPrices ? order.discount : undefined,
-        paidAmount: showPrices ? order.paidAmount : undefined,
-        remainingBalance,
-        dueDate: timestampToDate(order.dueDate)?.toISOString(),
-        createdAt: timestampToDate(order.createdAt)?.toISOString(),
-        updatedAt: timestampToDate(order.updatedAt)?.toISOString(),
       },
-    });
-  } catch (error) {
-    console.error('Get order error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to get order' },
-    });
-  }
-});
+    },
+  );
+  if (!updated) return notFound(res);
+  await sendOrder(req, res, updated, { id: updated.id, updated: true });
+}));
 
 /**
- * POST /api/v1/orders
- * Create a new order
+ * DELETE /orders/:id
+ * Same rule as firestore.rules (contract order-delete.json); see order-delete.service.
  */
-router.post('/', requireAppPermission('createOrder'), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
-    }
+router.delete('/:id', requireOrderAccess(), route('Failed to delete order', async (req, res, companyId) => {
+  const id = param(req, 'id');
+  const deleted = await deleteOrder(companyId, id, (order) => {
+    if (!canDeleteOrder(req, order)) throw forbiddenOrder('Not allowed to delete this order');
+  });
+  if (!deleted) return notFound(res);
+  res.json({ success: true, data: { id, deleted: true } });
+}));
 
-    // Validate input
-    const validation = validateInput(createOrderSchema, req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
-        },
-      });
-      return;
-    }
+// ============================================================================
+// Items
+// ============================================================================
 
-    if (!canCreateOrderWithStatus(req, validation.data.status ?? 'quote')) {
-      forbidden(res, 'Status not allowed on a new order');
-      return;
-    }
-
-    const { customerId, deviceId, ...orderData } = validation.data;
-
-    // Get customer
-    const customer = await customerService.getCustomer(companyId, customerId);
-    if (!customer) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Customer not found' },
-      });
-      return;
-    }
-
-    // Get device if provided
-    let device = null;
-    if (deviceId) {
-      device = await deviceService.getDevice(companyId, deviceId);
-      if (!device) {
-        res.status(404).json({
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Device not found' },
-        });
-        return;
-      }
-    }
-
-    const createdBy = getUserAggr(req);
-    const company = getCompanyAggr(req);
-
-    const result = await orderService.createOrder(
-      companyId,
-      {
-        ...orderData,
-        customerId,
-        customer: customerService.toCustomerAggr(customer),
-        deviceId,
-        device: device ? deviceService.toDeviceAggr(device) : undefined,
-      },
-      createdBy,
-      company
-    );
-
-    res.status(201).json({
-      success: true,
-      data: {
-        id: result.id,
-        number: result.number,
-        status: result.status,
-      },
-    });
-  } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to create order' },
-    });
+/** POST /orders/:id/items: a service or product of the catalog. */
+router.post('/:id/items', requireOrderAccess(), route('Failed to add item', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const validation = validateInput(addOrderItemSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const item = validation.data;
+  if ((item.value !== undefined || item.total !== undefined) && !(await can(req, res, 'editPrices'))) {
+    return forbidden(res, "Permission 'editPrices' is required");
   }
-});
+  const catalog = item.kind === 'service'
+    ? await catalogService.getService(companyId, item.catalogId)
+    : await catalogService.getProduct(companyId, item.catalogId);
+  if (!catalog) return notFound(res, 'Catalog item not found');
+
+  const result = await orderService.addOrderItem(
+    companyId,
+    param(req, 'id'),
+    { kind: item.kind, catalog, value: item.value, quantity: item.quantity, total: item.total, description: item.description, deviceId: item.deviceId },
+    getUserAggr(req),
+    { guard: mainFieldsGuard(req), expectedUpdatedAt: item.expectedUpdatedAt },
+  );
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order, { itemId: result.itemId }, 201);
+}));
 
 /**
- * PATCH /api/v1/orders/:id
- * Update an existing order
+ * PATCH /orders/:id/items/:itemId. Only the description: who sees the order
+ * (supervisor and technician keep notes after approval). Anything else: main
+ * fields. Own value or line total: `editPrices`.
  */
-router.patch('/:id', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
-    }
-
-    // Validate input
-    const validation = validateInput(updateOrderSchema, req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
-        },
-      });
-      return;
-    }
-
-    if (validation.data.status !== undefined) {
-      const order = await orderService.getOrder(companyId, String(req.params.id));
-      if (order && !canChangeOrderStatus(req, order, validation.data.status)) {
-        forbidden(res, 'Status change not allowed');
-        return;
-      }
-    }
-
-    const updatedBy = getUserAggr(req);
-
-    // Transform assignedTo string to UserAggr if provided
-    const updateInput: orderService.UpdateOrderInput = {
-      status: validation.data.status,
-      dueDate: validation.data.dueDate,
-      scheduledDate: validation.data.scheduledDate,
-    };
-    if (validation.data.assignedTo) {
-      // Note: In a real implementation, we would look up the user to get the full UserAggr
-      // For now, we create a minimal UserAggr from the ID
-      updateInput.assignedTo = {
-        id: validation.data.assignedTo,
-        name: '', // Would be resolved from user document
-      };
-    }
-
-    const updated = await orderService.updateOrder(
-      companyId,
-      String(req.params.id),
-      updateInput,
-      updatedBy
-    );
-
-    if (!updated) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Order not found' },
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: {
-        id: req.params.id,
-        updated: true,
-      },
-    });
-  } catch (error) {
-    console.error('Update order error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to update order' },
-    });
+router.patch('/:id/items/:itemId', requireOrderAccess(), route('Failed to update item', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const validation = validateInput(updateOrderItemSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const { expectedUpdatedAt, ...patch } = validation.data;
+  if ((patch.value !== undefined || patch.total !== undefined) && !(await can(req, res, 'editPrices'))) {
+    return forbidden(res, "Permission 'editPrices' is required");
   }
-});
+  const onlyNotes = Object.keys(patch).every((key) => key === 'description');
+  const result = await orderService.updateOrderItem(companyId, param(req, 'id'), param(req, 'itemId'), patch, getUserAggr(req), {
+    guard: onlyNotes ? seeGuard(req) : mainFieldsGuard(req),
+    expectedUpdatedAt,
+  });
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order, { itemId: result.itemId });
+}));
+
+/** DELETE /orders/:id/items/:itemId */
+router.delete('/:id/items/:itemId', requireOrderAccess(), route('Failed to remove item', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const result = await orderService.removeOrderItem(companyId, param(req, 'id'), param(req, 'itemId'), getUserAggr(req), {
+    guard: mainFieldsGuard(req),
+    expectedUpdatedAt: expectedUpdatedAtOf(req),
+  });
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order, { itemId: result.itemId });
+}));
 
 /**
- * POST /api/v1/orders/:id/services
- * Add a service to an order
+ * POST /orders/:id/services (bot, MCP and integrations): same rules as
+ * POST /:id/items, answer kept as `{success, newTotal}`.
  */
-router.post('/:id/services', requireAppPermission('editOrder'), requireOrderAccess(), requireOrderItemsEditable(), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
-    }
-
-    // Validate input
-    const validation = validateInput(addOrderServiceSchema, req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
-        },
-      });
-      return;
-    }
-
-    // Without editPrices the catalog price is used: no value of one's own
-    if (validation.data.value !== undefined && !(await can(req, res, 'editPrices'))) {
-      forbidden(res, "Permission 'editPrices' is required");
-      return;
-    }
-
-    const updatedBy = getUserAggr(req);
-
-    const result = await orderService.addOrderService(
-      companyId,
-      String(req.params.id),
-      validation.data.serviceId,
-      validation.data.value,
-      validation.data.description,
-      updatedBy
-    );
-
-    if (!result.success) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Order or service not found' },
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: {
-        success: true,
-        newTotal: result.newTotal,
-      },
-    });
-  } catch (error) {
-    console.error('Add service error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to add service' },
-    });
+router.post('/:id/services', requireOrderAccess(), route('Failed to add service', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const validation = validateInput(addOrderServiceSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  if (validation.data.value !== undefined && !(await can(req, res, 'editPrices'))) {
+    return forbidden(res, "Permission 'editPrices' is required");
   }
-});
+  const result = await orderService.addOrderService(
+    companyId, param(req, 'id'), validation.data.serviceId, validation.data.value, validation.data.description, getUserAggr(req),
+    { deviceId: validation.data.deviceId, guard: mainFieldsGuard(req) },
+  );
+  if (!result.success) return notFound(res, 'Order or service not found');
+  const showPrices = await showPricesOf(req, res);
+  res.json({ success: true, data: { success: true, ...(showPrices ? { newTotal: result.newTotal } : {}), itemId: result.itemId } });
+}));
+
+/** POST /orders/:id/products (bot, MCP and integrations). */
+router.post('/:id/products', requireOrderAccess(), route('Failed to add product', async (req, res, companyId) => {
+  if (!(await can(req, res, 'editOrder'))) return forbidden(res, "Permission 'editOrder' is required");
+  const validation = validateInput(addOrderProductSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const data = validation.data;
+  if ((data.value !== undefined || data.total !== undefined) && !(await can(req, res, 'editPrices'))) {
+    return forbidden(res, "Permission 'editPrices' is required");
+  }
+  const result = await orderService.addOrderProduct(
+    companyId, param(req, 'id'), data.productId, data.quantity, data.value, data.description, getUserAggr(req),
+    { total: data.total, deviceId: data.deviceId, guard: mainFieldsGuard(req) },
+  );
+  if (!result.success) return notFound(res, 'Order or product not found');
+  const showPrices = await showPricesOf(req, res);
+  res.json({ success: true, data: { success: true, ...(showPrices ? { newTotal: result.newTotal } : {}), itemId: result.itemId } });
+}));
+
+// ============================================================================
+// Money
+// ============================================================================
 
 /**
- * POST /api/v1/orders/:id/products
- * Add a product to an order
+ * POST /orders/:id/payments: money received, with when, how and the proof.
+ * Who: canReceiveOnOrder (financial access, or the consultant on their own order).
  */
-router.post('/:id/products', requireAppPermission('editOrder'), requireOrderAccess(), requireOrderItemsEditable(), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
-    }
-
-    // Validate input
-    const validation = validateInput(addOrderProductSchema, req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
-        },
-      });
-      return;
-    }
-
-    if (validation.data.value !== undefined && !(await can(req, res, 'editPrices'))) {
-      forbidden(res, "Permission 'editPrices' is required");
-      return;
-    }
-
-    const updatedBy = getUserAggr(req);
-
-    const result = await orderService.addOrderProduct(
-      companyId,
-      String(req.params.id),
-      validation.data.productId,
-      validation.data.quantity,
-      validation.data.value,
-      validation.data.description,
-      updatedBy
-    );
-
-    if (!result.success) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Order or product not found' },
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: {
-        success: true,
-        newTotal: result.newTotal,
-      },
-    });
-  } catch (error) {
-    console.error('Add product error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to add product' },
-    });
+router.post('/:id/payments', requireOrderAccess(), route('Failed to add payment', async (req, res, companyId) => {
+  const validation = validateInput(receivePaymentSchema, req.body);
+  if (!validation.success) {
+    const discount = (req.body as { type?: unknown } | undefined)?.type === 'discount';
+    return validationError(res, discount ? ['type: a discount goes to POST /:id/discounts'] : validation.errors);
   }
-});
+  const data = validation.data;
+  const guard = await receiveGuard(req, res);
+  const result = await orderService.addPayment(companyId, param(req, 'id'), data.amount, 'payment', data.description, getUserAggr(req), {
+    guard, paidAt: data.paidAt, paymentMethod: data.paymentMethod, receiptFile: data.receiptFile,
+  });
+  if (!result) return notFound(res);
+  const { order, ...summary } = result;
+  await sendOrder(req, res, order, summary);
+}));
+
+/** POST /orders/:id/payments/mark-paid: books what is left and marks it paid. */
+router.post('/:id/payments/mark-paid', requireOrderAccess(), route('Failed to mark as paid', async (req, res, companyId) => {
+  const validation = validateInput(markPaidSchema, req.body ?? {});
+  if (!validation.success) return validationError(res, validation.errors);
+  const result = await financeService.markOrderPaid(companyId, param(req, 'id'), validation.data, getUserAggr(req), {
+    guard: await receiveGuard(req, res),
+  });
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order, { transactionId: result.transactionId });
+}));
 
 /**
- * POST /api/v1/orders/:id/payments
- * Add a payment or discount to an order
+ * POST /orders/:id/payments/reset: removes every manual payment and discount
+ * (Asaas payments stay). It also removes discounts, so financial access.
  */
-router.post('/:id/payments', requireAppPermission('chargeOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const companyId = req.auth?.companyId;
-    if (!companyId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
-      });
-      return;
-    }
+router.post('/:id/payments/reset', requireOrderAccess(), route('Failed to reset payments', async (req, res, companyId) => {
+  const result = await financeService.resetOrderPayments(companyId, param(req, 'id'), getUserAggr(req), {
+    guard: await financialGuard(req, res),
+  });
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
 
-    // Validate input
-    const validation = validateInput(addPaymentSchema, req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
-        },
-      });
-      return;
-    }
+/** DELETE /orders/:id/payments/:transactionId (not Asaas, not a share of a receipt). */
+router.delete('/:id/payments/:transactionId', requireOrderAccess(), route('Failed to remove payment', async (req, res, companyId) => {
+  const result = await financeService.removeOrderTransaction(
+    companyId, param(req, 'id'), param(req, 'transactionId'), 'payment', getUserAggr(req), { guard: await receiveGuard(req, res) },
+  );
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
 
-    const createdBy = getUserAggr(req);
+/** PUT /orders/:id/payments/:transactionId/receipt: attaches (or replaces) the proof. */
+router.put('/:id/payments/:transactionId/receipt', requireOrderAccess(), route('Failed to attach receipt', async (req, res, companyId) => {
+  const validation = validateInput(z.object({ receiptFile: receiptFileSchema }), req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const result = await financeService.setTransactionReceipt(
+    companyId, param(req, 'id'), param(req, 'transactionId'), validation.data.receiptFile, getUserAggr(req),
+    { guard: await receiveGuard(req, res) },
+  );
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
 
-    const result = await orderService.addPayment(
-      companyId,
-      String(req.params.id),
-      validation.data.amount,
-      validation.data.type || 'payment',
-      validation.data.description,
-      createdBy
-    );
+/** DELETE /orders/:id/payments/:transactionId/receipt */
+router.delete('/:id/payments/:transactionId/receipt', requireOrderAccess(), route('Failed to remove receipt', async (req, res, companyId) => {
+  const result = await financeService.setTransactionReceipt(
+    companyId, param(req, 'id'), param(req, 'transactionId'), null, getUserAggr(req), { guard: await receiveGuard(req, res) },
+  );
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
 
-    if (!result) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Order not found' },
-      });
-      return;
-    }
+/** POST /orders/:id/discounts: financial access only, never above what is left. */
+router.post('/:id/discounts', requireOrderAccess(), route('Failed to add discount', async (req, res, companyId) => {
+  const validation = validateInput(discountSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const result = await orderService.addPayment(
+    companyId, param(req, 'id'), validation.data.amount, 'discount', validation.data.description, getUserAggr(req),
+    { guard: await financialGuard(req, res) },
+  );
+  if (!result) return notFound(res);
+  const { order, ...summary } = result;
+  await sendOrder(req, res, order, summary);
+}));
 
-    res.json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    if (error instanceof orderService.PaymentValidationError) {
-      res.status(400).json({
-        success: false,
-        error: { code: 'VALIDATION_ERROR', message: error.message },
-      });
-      return;
-    }
-    console.error('Add payment error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to add payment' },
-    });
-  }
-});
+/** DELETE /orders/:id/discounts: every discount (also one set without a transaction). */
+router.delete('/:id/discounts', requireOrderAccess(), route('Failed to remove discounts', async (req, res, companyId) => {
+  const result = await financeService.removeOrderDiscounts(companyId, param(req, 'id'), getUserAggr(req), {
+    guard: await financialGuard(req, res),
+  });
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
+
+/** DELETE /orders/:id/discounts/:transactionId */
+router.delete('/:id/discounts/:transactionId', requireOrderAccess(), route('Failed to remove discount', async (req, res, companyId) => {
+  const result = await financeService.removeOrderTransaction(
+    companyId, param(req, 'id'), param(req, 'transactionId'), 'discount', getUserAggr(req), { guard: await financialGuard(req, res) },
+  );
+  if (!result) return notFound(res);
+  await sendOrder(req, res, result.order);
+}));
+
+// ============================================================================
+// On hold ("parada")
+// ============================================================================
+
+/** POST /orders/:id/hold: marks (or changes the reason). Not the consultant; only approved/progress. */
+router.post('/:id/hold', requireOrderAccess(), route('Failed to mark on hold', async (req, res, companyId) => {
+  const validation = validateInput(orderHoldSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const order = await setOrderHold(companyId, param(req, 'id'), validation.data, getUserAggr(req), {
+    guard: (fresh) => {
+      if (!canChangeOrderHold(req, fresh)) throw forbiddenOrder('Not allowed to mark this order on hold');
+    },
+  });
+  if (!order) return notFound(res);
+  await sendOrder(req, res, order);
+}));
+
+/** DELETE /orders/:id/hold: resumes; without a mark it changes nothing. */
+router.delete('/:id/hold', requireOrderAccess(), route('Failed to resume', async (req, res, companyId) => {
+  const order = await removeOrderHold(companyId, param(req, 'id'), getUserAggr(req), {
+    guard: (fresh) => {
+      if (!canRemoveOrderHold(req, fresh)) throw forbiddenOrder('Not allowed to resume this order');
+    },
+  });
+  if (!order) return notFound(res);
+  await sendOrder(req, res, order);
+}));
 
 export default router;

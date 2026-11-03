@@ -83,6 +83,18 @@ export async function verifyMembership(
 }
 
 /**
+ * `{id, name}` of a member of the company (owner included), with the name
+ * from the user's own document, or null when `uid` is not a member. Used to
+ * assign an order: the name never comes from the client.
+ */
+export async function memberAggr(companyId: string, uid: string): Promise<{ id: string; name: string } | null> {
+  if (!(await verifyMembership(uid, companyId))) return null;
+  const user = await db.collection('users').doc(uid).get();
+  const name = user.data()?.name;
+  return { id: uid, name: typeof name === 'string' && name.trim() ? name.trim() : '' };
+}
+
+/**
  * Verifies every entry of a user's `companies` array and returns only the
  * memberships confirmed by server-side data, in the user's order, without
  * duplicates. Unconfirmed entries are dropped and logged (identifiers only).

@@ -15,7 +15,8 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest, OrderStatus } from '../../models/types';
+import { AuthenticatedRequest, OrderProduct, OrderService, OrderStatus } from '../../models/types';
+import { computeOrderTotal } from '../../services/order-items';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import {
@@ -253,7 +254,6 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       // Replace services if provided
       if (orderServices.length > 0) {
         const resolvedServices = [];
-        let servicesTotal = 0;
         for (const s of orderServices) {
           const svc = await catalogService.getService(companyId, s.serviceId);
           if (svc) {
@@ -263,22 +263,21 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
               description: s.description || svc.name,
               value,
             });
-            servicesTotal += value;
           }
         }
         updatePayload.services = resolvedServices;
 
-        // Recalculate total
-        const existingProductsTotal = (existingOrder.products || []).reduce(
-          (sum: number, p: { value?: number; quantity?: number }) => sum + (p.value || 0) * (p.quantity || 1), 0
-        );
-        updatePayload.total = servicesTotal + existingProductsTotal;
+        // Recalculate total from the items (line totals, discount, never below 0)
+        updatePayload.total = computeOrderTotal({
+          services: resolvedServices as OrderService[],
+          products: existingOrder.products,
+          discount: existingOrder.discount,
+        });
       }
 
       // Replace products if provided
       if (orderProducts.length > 0) {
         const resolvedProducts = [];
-        let productsTotal = 0;
         for (const p of orderProducts) {
           const prod = await catalogService.getProduct(companyId, p.productId);
           if (prod) {
@@ -290,16 +289,16 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
               value,
               quantity,
             });
-            productsTotal += value * quantity;
           }
         }
         updatePayload.products = resolvedProducts;
 
         // Recalculate total (use updated services if both changed)
-        const svcTotal = updatePayload.services
-          ? (updatePayload.services as Array<{ value: number }>).reduce((sum, s) => sum + s.value, 0)
-          : (existingOrder.services || []).reduce((sum: number, s: { value?: number }) => sum + (s.value || 0), 0);
-        updatePayload.total = svcTotal + productsTotal;
+        updatePayload.total = computeOrderTotal({
+          services: (updatePayload.services as OrderService[] | undefined) ?? existingOrder.services,
+          products: resolvedProducts as OrderProduct[],
+          discount: existingOrder.discount,
+        });
       }
 
       if (data.status) {

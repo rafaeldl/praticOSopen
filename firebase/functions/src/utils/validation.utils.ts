@@ -93,42 +93,142 @@ export const updateProductSchema = z.object({
   value: z.number().min(0).optional(),
 });
 
+/** ISO date-time with zone (what GET returns in `updatedAt`, `dueDate`...). */
+const isoDateTime = z.string().datetime({ offset: true });
+/** Money sent by a client: never negative, cents. */
+const moneySchema = z.number().min(0).max(1_000_000_000);
+/** The app decodes quantity as an int: a fraction would break old versions. */
+const quantitySchema = z.number().int().min(1).max(100_000);
+const ORDER_STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
+export const paymentMethodSchema = z.enum(['pix', 'cash', 'card', 'other']);
+
+export const receiptFileSchema = z.object({
+  url: z.string().url().max(2048),
+  storagePath: z.string().max(512),
+  fileName: z.string().max(256).optional(),
+  contentType: z.string().max(100),
+});
+
 export const createOrderSchema = z.object({
   customerId: idSchema,
   deviceId: idSchema.optional(),
+  deviceIds: z.array(idSchema).max(50).optional(),
   services: z.array(z.object({
     serviceId: idSchema,
-    value: z.number().min(0).optional(),
+    value: moneySchema.nullable().optional(),
     description: z.string().max(500).optional(),
-  })).optional(),
+  })).max(200).optional(),
   products: z.array(z.object({
     productId: idSchema,
-    quantity: z.number().min(1),
-    value: z.number().min(0).optional(),
+    quantity: quantitySchema,
+    value: moneySchema.nullable().optional(),
+    total: moneySchema.nullable().optional(),
     description: z.string().max(500).optional(),
-  })).optional(),
-  dueDate: z.string().datetime().optional(),
-  status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).default('quote'),
-});
-
-export const updateOrderSchema = z.object({
-  status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
+  })).max(200).optional(),
   dueDate: z.string().datetime().optional(),
   scheduledDate: z.string().datetime().optional(),
-  assignedTo: idSchema.optional(),
+  status: z.enum(ORDER_STATUSES).default('quote'),
+});
+
+/** PATCH /:id. null clears a date or the assignee. */
+export const updateOrderSchema = z.object({
+  status: z.enum(ORDER_STATUSES).optional(),
+  dueDate: isoDateTime.nullable().optional(),
+  scheduledDate: isoDateTime.nullable().optional(),
+  assignedTo: idSchema.nullable().optional(),
+  expectedUpdatedAt: isoDateTime.optional(),
 });
 
 export const addOrderServiceSchema = z.object({
   serviceId: idSchema,
-  value: z.number().min(0).optional(),
+  value: moneySchema.nullable().optional(),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
 });
 
 export const addOrderProductSchema = z.object({
   productId: idSchema,
-  quantity: z.number().min(1),
-  value: z.number().min(0).optional(),
+  quantity: quantitySchema,
+  value: moneySchema.nullable().optional(),
+  total: moneySchema.nullable().optional(),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
+});
+
+/** POST /:id/items: a service or product from the catalog. */
+export const addOrderItemSchema = z.object({
+  kind: z.enum(['service', 'product']),
+  catalogId: idSchema,
+  description: z.string().max(500).optional(),
+  value: moneySchema.nullable().optional(),
+  quantity: quantitySchema.optional(),
+  total: moneySchema.nullable().optional(),
+  deviceId: idSchema.nullable().optional(),
+  expectedUpdatedAt: isoDateTime.optional(),
+}).refine((item) => item.kind === 'product' || (item.quantity === undefined && item.total === undefined), {
+  message: 'A service has no quantity or line total',
+  path: ['kind'],
+});
+
+/** PATCH /:id/items/:itemId: only what changes. */
+export const updateOrderItemSchema = z.object({
+  description: z.string().max(500).optional(),
+  value: moneySchema.nullable().optional(),
+  quantity: quantitySchema.optional(),
+  total: moneySchema.nullable().optional(),
+  deviceId: idSchema.nullable().optional(),
+  expectedUpdatedAt: isoDateTime.optional(),
+}).refine((patch) => ['description', 'value', 'quantity', 'total', 'deviceId'].some((key) => key in patch), {
+  message: 'Nothing to change',
+});
+
+/** POST /:id/payments: money received. A discount has its own route. */
+export const receivePaymentSchema = z.object({
+  amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
+  description: z.string().max(500).optional(),
+  type: z.literal('payment').optional(),
+  paidAt: z.string().min(10).max(40).optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+  receiptFile: receiptFileSchema.optional(),
+});
+
+/** POST /:id/discounts */
+export const discountSchema = z.object({
+  amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
+  description: z.string().max(500).optional(),
+});
+
+/** POST /:id/payments/mark-paid */
+export const markPaidSchema = z.object({
+  description: z.string().max(500).optional(),
+  paidAt: z.string().min(10).max(40).optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+});
+
+/** POST /:id/hold */
+export const orderHoldSchema = z.object({
+  reason: z.enum(['part', 'customer', 'authorization', 'other']),
+  note: z.string().max(500).optional(),
+});
+
+/** GET /orders query string. */
+export const listOrdersQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).max(10_000).optional(),
+  cursor: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).optional(),
+  status: z.string().max(200).optional()
+    .transform((value) => (value ? value.split(',').map((s) => s.trim()).filter(Boolean) : undefined))
+    .pipe(z.array(z.enum(ORDER_STATUSES)).min(1).max(5).optional()),
+  sort: z.enum(['createdAt', 'updatedAt', 'dueDate', 'scheduledDate', 'number']).default('createdAt'),
+  direction: z.enum(['asc', 'desc']).optional(),
+  customerId: idSchema.optional(),
+  deviceId: idSchema.optional(),
+  assignedTo: idSchema.optional(),
+  startDate: z.string().datetime({ offset: true }).optional(),
+  endDate: z.string().datetime({ offset: true }).optional(),
+}).refine((q) => q.sort === 'createdAt' || (!q.startDate && !q.endDate), {
+  message: 'startDate/endDate filter createdAt: sort by createdAt',
+  path: ['sort'],
 });
 
 export const addPaymentSchema = z.object({
@@ -357,7 +457,7 @@ export const updateFormStatusSchema = z.object({
  * Validate and parse input with Zod schema
  */
 export function validateInput<T>(
-  schema: z.ZodType<T>,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   data: unknown
 ): { success: true; data: T } | { success: false; errors: string[] } {
   const result = schema.safeParse(data);
