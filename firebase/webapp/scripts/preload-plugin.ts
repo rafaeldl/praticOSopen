@@ -23,6 +23,13 @@ function chunkFiles(bundle: Record<string, ChunkLike>, test: (id: string) => boo
   return [...found]
 }
 
+/** Someone with a saved session gets Firestore (and the list, on /app/orders) preloaded. */
+export const PRELOAD_SCRIPT =
+  "try{if(Object.keys(localStorage).some(function(k){return k.indexOf('firebase:authUser:')===0})){" +
+  "var m=function(n){var e=document.querySelector('meta[name=\"'+n+'\"]');return e&&e.content?e.content.split(' '):[]};" +
+  "var f=m('praticos-preload-session');if(/^\\/app\\/orders\\/?$/.test(location.pathname))f=f.concat(m('praticos-preload-orders'));" +
+  "f.forEach(function(h){var l=document.createElement('link');l.rel='modulepreload';l.href=h;document.head.appendChild(l)})}}catch(e){}"
+
 export function preloadCritical(base: string): Plugin {
   return {
     name: 'praticos-preload-critical',
@@ -42,16 +49,17 @@ export function preloadCritical(base: string): Plugin {
         const list = chunkFiles(bundle, (id) => id.endsWith('/views/OrdersView.vue')).filter(
           (file) => !skip.has(file) && !always.includes(file) && !session.includes(file),
         )
-        const script = `try{if(Object.keys(localStorage).some(function(k){return k.indexOf('firebase:authUser:')===0})){var f=${JSON.stringify(
-          session.map(url),
-        )};if(/^\\/app\\/orders\\/?$/.test(location.pathname))f=f.concat(${JSON.stringify(list.map(url))});f.forEach(function(h){var l=document.createElement('link');l.rel='modulepreload';l.href=h;document.head.appendChild(l)})}}catch(e){}`
+        // The script is the same on every build (its CSP hash is in firebase.json);
+        // the file names travel in meta tags.
         return [
           ...always.map((file) => ({
             tag: 'link',
             attrs: { rel: 'modulepreload', crossorigin: '', href: url(file) },
             injectTo: 'head' as const,
           })),
-          { tag: 'script', children: script, injectTo: 'head' as const },
+          { tag: 'meta', attrs: { name: 'praticos-preload-session', content: session.map(url).join(' ') }, injectTo: 'head' as const },
+          { tag: 'meta', attrs: { name: 'praticos-preload-orders', content: list.map(url).join(' ') }, injectTo: 'head' as const },
+          { tag: 'script', children: PRELOAD_SCRIPT, injectTo: 'head' as const },
         ]
       },
     },

@@ -5,6 +5,8 @@ on:
     paths:
       - 'firebase/webapp/**'
       - 'firebase/firebase.e2e.json'
+      - 'firebase/firebase.json'
+      - 'firebase/functions/src/routes/v1/web-access.routes.ts'
       - 'firebase/hosting/src/css/tokens.css'
       - 'docs/web-app/contract-cases/**'
       - 'lib/l10n/*.arb'
@@ -34,6 +36,7 @@ jobs:
           cache-dependency-path: |
             firebase/webapp/package-lock.json
             firebase/functions/package-lock.json
+            firebase/hosting/package-lock.json
 
       - name: Setup Java (Firebase emulators)
         uses: actions/setup-java@v5
@@ -76,6 +79,12 @@ jobs:
 
       - name: Lighthouse
         run: npm run lhci
+
+      - name: Hosting emulator (/app rewrites, headers, CSP, site unchanged)
+        run: |
+          (cd ../hosting && npm ci && npm run build)
+          npm run build:hosting
+          npm run check:hosting
 
       - name: Keep E2E traces
         if: failure()

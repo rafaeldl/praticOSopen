@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { PASSWORD, USERS } from './fixtures.mjs'
 import { chooseCompany, login } from './helpers'
 
@@ -78,27 +78,35 @@ test('esqueceu a senha manda o e-mail pelo Auth', async ({ page }) => {
   await expect(page.getByText('E-mail enviado. Verifique sua caixa de entrada para redefinir sua senha.')).toBeVisible()
 })
 
+/** The Auth emulator's sign-in page. Its form appears after its own script runs, so retry the click. */
+async function signInOnEmulatorPopup(popup: Page, email: string) {
+  await popup.waitForLoadState('domcontentloaded')
+  const add = popup.getByText('Add new account')
+  const field = popup.getByLabel('Email')
+  await expect(async () => {
+    if (await add.isVisible()) await add.click()
+    await expect(field).toBeVisible({ timeout: 1000 })
+  }).toPass({ timeout: 20_000 })
+  await field.fill(email)
+  await popup.getByRole('button', { name: /Sign in with/ }).click()
+}
+
 test('Google pelo popup do emulador cria a conta e cai na lista de acesso', async ({ page }) => {
+  test.setTimeout(60_000)
   await page.goto('login')
   const popupPromise = page.waitForEvent('popup')
   await page.getByRole('button', { name: 'Continuar com Google' }).click()
-  const popup = await popupPromise
-  await popup.getByText('Add new account').click()
-  await popup.getByLabel('Email').fill('novo-google@praticos.test')
-  await popup.getByLabel('Display name').fill('Pessoa Nova')
-  await popup.getByRole('button', { name: /Sign in with Google/ }).click()
+  await signInOnEmulatorPopup(await popupPromise, 'novo-google@praticos.test')
   await expect(page.getByRole('heading', { level: 1, name: /ainda não foi liberado/ })).toBeVisible()
   await expect(page.locator('.shell')).toHaveCount(0)
 })
 
 test('Apple pelo popup do emulador', async ({ page }) => {
+  test.setTimeout(60_000)
   await page.goto('login')
   const popupPromise = page.waitForEvent('popup')
   await page.getByRole('button', { name: 'Continuar com Apple' }).click()
-  const popup = await popupPromise
-  await popup.getByText('Add new account').click()
-  await popup.getByLabel('Email').fill('novo-apple@praticos.test')
-  await popup.getByRole('button', { name: /Sign in with/ }).click()
+  await signInOnEmulatorPopup(await popupPromise, 'novo-apple@praticos.test')
   await expect(page.getByRole('heading', { level: 1, name: /ainda não foi liberado/ })).toBeVisible()
 })
 
