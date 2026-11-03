@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: base pronta para publicar, fechada por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base e o esqueleto da lista de OS. O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base e a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -43,9 +43,10 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 
 | Operação | Caminho |
 |---|---|
-| Sessão, empresa, listas de quem vê valores | Firestore direto |
-| Quem não tem `viewPrices` | Projeção da API (ainda não existe; a lista mostra aviso) |
-| Dinheiro, status, itens | API, ver pré-requisitos no ADR |
+| Sessão, empresa, lista e OS de quem vê valores | Firestore direto, com `onSnapshot` |
+| Lista e OS de quem não tem `viewPrices` | Projeção da API (`GET /v1/app/orders`, `/:id`), sem nenhum valor |
+| Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
+| Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Cache persistente fica desligado, porque o computador da oficina é compartilhado.
 
@@ -111,6 +112,28 @@ npm run webapp:access -- --open --project <projeto>     # abre para todos
 ### Moeda e datas
 
 `lib/format.ts` usa o **país da empresa**, não o idioma. Uma OS brasileira aberta em inglês continua em R$ e com vírgula. `parseMoney` lê o que foi digitado: `150` é 150, nunca 1,50.
+
+### Ordens de serviço
+
+Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/orders-model.test.ts`) e `src/components/orders/`.
+
+**Início (`/`, também `/orders`).** É a lista de OS, como no app. Filtros do app: Em aberto, Orçamentos, Paradas, Concluídas e Todas; o técnico vê Minhas, Paradas e Todas e abre em Minhas. Orçamentos, Paradas e Minhas filtram as OS abertas no navegador, como o app. A ordem de Em aberto é atrasadas (promessa mais antiga primeiro), de hoje e o resto. "Atrasada" compara por dia, na lista e na OS (`isOverdue`, contrato `overdue.json`). A frase de resumo aparece só com a lista toda carregada. A linha mostra aparelho e serviços, situação com entrega e visita, parada com motivo e dias, valor e "falta receber". Todas é separada por mês. Filtro, busca e OS aberta ficam na URL (`?f=`, `?q=`, `?order=`). A busca procura nas OS carregadas (número, cliente, situação, aparelho, placa, sem acento); "Buscar nas mais antigas" pede o número ao Firestore e as páginas seguintes. A lista se atualiza sozinha: as 30 primeiras linhas por `onSnapshot`, e o que muda no painel, na Nova OS ou no lote atualiza a linha no lugar (`lib/orders/bus.ts`), sem perder página nem rolagem.
+
+**Quadro.** Aba da lista (`?view=board`). Mover o cartão arrastando, pelo botão "…" ou com Shift e seta. Só oferece o que o papel permite.
+
+**Lote.** Selecionar linhas troca a barra de filtros pelas ações: mudar a situação (só as que todas as selecionadas aceitam) e responsável. Cada OS vai pela API; o que o servidor recusa é contado no aviso.
+
+**Nova OS.** `N`, a paleta ou o "+" da barra no celular. Técnico e gerente não criam (o app tira o técnico em `canCreateOrder`, apesar da matriz de permissões). Cliente, aparelho (o único do cliente entra sozinho; os que ele já trouxe aparecem primeiro), itens com o preço do catálogo, entrega, pedido do cliente e "Mais opções" (situação inicial sem "cancelada", visita, responsável). `Ctrl/⌘ Enter` salva de qualquer campo. Fechar com algo preenchido pergunta (Esc, X, Voltar e recarregar). O pedido do cliente vira o primeiro comentário interno, como no app. As listas são lidas enquanto a pessoa olha a lista, para a gaveta abrir pronta.
+
+**Tela da OS.** Cabeçalho com cliente, aparelho, situação e uma frase (prazo, atraso ou "Falta receber"), o botão azul do próximo passo (aprovar, começar, marcar como pronta, retomar, receber) e "Marcar como parada". Itens agrupados por aparelho, com mudar e tirar; tirar oferece Desfazer. Totais só para quem vê valores. Fotos (escolher, colar, arrastar), comentários com "só a equipe" ou "cliente também vê", Detalhes (entrega, visita, responsável, local). Menu "…" só com o que a OS e o papel permitem, destrutivas por último e com confirmação. Teclas: `A`, `S`, `C`, `D`, `R`. "Imprimir ou salvar PDF" usa uma folha própria de impressão. OS apagada ou sem acesso mostra "não está mais aqui", nunca uma OS vazia.
+
+**Gravações.** `expectedUpdatedAt` vai em situação, datas, responsável e itens; um `409 ORDER_CHANGED` mostra o aviso e a versão nova. Pagamento e desconto levam `clientTransactionId` gerado ao abrir o diálogo, então repetir não grava em dobro. Itens lidos do Firestore recebem o mesmo id derivado que o servidor calcula (`lib/orders/line-ids.ts`, igual a `locateLines`). As escritas do painel entram em fila: uma segunda espera a primeira, nunca some.
+
+**Assistente.** Barra "Peça ao assistente" no pé da OS, só para quem edita os itens e com `GET /v1/app/ai/status` ligado. Põe na OS os itens do catálogo que entendeu (`POST /v1/app/ai/order-assist` e depois `POST /items`), marca com ✦ e oferece Desfazer. No E2E a resposta do modelo é simulada com `page.route`.
+
+**Textos.** Os textos usados só por `src/components/orders/` vão para `generated/i18n/{pt,en,es}-orders.json`, baixados junto com o painel (`loadOrderTexts`), fora do primeiro download.
+
+**Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts` e `e2e/order-detail.spec.ts`, contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
 
 ### Histórico do navegador
 
@@ -206,6 +229,8 @@ Na 1ª visita, o tempo se divide assim:
 - até `session:auth`: cerca de 830 ms, entre download, execução com CPU 4x e início do Auth;
 - usuário, empresa e lista no Firestore: cerca de 520 ms, quase todo em idas e voltas da conexão.
 
+Com a fatia de OS (filtro Em aberto por padrão, consulta por `status in`), medido em 2026-11-03: **1.379 ms** na 1ª visita e **501 ms** na volta.
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -252,5 +277,8 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- Lista de OS é esqueleto: sem filtros, valores, paginação nem tempo real.
-- Quem não vê valores ainda não tem lista: depende da projeção da API.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, mandar ao cliente (link), nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- Item avulso ("Usar X nesta OS") não existe: `POST /items` exige item do catálogo.
+- O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
+- Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
+- Orçamento do primeiro download quase no limite: 239,6 de 240 KB.

@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 667 linhas, 561 capacidades de usuário e 106 de lógica ou componente; 60 exceções propostas, nenhuma aprovada.
+# Contagem: 671 linhas, 565 capacidades de usuário e 106 de lógica ou componente; 60 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -945,7 +945,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   permission: viewAllOrders
   note: "Consultor e técnico só com filtro createdBy.id; sem filtro a consulta é negada."
@@ -962,7 +963,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.list.customer-filter-clear
   screen: lib/screens/menu_navigation/home.dart
@@ -992,7 +994,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.profile.open
   screen: lib/screens/menu_navigation/home.dart
@@ -1052,7 +1055,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.list.reload-on-return
   screen: lib/screens/menu_navigation/home.dart
@@ -1067,7 +1071,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Volta da OS e o + ao lado das abas (ordersChanged) recarregam. Não copiar: o app recarrega do zero e perde página e rolagem; no web, manter a posição e só atualizar a OS mexida."
 - id: home.filter.open
@@ -1083,7 +1088,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.filter.quotes
   screen: lib/screens/menu_navigation/home_content.dart
@@ -1098,7 +1104,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Mais antigos primeiro. Filtra no cliente sobre as OS abertas."
 - id: home.filter.on-hold
@@ -1114,7 +1121,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Paradas há mais tempo primeiro. Filtra no cliente sobre as OS abertas."
 - id: home.filter.mine
@@ -1130,7 +1138,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Filtra por assignedTo só dentro das OS que o técnico criou. Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela."
 - id: home.filter.done
@@ -1146,7 +1155,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Técnico tem só Minhas, Paradas e Todas."
 - id: home.filter.all
@@ -1162,7 +1172,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Agrupa por mês de criação na ordem que chegou; OS sem data de criação ficam no fim, sem título."
 - id: home.filter.scroll
@@ -1194,7 +1205,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Campo sempre visível. Ignora maiúscula e acento. Busca só nas OS já carregadas."
 - id: home.search.older
@@ -1210,7 +1222,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Não aparece em Concluídas, Orçamentos e Paradas nem com filtro de cliente."
 - id: home.summary.count
@@ -1226,7 +1239,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Só com a lista aberta toda carregada (sem mais páginas), sem filtro de cliente e com itens; não aparece em Concluídas e Todas."
 - id: home.next.card
@@ -1258,7 +1272,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   permission: viewPrices
   note: "Total em qualquer situação, inclusive orçamento. No app depende só de viewPrices, sem useFinancial; a flag é requisito do web."
@@ -1275,7 +1290,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Atraso comparado por dia."
 - id: home.row.visit
@@ -1291,7 +1307,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Situação · entrega dd/mm · visita dd/mm; entrega e visita só em OS não finalizada. Atrasada troca pelo atraso."
 - id: home.row.hold
@@ -1307,7 +1324,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.empty.first-run
   screen: lib/screens/menu_navigation/home_content.dart
@@ -1368,7 +1386,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Título por filtro (nada com você, nenhuma em aberto, nenhum orçamento esperando, nenhuma parada, nada nesta lista). Primeira vez (home.empty.first-run) só quando a empresa nunca criou OS (consulta 1 OS); nunca em Concluídas, Orçamentos, Paradas, com erro de carga nem com filtro de cliente; desconhecido conta como tem OS."
 - id: home.row.remaining
@@ -1384,7 +1403,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   permission: viewPrices
   note: "Só status done, total > 0 e saldo acima de 0,009; valor não quebra no meio. No app depende só de viewPrices, sem useFinancial; a flag é requisito do web."
@@ -1401,9 +1421,44 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Aparelho só quando o segmento mostra aparelho na lista (showDeviceInOrderList); vários viram Nome +N. Depois os nomes dos serviços."
+- id: home.row.status-line
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver situação com entrega e visita na linha"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["status_labels"]
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  web_exception: null
+  note: "'Situação · entrega dd/mm · visita dd/mm' só em OS não finalizada; atrasada troca tudo pelo atraso."
+- id: home.all.month-sections
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver Todas separada por mês de criação"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  web_exception: null
+  note: "OS sem data de criação ficam no fim, sem título."
 - id: home.notifications.badge
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1591,7 +1646,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: home.whatsapp.link-sheet
   screen: lib/screens/menu_navigation/widgets/link_whatsapp_sheet.dart
@@ -1621,7 +1677,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Consultor e técnico só em OS que criaram (createdBy.id). Também abre por número (order.number sem id). Argumentos: scrollToComments, commentId (destaque), addChecklist, previousTitle."
 - id: order.route.new
@@ -1637,7 +1694,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Ouvindo: vem de order.ai.intro-try. Preenchimento traz cliente, aparelhos e serviços. Depois do ✓ roda order.new.after-save sem segurar o retorno. Técnico fora (canCreateOrder): o + ao lado das abas, Abrir OS da manutenção e a apresentação da IA checam. Não copiar: o + de Contratos e o + de Em qual OS? (arquivo recebido de outro app) abrem a Nova OS sem checar canCreateOrder."
@@ -1654,7 +1712,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
 - id: order.new.add-device
@@ -1670,7 +1729,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
 - id: order.new.add-item
@@ -1686,7 +1746,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Item entra com o preço do catálogo (vazio fica sem valor) e quantidade 1; com 2+ aparelhos pergunta para qual antes de entrar. Não copiar: preço, sem valor e total da Nova OS dependem só de viewPrices, sem useFinancial."
@@ -1703,7 +1764,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "O cartão aparece em todo segmento. Com service_order.observation grava no campo; sem ele vira o primeiro comentário interno depois que a OS ganha id. Não copiar: o pedido sem campo fica escondido nos comentários; dar lugar próprio."
@@ -1720,7 +1782,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
 - id: order.new.more-options
@@ -1736,10 +1799,29 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/memberships"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Situação sempre; Visita com useScheduling; Responsável e Local sem checar permissão nem fieldService (no … da OS salva o Local exige fieldService). Fechado, mostra o resumo do que já foi definido (situação se não é orçamento, visita, responsável, local, repetição) ou uma dica. Situação inicial segue getAvailableStatuses como criador; concluída no ✓ puxa a oferta de próxima manutenção. Não copiar: consultor consegue criar OS já cancelada."
+- id: order.new.status-pick
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Escolher a situação inicial da Nova OS"
+  kind: picker
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: ["status_labels"]
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
+  web_exception: null
+  permission: createOrder
+  note: "getAvailableStatuses como criador. Não copiar: consultor cria OS já cancelada; o web nunca oferece cancelada na criação."
 - id: order.new.repeat
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1770,7 +1852,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484). O ✓ fica cinza até ter cliente e enquanto a IA lê; nunca espera campo obrigatório do segmento. Não copiar: o app grava sem esperar e engole a falha (sem error nem denied na tela); o web mostra os dois."
@@ -1787,7 +1870,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "O X fecha direto quando nada foi preenchido e pergunta quando há cliente, aparelho, item, foto ou texto do pedido. Não copiar: voltar do Android com só o pedido digitado fecha sem perguntar; no web, beforeunload e voltar do navegador contam o texto."
@@ -1853,7 +1937,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Consultor e técnico só em OS que criaram (createdBy.id). OS parada mostra motivo, dias e observação, e o botão azul vira Retomar serviço. Ao abrir busca a OS de novo; se falhar ou não achar, mostra o que veio da lista (ou OS vazia com só o id). Seção de itens some sem item quando o papel não edita. Prévia dos comentários: os 2 últimos, sem os apagados, com Ver todos. not_found é requisito só do web. Não copiar: OS apagada ou sem acesso abre vazia e editável."
 - id: order.detail.title
@@ -1869,7 +1954,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Título curto OS 186 quando o rótulo do segmento é o padrão; segmento que renomeia mantém o nome. Sem cliente, o topo mostra o nome que o segmento dá à OS; linha do aparelho nome · série."
 - id: order.detail.back
@@ -1885,7 +1971,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.detail.next-approve
   screen: lib/screens/order/order_screen_v2.dart
@@ -1900,7 +1987,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Supervisor e técnico só se forem o criador; consultor só a partir de quote."
@@ -1917,7 +2005,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: executeOrder
 - id: order.detail.next-finish
@@ -1933,7 +2022,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: executeOrder
   note: "Com checklist pendente abre order.status.pending-checklist. Espera o servidor por até 3 s: se recusar, a situação volta e aparece aviso; sem resposta, segue. Depois vem device.maintenance.offer."
@@ -1950,7 +2040,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "canChangeOrderHold: só approved e progress, com acesso à OS; consultor não. Mostra na hora e grava sem esperar; recusa desfaz e avisa. Grava comentário interno depois que o servidor aceita. Situação não muda."
 - id: order.hold.sheet
@@ -1966,7 +2057,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Motivos: peça, cliente, autorização, outro. Tocar no motivo já salva: dois toques desde a OS."
 - id: order.hold.note
@@ -1982,7 +2074,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Opcional, até 500 caracteres, antes do motivo."
 - id: order.hold.view
@@ -1998,7 +2091,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Dias de calendário no fuso do aparelho. Marca fora de approved e progress é ignorada."
 - id: order.hold.resume
@@ -2014,7 +2108,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Tira a marca sem mudar a situação. Intervalo de 800 ms: toque duplo não conclui a OS. Grava comentário interno com os dias."
 - id: order.hold.clear
@@ -2046,7 +2141,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Consultor só em OS que criou."
 - id: order.detail.overdue-line
@@ -2062,7 +2158,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Fica pronto hoje, 17:00 ou Atrasada desde...; dia vira hoje/amanhã/ontem e meia-noite some a hora. Toque muda a entrega só para quem edita (canEditOrderMainFields). Não copiar: a OS compara o atraso por minuto e a lista por dia; usar uma regra só."
 - id: order.detail.remaining-line
@@ -2078,7 +2175,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewPrices
   note: "Frase do topo em OS concluída com saldo; toque abre o recebimento só para quem recebe (canReceiveOnOrder)."
@@ -2095,7 +2193,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "getAvailableStatuses: varia por papel, situação atual e criador. Ver order.status.*. Desde #484 o servidor aplica o mesmo fluxo por papel. Lista mostra a atual com ✓ mais as permitidas. Não copiar: recusa do servidor só desfaz a tela para concluída (espera 3 s), as outras ficam erradas; sem opção abre alerta Permissão negada e a linha parece tocável para todos."
@@ -2112,7 +2211,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Supervisor/técnico só se criador."
 - id: order.status.start-from-quote
@@ -2144,7 +2244,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.status.finish
   screen: lib/screens/order/order_screen_v2.dart
@@ -2159,7 +2260,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Mesmo fluxo de order.detail.next-finish."
 - id: order.status.pending-checklist
@@ -2191,7 +2293,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Consultor só a partir de quote. Tira a marca de parada. Pede confirmação (vai para as canceladas e pode ser reaberta). Zera o pagamento da OS."
 - id: order.status.reopen
@@ -2207,7 +2310,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.status.notify
   screen: lib/screens/order/order_screen_v2.dart
@@ -2238,7 +2342,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
@@ -2255,7 +2360,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484). Não copiar: a tela não checa canEditOrderMainFields ao tocar no item; qualquer papel abre a folha e o servidor recusa em silêncio."
@@ -2272,7 +2378,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484). Não copiar: a tela não checa canEditOrderMainFields ao tocar no item; qualquer papel abre a folha e o servidor recusa em silêncio."
@@ -2289,7 +2396,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484). Não copiar: a tela não checa canEditOrderMainFields; tirar não pede confirmação nem tem desfazer (a tela antiga confirmava)."
@@ -2306,7 +2414,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "No app não existe desfazer manual de item: só o Desfazer da IA recoloca linhas (order.ai.undo). Requisito do web, porque tirar item no app não confirma nem desfaz. Regras e /v1/app/orders: supervisor e técnico só mudam total em quote (#484)."
@@ -2323,7 +2432,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Só com 2 ou mais aparelhos."
 - id: order.item.no-price
@@ -2355,10 +2465,29 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewPrices
   note: "Peça sem total usa valor × quantidade, no total e no saldo. Total, Desconto − R$, aviso de itens sem valor e Falta receber (âmbar) ou Tudo pago só fora de quote e canceled; toque abre o recebimento só para quem recebe. Depois a linha da nota."
+- id: order.total.remaining-row
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Ver Falta receber ou Tudo pago abaixo do total"
+  kind: action
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
+  web_exception: null
+  permission: viewPrices
+  note: "Só fora de quote e canceled. Toque abre o recebimento só para quem recebe."
 - id: order.customer.pick
   screen: lib/screens/order/order_screen_v2.dart
   route: "/customer_list"
@@ -2372,7 +2501,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Também pelo link Escolher cliente no topo quando falta (só quem edita). Trocar traz o endereço do cliente se a OS não tem local. Não copiar: trocar o cliente mantém os aparelhos do anterior sem aviso."
@@ -2404,7 +2534,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Também pelo link Adicionar aparelho no topo quando falta (só quem edita)."
@@ -2470,7 +2601,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só aparece sem data; seletor sempre data e hora, 24 h, começando no minuto atual. Não copiar: não há como tirar a entrega e ela nasce com o minuto atual; depois de concluída a frase some e não há onde mudar."
@@ -2487,7 +2619,8 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Abre com a dica do lembrete (order.schedule.hint). Em OS salva, pede notificação na primeira vez. Com useScheduling desligado a linha continua (e edita) na OS que já tem visita: a flag só esconde a entrada."
@@ -2552,7 +2685,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/memberships", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
@@ -2618,7 +2752,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewFinancialReports
   note: "Regras exigem acesso ao financeiro (#484). Só OS salva, fora de quote e canceled, com saldo > 0; máximo = saldo. Exige viewPrices e viewFinancialReports. Não copiar: erro genérico Ocorreu um erro."
@@ -2635,7 +2770,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.comment.open
   screen: lib/screens/order/order_screen_v2.dart
@@ -2749,7 +2885,8 @@ rows:
   feature_flags: ["planLimits:photo"]
   hardware: [gallery]
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: attachPhotos
   note: "Na Nova OS ficam no aparelho até o ✓ (order.new.photos); na OS salva sobem na hora. Limite do plano checado antes e de novo com várias fotos."
@@ -2766,7 +2903,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewPhotos
 - id: order.document.open
@@ -2942,7 +3080,8 @@ rows:
   feature_flags: ["planLimits:pdfWatermark"]
   hardware: [pdf_generation]
   data: ["companies/{id}/orders", "companies/{id}", "companies/{id}/customers", "companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva. Busca empresa, cliente completo (falhou, usa o resumo da OS) e checklists antes de gerar, com indicador que trava a tela. Não copiar: erro genérico Ocorreu um erro."
 - id: order.pdf.viewer
@@ -3052,7 +3191,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "canDeleteOrder: admin sempre; gerente e supervisor só quote; consultor e técnico só quote criada por eles. Regras negam apagar quote com dinheiro recebido, salvo admin; o app não checa antes (#484). Apaga de vez (removeItem). Não copiar: recusa deixa a tela parada sem aviso; só o documento sai (fotos, documentos, comentários, checklists e OS geradas pelo contrato ficam órfãos)."
 - id: order.ai.status
@@ -3130,7 +3270,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Não copiar: na OS salva não checa canEditOrderMainFields."
 - id: order.ai.photo
@@ -3163,7 +3304,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.ai.marked
   screen: lib/screens/order/order_screen_v2.dart
@@ -3178,7 +3320,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.ai.ask-customer
   screen: lib/screens/order/order_screen_v2.dart
@@ -3379,7 +3522,8 @@ rows:
   feature_flags: ["useScheduling", "fieldService", "useContracts"]
   hardware: null
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Só o que a OS tem. Dica do lembrete só para visita futura. Responsável com nome ou e-mail. Contrato com resumo e próxima data, ou OS de origem. Linhas editáveis só para quem edita. As flags só escondem a entrada: OS que já tem visita, local ou contrato mostra a linha mesmo com a flag desligada."
 - id: order.menu.view
@@ -3395,7 +3539,8 @@ rows:
   feature_flags: ["useFinancial", "useScheduling", "useContracts", "fieldService", "nfseAvailable"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Mudar situação (se há opção), Marcar parada ou Retomar; Adicionar à OS: Comentário (salva), Checklist (salva e canManageOrderForms), Desconto, Responsável (salva, sem responsável), Local (fieldService, sem endereço), Documento (salva e attachPhotos), Repetir todo mês (salva, useContracts, sem contrato), Data de entrega (sem data), Agendar (useScheduling, sem visita), Outro aparelho; depois Ver PDF, Copiar link (salva), Emitir nota; por fim Cancelar e Apagar em vermelho."
 - id: order.status.payment-sync
@@ -3411,7 +3556,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "quote e canceled zeram payment e paid; voltar a ativa recalcula por total e pago (OrderPaymentMath), em gravação própria que funciona offline. Pela API, conferir se o servidor já faz."
 - id: order.ai.change-lines
@@ -3492,7 +3638,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Na Nova OS nada grava até o ✓ (deferSave). Não copiar: na OS salva o app regrava o documento inteiro a cada mudança (OrderStore.createItem), então a última gravação ganha entre app e web; no web, gravar por campo (ou pela API) e agrupar digitação."
 - id: order.nfse.next-step
@@ -3558,7 +3705,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Título Nova OS ou Novo contrato pelo rótulo do segmento; ícone de aparelho do segmento."
@@ -3637,7 +3785,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Descrição da linha só para item do catálogo; preço vazio é sem valor; quantidade só para peça, mínimo 1; total = valor × quantidade. Preço só com viewPrices (sem olhar useFinancial). O aparelho não muda depois que o item entra. Não copiar: abre para qualquer papel sem canEditOrderMainFields; item no aparelho errado só se corrige tirando e pondo de novo."
 - id: order.item-sheet.remove
@@ -3653,7 +3802,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Não copiar: abre para qualquer papel sem canEditOrderMainFields e tira sem confirmar."
 - id: order.item-search.pick
@@ -3669,7 +3819,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewServices
   note: "Técnico edita itens em quote, mas sem viewServices/viewProducts a busca fica vazia."
@@ -3752,7 +3903,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.item-form.remove
   screen: lib/screens/order/order_item_form.dart
@@ -3897,7 +4049,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.comments.send
   screen: lib/screens/widgets/order_comments_widget.dart
@@ -3912,7 +4065,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "As regras exigem que o autor seja quem está logado."
 - id: order.comments.visibility
@@ -3928,7 +4082,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   note: "Começa em só a equipe quando há escolha: mostrar ao cliente é decisão de quem escreve. Sem a chave, continua visível."
 - id: order.ai.speech-engine
@@ -4401,7 +4556,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   note: "Atrasada e parada: ponto vermelho e a linha da parada."
 - id: order.ui.next-step
@@ -4417,7 +4573,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: order.ui.status-dot
   screen: lib/screens/widgets/status_dot.dart
@@ -4432,7 +4589,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
 - id: pay.order.view
   screen: lib/screens/payment_management_screen.dart
