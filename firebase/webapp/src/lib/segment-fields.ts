@@ -2,7 +2,27 @@
 // the masks of fixed fields (customer.phone, device.serial): the same
 // `segments/{id}.customFields` the app reads (SegmentConfigService,
 // DynamicFieldBuilder, docs/SEGMENT_CUSTOM_FIELDS.md, FIELD_VALIDATION_MASKS.md).
+import { watch, type Ref } from 'vue'
 import { fieldLabel, segmentDocs, type CustomField, type SegmentDoc } from './segments'
+
+/**
+ * A field that follows a mask that may arrive late: the segment and the
+ * company's country load after the form can already be typed in. What was
+ * typed before the mask arrived is masked when it arrives, nothing is lost.
+ * `transform` runs after the mask (the serial in uppercase).
+ */
+export function useMask(value: Ref<string>, masks: () => readonly string[], transform: (text: string) => string = (text) => text) {
+  const shape = (text: string) => transform(applyMask(text, masks()))
+  watch(masks, () => {
+    if (value.value) value.value = shape(value.value)
+  })
+  return (event: Event) => {
+    const input = event.target as HTMLInputElement
+    value.value = shape(input.value)
+    // The input keeps what Vue would not re-render when the value did not change.
+    if (input.value !== value.value) input.value = value.value
+  }
+}
 
 export interface FormField extends CustomField {
   type: 'text' | 'textarea' | 'number' | 'select' | 'date' | string

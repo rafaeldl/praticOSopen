@@ -141,6 +141,13 @@ async function remove() {
   }
 }
 
+async function onChangedElsewhere() {
+  dialog.value = null
+  showToast(t('web.devices.changedElsewhere', { device: label('device._entity').toLocaleLowerCase() }))
+  await load()
+  emit('changed')
+}
+
 async function onEdited() {
   dialog.value = null
   showToast(t('web.customers.saved'))
@@ -257,7 +264,7 @@ onMounted(load)
       @confirm="saveMaintenance(null)"
       @close="dialog = null"
     />
-    <DeviceForm v-else-if="dialog === 'edit' && device" :device="device" :devices="devices" @saved="onEdited" @close="dialog = null" />
+    <DeviceForm v-else-if="dialog === 'edit' && device" :device="device" :version="detail?.version" :devices="devices" @saved="onEdited" @changed="onChangedElsewhere" @close="dialog = null" />
     <Layer v-else-if="dialog === 'maintenance'" kind="dialog" :label="t('nextMaintenanceQuestion')" @close="dialog = null">
       <template #default="{ close }">
         <form class="layer-form" @submit.prevent="saveMaintenance(day)">

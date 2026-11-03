@@ -3071,7 +3071,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Web: "Copiar o link" na folha, com a URL devolvida pela API."
+  note: "Web: 'Copiar o link' na folha, com a URL devolvida pela API."
 - id: order.pdf.view
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -6952,7 +6952,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Atrasada (dueDate antes de agora, ponto de atraso) vence aberta (ponto âmbar); aberta = approved ou progress. Web: contados no servidor com as OS que o papel lê; consultor e técnico veem "As OS em aberto contam só as suas". Não copiar: consultor e técnico não veem selo (consulta sem createdBy é negada, erro engolido). Na web, vem da API filtrada pelo papel."
+  note: "Atrasada (dueDate antes de agora, ponto de atraso) vence aberta (ponto âmbar); aberta = approved ou progress. Web: contados no servidor com as OS que o papel lê; consultor e técnico veem “As OS em aberto contam só as suas”. Não copiar: consultor e técnico não veem selo (consulta sem createdBy é negada, erro engolido). Na web, vem da API filtrada pelo papel."
 - id: customer.picker.choose
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -6970,7 +6970,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem "Recentes"; fica para a próxima fatia de OS."
+  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem “Recentes”; fica para a próxima fatia de OS."
 - id: customer.picker.create
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_form"
@@ -6988,7 +6988,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na lista de clientes, "Cadastrar «texto»" já vira telefone ou nome e some com nome existente (customers.spec.ts); no seletor da Nova OS ainda não."
+  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na lista de clientes, “Cadastrar «texto»” já vira telefone ou nome e some com nome existente (customers.spec.ts); no seletor da Nova OS ainda não."
 - id: customer.picker.plate
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -7024,7 +7024,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Web: falta "Recentes" no seletor da Nova OS. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê."
+  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Web: falta “Recentes” no seletor da Nova OS. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê."
 - id: customer.picker.auto-device
   screen: lib/screens/customers/customer_list_screen.dart
   route: null
@@ -7059,7 +7059,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Mostra telefone, 'gastou' (soma das concluídas, com viewPrices, maior que 0) e 'falta receber'. Frase 'O que fazer para {nome}?' acima do botão azul. Web: lido por id na API; mostra e-mail, CPF/CNPJ, endereço e campos do segmento; "não está mais aqui" para cliente apagado; consultor e técnico veem que a lista é parcial. Não copiar: não mostra e-mail, CPF/CNPJ, endereço nem campos do segmento (quem não edita nunca vê); consultor e técnico só contam as OS que criaram, sem aviso; cliente é foto do argumento da rota, não tempo real; sem argumento a tela fica em branco. Na web, ler por id e mostrar não encontrado."
+  note: "Mostra telefone, 'gastou' (soma das concluídas, com viewPrices, maior que 0) e 'falta receber'. Frase 'O que fazer para {nome}?' acima do botão azul. Web: lido por id na API; mostra e-mail, CPF/CNPJ, endereço e campos do segmento; “não está mais aqui” para cliente apagado; consultor e técnico veem que a lista é parcial. Não copiar: não mostra e-mail, CPF/CNPJ, endereço nem campos do segmento (quem não edita nunca vê); consultor e técnico só contam as OS que criaram, sem aviso; cliente é foto do argumento da rota, não tempo real; sem argumento a tela fica em branco. Na web, ler por id e mostrar não encontrado."
 - id: customer.detail.call
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"
@@ -7130,7 +7130,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro. Web: com uma OS abre ela; com várias abre Início em "Sem receber" buscando o cliente, até a tela "Receber de Ana" (fatia 04)."
+  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro. Web: com uma OS abre ela; com várias abre Início em “Sem receber” buscando o cliente, até a tela “Receber de Ana” (fatia 04)."
 - id: customer.detail.devices
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/device_detail"
@@ -7184,7 +7184,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
+  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
 - id: customer.detail.receipts
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7271,7 +7271,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "OS continuam salvas, com o cliente embutido. Apaga de vez. Web: DELETE /v1/app/customers/:id; erro vira aviso; aparelhos com a próxima manutenção dele perdem o id e ficam com o nome. Não copiar: o app não trata erro (exceção solta, sem aviso); aparelhos com nextMaintenanceCustomer dele ficam apontando para id que não existe."
+  note: "OS continuam salvas, com o cliente embutido. Apaga de vez. Web: DELETE /v1/app/customers/:id; erro vira aviso; aparelhos com a próxima manutenção dele perdem o id e ficam com o nome. O diálogo diz quantas OS, recibos e cobranças o cliente tem, contados no servidor sobre tudo (também o que o papel não vê), sem detalhe. A regra de quem apaga não muda. Não copiar: o app não trata erro (exceção solta, sem aviso); aparelhos com nextMaintenanceCustomer dele ficam apontando para id que não existe."
 - id: customer.form.save
   screen: lib/screens/customers/customer_form_screen.dart
   route: "/customer_form"
@@ -7289,7 +7289,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Cliente novo com telefone passa por customer.form.duplicate-check. Nada salva sem o ✓. ✓ cinza até ter nome, com dica customerSaveNeedsName; na edição empurrada Salvar fica ativo e nome vazio vira erro no campo. Erro abre alerta customerSaveError. Telefone gravado como digitado com máscara; customData vazio vira null. Web: criar e editar são rotas diferentes; editar não regrava createdAt/createdBy; fechar com mudança pergunta também na edição. Não copiar: editar regrava createdAt/createdBy, grava company com a primeira empresa do usuário e repete o analytics de cliente criado; a edição empurrada sai sem perguntar; o endereço muda o objeto a cada tecla."
+  note: "Cliente novo com telefone passa por customer.form.duplicate-check. Nada salva sem o ✓. ✓ cinza até ter nome, com dica customerSaveNeedsName; na edição empurrada Salvar fica ativo e nome vazio vira erro no campo. Erro abre alerta customerSaveError. Telefone gravado como digitado com máscara; customData vazio vira null. Web: criar e editar são rotas diferentes; editar não regrava createdAt/createdBy; fechar com mudança pergunta também na edição. Editar manda a versão lida (version, opaca como nas OS): se alguém salvou depois, 409 CUSTOMER_CHANGED, nada é gravado e a tela relê o cliente com aviso. Não copiar: editar regrava createdAt/createdBy, grava company com a primeira empresa do usuário e repete o analytics de cliente criado; a edição empurrada sai sem perguntar; o endereço muda o objeto a cada tecla."
 - id: customer.form.more
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -7461,7 +7461,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Só com nota fiscal ligada ou manageCustomers. Ordem: nota com várias OS, Editar, Apagar (vermelho). Técnico nunca vê. Web: menu "…" do design system, só com manageCustomers (Editar, Apagar). Não copiar: é CupertinoActionSheet com Cancelar, não o menu … do design system."
+  note: "Só com nota fiscal ligada ou manageCustomers. Ordem: nota com várias OS, Editar, Apagar (vermelho). Técnico nunca vê. Web: menu “…” do design system, só com manageCustomers (Editar, Apagar). Não copiar: é CupertinoActionSheet com Cancelar, não o menu … do design system."
 - id: customer.detail.owed
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7567,7 +7567,7 @@ rows:
   e2e: firebase/webapp/e2e/customers-import.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Só web (extra de mesa). Arquivo lido no navegador; colunas adivinhadas e conferidas; sem nome, CPF/CNPJ inválido, telefone de cliente que já existe ou repetido na planilha ficam de fora; nada grava antes de Importar. Até 5.000 linhas, enviadas de 400 em 400 com id por linha (repetir não duplica)."
+  note: "Só web (extra de mesa). Arquivo lido no navegador; colunas adivinhadas e conferidas; sem nome, CPF/CNPJ inválido, telefone de cliente que já existe ou repetido na planilha ficam de fora; nada grava antes de Importar. Até 5.000 linhas, enviadas de 100 em 100 com id por linha; o id da importação nasce na prévia e é o mesmo no Importar de novo depois de uma falha, então nada entra duas vezes."
 - id: customer.list.quick-search
   screen: firebase/webapp/src/views/customers/CustomersView.vue
   route: "/customers"
@@ -7603,7 +7603,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Entrada pelo perfil só com useDeviceManagement. Sem useDeviceManagement, tocar abre a edição; com ela, abre a tela do aparelho. Web: aba "Veículos" ao lado de "Clientes" (/devices); tocar abre a tela do aparelho para todos; vazio diz o que fazer só a quem pode. Não copiar: tocar sem useDeviceManagement abre o formulário para todos os papéis; vazio diz 'toque + para adicionar' mesmo sem o '+', com texto montado por concatenação (quebra en/es)."
+  note: "Entrada pelo perfil só com useDeviceManagement. Sem useDeviceManagement, tocar abre a edição; com ela, abre a tela do aparelho. Web: aba “Veículos” ao lado de “Clientes” (/devices); tocar abre a tela do aparelho para todos; vazio diz o que fazer só a quem pode. Não copiar: tocar sem useDeviceManagement abre o formulário para todos os papéis; vazio diz 'toque + para adicionar' mesmo sem o '+', com texto montado por concatenação (quebra en/es)."
 - id: device.list.search
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -7621,7 +7621,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Web: sem acento, e a série sem hífen e espaço. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
+  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Web: sem acento, e a série sem hífen e espaço. Divergência para o próximo lote do app: o app grava keywords só do nome (generateKeywords, sem série nem marca, sem tirar stopwords); web e servidor gravam nome, série e marca (generateSearchKeywords). Editar o aparelho no app tira a placa da busca do bot e da API. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
 - id: device.list.pick
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -7638,7 +7638,7 @@ rows:
   web_status: in_progress
   web_exception: null
   permission: viewDevices
-  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa "do cliente" de "outros" pelas regras daqui."
+  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa “do cliente” de “outros” pelas regras daqui."
 - id: device.list.create
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -7691,7 +7691,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Texto no subtítulo e ponto no canto da foto: ativo, em manutenção, inativo, desativado. Não aparece no seletor nem na tela do aparelho. Web: coluna "Situação" (texto e ponto) com useDeviceManagement."
+  note: "Texto no subtítulo e ponto no canto da foto: ativo, em manutenção, inativo, desativado. Não aparece no seletor nem na tela do aparelho. Web: coluna “Situação” (texto e ponto) com useDeviceManagement."
 - id: device.list.edit-swipe
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -7709,7 +7709,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Web: botão "Editar" na linha, só com manageDevices. Não copiar: no app abre para todos os papéis e só a gravação é negada. Na web vira botão, só com manageDevices."
+  note: "Web: botão “Editar” na linha, só com manageDevices. Não copiar: no app abre para todos os papéis e só a gravação é negada. Na web vira botão, só com manageDevices."
 - id: device.list.pick-none
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -7725,7 +7725,7 @@ rows:
   data: []
   web_status: in_progress
   web_exception: null
-  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult. Web: falta "Nenhum …" na troca de aparelho da OS."
+  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult. Web: falta “Nenhum …” na troca de aparelho da OS."
 - id: device.list.pick-create
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -7999,7 +7999,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "App mostra a todos; só gravar é negado a quem não tem manageDevices. Web: menu "…" só com manageDevices. Não copiar: na web, esconder pelo papel."
+  note: "App mostra a todos; só gravar é negado a quem não tem manageDevices. Web: menu “…” só com manageDevices. Não copiar: na web, esconder pelo papel."
 - id: device.detail.delete
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -8052,7 +8052,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Salva com modelo ou série: a série ficou opcional (regras em device.form.serial-rules). Não grava valores salvos (accumulatedFields). Web: erro aparece no formulário; fechar com mudança pergunta também na edição. Não copiar: erro ao gravar não mostra nada (try/finally sem catch); a edição empurrada sai sem perguntar; situação e campos do segmento mudam o objeto antes do Salvar."
+  note: "Salva com modelo ou série: a série ficou opcional (regras em device.form.serial-rules). Não grava valores salvos (accumulatedFields). Web: erro aparece no formulário; fechar com mudança pergunta também na edição. O app mostra alerta quando a gravação falha (showFailureAlert). Editar manda a versão lida: 409 DEVICE_CHANGED relê e avisa. Não copiar: a edição empurrada sai sem perguntar; situação e campos do segmento mudam o objeto antes do Salvar."
 - id: device.form.more
   screen: lib/screens/device_form_screen.dart
   route: null

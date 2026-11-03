@@ -58,7 +58,7 @@ const deviceBody = {
     .optional(),
 };
 const createSchema = z.object(deviceBody).refine((value) => !!value.name?.trim() || !!value.serial?.trim(), 'Model or serial is required');
-const updateSchema = z.object(deviceBody);
+const updateSchema = z.object({ ...deviceBody, version: z.string().min(1).max(64).optional() });
 const maintenanceSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable() });
 
 router.get('/', route('Failed to list devices', async (req, res, companyId) => {
@@ -86,7 +86,8 @@ router.patch('/:id', route('Failed to update device', async (req, res, companyId
   if (!(await can(req, res, 'manageDevices'))) return forbidden(res, "Permission 'manageDevices' is required");
   const validation = validateInput(updateSchema, req.body);
   if (!validation.success) return void validationError(res, validation.errors);
-  const result = await directory.updateDevice(companyId, param(req, 'id'), validation.data, getUserAggr(req));
+  const { version, ...input } = validation.data;
+  const result = await directory.updateDevice(companyId, param(req, 'id'), input, getUserAggr(req), version);
   if (result === 'not_found') return void notFound(res);
   if (result === 'empty') return void validationError(res, ['Model or serial is required']);
   res.json({ success: true, data: { id: param(req, 'id'), updated: true } });

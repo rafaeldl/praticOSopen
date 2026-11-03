@@ -1,7 +1,7 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
 import { expect, test, type Page } from '@playwright/test'
-import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc } from './data'
+import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc } from './data'
 import { chooseCompany, login, signOut } from './helpers'
 
 const list = (page: Page) => page.getByTestId('customers-table')
@@ -71,19 +71,23 @@ test('busca por nome sem acento, telefone por dígitos e placa a partir de 3 let
 })
 
 test('cadastrar: máscara do telefone, ✓ só com nome e abre o cliente novo (customer.list.create, customer.form.save)', async ({ page }) => {
-  const name = `Nova Cliente ${Date.now()}`
+  const stamp = Date.now()
+  const name = `Nova Cliente ${stamp}`
+  // A phone of its own: the same number twice would open the repeated phone warning (--repeat-each).
+  const tail = String(stamp).slice(-8)
+  const shown = `(48) 9${tail.slice(0, 4)}-${tail.slice(4)}`
   await openCustomers(page, 'supervisor')
   await page.getByTestId('new-customer').click()
   const form = page.getByTestId('customer-form')
   await expect(form.getByText('Escreva o nome para salvar.')).toBeVisible()
-  await form.getByLabel('Telefone ou WhatsApp').pressSequentially('48912345678')
-  await expect(form.getByLabel('Telefone ou WhatsApp')).toHaveValue('(48) 91234-5678')
+  await form.getByLabel('Telefone ou WhatsApp').pressSequentially(`489${tail}`)
+  await expect(form.getByLabel('Telefone ou WhatsApp')).toHaveValue(shown)
   await form.getByTestId('save-customer').click()
   await expect(form.getByRole('alert')).toHaveText('Escreva o nome para salvar.')
   await form.getByLabel('Nome', { exact: true }).fill(name)
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(panel(page).getByRole('heading', { name })).toBeVisible()
-  await expect(panel(page).getByTestId('customer-contact')).toContainText('(48) 91234-5678')
+  await expect(panel(page).getByTestId('customer-contact')).toContainText(shown)
 })
 
 test('gerente e técnico não cadastram nem editam; consultor cadastra (permissão manageCustomers)', async ({ page }) => {
@@ -245,12 +249,30 @@ test('fechar com algo digitado pergunta antes, também na edição (customer.for
   expect((await readDoc(`customers/${customer.id}`))?.name).toBe(customer.name)
 })
 
+test('outra pessoa salvou enquanto editava: avisa, relê e não grava por cima (revisão M1)', async ({ page }) => {
+  const customer = await makeCustomer({ updatedAt: '2026-10-01T10:00:00.000000' })
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  await panel(page).getByTestId('customer-menu').click()
+  await page.getByRole('button', { name: 'Editar cliente' }).click()
+  const form = page.getByTestId('customer-form')
+  await form.getByLabel('Nome', { exact: true }).fill('Nome da web')
+  await updateCustomerDoc(customer.id, { name: 'Nome do app', updatedAt: '2026-10-02T10:00:00.000000' })
+  await form.getByTestId('save-customer').click()
+  await expect(page.locator('.toast')).toContainText('Outra pessoa mudou este cliente')
+  await expect(form).toHaveCount(0)
+  await expect(panel(page).getByRole('heading', { name: 'Nome do app' })).toBeVisible()
+  expect((await readDoc(`customers/${customer.id}`))?.name).toBe('Nome do app')
+})
+
 test('apagar pede confirmação, avisa e tira da lista (customer.detail.delete, customer.detail.menu)', async ({ page }) => {
   const customer = await makeCustomer()
+  // An order the consultant does not read: the warning still counts it (revisão M2).
+  await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, status: 'quote' })
   await openCustomers(page, 'consultant', `?customer=${customer.id}`)
   await panel(page).getByTestId('customer-menu').click()
   await page.getByRole('button', { name: 'Apagar' }).click()
   const confirm = page.getByRole('dialog', { name: `Apagar ${customer.name}?` })
+  await expect(confirm).toContainText('Tem 1 OS, nenhum recibo e nenhuma cobrança.')
   await expect(confirm).toContainText('As OS continuam salvas.')
   await confirm.getByRole('button', { name: 'Apagar' }).click()
   await expect(page.locator('.toast')).toContainText(`${customer.name} apagado`)

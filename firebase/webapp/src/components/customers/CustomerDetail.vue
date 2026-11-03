@@ -58,6 +58,12 @@ const receivable = computed(() => detail.value?.receivable ?? [])
 const menuChoices = computed<Choice[]>(() =>
   canManage ? [{ id: 'edit', label: t('editCustomer') }, { id: 'delete', label: t('deleteAction'), danger: true }] : [],
 )
+/** What the customer has, counted on the server over everything, not only what the person reads (revisão M2). */
+const deleteLinks = computed(() => {
+  const links = detail.value?.links
+  if (!links || !(links.orders || links.receipts || links.charges)) return ''
+  return t('web.customers.deleteLinks', { orders: links.orders, receipts: links.receipts, charges: links.charges })
+})
 const customFields = computed(() => {
   const data = customer.value?.customData
   const fields = namespaceFields('customer', ['customer.name', 'customer.phone', 'customer.email', 'customer.address', 'customer.taxId'])
@@ -136,6 +142,14 @@ async function remove() {
   } finally {
     busy.value = false
   }
+}
+
+/** Someone saved this customer while it was being edited: say so and show the new version (revisão M1). */
+async function onChangedElsewhere() {
+  dialog.value = null
+  showToast(t('web.customers.changedElsewhere'))
+  await load()
+  emit('changed')
 }
 
 async function onEdited() {
@@ -243,6 +257,7 @@ onMounted(load)
           </li>
         </ul>
         <p v-else class="muted">{{ t('web.customers.noOrders') }}</p>
+        <p v-if="detail.ordersTruncated" class="sub" data-testid="orders-truncated">{{ t('web.customers.ordersTruncated', { count: detail.orders.length }) }}</p>
       </section>
     </div>
 
@@ -250,14 +265,14 @@ onMounted(load)
     <ConfirmDialog
       v-else-if="dialog === 'delete' && customer"
       :title="t('deleteCustomerTitle', { name: customer.name })"
-      :body="t('deleteCustomerKeepsOrders')"
+      :body="`${deleteLinks} ${t('deleteCustomerKeepsOrders')}`.trim()"
       :confirm="t('deleteAction')"
       :keep="t('cancel')"
       danger
       @confirm="remove"
       @close="dialog = null"
     />
-    <CustomerForm v-else-if="dialog === 'edit' && customer" :customer="customer" :directory="directory" @saved="onEdited" @close="dialog = null" />
+    <CustomerForm v-else-if="dialog === 'edit' && customer" :customer="customer" :version="detail?.version" :directory="directory" @saved="onEdited" @changed="onChangedElsewhere" @close="dialog = null" />
     <DeviceForm v-else-if="dialog === 'device'" :devices="[]" @saved="onDeviceSaved" @close="dialog = null" />
     <ReceiveCustomerDialog v-else-if="dialog === 'receive' && customer" :customer-id="customer.id" :customer-name="customer.name" :checked="receivable" @done="onReceived" @close="dialog = null" />
     <ReceiptsDialog v-else-if="dialog === 'receipts' && customer" :customer-id="customer.id" :customer-name="customer.name" @changed="load" @close="dialog = null" />

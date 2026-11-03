@@ -5,7 +5,8 @@ import { resolve } from 'node:path'
 import { describe, expect, test, vi } from 'vitest'
 import { formatPhone, phoneMatchKey, whatsappNumber } from '../src/lib/phone'
 import { formatTaxId, isValidCnpj, isValidCpf, isValidTaxId, normalizeTaxId } from '../src/lib/tax-id'
-import { applyMask, buildFields, fieldMasks, namespaceFields, readCustom, validateField, writeCustom, type FormField } from '../src/lib/segment-fields'
+import { nextTick, ref } from 'vue'
+import { applyMask, useMask, buildFields, fieldMasks, namespaceFields, readCustom, validateField, writeCustom, type FormField } from '../src/lib/segment-fields'
 import {
   addMonths,
   badgeOf,
@@ -62,6 +63,46 @@ describe('masks (easy_mask)', () => {
     expect(applyMask('abc1234', ['AAA-9999'])).toBe('abc-1234')
   })
   test('no mask keeps the text', () => expect(applyMask('anything', [])).toBe('anything'))
+})
+
+describe('mask that arrives after typing (CI #517)', () => {
+  const typed = (target: { value: string }) => ({ target }) as unknown as Event
+
+  test('typed before the segment loaded: masked when it arrives, nothing lost', async () => {
+    const masks = ref<string[]>([])
+    const phone = ref('')
+    const onInput = useMask(phone, () => masks.value)
+    const input = { value: '48912345678' }
+    onInput(typed(input))
+    expect(phone.value).toBe('48912345678')
+    // The segment (and the company's country) arrive now.
+    masks.value = ['(99) 9999-9999', '(99) 99999-9999']
+    await nextTick()
+    expect(phone.value).toBe('(48) 91234-5678')
+    // Typing on goes on with the mask.
+    onInput(typed({ value: '(48) 91234-567' }))
+    expect(phone.value).toBe('(48) 9123-4567')
+  })
+
+  test('serial: mask and uppercase also for what was typed early', async () => {
+    const masks = ref<string[]>([])
+    const serial = ref('')
+    const onInput = useMask(serial, () => masks.value, (text) => text.toUpperCase())
+    onInput(typed({ value: 'abc1234' }))
+    expect(serial.value).toBe('ABC1234')
+    masks.value = ['AAA-9999', 'AAA9N99']
+    await nextTick()
+    expect(serial.value).toBe('ABC-1234')
+  })
+
+  test('empty field stays empty when the mask arrives', async () => {
+    const masks = ref<string[]>([])
+    const phone = ref('')
+    useMask(phone, () => masks.value)
+    masks.value = ['(99) 99999-9999']
+    await nextTick()
+    expect(phone.value).toBe('')
+  })
 })
 
 describe('segment fields', () => {

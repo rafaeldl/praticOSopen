@@ -27,6 +27,12 @@ const message = ref('')
 const busy = ref(false)
 const progress = ref(0)
 const country = session.company?.country
+/**
+ * One id per review (new on each "Continuar"): "Importar" again after a
+ * failure sends the same part ids, and the server answers `existing` for what
+ * is already in, so nothing enters twice (revisão A1).
+ */
+let importId = ''
 
 const headers = computed(() => table.value[0] ?? [])
 const body = computed(() => table.value.slice(1))
@@ -79,6 +85,7 @@ async function toReview() {
   try {
     const directory = await loadCustomerDirectory(true)
     review.value = reviewRows(body.value, fields.value, directory.rows, country)
+    importId = crypto.randomUUID()
     step.value = 'review'
     announce(title.value)
   } catch (error) {
@@ -88,13 +95,12 @@ async function toReview() {
   }
 }
 
-/** In parts of up to 400 lines; each part has its id, so sending again never doubles a line. */
+/** In parts of up to 100 lines; each part has its id, so sending again never doubles a line. */
 async function finish() {
   const payload = importPayload(review.value)
   if (!payload.length || busy.value) return
   busy.value = true
   progress.value = 0
-  const importId = crypto.randomUUID()
   let created = 0
   try {
     for (let start = 0, part = 0; start < payload.length; start += IMPORT_CHUNK, part++) {

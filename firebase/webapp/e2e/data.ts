@@ -136,6 +136,12 @@ export async function makeDevice(data: Record<string, unknown> = {}): Promise<{ 
   return { id, name, serial }
 }
 
+/** Customers of company A whose name starts with `prefix`. */
+export async function countCustomersNamed(prefix: string): Promise<number> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/customers`).where('name', '>=', prefix).where('name', '<', `${prefix}`).get()
+  return snapshot.size
+}
+
 export async function readDoc(path: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
 }

@@ -8,7 +8,7 @@ import { fold } from './model'
 export type ImportField = '' | 'name' | 'phone' | 'email' | 'address' | 'taxId'
 export const IMPORT_FIELDS: ImportField[] = ['', 'name', 'phone', 'email', 'address', 'taxId']
 /** Lines per request (POST /v1/app/customers/import takes up to 500). */
-export const IMPORT_CHUNK = 400
+export const IMPORT_CHUNK = 100
 export const IMPORT_MAX_ROWS = 5000
 
 /** CSV with comma, semicolon or tab, quotes and line breaks inside quotes. */

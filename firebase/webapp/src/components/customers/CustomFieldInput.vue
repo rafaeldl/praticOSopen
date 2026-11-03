@@ -2,7 +2,7 @@
 // One field of the segment (DynamicFieldBuilder): text, textarea, number,
 // select and date. A select is the browser's own list (choosing is a picker,
 // never a menu of actions); a date is saved as the app saves it, ISO with time.
-import { computed, useId } from 'vue'
+import { computed, useId, watch } from 'vue'
 import { locale } from '@/i18n'
 import { applyMask, fieldMasks, fieldOptions, fieldTitle, type FormField } from '@/lib/segment-fields'
 import { session } from '@/lib/session'
@@ -22,6 +22,12 @@ const placeholder = computed(() =>
     : (props.field.placeholder ?? ''),
 )
 const upper = computed(() => props.field.textCapitalization === 'characters')
+// The company's country can arrive after typing: the value follows the mask then.
+watch(masks, (list) => {
+  if (typeof props.modelValue !== 'string' || !props.modelValue || !list.length || props.field.type !== 'text') return
+  const shaped = upper.value ? applyMask(props.modelValue, list).toUpperCase() : applyMask(props.modelValue, list)
+  if (shaped !== props.modelValue) emit('update:modelValue', shaped)
+})
 
 function onText(event: Event) {
   const input = event.target as HTMLInputElement | HTMLTextAreaElement

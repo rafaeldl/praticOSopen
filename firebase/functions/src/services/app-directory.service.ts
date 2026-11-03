@@ -16,6 +16,8 @@ import type { Order, UserAggr, CompanyAggr } from '../models/types';
 import { projectOrderSummary } from './order-projection';
 import { generatePhoneKeywords, generateSearchKeywords } from '../utils/search.utils';
 import { timestampToDate } from '../utils/date.utils';
+import { orderVersion, versionMatches } from './order-version';
+import { OrderRuleError } from './order-errors';
 
 type Json = Record<string, unknown>;
 
@@ -139,7 +141,13 @@ const round = (value: number) => Math.round(value * 100) / 100;
 
 export interface CustomerScreen {
   customer: Json;
+  /** Opaque version (order-version.ts), sent back on PATCH. */
+  version: string | null;
   orders: Json[];
+  /** More than ORDERS_LIMIT: the list, "gastou" and "falta receber" are of the newest ones. */
+  ordersTruncated: boolean;
+  /** Everything tied to the customer, whoever reads it: told before deleting, without detail. */
+  links: { orders: number; receipts: number; charges: number };
   devices: ReturnType<typeof devicesOf>;
   spent: number | null;
   owed: number | null;
@@ -154,13 +162,21 @@ export async function customerScreen(
   scope: OrderScope,
   options: { showPrices: boolean; canReceive: (order: Order) => boolean },
 ): Promise<CustomerScreen | null> {
-  const [snapshot, orders] = await Promise.all([
+  // Newest first (indexes customer.id + createdAt, also with createdBy / assignedTo), one more to know it was cut.
+  const count = (name: string) =>
+    (getTenantCollection(companyId, name) as unknown as Query).where('customer.id', '==', customerId).count().get().then((result) => result.data().count);
+  const [snapshot, scoped, ordersTotal, receipts, charges] = await Promise.all([
     getTenantCollection(companyId, 'customers').doc(customerId).get(),
-    scopedOrders(companyId, scope, (base) => [base.where('customer.id', '==', customerId).limit(ORDERS_LIMIT)]),
+    scopedOrders(companyId, scope, (base) => [base.where('customer.id', '==', customerId).orderBy('createdAt', 'desc').limit(ORDERS_LIMIT + 1)]),
+    count('orders'),
+    count('receipts'),
+    count('customerCharges'),
   ]);
   if (!snapshot.exists) return null;
+  scoped.sort(newestFirst);
+  const ordersTruncated = scoped.length > ORDERS_LIMIT;
+  const orders = scoped.slice(0, ORDERS_LIMIT);
   const data = snapshot.data() ?? {};
-  orders.sort(newestFirst);
   const owedOrders = orders.filter((o) => o.status !== 'quote' && o.status !== 'canceled' && o.payment !== 'paid' && (o.total ?? 0) - (o.paidAmount ?? 0) > 0);
   return {
     customer: {
@@ -174,7 +190,10 @@ export async function customerScreen(
       longitude: typeof data.longitude === 'number' ? data.longitude : null,
       customData: data.customData && typeof data.customData === 'object' ? data.customData : null,
     },
+    version: orderVersion(data.updatedAt),
     orders: orders.map((o) => projectOrderSummary(o, options.showPrices)),
+    ordersTruncated,
+    links: { orders: ordersTotal, receipts, charges },
     devices: devicesOf(orders),
     spent: options.showPrices ? totalSpent(orders) : null,
     owed: options.showPrices ? customerOwed(orders) : null,
@@ -226,13 +245,21 @@ export async function createCustomer(companyId: string, input: CustomerInput & {
   }
 }
 
-export async function updateCustomer(companyId: string, customerId: string, input: CustomerInput, updatedBy: UserAggr): Promise<boolean> {
+/**
+ * `version`: what the person saw (GET). Another save since then (web or app)
+ * refuses with 409 CUSTOMER_CHANGED and writes nothing. Returns the new version.
+ */
+export async function updateCustomer(companyId: string, customerId: string, input: CustomerInput, updatedBy: UserAggr, version?: string): Promise<string | null | false> {
   const ref = getTenantCollection(companyId, 'customers').doc(customerId);
   return db.runTransaction(async (tx) => {
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) return false;
-    tx.update(ref, { ...customerFields(input, snapshot.data() ?? {}), updatedBy, updatedAt: new Date().toISOString() });
-    return true;
+    if (version !== undefined && !versionMatches(snapshot.data()?.updatedAt, version)) {
+      throw new OrderRuleError('CUSTOMER_CHANGED', 409, 'The customer changed since it was read');
+    }
+    const updatedAt = new Date().toISOString();
+    tx.update(ref, { ...customerFields(input, snapshot.data() ?? {}), updatedBy, updatedAt });
+    return updatedAt;
   });
 }
 
@@ -320,6 +347,7 @@ export async function deviceScreen(companyId: string, deviceId: string, scope: O
   if (!snapshot.exists) return null;
   const data = snapshot.data() ?? {};
   return {
+    version: orderVersion(data.updatedAt),
     device: {
       id: snapshot.id,
       name: text(data.name),
@@ -376,12 +404,15 @@ export async function createDevice(companyId: string, input: DeviceInput, create
 }
 
 /** Never touches the next maintenance fields: only setNextMaintenance writes them. */
-export async function updateDevice(companyId: string, deviceId: string, input: DeviceInput, updatedBy: UserAggr): Promise<'ok' | 'not_found' | 'empty'> {
+export async function updateDevice(companyId: string, deviceId: string, input: DeviceInput, updatedBy: UserAggr, version?: string): Promise<'ok' | 'not_found' | 'empty'> {
   const ref = getTenantCollection(companyId, 'devices').doc(deviceId);
   return db.runTransaction(async (tx) => {
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) return 'not_found' as const;
     const current = snapshot.data() ?? {};
+    if (version !== undefined && !versionMatches(current.updatedAt, version)) {
+      throw new OrderRuleError('DEVICE_CHANGED', 409, 'The device changed since it was read');
+    }
     const fields = deviceFields(input, current);
     const name = 'name' in fields ? fields.name : current.name;
     const serial = 'serial' in fields ? fields.serial : current.serial;
