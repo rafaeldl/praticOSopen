@@ -90,6 +90,8 @@ class AuthRepository {
       await user.updateDisplayName(
           "${appleIdCredential.givenName} ${appleIdCredential.familyName ?? ''}"
               .trim());
+      // currentUser must carry the name before the user document is filled.
+      await user.reload();
     }
 
     final User firebaseUser = _auth.currentUser!;

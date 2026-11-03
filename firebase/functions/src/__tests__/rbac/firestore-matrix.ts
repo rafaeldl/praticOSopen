@@ -690,6 +690,16 @@ export const CASES: RulesCase[] = [
     allow: SIGNED_IN,
   },
   {
+    id: 'webAppAccess.read', area: 'Global', title: 'ler a lista de acesso do app web',
+    run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'config/webApp')),
+    allow: [],
+  },
+  {
+    id: 'webAppAccess.write', area: 'Global', title: 'se colocar na lista de acesso do app web',
+    run: ({ db, fs }) => fs.setDoc(fs.doc(db, 'config/webApp'), { open: true }),
+    allow: [],
+  },
+  {
     id: 'shareTokens.read', area: 'Link do cliente', title: 'ler token de link da empresa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'links/share/tokens/ST_c1')),
     allow: [],
@@ -762,6 +772,7 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
   set(`${C}/private/members`, { owner1: 'owner' });
   set('users/ghost', { id: 'ghost', companies: [] });
   set('segments/automotive', { name: 'Mecânica' });
+  set('config/webApp', { open: false, allowedEmailHashes: [] });
   set('links/share/tokens/ST_c1', { companyId: 'c1', orderId: 'ghost_quote' });
   set('links/invites/tokens/INV_c1', {
     company: { id: 'c1' }, role: 'technician', email: 'invitee@example.com', status: 'pending',

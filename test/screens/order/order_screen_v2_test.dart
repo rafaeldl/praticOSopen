@@ -20,6 +20,7 @@ import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -137,6 +138,9 @@ class FakeRegistration extends AssistantRegistration {
 /// Payments and status without Firestore; [assignsId] gives a new order its id.
 class _MoneyStore extends OrderStore {
   bool assignsId = false;
+
+  /// The new order fails to save: [createItem] calls `onError`.
+  bool failsSave = false;
   final List<double> received = [];
 
   @override
@@ -168,7 +172,14 @@ class _MoneyStore extends OrderStore {
   }
 
   @override
-  Future<void>? createItem({void Function(String orderId)? onCreated}) {
+  Future<void>? createItem({
+    void Function(String orderId)? onCreated,
+    void Function(Object error)? onError,
+  }) {
+    if (!deferSave && failsSave) {
+      onError?.call(StateError('save failed'));
+      return null;
+    }
     if (deferSave || !assignsId) return null;
     if (order!.id == null) {
       order!.id = 'new1';
@@ -240,7 +251,9 @@ OrderPermissions _permissions({
   bool Function(Order? order)? receiveOn,
   bool hold = true,
   List<String> statuses = const ['approved', 'progress', 'canceled'],
+  bool edit = true,
 }) => OrderPermissions(
+  canEditMainFields: (_) => edit,
   canChangeHold: (_) => hold,
   canViewPrices: () => prices,
   canReceivePayments: receiveOn ?? (_) => receive,
@@ -678,10 +691,7 @@ void main() {
         await tester.tap(confirm());
         await tester.pumpAndSettle();
         expect(store.received, [300]);
-        expect(
-          find.textContaining('Recebido ${_money(300)}'),
-          findsOneWidget,
-        );
+        expect(find.textContaining('Recebido ${_money(300)}'), findsOneWidget);
 
         await tester.tap(find.byKey(const ValueKey('assistant_note_action')));
         await tester.pumpAndSettle();
@@ -768,12 +778,8 @@ void main() {
             FakeAssistant(
               const AiOrderDraft(
                 customer: AiCustomerHit(id: 'c1', name: 'Revenda Sul'),
-                items: [
-                  AiDraftItem(kind: 'service', name: 'Óleo', value: 800),
-                ],
-                actions: AiOrderActions(
-                  payment: AiPaymentAction(kind: 'full'),
-                ),
+                items: [AiDraftItem(kind: 'service', name: 'Óleo', value: 800)],
+                actions: AiOrderActions(payment: AiPaymentAction(kind: 'full')),
               ),
             ),
           ),
@@ -804,9 +810,7 @@ void main() {
             FakeAssistant(
               const AiOrderDraft(
                 customer: AiCustomerHit(id: 'c1', name: 'Revenda Sul'),
-                actions: AiOrderActions(
-                  payment: AiPaymentAction(kind: 'full'),
-                ),
+                actions: AiOrderActions(payment: AiPaymentAction(kind: 'full')),
               ),
             ),
           ),
@@ -844,6 +848,35 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 5));
         expect(card(), findsNothing);
         expect(find.text('abrir'), findsOneWidget);
+      });
+
+      testWidgets('new order fails to save: closes, no card, no later toast', (
+        tester,
+      ) async {
+        final store = _MoneyStore()..failsSave = true;
+        await _pump(
+          tester,
+          assistantScreen(
+            store,
+            FakeAssistant(
+              const AiOrderDraft(
+                customer: AiCustomerHit(id: 'c1', name: 'Revenda Sul'),
+                actions: AiOrderActions(status: 'done'),
+              ),
+            ),
+          ),
+          hosted: true,
+        );
+        await talk(tester);
+        await tester.tap(find.byKey(const ValueKey('new_order_save')));
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+        expect(card(), findsNothing);
+        expect(find.text('abrir'), findsOneWidget);
+        expect(find.textContaining('Registre o recebimento'), findsNothing);
+        await tester.pump(kAiActionsSaveWait);
+        await tester.pumpAndSettle();
+        expect(find.textContaining('Registre o recebimento'), findsNothing);
+        expect(store.status, isNot('done'));
       });
     });
 
@@ -1563,7 +1596,9 @@ void main() {
       tester,
     ) async {
       SubscriptionService.debugPaidPlansEnabledOverride = true;
-      addTearDown(() => SubscriptionService.debugPaidPlansEnabledOverride = null);
+      addTearDown(
+        () => SubscriptionService.debugPaidPlansEnabledOverride = null,
+      );
       final events = <String, Map<String, Object>>{};
       AnalyticsService.debugAiEventSink = (name, parameters) =>
           events[name] = parameters;
@@ -1885,18 +1920,14 @@ void main() {
 
       await tester.tap(mark);
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const ValueKey('order_hold_reason_part')),
-      );
+      await tester.tap(find.byKey(const ValueKey('order_hold_reason_part')));
       await tester.pumpAndSettle();
 
       expect(store.hold?.reason, OrderHoldReason.part);
       expect(store.order!.status, 'progress');
       expect(find.text('Parada desde hoje · Esperando peça'), findsOneWidget);
       expect(mark, findsNothing);
-      expect(actions.calls, [
-        'log: Marcada como parada: Esperando peça',
-      ]);
+      expect(actions.calls, ['log: Marcada como parada: Esperando peça']);
     });
 
     testWidgets('the note is optional and goes with the reason', (
@@ -2127,6 +2158,89 @@ void main() {
         expect(asked, hasLength(1));
         expect(store.order!.status, 'done');
       });
+    });
+
+    testWidgets('who cannot edit the order does not open its items', (
+      tester,
+    ) async {
+      final saved = order('approved')
+        ..services = [
+          OrderService()
+            ..service = (ServiceAggr()
+              ..id = 's1'
+              ..name = 'Troca de óleo')
+            ..value = 80,
+        ];
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: OrderStore(),
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+          permissions: _permissions(edit: false),
+          actions: FakeActions(),
+          mostUsed: () async => const [],
+        ),
+        args: {'order': saved},
+      );
+      final row = find.text('Troca de óleo');
+      await tester.scrollUntilVisible(row, 200);
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byType(OrderItemSheet), findsNothing);
+    });
+
+    testWidgets('due earlier today is not late, as in the list', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      final saved = order('approved')
+        ..dueDate = DateTime(now.year, now.month, now.day, 0, 1);
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: OrderStore(),
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          mostUsed: () async => const [],
+        ),
+        args: {'order': saved},
+      );
+      expect(find.textContaining('Era para ficar pronto'), findsNothing);
+      expect(find.textContaining('Fica pronto'), findsOneWidget);
+    });
+
+    testWidgets('a refused start also goes back and warns', (tester) async {
+      final store = _StatusStore(() => Future.error(StateError('denied')));
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: store,
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          mostUsed: () async => const [],
+        ),
+        args: {'order': order('approved')},
+      );
+
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.order!.status, 'approved');
+      expect(store.status, 'approved');
+      expect(
+        find.text('Não foi possível salvar. Tente de novo.'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('a refused mark goes away, warns and leaves no comment', (
@@ -2727,6 +2841,38 @@ void main() {
       await tester.enterText(find.byType(EditableText).first, '');
       await tester.pump();
       expect(store.order!.customData, isNull);
+    });
+
+    testWidgets('typing writes once, after the pause, only customData', (
+      tester,
+    ) async {
+      final writes = <Map<String, dynamic>>[];
+      final store = OrderStore()
+        ..streamOrder = ((_, _) => const Stream.empty())
+        ..writeOrderFields = (_, _, fields) async => writes.add(fields);
+      // As stored: the total already matches the items.
+      await _pump(
+        tester,
+        screen(store),
+        args: {
+          'order': saved()
+            ..total = 0
+            ..createdAt = DateTime(2026, 11, 1),
+        },
+      );
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      addTearDown(() => Global.companyAggr = null);
+
+      for (final text in ['X', 'XY', 'XYZ']) {
+        await tester.enterText(find.byType(EditableText).first, text);
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+      expect(writes, isEmpty);
+
+      await tester.pump(kCustomFieldSaveDelay);
+      expect(writes, hasLength(1));
+      expect(writes.single['customData'], {'brand': 'XYZ'});
+      expect(writes.single.containsKey('services'), isFalse);
     });
 
     testWidgets('no fields configured, no section', (tester) async {

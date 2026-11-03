@@ -6612,4 +6612,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Última: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'Não deu para salvar a OS';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Confira a internet e crie a OS de novo.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'Não deu para guardar a resposta. Tente de novo.';
+
+  @override
+  String get profileSaveFailed =>
+      'Não deu para salvar o perfil. Tente de novo.';
+
+  @override
+  String get saveFailedTryAgain => 'Não deu para salvar. Tente de novo.';
+
+  @override
+  String get deleteFailedTryAgain => 'Não deu para apagar. Tente de novo.';
 }

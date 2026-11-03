@@ -49,6 +49,8 @@ tags:
     description: Busca inteligente
   - name: Bot Summary
     description: Resumos formatados
+  - name: App Orders
+    description: OS pelo app web (itens, dinheiro, situação, parada). Ver docs/WEB_API.md
   - name: App Payments
     description: Receber de um cliente com várias OS e cobrança Asaas de várias OS (app Flutter)
   - name: App NFS-e
@@ -95,8 +97,112 @@ components:
       required: true
       schema:
         type: string
+    AppOrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+    AppItemId:
+      name: itemId
+      in: path
+      required: true
+      description: '`id` da linha em GET /v1/app/orders/{orderId} (linhas antigas: id derivado `legacy_…`)'
+      schema:
+        type: string
+    AppTransactionId:
+      name: transactionId
+      in: path
+      required: true
+      description: '`id` da transação em GET /v1/app/orders/{orderId} (antigas: `legacy_…`)'
+      schema:
+        type: string
+    AppReceiptId:
+      name: receiptId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    AppOrderWritten:
+      description: A OS depois da escrita (sem valores para quem não tem viewPrices)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean }
+              data:
+                type: object
+                properties:
+                  itemId: { type: string }
+                  order: { $ref: '#/components/schemas/AppOrder' }
 
   schemas:
+    ExpectedUpdatedAt:
+      type: string
+      format: date-time
+      description: '`updatedAt` que o cliente viu. Outro valor na OS → 409 ORDER_CHANGED, nada gravado.'
+    ReceiptFile:
+      type: object
+      required: [url, storagePath, contentType]
+      properties:
+        url: { type: string, format: uri }
+        storagePath: { type: string }
+        fileName: { type: string }
+        contentType: { type: string, description: image/* ou application/pdf }
+    AppOrderLine:
+      type: object
+      properties:
+        id: { type: string }
+        service: { type: object, description: 'id, name, photo e value (só com viewPrices)' }
+        product: { type: object, description: 'id, name, photo e value (só com viewPrices)' }
+        description: { type: string }
+        quantity: { type: integer }
+        deviceId: { type: string }
+        value: { type: number, nullable: true, description: Só com viewPrices. null = sem valor }
+        total: { type: number, nullable: true, description: Total da linha do produto, só com viewPrices }
+    AppOrderSummary:
+      type: object
+      properties:
+        id: { type: string }
+        number: { type: integer }
+        customer: { type: object }
+        device: { type: object }
+        status: { type: string }
+        onHold: { type: object }
+        assignedTo: { type: object }
+        dueDate: { type: string, format: date-time }
+        scheduledDate: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        total: { type: number, description: Só com viewPrices }
+        paidAmount: { type: number, description: Só com viewPrices }
+        payment: { type: string, nullable: true, enum: [paid, unpaid], description: Só com viewPrices }
+    AppOrder:
+      type: object
+      properties:
+        id: { type: string }
+        number: { type: integer }
+        customer: { type: object }
+        device: { type: object }
+        devices: { type: array, items: { type: object } }
+        services: { type: array, items: { $ref: '#/components/schemas/AppOrderLine' } }
+        products: { type: array, items: { $ref: '#/components/schemas/AppOrderLine' } }
+        status: { type: string }
+        onHold: { type: object, properties: { reason: { type: string }, note: { type: string }, since: { type: string } } }
+        assignedTo: { type: object, nullable: true }
+        dueDate: { type: string, format: date-time, nullable: true }
+        scheduledDate: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, description: Mandar de volta em expectedUpdatedAt }
+        total: { type: number, description: Só com viewPrices }
+        discount: { type: number, description: Só com viewPrices }
+        paidAmount: { type: number, description: Só com viewPrices }
+        remainingBalance: { type: number, description: Só com viewPrices }
+        payment: { type: string, nullable: true, description: Só com viewPrices }
+        transactions: { type: array, items: { type: object }, description: Só com viewPrices }
+        documents: { type: array, items: { type: object }, description: Comprovantes, só com viewPrices }
     Error:
       type: object
       properties:
@@ -831,6 +937,380 @@ paths:
         '200':
           description: Pending items with formatted message
 
+  # ─── App Orders (app web; docs/WEB_API.md) ────────────────────────────────
+  /v1/app/orders:
+    get:
+      tags: [App Orders]
+      summary: Listar OS (todas, ou as que o usuário criou)
+      description: |
+        Quem tem `viewAllOrders` vê todas; consultor e técnico, as que criaram. Paginação por
+        cursor (`pagination.nextCursor`). Sem `viewPrices` nenhum valor sai. Combinação de filtro
+        e ordem sem índice no Firestore → 400 UNSUPPORTED_QUERY.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: cursor, in: query, schema: { type: string }, description: Id da última OS da página anterior }
+        - { name: status, in: query, schema: { type: string }, description: 'Uma ou várias situações separadas por vírgula (quote,approved,progress,done,canceled)' }
+        - { name: sort, in: query, schema: { type: string, enum: [createdAt, updatedAt, number, dueDate, scheduledDate], default: createdAt } }
+        - { name: direction, in: query, schema: { type: string, enum: [asc, desc] } }
+        - { name: customerId, in: query, schema: { type: string } }
+        - { name: deviceId, in: query, schema: { type: string } }
+        - { name: assignedTo, in: query, schema: { type: string } }
+        - { name: startDate, in: query, schema: { type: string, format: date-time }, description: Só com sort=createdAt }
+        - { name: endDate, in: query, schema: { type: string, format: date-time }, description: Só com sort=createdAt }
+      responses:
+        '200':
+          description: Página de OS
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { type: array, items: { $ref: '#/components/schemas/AppOrderSummary' } }
+                  pagination:
+                    type: object
+                    properties:
+                      limit: { type: integer }
+                      total: { type: integer, description: Só na primeira página }
+                      hasMore: { type: boolean }
+                      nextCursor: { type: string, nullable: true }
+        '400': { description: VALIDATION_ERROR / INVALID_CURSOR / UNSUPPORTED_QUERY }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+
+  /v1/app/orders/{orderId}:
+    get:
+      tags: [App Orders]
+      summary: Abrir uma OS
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200':
+          description: OS (sem valores para quem não tem viewPrices)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/AppOrder' }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: NOT_FOUND }
+    patch:
+      tags: [App Orders]
+      summary: Mudar situação, datas e responsável
+      description: |
+        Situação: fluxo por papel (status-transitions.json). Datas: supervisor e técnico só em
+        orçamento. Responsável: `assignOrder`, nome lido do membro. `null` limpa. Não grava `done`.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [quote, approved, progress, done, canceled] }
+                dueDate: { type: string, format: date-time, nullable: true }
+                scheduledDate: { type: string, format: date-time, nullable: true }
+                assignedTo: { type: string, nullable: true, description: Id do membro }
+                expectedUpdatedAt: { $ref: '#/components/schemas/ExpectedUpdatedAt' }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '400': { description: VALIDATION_ERROR / INVALID_ASSIGNEE }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: NOT_FOUND }
+        '409': { description: ORDER_CHANGED }
+    delete:
+      tags: [App Orders]
+      summary: Apagar a OS
+      description: |
+        Mesma regra de order-delete.json. Recusa com nota ativa ou cobrança de várias OS aberta;
+        cancela a cobrança aberta desta OS antes de apagar; leva subcoleções, arquivos e links.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { description: Apagada }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: NOT_FOUND }
+        '409': { description: ORDER_HAS_INVOICE / CUSTOMER_CHARGE_OPEN / INSTALLMENTS_IN_PROGRESS }
+        '502': { description: ASAAS_UNAVAILABLE }
+
+  /v1/app/orders/{orderId}/items:
+    post:
+      tags: [App Orders]
+      summary: Pôr serviço ou produto do catálogo
+      description: Total calculado no servidor. Valor ou total da linha próprio exige `editPrices`. `value null` = sem valor.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, catalogId]
+              properties:
+                kind: { type: string, enum: [service, product] }
+                catalogId: { type: string }
+                description: { type: string, maxLength: 500 }
+                value: { type: number, nullable: true }
+                quantity: { type: integer, minimum: 1, description: Só produto }
+                total: { type: number, nullable: true, description: Total da linha do produto }
+                deviceId: { type: string, nullable: true, description: Aparelho que está na OS }
+                expectedUpdatedAt: { $ref: '#/components/schemas/ExpectedUpdatedAt' }
+      responses:
+        '201': { $ref: '#/components/responses/AppOrderWritten' }
+        '400': { description: VALIDATION_ERROR / INVALID_DEVICE }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: NOT_FOUND }
+        '409': { description: ORDER_CHANGED }
+
+  /v1/app/orders/{orderId}/items/{itemId}:
+    patch:
+      tags: [App Orders]
+      summary: Mudar um item
+      description: Só a observação, quem vê a OS; o resto, quem edita os campos principais.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppItemId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description: { type: string }
+                value: { type: number, nullable: true }
+                quantity: { type: integer, minimum: 1 }
+                total: { type: number, nullable: true }
+                deviceId: { type: string, nullable: true }
+                expectedUpdatedAt: { $ref: '#/components/schemas/ExpectedUpdatedAt' }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: NOT_FOUND / ITEM_NOT_FOUND }
+        '409': { description: ORDER_CHANGED }
+    delete:
+      tags: [App Orders]
+      summary: Tirar um item
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppItemId'
+        - $ref: '#/components/parameters/AppCompanyId'
+        - { name: expectedUpdatedAt, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '404': { description: NOT_FOUND / ITEM_NOT_FOUND }
+        '409': { description: ORDER_CHANGED }
+
+  /v1/app/orders/{orderId}/payments:
+    post:
+      tags: [App Orders]
+      summary: Receber
+      description: |
+        Quem recebe: dono, admin e gerente; consultor nas OS que criou (canReceiveOnOrder).
+        Desconto vai em /discounts. Comprovante em `tenants/{companyId}/orders/{orderId}/`.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number, minimum: 0.01 }
+                description: { type: string }
+                paidAt: { type: string, format: date-time }
+                paymentMethod: { type: string, enum: [pix, cash, card, other] }
+                receiptFile: { $ref: '#/components/schemas/ReceiptFile' }
+                clientTransactionId: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$', description: 'uuid do cliente; repetir com o mesmo id não grava de novo' }
+      responses:
+        '200': { description: 'transactionId, paidAmount, remainingBalance, isFullyPaid e a OS' }
+        '400': { description: VALIDATION_ERROR / INVALID_FILE / INVALID_PAID_AT }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: TRANSACTION_ID_CONFLICT }
+
+  /v1/app/orders/{orderId}/payments/mark-paid:
+    post:
+      tags: [App Orders]
+      summary: Marcar como paga (lança o que falta)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description: { type: string }
+                paidAt: { type: string, format: date-time }
+                paymentMethod: { type: string, enum: [pix, cash, card, other] }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+
+  /v1/app/orders/{orderId}/payments/reset:
+    post:
+      tags: [App Orders]
+      summary: Zerar pagamentos e descontos feitos à mão (os do Asaas ficam)
+      description: Financeiro. OS com parte de recibo → 409 RECEIPT_SHARE (desfazer o recibo).
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: RECEIPT_SHARE }
+
+  /v1/app/orders/{orderId}/payments/{transactionId}:
+    delete:
+      tags: [App Orders]
+      summary: Tirar um pagamento
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppTransactionId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '404': { description: TRANSACTION_NOT_FOUND }
+        '409': { description: ASAAS_LOCKED / RECEIPT_SHARE }
+
+  /v1/app/orders/{orderId}/payments/{transactionId}/receipt:
+    put:
+      tags: [App Orders]
+      summary: Anexar ou trocar o comprovante de um pagamento
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppTransactionId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiptFile]
+              properties:
+                receiptFile: { $ref: '#/components/schemas/ReceiptFile' }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '400': { description: INVALID_FILE }
+        '409': { description: ASAAS_LOCKED / RECEIPT_SHARE }
+    delete:
+      tags: [App Orders]
+      summary: Tirar o comprovante de um pagamento
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppTransactionId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+
+  /v1/app/orders/{orderId}/discounts:
+    post:
+      tags: [App Orders]
+      summary: Dar desconto (financeiro, até o que falta)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number, minimum: 0.01 }
+                description: { type: string }
+                clientTransactionId: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$', description: 'uuid do cliente; repetir com o mesmo id não grava de novo' }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '400': { description: VALIDATION_ERROR (acima do que falta) }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: TRANSACTION_ID_CONFLICT }
+    delete:
+      tags: [App Orders]
+      summary: Tirar todo o desconto (também o que não tem transação)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+
+  /v1/app/orders/{orderId}/discounts/{transactionId}:
+    delete:
+      tags: [App Orders]
+      summary: Tirar um desconto
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppTransactionId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '404': { description: TRANSACTION_NOT_FOUND }
+
+  /v1/app/orders/{orderId}/hold:
+    post:
+      tags: [App Orders]
+      summary: Marcar como parada (docs/ORDER_ON_HOLD.md)
+      description: Não consultor; só aprovada ou em andamento. Deixa comentário interno.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, enum: [part, customer, authorization, other] }
+                note: { type: string, maxLength: 500 }
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: HOLD_NOT_ALLOWED }
+    delete:
+      tags: [App Orders]
+      summary: Retomar
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppOrderId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { $ref: '#/components/responses/AppOrderWritten' }
+
   /v1/app/customers/{customerId}/open-orders:
     get:
       tags: [App Payments]
@@ -867,6 +1347,17 @@ paths:
         '404': { description: CUSTOMER_NOT_FOUND }
 
   /v1/app/customers/{customerId}/receipts:
+    get:
+      tags: [App Payments]
+      summary: Recibos do cliente
+      description: Ativos, mais novos primeiro. Financeiro vê todos; consultor, os que registrou.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { description: Lista de recibos }
+        '403': { description: FORBIDDEN }
     post:
       tags: [App Payments]
       summary: Registrar recebimento em várias OS do cliente (inclui OS de outra pessoa)
@@ -913,6 +1404,58 @@ paths:
         '403': { description: FORBIDDEN }
         '404': { description: CUSTOMER_NOT_FOUND / ORDER_NOT_FOUND }
         '409': { description: ORDER_NOT_PAYABLE / VALUE_EXCEEDS_BALANCE / RECEIPT_EXISTS }
+
+  /v1/app/customers/{customerId}/receipts/{receiptId}/cancel:
+    post:
+      tags: [App Payments]
+      summary: Desfazer recibo
+      description: |
+        Tira a parte de cada OS (como tirar um pagamento) e marca o recibo `canceled`. O arquivo
+        do comprovante fica. Financeiro ou quem registrou. Recibo do Asaas → 409 ASAAS_LOCKED.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppReceiptId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { description: Recibo desfeito }
+        '403': { description: FORBIDDEN }
+        '404': { description: RECEIPT_NOT_FOUND }
+        '409': { description: ASAAS_LOCKED }
+
+  /v1/app/customers/{customerId}/receipts/{receiptId}/file:
+    put:
+      tags: [App Payments]
+      summary: Anexar comprovante ao recibo (em todas as OS dele)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppReceiptId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiptFile]
+              properties:
+                receiptFile: { $ref: '#/components/schemas/ReceiptFile' }
+      responses:
+        '200': { description: Recibo com comprovante }
+        '400': { description: 'INVALID_FILE (fora de tenants/{companyId}/receipts/{receiptId}/)' }
+        '403': { description: FORBIDDEN }
+        '409': { description: RECEIPT_CANCELED / ASAAS_LOCKED }
+    delete:
+      tags: [App Payments]
+      summary: Tirar o comprovante do recibo
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppReceiptId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { description: Recibo sem comprovante }
 
   /v1/app/customers/{customerId}/charges:
     post:

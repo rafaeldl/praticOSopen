@@ -34,6 +34,13 @@ import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Directory whose delete is refused.
+class _FailingDeleteDirectory extends FakeDirectory {
+  @override
+  Future<void> deleteCustomer(Customer customer) async =>
+      throw StateError('permission-denied');
+}
+
 class FakeDirectory implements CustomerDirectory {
   FakeDirectory({
     this.customers = const [],
@@ -1412,6 +1419,22 @@ void main() {
       await tester.tap(find.text('Apagar'));
       await tester.pumpAndSettle();
       expect(dir.deleted.single.id, 'c1');
+    });
+
+    testWidgets('a refused delete tells it and stays on the customer', (
+      tester,
+    ) async {
+      await pumpDetail(tester, _FailingDeleteDirectory());
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apagar'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apagar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Não deu para apagar. Tente de novo.'), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nova OS para Ana'), findsOneWidget);
     });
 
     Future<void> pumpWithNfse(WidgetTester tester, PaymentSettings s) async {

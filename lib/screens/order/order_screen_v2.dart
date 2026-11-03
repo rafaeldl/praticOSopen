@@ -11,7 +11,10 @@ import 'package:praticos/screens/order/assistant/ai_actions_plan.dart';
 import 'package:praticos/screens/order/assistant/ai_actions_runner.dart';
 import 'package:praticos/screens/order/assistant/ai_actions_sheet.dart';
 import 'package:praticos/screens/payments/order_payment_actions.dart';
+import 'package:praticos/screens/menu_navigation/home_groups.dart'
+    show HomeRules;
 import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
@@ -116,6 +119,31 @@ const Duration kStatusTapCooldown = Duration(milliseconds: 800);
 
 /// How long "pronta" waits for the server before going on without it.
 const Duration kStatusSaveWait = Duration(seconds: 3);
+
+/// Pause after the last key before the segment fields are written.
+const Duration kCustomFieldSaveDelay = Duration(milliseconds: 800);
+
+/// The new-order sheet closed before the server refused the order: tells the
+/// user on whatever screen is open now.
+void showOrderCreateFailed() {
+  final context = NotificationTapHandler.navigatorKey.currentContext;
+  if (context == null) return;
+  final l10n = context.l10n;
+  showCupertinoDialog<void>(
+    context: context,
+    builder: (ctx) => CupertinoAlertDialog(
+      title: Text(l10n.orderCreateFailedTitle),
+      content: Text(l10n.orderCreateFailedMessage),
+      actions: [
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.ok),
+        ),
+      ],
+    ),
+  );
+}
 
 class OrderScreenV2 extends StatefulWidget {
   const OrderScreenV2({
@@ -310,6 +338,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String? _notifyStatus;
   Timer? _notifyTimer;
 
+  /// Pending save of the segment fields while the user types.
+  Timer? _customFieldsSave;
+
+  void _flushCustomFields() {
+    _customFieldsSave?.cancel();
+    _customFieldsSave = null;
+    if (!_isNew) _store.createItem();
+  }
+
   /// Right after the blue button changes the status it turns into the next
   /// step under the same finger: a double tap would skip a status.
   Timer? _statusCooldown;
@@ -331,6 +368,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   @override
   void dispose() {
+    if (_customFieldsSave?.isActive ?? false) _flushCustomFields();
     _savedElsewhere?.cancel();
     if (_nfseListening) _nfse.removeListener(_onNfse);
     if (widget.nfse == null) _nfse.dispose();
@@ -633,7 +671,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     addPickToOrder(_store, pick);
   }
 
+  /// A saved order's items change only for who can edit its main fields
+  /// (the same rule as "+ Adicionar"). A new order is always editable.
+  bool get _canEditItems {
+    final order = _store.order;
+    return order == null ||
+        order.id == null ||
+        _permissions.canEditMainFields(order);
+  }
+
   Future<void> _editService(int index) async {
+    if (!_canEditItems) return;
     final item = _store.services![index];
     final edit = await AppSheet.show<OrderItemEdit>(
       context,
@@ -655,6 +703,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Future<void> _editProduct(int index) async {
+    if (!_canEditItems) return;
     final item = _store.products![index];
     final edit = await AppSheet.show<OrderItemEdit>(
       context,
@@ -776,8 +825,30 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (status == 'done' && previous != 'done') {
       if (!await _statusKept(saved, previous)) return;
       if (mounted) await _offerMaintenance(_store.order);
+    } else {
+      // Approve, start, cancel or go back: nothing waits, but a refusal
+      // still puts the previous status back on screen.
+      unawaited(_revertIfRefused(saved, previous, status));
     }
     await _offerNotifyCustomer(status);
+  }
+
+  /// Puts [previous] back when the server refuses the change to [status]
+  /// (only if the order still shows [status]: a later change wins).
+  Future<void> _revertIfRefused(
+    Future<void>? saved,
+    String? previous,
+    String status,
+  ) async {
+    if (saved == null) return;
+    try {
+      await saved;
+    } catch (e) {
+      debugPrint('Could not save the order status: $e');
+      if (_store.status != status) return;
+      _store.restoreStatus(previous);
+      if (mounted) showAppToast(context, context.l10n.orderStatusSaveError);
+    }
   }
 
   /// False when the server refused the new status: it goes back on screen, so
@@ -803,9 +874,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// "Falta terminar 1 checklist": blocks "pronta" and opens the first one
   /// still pending.
-  Future<void> _offerPendingChecklist(
-    List<of_model.OrderForm> pending,
-  ) async {
+  Future<void> _offerPendingChecklist(List<of_model.OrderForm> pending) async {
     final l10n = context.l10n;
     final open = await showCupertinoDialog<bool>(
       context: context,
@@ -1763,9 +1832,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           undo.lines.isEmpty &&
           (undo.changed.isNotEmpty || undo.removed.isNotEmpty);
       _note = !filled
-          ? (actions != null
-                ? null
-                : error ?? l10n.orderAssistantNothingFound)
+          ? (actions != null ? null : error ?? l10n.orderAssistantNothingFound)
           : _isNew && draft?.actions != null
           ? l10n.aiActionsAfterSave
           : onlyChanged
@@ -3000,6 +3067,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _afterCreated(orderId, photos, onCreated);
         if (actions != null) _openSavedForActions();
       },
+      onError: (_) {
+        if (actions != null) _dropActionsAfterFailedSave();
+        showOrderCreateFailed();
+      },
     );
     if (actions != null) {
       if (_savingForActions) {
@@ -3045,6 +3116,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// No id in time (offline): the order is saved and the screen closes as
   /// usual. Nothing about money goes in without the card, and the toast says
   /// what is left to do.
+  /// The new order was not saved: no card, and no "register it later"
+  /// toast either, since the failure dialog already tells what happened.
+  void _dropActionsAfterFailedSave() {
+    _saveWait?.cancel();
+    if (!mounted || _pendingActions == null) return;
+    setState(() {
+      _saveWait = null;
+      _pendingActions = null;
+      _leaving = true;
+      _barMode = AssistantBarMode.idle;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _popScreen(true);
+    });
+  }
+
   void _closeWithoutActions() {
     if (!mounted) return;
     final message = context.l10n.aiActionsSavedOffline;
@@ -3154,7 +3241,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   List<Widget> _buildFloating(Color fade) {
     final l10n = context.l10n;
     final canUndo = _noteFilled && (_undo != null || _actionsDone != null);
-    final showPlans = SubscriptionService.paidPlansEnabled &&
+    final showPlans =
+        SubscriptionService.paidPlansEnabled &&
         _note != null &&
         _note == _quotaNote;
     return [
@@ -3372,9 +3460,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   bool _isOverdue(String? status, DateTime? due) =>
-      due != null &&
-      due.isBefore(DateTime.now()) &&
-      const ['quote', 'approved', 'progress'].contains(status);
+      HomeRules.isOverdueAt(status: status, due: due, now: DateTime.now());
 
   /// "hoje, 17:00", "amanhã", "15/10, 09:30": the day in words when close,
   /// without the time when it is midnight (no time was picked).
@@ -4358,7 +4444,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         locale: config.locale,
         onChanged: (data) {
           setState(() => _store.order?.customData = data);
-          _store.createItem();
+          // Typing writes once it pauses, not on every key.
+          _customFieldsSave?.cancel();
+          _customFieldsSave = Timer(kCustomFieldSaveDelay, _flushCustomFields);
         },
         sectionBuilder: (context, name, rows) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

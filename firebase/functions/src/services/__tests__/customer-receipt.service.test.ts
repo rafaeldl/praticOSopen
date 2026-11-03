@@ -113,7 +113,7 @@ describe('customer-receipt.service', () => {
         paidAt: PAID_AT,
         allocations: [{ orderId: 'o2', amount: 10 }],
         receiptFile: {
-          url: 'https://firebasestorage.googleapis.com/x',
+          url: 'https://firebasestorage.googleapis.com/v0/b/praticos.appspot.com/o/tenants%2Fc1%2Freceipts%2Fr2%2Ffile.jpg?alt=media',
           storagePath: 'tenants/c1/receipts/r2/file.jpg',
           contentType: 'image/jpeg',
         },

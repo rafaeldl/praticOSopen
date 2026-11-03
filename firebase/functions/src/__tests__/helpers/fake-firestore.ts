@@ -100,34 +100,98 @@ export class FakeDoc {
     this.store.write(this.path, data, 'set');
   }
   async delete() {
-    this.store.docs.delete(this.path);
+    this.store.remove(this.path);
   }
+}
+
+/** Sort value of a document: `__name__` is the document id. */
+function sortValue(d: { path: string; value: Data }, field: string): unknown {
+  return field === '__name__' ? d.path.split('/').pop() : getField(d.value, field);
+}
+
+/** Firestore-like order across types: missing/null first, then numbers, then strings. */
+function compareValues(a: unknown, b: unknown): number {
+  const rank = (v: unknown) => (v === undefined || v === null ? 0 : typeof v === 'number' ? 1 : typeof v === 'string' ? 2 : 3);
+  if (rank(a) !== rank(b)) return rank(a) - rank(b);
+  if (typeof a === 'number' && typeof b === 'number') return a - b;
+  if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
+  return 0;
+}
+
+interface QueryState {
+  filters: Array<[string, string, unknown]>;
+  orders: Array<[string, 'asc' | 'desc']>;
+  limit?: number;
+  offset?: number;
+  /** Values of the order fields (and the id) the results start after. */
+  after?: unknown[];
 }
 
 class FakeQuery {
   constructor(
     protected store: FakeFirestore,
     public path: string,
-    private filters: Array<[string, string, unknown]> = [],
+    private state: QueryState = { filters: [], orders: [] },
     /** Collection-group query: `path` is the collection id, matched at any depth. */
     private group = false,
   ) {}
+  private next(change: Partial<QueryState>) {
+    return new FakeQuery(this.store, this.path, { ...this.state, ...change }, this.group);
+  }
   where(field: string, op: string, value: unknown) {
-    return new FakeQuery(this.store, this.path, [...this.filters, [field, op, value]], this.group);
+    return this.next({ filters: [...this.state.filters, [field, op, value]] });
   }
-  orderBy() {
-    return this;
+  /** Sorts like Firestore, except that documents without the field are kept (sorted first). */
+  orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
+    return this.next({ orders: [...this.state.orders, [field, direction]] });
   }
-  limit() {
-    return this;
+  limit(n: number) {
+    return this.next({ limit: n });
+  }
+  offset(n: number) {
+    return this.next({ offset: n });
+  }
+  /** startAfter(snapshot) or startAfter(...values of the order fields). */
+  startAfter(...values: unknown[]) {
+    const [first] = values;
+    if (first instanceof FakeSnapshot) {
+      const doc = { path: first.ref.path, value: first.data() as Data };
+      return this.next({ after: [...this.state.orders.map(([f]) => sortValue(doc, f)), sortValue(doc, '__name__')] });
+    }
+    return this.next({ after: values });
+  }
+  count() {
+    return { get: async () => {
+      const size = this.matching().length;
+      return { data: () => ({ count: size }) };
+    } };
+  }
+  private matching() {
+    const source = this.group ? this.store.listCollectionGroup(this.path) : this.store.listCollection(this.path);
+    return source.filter((d) => this.state.filters.every(([f, op, v]) => matches(getField(d.value, f), op, v)));
   }
   async get() {
-    const source = this.group ? this.store.listCollectionGroup(this.path) : this.store.listCollection(this.path);
-    const docs = source
-      .filter((d) =>
-        this.filters.every(([f, op, v]) => matches(getField(d.value, f), op, v)),
-      )
-      .map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), d.value));
+    const orders: Array<[string, 'asc' | 'desc']> = this.state.orders.length > 0
+      ? [...this.state.orders, ['__name__', this.state.orders[this.state.orders.length - 1][1]]]
+      : [];
+    let rows = this.matching();
+    const compare = (a: { path: string; value: Data }, values: unknown[]) => {
+      for (let i = 0; i < orders.length && i < values.length; i++) {
+        const diff = compareValues(sortValue(a, orders[i][0]), values[i]) * (orders[i][1] === 'desc' ? -1 : 1);
+        if (diff !== 0) return diff;
+      }
+      return 0;
+    };
+    if (orders.length > 0) {
+      rows = [...rows].sort((a, b) => compare(a, orders.map(([f]) => sortValue(b, f))));
+    }
+    if (this.state.after) {
+      const after = this.state.after;
+      rows = rows.filter((d) => compare(d, after) > 0);
+    }
+    if (this.state.offset) rows = rows.slice(this.state.offset);
+    if (this.state.limit !== undefined) rows = rows.slice(0, this.state.limit);
+    const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), d.value));
     return { empty: docs.length === 0, size: docs.length, docs };
   }
 }
@@ -146,6 +210,9 @@ export class FakeCollection extends FakeQuery {
 export class FakeFirestore {
   docs = new Map<string, Data>();
   autoId = 0;
+  /** Write counter per document path: a transaction whose reads changed is retried, like Firestore. */
+  private versions = new Map<string, number>();
+  private barrier: { size: number; waiting: Array<() => void> } | null = null;
 
   collection(name: string) {
     return new FakeCollection(this, name);
@@ -154,10 +221,47 @@ export class FakeFirestore {
     return new FakeDoc(this, path);
   }
   collectionGroup(collectionId: string) {
-    return new FakeQuery(this, collectionId, [], true);
+    return new FakeQuery(this, collectionId, { filters: [], orders: [] }, true);
+  }
+
+  private version(path: string): number {
+    return this.versions.get(path) ?? 0;
+  }
+  private bump(path: string) {
+    this.versions.set(path, this.version(path) + 1);
+  }
+
+  remove(path: string) {
+    this.docs.delete(path);
+    this.bump(path);
+  }
+
+  /**
+   * Test helper: the next `size` transactions wait for each other right
+   * before committing, so all of them read before any of them writes (the
+   * race two clients saving at the same time would have).
+   */
+  holdCommitsUntil(size: number) {
+    this.barrier = { size, waiting: [] };
+  }
+
+  private async atCommitPoint(): Promise<void> {
+    const barrier = this.barrier;
+    if (!barrier) return;
+    const open = () => {
+      if (this.barrier === barrier) this.barrier = null;
+      barrier.waiting.splice(0).forEach((release) => release());
+    };
+    await new Promise<void>((resolve) => {
+      barrier.waiting.push(resolve);
+      if (barrier.waiting.length >= barrier.size) open();
+      // Never hangs a test whose other transaction did not start.
+      else setTimeout(open, 500).unref();
+    });
   }
 
   write(path: string, data: Data, mode: 'set' | 'merge' | 'update') {
+    this.bump(path);
     const current = this.docs.get(path);
     if (mode === 'update') {
       if (!current) throw new Error(`NOT_FOUND: ${path}`);
@@ -210,33 +314,62 @@ export class FakeFirestore {
     return batch;
   }
 
+  /**
+   * Optimistic transaction like Firestore's server SDK: writes are applied
+   * together at commit; when a document read in it changed meanwhile, the
+   * whole function runs again (up to 5 times), then it fails with ABORTED.
+   */
   async runTransaction<T>(fn: (tx: unknown) => Promise<T>): Promise<T> {
-    const snapshot = new Map(this.docs);
-    const ops: Array<() => Promise<void>> = [];
-    let wrote = false;
-    const tx = {
-      get: async (ref: FakeDoc) => {
-        if (wrote) throw new Error('Firestore transactions require all reads before writes');
-        return ref.get();
-      },
-      set: (ref: FakeDoc, data: Data, opts?: { merge?: boolean }) => ((wrote = true), ops.push(() => ref.set(data, opts)), tx),
-      update: (ref: FakeDoc, data: Data) => ((wrote = true), ops.push(() => ref.update(data)), tx),
-      delete: (ref: FakeDoc) => ((wrote = true), ops.push(() => ref.delete()), tx),
-    };
-    try {
+    for (let attempt = 1; ; attempt++) {
+      const reads = new Map<string, number>();
+      const ops: Array<() => void> = [];
+      let wrote = false;
+      const remember = (path: string) => {
+        if (!reads.has(path)) reads.set(path, this.version(path));
+      };
+      const tx = {
+        get: async (ref: FakeDoc | FakeQuery) => {
+          if (wrote) throw new Error('Firestore transactions require all reads before writes');
+          if (ref instanceof FakeDoc) {
+            remember(ref.path);
+            return ref.get();
+          }
+          const result = await ref.get();
+          result.docs.forEach((doc) => remember(doc.ref.path));
+          return result;
+        },
+        set: (ref: FakeDoc, data: Data, opts?: { merge?: boolean }) =>
+          ((wrote = true), ops.push(() => this.write(ref.path, data, opts?.merge ? 'merge' : 'set')), tx),
+        create: (ref: FakeDoc, data: Data) => ((wrote = true), ops.push(() => {
+          if (this.docs.has(ref.path)) throw Object.assign(new Error(`ALREADY_EXISTS: ${ref.path}`), { code: 6 });
+          this.write(ref.path, data, 'set');
+        }), tx),
+        update: (ref: FakeDoc, data: Data) => ((wrote = true), ops.push(() => this.write(ref.path, data, 'update')), tx),
+        delete: (ref: FakeDoc) => ((wrote = true), ops.push(() => this.remove(ref.path)), tx),
+      };
       const result = await fn(tx);
-      for (const op of ops) await op();
+      await this.atCommitPoint();
+      // From here on nothing awaits: check and apply are atomic.
+      const changed = [...reads].some(([path, version]) => this.version(path) !== version);
+      if (changed) {
+        if (attempt >= 5) throw Object.assign(new Error('ABORTED: too much contention'), { code: 10 });
+        continue;
+      }
+      const before = new Map(this.docs);
+      try {
+        ops.forEach((op) => op());
+      } catch (error) {
+        this.docs = before;
+        throw error;
+      }
       return result;
-    } catch (error) {
-      this.docs = snapshot;
-      throw error;
     }
   }
 
   /** Deletes a document and everything below it (mirrors Firestore's recursiveDelete). */
   async recursiveDelete(ref: FakeDoc) {
     for (const path of [...this.docs.keys()]) {
-      if (path === ref.path || path.startsWith(`${ref.path}/`)) this.docs.delete(path);
+      if (path === ref.path || path.startsWith(`${ref.path}/`)) this.remove(path);
     }
   }
 
@@ -247,6 +380,8 @@ export class FakeFirestore {
   /** Test helper: drop every document. */
   reset() {
     this.docs.clear();
+    this.versions.clear();
+    this.barrier = null;
     this.autoId = 0;
   }
 
@@ -257,6 +392,23 @@ export class FakeFirestore {
   /** Test helper: seed a document. */
   seed(path: string, data: Data) {
     this.docs.set(path, clone(data));
+    this.bump(path);
+  }
+}
+
+/** Storage stand-in: records what the code deleted. */
+export class FakeStorage {
+  deleted: string[] = [];
+  deletedPrefixes: string[] = [];
+  bucket() {
+    return {
+      file: (path: string) => ({ delete: async () => void this.deleted.push(path) }),
+      deleteFiles: async ({ prefix }: { prefix: string }) => void this.deletedPrefixes.push(prefix),
+    };
+  }
+  reset() {
+    this.deleted = [];
+    this.deletedPrefixes = [];
   }
 }
 
@@ -264,10 +416,12 @@ export class FakeFirestore {
  * Builds a replacement for `services/firestore.service` backed by `fake`.
  * Usage: jest.mock('../firestore.service', () => require('<path>/fake-firestore').fakeFirestoreModule())
  */
-export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore()) {
+export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore(), storage: FakeStorage = new FakeStorage()) {
   return {
     __fake: fake,
     db: fake,
+    storage,
+    runTransaction: <T>(fn: (tx: unknown) => Promise<T>) => fake.runTransaction(fn),
     FieldValue: FakeFieldValue,
     Timestamp: {
       now: () => SERVER_TIMESTAMP,
@@ -288,6 +442,7 @@ export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore()) {
 
 /** Shared instance used by the module-level helpers below (Asaas service tests). */
 export const fakeDb = new FakeFirestore();
+export const fakeStorage = new FakeStorage();
 
 /** Seeds a document by full path, e.g. seed('companies/c1/private/asaas', {...}). */
 export function seed(path: string, data: Data) {
@@ -303,10 +458,11 @@ export function list(collectionPath: string) {
 }
 export function resetFakeDb() {
   fakeDb.reset();
+  fakeStorage.reset();
 }
 
 /**
  * Drop-in module for `services/firestore.service` backed by the shared `fakeDb`:
  * jest.mock('../../firestore.service', () => jest.requireActual('<path>/helpers/fake-firestore').firestoreServiceMock);
  */
-export const firestoreServiceMock = fakeFirestoreModule(fakeDb);
+export const firestoreServiceMock = fakeFirestoreModule(fakeDb, fakeStorage);

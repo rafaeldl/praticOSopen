@@ -13,6 +13,7 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/screens/widgets/failure_alert.dart';
 
 /// New / edit service or product (one form for both [CatalogKind]s).
 ///
@@ -92,10 +93,17 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
     }
     try {
       await widget.source.save(widget.kind, _item);
-    } finally {
+    } catch (e) {
+      debugPrint('Could not save the catalog item: $e');
       if (mounted) setState(() => _saving = false);
+      if (mounted) {
+        await showFailureAlert(context, context.l10n.saveFailedTryAgain);
+      }
+      return;
     }
-    if (mounted) Navigator.pop(context, _item);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    Navigator.pop(context, _item);
   }
 
   Future<void> _confirmDelete() async {
@@ -119,7 +127,15 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await widget.source.delete(widget.kind, _item);
+    try {
+      await widget.source.delete(widget.kind, _item);
+    } catch (e) {
+      debugPrint('Could not delete the catalog item: $e');
+      if (mounted) {
+        await showFailureAlert(context, context.l10n.deleteFailedTryAgain);
+      }
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 

@@ -151,17 +151,15 @@ class _AiActionsSheetState extends State<AiActionsSheet> {
     _edited = true;
   });
 
-  AiActionsEdits _with({
-    double? discount,
-    ReceiveDraft? payment,
-  }) => AiActionsEdits(
-    discount: discount ?? _edits.discount,
-    payment: payment?.amount ?? _edits.payment,
-    method: payment != null ? payment.paymentMethod : _edits.method,
-    methodEdited: payment != null || _edits.methodEdited,
-    paidDay: payment?.paidDay ?? _edits.paidDay,
-    receipt: payment != null ? payment.receipt : _edits.receipt,
-  );
+  AiActionsEdits _with({double? discount, ReceiveDraft? payment}) =>
+      AiActionsEdits(
+        discount: discount ?? _edits.discount,
+        payment: payment?.amount ?? _edits.payment,
+        method: payment != null ? payment.paymentMethod : _edits.method,
+        methodEdited: payment != null || _edits.methodEdited,
+        paidDay: payment?.paidDay ?? _edits.paidDay,
+        receipt: payment != null ? payment.receipt : _edits.receipt,
+      );
 
   Future<void> _editPayment(AiPaymentStep step) async {
     final l10n = context.l10n;
@@ -197,6 +195,8 @@ class _AiActionsSheetState extends State<AiActionsSheet> {
   }
 
   String? _chargeNote(AppLocalizations l10n) {
+    // A link this user can't see may be open: same warning as the manual sheet.
+    if (_charges.chargesUnknown) return l10n.receiveChargeMaybeOpen;
     if (_charges.openCharge == null) return null;
     final name = widget.customerName;
     return name != null && name.isNotEmpty
@@ -210,9 +210,11 @@ class _AiActionsSheetState extends State<AiActionsSheet> {
     final today = DateTime.now();
     final past =
         day != null &&
-        DateTime(day.year, day.month, day.day).isBefore(
-          DateTime(today.year, today.month, today.day),
-        );
+        DateTime(
+          day.year,
+          day.month,
+          day.day,
+        ).isBefore(DateTime(today.year, today.month, today.day));
     return [
       ?paymentMethodLabel(l10n, step.method),
       if (past) format.formatDate(day),

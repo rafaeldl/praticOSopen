@@ -6,10 +6,17 @@ export type UserKey = keyof typeof USERS
 
 export async function login(page: Page, user: UserKey, path = './') {
   await page.goto(path)
+  await page.getByRole('button', { name: 'Já tenho conta com e-mail' }).click()
   await page.getByLabel('E-mail').fill(USERS[user].email)
   await page.getByLabel('Senha').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await expect(page.getByLabel('E-mail')).toBeHidden()
+}
+
+/** Owner works in two companies, so the first stop is the company choice. */
+export async function chooseCompany(page: Page, name: string) {
+  await expect(page.getByRole('heading', { level: 1, name: 'Onde você vai trabalhar agora?' })).toBeVisible()
+  await page.getByRole('button', { name }).click()
 }
 
 export async function expectNoAxeViolations(page: Page, label: string) {

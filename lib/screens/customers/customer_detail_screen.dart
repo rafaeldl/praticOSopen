@@ -35,6 +35,7 @@ import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/screens/widgets/failure_alert.dart';
 
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
@@ -287,7 +288,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await _directory.deleteCustomer(_customer!);
+    try {
+      await _directory.deleteCustomer(_customer!);
+    } catch (e) {
+      debugPrint('Could not delete the customer: $e');
+      if (mounted) {
+        await showFailureAlert(context, context.l10n.deleteFailedTryAgain);
+      }
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 

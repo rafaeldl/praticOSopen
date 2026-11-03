@@ -2669,5 +2669,12 @@
   "maintenanceWhatsappMessageNoName": "¡Hola! Se acerca el mantenimiento de {device}, previsto para {date}. ¿Coordinamos un día?",
   "@maintenanceWhatsappMessageNoName": {"placeholders": {"device": {"type": "String"}, "date": {"type": "String"}}},
   "maintenanceLastService": "Última: {service}",
-  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}}
+  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
+  "orderCreateFailedTitle": "No se pudo guardar la OS",
+  "orderCreateFailedMessage": "Revisa la conexión y crea la OS de nuevo.",
+  "receiveChargeMaybeOpen": "Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida.",
+  "checklistAnswerSaveFailed": "No se pudo guardar la respuesta. Inténtalo de nuevo.",
+  "profileSaveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
+  "saveFailedTryAgain": "No se pudo guardar. Inténtalo de nuevo.",
+  "deleteFailedTryAgain": "No se pudo eliminar. Inténtalo de nuevo."
 }

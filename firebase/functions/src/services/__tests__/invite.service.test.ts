@@ -155,7 +155,7 @@ describe('invite.service', () => {
     });
 
     it('rejects an existing member with ALREADY_MEMBER without linking or changing the role', async () => {
-      seedInvite({ channel: 'whatsapp', role: 'admin' });
+      seedInvite({ channel: 'whatsapp', role: 'admin', phone: '+5548999999999' });
       mockChannel.getUserByPhone.mockResolvedValueOnce({ id: 'u1', name: 'User' } as never);
       fake.seed('companies/c1/private/membership', { members: { u1: 'technician' } });
 
@@ -165,6 +165,25 @@ describe('invite.service', () => {
       expect(fake.read('companies/c1/private/membership')?.members).toEqual({ u1: 'technician' });
       expect(fake.read(INVITE_PATH)?.status).toBe('pending');
       expect(mockChannel.linkWhatsApp).not.toHaveBeenCalled();
+    });
+
+    it('refuses an owner invite sent to another number, like admin', async () => {
+      seedInvite({ channel: 'whatsapp', role: 'owner', phone: '+5548911111111' });
+
+      const result = await acceptInviteViaWhatsApp('INV_ABC', '+5548999999999');
+
+      expect(result).toMatchObject({ success: false });
+      expect(fake.read(INVITE_PATH)?.status).toBe('pending');
+    });
+
+    it('refuses an admin invite sent to another number', async () => {
+      seedInvite({ channel: 'whatsapp', role: 'admin', phone: '+5548911111111' });
+
+      const result = await acceptInviteViaWhatsApp('INV_ABC', '+5548999999999');
+
+      expect(result).toMatchObject({ success: false });
+      expect(fake.read(INVITE_PATH)?.status).toBe('pending');
+      expect(mockChannel.createUserFromWhatsApp).not.toHaveBeenCalled();
     });
 
     it('rejects invites that are not pending', async () => {

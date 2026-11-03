@@ -347,6 +347,7 @@ import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 import { globalErrorHandler } from './middleware/error-handler.middleware';
 import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
+import { API_CORS_OPTIONS, createAppLimiters } from './utils/app-rate-limit.utils';
 
 // Routes - API Core v1
 import authRoutes from './routes/v1/auth.routes';
@@ -358,7 +359,7 @@ import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
-import appInviteRoutes from './routes/v1/invite.routes';
+import { mountAppInviteRoutes } from './routes/v1/app-invites.mount';
 import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
@@ -367,6 +368,7 @@ import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
+import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
 import { auth as adminAuth } from './services/firestore.service';
 
@@ -408,13 +410,8 @@ const app = express();
 // Make req.ip the real client IP (rate limiter keys) — see trust-proxy.utils.ts
 configureTrustProxy(app);
 
-// CORS configuration
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-API-Secret', 'X-WhatsApp-Number'],
-  credentials: true,
-}));
+// CORS configuration (the web app sends X-Company-Id) — see app-rate-limit.utils.ts
+app.use(cors(API_CORS_OPTIONS));
 
 // Parse JSON bodies (larger limit for base64 image uploads)
 app.use(express.json({ limit: '15mb' }));
@@ -472,6 +469,12 @@ const apiCoreLimiter = rateLimit({
     return req.headers['x-api-key'] as string || req.ip || 'unknown';
   },
 });
+
+// Rate limiters for the app's API (Firebase ID token): per user after the
+// token is verified (a team shares the office IP), plus a wide per-IP cap
+// before it — see app-rate-limit.utils.ts
+const { ipLimiter: appIpLimiter, userLimiter: appUserLimiter } = createAppLimiters();
+const appBearer = [appIpLimiter, bearerAuth, appUserLimiter, resolveCompanyContext];
 
 // Rate limiter for Bot API
 const botLimiter = rateLimit({
@@ -565,19 +568,25 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 
 // Bearer token routes (for Flutter app)
 // Single mount so the rate limit and token check run once per request.
-app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
-app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
-app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
-app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
-app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
-app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
-app.use('/v1/app/nfse', apiCoreLimiter, bearerAuth, resolveCompanyContext, nfseRoutes);
+app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes);
+app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, customersRoutes);
+app.use('/v1/app/devices', ...appBearer, devicesRoutes);
+// Invites: /pending and /:token/accept also serve an account without a company
+mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
+app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);
+app.use('/v1/app/payments/asaas', ...appBearer, asaasConnectionRoutes);
+app.use('/v1/app/nfse', ...appBearer, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
-app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
-app.use('/v1/app/team', apiCoreLimiter, bearerAuth, resolveCompanyContext, teamRoutes);
+app.use('/v1/app/ai', ...appBearer, aiRoutes);
+app.use('/v1/app/team', ...appBearer, teamRoutes);
+// Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
+app.use('/v1/app/web-access', createWebAccessRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token),
+  readConfig: async () => (await db.collection('config').doc('webApp').get()).data() ?? null,
+}));
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
-app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
+app.use('/user/link', ...appBearer, userLinkRoutes);
 
 // API Bot Routes
 app.use('/bot/link', botLimiter, botAuth, linkRoutes);

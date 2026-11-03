@@ -26,6 +26,7 @@ import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/report_week.dart';
 
 /// Relatório financeiro (gráficos, ranking de clientes/serviços/produtos e
 /// escolha de outro período), aberto a partir da aba Financeiro.
@@ -118,9 +119,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
       case 'hoje':
         return _periodOffset != 0 ? dayFormat.format(periodDate) : context.l10n.today;
       case 'semana':
-        DateTime startOfWeek =
-            periodDate.subtract(Duration(days: periodDate.weekday));
-        DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+        final startOfWeek = reportWeek(now, _periodOffset).start;
+        final endOfWeek = reportWeekLastDay(now, _periodOffset);
         return "${dayFormat.format(startOfWeek)} - ${dayFormat.format(endOfWeek)}";
       case 'mês':
         return _periodOffset != 0 ? monthFormat.format(periodDate) : context.l10n.currentMonth;
@@ -147,9 +147,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         if (_periodOffset == 0) return context.l10n.today;
         return format.formatDate(now.add(Duration(days: _periodOffset)));
       case 'semana':
-        final date = now.add(Duration(days: 7 * _periodOffset));
-        final start = date.subtract(Duration(days: date.weekday % 7));
-        final end = start.add(const Duration(days: 6));
+        final start = reportWeek(now, _periodOffset).start;
+        final end = reportWeekLastDay(now, _periodOffset);
         return '${format.formatDayMonth(start)} - ${format.formatDayMonth(end)}';
       case 'mês':
         if (_periodOffset == 0) return context.l10n.currentMonth;

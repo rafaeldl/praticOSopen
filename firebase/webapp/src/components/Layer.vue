@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // Drawer, sheet or dialog: focus trapped inside, Esc closes, focus returns to
-// the opener. Each layer is a history entry, so Voltar closes it too.
+// the opener. Each layer is a history entry, so Voltar closes it too. Rendered
+// at the end of <body>; everything behind it (the app, lower layers) is inert,
+// so neither the mouse nor a screen reader reaches it.
+// Every way of closing (Voltar, Esc, backdrop, a Cancel button) passes `guard`.
 import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { LAYER_PARAM, openLayers, queryValues, withoutParam } from '@/lib/route-layer'
@@ -20,6 +23,8 @@ const emit = defineEmits<{ close: [] }>()
 const route = useRoute()
 const router = useRouter()
 const box = ref<HTMLElement | null>(null)
+const root = ref<HTMLElement | null>(null)
+let madeInert: Element[] = []
 const key = `l${useId()}`.replace(/[^\w-]/g, '')
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex="0"]'
 
@@ -34,9 +39,26 @@ function focusables(): HTMLElement[] {
   return [...(box.value?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])].filter((item) => item.offsetParent !== null)
 }
 
-function requestClose() {
-  if (pushed && isOpenInUrl()) router.back()
-  else emit('close')
+async function requestClose() {
+  // In the history: going back runs the navigation guard below, which asks.
+  if (pushed && isOpenInUrl()) {
+    router.back()
+    return
+  }
+  if (props.guard && !(await props.guard())) return
+  emit('close')
+}
+
+function makeBackgroundInert() {
+  madeInert = [...document.body.children].filter(
+    (element) => element !== root.value && !element.hasAttribute('inert') && element.tagName !== 'SCRIPT',
+  )
+  madeInert.forEach((element) => element.setAttribute('inert', ''))
+}
+
+function restoreBackground() {
+  madeInert.forEach((element) => element.removeAttribute('inert'))
+  madeInert = []
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -78,6 +100,7 @@ onMounted(async () => {
   opener = document.activeElement as HTMLElement | null
   ui.layers++
   openLayers.add(key)
+  makeBackgroundInert()
   removeGuard = router.beforeEach(async (to) => {
     if (!props.guard || !pushed || queryValues(to.query, LAYER_PARAM).includes(key)) return true
     return (await props.guard()) ? true : false
@@ -93,6 +116,7 @@ onBeforeUnmount(() => {
   ui.layers--
   openLayers.delete(key)
   removeGuard?.()
+  restoreBackground()
   // Closed by the parent (saved, say): the entry must not stay behind.
   if (pushed && isOpenInUrl()) {
     const others = queryValues(route.query, LAYER_PARAM).filter((item) => item !== key)
@@ -105,9 +129,11 @@ defineExpose({ close: requestClose })
 </script>
 
 <template>
-  <div class="layer" :class="`layer--${kind}`" @mousedown.self="requestClose">
-    <div ref="box" class="layer-box" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" @keydown="onKeydown">
-      <slot :close="requestClose" />
+  <Teleport to="body">
+    <div ref="root" class="layer" :class="`layer--${kind}`" @mousedown.self="requestClose">
+      <div ref="box" class="layer-box" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" @keydown="onKeydown">
+        <slot :close="requestClose" />
+      </div>
     </div>
-  </div>
+  </Teleport>
 </template>

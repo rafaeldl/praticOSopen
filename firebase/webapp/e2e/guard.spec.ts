@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { login, type UserKey } from './helpers'
+import { chooseCompany, login, type UserKey } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.
 const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
@@ -14,6 +14,7 @@ const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
 for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {
   test(`${role}: URL direta respeita o papel`, async ({ page }) => {
     await login(page, role as UserKey)
+    if (role === 'owner') await chooseCompany(page, 'Oficina Alfa')
     await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
     for (const path of allowed) {
       await page.goto(path)
@@ -41,7 +42,7 @@ test('dono vê a lista; quem não vê valores não lê a OS direto', async ({ pa
   await expect(page.getByTestId('orders-table')).toBeVisible()
   await page.goto('settings')
   await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByLabel('E-mail')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
   await login(page, 'supervisor', 'orders')
   await expect(page.getByRole('heading', { name: 'Esta tela ainda está sendo feita' })).toBeVisible()
   await expect(page.getByTestId('orders-table')).toHaveCount(0)
@@ -50,4 +51,15 @@ test('dono vê a lista; quem não vê valores não lê a OS direto', async ({ pa
 test('rota que não existe', async ({ page }) => {
   await login(page, 'admin', 'not-a-route')
   await expect(page.getByRole('heading', { name: 'Este endereço não existe' })).toBeVisible()
+})
+
+test('trocar de empresa passa pela guarda: admin em A, técnico em B, sai da Equipe', async ({ page }) => {
+  await login(page, 'mixed', 'team')
+  await chooseCompany(page, 'Oficina Alfa')
+  await expect(page).toHaveURL(/\/team$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Equipe' })).toBeVisible()
+  await page.getByLabel('Empresa').selectOption({ label: 'Beta Repairs' })
+  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
+  await expect(page).toHaveURL(/\/app\/$/)
+  await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Equipe' })).toHaveCount(0)
 })

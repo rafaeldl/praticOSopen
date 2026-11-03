@@ -141,6 +141,7 @@ export interface DeviceAggr {
   name: string;
   serial?: string | null;
   photo?: string | null;
+  category?: string | null;
 }
 
 export interface Device extends DeviceAggr {
@@ -205,21 +206,43 @@ export type OrderStatus = 'quote' | 'approved' | 'progress' | 'done' | 'canceled
 export type PaymentStatus = 'unpaid' | 'paid';
 export type TransactionType = 'payment' | 'discount';
 
+/**
+ * A line of the order. `value: null` is an item without a price ("sem valor"),
+ * left out of the total. `id` exists only on lines the server wrote: the app
+ * does not keep it, so lines without one get a derived id (order-items.ts).
+ */
 export interface OrderService {
+  id?: string;
   service: ServiceAggr;
   description?: string;
-  value: number;
+  value: number | null;
   photo?: string;
-  deviceId?: string;
+  deviceId?: string | null;
 }
 
 export interface OrderProduct {
+  id?: string;
   product: ProductAggr;
   description?: string;
-  value: number;
+  value: number | null;
   quantity: number;
+  /** Line total when it differs from value × quantity (set by the app or with editPrices). */
+  total?: number | null;
   photo?: string;
-  deviceId?: string;
+  deviceId?: string | null;
+}
+
+/** File attached to an order (receipts of payments, among others). */
+export interface OrderDocument {
+  id: string;
+  url?: string;
+  storagePath?: string;
+  fileName?: string | null;
+  contentType?: string;
+  type?: string;
+  createdAt?: DateValue;
+  createdBy?: UserAggr;
+  linkedTransactionId?: string;
 }
 
 export interface OrderPhoto {
@@ -267,20 +290,27 @@ export interface Order {
   customer?: CustomerAggr;
   device?: DeviceAggr;
   devices?: DeviceAggr[];
+  /** Ids of `devices`, for the app's array-contains queries. */
+  deviceIds?: string[];
   services?: OrderService[];
   products?: OrderProduct[];
   photos?: OrderPhoto[];
+  documents?: OrderDocument[];
   total: number;
   discount: number;
-  dueDate?: DateValue;
-  scheduledDate?: DateValue;
+  dueDate?: DateValue | null;
+  scheduledDate?: DateValue | null;
   status: OrderStatus;
-  done: boolean;
+  /** Legacy: written by old API versions only. Nobody reads it; use `status`. */
+  done?: boolean;
   paid: boolean;
-  payment: PaymentStatus;
+  payment: PaymentStatus | null;
   paidAmount: number;
   transactions?: PaymentTransaction[];
-  assignedTo?: UserAggr;
+  assignedTo?: UserAggr | null;
+  /** UTC ISO. Stamped when `paid`/`payment` changed because the total changed (no money came in). */
+  paymentSyncedAt?: string;
+  lastPaymentAt?: string;
   rating?: OrderRating;
   company: CompanyAggr;
   createdAt: DateValue;
@@ -512,6 +542,12 @@ export interface AuthenticatedRequest extends Request {
     userId?: string;
     /** Email from the verified ID token (bearer auth only) */
     email?: string;
+    /** Whether the provider verified that email (bearer auth only) */
+    emailVerified?: boolean;
+    /** Phone number from the verified ID token, E.164 (bearer auth only) */
+    phone?: string;
+    /** Name from users/{uid} (bearer auth only) */
+    userName?: string;
     permissions?: string[];
     companyCountry?: string;
   };
@@ -556,7 +592,7 @@ export interface ShareTokenAuth {
 // ============================================================================
 
 export type CommentAuthorType = 'customer' | 'internal';
-export type CommentSource = 'app' | 'magicLink' | 'bot' | 'asaas';
+export type CommentSource = 'app' | 'magicLink' | 'bot' | 'asaas' | 'api';
 
 export interface CommentAuthor {
   name: string;

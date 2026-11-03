@@ -13,7 +13,7 @@
     {"id":"zero-total-is-never-paid","given":{"status":"done","total":0,"paidAmount":0},"expect":{"payment":"unpaid","paid":false,"remaining":0}},
     {"id":"negative-total-is-never-paid","given":{"status":"done","total":-30,"paidAmount":10},"expect":{"payment":"unpaid","paid":false,"remaining":0}},
     {"id":"float-drift-on-total-is-ignored","given":{"status":"done","total":824.4200000000001,"paidAmount":824.42},"expect":{"payment":"paid","paid":true,"remaining":0}},
-    {"id":"float-drift-on-paid-amount","given":{"status":"done","total":0.8,"paidAmount":0.7999999999999999},"expect":{"payment":"paid","paid":true,"remaining":0},"note":"O Dart arredonda os dois lados; o TS só o total. Os chamadores do servidor arredondam antes, então só a função pura diverge.","divergesIn":{"functions":{"payment":"unpaid","paid":false}}},
+    {"id":"float-drift-on-paid-amount","given":{"status":"done","total":0.8,"paidAmount":0.7999999999999999},"expect":{"payment":"paid","paid":true,"remaining":0},"note":"O Dart arredonda os dois lados; o TS só o total. Os chamadores do servidor arredondam antes, então só a função pura diverge."},
     {"id":"quote-has-no-payment-status","given":{"status":"quote","total":100,"paidAmount":0},"expect":{"payment":null,"paid":false,"remaining":100}},
     {"id":"quote-with-money-keeps-no-status","given":{"status":"quote","total":100,"paidAmount":100},"expect":{"payment":null,"paid":false,"remaining":0}},
     {"id":"canceled-has-no-payment-status","given":{"status":"canceled","total":100,"paidAmount":100},"expect":{"payment":null,"paid":false,"remaining":0}},

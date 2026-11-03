@@ -23,7 +23,7 @@
     {"id":"us-company-app-in-english","given":{"country":"US","appLocale":"en-US"},"expect":{"currency":"USD","locale":"en-US"}},
     {"id":"no-country-falls-back-to-brazil","given":{"country":null,"appLocale":"pt-BR"},"expect":{"currency":"BRL","locale":"pt-BR"}},
     {"id":"unknown-country-falls-back-to-brazil","given":{"country":"XX","appLocale":"pt-BR"},"expect":{"currency":"BRL","locale":"pt-BR"}},
-    {"id":"py-company","given":{"country":"PY","appLocale":"pt-BR"},"correct":{"currency":"PYG","locale":"es-PY"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"},"functions":{"currency":"BRL","locale":"pt-BR"}},"note":"O web conhece o país; getFormatContext não."},
-    {"id":"ao-company","given":{"country":"AO","appLocale":"pt-BR"},"correct":{"currency":"AOA","locale":"pt-AO"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"},"functions":{"currency":"BRL","locale":"pt-BR"}}}
+    {"id":"py-company","given":{"country":"PY","appLocale":"pt-BR"},"correct":{"currency":"PYG","locale":"es-PY"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}},"note":"O web conhece o país; getFormatContext não."},
+    {"id":"ao-company","given":{"country":"AO","appLocale":"pt-BR"},"correct":{"currency":"AOA","locale":"pt-AO"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}}
   ]
 }

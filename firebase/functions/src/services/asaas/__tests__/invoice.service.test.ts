@@ -771,6 +771,24 @@ describe('invoice.service', () => {
       expect(read(LOCK('o182'))).toMatchObject({ invoiceId: invoice.id });
     });
 
+    // The order trigger calls both moments when status and payment change in
+    // one write (e.g. PATCH to done on an order already paid): one nota only.
+    it.each(['paid', 'completed'])('situação e pagamento no mesmo evento (escolha "%s"): uma nota só', async (moment) => {
+      setAuto(moment);
+      await Promise.all([autoIssueInvoice('c1', 'o182', 'paid'), autoIssueInvoice('c1', 'o182', 'completed')]);
+
+      expect(client.createInvoice).toHaveBeenCalledTimes(1);
+      expect(await invoicesOf('o182')).toHaveLength(1);
+    });
+
+    it('o mesmo evento entregue duas vezes ao mesmo tempo: uma nota só', async () => {
+      setAuto('paid');
+      await Promise.all([autoIssueInvoice('c1', 'o182', 'paid'), autoIssueInvoice('c1', 'o182', 'paid')]);
+
+      expect(client.createInvoice).toHaveBeenCalledTimes(1);
+      expect(await invoicesOf('o182')).toHaveLength(1);
+    });
+
     it('outro momento, "só quando eu pedir" ou sem escolha: não emite', async () => {
       await autoIssueInvoice('c1', 'o182', 'paid');
       setAuto('manual');

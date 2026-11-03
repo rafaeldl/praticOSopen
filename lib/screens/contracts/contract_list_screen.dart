@@ -8,6 +8,7 @@ import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/contract_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -21,7 +22,17 @@ enum _ContractTab { active, ended }
 /// the next order is born; ended ones show when they stopped. Tapping a row
 /// opens the order that holds the contract.
 class ContractListScreen extends StatefulWidget {
-  const ContractListScreen({super.key, this.directory, this.onNew});
+  const ContractListScreen({
+    super.key,
+    this.directory,
+    this.onNew,
+    this.canCreate,
+  });
+
+  /// Whether the "+" (new contract = new order) shows. Defaults to
+  /// [AuthorizationService.canCreateOrder], the rule of the "+" beside the
+  /// tabs.
+  final bool? canCreate;
 
   /// Injected in tests; defaults to [FirestoreContractDirectory].
   final ContractDirectory? directory;
@@ -69,6 +80,9 @@ class _ContractListScreenState extends State<ContractListScreen> {
     super.dispose();
   }
 
+  bool get _canCreate =>
+      widget.canCreate ?? AuthorizationService.instance.canCreateOrder;
+
   void _new() {
     final onNew = widget.onNew;
     if (onNew != null) {
@@ -89,12 +103,14 @@ class _ContractListScreenState extends State<ContractListScreen> {
           AppNavBar(
             largeTitle: Text(contractsTitleOf(context)),
             previousTitle: l10n.myCompany,
-            trailing: GlassBarButton(
-              key: const ValueKey('contract_new'),
-              label: l10n.contractNew,
-              icon: CupertinoIcons.add,
-              onPressed: _new,
-            ),
+            trailing: _canCreate
+                ? GlassBarButton(
+                    key: const ValueKey('contract_new'),
+                    label: l10n.contractNew,
+                    icon: CupertinoIcons.add,
+                    onPressed: _new,
+                  )
+                : null,
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -174,11 +190,11 @@ class _ContractListScreenState extends State<ContractListScreen> {
           hasScrollBody: false,
           child: EmptyState(
             title: showActive ? l10n.noContracts : l10n.contractsEmptyEnded,
-            message: showActive
+            message: showActive && _canCreate
                 ? l10n.contractsEmptyAdd(l10n.orderShort)
                 : null,
-            actionLabel: showActive ? l10n.contractNew : null,
-            onAction: showActive ? _new : null,
+            actionLabel: showActive && _canCreate ? l10n.contractNew : null,
+            onAction: showActive && _canCreate ? _new : null,
           ),
         )
       else ...[

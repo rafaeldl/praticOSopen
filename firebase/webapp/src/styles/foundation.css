@@ -28,6 +28,18 @@ a.nav-item, a.more-row, .tabbar a, a.btn { text-decoration: none; }
 .company-select option { color: var(--color-ink); background: var(--color-card); }
 .company-pick { margin-top: 0.15rem; }
 
+.btn--apple { background: #000; color: #fff; border-color: #000; }
+.btn--apple:hover { background: #222; }
+:root[data-theme="dark"] .btn--apple { background: #fff; color: #000; border-color: #fff; }
+.entry-link { justify-self: center; padding: 0.5rem; }
+.entry-terms { text-align: center; }
+.layer-foot--inline { padding: 0.5rem 0 0; border-top: 0; }
+.choose-list, .invites { display: grid; gap: 0.5rem; }
+.choose-row { display: grid; gap: 0.1rem; text-align: left; min-height: 3.25rem; padding: 0.6rem 0.85rem; border: 1px solid var(--color-control); border-radius: 6px; background: var(--color-card); color: var(--color-ink); }
+.choose-row:hover { background: var(--color-paper-2); }
+.invites-title { font-size: 1rem; font-weight: 700; }
+.invite { display: grid; gap: 0.5rem; padding: 0.75rem 0; border-top: 1px solid var(--color-rule); }
+.invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .offline { padding: 0.5rem 1.25rem; background: var(--color-paper-2); color: var(--color-warning-text); font-weight: 600; border-bottom: 1px solid var(--color-rule); }
 
 .settings { display: block; overflow: auto; padding: 1rem 1.25rem; }
