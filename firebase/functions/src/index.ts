@@ -425,6 +425,7 @@ import chargesRoutes from './routes/v1/charges.routes';
 import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
 import appCustomersRoutes from './routes/v1/app-customers.routes';
 import appDevicesRoutes from './routes/v1/app-devices.routes';
+import { catalogRoutes } from './routes/v1/app-catalog.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
@@ -633,6 +634,9 @@ app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes
 // Web app reads and writes of customers and devices (app-*.routes.ts) answer before the generic ones.
 app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
 app.use('/v1/app/devices', ...appBearer, appDevicesRoutes, devicesRoutes);
+// Web app catalog (app-catalog.routes.ts): prices only with viewPrices, written only with editPrices.
+app.use('/v1/app/services', ...appBearer, catalogRoutes('service'));
+app.use('/v1/app/products', ...appBearer, catalogRoutes('product'));
 // Invites: /pending and /:token/accept also serve an account without a company
 mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
 app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);

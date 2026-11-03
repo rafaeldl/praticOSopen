@@ -55,7 +55,7 @@ Cada linha da resposta tem `id`. Linhas gravadas pela API guardam um `id` própr
 
 ## Rotas
 
-Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos) e `/v1/app/devices` (aparelhos).
+Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/devices` (aparelhos) e `/v1/app/services`, `/v1/app/products` (catálogo).
 
 | Rota | Quem | Observação |
 |---|---|---|
@@ -102,6 +102,22 @@ Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos) e `/v1/app
 
 Testes: `routes/v1/__tests__/app-directory.routes.test.ts` e os casos `customers.*`/`devices.*` de `__tests__/rbac/api-matrix.ts`.
 
+### Catálogo
+
+`routes/v1/app-catalog.routes.ts` (um roteador por tipo: `catalogRoutes('service')` em `/v1/app/services` e `catalogRoutes('product')` em `/v1/app/products`), com a lógica em `services/app-catalog.service.ts`. `/v1/services` e `/v1/products` (chave de API do bot e do MCP) não mudam. O app Flutter não chama estas rotas.
+
+| Rota | Quem | Observação |
+|---|---|---|
+| `GET /` | `viewServices` / `viewProducts` | Todos os itens (até 5.000; `meta.truncated` acima) com `name`, `photo`, `customData` e `version`. **`value` só com `viewPrices`**: sem ele o campo não vem, nem como `null`. `meta.prices` diz se veio. `meta.mostUsed`: até 5 ids do tipo mais usados nas últimas 50 OS que o papel lê (consultor: as que criou), empate pelo uso mais recente (`mostUsedItemKeys` do app), só itens que ainda existem; falha nessa conta não derruba a lista |
+| `GET /:id` | mesmo | Mesma projeção |
+| `POST /` | `manageServices` / `manageProducts` | `{name, value?, customData?}`. Nome sem espaços nas pontas; preço arredondado ao centavo; `company` da sessão; `createdAt`/`createdBy` só aqui. Mandar `value` (também `null`) exige `editPrices` |
+| `PATCH /:id` | mesmo | `{name?, value?, customData?, photo?, version?}`. Nunca regrava `createdAt`/`createdBy`. `value` exige `editPrices`; sem ele o preço guardado fica. `photo: {url, storagePath}` só de um arquivo em `tenants/{companyId}/{services\|products}/{id}/` do bucket do projeto (no emulador, a URL `http` do emulador de Storage); `photo: null` tira a foto e apaga a pasta. `version` velha → `409 CATALOG_ITEM_CHANGED` |
+| `DELETE /:id` | mesmo | Apaga o item e a pasta da foto. As OS ficam com a cópia |
+| `POST /import` | mesmo | `{importId, items: [{name, value?}]}`, até 500 por chamada; cada linha vira `{importId}-{n}`, então repetir devolve `existing`. Uma linha inválida recusa a chamada. Algum `value` exige `editPrices` |
+| `POST /prices` | manage e `editPrices` | `{changes: [{id, from, to}]}`, até 500, numa transação. `from` é o preço que a pessoa viu: item já em `to` fica (repetir depois de a resposta se perder), item em `from` muda, qualquer outro valor (ou item apagado) → `409 CATALOG_ITEM_CHANGED` com `error.ids` e nada gravado. Compara em centavos. Resposta `{updated, unchanged}` |
+
+Testes: `routes/v1/__tests__/app-catalog.routes.test.ts` e os casos `catalog.*` e `nofin.catalog.price` de `__tests__/rbac/api-matrix.ts`.
+
 **Quem recebe (`canReceiveOnOrder`)**: dono, admin e gerente em qualquer OS; consultor nas OS que criou, com "Valores e cobrança" ligado. Supervisor e técnico nunca. Igual a `canReceiveOnOrderFor` no app e a `canReceiveOnOrder` nas regras do Firestore.
 
 **Financeiro**: `viewFinancialReports` (dono, admin, gerente), com "Valores e cobrança" ligado.
@@ -141,7 +157,7 @@ Testes: `routes/v1/__tests__/app-directory.routes.test.ts` e os casos `customers
 | `INSUFFICIENT_PERMISSIONS`, `FORBIDDEN` | 403 | Papel |
 | `NOT_FOUND`, `ITEM_NOT_FOUND`, `TRANSACTION_NOT_FOUND`, `RECEIPT_NOT_FOUND` | 404 | |
 | `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente da `version` atual |
-| `CUSTOMER_CHANGED`, `DEVICE_CHANGED` | 409 | `version` do cliente ou do aparelho diferente |
+| `CUSTOMER_CHANGED`, `DEVICE_CHANGED`, `CATALOG_ITEM_CHANGED` | 409 | `version` do cliente, do aparelho ou do item diferente; no catálogo, também preço em lote mudado depois (`error.ids`) |
 | `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `RECEIPT_LEGACY_SHARE`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
 | `TRANSACTION_ID_CONFLICT` | 409 | `clientTransactionId` já usado com outro tipo ou valor |
 | `PAYMENT_EXCEEDS_BALANCE` | 409 | Pagamento acima do que falta; `error.remainingBalance` traz o saldo |
@@ -181,6 +197,7 @@ curl -X POST "$API/v1/app/orders/$ORDER/payments" \
 | Arquivo | Cobre |
 |---|---|
 | `firebase/functions/src/routes/v1/__tests__/orders.routes.test.ts` | Rotas, transações concorrentes, `expectedUpdatedAt`, projeção, outra empresa |
+| `firebase/functions/src/routes/v1/__tests__/app-catalog.routes.test.ts` | Catálogo: preço escondido, `editPrices`, versão, foto, importação e preço em lote |
 | `firebase/functions/src/__tests__/rbac/api-matrix.ts` + `rbac-api.test.ts` | Papel × rota |
 | `firebase/functions/src/__tests__/contract-cases.test.ts` | `docs/web-app/contract-cases/*.json` no servidor |
 | `firebase/functions/src/utils/app-rate-limit.utils.test.ts` | Limite por usuário e CORS |

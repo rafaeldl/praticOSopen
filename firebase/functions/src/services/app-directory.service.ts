@@ -37,7 +37,7 @@ export interface OrderScope {
 type Query = FirebaseFirestore.Query;
 
 /** Runs `build` once per slice the scope may read and merges by id. */
-async function scopedOrders(companyId: string, scope: OrderScope, build: (base: Query) => Query[]): Promise<Order[]> {
+export async function scopedOrders(companyId: string, scope: OrderScope, build: (base: Query) => Query[]): Promise<Order[]> {
   const orders = getTenantCollection(companyId, 'orders') as unknown as Query;
   const bases: Query[] = scope.all
     ? [orders]
@@ -54,7 +54,7 @@ async function scopedOrders(companyId: string, scope: OrderScope, build: (base: 
 }
 
 const time = (value: unknown): number => timestampToDate(value as string | undefined)?.getTime() ?? 0;
-const newestFirst = (a: Order, b: Order) => time(b.createdAt) - time(a.createdAt) || String(b.id).localeCompare(String(a.id));
+export const newestFirst = (a: Order, b: Order) => time(b.createdAt) - time(a.createdAt) || String(b.id).localeCompare(String(a.id));
 
 // ============================================================================
 // Customers
