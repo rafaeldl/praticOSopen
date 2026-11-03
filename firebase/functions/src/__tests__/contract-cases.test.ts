@@ -48,6 +48,7 @@ const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
 
 /** Every file this runner reads. A new file naming `functions` in `runsIn` must be added here. */
 const COVERED = [
+  'contract-generation.json', // contract-generation.cases.test.ts
   'currency.json',
   'order-items.json',
   'order-permissions.json',

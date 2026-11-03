@@ -1,0 +1,976 @@
+{
+  "version": 1,
+  "generatedFrom": "e05d6414",
+  "rule": "OS de contrato recorrente: o modelo (isContract) gera uma OS quando contract.active == true, contract.nextDueDate <= agora e contract.autoGenerate == true. A OS copia cliente, aparelhos, itens (só serviço/produto, descrição, valor, quantidade e total da linha), responsável e autor do modelo, nasce orçamento e não paga, sem número (o gatilho numera). O modelo grava lastGeneratedDate = agora, generatedCount + 1 e o próximo vencimento contado a partir de agora: períodos perdidos não são repostos e o dia 31 vira o dia 1 a 3 do mês seguinte, como o DateTime do Dart. Passado o endDate, gera uma última vez e desliga.",
+  "runsIn": [
+    "dart",
+    "functions"
+  ],
+  "sourceOfTruth": [
+    "lib/mobx/order_store.dart generateOrderFromContract e checkAndGenerateDueOrders",
+    "lib/models/order.dart OrderContract (computeNextDueDate, isDue, isExpired)"
+  ],
+  "dates": "Datas sem fuso são hora local: do aparelho no app, America/Sao_Paulo no servidor. `now` é o momento da geração.",
+  "fields": "`given.template` e `given.contract` são mesclados sobre `template` e `contract`. `expect.order` lista só os campos conferidos; createdAt e updatedAt são o momento da geração.",
+  "templateId": "tpl1",
+  "company": {
+    "id": "c1",
+    "name": "Clima Bom",
+    "country": "BR"
+  },
+  "template": {
+    "number": 12,
+    "isContract": true,
+    "status": "approved",
+    "payment": "paid",
+    "paid": true,
+    "paidAmount": 190,
+    "discount": 10,
+    "total": 180,
+    "createdBy": {
+      "id": "u1",
+      "name": "Ana",
+      "email": null,
+      "photo": null,
+      "preferredLanguage": null
+    },
+    "updatedBy": {
+      "id": "u2",
+      "name": "Bia",
+      "email": null,
+      "photo": null,
+      "preferredLanguage": null
+    },
+    "customer": {
+      "id": "cust1",
+      "name": "Condomínio Sol",
+      "phone": "+5511999990000",
+      "email": null,
+      "taxId": null
+    },
+    "device": {
+      "id": "d1",
+      "serial": "SN-d1",
+      "name": "Split 12k",
+      "photo": null,
+      "category": "Ar-condicionado",
+      "manufacturer": "LG",
+      "status": null
+    },
+    "devices": [
+      {
+        "id": "d1",
+        "serial": "SN-d1",
+        "name": "Split 12k",
+        "photo": null,
+        "category": "Ar-condicionado",
+        "manufacturer": "LG",
+        "status": null
+      }
+    ],
+    "deviceIds": [
+      "d1"
+    ],
+    "services": [
+      {
+        "service": {
+          "id": "s1",
+          "name": "Limpeza",
+          "value": 150,
+          "photo": null
+        },
+        "description": "Limpeza mensal",
+        "value": 150,
+        "photo": "https://example.com/s.jpg",
+        "deviceId": "d1"
+      }
+    ],
+    "products": [
+      {
+        "product": {
+          "id": "p1",
+          "name": "Filtro",
+          "value": 20,
+          "photo": null
+        },
+        "description": "Filtro",
+        "value": 20,
+        "quantity": 2,
+        "total": 40,
+        "photo": null,
+        "deviceId": "d1"
+      }
+    ],
+    "assignedTo": {
+      "id": "t1",
+      "name": "Caio",
+      "email": null,
+      "photo": null,
+      "preferredLanguage": null
+    },
+    "address": "Rua A, 10",
+    "customData": {
+      "floor": "3"
+    },
+    "photos": [
+      {
+        "id": "ph1",
+        "url": "https://example.com/p.jpg"
+      }
+    ],
+    "dueDate": "2026-10-10T00:00:00.000",
+    "scheduledDate": "2026-10-09T08:00:00.000"
+  },
+  "contract": {
+    "frequency": "monthly",
+    "interval": 1,
+    "startDate": "2026-10-03T09:15:00.000",
+    "endDate": null,
+    "nextDueDate": "2026-11-03T00:00:00.000",
+    "lastGeneratedDate": null,
+    "generatedCount": 0,
+    "autoGenerate": true,
+    "active": true,
+    "reminderDaysBefore": 3,
+    "parentOrderId": null,
+    "parentOrderNumber": null
+  },
+  "cases": [
+    {
+      "id": "monthly-due-copies-the-template",
+      "given": {
+        "now": "2026-11-03T02:00:00.000"
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "id": null,
+          "createdBy": {
+            "id": "u1",
+            "name": "Ana",
+            "email": null,
+            "photo": null,
+            "preferredLanguage": null
+          },
+          "updatedBy": {
+            "id": "u1",
+            "name": "Ana",
+            "email": null,
+            "photo": null,
+            "preferredLanguage": null
+          },
+          "company": {
+            "id": "c1",
+            "name": "Clima Bom",
+            "country": "BR"
+          },
+          "customer": {
+            "id": "cust1",
+            "name": "Condomínio Sol",
+            "phone": "+5511999990000",
+            "email": null,
+            "taxId": null
+          },
+          "device": {
+            "id": "d1",
+            "serial": "SN-d1",
+            "name": "Split 12k",
+            "photo": null,
+            "category": "Ar-condicionado",
+            "manufacturer": "LG",
+            "status": null
+          },
+          "devices": [
+            {
+              "id": "d1",
+              "serial": "SN-d1",
+              "name": "Split 12k",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            }
+          ],
+          "services": [
+            {
+              "service": {
+                "id": "s1",
+                "name": "Limpeza",
+                "value": 150,
+                "photo": null
+              },
+              "description": "Limpeza mensal",
+              "value": 150,
+              "photo": null,
+              "deviceId": null
+            }
+          ],
+          "products": [
+            {
+              "product": {
+                "id": "p1",
+                "name": "Filtro",
+                "value": 20,
+                "photo": null
+              },
+              "description": "Filtro",
+              "value": 20,
+              "quantity": 2,
+              "total": 40,
+              "photo": null,
+              "deviceId": null
+            }
+          ],
+          "photos": [],
+          "total": 190,
+          "discount": null,
+          "dueDate": null,
+          "scheduledDate": null,
+          "done": null,
+          "paid": null,
+          "payment": "unpaid",
+          "status": "quote",
+          "number": null,
+          "paidAmount": null,
+          "transactions": null,
+          "assignedTo": {
+            "id": "t1",
+            "name": "Caio",
+            "email": null,
+            "photo": null,
+            "preferredLanguage": null
+          },
+          "shareLink": null,
+          "rating": null,
+          "address": null,
+          "latitude": null,
+          "longitude": null,
+          "customData": null,
+          "documents": null,
+          "deviceIds": [
+            "d1"
+          ],
+          "contract": {
+            "frequency": null,
+            "interval": null,
+            "startDate": null,
+            "endDate": null,
+            "nextDueDate": null,
+            "lastGeneratedDate": null,
+            "generatedCount": null,
+            "autoGenerate": null,
+            "active": null,
+            "reminderDaysBefore": null,
+            "parentOrderId": "tpl1",
+            "parentOrderNumber": 12
+          },
+          "isContract": null
+        }
+      }
+    },
+    {
+      "id": "due-at-the-exact-moment",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-11-03T02:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "not-due-one-second-before",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-11-03T02:00:01.000"
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      }
+    },
+    {
+      "id": "inactive-contract-is-never-due",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "active": false
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      }
+    },
+    {
+      "id": "active-missing-is-not-due",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "active": null
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      }
+    },
+    {
+      "id": "reminder-only-contract-is-due-but-creates-nothing",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "autoGenerate": false
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": false
+      }
+    },
+    {
+      "id": "auto-generate-missing-creates-nothing",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "autoGenerate": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": false
+      }
+    },
+    {
+      "id": "without-next-due-date-nothing-happens",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "nextDueDate": null
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      }
+    },
+    {
+      "id": "monthly-on-the-31st-rolls-into-march",
+      "given": {
+        "now": "2027-01-31T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2027-01-31T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2027-03-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "after-the-roll-the-contract-stays-on-the-3rd",
+      "given": {
+        "now": "2027-03-03T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2027-03-03T00:00:00.000",
+          "lastGeneratedDate": "2027-01-31T02:00:00.000",
+          "generatedCount": 3
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2027-04-03T00:00:00.000",
+          "generatedCount": 4,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "monthly-on-january-31-of-a-leap-year",
+      "given": {
+        "now": "2028-01-31T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2028-01-31T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2028-03-02T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "monthly-on-the-30th-skips-february",
+      "given": {
+        "now": "2027-01-30T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2027-01-30T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2027-03-02T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "monthly-at-the-end-of-december-turns-the-year",
+      "given": {
+        "now": "2026-12-31T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-12-31T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2027-01-31T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "yearly-on-february-29-moves-to-march-1",
+      "given": {
+        "now": "2028-02-29T02:00:00.000",
+        "contract": {
+          "frequency": "yearly",
+          "nextDueDate": "2028-02-29T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2029-03-01T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "monthly-every-3-months",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "interval": 3
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2027-02-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "daily-keeps-the-time-of-generation",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "frequency": "daily",
+          "nextDueDate": "2026-11-02T14:35:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-11-04T02:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "weekly-every-2-weeks",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "frequency": "weekly",
+          "interval": 2
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-11-17T02:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "interval-missing-counts-as-1",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "interval": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "app-closed-three-months-makes-one-order",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-08-03T00:00:00.000",
+          "lastGeneratedDate": "2026-07-03T08:10:00.000",
+          "generatedCount": 4
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 5,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "daily-closed-ninety-days-makes-one-order",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "frequency": "daily",
+          "nextDueDate": "2026-08-05T10:00:00.000",
+          "lastGeneratedDate": "2026-08-04T10:00:00.000",
+          "generatedCount": 40
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-11-04T02:00:00.000",
+          "generatedCount": 41,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "opened-late-moves-the-due-day",
+      "given": {
+        "now": "2026-11-20T18:40:00.000",
+        "contract": {
+          "nextDueDate": "2026-11-15T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-20T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "past-end-date-makes-one-last-order-and-stops",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "endDate": "2026-11-01T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": false
+        }
+      }
+    },
+    {
+      "id": "end-date-ahead-stays-active",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "endDate": "2026-11-30T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "unknown-frequency-generates-and-clears-next-due-date",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "frequency": "fortnightly"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": null,
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "generated-count-missing-starts-at-1",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "generatedCount": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "single-device-becomes-the-devices-list",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "devices": null,
+          "deviceIds": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "device": {
+            "id": "d1",
+            "serial": "SN-d1",
+            "name": "Split 12k",
+            "photo": null,
+            "category": "Ar-condicionado",
+            "manufacturer": "LG",
+            "status": null
+          },
+          "devices": [
+            {
+              "id": "d1",
+              "serial": "SN-d1",
+              "name": "Split 12k",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            }
+          ],
+          "deviceIds": [
+            "d1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "several-devices-first-is-the-device",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "device": {
+            "id": "d9",
+            "serial": "SN-d9",
+            "name": "Old",
+            "photo": null,
+            "category": "Ar-condicionado",
+            "manufacturer": "LG",
+            "status": null
+          },
+          "devices": [
+            {
+              "id": "d2",
+              "serial": "SN-d2",
+              "name": "Split A",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            },
+            {
+              "id": "d3",
+              "serial": "SN-d3",
+              "name": "Split B",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            }
+          ]
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "device": {
+            "id": "d2",
+            "serial": "SN-d2",
+            "name": "Split A",
+            "photo": null,
+            "category": "Ar-condicionado",
+            "manufacturer": "LG",
+            "status": null
+          },
+          "devices": [
+            {
+              "id": "d2",
+              "serial": "SN-d2",
+              "name": "Split A",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            },
+            {
+              "id": "d3",
+              "serial": "SN-d3",
+              "name": "Split B",
+              "photo": null,
+              "category": "Ar-condicionado",
+              "manufacturer": "LG",
+              "status": null
+            }
+          ],
+          "deviceIds": [
+            "d2",
+            "d3"
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-device",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "device": null,
+          "devices": null,
+          "deviceIds": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "device": null,
+          "devices": null,
+          "deviceIds": null
+        }
+      }
+    },
+    {
+      "id": "lines-without-value-or-total",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "services": [
+            {
+              "service": {
+                "id": "s1",
+                "name": "Limpeza",
+                "value": 150,
+                "photo": null
+              },
+              "description": "Visita",
+              "value": null
+            }
+          ],
+          "products": [
+            {
+              "product": {
+                "id": "p1",
+                "name": "Filtro",
+                "value": 20,
+                "photo": null
+              },
+              "description": "Filtro",
+              "value": 30,
+              "quantity": null,
+              "total": null
+            }
+          ]
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "services": [
+            {
+              "service": {
+                "id": "s1",
+                "name": "Limpeza",
+                "value": 150,
+                "photo": null
+              },
+              "description": "Visita",
+              "value": null,
+              "photo": null,
+              "deviceId": null
+            }
+          ],
+          "products": [
+            {
+              "product": {
+                "id": "p1",
+                "name": "Filtro",
+                "value": 20,
+                "photo": null
+              },
+              "description": "Filtro",
+              "value": 30,
+              "quantity": null,
+              "total": null,
+              "photo": null,
+              "deviceId": null
+            }
+          ],
+          "total": 30
+        }
+      }
+    },
+    {
+      "id": "template-without-items",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "services": null,
+          "products": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "services": null,
+          "products": null,
+          "total": 0
+        }
+      }
+    },
+    {
+      "id": "template-without-number-or-assignee",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "template": {
+          "number": null,
+          "assignedTo": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true
+        },
+        "order": {
+          "assignedTo": null,
+          "contract": {
+            "frequency": null,
+            "interval": null,
+            "startDate": null,
+            "endDate": null,
+            "nextDueDate": null,
+            "lastGeneratedDate": null,
+            "generatedCount": null,
+            "autoGenerate": null,
+            "active": null,
+            "reminderDaysBefore": null,
+            "parentOrderId": "tpl1",
+            "parentOrderNumber": null
+          }
+        }
+      }
+    }
+  ]
+}
