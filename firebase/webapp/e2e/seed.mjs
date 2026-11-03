@@ -63,7 +63,8 @@ async function seedCompanies() {
       segment: company.segment,
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
-      nextOrderNumber: 100000,
+      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..507), like a real counter.
+      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 507) + 1,
       ...audit(company.owner, 100000),
     })
     // Server-only map: what buildRolesClaim verifies against.

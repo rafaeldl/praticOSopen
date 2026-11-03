@@ -83,12 +83,13 @@ export function removeItem(id: string, itemId: string, expectedUpdatedAt?: strin
   return api<OrderResponse>(`${base(id)}/items/${encodeURIComponent(itemId)}${query}`, { method: 'DELETE' })
 }
 
-export function receivePayment(id: string, body: { amount: number; paymentMethod?: string; clientTransactionId: string }) {
-  return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body })
+/** expectedUpdatedAt: a payment over a newer version is refused (two screens receiving the same balance). */
+export function receivePayment(id: string, body: { amount: number; paymentMethod?: string; clientTransactionId: string }, expectedUpdatedAt?: string | null) {
+  return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } })
 }
 
-export function giveDiscount(id: string, body: { amount: number; clientTransactionId: string }) {
-  return api<OrderResponse>(`${base(id)}/discounts`, { method: 'POST', body })
+export function giveDiscount(id: string, body: { amount: number; clientTransactionId: string }, expectedUpdatedAt?: string | null) {
+  return api<OrderResponse>(`${base(id)}/discounts`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } })
 }
 
 export function markOnHold(id: string, reason: HoldReason, note?: string) {

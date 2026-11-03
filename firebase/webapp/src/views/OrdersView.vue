@@ -15,10 +15,11 @@ import { mark } from '@/lib/marks'
 import { applyFreshFirstPage, mergeById } from '@/lib/order-list'
 import { onFreshFirstPage } from '@/lib/orders-query'
 import { onOrderEvent } from '@/lib/orders/bus'
-import { FIRST_PAGE, companyHasOrders, createListLoader, listContext, type ListLoader } from '@/lib/orders/data'
+import { ASSIGNED_READS, FIRST_PAGE, companyHasOrders, createListLoader, listContext, type ListLoader } from '@/lib/orders/data'
 import {
   canCreateOrders,
   defaultFilter,
+  exactFirst,
   deviceSummary,
   filtersFor,
   holdDays,
@@ -43,6 +44,7 @@ import { announce, ui } from '@/lib/ui'
 // Each comes with its texts (a second catalog, scripts/gen.mjs).
 const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
 const OrderBoard = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderBoard.vue'), loadOrderTexts()]).then(([m]) => m))
+const FirstRun = defineAsyncComponent(() => Promise.all([import('@/components/orders/FirstRun.vue'), loadOrderTexts()]).then(([m]) => m))
 const BatchActions = defineAsyncComponent(() => Promise.all([import('@/components/orders/BatchActions.vue'), loadOrderTexts()]).then(([m]) => m))
 
 const route = useRoute()
@@ -50,7 +52,7 @@ const router = useRouter()
 const panel = useRoutePanel('order')
 const ctx = listContext()
 const now = ref(new Date())
-const filters = filtersFor(session.role)
+const filters = filtersFor(session.role, ctx.showsMoney)
 const filter = computed<ListFilter>(() => {
   const wanted = route.query.f as ListFilter
   return filters.includes(wanted) ? wanted : defaultFilter(session.role)
@@ -63,6 +65,8 @@ const loadingMore = ref(false)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const stale = ref(false)
 const firstRun = ref(false)
+const unpaidCount = ref<number | null>(null)
+let stopSearch: (() => void) | undefined
 const selected = ref<string[]>([])
 const searchEl = ref<HTMLInputElement | null>(null)
 const sentinel = ref<HTMLElement | null>(null)
@@ -75,7 +79,7 @@ const canCreate = computed(() => canCreateOrders(session.role, can('createOrder'
 const filterRows = computed(() => rowsFor(filter.value, rows.value, now.value, session.uid))
 const visible = computed(() => {
   const query = search.value.trim()
-  return query ? filterRows.value.filter((order) => matchesSearch(order, query, statusText(order.status))) : filterRows.value
+  return query ? exactFirst(filterRows.value.filter((order) => matchesSearch(order, query, statusText(order.status))), query) : filterRows.value
 })
 const groups = computed(() =>
   filter.value === 'all' && !search.value.trim()
@@ -86,11 +90,14 @@ const summary = computed(() => (search.value.trim() ? null : summaryOf(filter.va
 const title = computed(() => t(route.name === 'orders' ? 'orders' : 'home'))
 /** The answer of the screen, right under the title (home.summary.count). */
 const summaryText = computed(() => {
+  // While searching, how many were found.
+  if (search.value.trim()) return t('web.orders.count', { count: visible.value.length })
   const value = summary.value
   if (!value) return ''
   if (value.kind === 'open') return value.late ? `${t('homeOpenCount', { count: value.open })} · ${t('homeLateCount', { count: value.late })}` : t('homeOpenCount', { count: value.open })
   if (value.kind === 'quotes') return t('homeQuotesWaiting', { count: value.count })
   if (value.kind === 'onHold') return t('homeOnHoldCount', { count: value.count })
+  if (value.kind === 'unpaid') return t('web.orders.unpaidSummary', { count: value.count, amount: money(value.amount) })
   return value.today ? t('homeWithYouToday', { count: value.count }) : t('homeWithYou', { count: value.count })
 })
 const searchHint = computed(() => t('homeSearchHintDevice', { device: deviceLabel().toLocaleLowerCase() }))
@@ -99,6 +106,9 @@ const selectedOrders = computed(() => selected.value.map((id) => rows.value.find
 
 const FILTER_LABEL: Record<ListFilter, () => string> = {
   open: () => t('filterOpen'),
+  late: () => t('web.orders.filterLate'),
+  today: () => t('web.orders.filterToday'),
+  unpaid: () => t('web.orders.filterUnpaid'),
   quotes: () => t('filterQuotes'),
   onHold: () => t('filterOnHold'),
   mine: () => t('filterMine'),
@@ -107,6 +117,9 @@ const FILTER_LABEL: Record<ListFilter, () => string> = {
 }
 const EMPTY_TITLE: Record<ListFilter, () => string> = {
   open: () => t('noOpenOrders'),
+  late: () => t('web.orders.noLate'),
+  today: () => t('web.orders.noToday'),
+  unpaid: () => t('web.orders.noUnpaid'),
   quotes: () => t('noQuotesWaiting'),
   onHold: () => t('noOrdersOnHold'),
   mine: () => t('noOrdersWithYou'),
@@ -127,7 +140,9 @@ async function load() {
   firstRun.value = false
   stopWatch?.()
   stopWatch = undefined
-  loader = createListLoader(ctx, queryStatuses(board.value ? 'all' : filter.value))
+  // Minhas by assignedTo once #514 is in (ASSIGNED_READS); until then the orders the technician created.
+  const assigned = ASSIGNED_READS && filter.value === 'mine' ? (session.uid as string) : undefined
+  loader = createListLoader(ctx, queryStatuses(board.value ? 'all' : filter.value), assigned)
   try {
     const page = await loader.first()
     if (token !== loadToken) return
@@ -141,12 +156,20 @@ async function load() {
     if (!rows.value.length && (filter.value === 'all' || filter.value === 'open' || filter.value === 'mine')) {
       firstRun.value = !(await companyHasOrders(ctx))
     }
-    // Nova OS should open with its lists ready: read them while the person looks at the list.
-    if (canCreate.value) {
-      const warm = () => void import('@/lib/orders/catalog').then((m) => Promise.all([m.loadCustomers(), m.loadDevices(), m.loadCatalog()])).catch(() => {})
-      if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 })
-      else setTimeout(warm, 1500)
-    }
+    // After the paint: Sem receber count, ⌘K search and the lists of Nova OS (list-extras.ts).
+    void import('@/lib/orders/list-extras').then((extras) => {
+      if (token !== loadToken) return
+      if (showsMoney) void extras.unpaidCount(ctx).then((count) => (unpaidCount.value = count))
+      stopSearch?.()
+      stopSearch = extras.paletteSearch(() => rows.value, (id) => void panel.open(id), (name) => {
+        search.value = name
+        choose('all')
+      })
+      if (canCreate.value) {
+        if ('requestIdleCallback' in window) requestIdleCallback(extras.warmLists, { timeout: 3000 })
+        else setTimeout(extras.warmLists, 1500)
+      }
+    })
     // Live first rows: another person's change shows without reloading.
     stopWatch = await loader.watch(
       FIRST_PAGE,
@@ -200,6 +223,13 @@ function choose(next: ListFilter) {
 
 function setView(view: 'list' | 'board') {
   setQuery({ view: view === 'board' ? 'board' : undefined })
+}
+
+/** Closing the open order puts the focus back on its row (never on the page body, where a typed "n" would open Nova OS). */
+function closePanel() {
+  const id = panel.value.value
+  panel.close()
+  void nextTick(() => setTimeout(() => (document.querySelector(`#row-${CSS.escape(id ?? '')} .row-btn`) as HTMLElement | null)?.focus(), 0))
 }
 
 function open(order: Order) {
@@ -262,7 +292,7 @@ function onKeys(event: KeyboardEvent) {
     }
   } else if (key === 'Escape') {
     if (selected.value.length) selected.value = []
-    else if (panelOpen.value) panel.close()
+    else if (panelOpen.value) closePanel()
   }
 }
 
@@ -322,6 +352,7 @@ onBeforeUnmount(() => {
   clearInterval(clock)
   window.removeEventListener('keydown', onKeys)
   removers.forEach((remove) => remove())
+  stopSearch?.()
   onFreshFirstPage(undefined)
 })
 
@@ -364,7 +395,7 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
             :aria-pressed="filter === item"
             @click="choose(item)"
           >
-            {{ FILTER_LABEL[item]() }}
+            {{ FILTER_LABEL[item]() }}<span v-if="item === 'unpaid' && unpaidCount" class="num"> {{ unpaidCount }}</span>
           </button>
         </div>
         <span class="spacer"></span>
@@ -389,21 +420,13 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
         </p>
         <LoadingState v-if="state === 'loading'" />
         <ErrorState v-else-if="state === 'failed'" :body="t('loadOrdersError')" :retry="load" />
-        <div v-else-if="firstRun" class="empty first-run" data-testid="first-run">
-          <h2>{{ t('firstOrderLabel') }}</h2>
-          <p>{{ t('web.orders.firstRunBody') }}</p>
-          <ol class="how">
-            <li>{{ t('howItWorksStep1') }} <span class="muted">{{ t('howItWorksStep1DetailDevice', { device: deviceLabel().toLocaleLowerCase() }) }}</span></li>
-            <li>{{ t('howItWorksStep2') }} <span class="muted">{{ t('howItWorksStep2Detail') }}</span></li>
-            <li>{{ t('howItWorksStep3') }} <span class="muted">{{ t('howItWorksStep3Detail') }}</span></li>
-          </ol>
-          <button v-if="canCreate" type="button" class="btn btn--primary" @click="ui.newOrder = true">{{ t('newOrderButton') }}</button>
-        </div>
+        <FirstRun v-else-if="firstRun" :can-create="canCreate" />
         <div v-else-if="!visible.length && search.trim()" class="empty">
           <h2>{{ t('web.orders.noMatch', { query: search.trim() }) }}</h2>
           <p>{{ hasMore ? t('searchNotFoundLoaded') : t('web.orders.noMatchHint', { device: deviceLabel().toLocaleLowerCase() }) }}</p>
           <div class="row-actions">
             <button v-if="hasMore" type="button" class="btn" :disabled="loadingMore" @click="searchOlder">{{ t('searchOlder') }}</button>
+            <button v-if="filter !== 'all'" type="button" class="btn" @click="choose('all')">{{ t('web.orders.searchAll') }}</button>
             <button type="button" class="btn btn--ghost" @click="search = ''">{{ t('web.orders.clearSearch') }}</button>
           </div>
         </div>
@@ -467,7 +490,7 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
         </div>
       </div>
       <aside v-if="panelOpen" class="panel" :aria-label="t('web.orders.panel')">
-        <OrderDetail :key="panel.value.value ?? ''" :order-id="panel.value.value as string" @close="panel.close()" />
+        <OrderDetail :key="panel.value.value ?? ''" :order-id="panel.value.value as string" @close="closePanel" />
       </aside>
     </div>
   </template>

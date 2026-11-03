@@ -49,7 +49,8 @@ onMounted(async () => {
             author: author.userId === session.uid ? t('orderCommentYou') : data.authorType === 'customer' ? t('commentFromCustomer') : author.name || author.email || t('commentFromTeam'),
             mine: author.userId === session.uid,
             customer: data.authorType === 'customer',
-            internal: data.isInternal !== false,
+            // Without the key the comment stays visible to the customer, as in the app and the link (comment.service.ts).
+            internal: data.isInternal === true,
             at: isoOf(data.createdAt) ?? '',
             deleted: data.deleted === true,
           }

@@ -1,7 +1,7 @@
 // Reference lists for the order screens: customers, devices, catalog and team.
 // Read once per company and kept in memory (no money in them except catalog
 // prices, which only show for who has viewPrices).
-import { firestoreClient } from '@/lib/firebase'
+import { authClient, firestoreClient } from '@/lib/firebase'
 import { can, session } from '@/lib/session'
 import { matchesWords } from '@/lib/text'
 
@@ -9,6 +9,8 @@ export interface Customer {
   id: string
   name: string
   phone?: string
+  email?: string
+  taxId?: string
   address?: string | null
 }
 export interface Device {
@@ -53,6 +55,8 @@ export const loadCustomers = () =>
     id,
     name: String(data.name ?? ''),
     phone: data.phone as string | undefined,
+    email: data.email as string | undefined,
+    taxId: data.taxId as string | undefined,
     address: (data.address as string | null) ?? null,
   })).then((list) => [...list].sort(byName))
 
@@ -61,14 +65,51 @@ export const loadDevices = () =>
     (list) => [...list].sort(byName),
   )
 
+/**
+ * Names of a collection by the Firestore REST API with a field mask: only `name`
+ * travels, and nothing goes to this browser's persistent cache. For who does
+ * not see values, so no price reaches the network or the disk.
+ */
+async function readNamesRest(collectionName: string): Promise<{ id: string; name: string }[]> {
+  const env = import.meta.env
+  const companyId = session.companyId as string
+  const key = `${companyId}|rest|${collectionName}`
+  let promise = cache.get(key) as Promise<{ id: string; name: string }[]> | undefined
+  if (!promise) {
+    promise = (async () => {
+      const auth = await authClient()
+      const token = await auth.currentUser?.getIdToken()
+      const host = import.meta.env.VITE_USE_EMULATORS === '1' ? `http://127.0.0.1:${env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080}` : 'https://firestore.googleapis.com'
+      const base = `${host}/v1/projects/${env.VITE_FIREBASE_PROJECT_ID}/databases/(default)/documents/companies/${companyId}/${collectionName}`
+      const items: { id: string; name: string }[] = []
+      let pageToken = ''
+      do {
+        const response = await fetch(`${base}?pageSize=300&mask.fieldPaths=name${pageToken ? `&pageToken=${pageToken}` : ''}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error(`catalog ${response.status}`)
+        const body = (await response.json()) as { documents?: { name: string; fields?: { name?: { stringValue?: string } } }[]; nextPageToken?: string }
+        for (const doc of body.documents ?? []) items.push({ id: doc.name.split('/').pop() as string, name: doc.fields?.name?.stringValue ?? '' })
+        pageToken = body.nextPageToken ?? ''
+      } while (pageToken && items.length < 2000)
+      return items
+    })()
+    cache.set(key, promise)
+    promise.catch(() => cache.delete(key))
+  }
+  return promise
+}
+
 /** Services and products the person may see (viewServices / viewProducts). Prices only with viewPrices. */
 export async function loadCatalog(): Promise<CatalogItem[]> {
   const prices = can('viewPrices')
-  const map = (kind: CatalogItem['kind']) => (id: string, data: Record<string, unknown>) =>
-    ({ id, kind, name: String(data.name ?? ''), value: prices && typeof data.value === 'number' ? data.value : null }) as CatalogItem
+  const read = (name: 'services' | 'products', kind: CatalogItem['kind']): Promise<CatalogItem[]> =>
+    prices
+      ? readAll(name, (id, data) => ({ id, kind, name: String(data.name ?? ''), value: typeof data.value === 'number' ? data.value : null }))
+      : readNamesRest(name).then((list) => list.map((item) => ({ ...item, kind, value: null })))
   const [services, products] = await Promise.all([
-    can('viewServices') ? readAll('services', map('service')) : Promise.resolve([]),
-    can('viewProducts') ? readAll('products', map('product')) : Promise.resolve([]),
+    can('viewServices') ? read('services', 'service') : Promise.resolve([]),
+    can('viewProducts') ? read('products', 'product') : Promise.resolve([]),
   ])
   return [...services, ...products].sort(byName)
 }

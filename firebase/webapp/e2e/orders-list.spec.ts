@@ -166,7 +166,7 @@ test('lote: mudar a situação de duas OS de uma vez', async ({ page }) => {
 test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ page }) => {
   const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name: 'Quadro Teste' } })
   await openHome(page, 'admin')
-  await page.getByRole('button', { name: 'Quadro' }).click()
+  await page.getByRole('button', { name: 'Quadro', exact: true }).click()
   await expect(page).toHaveURL(/view=board/)
   const board = page.getByTestId('board')
   const approved = board.getByRole('region', { name: /^Aprovado/ })

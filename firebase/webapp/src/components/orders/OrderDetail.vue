@@ -20,6 +20,7 @@ import {
   isActive,
   isHeld,
   linesByDevice,
+  STATUSES,
   nextStep,
   totals,
   type HoldReason,
@@ -42,7 +43,7 @@ import {
 import * as writes from '@/lib/orders/writes'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
-import { showToast } from '@/lib/toast'
+import { currentToast, showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
@@ -83,6 +84,7 @@ type Dialog =
   | { kind: 'device' }
   | { kind: 'keepDevices'; customer: Customer }
 const dialog = shallowRef<Dialog | null>(null)
+const menuButton = ref<HTMLElement | null>(null)
 const catalog = shallowRef<CatalogItem[]>([])
 const customers = shallowRef<Customer[]>([])
 const devices = shallowRef<Device[]>([])
@@ -96,7 +98,7 @@ const phrase = computed(() => (order.value ? headerPhrase(order.value, now.value
 const showsMoney = computed(() => !!order.value?.showsMoney)
 const canAddItems = computed(() => !!access.value?.canEditMainFields && (can('viewServices') || can('viewProducts')))
 const showItems = computed(() => !!order.value && (order.value.lines.length > 0 || !!access.value?.canEditMainFields))
-const groups = computed(() => (order.value ? linesByDevice(order.value) : []))
+const groups = computed(() => (order.value ? linesByDevice({ ...order.value, lines: order.value.lines.filter((line) => !line.id || !hiddenLines.value.includes(line.id)) }) : []))
 const useScheduling = computed(() => session.company && (session.company as { useScheduling?: boolean }).useScheduling !== false)
 const canPrint = computed(() => can('viewPrices') || !effectiveUseFinancial())
 const moneyRowTone = computed(() => order.value && order.value.status !== 'quote' && order.value.status !== 'canceled')
@@ -138,6 +140,8 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
   try {
     const response = await action()
     const fresh = response && response.order ? writes.orderOf(response, ctx.showsMoney) : null
+    // The next write in the queue sends this version even if the listener is late (B5).
+    if (fresh?.updatedAt) lastSaved = fresh.updatedAt
     if (fresh) {
       // Firestore users get the change from the listener (with item ids); the API is read again.
       if (!ctx.showsMoney) state.value = { kind: 'ready', order: fresh }
@@ -151,14 +155,19 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
   } catch (error) {
     console.warn('order: write failed', error)
     showToast(t(errorMessageKey(error)))
-    if (error instanceof ApiError && (error.code === 'ORDER_CHANGED' || error.code === 'ITEM_NOT_FOUND')) await watcher?.refresh()
+    if (error instanceof ApiError && ['ORDER_CHANGED', 'ITEM_NOT_FOUND', 'PAYMENT_EXCEEDS_BALANCE'].includes(error.code)) await watcher?.refresh()
     return false
   } finally {
     busy.value = false
   }
 }
 
-const expected = () => order.value?.updatedAt ?? null
+let lastSaved: string | null = null
+/** The newest version this screen knows: the listener's or the last response's. */
+const expected = () => {
+  const seen = order.value?.updatedAt ?? null
+  return lastSaved && (!seen || lastSaved > seen) ? lastSaved : seen
+}
 
 async function setStatus(status: OrderStatus) {
   dialog.value = null
@@ -190,12 +199,12 @@ async function assign(id: string) {
 }
 
 async function receive(value: { amount: number; paymentMethod?: string; clientTransactionId: string }) {
-  const ok = await run(() => writes.receivePayment(order.value!.id, value), t('web.order.received', { amount: money(value.amount) }))
+  const ok = await run(() => writes.receivePayment(order.value!.id, value, expected()), t('web.order.received', { amount: money(value.amount) }))
   if (ok) dialog.value = null
 }
 
 async function discount(value: { amount: number; clientTransactionId: string }) {
-  const ok = await run(() => writes.giveDiscount(order.value!.id, { amount: value.amount, clientTransactionId: value.clientTransactionId }), t('web.saved'))
+  const ok = await run(() => writes.giveDiscount(order.value!.id, { amount: value.amount, clientTransactionId: value.clientTransactionId }, expected()), t('web.saved'))
   if (ok) dialog.value = null
 }
 
@@ -213,30 +222,42 @@ async function saveLine(line: OrderLine, patch: { description?: string; value?: 
   if (ok) dialog.value = null
 }
 
-/** Removes at once and offers Undo until the next action (no app confirmation, no app undo: defect 10). */
-async function removeLine(line: OrderLine) {
+/**
+ * Tirar com Desfazer (no app confirmation, no app undo: defect 10). The line
+ * leaves the screen at once and the server only hears about it when the notice
+ * goes away (the next action): Desfazer keeps the line where it was, with its
+ * own description.
+ */
+const hiddenLines = ref<string[]>([])
+let pendingRemoval: { orderId: string; line: OrderLine } | null = null
+function commitRemoval() {
+  const pending = pendingRemoval
+  pendingRemoval = null
+  if (!pending) return
+  void run(() => writes.removeItem(pending.orderId, pending.line.id as string, expected())).then((ok) => {
+    if (!ok) hiddenLines.value = hiddenLines.value.filter((id) => id !== pending.line.id)
+  })
+}
+function removeLine(line: OrderLine) {
   if (!line.id || !order.value) return
-  const id = order.value.id
-  const ok = await run(() => writes.removeItem(id, line.id as string, expected()))
-  if (!ok) return
+  commitRemoval()
   dialog.value = null
-  const restore = line.catalogId
-    ? () =>
-        void run(
-          () =>
-            writes.addItem(id, {
-              kind: line.kind,
-              catalogId: line.catalogId as string,
-              ...(can('editPrices') && line.value !== undefined ? { value: line.value } : {}),
-              ...(line.kind === 'product' ? { quantity: line.quantity ?? 1 } : {}),
-              ...(line.deviceId ? { deviceId: line.deviceId } : {}),
-            }),
-          t('web.order.itemRestored', { name: line.name }),
-        )
-    : undefined
-  showToast(t('web.order.itemRemoved', { name: line.name }), { undo: restore })
+  pendingRemoval = { orderId: order.value.id, line }
+  hiddenLines.value = [...hiddenLines.value, line.id]
+  showToast(t('web.order.itemRemoved', { name: line.name }), {
+    undo: () => {
+      pendingRemoval = null
+      hiddenLines.value = hiddenLines.value.filter((id) => id !== line.id)
+      announce(t('web.order.itemRestored', { name: line.name }))
+    },
+  })
   announce(t('web.order.itemRemoved', { name: line.name }))
 }
+// The notice was replaced or closed without Desfazer: now the line really leaves.
+watch(currentToast, () => {
+  if (pendingRemoval && !currentToast.value?.undo) commitRemoval()
+})
+onBeforeUnmount(commitRemoval)
 
 async function deleteIt() {
   dialog.value = null
@@ -264,7 +285,9 @@ async function chooseCustomer(customer: Customer) {
 async function applyCustomer(customer: Customer, dropDevices: boolean) {
   dialog.value = null
   const o = order.value as Order
-  const fields: Record<string, unknown> = { customer: { id: customer.id, name: customer.name, ...(customer.phone ? { phone: customer.phone } : {}) } }
+  // Same customer summary the app and the server write (id, name, phone, e-mail, CPF/CNPJ).
+  const summary = { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email, taxId: customer.taxId }
+  const fields: Record<string, unknown> = { customer: Object.fromEntries(Object.entries(summary).filter(([, v]) => v !== undefined && v !== null && v !== '')) }
   // The customer's address comes when the order has no place yet (order.customer.address-from-customer).
   if (!o.address && customer.address) fields.address = customer.address
   if (dropDevices) Object.assign(fields, { device: null, devices: [], deviceIds: [] })
@@ -321,8 +344,9 @@ const deviceGroups = (query: string): ComboboxGroup[] => [
 const statusChoices = computed<Choice[]>(() => {
   const o = order.value
   if (!o || !access.value) return []
-  const allowed = access.value.transitions.filter((status) => status !== 'canceled')
-  return [o.status, ...allowed].map((status) => ({ id: status, label: statusText(status), dot: STATUS_DOT[status], current: status === o.status }))
+  const allowed: OrderStatus[] = access.value.transitions.filter((status) => status !== 'canceled')
+  // In the order of the work (quote → done), the current one marked with ✓.
+  return STATUSES.filter((status) => status === o.status || allowed.includes(status)).map((status) => ({ id: status, label: statusText(status), dot: STATUS_DOT[status], current: status === o.status }))
 })
 const teamChoices = computed<Choice[]>(() => [
   ...team.value.map((member) => ({ id: member.id, label: member.name, current: member.id === order.value?.assignedTo?.id })),
@@ -403,7 +427,7 @@ watch(
     <div class="od-top">
       <span v-if="order" class="num">{{ orderTitle(order) }}</span>
       <span class="spacer"></span>
-      <button v-if="order && menuChoices.length" type="button" class="icon-btn" :aria-label="t('orderMoreActions')" @click="dialog = { kind: 'menu' }">
+      <button v-if="order && menuChoices.length" ref="menuButton" type="button" class="icon-btn" :aria-label="t('orderMoreActions')" @click="dialog = { kind: 'menu' }">
         <MoreHorizontal :size="18" aria-hidden="true" />
       </button>
       <button type="button" class="icon-btn" :aria-label="t('close')" @click="emit('close')"><X :size="18" aria-hidden="true" /></button>
@@ -527,7 +551,7 @@ watch(
   </section>
 
   <template v-if="order && access && dialog">
-    <ChoiceDialog v-if="dialog.kind === 'menu'" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
+    <ChoiceDialog v-if="dialog.kind === 'menu'" :anchor="menuButton" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'assignee'" :title="t('pickerAssigneeTitle')" :choices="teamChoices" @pick="assign" @close="dialog = null" />
     <ConfirmDialog
@@ -555,9 +579,9 @@ watch(
       :title="t('web.order.dropDevicesTitle', { device: deviceLabel().toLocaleLowerCase() })"
       :body="t('web.order.dropDevicesBody', { devices: order.devices.map((d) => d.name).join(', '), customer: dialog.customer.name })"
       :confirm="t('web.order.dropDevices')"
-      :keep="t('web.order.keepDevices')"
+      :keep="t('cancel')"
       @confirm="applyCustomer((dialog as { customer: Customer }).customer, true)"
-      @close="applyCustomer((dialog as { customer: Customer }).customer, false)"
+      @close="dialog = null"
     />
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />

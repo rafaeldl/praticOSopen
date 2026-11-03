@@ -17,7 +17,8 @@ const transactionId = newTransactionId()
 const amount = ref<number | null>(props.kind === 'receive' ? props.remaining : null)
 const method = ref('')
 const title = computed(() => (props.kind === 'receive' ? t('receiveTitle') : t('receiveGiveDiscount')))
-const tooMuch = computed(() => props.kind === 'discount' && (amount.value ?? 0) > props.remaining + 0.001)
+// Never above what is left, like ReceivePaymentSheet (max: remaining). The balance follows the order live.
+const tooMuch = computed(() => (amount.value ?? 0) > props.remaining + 0.001)
 const valid = computed(() => (amount.value ?? 0) > 0 && !tooMuch.value)
 const preview = computed(() =>
   props.kind === 'discount' && valid.value
@@ -47,7 +48,7 @@ function save() {
         </div>
         <div class="layer-body">
           <MoneyInput id="money-amount" v-model="amount" :label="kind === 'receive' ? t('receiveCustomerAmountLabel') : t('discount')" :country="country()" required />
-          <p v-if="tooMuch" class="field-error" role="alert">{{ t('web.order.discountTooMuch', { amount: money(remaining) }) }}</p>
+          <p v-if="tooMuch" class="field-error" role="alert">{{ kind === 'discount' ? t('web.order.discountTooMuch', { amount: money(remaining) }) : t('web.order.receiveTooMuch', { amount: money(remaining) }) }}</p>
           <p v-else-if="preview" class="sub">{{ preview }}</p>
           <template v-if="kind === 'receive'">
             <label class="field-label" for="money-method">{{ t('receivePaymentMethodQuestion') }} <span class="muted">({{ t('receivePaymentMethodOptional') }})</span></label>

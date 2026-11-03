@@ -13,7 +13,7 @@ import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { firestoreClient } from '@/lib/firebase'
 import { orderCreated } from '@/lib/orders/bus'
-import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
@@ -110,11 +110,35 @@ async function devicesOf(customerId: string): Promise<Device[]> {
   }
 }
 
+const NEW = '__new'
+/** Item outside the catalog: waits for the API to accept a line without catalogId (FREE_ITEMS). */
+const FREE_ITEMS = false
+
 const customerGroups = (query: string): ComboboxGroup[] => [
   { title: query ? undefined : t('web.newOrder.customers'), items: search(customers.value, query, (c) => c.phone ?? '', 8).map((c) => ({ id: c.id, label: c.name, sub: c.phone })) },
+  // A new customer right here (POST /v1/app/customers): the name, or the phone when only digits were typed.
+  // Only once the list is in: an Enter typed before it loads must find the existing customer, never create a copy.
+  { items: query.trim() && !loading.value && can('manageCustomers') ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
 ]
-async function pickCustomer(item: ComboboxItem) {
-  const chosen = customers.value.find((c) => c.id === item.id) ?? null
+
+async function createCustomer(text: string): Promise<Customer | null> {
+  const digits = /^[\d\s()+-]+$/.test(text) && /\d{6}/.test(text.replace(/\D/g, ''))
+  const body = digits ? { name: text, phone: text } : { name: text }
+  try {
+    const created = await api<{ id: string; name: string }>('/v1/app/customers', { method: 'POST', body })
+    const fresh: Customer = { id: created.id, name: created.name, ...(digits ? { phone: text } : {}) }
+    customers.value = [...customers.value, fresh]
+    forgetLists()
+    announce(t('web.newOrder.registered', { name: fresh.name }))
+    return fresh
+  } catch (error) {
+    failed.value = t(errorMessageKey(error))
+    return null
+  }
+}
+
+async function pickCustomer(item: ComboboxItem, query = '') {
+  const chosen = item.id === NEW ? await createCustomer(query.trim()) : (customers.value.find((c) => c.id === item.id) ?? null)
   customer.value = chosen
   device.value = null
   customerDevices.value = []
@@ -138,16 +162,31 @@ async function pickCustomer(item: ComboboxItem) {
 }
 
 const deviceGroups = (query: string): ComboboxGroup[] => {
+  // While this customer's devices load, nothing to pick yet (an Enter waits for them).
+  if (devicesLoading.value) return []
   const own = search(customerDevices.value, query, (d) => d.serial ?? '', 5)
-  const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '', query ? 6 : 0)
+  // Without known devices of this customer (the consultant only reads their own orders), list the company's.
+  const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '', query || !own.length ? 6 : 0)
   const row = (d: Device) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })
   return [
     { title: own.length ? t('web.newOrder.fromCustomer') : undefined, items: own.map(row) },
     { title: others.length && own.length ? t('web.newOrder.otherDevices', { device: deviceLabel().toLocaleLowerCase() }) : undefined, items: others.map(row) },
+    { items: query.trim() && !loading.value && can('manageDevices') ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
   ]
 }
-async function pickDevice(item: ComboboxItem) {
-  device.value = devices.value.find((d) => d.id === item.id) ?? customerDevices.value.find((d) => d.id === item.id) ?? null
+async function pickDevice(item: ComboboxItem, query = '') {
+  if (item.id === NEW) {
+    try {
+      const created = await api<{ id: string; name: string }>('/v1/app/devices', { method: 'POST', body: { name: query.trim() } })
+      const fresh: Device = { id: created.id, name: created.name ?? query.trim() }
+      devices.value = [...devices.value, fresh]
+      forgetLists()
+      device.value = fresh
+    } catch (error) {
+      failed.value = t(errorMessageKey(error))
+      return
+    }
+  } else device.value = devices.value.find((d) => d.id === item.id) ?? customerDevices.value.find((d) => d.id === item.id) ?? null
   await nextTick()
   itemRef.value?.focus()
 }
@@ -162,6 +201,7 @@ const itemGroups = (query: string): ComboboxGroup[] => [
       right: showsMoney ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
     })),
   },
+  { items: FREE_ITEMS && query.trim() ? [{ id: NEW, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
 ]
 function pickItem(picked: ComboboxItem) {
   const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
@@ -180,6 +220,14 @@ async function save() {
   if (!customer.value) {
     failed.value = t('orderSaveNeedsCustomer')
     customerRef.value?.focus()
+    return
+  }
+  // Something typed and not chosen is never thrown away in silence.
+  const pendingDevice = deviceRef.value?.pending()
+  const pendingItem = itemRef.value?.pending()
+  if (pendingDevice || pendingItem) {
+    failed.value = t('web.newOrder.pending', { text: (pendingDevice || pendingItem) as string, field: pendingDevice ? deviceLabel() : t('pickerItemTitle') })
+    ;(pendingDevice ? deviceRef : itemRef).value?.focus()
     return
   }
   saving.value = true
@@ -267,7 +315,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
             <span><span class="field-label">{{ deviceLabel() }}</span>{{ device.name }} <span v-if="device.serial" class="num">{{ device.serial }}</span></span>
             <button type="button" class="link" @click="device = null; $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
-          <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" preselect @pick="pickDevice" />
+          <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" :preselect="devicesLoading || customerDevices.length > 0" @pick="pickDevice" @next="itemRef?.focus()" />
         </div>
         <div class="step">
           <Combobox id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />

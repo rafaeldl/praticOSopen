@@ -131,6 +131,16 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 
 **Assistente.** Barra "Peça ao assistente" no pé da OS, só para quem edita os itens e com `GET /v1/app/ai/status` ligado. Põe na OS os itens do catálogo que entendeu (`POST /v1/app/ai/order-assist` e depois `POST /items`), marca com ✦ e oferece Desfazer. No E2E a resposta do modelo é simulada com `page.route`.
 
+**Depois da revisão e do teste de usuários (#515).**
+- Filtros também Atrasadas, Para hoje e Sem receber (com contagem; lido por `payment == 'unpaid'`, indexado com `createdAt`). A busca mostra quantas achou, põe o número exato primeiro e oferece "Procurar em todas". `⌘K` acha OS por número, cliente ou aparelho, e clientes.
+- Nova OS cadastra cliente (`POST /v1/app/customers`) e veículo (`POST /v1/app/devices`) com "+ Cadastrar «nome»", só depois das listas carregadas, para nunca duplicar. Quando o cliente não tem OS que a pessoa lê (consultor), lista os veículos da empresa. Texto digitado e não escolhido trava o salvar com aviso. Enter vazio no veículo vai para o item. Item fora do catálogo está pronto atrás de `FREE_ITEMS` e espera a API.
+- Receber nunca passa do que falta e acompanha o saldo ao vivo; pagamento e desconto mandam `expectedUpdatedAt`; `409 PAYMENT_EXCEEDS_BALANCE` mostra o aviso e relê a OS.
+- Tirar item só vai ao servidor quando o aviso sai; Desfazer mantém descrição e posição.
+- Fechar "E o veículo?" cancela a troca de cliente. O resumo do cliente gravado leva e-mail e CPF/CNPJ.
+- Quem não tem `viewPrices` lê o catálogo pela REST do Firestore com máscara só do nome: o preço não chega à rede nem ao IndexedDB.
+- Menu "…" preso ao botão (no celular, folha embaixo). Situações na ordem do serviço. Fechar a OS devolve o foco à linha.
+- "Minhas" por `assignedTo` fica atrás de `ASSIGNED_READS` (`lib/orders/data.ts`) até o #514 (regras e índices).
+
 **Textos.** Os textos usados só por `src/components/orders/` vão para `generated/i18n/{pt,en,es}-orders.json`, baixados junto com o painel (`loadOrderTexts`), fora do primeiro download.
 
 **Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts` e `e2e/order-detail.spec.ts`, contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
@@ -279,6 +289,9 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
 - OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, mandar ao cliente (link), nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - Item avulso ("Usar X nesta OS") não existe: `POST /items` exige item do catálogo.
+- Nova OS sem idempotência: falta `clientOrderId` na API (falha de rede depois de criar + salvar de novo = duas OS).
+- `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
+- Técnico não vê em "Minhas" a OS que outro criou e atribuiu a ele: depende do #514.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
 - Orçamento do primeiro download quase no limite: 239,6 de 240 KB.

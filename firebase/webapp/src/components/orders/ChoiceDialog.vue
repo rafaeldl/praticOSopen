@@ -13,12 +13,15 @@ export interface Choice {
   danger?: boolean
 }
 
-defineProps<{ title: string; sub?: string; choices: Choice[] }>()
+const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anchor?: HTMLElement | null }>()
+// With an anchor it is a menu held under its button, not a box in the middle of the screen.
+const rect = props.anchor?.getBoundingClientRect()
+const boxStyle = rect ? { top: `${Math.round(rect.bottom + 4)}px`, right: `${Math.max(8, Math.round(window.innerWidth - rect.right))}px` } : undefined
 const emit = defineEmits<{ pick: [id: string]; close: [] }>()
 </script>
 
 <template>
-  <Layer kind="sheet" :label="title" @close="emit('close')">
+  <Layer :kind="anchor ? 'menu' : 'sheet'" :box-style="boxStyle" :label="title" @close="emit('close')">
     <template #default="{ close }">
       <div class="layer-head">
         <h2 class="layer-title">{{ title }}</h2>

@@ -5,6 +5,7 @@ import {
   accessOf,
   createStatuses,
   deviceSummary,
+  exactFirst,
   filtersFor,
   initialsOf,
   lateness,
@@ -88,6 +89,23 @@ describe('lateness and groups', () => {
     expect(rowsFor('quotes', rows, NOW, 'tech').map((r) => r.id)).toEqual(['q1', 'q2'])
     expect(rowsFor('onHold', rows, NOW, 'tech').map((r) => r.id)).toEqual(['h2', 'h1'])
     expect(rowsFor('mine', rows, NOW, 'tech').map((r) => r.id)).toEqual(['m1', 'm2', 'm3'])
+  })
+
+  test('Atrasadas, Para hoje, Sem receber; número exato primeiro', () => {
+    const rows = [
+      order('late', { dueDate: day(-2) }),
+      order('today', { scheduledDate: day(0, 15) }),
+      order('owed', { status: 'done', total: 100, paidAmount: 40 }),
+      order('paid', { status: 'done', total: 100, paidAmount: 100 }),
+    ]
+    expect(rowsFor('late', rows, NOW, null).map((r) => r.id)).toEqual(['late'])
+    expect(rowsFor('today', rows, NOW, null).map((r) => r.id)).toEqual(['today'])
+    expect(rowsFor('unpaid', rows, NOW, null).map((r) => r.id)).toEqual(['owed'])
+    expect(summaryOf('unpaid', rowsFor('unpaid', rows, NOW, null), true, NOW)).toEqual({ kind: 'unpaid', count: 1, amount: 60 })
+    const numbered = [order('a', { number: 31 }), order('b', { number: 3 }), order('c', { number: 13 })]
+    expect(exactFirst(numbered, '3').map((r) => r.id)).toEqual(['b', 'a', 'c'])
+    expect(filtersFor('admin', true)).toContain('unpaid')
+    expect(filtersFor('supervisor', false)).not.toContain('unpaid')
   })
 
   test('all: by month of creation in arrival order', () => {

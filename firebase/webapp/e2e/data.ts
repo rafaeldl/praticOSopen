@@ -64,6 +64,23 @@ export async function updateOrderDoc(id: string, fields: Record<string, unknown>
   await db().doc(`companies/${COMPANY_A}/orders/${id}`).update({ ...fields, updatedAt: new Date().toISOString() })
 }
 
+export async function readComments(orderId: string): Promise<Record<string, unknown>[]> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/orders/${orderId}/comments`).get()
+  return snapshot.docs.map((doc) => doc.data())
+}
+
+export async function addCommentDoc(orderId: string, data: Record<string, unknown>): Promise<void> {
+  await db().collection(`companies/${COMPANY_A}/orders/${orderId}/comments`).add({ createdAt: new Date().toISOString(), ...data })
+}
+
+export async function updateCustomerDoc(id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/customers/${id}`).update(fields)
+}
+
+export async function countOrders(field: string, value: unknown): Promise<number> {
+  return (await db().collection(`companies/${COMPANY_A}/orders`).where(field, '==', value).get()).size
+}
+
 export async function readOrder(id: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${COMPANY_A}/orders/${id}`).get()).data()
 }

@@ -29,6 +29,7 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   CUSTOMER_CHARGE_OPEN: 'web.error.orderDeleteBlocked',
   INSTALLMENTS_IN_PROGRESS: 'web.error.orderDeleteBlocked',
   INVALID_ASSIGNEE: 'web.error.validation',
+  PAYMENT_EXCEEDS_BALANCE: 'web.error.paymentExceeds',
 }
 
 function statusMessage(status: number): MessageKey {

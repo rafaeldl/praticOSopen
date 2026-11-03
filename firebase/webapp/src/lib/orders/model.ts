@@ -343,11 +343,13 @@ export function nextStep(order: Order, access: OrderAccess): NextStep | null {
 // List: filters, groups, summary
 // ---------------------------------------------------------------------------
 
-export type ListFilter = 'open' | 'quotes' | 'onHold' | 'mine' | 'done' | 'all'
+export type ListFilter = 'open' | 'late' | 'today' | 'quotes' | 'onHold' | 'unpaid' | 'mine' | 'done' | 'all'
 
 /** Technician: Minhas, Paradas, Todas. Everyone else: the five of the app. */
-export function filtersFor(role: string | null | undefined): ListFilter[] {
-  return orderRoleOf(role) === 'technician' ? ['mine', 'onHold', 'all'] : ['open', 'quotes', 'onHold', 'done', 'all']
+export function filtersFor(role: string | null | undefined, showsMoney = false): ListFilter[] {
+  if (orderRoleOf(role) === 'technician') return ['mine', 'onHold', 'all']
+  // The app's five, plus Atrasadas, Para hoje and Sem receber of the prototype (Sem receber only with values).
+  return ['open', 'late', 'today', 'quotes', 'onHold', ...(showsMoney ? (['unpaid'] as ListFilter[]) : []), 'done', 'all']
 }
 
 export function defaultFilter(role: string | null | undefined): ListFilter {
@@ -356,7 +358,7 @@ export function defaultFilter(role: string | null | undefined): ListFilter {
 
 /** Statuses the server query asks for. Quotes, Paradas and Minhas filter the open ones here, like the app. */
 export function queryStatuses(filter: ListFilter): OrderStatus[] | null {
-  if (filter === 'done') return ['done']
+  if (filter === 'done' || filter === 'unpaid') return ['done']
   if (filter === 'all') return null
   return OPEN_STATUSES
 }
@@ -378,6 +380,12 @@ export function rowsFor(filter: ListFilter, rows: Order[], now: Date, uid: strin
       const rest = open.filter((o) => !late.includes(o) && !today.includes(o))
       return [...late, ...today, ...rest]
     }
+    case 'late':
+      return rows.filter((o) => isOpen(o) && overdue(o, now)).sort(byDate('dueDate'))
+    case 'today':
+      return rows.filter((o) => isOpen(o) && !overdue(o, now) && (sameDay(o.dueDate, now) || sameDay(o.scheduledDate, now)))
+    case 'unpaid':
+      return rows.filter((o) => remainingOnRow(o) !== null)
     case 'quotes':
       return rows.filter((o) => o.status === 'quote').sort(byDate('createdAt'))
     case 'onHold':
@@ -420,6 +428,7 @@ export type Summary =
   | { kind: 'quotes'; count: number }
   | { kind: 'onHold'; count: number }
   | { kind: 'mine'; count: number; today: boolean }
+  | { kind: 'unpaid'; count: number; amount: number }
   | null
 
 /** One sentence on top (home.summary.count): only with the whole list loaded and something in it. */
@@ -427,6 +436,7 @@ export function summaryOf(filter: ListFilter, visible: Order[], loadedAll: boole
   if (!loadedAll || !visible.length) return null
   if (filter === 'open') return { kind: 'open', open: visible.length, late: visible.filter((o) => overdue(o, now)).length }
   if (filter === 'quotes') return { kind: 'quotes', count: visible.length }
+  if (filter === 'unpaid') return { kind: 'unpaid', count: visible.length, amount: roundMoney(visible.reduce((sum, o) => sum + (remainingOnRow(o) ?? 0), 0)) }
   if (filter === 'onHold') return { kind: 'onHold', count: visible.length }
   if (filter === 'mine') {
     const today = visible.filter((o) => sameDay(o.scheduledDate, now) || sameDay(o.dueDate, now)).length
@@ -442,6 +452,13 @@ const fold = (text: string) =>
     .toLowerCase()
 
 /** Number, customer, status text, device name or serial; ignores case and accents. */
+/** The exact number first, then the rest in screen order (search). */
+export function exactFirst(rows: Order[], query: string): Order[] {
+  const number = Number(query.trim())
+  if (!Number.isInteger(number) || number <= 0) return rows
+  return [...rows.filter((o) => o.number === number), ...rows.filter((o) => o.number !== number)]
+}
+
 export function matchesSearch(order: Order, query: string, statusText: string): boolean {
   const words = fold(query).split(/\s+/).filter(Boolean)
   if (!words.length) return true

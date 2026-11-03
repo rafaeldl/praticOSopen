@@ -28,7 +28,7 @@ onSessionHint(({ uid, companyId, role }) => {
   void firstOrdersPage({
     companyId,
     createdBy: roleHasPermission(role, 'viewAllOrders') ? null : uid,
-    statuses: filter === 'done' ? ['done'] : filter === 'all' ? null : ['quote', 'approved', 'progress'],
+    statuses: filter === 'done' || filter === 'unpaid' ? ['done'] : filter === 'all' ? null : ['quote', 'approved', 'progress'],
   }).catch(() => {})
 })
 // Network work starts now, side by side, so it does not wait for the screen.

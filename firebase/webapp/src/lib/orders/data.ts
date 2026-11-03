@@ -40,7 +40,7 @@ interface ApiList {
  * Pages of one filter. Firestore pages by createdAt and id; the API by its
  * cursor. Both keep the same order: newest first.
  */
-export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | null) {
+export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | null, assignedTo?: string) {
   const query: OrdersQuery = { companyId: ctx.companyId, createdBy: ctx.seesAll ? null : ctx.uid, statuses }
   let lastRaw: OrderRow | null = null
   let cursor: string | null = null
@@ -50,6 +50,7 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
     const params = new URLSearchParams({ limit: String(size) })
     if (statuses?.length) params.set('status', statuses.join(','))
     if (cursor) params.set('cursor', cursor)
+    if (assignedTo) params.set('assignedTo', assignedTo)
     // The list carries pagination next to data: read the raw envelope.
     const body = await api<ApiList | Record<string, unknown>[]>(`/v1/app/orders?${params}`, { raw: true })
     const envelope = Array.isArray(body) ? { data: body } : body
@@ -87,6 +88,13 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
 }
 
 export type ListLoader = ReturnType<typeof createListLoader>
+
+/**
+ * Minhas by `assignedTo` (the technician sees what was given to them, created by
+ * anyone). Off until the rules and indexes of #514 are in: then the API list is
+ * asked for `assignedTo=<uid>` instead of the orders the technician created.
+ */
+export const ASSIGNED_READS = false
 
 /** "Primeira vez": has this company ever created an order? Unknown counts as yes. */
 export async function companyHasOrders(ctx: ListContext): Promise<boolean> {
