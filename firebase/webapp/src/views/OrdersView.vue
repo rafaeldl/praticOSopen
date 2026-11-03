@@ -33,7 +33,7 @@ import {
   type ListFilter,
   type Order,
 } from '@/lib/orders/model'
-import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText } from '@/lib/orders/text'
+import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText, whenCell } from '@/lib/orders/text'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -363,7 +363,16 @@ onBeforeUnmount(() => {
   stopSearch?.()
 })
 
-const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order)].filter(Boolean).join(' · ')
+// The plate (or serial) after the device's name: the user tests looked for it on the row (P3 17 of #515).
+const plateOf = (order: Order) => (order.devices[0]?.name && order.devices[0]?.serial ? order.devices[0].serial : '')
+const rowDetail = (order: Order) => [deviceSummary(order), plateOf(order), servicesSummary(order)].filter(Boolean).join(' · ')
+// "Quando" as its own column from 64rem; below it the dates stay in the status line.
+const wideQuery = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(min-width: 64rem)') : null
+const wide = ref(wideQuery?.matches ?? true)
+const onWide = () => (wide.value = wideQuery?.matches ?? true)
+wideQuery?.addEventListener('change', onWide)
+onBeforeUnmount(() => wideQuery?.removeEventListener('change', onWide))
+const columns = computed(() => 4 + (showsMoney ? 1 : 0) + (wide.value ? 1 : 0))
 </script>
 
 <template>
@@ -449,12 +458,13 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
               <th class="c-num" scope="col">{{ t('web.orders.number') }}</th>
               <th scope="col">{{ t('customer') }}</th>
               <th scope="col">{{ t('orderStatusLabel') }}</th>
+              <th v-if="wide" class="c-when" scope="col">{{ t('web.orders.when') }}</th>
               <th v-if="showsMoney" class="c-money" scope="col">{{ t('total') }}</th>
             </tr>
           </thead>
           <tbody v-for="group in groups" :key="group.key">
             <tr v-if="group.title" class="group-row no-click">
-              <th :colspan="showsMoney ? 5 : 4" scope="rowgroup">{{ group.title }}</th>
+              <th :colspan="columns" scope="rowgroup">{{ group.title }}</th>
             </tr>
             <tr
               v-for="order in group.rows"
@@ -481,8 +491,11 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
                 <span v-if="rowDetail(order)" class="sub row-detail">{{ rowDetail(order) }}</span>
               </td>
               <td>
-                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusLine(order)" />
+                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="wide ? statusText(order.status) : statusLine(order)" />
                 <span v-if="isHeld(order) && holdDays(order, now) !== null" class="sub row-hold">{{ holdText(order, now) }}</span>
+              </td>
+              <td v-if="wide" class="c-when" data-testid="row-when">
+                <span v-if="whenCell(order, now)" :class="{ 'is-late': whenCell(order, now)?.late }">{{ whenCell(order, now)?.text }}</span>
               </td>
               <td v-if="showsMoney" class="c-money">
                 <span class="num">{{ money(order.total) }}</span>
