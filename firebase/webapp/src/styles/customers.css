@@ -1,0 +1,45 @@
+/* Customers, devices and the spreadsheet import (fatia 03). Loaded with their
+   screens, out of the first download. Reuses the list and panel of orders.css. */
+
+/* Clientes | Veículos: two links in the look of the list's tabs. */
+.dir-tabs a { display: inline-flex; align-items: center; padding: 0 0.7rem; min-height: 1.95rem; border-radius: 4px; color: var(--color-muted); font-weight: 600; text-decoration: none; }
+.dir-tabs a[aria-current="page"] { background: var(--color-card); color: var(--color-ink); box-shadow: 0 0 0 1px var(--color-rule); }
+.dir-tabs a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.list-note { padding: 0 0 0.5rem; }
+.plate-hits { list-style: none; margin: 0 0 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); display: grid; gap: 0.15rem; }
+.plate-hits .row-btn { min-height: 2rem; }
+
+.od-ask { margin: 0.4rem 0 0; font-weight: 600; }
+.od-actions a.btn { text-decoration: none; }
+.dir-list { list-style: none; margin: 0; padding: 0; }
+.dir-list li { display: flex; flex-wrap: wrap; gap: 0.15rem 0.75rem; align-items: baseline; padding: 0.35rem 0; border-bottom: 1px dashed var(--color-rule); }
+.dir-list li:last-child { border-bottom: 0; }
+.dir-list .row-btn { min-height: 1.75rem; }
+.dir-list .sub { flex-basis: 100%; }
+.dir-order .dir-money { margin-left: auto; }
+
+.form-section { font-size: 0.8125rem; font-weight: 700; margin: 0.5rem 0 0; }
+.choice-set { border: 0; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
+.choice-set .check-row { min-height: 2.75rem; }
+.suggest { position: relative; }
+.suggest-list { list-style: none; margin: 0.25rem 0 0; padding: 0.25rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); box-shadow: 0 6px 18px oklch(20% 0.02 255 / 0.12); display: grid; gap: 2px; }
+.suggest-list li { display: grid; padding: 0.4rem 0.5rem; border-radius: 4px; cursor: pointer; min-height: 2.75rem; align-content: center; }
+.suggest-list li:hover { background: var(--color-paper-2); }
+
+.row-tools { white-space: nowrap; text-align: right; }
+.btn--small { min-height: 2rem; padding: 0 0.55rem; }
+@media (max-width: 40rem) { .row-tools { white-space: normal; } }
+
+/* Import */
+.imp { padding: 0 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; max-width: 76rem; }
+.imp-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.imp-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; min-height: 14rem; padding: 1rem; border: 2px dashed var(--color-control-border, var(--color-neutral)); border-radius: 8px; color: var(--color-muted); cursor: pointer; text-align: center; }
+.imp-drop strong { color: var(--color-ink); }
+.imp-drop:hover, .imp-drop.is-over, .imp-drop:focus-within { border-color: var(--color-accent); background: var(--color-paper-2); }
+.imp-paste { display: grid; gap: 0.4rem; align-content: start; }
+.imp-paste .btn { justify-self: start; }
+.imp-scroll { overflow: auto; border-top: 2px solid var(--color-ink); }
+.imp-table th { vertical-align: top; min-width: 10rem; }
+.imp-h { display: block; margin-bottom: 0.25rem; color: var(--color-ink); }
+.imp-table select { width: 100%; font-weight: 400; color: var(--color-ink); min-height: 2.1rem; }
+.imp-table td { overflow-wrap: anywhere; }
