@@ -68,6 +68,8 @@ const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/com
 // Checklists, after the order shows (their texts are in the orders chunk).
 const PdfDialog = defineAsyncComponent(() => import('./PdfDialog.vue'))
 const OrderForms = defineAsyncComponent(() => import('@/components/forms/OrderForms.vue'))
+// Contract of the order (repeats, next order, created ones), after the order shows.
+const OrderContract = defineAsyncComponent(() => import('@/components/contracts/OrderContract.vue'))
 
 const props = defineProps<{ orderId: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -606,6 +608,7 @@ watch(
         <OrderPhotos :order="order" />
         <OrderComments :order-id="order.id" />
         <OrderForms ref="formsRef" :order="order" @forms="(list: { id: string; status: string }[]) => (orderForms = list)" />
+        <OrderContract :key="order.id" :order="order" :can-edit="!!access?.canEditMainFields" />
 
         <section class="od-sec od-sec--details" aria-labelledby="od-details-title">
           <h3 id="od-details-title">{{ t('details') }}</h3>

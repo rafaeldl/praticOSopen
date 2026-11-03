@@ -21,6 +21,8 @@ export interface CompanyProfile {
   country?: string
   segment?: string
   useFinancial?: boolean
+  /** Contratos on (company.settings.contracts). */
+  useContracts?: boolean
 }
 
 export interface SessionState {

@@ -11,7 +11,7 @@
 // changes only that question (lib/forms/data.ts saveAnswer), so the app and
 // the web can answer at the same time. An answer that did not reach the
 // server stays on screen marked "não foi salvo", with "Tentar de novo".
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft, ChevronRight, ImagePlus, MoreHorizontal, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
@@ -52,7 +52,14 @@ const router = useRouter()
 
 interface Pending {
   change: AnswerChange
-  state: 'saving' | 'failed'
+  /**
+   * 'saved': written, but the live copy (onSnapshot) has not brought it yet.
+   * A transaction does not touch the local cache, so for a moment after it
+   * resolves the listener still shows the checklist without this answer.
+   */
+  state: 'saving' | 'failed' | 'saved'
+  /** For 'saved': the live version when it was written; any newer one already has it. */
+  liveAt?: string | null
   /** Which send this is: a newer answer to the same question replaces it. */
   seq: number
   /** Refused because the checklist was completed meanwhile (B1 of #524). */
@@ -80,6 +87,13 @@ const view = computed<OrderForm>(() => {
   return { ...props.form, responses, status: statusAfter(props.form.status, responses) }
 })
 const completed = computed(() => props.form.status === 'completed')
+// A newer live copy carries the answers already written.
+watch(
+  () => props.form.updatedAt,
+  (live) => {
+    for (const [itemId, entry] of Object.entries(pending)) if (entry.state === 'saved' && entry.liveAt !== live) delete pending[itemId]
+  },
+)
 const editable = computed(() => props.access.fill && !completed.value)
 const missing = computed(() => missingCount(view.value))
 const answeredAny = computed(() => missing.value < view.value.items.length)
@@ -144,7 +158,13 @@ async function write(item: FormItem, change: AnswerChange, complete: boolean, se
   try {
     const saved = await saveAnswer(props.orderId, props.form.id, change, complete)
     // A newer answer to the same question may be on its way: only that one stays.
-    if (pending[item.id]?.seq === seq) delete pending[item.id]
+    // Kept on screen until the live copy brings it: dropped now, the answer would
+    // vanish for a moment, the next Enter would not see "nothing left" and the
+    // checklist would stay open (and the focus go back to it).
+    if (pending[item.id]?.seq === seq) {
+      if (props.form.updatedAt === saved.updatedAt) delete pending[item.id]
+      else pending[item.id] = { change, state: 'saved', seq, liveAt: props.form.updatedAt }
+    }
     if (saved.status === 'completed' && complete && !finished) {
       finished = true
       const message = t('web.forms.completed', { name: title.value })

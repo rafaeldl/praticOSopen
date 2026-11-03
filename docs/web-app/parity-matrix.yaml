@@ -1837,10 +1837,11 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Só existe quando a Nova OS veio de Contratos (repeat): título Novo contrato e Mais opções já aberto. Numa Nova OS comum não há como ligar repetição."
+  note: "Só existe quando a Nova OS veio de Contratos (repeat): título Novo contrato e Mais opções já aberto. Numa Nova OS comum não há como ligar repetição. Web: Nova OS aberta por Novo contrato tem a seção Repetir; a OS é criada pela API e o contrato gravado em seguida."
 - id: order.new.save
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2961,10 +2962,11 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Liga com o padrão (mensal, intervalo 1, gerar sozinho, lembrete 3 dias, início hoje, próxima em um mês) e abre a configuração. Grava antes de abrir: voltar sem mexer deixa a repetição ligada; só Parar desliga."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Liga com o padrão (mensal, intervalo 1, gerar sozinho, lembrete 3 dias, início hoje, próxima em um mês) e abre a configuração. Grava antes de abrir: voltar sem mexer deixa a repetição ligada; só Parar desliga. Web: seção Contrato da OS, para quem edita os campos principais da OS, só com useContracts. Diferença do app: a OS cancelada fica de fora (não oferece Repetir numa OS cancelada)."
 - id: order.contract.card
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2978,7 +2980,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   note: "Com useContracts desligado a linha continua (e edita) na OS que já tem contrato: a flag só esconde a entrada."
 - id: order.contract.children
@@ -2994,9 +2997,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Mais nova primeiro, com ponto de situação e data. Tocar abre outra tela da OS por cima, só pelo id."
+  note: "Mais nova primeiro, com ponto de situação e data. Tocar abre outra tela da OS por cima, só pelo id. Web: consulta contract.parentOrderId com máscara; consultor e técnico só as que criaram."
 - id: order.contract.open-parent
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3010,7 +3014,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   note: "Abre outra tela da OS por cima, só pelo id."
 - id: order.rating.view
@@ -4641,9 +4646,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "8 opções fixas (todo dia, toda semana, 2 semanas, todo mês, 2, 3 e 6 meses, todo ano), mais a atual se for diferente; cada mudança grava a OS e recalcula a próxima."
+  note: "8 opções fixas (todo dia, toda semana, 2 semanas, todo mês, 2, 3 e 6 meses, todo ano), mais a atual se for diferente; cada mudança grava a OS e recalcula a próxima. Web: grava só os campos que mudaram, sobre a versão lida (updateTime); se o app mudou o mesmo campo, não grava e mostra a versão nova. A próxima OS conta os períodos do começo, a partir de hoje, sem repor o que passou."
 - id: contract.config.dates
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -4657,7 +4663,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   note: "Término no mínimo o começo; sugestão começo + 1 ano; Sem término tira a data; começo depois do término puxa o término junto."
 - id: contract.config.reminder
@@ -4674,7 +4681,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "reminderDaysBefore é gravado e nada lê, nem no app nem no servidor: o web não mostra um campo que não faz nada. Volta quando houver aviso de verdade."}
   note: "Opções 0, 1, 2, 3, 5, 7, 15 ou 30 dias. Não copiar: reminderDaysBefore é gravado e nenhum código lê, hoje não avisa nada. Na web: implementar o aviso ou propor exceção."
 - id: contract.config.auto
   screen: lib/screens/widgets/contract_config_sheet.dart
@@ -4689,9 +4696,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Geração roda no cliente ao abrir o app; ver contract.generate.startup. Não copiar: desligado, não gera OS e não avisa (a geração só pega isDue e autoGenerate; o aviso não existe)."
+  note: "Geração roda no cliente ao abrir o app; ver contract.generate.startup. Não copiar: desligado, não gera OS e não avisa (a geração só pega isDue e autoGenerate; o aviso não existe). Web: o texto diz a verdade: desligado, nenhuma OS é criada (não existe aviso)."
 - id: contract.config.stop
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -4705,9 +4713,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato."
+  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato. Web: Parar de repetir grava active=false e endDate=hoje, mantém o contrato em Encerrados. Pausar e Retomar ficam de fora até o app reler o modelo dentro da transação ao gerar (lote 3 do app, revisão do #527, A1): hoje o app lê o modelo do cache e regrava o mapa contract inteiro, então criaria OS de um contrato pausado e o reativaria. Parar de repetir grava o mesmo active=false que o app já usa e tem o mesmo risco de hoje entre dois celulares."
 - id: contract.config.defaults
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -4721,7 +4730,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   note: "Todo mês, intervalo 1, criar sozinha, ativo, aviso 3 dias, começa hoje, próxima em hoje + 1 mês; grava isContract=true. Cada mudança no Repetir grava a OS na hora."
 - id: order.ui.history-row
@@ -9849,7 +9859,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   note: "Aparece com useContracts ou para quem tem manageCompany. Desligado, abre contract.off.view."
 - id: settings.open-company
@@ -10733,9 +10744,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Consulta isContract == true; consultor e técnico veem só os seus. Vazio em ativos tem o botão Novo contrato; erro com Tentar de novo. Não copiar: sem empresa atual o stream é vazio e a tela fica no carregando para sempre."
+  note: "Consulta isContract == true; consultor e técnico veem só os seus. Vazio em ativos tem o botão Novo contrato; erro com Tentar de novo. Não copiar: sem empresa atual o stream é vazio e a tela fica no carregando para sempre. Web: lista pela REST do Firestore com máscara de campos (sem valores da OS), consultor e técnico só os seus; relê ao voltar à janela."
 - id: contract.list.switch
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/contract_list"
@@ -10749,9 +10761,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Encerrados = contract.active diferente de true; só recebe contrato que venceu (endDate) na hora de gerar. Parar de repetir não aparece aqui. Encerrados vazio não tem botão."
+  note: "Encerrados = contract.active diferente de true; só recebe contrato que venceu (endDate) na hora de gerar. Parar de repetir não aparece aqui. Encerrados vazio não tem botão. Web: igual ao app, Encerrados = active diferente de true (inclui o que parou de repetir no web)."
 - id: contract.list.new
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/order"
@@ -10765,10 +10778,11 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. A folha abre com o título Novo contrato e Repetir já ligado (ver contract.config.defaults)."
+  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. A folha abre com o título Novo contrato e Repetir já ligado (ver contract.config.defaults). Web: só com canCreateOrder (técnico e gerente não veem). Abre a Nova OS como Novo contrato."
 - id: contract.list.open
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/order"
@@ -10782,8 +10796,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
+  note: "Web: abre a OS ao lado da lista (?order=)."
 - id: contract.list.row
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/contract_list"
@@ -10797,9 +10813,10 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Título com o nome do cliente; Todo mês · aparelho; ativo: Próxima OS em dd/mm; encerrado: endDate ou lastGeneratedDate, ou Encerrado sem data. Rodapé com dica."
+  note: "Título com o nome do cliente; Todo mês · aparelho; ativo: Próxima OS em dd/mm; encerrado: endDate ou lastGeneratedDate, ou Encerrado sem data. Rodapé com dica. Web: próxima OS que passou do dia diz que nasce quando alguém abrir o app (o web não cria OS)."
 - id: contract.off.view
   screen: lib/screens/contracts/contracts_off_screen.dart
   route: null
@@ -10813,7 +10830,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: manageCompany
 - id: contract.off.turn-on
@@ -10829,10 +10847,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Grava useContracts e abre a lista."
+  note: "Grava useContracts e abre a lista. Web: grava só useContracts (REST, máscara) e mostra a lista."
 - id: contract.title.label
   screen: lib/screens/contracts/contracts_title.dart
   route: null
@@ -10846,8 +10865,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
+  note: "Web: lib/contracts/text.ts contractsTitle; o caso do ramo que chama a OS de Contrato está no vitest (titleClashes)."
 - id: ratings.view
   screen: lib/screens/ratings/ratings_screen.dart
   route: "/ratings"
