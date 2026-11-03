@@ -14,6 +14,8 @@ export const ui = reactive({
   newOrderSeed: null as null | {
     customer?: { id: string; name: string; phone?: string }
     device?: { id: string; name: string; serial?: string | null }
+    /** "Novo contrato" (contract.list.new): Nova OS with Repetir on. */
+    repeat?: boolean
   },
 })
 
