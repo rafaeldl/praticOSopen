@@ -38,6 +38,12 @@ jest.mock('../services/order.service', () => ({
   addOrderProduct: jest.fn(async () => ({ success: true, newTotal: 999 })),
   addPayment: jest.fn(async () => ({ paidAmount: 10 })),
   updateOrderShareLink: jest.fn(async () => undefined),
+  addPhotoToOrder: jest.fn(async () => undefined),
+}));
+
+jest.mock('../services/photo-upload.service', () => ({
+  uploadPhotoFromBase64: jest.fn(async () => ({ id: 'ph1', url: 'https://x/ph1.jpg', storagePath: 'p', createdAt: '' })),
+  uploadPhotoFromUrl: jest.fn(async () => ({ id: 'ph1', url: 'https://x/ph1.jpg', storagePath: 'p', createdAt: '' })),
 }));
 
 jest.mock('../services/customer.service', () => ({
@@ -139,6 +145,9 @@ import integrationsRoutes from '../routes/v1/integrations.routes';
 import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
 import nfseRoutes from '../routes/v1/nfse.routes';
 import aiRoutes from '../routes/v1/ai.routes';
+import contractsRoutes from '../routes/v1/contracts.routes';
+import orderPhotosRoutes from '../routes/v1/order-photos.routes';
+import formTemplatesRoutes from '../routes/v1/form-templates.routes';
 import appPermissions from './rbac/app-permissions.json';
 import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
@@ -157,7 +166,9 @@ function seedTenants() {
   for (const [cid, data] of Object.entries(COMPANIES)) {
     seed(`companies/${cid}`, data);
     seed(`companies/${cid}/private/membership`, { members });
+    seed(`companies/${cid}/forms/f1`, { title: 'Vistoria', isActive: true });
   }
+  seed('segments/hvac/forms/g1', { title: 'Vistoria do ramo', isActive: true, items: [] });
   for (const role of API_ROLES) {
     seed(`users/${UID[role]}`, {
       name: role,
@@ -170,7 +181,7 @@ function seedTenants() {
 function buildApp(): Express {
   const app = express();
   app.use(express.json());
-  app.use('/v1/app/orders', bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
+  app.use('/v1/app/orders', bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
   app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
   app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, devicesRoutes);
   app.use('/v1/app/invites', bearerAuth, resolveCompanyContext, appInviteRoutes);
@@ -178,6 +189,8 @@ function buildApp(): Express {
   app.use('/v1/app/payments/asaas', bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
   app.use('/v1/app/nfse', bearerAuth, resolveCompanyContext, nfseRoutes);
   app.use('/v1/app/ai', bearerAuth, resolveCompanyContext, aiRoutes);
+  app.use('/v1/app/contracts', bearerAuth, resolveCompanyContext, contractsRoutes);
+  app.use('/v1/app/forms/templates', bearerAuth, resolveCompanyContext, formTemplatesRoutes);
   return app;
 }
 

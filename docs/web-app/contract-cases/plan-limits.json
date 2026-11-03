@@ -1,0 +1,582 @@
+{
+  "version": 1,
+  "generatedFrom": "e05d6414",
+  "rule": "Limite do plano: permitido se o limite é -1 (ilimitado) ou uso + o que entra <= limite. Limites desligados (paidPlansEnabled falso no app, config/paidPlans.enabled falso no servidor) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free com os limites padrão do Free; o status não conta. Enquanto o plano vale, os limites gravados ganham do padrão, e campo faltando nos limites gravados vira o padrão do Free; `collaborators` é o nome antigo de `users`.",
+  "runsIn": [
+    "dart",
+    "functions"
+  ],
+  "sourceOfTruth": [
+    "lib/services/feature_gate_service.dart FeatureGateService (_check, shouldShowPdfWatermark)",
+    "lib/models/subscription.dart Subscription.effectivePlan, effectiveLimits, SubscriptionLimits.fromJson"
+  ],
+  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos.",
+  "cases": [
+    {
+      "id": "free-photo-under-the-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 29,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-photo-at-the-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 30,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-photos-batch-that-fits",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 25,
+        "adding": 5
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-photos-batch-one-too-many",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 25,
+        "adding": 6
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-first-form-template",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 0,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-second-form-template",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 1,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-owner-alone-cannot-invite",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 1,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "starter-third-person",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "starter-fourth-person",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 3,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "pro-photo-499",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 499,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 500,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "pro-tenth-form-template",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 9,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "business-is-unlimited",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "business"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 100000,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "business"
+      }
+    },
+    {
+      "id": "limits-off-without-paid-plans",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": false,
+        "resource": "photo",
+        "usage": 500,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "limits-off-also-for-people",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": false,
+        "resource": "collaborator",
+        "usage": 9,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "no-subscription-is-free",
+      "given": {
+        "kind": "check",
+        "subscription": null,
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 0,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "no-subscription-photos-batch-over-free",
+      "given": {
+        "kind": "check",
+        "subscription": null,
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 0,
+        "adding": 31
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "usage-only-map-is-free",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "usage": {
+            "photosThisMonth": 3
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 3,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 30,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "unknown-plan-is-free",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "enterprise"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 1,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "courtesy-running-gives-pro",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "limits": {
+            "photosPerMonth": 500,
+            "formTemplates": 10,
+            "users": 5,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 4,
+        "adding": 1,
+        "expiresInDays": 30
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 5,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-ended-falls-to-free",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "limits": {
+            "photosPerMonth": 500,
+            "formTemplates": 10,
+            "users": 5,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 1,
+        "adding": 1,
+        "expiresInDays": -1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "store-plan-past-expiry-is-free",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 1,
+        "adding": 1,
+        "expiresInDays": -1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "status-expired-without-date-keeps-the-plan",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro",
+          "status": "expired"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 400,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 500,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "stored-limits-win-over-the-plan",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "limits": {
+            "photosPerMonth": 1000,
+            "formTemplates": 3,
+            "users": 3,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 900,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 1000,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "partial-stored-limits-fill-with-free-defaults",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro",
+          "limits": {
+            "photosPerMonth": 500
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 1,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 1,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "legacy-collaborators-limit-key",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "limits": {
+            "photosPerMonth": 200,
+            "formTemplates": 3,
+            "collaborators": 4
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 3,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 4,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "watermark-on-free",
+      "given": {
+        "kind": "watermark",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "watermark": true
+      }
+    },
+    {
+      "id": "watermark-off-on-pro",
+      "given": {
+        "kind": "watermark",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "watermark": false
+      }
+    },
+    {
+      "id": "watermark-off-without-paid-plans",
+      "given": {
+        "kind": "watermark",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": false
+      },
+      "expect": {
+        "watermark": false
+      }
+    },
+    {
+      "id": "watermark-back-after-courtesy",
+      "given": {
+        "kind": "watermark",
+        "subscription": {
+          "plan": "pro",
+          "source": "grace",
+          "limits": {
+            "photosPerMonth": 500,
+            "formTemplates": 10,
+            "users": 5,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "expiresInDays": -1
+      },
+      "expect": {
+        "watermark": true
+      }
+    },
+    {
+      "id": "watermark-without-subscription",
+      "given": {
+        "kind": "watermark",
+        "subscription": null,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "watermark": true
+      }
+    }
+  ]
+}

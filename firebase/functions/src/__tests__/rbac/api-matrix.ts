@@ -48,6 +48,7 @@ export interface ApiCase {
 const O = '/v1/app/orders';
 const CU = '/v1/app/customers';
 const NF = '/v1/app/nfse';
+const FT = '/v1/app/forms/templates';
 
 const receipt = { receiptId: 'r1', paidAt: '2026-10-20', allocations: [{ orderId: 'o1', amount: 10 }] };
 
@@ -122,6 +123,40 @@ export const API_CASES: ApiCase[] = [
     id: 'orders.discount', area: 'OS', title: 'dar desconto na OS',
     method: 'post', path: `${O}/o1/payments`, body: { amount: 10, type: 'discount' },
     allow: FINANCIAL, permission: 'chargeOrder',
+  },
+
+  {
+    // attachPhotos plus seeing the order: o1 is someone else's.
+    id: 'orders.photos.others', area: 'OS', title: 'pôr foto em OS de outra pessoa',
+    method: 'post', path: `${O}/o1/photos`, body: { base64: 'aGk=' },
+    allow: ['owner', 'admin', 'supervisor'],
+  },
+  {
+    id: 'contracts.generateDue', area: 'OS', title: 'gerar as OS de contrato vencidas',
+    method: 'post', path: '/v1/app/contracts/generate-due', body: {},
+    allow: ['owner', 'admin', 'supervisor', 'consultant', 'technician'], permission: 'createOrder',
+  },
+
+  // ─── Checklists ────────────────────────────────────────────────────────
+  {
+    id: 'forms.templates.create', area: 'Checklists', title: 'criar modelo de checklist',
+    method: 'post', path: FT, body: { title: 'Vistoria' },
+    allow: ['owner', 'admin', 'supervisor'], permission: 'manageForms',
+  },
+  {
+    id: 'forms.templates.import', area: 'Checklists', title: 'importar modelo de checklist do ramo',
+    method: 'post', path: `${FT}/import`, body: { segmentId: 'hvac', formId: 'g1' },
+    allow: ['owner', 'admin', 'supervisor'], permission: 'manageForms',
+  },
+  {
+    id: 'forms.templates.update', area: 'Checklists', title: 'editar modelo de checklist',
+    method: 'patch', path: `${FT}/f1`, body: { title: 'Vistoria 2' },
+    allow: ['owner', 'admin', 'supervisor'], permission: 'manageForms',
+  },
+  {
+    id: 'forms.templates.delete', area: 'Checklists', title: 'apagar modelo de checklist',
+    method: 'delete', path: `${FT}/f1`,
+    allow: ['owner', 'admin', 'supervisor'], permission: 'manageForms',
   },
 
   // ─── Link do cliente ───────────────────────────────────────────────────

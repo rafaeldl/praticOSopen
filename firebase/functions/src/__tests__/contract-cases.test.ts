@@ -58,6 +58,7 @@ const COVERED = [
   'payment-status.json',
   'payment-transactions.json',
   'phone.json',
+  'plan-limits.json', // plan-limits.cases.test.ts
   'receipts.json',
   'round-money.json',
   'status-transitions.json',

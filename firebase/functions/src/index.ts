@@ -397,6 +397,8 @@ import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import contractsRoutes from './routes/v1/contracts.routes';
+import orderPhotosRoutes from './routes/v1/order-photos.routes';
+import formTemplatesRoutes from './routes/v1/form-templates.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
 import { auth as adminAuth } from './services/firestore.service';
@@ -596,7 +598,7 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 
 // Bearer token routes (for Flutter app)
 // Single mount so the rate limit and token check run once per request.
-app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
+app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
@@ -608,6 +610,8 @@ app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoute
 app.use('/v1/app/team', apiCoreLimiter, bearerAuth, resolveCompanyContext, teamRoutes);
 // Recurring contracts: due orders on demand (docs/CONTRACTS_SERVER_JOB.md)
 app.use('/v1/app/contracts', apiCoreLimiter, bearerAuth, resolveCompanyContext, contractsRoutes);
+// Form templates (checklists); plan limit on create/import/activate (docs/PLAN_LIMITS_SERVER.md)
+app.use('/v1/app/forms/templates', apiCoreLimiter, bearerAuth, resolveCompanyContext, formTemplatesRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);

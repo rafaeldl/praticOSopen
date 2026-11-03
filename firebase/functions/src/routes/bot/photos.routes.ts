@@ -12,6 +12,7 @@ import { getUserAggr } from '../../middleware/company.middleware';
 import * as orderService from '../../services/order.service';
 import * as photoService from '../../services/photo-upload.service';
 import { validateInput, uploadPhotoSchema } from '../../utils/validation.utils';
+import { requirePlanCapacity } from '../../middleware/plan-limit.middleware';
 
 const router: Router = Router();
 router.param('number', checkOrderNumberAccess);
@@ -20,7 +21,7 @@ router.param('number', checkOrderNumberAccess);
  * POST /bot/orders/:number/photos
  * Upload photo to order (base64 or URL)
  */
-router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:number/photos', requireLinked, requirePlanCapacity('photo'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.userContext?.companyId;
 
@@ -127,7 +128,7 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
  * POST /bot/orders/:number/photos/upload
  * Upload photo via multipart/form-data (RECOMMENDED - more efficient than base64)
  */
-router.post('/:number/photos/upload', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:number/photos/upload', requireLinked, requirePlanCapacity('photo'), async (req: AuthenticatedRequest, res: Response) => {
   const companyId = req.userContext?.companyId;
 
   if (!companyId) {
