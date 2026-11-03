@@ -171,9 +171,11 @@ void main() {
   });
 
   group('MyCompanySettings', () {
-    late List<Company> saved;
+    // Each save writes only the fields that changed (`update` on the company
+    // document), never the whole company from the copy the screen loaded.
+    late List<Map<String, dynamic>> writes;
 
-    setUp(() => saved = []);
+    setUp(() => writes = []);
     tearDown(() => SegmentConfigService().clear());
 
     Future<void> pumpSettings(WidgetTester tester, Company loaded) async {
@@ -184,10 +186,9 @@ void main() {
           child: app(
             MyCompanySettings(
               companyId: 'c1',
-              writer: (_, __) async {},
+              writer: (_, fields) async => writes.add(fields),
               loadCompany: (_) async => loaded,
               loadSegments: () async => const [_mechanics, _hvac],
-              saveCompany: (c) async => saved.add(c),
             ),
           ),
         ),
@@ -226,9 +227,13 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('segment_hvac')));
       await tester.pumpAndSettle();
 
-      expect(saved, hasLength(1));
-      expect(saved.single.segment, 'hvac');
-      expect(saved.single.subspecialties, isNull);
+      expect(writes, hasLength(1));
+      expect(
+        writes.single.keys.where((k) => k != 'updatedBy'),
+        unorderedEquals(['segment', 'subspecialties', 'updatedAt']),
+      );
+      expect(writes.single['segment'], 'hvac');
+      expect(writes.single['subspecialties'], isNull);
       final segmentRow = tester.widget<AppListRow>(
         find.byKey(const ValueKey('company_segment')),
       );
@@ -247,7 +252,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('picker_confirm')));
       await tester.pumpAndSettle();
 
-      expect(saved.single.subspecialties, ['mechanical', 'bodywork']);
+      expect(writes.single['subspecialties'], ['mechanical', 'bodywork']);
       expect(find.text('Mecânica, Funilaria'), findsOneWidget);
     });
 
@@ -269,10 +274,38 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('company_editor_save')));
       await tester.pumpAndSettle();
 
-      expect(saved.single.name, 'Oficina Nova');
-      expect(saved.single.updatedAt, isNotNull);
+      expect(writes.single['name'], 'Oficina Nova');
+      expect(writes.single['updatedAt'], isNotNull);
+      // Only the name: the copy loaded when the screen opened (Valores e
+      // cobrança, plan, team) is never written back.
+      expect(
+        writes.single.keys.where((k) => k != 'updatedBy'),
+        unorderedEquals(['name', 'updatedAt']),
+      );
       expect(find.byType(CompanyDataScreen), findsNothing);
       expect(find.text('Oficina Nova'), findsOneWidget);
+    });
+
+    testWidgets('a stale copy never turns Valores e cobrança back on', (
+      tester,
+    ) async {
+      // Loaded with useFinancial on; the web turns it off meanwhile.
+      await pumpSettings(tester, company()..useFinancial = true);
+      await tester.tap(find.text('Oficina Exemplo'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('company_name_field')),
+          matching: find.byType(CupertinoTextField),
+        ),
+        'Oficina Nova',
+      );
+      await tester.tap(find.byKey(const ValueKey('company_editor_save')));
+      await tester.pumpAndSettle();
+
+      expect(writes.single.containsKey('useFinancial'), isFalse);
+      expect(writes.single.containsKey('phone'), isFalse);
+      expect(writes.single.containsKey('users'), isFalse);
     });
 
     testWidgets('terms row opens Termos para o cliente', (tester) async {

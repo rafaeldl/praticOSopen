@@ -11,6 +11,7 @@ import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
+import 'package:praticos/utils/field_diff.dart';
 import 'package:provider/provider.dart';
 
 /// Company switches of "Como você trabalha" besides "Valores e cobrança",
@@ -190,8 +191,35 @@ typedef SegmentsLoader = Future<List<OnboardingSegment>> Function();
 Future<Company?> _loadCompanyWithStore(String companyId) async =>
     await CompanyStore().retrieveCompany(companyId) as Company?;
 
-Future<void> _saveCompanyWithStore(Company company) =>
-    CompanyStore().updateCompany(company);
+/// Fields never written from the company screen's copy: the switches (each
+/// written on its own by [CompanyFieldsWriter]), the plan and usage (server
+/// owned), the owner, the team and the audit fields.
+const _companyFieldsNotEdited = {
+  'id',
+  'owner',
+  'users',
+  'subscription',
+  'usage',
+  'useFinancial',
+  'useScheduling',
+  'fieldService',
+  'useContracts',
+  'useDeviceManagement',
+  'createdAt',
+  'createdBy',
+  'updatedAt',
+  'updatedBy',
+};
+
+/// What saving [after] (edited from [before], the company the screen
+/// loaded) writes: only the fields that changed, so a stale copy never puts
+/// back what the web changed meanwhile ("Valores e cobrança", plan, team).
+Map<String, dynamic> companyChangedFields(Company before, Company after) =>
+    changedFields(
+      before.toJson(),
+      after.toJson(),
+      ignore: _companyFieldsNotEdited,
+    );
 
 Future<List<OnboardingSegment>> _loadActiveSegments() =>
     firestoreOnboardingSegments().first;
@@ -216,12 +244,10 @@ class MyCompanySettings extends StatefulWidget {
     this.companyName,
     CompanyFieldsWriter? writer,
     CompanyLoader? loadCompany,
-    CompanySaver? saveCompany,
     SegmentsLoader? loadSegments,
     this.uploadLogo,
   }) : writer = writer ?? _writeCompanyFields,
        loadCompany = loadCompany ?? _loadCompanyWithStore,
-       saveCompany = saveCompany ?? _saveCompanyWithStore,
        loadSegments = loadSegments ?? _loadActiveSegments;
 
   /// Null when there is no current company: the switches are disabled.
@@ -229,9 +255,11 @@ class MyCompanySettings extends StatefulWidget {
 
   /// Shown until the company document loads.
   final String? companyName;
+
+  /// Every write of the screen: the switches and, for the editors, only the
+  /// fields that changed ([companyChangedFields]).
   final CompanyFieldsWriter writer;
   final CompanyLoader loadCompany;
-  final CompanySaver saveCompany;
   final SegmentsLoader loadSegments;
   final CompanyLogoUploader? uploadLogo;
 
@@ -275,12 +303,25 @@ class _MyCompanySettingsState extends State<MyCompanySettings> {
     return null;
   }
 
-  /// Saves [company] and applies it to the app.
+  /// Saves what changed in [company] (a copy of the loaded one) and applies
+  /// it to the app. Only the changed fields are written: the loaded copy may
+  /// be old, and writing it whole would undo what the web changed.
   Future<void> _persist(Company company) async {
+    final companyId = widget.companyId;
+    final before = _company;
+    if (companyId == null || before == null) return;
+    final fields = companyChangedFields(before, company);
     company
       ..updatedAt = DateTime.now()
       ..updatedBy = Global.userAggr;
-    await widget.saveCompany(company);
+    if (fields.isNotEmpty) {
+      final audit = company.toJson();
+      await widget.writer(companyId, {
+        ...fields,
+        'updatedAt': audit['updatedAt'],
+        if (audit['updatedBy'] != null) 'updatedBy': audit['updatedBy'],
+      });
+    }
     if (!mounted) return;
     final aggr = Global.companyAggr;
     if (aggr != null && company.id == aggr.id) {
