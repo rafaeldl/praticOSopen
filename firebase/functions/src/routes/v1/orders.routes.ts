@@ -170,13 +170,17 @@ router.get('/', route('Failed to list orders', async (req, res, companyId) => {
   // The technician asking for their own assigned orders gets them whoever created them
   // (firestore.rules isOrderAssignee; indexes assignedTo.id + status/createdAt).
   const userId = req.userContext?.userId;
-  const assignedToSelf = !seesAll && !!userId && query.assignedTo === userId && req.userContext?.role === 'technician';
+  const technician = !seesAll && !!userId && req.userContext?.role === 'technician';
+  const assignedToSelf = technician && query.assignedTo === userId;
+  // Without an owner filter, the technician gets what they created and what was given to them (Todas, Paradas…).
+  const createdOrAssigned = technician && query.assignedTo === undefined;
   const result = await orderService.listOrders(companyId, {
     status: query.status as OrderStatus[] | undefined,
     customerId: query.customerId,
     deviceId: query.deviceId,
     assignedTo: query.assignedTo,
-    createdById: seesAll || assignedToSelf ? undefined : userId,
+    createdById: seesAll || assignedToSelf || createdOrAssigned ? undefined : userId,
+    createdOrAssignedTo: createdOrAssigned ? userId : undefined,
     startDate: query.startDate,
     endDate: query.endDate,
     limit: query.limit,
@@ -428,7 +432,7 @@ router.post('/:id/payments', requireOrderAccess(), route('Failed to add payment'
   const guard = await receiveGuard(req, res);
   const result = await orderService.addPayment(companyId, param(req, 'id'), data.amount, 'payment', data.description, getUserAggr(req), {
     guard, paidAt: data.paidAt, paymentMethod: data.paymentMethod, receiptFile: data.receiptFile,
-    clientTransactionId: data.clientTransactionId,
+    clientTransactionId: data.clientTransactionId, expectedUpdatedAt: data.expectedUpdatedAt,
   });
   if (!result) return notFound(res);
   const { order, ...summary } = result;
@@ -494,7 +498,7 @@ router.post('/:id/discounts', requireOrderAccess(), route('Failed to add discoun
   if (!validation.success) return validationError(res, validation.errors);
   const result = await orderService.addPayment(
     companyId, param(req, 'id'), validation.data.amount, 'discount', validation.data.description, getUserAggr(req),
-    { guard: await financialGuard(req, res), clientTransactionId: validation.data.clientTransactionId },
+    { guard: await financialGuard(req, res), clientTransactionId: validation.data.clientTransactionId, expectedUpdatedAt: validation.data.expectedUpdatedAt },
   );
   if (!result) return notFound(res);
   const { order, ...summary } = result;

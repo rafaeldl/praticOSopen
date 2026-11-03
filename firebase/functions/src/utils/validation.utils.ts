@@ -199,6 +199,8 @@ export const updateOrderItemSchema = z.object({
 /** POST /:id/payments: money received. A discount has its own route. */
 export const receivePaymentSchema = z.object({
   clientTransactionId: clientTransactionIdSchema.optional(),
+  /** Refuses a payment over a newer version (409 ORDER_CHANGED), unless it repeats clientTransactionId. */
+  expectedUpdatedAt: isoDateTime.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
   type: z.literal('payment').optional(),
@@ -210,6 +212,7 @@ export const receivePaymentSchema = z.object({
 /** POST /:id/discounts */
 export const discountSchema = z.object({
   clientTransactionId: clientTransactionIdSchema.optional(),
+  expectedUpdatedAt: isoDateTime.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
 });

@@ -99,6 +99,12 @@ export interface OrderQueryParams {
   assignedTo?: string;
   /** Only the orders this user created (consultant and technician). */
   createdById?: string;
+  /**
+   * The orders this user created or that are assigned to them (technician, as
+   * firestore.rules isOrderAssignee and the app's OrderScope). Two queries merged
+   * by the same order and cursor; no `total` (it would count the overlap twice).
+   */
+  createdOrAssignedTo?: string;
   startDate?: string;
   endDate?: string;
   limit?: number;
@@ -126,6 +132,7 @@ const DEFAULT_DIRECTION: Record<OrderSort, 'asc' | 'desc'> = {
  * Firestore indexes do not cover answers UNSUPPORTED_QUERY (400) instead of 500.
  */
 export async function listOrders(companyId: string, params: OrderQueryParams): Promise<OrderPage> {
+  if (params.createdOrAssignedTo) return listCreatedOrAssigned(companyId, params, params.createdOrAssignedTo);
   const collection = getTenantCollection(companyId, 'orders');
   let query: FirebaseFirestore.Query = collection;
   const statuses = params.status === undefined ? [] : Array.isArray(params.status) ? params.status : [params.status];
@@ -168,6 +175,50 @@ export async function listOrders(companyId: string, params: OrderQueryParams): P
     }
     throw error;
   }
+}
+
+/** Firestore order of a field value: numbers, ISO strings and Timestamps. */
+function sortKey(value: unknown): number | string {
+  if (typeof value === 'number') return value;
+  if (value && typeof (value as { toMillis?: unknown }).toMillis === 'function') return (value as { toMillis: () => number }).toMillis();
+  if (typeof value === 'string') {
+    const time = Date.parse(value);
+    return /^\d{4}-\d{2}-\d{2}/.test(value) && !Number.isNaN(time) ? time : value;
+  }
+  return '';
+}
+
+/**
+ * Created by the user OR assigned to them: one query each (both indexed), each
+ * from the same cursor, merged by (sort field, id) like Firestore orders them,
+ * repeated ids once. The next page starts after the last id shown, so it is stable.
+ */
+async function listCreatedOrAssigned(companyId: string, params: OrderQueryParams, userId: string): Promise<OrderPage> {
+  const { createdOrAssignedTo: _drop, offset, ...rest } = params;
+  void _drop;
+  const limit = params.limit ?? 20;
+  const sort = params.sort ?? 'createdAt';
+  const direction = params.direction ?? DEFAULT_DIRECTION[sort];
+  // Each side brings enough for this page (and the offset, when one is used).
+  const size = limit + (offset ?? 0);
+  const [created, assigned] = await Promise.all([
+    listOrders(companyId, { ...rest, createdById: userId, limit: size }),
+    listOrders(companyId, { ...rest, createdById: undefined, assignedTo: userId, limit: size }),
+  ]);
+  const seen = new Set<string>();
+  const sign = direction === 'asc' ? 1 : -1;
+  const merged = [...created.data, ...assigned.data]
+    .filter((order) => (seen.has(order.id) ? false : (seen.add(order.id), true)))
+    .sort((a, b) => {
+      const x = sortKey((a as unknown as Record<string, unknown>)[sort]);
+      const y = sortKey((b as unknown as Record<string, unknown>)[sort]);
+      if (x !== y) return (x < y ? -1 : 1) * sign;
+      return (a.id < b.id ? -1 : a.id > b.id ? 1 : 0) * sign;
+    });
+  const start = offset ?? 0;
+  const data = merged.slice(start, start + limit);
+  const hasMore = merged.length > start + limit || created.hasMore || assigned.hasMore;
+  return { data, hasMore: hasMore && data.length > 0, nextCursor: hasMore && data.length ? data[data.length - 1].id : null };
 }
 
 /**
@@ -930,7 +981,10 @@ export async function addPayment(
   validateReceiptFile(orderFilesPrefix(companyId, orderId), options.receiptFile);
 
   return runTransaction(async (tx) => {
-    const order = await readOrderForWrite(tx, ref, options);
+    // The repeated clientTransactionId is looked up before expectedUpdatedAt: a retry after
+    // the answer was lost returns what was saved instead of 409 ORDER_CHANGED.
+    const { expectedUpdatedAt, ...readOptions } = options;
+    const order = await readOrderForWrite(tx, ref, readOptions);
     if (!order) return null;
 
     const clientId = options.clientTransactionId;
@@ -947,6 +1001,9 @@ export async function addPayment(
         isFullyPaid: order.paid === true,
         order,
       };
+    }
+    if (expectedUpdatedAt !== undefined && !sameInstant(order.updatedAt, expectedUpdatedAt)) {
+      throw new OrderRuleError('ORDER_CHANGED', 409, 'The order changed since it was loaded');
     }
     if (type === 'payment' && options.paidAt) validatePaidAt(options.paidAt, order.createdAt);
     if (type === 'payment') assertPaymentWithinBalance(order, amount);

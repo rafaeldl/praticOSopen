@@ -79,13 +79,15 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-sec h3 .link { font-size: 0.875rem; }
 .od-group { font-size: 0.8125rem; font-weight: 700; margin: 0.5rem 0 0.15rem; }
 .items { list-style: none; margin: 0; padding: 0; }
-.item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0.25rem 0.75rem; align-items: baseline; padding: 0.35rem 0; border-bottom: 1px dashed var(--color-rule); }
+/* Flex that wraps: at 200% text on a phone, the value and "Mudar" go under the name instead of past the edge. */
+.item { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.25rem 0.75rem; align-items: baseline; padding: 0.35rem 0; border-bottom: 1px dashed var(--color-rule); }
+.item > :first-child { flex: 1 1 9rem; min-width: 0; }
 .item:last-child { border-bottom: 0; }
 .item .sub { display: block; }
 .item-name { font-weight: 500; overflow-wrap: anywhere; }
 .receipt { margin: 0.35rem 0 0; display: grid; gap: 0.12rem; }
-.receipt div { display: flex; justify-content: space-between; gap: 1rem; }
-.receipt dd { margin: 0; font-family: var(--font-num); font-weight: 500; }
+.receipt div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1rem; }
+.receipt dd { margin: 0 0 0 auto; font-family: var(--font-num); font-weight: 500; }
 .receipt dt { color: var(--color-muted); }
 .receipt .is-total { border-top: 2px solid var(--color-ink); padding-top: 0.3rem; margin-top: 0.2rem; }
 .receipt .is-total dt, .receipt .is-rest dt { color: var(--color-ink); font-weight: 700; }

@@ -175,6 +175,27 @@ test('M2 (home.filter.mine): o técnico vê em Minhas a OS que o admin criou e a
   await expect(panel(page).getByText('OS não está mais aqui')).toHaveCount(0)
 })
 
+test('N1: a OS atribuída ao técnico aparece também em Paradas e Todas, sem valores', async ({ page }) => {
+  const order = await makeOrder('admin', {
+    status: 'progress',
+    assignedTo: { id: 'e2e-technician', name: 'Tiago Tecnico' },
+    onHold: { reason: 'part', since: new Date(Date.now() - 86400000).toISOString() },
+  })
+  const lists: string[] = []
+  page.on('response', async (response) => {
+    if (/\/v1\/app\/orders\?/.test(response.url())) lists.push(await response.text())
+  })
+  await login(page, 'technician')
+  await page.getByRole('button', { name: 'Paradas' }).click()
+  await expect(row(page, order.number)).toHaveCount(1)
+  await page.getByRole('button', { name: 'Todas' }).click()
+  await expect(row(page, order.number)).toHaveCount(1)
+  // Once each, and no money in the projection (N3).
+  await expect(table(page).locator('td.c-num', { hasText: new RegExp(`^${order.number}$`) })).toHaveCount(1)
+  expect(lists.length).toBeGreaterThan(0)
+  for (const body of lists) expect(JSON.stringify(JSON.parse(body).data)).not.toMatch(/"(total|paidAmount|payment|value)"/)
+})
+
 test('M2 (order.responsible.pick): o admin escolhe o técnico e a OS aparece em Minhas dele', async ({ page }) => {
   const order = await makeOrder('admin', { status: 'approved' })
   await openOrder(page, 'admin', order.id)

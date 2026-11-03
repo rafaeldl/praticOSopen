@@ -149,6 +149,37 @@ describe('GET /orders', () => {
     expect((await call('consultant', 'get', `${O}/g`)).status).toBe(403);
   });
 
+  it('N1 e N3: sem filtro de dono, o técnico recebe as que criou e as atribuídas, sem repetir, paginado e sem valores', async () => {
+    // e: admin's, assigned to tech1. h: created by tech1 and assigned to tech1 (must come once). f: someone else's.
+    seedOrder('e', { number: 5, createdAt: '2026-10-05T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' }, status: 'progress' });
+    seedOrder('f', { number: 6, createdAt: '2026-10-06T10:00:00.000Z', assignedTo: { id: 'other', name: 'Outro' } });
+    seedOrder('h', { number: 8, createdAt: '2026-10-08T10:00:00.000Z', createdBy: { id: 'tech1', name: 'Téo' }, assignedTo: { id: 'tech1', name: 'Téo' } });
+    const all = await call('technician', 'get', O);
+    expect(all.status).toBe(200);
+    expect(all.body.data.map((o: any) => o.id)).toEqual(['h', 'e', 'c', 'a']);
+    for (const o of all.body.data) {
+      for (const field of ['total', 'paidAmount', 'payment', 'remainingBalance']) expect(o).not.toHaveProperty(field);
+      expect(o.services?.[0] ?? {}).not.toHaveProperty('value');
+    }
+    // Pages of 2 walk the same list, no repeats, no gaps.
+    const ids: string[] = [];
+    let cursor = '';
+    for (let i = 0; i < 4; i++) {
+      const page = await call('technician', 'get', `${O}?limit=2${cursor ? `&cursor=${cursor}` : ''}`);
+      ids.push(...page.body.data.map((o: any) => o.id));
+      if (!page.body.pagination.hasMore) break;
+      cursor = page.body.pagination.nextCursor;
+    }
+    expect(ids).toEqual(['h', 'e', 'c', 'a']);
+    // Status filters keep the union (Paradas/Em aberto read the open ones).
+    expect((await call('technician', 'get', `${O}?status=progress`)).body.data.map((o: any) => o.id)).toEqual(['e', 'c']);
+    // The assigned order opens for the technician without values (N3).
+    const detail = await call('technician', 'get', `${O}/e`);
+    expect(detail.status).toBe(200);
+    for (const field of ['total', 'paidAmount', 'payment', 'transactions']) expect(detail.body.data[field]).toBeUndefined();
+    expect(detail.body.data.services[0]).not.toHaveProperty('value');
+  });
+
   it('consultor vê o total das próprias', async () => {
     const res = await call('consultant', 'get', O);
     expect(res.body.data).toEqual([expect.objectContaining({ id: 'd', total: 100 })]);
@@ -774,6 +805,24 @@ describe('clientTransactionId', () => {
     expect((await call('owner', 'post', `${O}/o1/discounts`, body)).status).toBe(200);
     expect(doc('o1')).toMatchObject({ total: 90, discount: 10 });
     expect(doc('o1').transactions).toHaveLength(1);
+  });
+
+  it('N2: repetir com o mesmo id depois de a resposta se perder devolve o gravado, mesmo com expectedUpdatedAt velho', async () => {
+    seedOrder('o1');
+    const payment = { amount: 40, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b1', expectedUpdatedAt: T0 };
+    expect((await call('owner', 'post', `${O}/o1/payments`, payment)).status).toBe(200);
+    // The answer was lost: the screen still holds the old updatedAt and sends the same request.
+    const again = await call('owner', 'post', `${O}/o1/payments`, payment);
+    expect(again.status).toBe(200);
+    expect(again.body.data).toMatchObject({ transactionId: payment.clientTransactionId, paidAmount: 40 });
+    const discount = { amount: 5, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b2', expectedUpdatedAt: doc('o1').updatedAt };
+    expect((await call('owner', 'post', `${O}/o1/discounts`, discount)).status).toBe(200);
+    expect((await call('owner', 'post', `${O}/o1/discounts`, discount)).status).toBe(200);
+    expect(doc('o1').transactions).toHaveLength(2);
+    // A new id over an old version is still refused.
+    const stale = await call('owner', 'post', `${O}/o1/payments`, { amount: 1, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b3', expectedUpdatedAt: T0 });
+    expect(stale.status).toBe(409);
+    expect(stale.body.error.code).toBe('ORDER_CHANGED');
   });
 
   it('mesmo id com outro valor ou tipo é recusado', async () => {
