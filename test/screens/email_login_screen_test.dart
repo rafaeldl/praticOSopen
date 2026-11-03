@@ -65,6 +65,10 @@ void main() {
       expect(find.text('Entrar com e-mail'), findsWidgets);
       expect(find.byType(PrimaryButton), findsOneWidget);
       expect(find.text('Esqueceu a senha?'), findsOneWidget);
+      expect(
+        find.text('Ainda não tem conta? Volte e continue com Apple ou Google.'),
+        findsOneWidget,
+      );
       // No old all-caps section header.
       expect(find.text('CREDENCIAIS'), findsNothing);
     });

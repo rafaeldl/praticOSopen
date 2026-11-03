@@ -145,8 +145,34 @@ class AuthRepository {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  /// First provider of [providerIds] the app can re-authenticate with. Linked
+  /// providers like `phone` are skipped; null when none is supported.
+  static String? reauthProviderId(Iterable<String> providerIds) {
+    const supported = {'google.com', 'apple.com', 'password'};
+    return providerIds.where(supported.contains).firstOrNull;
+  }
+
+  bool get reauthNeedsPassword {
+    final providerData = _auth.currentUser?.providerData ?? const [];
+    return reauthProviderId(providerData.map((p) => p.providerId)) ==
+        'password';
+  }
+
+  /// Re-authenticates the current user with the password of their account.
+  Future<void> reauthenticateWithPassword(String password) async {
+    final User? user = _auth.currentUser;
+    final String? email = user?.email;
+    if (user == null || email == null) {
+      throw Exception('No authenticated user to reauthenticate');
+    }
+    await user.reauthenticateWithCredential(
+      EmailAuthProvider.credential(email: email, password: password),
+    );
+  }
+
   /// Re-authenticates the current user with their provider (Google or Apple)
-  /// This is required before sensitive operations like account deletion
+  /// This is required before sensitive operations like account deletion.
+  /// Password accounts use [reauthenticateWithPassword].
   Future<void> reauthenticate() async {
     final User? user = _auth.currentUser;
     if (user == null) {
@@ -159,7 +185,8 @@ class AuthRepository {
       throw Exception('No provider data found for user');
     }
 
-    final providerId = providerData.first.providerId;
+    final providerId =
+        reauthProviderId(providerData.map((p) => p.providerId));
 
     try {
       if (providerId == 'google.com') {

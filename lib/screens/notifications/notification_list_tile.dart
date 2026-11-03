@@ -41,6 +41,8 @@ String noticeText(BuildContext context, AppNotification notification) {
     case NotificationType.paymentReceived:
       final amount = RegExp(r'[–-]\s*(.+)$').firstMatch(body)?.group(1);
       return amount == null ? title : l10n.noticePaymentReceived(amount.trim());
+    case NotificationType.maintenanceDue:
+      return '$title: $body';
   }
 
   final withoutOrder = body

@@ -41,12 +41,14 @@ function getField(data: Data | undefined, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, key) => (isPlainObject(acc) ? acc[key] : undefined), data);
 }
 
-/** Firestore filter semantics used by the tests: ==, in, array-contains and numeric > (numbers only). */
+/** Firestore filter semantics used by the tests: ==, in, array-contains, numeric > and text >= / <=. */
 function matches(actual: unknown, op: string, value: unknown): boolean {
   if (op === '==') return actual === value;
   if (op === 'array-contains') return Array.isArray(actual) && actual.includes(value);
   if (op === 'in') return Array.isArray(value) && value.includes(actual);
   if (op === '>') return typeof actual === 'number' && typeof value === 'number' && actual > value;
+  if (op === '>=') return typeof actual === 'string' && typeof value === 'string' && actual >= value;
+  if (op === '<=') return typeof actual === 'string' && typeof value === 'string' && actual <= value;
   throw new Error(`FakeQuery: unsupported operator ${op}`);
 }
 
@@ -88,6 +90,13 @@ export class FakeDoc {
   }
   async update(data: Data) {
     this.store.write(this.path, data, 'update');
+  }
+  /** Like Firestore: fails with ALREADY_EXISTS (6) when the document exists. */
+  async create(data: Data) {
+    if (this.store.docs.has(this.path)) {
+      throw Object.assign(new Error(`ALREADY_EXISTS: ${this.path}`), { code: 6 });
+    }
+    this.store.write(this.path, data, 'set');
   }
   async delete() {
     this.store.docs.delete(this.path);

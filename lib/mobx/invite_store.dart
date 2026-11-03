@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
@@ -8,6 +9,36 @@ import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/invite_api_service.dart';
 
 part 'invite_store.g.dart';
+
+/// Pending, unexpired invites for [email] and [phone], without repeats.
+///
+/// A failure of the phone query keeps the e-mail invites: the Firestore rules
+/// only let the recipient read by verified e-mail, so an account with a linked
+/// phone is denied there.
+@visibleForTesting
+Future<List<Invite>> collectPendingInvites({
+  required String? email,
+  required String? phone,
+  required Future<List<Invite>> Function(String email) byEmail,
+  required Future<List<Invite>> Function(String phone) byPhone,
+}) async {
+  final found = <Invite>[
+    if (email != null && email.isNotEmpty) ...await byEmail(email),
+  ];
+  if (phone != null && phone.isNotEmpty) {
+    try {
+      found.addAll(await byPhone(phone));
+    } catch (e) {
+      debugPrint('[InviteStore] phone invites unavailable: $e');
+    }
+  }
+
+  final seenTokens = <String>{};
+  return found
+      .where((i) => i.token != null && seenTokens.add(i.token!))
+      .where((i) => !i.isExpired)
+      .toList();
+}
 
 /// Store para gerenciamento de convites recebidos pelo usuário.
 ///
@@ -45,36 +76,15 @@ abstract class _InviteStore with Store {
     errorMessage = null;
 
     try {
-      final email = currentUser.email;
-      final phone = currentUser.phoneNumber?.replaceAll(RegExp(r'\D'), '');
-
-      final Set<String> seenTokens = {};
-      final List<Invite> allInvites = [];
-
-      // Busca por email
-      if (email != null && email.isNotEmpty) {
-        final emailInvites = await _inviteRepository.getPendingByEmail(email);
-        for (final invite in emailInvites) {
-          if (invite.token != null && !seenTokens.contains(invite.token)) {
-            seenTokens.add(invite.token!);
-            allInvites.add(invite);
-          }
-        }
-      }
-
-      // Busca por telefone
-      if (phone != null && phone.isNotEmpty) {
-        final phoneInvites = await _inviteRepository.getPendingByPhone(phone);
-        for (final invite in phoneInvites) {
-          if (invite.token != null && !seenTokens.contains(invite.token)) {
-            seenTokens.add(invite.token!);
-            allInvites.add(invite);
-          }
-        }
-      }
+      final allInvites = await collectPendingInvites(
+        email: currentUser.email,
+        phone: currentUser.phoneNumber?.replaceAll(RegExp(r'\D'), ''),
+        byEmail: _inviteRepository.getPendingByEmail,
+        byPhone: _inviteRepository.getPendingByPhone,
+      );
 
       pendingInvites.clear();
-      pendingInvites.addAll(allInvites.where((i) => !i.isExpired));
+      pendingInvites.addAll(allInvites);
     } catch (e) {
       errorMessage = e.toString();
       print('[InviteStore] Error loading pending invites: $e');

@@ -32,6 +32,7 @@ OS nova → sem id até o "✓" → createItem(onCreated) → scheduleReminder
 3. **Pedido de notificação no iPhone.** Não sai mais depois do login. Sai depois de salvar a primeira OS ou de marcar uma visita numa OS salva, precedido de um aviso com um botão só, "Continuar", como a HIG pede para telas antes de um alerta. Quem já respondeu não vê nada. No Android continua como antes.
 4. **Depois de salvar, uma interrupção por vez.** Quem aceita o checklist vai para a OS, e o pedido de notificação fica para a próxima.
 5. **Checklist de entrada.** Oferecido só no ramo `automotive`, em OS com veículo, com id, sem contrato e para quem pode mexer em checklists. Depois de 3 "Agora não" seguidos a oferta para (`checklist_offer_declined` em `SharedPreferences`). Offline a OS não recebe id em 3 segundos, e a oferta não aparece.
+6. **Próxima manutenção.** Ao concluir a OS, a pergunta segue o mesmo padrão de 3 recusas seguidas. Na Nova OS salva já concluída, ela toma o lugar do checklist. Ver `docs/DEVICE_NEXT_MAINTENANCE.md`.
 
 ## Exemplos de Uso
 

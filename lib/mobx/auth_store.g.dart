@@ -121,7 +121,7 @@ mixin _$AuthStore on _AuthStore, Store {
   );
 
   @override
-  dynamic signInWithGoogle() {
+  Future<dynamic> signInWithGoogle() {
     final _$actionInfo = _$_AuthStoreActionController.startAction(
       name: '_AuthStore.signInWithGoogle',
     );
@@ -163,6 +163,18 @@ mixin _$AuthStore on _AuthStore, Store {
     );
     try {
       return super.sendPasswordResetEmail(email);
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<void> reauthenticateWithPassword(String password) {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.reauthenticateWithPassword',
+    );
+    try {
+      return super.reauthenticateWithPassword(password);
     } finally {
       _$_AuthStoreActionController.endAction(_$actionInfo);
     }

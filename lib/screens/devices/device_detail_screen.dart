@@ -11,12 +11,17 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/devices/next_maintenance_offer.dart';
+import 'package:praticos/screens/order/order_extras.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/order_history_row.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/device_maintenance_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -25,9 +30,28 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
 
+/// [value] of a number field, grouped for reading ("98.000"), or null to show
+/// it as it is. The saved value does not change. Year has the number type but
+/// is not a quantity. A value with a leading zero or any other text stays as
+/// typed.
+String? formatDeviceNumber(
+  CustomField? field,
+  Object? value,
+  FormatService format,
+) {
+  if (field?.type != 'number' || field?.fieldName == 'year') return null;
+  final number = value is num
+      ? (value == value.truncate() ? value.toInt() : null)
+      : RegExp(r'^-?[1-9]\d*$').hasMatch('$value')
+      ? int.tryParse('$value')
+      : null;
+  return number == null ? null : format.formatDecimal(number);
+}
+
 /// Vehicle (device) screen (`/device_detail`, arguments `device` and
-/// optionally `customer`): data, owner, "Nova OS" for this vehicle, order
-/// history and active contracts. Edit and delete live in the "…" menu.
+/// optionally `customer`): data, owner, next maintenance, "Nova OS" for this
+/// vehicle, order history and active contracts. Edit and delete live in the
+/// "…" menu.
 ///
 /// The device label ("Veículo", "Aparelho"…) and icon come from the segment.
 class DeviceDetailScreen extends StatefulWidget {
@@ -36,6 +60,9 @@ class DeviceDetailScreen extends StatefulWidget {
     this.device,
     this.customer,
     this.orderRepository,
+    this.deviceRepository,
+    this.canManageDevices,
+    this.saveMaintenance,
     this.onDelete,
     this.showPrices,
   });
@@ -49,6 +76,22 @@ class DeviceDetailScreen extends StatefulWidget {
 
   /// Injected in tests; defaults to [TenantOrderRepository].
   final TenantOrderRepository? orderRepository;
+
+  /// Injected in tests; defaults to [TenantDeviceRepository].
+  final TenantDeviceRepository? deviceRepository;
+
+  /// Who may set the next maintenance. Defaults to `manageDevices`.
+  final bool? canManageDevices;
+
+  /// Writes the next maintenance; defaults to [DeviceMaintenanceService].
+  final void Function(
+    String deviceId,
+    DateTime? date,
+    CustomerAggr? customer,
+    String? lastService,
+    VoidCallback onFailed,
+  )?
+  saveMaintenance;
 
   /// Deletes the device. Defaults to [DeviceStore.deleteDevice].
   final Future<void> Function(Device device)? onDelete;
@@ -71,9 +114,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   TenantOrderRepository? _repo;
   Stream<List<Order?>>? _orderStream;
   Stream<List<Order?>>? _contractStream;
+  Stream<List<Order?>>? _maintenanceContracts;
+  Stream<Device?>? _maintenanceStream;
+  bool _editingMaintenance = false;
 
   TenantOrderRepository get _orderRepo =>
       _repo ??= widget.orderRepository ?? TenantOrderRepository();
+
+  bool get _canManageDevices =>
+      widget.canManageDevices ??
+      AuthorizationService.instance.hasPermission(PermissionType.manageDevices);
 
   @override
   void didChangeDependencies() {
@@ -94,6 +144,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       if (deviceId != null && companyId != null) {
         _orderStream = _orderRepo.streamOrdersByDevice(companyId, deviceId);
         _contractStream = _orderRepo.streamContractsByDevice(companyId, deviceId);
+        // A stream has one listener: this one is for the maintenance row.
+        _maintenanceContracts = _orderRepo.streamContractsByDevice(
+          companyId,
+          deviceId,
+        );
+        // The device that came in may be an aggregate, with no date.
+        _maintenanceStream =
+            (widget.deviceRepository ?? TenantDeviceRepository())
+                .streamSingle(companyId, deviceId);
       }
     });
   }
@@ -353,6 +412,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ],
           ),
         ),
+      _buildMaintenance(owner, mainServiceName(lastDoneOrder(orders), device.id)),
       Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
@@ -392,6 +452,144 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     ];
   }
 
+  /// "Próxima manutenção: maio de 2027". With an active contract the date is
+  /// the contract's and nothing asks for another one.
+  Widget _buildMaintenance(Customer? owner, String? lastService) {
+    final contracts = _maintenanceContracts;
+    final deviceStream = _maintenanceStream;
+    if (contracts == null || deviceStream == null) {
+      return const SizedBox.shrink();
+    }
+    return StreamBuilder<List<Order?>>(
+      stream: contracts,
+      builder: (context, contractSnapshot) => StreamBuilder<Device?>(
+        stream: deviceStream,
+        builder: (context, deviceSnapshot) {
+          // Waits for both, so a contract's device never flashes "Definir".
+          if (!deviceSnapshot.hasData &&
+              !deviceSnapshot.hasError &&
+              deviceSnapshot.connectionState != ConnectionState.done) {
+            return const SizedBox.shrink();
+          }
+          if (!contractSnapshot.hasData && !contractSnapshot.hasError) {
+            return const SizedBox.shrink();
+          }
+          final contract = contractSnapshot.data
+              ?.whereType<Order>()
+              .where((order) => order.contract?.active == true)
+              .firstOrNull;
+          if (contract != null) return _contractMaintenanceRow(contract);
+          return _maintenanceRow(deviceSnapshot.data, owner, lastService);
+        },
+      ),
+    );
+  }
+
+  Widget _contractMaintenanceRow(Order contract) {
+    final l10n = context.l10n;
+    final format = FormatService()..setLocale(l10n.localeName);
+    final due = contract.contract?.nextDueDate;
+    return AppListRow(
+      key: const ValueKey('device_maintenance_contract'),
+      leading: _maintenanceIcon(),
+      title: due == null
+          ? l10n.nextMaintenanceByContract
+          : l10n.nextMaintenanceOn(format.formatMonthYear(due)),
+      subtitle: due == null ? null : l10n.nextMaintenanceByContract,
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/order',
+        arguments: {'order': contract},
+      ),
+    );
+  }
+
+  Widget _maintenanceRow(
+    Device? device,
+    Customer? owner,
+    String? lastService,
+  ) {
+    final l10n = context.l10n;
+    final format = FormatService()..setLocale(l10n.localeName);
+    final date = device?.nextMaintenance;
+    if (date == null && !_canManageDevices) return const SizedBox.shrink();
+    return AppListRow(
+      key: const ValueKey('device_maintenance'),
+      leading: _maintenanceIcon(),
+      title: date == null
+          ? l10n.nextMaintenanceSet
+          : l10n.nextMaintenanceOn(format.formatMonthYear(date)),
+      titleStyle: date == null
+          ? AppTypography.body.copyWith(
+              color: AppColors.accentText.resolveFrom(context),
+            )
+          : null,
+      subtitle: date != null && _canManageDevices
+          ? l10n.nextMaintenanceChangeHint
+          : null,
+      onTap: _canManageDevices
+          ? () => _editMaintenance(date, owner, lastService)
+          : null,
+    );
+  }
+
+  Icon _maintenanceIcon() => Icon(
+    CupertinoIcons.calendar,
+    size: 22,
+    color: AppColors.textSecondary.resolveFrom(context),
+  );
+
+  /// The row stays on screen behind the sheet: only the first tap opens it.
+  Future<void> _editMaintenance(
+    DateTime? current,
+    Customer? owner,
+    String? lastService,
+  ) async {
+    if (_editingMaintenance) return;
+    _editingMaintenance = true;
+    final l10n = context.l10n;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final pick = await OrderDateSheet.show(
+      context,
+      initial: current == null || current.isBefore(today)
+          ? addMonths(today, 6)
+          : current,
+      minimum: today,
+      dateOnly: true,
+      removeLabel: current == null ? null : l10n.nextMaintenanceRemove,
+    );
+    _editingMaintenance = false;
+    if (pick == null || !mounted) return;
+    final saveError = l10n.nextMaintenanceSaveError;
+    (widget.saveMaintenance ?? _saveMaintenance)(
+      _device!.id!,
+      pick.date,
+      owner?.toAggr(),
+      lastService,
+      () {
+        if (mounted) showAppToast(context, saveError);
+      },
+    );
+    if (pick.date != null) await resetMaintenanceDeclines();
+  }
+
+  void _saveMaintenance(
+    String deviceId,
+    DateTime? date,
+    CustomerAggr? customer,
+    String? lastService,
+    VoidCallback onFailed,
+  ) {
+    DeviceMaintenanceService(devices: widget.deviceRepository).save(
+      [deviceId],
+      date: date,
+      customer: customer,
+      lastServices: {deviceId: ?lastService},
+      onFailed: onFailed,
+    );
+  }
+
   List<Widget> _buildInfoRows(SegmentConfigProvider config) {
     final l10n = context.l10n;
     final device = _device!;
@@ -413,6 +611,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     if (data == null) return const [];
     final locale = context.l10n.localeName;
     final fields = config.fieldsFor('device');
+    final format = FormatService()..setLocale(locale);
 
     final labelMap = <String, String>{};
     for (final f in fields) {
@@ -432,7 +631,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           );
       final display = (field != null && field.type == 'select')
           ? field.getOptionLabel(value, locale)
-          : value;
+          : formatDeviceNumber(field, entry.value, format) ?? value;
       return AppListRow(title: label, trailing: display);
     }).toList();
   }

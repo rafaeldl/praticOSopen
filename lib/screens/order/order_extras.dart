@@ -73,6 +73,14 @@ class OrderDateSheet extends StatefulWidget {
 
 class _OrderDateSheetState extends State<OrderDateSheet> {
   late DateTime _picked = widget.initial;
+  bool _closed = false;
+
+  /// A second tap while the sheet slides away would pop the screen under it.
+  void _close(OrderDatePick pick) {
+    if (_closed) return;
+    _closed = true;
+    Navigator.pop(context, pick);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +97,7 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
               children: [
                 if (widget.removeLabel != null)
                   CupertinoButton(
-                    onPressed: () =>
-                        Navigator.pop(context, const OrderDatePick.remove()),
+                    onPressed: () => _close(const OrderDatePick.remove()),
                     child: Text(
                       widget.removeLabel!,
                       style: AppTypography.callout.copyWith(
@@ -100,8 +107,7 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
                   ),
                 const Spacer(),
                 CupertinoButton(
-                  onPressed: () =>
-                      Navigator.pop(context, OrderDatePick.date(_picked)),
+                  onPressed: () => _close(OrderDatePick.date(_picked)),
                   child: Text(
                     l10n.save,
                     style: AppTypography.callout.copyWith(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -44,6 +45,19 @@ import 'package:provider/provider.dart';
 
 /// Firebase core mock whose default app has a storage bucket (OrderStore
 /// creates Firestore/Storage services in its fields).
+/// Answers [setStatus] with [saved] instead of the server.
+class _StatusStore extends OrderStore {
+  _StatusStore(this.saved);
+
+  final Future<void> Function() saved;
+
+  @override
+  Future<void>? setStatus(String? status) {
+    super.setStatus(status);
+    return saved();
+  }
+}
+
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
@@ -1978,6 +1992,112 @@ void main() {
       await tester.tap(primary);
       await tester.pumpAndSettle();
       expect(store.order!.status, 'done');
+    });
+
+    testWidgets('a maintenance opens Nova OS with the last services', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        buildScreen(store, FakeActions()),
+        args: {
+          'order': Order()
+            ..customer = (CustomerAggr()..name = 'Padaria')
+            ..device = (DeviceAggr()
+              ..id = 'd1'
+              ..name = 'Split')
+            ..services = [
+              OrderService()
+                ..service = (ServiceAggr()..name = 'Limpeza')
+                ..value = 250,
+            ],
+        },
+      );
+
+      expect(store.order!.id, isNull);
+      expect(store.customer?.name, 'Padaria');
+      expect(store.order!.services?.single.service?.name, 'Limpeza');
+      expect(store.order!.effectiveDevices.single.id, 'd1');
+      expect(store.total, 250);
+    });
+
+    group('finishing asks for the next maintenance', () {
+      Future<List<Order?>> pumpProgress(
+        WidgetTester tester,
+        OrderStore store,
+      ) async {
+        final asked = <Order?>[];
+        await _pump(
+          tester,
+          OrderScreenV2(
+            showAssistant: false,
+            store: store,
+            catalogSource: FakeSource(),
+            catalogPermissions: _allCatalog,
+            permissions: _permissions(statuses: const ['done']),
+            actions: FakeActions(),
+            mostUsed: () async => const [],
+            offerMaintenance: (_, order) async => asked.add(order),
+          ),
+          args: {'order': order('progress')},
+        );
+        return asked;
+      }
+
+      testWidgets('after the order is done, once, even on a double tap', (
+        tester,
+      ) async {
+        final store = OrderStore();
+        final asked = await pumpProgress(tester, store);
+
+        await tester.tap(primary);
+        await tester.pump(const Duration(milliseconds: 100));
+        // Paid orders have no next step: the spot may be empty by now.
+        if (primary.evaluate().isNotEmpty) await tester.tap(primary);
+        await tester.pumpAndSettle();
+
+        expect(store.order!.status, 'done');
+        expect(asked, hasLength(1));
+        expect(asked.single?.id, 'o1');
+      });
+
+      testWidgets('a refused status goes back, warns and asks nothing', (
+        tester,
+      ) async {
+        final store = _StatusStore(() => Future.error(StateError('denied')));
+        final asked = await pumpProgress(tester, store);
+
+        await tester.tap(primary);
+        await tester.pumpAndSettle();
+
+        expect(store.order!.status, 'progress');
+        expect(asked, isEmpty);
+        expect(find.text('Marcar como pronta'), findsOneWidget);
+        expect(
+          find.text('Não foi possível salvar. Tente de novo.'),
+          findsOneWidget,
+        );
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('offline it asks after a moment, without the server', (
+        tester,
+      ) async {
+        final never = Completer<void>();
+        final store = _StatusStore(() => never.future);
+        final asked = await pumpProgress(tester, store);
+
+        await tester.tap(primary);
+        await tester.pump();
+        expect(asked, isEmpty);
+
+        await tester.pump(kStatusSaveWait);
+        await tester.pumpAndSettle();
+        expect(asked, hasLength(1));
+        expect(store.order!.status, 'done');
+      });
     });
 
     testWidgets('a refused mark goes away, warns and leaves no comment', (

@@ -108,7 +108,7 @@ Para cada conta, seguir os seguintes passos:
 
 ### 1. Login
 1. Abrir o app
-2. Clicar em "Entrar com email" / "Sign in with email" / "Iniciar sesión con email"
+2. Clicar em "Já tenho conta com e-mail" / "I already have an account with email" / "Ya tengo cuenta con correo"
 3. Inserir email e senha correspondentes
 4. Fazer login
 

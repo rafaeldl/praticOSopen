@@ -254,6 +254,8 @@ class _AccountScreenState extends State<AccountScreen> {
           deletion: AccountDeletionFlow(
             deleteAccount: authStore.deleteAccount,
             reauthenticate: authStore.reauthenticate,
+            needsPassword: () => authStore.reauthNeedsPassword,
+            reauthenticateWithPassword: authStore.reauthenticateWithPassword,
           ),
           onSignOut: () async => authStore.signOutGoogle(),
           onEditProfile: () =>

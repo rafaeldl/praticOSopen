@@ -3516,7 +3516,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSampleDone => 'Order ready to send';
 
   @override
-  String get loginWithEmailLink => 'Sign in with email and password';
+  String get loginWithEmailLink => 'I already have an account with email';
 
   @override
   String get errorSignInAppleFriendly =>
@@ -5224,6 +5224,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailLoginTitle => 'Sign in with email';
 
   @override
+  String get emailLoginNewAccountHint =>
+      'No account yet? Go back and continue with Apple or Google.';
+
+  @override
   String get emailLoginEmailRequired => 'Enter your email.';
 
   @override
@@ -6508,4 +6512,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiActionsNfseStays => 'The invoice stays issued.';
+
+  @override
+  String get nextMaintenanceQuestion => 'When is the next maintenance?';
+
+  @override
+  String get nextMaintenanceThreeMonths => '3 months';
+
+  @override
+  String get nextMaintenanceSixMonths => '6 months';
+
+  @override
+  String get nextMaintenanceOneYear => '1 year';
+
+  @override
+  String get nextMaintenanceNoRepeat => 'Don\'t repeat';
+
+  @override
+  String nextMaintenanceCurrent(String date) {
+    return 'Set for $date';
+  }
+
+  @override
+  String nextMaintenanceOn(String date) {
+    return 'Next maintenance: $date';
+  }
+
+  @override
+  String get nextMaintenanceSet => 'Set next maintenance';
+
+  @override
+  String get nextMaintenanceChangeHint => 'Tap to change or remove';
+
+  @override
+  String get nextMaintenanceRemove => 'Remove';
+
+  @override
+  String get nextMaintenanceByContract => 'From the contract';
+
+  @override
+  String get nextMaintenanceSaveError => 'Couldn\'t save the maintenance date';
+
+  @override
+  String get orderStatusSaveError => 'Couldn\'t save. Try again.';
+
+  @override
+  String get maintenanceComing => 'Maintenance coming up';
+
+  @override
+  String maintenanceShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count more',
+      one: 'Show 1 more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get maintenanceCallCustomer => 'Contact customer';
+
+  @override
+  String get maintenanceOpenOrder => 'Open order';
+
+  @override
+  String maintenanceViewDevice(String device) {
+    return 'View $device';
+  }
+
+  @override
+  String get maintenanceNoPhone => 'Customer has no phone';
+
+  @override
+  String get maintenanceWhatsappError => 'Couldn\'t open WhatsApp';
+
+  @override
+  String maintenanceWhatsappMessage(
+    String customer,
+    String device,
+    String date,
+  ) {
+    return 'Hi $customer! The maintenance of $device is coming up, planned for $date. Can we pick a day?';
+  }
+
+  @override
+  String maintenanceWhatsappMessageNoName(String device, String date) {
+    return 'Hi! The maintenance of $device is coming up, planned for $date. Can we pick a day?';
+  }
+
+  @override
+  String maintenanceLastService(String service) {
+    return 'Last: $service';
+  }
 }
