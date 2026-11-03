@@ -129,6 +129,11 @@ left. When a request is refused for the limit, the note offers "Ver planos" and 
   - `subscription.usage.photosThisMonth` (`FieldValue.increment(1)`, `PhotoService`)
   - `subscription.usage.formTemplatesActive` (`FormTemplateStore`)
   - `subscription.usage.usersActive` (`CollaboratorStore`, members + pending invites)
+- The server keeps the same counters (`services/usage-counter.service.ts`):
+  - `onFormTemplateWrittenUsage` recounts `formTemplatesActive` from `forms` (a template without `isActive` counts as active);
+  - `onMembershipWrittenUsage` and `onInviteWrittenUsage` recount `usersActive` (memberships + pending, not expired invites in `links/invites/tokens`);
+  - the order triggers add new photos of an order to `photosThisMonth`, only while the flag below is on (the app still increments it otherwise).
+- Flag `config/usageCounters` `{ serverOnly: true }` (server only, set with the Admin SDK): `firestore.rules` refuses client changes to `subscription.usage` and the server alone counts photos. Off by default. Turning it on is a visible change for apps <= 1.55, which rewrite `usage` when saving the company: that save is refused when the counters differ.
 
 **Known limitation:** app versions <= 1.55 cannot parse the statuses `cancelled` and `past_due`; those clients fail to read the subscription of such companies until updated.
 

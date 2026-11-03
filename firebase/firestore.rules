@@ -164,6 +164,26 @@ service cloud.firestore {
             'currentPeriodStart', 'currentPeriodEnd', 'revenueCatCustomerId']));
     }
 
+    // ─── Contadores de uso do plano (subscription.usage) ──────────────────
+    // Os gatilhos do servidor mantêm os contadores (usage-counter.service).
+    // Com a flag config/usageCounters.serverOnly ligada, o cliente não muda
+    // mais `usage`; desligada (padrão), segue como antes. A flag existe porque
+    // o app até a 1.55 regrava `usage` ao salvar a empresa.
+    function usageOf(sub) {
+      return sub is map ? sub.get('usage', null) : null;
+    }
+
+    function usageCountersServerOnly() {
+      return exists(/databases/$(database)/documents/config/usageCounters)
+        && get(/databases/$(database)/documents/config/usageCounters).data.get('serverOnly', false) == true;
+    }
+
+    function usageUpdateAllowed() {
+      return usageOf(request.resource.data.get('subscription', null))
+          == usageOf(resource.data.get('subscription', null))
+        || !usageCountersServerOnly();
+    }
+
     // ─── Ordens: o que o papel pode mudar ──────────────────────────────────
     // Compara antes e depois (diff): o save completo do app reenvia o documento
     // inteiro, e campo igual não conta como mudança. Espelha o app:
@@ -425,6 +445,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Flag dos contadores de uso (ver usageUpdateAllowed): só o servidor.
+    match /config/usageCounters {
+      allow read, write: if false;
+    }
+
     match /segments/{segmentId} {
       allow read: if request.auth != null;
       allow write: if false; // Apenas via Admin SDK (script de seed)
@@ -456,7 +481,7 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         resource.data.owner == request.auth.uid ||
         (resource.data.owner is map && resource.data.owner.id == request.auth.uid)
-      ) && subscriptionUpdateAllowed() && ownerUpdateAllowed();
+      ) && subscriptionUpdateAllowed() && usageUpdateAllowed() && ownerUpdateAllowed();
     }
 
     match /customers/{id} {
@@ -515,6 +540,7 @@ service cloud.firestore {
           || isCompanyAdmin(companyId)
         )
         && subscriptionUpdateAllowed()
+        && usageUpdateAllowed()
         && ownerUpdateAllowed();
 
       // ──────────────────────────────────────────────────────────────────────
