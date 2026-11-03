@@ -9,7 +9,7 @@ const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta
 
 async function screens(page: Page, label: string) {
   const item = await makeContract('admin', { nextDueDate: '2020-01-01T00:00:00.000' })
-  await makeContract('admin', { active: false, pausedAt: '2026-11-01T09:00:00.000' })
+  await makeContract('admin', { active: false, endDate: '2026-10-01T00:00:00.000' })
   await makeOrder('admin', { status: 'quote', contract: { parentOrderId: item.id, parentOrderNumber: item.number } })
   await page.goto('contracts')
   await expect(page.getByTestId('contracts-list')).toBeVisible()

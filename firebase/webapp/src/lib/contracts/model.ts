@@ -7,8 +7,14 @@
 // so no browser or company zone ever moves a day.
 //
 // The web never generates an order: the app (on opening) or the server job do
-// (docs/CONTRACTS_SERVER_JOB.md). The web edits the schedule, pauses, stops,
-// and shows the next order planned.
+// (docs/CONTRACTS_SERVER_JOB.md). The web edits the schedule, stops, and
+// shows the next order planned.
+//
+// No pause (A1 and M3 of the #527 review): the app reads the templates from
+// its cache when it opens and writes the whole `contract` map back, so a
+// paused contract would get an order and be turned back on, and a `pausedAt`
+// the app does not know would be erased. Pause comes back when the app reads
+// the template inside its transaction (app batch 3).
 
 export type Frequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -40,13 +46,11 @@ export interface Contract {
   autoGenerate: boolean
   active: boolean
   reminderDaysBefore: number | null
-  /** Web only: set by "Pausar", gone on "Retomar". The app ignores it. */
-  pausedAt: string | null
   parentOrderId: string | null
   parentOrderNumber: number | null
 }
 
-export type ContractState = 'active' | 'paused' | 'ended'
+export type ContractState = 'active' | 'ended'
 
 // ---------------------------------------------------------------------------
 // Wall text
@@ -121,7 +125,6 @@ export function normalizeContract(raw: unknown, toWall: (date: Date) => string):
     autoGenerate: c.autoGenerate !== false,
     active: c.active === true,
     reminderDaysBefore: int(c.reminderDaysBefore),
-    pausedAt: date(c.pausedAt),
     parentOrderId: typeof c.parentOrderId === 'string' ? c.parentOrderId : null,
     parentOrderNumber: int(c.parentOrderNumber),
   }
@@ -130,10 +133,9 @@ export function normalizeContract(raw: unknown, toWall: (date: Date) => string):
 /** A contract the order holds (the repeating order), not the parent link of a generated one. */
 export const isTemplate = (isContract: unknown, contract: Contract | null): contract is Contract => isContract === true && !!contract && !contract.parentOrderId
 
-/** Ativos (active and paused) or Encerrados. The app lists `active != true` as Encerrados. */
-export function stateOf(contract: Contract): ContractState {
-  if (contract.active) return 'active'
-  return contract.pausedAt ? 'paused' : 'ended'
+/** Ativos or Encerrados, as the app lists them (`active != true` is Encerrados). */
+export function stateOf(contract: Pick<Contract, 'active'>): ContractState {
+  return contract.active ? 'active' : 'ended'
 }
 
 // ---------------------------------------------------------------------------
@@ -167,9 +169,9 @@ export function stepFrom(base: string, repeat: Repeat): string | null {
   }
 }
 
-/** Steps from `base` until the day is not before `minDay`. `base` itself counts when `includeBase`. */
-function firstOnOrAfter(base: string, repeat: Repeat, minDay: string, includeBase: boolean): string | null {
-  let next: string | null = includeBase ? base : stepFrom(base, repeat)
+/** Steps from `base` until the day is not before `minDay`. */
+function firstOnOrAfter(base: string, repeat: Repeat, minDay: string): string | null {
+  let next: string | null = stepFrom(base, repeat)
   let guard = 0
   while (next && dayOf(next) < minDay && guard++ < 100_000) next = stepFrom(next, repeat)
   return next
@@ -188,7 +190,7 @@ export function plannedNext(contract: Pick<Contract, 'frequency' | 'interval' | 
   const start = contract.startDate ?? midnight(today)
   const last = contract.lastGeneratedDate ? nextDay(dayOf(contract.lastGeneratedDate)) : ''
   const minDay = last > today ? last : today
-  return firstOnOrAfter(start, repeat, minDay, false)
+  return firstOnOrAfter(start, repeat, minDay)
 }
 
 /** The due day falls after the contract's last day (endDate is included). */
@@ -216,7 +218,7 @@ export function nextPlanned(contract: Contract, today: string): Planned {
 // Changes (only the fields that change are written)
 // ---------------------------------------------------------------------------
 
-export type ContractPatch = Partial<Pick<Contract, 'frequency' | 'interval' | 'startDate' | 'endDate' | 'nextDueDate' | 'autoGenerate' | 'active' | 'pausedAt'>>
+export type ContractPatch = Partial<Pick<Contract, 'frequency' | 'interval' | 'startDate' | 'endDate' | 'nextDueDate' | 'autoGenerate' | 'active'>>
 
 /** "Repetir" turned on (OrderStore.toggleContract): every month, creates the order, on, 3 days notice. */
 export function newContract(input: { repeat: Repeat; startDay: string; endDay: string | null; autoGenerate: boolean }, today: string): Contract {
@@ -230,7 +232,6 @@ export function newContract(input: { repeat: Repeat; startDay: string; endDay: s
     autoGenerate: input.autoGenerate,
     active: true,
     reminderDaysBefore: 3,
-    pausedAt: null,
     parentOrderId: null,
     parentOrderNumber: null,
   }
@@ -267,27 +268,12 @@ export function scheduleChanges(contract: Contract, input: ScheduleInput, today:
   return patch
 }
 
-/** "Pausar": no order is born while paused (active false, as the app reads it). */
-export function pauseChanges(nowWall: string): ContractPatch {
-  return { active: false, pausedAt: nowWall }
-}
-
-/**
- * "Retomar": the next order is the first from today on, stepping from the one
- * that was due. Periods of the pause are not made up.
- */
-export function resumeChanges(contract: Contract, today: string): ContractPatch {
-  const repeat = { frequency: contract.frequency ?? 'monthly', interval: contract.interval }
-  const next = contract.nextDueDate ? firstOnOrAfter(contract.nextDueDate, repeat, today, true) : plannedNext(contract, today)
-  return { active: true, pausedAt: null, nextDueDate: next }
-}
-
 /**
  * "Parar de repetir": the contract stays (Encerrados, with its history), off,
  * ending today unless it already ended earlier. The app erases it (defect 62).
  */
 export function stopChanges(contract: Contract, today: string): ContractPatch {
-  const patch: ContractPatch = { active: false, pausedAt: null }
+  const patch: ContractPatch = { active: false }
   if (!contract.endDate || dayOf(contract.endDate) > today) patch.endDate = midnight(today)
   return patch
 }

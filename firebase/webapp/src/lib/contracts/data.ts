@@ -170,7 +170,6 @@ const author = () => ({ id: session.uid, name: session.name ?? session.email ?? 
 
 async function commit(id: string, fields: Record<string, unknown>, mask: string[], precondition: { updateTime: string } | { exists: true }): Promise<void> {
   const data: Record<string, unknown> = { ...fields, updatedAt: new Date().toISOString(), updatedBy: author() }
-  // A field in the mask and missing from `fields` is deleted (pausedAt on "Retomar").
   const present = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined))
   const nested: Record<string, unknown> = {}
   for (const [path, value] of Object.entries(present)) {
@@ -203,7 +202,7 @@ export async function saveContract(order: ContractOrder, patch: ContractPatch): 
   const keys = Object.keys(patch) as (keyof ContractPatch)[]
   if (!keys.length) return
   const fields: Record<string, unknown> = {}
-  for (const key of keys) fields[`contract.${key}`] = key === 'pausedAt' && patch.pausedAt === null ? undefined : patch[key]
+  for (const key of keys) fields[`contract.${key}`] = patch[key]
   const mask = keys.map((key) => `contract.${key}`)
   try {
     await commit(order.id, fields, mask, { updateTime: order.updateTime })
@@ -218,8 +217,7 @@ export async function saveContract(order: ContractOrder, patch: ContractPatch): 
 
 /** A new contract on an order just created (Novo contrato): the whole map, as OrderContract.toJson. */
 export async function startContract(orderId: string, contract: Contract): Promise<void> {
-  const { pausedAt: _web, ...appShape } = contract
-  await commit(orderId, { contract: appShape, isContract: true }, ['contract', 'isContract'], { exists: true })
+  await commit(orderId, { contract, isContract: true }, ['contract', 'isContract'], { exists: true })
 }
 
 /** "Usar contratos" (contract.off.turn-on): only `useContracts` of the company. */

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as model from '@/lib/contracts/model'
 import {
   afterEnd,
   byNext,
@@ -7,11 +8,9 @@ import {
   newContract,
   nextPlanned,
   normalizeContract,
-  pauseChanges,
   plannedNext,
   repeatChoices,
   repeatOfKey,
-  resumeChanges,
   scheduleChanges,
   stateOf,
   stepFrom,
@@ -36,7 +35,6 @@ function contract(fields: Partial<Contract> = {}): Contract {
     autoGenerate: true,
     active: true,
     reminderDaysBefore: 3,
-    pausedAt: null,
     parentOrderId: null,
     parentOrderNumber: null,
     ...fields,
@@ -82,10 +80,12 @@ describe('reading what the app and the server wrote', () => {
 })
 
 describe('states and the next order', () => {
-  it('paused is off with pausedAt; off without it is ended (the app lists both as Encerrados)', () => {
+  it('on or ended: off is ended, as in the app; no paused state (A1 and M3 of the #527 review)', () => {
     expect(stateOf(contract())).toBe('active')
-    expect(stateOf(contract({ active: false, pausedAt: '2026-11-01T09:00:00.000' }))).toBe('paused')
     expect(stateOf(contract({ active: false }))).toBe('ended')
+    // A pausedAt written by an older web build changes nothing.
+    expect(stateOf({ ...contract({ active: false }), pausedAt: '2026-11-01T09:00:00.000' } as Contract)).toBe('ended')
+    expect(Object.keys(model.normalizeContract({ active: false, pausedAt: '2026-11-01T09:00:00.000' }, toWall) ?? {})).not.toContain('pausedAt')
   })
   it('next planned: date, late, manual, or none after the end (endDate included)', () => {
     expect(nextPlanned(contract(), '2026-11-03')).toEqual({ kind: 'date', date: '2026-11-15T00:00:00.000', late: false })
@@ -109,7 +109,7 @@ describe('schedule', () => {
     const c = newContract({ repeat: monthly, startDay: '2026-11-03', endDay: null, autoGenerate: true }, '2026-11-03')
     expect(c).toEqual({
       frequency: 'monthly', interval: 1, startDate: '2026-11-03T00:00:00.000', endDate: null, nextDueDate: '2026-12-03T00:00:00.000',
-      lastGeneratedDate: null, generatedCount: 0, autoGenerate: true, active: true, reminderDaysBefore: 3, pausedAt: null, parentOrderId: null, parentOrderNumber: null,
+      lastGeneratedDate: null, generatedCount: 0, autoGenerate: true, active: true, reminderDaysBefore: 3, parentOrderId: null, parentOrderNumber: null,
     })
   })
   it('save writes only what changed, and the next order when the schedule moved', () => {
@@ -130,18 +130,14 @@ describe('schedule', () => {
   })
 })
 
-describe('pause, resume, stop', () => {
-  it('pause turns it off and marks when', () => {
-    expect(pauseChanges('2026-11-03T10:00:00.000')).toEqual({ active: false, pausedAt: '2026-11-03T10:00:00.000' })
-  })
-  it('resume skips the periods of the pause', () => {
-    const paused = contract({ active: false, pausedAt: '2026-08-01T00:00:00.000', nextDueDate: '2026-08-15T00:00:00.000' })
-    expect(resumeChanges(paused, '2026-11-03')).toEqual({ active: true, pausedAt: null, nextDueDate: '2026-11-15T00:00:00.000' })
-    expect(resumeChanges(contract({ active: false, pausedAt: 'x', nextDueDate: '2026-11-03T00:00:00.000' }), '2026-11-03').nextDueDate).toBe('2026-11-03T00:00:00.000')
+describe('stop', () => {
+  it('no pause nor resume until the app reads the template in its transaction (A1 of the #527 review)', () => {
+    expect('pauseChanges' in model).toBe(false)
+    expect('resumeChanges' in model).toBe(false)
   })
   it('stop keeps the contract, off, ending today unless it ended before', () => {
-    expect(stopChanges(contract(), '2026-11-03')).toEqual({ active: false, pausedAt: null, endDate: '2026-11-03T00:00:00.000' })
-    expect(stopChanges(contract({ endDate: '2026-10-01T00:00:00.000' }), '2026-11-03')).toEqual({ active: false, pausedAt: null })
+    expect(stopChanges(contract(), '2026-11-03')).toEqual({ active: false, endDate: '2026-11-03T00:00:00.000' })
+    expect(stopChanges(contract({ endDate: '2026-10-01T00:00:00.000' }), '2026-11-03')).toEqual({ active: false })
   })
 })
 

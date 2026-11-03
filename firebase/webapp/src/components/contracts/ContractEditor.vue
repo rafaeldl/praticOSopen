@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // "Repetir" of an order (contract.config.*, order.contract.enable). A drawer:
 // how often, start, end, and whether the order is born by itself, saved with
-// "Salvar" (the app writes each change at once). On an active contract:
-// "Pausar" and "Parar de repetir"; on a paused one: "Retomar". Stopping keeps
-// the contract in Encerrados with its history (the app erases it, defect 62).
+// "Salvar" (the app writes each change at once). On an active contract,
+// "Parar de repetir", which keeps it in Encerrados with its history (the app
+// erases it, defect 62). No "Pausar" until the app reads the template inside
+// its transaction (A1 of the #527 review).
 // "Avisar antes" is not offered: nothing reads it, in the app or here.
 // The web never creates the order itself: the app or the server do.
 import { computed, ref } from 'vue'
@@ -14,14 +15,13 @@ import RepeatFields, { type RepeatForm } from './RepeatFields.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { ContractChanged, saveContract, startContract, type ContractOrder } from '@/lib/contracts/data'
-import { dayOf, newContract, pauseChanges, resumeChanges, scheduleChanges, stateOf, stopChanges, type ContractPatch } from '@/lib/contracts/model'
+import { dayOf, newContract, scheduleChanges, stateOf, stopChanges, type ContractPatch } from '@/lib/contracts/model'
 import { contractsTitle, stateText } from '@/lib/contracts/text'
 import { toIsoDay } from '@/lib/format'
 import { orderShort } from '@/lib/orders/text'
 import { isMac } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
-import { wallText } from '@/lib/zone'
 
 const props = defineProps<{ order: ContractOrder }>()
 const emit = defineEmits<{ saved: []; close: [] }>()
@@ -95,8 +95,6 @@ function save() {
   void run(() => saveContract(current.value, patch), t('web.contracts.saved'))
 }
 
-const pause = () => run(() => saveContract(current.value, pauseChanges(wallText(new Date()))), t('web.contracts.pausedToast'))
-const resume = () => contract.value && run(() => saveContract(current.value, resumeChanges(contract.value!, today)), t('web.contracts.resumedToast'))
 function stop() {
   confirmStop.value = false
   if (contract.value) void run(() => saveContract(current.value, stopChanges(contract.value!, today)), t('web.contracts.stoppedToast'))
@@ -132,12 +130,8 @@ function guard(): boolean {
           <RepeatFields v-model="form" id-prefix="ce" :today="today" :last-generated="contract?.lastGeneratedDate" />
           <p class="sub field-hint">{{ t('web.contracts.webNeverCreates', { order: orderShort(), title: contractsTitle() }) }}</p>
         </template>
-        <div v-if="state === 'active' || state === 'paused'" class="contract-actions">
-          <h3 class="form-section">{{ t('web.contracts.pauseOrStop') }}</h3>
-          <p class="sub">{{ t('web.contracts.pauseHint', { order: orderShort() }) }}</p>
+        <div v-if="state === 'active'" class="contract-actions">
           <div class="row-actions">
-            <button v-if="state === 'active'" type="button" class="btn" data-testid="contract-pause" :aria-disabled="saving" @click="pause">{{ t('web.contracts.pause') }}</button>
-            <button v-else type="button" class="btn" data-testid="contract-resume" :aria-disabled="saving" @click="resume">{{ t('web.contracts.resume') }}</button>
             <button type="button" class="btn btn--danger" data-testid="contract-stop" :aria-disabled="saving" @click="confirmStop = true">{{ t('contractStopRepeating') }}</button>
           </div>
         </div>

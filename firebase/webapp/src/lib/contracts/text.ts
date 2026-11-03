@@ -33,11 +33,10 @@ export function contractsTitle(): string {
   return titleClashes(plural, t('contracts')) ? t('recurringOrdersTitle', { orders: plural }) : t('contracts')
 }
 
-/** The last line of a row and of the order's card: next order, paused or ended (contract.list.row). */
+/** The last line of a row and of the order's card: next order or ended (contract.list.row). */
 export function stateText(contract: Contract, today: string): { text: string; tone: 'normal' | 'late' | 'muted' } {
   const order = orderShort()
   const state = stateOf(contract)
-  if (state === 'paused') return { text: t('web.contracts.pausedSince', { date: dayText(contract.pausedAt) }), tone: 'muted' }
   if (state === 'ended') {
     const day = endedDay(contract)
     return { text: day ? t('contractEndedOn', { date: dayText(day) }) : t('contractEnded'), tone: 'muted' }

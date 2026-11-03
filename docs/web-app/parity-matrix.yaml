@@ -2966,7 +2966,7 @@ rows:
   e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Liga com o padrão (mensal, intervalo 1, gerar sozinho, lembrete 3 dias, início hoje, próxima em um mês) e abre a configuração. Grava antes de abrir: voltar sem mexer deixa a repetição ligada; só Parar desliga. Web: seção Contrato da OS, para quem edita os campos principais da OS, só com useContracts."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Liga com o padrão (mensal, intervalo 1, gerar sozinho, lembrete 3 dias, início hoje, próxima em um mês) e abre a configuração. Grava antes de abrir: voltar sem mexer deixa a repetição ligada; só Parar desliga. Web: seção Contrato da OS, para quem edita os campos principais da OS, só com useContracts. Diferença do app: a OS cancelada fica de fora (não oferece Repetir numa OS cancelada)."
 - id: order.contract.card
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4604,7 +4604,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato. Web: Parar de repetir grava active=false e endDate=hoje, mantém o contrato em Encerrados. Pausar (active=false, pausedAt) e Retomar (sem repor períodos) também."
+  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato. Web: Parar de repetir grava active=false e endDate=hoje, mantém o contrato em Encerrados. Pausar e Retomar ficam de fora até o app reler o modelo dentro da transação ao gerar (lote 3 do app, revisão do #527, A1): hoje o app lê o modelo do cache e regrava o mapa contract inteiro, então criaria OS de um contrato pausado e o reativaria. Parar de repetir grava o mesmo active=false que o app já usa e tem o mesmo risco de hoje entre dois celulares."
 - id: contract.config.defaults
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -10635,7 +10635,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Consulta isContract == true; consultor e técnico veem só os seus. Vazio em ativos tem o botão Novo contrato; erro com Tentar de novo. Não copiar: sem empresa atual o stream é vazio e a tela fica no carregando para sempre. Web: lista pela REST do Firestore com máscara de campos (sem valores da OS), consultor e técnico só os seus; relê ao voltar à janela. Pausado fica em Ativos com \"Pausado desde\"."
+  note: "Consulta isContract == true; consultor e técnico veem só os seus. Vazio em ativos tem o botão Novo contrato; erro com Tentar de novo. Não copiar: sem empresa atual o stream é vazio e a tela fica no carregando para sempre. Web: lista pela REST do Firestore com máscara de campos (sem valores da OS), consultor e técnico só os seus; relê ao voltar à janela."
 - id: contract.list.switch
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/contract_list"
@@ -10652,7 +10652,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Encerrados = contract.active diferente de true; só recebe contrato que venceu (endDate) na hora de gerar. Parar de repetir não aparece aqui. Encerrados vazio não tem botão. Web: Encerrados = active false sem pausedAt (inclui o que parou de repetir no web)."
+  note: "Encerrados = contract.active diferente de true; só recebe contrato que venceu (endDate) na hora de gerar. Parar de repetir não aparece aqui. Encerrados vazio não tem botão. Web: igual ao app, Encerrados = active diferente de true (inclui o que parou de repetir no web)."
 - id: contract.list.new
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/order"

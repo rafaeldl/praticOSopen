@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Contratos (contract.list.*, contract.off.*, contract.title.label): the orders
-// that repeat. Ativos (on and paused) and Encerrados, the customer, how often,
+// that repeat. Ativos and Encerrados, the customer, how often,
 // the device and the next order planned. A row opens its order beside the list;
 // "Ajustar" opens the schedule (only who edits that order). "Novo contrato"
 // opens Nova OS with Repetir on, only with canCreateOrder (the app's "+" did
@@ -170,7 +170,6 @@ onBeforeUnmount(() => {
               <span class="who">{{ row.customer || t('noName') }}</span>
               <span class="sub">{{ [repeatText(row.contract), deviceOf(row.order)].filter(Boolean).join(' · ') }}<template v-if="row.order.number"> · {{ orderShort() }} {{ row.order.number }}</template></span>
               <span class="contract-state" :class="`contract-state--${stateText(row.contract, today).tone}`">
-                <span v-if="stateOf(row.contract) === 'paused'" class="dot dot--hollow" aria-hidden="true"></span>
                 {{ stateText(row.contract, today).text }}
               </span>
             </button>

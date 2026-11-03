@@ -290,7 +290,7 @@ Código em `src/views/forms/`, `src/components/forms/` e `src/lib/forms/` (regra
 
 Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contracts/` (regras puras em `model.ts`, testadas em `tests/contracts-model.test.ts`; REST do Firestore em `data.ts`; textos em `text.ts`). Textos no pedaço de OS (`-orders.json`). Testes: `e2e/contracts.spec.ts` e `e2e/contracts-a11y.spec.ts`.
 
-**Formato.** O do app: o contrato mora na OS que se repete (`isContract: true` e o mapa `contract` de `OrderContract.toJson`: `frequency`, `interval`, `startDate`, `endDate`, `nextDueDate`, `lastGeneratedDate`, `generatedCount`, `autoGenerate`, `active`, `reminderDaysBefore`, `parentOrderId`, `parentOrderNumber`). Datas como o app grava, hora da empresa sem fuso (`2026-12-03T00:00:00.000`), e a conta de calendário é feita nesse texto, sem passar pelo fuso do navegador (mensal no dia 31 rola como o `DateTime` do Dart). A OS criada por um contrato tem `contract.parentOrderId`. O web acrescenta só `contract.pausedAt` (pausa), que o app ignora.
+**Formato.** O do app: o contrato mora na OS que se repete (`isContract: true` e o mapa `contract` de `OrderContract.toJson`: `frequency`, `interval`, `startDate`, `endDate`, `nextDueDate`, `lastGeneratedDate`, `generatedCount`, `autoGenerate`, `active`, `reminderDaysBefore`, `parentOrderId`, `parentOrderNumber`). Datas como o app grava, hora da empresa sem fuso (`2026-12-03T00:00:00.000`), e a conta de calendário é feita nesse texto, sem passar pelo fuso do navegador (mensal no dia 31 rola como o `DateTime` do Dart). A OS criada por um contrato tem `contract.parentOrderId`. O web não acrescenta campo nenhum.
 
 **Regra única: o web não cria OS.** Quem cria a OS do contrato é o app, ao abrir, ou o job do servidor (`docs/CONTRACTS_SERVER_JOB.md`, desligado). Nenhuma tela do web chama a geração. Quando a data passou e a OS ainda não nasceu, a linha diz "Ela nasce quando alguém da equipe abrir o app".
 
@@ -298,7 +298,7 @@ Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contra
 
 **Gravação.** `documents:commit` com `updateMask` só dos campos do contrato que mudaram, mais `updatedAt`/`updatedBy`, e `currentDocument.updateTime` da leitura. Se a OS foi salva depois (pelo app ou outra aba), o web relê: se os campos do contrato que ele muda continuam iguais, grava sobre a versão nova; se mudaram, não grava, mostra "Alguém mudou este contrato" e põe a versão nova na tela. Sem conexão, a gravação falha e a tela diz (não fica em fila). As regras do Firestore não mudaram: quem pode editar a OS pode editar o contrato.
 
-**Contratos (`/contracts`).** Pelo link em Ajustes (com `useContracts` ou para quem tem `manageCompany`) e pela URL, para qualquer papel que vê OS. Título "Contratos", ou "{OS} que se repetem" quando o ramo chama a OS de Contrato. Ativos (ligados e pausados) e Encerrados. Linha: cliente, frequência, aparelho e número da OS; ligado mostra a próxima OS, pausado "Pausado desde", encerrado a data do fim. A linha abre a OS ao lado (`?order=`). "Ajustar" só para quem edita os campos principais daquela OS (técnico só em orçamento, consultor e técnico só nas suas). Vazio, erro com "Tentar de novo" e carregando. "Novo contrato" só com `canCreateOrder` (técnico e gerente não veem; no app o "+" não conferia, defeito 36).
+**Contratos (`/contracts`).** Pelo link em Ajustes (com `useContracts` ou para quem tem `manageCompany`) e pela URL, para qualquer papel que vê OS. Título "Contratos", ou "{OS} que se repetem" quando o ramo chama a OS de Contrato. Ativos e Encerrados, como no app (`active` diferente de `true` é Encerrado). Linha: cliente, frequência, aparelho e número da OS; ligado mostra a próxima OS, encerrado a data do fim. A linha abre a OS ao lado (`?order=`). "Ajustar" só para quem edita os campos principais daquela OS (técnico só em orçamento, consultor e técnico só nas suas). Vazio, erro com "Tentar de novo" e carregando. "Novo contrato" só com `canCreateOrder` (técnico e gerente não veem; no app o "+" não conferia, defeito 36).
 
 **Contratos desligado.** Para que serve e "Usar contratos" para quem tem `manageCompany`, que grava só `useContracts` e mostra a lista. Os outros papéis leem que está desligado.
 
@@ -306,11 +306,13 @@ Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contra
 
 **Ajustar (gaveta).** Com que frequência (as 8 do app, mais a atual se for outra), começa, termina ou "Sem data para terminar" (o término nunca antes do começo; sugestão começo + 1 ano) e "Criar a OS sozinha", com a próxima OS calculada antes de salvar. "Salvar" grava de uma vez (o app grava a cada toque). A próxima OS conta os períodos a partir do começo e é a primeira de hoje em diante, depois da última criada: períodos perdidos não são repostos. "Avisar antes" não aparece: o app grava e nada lê (exceção proposta na matriz).
 
-**Pausar, retomar e parar.** Pausar grava `active: false` e `pausedAt`; nenhuma OS nasce. Retomar volta `active: true`, tira `pausedAt` e a próxima OS é a primeira de hoje em diante, sem repor a pausa. "Parar de repetir" pede confirmação e grava `active: false` e `endDate` de hoje: o contrato fica em Encerrados com o histórico (o app apaga o contrato, defeito 62). No app, o pausado aparece em Encerrados.
+**Parar de repetir.** Pede confirmação e grava `active: false` e `endDate` de hoje: o contrato fica em Encerrados com o histórico (o app apaga o contrato, defeito 62). Grava o mesmo `active` que o app já usa, com o mesmo risco de hoje entre dois celulares.
+
+**Sem pausa, por enquanto** (revisão do #527, A1 e M3). Ao abrir, o app lê os modelos do cache e, ao gerar, regrava o mapa `contract` inteiro, sem reler o modelo na transação. Um contrato pausado no web ganharia uma OS e voltaria a ativo, e um `pausedAt` que o app não conhece seria apagado. Pausar e Retomar voltam quando o app reler o modelo dentro da transação (lote 3 do app).
 
 **Na OS.** Seção "Contrato": a frequência, a próxima OS, "Ajustar" e as OS criadas por ele (da mais nova), cada uma abrindo ao lado. Na OS criada, "Criada pelo contrato da OS N" abre a de origem. Sem contrato, "Repetir esta OS" para quem edita a OS, com Contratos ligado.
 
-**Fica para depois.** Contratos do aparelho (`device.detail.contracts`), a data da próxima manutenção pelo contrato, ligar e desligar Contratos nos dados da empresa, e o aviso antes da data.
+**Fica para depois.** Pausar e retomar (acima), contratos do aparelho (`device.detail.contracts`), a data da próxima manutenção pelo contrato, ligar e desligar Contratos nos dados da empresa, e o aviso antes da data.
 
 ### Histórico do navegador
 
