@@ -344,8 +344,10 @@ export async function syncCompanyFormsFromSegment(params: {
   subspecialties: string[];
   userAggr: UserAggr;
   locale?: string;
+  /** Create only the checklists the company does not have; never write over one (first access). */
+  onlyMissing?: boolean;
 }): Promise<void> {
-  const { companyId, segmentId, subspecialties, userAggr, locale } = params;
+  const { companyId, segmentId, subspecialties, userAggr, locale, onlyMissing = false } = params;
 
   const segmentSnapshot = await db
     .collection('segments')
@@ -393,6 +395,16 @@ export async function syncCompanyFormsFromSegment(params: {
       formData.createdBy = userAggr;
     }
 
+    if (onlyMissing) {
+      if (existingIds.has(doc.id)) continue;
+      try {
+        await companyFormsRef.doc(doc.id).create(formData);
+      } catch (error) {
+        // Created meanwhile (ALREADY_EXISTS): left as it is.
+        if ((error as { code?: unknown }).code !== 6) throw error;
+      }
+      continue;
+    }
     await companyFormsRef.doc(doc.id).set(formData, { merge: true });
   }
 }
@@ -683,7 +695,10 @@ export async function createSampleOrders(params: {
       companyAggr,
     );
     // Created some days ago, as the app does, so the list is not all "today".
+    // Payment left empty, as the app's sample orders (Order without payment): money screens read
+    // "aprovada, em andamento ou concluída sem payment" as open, nothing paid (docs/ONBOARDING.md).
     await company.collection('orders').doc(order.id).update({
+      payment: null,
       createdAt: new Date(now.getTime() - (11 - i * 2) * DAY_MS).toISOString(),
       updatedAt: new Date(now.getTime() - (10 - i * 2) * DAY_MS).toISOString(),
     });

@@ -3,6 +3,7 @@
 // companies/{id} and companies/{id}/memberships/{uid}, under the same rules
 // (`createsOwnCompanyInBatch`). The segment's checklists and samples come from
 // the server (POST /v1/app/onboarding/seed), the server's BootstrapService.
+import { ApiError } from '../api'
 import { firestoreLite } from '../firebase'
 import { waitForCompanyClaim } from '../invites'
 import { api, refreshClaims, selectCompany, session } from '../session'
@@ -90,8 +91,17 @@ export async function waitForClaim(companyId: string): Promise<void> {
   if (!(await waitForCompanyClaim(companyId, 20000, 500))) throw new ClaimTimeout()
 }
 
+/**
+ * Once per company: the server marks it in a transaction. A 409 ONBOARDING_ALREADY_SEEDED
+ * means an earlier try got there (its answer was lost): nothing to do but go in.
+ */
 export async function seedCompany(companyId: string, withSamples: boolean, localeTag: string): Promise<void> {
-  await api('/v1/app/onboarding/seed', { method: 'POST', companyId, body: { withSamples, locale: localeTag } })
+  try {
+    await api('/v1/app/onboarding/seed', { method: 'POST', companyId, body: { withSamples, locale: localeTag } })
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'ONBOARDING_ALREADY_SEEDED') return
+    throw error
+  }
 }
 
 /** Into the new company: the session reads the token again and opens it. */

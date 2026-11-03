@@ -41,6 +41,9 @@ export const USERS = {
   founderLean: { ...user('founderlean', 'Lia Sem Exemplos'), roles: {} },
   /** No name on the account: the name on the order is required. */
   founderNoName: { ...user('foundernoname', ''), roles: {} },
+  /** Reloads between creating the company and seeding it; loses the seed's answer. */
+  founderReload: { ...user('founderreload', 'Rui Recarrega'), roles: {} },
+  founderTwice: { ...user('foundertwice', 'Teca Duas Vezes'), roles: {} },
   /** Owner and technician of company D (maintenances). */
   maintOwner: { ...user('maintowner', 'Mara Dona Manutencao'), roles: { [COMPANY_M]: 'owner' } },
   maintTech: { ...user('mainttech', 'Tito Tecnico Manutencao'), roles: { [COMPANY_M]: 'technician' } },

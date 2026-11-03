@@ -48,7 +48,7 @@ function seedWorld(company: Record<string, unknown> = {}) {
   resetFakeDb();
   seed('companies/new1', {
     id: 'new1', name: 'Oficina Nova', country: 'BR', segment: 'automotive', subspecialties: null,
-    owner: { id: 'founder', name: 'Fábio' }, ...company,
+    owner: { id: 'founder', name: 'Fábio' }, createdAt: new Date(Date.now() - 60_000).toISOString(), ...company,
   });
   seed('users/founder', { id: 'founder', name: 'Fábio', companies: [{ company: { id: 'new1', name: 'Oficina Nova' }, role: 'admin' }] });
   seed('companies/new1/private/membership', { members: { tech1: 'technician', mgr1: 'manager' } });
@@ -138,14 +138,51 @@ describe('POST /v1/app/onboarding/seed', () => {
     expect(list(`companies/new1/orders/${first.id}/forms`).map((form) => form.data.formDefinitionId)).toEqual(['funilaria']);
   });
 
-  it('repeating it creates nothing twice (a retry after a failure)', async () => {
+  it('a second call (retry or two tabs) is refused with 409 and changes nothing', async () => {
     await post('founder', { withSamples: true, locale: 'pt-BR' });
-    const res = await post('founder', { withSamples: true, locale: 'pt-BR' });
-    expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({ services: 0, products: 0, devices: 0, customers: 0, orders: 0 });
-    expect(names('services')).toEqual(['Pintura', 'Troca de óleo']);
-    expect(names('customers')).toEqual(['Cliente (Exemplo)']);
+    const company = read('companies/new1') as Record<string, unknown>;
+    expect(typeof company.onboardingSeededAt).toBe('string');
+    const before = JSON.stringify([list('companies/new1/forms'), list('companies/new1/services'), list('companies/new1/orders'), company]);
+    const res = await post('founder', { withSamples: true, locale: 'en-US' });
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('ONBOARDING_ALREADY_SEEDED');
+    expect(JSON.stringify([list('companies/new1/forms'), list('companies/new1/services'), list('companies/new1/orders'), read('companies/new1')])).toBe(before);
+  });
+
+  it('two calls at the same time: only one seeds', async () => {
+    const [a, b] = await Promise.all([
+      post('founder', { withSamples: true, locale: 'pt-BR' }),
+      post('founder', { withSamples: true, locale: 'pt-BR' }),
+    ]);
+    expect([a.status, b.status].sort()).toEqual([200, 409]);
     expect(list('companies/new1/orders')).toHaveLength(4);
+    expect(names('services')).toEqual(['Pintura', 'Troca de óleo']);
+  });
+
+  it('an existing company (older than a day, or without createdAt) is refused and untouched', async () => {
+    for (const createdAt of ['2025-01-10T12:00:00.000', undefined]) {
+      seedWorld({ createdAt });
+      const res = await post('founder', { withSamples: true, locale: 'pt-BR' });
+      expect(res.status).toBe(409);
+      expect(res.body.error.code).toBe('ONBOARDING_NOT_NEW');
+      expect(list('companies/new1/forms')).toEqual([]);
+      expect(names('services')).toEqual([]);
+      expect((read('companies/new1') as Record<string, unknown>).onboardingSeededAt).toBeUndefined();
+    }
+  });
+
+  it('a checklist already in the company is never written over; only the missing ones are created', async () => {
+    seed('companies/new1/forms/entrada', { title: 'Minha vistoria', isActive: true, items: [] });
+    await post('founder', { withSamples: false, locale: 'pt-BR' });
+    expect(read('companies/new1/forms/entrada')).toEqual({ title: 'Minha vistoria', isActive: true, items: [] });
+    expect(list('companies/new1/forms').map((form) => form.id).sort()).toEqual(['entrada', 'funilaria']);
+  });
+
+  it('sample orders keep the payment empty, as the app writes them', async () => {
+    await post('founder', { withSamples: true, locale: 'pt-BR' });
+    const orders = list('companies/new1/orders').map((doc) => doc.data as Record<string, unknown>);
+    expect(orders.map((order) => order.payment)).toEqual([null, null, null, null]);
+    expect(list('companies/new1/orders').map((doc) => doc.id).sort()).toEqual(['sample-order-1', 'sample-order-2', 'sample-order-3', 'sample-order-4']);
   });
 
   it('only who manages the company', async () => {

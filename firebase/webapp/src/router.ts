@@ -3,6 +3,7 @@ import { decideAccess, type RouteAccess } from '@/lib/access'
 import { stripStaleLayers } from '@/lib/route-layer'
 import { effectiveUseFinancial, session, startSession } from '@/lib/session'
 import { NAV } from '@/navigation'
+import { readPending } from '@/lib/onboarding/pending'
 import { loadOrderTexts, loadTexts } from '@/i18n'
 import type { MessageKey } from '@/generated/message-keys'
 
@@ -236,5 +237,7 @@ router.beforeEach(async (to) => {
   if (decision === 'noCompany') return { name: 'noCompany', replace: true }
   if (decision === 'forbidden') return { name: 'forbidden', query: { from: to.path }, replace: true }
   if (to.name === 'login' && session.uid) return { path: '/', replace: true }
+  // A first access stopped after creating the company (reload): finish it before anything else.
+  if (session.uid && to.name !== 'onboarding' && readPending(session.uid)) return { name: 'onboarding', replace: true }
   return true
 })

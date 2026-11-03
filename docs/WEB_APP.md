@@ -344,7 +344,7 @@ Código em `src/views/onboarding/` e `src/lib/onboarding/` (regras puras em `mod
 3. `POST /v1/app/onboarding/seed` (ver `docs/WEB_API.md`): checklists sempre, exemplos só no botão azul, no idioma ativo.
 4. Relê o token e entra na empresa, na Início.
 
-Erro em qualquer passo mostra "Não deu para terminar…" com "Tentar de novo" (repete a última escolha) e "‹ Para o cliente" (volta ao formulário com o que foi digitado). A empresa salva fica guardada: tentar de novo completa a mesma, nunca cria outra.
+Erro em qualquer passo mostra "Não deu para terminar…" com "Tentar de novo" (repete a última escolha) e "‹ Para o cliente" (volta ao formulário com o que foi digitado). A empresa salva fica guardada: tentar de novo completa a mesma, nunca cria outra. O id dela e a escolha ficam no `sessionStorage` (`lib/onboarding/pending.ts`): recarregar a página leva de volta ao primeiro acesso, que termina a mesma empresa (o roteador manda para lá enquanto houver pendência). Depois de pedir a cópia dos dados, o formulário não volta mais ao ramo. Um `409 ONBOARDING_ALREADY_SEEDED` conta como pronto.
 
 **Fica para depois.** "Recebi um código de convite" (a tela de código não existe no web), empresa que já existe sem ramo (o app retoma o primeiro acesso para ela; o web abre normalmente) e os eventos de analytics (`tutorial_begin`, `company_created`, `tutorial_complete`).
 

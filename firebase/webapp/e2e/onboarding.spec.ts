@@ -105,6 +105,10 @@ test('sem nome na conta o nome é obrigatório; a falha volta ao formulário e t
   // Back goes to the form with what was typed, not to the previous step.
   await page.getByRole('button', { name: '‹ Para o cliente' }).click()
   await expect(page.getByLabel('Nome que aparece na OS')).toHaveValue('Oficina Sem Nome')
+  // The seed was asked for: the segment can no longer change (its checklists may be in), not even by Voltar.
+  await expect(page.getByRole('button', { name: '‹ Especialidades' })).toHaveCount(0)
+  await page.goBack()
+  await expect(heading(page, 'Para o cliente')).toBeVisible()
   await page.getByRole('button', { name: 'Criar meu PraticOS' }).click()
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible({ timeout: 45_000 })
 
@@ -115,6 +119,46 @@ test('sem nome na conta o nome é obrigatório; a falha volta ao formulário e t
   expect(companies).toHaveLength(1)
   expect(companies[0]!.data.name).toBe('Oficina Sem Nome')
   expect(companies[0]!.orders).toBe(4)
+})
+
+test('recarregar entre criar a empresa e copiar os dados continua de onde parou', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, 'founderReload')
+  await page.getByRole('list', { name: 'Qual é o seu ramo?' }).getByRole('button', { name: /Mecânica/ }).click()
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  await page.route('**/v1/app/onboarding/seed', (route) => route.abort())
+  await page.getByRole('button', { name: 'Criar meu PraticOS' }).click()
+  await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible({ timeout: 45_000 })
+  await page.unroute('**/v1/app/onboarding/seed')
+  // The token already has the company: without the pending step the reload would open it empty.
+  await page.reload()
+  await expect(heading(page, 'Início')).toBeVisible({ timeout: 45_000 })
+  const companies = await companiesOwnedBy('founderReload')
+  expect(companies).toHaveLength(1)
+  expect(companies[0]!.orders).toBe(4)
+  expect(companies[0]!.forms).toEqual(expect.arrayContaining(['seg-entrada']))
+})
+
+test('a resposta do servidor se perde: tentar de novo recebe 409 e entra, sem copiar nada outra vez', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, 'founderTwice')
+  await page.getByRole('list', { name: 'Qual é o seu ramo?' }).getByRole('button', { name: /Mecânica/ }).click()
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  // The server seeds; the answer never reaches the browser.
+  await page.route('**/v1/app/onboarding/seed', async (route) => {
+    await route.fetch()
+    await route.abort()
+  })
+  await page.getByRole('button', { name: 'Criar meu PraticOS' }).click()
+  await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible({ timeout: 45_000 })
+  await page.unroute('**/v1/app/onboarding/seed')
+  const retried = page.waitForResponse((response) => response.url().includes('/v1/app/onboarding/seed') && response.request().method() === 'POST')
+  await page.getByRole('button', { name: 'Tentar de novo' }).click()
+  expect((await retried).status()).toBe(409)
+  await expect(heading(page, 'Início')).toBeVisible({ timeout: 45_000 })
+  const [company] = await companiesOwnedBy('founderTwice')
+  expect(company!.orders).toBe(4)
+  expect(company!.services).toEqual(['Pintura (exemplo)', 'Troca de óleo (exemplo)'])
 })
 
 test('com convite pendente, o convite vem antes; "Começar sem convite" abre o primeiro acesso e "Sair" sai', async ({ page }) => {

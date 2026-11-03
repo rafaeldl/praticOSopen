@@ -23,8 +23,9 @@ const seedSchema = z.object({
  * POST /v1/app/onboarding/seed  {withSamples, locale}
  * Copies the segment checklists and, with samples, services, products, devices,
  * the sample customer and four sample orders, like the app's first access.
- * Only for who manages the company (the owner, right after creating it). Safe to
- * repeat: what already exists by name (or any order) is not created again.
+ * Only for who manages the company (the owner, right after creating it), once:
+ * a transaction marks `onboardingSeededAt` first, and a company already marked
+ * or created more than a day ago gets 409 and nothing is written.
  */
 router.post('/seed', requireAppPermission('manageCompany'), async (req: AuthenticatedRequest, res: Response) => {
   const companyId = req.userContext?.companyId;
@@ -43,7 +44,8 @@ router.post('/seed', requireAppPermission('manageCompany'), async (req: Authenti
     res.json({ success: true, data: result });
   } catch (error) {
     if (error instanceof OnboardingSeedError) {
-      res.status(error.status).json({ success: false, error: { code: error.code, message: 'Company not ready for the first access' } });
+      const message = error.status === 409 ? 'The first access already prepared this company, or it is not new' : 'Company not ready for the first access';
+      res.status(error.status).json({ success: false, error: { code: error.code, message } });
       return;
     }
     console.error('Onboarding seed error:', error instanceof Error ? error.message : 'unknown');

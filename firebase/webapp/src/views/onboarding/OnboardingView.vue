@@ -19,6 +19,7 @@ import {
   subspecialtyName,
   type OnboardingSegment,
 } from '@/lib/onboarding/model'
+import { readPending, writePending } from '@/lib/onboarding/pending'
 import { applyMask } from '@/lib/segment-fields'
 import { session, signOutEverywhere } from '@/lib/session'
 
@@ -40,8 +41,10 @@ const showErrors = ref(false)
 const status = ref<'editing' | 'saving' | 'failed'>('editing')
 const lastWithSamples = ref(true)
 const masks = ref<string[]>([])
-/** Company saved by an attempt that failed later: the retry completes it. */
+/** Company saved by an attempt that failed later (or before a reload): the retry completes it. */
 let savedId: string | null = null
+/** The seed was asked for: its checklists may be in, so the segment cannot change any more. */
+const seedTried = ref(false)
 
 const step = computed<Step>(() => {
   const wanted = route.query.step
@@ -108,15 +111,43 @@ async function create(withSamples: boolean) {
       savedId,
     })
     savedId = id
-    await waitForClaim(id)
-    await seedCompany(id, withSamples, tag.value)
-    await enterCompany(id)
-    await router.replace('/')
+    // A reload from here on continues the same company (the router sends it back here).
+    writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value })
+    await finish(id, withSamples, tag.value)
   } catch (error) {
     console.error('onboarding: company setup failed', error)
     status.value = 'failed'
   }
 }
+
+/** Claim, checklists and samples (only now, at the end), then Início. */
+async function finish(id: string, withSamples: boolean, localeTag: string) {
+  await waitForClaim(id)
+  seedTried.value = true
+  writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true })
+  await seedCompany(id, withSamples, localeTag)
+  await enterCompany(id)
+  writePending(null)
+  await router.replace('/')
+}
+
+/** After a reload: the company exists, the rest goes on with what was chosen then. */
+async function resume() {
+  const pending = readPending(session.uid)
+  if (!pending) return
+  savedId = pending.companyId
+  seedTried.value = pending.seedTried
+  lastWithSamples.value = pending.withSamples
+  status.value = 'saving'
+  try {
+    await finish(pending.companyId, pending.withSamples, pending.localeTag)
+  } catch (error) {
+    console.error('onboarding: company setup failed', error)
+    status.value = 'failed'
+  }
+}
+
+const retry = () => (segment.value ? create(lastWithSamples.value) : resume())
 
 /** Back from the error goes to the form with what was typed, not to the previous step. */
 function backToForm() {
@@ -127,16 +158,22 @@ async function leave() {
   await signOutEverywhere()
 }
 
-// A step without its segment (page reloaded) starts over.
+// A step without its segment (page reloaded) starts over; after the seed was asked for, only the last step stays.
 watch(
   () => route.query.step,
   (wanted) => {
     if (wanted && !segment.value) void router.replace({ query: {} })
+    else if (seedTried.value && segment.value && wanted !== 'business') void router.replace({ query: { step: 'business' } })
     void nextTick(() => document.querySelector<HTMLElement>('[data-page-title]')?.focus({ preventScroll: true }))
   },
 )
 
 onMounted(() => {
+  if (readPending(session.uid)) {
+    if (route.query.step) void router.replace({ query: {} })
+    void resume()
+    return
+  }
   if (session.companyId) {
     void router.replace('/')
     return
@@ -156,11 +193,11 @@ onMounted(() => {
       </div>
       <div v-else-if="status === 'failed'" class="entry-box">
         <div class="ob-top">
-          <button type="button" class="link" @click="backToForm">‹ {{ t('onboardingBusinessTitle') }}</button>
+          <button v-if="segment" type="button" class="link" @click="backToForm">‹ {{ t('onboardingBusinessTitle') }}</button>
         </div>
         <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.error.title') }}</h1>
         <p role="alert">{{ t('onboardingCreateError') }}</p>
-        <button type="button" class="btn btn--primary btn--wide" @click="create(lastWithSamples)">{{ t('web.tryAgain') }}</button>
+        <button type="button" class="btn btn--primary btn--wide" @click="retry">{{ t('web.tryAgain') }}</button>
       </div>
 
       <div v-else-if="step === 'segment'" class="entry-box">
@@ -204,7 +241,7 @@ onMounted(() => {
 
       <form v-else-if="step === 'business' && segment" class="entry-box" novalidate @submit.prevent="create(true)">
         <div class="ob-top">
-          <button type="button" class="link" @click="back">‹ {{ previousTitle }}</button>
+          <button v-if="!seedTried" type="button" class="link" @click="back">‹ {{ previousTitle }}</button>
         </div>
         <h1 class="page-title" tabindex="-1" data-page-title>{{ t('onboardingBusinessTitle') }}</h1>
         <div>

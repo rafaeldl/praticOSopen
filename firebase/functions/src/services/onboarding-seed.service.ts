@@ -7,14 +7,14 @@
  * segment, specialties, names and country come from the company document.
  */
 
-import { db } from './firestore.service';
+import { db, runTransaction } from './firestore.service';
 import { executeServerBootstrap, syncCompanyFormsFromSegment } from './bootstrap-server.service';
 
 export const ONBOARDING_LOCALES = ['pt-BR', 'en-US', 'es-ES'] as const;
 export type OnboardingLocale = (typeof ONBOARDING_LOCALES)[number];
 
 export class OnboardingSeedError extends Error {
-  constructor(public code: 'NOT_FOUND' | 'NO_SEGMENT', public status: number) {
+  constructor(public code: 'NOT_FOUND' | 'NO_SEGMENT' | 'ONBOARDING_ALREADY_SEEDED' | 'ONBOARDING_NOT_NEW', public status: number) {
     super(code);
   }
 }
@@ -33,6 +33,18 @@ export function seedSubspecialties(picked: unknown, segmentSubspecialties: unkno
     .filter((id): id is string => typeof id === 'string' && !!id);
 }
 
+/** Only a company created in the last day is seeded: an existing one never gets samples by this route. */
+export const NEW_COMPANY_MS = 24 * 60 * 60 * 1000;
+
+function createdAtOf(value: unknown): Date | null {
+  if (typeof value === 'string') {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const timestamp = value as { toDate?: () => Date } | null | undefined;
+  return timestamp && typeof timestamp.toDate === 'function' ? timestamp.toDate() : null;
+}
+
 export interface OnboardingSeedResult {
   services: number;
   products: number;
@@ -49,11 +61,20 @@ export async function seedOnboardingCompany(params: {
   now?: Date;
 }): Promise<OnboardingSeedResult> {
   const { companyId, userId, withSamples, locale, now = new Date() } = params;
-  const companySnap = await db.collection('companies').doc(companyId).get();
-  if (!companySnap.exists) throw new OnboardingSeedError('NOT_FOUND', 404);
-  const company = companySnap.data() ?? {};
-  const segmentId = typeof company.segment === 'string' ? company.segment : '';
-  if (!segmentId) throw new OnboardingSeedError('NO_SEGMENT', 400);
+  // Claimed once, in a transaction: a retry, a second tab or an old company changes nothing.
+  const companyRef = db.collection('companies').doc(companyId);
+  const company = await runTransaction(async (tx) => {
+    const snap = await tx.get(companyRef);
+    if (!snap.exists) throw new OnboardingSeedError('NOT_FOUND', 404);
+    const data = (snap.data() ?? {}) as Record<string, unknown>;
+    if (typeof data.segment !== 'string' || !data.segment) throw new OnboardingSeedError('NO_SEGMENT', 400);
+    if (data.onboardingSeededAt) throw new OnboardingSeedError('ONBOARDING_ALREADY_SEEDED', 409);
+    const createdAt = createdAtOf(data.createdAt);
+    if (!createdAt || now.getTime() - createdAt.getTime() > NEW_COMPANY_MS) throw new OnboardingSeedError('ONBOARDING_NOT_NEW', 409);
+    tx.update(companyRef, { onboardingSeededAt: now.toISOString() });
+    return data;
+  });
+  const segmentId = company.segment as string;
 
   const [segmentSnap, userSnap] = await Promise.all([
     db.collection('segments').doc(segmentId).get(),
@@ -69,7 +90,7 @@ export async function seedOnboardingCompany(params: {
   };
 
   // Checklists always, with or without samples (onboarding.seed.checklists).
-  await syncCompanyFormsFromSegment({ companyId, segmentId, subspecialties, userAggr, locale });
+  await syncCompanyFormsFromSegment({ companyId, segmentId, subspecialties, userAggr, locale, onlyMissing: true });
   const result: OnboardingSeedResult = { services: 0, products: 0, devices: 0, customers: 0, orders: 0 };
   if (!withSamples) return result;
 
