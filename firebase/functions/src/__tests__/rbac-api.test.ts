@@ -139,6 +139,7 @@ import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
 import nfseRoutes from '../routes/v1/nfse.routes';
 import aiRoutes from '../routes/v1/ai.routes';
 import contractsRoutes from '../routes/v1/contracts.routes';
+import onboardingRoutes from '../routes/v1/onboarding.routes';
 import appPermissions from './rbac/app-permissions.json';
 import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
@@ -151,7 +152,7 @@ const UID: Record<ApiRole, string> = {
   owner: 'owner1', admin: 'admin1', supervisor: 'sup1', manager: 'mgr1', consultant: 'cons1', technician: 'tech1',
 };
 const COMPANIES: Record<CompanyKey, Record<string, unknown>> = {
-  c1: { name: 'Company c1', owner: { id: 'owner1', name: 'Owner' } },
+  c1: { name: 'Company c1', owner: { id: 'owner1', name: 'Owner' }, segment: 'automotive' },
   nofin: { name: 'Sem valores', owner: { id: 'owner1', name: 'Owner' }, useFinancial: false },
 };
 
@@ -226,6 +227,7 @@ function buildApp(): Express {
   app.use('/v1/app/nfse', bearerAuth, resolveCompanyContext, nfseRoutes);
   app.use('/v1/app/ai', bearerAuth, resolveCompanyContext, aiRoutes);
   app.use('/v1/app/contracts', bearerAuth, resolveCompanyContext, contractsRoutes);
+  app.use('/v1/app/onboarding', bearerAuth, resolveCompanyContext, onboardingRoutes);
   return app;
 }
 
