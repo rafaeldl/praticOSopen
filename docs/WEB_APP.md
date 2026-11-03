@@ -287,6 +287,8 @@ Com a fatia de OS (filtro Em aberto por padrão, consulta por `status in`), medi
 
 Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª visita e **487 ms** na volta. A paleta, os atalhos e a folha "Mais" passaram a carregar sob demanda e os textos são divididos por funcionalidade; as telas novas usam só a API, sem nada novo no pedaço do Firestore.
 
+Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1ª visita e **487 ms** na volta.
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -337,4 +339,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 238,7 de 240 KB depois da fatia de clientes (era 239,0; a paleta, os atalhos e a folha "Mais" saíram do primeiro download e abriram 1,6 KB).
+- Orçamento do primeiro download: 238,9 de 240 KB depois da fatia de mandar, receber e cobrar (238,7 depois da de clientes). As telas novas ficam fora do primeiro download.

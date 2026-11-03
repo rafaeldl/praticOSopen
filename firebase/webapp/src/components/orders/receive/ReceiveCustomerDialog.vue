@@ -47,8 +47,9 @@ const owed = computed(() => owedOf(chosen.value))
 const split = computed(() => allocate(amount.value ?? 0, chosen.value))
 const summary = computed(() => allocationSummary(split.value, owed.value))
 const tooMuch = computed(() => toCents(amount.value ?? 0) > toCents(owed.value))
-const minDay = computed(() => chosen.value.map((o) => (o.createdAt ? localDay(new Date(o.createdAt)) : '')).sort().at(-1) ?? '')
-const dayValid = computed(() => !!day.value && day.value <= today && (!minDay.value || day.value >= minDay.value))
+// One day of slack before the newest order, like the server (24 h by the company's zone). Today is always fine.
+const minDay = computed(() => chosen.value.map((o) => (o.createdAt ? localDay(new Date(Date.parse(o.createdAt) - 86_400_000)) : '')).sort().at(-1) ?? '')
+const dayValid = computed(() => day.value === today || (!!day.value && day.value < today && (!minDay.value || day.value >= minDay.value)))
 const problem = computed(() => {
   if (!chosen.value.length) return t('receiveCustomerNoneChecked')
   if (toCents(amount.value ?? 0) <= 0) return t('receiveCustomerZero')
@@ -256,7 +257,7 @@ const preview = computed(() => {
               <option v-for="item in METHODS" :key="item.id" :value="item.id">{{ item.label() }}</option>
             </select>
             <label class="field-label" for="rc-day">{{ t('receiveWhen') }}</label>
-            <input id="rc-day" v-model="day" class="field" type="date" :max="today" :min="minDay || undefined" required />
+            <input id="rc-day" v-model="day" class="field" type="date" :max="today" required />
             <div class="pay-total" aria-live="polite" data-testid="receive-total">
               <p v-if="problem" :class="chosen.length ? 'sub' : 'field-error'">{{ problem }}</p>
               <template v-else>

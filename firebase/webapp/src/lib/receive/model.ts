@@ -209,9 +209,9 @@ export const PERMISSIONS_OF: Record<PermissionKind, SharePermission[]> = {
   view: ['view'],
 }
 
-/** Days the link still has, rounded up (the picker shows the token's real validity, defect 81). */
+/** Days the link still has, to the nearest day (the picker shows the token's real validity, defect 81). */
 export function validityDays(token: Pick<ShareToken, 'expiresAt'>, now: Date): number {
-  return Math.max(1, Math.ceil((Date.parse(token.expiresAt) - now.getTime()) / 86_400_000))
+  return Math.max(1, Math.round((Date.parse(token.expiresAt) - now.getTime()) / 86_400_000))
 }
 
 /** Which message goes with the link: by where the order stands (share_link_service). */

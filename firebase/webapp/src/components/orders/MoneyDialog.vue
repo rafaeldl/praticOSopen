@@ -20,8 +20,9 @@ const method = ref('')
 // "Quando": today by default, never in the future nor before the order (server: INVALID_PAID_AT).
 const today = localDay(new Date())
 const day = ref(today)
-const minDay = props.createdAt ? localDay(new Date(props.createdAt)) : undefined
-const dayValid = computed(() => !!day.value && day.value <= today && (!minDay || day.value >= minDay))
+// One day of slack before the order, like the server (24 h by the company's zone). Today is always fine.
+const minDay = props.createdAt ? localDay(new Date(Date.parse(props.createdAt) - 86_400_000)) : undefined
+const dayValid = computed(() => day.value === today || (!!day.value && day.value < today && (!minDay || day.value >= minDay)))
 const title = computed(() => (props.kind === 'receive' ? t('receiveTitle') : t('receiveGiveDiscount')))
 // Never above what is left, like ReceivePaymentSheet (max: remaining). The balance follows the order live.
 const tooMuch = computed(() => (amount.value ?? 0) > props.remaining + 0.001)
@@ -64,7 +65,7 @@ function save() {
               <option v-for="item in METHODS" :key="item.id" :value="item.id">{{ item.label() }}</option>
             </select>
             <label class="field-label" for="money-day">{{ t('receiveWhen') }}</label>
-            <input id="money-day" v-model="day" class="field" type="date" :max="today" :min="minDay" required />
+            <input id="money-day" v-model="day" class="field" type="date" :max="today" required />
             <p v-if="!dayValid" class="field-error" role="alert">{{ t('web.receive.dayInvalid') }}</p>
           </template>
         </div>

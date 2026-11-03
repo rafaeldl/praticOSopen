@@ -34,11 +34,11 @@ const copied = ref(false)
 const confirmRevoke = ref(false)
 const text = ref('')
 const edited = ref(false)
-const now = new Date()
 
 const name = computed(() => props.order.customer?.name?.trim() || '')
 const kind = computed<PermissionKind>(() => permissionKind(token.value?.permissions ?? []))
-const days = computed(() => (token.value ? validityDays(token.value, now) : 7))
+// Measured when the link arrives: a link made after the dialog opened is not counted a day longer.
+const days = computed(() => (token.value ? validityDays(token.value, new Date()) : 7))
 const wa = computed(() => whatsappNumber(phone.value, country()))
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 const VALIDITIES = [7, 14, 30]
