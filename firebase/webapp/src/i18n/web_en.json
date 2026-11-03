@@ -150,6 +150,7 @@
   "web.orders.clearSearch": "Clear the search",
   "web.orders.filters": "Filters",
   "web.orders.firstRunBody": "Pick the customer, what will be done, and that's it. It takes less than a minute.",
+  "web.maintenance.customerGone": "This customer was deleted. Change or remove the maintenance on the {device}.",
   "web.orders.loadMore": "Show more",
   "web.orders.noCustomer": "No customer",
   "web.orders.noMatch": "Nothing with “{query}”",

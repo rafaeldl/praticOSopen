@@ -150,6 +150,7 @@
   "web.orders.clearSearch": "Borrar la búsqueda",
   "web.orders.filters": "Filtros",
   "web.orders.firstRunBody": "Elige el cliente, lo que se va a hacer y listo. Toma menos de un minuto.",
+  "web.maintenance.customerGone": "Ese cliente fue eliminado. Cambia o quita el mantenimiento en el {device}.",
   "web.orders.loadMore": "Mostrar más",
   "web.orders.noCustomer": "Sin cliente",
   "web.orders.noMatch": "Nada con “{query}”",

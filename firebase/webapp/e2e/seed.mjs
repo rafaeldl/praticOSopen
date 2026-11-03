@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_D, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -385,6 +385,47 @@ async function seedForms() {
 }
 
 // Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
+// "Manutenções chegando" in company D, relative to the real today (the list compares with now).
+async function seedMaintenance() {
+  const day = (offset) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+    const date = new Date(`${today}T12:00:00.000Z`)
+    date.setUTCDate(date.getUTCDate() + offset)
+    return date.toISOString().slice(0, 10)
+  }
+  const company = { id: COMPANY_D, name: COMPANIES[COMPANY_D].name, country: 'BR' }
+  const owner = USERS.maintOwner
+  const batch = db.batch()
+  const device = (id, name, offset, extra = {}) =>
+    batch.set(db.doc(`companies/${COMPANY_D}/devices/${id}`), {
+      id, name, serial: null, company, ...(offset === null ? {} : { nextMaintenanceDate: day(offset) }), ...audit(owner, 5000), ...extra,
+    })
+  device('d-late', 'Uno Atrasado', -3, { nextMaintenanceCustomer: { id: 'd-cust-ana', name: 'Ana Lima' }, nextMaintenanceLastService: 'Troca de óleo' })
+  device('d-today', 'Palio Hoje', 0)
+  device('d-soon', 'Gol Chegando', 2, { nextMaintenanceCustomer: { id: 'd-cust-bia', name: 'Bia Souza' } })
+  device('d-week', 'Fox Semana', 7, { nextMaintenanceCustomer: { id: 'd-cust-gone', name: 'Cliente Apagado' } })
+  device('d-far', 'Celta Longe', 8)
+  device('d-contract', 'Corsa Contrato', 1)
+  device('d-none', 'Sem Data', null)
+  batch.set(db.doc(`companies/${COMPANY_D}/customers/d-cust-ana`), { id: 'd-cust-ana', name: 'Ana Lima', phone: null, company, ...audit(owner, 5000) })
+  batch.set(db.doc(`companies/${COMPANY_D}/customers/d-cust-bia`), { id: 'd-cust-bia', name: 'Bia Souza', phone: '(11) 99000-1111', company, ...audit(owner, 5000) })
+  batch.set(db.doc(`companies/${COMPANY_D}/services/d-svc-oil`), { id: 'd-svc-oil', name: 'Troca de óleo', value: 120, company, ...audit(owner, 5000) })
+  // Last finished order of the Gol: "Abrir OS" copies its services, with its value.
+  batch.set(db.doc(`companies/${COMPANY_D}/orders/d-order-gol`), {
+    number: 1, status: 'done', customer: { id: 'd-cust-bia', name: 'Bia Souza' },
+    device: { id: 'd-soon', name: 'Gol Chegando', serial: null }, devices: [{ id: 'd-soon', name: 'Gol Chegando', serial: null }], deviceIds: ['d-soon'],
+    services: [{ service: { id: 'd-svc-oil', name: 'Troca de óleo', value: 120 }, value: 150 }], products: [],
+    total: 150, paidAmount: 150, payment: 'paid', company, ...audit(owner, 4000),
+  })
+  // An active contract covers the Corsa: hidden for who reads contracts.
+  batch.set(db.doc(`companies/${COMPANY_D}/orders/d-contract-corsa`), {
+    status: 'approved', isContract: true, contract: { active: true, frequency: 'monthly' }, customer: { id: 'd-cust-ana', name: 'Ana Lima' },
+    devices: [{ id: 'd-contract', name: 'Corsa Contrato', serial: null }], deviceIds: ['d-contract'], services: [], products: [], total: 0,
+    company, ...audit(owner, 4000),
+  })
+  await batch.commit()
+}
+
 async function seedWebAccess() {
   const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
   await db.doc('config/webApp').set({
@@ -419,6 +460,7 @@ await seedCatalog()
 await seedWebAccess()
 await seedInvites()
 await seedForms()
+await seedMaintenance()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 // The big list measures the list alone; the scenarios are for the screen tests.

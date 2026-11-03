@@ -6,6 +6,8 @@ export const COMPANY_A = 'company-alpha'
 export const COMPANY_B = 'company-beta'
 /** "Valores e cobrança" off (useFinancial: false): nobody sees money, not even the owner. */
 export const COMPANY_C = 'company-gamma'
+/** "Manutenções chegando" (e2e/maintenance.spec.ts): its own devices, so counts do not move. */
+export const COMPANY_D = 'company-delta'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -34,6 +36,9 @@ export const USERS = {
   founderLean: { ...user('founderlean', 'Lia Sem Exemplos'), roles: {} },
   /** No name on the account: the name on the order is required. */
   founderNoName: { ...user('foundernoname', ''), roles: {} },
+  /** Owner and technician of company D (maintenances). */
+  maintOwner: { ...user('maintowner', 'Mara Dona Delta'), roles: { [COMPANY_D]: 'owner' } },
+  maintTech: { ...user('mainttech', 'Tito Tecnico Delta'), roles: { [COMPANY_D]: 'technician' } },
   /** No company and outside the access list: never reaches the first access. */
   strangerNew: { ...user('strangernew', 'Saulo Fora'), roles: {}, blocked: true },
 }
@@ -48,6 +53,7 @@ export const COMPANIES = {
   [COMPANY_A]: { name: 'Oficina Alfa', country: 'BR', segment: 'automotive', owner: USERS.owner },
   [COMPANY_B]: { name: 'Beta Repairs', country: 'US', segment: 'electronics', owner: USERS.owner },
   [COMPANY_C]: { name: 'Gama Sem Valores', country: 'BR', segment: 'automotive', owner: USERS.noValues, useFinancial: false },
+  [COMPANY_D]: { name: 'Delta Manutenção', country: 'BR', segment: 'automotive', owner: USERS.maintOwner },
 }
 
 export const DEFAULT_ORDERS = 30

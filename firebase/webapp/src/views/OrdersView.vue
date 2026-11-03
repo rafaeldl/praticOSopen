@@ -43,6 +43,8 @@ import { announce, ui } from '@/lib/ui'
 const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
 const OrderBoard = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderBoard.vue'), loadOrderTexts()]).then(([m]) => m))
 const FirstRun = defineAsyncComponent(() => Promise.all([import('@/components/orders/FirstRun.vue'), loadOrderTexts()]).then(([m]) => m))
+// "Manutenções chegando": read after the list paints, only on the open lists (home.maintenance.list).
+const Maintenances = defineAsyncComponent(() => Promise.all([import('@/components/orders/Maintenances.vue'), loadOrderTexts()]).then(([m]) => m))
 const BatchActions = defineAsyncComponent(() => Promise.all([import('@/components/orders/BatchActions.vue'), loadOrderTexts()]).then(([m]) => m))
 
 const route = useRoute()
@@ -109,6 +111,7 @@ const summaryText = computed(() => {
 })
 const searchHint = computed(() => t('homeSearchHintDevice', { device: deviceLabel().toLocaleLowerCase() }))
 const panelOpen = computed(() => !!panel.value.value)
+const showsMaintenances = computed(() => state.value === 'ready' && !search.value.trim() && ['open', 'mine', 'quotes', 'onHold'].includes(filter.value))
 const selectedOrders = computed(() => selected.value.map((id) => rows.value.find((row) => row.id === id)).filter((row): row is Order => !!row))
 
 const FILTER_LABEL: Record<ListFilter, () => string> = {
@@ -426,6 +429,7 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
           {{ t('web.orders.stale') }}
           <button type="button" class="link" @click="load">{{ t('web.tryAgain') }}</button>
         </p>
+        <Maintenances v-if="showsMaintenances" />
         <LoadingState v-if="state === 'loading'" />
         <ErrorState v-else-if="state === 'failed'" :body="t('loadOrdersError')" :retry="load" />
         <FirstRun v-else-if="firstRun" :can-create="canCreate" />
