@@ -8,6 +8,7 @@ import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'order.g.dart';
@@ -81,12 +82,9 @@ class Order extends BaseAuditCompany {
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
-  /// Calcula o saldo restante a pagar
-  double get remainingBalance {
-    final totalValue = total ?? 0.0;
-    final paid = paidAmount ?? 0.0;
-    return totalValue - paid;
-  }
+  /// Remaining balance: rounded to cents and never below zero (same as
+  /// OrderPaymentMath.remainingBalance and the server).
+  double get remainingBalance => OrderPaymentMath.remainingBalance(this);
 
   /// Statuses in which an order can be marked "parada".
   static const holdStatuses = ['approved', 'progress'];

@@ -463,4 +463,61 @@ void main() {
       expect(update['paid'], true);
     });
   });
+
+
+  group('quote and canceled have no payment status (D2)', () {
+    for (final status in ['quote', 'canceled']) {
+      test('a full payment on a $status keeps payment null', () {
+        final order = _order()..status = status;
+        OrderPaymentMath.addPayment(order, PaymentTransaction.payment(amount: 100));
+        expect(order.paidAmount, 100);
+        expect(order.payment, isNull);
+        expect(order.paid, isFalse);
+      });
+
+      test('the offline update on a $status writes payment null', () {
+        final order = _order()..status = status;
+        final update = OrderPaymentMath.addPaymentUpdate(
+          current: order,
+          tx: PaymentTransaction.payment(amount: 100),
+        );
+        expect(update['payment'], isNull);
+        expect(update['paid'], isFalse);
+      });
+
+      test('markAsFullyPaid on a $status does not force paid', () {
+        final order = _order()..status = status;
+        OrderPaymentMath.markAsFullyPaid(
+          order,
+          (remaining) => PaymentTransaction.payment(amount: remaining),
+        );
+        expect(order.paidAmount, 100);
+        expect(order.payment, isNull);
+        expect(order.paid, isFalse);
+      });
+    }
+  });
+
+  group('total never below zero (D3)', () {
+    test('computeTotal stops at zero when the discount is above the items', () {
+      expect(OrderPaymentMath.computeTotal(_order(services: 50, discount: 80)), 0);
+    });
+
+    test('a discount above the total keeps the discount and a zero total', () {
+      final order = _order();
+      OrderPaymentMath.addDiscount(order, PaymentTransaction.discount(amount: 150));
+      expect(order.discount, 150);
+      expect(order.total, 0);
+      expect(OrderPaymentMath.remainingBalance(order), 0);
+    });
+
+    test('the offline discount update only takes the total down to zero', () {
+      final update = OrderPaymentMath.addDiscountUpdate(
+        current: _order(),
+        tx: PaymentTransaction.discount(amount: 150),
+      );
+      expect((update['discount'] as IncrementOp).by, 150);
+      expect((update['total'] as IncrementOp).by, -100);
+    });
+  });
 }
