@@ -263,6 +263,32 @@ async function seedScenario() {
   await batch.commit()
 }
 
+// Checklists: two ready-made ones in the automotive segment, the first already
+// copied to company A with the segment's id (as the first access does).
+// Company A has the Business plan (no checklist limit), so tests can create
+// many; company B stays Free (1 active) with one active and one off.
+async function seedForms() {
+  const q = (id, label, type, extra = {}) => ({ id, label, type, options: null, required: false, allowPhotos: true, labelI18n: null, optionsI18n: null, ...extra })
+  const entrada = {
+    title: 'Vistoria de entrada',
+    description: 'Como o veículo chegou',
+    isActive: true,
+    items: [q('pneus', 'Os pneus estão bons?', 'boolean', { required: true }), q('painel', 'Luzes do painel', 'select', { options: ['Apagadas', 'Acesas'] })],
+  }
+  const final = { title: 'Teste final', description: 'Antes de entregar', isActive: true, items: [q('freio', 'Freio ok?', 'boolean')] }
+  const importable = { title: 'Pronto para copiar', description: 'Só o teste de Usar', isActive: true, items: [q('um', 'Uma pergunta', 'text')] }
+  const batch = db.batch()
+  batch.set(db.doc('segments/automotive/forms/seg-entrada'), entrada)
+  batch.set(db.doc('segments/automotive/forms/seg-final'), final)
+  batch.set(db.doc('segments/automotive/forms/seg-import'), importable)
+  batch.set(db.doc(`companies/${COMPANY_A}/forms/seg-entrada`), { id: 'seg-entrada', ...entrada, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, ...audit(USERS.owner, 90000) })
+  batch.set(db.doc(`companies/${COMPANY_A}`), { subscription: { plan: 'business', status: 'active' } }, { merge: true })
+  const companyB = { id: COMPANY_B, name: COMPANIES[COMPANY_B].name }
+  batch.set(db.doc(`companies/${COMPANY_B}/forms/b-active`), { id: 'b-active', title: 'Intake', description: null, isActive: true, items: [q('screen', 'Screen ok?', 'boolean')], company: companyB, ...audit(USERS.owner, 90000) })
+  batch.set(db.doc(`companies/${COMPANY_B}/forms/b-off`), { id: 'b-off', title: 'Old check', description: null, isActive: false, items: [q('x', 'Anything?', 'text')], company: companyB, ...audit(USERS.owner, 90000) })
+  await batch.commit()
+}
+
 // Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
 async function seedWebAccess() {
   const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
@@ -297,6 +323,7 @@ await seedUsers()
 await seedCatalog()
 await seedWebAccess()
 await seedInvites()
+await seedForms()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 // The big list measures the list alone; the scenarios are for the screen tests.

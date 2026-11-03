@@ -1907,9 +1907,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms", "local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
-  note: "Só com veículo, sem contrato e com canManageOrderForms. 3 \"Agora não\" seguidos param a oferta, contando no aparelho. Só no segmento automotive. Aceitar reabre a OS salva com addChecklist e já abre Qual checklist? (pergunta o aparelho com 2+). Não copiar: oferta presa ao id automotive; no web, ler da configuração do segmento."
+  note: "Só com veículo, sem contrato e com canManageOrderForms. 3 \"Agora não\" seguidos param a oferta, contando no aparelho. Só no segmento automotive. Aceitar reabre a OS salva com addChecklist e já abre Qual checklist? (pergunta o aparelho com 2+). Não copiar: oferta presa ao id automotive; no web, ler da configuração do segmento. Web: oferece onde a empresa tem checklist ativo (não há campo no segmento); 3 Agora não contados por empresa neste navegador."
 - id: order.offer.notifications
   screen: lib/screens/order/new_order_offers.dart
   route: null
@@ -2279,9 +2280,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
-  note: "Bloqueia a conclusão; Agora não fica na OS."
+  note: "Bloqueia a conclusão; Agora não fica na OS. Web: pelo botão azul e por Mudar situação; o quadro e o lote ainda não conferem."
 - id: order.status.cancel
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2804,7 +2806,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms", "companies/{id}/forms", "segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: editOrder
   note: "canManageOrderForms: técnico só em quote; supervisor até concluir. Com 2 ou mais aparelhos pergunta o aparelho antes (checklist.pick.device-first); depois de adicionar abre o preenchimento em tela cheia. Não copiar: OS sem id não faz nada e não avisa; addFormToOrder sem try, falha calada."
@@ -2821,7 +2824,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   note: "Mostra \"x de y respondidas\"."
 - id: order.checklist.delete
@@ -2837,7 +2841,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: editOrder
   note: "Mesma regra de order.checklist.add. Também arrastando a linha, com confirmação; no web, ação visível na linha."
@@ -3758,10 +3763,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: editOrder
-  note: "O mesmo modelo pode entrar várias vezes na mesma OS. Não copiar: escolher vários aparelhos fica só com o primeiro; na web, um checklist por aparelho escolhido ou escolha única."
+  note: "O mesmo modelo pode entrar várias vezes na mesma OS. Não copiar: escolher vários aparelhos fica só com o primeiro; na web, um checklist por aparelho escolhido ou escolha única. Web: escolha única (um aparelho ou Geral)."
 - id: order.new.form
   screen: lib/screens/order/new_order_form.dart
   route: null
@@ -8630,10 +8636,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms", "segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Rota sem ProtectedRoute e a tela não confere manageForms: qualquer papel chega pela linha Checklists do Plano (plan.open-limit) e vê as ações, que falham na gravação. Carregando e erro olham só a lista da empresa; se os prontos do segmento falham, a seção some calada. Vazio só quando as duas listas estão vazias. Linha: N perguntas, com fotos quando há pergunta só de foto; desligado mostra Desligado. Não copiar: guardar a rota e esconder ações sem permissão; carregando e erro também para os prontos."
+  note: "Rota sem ProtectedRoute e a tela não confere manageForms: qualquer papel chega pela linha Checklists do Plano (plan.open-limit) e vê as ações, que falham na gravação. Carregando e erro olham só a lista da empresa; se os prontos do segmento falham, a seção some calada. Vazio só quando as duas listas estão vazias. Linha: N perguntas, com fotos quando há pergunta só de foto; desligado mostra Desligado. Não copiar: guardar a rota e esconder ações sem permissão; carregando e erro também para os prontos. Web: /checklists só com manageForms (rota e Configurações); lista da empresa ao vivo (onSnapshot) e prontos lidos uma vez, cada um com carregando e erro com Tentar de novo."
 - id: checklist.list.delete
   screen: lib/screens/forms/form_template_list_screen.dart
   route: null
@@ -8647,10 +8654,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Arrastar para apagar, com confirmação. Não copiar: o app tira a linha mesmo se a gravação falhar (sem try) e o alerta diz Descartar; na web, botão Apagar, texto de apagar, erro tratado e linha mantida."
+  note: "Arrastar para apagar, com confirmação. Não copiar: o app tira a linha mesmo se a gravação falhar (sem try) e o alerta diz Descartar; na web, botão Apagar, texto de apagar, erro tratado e linha mantida. Web: botão Apagar na linha, confirmação com o texto de apagar do app; toda gravação é transação que lê antes, então sem conexão falha, avisa e a linha fica."
 - id: checklist.list.preview
   screen: lib/screens/forms/form_template_list_screen.dart
   route: null
@@ -8664,8 +8672,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
+  note: "Web: o pronto abre num diálogo com descrição, N perguntas e a lista; Usar no rodapé."
   permission: manageForms
 - id: checklist.list.import
   screen: lib/screens/forms/form_template_list_screen.dart
@@ -8680,10 +8690,11 @@ rows:
   feature_flags: ["planLimits:formTemplate"]
   hardware: null
   data: ["companies/{id}/forms", "segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Pede confirmação, confere o limite e copia título, descrição, itens e o isActive do pronto, com id novo. O detalhe do pronto mostra descrição, N itens e as perguntas. Não copiar: o pronto já copiado continua na lista (o primeiro acesso copia com o id do segmento, Usar com id novo) e dá para ter o mesmo checklist duas ou três vezes; o sucesso vem em alerta modal. Na web: marcar ou esconder o que já foi copiado e avisar em toast."
+  note: "Pede confirmação, confere o limite e copia título, descrição, itens e o isActive do pronto, com id novo. O detalhe do pronto mostra descrição, N itens e as perguntas. Não copiar: o pronto já copiado continua na lista (o primeiro acesso copia com o id do segmento, Usar com id novo) e dá para ter o mesmo checklist duas ou três vezes; o sucesso vem em alerta modal. Na web: marcar ou esconder o que já foi copiado e avisar em toast. Web: esconde o pronto já copiado (mesmo id ou mesmo título, sem acento e sem caixa) e avisa em toast."
 - id: checklist.counter.active
   screen: lib/screens/forms/form_template_list_screen.dart
   route: "/form_template_list"
@@ -8697,10 +8708,11 @@ rows:
   feature_flags: ["planLimits:formTemplate"]
   hardware: null
   data: ["companies/{id}/forms", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458)."
+  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458). Web: não grava contador (o servidor recontou em onFormTemplateWrittenUsage); o limite usa os ativos da lista (isActive != false) e o plano de companies/{id}.subscription (vencido vale Free), conferido antes de abrir Novo, ao Usar um pronto e ao religar. Sem trava nova no servidor."
 - id: checklist.view.list
   screen: lib/screens/forms/checklists_view.dart
   route: null
@@ -8714,7 +8726,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms", "segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
 - id: checklist.view.new
@@ -8730,10 +8743,11 @@ rows:
   feature_flags: ["planLimits:formTemplate"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "O limite só é conferido ao salvar, não ao abrir. Na web: conferir antes de abrir."
+  note: "O limite só é conferido ao salvar, não ao abrir. Na web: conferir antes de abrir. Web: confere antes de abrir e de novo ao salvar."
 - id: checklist.view.open
   screen: lib/screens/forms/checklists_view.dart
   route: "/form_template_form"
@@ -8747,8 +8761,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
+  note: "Web: abre o editor numa gaveta, com o id na URL (?checklist=)."
   permission: manageForms
 - id: checklist.form.save
   screen: lib/screens/forms/form_template_form_screen.dart
@@ -8763,10 +8779,11 @@ rows:
   feature_flags: ["planLimits:formTemplate"]
   hardware: null
   data: ["companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Editando é decidido por createdAt: modelo sem createdAt abre como novo e salvar cria outro e confere o limite. Novo e edição mostram coisas diferentes (descrição em Mais dados no novo; título grande e N perguntas na edição). Ver checklist.counter.active."
+  note: "Editando é decidido por createdAt: modelo sem createdAt abre como novo e salvar cria outro e confere o limite. Novo e edição mostram coisas diferentes (descrição em Mais dados no novo; título grande e N perguntas na edição). Ver checklist.counter.active. Web: editar é abrir um existente (pelo id, nunca por createdAt); grava todas as chaves de FormDefinition.toJson; editar manda a versão lida (updatedAt) numa transação: se o app salvou depois, nada é gravado e a tela avisa. Ctrl/⌘ Enter salva."
 - id: checklist.form.question-add
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8780,7 +8797,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
 - id: checklist.form.question-edit
@@ -8796,10 +8814,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Escolha e Várias escolhas pedem 2 ou mais opções, uma por linha; Só foto esconde Obrigatória e grava required=false; Pode pôr foto vem ligado; labelI18n e optionsI18n só ficam enquanto o texto não muda; placeholder de exemplo pelo segmento. Não copiar: o tipo padrão é Texto, mas a lista mostra Sim/Não primeiro; na web, padrão igual ao primeiro da lista."
+  note: "Escolha e Várias escolhas pedem 2 ou mais opções, uma por linha; Só foto esconde Obrigatória e grava required=false; Pode pôr foto vem ligado; labelI18n e optionsI18n só ficam enquanto o texto não muda; placeholder de exemplo pelo segmento. Não copiar: o tipo padrão é Texto, mas a lista mostra Sim/Não primeiro; na web, padrão igual ao primeiro da lista. Web: padrão Sim ou não (o primeiro da lista)."
 - id: checklist.form.question-delete
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8813,10 +8832,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Novo (sheet): arrastar a linha. Edição: Apagar pergunta no editor da pergunta. Só vale ao salvar o checklist. Não copiar: sem confirmação nem desfazer; na web, desfazer no aviso."
+  note: "Novo (sheet): arrastar a linha. Edição: Apagar pergunta no editor da pergunta. Só vale ao salvar o checklist. Não copiar: sem confirmação nem desfazer; na web, desfazer no aviso. Web: Desfazer numa linha dentro da gaveta (o aviso da página fica fora de alcance com a gaveta aberta)."
 - id: checklist.form.question-reorder
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8830,10 +8850,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Segurar e arrastar, só na edição (empurrada); o novo (sheet) não reordena. Na web precisa alternativa por teclado."
+  note: "Segurar e arrastar, só na edição (empurrada); o novo (sheet) não reordena. Na web precisa alternativa por teclado. Web: no novo e na edição, arrastando, pelos botões Subir/Descer ou Alt + ↑/↓ na pergunta, com a posição anunciada."
 - id: checklist.form.toggle
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8847,7 +8868,8 @@ rows:
   feature_flags: ["planLimits:formTemplate"]
   hardware: null
   data: ["companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
   note: "Pelo menu …, grava na hora, fora do Salvar checklist; ao religar confere o limite."
@@ -8864,7 +8886,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
 - id: checklist.form.description
@@ -8880,7 +8903,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
 - id: checklist.form.discard
@@ -8896,7 +8920,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
   note: "Descartar ou Continuar editando, no novo (sheet) e na edição; conta nome, descrição e perguntas. Na web: também em beforeunload."
@@ -8913,10 +8938,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Três frases. Não copiar: para o nome sozinho o app usa customerSaveNeedsName (string do cliente); na web, uma string própria."
+  note: "Três frases. Não copiar: para o nome sozinho o app usa customerSaveNeedsName (string do cliente); na web, uma string própria. Web: web.forms.needsName."
 - id: checklist.question.validation
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8930,7 +8956,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
   note: "Texto obrigatório; Escolha e Várias com 2 ou mais opções (uma por linha, vazias ignoradas)."
@@ -8947,10 +8974,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms", "segments/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Só modelos ativos, em ordem de título; rótulos Da empresa e Globais só com os dois; busca em título e descrição. Os prontos dependem do segmento já carregado. Não copiar: põe o pronto do segmento direto na OS, sem copiar para a empresa e sem limite; getCompanyTemplates devolve lista vazia quando falha e a falha dos prontos passa calada, então o erro vira vazio."
+  note: "Só modelos ativos, em ordem de título; rótulos Da empresa e Globais só com os dois; busca em título e descrição. Os prontos dependem do segmento já carregado. Não copiar: põe o pronto do segmento direto na OS, sem copiar para a empresa e sem limite; getCompanyTemplates devolve lista vazia quando falha e a falha dos prontos passa calada, então o erro vira vazio. Web: só os da empresa (o pronto entra pela tela Checklists, onde conta no plano); erro com Tentar de novo; busca com mais de 10."
 - id: checklist.pick.create
   screen: lib/screens/forms/form_selection_screen.dart
   route: null
@@ -8964,7 +8992,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
   note: "Só com manageForms. Cria pela sheet e recarrega a lista. Não copiar: não escolhe o checklist criado; na web, já voltar com ele escolhido."
@@ -8981,9 +9010,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
-  note: "Gerente abre e grava mesmo sem fillForms no app. Cabeçalho: concluído verde Completo; faltando âmbar Faltam N; tudo respondido sem concluir azul; botão Começar, Continuar ou Concluir. Concluído: linhas sem toque e galeria sem lixeira. Ver checklist.fill.auto-open."
+  note: "Gerente abre e grava mesmo sem fillForms no app. Cabeçalho: concluído verde Completo; faltando âmbar Faltam N; tudo respondido sem concluir azul; botão Começar, Continuar ou Concluir. Concluído: linhas sem toque e galeria sem lixeira. Ver checklist.fill.auto-open. Web: todas as perguntas na gaveta, respondidas no lugar; o gerente (sem fillForms no contrato) só lê e reabre."
 - id: checklist.fill.answer
   screen: lib/screens/forms/form_fill_screen.dart
   route: null
@@ -8997,10 +9027,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar."
+  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar. Web: cada resposta numa transação que relê o checklist e muda só aquela pergunta (valor e fotos separados), então app e web juntos não se apagam; respostas em fila na ordem dada. Sem conexão a transação falha: a resposta fica na tela marcada Não deu para guardar, com Tentar de novo (não há fila offline no web)."
 - id: checklist.fill.complete
   screen: lib/screens/forms/form_fill_screen.dart
   route: null
@@ -9014,7 +9045,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
   note: "Obrigatória vazia: alerta com a lista das perguntas (na de foto, vale ter foto). Concluir assim mesmo só com alguma respondida, alguma faltando e nenhuma obrigatória em aberto. Ao responder a última sem nada faltando (contando opcionais) conclui sozinho e volta para a OS; Pular na última só fecha."
@@ -9031,7 +9063,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   note: "Menu … só aparece para quem pode (canReopenCompletedForms); consultor e técnico não reabrem. O alerta de sem permissão é código morto."
 - id: checklist.fill.photo-camera
@@ -9063,8 +9096,10 @@ rows:
   feature_flags: []
   hardware: [gallery]
   data: ["companies/{id}/orders/{id}/forms", "storage:tenants/{id}/orders/{id}/forms/{id}/items/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
+  note: "Web: escolher (várias) ou arrastar arquivo; cada falha é contada no aviso."
   permission: fillForms
 - id: checklist.fill.gallery
   screen: lib/screens/forms/form_fill_screen.dart
@@ -9079,7 +9114,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["storage:tenants/{id}/orders/{id}/forms/{id}/items/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
 - id: checklist.fill.photo-delete
   screen: lib/screens/forms/form_fill_screen.dart
@@ -9094,10 +9130,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms", "storage:tenants/{id}/orders/{id}/forms/{formId}/{itemId}_{ts}.jpg"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Caminho real no Storage: forms/{formId}/{itemId}_{ts}.jpg, não items/{itemId}/. Não copiar: só tira a URL e o arquivo fica no Storage (o alerta diz que não dá para desfazer); duas remoções seguidas na mesma galeria tiram a foto errada (índice da lista original). Várias fotos: falha parcial passa calada."
+  note: "Caminho real no Storage: forms/{formId}/{itemId}_{ts}.jpg, não items/{itemId}/. Não copiar: só tira a URL e o arquivo fica no Storage (o alerta diz que não dá para desfazer); duas remoções seguidas na mesma galeria tiram a foto errada (índice da lista original). Várias fotos: falha parcial passa calada. Web: grava no mesmo caminho do app (storage.rules só libera um nível abaixo do checklist); tira pela URL, com confirmação, e apaga o arquivo."
 - id: checklist.fill.auto-open
   screen: lib/screens/forms/form_fill_screen.dart
   route: null
@@ -9111,7 +9148,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   note: "Só quando aberto ao adicionar (openQuestionsOnStart), não concluído, com perguntas e sem resposta."
 - id: checklist.fill.device-label
@@ -9127,7 +9165,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   note: "Só quando o checklist tem deviceId."
 - id: checklist.question.yes-no
@@ -9143,7 +9182,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
 - id: checklist.question.choice
@@ -9159,7 +9199,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
 - id: checklist.question.text
@@ -9175,10 +9216,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Rascunho gravado em Próxima, Voltar e Fechar. Apagar o texto grava vazio e a pergunta volta a sem resposta. Não copiar: número abre teclado decimal mas grava texto sem validar nem ler conforme o idioma; na web, validar e normalizar pelo FormatService."
+  note: "Rascunho gravado em Próxima, Voltar e Fechar. Apagar o texto grava vazio e a pergunta volta a sem resposta. Não copiar: número abre teclado decimal mas grava texto sem validar nem ler conforme o idioma; na web, validar e normalizar pelo FormatService. Web: número validado pelo jeito do país da empresa e gravado como digitado (o app lê texto); texto salvo ao sair do campo ou com Enter."
 - id: checklist.question.photo
   screen: lib/screens/forms/form_question_sheet.dart
   route: null
@@ -9192,7 +9234,8 @@ rows:
   feature_flags: []
   hardware: [camera, gallery]
   data: ["storage:tenants/{id}/orders/{id}/forms/{id}/items/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
 - id: checklist.question.nav
@@ -9208,8 +9251,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
+  note: "Web: Tab passa de pergunta, setas escolhem, espaço ou o número marca, Enter segue; responder passa para a próxima sem resposta; Pronto na de várias."
   permission: fillForms
 - id: team.list.load
   screen: lib/screens/menu_navigation/collaborator_list_screen.dart
@@ -9668,8 +9713,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
+  note: "Web: em Configurações (link Checklists) e na rota /checklists, só com manageForms."
   permission: manageForms
 - id: settings.open-ratings
   screen: lib/screens/menu_navigation/settings.dart

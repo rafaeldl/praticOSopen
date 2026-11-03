@@ -26,7 +26,8 @@ Hoje o app usa `FormDefinition` como template e `OrderForm` como instância vinc
 - Templates da empresa (V2): `/companies/{companyId}/forms/{templateId}`.
 - Templates da empresa (legado, ainda usado em partes do app): `/companies/{companyId}/forms/{formId}`.
 - Instâncias vinculadas à OS: `/companies/{companyId}/orders/{orderId}/forms/{formId}`.
-- Fotos por item (atual): `tenants/{companyId}/orders/{orderId}/forms/{orderFormId}/{itemId}_{timestamp}.jpg`.
+- Fotos por item (atual): `tenants/{companyId}/orders/{orderId}/forms/{orderFormId}/{itemId}_{timestamp}.jpg`. O app web grava no mesmo lugar (`{itemId}_{timestamp}_{n}.{ext}`); `storage.rules` só libera um nível abaixo do checklist.
+- App web: telas e regras em `docs/WEB_APP.md`, seção "Checklists".
 
 ## Regras de obrigatoriedade
 O core atual cobre a criação e preenchimento de formulários na OS. As regras de “obrigatórios por serviço/produto” continuam como diretriz de evolução (ver seção “Próximos passos”).

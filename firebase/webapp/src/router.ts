@@ -30,6 +30,8 @@ const AgendaView = () => Promise.all([import('@/views/agenda/AgendaView.vue'), l
 // The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
 const CatalogView = withCustomerTexts(() => import('@/views/catalog/CatalogView.vue'))
 const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/CatalogImportView.vue'))
+// Checklists: their texts are in the orders chunk (scripts/gen.mjs FEATURES).
+const ChecklistsView = () => Promise.all([import('@/views/forms/ChecklistsView.vue'), loadOrderTexts()]).then(([m]) => m)
 const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, catalog: CatalogView }
 
 export const routes: RouteRecordRaw[] = [
@@ -84,6 +86,13 @@ export const routes: RouteRecordRaw[] = [
     name: 'catalogImport',
     component: CatalogImportView,
     meta: { access: { kind: 'member', anyOf: ['manageServices', 'manageProducts'] }, title: 'web.nav.catalog' },
+  },
+  // From Ajustes, as in the app, but only for who manages checklists (the app lets any role in: defect 27).
+  {
+    path: '/checklists',
+    name: 'checklists',
+    component: ChecklistsView,
+    meta: { access: { kind: 'member', anyOf: ['manageForms'] }, title: 'checklistsTitle' },
   },
   {
     path: '/devices',

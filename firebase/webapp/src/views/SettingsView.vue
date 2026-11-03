@@ -4,7 +4,7 @@ import InvitesList from '@/components/InvitesList.vue'
 import PageHead from '@/components/PageHead.vue'
 import { t } from '@/i18n'
 import { prefs } from '@/lib/prefs'
-import { session, signOutEverywhere } from '@/lib/session'
+import { can, session, signOutEverywhere } from '@/lib/session'
 
 const router = useRouter()
 
@@ -39,6 +39,7 @@ async function leave() {
         <input v-model="prefs.singleKeyShortcuts" class="check" type="checkbox" />
         <span>{{ t('web.settings.singleKeys') }}</span>
       </label>
+      <RouterLink v-if="can('manageForms')" class="btn" to="/checklists" data-testid="settings-checklists">{{ t('checklistsTitle') }}</RouterLink>
       <InvitesList />
       <button type="button" class="btn" @click="leave">{{ t('logout') }}</button>
     </div>
