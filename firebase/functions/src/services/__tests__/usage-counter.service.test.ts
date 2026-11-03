@@ -12,7 +12,16 @@ describe('usage-counter.service (contadores do plano pelo servidor)', () => {
     seed(C1, { name: 'Empresa', subscription: { plan: 'free', usage: { photosThisMonth: 2, formTemplatesActive: 9, usersActive: 9 } } });
   });
 
+  it('com a flag desligada não recalcula os checklists (o app ainda grava)', async () => {
+    seed(`${C1}/forms/f1`, { title: 'A', isActive: true });
+    seed(`${C1}/forms/f2`, { title: 'B' });
+
+    expect(await recountFormTemplates('c1')).toBeNull();
+    expect(usage()?.formTemplatesActive).toBe(9);
+  });
+
   it('conta os checklists ativos em forms (sem isActive conta como ativo)', async () => {
+    seed('config/usageCounters', { serverOnly: true });
     seed(`${C1}/forms/f1`, { title: 'A', isActive: true });
     seed(`${C1}/forms/f2`, { title: 'B' });
     seed(`${C1}/forms/f3`, { title: 'C', isActive: false });
@@ -37,6 +46,7 @@ describe('usage-counter.service (contadores do plano pelo servidor)', () => {
   });
 
   it('empresa que não existe não é criada', async () => {
+    seed('config/usageCounters', { serverOnly: true });
     seed('companies/ghost/forms/f1', { isActive: true });
     await recountFormTemplates('ghost');
     expect(read('companies/ghost')).toBeUndefined();

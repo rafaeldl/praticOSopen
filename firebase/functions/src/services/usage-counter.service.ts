@@ -2,9 +2,10 @@
  * Plan usage counters kept by the server (`subscription.usage` on the company
  * document), so the limits don't depend on what the app writes.
  *
- * - formTemplatesActive: active checklist templates in `forms` (a template
- *   without `isActive` is active, as in FormDefinition). Recounted on every
- *   write to `companies/{cid}/forms/{id}`.
+ * - formTemplatesActive: active checklist templates in `forms` (`isActive
+ *   != false`: a template without the field is active, as in FormDefinition).
+ *   Recounted on writes to `companies/{cid}/forms/{id}`, only while
+ *   `config/usageCounters.serverOnly` is on (the app writes it otherwise).
  * - usersActive: memberships plus pending, not expired invites, the same sum
  *   the app writes (CollaboratorStore). Recounted on every write to a
  *   membership or an invite token.
@@ -14,8 +15,8 @@
  *   would count those photos twice.
  *
  * The flag also makes firestore.rules refuse client writes to `usage`
- * (usageUpdateAllowed). Recounts are absolute, so running with the flag off
- * only corrects the value the app wrote.
+ * (usageUpdateAllowed). With it off only usersActive is recounted, and it
+ * gives the same number the app writes.
  */
 import { db, runTransaction } from './firestore.service';
 
@@ -38,7 +39,13 @@ async function setCounter(companyId: string, field: 'formTemplatesActive' | 'use
   await ref.update({ [`subscription.usage.${field}`]: value });
 }
 
-export async function recountFormTemplates(companyId: string): Promise<number> {
+/**
+ * Recounts formTemplatesActive, only while the flag is on: the app still
+ * writes it with the flag off, and two writers would alternate values.
+ * Returns null when skipped.
+ */
+export async function recountFormTemplates(companyId: string): Promise<number | null> {
+  if (!(await usageCountersServerOnly())) return null;
   const forms = await companyRef(companyId).collection('forms').get();
   const active = forms.docs.filter((doc) => doc.data()?.isActive !== false).length;
   await setCounter(companyId, 'formTemplatesActive', active);

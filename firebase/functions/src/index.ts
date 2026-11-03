@@ -169,8 +169,9 @@ import { cleanupDeletedOrder } from './services/order-cleanup.service';
 
 /**
  * [V2] Plan usage counters kept by the server (services/usage-counter.service.ts):
- * active checklist templates and team size (members + pending invites) are
- * recounted on every write. Photos are counted by the order triggers above.
+ * team size (members + pending invites) is recounted on every write; active
+ * checklist templates and photos (order triggers above) only while the flag
+ * config/usageCounters.serverOnly is on.
  */
 export const onFormTemplateWrittenUsage = onDocumentWritten(
   { document: 'companies/{companyId}/forms/{formId}', region: 'southamerica-east1' },
