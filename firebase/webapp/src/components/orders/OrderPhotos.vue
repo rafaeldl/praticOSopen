@@ -10,6 +10,7 @@ import type { Order, OrderPhoto } from '@/lib/orders/model'
 import { uploadPhoto } from '@/lib/orders/writes'
 import { can } from '@/lib/session'
 import { showToast } from '@/lib/toast'
+import { ui } from '@/lib/ui'
 
 const props = defineProps<{ order: Order }>()
 const uploading = ref(0)
@@ -37,6 +38,8 @@ async function add(files: FileList | File[] | null | undefined) {
 }
 
 function onPaste(event: ClipboardEvent) {
+  // A dialog or drawer on top (a checklist, say) is not the order's photos.
+  if (ui.layers > 0) return
   if (event.clipboardData?.files?.length && !(event.target as HTMLElement)?.matches?.('input, textarea')) void add(event.clipboardData.files)
 }
 onMounted(() => window.addEventListener('paste', onPaste))

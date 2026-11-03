@@ -46,7 +46,8 @@ const files = sourceFiles(resolve(webapp, 'src'))
 // two features share goes to both; a text the rest of the app uses stays in the
 // main file. Each feature is a set of folders under src/.
 const FEATURES = {
-  orders: ['src/components/orders'],
+  // Checklists ride with the orders: they open inside the order, and src/i18n/index.ts (first download) stays as is.
+  orders: ['src/components/orders', 'src/components/forms', 'src/views/forms'],
   // Cadastros: customers, devices and the catalog share one chunk (src/i18n/index.ts stays as is).
   customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
   agenda: ['src/components/agenda', 'src/views/agenda'],

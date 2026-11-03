@@ -1,0 +1,50 @@
+/* Checklists: the list of templates, the editor and filling one on the order.
+   Loaded with their screens, out of the first download. Reuses the drawer,
+   options and photos of orders.css. */
+
+.forms-page { display: grid; gap: 1.25rem; padding: 0.75rem 1rem 2rem; max-width: 56rem; }
+.forms-h { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; }
+.forms-none { margin: 0.25rem 0; }
+.forms-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.forms-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; padding: 0.35rem 0; border-bottom: 1px solid var(--color-rule); }
+.forms-row-main { flex: 1 1 14rem; min-width: 0; display: grid; text-align: left; min-height: 2.75rem; padding: 0.25rem 0.35rem; }
+.forms-row-main .who { overflow-wrap: anywhere; }
+.forms-preview { margin: 0.5rem 0 0; padding-left: 1.4rem; display: grid; gap: 0.25rem; }
+
+/* Editor: the questions, numbered, with up and down. */
+.q-list { list-style: none; margin: 0.35rem 0 0.5rem; padding: 0; display: grid; gap: 2px; }
+.q-row { display: flex; align-items: center; gap: 0.4rem; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.2rem 0.3rem 0.2rem 0.5rem; }
+.q-row.is-dragging { opacity: 0.5; }
+.q-num { color: var(--color-muted); min-width: 1.4rem; font-size: 0.875rem; }
+.q-open { flex: 1 1 auto; min-width: 0; display: grid; text-align: left; min-height: 2.75rem; padding: 0.2rem 0.25rem; }
+.q-open .who { overflow-wrap: anywhere; }
+.q-move { display: flex; flex-wrap: wrap; gap: 2px; }
+.q-move .icon-btn:disabled { opacity: 0.35; }
+.q-form { display: grid; gap: 0.85rem; }
+.q-delete { margin-right: auto; }
+
+/* Filling: every question on the page, answered in place. */
+.fill-head { display: grid; gap: 0.5rem; }
+.fill-status { margin: 0; display: flex; align-items: center; gap: 0.45rem; }
+.fill-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.fill-q { background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.6rem 0.75rem; min-width: 0; }
+.fill-q.is-open { border-left: 3px solid var(--color-warning); }
+.fill-set { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 0.5rem; }
+.fill-label { padding: 0; font-weight: 600; overflow-wrap: anywhere; display: block; }
+.fill-label .q-num { display: inline-block; margin-right: 0.35rem; font-weight: 500; }
+.fill-answer { margin: 0; overflow-wrap: anywhere; }
+.fill-opts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.fill-opt { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.3rem 0.75rem; border: 1px solid var(--color-control-border, var(--color-neutral)); border-radius: 6px; background: var(--color-paper); color: var(--color-ink); text-align: left; max-width: 100%; overflow-wrap: anywhere; }
+.fill-opt kbd { font-size: 0.75rem; color: var(--color-muted); }
+.fill-opt[aria-checked='true'] { background: var(--color-accent-soft); border-color: var(--color-accent); font-weight: 600; }
+.fill-opt .check-mark { color: var(--color-ink); font-weight: 700; }
+.fill-done { justify-self: start; }
+.fill-photos { grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); }
+.fill-state { margin: 0; min-height: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; }
+.fill-state:empty { display: none; }
+.fill-failed { color: var(--color-danger-text, var(--color-danger)); font-weight: 600; }
+.fill-viewer-nav { display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin: 0.5rem 0 0; }
+.q-removed { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; margin: 0 0 0.5rem; color: var(--color-muted); }
+.q-conflict { border: 1px solid var(--color-warning); border-left-width: 4px; border-radius: 6px; padding: 0.6rem 0.75rem; background: var(--color-card); display: grid; gap: 0.5rem; }
+.q-conflict p { margin: 0; }
+.picker-h { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0.5rem 0 0.2rem; }

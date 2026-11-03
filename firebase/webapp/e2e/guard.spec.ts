@@ -3,12 +3,12 @@ import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.
 const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
-  owner: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
-  admin: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
-  manager: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'catalog', 'customers', 'devices', 'invoices'], denied: ['team', 'customers/import', 'catalog/import'] },
-  supervisor: { allowed: ['schedule', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'invoices', 'catalog/import'] },
-  consultant: { allowed: ['schedule', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'invoices', 'catalog/import'] },
-  technician: { allowed: ['schedule', 'customers', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'catalog', 'catalog/import', 'invoices', 'customers/import'] },
+  owner: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'team', 'checklists', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  admin: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'team', 'checklists', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  manager: { allowed: ['schedule', 'finance', 'finance/report', 'finance/receive', 'catalog', 'customers', 'devices', 'invoices'], denied: ['team', 'checklists', 'customers/import', 'catalog/import'] },
+  supervisor: { allowed: ['schedule', 'checklists', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'invoices', 'catalog/import'] },
+  consultant: { allowed: ['schedule', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'checklists', 'invoices', 'catalog/import'] },
+  technician: { allowed: ['schedule', 'customers', 'devices', 'orders'], denied: ['finance', 'finance/report', 'finance/receive', 'team', 'checklists', 'catalog', 'catalog/import', 'invoices', 'customers/import'] },
 }
 
 for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {

@@ -65,6 +65,8 @@ const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue
 const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
 // Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
 const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
+// Checklists, after the order shows (their texts are in the orders chunk).
+const OrderForms = defineAsyncComponent(() => import('@/components/forms/OrderForms.vue'))
 
 const props = defineProps<{ orderId: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -93,6 +95,7 @@ type Dialog =
   | { kind: 'device' }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share' }
+  | { kind: 'pendingForms'; count: number; first: string }
 const dialog = shallowRef<Dialog | null>(null)
 const menuButton = ref<HTMLElement | null>(null)
 const catalog = shallowRef<CatalogItem[]>([])
@@ -221,9 +224,19 @@ const expected = () => {
   return saved && seen === saved.over ? saved.version : seen
 }
 
+/** The order's checklists, as OrderForms reads them (live). */
+const orderForms = shallowRef<{ id: string; status: string }[]>([])
+const formsRef = ref<{ open: (id: string) => void } | null>(null)
+
 async function setStatus(status: OrderStatus) {
   dialog.value = null
   if (!order.value) return
+  // A checklist not completed blocks "concluída" and offers to open it (order.status.pending-checklist).
+  const pendingForms = status === 'done' && order.value.status !== 'done' ? orderForms.value.filter((form) => form.status !== 'completed') : []
+  if (pendingForms.length) {
+    dialog.value = { kind: 'pendingForms', count: pendingForms.length, first: (pendingForms[0] as { id: string }).id }
+    return
+  }
   await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
 }
 
@@ -453,6 +466,11 @@ function onMenu(id: string) {
   else if (id === 'delete') dialog.value = { kind: 'delete' }
 }
 
+function openPendingForm(id: string) {
+  dialog.value = null
+  formsRef.value?.open(id)
+}
+
 function print() {
   printing.value = true
   window.addEventListener('afterprint', () => (printing.value = false), { once: true })
@@ -582,6 +600,7 @@ watch(
 
         <OrderPhotos :order="order" />
         <OrderComments :order-id="order.id" />
+        <OrderForms ref="formsRef" :order="order" @forms="(list: { id: string; status: string }[]) => (orderForms = list)" />
 
         <section class="od-sec od-sec--details" aria-labelledby="od-details-title">
           <h3 id="od-details-title">{{ t('details') }}</h3>
@@ -652,6 +671,15 @@ watch(
       :confirm="t('web.order.dropDevices')"
       :keep="t('cancel')"
       @confirm="applyCustomer((dialog as { customer: Customer }).customer, true)"
+      @close="dialog = null"
+    />
+    <ConfirmDialog
+      v-else-if="dialog.kind === 'pendingForms'"
+      :title="t('orderPendingChecklists', { count: dialog.count })"
+      :body="t('web.forms.pendingBody')"
+      :confirm="t('orderOpenChecklist')"
+      :keep="t('notNow')"
+      @confirm="openPendingForm((dialog as { first: string }).first)"
       @close="dialog = null"
     />
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
