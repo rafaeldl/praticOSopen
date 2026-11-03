@@ -1047,11 +1047,24 @@ describe('versão da OS (expectedUpdatedAt opaco)', () => {
     expect((await call('owner', 'post', `${O}/i/items`, { kind: 'service', catalogId: 's1', expectedUpdatedAt: LOCAL })).status).toBe(201);
   });
 
-  it('o mesmo texto convertido pelo fuso do navegador não vira 409 falso (compatibilidade com ISO e Z)', async () => {
-    seedOrder('l', { updatedAt: LOCAL, status: 'done' });
-    // What the web sent before: the local text read in São Paulo (-03:00) as an instant.
-    const converted = new Date(Date.UTC(2026, 9, 1, 12, 0, 0, 123)).toISOString();
-    expect((await call('owner', 'post', `${O}/l/payments`, { amount: 10, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c3', expectedUpdatedAt: converted })).status).toBe(200);
+  it('R1: o web guarda a versão do servidor (…Z), o app grava texto sem fuso, e o envio com a versão velha dá 409', async () => {
+    seedOrder('r', { updatedAt: T0, status: 'done', total: 200, paidAmount: 0 });
+    // 1. The web saw the server's version.
+    const seen = (await call('owner', 'get', `${O}/r`)).body.data.version;
+    expect(seen).toBe(T0);
+    // 2. The app books R$ 100 and saves local time without a zone.
+    seed('companies/c1/orders/r', { ...doc('r'), paidAmount: 100, payment: 'unpaid', updatedAt: '2026-10-01T10:05:00.123456',
+      transactions: [{ id: 'app-1', type: 'payment', amount: 100, createdAt: '2026-10-01T10:05:00.123456' }] });
+    // 3. A screen still on the old version sends the same R$ 100.
+    const late = await call('owner', 'post', `${O}/r/payments`, { amount: 100, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c4', expectedUpdatedAt: seen });
+    expect(late.status).toBe(409);
+    expect(late.body.error.code).toBe('ORDER_CHANGED');
+    expect(doc('r').paidAmount).toBe(100);
+    // The same for PATCH and items.
+    expect((await call('owner', 'patch', `${O}/r`, { dueDate: DUE, expectedUpdatedAt: seen })).status).toBe(409);
+    // Text without a zone read as an instant by a browser is not the version either.
+    const converted = new Date(Date.UTC(2026, 9, 1, 13, 5, 0, 123)).toISOString();
+    expect((await call('owner', 'patch', `${O}/r`, { dueDate: DUE, expectedUpdatedAt: converted })).status).toBe(409);
   });
 
   it('Timestamp: millis e ISO com Z do mesmo instante passam; outro instante dá 409', async () => {
@@ -1087,6 +1100,12 @@ describe('GET /orders?number=', () => {
     expect((await call('technician', 'get', `${O}?number=44`)).body.data).toEqual([]);
     expect((await call('supervisor', 'get', `${O}?number=44`)).body.data.map((o: any) => o.id)).toEqual(['other']);
     expect((await call('technician', 'get', `${O}?number=abc`)).status).toBe(400);
+  });
+
+  it('R2: com mais de 10 OS repetidas no número, a da pessoa não fica de fora', async () => {
+    for (let i = 0; i < 120; i++) seedOrder(`dup${String(i).padStart(3, '0')}`, { number: 77 });
+    seedOrder('zz-mine', { number: 77, createdBy: { id: 'tech1', name: 'Téo' } });
+    expect((await call('technician', 'get', `${O}?number=77`)).body.data.map((o: any) => o.id)).toEqual(['zz-mine']);
   });
 });
 

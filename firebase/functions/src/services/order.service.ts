@@ -218,10 +218,20 @@ export async function getOrder(
   return getDocument<Order>(collection, orderId);
 }
 
-/** Every order with this number (legacy data can repeat one); the caller filters who may see them. */
+/**
+ * Every order with this number (legacy data can repeat one, many times), read
+ * in pages so none is left out before the caller filters who may see them.
+ */
 export async function findOrdersByNumber(companyId: string, orderNumber: number): Promise<Order[]> {
-  const snapshot = await getTenantCollection(companyId, 'orders').where('number', '==', orderNumber).limit(10).get();
-  return snapshot.docs.map((doc) => ({ ...(doc.data() as Order), id: doc.id }));
+  const query = getTenantCollection(companyId, 'orders').where('number', '==', orderNumber).orderBy('__name__');
+  const found: Order[] = [];
+  let last: FirebaseFirestore.QueryDocumentSnapshot | undefined;
+  for (;;) {
+    const snapshot = await (last ? query.startAfter(last) : query).limit(100).get();
+    found.push(...snapshot.docs.map((doc) => ({ ...(doc.data() as Order), id: doc.id })));
+    if (snapshot.docs.length < 100) return found;
+    last = snapshot.docs[snapshot.docs.length - 1];
+  }
 }
 
 /**

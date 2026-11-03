@@ -32,11 +32,13 @@ export function orderVersion(stored: unknown): string | null {
 }
 
 /**
- * Does the version the client saw still match? Equal to `orderVersion` always
- * matches. Also accepted, for clients that send an ISO instant with a zone: the
- * same instant of a zoned or Timestamp value, and any instant over a text
- * without a zone (no instant to compare it with). Nothing stored: nothing to
- * compare, never a false refusal.
+ * Does the version the client saw still match? Only the exact opaque version
+ * (`orderVersion`). An ISO instant with a zone is also accepted against a value
+ * that is itself an instant (a Timestamp, or text with a zone) when it is the
+ * same instant. Against text without a zone (saved by the app) anything but the
+ * raw text is 409: a screen holding the server's `…Z` version must not write
+ * over what the app saved after it (revisao-pr515-3 R1). Nothing stored:
+ * nothing to compare, never a refusal.
  */
 export function versionMatches(stored: unknown, expected: string): boolean {
   const version = orderVersion(stored);
@@ -44,10 +46,7 @@ export function versionMatches(stored: unknown, expected: string): boolean {
   if (!ZONED.test(expected)) return false;
   const expectedMillis = Date.parse(expected);
   if (Number.isNaN(expectedMillis)) return false;
-  if (typeof stored === 'string') {
-    if (!ZONED.test(stored)) return true;
-    return Date.parse(stored) === expectedMillis;
-  }
+  if (typeof stored === 'string') return ZONED.test(stored) && Date.parse(stored) === expectedMillis;
   return Number(version) === expectedMillis;
 }
 
