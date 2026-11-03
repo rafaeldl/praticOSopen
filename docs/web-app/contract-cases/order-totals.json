@@ -18,7 +18,7 @@
     {"id":"zero-is-a-price","given":{"services":[{"value":0}],"products":[{"value":0,"quantity":1,"total":0}],"discount":0},"expect":{"total":0,"unpricedCount":0,"paymentMathTotal":0}},
     {"id":"float-noise-is-rounded","given":{"services":[{"value":0.1},{"value":0.2}],"products":[],"discount":0},"expect":{"total":0.3,"unpricedCount":0,"paymentMathTotal":0.3},"divergesIn":{"functions":{"total":0.30000000000000004}},"note":"createOrder soma sem arredondar."},
     {"id":"discount-lowers-total","given":{"services":[{"value":100}],"products":[{"value":25.5,"quantity":2,"total":51}],"discount":11.5},"expect":{"total":139.5,"unpricedCount":0,"paymentMathTotal":139.5}},
-    {"id":"discount-above-items-stops-at-zero","given":{"services":[{"value":50}],"products":[],"discount":80},"note":"D3: total nunca negativo. O app ainda grava -30; o servidor limita a 0.","correct":{"total":0,"unpricedCount":0,"paymentMathTotal":0},"divergesIn":{"dart":{"total":-30,"paymentMathTotal":-30}}},
-    {"id":"discount-above-items-by-half-cent-stops-at-zero","given":{"services":[{"value":0.125}],"products":[],"discount":0.25},"note":"D3. O arredondamento simétrico (D10) está em round-money.json.","correct":{"total":0,"unpricedCount":0,"paymentMathTotal":0},"divergesIn":{"dart":{"total":-0.13,"paymentMathTotal":-0.13}}}
+    {"id":"discount-above-items-stops-at-zero","given":{"services":[{"value":50}],"products":[],"discount":80},"note":"D3: total nunca negativo.","expect":{"total":0,"unpricedCount":0,"paymentMathTotal":0}},
+    {"id":"discount-above-items-by-half-cent-stops-at-zero","given":{"services":[{"value":0.125}],"products":[],"discount":0.25},"note":"D3. O arredondamento simétrico (D10) está em round-money.json.","expect":{"total":0,"unpricedCount":0,"paymentMathTotal":0}}
   ]
 }

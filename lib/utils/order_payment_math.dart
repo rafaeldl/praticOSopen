@@ -104,9 +104,18 @@ class OrderPaymentMath {
     return sum;
   }
 
-  /// total = services + products - discount (same rule as OrderStore.updateTotal).
+  /// total = services + products - discount (same rule as OrderStore.updateTotal),
+  /// never below zero: a discount above the items leaves the total at 0.
   static double computeTotal(Order order) =>
-      roundMoney(_itemsTotal(order) - (order.discount ?? 0.0));
+      floorAtZero(roundMoney(_itemsTotal(order) - (order.discount ?? 0.0)));
+
+  /// [value] or 0 when negative (money that can't go below zero).
+  static double floorAtZero(double value) => value < 0 ? 0.0 : value;
+
+  /// Quotes and canceled orders have no payment status: money received
+  /// stays in `paidAmount`, but `payment` is null and `paid` false.
+  static bool hasPaymentStatus(String? orderStatus) =>
+      orderStatus != 'quote' && orderStatus != 'canceled';
 
   static String paymentStatusFor({
     required double total,
@@ -123,6 +132,11 @@ class OrderPaymentMath {
   }
 
   static Order _refreshStatus(Order order) {
+    if (!hasPaymentStatus(order.status)) {
+      order.payment = null;
+      order.paid = false;
+      return order;
+    }
     order.payment = paymentStatusFor(
       total: order.total ?? 0.0,
       paidAmount: order.paidAmount ?? 0.0,
@@ -154,10 +168,9 @@ class OrderPaymentMath {
     DateTime? updatedAt,
   }) {
     final newPaid = roundMoney((current.paidAmount ?? 0.0) + tx.amount);
-    final status = paymentStatusFor(
-      total: current.total ?? 0.0,
-      paidAmount: newPaid,
-    );
+    final status = hasPaymentStatus(current.status)
+        ? paymentStatusFor(total: current.total ?? 0.0, paidAmount: newPaid)
+        : null;
     return {
       'transactions': ArrayUnionOp([tx.toJson()]),
       'paidAmount': IncrementOp(tx.amount),
@@ -168,21 +181,25 @@ class OrderPaymentMath {
   }
 
   /// Offline-safe update map for adding a discount: `discount` grows and the
-  /// (net) `total` shrinks by the same amount. [current] is not mutated.
+  /// (net) `total` shrinks by the same amount, but never below zero.
+  /// [current] is not mutated.
   static Map<String, dynamic> addDiscountUpdate({
     required Order current,
     required PaymentTransaction tx,
     DateTime? updatedAt,
   }) {
-    final newTotal = roundMoney((current.total ?? 0.0) - tx.amount);
-    final status = paymentStatusFor(
-      total: newTotal,
-      paidAmount: current.paidAmount ?? 0.0,
-    );
+    final currentTotal = floorAtZero(current.total ?? 0.0);
+    final newTotal = floorAtZero(roundMoney(currentTotal - tx.amount));
+    final status = hasPaymentStatus(current.status)
+        ? paymentStatusFor(
+            total: newTotal,
+            paidAmount: current.paidAmount ?? 0.0,
+          )
+        : null;
     return {
       'transactions': ArrayUnionOp([tx.toJson()]),
       'discount': IncrementOp(tx.amount),
-      'total': IncrementOp(-tx.amount),
+      'total': IncrementOp(roundMoney(newTotal - currentTotal)),
       'paid': status == 'paid',
       'payment': status,
       ..._auditOf(current, updatedAt),
@@ -195,7 +212,8 @@ class OrderPaymentMath {
           'updatedBy': current.updatedBy!.toJson(),
       };
 
-  /// Adds the remaining balance as a payment (when > 0) and forces 'paid'.
+  /// Adds the remaining balance as a payment (when > 0) and forces 'paid'
+  /// (quotes and canceled orders keep no payment status).
   static Order markAsFullyPaid(
     Order fresh,
     PaymentTransaction Function(double remaining) buildPayment,
@@ -204,6 +222,7 @@ class OrderPaymentMath {
     if (remaining > 0) {
       addPayment(fresh, buildPayment(remaining));
     }
+    if (!hasPaymentStatus(fresh.status)) return _refreshStatus(fresh);
     fresh.payment = 'paid';
     fresh.paid = true;
     return fresh;
