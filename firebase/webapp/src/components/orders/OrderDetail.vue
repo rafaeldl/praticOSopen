@@ -481,7 +481,7 @@ watch(
       <p>{{ t('web.order.notFoundBody') }}</p>
       <button type="button" class="btn" @click="emit('close')">{{ t('back') }}</button>
     </div>
-    <ErrorState v-else-if="state.kind === 'failed'" :retry="() => watcher?.refresh()" />
+    <ErrorState v-else-if="state.kind === 'failed'" :retry="() => watcher?.retry()" />
 
     <div v-else-if="order && access" class="od-scroll" tabindex="-1" data-od-focus>
       <header class="od-head">
