@@ -1088,7 +1088,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               label: l10n.orderAddDiscount,
               icon: CupertinoIcons.tag,
             ),
-          if (canEdit && saved && order.assignedTo == null)
+          if (canEdit &&
+              saved &&
+              order.assignedTo == null &&
+              _permissions.canAssign(order))
             PullDownItem(
               value: 'responsible',
               label: l10n.orderAddResponsible,
@@ -1367,6 +1370,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// "Responsável": who of the team takes care of this order.
   Future<void> _pickResponsible() async {
     final l10n = context.l10n;
+    final order = _store.order;
+    if (order == null || !_permissions.canAssign(order)) return;
     final team = await _actions.teamMembers();
     if (!mounted || team.isEmpty) return;
     final current = _store.order?.assignedTo;
@@ -2973,12 +2978,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   : _format.formatDateTime(order!.scheduledDate),
               onTap: () => run(_pickSchedule),
             ),
-          FormRow(
-            key: const ValueKey('new_order_more_responsible'),
-            title: l10n.orderAddResponsible,
-            value: order?.assignedTo?.name,
-            onTap: () => run(_pickResponsible),
-          ),
+          if (order != null && _permissions.canAssign(order))
+            FormRow(
+              key: const ValueKey('new_order_more_responsible'),
+              title: l10n.orderAddResponsible,
+              value: order.assignedTo?.name,
+              onTap: () => run(_pickResponsible),
+            ),
           FormRow(
             key: const ValueKey('new_order_more_address'),
             title: l10n.orderAddressLabel,
@@ -4300,7 +4306,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         AppListRow(
           title: l10n.orderAddResponsible,
           trailing: order.assignedTo!.name ?? order.assignedTo!.email,
-          onTap: canEdit ? _pickResponsible : null,
+          onTap: canEdit && _permissions.canAssign(order)
+              ? _pickResponsible
+              : null,
         ),
       if (_hasAddress)
         AppListRow(

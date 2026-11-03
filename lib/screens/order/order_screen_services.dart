@@ -53,6 +53,7 @@ class OrderPermissions {
     this.canRegisterCustomers = _always,
     this.canRegisterDevices = _always,
     this.canChangeHold = _anyOrder,
+    this.canAssign = _anyOrder,
   });
 
   static bool _anyOrder(Order order) => true;
@@ -77,6 +78,7 @@ class OrderPermissions {
       canRegisterDevices: () =>
           auth.hasPermission(PermissionType.manageDevices),
       canChangeHold: auth.canChangeOrderHold,
+      canAssign: auth.canAssignOrder,
     );
   }
 
@@ -87,6 +89,10 @@ class OrderPermissions {
 
   /// Customer, vehicle, dates and address.
   final bool Function(Order order) canEditMainFields;
+
+  /// Who takes care of the order ("Responsável"): `assignOrder`, admin and
+  /// supervisor ([AuthorizationService.canAssignOrder]), as the web.
+  final bool Function(Order order) canAssign;
 
   /// Add, fill and remove checklists.
   final bool Function(Order order) canManageForms;

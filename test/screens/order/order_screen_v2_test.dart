@@ -252,8 +252,10 @@ OrderPermissions _permissions({
   bool hold = true,
   List<String> statuses = const ['approved', 'progress', 'canceled'],
   bool edit = true,
+  bool assign = true,
 }) => OrderPermissions(
   canEditMainFields: (_) => edit,
+  canAssign: (_) => assign,
   canChangeHold: (_) => hold,
   canViewPrices: () => prices,
   canReceivePayments: receiveOn ?? (_) => receive,
@@ -411,6 +413,7 @@ void main() {
     bool prices = true,
     bool receive = true,
     bool Function(Order? order)? receiveOn,
+    bool assign = true,
   }) => OrderScreenV2(
     showAssistant: false,
     store: store,
@@ -418,6 +421,7 @@ void main() {
       prices: prices,
       receive: receive,
       receiveOn: receiveOn,
+      assign: assign,
     ),
     actions: actions ?? FakeActions(),
     catalogSource: catalog ?? source,
@@ -3060,4 +3064,101 @@ void main() {
       expect(store.pendingDeviceId, isNull);
     });
   });
+
+  // Only who has `assignOrder` (admin and supervisor, canAssignOrder) changes
+  // the responsible: the "…" menu, the row of the saved order and "Mais
+  // opções" of the new one.
+  group('responsible (canAssignOrder)', () {
+    Order saved({UserAggr? assignee}) => Order()
+      ..id = 'o1'
+      ..number = 186
+      ..status = 'approved'
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..assignedTo = assignee
+      ..services = []
+      ..products = []
+      ..discount = 0
+      ..paidAmount = 0
+      ..transactions = [];
+
+    final tech = UserAggr()
+      ..id = 'u9'
+      ..name = 'Carlos Técnico';
+
+    testWidgets('without it the "…" menu has no Responsável', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), assign: false),
+        args: {'order': saved()},
+      );
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      expect(_menuLabels(tester), isNot(contains('Responsável')));
+    });
+
+    testWidgets('with it the "…" menu offers Responsável', (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': saved()});
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      expect(_menuLabels(tester), contains('Responsável'));
+    });
+
+    testWidgets('without it the Responsável row of a saved order is read only',
+        (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), assign: false),
+        args: {'order': saved(assignee: tech)},
+      );
+      final row = find.ancestor(
+        of: find.text('Carlos Técnico'),
+        matching: find.byType(AppListRow),
+      );
+      await tester.scrollUntilVisible(
+        row,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.widget<AppListRow>(row).onTap, isNull);
+    });
+
+    testWidgets('with it the Responsável row opens the picker', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': saved(assignee: tech)},
+      );
+      final row = find.ancestor(
+        of: find.text('Carlos Técnico'),
+        matching: find.byType(AppListRow),
+      );
+      await tester.scrollUntilVisible(
+        row,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.widget<AppListRow>(row).onTap, isNotNull);
+    });
+
+    testWidgets('without it "Mais opções" of a new order hides Responsável', (
+      tester,
+    ) async {
+      await _pump(tester, screen(OrderStore(), assign: false), hosted: true);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('new_order_more')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('new_order_more_address')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('new_order_more_responsible')),
+        findsNothing,
+      );
+    });
+  });
+
 }
