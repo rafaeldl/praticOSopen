@@ -1,21 +1,37 @@
 <script setup lang="ts">
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Menu, Search, Settings } from '@lucide/vue'
+import { Menu, Plus, Search, Settings } from '@lucide/vue'
 import CommandPalette from '@/components/CommandPalette.vue'
 import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
 import ShortcutsDialog from '@/components/ShortcutsDialog.vue'
-import { t } from '@/i18n'
+import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { canAny, reloadCompany, selectCompany, session } from '@/lib/session'
+import { can, canAny, reloadCompany, selectCompany, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
-import { shortcutLabel } from '@/lib/shortcuts'
+import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
+import { registerCommand } from '@/lib/commands'
 import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
+import { canCreateOrders } from '@/lib/orders/model'
+
+const NewOrderDrawer = defineAsyncComponent(() =>
+  Promise.all([import('@/components/orders/NewOrderDrawer.vue'), loadOrderTexts()]).then(([m]) => m),
+)
 
 const route = useRoute()
+// Nova OS from anywhere: N, the palette and the + of the phone bar (technician does not create: canCreateOrder).
+const canCreate = computed(() => canCreateOrders(session.role, can('createOrder')))
+const openNewOrder = () => {
+  if (canCreate.value) ui.newOrder = true
+}
+const removeNewOrderKeys = [
+  registerShortcut({ keys: 'n', label: 'web.shortcuts.newOrder', run: openNewOrder }),
+  registerCommand({ id: 'new-order', label: 'newOrderButton', icon: Plus, keys: 'N', run: openNewOrder }),
+]
+onBeforeUnmount(() => removeNewOrderKeys.forEach((remove) => remove()))
 const moreOpen = ref(false)
 const online = ref(navigator.onLine)
 
@@ -92,6 +108,9 @@ onBeforeUnmount(() => {
       <button type="button" class="topbar-btn" :aria-label="t('search')" @click="ui.palette = true">
         <Search :size="21" aria-hidden="true" />
       </button>
+      <button v-if="canCreate" type="button" class="topbar-btn topbar-add" @click="openNewOrder">
+        <Plus :size="18" aria-hidden="true" />{{ t('newOrderButton') }}
+      </button>
     </header>
 
     <main class="main">
@@ -129,6 +148,7 @@ onBeforeUnmount(() => {
       </RouterLink>
     </div>
   </Layer>
+  <NewOrderDrawer v-if="ui.newOrder && canCreate" />
   <CommandPalette v-if="ui.palette" />
   <ShortcutsDialog v-if="ui.shortcuts" />
 </template>

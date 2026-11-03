@@ -32,20 +32,25 @@ for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {
 test('quem não pode não vê o link', async ({ page }) => {
   await login(page, 'technician')
   const nav = page.getByRole('navigation', { name: 'Principal' })
-  await expect(nav.getByRole('link', { name: 'Ordens de Serviço' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Início' })).toBeVisible()
   await expect(nav.getByRole('link', { name: 'Financeiro' })).toHaveCount(0)
   await expect(nav.getByRole('link', { name: 'Equipe' })).toHaveCount(0)
 })
 
-test('dono vê a lista; quem não vê valores não lê a OS direto', async ({ page }) => {
+test('quem vê valores lê o Firestore; quem não vê usa a projeção da API, sem valores', async ({ page }) => {
   await login(page, 'admin', 'orders')
   await expect(page.getByTestId('orders-table')).toBeVisible()
+  await expect(page.getByTestId('orders-table').getByRole('columnheader', { name: 'Total' })).toBeVisible()
   await page.goto('settings')
   await page.getByRole('button', { name: 'Sair' }).click()
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  const apiList = page.waitForResponse((response) => /\/v1\/app\/orders\?/.test(response.url()))
   await login(page, 'supervisor', 'orders')
-  await expect(page.getByRole('heading', { name: 'Esta tela ainda está sendo feita' })).toBeVisible()
-  await expect(page.getByTestId('orders-table')).toHaveCount(0)
+  const body = await (await apiList).json()
+  // No money in any field of the projection.
+  expect(JSON.stringify(body.data)).not.toMatch(/"(total|paidAmount|value|payment)"/)
+  await expect(page.getByTestId('orders-table')).toBeVisible()
+  await expect(page.getByTestId('orders-table').getByRole('columnheader', { name: 'Total' })).toHaveCount(0)
 })
 
 test('rota que não existe', async ({ page }) => {

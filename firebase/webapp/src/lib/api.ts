@@ -21,6 +21,14 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   ALREADY_MEMBER: 'web.error.conflict',
   RATE_LIMIT_EXCEEDED: 'web.error.rateLimit',
   ASAAS_UNAVAILABLE: 'web.error.unavailable',
+  ORDER_CHANGED: 'web.error.orderChanged',
+  ITEM_NOT_FOUND: 'web.error.orderChanged',
+  TRANSACTION_ID_CONFLICT: 'web.error.orderChanged',
+  HOLD_NOT_ALLOWED: 'web.error.holdNotAllowed',
+  ORDER_HAS_INVOICE: 'web.error.orderDeleteBlocked',
+  CUSTOMER_CHARGE_OPEN: 'web.error.orderDeleteBlocked',
+  INSTALLMENTS_IN_PROGRESS: 'web.error.orderDeleteBlocked',
+  INVALID_ASSIGNEE: 'web.error.validation',
 }
 
 function statusMessage(status: number): MessageKey {
@@ -67,6 +75,8 @@ export interface ApiOptions {
   companyId?: string
   /** Account routes must not carry X-Company-Id. */
   noCompany?: boolean
+  /** The whole envelope (lists carry `pagination` next to `data`). */
+  raw?: boolean
 }
 
 interface Envelope<T> {
@@ -109,7 +119,7 @@ export function createApi(deps: ApiDeps) {
       const code = typeof body?.error?.code === 'string' ? body.error.code : 'UNKNOWN'
       throw new ApiError(code, response.status, CODE_MESSAGES[code] ?? statusMessage(response.status))
     }
-    return (body?.data ?? body) as T
+    return (options.raw ? body : (body?.data ?? body)) as T
   }
 
   return { request }

@@ -1,6 +1,6 @@
 // Navigation entries, in the app's tab order. Each one carries the same access
 // as its route, so a person never sees a link that would be denied.
-import { CalendarDays, ClipboardList, FileText, House, Tags, UserCog, Users, Wallet, type LucideIcon } from '@lucide/vue'
+import { CalendarDays, FileText, House, Tags, UserCog, Users, Wallet, type LucideIcon } from '@lucide/vue'
 import type { MessageKey } from '@/generated/message-keys'
 import type { RouteAccess } from '@/lib/access'
 import type { Permission } from '@/lib/permissions'
@@ -20,16 +20,8 @@ export interface NavEntry {
 }
 
 export const NAV: NavEntry[] = [
+  // Início is the order list, as in the app; /orders is the same screen (router.ts).
   { name: 'home', path: '/', label: 'home', icon: House, access: { kind: 'member', anyOf: ANY_ORDERS }, tab: true },
-  {
-    name: 'orders',
-    path: '/orders',
-    label: 'orders',
-    tabLabel: 'web.nav.ordersShort',
-    icon: ClipboardList,
-    access: { kind: 'member', anyOf: ANY_ORDERS },
-    tab: true,
-  },
   { name: 'schedule', path: '/schedule', label: 'agenda', icon: CalendarDays, access: { kind: 'member', anyOf: ANY_ORDERS }, tab: true },
   { name: 'finance', path: '/finance', label: 'financial', icon: Wallet, access: { kind: 'member', anyOf: ['viewFinancialReports'] }, tab: true },
   { name: 'customers', path: '/customers', label: 'customers', icon: Users, access: { kind: 'member', anyOf: ['viewCustomers'] } },

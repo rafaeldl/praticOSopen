@@ -8,6 +8,8 @@ export const ui = reactive({
   live: '',
   palette: false,
   shortcuts: false,
+  /** Nova OS drawer, over any screen (key N, the + of the shell). */
+  newOrder: false,
 })
 
 export function announce(text: string): void {

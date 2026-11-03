@@ -32,12 +32,15 @@ export async function setTheme(page: Page, theme: 'light' | 'dark') {
   }, theme)
 }
 
-export async function expectNoSideScroll(page: Page) {
-  const overflow = await page.evaluate(() => {
-    const roots = [document.documentElement, ...document.querySelectorAll('.main, .list-pane, .workspace, .entry-main')]
+/** `allowed`: containers that scroll sideways on purpose (the board's columns). */
+export async function expectNoSideScroll(page: Page, allowed: string[] = []) {
+  const overflow = await page.evaluate((skip) => {
+    const roots = [document.documentElement, ...document.querySelectorAll('.main, .list-pane, .workspace, .entry-main, .od-scroll, .board-wrap')].filter(
+      (element) => !skip.some((selector) => element.matches(selector)),
+    )
     return roots
       .filter((element) => element.scrollWidth > element.clientWidth + 1)
       .map((element) => `${element.tagName}.${element.className}: ${element.scrollWidth} > ${element.clientWidth}`)
-  })
+  }, allowed)
   expect(overflow).toEqual([])
 }

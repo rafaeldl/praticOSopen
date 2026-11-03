@@ -40,12 +40,25 @@ function sourceFiles(dir) {
   })
 }
 const prune = process.argv.includes('--prune')
-const keep = prune ? usedKeys(sourceFiles(resolve(webapp, 'src')).map((file) => readFileSync(file, 'utf8'))) : null
+const files = sourceFiles(resolve(webapp, 'src'))
+// Texts only the order screens use (src/components/orders/, loaded on demand)
+// go to a second file per language, out of the list's first download.
+const ORDERS_DIR = resolve(webapp, 'src/components/orders')
+const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
+const keep = prune ? read(files) : null
+const outsideOrders = prune ? read(files.filter((file) => !file.startsWith(ORDERS_DIR))) : null
+const ordersOnly = prune ? new Set([...read(files.filter((file) => file.startsWith(ORDERS_DIR)))].filter((key) => !outsideOrders.has(key))) : new Set()
 const pick = (messages) =>
-  keep ? Object.fromEntries(Object.entries(messages).filter(([key]) => keep.has(key) || key.startsWith('web.'))) : messages
+  keep
+    ? Object.fromEntries(Object.entries(messages).filter(([key]) => (keep.has(key) || key.startsWith('web.')) && !ordersOnly.has(key)))
+    : messages
+const pickOrders = (messages) => Object.fromEntries(Object.entries(messages).filter(([key]) => ordersOnly.has(key)))
 
 mkdirSync(resolve(out, 'i18n'), { recursive: true })
-for (const locale of LOCALES) writeFileSync(resolve(out, `i18n/${locale}.json`), JSON.stringify(pick(merged[locale])))
+for (const locale of LOCALES) {
+  writeFileSync(resolve(out, `i18n/${locale}.json`), JSON.stringify(pick(merged[locale])))
+  writeFileSync(resolve(out, `i18n/${locale}-orders.json`), JSON.stringify(pickOrders(merged[locale])))
+}
 writeFileSync(resolve(out, 'message-keys.ts'), keysModule(Object.keys(merged[LOCALES[0]])))
 writeFileSync(
   resolve(out, 'permissions.ts'),

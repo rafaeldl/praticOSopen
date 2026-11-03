@@ -1,0 +1,326 @@
+<script setup lang="ts">
+// Nova OS by keyboard (WEB_APP_DESIGN, "menos de 45 segundos"): N opens with the
+// cursor on Cliente; Enter picks; the device is suggested; each item enters with
+// the catalog price; Ctrl+Enter saves from any field. Nothing is saved before
+// that. Closing with something filled in asks first (also the browser's Voltar).
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { useRouter } from 'vue-router'
+import { Check, Trash2, X } from '@lucide/vue'
+import Combobox, { type ComboboxGroup, type ComboboxItem } from '@/components/Combobox.vue'
+import Layer from '@/components/Layer.vue'
+import MoneyInput from '@/components/MoneyInput.vue'
+import { t } from '@/i18n'
+import { errorMessageKey } from '@/lib/api'
+import { firestoreClient } from '@/lib/firebase'
+import { orderCreated } from '@/lib/orders/bus'
+import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { createStatuses, type OrderStatus } from '@/lib/orders/model'
+import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
+import * as writes from '@/lib/orders/writes'
+import { api, can, session } from '@/lib/session'
+import { isMac } from '@/lib/shortcuts'
+import { showToast } from '@/lib/toast'
+import { announce, ui } from '@/lib/ui'
+
+interface Line {
+  key: string
+  item: CatalogItem
+  value: number | null
+  quantity: number
+}
+
+const router = useRouter()
+const layer = ref<InstanceType<typeof Layer> | null>(null)
+const customerRef = ref<InstanceType<typeof Combobox> | null>(null)
+const deviceRef = ref<InstanceType<typeof Combobox> | null>(null)
+const itemRef = ref<InstanceType<typeof Combobox> | null>(null)
+const customers = shallowRef<Customer[]>([])
+const devices = shallowRef<Device[]>([])
+const catalog = shallowRef<CatalogItem[]>([])
+const team = shallowRef<Member[]>([])
+const customerDevices = shallowRef<Device[]>([])
+const customer = ref<Customer | null>(null)
+const device = ref<Device | null>(null)
+const lines = ref<Line[]>([])
+const due = ref('')
+const request = ref('')
+const status = ref<OrderStatus>('quote')
+const visit = ref('')
+const assignee = ref('')
+const more = ref(false)
+const saving = ref(false)
+const failed = ref('')
+const loading = ref(true)
+const devicesLoading = ref(false)
+let allowClose = false
+
+const showsMoney = can('viewPrices')
+const editPrices = showsMoney && can('editPrices')
+const statuses = createStatuses(session.role)
+const useScheduling = (session.company as { useScheduling?: boolean } | null)?.useScheduling !== false
+const title = computed(() => t('orderNewTitle', { order: orderShort() }))
+const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value))
+const total = computed(() => lines.value.reduce((sum, line) => sum + (line.value ?? 0) * line.quantity, 0))
+const unpriced = computed(() => lines.value.filter((line) => line.value === null).length)
+const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
+const moreSummary = computed(() => {
+  const parts: string[] = []
+  if (status.value !== 'quote') parts.push(statusText(status.value))
+  if (visit.value) parts.push(t('orderScheduleLabel'))
+  const person = team.value.find((member) => member.id === assignee.value)
+  if (person) parts.push(person.name)
+  return parts.length ? parts.join(' · ') : t('orderMoreOptionsHint')
+})
+
+onMounted(async () => {
+  try {
+    const [c, d, k] = await Promise.all([loadCustomers(), loadDevices(), loadCatalog()])
+    customers.value = c
+    devices.value = d
+    catalog.value = k
+    loading.value = false
+    if (can('assignOrder')) team.value = await loadTeam()
+  } catch (error) {
+    console.warn('new order: lists not loaded', error)
+    failed.value = t(errorMessageKey(error))
+  } finally {
+    loading.value = false
+  }
+})
+
+/** Devices this customer brought before: suggested first, the only one is picked. */
+async function devicesOf(customerId: string): Promise<Device[]> {
+  try {
+    let rows: { devices?: Device[]; device?: Device }[] = []
+    if (showsMoney) {
+      const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+      const filters = [where('customer.id', '==', customerId), ...(can('viewAllOrders') ? [] : [where('createdBy.id', '==', session.uid)])]
+      rows = (await getDocs(query(collection(db, 'companies', session.companyId as string, 'orders'), ...filters, limit(10)))).docs.map((doc) => doc.data())
+    } else {
+      const body = await api<{ data?: typeof rows }>(`/v1/app/orders?limit=10&customerId=${encodeURIComponent(customerId)}`, { raw: true })
+      rows = body.data ?? []
+    }
+    const found = new Map<string, Device>()
+    for (const row of rows) for (const item of row.devices?.length ? row.devices : row.device ? [row.device] : []) if (item?.id) found.set(item.id, item)
+    return [...found.values()]
+  } catch (error) {
+    // Only the suggestion is lost: the device can still be searched.
+    console.warn('new order: devices of the customer not read', error)
+    return []
+  }
+}
+
+const customerGroups = (query: string): ComboboxGroup[] => [
+  { title: query ? undefined : t('web.newOrder.customers'), items: search(customers.value, query, (c) => c.phone ?? '', 8).map((c) => ({ id: c.id, label: c.name, sub: c.phone })) },
+]
+async function pickCustomer(item: ComboboxItem) {
+  const chosen = customers.value.find((c) => c.id === item.id) ?? null
+  customer.value = chosen
+  device.value = null
+  customerDevices.value = []
+  if (!chosen) return
+  // The cursor goes to the device at once, so nothing typed meanwhile is lost.
+  devicesLoading.value = true
+  await nextTick()
+  deviceRef.value?.focus()
+  const found = await devicesOf(chosen.id)
+  // Another customer was picked meanwhile (compare ids: customer.value is a reactive proxy).
+  if (customer.value?.id !== chosen.id) return
+  customerDevices.value = found
+  devicesLoading.value = false
+  // The only device of this customer comes in by itself, unless the person already typed.
+  const input = document.getElementById('no-device') as HTMLInputElement | null
+  if (found.length === 1 && !device.value && input && !input.value && document.activeElement === input) {
+    device.value = found[0] as Device
+    await nextTick()
+    itemRef.value?.focus()
+  }
+}
+
+const deviceGroups = (query: string): ComboboxGroup[] => {
+  const own = search(customerDevices.value, query, (d) => d.serial ?? '', 5)
+  const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '', query ? 6 : 0)
+  const row = (d: Device) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })
+  return [
+    { title: own.length ? t('web.newOrder.fromCustomer') : undefined, items: own.map(row) },
+    { title: others.length && own.length ? t('web.newOrder.otherDevices', { device: deviceLabel().toLocaleLowerCase() }) : undefined, items: others.map(row) },
+  ]
+}
+async function pickDevice(item: ComboboxItem) {
+  device.value = devices.value.find((d) => d.id === item.id) ?? customerDevices.value.find((d) => d.id === item.id) ?? null
+  await nextTick()
+  itemRef.value?.focus()
+}
+
+const itemGroups = (query: string): ComboboxGroup[] => [
+  {
+    title: query ? undefined : t('orderAllItems'),
+    items: search(catalog.value, query, (item) => lineKindText(item.kind), 8).map((item) => ({
+      id: `${item.kind}:${item.id}`,
+      label: item.name,
+      sub: lineKindText(item.kind),
+      right: showsMoney ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
+    })),
+  },
+]
+function pickItem(picked: ComboboxItem) {
+  const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
+  if (!item) return
+  lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: item.value, quantity: 1 }]
+  announce(t('web.order.itemAdded', { name: item.name }))
+}
+
+const isoOrUndefined = (value: string) => (value ? new Date(value).toISOString() : undefined)
+
+async function save() {
+  if (saving.value) return
+  // A price being typed is read on blur: let it commit before saving.
+  ;(document.activeElement as HTMLElement | null)?.blur?.()
+  await nextTick()
+  if (!customer.value) {
+    failed.value = t('orderSaveNeedsCustomer')
+    customerRef.value?.focus()
+    return
+  }
+  saving.value = true
+  failed.value = ''
+  try {
+    // Own price only when it differs from the catalog (and only who may edit prices).
+    const own = (line: Line) => (editPrices && line.value !== line.item.value ? { value: line.value } : {})
+    const created = await writes.createOrder({
+      customerId: customer.value.id,
+      ...(device.value ? { deviceId: device.value.id } : {}),
+      services: lines.value.filter((l) => l.item.kind === 'service').map((l) => ({ serviceId: l.item.id, ...own(l) })),
+      products: lines.value.filter((l) => l.item.kind === 'product').map((l) => ({ productId: l.item.id, quantity: l.quantity, ...own(l) })),
+      status: status.value,
+      ...(due.value ? { dueDate: isoOrUndefined(due.value) } : {}),
+      ...(visit.value ? { scheduledDate: isoOrUndefined(visit.value) } : {}),
+    })
+    // The rest after the id: a failure here says what did not stay, the order is already saved.
+    const after: Promise<unknown>[] = []
+    if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
+    if (request.value.trim()) after.push(writes.addComment(created.id, request.value.trim(), true))
+    const results = await Promise.allSettled(after)
+    allowClose = true
+    orderCreated(created.id)
+    const message = t('web.newOrder.created', { order: `${orderShort()} ${created.number}` })
+    showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
+    announce(message)
+    // The drawer's history entry becomes the new order: Voltar goes to the list, not to an empty drawer.
+    await router.replace({ path: '/', query: { order: created.id } })
+    ui.newOrder = false
+  } catch (error) {
+    console.warn('new order: not saved', error)
+    failed.value = t(errorMessageKey(error))
+  } finally {
+    saving.value = false
+  }
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    event.preventDefault()
+    event.stopPropagation()
+    void save()
+  }
+}
+
+/**
+ * Asked before closing with something filled in (Esc, X, Voltar), the text of
+ * the request included. The browser's own confirm, as Layer's other guards: it
+ * answers inside the navigation guard without opening a second layer.
+ */
+function guard(): boolean {
+  if (allowClose || !dirty.value) return true
+  const ok = window.confirm(`${t('orderDiscardTitle')}\n${t('orderDiscardMessage')}`)
+  if (ok) allowClose = true
+  return ok
+}
+
+// Closing the tab or reloading with something typed asks too (defect 17).
+const beforeUnload = (event: BeforeUnloadEvent) => {
+  if (dirty.value && !allowClose) event.preventDefault()
+}
+onMounted(() => window.addEventListener('beforeunload', beforeUnload))
+onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
+</script>
+
+<template>
+  <Layer ref="layer" kind="drawer" :label="title" :guard="guard" @close="ui.newOrder = false">
+    <div class="drawer" data-testid="new-order-drawer" @keydown="onKeydown">
+      <div class="drawer-head">
+        <button type="button" class="icon-btn" :aria-label="t('close')" @click="layer?.close()"><X :size="18" aria-hidden="true" /></button>
+        <h2 class="layer-title">{{ title }}</h2>
+        <span class="muted small">{{ session.company?.name }}</span>
+      </div>
+      <div class="drawer-body">
+        <p v-if="failed" class="field-error" role="alert">{{ failed }}</p>
+        <div class="step">
+          <div v-if="customer" class="chosen">
+            <span><span class="field-label">{{ t('customer') }}</span><strong>{{ customer.name }}</strong></span>
+            <button type="button" class="link" @click="customer = null; device = null; $nextTick(() => customerRef?.focus())">{{ t('web.newOrder.change') }}</button>
+          </div>
+          <Combobox v-else id="no-customer" ref="customerRef" :label="t('customer')" :placeholder="t('web.newOrder.customerHint')" :groups="customerGroups" :loading="loading" autofocus @pick="pickCustomer" />
+        </div>
+        <div v-if="customer" class="step">
+          <div v-if="device" class="chosen">
+            <span><span class="field-label">{{ deviceLabel() }}</span>{{ device.name }} <span v-if="device.serial" class="num">{{ device.serial }}</span></span>
+            <button type="button" class="link" @click="device = null; $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
+          </div>
+          <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" preselect @pick="pickDevice" />
+        </div>
+        <div class="step">
+          <Combobox id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
+          <ul v-if="lines.length" class="drawer-items" :aria-label="t('orderItemsSection')">
+            <li v-for="line in lines" :key="line.key">
+              <span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>
+              <MoneyInput v-if="editPrices" :id="`no-price-${line.key}`" v-model="line.value" class="line-price" :label="t('web.newOrder.priceOf', { name: line.item.name })" :country="country()" />
+              <span v-else-if="showsMoney" class="num">{{ line.value === null ? t('catalogNoPrice') : money(line.value) }}</span>
+              <span v-else></span>
+              <button type="button" class="icon-btn" :aria-label="t('web.newOrder.removeLine', { name: line.item.name })" @click="lines = lines.filter((l) => l !== line)"><Trash2 :size="15" aria-hidden="true" /></button>
+            </li>
+          </ul>
+        </div>
+        <div class="step">
+          <label class="field-label" for="no-due">{{ t('web.newOrder.due') }}</label>
+          <input id="no-due" v-model="due" class="field" type="datetime-local" />
+        </div>
+        <div class="step">
+          <label class="field-label" for="no-request">{{ t('orderCustomerRequestTitle') }}</label>
+          <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
+        </div>
+        <details class="step more-options" :open="more" @toggle="more = ($event.target as HTMLDetailsElement).open">
+          <summary>{{ t('orderMoreOptions') }} <span class="sub">{{ moreSummary }}</span></summary>
+          <div class="more-body">
+            <div v-if="statuses.length > 1">
+              <label class="field-label" for="no-status">{{ t('orderStatusLabel') }}</label>
+              <select id="no-status" v-model="status" class="field">
+                <option v-for="item in statuses" :key="item" :value="item">{{ statusText(item) }}</option>
+              </select>
+            </div>
+            <div v-if="useScheduling">
+              <label class="field-label" for="no-visit">{{ t('orderScheduleLabel') }}</label>
+              <input id="no-visit" v-model="visit" class="field" type="datetime-local" />
+            </div>
+            <div v-if="team.length">
+              <label class="field-label" for="no-assignee">{{ t('orderAddResponsible') }}</label>
+              <select id="no-assignee" v-model="assignee" class="field">
+                <option value="">{{ t('web.order.nobody') }}</option>
+                <option v-for="member in team" :key="member.id" :value="member.id">{{ member.name }}</option>
+              </select>
+            </div>
+          </div>
+        </details>
+      </div>
+      <div class="drawer-foot">
+        <span class="hint" aria-live="polite">
+          {{ !customer ? t('orderSaveNeedsCustomer') : showsMoney && lines.length ? `${t('total')} ${money(total)}` : '' }}
+          <template v-if="showsMoney && unpriced"> · {{ t('orderUnpricedCount', { count: unpriced }) }}</template>
+        </span>
+        <button type="button" class="btn btn--primary" :aria-disabled="!customer || saving" data-testid="save-order" @click="save">
+          <Check :size="16" aria-hidden="true" />{{ saving ? t('web.newOrder.saving') : t('web.newOrder.save', { order: orderShort() }) }} <kbd>{{ saveKey }}</kbd>
+        </button>
+      </div>
+    </div>
+  </Layer>
+</template>
