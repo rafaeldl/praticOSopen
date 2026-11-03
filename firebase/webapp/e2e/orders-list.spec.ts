@@ -74,7 +74,8 @@ test('tela estreita: sem a coluna Quando, as datas voltam à linha da situação
 })
 
 async function loadAll(page: Page) {
-  const more = page.getByRole('button', { name: 'Mostrar mais' })
+  // The row stays while a page loads (the button then reads "Carregando…"): wait for it to go.
+  const more = page.locator('.more-rows button')
   for (let i = 0; i < 20 && (await more.count()); i++) {
     // The infinite scroll can load the last page and take the button away between count and click.
     await more.click({ timeout: 3000 }).catch(() => {})
@@ -185,20 +186,22 @@ test('lote: mudar a situação de duas OS de uma vez', async ({ page }) => {
 })
 
 test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ page }) => {
-  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name: 'Quadro Teste' } })
+  // Its own name: a repeated run leaves the previous card on the board.
+  const name = `Quadro Teste ${Date.now()}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name: name } })
   await openHome(page, 'admin')
   await page.getByRole('button', { name: 'Quadro', exact: true }).click()
   await expect(page).toHaveURL(/view=board/)
   const board = page.getByTestId('board')
   const approved = board.getByRole('region', { name: /^Aprovado/ })
-  await expect(approved.getByText('Quadro Teste')).toBeVisible()
+  await expect(approved.getByText(name)).toBeVisible()
   await approved.getByRole('button', { name: `Mover OS ${order.number}` }).click()
   await page.getByRole('dialog', { name: 'Mover para onde?' }).getByRole('button', { name: 'Na oficina' }).click()
   const progress = board.getByRole('region', { name: /^Na oficina/ })
-  await expect(progress.getByText('Quadro Teste')).toBeVisible()
+  await expect(progress.getByText(name)).toBeVisible()
   await progress.locator(`#card-${order.id}`).focus()
   await page.keyboard.press('Shift+ArrowRight')
-  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText('Quadro Teste')).toBeVisible()
+  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
 })
 
 test('idiomas: filtros em inglês e espanhol, moeda continua do Brasil', async ({ page }) => {

@@ -245,7 +245,7 @@ onBeforeUnmount(() => {
             <button type="button" class="btn btn--ghost" @click="search = ''">{{ t('web.orders.clearSearch') }}</button>
           </div>
         </div>
-        <table v-else class="grid" data-testid="customers-table">
+        <table v-else class="grid dir-customers" data-testid="customers-table">
           <caption class="sr">{{ label('customer._entity_plural') }}</caption>
           <thead>
             <tr>

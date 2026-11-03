@@ -233,6 +233,12 @@ async function loadMore() {
     stale.value = true
   } finally {
     loadingMore.value = false
+    // A filter that shows few rows (Paradas) keeps the sentinel in view, and the observer
+    // does not fire again: keep filling while it is still on screen and there is more.
+    if (token === loadToken && hasMore.value) void nextTick(() => {
+      const box = sentinel.value?.getBoundingClientRect()
+      if (box && box.top < window.innerHeight + 200) void loadMore()
+    })
   }
 }
 
