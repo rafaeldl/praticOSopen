@@ -13,6 +13,7 @@ import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
 import {
   accessOf,
@@ -39,6 +40,7 @@ import {
   orderTitle,
   statusText,
   whenText,
+  country,
 } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { formatPhone } from '@/lib/phone'
@@ -48,6 +50,10 @@ import { currentToast, showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
+import * as maintenance from '@/lib/orders/maintenance-offer'
+import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
+import TextDialog from './TextDialog.vue'
+import OrderCustomFields from './OrderCustomFields.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import DateDialog from './DateDialog.vue'
 import HoldDialog from './HoldDialog.vue'
@@ -58,7 +64,7 @@ import OrderPhotos from './OrderPhotos.vue'
 import OrderPrint from './OrderPrint.vue'
 import OrderAssistant from './OrderAssistant.vue'
 import PaymentHistory from './receive/PaymentHistory.vue'
-import { paymentSettings, removeTransaction, resetPayments } from '@/lib/receive/data'
+import { dropUpload, paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
 import { receivesMoney, type Payment } from '@/lib/receive/model'
 // Opened on demand: the order shows without them.
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
@@ -95,7 +101,9 @@ type Dialog =
   | { kind: 'item'; line: OrderLine }
   | { kind: 'addItem' }
   | { kind: 'customer' }
-  | { kind: 'device' }
+  | { kind: 'address' }
+  | { kind: 'maintenance'; devices: { id: string; name: string }[] }
+  | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share' }
   | { kind: 'pendingForms'; count: number; first: string }
@@ -209,7 +217,7 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
     return true
   } catch (error) {
     console.warn('order: write failed', error)
-    showToast(t(errorMessageKey(error)))
+    showToast(error instanceof ProofUploadError ? t('receiveCustomerUploadFailed') : t(errorMessageKey(error)))
     if (error instanceof ApiError && ['ORDER_CHANGED', 'ITEM_NOT_FOUND', 'PAYMENT_EXCEEDS_BALANCE'].includes(error.code)) await watcher?.refresh()
     return false
   } finally {
@@ -241,7 +249,46 @@ async function setStatus(status: OrderStatus) {
     dialog.value = { kind: 'pendingForms', count: pendingForms.length, first: (pendingForms[0] as { id: string }).id }
     return
   }
-  await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
+  const was = order.value.status
+  const ok = await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
+  // Done now (the server took it): when is the next maintenance? (device.maintenance.offer)
+  if (ok && status === 'done' && was !== 'done' && order.value) {
+    const devices = await maintenance.devicesToAsk(order.value)
+    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
+  }
+}
+
+// Saved already done in the Nova OS: ask once the order is here (device.maintenance.offer).
+watch(
+  () => order.value?.id,
+  async (id) => {
+    if (!id || !maintenance.takeAskOnOpen(id) || !order.value || order.value.status !== 'done') return
+    const devices = await maintenance.devicesToAsk(order.value)
+    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
+  },
+  { immediate: true },
+)
+
+const maintenanceChoices = computed<Choice[]>(() => {
+  const today = toIsoDay(new Date())
+  const option = (id: string, label: string, months: number) => ({ id, label, sub: formatMonthYear(fromIsoDay(maintenance.addMonths(today, months)), country()) })
+  return [
+    option('3', t('nextMaintenanceThreeMonths'), 3),
+    option('6', t('nextMaintenanceSixMonths'), 6),
+    option('12', t('nextMaintenanceOneYear'), 12),
+    { id: 'none', label: t('nextMaintenanceNoRepeat') },
+  ]
+})
+
+/** device.maintenance.answer / no-repeat; closing without an answer counts as a refusal and changes nothing. */
+async function answerMaintenance(id: string | null) {
+  const current = dialog.value
+  dialog.value = null
+  if (current?.kind !== 'maintenance') return
+  if (id === null) return maintenance.decline()
+  const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id), order.value?.id)
+  if (failed) showToast(t('nextMaintenanceSaveError'))
+  else if (id !== 'none') showToast(t('web.order.maintenanceSaved'))
 }
 
 async function runStep() {
@@ -267,9 +314,41 @@ async function assign(id: string) {
   await run(() => writes.patchOrder(order.value!.id, { assignedTo: id === 'none' ? null : id }, expected()), t('web.saved'))
 }
 
-async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }) {
-  const ok = await run(() => writes.receivePayment(order.value!.id, value, expected()), t('web.order.received', { amount: money(value.amount) }))
+async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; proof?: File }) {
+  const { proof, ...body } = value
+  const id = order.value!.id
+  const ok = await run(async () => {
+    // The file goes first (to the payment's folder), then the payment carries it.
+    const receiptFile = proof ? await uploadProof(id, body.clientTransactionId, proof).catch(() => Promise.reject(new ProofUploadError())) : undefined
+    try {
+      return await writes.receivePayment(id, { ...body, ...(receiptFile ? { receiptFile } : {}) }, expected())
+    } catch (error) {
+      // Refused after the upload: the file goes away (it is never anyone's proof).
+      if (receiptFile) await dropUpload(receiptFile.storagePath)
+      throw error
+    }
+  }, t('web.order.received', { amount: money(value.amount) }))
   if (ok) dialog.value = null
+}
+
+class ProofUploadError extends Error {}
+
+/** Attach or replace (the server deletes the old file) and take out the proof of a payment. */
+async function attachProof(payment: Payment, file: File) {
+  const id = order.value!.id
+  await run(async () => {
+    const receiptFile = await uploadProof(id, payment.id as string, file).catch(() => Promise.reject(new ProofUploadError()))
+    try {
+      return await setProof(id, payment.id as string, receiptFile)
+    } catch (error) {
+      await dropUpload(receiptFile.storagePath)
+      throw error
+    }
+  }, t('web.receive.proofSaved'))
+}
+
+async function detachProof(payment: Payment) {
+  await run(() => removeProof(order.value!.id, payment.id as string), t('web.receive.proofRemoved'))
 }
 
 async function discount(value: { amount: number; clientTransactionId: string }) {
@@ -287,7 +366,7 @@ async function addFreeItem(name: string) {
   await run(() => writes.addItem(order.value!.id, { kind: 'service', description: name }, expected()), t('web.order.itemAdded', { name }))
 }
 
-async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number }) {
+async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number; deviceId?: string | null }) {
   if (!Object.keys(patch).length || !line.id) {
     dialog.value = null
     return
@@ -368,19 +447,74 @@ async function applyCustomer(customer: Customer, dropDevices: boolean) {
   await run(() => writes.updateOrderFields(o.id, fields), t('web.saved'))
 }
 
+const fieldService = computed(() => !!(session.company as { fieldService?: boolean } | null)?.fieldService)
+
+/**
+ * The place of the order (order.address.edit / remove): a new text drops the
+ * coordinates (they belonged to the customer's address); the same text keeps them.
+ */
+async function saveAddress(text: string | null) {
+  dialog.value = null
+  const o = order.value as Order
+  const next = text?.trim() || null
+  if (next === (o.address ?? null)) return
+  await run(() => writes.updateOrderFields(o.id, { address: next, latitude: null, longitude: null }), next ? t('web.saved') : t('web.order.addressRemoved'))
+}
+
 async function addDevice(device: Device) {
   dialog.value = null
   const o = order.value as Order
   if (o.devices.some((item) => item.id === device.id)) return
   const list = [...o.devices, { id: device.id, name: device.name, ...(device.serial ? { serial: device.serial } : {}) }]
-  await run(() => writes.updateOrderFields(o.id, { device: list[0], devices: list, deviceIds: list.map((item) => item.id) }), t('web.saved'))
+  await saveDevices(list)
+}
+
+function saveDevices(list: { id?: string; name?: string; serial?: string | null }[]) {
+  const o = order.value as Order
+  return run(() => writes.updateOrderFields(o.id, { device: list[0] ?? null, devices: list, deviceIds: list.map((item) => item.id) }), t('web.saved'))
+}
+
+/**
+ * Changing one device of the order (order.device.change): another replaces it in its
+ * place; "Nenhum" takes it out (device.list.pick-none), like the app's _changeDevice.
+ */
+async function changeDevice(current: { id: string }, picked: ComboboxItem) {
+  dialog.value = null
+  const o = order.value as Order
+  if (picked.id === current.id) return
+  const kept = o.devices.filter((item) => item.id !== current.id)
+  if (picked.id === NONE) return saveDevices(kept)
+  const device = devices.value.find((d) => d.id === picked.id)
+  if (!device) return
+  if (kept.some((item) => item.id === device.id)) return saveDevices(kept)
+  await saveDevices(o.devices.map((item) => (item.id === current.id ? { id: device.id, name: device.name, ...(device.serial ? { serial: device.serial } : {}) } : item)))
+}
+
+/** A plate brings its owner and the device together (customer.picker.plate). */
+async function pickCustomerItem(item: ComboboxItem) {
+  if (!item.id.startsWith(PLATE)) return chooseCustomer((customers.value.find((c) => c.id === item.id) ?? recents.value.find((c) => c.id === item.id)) as Customer)
+  const deviceId = item.id.slice(PLATE.length)
+  dialog.value = null
+  const device = devices.value.find((d) => d.id === deviceId)
+  const owner = await ownerOf(deviceId)
+  const o = order.value as Order
+  if (owner && owner.id !== o.customer?.id) await applyCustomer(customers.value.find((c) => c.id === owner.id) ?? owner, false)
+  if (device && !order.value?.devices.some((d) => d.id === device.id)) await addDevice(device)
+}
+
+async function openDevicePicker(current: { id?: string; name?: string }) {
+  await openPicker('device')
+  if (dialog.value?.kind === 'device' && current.id) dialog.value = { kind: 'device', current: { id: current.id, name: current.name ?? '' } }
 }
 
 async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') {
   try {
     if (kind === 'addItem' && !catalog.value.length) catalog.value = await loadCatalog()
+    // "Mais usados" as in the Nova OS (order.item-search.most-used); a failure only hides it.
+    if (kind === 'addItem' && !mostUsed.value.length) void mostUsedKeys().then((keys) => (mostUsed.value = keys), () => {})
     if (kind === 'customer' && !customers.value.length) customers.value = await loadCustomers()
-    if (kind === 'device' && !devices.value.length) devices.value = await loadDevices()
+    if ((kind === 'device' || kind === 'customer') && !devices.value.length) devices.value = await loadDevices()
+    if (kind === 'customer') void recentCustomers().then((list) => (recents.value = list), () => {})
     if (kind === 'assignee' && !team.value.length) team.value = await loadTeam()
   } catch (error) {
     showToast(t(errorMessageKey(error)))
@@ -390,9 +524,20 @@ async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') 
   dialog.value = { kind }
 }
 
+const mostUsed = shallowRef<string[]>([])
 const itemGroups = (query: string): ComboboxGroup[] => {
   const list = search(catalog.value, query, (item) => lineKindText(item.kind), 10)
+  const row = (item: CatalogItem) => ({
+    id: `${item.kind}:${item.id}`,
+    label: item.name,
+    sub: lineKindText(item.kind),
+    right: showsMoney.value ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
+  })
   return [
+    {
+      title: t('orderMostUsed'),
+      items: query.trim() ? [] : mostUsed.value.map((key) => catalog.value.find((item) => `${item.kind}:${item.id}` === key)).filter((item): item is CatalogItem => !!item).map(row),
+    },
     {
       title: query ? undefined : t('orderAllItems'),
       items: list.map((item) => ({
@@ -412,12 +557,26 @@ const pickItem = (picked: ComboboxItem, query = '') => {
   const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (item) void addCatalogItem(item)
 }
+const PLATE = 'plate:'
+const NONE = '__none'
+const recents = shallowRef<Named[]>([])
+const customerRow = (c: Customer | Named) => ({ id: c.id, label: c.name, sub: formatPhone((c as Customer).phone) || undefined })
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { items: search(customers.value, query, (c) => c.phone ?? '').map((c) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })) },
+  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}`, sub: plateOwnerName(d.id) })) },
+  { title: t('pickerRecent'), items: query.trim() ? [] : recents.value.map((r) => customers.value.find((c) => c.id === r.id) ?? r).map(customerRow) },
+  {
+    title: query.trim() || !recents.value.length ? undefined : t('web.newOrder.customers'),
+    items: search(query.trim() ? customers.value : customers.value.filter((c) => !recents.value.some((r) => r.id === c.id)), query, (c) => c.phone ?? '').map(customerRow),
+  },
 ]
-const deviceGroups = (query: string): ComboboxGroup[] => [
-  { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },
-]
+const deviceGroups = (query: string): ComboboxGroup[] => {
+  const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
+  return [
+    // "Nenhum …" only when changing a device and nothing is typed (device.list.pick-none).
+    { items: current && !query.trim() ? [{ id: NONE, label: t('pickerNoDevice', { device: deviceLabel().toLocaleLowerCase() }) }] : [] },
+    { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },
+  ]
+}
 
 const statusChoices = computed<Choice[]>(() => {
   const o = order.value
@@ -543,7 +702,16 @@ watch(
         </h2>
         <button v-if="!order.customer?.name && access.canEditMainFields" type="button" class="link" @click="openPicker('customer')">{{ t('orderPickCustomerRow') }}</button>
         <p v-if="order.devices.length" class="od-device-line">
-          <span v-for="(device, index) in order.devices" :key="device.id ?? index">{{ index ? ' · ' : '' }}{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></span>
+          <span v-for="(device, index) in order.devices" :key="device.id ?? index"
+            >{{ index ? ' · ' : '' }}<button
+              v-if="access.canEditMainFields && device.id"
+              type="button"
+              class="od-device-btn"
+              :aria-label="t('web.order.changeDevice', { name: [device.name, device.serial].filter(Boolean).join(' · ') })"
+              @click="openDevicePicker(device)"
+            >{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></button
+            ><template v-else>{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></template></span
+          >
         </p>
         <button v-else-if="access.canEditMainFields" type="button" class="link od-device-add" @click="openPicker('device')">
           {{ t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() }) }}
@@ -601,7 +769,17 @@ watch(
           <p v-if="money$.unpricedCount" class="sub">{{ t('orderUnpricedCount', { count: money$.unpricedCount }) }}</p>
           <button v-if="access.canReceive && moneyRowTone && money$.remaining > 0 && step?.kind !== 'receive'" type="button" class="link" @click="dialog = { kind: 'receive' }">{{ t('receiveTitle') }}</button>
           <p v-if="!moneyRowTone && order.transactions.length" class="sub" data-testid="blocked-status">{{ t('web.receive.blockedStatus', { status: statusText(order.status) }) }}</p>
-          <PaymentHistory :order="order" :can-receive="access.canReceive && !!moneyRowTone" :can-discount="access.canDiscount && !!moneyRowTone" :busy="busy" @remove="removePayment" @undo-all="undoAllPayments" />
+          <PaymentHistory
+            :order="order"
+            :can-receive="access.canReceive && !!moneyRowTone"
+            :can-discount="access.canDiscount && !!moneyRowTone"
+            :can-attach="access.canReceive && !!moneyRowTone && can('attachPhotos')"
+            :busy="busy"
+            @remove="removePayment"
+            @undo-all="undoAllPayments"
+            @attach="attachProof"
+            @detach="detachProof"
+          />
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
@@ -609,6 +787,8 @@ watch(
         <OrderComments :order-id="order.id" />
         <OrderForms ref="formsRef" :order="order" @forms="(list: { id: string; status: string }[]) => (orderForms = list)" />
         <OrderContract :key="order.id" :order="order" :can-edit="!!access?.canEditMainFields" />
+
+        <OrderCustomFields :order="order" :can-edit="!!access.canEditMainFields" />
 
         <section class="od-sec od-sec--details" aria-labelledby="od-details-title">
           <h3 id="od-details-title">{{ t('details') }}</h3>
@@ -634,11 +814,15 @@ watch(
                 <span v-else>{{ order.assignedTo?.name }}</span>
               </dd>
             </template>
-            <template v-if="order.address">
+            <template v-if="order.address || (access.canEditMainFields && fieldService)">
               <dt>{{ t('orderAddressLabel') }}</dt>
-              <dd>
-                {{ order.address }}
-                <a class="link" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`" target="_blank" rel="noopener">{{ t('openInMaps') }}</a>
+              <dd class="od-address" data-testid="order-address">
+                <span v-if="order.address">{{ order.address }}</span>
+                <a v-if="order.address" class="link" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`" target="_blank" rel="noopener">{{ t('openInMaps') }}</a>
+                <template v-if="access.canEditMainFields">
+                  <button type="button" class="link" @click="dialog = { kind: 'address' }">{{ order.address ? t('orderAddressChange') : t('web.order.addAddress') }}</button>
+                  <button v-if="order.address" type="button" class="link link--danger" :disabled="busy" @click="saveAddress(null)">{{ t('orderAddressRemove') }}</button>
+                </template>
               </dd>
             </template>
           </dl>
@@ -651,6 +835,14 @@ watch(
   <template v-if="order && access && dialog">
     <ChoiceDialog v-if="dialog.kind === 'menu'" :anchor="menuButton" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
+    <ChoiceDialog
+      v-else-if="dialog.kind === 'maintenance'"
+      :title="t('nextMaintenanceQuestion')"
+      :sub="dialog.devices.map((device) => device.name).join(', ')"
+      :choices="maintenanceChoices"
+      @pick="answerMaintenance"
+      @close="answerMaintenance(null)"
+    />
     <ChoiceDialog v-else-if="dialog.kind === 'assignee'" :title="t('pickerAssigneeTitle')" :choices="teamChoices" @pick="assign" @close="dialog = null" />
     <ConfirmDialog
       v-else-if="dialog.kind === 'cancel'"
@@ -693,13 +885,30 @@ watch(
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
-    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
+    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
     <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
-    <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
+    <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :devices="order.devices" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
+    <TextDialog
+      v-else-if="dialog.kind === 'address'"
+      :title="t('orderAddressLabel')"
+      :label="t('orderAddressLabel')"
+      :value="order.address ?? ''"
+      @save="saveAddress"
+      @close="dialog = null"
+    />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
-    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="(item) => chooseCustomer(customers.find((c) => c.id === item.id) as Customer)" @close="dialog = null" />
-    <ComboDialog v-else-if="dialog.kind === 'device'" id="od-device" :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })" :label="deviceLabel()" :groups="deviceGroups" @pick="(item) => addDevice(devices.find((d) => d.id === item.id) as Device)" @close="dialog = null" />
+    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="pickCustomerItem" @close="dialog = null" />
+    <ComboDialog
+      v-else-if="dialog.kind === 'device'"
+      id="od-device"
+      :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })"
+      :label="deviceLabel()"
+      :groups="deviceGroups"
+      :selected-id="dialog.current?.id"
+      @pick="(item) => (dialog?.kind === 'device' && dialog.current ? changeDevice(dialog.current, item) : addDevice(devices.find((d) => d.id === item.id) as Device))"
+      @close="dialog = null"
+    />
   </template>
   <PdfDialog v-if="pdfOpen && order" :ids="[order.id]" :numbers="[order.number]" @close="pdfOpen = false" />
   <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />

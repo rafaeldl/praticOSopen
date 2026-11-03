@@ -1,6 +1,6 @@
 /* Agenda (views/agenda, components/agenda). Sizes in rem: the grid grows with the text. */
 .ag-toolbar { align-items: center; }
-.ag-step { display: flex; align-items: center; gap: 0.25rem; }
+.ag-step { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; max-width: 100%; }
 .ag-only { padding: 0 1.25rem 0.6rem; color: var(--color-muted); display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; }
 .ag-pane { overflow: hidden; }
 .ag { flex: 1; min-height: 0; display: flex; flex-direction: column; }

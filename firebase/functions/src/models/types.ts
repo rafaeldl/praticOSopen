@@ -321,6 +321,12 @@ export interface Order {
   completedAt?: string;
   /** "Parada" mark, separate from `status`. Removed by order-hold.service when the status no longer allows it. */
   onHold?: OrderHold;
+  /** Place of the service (fieldService) and its coordinates, when they came from the customer. */
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  /** The segment's own fields of the order (`service_order.*`), by field name. */
+  customData?: Record<string, unknown> | null;
 }
 
 /** Why an order stopped and since when (UTC ISO). Only on `approved` or `progress` orders. */

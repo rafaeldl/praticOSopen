@@ -45,6 +45,12 @@ test('Configurações: a linha da conta diz quem, empresa e papel, e cada linha 
   }
 })
 
+test('rodapé com a versão do web, para todos os papéis (settings.more-view)', async ({ page }) => {
+  await login(page, 'gTech', 'settings')
+  // Build day and commit of this build, as the app shows its version and build.
+  await expect(page.getByTestId('settings-version')).toHaveText(/^PraticOS web \d{4}\.\d{2}\.\d{2} \([0-9a-z]+\)$/)
+})
+
 test('Sair pede confirmação (account.sign-out)', async ({ page }) => {
   await login(page, 'gTech', 'settings/account')
   await page.getByTestId('account-sign-out').click()

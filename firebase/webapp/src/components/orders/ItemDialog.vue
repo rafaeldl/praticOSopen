@@ -6,24 +6,29 @@ import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
 import type { OrderLine } from '@/lib/orders/model'
-import { country, lineKindText, money } from '@/lib/orders/text'
+import { country, deviceLabel, lineKindText, money } from '@/lib/orders/text'
 import { roundMoney } from '@/lib/rules/order-rules'
 
-const props = defineProps<{ line: OrderLine; showsMoney: boolean; canEditPrice: boolean; busy?: boolean }>()
-const emit = defineEmits<{ save: [patch: { description?: string; value?: number | null; quantity?: number }]; remove: []; close: [] }>()
+const props = defineProps<{ line: OrderLine; showsMoney: boolean; canEditPrice: boolean; busy?: boolean; devices?: { id?: string; name?: string; serial?: string | null }[] }>()
+const emit = defineEmits<{ save: [patch: { description?: string; value?: number | null; quantity?: number; deviceId?: string | null }]; remove: []; close: [] }>()
 
 const description = ref(props.line.description && props.line.description !== props.line.name ? props.line.description : '')
 const value = ref<number | null>(props.line.value ?? null)
 const quantity = ref(props.line.quantity ?? 1)
+// With 2 or more devices the line says which one (or none: "Geral"), like the app's item form.
+const choices = computed(() => (props.devices ?? []).filter((device) => !!device.id))
+const current = (props.line.deviceId && choices.value.some((device) => device.id === props.line.deviceId) ? props.line.deviceId : '') as string
+const deviceId = ref(current)
 const total = computed(() => (value.value === null ? null : roundMoney(value.value * (props.line.kind === 'product' ? quantity.value : 1))))
 
 function save() {
   if (props.busy) return
-  const patch: { description?: string; value?: number | null; quantity?: number } = {}
+  const patch: { description?: string; value?: number | null; quantity?: number; deviceId?: string | null } = {}
   const before = props.line.description && props.line.description !== props.line.name ? props.line.description : ''
   if (description.value.trim() !== before) patch.description = description.value.trim()
   if (props.showsMoney && props.canEditPrice && value.value !== (props.line.value ?? null)) patch.value = value.value
   if (props.line.kind === 'product' && quantity.value !== (props.line.quantity ?? 1)) patch.quantity = Math.max(1, Math.round(quantity.value))
+  if (choices.value.length > 1 && deviceId.value !== current) patch.deviceId = deviceId.value || null
   emit('save', patch)
 }
 </script>
@@ -40,6 +45,13 @@ function save() {
           <label class="field-label" for="item-description">{{ t('orderItemDescription') }}</label>
           <input id="item-description" v-model="description" class="field" maxlength="500" data-autofocus aria-describedby="item-description-hint" />
           <p id="item-description-hint" class="sub">{{ t('orderItemDescriptionHint') }}</p>
+          <template v-if="choices.length > 1">
+            <label class="field-label" for="item-device">{{ deviceLabel() }}</label>
+            <select id="item-device" v-model="deviceId" class="field">
+              <option value="">{{ t('generalNoDevice') }}</option>
+              <option v-for="device in choices" :key="device.id" :value="device.id">{{ [device.name, device.serial].filter(Boolean).join(' · ') }}</option>
+            </select>
+          </template>
           <template v-if="showsMoney && canEditPrice">
             <MoneyInput id="item-price" v-model="value" :label="t('orderItemPrice')" :country="country()" />
             <p class="sub">{{ t('orderItemPriceHint') }}</p>

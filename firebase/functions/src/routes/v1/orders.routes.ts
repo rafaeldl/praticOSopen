@@ -137,6 +137,21 @@ async function receiveGuard(req: AuthenticatedRequest, res: Response) {
   };
 }
 
+/**
+ * Guard of the proof of a payment (pay.order.attach-proof): who receives on the
+ * order, on an order that takes money (not a quote nor canceled), as the app.
+ */
+async function proofGuard(req: AuthenticatedRequest, res: Response) {
+  const receive = await receiveGuard(req, res);
+  return (order: Order) => {
+    receive(order);
+    if (order.status === 'quote' || order.status === 'canceled') throw new OrderRuleError('ORDER_STATUS', 409, 'This order does not take payments');
+  };
+}
+
+/** The app attaches a proof only with attachPhotos (payment_management_screen). */
+const PROOF_PERMISSION = "Permission 'attachPhotos' is required";
+
 /** Guard: discounts and money of others (financial access) on an order the user sees. */
 async function financialGuard(req: AuthenticatedRequest, res: Response) {
   const allowed = canGiveDiscount(req, await companyUsesFinancial(req, res));
@@ -436,6 +451,7 @@ router.post('/:id/payments', requireOrderAccess(), route('Failed to add payment'
     return validationError(res, discount ? ['type: a discount goes to POST /:id/discounts'] : validation.errors);
   }
   const data = validation.data;
+  if (data.receiptFile && !(await can(req, res, 'attachPhotos'))) return forbidden(res, PROOF_PERMISSION);
   const guard = await receiveGuard(req, res);
   const result = await orderService.addPayment(companyId, param(req, 'id'), data.amount, 'payment', data.description, getUserAggr(req), {
     guard, paidAt: data.paidAt, paymentMethod: data.paymentMethod, receiptFile: data.receiptFile,
@@ -480,11 +496,12 @@ router.delete('/:id/payments/:transactionId', requireOrderAccess(), route('Faile
 
 /** PUT /orders/:id/payments/:transactionId/receipt: attaches (or replaces) the proof. */
 router.put('/:id/payments/:transactionId/receipt', requireOrderAccess(), route('Failed to attach receipt', async (req, res, companyId) => {
+  if (!(await can(req, res, 'attachPhotos'))) return forbidden(res, PROOF_PERMISSION);
   const validation = validateInput(z.object({ receiptFile: receiptFileSchema }), req.body);
   if (!validation.success) return validationError(res, validation.errors);
   const result = await financeService.setTransactionReceipt(
     companyId, param(req, 'id'), param(req, 'transactionId'), validation.data.receiptFile, getUserAggr(req),
-    { guard: await receiveGuard(req, res) },
+    { guard: await proofGuard(req, res) },
   );
   if (!result) return notFound(res);
   await sendOrder(req, res, result.order);
@@ -492,8 +509,9 @@ router.put('/:id/payments/:transactionId/receipt', requireOrderAccess(), route('
 
 /** DELETE /orders/:id/payments/:transactionId/receipt */
 router.delete('/:id/payments/:transactionId/receipt', requireOrderAccess(), route('Failed to remove receipt', async (req, res, companyId) => {
+  if (!(await can(req, res, 'attachPhotos'))) return forbidden(res, PROOF_PERMISSION);
   const result = await financeService.setTransactionReceipt(
-    companyId, param(req, 'id'), param(req, 'transactionId'), null, getUserAggr(req), { guard: await receiveGuard(req, res) },
+    companyId, param(req, 'id'), param(req, 'transactionId'), null, getUserAggr(req), { guard: await proofGuard(req, res) },
   );
   if (!result) return notFound(res);
   await sendOrder(req, res, result.order);

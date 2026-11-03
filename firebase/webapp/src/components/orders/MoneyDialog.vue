@@ -2,7 +2,7 @@
 // "Receber" and "Dar desconto". The id of the transaction is made once when the
 // dialog opens: pressing again after a network failure sends the same id, and
 // the server books it once (WEB_API, clientTransactionId).
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
@@ -10,13 +10,28 @@ import { newTransactionId } from '@/lib/orders/writes'
 import { country, money } from '@/lib/orders/text'
 import { roundMoney } from '@/lib/rules/order-rules'
 import { localDay, paidAtFor, toCents } from '@/lib/receive/model'
+import { proofProblem } from '@/lib/receive/proof'
+import '@/styles/receive.css'
 
-const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean; createdAt?: string | null; linkNote?: string }>()
-const emit = defineEmits<{ save: [value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }]; close: [] }>()
+const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean; createdAt?: string | null; linkNote?: string; canAttach?: boolean }>()
+const emit = defineEmits<{ save: [value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; proof?: File }]; close: [] }>()
 
 const transactionId = newTransactionId()
 const amount = ref<number | null>(props.kind === 'receive' ? props.remaining : null)
 const method = ref('')
+// Proof (pay.widget.sheet): an image or PDF, sent with the payment. Without attachPhotos the row is not there.
+const proof = shallowRef<File | null>(null)
+const proofError = ref('')
+const proofInput = ref<HTMLInputElement | null>(null)
+function pickProof(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  const problem = proofProblem(file)
+  proofError.value = problem === 'type' ? t('web.receive.proofType') : problem === 'size' ? t('web.receive.proofSize') : ''
+  if (!problem) proof.value = file
+}
 // "Quando": today by default, never in the future nor before the order (server: INVALID_PAID_AT).
 const today = localDay(new Date())
 const day = ref(today)
@@ -44,7 +59,13 @@ const METHODS = [
 function save() {
   if (!valid.value || props.busy) return
   const when = props.kind === 'receive' && day.value !== today ? { paidAt: paidAtFor(day.value, new Date()) } : {}
-  emit('save', { amount: amount.value as number, ...(method.value ? { paymentMethod: method.value } : {}), ...when, clientTransactionId: transactionId })
+  emit('save', {
+    amount: amount.value as number,
+    ...(method.value ? { paymentMethod: method.value } : {}),
+    ...when,
+    clientTransactionId: transactionId,
+    ...(proof.value ? { proof: proof.value } : {}),
+  })
 }
 </script>
 
@@ -70,6 +91,18 @@ function save() {
             <label class="field-label" for="money-day">{{ t('receiveWhen') }}</label>
             <input id="money-day" v-model="day" class="field" type="date" :max="today" required />
             <p v-if="!dayValid" class="field-error" role="alert">{{ t('web.receive.dayInvalid') }}</p>
+            <template v-if="canAttach">
+              <span class="field-label" id="money-proof-label">{{ t('receipt') }} <span class="muted">({{ t('receivePaymentMethodOptional') }})</span></span>
+              <div v-if="proof" class="proof-chip" data-testid="receive-proof">
+                <span class="proof-name">{{ proof.name }}</span>
+                <button type="button" class="link link--danger" @click="proof = null">{{ t('receiveRemoveReceipt') }}</button>
+              </div>
+              <template v-else>
+                <button type="button" class="btn" aria-describedby="money-proof-label" @click="proofInput?.click()">{{ t('receiveAttachReceipt') }}</button>
+                <input ref="proofInput" type="file" class="sr" accept="image/*,application/pdf" tabindex="-1" aria-hidden="true" data-testid="receive-proof-input" @change="pickProof" />
+              </template>
+              <p v-if="proofError" class="field-error" role="alert">{{ proofError }}</p>
+            </template>
           </template>
         </div>
         <div class="layer-foot">
@@ -82,3 +115,4 @@ function save() {
     </template>
   </Layer>
 </template>
+

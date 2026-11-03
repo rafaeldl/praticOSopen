@@ -436,12 +436,44 @@ export async function deleteDevice(companyId: string, deviceId: string): Promise
  * service of the last done order. Changing or removing the day also clears
  * `nextMaintenanceNoticeFor`, so the daily notice counts the new day.
  */
-export async function setNextMaintenance(companyId: string, deviceId: string, date: string | null): Promise<boolean> {
+/**
+ * Customer and main service of the order that set the date (the app's
+ * DeviceMaintenanceService.save): the order's customer, and its first service
+ * on this device (a line without device counts for every device).
+ */
+function fromOrder(order: Record<string, unknown>, deviceId: string): { customer: { id: string; name: string } | null; lastService: string | null } {
+  const raw = order.customer as { id?: string; name?: string } | undefined;
+  const services = (Array.isArray(order.services) ? order.services : []) as { deviceId?: string | null; description?: string; service?: { name?: string } }[];
+  const line = services.find((item) => !item.deviceId || item.deviceId === deviceId);
+  const name = (line?.service?.name ?? line?.description ?? '').trim();
+  return { customer: raw?.id ? { id: raw.id, name: raw.name ?? '' } : null, lastService: name || null };
+}
+
+export async function setNextMaintenance(
+  companyId: string,
+  deviceId: string,
+  date: string | null,
+  updatedBy?: UserAggr,
+  orderId?: string,
+): Promise<boolean | 'ORDER_MISMATCH'> {
   const ref = getTenantCollection(companyId, 'devices').doc(deviceId);
   const snapshot = await ref.get();
   if (!snapshot.exists) return false;
+  const audit = { updatedAt: new Date().toISOString(), ...(updatedBy ? { updatedBy } : {}) };
+  let source: ReturnType<typeof fromOrder> | null = null;
+  if (orderId && date !== null) {
+    const order = (await getTenantCollection(companyId, 'orders').doc(orderId).get()).data();
+    const ids = new Set<string>([
+      ...((order?.deviceIds as string[] | undefined) ?? []),
+      ...(((order?.devices as { id?: string }[] | undefined) ?? []).map((item) => item.id ?? '')),
+      (order?.device as { id?: string } | undefined)?.id ?? '',
+    ]);
+    if (!order || !ids.has(deviceId)) return 'ORDER_MISMATCH';
+    source = fromOrder(order, deviceId);
+  }
   if (date === null) {
     await ref.update({
+      ...audit,
       nextMaintenanceDate: FieldValue.delete(),
       nextMaintenanceCustomer: FieldValue.delete(),
       nextMaintenanceLastService: FieldValue.delete(),
@@ -449,10 +481,12 @@ export async function setNextMaintenance(companyId: string, deviceId: string, da
     });
     return true;
   }
-  const history = await deviceHistory(companyId, deviceId);
+  const found = source ? null : await deviceHistory(companyId, deviceId);
+  const history: { customer: { id: string; name: string } | null; lastService: string | null } = source ?? { customer: found?.owner ?? null, lastService: found?.lastService ?? null };
   await ref.update({
+    ...audit,
     nextMaintenanceDate: date,
-    ...(history.owner ? { nextMaintenanceCustomer: history.owner } : {}),
+    ...(history.customer ? { nextMaintenanceCustomer: history.customer } : {}),
     nextMaintenanceLastService: history.lastService ?? FieldValue.delete(),
     nextMaintenanceNoticeFor: FieldValue.delete(),
   });
