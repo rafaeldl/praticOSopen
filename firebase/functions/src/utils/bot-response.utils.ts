@@ -83,7 +83,7 @@ export async function buildOrderDetail(
   const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
   let shareUrl: string | null = null;
   const tokens = await shareTokenService.getTokensForOrder(order.id, companyId);
-  const activeToken = tokens.find((t: any) => new Date(t.expiresAt) > new Date());
+  const activeToken = tokens.find((t: any) => !t.revokedAt && new Date(t.expiresAt) > new Date());
   if (activeToken) {
     shareUrl = `${baseUrl}/q/${activeToken.token}`;
   } else if (order.customer && createdBy) {

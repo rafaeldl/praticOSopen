@@ -403,6 +403,7 @@ match /links/{linkType}/tokens/{tokenId} {
 2. **Permissões:** Middleware valida permissão antes de cada ação
 3. **Multi-tenancy:** `companyId` isola tokens entre empresas
 4. **Revogação:** Token pode ser revogado a qualquer momento
+5. **Troca do link:** gerar um link novo para a OS (outra validade ou permissão) marca os links mais antigos da mesma OS com `revokedAt`; eles param de valer na hora. O documento fica, com o histórico de aprovação
 
 ## UI: ShareLinkSheet
 

@@ -140,6 +140,7 @@ router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: Authent
         rejectedAt: t.rejectedAt,
         rejectionReason: t.rejectionReason,
         isExpired: new Date(t.expiresAt) < new Date(),
+        isRevoked: shareTokenService.isRevoked(t),
       })),
     });
   } catch (error) {
