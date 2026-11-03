@@ -104,3 +104,7 @@ O app não fala em "cadastro de empresa": a empresa continua existindo por baixo
 OS, permissões), mas para o usuário é a conta dele. Spec:
 `docs/superpowers/specs/2026-10-16-modo-individual-design.md`. Equipe é recurso pago: no Free,
 "Convidar" abre os planos (IAP) antes do formulário.
+
+## Web
+
+O app web segue o mesmo fluxo em `/app/start` (`docs/WEB_APP.md`, "Primeiro acesso"): cria a empresa com o mesmo lote e as mesmas regras, e os checklists e exemplos vêm de `POST /v1/app/onboarding/seed`, a versão do servidor do `BootstrapService` (`docs/WEB_API.md`).
