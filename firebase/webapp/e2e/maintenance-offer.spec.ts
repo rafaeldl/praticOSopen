@@ -2,7 +2,7 @@
 // device.maintenance.answer, device.maintenance.no-repeat, device.maintenance.limit),
 // per role: only who manages devices is asked.
 import { expect, test, type Page } from '@playwright/test'
-import { makeContract, makeDevice, makeOrder, readDoc } from './data'
+import { makeContract, makeCustomer, makeDevice, makeOrder, readDoc } from './data'
 import { login, type UserKey } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -103,4 +103,26 @@ test('aparelho com contrato ativo: contratos na ficha, próxima pelo contrato e 
   await panel(page).getByTestId('next-step').click()
   await expect(panel(page).getByTestId('order-status')).toContainText('Concluído')
   await expect(question(page)).toHaveCount(0)
+})
+
+test('Nova OS salva já concluída, com veículo, faz a pergunta (device.maintenance.offer)', async ({ page }) => {
+  const device = await makeDevice()
+  const customer = await makeCustomer({ name: 'Concluída Na Hora' })
+  await login(page, 'admin')
+  await expect(page.getByTestId('orders-table')).toBeVisible()
+  await page.locator('h1').click()
+  await page.keyboard.press('n')
+  const drawer = page.getByRole('dialog', { name: 'Nova OS' })
+  await page.getByRole('combobox', { name: 'Cliente' }).fill('Concluída Na Hora')
+  await page.keyboard.press('Enter')
+  await page.getByRole('combobox', { name: /Veículo/ }).fill(device.serial)
+  await page.getByRole('option', { name: new RegExp(device.name) }).click()
+  await drawer.locator('summary', { hasText: 'Mais opções' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(drawer.getByLabel('Situação')).toBeVisible()
+  await drawer.getByLabel('Situação').selectOption({ label: 'Concluído' })
+  await page.keyboard.press('ControlOrMeta+Enter')
+  await expect(question(page)).toBeVisible()
+  await question(page).getByRole('button', { name: /3 meses/ }).click()
+  await expect.poll(async () => (await readDoc(`devices/${device.id}`))?.nextMaintenanceDate).toBe(addMonths(today(), 3))
 })

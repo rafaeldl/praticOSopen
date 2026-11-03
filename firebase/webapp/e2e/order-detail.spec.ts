@@ -2,7 +2,7 @@
 // dates, person in charge, money, comments, photos, print, delete, assistant).
 // Every write goes through /v1/app/orders; tests check what the server saved.
 import { expect, test, type Page } from '@playwright/test'
-import { makeOrder, readOrder, updateOrderDoc } from './data'
+import { makeDevice, makeOrder, readOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -36,7 +36,10 @@ test('cabeçalho: cliente, veículo, situação, frase do prazo e totais (order.
 })
 
 test('do orçamento ao recebido, pelo botão azul (approve, start, finish, receive)', async ({ page }) => {
-  const order = await makeOrder('admin', { status: 'quote', payment: null })
+  // A vehicle of its own: no other test puts it under a contract, so the maintenance question always comes.
+  const device = await makeDevice()
+  const aggr = { id: device.id, name: device.name, serial: device.serial }
+  const order = await makeOrder('admin', { status: 'quote', payment: null, device: aggr, devices: [aggr], deviceIds: [device.id] })
   await openOrder(page, 'admin', order.id)
   await expect(nextStep(page)).toHaveText('Aprovar orçamento')
   await nextStep(page).click()
@@ -46,6 +49,9 @@ test('do orçamento ao recebido, pelo botão azul (approve, start, finish, recei
   await expect(nextStep(page)).toHaveText('Concluir serviço')
   await nextStep(page).click()
   await expect(status(page)).toHaveText('Concluído')
+  // With a vehicle, the admin is asked for the next maintenance (device.maintenance.offer); closing is a refusal.
+  await expect(page.getByRole('dialog', { name: 'Quando é a próxima manutenção?' })).toBeVisible()
+  await page.keyboard.press('Escape')
   await expect(nextStep(page)).toHaveText('Receber R$ 50,00')
   await nextStep(page).click()
   const receive = dialog(page, 'Receber')

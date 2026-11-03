@@ -4,7 +4,10 @@
 // server checks it (validateReceiptFile accepts the emulator's http URL only
 // inside the Functions emulator).
 import { expect, test, type Page } from '@playwright/test'
+import { getApps, initializeApp } from 'firebase-admin/app'
+import { getStorage } from 'firebase-admin/storage'
 import { makeOrder, readOrder } from './data'
+import { PROJECT_ID } from './fixtures.mjs'
 import { expectNoAxeViolations, login, setTheme, type UserKey } from './helpers'
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
@@ -45,6 +48,14 @@ async function choose(page: Page, button: ReturnType<Page['getByRole']>, file: {
   const chooser = page.waitForEvent('filechooser')
   await button.click()
   await (await chooser).setFiles(file)
+}
+
+/** Whether the Storage emulator still has the file (admin SDK, emulator only). */
+async function storageHas(path: string): Promise<boolean> {
+  if (!process.env.FIREBASE_STORAGE_EMULATOR_HOST) throw new Error('só no emulador')
+  const app = getApps()[0] ?? initializeApp({ projectId: PROJECT_ID })
+  const [exists] = await getStorage(app).bucket(`${PROJECT_ID}.appspot.com`).file(path).exists()
+  return exists
 }
 
 const fileStatus = (url: string) => fetch(url).then((response) => response.status)
@@ -122,3 +133,21 @@ for (const theme of ['light', 'dark'] as const) {
     await expectNoAxeViolations(page, `receber com comprovante ${theme}`)
   })
 }
+
+test('a API recusa depois do envio: o arquivo que subiu é apagado (comprovante órfão)', async ({ page }) => {
+  const order = await done('admin', 70, { paidAmount: 10, transactions: [{ id: 'orph1', type: 'payment', amount: 10, createdAt: new Date().toISOString() }] })
+  await openOrder(page, 'admin', order.id)
+  const uploads: string[] = []
+  page.on('request', (request) => {
+    const match = /\/o\?name=([^&]+)/.exec(request.url()) ?? /\/o\/([^?]+)\?/.exec(request.url())
+    if (request.method() === 'POST' && match && decodeURIComponent(match[1]!).includes('/payments/orph1/')) uploads.push(decodeURIComponent(match[1]!))
+  })
+  await page.route(/\/payments\/orph1\/receipt/, (route) =>
+    route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ success: false, error: { code: 'ORDER_STATUS', message: 'no' } }) }),
+  )
+  const history = panel(page).getByTestId('payment-history')
+  await choose(page, history.getByRole('button', { name: 'Anexar comprovante a R$ 10,00' }), { name: 'pix.png', mimeType: 'image/png', buffer: PNG })
+  await expect.poll(() => uploads.length).toBeGreaterThan(0)
+  await expect.poll(() => storageHas(uploads[0]!)).toBe(false)
+  expect((await readOrder(order.id))?.documents ?? []).toEqual([])
+})

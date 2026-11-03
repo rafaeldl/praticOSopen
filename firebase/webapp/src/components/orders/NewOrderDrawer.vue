@@ -22,7 +22,8 @@ import { newContract } from '@/lib/contracts/model'
 import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
-import { mostUsedKeys, ownerOf, plateHits, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { askWhenOpened } from '@/lib/orders/maintenance-offer'
+import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
@@ -150,7 +151,7 @@ const PLATE = 'plate:'
 const customerRow = (c: Customer) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })
 const customerGroups = (query: string): ComboboxGroup[] => [
   // A plate brings the device and its owner together (customer.picker.plate).
-  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}` })) },
+  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}`, sub: plateOwnerName(d.id) })) },
   // "Recentes": the customers of the last orders, only without a search (customer.picker.recents).
   {
     title: t('pickerRecent'),
@@ -331,6 +332,8 @@ async function save() {
     orderCreated(created.id)
     // With a device and not saved done: the order asks for the check-in checklist (order.offer.checklist).
     if (device.value && status.value !== 'done') markOffer(created.id)
+    // Saved already done with a device: the order asks for the next maintenance (device.maintenance.offer).
+    if (device.value && status.value === 'done') askWhenOpened(created.id)
     const message = t('web.newOrder.created', { order: `${orderShort()} ${created.number}` })
     showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
     announce(message)

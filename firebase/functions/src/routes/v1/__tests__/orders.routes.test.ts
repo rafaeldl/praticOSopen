@@ -633,6 +633,24 @@ describe('dinheiro', () => {
     expect(fakeStorage.deleted).toEqual(['tenants/c1/orders/o1/payments/t1/a.jpg']);
   });
 
+  it('comprovante exige attachPhotos (gerente recebe, mas não anexa) e OS que recebe (nem orçamento nem cancelada)', async () => {
+    seedOrder('o1', {
+      paidAmount: 10,
+      transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: { id: 'owner1', name: 'R' } }],
+    });
+    const receiptFile = file('tenants/c1/orders/o1/payments/t1/a.jpg');
+    expect((await call('manager', 'put', `${O}/o1/payments/t1/receipt`, { receiptFile })).status).toBe(403);
+    expect((await call('manager', 'delete', `${O}/o1/payments/t1/receipt`)).status).toBe(403);
+    expect((await call('manager', 'post', `${O}/o1/payments`, { amount: 5, receiptFile: file('tenants/c1/orders/o1/payments/t2/b.jpg') })).status).toBe(403);
+    expect((await call('manager', 'post', `${O}/o1/payments`, { amount: 5 })).status).toBe(200);
+    for (const status of ['quote', 'canceled']) {
+      seedOrder('o2', { status, paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: { id: 'owner1', name: 'R' } }] });
+      const put = await call('owner', 'put', `${O}/o2/payments/t1/receipt`, { receiptFile: file('tenants/c1/orders/o2/payments/t1/a.jpg') });
+      expect([status, put.status]).toEqual([status, 409]);
+      expect([status, (await call('owner', 'delete', `${O}/o2/payments/t1/receipt`)).status]).toEqual([status, 409]);
+    }
+  });
+
   it('com Valores e cobrança desligado ninguém mexe em dinheiro', async () => {
     seedCompanies({ useFinancial: false });
     seedOrder('o1');

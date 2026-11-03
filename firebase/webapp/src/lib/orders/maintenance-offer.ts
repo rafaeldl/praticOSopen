@@ -13,6 +13,11 @@ import { readStorage, writeStorage } from '@/lib/storage'
 import type { Order } from './model'
 
 export const OFFER_LIMIT = 3
+
+/** Orders saved already done in the Nova OS: the order screen asks once, when it opens. */
+const askOnOpen = new Set<string>()
+export const askWhenOpened = (orderId: string) => void askOnOpen.add(orderId)
+export const takeAskOnOpen = (orderId: string) => askOnOpen.delete(orderId)
 const key = () => `praticos.maintenanceDeclined.${session.companyId}`
 
 export function declines(): number {
@@ -56,7 +61,7 @@ export async function devicesToAsk(order: Order): Promise<{ id: string; name: st
 }
 
 /** Saves the date on every device (one write each: a deleted one does not stop the others). */
-export async function answer(deviceIds: string[], months: number | null, now = new Date()): Promise<number> {
+export async function answer(deviceIds: string[], months: number | null, orderId?: string, now = new Date()): Promise<number> {
   const today = toIsoDay(now)
   let failed = 0
   if (months === null) {
@@ -69,7 +74,8 @@ export async function answer(deviceIds: string[], months: number | null, now = n
     decline()
     return failed
   }
-  for (const id of deviceIds) await setNextMaintenance(id, addMonths(today, months)).catch(() => failed++)
+  // The order gives the customer and the main service (device.maintenance.answer).
+  for (const id of deviceIds) await setNextMaintenance(id, addMonths(today, months), orderId).catch(() => failed++)
   resetDeclines()
   return failed
 }

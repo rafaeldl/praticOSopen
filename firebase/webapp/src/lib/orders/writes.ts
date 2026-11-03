@@ -158,7 +158,8 @@ export async function deletePhoto(orderId: string, photo: { id?: string; url?: s
     const photos = ((snap.data()?.photos ?? []) as { id?: string; url?: string }[]).filter((item) => (photo.id ? item.id !== photo.id : item.url !== photo.url))
     tx.update(docRef, { photos, updatedAt: new Date().toISOString(), updatedBy: author() })
   })
-  if (!photo.storagePath) return
+  // Only a file in this order's photos folder leaves the Storage (an odd path in the document never does).
+  if (!photo.storagePath || !photo.storagePath.startsWith(`tenants/${session.companyId}/orders/${orderId}/photos/`) || photo.storagePath.includes('..')) return
   const [storage, { ref, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
   await deleteObject(ref(storage, photo.storagePath)).catch((error: { code?: string }) => {
     if (error?.code !== 'storage/object-not-found') console.warn('photos: file not deleted', error)

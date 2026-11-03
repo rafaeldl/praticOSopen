@@ -59,7 +59,8 @@ const deviceBody = {
 };
 const createSchema = z.object(deviceBody).refine((value) => !!value.name?.trim() || !!value.serial?.trim(), 'Model or serial is required');
 const updateSchema = z.object({ ...deviceBody, version: z.string().min(1).max(64).optional() });
-const maintenanceSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable() });
+/** orderId: the order just done (device.maintenance.answer); customer and main service come from it, as in the app. */
+const maintenanceSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(), orderId: z.string().min(1).max(200).regex(/^[^/]+$/).optional() });
 
 router.get('/', route('Failed to list devices', async (req, res, companyId) => {
   if (!(await can(req, res, 'viewDevices'))) return forbidden(res, "Permission 'viewDevices' is required");
@@ -103,12 +104,14 @@ router.put('/:id/next-maintenance', route('Failed to set next maintenance', asyn
   if (!(await can(req, res, 'manageDevices'))) return forbidden(res, "Permission 'manageDevices' is required");
   const validation = validateInput(maintenanceSchema, req.body);
   if (!validation.success) return void validationError(res, validation.errors);
-  const { date } = validation.data;
+  const { date, orderId } = validation.data;
   // Only a day from today on (device.detail.maintenance-edit), and a real day.
   if (date !== null && (date < directory.todayInBrazil() || Number.isNaN(Date.parse(`${date}T12:00:00Z`)) || new Date(`${date}T12:00:00Z`).toISOString().slice(0, 10) !== date)) {
     return void validationError(res, ['date must be a day from today on']);
   }
-  if (!(await directory.setNextMaintenance(companyId, param(req, 'id'), date))) return void notFound(res);
+  const result = await directory.setNextMaintenance(companyId, param(req, 'id'), date, getUserAggr(req), orderId);
+  if (result === 'ORDER_MISMATCH') return void validationError(res, ['orderId must be an order with this device']);
+  if (!result) return void notFound(res);
   res.json({ success: true, data: { id: param(req, 'id'), nextMaintenanceDate: date } });
 }));
 

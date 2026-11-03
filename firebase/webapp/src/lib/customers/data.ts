@@ -162,7 +162,7 @@ export async function deleteDevice(id: string): Promise<void> {
   forgetDirectory()
 }
 
-export async function setNextMaintenance(id: string, date: string | null): Promise<void> {
-  await api(`/v1/app/devices/${encodeURIComponent(id)}/next-maintenance`, { method: 'PUT', body: { date } })
+export async function setNextMaintenance(id: string, date: string | null, orderId?: string): Promise<void> {
+  await api(`/v1/app/devices/${encodeURIComponent(id)}/next-maintenance`, { method: 'PUT', body: { date, ...(orderId ? { orderId } : {}) } })
   forgetDirectory()
 }

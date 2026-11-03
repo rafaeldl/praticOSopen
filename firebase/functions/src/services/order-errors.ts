@@ -22,7 +22,8 @@ export type OrderErrorCode =
   | 'INVALID_ASSIGNEE'
   | 'INVALID_CURSOR'
   | 'UNSUPPORTED_QUERY'
-  | 'HOLD_NOT_ALLOWED';
+  | 'HOLD_NOT_ALLOWED'
+  | 'ORDER_STATUS';
 
 export class OrderRuleError extends Error {
   constructor(

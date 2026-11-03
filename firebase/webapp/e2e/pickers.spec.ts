@@ -98,3 +98,17 @@ test('OS: trocar o veículo com ✓ no atual e Nenhum para tirar; placa no selet
   await customers.getByRole('combobox').fill('trc1a')
   await expect(customers.getByRole('group', { name: 'Pela placa ou série' }).getByRole('option', { name: /TRC1A11 · Troca Um/ })).toBeVisible()
 })
+
+test('a placa mostra o nome do dono; Mais usados também no Adicionar da OS (customer.picker.plate, order.item-search.most-used)', async ({ page }) => {
+  const customer = await makeCustomer({ name: 'Dona Placa Nome' })
+  const device = await makeDevice({ serial: 'NMD5F55', name: 'Kwid Nome' })
+  const order = await recentOrder('admin', { customer: { id: customer.id, name: customer.name }, device: { id: device.id, name: device.name, serial: device.serial }, devices: [{ id: device.id, name: device.name, serial: device.serial }], deviceIds: [device.id] })
+  await newOrder(page, 'admin')
+  await page.getByRole('combobox', { name: 'Cliente' }).fill('nmd5')
+  await expect(group(page, 'Pela placa ou série').getByRole('option', { name: /NMD5F55 · Kwid Nome/ })).toContainText('Dona Placa Nome')
+  await page.keyboard.press('Escape')
+  await page.goto(`orders?order=${order.id}`)
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await panel(page).getByRole('button', { name: 'Adicionar serviço ou peça' }).click()
+  await expect(page.getByRole('dialog', { name: 'O que vai ser feito?' }).getByRole('group', { name: 'Mais usados' }).getByRole('option').first()).toBeVisible()
+})

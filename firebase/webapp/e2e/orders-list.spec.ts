@@ -93,6 +93,8 @@ test('filtros do app: orçamentos, paradas, concluídas e todas por mês (home.f
 
   await page.getByRole('button', { name: 'Paradas' }).click()
   await expect(row(page, 503)).toHaveCount(1)
+  // The sentence comes with the whole open list loaded; other tests running alongside add open orders.
+  await loadAll(page)
   await expect(table(page).locator('tbody tr')).toHaveCount(1)
   await expect(page.getByTestId('summary')).toHaveText('1 parada')
 

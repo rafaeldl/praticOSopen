@@ -8,6 +8,7 @@ import { loadCatalogList } from '@/lib/catalog/data'
 import { loadDevice } from '@/lib/customers/data'
 import { normalizePlate } from '@/lib/customers/model'
 import { api, can } from '@/lib/session'
+import { shallowRef } from 'vue'
 import type { Device } from './catalog'
 
 export interface Named {
@@ -46,6 +47,23 @@ export async function ownerOf(deviceId: string): Promise<Named | null> {
   } catch {
     return null
   }
+}
+
+/**
+ * Owner of each plate shown, read once per device and kept for the visit: the
+ * picker reads `plateOwners` and redraws when an owner arrives (customer.picker.plate:
+ * "placa · modelo" with the owner's name below).
+ */
+export const plateOwners = shallowRef(new Map<string, Named | null>())
+const asked = new Set<string>()
+export function plateOwnerName(deviceId: string): string | undefined {
+  const known = plateOwners.value.get(deviceId)
+  if (known !== undefined) return known?.name || undefined
+  if (!asked.has(deviceId)) {
+    asked.add(deviceId)
+    void ownerOf(deviceId).then((owner) => (plateOwners.value = new Map(plateOwners.value).set(deviceId, owner)))
+  }
+  return undefined
 }
 
 /**

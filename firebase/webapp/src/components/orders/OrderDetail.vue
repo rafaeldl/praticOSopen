@@ -13,7 +13,7 @@ import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
-import { ownerOf, plateHits, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
 import {
   accessOf,
@@ -64,7 +64,7 @@ import OrderPhotos from './OrderPhotos.vue'
 import OrderPrint from './OrderPrint.vue'
 import OrderAssistant from './OrderAssistant.vue'
 import PaymentHistory from './receive/PaymentHistory.vue'
-import { paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
+import { dropUpload, paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
 import { receivesMoney, type Payment } from '@/lib/receive/model'
 // Opened on demand: the order shows without them.
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
@@ -258,6 +258,17 @@ async function setStatus(status: OrderStatus) {
   }
 }
 
+// Saved already done in the Nova OS: ask once the order is here (device.maintenance.offer).
+watch(
+  () => order.value?.id,
+  async (id) => {
+    if (!id || !maintenance.takeAskOnOpen(id) || !order.value || order.value.status !== 'done') return
+    const devices = await maintenance.devicesToAsk(order.value)
+    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
+  },
+  { immediate: true },
+)
+
 const maintenanceChoices = computed<Choice[]>(() => {
   const today = toIsoDay(new Date())
   const option = (id: string, label: string, months: number) => ({ id, label, sub: formatMonthYear(fromIsoDay(maintenance.addMonths(today, months)), country()) })
@@ -275,7 +286,7 @@ async function answerMaintenance(id: string | null) {
   dialog.value = null
   if (current?.kind !== 'maintenance') return
   if (id === null) return maintenance.decline()
-  const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id))
+  const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id), order.value?.id)
   if (failed) showToast(t('nextMaintenanceSaveError'))
   else if (id !== 'none') showToast(t('web.order.maintenanceSaved'))
 }
@@ -309,7 +320,13 @@ async function receive(value: { amount: number; paymentMethod?: string; paidAt?:
   const ok = await run(async () => {
     // The file goes first (to the payment's folder), then the payment carries it.
     const receiptFile = proof ? await uploadProof(id, body.clientTransactionId, proof).catch(() => Promise.reject(new ProofUploadError())) : undefined
-    return writes.receivePayment(id, { ...body, ...(receiptFile ? { receiptFile } : {}) }, expected())
+    try {
+      return await writes.receivePayment(id, { ...body, ...(receiptFile ? { receiptFile } : {}) }, expected())
+    } catch (error) {
+      // Refused after the upload: the file goes away (it is never anyone's proof).
+      if (receiptFile) await dropUpload(receiptFile.storagePath)
+      throw error
+    }
   }, t('web.order.received', { amount: money(value.amount) }))
   if (ok) dialog.value = null
 }
@@ -321,7 +338,12 @@ async function attachProof(payment: Payment, file: File) {
   const id = order.value!.id
   await run(async () => {
     const receiptFile = await uploadProof(id, payment.id as string, file).catch(() => Promise.reject(new ProofUploadError()))
-    return setProof(id, payment.id as string, receiptFile)
+    try {
+      return await setProof(id, payment.id as string, receiptFile)
+    } catch (error) {
+      await dropUpload(receiptFile.storagePath)
+      throw error
+    }
   }, t('web.receive.proofSaved'))
 }
 
@@ -488,6 +510,8 @@ async function openDevicePicker(current: { id?: string; name?: string }) {
 async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') {
   try {
     if (kind === 'addItem' && !catalog.value.length) catalog.value = await loadCatalog()
+    // "Mais usados" as in the Nova OS (order.item-search.most-used); a failure only hides it.
+    if (kind === 'addItem' && !mostUsed.value.length) void mostUsedKeys().then((keys) => (mostUsed.value = keys), () => {})
     if (kind === 'customer' && !customers.value.length) customers.value = await loadCustomers()
     if ((kind === 'device' || kind === 'customer') && !devices.value.length) devices.value = await loadDevices()
     if (kind === 'customer') void recentCustomers().then((list) => (recents.value = list), () => {})
@@ -500,9 +524,20 @@ async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') 
   dialog.value = { kind }
 }
 
+const mostUsed = shallowRef<string[]>([])
 const itemGroups = (query: string): ComboboxGroup[] => {
   const list = search(catalog.value, query, (item) => lineKindText(item.kind), 10)
+  const row = (item: CatalogItem) => ({
+    id: `${item.kind}:${item.id}`,
+    label: item.name,
+    sub: lineKindText(item.kind),
+    right: showsMoney.value ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
+  })
   return [
+    {
+      title: t('orderMostUsed'),
+      items: query.trim() ? [] : mostUsed.value.map((key) => catalog.value.find((item) => `${item.kind}:${item.id}` === key)).filter((item): item is CatalogItem => !!item).map(row),
+    },
     {
       title: query ? undefined : t('orderAllItems'),
       items: list.map((item) => ({
@@ -527,7 +562,7 @@ const NONE = '__none'
 const recents = shallowRef<Named[]>([])
 const customerRow = (c: Customer | Named) => ({ id: c.id, label: c.name, sub: formatPhone((c as Customer).phone) || undefined })
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}` })) },
+  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}`, sub: plateOwnerName(d.id) })) },
   { title: t('pickerRecent'), items: query.trim() ? [] : recents.value.map((r) => customers.value.find((c) => c.id === r.id) ?? r).map(customerRow) },
   {
     title: query.trim() || !recents.value.length ? undefined : t('web.newOrder.customers'),

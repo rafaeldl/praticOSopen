@@ -21,6 +21,8 @@ export type ApiRole = (typeof API_ROLES)[number];
 const MEMBERS: ApiRole[] = [...API_ROLES];
 const ADMINS: ApiRole[] = ['owner', 'admin'];
 const FINANCIAL: ApiRole[] = ['owner', 'admin', 'manager'];
+/** Proof of a payment: who receives and has attachPhotos (the manager receives, but does not attach). */
+const FINANCIAL_PROOF: ApiRole[] = ['owner', 'admin'];
 const SEE_ALL_ORDERS: ApiRole[] = ['owner', 'admin', 'manager', 'supervisor'];
 const RECEIVERS: ApiRole[] = ['owner', 'admin', 'manager', 'consultant'];
 const ASSIGNERS: ApiRole[] = ['owner', 'admin', 'supervisor'];
@@ -190,7 +192,7 @@ export const API_CASES: ApiCase[] = [
     // Who receives: financial access, or the consultant on their own order (canReceiveOnOrder).
     id: 'orders.payment', area: 'OS', title: 'lançar pagamento na OS de outra pessoa',
     method: 'post', path: `${O}/o1/payments`, body: { amount: 10, paymentMethod: 'pix', receiptFile: orderFile },
-    allow: FINANCIAL,
+    allow: FINANCIAL_PROOF,
   },
   {
     id: 'orders.payment.remove', area: 'OS', title: 'tirar pagamento da OS',
@@ -210,12 +212,12 @@ export const API_CASES: ApiCase[] = [
   {
     id: 'orders.payment.receipt', area: 'OS', title: 'anexar comprovante ao pagamento',
     method: 'put', path: `${O}/o1/payments/t1/receipt`, body: { receiptFile: orderFile },
-    allow: FINANCIAL,
+    allow: FINANCIAL_PROOF,
   },
   {
     id: 'orders.payment.receiptRemove', area: 'OS', title: 'tirar comprovante do pagamento',
     method: 'delete', path: `${O}/o1/payments/t1/receipt`,
-    allow: FINANCIAL,
+    allow: FINANCIAL_PROOF,
   },
   {
     id: 'orders.discount', area: 'OS', title: 'dar desconto na OS',

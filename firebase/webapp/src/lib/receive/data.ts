@@ -72,6 +72,16 @@ export async function uploadProof(orderId: string, transactionId: string, file: 
   return { url: await getDownloadURL(target), storagePath, fileName: file.name.slice(0, 256), contentType: file.type }
 }
 
+/** The file just uploaded, when the API refused it: never left behind (a failure here is only logged). */
+export async function dropUpload(storagePath: string): Promise<void> {
+  try {
+    const [storage, { ref, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
+    await deleteObject(ref(storage, storagePath))
+  } catch (error) {
+    console.warn('proof: upload not removed', error)
+  }
+}
+
 /** Attaches or replaces the proof of a payment; the server deletes the old file. */
 export function setProof(orderId: string, transactionId: string, receiptFile: ProofFile) {
   return api<OrderResponse>(`${order(orderId)}/payments/${encodeURIComponent(transactionId)}/receipt`, { method: 'PUT', body: { receiptFile } })
