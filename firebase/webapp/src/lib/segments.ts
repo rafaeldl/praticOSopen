@@ -2,7 +2,7 @@
 // segment custom label, then i18n, then English. `segments/global` comes first and
 // the company's segment overrides it.
 import { reactive } from 'vue'
-import { firestoreClient } from './firebase'
+import { firestoreLite } from './firebase'
 import type { MessageKey } from '@/generated/message-keys'
 
 export interface CustomField {
@@ -91,7 +91,7 @@ const state = reactive({
 })
 
 async function readSegment(id: string): Promise<SegmentDoc | null> {
-  const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snapshot = await getDoc(doc(db, 'segments', id))
   return snapshot.exists() ? (snapshot.data() as SegmentDoc) : null
 }

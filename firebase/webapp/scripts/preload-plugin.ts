@@ -43,7 +43,7 @@ export function preloadCritical(base: string): Plugin {
         const skip = new Set([entry, ...((entry && (bundle[entry]?.imports ?? [])) || [])])
         const url = (file: string) => `${base}${file}`
         const always = chunkFiles(bundle, (id) => /node_modules\/firebase\/(app|auth)\//.test(id)).filter((file) => !skip.has(file))
-        const session = chunkFiles(bundle, (id) => /node_modules\/firebase\/firestore\//.test(id)).filter(
+        const session = chunkFiles(bundle, (id) => /node_modules\/firebase\/firestore\/lite\//.test(id)).filter(
           (file) => !skip.has(file) && !always.includes(file),
         )
         const list = chunkFiles(bundle, (id) => id.endsWith('/views/OrdersView.vue')).filter(

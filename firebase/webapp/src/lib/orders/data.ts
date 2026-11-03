@@ -27,8 +27,6 @@ export function listContext(): ListContext {
 export interface ListPage {
   rows: Order[]
   hasMore: boolean
-  /** The server did not answer: the rows came from this browser's copy. */
-  stale?: boolean
 }
 
 interface ApiList {
@@ -71,9 +69,9 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
     async more(): Promise<ListPage> {
       if (!ctx.showsMoney) return apiPage(PAGE_SIZE)
       if (!lastRaw) return { rows: [], hasMore: false }
-      const page = await nextOrdersPage(query, lastRaw, PAGE_SIZE)
-      lastRaw = page.rows[page.rows.length - 1] ?? lastRaw
-      return { rows: page.rows.map(toOrder), hasMore: page.rows.length === PAGE_SIZE, stale: page.fromCache }
+      const raw = await nextOrdersPage(query, lastRaw, PAGE_SIZE)
+      lastRaw = raw[raw.length - 1] ?? lastRaw
+      return { rows: raw.map(toOrder), hasMore: raw.length === PAGE_SIZE }
     },
     /** Live first rows (Firestore only). The API list is refreshed after each write instead. */
     watch(size: number, onRows: (rows: Order[]) => void, onError: (error: unknown) => void) {

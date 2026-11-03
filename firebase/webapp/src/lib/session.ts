@@ -4,7 +4,7 @@
 import { reactive } from 'vue'
 import type { User } from 'firebase/auth'
 import { createApi, type ApiOptions } from './api'
-import { authClient, cacheState, clearFirestoreCache, firestoreClient } from './firebase'
+import { authClient, cacheState, clearFirestoreCache, firestoreLite } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { readStorage, writeStorage } from './storage'
@@ -90,29 +90,14 @@ export function pickCompany(companies: CompanyEntry[], saved: string | null): st
 
 const savedCompanyKey = (uid: string) => `praticos.company.${uid}`
 
+/**
+ * One-shot read through the REST build (lib/firebase.ts), so the start never
+ * waits for the full Firestore client.
+ */
 async function readDoc<T>(path: string): Promise<T | null> {
-  const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snapshot = await getDoc(doc(db, path))
   return snapshot.exists() ? (snapshot.data() as T) : null
-}
-
-/**
- * This browser's copy first, when it has one, and the server copy right after
- * through `onFresh`. Returning to the app then waits for the disk, not the network.
- */
-async function readDocCacheFirst<T>(path: string, onFresh: (value: T | null) => void): Promise<T | null> {
-  if (!cacheState.trusted) return readDoc<T>(path)
-  const [db, { doc, getDocFromCache }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-  try {
-    const cached = await getDocFromCache(doc(db, path))
-    if (cached.exists()) {
-      void readDoc<T>(path).then(onFresh, (error) => console.warn('session: refresh failed', error))
-      return cached.data() as T
-    }
-  } catch {
-    // Not in the cache: read from the server below.
-  }
-  return readDoc<T>(path)
 }
 
 async function loadCompany(companyId: string): Promise<void> {
@@ -243,15 +228,9 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     const guess = guessCompany(roles, saved)
     if (guess) hintListeners.forEach((listener) => listener({ uid: user.uid, companyId: guess, role: roles[guess] as string }))
     const [profile, guessed] = await Promise.all([
-      readDocCacheFirst<{ name?: string; companies?: unknown }>(`users/${user.uid}`, (fresh) => {
-        if (session.uid !== user.uid) return
-        session.name = fresh?.name ?? user.displayName
-        session.companies = resolveCompanies(fresh?.companies, roles)
-      }),
+      readDoc<{ name?: string; companies?: unknown }>(`users/${user.uid}`),
       guess
-        ? readDocCacheFirst<CompanyProfile>(`companies/${guess}`, (fresh) => {
-            if (session.companyId === guess) session.company = fresh
-          }).catch((error) => {
+        ? readDoc<CompanyProfile>(`companies/${guess}`).catch((error) => {
             console.warn('session: company not loaded', error)
             companyReadFailed = true
             return null

@@ -43,13 +43,14 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 
 | Operação | Caminho |
 |---|---|
-| Sessão, empresa, lista e OS de quem vê valores | Firestore direto, com `onSnapshot` |
+| Sessão, empresa, rótulos do ramo e páginas da lista de quem vê valores | Firestore REST (`firebase/firestore/lite`), leitura única |
+| Linhas ao vivo da lista e OS de quem vê valores | Firestore completo, com `onSnapshot`, carregado depois da lista aparecer |
 | Lista e OS de quem não tem `viewPrices` | Projeção da API (`GET /v1/app/orders`, `/:id`), sem nenhum valor |
 | Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
 | Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
 
-Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Cache persistente fica desligado, porque o computador da oficina é compartilhado.
+Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
 
 ### Sessão e permissões
 
@@ -289,6 +290,18 @@ Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª v
 
 Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1ª visita e **487 ms** na volta.
 
+Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta máquina: **1.104 ms** na 1ª visita e **706 ms** na volta. Na mesma máquina e no mesmo dia, antes da mudança: 1.328 ms e 520 ms. O caminho até a lista caiu de 239,1 KB para 130,4 KB (brotli).
+
+| Caminho medido | JS até a lista | 1ª visita | Volta |
+|---|---|---|---|
+| Antes: Firestore completo com cache persistente | 239,1 KB | 1.328 ms | 520 ms |
+| Firestore REST (`lite`) para sessão, rótulos e páginas; completo depois, só para o tempo real | **130,4 KB** | **1.104 ms** | 706 ms |
+
+- **Por que REST e não a API:** `GET /v1/app/orders` também tiraria o Firestore do caminho, mas passa pela Function (partida a frio em produção) e não roda no teste de desempenho, que fica sem o emulador de Functions. O REST lê direto do Firestore, com as mesmas regras, e não abre o canal do cliente completo, que custa idas e voltas.
+- **Auth em pedaço menor:** não muda nada. O Auth já usa `initializeAuth` sem o resolvedor de popup (8,2 KB); o popup só baixa ao entrar.
+- **A volta ficou mais lenta (520 para 706 ms):** antes ela lia a lista do disco (cache persistente). Agora a 1ª página sempre vem do servidor. Continua bem abaixo da meta e a 1ª visita, que é a meta, ficou 220 ms mais rápida. O cache persistente continua no cliente completo (OS aberta) e as regras de apagar ao sair não mudaram.
+- **Sem dados velhos na 1ª página:** como ela não vem mais do disco, o aviso "pode estar desatualizado" só aparece quando falha uma página seguinte.
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -299,16 +312,17 @@ O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim"
 - É apagado quando a sessão termina de outro jeito: outra aba, token que não renova, conta desativada (`onAuthStateChanged` com `null`).
 - É apagado quando entra outra conta.
 - O dono do cache fica guardado (`praticos.cacheOwner`) até a exclusão dar certo, então uma falha é tentada de novo na próxima carga.
-- Enquanto a exclusão não sai, as leituras ignoram o disco.
+- Enquanto a exclusão não sai, o cliente completo fica só na memória e não lê o disco. A sessão e a lista nunca leem o disco (Firestore REST).
 
-**Lista:** disco, páginas e servidor se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se a lista veio do disco e o servidor não respondeu, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
+**Lista:** páginas e linhas ao vivo se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se uma página seguinte falha, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
 
 ### Metas e guardas
 
 | Guarda | Onde | Limite |
 |---|---|---|
 | JS da tela de entrada (brotli) | `scripts/check-budget.mjs` | 200 KB |
-| JS até a lista, com Firestore | `scripts/check-budget.mjs` | 240 KB |
+| JS até a lista, com Firestore REST | `scripts/check-budget.mjs` | 240 KB |
+| Firestore completo fora do caminho até a lista | `scripts/check-budget.mjs` | sim |
 | Acessibilidade, LCP, CLS, TBT | `lighthouserc.json` | 100, 2,5 s, 0,1, 300 ms |
 | axe em claro e escuro | `e2e/a11y.spec.ts` | 0 violações |
 | Lista visível, p75, 1ª visita | `e2e/perf/list-visible.spec.ts` | 1,5 s |
@@ -339,4 +353,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 238,9 de 240 KB depois da fatia de mandar, receber e cobrar (238,7 depois da de clientes). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 130,4 de 240 KB desde a fatia da agenda (era 239,1 KB). As telas novas ficam fora do primeiro download.

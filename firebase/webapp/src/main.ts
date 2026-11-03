@@ -6,7 +6,7 @@ import './styles/foundation.css'
 import './styles/orders.css'
 import App from './App.vue'
 import { startI18n } from './i18n'
-import { firestoreClient } from './lib/firebase'
+import { firestoreLite } from './lib/firebase'
 import { firstOrdersPage } from './lib/orders-query'
 import { roleHasPermission } from './lib/permissions'
 import { startPrefs } from './lib/prefs'
@@ -34,7 +34,7 @@ onSessionHint(({ uid, companyId, role }) => {
 // Network work starts now, side by side, so it does not wait for the screen.
 // Firestore only for who already has a session: the login screen does not need it.
 void startSession()
-if (hasSavedSession()) void firestoreClient()
+if (hasSavedSession()) void firestoreLite()
 // Text first: nothing on screen can render without it.
 void startI18n().then(() => {
   createApp(App).use(router).mount('#app')
