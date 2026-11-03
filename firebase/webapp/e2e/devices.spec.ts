@@ -29,7 +29,7 @@ test('lista com situação e busca pela placa sem hífen (device.list.view, devi
 })
 
 test('cadastrar: série em maiúsculas com a máscara e sugestão de modelo que traz a marca (device.list.create, device.form.save, device.form.autocomplete, device.form.serial-rules)', async ({ page }) => {
-  const model = `Strada ${Date.now()}`
+  const model = `Yaris Cross ${Date.now()}`
   await makeDevice({ name: model, manufacturer: 'Fiat', category: 'Picape' })
   await openDevices(page, 'supervisor')
   await page.getByTestId('new-device').click()
@@ -148,6 +148,17 @@ test('apagar pelo botão da linha só sai quando o servidor confirma (device.lis
   expect(await readDoc(`devices/${device.id}`)).toBeUndefined()
 })
 
+test('apagar pelo menu da tela do veículo volta à lista (device.detail.delete)', async ({ page }) => {
+  const device = await makeDevice()
+  await openDevices(page, 'admin', `?device=${device.id}`)
+  await panel(page).getByTestId('device-menu').click()
+  await page.getByRole('dialog', { name: device.name }).getByRole('button', { name: 'Apagar', exact: true }).click()
+  await page.getByRole('dialog', { name: `Apagar ${device.name}?` }).getByRole('button', { name: 'Apagar' }).click()
+  await expect(page.locator('.toast')).toContainText(`${device.name} apagado`)
+  await expect(panel(page)).toHaveCount(0)
+  expect(await readDoc(`devices/${device.id}`)).toBeUndefined()
+})
+
 test('aparelho que não existe mais (device.detail.view not_found)', async ({ page }) => {
   await openDevices(page, 'admin', '?device=nope-device')
   await expect(page.getByTestId('device-not-found')).toContainText('Este Veículo não está mais aqui')
@@ -158,7 +169,7 @@ test('cadastrar outro veículo pela tela do cliente (customer.detail.add-device)
   await login(page, 'supervisor', `customers?customer=${customer.id}`)
   await page.getByTestId('customer-add-device').click()
   const form = page.getByTestId('device-form')
-  await form.getByLabel('Modelo').fill(`Gol ${Date.now()}`)
+  await form.getByLabel('Modelo').fill(`Xsara ${Date.now()}`)
   await form.getByTestId('save-device').click()
   await expect(panel(page)).toBeVisible()
   await expect(page).toHaveURL(/devices\?device=/)

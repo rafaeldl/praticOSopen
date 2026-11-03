@@ -36,7 +36,7 @@ test('troca tema, e o escuro não pisca depois de recarregar', async ({ page }) 
 test('tema do sistema é seguido', async ({ browser }) => {
   const context = await browser.newContext({ colorScheme: 'dark' })
   const page = await context.newPage()
-  await page.goto('http://127.0.0.1:4183/app/login')
+  await page.goto(`http://127.0.0.1:${process.env.PW_PORT ?? 4183}/app/login`)
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await context.close()
 })

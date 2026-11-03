@@ -1,8 +1,8 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
 import { expect, test, type Page } from '@playwright/test'
-import { brDay, makeCustomer, makeDevice, makeOrder, readDoc } from './data'
-import { login, signOut } from './helpers'
+import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc } from './data'
+import { chooseCompany, login, signOut } from './helpers'
 
 const list = (page: Page) => page.getByTestId('customers-table')
 const panel = (page: Page) => page.getByTestId('customer-detail')
@@ -25,17 +25,21 @@ test('lista: total, grupos por inicial sem acento e "#" no fim (customer.list.vi
   await expect(row(page, digit.name)).toBeVisible()
 })
 
-test('selos: atrasada vence aberta; consultor e técnico contam só as OS que leem (customer.list.badges)', async ({ page }) => {
-  const late = await makeCustomer()
-  await makeOrder('admin', { customer: { id: late.id, name: late.name }, status: 'approved', dueDate: brDay(-3) })
-  await makeOrder('admin', { customer: { id: late.id, name: late.name }, status: 'progress' })
+test('selos: atrasada vence aberta (customer.list.badges)', async ({ page }) => {
+  // Company B: a late order in A would change the order list's "1 atrasada".
+  const late = await makeCustomer({}, 'company-beta')
+  await makeLateOrderInB(late)
+  await login(page, 'owner', `customers?q=${encodeURIComponent(late.name)}`)
+  await chooseCompany(page, 'Beta Repairs')
+  await expect(row(page, late.name)).toContainText('1 atrasada')
+})
+
+test('selos: consultor e técnico contam só as OS que leem (customer.list.badges)', async ({ page }) => {
   const mine = await makeCustomer()
   await makeOrder('consultant', { customer: { id: mine.id, name: mine.name }, status: 'approved' })
-  await makeOrder('admin', { customer: { id: mine.id, name: mine.name }, status: 'approved' })
+  await makeOrder('admin', { customer: { id: mine.id, name: mine.name }, status: 'progress' })
 
-  await openCustomers(page, 'admin', `?q=${encodeURIComponent(late.name)}`)
-  await expect(row(page, late.name)).toContainText('1 atrasada')
-  await page.getByLabel(/Buscar por nome/).fill(mine.name)
+  await openCustomers(page, 'admin', `?q=${encodeURIComponent(mine.name)}`)
   await expect(row(page, mine.name)).toContainText('2 em aberto')
 
   await page.goto('settings')
@@ -144,6 +148,8 @@ test('tela do cliente: contato completo, campo do segmento, gastou, falta recebe
   await expect(contact).toContainText('cliente@exemplo.test')
   await expect(contact).toContainText('529.982.247-25')
   await expect(contact).toContainText('Rua das Flores, 10')
+  // customer.form.map: the address opens in the maps site.
+  await expect(detail.getByTestId('customer-map')).toHaveAttribute('href', /google\.com\/maps\/search\/\?api=1&query=Rua%20das%20Flores/)
   await expect(detail.getByTestId('customer-custom')).toContainText('Aniversário')
   await expect(detail.getByTestId('customer-custom')).toContainText('20/05/1990')
   await expect(detail.getByTestId('customer-money')).toContainText('Falta receber R$ 200,00')

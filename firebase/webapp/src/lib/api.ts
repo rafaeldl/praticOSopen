@@ -11,6 +11,7 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   NOT_FOUND: 'web.error.notFound',
   ORDER_NOT_FOUND: 'web.error.notFound',
   CUSTOMER_NOT_FOUND: 'web.error.notFound',
+  DEVICE_NOT_FOUND: 'web.error.notFound',
   CHARGE_NOT_FOUND: 'web.error.notFound',
   INVOICE_NOT_FOUND: 'web.error.notFound',
   VALIDATION_ERROR: 'web.error.validation',

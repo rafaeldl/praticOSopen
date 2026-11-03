@@ -8,3 +8,4 @@ test-results/
 *.log
 .env.local
 e2e/.state/
+.env.*.local
