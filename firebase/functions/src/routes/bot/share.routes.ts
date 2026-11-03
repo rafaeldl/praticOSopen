@@ -181,7 +181,7 @@ router.get('/:number/share', async (req: AuthenticatedRequest, res: Response) =>
     const now = new Date();
 
     // Filter to only active (non-expired) tokens
-    const activeTokens = tokens.filter((t) => new Date(t.expiresAt) > now);
+    const activeTokens = tokens.filter((t) => !shareTokenService.isRevoked(t) && new Date(t.expiresAt) > now);
 
     if (activeTokens.length === 0) {
       res.json({

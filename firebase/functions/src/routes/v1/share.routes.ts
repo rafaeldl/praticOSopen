@@ -121,8 +121,10 @@ router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: Authent
 
     const orderId = String(req.params.orderId);
 
-    // Get all tokens for this order
-    const tokens = await shareTokenService.getTokensForOrder(orderId, companyId);
+    // Tokens of this order, without the ones replaced by a newer link: the
+    // app shares the first one not expired, and a revoked one never opens.
+    const tokens = (await shareTokenService.getTokensForOrder(orderId, companyId))
+      .filter((t) => !shareTokenService.isRevoked(t));
 
     const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
 
@@ -140,7 +142,6 @@ router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: Authent
         rejectedAt: t.rejectedAt,
         rejectionReason: t.rejectionReason,
         isExpired: new Date(t.expiresAt) < new Date(),
-        isRevoked: shareTokenService.isRevoked(t),
       })),
     });
   } catch (error) {
