@@ -4,7 +4,7 @@
 // templates and orders it changes; the seed has "Vistoria de entrada" copied
 // from the segment, "Teste final" and "Pronto para copiar" still ready.
 import { expect, test, type Page } from '@playwright/test'
-import { makeOrder, makeOrderForm, makeTemplate, readOrder, readOrderForms, readTemplate, templatesNamed, updateTemplateDoc, writeOrderFormRaw } from './data'
+import { makeOrder, makeOrderForm, makeReadyTemplate, makeTemplate, setTemplateInB, readOrder, readOrderForms, readTemplate, templatesNamed, updateTemplateDoc, writeOrderFormRaw } from './data'
 import { chooseCompany, login, signOut, type UserKey } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -78,20 +78,23 @@ test('quem não gerencia checklists não chega à tela, nem pela URL (checklist.
 })
 
 test('pronto: ver as perguntas e usar, com id novo, e ele sai dos prontos (checklist.list.preview, checklist.list.import)', async ({ page }) => {
+  // Its own ready-made one: "Usar" takes it out of the list, so the test can run again.
+  const name = `Pronto para copiar ${Date.now()}`
+  const readyId = await makeReadyTemplate(name)
   await openChecklists(page, 'admin')
-  await page.getByTestId('ready-list').getByRole('button', { name: 'Ver Pronto para copiar' }).click()
+  await page.getByTestId('ready-list').getByRole('button', { name: `Ver ${name}` }).click()
   const preview = page.getByTestId('ready-preview')
   await expect(preview).toContainText('Só o teste de Usar')
   await expect(preview).toContainText('Uma pergunta')
-  await page.getByRole('dialog', { name: 'Pronto para copiar' }).getByRole('button', { name: 'Usar' }).click()
-  await page.getByRole('dialog', { name: 'Usar Pronto para copiar?' }).getByRole('button', { name: 'Usar' }).click()
-  await expect(page.getByText('Pronto para copiar está nos seus checklists').first()).toBeVisible()
-  await expect(page.getByTestId('checklists-list').getByRole('button', { name: 'Abrir Pronto para copiar' })).toBeVisible()
-  await expect(page.getByTestId('ready-list').getByText('Pronto para copiar')).toHaveCount(0)
-  const copies = await templatesNamed('Pronto para copiar')
+  await page.getByRole('dialog', { name }).getByRole('button', { name: 'Usar' }).click()
+  await page.getByRole('dialog', { name: `Usar ${name}?` }).getByRole('button', { name: 'Usar' }).click()
+  await expect(page.getByText(`${name} está nos seus checklists`).first()).toBeVisible()
+  await expect(page.getByTestId('checklists-list').getByRole('button', { name: `Abrir ${name}` })).toBeVisible()
+  await expect(page.getByTestId('ready-list').getByText(name)).toHaveCount(0)
+  const copies = await templatesNamed(name)
   expect(copies).toHaveLength(1)
-  expect(copies[0]?.docId).not.toBe('seg-import')
-  expect(copies[0]).toMatchObject({ title: 'Pronto para copiar', description: 'Só o teste de Usar', isActive: true, id: copies[0]?.docId })
+  expect(copies[0]?.docId).not.toBe(readyId)
+  expect(copies[0]).toMatchObject({ title: name, description: 'Só o teste de Usar', isActive: true, id: copies[0]?.docId })
 })
 
 test('novo checklist só com teclado: diz o que falta, valida a pergunta, reordena com Alt+↑ e grava como o app (checklist.view.new, checklist.form.*, checklist.question.validation)', async ({ page }) => {
@@ -229,6 +232,9 @@ test('parar de usar, voltar a usar e apagar pelo "…"; apagar na lista mantém 
 })
 
 test('plano Free com 1 ativo não trava no navegador, como o app sem planos pagos (checklist.counter.active, checklist.view.new)', async ({ page }) => {
+  // The seed's state of company B (one on, one off), also when the test runs again.
+  await setTemplateInB('b-active', { isActive: true })
+  await setTemplateInB('b-off', { isActive: false })
   await login(page, 'owner', 'checklists')
   await chooseCompany(page, 'Beta Repairs')
   await expect(page.getByTestId('checklists-summary')).not.toContainText('em uso')
@@ -303,8 +309,7 @@ test('OS: adicionar abre direto na 1ª pergunta e responde só com teclado, como
   await fill(page).getByRole('textbox', { name: 'Quilometragem' }).fill('12.345,5')
   // Last answer with nothing left: completed and back to the order.
   await page.keyboard.press('Enter')
-  // Five answers go one after the other; on a busy machine the last one may take a while.
-  await expect(fill(page)).toBeHidden({ timeout: 20_000 })
+  await expect(fill(page)).toBeHidden()
   await expect(forms(page).getByTestId('form-progress')).toHaveText('Completo')
   const [saved] = await readOrderForms(order.id)
   expect(saved).toMatchObject({ formDefinitionId: template.id, title: template.title, status: 'completed', deviceId: 'device-2' })
@@ -507,10 +512,10 @@ test('Nova OS com veículo oferece o checklist de entrada; Agora não três veze
     await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 03')
     await page.keyboard.press('Enter')
     const drawer = page.getByRole('dialog', { name: 'Nova OS' })
-    // The only vehicle comes in by itself once the customer's are read; with more than one known, pick it.
-    const auto = await drawer
-      .getByText('TST0003')
-      .waitFor({ timeout: 4000 })
+    // The only vehicle comes in by itself once the customer's are read (the device field goes away); with more than one known, pick it.
+    const auto = await page
+      .locator('#no-device')
+      .waitFor({ state: 'detached', timeout: 4000 })
       .then(
         () => true,
         () => false,
@@ -520,7 +525,8 @@ test('Nova OS com veículo oferece o checklist de entrada; Agora não três veze
       await expect(page.getByRole('option', { name: /Veículo 3/ }).first()).toBeVisible()
       await page.keyboard.press('Enter')
     }
-    await expect(drawer).toContainText('TST0003')
+    await expect(page.locator('#no-device')).toHaveCount(0)
+    await expect(drawer).toContainText('Veículo 3')
     await page.keyboard.press('ControlOrMeta+Enter')
     await expect(panel(page)).toBeVisible()
   }

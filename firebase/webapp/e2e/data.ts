@@ -342,3 +342,17 @@ export async function setCompanyFields(company: string, fields: Record<string, u
 export async function readCompany(company: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${company}`).get()).data()
 }
+
+/** A ready-made checklist of the automotive segment, unique per test, so "Usar" can run again. */
+export async function makeReadyTemplate(title: string): Promise<string> {
+  const id = `seg-${randomUUID().slice(0, 8)}`
+  await db()
+    .doc(`segments/automotive/forms/${id}`)
+    .set({ title, description: 'Só o teste de Usar', isActive: true, items: [question({ id: 'um', label: 'Uma pergunta', type: 'text' })] })
+  return id
+}
+
+/** Fields of a checklist of company B (merge), so a test starts from the seed's state. */
+export async function setTemplateInB(id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_B}/forms/${id}`).set({ ...fields, updatedAt: new Date().toISOString() }, { merge: true })
+}
