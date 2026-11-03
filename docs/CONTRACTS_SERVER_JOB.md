@@ -9,7 +9,7 @@ O servidor agora tem a mesma geração, em três entradas:
 | Entrada | Quando | `now` |
 |---|---|---|
 | `scheduledContractOrders` (job) | Todo dia às 02:00 de Brasília, só com `config/contracts.jobEnabled == true` | Horário agendado do job (`event.scheduleTime`) |
-| `POST /v1/app/contracts/generate-due` | Quando o app ou o web pedir | Hora da chamada |
+| `POST /v1/app/contracts/generate-due` | Quando o app pedir, só com `config/contracts.routeEnabled == true` (senão 403 `CONTRACTS_ROUTE_DISABLED`) | Hora da chamada |
 | App antigo | Ao abrir, como sempre | `DateTime.now()` do aparelho |
 
 O app não mudou nesta etapa.
@@ -28,7 +28,7 @@ Firestore:
 companies/{companyId}                    useContracts, name, country
 companies/{companyId}/orders/{modelo}    isContract: true, contract { ... }
 companies/{companyId}/orders/contract_{modelo}_{AAAAMMDD}   OS gerada (servidor ou app, mesmo id)
-config/contracts                         jobEnabled (chave global do job)
+config/contracts                         jobEnabled (job), routeEnabled (rota); as duas desligadas por padrão
 ```
 
 ## Fluxo de Dados
@@ -93,11 +93,11 @@ Desligado por padrão: o deploy sobe o job, mas ele sai sem fazer nada enquanto 
 1. O app precisa parar de gerar sozinho (chamar a rota em vez de `checkAndGenerateDueOrders`, ou ler o modelo do servidor dentro de transação), e as versões antigas precisam sair de uso.
 2. Ou aceitar o risco de duplicar com alguma proteção do servidor. Opções no fim deste documento.
 
-A rota pode ser usada pelo web desde já: ela tem o mesmo risco que dois celulares abertos hoje.
+A rota também nasce desligada (`config/contracts.routeEnabled`). O web não chama a rota nem gera OS: quem gera é o app ou o job. Ligar a rota só faz sentido quando o app passar a chamá-la em vez de gerar sozinho.
 
 ## Pendente de decisão
 
-- Quando ligar o job e o que fazer com as versões antigas do app (acima).
+- Quando ligar o job e a rota (`config/contracts { jobEnabled: true, routeEnabled: true }`) e o que fazer com as versões antigas do app (acima). Decisão do dono.
 - Proteção opcional contra a OS duplicada do app antigo: um gatilho na criação que encontre a OS do mesmo modelo e vencimento gerada pelo servidor e marque ou apague a do app. Não foi feito: apaga dado criado pelo usuário.
 - Empresas abandonadas com `useContracts` vão passar a receber uma OS por período para sempre. Hoje só gera quem abre o app. Talvez gerar só para empresa com uso recente ou plano ativo.
 - Empresas fora do Brasil: o job roda no horário de Brasília. Para fusos a oeste (ex.: EUA), a OS mensal sai na noite anterior pelo horário local.
@@ -107,8 +107,8 @@ A rota pode ser usada pelo web desde já: ela tem o mesmo risco que dois celular
 ## Exemplos de Uso
 
 ```bash
-# Ligar o job (decisão do dono, não fazer antes do item "Ligar o job")
-# Firestore: config/contracts { jobEnabled: true }
+# Ligar o job e a rota (decisão do dono, não fazer antes do item "Ligar o job")
+# Firestore: config/contracts { jobEnabled: true, routeEnabled: true }
 
 # Rota
 curl -X POST "$API/v1/app/contracts/generate-due" \

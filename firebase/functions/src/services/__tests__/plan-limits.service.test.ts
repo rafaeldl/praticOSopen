@@ -118,6 +118,7 @@ describe('checkCompanyPlanLimit', () => {
 describe('routes return PLAN_LIMIT', () => {
   let server: Server;
   beforeAll((done) => {
+    process.env.PLAN_LIMITS_ENABLED = 'true';
     const app = express();
     app.use(express.json());
     app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -134,10 +135,12 @@ describe('routes return PLAN_LIMIT', () => {
     server = app.listen(0, '127.0.0.1', done);
   });
   afterAll((done) => {
+    delete process.env.PLAN_LIMITS_ENABLED;
     server.close(done);
   });
 
   beforeEach(() => {
+    process.env.PLAN_LIMITS_ENABLED = 'true';
     seed('config/paidPlans', { enabled: true });
     seed('companies/c1', FREE);
     seed('companies/c1/memberships/owner1', { role: 'owner' });
@@ -183,5 +186,11 @@ describe('routes return PLAN_LIMIT', () => {
     const res = await request(server).post('/orders/o1/photos').send({ base64: 'aGk=' });
     expect(res.status).toBe(201);
     expect(res.body.data.photo.id).toBe('ph1');
+  });
+
+  it('deploy switch off (PLAN_LIMITS_ENABLED unset): at the limit still goes through', async () => {
+    delete process.env.PLAN_LIMITS_ENABLED;
+    const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
+    expect(res.status).toBe(201);
   });
 });

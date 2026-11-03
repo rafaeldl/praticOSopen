@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireAppPermission, roleHasPermission } from '../../middleware/app-permission.middleware';
-import { generateDueOrders } from '../../services/contract.service';
+import { generateDueOrders, isContractsRouteEnabled } from '../../services/contract.service';
 
 const router: Router = Router();
 
@@ -16,6 +16,7 @@ const router: Router = Router();
  * opens: needs `createOrder` (the manager can't); consultant and technician
  * generate only from the contracts they created. Safe to repeat: an order
  * that already exists for a due date is not created again.
+ * Off (403 CONTRACTS_ROUTE_DISABLED) unless config/contracts.routeEnabled.
  */
 router.post('/generate-due', requireAppPermission('createOrder'), async (req: AuthenticatedRequest, res: Response) => {
   const companyId = req.userContext?.companyId;
@@ -24,6 +25,13 @@ router.post('/generate-due', requireAppPermission('createOrder'), async (req: Au
     return;
   }
   try {
+    if (!(await isContractsRouteEnabled())) {
+      res.status(403).json({
+        success: false,
+        error: { code: 'CONTRACTS_ROUTE_DISABLED', message: 'Contract generation on the server is off' },
+      });
+      return;
+    }
     // Same scope as TenantOrderRepository.creatorScope (orderCreatorFilterFor).
     const seesAll = roleHasPermission(req.userContext?.role, 'viewAllOrders', undefined);
     const result = await generateDueOrders(companyId, {

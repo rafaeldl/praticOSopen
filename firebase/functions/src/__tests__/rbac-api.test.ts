@@ -178,6 +178,7 @@ function seedTenants() {
     });
     seedOrders(cid);
   }
+  seed('config/contracts', { routeEnabled: true });
   seed('segments/hvac/forms/g1', { title: 'Vistoria do ramo', isActive: true, items: [] });
   for (const role of API_ROLES) {
     seed(`users/${UID[role]}`, {

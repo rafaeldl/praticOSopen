@@ -174,3 +174,13 @@ export async function isContractsJobEnabled(): Promise<boolean> {
   const snap = await db.collection('config').doc('contracts').get();
   return snap.exists && snap.get('jobEnabled') === true;
 }
+
+/**
+ * Switch of POST /v1/app/contracts/generate-due: `config/contracts.routeEnabled == true`.
+ * Off by default, for the same reason as the job: until the app stops
+ * generating on its own, the web never generates (docs/CONTRACTS_SERVER_JOB.md).
+ */
+export async function isContractsRouteEnabled(): Promise<boolean> {
+  const snap = await db.collection('config').doc('contracts').get();
+  return snap.exists && snap.get('routeEnabled') === true;
+}

@@ -184,8 +184,18 @@ describe('POST /generate-due', () => {
   afterAll((done) => {
     server.close(done);
   });
+  beforeEach(() => seed('config/contracts', { routeEnabled: true }));
   const post = (role: string, user = 'u1') =>
     request(server).post('/contracts/generate-due').set('x-test-role', role).set('x-test-user', user).send({});
+
+  it('off without config/contracts.routeEnabled: 403 and nothing generated', async () => {
+    seed('config/contracts', { jobEnabled: true });
+    seed('companies/c1/orders/t1', template({ nextDueDate: '2020-01-01T00:00:00.000' }));
+    const res = await post('admin');
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe('CONTRACTS_ROUTE_DISABLED');
+    expect(generated()).toHaveLength(0);
+  });
 
   it('the manager cannot (no createOrder), like the app', async () => {
     seed('companies/c1/orders/t1', template({ nextDueDate: '2020-01-01T00:00:00.000' }));
