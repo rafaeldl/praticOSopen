@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "generatedFrom": "fd9e64da",
+  "rule": "Situação do pagamento: gravada só como paid/unpaid; orçamento e cancelada não têm situação. \"Parcial\" é calculado em memória.",
+  "sourceOfTruth": [
+    "lib/utils/order_payment_math.dart paymentStatusFor, applyOrderStatus, orderStatusPaymentUpdate, activeStatusPaymentUpdate, remainingBalance"
+  ],
+  "otherImplementations": [
+    "firebase/functions/src/services/order.service.ts paymentStatusFields, calculateRemainingBalance"
+  ],
+  "cases": [
+    {"id":"approved-unpaid","given":{"status":"approved","total":100,"paidAmount":0},"expect":{"payment":"unpaid","paid":false,"remaining":100}},
+    {"id":"approved-partial-is-stored-as-unpaid","given":{"status":"approved","total":100,"paidAmount":40},"expect":{"payment":"unpaid","paid":false,"remaining":60}},
+    {"id":"progress-paid","given":{"status":"progress","total":100,"paidAmount":100},"expect":{"payment":"paid","paid":true,"remaining":0}},
+    {"id":"done-overpaid","given":{"status":"done","total":100,"paidAmount":120},"expect":{"payment":"paid","paid":true,"remaining":0}},
+    {"id":"zero-total-is-never-paid","given":{"status":"done","total":0,"paidAmount":0},"expect":{"payment":"unpaid","paid":false,"remaining":0}},
+    {"id":"negative-total-is-never-paid","given":{"status":"done","total":-30,"paidAmount":10},"expect":{"payment":"unpaid","paid":false,"remaining":0}},
+    {"id":"float-drift-on-total-is-ignored","given":{"status":"done","total":824.4200000000001,"paidAmount":824.42},"expect":{"payment":"paid","paid":true,"remaining":0}},
+    {"id":"float-drift-on-paid-amount","given":{"status":"done","total":0.8,"paidAmount":0.7999999999999999},"expect":{"payment":"paid","paid":true,"remaining":0},"note":"O Dart arredonda os dois lados; o TS só o total. Os chamadores do servidor arredondam antes, então só a função pura diverge.","divergesIn":{"functions":{"payment":"unpaid","paid":false,"remaining":0}}},
+    {"id":"quote-has-no-payment-status","given":{"status":"quote","total":100,"paidAmount":0},"expect":{"payment":null,"paid":false,"remaining":100}},
+    {"id":"quote-with-money-keeps-no-status","given":{"status":"quote","total":100,"paidAmount":100},"expect":{"payment":null,"paid":false,"remaining":0}},
+    {"id":"canceled-has-no-payment-status","given":{"status":"canceled","total":100,"paidAmount":100},"expect":{"payment":null,"paid":false,"remaining":0}},
+    {"id":"remaining-is-rounded","given":{"status":"approved","total":0.3,"paidAmount":0.1},"expect":{"payment":"unpaid","paid":false,"remaining":0.2}}
+  ]
+}
