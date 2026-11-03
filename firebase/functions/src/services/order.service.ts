@@ -38,6 +38,7 @@ import * as catalogService from './catalog.service';
 import { roundMoney } from '../utils/money';
 import { computeOrderTotal, findLine, ItemKind } from './order-items';
 import { OrderRuleError } from './order-errors';
+import { isValidOrderDate, ZONELESS_DATE_TIME } from '../utils/validation.utils';
 import { orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
 
 export { roundMoney };
@@ -79,6 +80,18 @@ export async function readOrderForWrite(
 
 function audit(actor: UserAggr | undefined, now: string): Record<string, unknown> {
   return { updatedAt: now, ...(actor ? { updatedBy: actor } : {}) };
+}
+
+/**
+ * Visit and delivery as stored: local time without a zone stays as it came (the
+ * app writes and reads it that way; turning it into UTC would move it by the
+ * company's offset in the app). An instant with a zone is saved in UTC.
+ */
+export function storedOrderDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  // Last guard for every caller (app routes, bot): an impossible date is a 400, never saved.
+  if (!isValidOrderDate(value)) throw new OrderRuleError('VALIDATION_ERROR', 400, 'Invalid date');
+  return ZONELESS_DATE_TIME.test(value) ? value : new Date(value).toISOString();
 }
 
 // ============================================================================
@@ -139,10 +152,15 @@ export async function listOrders(companyId: string, params: OrderQueryParams): P
   if (params.customerId) query = query.where('customer.id', '==', params.customerId);
   if (params.deviceId) query = query.where('device.id', '==', params.deviceId);
   if (params.assignedTo) query = query.where('assignedTo.id', '==', params.assignedTo);
-  if (params.startDate) query = query.where('createdAt', '>=', new Date(params.startDate).toISOString());
-  if (params.endDate) query = query.where('createdAt', '<=', new Date(params.endDate).toISOString());
-
   const sort = params.sort ?? 'createdAt';
+  // The range is on the sorted field (Firestore takes one range per query): createdAt
+  // for lists, scheduledDate or dueDate for the agenda. Stored as ISO text, so the
+  // bounds are compared as text; the app writes local time without a zone, so the
+  // caller widens the range and places each order in the company's zone.
+  const rangeField = sort === 'scheduledDate' || sort === 'dueDate' ? sort : 'createdAt';
+  if (params.startDate) query = query.where(rangeField, '>=', new Date(params.startDate).toISOString());
+  if (params.endDate) query = query.where(rangeField, '<=', new Date(params.endDate).toISOString());
+
   const direction = params.direction ?? DEFAULT_DIRECTION[sort];
   const limit = params.limit ?? 20;
 
@@ -749,8 +767,8 @@ export async function createOrder(
     photos: [],
     total,
     discount: 0,
-    dueDate: input.dueDate ? new Date(input.dueDate).toISOString() : null,
-    scheduledDate: input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null,
+    dueDate: storedOrderDate(input.dueDate),
+    scheduledDate: storedOrderDate(input.scheduledDate),
     status,
     paid: false,
     payment: status === 'quote' || status === 'canceled' ? null : 'unpaid',
@@ -816,10 +834,10 @@ export async function updateOrder(
       }
     }
     if (input.dueDate !== undefined) {
-      updateData.dueDate = input.dueDate ? new Date(input.dueDate).toISOString() : null;
+      updateData.dueDate = storedOrderDate(input.dueDate);
     }
     if (input.scheduledDate !== undefined) {
-      updateData.scheduledDate = input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null;
+      updateData.scheduledDate = storedOrderDate(input.scheduledDate);
     }
     if (input.assignedTo !== undefined) {
       updateData.assignedTo = input.assignedTo;

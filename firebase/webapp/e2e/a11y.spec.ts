@@ -20,6 +20,7 @@ async function auditScreens(page: Page, theme: Theme) {
   for (const [path, title] of [
     ['./', 'Início'],
     ['orders', 'Ordens de Serviço'],
+    ['schedule', 'Agenda'],
     ['settings', 'Configurações'],
     ['dev/components', 'Componentes'],
     ['nope', 'Página não encontrada'],

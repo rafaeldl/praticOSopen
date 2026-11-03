@@ -25,10 +25,12 @@ const DevicesView = withCustomerTexts(() => import('@/views/customers/DevicesVie
 const ImportView = withCustomerTexts(() => import('@/views/customers/ImportView.vue'))
 // Financeiro > Receber: its texts are in the orders chunk (components/orders/receive).
 const FinanceView = () => Promise.all([import('@/components/orders/receive/FinanceReceive.vue'), loadOrderTexts()]).then(([m]) => m)
+// Agenda opens orders beside it, so it brings their texts too.
+const AgendaView = () => Promise.all([import('@/views/agenda/AgendaView.vue'), loadTexts('agenda'), loadOrderTexts()]).then(([m]) => m)
 // The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
 const CatalogView = withCustomerTexts(() => import('@/views/catalog/CatalogView.vue'))
 const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/CatalogImportView.vue'))
-const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView, finance: FinanceView, catalog: CatalogView }
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, catalog: CatalogView }
 
 export const routes: RouteRecordRaw[] = [
   {

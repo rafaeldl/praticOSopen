@@ -13,7 +13,6 @@ import { loadOrderTexts, t } from '@/i18n'
 import { formatMonthYear } from '@/lib/format'
 import { mark } from '@/lib/marks'
 import { applyFreshFirstPage, mergeById } from '@/lib/order-list'
-import { onFreshFirstPage } from '@/lib/orders-query'
 import { onOrderEvent } from '@/lib/orders/bus'
 import { ASSIGNED_READS, FIRST_PAGE, companyHasOrders, createListLoader, listContext, type ListLoader } from '@/lib/orders/data'
 import {
@@ -26,7 +25,6 @@ import {
   isHeld,
   matchesSearch,
   monthGroups,
-  normalizeOrder,
   queryStatuses,
   remainingOnRow,
   rowsFor,
@@ -203,7 +201,6 @@ async function loadMore() {
     if (token !== loadToken) return
     rows.value = mergeById(rows.value, page.rows)
     hasMore.value = page.hasMore
-    if (page.stale) stale.value = true
   } catch (error) {
     console.warn('orders: next page failed', error)
     stale.value = true
@@ -329,12 +326,6 @@ watch(
   },
 )
 
-// Shown from this browser's copy: replace the first page when the server answers.
-onFreshFirstPage((result) => {
-  if (result.failed) stale.value = true
-  else rows.value = applyFreshFirstPage(rows.value, result.rows.map((row) => normalizeOrder(row.id, row, ctx.showsMoney)), FIRST_PAGE)
-})
-
 const stopBus = onOrderEvent(({ order, removedId, createdId }) => {
   // Firestore's live rows bring a new order by themselves; the API list is read again.
   if (createdId && !ctx.showsMoney) void load()
@@ -370,7 +361,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeys)
   removers.forEach((remove) => remove())
   stopSearch?.()
-  onFreshFirstPage(undefined)
 })
 
 const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order)].filter(Boolean).join(' · ')

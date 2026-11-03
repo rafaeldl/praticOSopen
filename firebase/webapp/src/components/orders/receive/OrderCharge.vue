@@ -23,12 +23,15 @@ import '@/styles/receive.css'
 
 // canCharge false: who only receives (consultant) sees the open link to read, never acts on it (#513, R4).
 const props = defineProps<{ order: Order; remaining: number; canCharge: boolean }>()
-const emit = defineEmits<{ open: [open: boolean] }>()
+// open: true (a link is open), false (none), null (not known yet, or the read failed).
+const emit = defineEmits<{ open: [open: boolean | null] }>()
 const phone = ref(props.order.customer?.phone ?? '')
 
 const BR = 'BR'
 const charges = shallowRef<Charge[]>([])
 const loaded = ref(false)
+/** Neither the channel nor the REST read answered: the error with "Tentar de novo" (M1 of #518). */
+const failed = ref(false)
 const dialog = ref<null | 'new' | 'cancel'>(null)
 const busy = ref(false)
 const keptKey = 'praticos.keptCharges'
@@ -60,18 +63,41 @@ const resend = computed(() => {
 })
 
 let stop: (() => void) | undefined
-onMounted(async () => {
+let alive = true
+/** Until the charges are known, the order screen does not offer Receber in blue. */
+async function watchCharges() {
+  stop?.()
+  failed.value = false
+  emit('open', null)
+  const next = await watchOrderCharges(
+    props.order.id,
+    (list) => {
+      charges.value = list
+      failed.value = false
+      emit('open', !!openChargeOf(list))
+      loaded.value = true
+    },
+    {
+      onFailed: () => {
+        failed.value = true
+        emit('open', null)
+      },
+    },
+  )
+  if (alive) stop = next
+  else next()
+}
+onMounted(() => {
   if (props.order.customer?.id)
     void loadCustomer(props.order.customer.id)
       .then((detail) => detail.customer.phone && (phone.value = detail.customer.phone))
       .catch(() => {})
-  stop = await watchOrderCharges(props.order.id, (list) => {
-    charges.value = list
-    emit('open', !!openChargeOf(list))
-    loaded.value = true
-  })
+  void watchCharges()
 })
-onBeforeUnmount(() => stop?.())
+onBeforeUnmount(() => {
+  alive = false
+  stop?.()
+})
 
 function keep() {
   if (!open.value) return
@@ -105,7 +131,11 @@ async function copy() {
 </script>
 
 <template>
-  <section v-if="loaded && (canCharge || open)" class="charge-card" aria-labelledby="od-charge-title" data-testid="order-charge">
+  <section v-if="failed" class="charge-card" role="alert" data-testid="charge-error">
+    <p>{{ t('web.charge.loadError') }}</p>
+    <button type="button" class="btn btn--small" @click="watchCharges">{{ t('web.tryAgain') }}</button>
+  </section>
+  <section v-else-if="loaded && (canCharge || open)" class="charge-card" aria-labelledby="od-charge-title" data-testid="order-charge">
     <h3 id="od-charge-title">{{ t('chargeLinkSection') }}</h3>
     <template v-if="open && state">
       <p :class="{ 'is-late': state.expired }" data-testid="charge-state">

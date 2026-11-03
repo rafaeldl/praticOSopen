@@ -60,7 +60,8 @@ test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ pag
 async function loadAll(page: Page) {
   const more = page.getByRole('button', { name: 'Mostrar mais' })
   for (let i = 0; i < 20 && (await more.count()); i++) {
-    await more.click()
+    // The infinite scroll can load the last page and take the button away between count and click.
+    await more.click({ timeout: 3000 }).catch(() => {})
     await page.waitForTimeout(300)
   }
 }

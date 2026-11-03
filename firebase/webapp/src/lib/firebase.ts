@@ -3,6 +3,7 @@
 import type { FirebaseApp, FirebaseOptions } from 'firebase/app'
 import type { Auth } from 'firebase/auth'
 import type { Firestore } from 'firebase/firestore'
+import type { Firestore as LiteFirestore } from 'firebase/firestore/lite'
 import type { FirebaseStorage } from 'firebase/storage'
 
 const env = import.meta.env
@@ -52,27 +53,45 @@ export function authClient(): Promise<Auth> {
   return auth
 }
 
+let lite: Promise<LiteFirestore> | undefined
+/**
+ * One-shot reads (session documents, list pages, segment labels) through the
+ * REST build of Firestore: about a quarter of the size and no channel to open,
+ * so the list paints before the full client below downloads. Never cached on disk.
+ */
+export function firestoreLite(): Promise<LiteFirestore> {
+  lite ??= (async () => {
+    const [instance, { getFirestore, connectFirestoreEmulator }] = await Promise.all([firebaseApp(), import('firebase/firestore/lite')])
+    const client = getFirestore(instance)
+    if (import.meta.env.VITE_USE_EMULATORS === '1') connectFirestoreEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080))
+    return client
+  })()
+  return lite
+}
+
+/**
+ * False while the cache may still hold another account's data (a deletion
+ * failed): the full client then keeps its cache in memory only.
+ */
+export const cacheState = { trusted: true }
+
 let firestore: Promise<Firestore> | undefined
+/** Full client: live updates (onSnapshot) and writes. Loaded after the first paint. */
 export function firestoreClient(): Promise<Firestore> {
   firestore ??= (async () => {
-    const [instance, { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator }] =
+    const [instance, { initializeFirestore, memoryLocalCache, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator }] =
       await Promise.all([firebaseApp(), import('firebase/firestore')])
-    // Persistent cache makes the return visit start from disk. The computer is
-    // shared, so signing out erases it (clearFirestoreCache).
+    // Persistent cache keeps the open order across tabs. The computer is shared,
+    // so signing out erases it (clearFirestoreCache); while another account's copy
+    // could not be erased, this client stays in memory and never reads the disk.
     const client = initializeFirestore(instance, {
-      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+      localCache: cacheState.trusted ? persistentLocalCache({ tabManager: persistentMultipleTabManager() }) : memoryLocalCache(),
     })
     if (import.meta.env.VITE_USE_EMULATORS === '1') connectFirestoreEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080))
     return client
   })()
   return firestore
 }
-
-/**
- * False while the cache may still hold another account's data (a deletion
- * failed): reads then skip the disk and go to the server.
- */
-export const cacheState = { trusted: true }
 
 /**
  * Erases this browser's copy of the data. Throws when it could not, so the

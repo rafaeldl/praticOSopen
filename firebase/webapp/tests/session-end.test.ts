@@ -11,7 +11,7 @@ vi.mock('firebase/auth', () => ({
     authCallback = callback
   },
 }))
-vi.mock('firebase/firestore', () => ({
+vi.mock('firebase/firestore/lite', () => ({
   doc: (_db: unknown, path: string) => path,
   getDoc: async () => ({ exists: () => false, data: () => undefined }),
   getDocFromCache: async () => {
@@ -20,7 +20,7 @@ vi.mock('firebase/firestore', () => ({
 }))
 vi.mock('../src/lib/firebase', () => ({
   authClient: async () => ({ currentUser: null }),
-  firestoreClient: async () => ({}),
+  firestoreLite: async () => ({}),
   clearFirestoreCache: () => clearFirestoreCache(),
   cacheState,
 }))

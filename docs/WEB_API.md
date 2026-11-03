@@ -129,7 +129,10 @@ Testes: `routes/v1/__tests__/app-catalog.routes.test.ts` e os casos `catalog.*` 
 - `limit` até 100; `cursor` é o `pagination.nextCursor` da página anterior.
 - `status`: uma ou várias situações separadas por vírgula.
 - `sort`: `createdAt` (padrão, mais nova primeiro), `updatedAt`, `number`, `dueDate`, `scheduledDate` (estas duas, mais próxima primeiro). OS sem o campo da ordem ficam fora.
-- Filtros: `customerId`, `deviceId`, `assignedTo`, `startDate`/`endDate` (em `createdAt`, só com `sort=createdAt`).
+- Filtros: `customerId`, `deviceId`, `assignedTo`, `startDate`/`endDate`. O intervalo vale no campo da ordem: `createdAt`, `scheduledDate` ou `dueDate` (a agenda pede `sort=scheduledDate&startDate=…&endDate=…`); com outra ordem → `400`. As datas ficam gravadas como texto ISO e são comparadas como texto. O app grava visita e entrega em hora local sem fuso, então quem pede folga o intervalo (o web usa 14 h de cada lado) e põe cada OS no dia pelo fuso da empresa.
+- `POST` e `PATCH` aceitam `dueDate`/`scheduledDate` com fuso (gravado em UTC) ou sem fuso (`yyyy-mm-ddTHH:mm[:ss[.ffffff]]`, hora local da empresa, gravado como veio, como o app grava). Assim o valor lido no GET pode voltar igual no PATCH. O web grava sem fuso.
+- `dueDate` e `scheduledDate` saem como foram gravados quando são texto sem fuso (gravados pelo app, hora local da empresa); com fuso ou Timestamp, saem em UTC. Antes eles viravam UTC lidos no fuso da Function, o que mudava a hora pelo fuso da empresa.
+- Cada linha traz `createdBy` (como o detalhe): consultor e técnico só mudam a OS que criaram.
 - Combinação sem índice no Firestore → `400 UNSUPPORTED_QUERY`.
 - `pagination.total` só na primeira página.
 

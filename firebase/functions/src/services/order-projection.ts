@@ -16,6 +16,16 @@ type Json = Record<string, unknown>;
 const iso = (value: unknown): string | null =>
   timestampToDate(value as string | undefined)?.toISOString() ?? null;
 
+/**
+ * Visit and delivery dates. The app writes them as local time without a zone
+ * (Dart toIso8601String); read on the server they would turn into UTC and move
+ * by the company's offset. That text goes out as it is, for the client to place
+ * in the company's zone; a Timestamp or text with a zone goes out as UTC ISO.
+ */
+const ZONELESS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?$/;
+const wallTime = (value: unknown): string | null =>
+  typeof value === 'string' && ZONELESS.test(value) ? value : iso(value);
+
 function compact(value: Json): Json {
   return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined));
 }
@@ -74,8 +84,10 @@ export function projectOrderSummary(order: Order, showPrices: boolean): Json {
     status: order.status,
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? undefined,
-    dueDate: iso(order.dueDate) ?? undefined,
-    scheduledDate: iso(order.scheduledDate) ?? undefined,
+    // Who created it decides what consultant and technician may change (agenda, board).
+    createdBy: order.createdBy ?? undefined,
+    dueDate: wallTime(order.dueDate) ?? undefined,
+    scheduledDate: wallTime(order.scheduledDate) ?? undefined,
     createdAt: iso(order.createdAt) ?? undefined,
     updatedAt: iso(order.updatedAt) ?? undefined,
     // Opaque: sent back as expectedUpdatedAt without any conversion (order-version.ts).
@@ -103,8 +115,8 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? null,
     rating: order.rating,
-    dueDate: iso(order.dueDate),
-    scheduledDate: iso(order.scheduledDate),
+    dueDate: wallTime(order.dueDate),
+    scheduledDate: wallTime(order.scheduledDate),
     completedAt: order.completedAt,
     createdAt: iso(order.createdAt),
     createdBy: order.createdBy,

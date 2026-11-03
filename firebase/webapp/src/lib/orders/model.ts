@@ -12,6 +12,7 @@ import {
   roundMoney,
   type OrderRole,
 } from '@/lib/rules/order-rules'
+import { instantOf, wallParts } from '@/lib/zone'
 
 export type OrderStatus = 'quote' | 'approved' | 'progress' | 'done' | 'canceled'
 export const STATUSES: OrderStatus[] = ['quote', 'approved', 'progress', 'done', 'canceled']
@@ -108,7 +109,11 @@ export function versionOf(raw: Raw): string | null {
 /** Firestore Timestamp, Date, ISO string or millis → ISO string. */
 export function isoOf(value: unknown): string | null {
   if (value === null || value === undefined || value === '') return null
-  if (typeof value === 'string') return Number.isNaN(Date.parse(value)) ? null : new Date(value).toISOString()
+  // Text without a zone (the app's visit and delivery) is the company's local time.
+  if (typeof value === 'string') {
+    const date = instantOf(value)
+    return Number.isNaN(date.getTime()) ? null : date.toISOString()
+  }
   if (value instanceof Date) return value.toISOString()
   if (typeof value === 'number') return new Date(value).toISOString()
   const ts = value as { toDate?: () => Date; seconds?: number }
@@ -210,11 +215,15 @@ export function overdue(order: Pick<Order, 'status' | 'dueDate'>, now: Date): bo
   return isOverdue(order.status, order.dueDate, now)
 }
 
-const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
+/** The company's calendar day as a UTC midnight, so days subtract exactly. */
+const dayIndex = (date: Date) => {
+  const p = wallParts(date)
+  return Date.UTC(p.y, p.m - 1, p.d) / 86400000
+}
 
-/** Whole calendar days from `from` to `to` (local time), never negative. */
+/** Whole calendar days from `from` to `to` (company's days), never negative. */
 export function daysBetween(from: Date, to: Date): number {
-  return Math.max(0, Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000))
+  return Math.max(0, dayIndex(to) - dayIndex(from))
 }
 
 /** How late, for "Atrasada 3 dias / há 2 meses / há 1 ano" (home.row.overdue). */
@@ -235,14 +244,14 @@ export const sameDay = (iso: string | null | undefined, now: Date) => !!iso && d
 
 /** today / tomorrow / yesterday, or null: the screen writes the date then. */
 export function relativeDay(iso: string, now: Date): 'today' | 'tomorrow' | 'yesterday' | null {
-  const diff = Math.round((startOfDay(new Date(iso)).getTime() - startOfDay(now).getTime()) / 86400000)
+  const diff = dayIndex(new Date(iso)) - dayIndex(now)
   return diff === 0 ? 'today' : diff === 1 ? 'tomorrow' : diff === -1 ? 'yesterday' : null
 }
 
 /** Midnight means "only the day": the hour is not shown. */
 export function hasTime(iso: string): boolean {
-  const date = new Date(iso)
-  return date.getHours() !== 0 || date.getMinutes() !== 0
+  const p = wallParts(instantOf(iso))
+  return p.h !== 0 || p.min !== 0
 }
 
 // ---------------------------------------------------------------------------

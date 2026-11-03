@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 const docs = new Map<string, unknown>()
 const failing = new Set<string>()
 
-vi.mock('firebase/firestore', () => ({
+vi.mock('firebase/firestore/lite', () => ({
   doc: (_db: unknown, path: string) => path,
   getDoc: async (path: string) => {
     if (failing.has(path)) throw new Error('offline')
@@ -30,7 +30,7 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('../src/lib/firebase', () => ({
   authClient: async () => ({ currentUser: user }),
-  firestoreClient: async () => ({}),
+  firestoreLite: async () => ({}),
   clearFirestoreCache: async () => {},
   cacheState: { trusted: true },
 }))

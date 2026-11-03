@@ -1,6 +1,6 @@
 // Where orders are read from (ADR-001): Firestore for who sees values, the API
 // projection (no money in any field) for who does not. Writes are in writes.ts.
-import { firestoreClient } from '@/lib/firebase'
+import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { FIRST_PAGE, PAGE_SIZE, firstOrdersPage, nextOrdersPage, orderByNumber, watchFirstRows, type OrderRow, type OrdersQuery } from '@/lib/orders-query'
 import { api, can, session } from '@/lib/session'
 import { lineIds } from './line-ids'
@@ -27,8 +27,6 @@ export function listContext(): ListContext {
 export interface ListPage {
   rows: Order[]
   hasMore: boolean
-  /** The server did not answer: the rows came from this browser's copy. */
-  stale?: boolean
 }
 
 interface ApiList {
@@ -71,9 +69,9 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
     async more(): Promise<ListPage> {
       if (!ctx.showsMoney) return apiPage(PAGE_SIZE)
       if (!lastRaw) return { rows: [], hasMore: false }
-      const page = await nextOrdersPage(query, lastRaw, PAGE_SIZE)
-      lastRaw = page.rows[page.rows.length - 1] ?? lastRaw
-      return { rows: page.rows.map(toOrder), hasMore: page.rows.length === PAGE_SIZE, stale: page.fromCache }
+      const raw = await nextOrdersPage(query, lastRaw, PAGE_SIZE)
+      lastRaw = raw[raw.length - 1] ?? lastRaw
+      return { rows: raw.map(toOrder), hasMore: raw.length === PAGE_SIZE }
     },
     /** Live first rows (Firestore only). The API list is refreshed after each write instead. */
     watch(size: number, onRows: (rows: Order[]) => void, onError: (error: unknown) => void) {
@@ -107,7 +105,7 @@ export async function companyHasOrders(ctx: ListContext): Promise<boolean> {
       const body = await api<ApiList | unknown[]>('/v1/app/orders?limit=1', { raw: true })
       return (Array.isArray(body) ? body : (body.data ?? [])).length > 0
     }
-    const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+    const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
     const filters = ctx.seesAll ? [] : [where('createdBy.id', '==', ctx.uid)]
     const snapshot = await getDocs(query(collection(db, 'companies', ctx.companyId, 'orders'), ...filters, limit(1)))
     return !snapshot.empty
@@ -135,14 +133,24 @@ const isMissing = (error: unknown) => {
   return code === 'permission-denied' || code === 'NOT_FOUND' || code === 'FORBIDDEN' || code === 'INSUFFICIENT_PERMISSIONS'
 }
 
+/** How long the live channel may stay silent before the order is read once instead (B6). */
+export const LIVE_TIMEOUT_MS = 6000
+
 /**
  * One order, kept current. Firestore listens (who sees values); the API is read
  * again on `refresh()` and when the window gets focus. A deleted order, or one
  * this person cannot open, is "not found" (never an empty editable order).
+ *
+ * The live channel can stall (a busy network or emulator): after LIVE_TIMEOUT_MS
+ * without its first answer, the order is read once through the REST build and
+ * the channel keeps trying behind it. If that read fails too, the screen shows
+ * the error with "Tentar de novo", never "Carregando…" forever.
  */
 export function watchOrder(ctx: ListContext, id: string, onState: (state: DetailState) => void) {
   let stop: (() => void) | undefined
   let alive = true
+  let answered = false
+  let timer: ReturnType<typeof setTimeout> | undefined
 
   async function readApi() {
     try {
@@ -153,25 +161,57 @@ export function watchOrder(ctx: ListContext, id: string, onState: (state: Detail
     }
   }
 
-  async function start() {
-    onState({ kind: 'loading' })
-    if (!ctx.showsMoney) {
-      await readApi()
-      return
+  /** One read without the channel (REST build). */
+  async function readOnce() {
+    try {
+      const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+      const snapshot = await getDoc(doc(db, 'companies', ctx.companyId, 'orders', id))
+      if (!alive || answered) return
+      if (!snapshot.exists()) onState({ kind: 'notFound' })
+      else {
+        const order = await orderFromDoc(id, snapshot.data() as Record<string, unknown>)
+        if (alive && !answered) onState({ kind: 'ready', order })
+      }
+    } catch (error) {
+      if (alive && !answered) onState({ kind: isMissing(error) ? 'notFound' : 'failed' })
     }
+  }
+
+  async function listen() {
+    stop?.()
+    answered = false
+    clearTimeout(timer)
+    timer = setTimeout(() => void readOnce(), LIVE_TIMEOUT_MS)
     const [db, { doc, onSnapshot }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
     if (!alive) return
     stop = onSnapshot(
       doc(db, 'companies', ctx.companyId, 'orders', id),
       (snapshot) => {
+        // A miss in this browser's cache is not "deleted": wait for the server (or the read after the timeout).
+        if (!snapshot.exists() && snapshot.metadata.fromCache) return
+        answered = true
+        clearTimeout(timer)
         if (!snapshot.exists()) {
           onState({ kind: 'notFound' })
           return
         }
         void orderFromDoc(id, snapshot.data() as Record<string, unknown>).then((order) => alive && onState({ kind: 'ready', order }))
       },
-      (error) => onState({ kind: isMissing(error) ? 'notFound' : 'failed' }),
+      (error) => {
+        answered = true
+        clearTimeout(timer)
+        onState({ kind: isMissing(error) ? 'notFound' : 'failed' })
+      },
     )
+  }
+
+  async function start() {
+    onState({ kind: 'loading' })
+    if (!ctx.showsMoney) {
+      await readApi()
+      return
+    }
+    await listen()
   }
 
   const onFocus = () => {
@@ -181,8 +221,16 @@ export function watchOrder(ctx: ListContext, id: string, onState: (state: Detail
   void start()
   return {
     refresh: () => (ctx.showsMoney ? Promise.resolve() : readApi()),
+    /** "Tentar de novo" after a failure: the API again, or listen again and read once meanwhile. */
+    retry: async () => {
+      if (!ctx.showsMoney) return readApi()
+      onState({ kind: 'loading' })
+      await listen()
+      await readOnce()
+    },
     stop() {
       alive = false
+      clearTimeout(timer)
       stop?.()
       window.removeEventListener('focus', onFocus)
     },

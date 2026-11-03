@@ -3,12 +3,12 @@ import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.
 const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
-  owner: { allowed: ['finance', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
-  admin: { allowed: ['finance', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
-  manager: { allowed: ['finance', 'catalog', 'customers', 'devices', 'invoices'], denied: ['team', 'customers/import', 'catalog/import'] },
-  supervisor: { allowed: ['catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices', 'catalog/import'] },
-  consultant: { allowed: ['catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices', 'catalog/import'] },
-  technician: { allowed: ['customers', 'devices', 'orders'], denied: ['finance', 'team', 'catalog', 'catalog/import', 'invoices', 'customers/import'] },
+  owner: { allowed: ['schedule', 'finance', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  admin: { allowed: ['schedule', 'finance', 'team', 'catalog', 'catalog/import', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  manager: { allowed: ['schedule', 'finance', 'catalog', 'customers', 'devices', 'invoices'], denied: ['team', 'customers/import', 'catalog/import'] },
+  supervisor: { allowed: ['schedule', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices', 'catalog/import'] },
+  consultant: { allowed: ['schedule', 'catalog', 'customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices', 'catalog/import'] },
+  technician: { allowed: ['schedule', 'customers', 'devices', 'orders'], denied: ['finance', 'team', 'catalog', 'catalog/import', 'invoices', 'customers/import'] },
 }
 
 for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {

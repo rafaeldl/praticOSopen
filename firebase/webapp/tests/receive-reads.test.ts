@@ -6,7 +6,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 const listeners: { next: (snap: unknown) => void; error: (e: unknown) => void; stopped: boolean }[] = []
 let settingsFailures = 0
 
-vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(async () => ({})) }))
+const liteGetDocs = vi.fn(async () => snapOf(['open1']))
+vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(async () => ({})), firestoreLite: vi.fn(async () => ({})) }))
+// One-off reads go through the REST build: the full client's getDoc waits on the live channel, which can stall.
+vi.mock('firebase/firestore/lite', () => ({
+  collection: vi.fn(() => ({})),
+  doc: vi.fn(() => ({})),
+  getDocs: (...args: unknown[]) => liteGetDocs(...(args as [])),
+  getDoc: vi.fn(async () => {
+    if (settingsFailures-- > 0) throw new Error('unavailable')
+    return { data: () => ({ asaasEnabled: true, asaasConnected: true }) }
+  }),
+}))
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(() => ({})),
   doc: vi.fn(() => ({})),
@@ -15,20 +26,70 @@ vi.mock('firebase/firestore', () => ({
     listeners.push(entry)
     return () => (entry.stopped = true)
   }),
-  getDoc: vi.fn(async () => {
-    if (settingsFailures-- > 0) throw new Error('unavailable')
-    return { data: () => ({ asaasEnabled: true, asaasConnected: true }) }
-  }),
+  getDoc: vi.fn(async () => new Promise(() => {})),
 }))
 
 import { paymentSettings, watchOrderCharges } from '../src/lib/receive/data'
 
-const snapOf = (ids: string[]) => ({ docs: ids.map((id) => ({ id, data: () => ({ status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single' }) })) })
+function snapOf(ids: string[]) {
+  return { docs: ids.map((id) => ({ id, data: () => ({ status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single' }) })) }
+}
 
 afterEach(() => {
   listeners.length = 0
   settingsFailures = 0
   vi.useRealTimers()
+})
+
+describe('canal ao vivo travado (CI do #521, R4)', () => {
+  it('cobranças: a cópia vazia do disco não é "sem cobrança"; sem resposta do canal, lê uma vez pelo REST', async () => {
+    vi.useFakeTimers()
+    const seen: string[][] = []
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)))
+    listeners[0]!.next({ docs: [], metadata: { fromCache: true } })
+    expect(seen).toEqual([])
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(seen).toEqual([['open1']])
+    // The channel answering later still updates.
+    listeners[0]!.next({ ...snapOf([]), metadata: { fromCache: false } })
+    expect(seen).toEqual([['open1'], []])
+  })
+
+  it('cobranças: canal calado e leitura REST com erro dão erro, nunca lista vazia', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockRejectedValueOnce(new Error('unavailable'))
+    const seen: string[][] = []
+    let failed = 0
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { onFailed: () => failed++ })
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(seen).toEqual([])
+    expect(failed).toBe(1)
+  })
+
+  it('cobranças: a cópia do disco com dados aparece na hora, mas a leitura REST só para com a resposta do servidor', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockClear()
+    const seen: string[][] = []
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)))
+    listeners[0]!.next({ ...snapOf(['cached']), metadata: { fromCache: true } })
+    expect(seen).toEqual([['cached']])
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(liteGetDocs).toHaveBeenCalledTimes(1)
+    expect(seen).toEqual([['cached'], ['open1']])
+  })
+
+  it('cobranças: resposta do servidor antes do prazo cancela a leitura REST', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockClear()
+    await watchOrderCharges('o1', () => undefined)
+    listeners[0]!.next({ ...snapOf([]), metadata: { fromCache: false } })
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(liteGetDocs).not.toHaveBeenCalled()
+  })
+
+  it('settings/payments não espera o canal (o getDoc do cliente completo fica preso nele)', async () => {
+    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true })
+  })
 })
 
 describe('leituras do Receber que falham uma vez', () => {
@@ -46,14 +107,16 @@ describe('leituras do Receber que falham uma vez', () => {
     expect(listeners[1]!.stopped).toBe(true)
   })
 
-  it('cobranças: depois das novas tentativas, a lista vazia (a tela some com a seção, como o app)', async () => {
+  it('cobranças: depois das novas tentativas, erro e nunca lista vazia (M1 do #518)', async () => {
     vi.useFakeTimers()
     const seen: string[][] = []
-    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { retries: 1, wait: 100 })
+    let failed = 0
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { retries: 1, wait: 100, onFailed: () => failed++ })
     listeners[0]!.error(new Error('x'))
     await vi.advanceTimersByTimeAsync(100)
     listeners[1]!.error(new Error('x'))
-    expect(seen).toEqual([[]])
+    expect(seen).toEqual([])
+    expect(failed).toBe(1)
   })
 
   it('cobranças: parar durante a espera não abre outra leitura', async () => {

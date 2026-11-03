@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { buildLabels, fieldLabel, resolveLabel } from '../src/lib/segments'
 import type { MessageKey } from '../src/generated/message-keys'
 
-vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn() }))
+vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(), firestoreLite: vi.fn() }))
 
 const translate = (key: MessageKey) => `i18n:${key}`
 

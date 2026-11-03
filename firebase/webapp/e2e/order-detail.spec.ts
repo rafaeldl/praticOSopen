@@ -227,6 +227,8 @@ test('datas: entrega e visita, tirar a data; responsável (order.due.set, order.
   await visit.getByLabel('Visita').fill('2030-05-09T08:30')
   await visit.getByRole('button', { name: 'Salvar' }).click()
   await expect(details).toContainText('09/05, 08:30')
+  // As the app writes it: the company's local time, without a zone (M1).
+  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2030-05-09T08:30:00.000')
 
   await details.getByRole('button', { name: 'Ninguém' }).click()
   await dialog(page, 'Quem é o responsável?').getByRole('button', { name: 'Tiago Tecnico' }).click()
@@ -343,4 +345,29 @@ test('assistente: lê o pedido, põe na OS com ✦ e desfaz (order.ai.type, orde
   await expect(panel(page).getByTestId('assistant')).toContainText('Coloquei na OS o que está marcado. Confira.')
   await page.locator('.toast').getByRole('button', { name: 'Desfazer' }).click()
   await expect(line).toHaveCount(0)
+})
+
+// B6: the live channel stuck must never leave the order in "Carregando…".
+const LISTEN = '**/google.firestore.v1.Firestore/Listen/**'
+
+test('canal ao vivo travado: a OS abre por leitura avulsa (B6)', async ({ page }) => {
+  const order = await makeOrder('admin', { status: 'approved' })
+  await page.route(LISTEN, () => {})
+  await login(page, 'admin', `orders?order=${order.id}`)
+  await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 02', { timeout: 20_000 })
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+})
+
+test('canal travado e leitura com erro: mostra o erro com Tentar de novo (B6)', async ({ page }) => {
+  const order = await makeOrder('admin', { status: 'approved' })
+  await page.route(LISTEN, () => {})
+  // Only the one-off read of this order fails; the session reads go through.
+  const reads = '**/documents:batchGet**'
+  await page.route(reads, (route) => (route.request().postData()?.includes(order.id) ? route.abort() : route.continue()))
+  await login(page, 'admin', `orders?order=${order.id}`)
+  const error = panel(page).getByRole('alert')
+  await expect(error).toBeVisible({ timeout: 20_000 })
+  await page.unroute(reads)
+  await error.getByRole('button', { name: 'Tentar de novo' }).click()
+  await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 02', { timeout: 20_000 })
 })

@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos" e a do Catálogo (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo e a "Agenda" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -43,14 +43,16 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 
 | Operação | Caminho |
 |---|---|
-| Sessão, empresa, lista e OS de quem vê valores | Firestore direto, com `onSnapshot` |
+| Sessão, empresa, rótulos do ramo e páginas da lista de quem vê valores | Firestore REST (`firebase/firestore/lite`), leitura única |
+| Linhas ao vivo da lista e OS de quem vê valores | Firestore completo, com `onSnapshot`, carregado depois da lista aparecer |
 | Lista e OS de quem não tem `viewPrices` | Projeção da API (`GET /v1/app/orders`, `/:id`), sem nenhum valor |
 | Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
 | Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
+| Agenda: leitura e mudar a data | API (`lib/agenda/data.ts`): `GET /v1/app/orders?sort=scheduledDate&startDate&endDate`, `PATCH /v1/app/orders/:id` com `expectedUpdatedAt` |
 | Telas do catálogo: lista, cadastro, foto, importação, preços em lote | API (`lib/catalog/data.ts`): `/v1/app/services`, `/v1/app/products`; a foto vai para o Storage na pasta do item |
 
-Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Cache persistente fica desligado, porque o computador da oficina é compartilhado.
+Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
 
 ### Sessão e permissões
 
@@ -214,6 +216,26 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 
 **Fica para depois.** Anexar e trocar comprovante (o servidor só aceita URL https do bucket e o emulador serve http, então não há E2E possível; `pay.widget.sheet` volta a `in_progress`), "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
 
+### Agenda
+
+Código em `src/views/agenda/`, `src/components/agenda/` e `src/lib/agenda/` (regras puras em `model.ts`, testadas em `tests/agenda-model.test.ts`; textos e datas em `text.ts`; chamadas em `data.ts`). Textos no pedaço `-agenda.json`. Testes: `e2e/agenda.spec.ts`.
+
+**Fuso e formato da empresa (todo o web).** `lib/zone.ts` guarda o fuso da empresa (`App.vue` acerta ao carregar a empresa); `lib/format.ts`, o dia de atraso, "hoje/amanhã" e o "só o dia" da meia-noite usam esse fuso, na lista, na OS e na agenda. Visita e entrega são gravadas como o app grava: hora da empresa sem fuso (`2026-11-03T14:00:00.000`; "Dia todo" é `T00:00:00.000`), pela agenda, pelo seletor da OS e pela Nova OS. Assim o app lê a mesma hora, o mesmo dia e o mesmo mês (revisão do #521, M1). Limite: a empresa não tem campo de fuso; ele vem do país, e o do navegador vale quando é do mesmo país (uma empresa em Manaus aberta num computador em São Paulo usa São Paulo).
+
+Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo; se o computador estiver em outro fuso do mesmo país, como Manaus, vale o dele; empresa sem país segue o computador), nunca os do computador: uma visita das 09:00 em São Paulo aparece às 09:00 num computador em Tóquio. O formato (24 h ou AM/PM, nome dos dias) segue o país, e as palavras, o idioma. O texto sem fuso que o app grava (`toIso8601String()`) é lido como hora da empresa; o que a API grava vem em UTC.
+
+**Tela (`/schedule`).** Semana (padrão na tela grande) ou Dia, com a grade de horas de 7 às 19 (cresce para caber toda visita) e uma faixa "Dia todo" para meia-noite. O mês fica ao lado, com ponto nos dias com OS, inclusive os do mês vizinho. A semana começa no dia do país. Setas, `←` `→`, `T` (hoje) e o dia na URL (`?d=`, `?view=day`, `?who=`). Abrir a OS a põe ao lado (`?order=`); o que muda nela relê a agenda. Se o canal ao vivo do Firestore não responde em 6 s, a OS é lida uma vez pelo REST e o canal segue tentando; se essa leitura falha, aparece o erro com "Tentar de novo" (`watchOrder`, revisão B6). No celular (abaixo de 48 rem): faixa da semana, "Ver o mês" e a lista do dia com cliente e hora, situação · nº e aparelho · com responsável.
+
+**Dados.** Pela API para todos os papéis: o servidor aplica quem vê o quê (o técnico vê as que criou e as atribuídas a ele, o que o app não faz) e tira os valores de quem não tem `viewPrices`. Pede a grade inteira do mês, com 14 h de folga de cada lado (o texto sem fuso é comparado como texto), e põe cada OS no dia pelo fuso da empresa. Até 30 páginas de 100; passou disso, um aviso diz que a lista foi cortada. Relê ao voltar à janela.
+
+**Mudar a data (tela grande).** Arrastar o bloco para outra hora ou dia (de meia em meia hora) ou para "Dia todo". Pelo teclado, com o bloco em foco: `Shift` + `↑` `↓` meia hora, `Shift` + `←` `→` um dia; o bloco vai para onde ficaria, `Enter` confirma e `Esc` desfaz. Mudar uma visita que o cliente já esperava (tinha data, tem cliente, não está concluída nem cancelada) pergunta antes, com a data antiga e a nova e o lembrete de avisar o cliente. Depois de gravar, o aviso tem "Desfazer". Grava só a data (`PATCH /v1/app/orders/:id`, que confere `canEditOrderMainFields`), com a `version` lida; `409 ORDER_CHANGED` mostra o aviso e relê. Quem não pode mudar a data (supervisor e técnico fora do orçamento, consultor e técnico em OS de outra pessoa) não arrasta, e o teclado avisa.
+
+**Sem agendamento.** Com `useScheduling` desligado na empresa, a agenda mostra as entregas (`dueDate`), todas como "Dia todo".
+
+**De quem.** Admin, gerente e supervisor filtram por responsável (`assignedTo` no servidor). "Só de {nome}" com "Mostrar todos". Trocar de empresa tira o filtro.
+
+**Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push).
+
 ### Histórico do navegador
 
 Voltar fecha o que estiver aberto. O painel lateral usa `useRoutePanel`, com o id na URL. Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado.
@@ -316,6 +338,18 @@ Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1
 
 Com a fatia do catálogo, medido em 2026-11-03 com a máquina carregada (outros emuladores rodando): **1.334 ms** na 1ª visita e **659 ms** na volta. As telas do catálogo são rotas sob demanda e só usam a API; no caminho até a lista entram só as duas rotas novas no `router.ts` (239,3 KB contra 239,1 KB da master).
 
+Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta máquina: **1.104 ms** na 1ª visita e **706 ms** na volta. Na mesma máquina e no mesmo dia, antes da mudança: 1.328 ms e 520 ms. O caminho até a lista caiu de 239,1 KB para 130,4 KB (brotli); com a agenda (atalhos e textos no núcleo), 131,1 KB.
+
+| Caminho medido | JS até a lista | 1ª visita | Volta |
+|---|---|---|---|
+| Antes: Firestore completo com cache persistente | 239,1 KB | 1.328 ms | 520 ms |
+| Firestore REST (`lite`) para sessão, rótulos e páginas; completo depois, só para o tempo real | **130,4 KB** | **1.104 ms** | 706 ms |
+
+- **Por que REST e não a API:** `GET /v1/app/orders` também tiraria o Firestore do caminho, mas passa pela Function (partida a frio em produção) e não roda no teste de desempenho, que fica sem o emulador de Functions. O REST lê direto do Firestore, com as mesmas regras, e não abre o canal do cliente completo, que custa idas e voltas.
+- **Auth em pedaço menor:** não muda nada. O Auth já usa `initializeAuth` sem o resolvedor de popup (8,2 KB); o popup só baixa ao entrar.
+- **A volta ficou mais lenta (520 para 706 ms):** antes ela lia a lista do disco (cache persistente). Agora a 1ª página sempre vem do servidor. Continua bem abaixo da meta e a 1ª visita, que é a meta, ficou 220 ms mais rápida. O cache persistente continua no cliente completo (OS aberta) e as regras de apagar ao sair não mudaram.
+- **Sem dados velhos na 1ª página:** como ela não vem mais do disco, o aviso "pode estar desatualizado" só aparece quando falha uma página seguinte.
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -326,16 +360,17 @@ O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim"
 - É apagado quando a sessão termina de outro jeito: outra aba, token que não renova, conta desativada (`onAuthStateChanged` com `null`).
 - É apagado quando entra outra conta.
 - O dono do cache fica guardado (`praticos.cacheOwner`) até a exclusão dar certo, então uma falha é tentada de novo na próxima carga.
-- Enquanto a exclusão não sai, as leituras ignoram o disco.
+- Enquanto a exclusão não sai, o cliente completo fica só na memória e não lê o disco. A sessão e a lista nunca leem o disco (Firestore REST).
 
-**Lista:** disco, páginas e servidor se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se a lista veio do disco e o servidor não respondeu, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
+**Lista:** páginas e linhas ao vivo se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se uma página seguinte falha, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
 
 ### Metas e guardas
 
 | Guarda | Onde | Limite |
 |---|---|---|
 | JS da tela de entrada (brotli) | `scripts/check-budget.mjs` | 200 KB |
-| JS até a lista, com Firestore | `scripts/check-budget.mjs` | 240 KB |
+| JS até a lista, com Firestore REST | `scripts/check-budget.mjs` | 240 KB |
+| Firestore completo fora do caminho até a lista | `scripts/check-budget.mjs` | sim |
 | Acessibilidade, LCP, CLS, TBT | `lighthouserc.json` | 100, 2,5 s, 0,1, 300 ms |
 | axe em claro e escuro | `e2e/a11y.spec.ts` | 0 violações |
 | Lista visível, p75, 1ª visita | `e2e/perf/list-visible.spec.ts` | 1,5 s |
@@ -366,4 +401,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 239,3 de 240 KB depois da fatia do catálogo (239,1 antes dela; 238,9 medido na fatia de mandar, receber e cobrar). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 131,3 de 240 KB desde a fatia da agenda (era 239,1 KB; 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.

@@ -49,19 +49,29 @@ function size(keys) {
 
 const kb = (bytes) => (bytes / 1024).toFixed(1)
 const entry = findKey((_, item) => item.isEntry)
-const pkg = (name) => findKey((key) => key.includes(`node_modules/${name}/`) && !key.includes('.css') && !key.includes('.woff'))
+const pkg = (name) =>
+  findKey((key) => key.includes(`node_modules/${name}/`) && !key.includes('.css') && !key.includes('.woff') && (name === 'firebase/firestore' ? !key.includes('/lite/') : true))
 
 // What a first visit needs for the login screen: code, text and Auth.
 const initial = size([entry, findKey((key) => key.endsWith('generated/i18n/pt.json')), pkg('firebase/app'), pkg('firebase/auth'), findKey((key) => key.endsWith('views/LoginView.vue'))])
-// What an authenticated first visit downloads until the list shows.
-const list = size([
+// What an authenticated first visit downloads until the list shows: the REST
+// build of Firestore reads the session and the first page (lib/firebase.ts).
+const listKeys = [
   entry,
   findKey((key) => key.endsWith('generated/i18n/pt.json')),
   pkg('firebase/app'),
   pkg('firebase/auth'),
-  pkg('firebase/firestore'),
+  pkg('firebase/firestore/lite'),
   findKey((key) => key.endsWith('views/OrdersView.vue')),
-])
+]
+const list = size(listKeys)
+// The full client (live rows) comes after the paint: it must not be pulled in statically.
+const full = pkg('firebase/firestore')
+if (closure(listKeys).has(full)) {
+  console.error('O Firestore completo entrou no caminho até a lista')
+  process.exit(1)
+}
+const later = size([full])
 
 const css = entries.filter(([, item]) => item.isEntry).flatMap(([, item]) => item.css ?? [])
 const cssBytes = css.reduce((sum, file) => sum + brotliBytes(file), 0)
@@ -69,7 +79,10 @@ const cssBytes = css.reduce((sum, file) => sum + brotliBytes(file), 0)
 console.log(`Orçamento (brotli):`)
 for (const [bytes, file] of initial.lines) console.log(`  ${kb(bytes).padStart(7)} KB  ${file}`)
 console.log(`JS inicial (tela de entrada): ${kb(initial.total)} KB, limite ${INITIAL_LIMIT_KB} KB`)
-console.log(`JS até a lista (com Firestore): ${kb(list.total)} KB, limite ${LIST_LIMIT_KB} KB`)
+console.log('Até a lista, além da entrada:')
+for (const [bytes, file] of list.lines) if (!initial.lines.some(([, f]) => f === file)) console.log(`  ${kb(bytes).padStart(7)} KB  ${file}`)
+console.log(`JS até a lista (Firestore REST): ${kb(list.total)} KB, limite ${LIST_LIMIT_KB} KB`)
+console.log(`Firestore completo, depois da lista: ${kb(later.total)} KB`)
 console.log(`CSS: ${kb(cssBytes)} KB`)
 
 const failures = []

@@ -11,7 +11,7 @@ import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { firestoreClient } from '@/lib/firebase'
+import { firestoreLite } from '@/lib/firebase'
 import { orderCreated } from '@/lib/orders/bus'
 import { forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
@@ -103,7 +103,7 @@ async function devicesOf(customerId: string): Promise<Device[]> {
   try {
     let rows: { devices?: Device[]; device?: Device }[] = []
     if (showsMoney) {
-      const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+      const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
       const filters = [where('customer.id', '==', customerId), ...(can('viewAllOrders') ? [] : [where('createdBy.id', '==', session.uid)])]
       rows = (await getDocs(query(collection(db, 'companies', session.companyId as string, 'orders'), ...filters, limit(10)))).docs.map((doc) => doc.data())
     } else {
@@ -223,7 +223,8 @@ function pickItem(picked: ComboboxItem, query = '') {
   announce(t('web.order.itemAdded', { name: item.name }))
 }
 
-const isoOrUndefined = (value: string) => (value ? new Date(value).toISOString() : undefined)
+// The picker gives the company's local time; saved as the app saves it, without a zone (revisão do #521, M1).
+const isoOrUndefined = (value: string) => (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00.000` : undefined)
 
 async function save() {
   if (saving.value) return

@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect
 import { useRoute, useRouter } from 'vue-router'
 import { locale, t } from '@/i18n'
 import { loadSegmentLabels } from '@/lib/segments'
+import { companyZone, setZone } from '@/lib/zone'
 import { session } from '@/lib/session'
 import { recheckCurrentRoute } from '@/router'
 import { handleShortcut, registerShortcut } from '@/lib/shortcuts'
@@ -24,6 +25,8 @@ watchEffect(() => {
   document.title = title ? `${t(title)} · PraticOS` : 'PraticOS'
 })
 
+// Every date on screen and every date the web writes in the company's zone (lib/zone.ts).
+watchEffect(() => setZone(session.company ? companyZone(session.company.country) : null))
 watchEffect(() => {
   if (session.company) void loadSegmentLabels(session.company.segment, locale.value)
 })
