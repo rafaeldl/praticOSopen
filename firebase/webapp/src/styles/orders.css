@@ -65,6 +65,7 @@ span.od-name { cursor: default; }
 button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-name:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .od-device-line { color: var(--color-muted); }
+.od-device-btn { border: 0; background: none; padding: 0; min-height: 1.75rem; font: inherit; color: inherit; text-align: left; text-decoration: underline dotted; text-underline-offset: 0.2em; cursor: pointer; overflow-wrap: anywhere; }
 .od-state { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: baseline; margin-top: 0.3rem; }
 .od-sentence { font-weight: 600; }
 .od-sentence--late { color: var(--color-danger-text); }

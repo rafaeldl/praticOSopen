@@ -13,6 +13,7 @@ import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { ownerOf, plateHits, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
 import {
   accessOf,
@@ -95,7 +96,7 @@ type Dialog =
   | { kind: 'item'; line: OrderLine }
   | { kind: 'addItem' }
   | { kind: 'customer' }
-  | { kind: 'device' }
+  | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share' }
   | { kind: 'pendingForms'; count: number; first: string }
@@ -394,14 +395,53 @@ async function addDevice(device: Device) {
   const o = order.value as Order
   if (o.devices.some((item) => item.id === device.id)) return
   const list = [...o.devices, { id: device.id, name: device.name, ...(device.serial ? { serial: device.serial } : {}) }]
-  await run(() => writes.updateOrderFields(o.id, { device: list[0], devices: list, deviceIds: list.map((item) => item.id) }), t('web.saved'))
+  await saveDevices(list)
+}
+
+function saveDevices(list: { id?: string; name?: string; serial?: string | null }[]) {
+  const o = order.value as Order
+  return run(() => writes.updateOrderFields(o.id, { device: list[0] ?? null, devices: list, deviceIds: list.map((item) => item.id) }), t('web.saved'))
+}
+
+/**
+ * Changing one device of the order (order.device.change): another replaces it in its
+ * place; "Nenhum" takes it out (device.list.pick-none), like the app's _changeDevice.
+ */
+async function changeDevice(current: { id: string }, picked: ComboboxItem) {
+  dialog.value = null
+  const o = order.value as Order
+  if (picked.id === current.id) return
+  const kept = o.devices.filter((item) => item.id !== current.id)
+  if (picked.id === NONE) return saveDevices(kept)
+  const device = devices.value.find((d) => d.id === picked.id)
+  if (!device) return
+  if (kept.some((item) => item.id === device.id)) return saveDevices(kept)
+  await saveDevices(o.devices.map((item) => (item.id === current.id ? { id: device.id, name: device.name, ...(device.serial ? { serial: device.serial } : {}) } : item)))
+}
+
+/** A plate brings its owner and the device together (customer.picker.plate). */
+async function pickCustomerItem(item: ComboboxItem) {
+  if (!item.id.startsWith(PLATE)) return chooseCustomer((customers.value.find((c) => c.id === item.id) ?? recents.value.find((c) => c.id === item.id)) as Customer)
+  const deviceId = item.id.slice(PLATE.length)
+  dialog.value = null
+  const device = devices.value.find((d) => d.id === deviceId)
+  const owner = await ownerOf(deviceId)
+  const o = order.value as Order
+  if (owner && owner.id !== o.customer?.id) await applyCustomer(customers.value.find((c) => c.id === owner.id) ?? owner, false)
+  if (device && !order.value?.devices.some((d) => d.id === device.id)) await addDevice(device)
+}
+
+async function openDevicePicker(current: { id?: string; name?: string }) {
+  await openPicker('device')
+  if (dialog.value?.kind === 'device' && current.id) dialog.value = { kind: 'device', current: { id: current.id, name: current.name ?? '' } }
 }
 
 async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') {
   try {
     if (kind === 'addItem' && !catalog.value.length) catalog.value = await loadCatalog()
     if (kind === 'customer' && !customers.value.length) customers.value = await loadCustomers()
-    if (kind === 'device' && !devices.value.length) devices.value = await loadDevices()
+    if ((kind === 'device' || kind === 'customer') && !devices.value.length) devices.value = await loadDevices()
+    if (kind === 'customer') void recentCustomers().then((list) => (recents.value = list), () => {})
     if (kind === 'assignee' && !team.value.length) team.value = await loadTeam()
   } catch (error) {
     showToast(t(errorMessageKey(error)))
@@ -433,12 +473,26 @@ const pickItem = (picked: ComboboxItem, query = '') => {
   const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (item) void addCatalogItem(item)
 }
+const PLATE = 'plate:'
+const NONE = '__none'
+const recents = shallowRef<Named[]>([])
+const customerRow = (c: Customer | Named) => ({ id: c.id, label: c.name, sub: formatPhone((c as Customer).phone) || undefined })
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { items: search(customers.value, query, (c) => c.phone ?? '').map((c) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })) },
+  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}` })) },
+  { title: t('pickerRecent'), items: query.trim() ? [] : recents.value.map((r) => customers.value.find((c) => c.id === r.id) ?? r).map(customerRow) },
+  {
+    title: query.trim() || !recents.value.length ? undefined : t('web.newOrder.customers'),
+    items: search(query.trim() ? customers.value : customers.value.filter((c) => !recents.value.some((r) => r.id === c.id)), query, (c) => c.phone ?? '').map(customerRow),
+  },
 ]
-const deviceGroups = (query: string): ComboboxGroup[] => [
-  { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },
-]
+const deviceGroups = (query: string): ComboboxGroup[] => {
+  const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
+  return [
+    // "Nenhum …" only when changing a device and nothing is typed (device.list.pick-none).
+    { items: current && !query.trim() ? [{ id: NONE, label: t('pickerNoDevice', { device: deviceLabel().toLocaleLowerCase() }) }] : [] },
+    { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },
+  ]
+}
 
 const statusChoices = computed<Choice[]>(() => {
   const o = order.value
@@ -564,7 +618,16 @@ watch(
         </h2>
         <button v-if="!order.customer?.name && access.canEditMainFields" type="button" class="link" @click="openPicker('customer')">{{ t('orderPickCustomerRow') }}</button>
         <p v-if="order.devices.length" class="od-device-line">
-          <span v-for="(device, index) in order.devices" :key="device.id ?? index">{{ index ? ' · ' : '' }}{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></span>
+          <span v-for="(device, index) in order.devices" :key="device.id ?? index"
+            >{{ index ? ' · ' : '' }}<button
+              v-if="access.canEditMainFields && device.id"
+              type="button"
+              class="od-device-btn"
+              :aria-label="t('web.order.changeDevice', { name: [device.name, device.serial].filter(Boolean).join(' · ') })"
+              @click="openDevicePicker(device)"
+            >{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></button
+            ><template v-else>{{ device.name }}<template v-if="device.serial"> · <span class="num">{{ device.serial }}</span></template></template></span
+          >
         </p>
         <button v-else-if="access.canEditMainFields" type="button" class="link od-device-add" @click="openPicker('device')">
           {{ t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() }) }}
@@ -729,8 +792,17 @@ watch(
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
-    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="(item) => chooseCustomer(customers.find((c) => c.id === item.id) as Customer)" @close="dialog = null" />
-    <ComboDialog v-else-if="dialog.kind === 'device'" id="od-device" :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })" :label="deviceLabel()" :groups="deviceGroups" @pick="(item) => addDevice(devices.find((d) => d.id === item.id) as Device)" @close="dialog = null" />
+    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="pickCustomerItem" @close="dialog = null" />
+    <ComboDialog
+      v-else-if="dialog.kind === 'device'"
+      id="od-device"
+      :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })"
+      :label="deviceLabel()"
+      :groups="deviceGroups"
+      :selected-id="dialog.current?.id"
+      @pick="(item) => (dialog?.kind === 'device' && dialog.current ? changeDevice(dialog.current, item) : addDevice(devices.find((d) => d.id === item.id) as Device))"
+      @close="dialog = null"
+    />
   </template>
   <PdfDialog v-if="pdfOpen && order" :ids="[order.id]" :numbers="[order.number]" @close="pdfOpen = false" />
   <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
