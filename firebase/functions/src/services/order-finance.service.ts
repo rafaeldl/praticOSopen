@@ -115,16 +115,30 @@ function orderRef(companyId: string, orderId: string) {
   return getTenantCollection(companyId, 'orders').doc(orderId) as unknown as FirebaseFirestore.DocumentReference;
 }
 
-/** Documents that went with [removed] (its proof), and the Storage files that are only theirs. */
-function documentsWithout(order: Order, removed: PaymentTransaction[]): { documents: OrderDocument[]; files: string[] } {
+/**
+ * Documents that went with [removed] (its proof), and the Storage files that
+ * are only theirs: a proof file is deleted only from the folder of its own
+ * payment (`{orderFolder}payments/{transactionId}/`, where the app uploads it).
+ */
+function documentsWithout(
+  orderFolder: string,
+  order: Order,
+  removed: PaymentTransaction[],
+): { documents: OrderDocument[]; files: string[] } {
   const ids = new Set(removed.map((t) => t.id));
-  const docIds = new Set(removed.map((t) => t.receiptDocumentId).filter((id): id is string => !!id));
+  const byDocId = new Map(removed.filter((t) => t.receiptDocumentId).map((t) => [t.receiptDocumentId as string, t.id]));
   const current = order.documents ?? [];
-  const documents = current.filter((d) => !(d.linkedTransactionId && ids.has(d.linkedTransactionId)) && !docIds.has(d.id));
-  const files = current
-    .filter((d) => !documents.includes(d))
-    .map((d) => d.storagePath)
-    .filter((path): path is string => !!path && !isSharedReceiptPath(path));
+  const documents = current.filter((d) => !(d.linkedTransactionId && ids.has(d.linkedTransactionId)) && !byDocId.has(d.id));
+  const files: string[] = [];
+  for (const d of current) {
+    if (documents.includes(d) || !d.storagePath || isSharedReceiptPath(d.storagePath)) continue;
+    const transactionId = d.linkedTransactionId && ids.has(d.linkedTransactionId) ? d.linkedTransactionId : byDocId.get(d.id);
+    if (transactionId && isInsideFolder(`${orderFolder}payments/${transactionId}/`, d.storagePath)) {
+      files.push(d.storagePath);
+    } else {
+      console.warn(`[OrderFinance] kept a proof file outside its payment folder: order=${order.id ?? ''}`);
+    }
+  }
   return { documents, files };
 }
 
@@ -179,7 +193,7 @@ async function writePayments(
     const update: Record<string, unknown> = { ...state, updatedAt: now, updatedBy: actor };
     files = [...extra];
     if (removed.length > 0) {
-      const cleaned = documentsWithout(order, removed);
+      const cleaned = documentsWithout(orderFilesPrefix(companyId, orderId), order, removed);
       if (cleaned.documents.length !== (order.documents ?? []).length) update.documents = cleaned.documents;
       files.push(...cleaned.files);
     }
@@ -291,7 +305,7 @@ export async function setTransactionReceipt(
     if (!target || target.type !== 'payment') throw new OrderRuleError('TRANSACTION_NOT_FOUND', 404, 'Transaction not found');
     if (isAsaasTransaction(target)) throw new OrderRuleError('ASAAS_LOCKED', 409, 'An Asaas payment has the receipt of Asaas');
     if (target.receiptGroupId) throw new OrderRuleError('RECEIPT_SHARE', 409, 'The proof belongs to the customer receipt');
-    const { documents, files } = documentsWithout(order, [target]);
+    const { documents, files } = documentsWithout(orderFilesPrefix(companyId, orderId), order, [target]);
     const next: PaymentTransaction = { ...target, id: target.id || uuidv4() };
     delete next.receiptDocumentId;
     const kept = [...documents];

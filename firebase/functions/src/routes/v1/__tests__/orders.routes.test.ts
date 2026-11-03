@@ -711,6 +711,8 @@ describe('arquivos apagados só da pasta da OS', () => {
     { id: 'foreign', linkedTransactionId: 't1', storagePath: 'tenants/c2/orders/z/secret.pdf' },
     { id: 'dots', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o1/../o2/b.jpg' },
     { id: 'sibling', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o10/c.jpg' },
+    { id: 'photo', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o1/photos/p.jpg' },
+    { id: 'otherPayment', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o1/payments/t2/x.jpg' },
   ];
   beforeEach(() => seedOrder('o1', {
     paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: by }], documents: docs,
