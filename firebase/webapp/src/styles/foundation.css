@@ -1,0 +1,85 @@
+/* What the prototype lacked: real links in the navigation, base components,
+   text at 200%, contrast preferences and forced colors. */
+a.nav-item, a.more-row, .tabbar a, a.btn { text-decoration: none; }
+.more-row { color: var(--color-ink); }
+.side .logo { display: block; }
+
+/* Side panel: part of the workspace, not a layer. */
+.panel { display: flex; flex-direction: column; min-height: 0; overflow: auto; background: var(--color-card); border-left: 1px solid var(--color-rule); }
+.panel-top { display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.5rem 0 1rem; }
+.panel-body { display: grid; gap: 0.3rem; padding: 0.1rem 1rem 0.85rem; }
+.panel-title { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; line-height: 1.15; }
+
+.layer-head { padding: 1rem 1.15rem 0.5rem; }
+.layer-body { padding: 0.5rem 1.15rem 1rem; overflow: auto; display: grid; gap: 0.5rem; }
+.layer--sheet { align-items: center; justify-content: center; }
+.layer--sheet .layer-box { width: 28rem; border-radius: 8px; max-height: 80vh; }
+.layer-box:focus { outline: none; }
+.pal-none { padding: 1rem; }
+
+.money { position: relative; display: flex; align-items: center; }
+.money-symbol { position: absolute; left: 0.6rem; color: var(--color-muted); pointer-events: none; font-family: var(--font-num); }
+.money-input { padding-left: 2.4rem; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.field-error { color: var(--color-danger-text); font-size: 0.8125rem; font-weight: 600; margin-top: 0.25rem; }
+.field-hint { margin-top: 0.25rem; }
+.field[aria-invalid="true"] { border-color: var(--color-danger-text); border-width: 2px; }
+
+.company-select { width: 100%; min-height: 2.25rem; background: transparent; color: var(--color-on-navy-2); border: 0; padding: 0 0.45rem; font-size: 0.8125rem; }
+.company-select option { color: var(--color-ink); background: var(--color-card); }
+.company-pick { margin-top: 0.15rem; }
+
+.offline { padding: 0.5rem 1.25rem; background: var(--color-paper-2); color: var(--color-warning-text); font-weight: 600; border-bottom: 1px solid var(--color-rule); }
+
+.settings { display: block; overflow: auto; padding: 1rem 1.25rem; }
+.settings-form { display: grid; gap: 1rem; max-width: 26rem; }
+.check-row { display: flex; align-items: center; gap: 0.5rem; }
+
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; padding: 1rem 1.25rem; overflow: auto; }
+.gallery-sec { display: grid; gap: 0.75rem; align-content: start; min-width: 0; }
+.gallery-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+
+/* The icon rail keeps the search button named for screen readers. */
+@media (max-width: 48rem) {
+  .side-search span { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
+/* Touch: the side keeps icons only below 48rem, so the links need the full target. */
+@media (pointer: coarse) {
+  a.nav-item { min-height: 2.75rem; }
+  .btn--primary { min-height: 3.25rem; }
+}
+
+/* Text enlarged to 200%: nothing clipped, nothing wider than the screen. */
+.page-title, .who, .combo-main strong { overflow-wrap: anywhere; }
+.btn { white-space: normal; text-align: center; }
+.field { min-width: 0; }
+.gallery-sec > * { min-width: 0; }
+.entry-main { min-width: 0; }
+.main { overflow: auto; }
+
+@media (max-width: 40rem) {
+  .tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; min-height: 3.5rem; padding: 0.15rem; color: var(--color-muted); font: inherit; font-size: 0.75rem; line-height: 1.2; text-align: center; }
+  .tabbar a[aria-current="page"] { color: var(--color-ink); font-weight: 700; box-shadow: inset 0 3px 0 var(--color-rule-strong); }
+  .tabbar span { overflow-wrap: anywhere; min-width: 0; }
+  .tabbar button { font-size: 0.75rem; padding: 0.15rem; }
+  .topbar .logo { font-size: 1.44rem; }
+  .settings { padding-inline: 1rem; }
+}
+
+@media (prefers-contrast: more) {
+  :root, :root[data-theme="dark"] { --color-muted: var(--color-ink); --color-rule: var(--color-ink); --color-control: var(--color-ink); }
+  .btn, .field, .chip { border-width: 2px; }
+  .side, .nav-item { color: var(--color-on-navy); }
+  .link { text-decoration-color: currentColor; }
+}
+
+/* Forced colors drop backgrounds: dots, the current tab and the toast need borders or system colors. */
+@media (forced-colors: active) {
+  .dot { forced-color-adjust: none; background: CanvasText; }
+  .dot--hollow { background: Canvas; box-shadow: inset 0 0 0 2px CanvasText; }
+  .nav-item[aria-current="page"], .tabbar a[aria-current="page"], .tabbar button[aria-current="page"], .chip[aria-pressed="true"], .tabs button[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
+  .grid tbody tr.is-open td:first-child { border-left: 3px solid Highlight; }
+  .toast, .layer-box { border: 1px solid CanvasText; }
+  .combo-opt.is-active, .pal-opt.is-active { outline: 2px solid Highlight; outline-offset: -2px; }
+  :focus-visible { outline-color: Highlight; }
+}

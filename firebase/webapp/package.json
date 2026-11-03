@@ -1,0 +1,49 @@
+{
+  "name": "praticos-webapp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "gen": "node scripts/gen.mjs",
+    "predev": "npm run gen",
+    "dev": "vite --mode e2e --port 5180 --strictPort",
+    "emulators": "node e2e/run.mjs serve",
+    "prebuild": "npm run gen -- --prune",
+    "build": "vite build && node scripts/check-budget.mjs",
+    "build:e2e": "npm run gen -- --prune && vite build --mode e2e --outDir dist-e2e",
+    "pretypecheck": "npm run gen",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "pretest": "npm run gen",
+    "test": "vitest run",
+    "e2e": "node e2e/run.mjs",
+    "e2e:perf": "E2E_ORDERS=10000 E2E_ONLY=auth,firestore,storage node e2e/run.mjs perf",
+    "lhci": "node scripts/lhci.mjs"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/outfit": "5.3.0",
+    "@lucide/vue": "1.66.0",
+    "firebase": "12.19.0",
+    "vue": "3.5.44",
+    "vue-router": "4.6.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@lhci/cli": "0.16.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "22.19.1",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vue/test-utils": "2.5.1",
+    "firebase-admin": "13.10.0",
+    "firebase-tools": "15.34.2",
+    "happy-dom": "21.0.4",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "5.1.0",
+    "vue-tsc": "3.3.14"
+  }
+}
