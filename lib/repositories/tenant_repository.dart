@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/utils/firestore_fields.dart';
 
 /// Repository base para entidades com isolamento por tenant usando subcollections.
 ///
@@ -234,7 +235,7 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
     String id,
     Map<String, dynamic> fields,
   ) {
-    return _getCollection(companyId).doc(id).update(fields);
+    return _getCollection(companyId).doc(id).update(firestoreFieldsOf(fields));
   }
 
   /// Remove um documento.

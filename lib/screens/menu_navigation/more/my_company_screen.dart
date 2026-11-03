@@ -12,6 +12,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/utils/field_diff.dart';
+import 'package:praticos/utils/firestore_fields.dart';
 import 'package:provider/provider.dart';
 
 /// Company switches of "Como você trabalha" besides "Valores e cobrança",
@@ -178,7 +179,7 @@ Future<void> _writeCompanyFields(
   return FirebaseFirestore.instance
       .collection('companies')
       .doc(companyId)
-      .update(fields);
+      .update(firestoreFieldsOf(fields));
 }
 
 /// Reads the company document (defaults to [CompanyStore.retrieveCompany]).
