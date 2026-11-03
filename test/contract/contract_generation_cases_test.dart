@@ -8,6 +8,10 @@
 // due checks shift the contract dates by (real now - case now), and the next
 // due date is checked as computeNextDueDate from the lastGeneratedDate the app
 // really wrote, plus computeNextDueDate from the case's `now`.
+//
+// The two platform-interface packages come with cloud_firestore; they are
+// only needed here to stand in for Firestore.
+// ignore_for_file: depend_on_referenced_packages
 import 'dart:convert';
 import 'dart:io';
 

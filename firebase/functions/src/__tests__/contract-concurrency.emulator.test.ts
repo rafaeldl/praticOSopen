@@ -17,6 +17,11 @@ const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
 const describeEmulator = emulatorHost ? describe : describe.skip;
 
 describeEmulator('contracts: job, route and old app at the same time', () => {
+  // Own project: the rules suites clear the emulator's demo-praticos data in parallel.
+  // firebase-admin reads FIREBASE_CONFIG (set by emulators:exec) before GCLOUD_PROJECT.
+  process.env.GCLOUD_PROJECT = 'demo-praticos-contracts';
+  process.env.GOOGLE_CLOUD_PROJECT = 'demo-praticos-contracts';
+  process.env.FIREBASE_CONFIG = JSON.stringify({ projectId: 'demo-praticos-contracts' });
   /* eslint-disable @typescript-eslint/no-require-imports */
   const { db } = require('../services/firestore.service') as typeof import('../services/firestore.service');
   const { generateDueOrders } = require('../services/contract.service') as typeof import('../services/contract.service');
