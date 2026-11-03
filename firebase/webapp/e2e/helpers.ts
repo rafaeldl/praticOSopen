@@ -4,13 +4,18 @@ import { PASSWORD, USERS } from './fixtures.mjs'
 
 export type UserKey = keyof typeof USERS
 
+// The login screen in pt, en and es: a test may set the language before the app starts (startWithPrefs).
+const EMAIL_LOGIN = /^(Já tenho conta com e-mail|I already have an account with email|Ya tengo cuenta con correo)$/
+const EMAIL = /^(E-mail|Email|Correo)$/
+const SIGN_IN = /^(Entrar|Sign In|Iniciar Sesión)$/
+
 export async function login(page: Page, user: UserKey, path = './') {
   await page.goto(path)
-  await page.getByRole('button', { name: 'Já tenho conta com e-mail' }).click()
-  await page.getByLabel('E-mail').fill(USERS[user].email)
-  await page.getByLabel('Senha').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
-  await expect(page.getByLabel('E-mail')).toBeHidden()
+  await page.getByRole('button', { name: EMAIL_LOGIN }).click()
+  await page.getByLabel(EMAIL).fill(USERS[user].email)
+  await page.getByLabel(/^(Senha|Password|Contraseña)$/).fill(PASSWORD)
+  await page.getByRole('button', { name: SIGN_IN }).click()
+  await expect(page.getByLabel(EMAIL)).toBeHidden()
 }
 
 /**
@@ -51,6 +56,17 @@ export async function setTheme(page: Page, theme: 'light' | 'dark') {
     localStorage.setItem('praticos.prefs', JSON.stringify({ theme: value }))
     document.documentElement.setAttribute('data-theme', value)
   }, theme)
+}
+
+/**
+ * Theme and language in place before the app starts, so the test logs in
+ * straight on the screen it checks: one page load. Reloading right after the
+ * live Firestore client starts can leave the new page waiting for the old
+ * one's lease on the browser cache (persistentMultipleTabManager), and the
+ * live data (order, checklists) only arrives seconds later.
+ */
+export async function startWithPrefs(page: Page, prefs: { theme?: 'light' | 'dark'; language?: 'pt' | 'en' | 'es' }) {
+  await page.addInitScript((value) => localStorage.setItem('praticos.prefs', JSON.stringify(value)), prefs)
 }
 
 /** `allowed`: containers that scroll sideways on purpose (the board's columns). */

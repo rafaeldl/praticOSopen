@@ -36,6 +36,7 @@ import {
   type ListFilter,
   type Order,
 } from '@/lib/orders/model'
+import { watchListEnd } from '@/lib/orders/list-end'
 import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText, whenCell } from '@/lib/orders/text'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
@@ -219,26 +220,24 @@ async function load() {
   }
 }
 
-async function loadMore() {
-  if (!loader || loadingMore.value || !hasMore.value) return
+/** True when a page came (the infinite scroll then looks at the end of the list again). */
+async function loadMore(): Promise<boolean> {
+  if (!loader || loadingMore.value || !hasMore.value) return false
   loadingMore.value = true
   const token = loadToken
   try {
     const page = await loader.more()
-    if (token !== loadToken) return
+    if (token !== loadToken) return false
     rows.value = mergeById(rows.value, page.rows)
     hasMore.value = page.hasMore
+    return true
   } catch (error) {
     console.warn('orders: next page failed', error)
     stale.value = true
+    return false
   } finally {
+    // A filter that shows few rows (Paradas) keeps the end in view: watchListEnd looks again after each page.
     loadingMore.value = false
-    // A filter that shows few rows (Paradas) keeps the sentinel in view, and the observer
-    // does not fire again: keep filling while it is still on screen and there is more.
-    if (token === loadToken && hasMore.value) void nextTick(() => {
-      const box = sentinel.value?.getBoundingClientRect()
-      if (box && box.top < window.innerHeight + 200) void loadMore()
-    })
   }
 }
 
@@ -371,7 +370,7 @@ const stopBus = onOrderEvent(({ order, removedId, createdId }) => {
   }
 })
 
-let observer: IntersectionObserver | undefined
+let observer: ReturnType<typeof watchListEnd> | undefined
 const clock = setInterval(() => (now.value = new Date()), 60_000)
 const removers: (() => void)[] = []
 onMounted(() => {
@@ -379,11 +378,8 @@ onMounted(() => {
   window.addEventListener('keydown', onKeys)
   removers.push(registerShortcut({ keys: '/', label: 'web.shortcuts.filter', run: () => searchEl.value?.focus() }))
   // Infinite scroll: more rows before the end shows (home.list.load-more).
-  observer = new IntersectionObserver((entries) => entries.some((entry) => entry.isIntersecting) && void loadMore(), { rootMargin: '200px' })
-  watch(sentinel, (element, old) => {
-    if (old) observer?.unobserve(old)
-    if (element) observer?.observe(element)
-  }, { immediate: true })
+  observer = watchListEnd(loadMore)
+  watch(sentinel, (element) => observer?.watch(element), { immediate: true })
 })
 onBeforeUnmount(() => {
   loadToken++
