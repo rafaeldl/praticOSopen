@@ -2462,8 +2462,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/order-detail.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
   note: "Só com 2 ou mais aparelhos."
 - id: order.item.no-price
@@ -2582,10 +2582,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Web: o nome do veículo no cabeçalho abre a troca, com ✓ no atual; outro substitui no mesmo lugar, Nenhum tira."
 - id: order.device.open
   screen: lib/screens/order/order_screen_v2.dart
   route: "/device_detail"
@@ -2734,10 +2735,11 @@ rows:
   feature_flags: ["fieldService"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Sem geocodificação: coordenada só quando o endereço veio do cliente; trocar o texto apaga latitude e longitude, salvar o mesmo mantém. Com fieldService desligado a linha continua na OS que já tem local. Toque no local abre Abrir no mapa para todos e Mudar/Tirar só para quem edita."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Sem geocodificação: coordenada só quando o endereço veio do cliente; trocar o texto apaga latitude e longitude, salvar o mesmo mantém. Com fieldService desligado a linha continua na OS que já tem local. Toque no local abre Abrir no mapa para todos e Mudar/Tirar só para quem edita. Web: Pôr o local (com fieldService), Mudar endereço e Abrir no mapa em Detalhes; texto novo apaga latitude e longitude."
 - id: order.address.remove
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2751,10 +2753,11 @@ rows:
   feature_flags: ["fieldService"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Web: Tirar endereço em Detalhes."
 - id: order.address.map
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3071,9 +3074,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
-  note: "public_works traz licitação, contrato, fiscal, marco e execução. Tipos: text, textarea, number, select, date (só data). Aparece também na Nova OS. Não copiar: qualquer papel edita em qualquer situação; required, minLength e pattern nunca rodam (sem Form); texto grava a OS inteira a cada tecla; select em folha de ações em vez da tela de escolher."
+  note: "public_works traz licitação, contrato, fiscal, marco e execução. Tipos: text, textarea, number, select, date (só data). Aparece também na Nova OS. Não copiar: qualquer papel edita em qualquer situação; required, minLength e pattern nunca rodam (sem Form); texto grava a OS inteira a cada tecla; select em folha de ações em vez da tela de escolher. Web: seção Mais dados com os campos service_order.* do segmento; Mudar só para quem edita a OS, com required, mínimo, máximo e pattern antes de gravar. A projeção da API leva customData e local para quem não vê valores."
 - id: order.share.open
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3973,8 +3977,10 @@ rows:
   feature_flags: ["fieldService"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
+  note: "Web: folha com um campo e Salvar (cinza até mudar)."
 - id: order.sheet.text
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -4089,10 +4095,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
   permission: viewServices
-  note: "Das últimas 50 OS da empresa; depois Todos em ordem alfabética sem acento. Cada linha diz serviço ou produto. Some com busca. Falha só esconde a seção."
+  note: "Das últimas 50 OS da empresa; depois Todos em ordem alfabética sem acento. Cada linha diz serviço ou produto. Some com busca. Falha só esconde a seção. Web: Mais usados no item da Nova OS, pela rota do catálogo (meta.mostUsed), um de cada tipo por vez; some com busca e falha só esconde."
 - id: order.item-form.device
   screen: lib/screens/order/order_item_form.dart
   route: null
@@ -4106,8 +4113,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
+  note: "Web: com 2 ou mais veículos, Mudar o item mostra de qual (ou Geral), gravado pela API (PATCH /items deviceId)."
 - id: order.item-form.quantity
   screen: lib/screens/order/order_item_form.dart
   route: null
@@ -4445,9 +4454,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
   permission: attachPhotos
+  note: "Web: Apagar foto no visualizador, com confirmação; a transação tira só esta foto e o arquivo sai do Storage."
 - id: order.share.native
   screen: lib/screens/widgets/order_status_share.dart
   route: null
@@ -5073,10 +5084,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [external_browser]
   data: ["storage:tenants/{id}/receipts/{id}", "storage:tenants/{id}/orders/{id}/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/proof.spec.ts
   web_exception: null
   permission: viewPhotos
-  note: "Supervisor e técnico nunca chegam à tela (canReceiveOnOrder). Renova a URL do Storage antes de abrir; imagem no visualizador, PDF e outros no app externo."
+  note: "Supervisor e técnico nunca chegam à tela (canReceiveOnOrder). Renova a URL do Storage antes de abrir; imagem no visualizador, PDF e outros no app externo. Web: Ver comprovante abre o arquivo em outra aba (o navegador mostra imagem e PDF)."
 - id: pay.order.attach-proof
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -5090,9 +5102,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [camera, gallery, file]
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/proof.spec.ts
   web_exception: null
   permission: attachPhotos
+  note: "Web: Anexar, Trocar e Tirar comprovante em Já recebido (este com confirmação) e no Receber. Arquivo novo a cada vez em payments/{id}/receipt_{ms}.{ext}; o servidor apaga o antigo. Gerente (sem attachPhotos) só vê."
 - id: pay.order.blocked-status
   screen: lib/screens/payment_management_screen.dart
   route: "/payment_management"
@@ -5691,10 +5705,11 @@ rows:
   feature_flags: []
   hardware: [camera, gallery, file]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/proof.spec.ts
   web_exception: null
   permission: attachPhotos
-  note: "Tirar foto, Galeria, Arquivos e Cancelar. Arquivo: tipo pela extensão (pdf, jpg, png); o resto, HEIC incluído, vai como application/octet-stream. Não copiar: galeria grava foto_{ms}.jpg como image/jpeg qualquer que seja o tipo real."
+  note: "Tirar foto, Galeria, Arquivos e Cancelar. Arquivo: tipo pela extensão (pdf, jpg, png); o resto, HEIC incluído, vai como application/octet-stream. Não copiar: galeria grava foto_{ms}.jpg como image/jpeg qualquer que seja o tipo real. Web: escolher arquivo (imagem ou PDF abaixo de 10 MB); outro tipo ou maior é recusado com frase antes de enviar. Câmera não (no computador é arquivo)."
 - id: pay.widget.proof-viewer
   screen: lib/screens/payments/widgets/receipt_image_viewer.dart
   route: null
@@ -5806,10 +5821,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [camera, gallery, file]
   data: []
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/receive.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/proof.spec.ts
   web_exception: null
-  note: "Sem attachPhotos (gerente), a linha Comprovante some. Não aceita mais que o saldo (compara em centavos). Prévia Quita a OS ou Fica faltando R$ X; com link aberto, nota A cobrança aberta se ajusta sozinha. Rascunho acima do saldo novo volta ao saldo. Mexer no valor, comprovante ou forma conta como alterado. Comprovante vira linha com nome e X para tirar. Web (revisão #518): prévia 'Quita a OS.' / 'Ficam R$ X.' e aviso de link aberto feitos; falta o comprovante (o servidor só aceita URL https do bucket, o emulador serve http: sem E2E possível)."
+  note: "Sem attachPhotos (gerente), a linha Comprovante some. Não aceita mais que o saldo (compara em centavos). Prévia Quita a OS ou Fica faltando R$ X; com link aberto, nota A cobrança aberta se ajusta sozinha. Rascunho acima do saldo novo volta ao saldo. Mexer no valor, comprovante ou forma conta como alterado. Comprovante vira linha com nome e X para tirar. Web (revisão #518): prévia 'Quita a OS.' / 'Ficam R$ X.' e aviso de link aberto feitos; falta o comprovante (o servidor só aceita URL https do bucket, o emulador serve http: sem E2E possível). Web (fechamento): comprovante no Receber, com nome e Tirar comprovante; testado no emulador (o servidor aceita a URL http do emulador só dentro do emulador de Functions)."
 - id: pay.widget.method
   screen: lib/screens/payments/widgets/receive_payment_sheet.dart
   route: null
@@ -7304,7 +7319,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem “Recentes”; fica para a próxima fatia de OS."
+  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem “Recentes”; fica para a próxima fatia de OS. Fechamento: na OS, ✓ no cliente atual por id e placa no seletor; falta o ✓ por nome+telefone de registro antigo sem id."
 - id: customer.picker.create
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_form"
@@ -7336,11 +7351,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "3+ caracteres, sem hífen, espaço ou caixa; no máximo 5 acertos no topo com 'placa · modelo'. Dono = cliente da OS mais recente com o aparelho. Web: a lista de clientes e o ⌘K acham pela placa e abrem o dono; o seletor da Nova OS ainda não. Não copiar: no app falha calada para consultor e técnico; na web a API resolve."
+  note: "3+ caracteres, sem hífen, espaço ou caixa; no máximo 5 acertos no topo com 'placa · modelo'. Dono = cliente da OS mais recente com o aparelho. Web: a lista de clientes e o ⌘K acham pela placa e abrem o dono; o seletor da Nova OS ainda não. Não copiar: no app falha calada para consultor e técnico; na web a API resolve. Web (fechamento): no seletor da Nova OS e da OS, “Pela placa ou série” no topo; escolher traz o dono e o veículo juntos."
 - id: customer.picker.recents
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -7354,11 +7369,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Web: falta “Recentes” no seletor da Nova OS. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê."
+  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Web: falta “Recentes” no seletor da Nova OS. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê. Web (fechamento): Recentes na Nova OS e na troca de cliente da OS, pela API (OS que o papel lê, consultor incluído)."
 - id: customer.picker.auto-device
   screen: lib/screens/customers/customer_list_screen.dart
   route: null
@@ -7972,7 +7987,7 @@ rows:
   web_status: in_progress
   web_exception: null
   permission: viewDevices
-  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa “do cliente” de “outros” pelas regras daqui."
+  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa “do cliente” de “outros” pelas regras daqui. Fechamento: Nova OS separa do cliente e outros; na troca de veículo da OS, ✓ no atual. Falta ✓ em todos os da OS ao adicionar."
 - id: device.list.create
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -8057,9 +8072,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: in_progress
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
-  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult. Web: falta “Nenhum …” na troca de aparelho da OS."
+  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult. Web: falta “Nenhum …” na troca de aparelho da OS. Web (fechamento): ao trocar um veículo da OS, “Nenhum veículo” o tira."
 - id: device.list.pick-create
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -8160,10 +8176,11 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Só contratos ativos, 'OS #n · repetição' com o próximo vencimento; cada um abre a OS. Some quando não há."
+  note: "Só contratos ativos, 'OS #n · repetição' com o próximo vencimento; cada um abre a OS. Some quando não há. Web: lido do REST do Firestore com máscara (sem valores); falha esconde a seção."
 - id: device.detail.maintenance
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -8229,7 +8246,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   note: "Contrato ativo manda: não pede outra data."
 - id: device.maintenance.offer
@@ -8245,10 +8263,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders", "local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída."
+  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo."
 - id: device.maintenance.answer
   screen: lib/screens/devices/next_maintenance_offer.dart
   route: null
@@ -8262,10 +8281,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "A data vale para todos os aparelhos da OS e guarda cliente e serviço principal. Último dia do mês quando ele é mais curto. Cada opção mostra o mês/ano em que cai; o subtítulo traz os aparelhos e, se já há data, 'agora: mês de ano' (nextMaintenanceCurrent)."
+  note: "A data vale para todos os aparelhos da OS e guarda cliente e serviço principal. Último dia do mês quando ele é mais curto. Cada opção mostra o mês/ano em que cai; o subtítulo traz os aparelhos e, se já há data, 'agora: mês de ano' (nextMaintenanceCurrent). Web: 3 meses, 6 meses, 1 ano (com o mês/ano) pela API PUT /devices/:id/next-maintenance, um por aparelho."
 - id: device.maintenance.no-repeat
   screen: lib/screens/devices/next_maintenance_offer.dart
   route: null
@@ -8279,7 +8299,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
   note: "Tira só data cumprida por esta OS (atrasada ou nos próximos 7 dias). Voltar sem responder conta como recusa e não muda data."
@@ -8296,9 +8317,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
-  note: "Conta por empresa, no aparelho; definir uma data zera."
+  note: "Conta por empresa, no aparelho; definir uma data zera. Web: contagem em localStorage por empresa; marcar a data na ficha zera."
 - id: device.detail.price
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -8420,7 +8442,7 @@ rows:
   web_status: in_progress
   web_exception: null
   permission: manageDevices
-  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: foto do aparelho ainda não; precisa de envio ao Storage e de a API aceitar a URL da pasta do aparelho. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado."
+  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: foto do aparelho ainda não; precisa de envio ao Storage e de a API aceitar a URL da pasta do aparelho. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado. Fechamento: continua sem foto; a rota PUT /devices não aceita a foto (precisa da mesma regra do catálogo: pasta do aparelho, photoSeen e apagar o antigo)."
 - id: device.form.autocomplete
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -10055,9 +10077,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Rodapé PraticOS {versão} ({build}); web mostra a versão do build web. Linha da conta: nome com inicial num círculo e Sua conta · empresa; sem nome, Sua conta. Seções vazias somem."
+  note: "Rodapé PraticOS {versão} ({build}); web mostra a versão do build web. Linha da conta: nome com inicial num círculo e Sua conta · empresa; sem nome, Sua conta. Seções vazias somem. Web: rodapé PraticOS web {dia do build} ({commit})."
 - id: settings.more-page
   screen: lib/screens/menu_navigation/more/more_page.dart
   route: null

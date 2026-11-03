@@ -390,6 +390,26 @@ describe('PUT /devices/:id/next-maintenance', () => {
     expect(saved.nextMaintenanceNoticeFor).toBeUndefined();
   });
 
+  test('com orderId, cliente e serviço principal vêm dessa OS (o do veículo, ou o sem veículo), e grava updatedAt/updatedBy', async () => {
+    seedOrder('o2', {
+      status: 'done', createdAt: '2026-09-01T10:00:00.000Z', customer: { id: 'caio', name: 'Caio', phone: '1' }, deviceIds: ['gol', 'uno'],
+      devices: [{ id: 'gol', name: 'Gol' }, { id: 'uno', name: 'Uno' }],
+      services: [{ service: { id: 's9', name: 'Freio do Uno' }, deviceId: 'uno' }, { service: { id: 's8', name: 'Revisão geral' } }],
+    });
+    const res = await call('admin', 'put', `${DE}/gol/next-maintenance`, { date: '2099-05-31', orderId: 'o2' });
+    expect(res.status).toBe(200);
+    const saved = read('companies/c1/devices/gol') as any;
+    expect(saved).toMatchObject({ nextMaintenanceCustomer: { id: 'caio', name: 'Caio' }, nextMaintenanceLastService: 'Revisão geral' });
+    expect(typeof saved.updatedAt).toBe('string');
+    expect(saved.updatedBy).toMatchObject({ id: expect.any(String) });
+  });
+
+  test('orderId de OS que não tem o veículo é recusado', async () => {
+    seedOrder('o3', { status: 'done', customer: { id: 'caio', name: 'Caio' }, deviceIds: ['uno'], devices: [{ id: 'uno', name: 'Uno' }] });
+    const res = await call('admin', 'put', `${DE}/gol/next-maintenance`, { date: '2099-05-31', orderId: 'o3' });
+    expect(res.status).toBe(400);
+  });
+
   test('sem dono conhecido mantém o cliente antigo', async () => {
     seed('companies/c1/devices/uno', { name: 'Uno', nextMaintenanceCustomer: { id: 'bia', name: 'Bia' } });
     await call('admin', 'put', `${DE}/uno/next-maintenance`, { date: '2099-01-01' });

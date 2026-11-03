@@ -81,7 +81,7 @@ export function addItem(
 export function updateItem(
   id: string,
   itemId: string,
-  patch: { description?: string; value?: number | null; quantity?: number; total?: number | null },
+  patch: { description?: string; value?: number | null; quantity?: number; total?: number | null; deviceId?: string | null },
   expectedUpdatedAt?: string | null,
 ) {
   return api<OrderResponse>(`${base(id)}/items/${encodeURIComponent(itemId)}`, {
@@ -96,7 +96,11 @@ export function removeItem(id: string, itemId: string, expectedUpdatedAt?: strin
 }
 
 /** expectedUpdatedAt: a payment over a newer version is refused (two screens receiving the same balance). */
-export function receivePayment(id: string, body: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }, expectedUpdatedAt?: string | null) {
+export function receivePayment(
+  id: string,
+  body: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; receiptFile?: { url: string; storagePath: string; fileName: string; contentType: string } },
+  expectedUpdatedAt?: string | null,
+) {
   return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } })
 }
 
@@ -138,6 +142,27 @@ export async function addComment(orderId: string, text: string, isInternal: bool
     source: 'web',
     isInternal,
     createdAt: new Date().toISOString(),
+  })
+}
+
+/**
+ * Takes one photo out (order.photo.delete): a transaction rereads the list and
+ * drops only this one (photos added elsewhere stay), then the file leaves the
+ * Storage. A file already gone is fine.
+ */
+export async function deletePhoto(orderId: string, photo: { id?: string; url?: string; storagePath?: string }): Promise<void> {
+  const { ref: docRef, firestore } = await orderDoc(orderId)
+  const db = await firestoreClient()
+  await firestore.runTransaction(db, async (tx) => {
+    const snap = await tx.get(docRef)
+    const photos = ((snap.data()?.photos ?? []) as { id?: string; url?: string }[]).filter((item) => (photo.id ? item.id !== photo.id : item.url !== photo.url))
+    tx.update(docRef, { photos, updatedAt: new Date().toISOString(), updatedBy: author() })
+  })
+  // Only a file in this order's photos folder leaves the Storage (an odd path in the document never does).
+  if (!photo.storagePath || !photo.storagePath.startsWith(`tenants/${session.companyId}/orders/${orderId}/photos/`) || photo.storagePath.includes('..')) return
+  const [storage, { ref, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
+  await deleteObject(ref(storage, photo.storagePath)).catch((error: { code?: string }) => {
+    if (error?.code !== 'storage/object-not-found') console.warn('photos: file not deleted', error)
   })
 }
 

@@ -26,6 +26,10 @@ import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import DeviceForm from './DeviceForm.vue'
+import { loadOrderTexts } from '@/i18n'
+import { loadContracts, type ContractOrder } from '@/lib/contracts/data'
+import { dayText, repeatText } from '@/lib/contracts/text'
+import { resetDeclines } from '@/lib/orders/maintenance-offer'
 
 const props = defineProps<{ deviceId: string; devices: DeviceRow[] }>()
 const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
@@ -74,8 +78,26 @@ function customText(field: FormField, value: unknown): string {
   return String(value)
 }
 
+/**
+ * Active contracts with this device (device.detail.contracts): "OS 12 · Todo mês"
+ * and the next one, each opening its order. An active contract sets the next
+ * maintenance (device.detail.maintenance-contract): no other date is asked.
+ * A failure only hides the section.
+ */
+const contracts = shallowRef<ContractOrder[]>([])
+async function loadDeviceContracts() {
+  try {
+    const [list] = await Promise.all([loadContracts(), loadOrderTexts()])
+    contracts.value = list.filter((order) => order.contract?.active && order.devices.some((item) => item.id === props.deviceId))
+  } catch {
+    contracts.value = []
+  }
+}
+const contractDue = computed(() => contracts.value.map((order) => order.contract?.nextDueDate).filter((day): day is string => !!day).sort()[0] ?? null)
+
 async function load() {
   state.value = 'loading'
+  void loadDeviceContracts()
   try {
     detail.value = await loadDevice(props.deviceId)
     state.value = 'ready'
@@ -112,6 +134,8 @@ async function saveMaintenance(next: string | null) {
   busy.value = true
   try {
     await setNextMaintenance(device.value.id, next)
+    // A date set here resets the refusals of the question after done (device.maintenance.limit).
+    if (next) resetDeclines()
     dialog.value = null
     const message = next ? t('nextMaintenanceOn', { date: formatDateLong(fromIsoDay(next), country.value) }) : t('web.devices.maintenanceRemoved')
     showToast(message)
@@ -199,7 +223,24 @@ onMounted(load)
         </div>
       </header>
 
-      <section v-if="maintenance || canManage" class="od-sec" :aria-label="t('nextMaintenanceSet')" data-testid="device-maintenance">
+      <section v-if="contracts.length" class="od-sec" aria-labelledby="dd-contracts-title" data-testid="device-contracts">
+        <h3 id="dd-contracts-title">{{ t('web.devices.contracts') }}</h3>
+        <ul class="dir-orders">
+          <li v-for="order in contracts" :key="order.id" class="dir-order">
+            <RouterLink class="row-btn" :to="{ path: '/', query: { order: order.id } }">
+              <span class="num">{{ orderShort() }} {{ order.number }}</span> · {{ order.contract ? repeatText(order.contract) : '' }}
+            </RouterLink>
+            <span v-if="order.contract?.nextDueDate" class="sub">{{ t('web.devices.contractNext', { date: dayText(order.contract.nextDueDate) }) }}</span>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="contractDue" class="od-sec" :aria-label="t('nextMaintenanceSet')" data-testid="device-maintenance">
+        <h3>{{ t('web.devices.maintenance') }}</h3>
+        <p class="od-sentence">{{ t('web.devices.contractNext', { date: dayText(contractDue) }) }}</p>
+        <p class="sub">{{ t('nextMaintenanceByContract') }}</p>
+      </section>
+      <section v-else-if="maintenance || canManage" class="od-sec" :aria-label="t('nextMaintenanceSet')" data-testid="device-maintenance">
         <h3>{{ t('web.devices.maintenance') }}</h3>
         <template v-if="maintenance">
           <p :class="{ 'od-sentence--late': lateMaintenance }" class="od-sentence">

@@ -91,6 +91,18 @@ export function statusLine(order: Order): string {
   return text
 }
 
+/**
+ * "Quando" of the list on a wide screen: the visit (with the hour) or the delivery,
+ * on an order still to do; late when the delivery passed. The status column then
+ * shows only the status (statusLine keeps the dates where the column is not there).
+ */
+export function whenCell(order: Order, now: Date): { text: string; late: boolean } | null {
+  if (!isActive(order) && order.status !== 'quote') return null
+  if (order.scheduledDate) return { text: t('web.orders.whenVisit', { when: whenText(order.scheduledDate, now) }), late: false }
+  if (order.dueDate) return { text: t('web.orders.whenDue', { when: whenText(order.dueDate, now) }), late: !!lateness(order, now) }
+  return null
+}
+
 /** The phrase under the header (order.detail.overdue-line / remaining-line). */
 export function headerPhrase(order: Order, now: Date, remaining: number | null): { text: string; late: boolean } | null {
   if (order.status === 'done' && remaining && remaining > 0) return { text: t('orderRemainingToReceive', { amount: money(remaining) }), late: false }

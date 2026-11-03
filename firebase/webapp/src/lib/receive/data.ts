@@ -4,7 +4,7 @@
 // and the rules let this person read (charges, settings/payments, unpaid orders).
 import type { MessageKey } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
-import { firestoreClient, firestoreLite } from '@/lib/firebase'
+import { firestoreClient, firestoreLite, storageClient } from '@/lib/firebase'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
 import { api, session } from '@/lib/session'
 import { chargeOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
@@ -45,6 +45,50 @@ export function receivePayment(
 export function removeTransaction(orderId: string, transactionId: string, type: 'payment' | 'discount') {
   const kind = type === 'discount' ? 'discounts' : 'payments'
   return api<OrderResponse>(`${order(orderId)}/${kind}/${encodeURIComponent(transactionId)}`, { method: 'DELETE' })
+}
+
+// ---------------------------------------------------------------------------
+// Proof of a payment (pay.order.attach-proof)
+// ---------------------------------------------------------------------------
+
+export interface ProofFile {
+  url: string
+  storagePath: string
+  fileName: string
+  contentType: string
+}
+
+/**
+ * Uploads to the payment's folder (the app's path), with a new name each time:
+ * the server deletes the old file after a replace, so the new one never shares
+ * its path. The order's API call comes after, with this file.
+ */
+export async function uploadProof(orderId: string, transactionId: string, file: File): Promise<ProofFile> {
+  const extension = file.type === 'application/pdf' ? 'pdf' : (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const storagePath = `tenants/${session.companyId}/orders/${orderId}/payments/${transactionId}/receipt_${Date.now()}.${extension}`
+  const [storage, { ref, uploadBytes, getDownloadURL }] = await Promise.all([storageClient(), import('firebase/storage')])
+  const target = ref(storage, storagePath)
+  await uploadBytes(target, file, { contentType: file.type })
+  return { url: await getDownloadURL(target), storagePath, fileName: file.name.slice(0, 256), contentType: file.type }
+}
+
+/** The file just uploaded, when the API refused it: never left behind (a failure here is only logged). */
+export async function dropUpload(storagePath: string): Promise<void> {
+  try {
+    const [storage, { ref, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
+    await deleteObject(ref(storage, storagePath))
+  } catch (error) {
+    console.warn('proof: upload not removed', error)
+  }
+}
+
+/** Attaches or replaces the proof of a payment; the server deletes the old file. */
+export function setProof(orderId: string, transactionId: string, receiptFile: ProofFile) {
+  return api<OrderResponse>(`${order(orderId)}/payments/${encodeURIComponent(transactionId)}/receipt`, { method: 'PUT', body: { receiptFile } })
+}
+
+export function removeProof(orderId: string, transactionId: string) {
+  return api<OrderResponse>(`${order(orderId)}/payments/${encodeURIComponent(transactionId)}/receipt`, { method: 'DELETE' })
 }
 
 /** Manual payments and discounts leave; the Asaas ones stay. */

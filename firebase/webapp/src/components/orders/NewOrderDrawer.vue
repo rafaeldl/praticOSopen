@@ -22,6 +22,8 @@ import { newContract } from '@/lib/contracts/model'
 import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
+import { askWhenOpened } from '@/lib/orders/maintenance-offer'
+import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
@@ -47,6 +49,8 @@ const devices = shallowRef<Device[]>([])
 const catalog = shallowRef<CatalogItem[]>([])
 const team = shallowRef<Member[]>([])
 const customerDevices = shallowRef<Device[]>([])
+const recents = shallowRef<Named[]>([])
+const mostUsed = shallowRef<string[]>([])
 const customer = ref<Customer | null>(null)
 const device = ref<Device | null>(null)
 const lines = ref<Line[]>([])
@@ -101,6 +105,9 @@ onMounted(async () => {
       const item = k.find((entry) => entry.kind === 'service' && entry.id === seeded.id)
       if (item) lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: showsMoney ? (seeded.value ?? item.value) : item.value, quantity: 1 }]
     }
+    // "Recentes" and "Mais usados" come after the lists; a failure only hides the section.
+    void recentCustomers().then((list) => (recents.value = list), () => {})
+    void mostUsedKeys().then((keys) => (mostUsed.value = keys), () => {})
     // Only the customer: their devices are suggested first, none is picked (the app's rule).
     if (seed?.customer && !seed.device) customerDevices.value = await devicesOf(seed.customer.id)
     if (can('assignOrder')) team.value = await loadTeam()
@@ -140,8 +147,20 @@ const FREE_ITEMS = writes.API_516
 /** One per Nova OS opened: a "Salvar" again after a network failure never creates a second order (API_516). */
 const clientOrderId = crypto.randomUUID()
 
+const PLATE = 'plate:'
+const customerRow = (c: Customer) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })
 const customerGroups = (query: string): ComboboxGroup[] => [
-  { title: query ? undefined : t('web.newOrder.customers'), items: search(customers.value, query, (c) => c.phone ?? '', 8).map((c) => ({ id: c.id, label: c.name, sub: formatPhone(c.phone) || undefined })) },
+  // A plate brings the device and its owner together (customer.picker.plate).
+  { title: t('web.newOrder.byPlate'), items: plateHits(devices.value, query).map((d) => ({ id: `${PLATE}${d.id}`, label: `${d.serial} · ${d.name}`, sub: plateOwnerName(d.id) })) },
+  // "Recentes": the customers of the last orders, only without a search (customer.picker.recents).
+  {
+    title: t('pickerRecent'),
+    items: query.trim() ? [] : recents.value.map((r) => customers.value.find((c) => c.id === r.id) ?? r).map(customerRow),
+  },
+  {
+    title: query ? undefined : t('web.newOrder.customers'),
+    items: search(query.trim() ? customers.value : customers.value.filter((c) => !recents.value.some((r) => r.id === c.id)), query, (c) => c.phone ?? '', 8).map(customerRow),
+  },
   // A new customer right here (POST /v1/app/customers): the name, or the phone when only digits were typed.
   // Only once the list is in: an Enter typed before it loads must find the existing customer, never create a copy.
   { items: query.trim() && !loading.value && can('manageCustomers') ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
@@ -163,8 +182,21 @@ async function createCustomer(text: string): Promise<Customer | null> {
   }
 }
 
+/** The plate's device and its owner (the customer of its latest order); without an owner, only the device. */
+async function pickPlate(deviceId: string) {
+  const found = devices.value.find((d) => d.id === deviceId) ?? null
+  const owner = await ownerOf(deviceId)
+  if (owner) customer.value = customers.value.find((c) => c.id === owner.id) ?? owner
+  device.value = found
+  customerDevices.value = found ? [found] : []
+  await nextTick()
+  if (customer.value) itemRef.value?.focus()
+}
+
 async function pickCustomer(item: ComboboxItem, query = '') {
-  const chosen = item.id === NEW ? await createCustomer(query.trim()) : (customers.value.find((c) => c.id === item.id) ?? null)
+  if (item.id.startsWith(PLATE)) return pickPlate(item.id.slice(PLATE.length))
+  const chosen =
+    item.id === NEW ? await createCustomer(query.trim()) : (customers.value.find((c) => c.id === item.id) ?? recents.value.find((c) => c.id === item.id) ?? null)
   customer.value = chosen
   device.value = null
   customerDevices.value = []
@@ -217,7 +249,18 @@ async function pickDevice(item: ComboboxItem, query = '') {
   itemRef.value?.focus()
 }
 
+const itemRow = (item: CatalogItem) => ({
+  id: `${item.kind}:${item.id}`,
+  label: item.name,
+  sub: lineKindText(item.kind),
+  right: showsMoney ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
+})
 const itemGroups = (query: string): ComboboxGroup[] => [
+  // "Mais usados" of the last orders, only without a search (order.item-search.most-used).
+  {
+    title: t('orderMostUsed'),
+    items: query.trim() ? [] : mostUsed.value.map((key) => catalog.value.find((entry) => `${entry.kind}:${entry.id}` === key)).filter((item): item is CatalogItem => !!item).map(itemRow),
+  },
   {
     title: query ? undefined : t('orderAllItems'),
     items: search(catalog.value, query, (item) => lineKindText(item.kind), 8).map((item) => ({
@@ -289,6 +332,8 @@ async function save() {
     orderCreated(created.id)
     // With a device and not saved done: the order asks for the check-in checklist (order.offer.checklist).
     if (device.value && status.value !== 'done') markOffer(created.id)
+    // Saved already done with a device: the order asks for the next maintenance (device.maintenance.offer).
+    if (device.value && status.value === 'done') askWhenOpened(created.id)
     const message = t('web.newOrder.created', { order: `${orderShort()} ${created.number}` })
     showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
     announce(message)

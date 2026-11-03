@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** Build day and commit of this web build (vite.config.ts). */
+declare const __WEB_VERSION__: string
+
 interface ImportMetaEnv {
   /** '1' connects every Firebase client to the local emulators. */
   readonly VITE_USE_EMULATORS?: string

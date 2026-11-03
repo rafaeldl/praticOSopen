@@ -26,6 +26,16 @@ export function projectBucket(): string {
   return process.env.STORAGE_BUCKET || 'praticos.appspot.com';
 }
 
+/**
+ * Host of the Storage emulator, only while running inside the Functions
+ * emulator (FUNCTIONS_EMULATOR is never set in Cloud Functions). Null in
+ * production, so only https URLs of the bucket pass there.
+ */
+function emulatorStorageHost(): string | null {
+  if (process.env.FUNCTIONS_EMULATOR !== 'true') return null;
+  return process.env.FIREBASE_STORAGE_EMULATOR_HOST || null;
+}
+
 /** Path of a Storage download URL of the project bucket, or null for any other URL. */
 function storagePathOfUrl(raw: string): string | null {
   let url: URL;
@@ -34,11 +44,13 @@ function storagePathOfUrl(raw: string): string | null {
   } catch {
     return null;
   }
-  if (url.protocol !== 'https:') return null;
   const bucket = projectBucket();
+  const emulator = emulatorStorageHost();
   const prefix =
-    url.hostname === 'firebasestorage.googleapis.com' ? `/v0/b/${bucket}/o/` :
-    url.hostname === 'storage.googleapis.com' ? `/${bucket}/` : null;
+    url.protocol === 'https:' && url.hostname === 'firebasestorage.googleapis.com' ? `/v0/b/${bucket}/o/` :
+    url.protocol === 'https:' && url.hostname === 'storage.googleapis.com' ? `/${bucket}/` :
+    // The Storage emulator serves plain http on its own host (E2E of the web app).
+    emulator && url.protocol === 'http:' && url.host === emulator ? `/v0/b/${bucket}/o/` : null;
   if (!prefix || !url.pathname.startsWith(prefix)) return null;
   try {
     return decodeURIComponent(url.pathname.slice(prefix.length));

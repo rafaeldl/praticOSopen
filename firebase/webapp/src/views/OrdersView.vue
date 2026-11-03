@@ -36,7 +36,7 @@ import {
   type ListFilter,
   type Order,
 } from '@/lib/orders/model'
-import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText } from '@/lib/orders/text'
+import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText, whenCell } from '@/lib/orders/text'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -233,6 +233,12 @@ async function loadMore() {
     stale.value = true
   } finally {
     loadingMore.value = false
+    // A filter that shows few rows (Paradas) keeps the sentinel in view, and the observer
+    // does not fire again: keep filling while it is still on screen and there is more.
+    if (token === loadToken && hasMore.value) void nextTick(() => {
+      const box = sentinel.value?.getBoundingClientRect()
+      if (box && box.top < window.innerHeight + 200) void loadMore()
+    })
   }
 }
 
@@ -390,7 +396,14 @@ onBeforeUnmount(() => {
   stopSearch?.()
 })
 
+// The plate (or serial) after the device's name: the user tests looked for it on the row (P3 17 of #515).
+const plateOf = (order: Order) => (order.devices[0]?.name && order.devices[0]?.serial ? order.devices[0].serial : '')
 const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order)].filter(Boolean).join(' · ')
+// Below 64rem of list the row keeps its short form: the dates go after the status and the plate stays out.
+const rowDates = (order: Order) => (lateText(order, now.value) ? '' : statusLine(order).slice(statusText(order.status).length))
+// "Quando" is its own column when the list is 64rem wide or more (a container query in
+// orders.css, so text at 200% counts); below it the dates stay in the status line.
+const columns = 5 + (showsMoney ? 1 : 0)
 </script>
 
 <template>
@@ -487,12 +500,13 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
               <th class="c-num" scope="col">{{ t('web.orders.number') }}</th>
               <th scope="col">{{ t('customer') }}</th>
               <th scope="col">{{ t('orderStatusLabel') }}</th>
+              <th class="c-when" scope="col">{{ t('web.orders.when') }}</th>
               <th v-if="showsMoney" class="c-money" scope="col">{{ t('total') }}</th>
             </tr>
           </thead>
           <tbody v-for="group in groups" :key="group.key">
             <tr v-if="group.title" class="group-row no-click">
-              <th :colspan="showsMoney ? 5 : 4" scope="rowgroup">{{ group.title }}</th>
+              <th :colspan="columns" scope="rowgroup">{{ group.title }}</th>
             </tr>
             <tr
               v-for="order in group.rows"
@@ -516,12 +530,21 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
                 <button type="button" class="row-btn who" @click.stop="open(order)">
                   {{ order.customer?.name || t('web.orders.noCustomer') }}
                 </button>
-                <span v-if="rowDetail(order)" class="sub row-detail">{{ rowDetail(order) }}</span>
+                <span v-if="rowDetail(order)" class="sub row-detail"
+                  >{{ deviceSummary(order) }}<span v-if="plateOf(order)" class="row-plate"> · {{ plateOf(order) }}</span
+                  >{{ deviceSummary(order) && servicesSummary(order) ? ' · ' : '' }}{{ servicesSummary(order) }}</span
+                >
               </td>
               <td>
                 <span v-if="visitTime(order)" class="num visit-time" data-testid="visit-time">{{ visitTime(order) }}</span>
-                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusLine(order)" />
+                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusText(order.status)" /><span
+                  v-if="rowDates(order)"
+                  class="st-narrow"
+                >{{ rowDates(order) }}</span>
                 <span v-if="isHeld(order) && holdDays(order, now) !== null" class="sub row-hold">{{ holdText(order, now) }}</span>
+              </td>
+              <td class="c-when" data-testid="row-when">
+                <span v-if="whenCell(order, now)" :class="{ 'is-late': whenCell(order, now)?.late }">{{ whenCell(order, now)?.text }}</span>
               </td>
               <td v-if="showsMoney" class="c-money">
                 <span class="num">{{ money(order.total) }}</span>

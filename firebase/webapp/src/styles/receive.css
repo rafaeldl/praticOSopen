@@ -39,3 +39,5 @@
 .recv .grid tbody tr { cursor: default; }
 .recv .grid tbody tr:hover td { background: transparent; }
 .recv .grid tbody tr.is-selected td { background: var(--color-selected); }
+.proof-chip { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-rule); border-radius: 6px; }
+.proof-name { overflow-wrap: anywhere; }

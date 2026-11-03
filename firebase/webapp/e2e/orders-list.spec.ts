@@ -45,10 +45,16 @@ test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ pag
   await openHome(page, 'admin')
   await expect(row(page, 501)).toContainText('Atrasada 3 dias')
   await expect(row(page, 501).locator('.dot--danger')).toHaveCount(1)
-  await expect(row(page, 501)).toContainText('Veículo 3 · Serviço 2')
-  await expect(row(page, 502)).toContainText(/Na oficina · entrega \d{2}\/\d{2}/)
+  // The plate after the device (P3 17 of the user tests of #515).
+  await expect(row(page, 501)).toContainText('Veículo 3 · TST0003 · Serviço 2')
+  // Wide screen: "Quando" is a column; the status column keeps only the status.
+  await expect(table(page).getByRole('columnheader', { name: 'Quando' })).toBeVisible()
+  await expect(row(page, 502).getByTestId('row-when')).toHaveText(/^Entrega (hoje|amanhã|\d{2}\/\d{2})/)
+  await expect(row(page, 502)).not.toContainText('Na oficina · entrega', { useInnerText: true })
+  await expect(row(page, 501).getByTestId('row-when')).toHaveClass(/c-when/)
+  await expect(row(page, 501).getByTestId('row-when').locator('.is-late')).toHaveCount(1)
   await expect(row(page, 503)).toContainText('Esperando peça · Parada há 2 dias')
-  await expect(row(page, 506)).toContainText(/visita \d{2}\/\d{2}/)
+  await expect(row(page, 506).getByTestId('row-when')).toHaveText(/^Visita /)
   await expect(row(page, 501).locator('td.c-money')).toHaveText('R$ 100,00')
   // Late first, then today (home.rules.groups).
   const numbers = await table(page).locator('tbody td.c-num').allTextContents()
@@ -59,8 +65,17 @@ test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ pag
   await expect(page.getByTestId('summary')).toHaveText(/\d+ em aberto · 1 atrasada/)
 })
 
+test('tela estreita: sem a coluna Quando, as datas voltam à linha da situação (home.row.status-line)', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 800 })
+  await openHome(page, 'admin')
+  await expect(table(page).getByRole('columnheader', { name: 'Quando' })).toHaveCount(0)
+  await expect(row(page, 502)).toContainText(/Na oficina\s*· entrega \d{2}\/\d{2}/, { useInnerText: true })
+  await expect(row(page, 506)).toContainText(/visita \d{2}\/\d{2}/, { useInnerText: true })
+})
+
 async function loadAll(page: Page) {
-  const more = page.getByRole('button', { name: 'Mostrar mais' })
+  // The row stays while a page loads (the button then reads "Carregando…"): wait for it to go.
+  const more = page.locator('.more-rows button')
   for (let i = 0; i < 20 && (await more.count()); i++) {
     // The infinite scroll can load the last page and take the button away between count and click.
     await more.click({ timeout: 3000 }).catch(() => {})
@@ -79,6 +94,8 @@ test('filtros do app: orçamentos, paradas, concluídas e todas por mês (home.f
 
   await page.getByRole('button', { name: 'Paradas' }).click()
   await expect(row(page, 503)).toHaveCount(1)
+  // The sentence comes with the whole open list loaded; other tests running alongside add open orders.
+  await loadAll(page)
   await expect(table(page).locator('tbody tr')).toHaveCount(1)
   await expect(page.getByTestId('summary')).toHaveText('1 parada')
 
@@ -169,20 +186,22 @@ test('lote: mudar a situação de duas OS de uma vez', async ({ page }) => {
 })
 
 test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ page }) => {
-  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name: 'Quadro Teste' } })
+  // Its own name: a repeated run leaves the previous card on the board.
+  const name = `Quadro Teste ${Date.now()}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name: name } })
   await openHome(page, 'admin')
   await page.getByRole('button', { name: 'Quadro', exact: true }).click()
   await expect(page).toHaveURL(/view=board/)
   const board = page.getByTestId('board')
   const approved = board.getByRole('region', { name: /^Aprovado/ })
-  await expect(approved.getByText('Quadro Teste')).toBeVisible()
+  await expect(approved.getByText(name)).toBeVisible()
   await approved.getByRole('button', { name: `Mover OS ${order.number}` }).click()
   await page.getByRole('dialog', { name: 'Mover para onde?' }).getByRole('button', { name: 'Na oficina' }).click()
   const progress = board.getByRole('region', { name: /^Na oficina/ })
-  await expect(progress.getByText('Quadro Teste')).toBeVisible()
+  await expect(progress.getByText(name)).toBeVisible()
   await progress.locator(`#card-${order.id}`).focus()
   await page.keyboard.press('Shift+ArrowRight')
-  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText('Quadro Teste')).toBeVisible()
+  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
 })
 
 test('idiomas: filtros em inglês e espanhol, moeda continua do Brasil', async ({ page }) => {

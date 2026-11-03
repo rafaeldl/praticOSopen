@@ -320,6 +320,16 @@ describe('GET /orders/:id', () => {
     expect(data.services[0]).not.toHaveProperty('value');
   });
 
+  it('quem não vê valores recebe o local e os campos do ramo da OS (sem dinheiro)', async () => {
+    seedOrder('o2', {
+      createdBy: { id: 'tech1', name: 'Téo' },
+      address: 'Rua A, 1', latitude: -27.5, longitude: -48.5, customData: { mileageIn: 1200 },
+    });
+    const res = await call('technician', 'get', `${O}/o2`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ address: 'Rua A, 1', latitude: -27.5, longitude: -48.5, customData: { mileageIn: 1200 } });
+  });
+
   it('dono vê valores, total da linha e transações com id (também as antigas, sem id)', async () => {
     const res = await call('owner', 'get', `${O}/o1`);
     const data = res.body.data;
@@ -621,6 +631,24 @@ describe('dinheiro', () => {
     expect(doc('o1').transactions[0]).not.toHaveProperty('receiptDocumentId');
     expect(doc('o1').documents).toEqual([]);
     expect(fakeStorage.deleted).toEqual(['tenants/c1/orders/o1/payments/t1/a.jpg']);
+  });
+
+  it('comprovante exige attachPhotos (gerente recebe, mas não anexa) e OS que recebe (nem orçamento nem cancelada)', async () => {
+    seedOrder('o1', {
+      paidAmount: 10,
+      transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: { id: 'owner1', name: 'R' } }],
+    });
+    const receiptFile = file('tenants/c1/orders/o1/payments/t1/a.jpg');
+    expect((await call('manager', 'put', `${O}/o1/payments/t1/receipt`, { receiptFile })).status).toBe(403);
+    expect((await call('manager', 'delete', `${O}/o1/payments/t1/receipt`)).status).toBe(403);
+    expect((await call('manager', 'post', `${O}/o1/payments`, { amount: 5, receiptFile: file('tenants/c1/orders/o1/payments/t2/b.jpg') })).status).toBe(403);
+    expect((await call('manager', 'post', `${O}/o1/payments`, { amount: 5 })).status).toBe(200);
+    for (const status of ['quote', 'canceled']) {
+      seedOrder('o2', { status, paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: { id: 'owner1', name: 'R' } }] });
+      const put = await call('owner', 'put', `${O}/o2/payments/t1/receipt`, { receiptFile: file('tenants/c1/orders/o2/payments/t1/a.jpg') });
+      expect([status, put.status]).toEqual([status, 409]);
+      expect([status, (await call('owner', 'delete', `${O}/o2/payments/t1/receipt`)).status]).toEqual([status, 409]);
+    }
   });
 
   it('com Valores e cobrança desligado ninguém mexe em dinheiro', async () => {

@@ -45,3 +45,5 @@
 .imp-h { display: block; margin-bottom: 0.25rem; color: var(--color-ink); }
 .imp-table select { width: 100%; font-weight: 400; color: var(--color-ink); min-height: 2.1rem; }
 .imp-table td { overflow-wrap: anywhere; }
+/* The badge ("12 atrasadas") wraps instead of pushing the table past a narrow screen with large text. */
+.dir-customers .status { white-space: normal; }

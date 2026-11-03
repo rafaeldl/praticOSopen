@@ -340,6 +340,21 @@ test('celular de 320 px: faixa da semana, lista do dia, ver o mês, sem rolagem 
   await expect(panel(page)).toBeVisible()
 })
 
+test('celular de 320 px com texto a 200%: faixa, lista do dia e mês sem passar da tela (agenda.view)', async ({ page }) => {
+  const order = await makeOrder('admin', {
+    scheduledDate: '2032-02-17T13:00:00.000Z',
+    assignedTo: { id: 'e2e-technician', name: 'Tiago Tecnico' },
+  })
+  await page.setViewportSize({ width: 320, height: 720 })
+  await openAgenda(page, 'admin', 'd=2032-02-17')
+  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
+  await expect(page.locator(`.ag-row[data-order="${order.id}"]`)).toBeVisible()
+  await expectNoSideScroll(page)
+  await page.getByRole('button', { name: 'Ver o mês' }).click()
+  await expect(calendarDay(page, '2032-02-17')).toBeVisible()
+  await expectNoSideScroll(page)
+})
+
 test('2560 px e texto a 200%: grade inteira e nada para o lado fora da grade', async ({ page }) => {
   await makeOrder('admin', { scheduledDate: '2032-03-09T13:00:00.000Z' })
   await page.setViewportSize({ width: 2560, height: 1300 })
