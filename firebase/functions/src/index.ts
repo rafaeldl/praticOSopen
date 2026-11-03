@@ -368,6 +368,7 @@ import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
+import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
 import { auth as adminAuth } from './services/firestore.service';
 
@@ -578,6 +579,11 @@ app.use('/v1/app/nfse', ...appBearer, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', ...appBearer, aiRoutes);
 app.use('/v1/app/team', ...appBearer, teamRoutes);
+// Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
+app.use('/v1/app/web-access', createWebAccessRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token),
+  readConfig: async () => (await db.collection('config').doc('webApp').get()).data() ?? null,
+}));
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', ...appBearer, userLinkRoutes);
