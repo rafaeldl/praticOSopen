@@ -772,14 +772,17 @@ abstract class _OrderStore with Store {
     );
   }
 
+  /// Resolves when the server has the new status and fails when it refused
+  /// it (never resolves offline). Null when nothing was written.
   @action
-  setStatus(String? status) {
-    if (status == null) return;
+  Future<void>? setStatus(String? status) {
+    if (status == null) return null;
     final previousPayment = order!.payment;
+    _holdBeforeStatus = order!.onHold;
     order!.status = status;
     this.status = status;
     updatePayment();
-    createItem();
+    final saved = createItem();
     // Done, canceled or back to quote: the "parada" mark no longer applies.
     // If this write fails the mark stays hidden and the order trigger removes
     // it, so there is nothing to undo.
@@ -803,6 +806,25 @@ abstract class _OrderStore with Store {
         order!.paid = update['paid'] as bool?;
         _queuePaymentFieldUpdate(order!.id!, update, Global.userAggr);
       }
+    }
+    return saved;
+  }
+
+  /// "Parada" mark before the last [setStatus], for [restoreStatus].
+  OrderHold? _holdBeforeStatus;
+
+  /// Puts the status back on screen after the server refused [setStatus]: the
+  /// server never took the new one. The "parada" mark [setStatus] took away
+  /// comes back too, and is written again, because that separate write may
+  /// have gone through.
+  @action
+  void restoreStatus(String? status) {
+    order?.status = status;
+    this.status = status;
+    updatePayment();
+    final mark = _holdBeforeStatus;
+    if (mark != null && order?.onHold == null) {
+      _saveHold(mark, undoOnFailure: false);
     }
   }
 
@@ -1901,9 +1923,10 @@ abstract class _OrderStore with Store {
   }
 
   /// [onCreated] runs once a new order has its id (used to add the
-  /// customer's request as the first comment).
-  createItem({void Function(String orderId)? onCreated}) {
-    if (deferSave || order == null || companyId == null) return;
+  /// customer's request as the first comment). On an existing order, resolves
+  /// when the update reached the server.
+  Future<void>? createItem({void Function(String orderId)? onCreated}) {
+    if (deferSave || order == null || companyId == null) return null;
     order!.syncDeviceIds();
 
     if (order!.id == null) {
@@ -1948,7 +1971,7 @@ abstract class _OrderStore with Store {
       }
     } else {
       // Atualiza OS existente
-      repository.updateItem(companyId!, order).then((_) {
+      return repository.updateItem(companyId!, order).then((_) {
         if (orderStream == null || orderStream!.value?.id != order!.id) {
           orderStream = repository
               .streamSingle(companyId!, order!.id)
@@ -1956,6 +1979,7 @@ abstract class _OrderStore with Store {
         }
       });
     }
+    return null;
   }
 
   void _logOrderCreated() {

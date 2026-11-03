@@ -38,6 +38,7 @@ import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
+import 'package:praticos/screens/devices/next_maintenance_offer.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_hold_sheet.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
@@ -106,6 +107,9 @@ const Duration kNotifyNoteDuration = Duration(seconds: 8);
 /// Taps on the blue button ignored after it changes the status.
 const Duration kStatusTapCooldown = Duration(milliseconds: 800);
 
+/// How long "pronta" waits for the server before going on without it.
+const Duration kStatusSaveWait = Duration(seconds: 3);
+
 class OrderScreenV2 extends StatefulWidget {
   const OrderScreenV2({
     super.key,
@@ -123,6 +127,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.speechListener,
     this.registration,
     this.nfse,
+    this.offerMaintenance,
   });
 
   /// Injected in tests; defaults to a new [OrderStore].
@@ -166,6 +171,11 @@ class OrderScreenV2 extends StatefulWidget {
   /// Notas fiscais of the order (tests); defaults to a new [NfseController]
   /// that stays off unless the company has `nfseEnabled`.
   final NfseController? nfse;
+
+  /// "Quando é a próxima manutenção?" after the order is done. Defaults to
+  /// [offerNextMaintenance] (tests inject).
+  final Future<void> Function(BuildContext context, Order? order)?
+  offerMaintenance;
 
   @override
   State<OrderScreenV2> createState() => _OrderScreenV2State();
@@ -454,7 +464,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _store.loadOrder();
     final customer = prefill?.customer;
     final devices = prefill?.effectiveDevices ?? const <DeviceAggr>[];
-    if (customer != null || devices.isNotEmpty) {
+    final services = prefill?.services ?? const <OrderService>[];
+    if (customer != null || devices.isNotEmpty || services.isNotEmpty) {
       runInAction(() {
         final order = _store.order!;
         if (customer != null) {
@@ -465,6 +476,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           _store.addDevice(Device.fromJson(d.toJson()));
         }
         order.syncDeviceIds();
+        services.forEach(_store.addService);
       });
     }
     _ready = true;
@@ -733,9 +745,35 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
     }
     if (status == 'canceled' && !await _confirmCancel()) return;
-    _store.setStatus(status);
+    final previous = order.status;
+    final saved = _store.setStatus(status);
+    if (status == 'done' && previous != 'done') {
+      if (!await _statusKept(saved, previous)) return;
+      if (mounted) await _offerMaintenance(_store.order);
+    }
     await _offerNotifyCustomer(status);
   }
+
+  /// False when the server refused the new status: it goes back on screen, so
+  /// nothing follows an order that did not change. Offline nothing answers,
+  /// and after [kStatusSaveWait] the order counts as changed.
+  Future<bool> _statusKept(Future<void>? saved, String? previous) async {
+    if (saved == null) return true;
+    try {
+      await saved.timeout(kStatusSaveWait);
+      return true;
+    } on TimeoutException {
+      return true;
+    } catch (e) {
+      debugPrint('Could not save the order status: $e');
+      _store.restoreStatus(previous);
+      if (mounted) showAppToast(context, context.l10n.orderStatusSaveError);
+      return false;
+    }
+  }
+
+  Future<void> _offerMaintenance(Order? order) =>
+      (widget.offerMaintenance ?? offerNextMaintenance)(context, order);
 
   /// "Falta terminar 1 checklist": blocks "pronta" and opens the first one
   /// still pending.
@@ -3120,6 +3158,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             },
           )
         : null;
+    // The spot of the button that just changed the status: its second tap
+    // does nothing here.
+    VoidCallback afterCooldown(VoidCallback action) => () {
+      if (_statusCooldown?.isActive ?? false) return;
+      action();
+    };
     switch (_store.status) {
       case 'quote':
         return to(l10n.orderActionApproveQuote, 'approved');
@@ -3129,11 +3173,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         return to(l10n.orderActionMarkReady, 'done');
       case 'done':
         final remaining = _store.remainingBalance;
-        if (remaining <= 0) return _nfseAction(order);
+        if (remaining <= 0) {
+          final nfse = _nfseAction(order);
+          return nfse == null ? null : (nfse.$1, afterCooldown(nfse.$2));
+        }
         if (!_canReceive(config)) return null;
         return (
           l10n.orderNextStepReceive(_format.formatCurrency(remaining)),
-          () => _actions.openPayments(context, _store),
+          afterCooldown(() => _actions.openPayments(context, _store)),
         );
     }
     return null;

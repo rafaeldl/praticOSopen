@@ -5,6 +5,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/devices/next_maintenance_offer.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,10 +119,15 @@ Future<void> askNotificationsOnce(BuildContext context) async {
   await store.requestPermissionAgain();
 }
 
-/// After "Nova OS" closes: the checklist, when it applies; then the
-/// notifications, the first time. Taking the checklist leaves the
-/// notifications for the next order: one interruption at a time.
+/// After "Nova OS" closes: the next maintenance of an order saved already
+/// done, or the checklist, when it applies; then the notifications, the first
+/// time. Taking the checklist leaves the notifications for the next order:
+/// one interruption at a time.
 Future<void> runNewOrderOffers(BuildContext context, Order? order) async {
-  if (await offerChecklist(context, order)) return;
+  if (order?.status == 'done') {
+    await offerNextMaintenance(context, order);
+  } else if (await offerChecklist(context, order)) {
+    return;
+  }
   if (context.mounted) await askNotificationsOnce(context);
 }

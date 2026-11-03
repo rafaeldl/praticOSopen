@@ -62,6 +62,36 @@ void main() {
 
   tearDown(() => Global.companyAggr = null);
 
+  group('a refused status', () {
+    test('brings the mark back on screen and in the order', () async {
+      final mark = stopped();
+      store.order = order('progress', hold: mark);
+      store.hold = mark;
+
+      store.setStatus('done');
+      expect(store.hold, isNull);
+
+      store.restoreStatus('progress');
+      await pumpEventQueue();
+
+      expect(store.status, 'progress');
+      expect(store.hold, same(mark));
+      expect(store.order!.onHold, same(mark));
+      expect(writes, [null, mark]);
+    });
+
+    test('invents no mark on an order that had none', () async {
+      store.order = order('progress');
+
+      store.setStatus('done');
+      store.restoreStatus('progress');
+      await pumpEventQueue();
+
+      expect(store.hold, isNull);
+      expect(writes, isEmpty);
+    });
+  });
+
   test('marks with reason, note and start date, keeping the status', () {
     store.order = order('progress');
 

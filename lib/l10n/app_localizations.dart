@@ -10471,6 +10471,148 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count, plural, =0{Retomada no mesmo dia} =1{Retomada depois de 1 dia parada} other{Retomada depois de {count} dias parada}}'**
   String orderHoldLogResumed(int count);
+
+  /// No description provided for @nextMaintenanceQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando é a próxima manutenção?'**
+  String get nextMaintenanceQuestion;
+
+  /// No description provided for @nextMaintenanceThreeMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'3 meses'**
+  String get nextMaintenanceThreeMonths;
+
+  /// No description provided for @nextMaintenanceSixMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'6 meses'**
+  String get nextMaintenanceSixMonths;
+
+  /// No description provided for @nextMaintenanceOneYear.
+  ///
+  /// In pt, this message translates to:
+  /// **'1 ano'**
+  String get nextMaintenanceOneYear;
+
+  /// No description provided for @nextMaintenanceNoRepeat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não repetir'**
+  String get nextMaintenanceNoRepeat;
+
+  /// No description provided for @nextMaintenanceCurrent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcada para {date}'**
+  String nextMaintenanceCurrent(String date);
+
+  /// No description provided for @nextMaintenanceOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima manutenção: {date}'**
+  String nextMaintenanceOn(String date);
+
+  /// No description provided for @nextMaintenanceSet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir próxima manutenção'**
+  String get nextMaintenanceSet;
+
+  /// No description provided for @nextMaintenanceChangeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para mudar ou tirar'**
+  String get nextMaintenanceChangeHint;
+
+  /// No description provided for @nextMaintenanceRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar'**
+  String get nextMaintenanceRemove;
+
+  /// No description provided for @nextMaintenanceByContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pelo contrato'**
+  String get nextMaintenanceByContract;
+
+  /// No description provided for @nextMaintenanceSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar a data da manutenção'**
+  String get nextMaintenanceSaveError;
+
+  /// No description provided for @orderStatusSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar. Tente de novo.'**
+  String get orderStatusSaveError;
+
+  /// No description provided for @maintenanceComing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenções chegando'**
+  String get maintenanceComing;
+
+  /// No description provided for @maintenanceShowMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Ver mais 1} other{Ver mais {count}}}'**
+  String maintenanceShowMore(int count);
+
+  /// No description provided for @maintenanceCallCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chamar cliente'**
+  String get maintenanceCallCustomer;
+
+  /// No description provided for @maintenanceOpenOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir OS'**
+  String get maintenanceOpenOrder;
+
+  /// No description provided for @maintenanceViewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver {device}'**
+  String maintenanceViewDevice(String device);
+
+  /// No description provided for @maintenanceNoPhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente sem telefone'**
+  String get maintenanceNoPhone;
+
+  /// No description provided for @maintenanceWhatsappError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o WhatsApp'**
+  String get maintenanceWhatsappError;
+
+  /// No description provided for @maintenanceWhatsappMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {customer}! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?'**
+  String maintenanceWhatsappMessage(
+    String customer,
+    String device,
+    String date,
+  );
+
+  /// No description provided for @maintenanceWhatsappMessageNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?'**
+  String maintenanceWhatsappMessageNoName(String device, String date);
+
+  /// No description provided for @maintenanceLastService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Última: {service}'**
+  String maintenanceLastService(String service);
 }
 
 class _AppLocalizationsDelegate
