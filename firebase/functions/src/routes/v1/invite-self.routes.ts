@@ -6,8 +6,8 @@
  * mounted behind bearerAuthAllowingNoCompany — see app-invites.mount.ts.
  * - The code (token) is the secret: anyone signed in who has it can look the
  *   invite up and accept it, with or without a company.
- * - An admin invite is only accepted by its recipient (verified email or the
- *   login phone), whoever asks.
+ * - An admin invite (owner counts as admin) is only accepted by its recipient
+ *   (verified email or the login phone), whoever asks.
  * - Unknown codes are counted per user (invite-attempts.service.ts): after 10
  *   in an hour, lookup and acceptance answer 429.
  */
@@ -172,7 +172,7 @@ export function createSelfInviteRouter(auth: RequestHandler[]): Router {
         return;
       }
 
-      if (invite.role === 'admin' && !inviteService.isInviteAddressedTo(invite, callerOf(req))) {
+      if (inviteService.inviteNeedsRecipient(invite) && !inviteService.isInviteAddressedTo(invite, callerOf(req))) {
         res.status(403).json({
           success: false,
           error: { code: 'FORBIDDEN', message: 'This invite was sent to someone else' },

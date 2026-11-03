@@ -167,6 +167,15 @@ describe('invite.service', () => {
       expect(mockChannel.linkWhatsApp).not.toHaveBeenCalled();
     });
 
+    it('refuses an owner invite sent to another number, like admin', async () => {
+      seedInvite({ channel: 'whatsapp', role: 'owner', phone: '+5548911111111' });
+
+      const result = await acceptInviteViaWhatsApp('INV_ABC', '+5548999999999');
+
+      expect(result).toMatchObject({ success: false });
+      expect(fake.read(INVITE_PATH)?.status).toBe('pending');
+    });
+
     it('refuses an admin invite sent to another number', async () => {
       seedInvite({ channel: 'whatsapp', role: 'admin', phone: '+5548911111111' });
 

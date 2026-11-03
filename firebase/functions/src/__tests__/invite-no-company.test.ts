@@ -62,6 +62,7 @@ function seedAll() {
   invite('INV_LOCAL', { phone: '(48) 99999-0000', createdAt: '2020-01-01T00:00:00.000Z' });
   invite('INV_OTHER', { email: 'someone-else@example.com' });
   invite('INV_ADMIN', { email: 'newbie@example.com', role: 'admin' });
+  invite('INV_OWNER', { email: 'newbie@example.com', role: 'owner' });
   invite('INV_OLD', { email: 'someone-else@example.com', expiresAt: undefined, createdAt: daysAgo(8) });
   invite('INV_RECENT', { email: 'someone-else@example.com', expiresAt: undefined, createdAt: daysAgo(1) });
   // A member of another company.
@@ -98,7 +99,7 @@ describe('invites for an account without a company', () => {
     const res = await request(app).get('/v1/app/invites/pending').set(as('newbie'));
 
     expect(res.status).toBe(200);
-    expect(res.body.data.invites.map((i: { token: string }) => i.token).sort()).toEqual(['INV_ADMIN', 'INV_EMAIL']);
+    expect(res.body.data.invites.map((i: { token: string }) => i.token).sort()).toEqual(['INV_ADMIN', 'INV_EMAIL', 'INV_OWNER']);
   });
 
   it('lists the invites addressed to the verified phone', async () => {
@@ -162,6 +163,13 @@ describe('invites for an account without a company', () => {
       expect(res.status).toBe(403);
       expect(read('links/invites/tokens/INV_ADMIN')?.status).toBe('pending');
       expect(read('companies/c1/private/membership')?.members).not.toHaveProperty(who);
+    });
+
+    it('an owner invite counts as admin', async () => {
+      const res = await request(app).post('/v1/app/invites/INV_OWNER/accept').set(as('stranger'));
+
+      expect(res.status).toBe(403);
+      expect(read('links/invites/tokens/INV_OWNER')?.status).toBe('pending');
     });
 
     it('the recipient accepts it', async () => {

@@ -374,6 +374,11 @@ export async function listByUser(email?: string, phone?: string): Promise<Invite
   return invites;
 }
 
+/** Roles that only the invite's recipient may accept (owner counts as admin). */
+export function inviteNeedsRecipient(invite: Pick<Invite, 'role'>): boolean {
+  return invite.role === 'admin' || invite.role === 'owner';
+}
+
 /** Identity of the caller, from the verified ID token. */
 export interface InviteCaller {
   email?: string;
@@ -715,8 +720,8 @@ export async function acceptInviteViaWhatsApp(
     return { success: false, error: stateError };
   }
 
-  // An admin invite is only accepted by its recipient
-  if (invite.role === 'admin' && !isInviteAddressedTo(invite, { phone: whatsappNumber })) {
+  // An admin (or owner) invite is only accepted by its recipient
+  if (inviteNeedsRecipient(invite) && !isInviteAddressedTo(invite, { phone: whatsappNumber })) {
     return { success: false, error: 'This invite was sent to someone else' };
   }
 
