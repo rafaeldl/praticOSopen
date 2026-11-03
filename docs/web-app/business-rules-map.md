@@ -1,6 +1,6 @@
 # Mapa de regras de negócio: duas verdades
 
-Commit de referência: `fd9e64da`. Mudanças em API, regras e app ficam como proposta; nada aqui foi aplicado.
+Mapa feito em `fd9e64da`; casos de contrato e divergências revistos em `e05d6414`. Mudanças em API, regras e app ficam como proposta.
 
 **Conclusão.** O app é a dona da maior parte das regras. Um cliente web que grave direto no Firestore teria de repetir totais, pagamentos, fluxo de status e permissões, e as regras do Firestore não pegariam um erro dele. Regra de dinheiro e de status vai para a API; regra de exibição fica no cliente, com casos compartilhados.
 
@@ -10,11 +10,11 @@ Legenda da recomendação: **API** = mover para o servidor; **Casos** = cada cli
 
 | # | Regra | Onde vive | Quem mais repete | Risco se divergir | Recomendação |
 |---|---|---|---|---|---|
-| 1 | Total da OS | `lib/mobx/order_store.dart:1767` (`updateTotal`), `lib/utils/order_items.dart:4` | `order_payment_math.dart:107` (`computeTotal`), `order_store.dart:661` (contrato), `order.service.ts:292,462,510`, `orders-management.routes.ts:261`, `invoice.service.ts:136` | Valor cobrado e nota fiscal diferentes do que a tela mostra. **Já diverge**, ver D1 | **API**: endpoint de itens que recalcula. Até lá, Casos |
+| 1 | Total da OS | `lib/mobx/order_store.dart:1767` (`updateTotal`), `lib/utils/order_items.dart:4` | `order_payment_math.dart:107` (`computeTotal`), `order_store.dart:661` (contrato), `order.service.ts:292,462,510`, `orders-management.routes.ts:261`, `invoice.service.ts:136` | Valor cobrado e nota fiscal diferentes do que a tela mostra. Bug do app corrigido (D1); servidor ainda soma sem arredondar e sem `total` da linha (`order-totals`, `order-items`) | **API**: endpoint de itens que recalcula. Até lá, Casos |
 | 2 | Desconto e transações | `order_payment_math.dart:128-260` | `order.service.ts:591` (`applyPaymentTransaction`), `customer-receipt.service.ts` | Saldo errado, total negativo. **Já diverge**, ver D2, D3 | **API**: `POST /v1/app/orders/:id/payments` já existe; falta alinhar permissão (D6) |
 | 3 | Situação do pagamento | `order_payment_math.dart:110`, `order_store.dart:808` | `order.service.ts:579`, gatilho `order-payment.service.ts:613` | "Pago" errado na lista e no Financeiro | **API**; leitura e rótulo com Casos |
 | 4 | Saldo restante | `order_payment_math.dart:118` | `order.dart:78` e `order_store.dart:186` (sem piso em 0), `order.service.ts:722`, `firebase/web/components/order/OrderTotalSection.vue:43` | Saldo negativo no link do cliente (D4) | **Casos** |
-| 5 | Transição de status | `authorization_service.dart:381,435` | `routes/bot/orders.routes.ts:15` (outra tabela, sem perfil), `routes/public/orders.routes.ts:256,338`, `routes/v1/orders.routes.ts:248` (nenhuma validação) | Perfil faz no web o que não faz no app. **Já diverge**, ver D5 | **API**: validar no `PATCH`. Exige aprovação |
+| 5 | Transição de status | `authorization_service.dart:381,435` | `app-permission.middleware.ts` (`PATCH` e bot), `firestore.rules` (`orderStatusChangeAllowed`), `routes/bot/orders.routes.ts:18` (tabela mais estreita além do perfil), `routes/public/orders.routes.ts` (cliente só decide orçamento) | Perfil faz no web o que não faz no app. Alinhado, ver D5 | **API**: já valida. Manter os casos |
 | 6 | Efeitos do status | `order_store.dart:759`, `order-trigger.service.ts`, `order-completion.service.ts` | `order.service.ts:421` (`updateOrder` não limpa `payment`; grava `done`, que o app não grava) | OS cancelada pela API segue "paga" | **API** |
 | 7 | Permissões por perfil | `lib/models/permission.dart:131` | `app-permission.middleware.ts`, `__tests__/rbac/app-permissions.json` | Baixo: já tem teste cruzado | **Contrato**: gerar a tabela do web do JSON existente |
 | 8 | Acesso à OS por status | `authorization_service.dart:281,314,341` | Só exclusão e leitura estão em `firestore.rules:396,424` | Regra de edição precisa valer no servidor | **API** para gravar; **Casos** para a tela |
@@ -59,16 +59,24 @@ O isolamento entre empresas está coberto. Dentro da mesma empresa, parte das re
 
 | # | Divergência | Evidência |
 |---|---|---|
-| D1 | **Bug.** `computeTotal` ignora `value × quantity`. Remover desconto ou zerar pagamentos numa OS criada pela API ou MCP grava total sem os produtos | `order-totals.json`, `remove-discount-on-api-product-line` |
-| D2 | Pagamento em orçamento ou cancelada: app grava `paid`, servidor grava `null` | `payment-on-a-quote` |
-| D3 | Desconto acima do total: app grava negativo, servidor limita a 0 | `discount-above-total` |
-| D4 | Link do cliente mostra saldo sem piso nem arredondamento | `OrderTotalSection.vue:43` |
-| D5 | Quatro regras de status: app, bot, link público, `PATCH` sem validação | `status-transitions.json` |
-| D6 | Consultor recebe no app; `/payments` exige `chargeOrder`, que ele não tem | `permission.dart:332`, `orders.routes.ts:462` |
-| D7 | API não grava `deviceIds` nem `total` da linha de produto; item sem preço vira 0 no servidor e "sem valor" no app | `order.service.ts:335-347,382` |
-| D8 | Clientes do app sem `keywords` de telefone | `customer_store.dart:69` |
-| D9 | Moeda por idioma no app, por país no web | Regra 21 |
-| D10 | `roundMoney` do JS difere do Dart em valor negativo com meio centavo | `half-cent-rounds-away-from-zero-when-negative` |
+| D1 | **Corrigida.** `computeTotal` usa `productLineTotal`; linha sem `total` vale `value × quantity` | `order-totals.json`, `payment-transactions.json`, sem `divergesIn` |
+| D2 | **Aberta no app.** Pagamento em orçamento ou cancelada: decisão é `payment` null e `paid` false. O servidor já faz; o app grava `paid`/`unpaid`, online e offline | `payment-on-a-quote`, `payment-on-a-canceled-order`, `discount-on-a-quote`, `remove-payment-on-a-quote` |
+| D3 | **Aberta no app.** Total nunca negativo. O servidor limita a 0 em `applyPaymentTransaction`, mas não ao remover item. O app grava negativo em todos os caminhos | `discount-above-total`, `discount-above-items-stops-at-zero`, `remove-keeps-total-above-zero` |
+| D4 | **Aberta no link do cliente.** `OrderTotalSection.vue:42` mostra saldo sem piso nem arredondamento. Fora dos casos: é `firebase/web` | `OrderTotalSection.vue:42` |
+| D5 | **Resolvida no essencial.** App, `PATCH`, bot e `firestore.rules` usam o mesmo fluxo por perfil. O bot ainda aplica tabela mais estreita (não reabre) e o link do cliente só decide orçamento. Mesmo status: o servidor aceita de propósito (`sameStatus`) | `status-transitions.json`, `enforcedBy` |
+| D6 | **Aberta no servidor.** Consultor recebe nas OS que criou no app e nas regras; `POST /:id/payments` exige `chargeOrder` e devolve 403. Desconto continua só do financeiro | `order-receive.json`, casos `consultant-own-*-values-on` |
+| D7 | **Aberta no servidor.** API não grava `deviceIds` nem `total` da linha, ignora `total` enviado, e item sem preço vira 0 em vez de "sem valor" | `order-totals.json`, `order-items.json`; `deviceIds` em `order.service.ts:382` |
+| D8 | **Aberta.** Cliente do app sem `keywords` de telefone. Fora dos casos | `customer_store.dart:69` |
+| D9 | **Aberta no app.** Moeda pelo país da empresa é a decisão; o app segue o idioma. `getFormatContext` não conhece PY, BO, AO e MZ | `currency.json` |
+| D10 | **Aberta no servidor.** `roundMoney` do JS sobe para zero em meio centavo negativo; o certo é simétrico | `round-money.json` |
+
+Achados novos ao escrever os casos, todos com `divergesIn`:
+
+- **Valor vazando.** `GET /v1/app/orders/:id` tira `value`, mas devolve `products[].total` a quem não vê preço. `POST /:id/services` e `/products` devolvem `newTotal` para técnico e supervisor e com Valores desligado (`visibility.json`).
+- **Telefone.** `normalizePhone` prefixa 55 em número de até 11 dígitos mesmo com `+1`, e transforma vazio em `+55` (`phone.json`).
+- **Apagar OS.** `firestore.rules` recusa apagar OS com dinheiro, exceto admin; a tela oferece e o servidor recusa (`order-delete.json`).
+- **Recibo.** `buildReceiptPlan` não recusa orçamento, cancelada nem valor acima do aberto; quem barra é a tela (`receipts.json`).
+- **Atrasada.** `getOverdueOrders` deixa orçamento de fora; a decisão segue a tela (`overdue.json`).
 
 Sem divergência encontrada: CPF/CNPJ, repartição de pagamento, `isSafeInvoiceUrl`/`sanitizeReceiptUrl`/`asaas_billing.dart`, `showsValues`/`companyShowsValues`, tabela de permissões.
 
@@ -76,29 +84,31 @@ Sem divergência encontrada: CPF/CNPJ, repartição de pagamento, `isSafeInvoice
 
 Mesmo desenho que já funciona em `test/models/permission_matrix_test.dart` e `rbac/app-permissions.json`: um JSON no repo, lido pelos testes de cada linguagem.
 
-- **Casos:** `docs/web-app/contract-cases/`. `order-totals`, `payment-status`, `payment-transactions`, `status-transitions`, `order-permissions`.
-- **`expect`** é o comportamento do app hoje. **`correct`** marca bug do app: o web segue `correct`. **`divergesIn.functions`** registra diferença conhecida; ao corrigir, o teste falha de propósito e a entrada sai (igual a `gap` da matriz RBAC).
-- **Runners:** em `contract-cases/runners/`, como `.txt` para não entrarem no `analyze` nem no CI antes de aprovados. O nome no topo de cada um diz para onde vai.
+- **Casos:** `docs/web-app/contract-cases/*.json`. `runsIn` diz quais linguagens leem cada arquivo.
+- **`expect`** é o que todas as linguagens fazem. **`correct`** é a decisão quando alguém ainda diverge.
+- **`divergesIn.<linguagem>`** é o que aquela linguagem faz hoje, mesclado sobre a decisão. Cada runner testa `divergesIn[linguagem]` sobre `correct ?? expect`. Corrigiu a linguagem sem tirar a entrada, o teste falha de propósito.
+- **Sem divergência:** caso com `correct` e sem `divergesIn` também falha: promova para `expect`. Idem entrada igual à decisão, id repetido e linguagem desconhecida.
+- **Arquivo novo:** se nomeia uma linguagem em `runsIn` e o runner dela não lê, falha.
+- **Runners:** `test/contract/contract_cases_test.dart` (app real: `OrderStore`, `AuthorizationService`, `OrderPaymentMath`) e `firebase/functions/src/__tests__/contract-cases.test.ts` (serviços reais em Firestore fake; rotas `v1/orders` reais onde a regra mora na rota). O do web está em `contract-cases/runners/*.txt` até entrar em `feat/webapp-foundation`; ele lê `correct ?? expect`.
+- **Limites:** `firestoreRules` e `order-delete.json` descrevem as regras, mas não rodam no emulador. `editService`, `editProduct`, `removeTransaction`, `resetPayments` e `markAsFullyPaid` só rodam no Dart: o servidor não tem.
 
-Validado em 2026-10-31 com os runners copiados temporariamente: Dart 144 de 144 contra `OrderStore` e `AuthorizationService` reais; referência web 144 de 144; `functions` 23 de 23. Dois valores alterados de propósito geraram duas falhas.
-
-| Job | Workflow | Roda | Mudança necessária |
+| Job | Workflow | Roda | `paths` |
 |---|---|---|---|
-| Flutter Analyze | `code_quality.yml` | `flutter test` | Adicionar `test/**` e `docs/web-app/contract-cases/**` em `paths`. Hoje alterar só teste não dispara o job |
-| Lint + Test | `functions_check.yml` | `npm test` | Adicionar `docs/web-app/contract-cases/**` ao `paths` do `push` |
-| Test + Build | `web_check.yml` | `npm test` | Adicionar `docs/web-app/contract-cases/**` ao `paths` |
+| Flutter Analyze | `code_quality.yml` | `flutter test` | `test/**`, `docs/web-app/contract-cases/**` |
+| Lint + Test | `functions_check.yml` | `npm test` | `docs/web-app/contract-cases/**`, no `push` |
+| Web | `webapp_check.yml`, a criar em `feat/webapp-foundation` | `npm test` | `docs/web-app/contract-cases/**`. `web_check.yml` é o link do cliente e não roda estes casos |
 
 Ao mudar uma regra no Dart, o job Flutter quebra até o JSON ser atualizado, e o JSON atualizado quebra `functions` e web até acompanharem. `.github/workflows` é `risk:high`.
 
-Faltam casos, quando o web chegar nessas telas: segmento (`getLabel`, `getMasks`), telefone, CPF/CNPJ, atrasada, moeda.
+Ao juntar com o web: `orderTotal` de `runners/order-rules.ts.txt` precisa limitar a 0 (D3), senão `order-totals.json` falha lá.
 
 ## Propostas que exigem aprovação
 
 1. `PATCH /v1/app/orders/:id`: validar transição por perfil. Muda contrato usado pelo app.
 2. `POST /v1/app/orders/:id/items`: recalcular total no servidor.
-3. Unificar a regra de `/payments` com `canReceiveOnOrderFor`.
-4. Projeção de OS sem valores para quem não tem `viewPrices`.
+3. Unificar a regra de `/payments` com `canReceiveOnOrderFor` (D6).
+4. Projeção de OS sem valores para quem não tem `viewPrices`: tirar `products[].total` e `newTotal`.
 5. Contratos recorrentes em job agendado.
 6. Limites de plano no servidor.
 7. Endurecer `firestore.rules` depois de o web gravar via API e de as versões antigas do app saírem. Detalhe fora do repositório.
-8. Corrigir D1, com teste, em `_itemsTotal`.
+8. Corrigir D2 e D3 no app, D10 no servidor e D9 nos dois lados, tirando as entradas de `divergesIn`.
