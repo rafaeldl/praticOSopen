@@ -263,4 +263,5 @@ Falta:
 - Nota emitida pelo painel do Asaas, ou vinculada a cobrança pela configuração do Asaas, não aparece no PraticOS.
 - Deduções (`deductions`) sempre zero; retenções além do ISS seguem os percentuais do serviço padrão, iguais para todas as notas.
 - Estorno de um pagamento não cancela a nota: cancelar à mão se for o caso.
+- Cancelar não trava a nota no servidor entre a conferência e o pedido ao Asaas: dois pedidos ao mesmo tempo podem chegar os dois ao Asaas (o segundo deve ser recusado por lá; depois do primeiro, a repetição recebe `INVOICE_NOT_CANCELABLE`). O app e o web bloqueiam o segundo toque. Visto na revisão do #525, fica para um PR do servidor.
 - Emissão automática "quando paga" usa a situação de pagamento da OS: OS paga junto com outras num link de várias OS gera uma nota por OS, não uma nota do pagamento.

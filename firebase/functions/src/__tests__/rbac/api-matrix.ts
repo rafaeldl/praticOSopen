@@ -369,6 +369,11 @@ export const API_CASES: ApiCase[] = [
     method: 'get', path: `${FI}/report?from=2026-10-01&to=2026-10-31`, company: 'nofin',
     allow: [],
   },
+  {
+    id: 'nofin.finance.receivable', area: 'Sem valores', title: 'ver o que falta receber com valores desligados',
+    method: 'get', path: `${FI}/receivable`, company: 'nofin',
+    allow: [],
+  },
 
   // ─── Financeiro (web) ──────────────────────────────────────────────────
   {

@@ -265,8 +265,9 @@ export interface ReportFilters {
 /**
  * The report of the period: orders created in it, without quotes and canceled
  * ones. A chosen customer narrows every number but the customer ranking; the
- * payment filter narrows only the list of orders ("a receber" is anything not
- * paid, partial and missing included).
+ * payment filter narrows the list of orders, the composition and the item
+ * rankings, not the totals ("a receber" is anything not paid, partial and
+ * missing included).
  */
 export function reportOf(orders: FinanceOrder[], period: Period & ReportFilters): FinanceReport {
   const { zone } = period;
@@ -293,11 +294,17 @@ export function reportOf(orders: FinanceOrder[], period: Period & ReportFilters)
     byCustomer.set(key, entry);
   }
 
+  // The payment filter narrows the orders, the composition and the item rankings, as the app does
+  // (its rankings read recentOrders, already filtered); totals and the customer ranking stay (B1 of #525).
+  const filtered = chosen.filter((order) =>
+    period.payment === 'paid' ? order.payment === 'paid' : period.payment === 'unpaid' ? order.payment !== 'paid' : true,
+  );
+
   const services = new Map<string, { name: string | null; total: number; count: number; quantity: number }>();
   const products = new Map<string, { name: string | null; total: number; count: number; quantity: number }>();
   let servicesCents = 0;
   let productsCents = 0;
-  for (const order of chosen) {
+  for (const order of filtered) {
     for (const line of order.services ?? []) {
       const name = text(line?.service?.name) ?? text(line?.description);
       const value = cents(line?.value);
@@ -320,9 +327,7 @@ export function reportOf(orders: FinanceOrder[], period: Period & ReportFilters)
     }
   }
 
-  const listed = chosen
-    .filter((order) => (period.payment === 'paid' ? order.payment === 'paid' : period.payment === 'unpaid' ? order.payment !== 'paid' : true))
-    .sort(
+  const listed = [...filtered].sort(
       (a, b) =>
         timeOf(b.updatedAt, zone) - timeOf(a.updatedAt, zone) ||
         timeOf(b.createdAt, zone) - timeOf(a.createdAt, zone) ||
@@ -363,27 +368,46 @@ export function reportOf(orders: FinanceOrder[], period: Period & ReportFilters)
 // Reads
 // ---------------------------------------------------------------------------
 
-/** Orders read for one answer. Above it the answer says `truncated`. */
+/**
+ * Orders read for one answer, all its queries together. They run one after the
+ * other on the same budget, so an answer never reads more than this (B2 of
+ * #525); above it the answer says `truncated`.
+ */
 export const MAX_ORDERS = 20000;
 const PAGE = 1000;
 /** Text dates are compared as text: the app's have no zone, so the range is widened and each order placed by the zone. */
 const SLACK_MS = 14 * 3600 * 1000;
 
 type Query = FirebaseFirestore.Query;
+interface Budget {
+  left: number;
+  truncated: boolean;
+}
+const budgetOf = (max: number): Budget => ({ left: max, truncated: false });
 
-async function readAll(query: Query, budget: { left: number }): Promise<{ orders: FinanceOrder[]; truncated: boolean }> {
+async function readAll(query: Query, budget: Budget): Promise<FinanceOrder[]> {
   const orders: FinanceOrder[] = [];
   let last: FirebaseFirestore.QueryDocumentSnapshot | null = null;
   for (;;) {
     const size = Math.min(PAGE, budget.left);
-    if (size <= 0) return { orders, truncated: true };
+    if (size <= 0) {
+      budget.truncated = true;
+      return orders;
+    }
     const page = await (last ? query.startAfter(last) : query).limit(size).get();
     for (const doc of page.docs) orders.push({ ...(doc.data() as Omit<FinanceOrder, 'id'>), id: doc.id });
     budget.left -= page.docs.length;
-    if (page.docs.length < size) return { orders, truncated: false };
+    if (page.docs.length < size) return orders;
     last = page.docs[page.docs.length - 1];
   }
 }
+
+interface ReadMeta {
+  truncated: boolean;
+  /** Orders read for this answer (never above the limit). */
+  read: number;
+}
+const metaOf = (budget: Budget, max: number): ReadMeta => ({ truncated: budget.truncated, read: max - budget.left });
 
 const ordersOf = (companyId: string) => db.collection('companies').doc(companyId).collection('orders');
 
@@ -399,45 +423,51 @@ function createdIn(companyId: string, period: Period): Query {
 /**
  * Every order with money open, any month: `payment` unpaid or partial, and
  * running or done orders without the field (approved outside the app). Equality
- * filters only, as the app reads them (getUnpaidOrders).
+ * filters only, as the app reads them (getUnpaidOrders). In id order (no
+ * single-field index sorts them by date): when the limit cuts, any of them may
+ * be the one missing.
  */
-async function openOrders(companyId: string, budget: { left: number }) {
-  const [unpaid, missing] = await Promise.all([
-    readAll(ordersOf(companyId).where('payment', 'in', ['unpaid', 'partial']).orderBy('__name__'), budget),
-    readAll(ordersOf(companyId).where('payment', '==', null).where('status', 'in', ['approved', 'progress', 'done']).orderBy('__name__'), budget),
-  ]);
-  return { orders: [...unpaid.orders, ...missing.orders], truncated: unpaid.truncated || missing.truncated };
+async function openOrders(companyId: string, budget: Budget): Promise<FinanceOrder[]> {
+  const unpaid = await readAll(ordersOf(companyId).where('payment', 'in', ['unpaid', 'partial']).orderBy('__name__'), budget);
+  const missing = await readAll(
+    ordersOf(companyId).where('payment', '==', null).where('status', 'in', ['approved', 'progress', 'done']).orderBy('__name__'),
+    budget,
+  );
+  return [...unpaid, ...missing];
 }
 
-export async function financeSummary(companyId: string, period: Period): Promise<FinanceSummary & { truncated: boolean }> {
-  const budget = { left: MAX_ORDERS };
+export async function financeSummary(companyId: string, period: Period, max = MAX_ORDERS): Promise<FinanceSummary & ReadMeta> {
+  const budget = budgetOf(max);
   const { start } = daysRange(period.from, period.to, period.zone);
-  const [created, paid, open] = await Promise.all([
-    readAll(createdIn(companyId, period), budget),
-    // lastPaymentAt (UTC ISO, kept by the server) finds the orders paid since the start, whenever created.
-    readAll(ordersOf(companyId).where('lastPaymentAt', '>=', start.toISOString()).orderBy('lastPaymentAt'), budget),
-    openOrders(companyId, budget),
-  ]);
-  return {
-    ...summarizeOrders([...created.orders, ...paid.orders, ...open.orders], period),
-    truncated: created.truncated || paid.truncated || open.truncated,
-  };
+  // What is open now first: A receber and Em andamento do not depend on the month.
+  const open = await openOrders(companyId, budget);
+  const created = await readAll(createdIn(companyId, period), budget);
+  // lastPaymentAt (UTC ISO, kept by the server) finds the orders paid since the start, whenever created. It reads
+  // the app's zoneless text as -03:00, so a payment just after midnight of the 1st west of Brasília sits before the
+  // start: the query is widened like createdAt and receivedIn places each payment by the zone (M1 of #525).
+  const paid = await readAll(
+    ordersOf(companyId).where('lastPaymentAt', '>=', new Date(start.getTime() - SLACK_MS).toISOString()).orderBy('lastPaymentAt'),
+    budget,
+  );
+  return { ...summarizeOrders([...open, ...created, ...paid], period), ...metaOf(budget, max) };
 }
 
-export async function financeReport(companyId: string, period: Period & ReportFilters): Promise<FinanceReport & { truncated: boolean }> {
-  const created = await readAll(createdIn(companyId, period), { left: MAX_ORDERS });
-  return { ...reportOf(created.orders, period), truncated: created.truncated };
+export async function financeReport(companyId: string, period: Period & ReportFilters, max = MAX_ORDERS): Promise<FinanceReport & ReadMeta> {
+  const budget = budgetOf(max);
+  const created = await readAll(createdIn(companyId, period), budget);
+  return { ...reportOf(created, period), ...metaOf(budget, max) };
 }
 
 /** Financeiro > Receber: every order that still owes, oldest first. */
-export async function receivableOrders(companyId: string, zone: string): Promise<{ orders: FinanceRow[]; truncated: boolean }> {
-  const open = await openOrders(companyId, { left: MAX_ORDERS });
-  const unique = [...new Map(open.orders.map((order) => [order.id, order])).values()];
+export async function receivableOrders(companyId: string, zone: string, max = MAX_ORDERS): Promise<{ orders: FinanceRow[] } & ReadMeta> {
+  const budget = budgetOf(max);
+  const open = await openOrders(companyId, budget);
+  const unique = [...new Map(open.map((order) => [order.id, order])).values()];
   return {
     orders: unique
       .filter(isReceivable)
       .sort(oldestFirst(zone))
       .map((order) => rowOf(order, zone, openCents(order))),
-    truncated: open.truncated,
+    ...metaOf(budget, max),
   };
 }

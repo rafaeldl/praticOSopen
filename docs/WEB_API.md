@@ -125,17 +125,17 @@ Testes: `routes/v1/__tests__/app-catalog.routes.test.ts` e os casos `catalog.*` 
 | Rota | O quê |
 |---|---|
 | `GET /finance/summary?month=AAAA-MM` | Recebido e Vendido do mês, A receber e Em andamento de hoje, com as linhas de cada lista (`received`, `sold`, `receivable.debtors`/`deposits`, `progress`). Sem `month`, o mês atual |
-| `GET /finance/report?from=AAAA-MM-DD&to=AAAA-MM-DD` | Faturamento, já pago, a receber, quantidade, composição, ranking de clientes, serviços e produtos, e as OS do período. `customer=<id>` (ou `none`) estreita tudo menos o ranking de clientes; `payment=paid\|unpaid` estreita só a lista de OS. Até 4.000 dias |
+| `GET /finance/report?from=AAAA-MM-DD&to=AAAA-MM-DD` | Faturamento, já pago, a receber, quantidade, composição, ranking de clientes, serviços e produtos, e as OS do período. `customer=<id>` (ou `none`) estreita tudo menos o ranking de clientes; `payment=paid\|unpaid` estreita a lista de OS, a composição e os rankings de serviços e produtos (como o app), não os totais nem o ranking de clientes. Até 4.000 dias |
 | `GET /finance/receivable` | Financeiro > Receber: toda OS que ainda deve (concluída com saldo e aberta com sinal), da mais antiga |
 
 Regras (contrato `docs/web-app/contract-cases/finance-summary.json`, as mesmas de `lib/utils/financial_summary.dart` e do relatório do app):
 
 - **Dias da empresa.** `zone` (o fuso do navegador) só vale se for um fuso do país da empresa; senão, o principal do país (`companyZone`, igual a `lib/zone.ts` do web). Texto sem fuso, como o app grava, é hora da empresa. O período inclui o último dia (o app deixava de fora, defeito 60).
-- **Recebido** pela data de cada pagamento (`paidAt`, senão `createdAt`), em OS de qualquer mês (achadas por `lastPaymentAt`). Dinheiro antigo sem transação conta no dia da OS; `payment: 'paid'` sem `paidAmount` conta o total.
+- **Recebido** pela data de cada pagamento (`paidAt`, senão `createdAt`), em OS de qualquer mês (achadas por `lastPaymentAt`, com a mesma folga de 14 h: o campo lê o texto sem fuso do app como -03:00, e uma empresa a oeste de Brasília que recebe logo depois da meia-noite do dia 1 ficaria de fora). Dinheiro antigo sem transação conta no dia da OS; `payment: 'paid'` sem `paidAmount` conta o total.
 - **Vendido e faturamento**: OS criadas no período, sem orçamento nem cancelada.
 - **Em aberto**: `payment` `unpaid` ou `partial`, e aprovada, em andamento ou concluída sem `payment`. Cada OS conta num lugar: concluída com saldo e aberta com sinal em A receber; aberta sem nada pago em Em andamento.
 - **Relatório**: "a receber" é tudo que não está pago (também parcial e sem situação; o app listava só `unpaid`, defeito 58).
-- Leitura em páginas de 1.000, até 20.000 OS por resposta; acima disso `truncated: true` e a tela avisa. As datas gravadas como texto são comparadas como texto, então a consulta pede 14 h a mais de cada lado e cada OS é posta no dia pelo fuso.
+- Leitura em páginas de 1.000, até 20.000 OS por resposta, somando todas as consultas dela: rodam uma depois da outra no mesmo limite (primeiro as em aberto), então nunca passam disso. Acima, `truncated: true` e a tela avisa; `read` diz quantas foram lidas. As em aberto vêm na ordem dos ids (nenhum índice de campo único as ordena por data), então a que falta pode ser qualquer uma. As datas gravadas como texto são comparadas como texto, então a consulta pede 14 h a mais de cada lado e cada OS é posta no dia pelo fuso.
 
 Testes: `routes/v1/__tests__/app-finance.routes.test.ts`, `__tests__/contract-cases.test.ts` e os casos `finance.*` e `nofin.finance.*` de `__tests__/rbac/api-matrix.ts`.
 

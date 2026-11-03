@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generatedFrom": "9b0702d9",
-  "rule": "Financeiro e relatório: Recebido pela data de cada pagamento (OS de qualquer mês; dinheiro antigo sem transação conta no dia da OS); Vendido e faturamento sem orçamento nem cancelada; cada OS aberta conta num lugar só (concluída com saldo em A receber, aberta com sinal em A receber, aberta sem nada pago em Em andamento). Dias no fuso da empresa, o último dia do período incluído. No relatório, 'a receber' é tudo que não está pago (também parcial e sem situação), e escolher um cliente não encolhe o ranking.",
+  "rule": "Financeiro e relatório: Recebido pela data de cada pagamento (OS de qualquer mês; dinheiro antigo sem transação conta no dia da OS); Vendido e faturamento sem orçamento nem cancelada; cada OS aberta conta num lugar só (concluída com saldo em A receber, aberta com sinal em A receber, aberta sem nada pago em Em andamento). Dias no fuso da empresa, o último dia do período incluído. No relatório, 'a receber' é tudo que não está pago (também parcial e sem situação), e escolher um cliente não encolhe o ranking. O filtro de pagamento estreita a lista de OS, a composição e os rankings de serviços e produtos, como no app; os totais e o ranking de clientes não mudam com ele.",
   "runsIn": ["functions"],
   "sourceOfTruth": ["lib/utils/financial_summary.dart FinancialSummary.compute", "lib/mobx/order_store.dart loadOrdersForDashboardCustomRange"],
   "otherImplementations": ["firebase/functions/src/services/app-finance.service.ts (rota GET /v1/app/finance/summary e /report, usada pelo web)"],
@@ -72,6 +72,10 @@
     {"id":"report-no-customer-filter","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","customer":"none","orders":[
       {"id":"a","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid","customer":{"id":"ana","name":"Ana"}},
       {"id":"n","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":25,"paidAmount":0,"payment":"unpaid"}
-    ]},"expect":{"revenue":25,"orderIds":["n"]}}
+    ]},"expect":{"revenue":25,"orderIds":["n"]}},
+    {"id":"report-payment-filter-narrows-composition-and-items","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","payment":"paid","orders":[
+      {"id":"p","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":150,"paidAmount":150,"payment":"paid","services":[{"service":{"name":"Revisão"},"value":100}],"products":[{"product":{"name":"Filtro"},"value":25,"quantity":2}]},
+      {"id":"u","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":300,"paidAmount":0,"payment":"unpaid","services":[{"service":{"name":"Pintura"},"value":300}],"products":[]}
+    ]},"expect":{"revenue":450,"count":2,"orderIds":["p"],"compositionServices":100,"compositionProducts":50,"serviceNames":["Revisão"],"productNames":["Filtro"],"customerIds":[null]},"note":"Como o app: os rankings de serviços e produtos leem recentOrders, já filtrado pelo pagamento (financial_report_screen.dart _calculateServicesRanking). Os totais e o ranking de clientes não mudam com o filtro. Revisão do #525, B1."}
   ]
 }

@@ -17,6 +17,7 @@ import { resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { bearerAuth } from '../../../middleware/auth.middleware';
 import { resolveCompanyContext } from '../../../middleware/company.middleware';
 import financeRoutes from '../app-finance.routes';
+import { financeReport, financeSummary, receivableOrders } from '../../../services/app-finance.service';
 
 type Role = 'owner' | 'admin' | 'manager' | 'supervisor' | 'consultant' | 'technician';
 const UID: Record<Role, string> = {
@@ -154,6 +155,22 @@ describe('GET /finance/summary', () => {
     expect(tokyo.body.data.zone).toBe('America/Sao_Paulo');
   });
 
+  it('a company in Manaus paid at 00:30 of the 1st: received in that month (M1 of #525)', async () => {
+    // lastPaymentAt reads the app's zoneless text as -03:00 (03:30Z); the month starts at 04:00Z in Manaus.
+    order('m1', {
+      createdAt: '2026-10-20T15:00:00.000Z', total: 70, paidAmount: 70, payment: 'paid',
+      transactions: [{ id: 'tm', type: 'payment', amount: 70, paidAt: '2026-11-01T00:30:00.000' }],
+      lastPaymentAt: '2026-11-01T03:30:00.000Z',
+    });
+    const res = await call('admin', `${FI}/summary?month=2026-11&zone=America/Manaus`);
+    expect(res.body.data.zone).toBe('America/Manaus');
+    expect(res.body.data.received.orders.map((o: { id: string }) => o.id)).toEqual(['m1']);
+    expect(res.body.data.received.total).toBe(70);
+    // And not in October, the month before.
+    const october = await call('admin', `${FI}/summary?month=2026-10&zone=America/Manaus`);
+    expect(october.body.data.received.orders.map((o: { id: string }) => o.id)).not.toContain('m1');
+  });
+
   it.each(['supervisor', 'consultant', 'technician'] as Role[])('%s gets 403', async (role) => {
     const res = await call(role, `${FI}/summary?month=2026-03`);
     expect(res.status).toBe(403);
@@ -171,6 +188,25 @@ describe('GET /finance/summary', () => {
 
   it('a member of another company gets 403 for c1', async () => {
     expect((await call('other2', `${FI}/summary?month=2026-03`)).status).toBe(403);
+  });
+});
+
+describe('reading limit (B2 of #525)', () => {
+  it('never reads more than the limit, all the queries of one answer together', async () => {
+    const period = { from: '2026-03-01', to: '2026-03-31', zone: 'America/Sao_Paulo' };
+    const all = await financeSummary('c1', period);
+    expect(all.truncated).toBe(false);
+    for (const max of [1, 2, 3, 4, 5]) {
+      const cut = await financeSummary('c1', period, max);
+      expect(cut.read).toBeLessThanOrEqual(max);
+      expect(cut.truncated).toBe(true);
+    }
+    const report = await financeReport('c1', period, 1);
+    expect(report.read).toBeLessThanOrEqual(1);
+    expect(report.truncated).toBe(true);
+    const receivable = await receivableOrders('c1', period.zone, 1);
+    expect(receivable.read).toBeLessThanOrEqual(1);
+    expect(receivable.truncated).toBe(true);
   });
 });
 

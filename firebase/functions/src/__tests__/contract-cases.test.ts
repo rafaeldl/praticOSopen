@@ -531,6 +531,10 @@ describe('finance-summary', () => {
           paidCount: r.paidCount,
           orderIds: r.orders.map((o) => o.id),
           customerIds: r.customers.map((x) => x.id),
+          compositionServices: r.composition.services,
+          compositionProducts: r.composition.products,
+          serviceNames: r.services.map((x) => x.name),
+          productNames: r.products.map((x) => x.name),
         };
         expect(pick(facts, expected)).toEqual(expected);
       }
