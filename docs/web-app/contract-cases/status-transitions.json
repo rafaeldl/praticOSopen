@@ -1,17 +1,12 @@
 {
-  "version": 1,
-  "generatedFrom": "fd9e64da",
-  "rule": "Para quais status cada perfil pode mover a OS. `owner` lê como `admin`. Inclui o mesmo status como negado.",
-  "sourceOfTruth": [
-    "lib/services/authorization_service.dart canChangeOrderStatus, getAvailableStatuses"
-  ],
-  "notEnforcedBy": [
-    "firebase/firestore.rules: update de /orders não olha o status",
-    "firebase/functions/src/routes/v1/orders.routes.ts PATCH /:id: aceita qualquer status com editOrder"
-  ],
-  "otherImplementations": [
-    "firebase/functions/src/routes/bot/orders.routes.ts validTransitions: sem perfil, sem reabrir, com cancelar em approved e progress"
-  ],
+  "version": 2,
+  "generatedFrom": "e05d6414",
+  "rule": "Para quais status cada perfil pode mover a OS. `owner` lê como `admin`.",
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": ["lib/services/authorization_service.dart canChangeOrderStatus, getAvailableStatuses"],
+  "otherImplementations": ["firebase/functions/src/routes/bot/orders.routes.ts validTransitions: sem perfil, sem reabrir, com cancelar em approved e progress"],
+  "enforcedBy": ["firebase/functions/src/middleware/app-permission.middleware.ts canChangeOrderStatus (PATCH /v1/app/orders/:id)", "firebase/firestore.rules orderStatusChangeAllowed"],
+  "sameStatus": {"note": "Manter o status não é mudança: o servidor aceita de propósito (o save completo reenvia o documento). No app a função responde false porque a tela não oferece o status atual.", "dart": false, "functions": true},
   "cases": [
     {"id":"admin-creator-quote","given":{"role":"admin","isCreator":true,"from":"quote"},"expect":{"allowed":["approved","progress","done","canceled"]}},
     {"id":"admin-creator-approved","given":{"role":"admin","isCreator":true,"from":"approved"},"expect":{"allowed":["quote","progress","done","canceled"]}},

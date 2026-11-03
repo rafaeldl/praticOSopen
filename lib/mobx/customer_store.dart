@@ -66,7 +66,7 @@ abstract class _CustomerStore with Store {
     customer.company = user?.companies![0].company;
     customer.updatedAt = DateTime.now();
     customer.updatedBy = user?.toAggr();
-    customer.keywords = generateKeywords(customer.name);
+    customer.keywords = customerKeywords(customer.name, customer.phone);
     await repository.createItem(companyId!, customer);
     _onCreated(customer);
   }

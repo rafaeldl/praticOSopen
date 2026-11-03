@@ -5,6 +5,8 @@ on:
     branches-ignore: [ master ]
     paths:
       - 'firebase/functions/**'
+      # Casos de contrato: src/__tests__/contract-cases.test.ts lê estes JSON
+      - 'docs/web-app/contract-cases/**'
       - '.github/workflows/functions_check.yml'
   pull_request:
     paths:

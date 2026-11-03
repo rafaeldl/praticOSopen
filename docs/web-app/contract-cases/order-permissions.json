@@ -1,10 +1,10 @@
 {
-  "version": 1,
-  "generatedFrom": "fd9e64da",
+  "version": 2,
+  "generatedFrom": "e05d6414",
   "rule": "O que cada perfil faz numa OS, por status. `expect` é o app; `firestoreRules` é o que firestore.rules deixa passar.",
-  "sourceOfTruth": [
-    "lib/services/authorization_service.dart canAccessOrder, canEditOrder, canExecuteOrder, canAssignOrder, canDeleteOrder, canEditOrderMainFields, canManageOrderForms"
-  ],
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": ["lib/services/authorization_service.dart canAccessOrder, canEditOrder, canExecuteOrder, canAssignOrder, canDeleteOrder, canEditOrderMainFields, canManageOrderForms"],
+  "otherImplementations": ["firebase/functions/src/middleware/app-permission.middleware.ts canSeeOrder, roleHasPermission, canEditOrderMainFields (sem canDelete nem canManageForms)"],
   "gaps": "Onde expect.canEditMainFields é false e firestoreRules.update é true, só a tela impede.",
   "cases": [
     {"id":"admin-creator-quote","given":{"role":"admin","isCreator":true,"status":"quote"},"expect":{"canAccess":true,"canEdit":true,"canExecute":true,"canAssign":true,"canDelete":true,"canEditMainFields":true,"canManageForms":true},"firestoreRules":{"read":true,"update":true,"delete":true}},

@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "generatedFrom": "e05d6414",
+  "rule": "Moeda (D9): vem do país da empresa, não do idioma do app. Sem país ou país desconhecido, Brasil.",
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": ["firebase/web/utils/format.ts getCurrencyConfig (a regra decidida)"],
+  "otherImplementations": ["lib/services/format_service.dart formatCurrency (pelo idioma do app)", "firebase/functions/src/utils/format.utils.ts getFormatContext"],
+  "fields": {"currency": "dart: FormatService.currencyFormat.currencyName; functions: getFormatContext", "locale": "dart: FormatService.locale; functions: getFormatContext"},
+  "cases": [
+    {"id":"br-company-app-in-portuguese","given":{"country":"BR","appLocale":"pt-BR"},"expect":{"currency":"BRL","locale":"pt-BR"}},
+    {"id":"us-company-app-in-portuguese","given":{"country":"US","appLocale":"pt-BR"},"correct":{"currency":"USD","locale":"en-US"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"pt-company-app-in-portuguese","given":{"country":"PT","appLocale":"pt-BR"},"correct":{"currency":"EUR","locale":"pt-PT"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"es-company-app-in-portuguese","given":{"country":"ES","appLocale":"pt-BR"},"correct":{"currency":"EUR","locale":"es-ES"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"mx-company-app-in-portuguese","given":{"country":"MX","appLocale":"pt-BR"},"correct":{"currency":"MXN","locale":"es-MX"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"ar-company-app-in-portuguese","given":{"country":"AR","appLocale":"pt-BR"},"correct":{"currency":"ARS","locale":"es-AR"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"cl-company-app-in-portuguese","given":{"country":"CL","appLocale":"pt-BR"},"correct":{"currency":"CLP","locale":"es-CL"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"co-company-app-in-portuguese","given":{"country":"CO","appLocale":"pt-BR"},"correct":{"currency":"COP","locale":"es-CO"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"pe-company-app-in-portuguese","given":{"country":"PE","appLocale":"pt-BR"},"correct":{"currency":"PEN","locale":"es-PE"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"uy-company-app-in-portuguese","given":{"country":"UY","appLocale":"pt-BR"},"correct":{"currency":"UYU","locale":"es-UY"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"gb-company-app-in-portuguese","given":{"country":"GB","appLocale":"pt-BR"},"correct":{"currency":"GBP","locale":"en-GB"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"ca-company-app-in-portuguese","given":{"country":"CA","appLocale":"pt-BR"},"correct":{"currency":"CAD","locale":"en-CA"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"}}},
+    {"id":"br-company-app-in-english","given":{"country":"BR","appLocale":"en-US"},"correct":{"currency":"BRL","locale":"pt-BR"},"divergesIn":{"dart":{"currency":"USD","locale":"en-US"}},"note":"D9: mesma OS em R$ no web e em $ no app em inglês."},
+    {"id":"us-company-app-in-english","given":{"country":"US","appLocale":"en-US"},"expect":{"currency":"USD","locale":"en-US"}},
+    {"id":"no-country-falls-back-to-brazil","given":{"country":null,"appLocale":"pt-BR"},"expect":{"currency":"BRL","locale":"pt-BR"}},
+    {"id":"unknown-country-falls-back-to-brazil","given":{"country":"XX","appLocale":"pt-BR"},"expect":{"currency":"BRL","locale":"pt-BR"}},
+    {"id":"py-company","given":{"country":"PY","appLocale":"pt-BR"},"correct":{"currency":"PYG","locale":"es-PY"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"},"functions":{"currency":"BRL","locale":"pt-BR"}},"note":"O web conhece o país; getFormatContext não."},
+    {"id":"ao-company","given":{"country":"AO","appLocale":"pt-BR"},"correct":{"currency":"AOA","locale":"pt-AO"},"divergesIn":{"dart":{"currency":"BRL","locale":"pt-BR"},"functions":{"currency":"BRL","locale":"pt-BR"}}}
+  ]
+}
