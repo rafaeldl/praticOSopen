@@ -257,7 +257,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         for (const s of orderServices) {
           const svc = await catalogService.getService(companyId, s.serviceId);
           if (svc) {
-            const value = s.value ?? svc.value ?? 0;
+            const value = s.value ?? svc.value ?? null;
             resolvedServices.push({
               service: { id: svc.id, name: svc.name, value: svc.value, photo: svc.photo ?? null },
               description: s.description || svc.name,
@@ -281,7 +281,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         for (const p of orderProducts) {
           const prod = await catalogService.getProduct(companyId, p.productId);
           if (prod) {
-            const value = p.value ?? prod.value ?? 0;
+            const value = p.value ?? prod.value ?? null;
             const quantity = p.quantity || 1;
             resolvedProducts.push({
               product: { id: prod.id, name: prod.name, value: prod.value, photo: prod.photo ?? null },
@@ -418,8 +418,8 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
-    const serviceValue = data.value !== undefined ? data.value : (service.value ?? 0);
+    // Value with fallback to catalog; none on either side stays "sem valor" (null). 0 is a valid gift/courtesy.
+    const serviceValue = data.value !== undefined ? data.value : (service.value ?? null);
 
     // Add service to order
     const result = await orderService.addServiceToOrderByNumber(
@@ -518,8 +518,8 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
-    const productValue = data.value !== undefined ? data.value : (product.value ?? 0);
+    // Value with fallback to catalog; none on either side stays "sem valor" (null). 0 is a valid gift/courtesy.
+    const productValue = data.value !== undefined ? data.value : (product.value ?? null);
 
     // Add product to order
     const result = await orderService.addProductToOrderByNumber(
