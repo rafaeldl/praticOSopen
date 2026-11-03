@@ -10619,6 +10619,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Última: {service}'**
   String maintenanceLastService(String service);
+
+  /// No description provided for @orderCreateFailedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar a OS'**
+  String get orderCreateFailedTitle;
+
+  /// No description provided for @orderCreateFailedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira a internet e crie a OS de novo.'**
+  String get orderCreateFailedMessage;
+
+  /// No description provided for @receiveChargeMaybeOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.'**
+  String get receiveChargeMaybeOpen;
+
+  /// No description provided for @checklistAnswerSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar a resposta. Tente de novo.'**
+  String get checklistAnswerSaveFailed;
+
+  /// No description provided for @profileSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar o perfil. Tente de novo.'**
+  String get profileSaveFailed;
+
+  /// No description provided for @saveFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Tente de novo.'**
+  String get saveFailedTryAgain;
+
+  /// No description provided for @deleteFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para apagar. Tente de novo.'**
+  String get deleteFailedTryAgain;
 }
 
 class _AppLocalizationsDelegate

@@ -6,7 +6,7 @@
   "sourceOfTruth": ["lib/services/authorization_service.dart canChangeOrderStatus, getAvailableStatuses"],
   "otherImplementations": ["firebase/functions/src/routes/bot/orders.routes.ts validTransitions: sem perfil, sem reabrir, com cancelar em approved e progress"],
   "enforcedBy": ["firebase/functions/src/middleware/app-permission.middleware.ts canChangeOrderStatus (PATCH /v1/app/orders/:id)", "firebase/firestore.rules orderStatusChangeAllowed"],
-  "sameStatus": {"note": "Manter o status não é mudança: o servidor aceita de propósito (o save completo reenvia o documento). No app a função responde false porque a tela não oferece o status atual.", "dart": false, "functions": true},
+  "sameStatus": {"note": "Manter o status não é mudança: o servidor aceita de propósito (o save completo antigo reenviava o documento; desde fix/app-defects-batch-2 o app só manda o que mudou, mas versões antigas continuam em uso). No app a função responde false porque a tela não oferece o status atual.", "dart": false, "functions": true},
   "cases": [
     {"id":"admin-creator-quote","given":{"role":"admin","isCreator":true,"from":"quote"},"expect":{"allowed":["approved","progress","done","canceled"]}},
     {"id":"admin-creator-approved","given":{"role":"admin","isCreator":true,"from":"approved"},"expect":{"allowed":["quote","progress","done","canceled"]}},

@@ -50,9 +50,18 @@ class HomeRules {
   static bool isFinished(Order o) =>
       o.status == 'done' || o.status == 'canceled';
 
-  static bool isOverdue(Order o, DateTime now) {
-    final due = o.dueDate;
-    if (due == null || isFinished(o)) return false;
+  static bool isOverdue(Order o, DateTime now) =>
+      isOverdueAt(status: o.status, due: o.dueDate, now: now);
+
+  /// Same rule from the fields: the promised day is behind (day, not time)
+  /// and the order is neither done nor canceled. The order screen uses it
+  /// too, so the list and the order agree.
+  static bool isOverdueAt({
+    required String? status,
+    required DateTime? due,
+    required DateTime now,
+  }) {
+    if (due == null || status == 'done' || status == 'canceled') return false;
     return _day(due).isBefore(_day(now));
   }
 

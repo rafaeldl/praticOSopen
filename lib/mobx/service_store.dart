@@ -6,6 +6,9 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:praticos/utils/audit_stamp.dart';
 import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,9 +19,9 @@ part 'service_store.g.dart';
 class ServiceStore = _ServiceStore with _$ServiceStore;
 
 abstract class _ServiceStore with Store {
-  final ServiceRepositoryV2 repository = ServiceRepositoryV2();
-  final UserStore userStore = UserStore();
-  final PhotoService photoService = PhotoService();
+  final ServiceRepositoryV2 repository;
+  final UserStore userStore;
+  final PhotoService photoService;
 
   @observable
   ObservableStream<List<Service?>>? serviceList;
@@ -32,7 +35,13 @@ abstract class _ServiceStore with Store {
   /// write must wait for it, or there is no company to write in.
   late final Future<void> _companyLoaded;
 
-  _ServiceStore() {
+  _ServiceStore({
+    ServiceRepositoryV2? repository,
+    UserStore? userStore,
+    PhotoService? photoService,
+  }) : repository = repository ?? ServiceRepositoryV2(),
+       userStore = userStore ?? UserStore(),
+       photoService = photoService ?? PhotoService() {
     _companyLoaded = SharedPreferences.getInstance().then((value) {
       companyId = value.getString('companyId');
       retrieveServices();
@@ -53,14 +62,20 @@ abstract class _ServiceStore with Store {
     await _companyLoaded;
     if (companyId == null) return;
     User? user = await userStore.getSingleUserById();
-    service.createdAt = DateTime.now();
-    service.createdBy = user?.toAggr();
-    service.company = user?.companies![0].company;
-    service.updatedAt = DateTime.now();
-    service.updatedBy = user?.toAggr();
+    final isNew = service.id == null || _draftIds.contains(service.id);
+    stampAudit(service, isNew: isNew, user: user, companyId: companyId!);
     service.keywords = generateKeywords(service.name);
     await repository.createItem(companyId!, service);
+    _draftIds.remove(service.id);
   }
+
+  /// Ids given to services not saved yet (a photo taken before the ✓).
+  final Set<String> _draftIds = {};
+
+  /// New document id, without writing anything. Replaceable in tests.
+  @visibleForTesting
+  String Function() newId = () =>
+      FirebaseFirestore.instance.collection('tmp').doc().id;
 
   @action
   deleteService(Service service) async {
@@ -74,8 +89,11 @@ abstract class _ServiceStore with Store {
     await _companyLoaded;
     if (companyId == null) return null;
 
+    // A new service gets its id now but is written only on ✓: cancelling
+    // leaves no nameless service behind.
     if (service.id == null) {
-      await saveService(service);
+      service.id = newId();
+      _draftIds.add(service.id!);
     }
 
     isUploading = true;
@@ -85,7 +103,9 @@ abstract class _ServiceStore with Store {
 
       if (url != null) {
         service.photo = url;
-        await repository.updateItem(companyId!, service);
+        if (!_draftIds.contains(service.id)) {
+          await repository.updateItem(companyId!, service);
+        }
       }
       return url;
     } finally {

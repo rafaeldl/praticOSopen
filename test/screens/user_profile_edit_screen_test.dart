@@ -50,6 +50,30 @@ void main() {
     expect(saved.single.name, 'Ana Lima');
   });
 
+  testWidgets('a failed save stays on the screen and tells it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: UserProfileEditScreen(
+          loadUser: () async => user(),
+          saveUser: (_) async => throw StateError('offline'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Não deu para salvar o perfil. Tente de novo.'),
+        findsOneWidget);
+    expect(find.byType(UserProfileEditScreen), findsOneWidget);
+  });
+
   testWidgets('empty name blocks saving', (tester) async {
     final saved = await pump(tester, user());
 

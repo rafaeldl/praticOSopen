@@ -14,7 +14,9 @@ class FirestoreContractDirectory implements ContractDirectory {
   @override
   Stream<List<Order>> watchContractOrders() {
     final companyId = Global.companyAggr?.id;
-    if (companyId == null) return const Stream.empty();
+    // Without a company there is nothing to list (an empty stream would
+    // keep the screen loading forever).
+    if (companyId == null) return Stream.value(const <Order>[]);
     return _repository
         .streamContractOrders(companyId)
         .map((list) => list.whereType<Order>().toList());

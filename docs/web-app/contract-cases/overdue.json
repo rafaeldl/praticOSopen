@@ -4,7 +4,7 @@
   "rule": "Atrasada: a data prometida ficou para trás (dia, não hora) e a OS não foi concluída nem cancelada. Orçamento conta, como na Início.",
   "runsIn": ["dart", "functions", "web"],
   "sourceOfTruth": ["lib/screens/menu_navigation/home_groups.dart HomeRules.isOverdue"],
-  "otherImplementations": ["firebase/functions/src/services/order.service.ts getOverdueOrders"],
+  "otherImplementations": ["lib/screens/order/order_screen_v2.dart _isOverdue (usa HomeRules.isOverdueAt desde fix/app-defects-batch-2; antes olhava o minuto)", "firebase/functions/src/services/order.service.ts getOverdueOrders"],
   "cases": [
     {"id":"past-due-quote","given":{"status":"quote","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true},"note":"A Início mostra orçamento vencido como atrasado; getOverdueOrders só olha approved e progress."},
     {"id":"past-due-approved","given":{"status":"approved","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}},
