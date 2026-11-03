@@ -2323,6 +2323,13 @@ abstract class _OrderStore with Store {
   @action
   Future<void> loadOrdersForDashboard() async {
     if (companyId == null) return;
+    // Filters, customer and pull-to-refresh reload the chosen dates, not the
+    // current month.
+    final start = customStartDate;
+    final end = customEndDate;
+    if (selectedDashboardPeriod == 'custom' && start != null && end != null) {
+      return loadOrdersForDashboardCustomRange(start, end);
+    }
     try {
       final orders = await repository.getOrdersByCustomPeriod(
         companyId!,

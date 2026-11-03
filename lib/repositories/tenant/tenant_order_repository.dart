@@ -7,6 +7,7 @@ import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_field_diff.dart';
+import 'package:praticos/utils/report_week.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/switch_stream.dart';
 
@@ -362,16 +363,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         break;
 
       case 'semana':
-        int currentWeek =
-            ((now.difference(DateTime(now.year, 1, 1)).inDays) / 7).floor();
-        int targetWeek = currentWeek + offset;
-        startDate = DateTime(
-          now.year,
-          1,
-          1,
-        ).add(Duration(days: targetWeek * 7));
-        startDate = startDate.subtract(Duration(days: startDate.weekday));
-        endDate = startDate.add(Duration(days: 7));
+        final week = reportWeek(now, offset);
+        startDate = week.start;
+        endDate = week.end;
         break;
 
       case 'mês':
