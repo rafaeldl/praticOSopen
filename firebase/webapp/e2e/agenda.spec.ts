@@ -3,19 +3,8 @@
 // keyboard, with confirmation and undo. Each test uses its own month far in the
 // future, so the orders other tests create never land on its screen.
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { makeOrder as makeOrderDoc, makeOrderInB, readOrder, updateCompanyB, updateOrderDoc } from './data'
+import { makeOrder, makeOrderInB, readOrder, updateCompanyB, updateOrderDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
-
-// The orders a test made leave the lists of the other tests (Em aberto, Atrasadas) when it ends.
-const made: string[] = []
-const makeOrder: typeof makeOrderDoc = async (...args) => {
-  const order = await makeOrderDoc(...args)
-  made.push(order.id)
-  return order
-}
-test.afterEach(async () => {
-  await Promise.all(made.splice(0).map((id) => updateOrderDoc(id, { status: 'canceled' })))
-})
 
 const grid = (page: Page) => page.locator('.tg')
 const block = (page: Page, id: string) => page.locator(`[data-order="${id}"]`)
