@@ -130,6 +130,12 @@ export const CASES: RulesCase[] = [
     allow: SEE_ALL_ORDERS, permission: 'viewAllOrders',
   },
   {
+    id: 'orders.read.ownWithValues', area: 'OS', title: 'abrir OS que criou, com os valores',
+    run: ({ db, fs, uid }) => fs.getDoc(fs.doc(db, ownApproved(uid))),
+    allow: MEMBERS, permission: 'viewPrices',
+    gap: 'Técnico e supervisor não têm viewPrices no app, mas a regra é por documento: quem abre a OS recebe os valores. Bloquear quebra o app em uso; fica para decisão (projeção ou subcoleção de valores).',
+  },
+  {
     // An admin creates the order and assigns it (assignedTo): the technician
     // has to see it. The consultant only sees the orders they created.
     id: 'orders.read.assigned', area: 'OS', title: 'abrir OS de outra pessoa atribuída a mim',
