@@ -428,23 +428,20 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    try {
-      final List<QueryArgs> filterList = [
-        QueryArgs(
-          'createdAt',
-          startDate.toIso8601String(),
-          oper: 'isGreaterThanOrEqualTo',
-        ),
-        QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan'),
-      ];
+    // Errors are not swallowed: an empty list here showed R$ 0 for a month
+    // that failed to load; callers show the error and offer to retry.
+    final List<QueryArgs> filterList = [
+      QueryArgs(
+        'createdAt',
+        startDate.toIso8601String(),
+        oper: 'isGreaterThanOrEqualTo',
+      ),
+      QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan'),
+    ];
 
-      final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
+    final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
 
-      return await getQueryList(companyId, orderBy: orderBy, args: filterList);
-    } catch (e) {
-      print('Erro ao buscar ordens por intervalo de datas: $e');
-      return [];
-    }
+    return getQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
   /// Busca todas as orders que não estão pagas, de qualquer período. Covers
