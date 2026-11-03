@@ -9,7 +9,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onDocumentDeleted, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import { buildRolesClaim } from './services/membership.service';
@@ -155,6 +155,26 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
   async (event) => {
     const { companyId, orderId } = event.params;
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
+  }
+);
+
+import { cleanupDeletedOrder } from './services/order-cleanup.service';
+
+/**
+ * [V2] Cleanup of a deleted order. The app deletes orders straight in
+ * Firestore, which leaves subcollections and Storage files behind. This
+ * removes only what is inside the order's own folder (comments, checklists,
+ * photos and `tenants/{companyId}/orders/{orderId}/` in Storage); charges
+ * stay. Logic in services/order-cleanup.service.ts.
+ */
+export const onOrderDeletedCleanup = onDocumentDeleted(
+  {
+    document: 'companies/{companyId}/orders/{orderId}',
+    region: 'southamerica-east1',
+  },
+  async (event) => {
+    const { companyId, orderId } = event.params;
+    await cleanupDeletedOrder(companyId, orderId);
   }
 );
 
