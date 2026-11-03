@@ -6549,4 +6549,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get profileSaveFailed =>
       'Não deu para salvar o perfil. Tente de novo.';
+
+  @override
+  String get saveFailedTryAgain => 'Não deu para salvar. Tente de novo.';
+
+  @override
+  String get deleteFailedTryAgain => 'Não deu para apagar. Tente de novo.';
 }

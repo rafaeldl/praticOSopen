@@ -3024,5 +3024,7 @@
   "orderCreateFailedMessage": "Confira a internet e crie a OS de novo.",
   "receiveChargeMaybeOpen": "Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.",
   "checklistAnswerSaveFailed": "Não deu para guardar a resposta. Tente de novo.",
-  "profileSaveFailed": "Não deu para salvar o perfil. Tente de novo."
+  "profileSaveFailed": "Não deu para salvar o perfil. Tente de novo.",
+  "saveFailedTryAgain": "Não deu para salvar. Tente de novo.",
+  "deleteFailedTryAgain": "Não deu para apagar. Tente de novo."
 }

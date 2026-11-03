@@ -29,6 +29,7 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/screens/widgets/failure_alert.dart';
 
 /// [value] of a number field, grouped for reading ("98.000"), or null to show
 /// it as it is. The saved value does not change. Year has the number type but
@@ -214,10 +215,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     );
     if (confirmed != true || !mounted) return;
     final onDelete = widget.onDelete;
-    if (onDelete != null) {
-      await onDelete(_device!);
-    } else {
-      await DeviceStore().deleteDevice(_device!);
+    try {
+      if (onDelete != null) {
+        await onDelete(_device!);
+      } else {
+        await DeviceStore().deleteDevice(_device!);
+      }
+    } catch (e) {
+      debugPrint('Could not delete the device: $e');
+      if (mounted) {
+        await showFailureAlert(context, context.l10n.deleteFailedTryAgain);
+      }
+      return;
     }
     if (mounted) Navigator.pop(context);
   }

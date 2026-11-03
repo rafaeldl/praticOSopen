@@ -10649,6 +10649,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para salvar o perfil. Tente de novo.'**
   String get profileSaveFailed;
+
+  /// No description provided for @saveFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Tente de novo.'**
+  String get saveFailedTryAgain;
+
+  /// No description provided for @deleteFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para apagar. Tente de novo.'**
+  String get deleteFailedTryAgain;
 }
 
 class _AppLocalizationsDelegate
