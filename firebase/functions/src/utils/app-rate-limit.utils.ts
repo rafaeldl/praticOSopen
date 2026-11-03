@@ -63,3 +63,13 @@ export const API_CORS_OPTIONS: CorsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-API-Secret', 'X-WhatsApp-Number', 'X-Company-Id'],
   credentials: true,
 };
+
+/**
+ * /v1/app answers carry prices and customer data and are read on shared shop
+ * computers: never kept in the browser's cache. With no-store the browser keeps
+ * nothing, so the ETag Express adds has nothing to revalidate.
+ */
+export const noStore: RequestHandler = (_req, res, next) => {
+  res.setHeader('Cache-Control', 'private, no-store');
+  next();
+};

@@ -25,7 +25,10 @@ const DevicesView = withCustomerTexts(() => import('@/views/customers/DevicesVie
 const ImportView = withCustomerTexts(() => import('@/views/customers/ImportView.vue'))
 // Financeiro > Receber: its texts are in the orders chunk (components/orders/receive).
 const FinanceView = () => Promise.all([import('@/components/orders/receive/FinanceReceive.vue'), loadOrderTexts()]).then(([m]) => m)
-const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView, finance: FinanceView }
+// The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
+const CatalogView = withCustomerTexts(() => import('@/views/catalog/CatalogView.vue'))
+const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/CatalogImportView.vue'))
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView, finance: FinanceView, catalog: CatalogView }
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -73,6 +76,12 @@ export const routes: RouteRecordRaw[] = [
     name: 'customersImport',
     component: ImportView,
     meta: { access: { kind: 'member', anyOf: ['manageCustomers'] }, title: 'web.import.title' },
+  },
+  {
+    path: '/catalog/import',
+    name: 'catalogImport',
+    component: CatalogImportView,
+    meta: { access: { kind: 'member', anyOf: ['manageServices', 'manageProducts'] }, title: 'web.nav.catalog' },
   },
   {
     path: '/devices',

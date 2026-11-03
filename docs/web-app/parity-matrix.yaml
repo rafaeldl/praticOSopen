@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 671 linhas, 565 capacidades de usuário e 106 de lógica ou componente; 60 exceções propostas, nenhuma aprovada.
+# Contagem: 676 linhas, 569 capacidades de usuário e 107 de lógica ou componente; 60 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -8233,11 +8233,12 @@ rows:
   states: [empty, error, loading, retry]
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products", "companies/{id}/orders"]
-  web_status: todo
+  data: ["api:GET /v1/app/services", "api:GET /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: viewServices
-  note: "Rotas /service_list e /product_list abrem a mesma tela; /catalog não tem chamador. Entrada pelo perfil com viewServices ou viewProducts; sem viewServices abre /product_list. Sem manage* as linhas são só leitura (sem seta, sem toque). Linha com miniatura 40 (foto ou ícone por tipo). Vazio e erro por tipo; Tentar de novo reassina só aquele tipo. Não copiar: rota aberta direto sem permissão ainda assina serviços (web barra na rota); ordem por name diferencia maiúsculas e põe acentuados no fim."
+  note: "Rotas /service_list e /product_list abrem a mesma tela; /catalog não tem chamador. Entrada pelo perfil com viewServices ou viewProducts; sem viewServices abre /product_list. Sem manage* as linhas são só leitura (sem seta, sem toque). Linha com miniatura 40 (foto ou ícone por tipo). Vazio e erro por tipo; Tentar de novo reassina só aquele tipo. Não copiar: rota aberta direto sem permissão ainda assina serviços (web barra na rota); ordem por name diferencia maiúsculas e põe acentuados no fim. Web: /catalog só com viewServices ou viewProducts (técnico barrado na rota); lido só pela API; vazio, erro com Tentar de novo e carregando por tipo; miniatura 40 com foto ou ícone."
 - id: catalog.list.switch
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: "/service_list"
@@ -8251,10 +8252,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: viewServices
-  note: "/service_list é a rota que o menu abre. Controle Serviços (N) / Produtos (N), contagem quando o tipo carrega; assina os dois tipos; some quando o papel vê só um tipo; trocar limpa a busca."
+  note: "/service_list é a rota que o menu abre. Controle Serviços (N) / Produtos (N), contagem quando o tipo carrega; assina os dois tipos; some quando o papel vê só um tipo; trocar limpa a busca. Web: Serviços (N) | {Peças} (N) com o rótulo product._entity_plural do segmento; ?kind= na URL; trocar limpa busca e seleção."
 - id: catalog.list.products
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: "/product_list"
@@ -8267,10 +8269,12 @@ rows:
   states: []
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/products"]
-  web_status: todo
+  data: ["api:GET /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: viewProducts
+  note: "Web: /catalog?kind=product; sem viewServices abre em produtos."
 - id: catalog.list.search
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: null
@@ -8284,9 +8288,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
-  note: "Só pelo nome, contém, sem diferenciar maiúsculas; limpa ao trocar o tipo; vazio Nada com {busca}. keywords não é usado. Não copiar: não ignora acentos; web compara sem acento e sem caixa."
+  note: "Só pelo nome, contém, sem diferenciar maiúsculas; limpa ao trocar o tipo; vazio Nada com {busca}. keywords não é usado. Não copiar: não ignora acentos; web compara sem acento e sem caixa. Web: contém, sem acento e sem caixa; ?q= na URL; / foca a busca."
 - id: catalog.list.pick
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: null
@@ -8316,11 +8321,12 @@ rows:
   states: []
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  data: ["api:POST /v1/app/services", "api:POST /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Botão azul flutuante Novo serviço / Novo produto (segue o tipo escolhido), só com manage*; abre a sheet (catalog.form.save). O vazio não tem botão próprio."
+  note: "Botão azul flutuante Novo serviço / Novo produto (segue o tipo escolhido), só com manage*; abre a sheet (catalog.form.save). O vazio não tem botão próprio. Web: botão Novo serviço / Novo produto (Cadastrar {rótulo} quando o segmento nomeia produtos) e também no vazio, com Importar planilha."
 - id: catalog.list.price
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: null
@@ -8334,10 +8340,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: viewPrices
-  note: "Sem preço mostra sem valor."
+  note: "Sem preço mostra sem valor. Web: sem viewPrices a API não manda o campo value (nem null): o preço não chega à rede nem ao cache. Conferido pela resposta no E2E do supervisor."
 - id: catalog.list.most-used
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: null
@@ -8351,9 +8358,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
-  note: "Top 5 somando serviços e produtos das últimas 50 OS (consultor e técnico: só as suas), depois filtrado pelo tipo; some durante a busca; falha sem aviso. Não copiar: mistura os tipos antes de filtrar (pode mostrar menos de 5); web faz top N por tipo."
+  note: "Top 5 somando serviços e produtos das últimas 50 OS (consultor e técnico: só as suas), depois filtrado pelo tipo; some durante a busca; falha sem aviso. Não copiar: mistura os tipos antes de filtrar (pode mostrar menos de 5); web faz top N por tipo. Web: meta.mostUsed do GET, top 5 do tipo nas últimas 50 OS que a pessoa lê (consultor: as que criou), empate pelo uso mais recente, só itens que ainda existem."
 - id: catalog.list.tip
   screen: lib/screens/catalog/catalog_list_screen.dart
   route: null
@@ -8367,7 +8375,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   note: "Subtítulo O que você coloca nas OS; dica no fim da lista, só sem busca."
 - id: catalog.source.access
@@ -8382,10 +8391,11 @@ rows:
   states: []
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  data: ["api:GET /v1/app/services", "api:GET /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
-  note: "Não copiar: companyId vem da preferência local, não da sessão; sem ele a lista vem vazia e salvar volta sem gravar e sem erro. Web usa a empresa da sessão; sem empresa é erro."
+  note: "Não copiar: companyId vem da preferência local, não da sessão; sem ele a lista vem vazia e salvar volta sem gravar e sem erro. Web usa a empresa da sessão; sem empresa é erro. Web: empresa da sessão (X-Company-Id), papel conferido no servidor (app-catalog.routes.ts)."
 - id: catalog.form.save
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8398,11 +8408,12 @@ rows:
   states: [saving, unsaved, error]
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  data: ["api:POST /v1/app/services", "api:POST /v1/app/products"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Abre pelo catálogo e pela busca de itens da OS (Novo item pergunta Serviço ou produto?; o item criado volta para a OS). ✓ azul quando há nome, aviso Escreva o nome para salvar., foco no nome, exemplo do nome por ramo; cartão Mais dados com foto e campos do ramo, aberto se houver dados; X pergunta quando algo foi preenchido (ui.form-sheet). Nome sem espaços nas pontas; customData vazio vira null. Seed atual não define campos extras de serviço/produto. Edição: catalog.form.edit. Não copiar: erro ao salvar não mostra nada; salvar sobrescreve createdAt/createdBy e grava company de companies[0]."
+  note: "Abre pelo catálogo e pela busca de itens da OS (Novo item pergunta Serviço ou produto?; o item criado volta para a OS). ✓ azul quando há nome, aviso Escreva o nome para salvar., foco no nome, exemplo do nome por ramo; cartão Mais dados com foto e campos do ramo, aberto se houver dados; X pergunta quando algo foi preenchido (ui.form-sheet). Nome sem espaços nas pontas; customData vazio vira null. Seed atual não define campos extras de serviço/produto. Edição: catalog.form.edit. (Erro ao salvar, createdAt/createdBy e company de companies[0] já corrigidos no app em #513.) Web: gaveta com X, Salvar cinza até ter nome, Ctrl/⌘ Enter, foco no nome, exemplo por ramo, Foto e mais dados; erro sempre aparece; fechar com algo digitado pergunta; criação grava company da sessão e createdAt/createdBy só uma vez."
 - id: catalog.form.price
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8416,10 +8427,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: viewPrices
-  note: "viewPrices para ver o campo; gravar exige manageServices/manageProducts. Em branco grava null; oculto mantém o valor guardado. Dica: pode deixar em branco e combinar o preço em cada OS."
+  note: "viewPrices para ver o campo; gravar exige manageServices/manageProducts. Em branco grava null; oculto mantém o valor guardado. Dica: pode deixar em branco e combinar o preço em cada OS. Web: campo só com editPrices (MoneyInput: 150 é 150); a API exige editPrices para gravar value, também null; sem ele o valor guardado fica."
 - id: catalog.form.photo
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8432,11 +8444,12 @@ rows:
   states: [saving]
   feature_flags: []
   hardware: [camera, gallery]
-  data: ["storage:tenants/{id}/services/{id}/photo.jpg", "storage:tenants/{id}/products/{id}/photo.jpg"]
-  web_status: todo
+  data: ["storage:tenants/{id}/services/{id}/photo.jpg", "storage:tenants/{id}/products/{id}/photo.jpg", "api:PATCH /v1/app/services/{id}", "api:PATCH /v1/app/products/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Link + Adicionar foto ou miniatura 56 + Trocar foto; spinner enquanto sobe; grava na hora, antes do Salvar; sem opção de remover. Não copiar: em item novo cria o documento sem nome antes do ✓ (item órfão se cancelar); erro no upload não é tratado; action sheet em vez do menu do design system."
+  note: "Link + Adicionar foto ou miniatura 56 + Trocar foto; spinner enquanto sobe; grava na hora, antes do Salvar; sem opção de remover. Não copiar: erro no upload não é tratado; action sheet em vez do menu do design system. Web: escolher, colar ou arrastar; a foto espera no navegador e sobe só depois de o item existir; a API aceita só arquivo da pasta do item; Tirar a foto manda a foto vista (photoSeen) e apaga só esse arquivo, nunca a pasta."
 - id: catalog.form.delete
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8449,11 +8462,12 @@ rows:
   states: [error]
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  data: ["api:DELETE /v1/app/services/{id}", "api:DELETE /v1/app/products/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "'…' da edição, depois Apagar serviço/produto e alerta Apagar {nome}? (as OS que já usam continuam salvas). Não copiar: erro não é tratado no app; não apaga a foto do Storage."
+  note: "'…' da edição, depois Apagar serviço/produto e alerta Apagar {nome}? (as OS que já usam continuam salvas). (Erro e foto no Storage já corrigidos no app em #513.) Web: menu … da gaveta, confirmação com o texto do app; apaga também a foto; erro aparece."
 - id: catalog.form.edit
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8466,11 +8480,12 @@ rows:
   states: [saving, error]
   feature_flags: []
   hardware: null
-  data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  data: ["api:PATCH /v1/app/services/{id}", "api:PATCH /v1/app/products/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar; erro ao salvar não aparece; createdAt/createdBy sobrescritos. Web preserva a criação e avisa mudanças não salvas."
+  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar. Web preserva a criação e avisa mudanças não salvas. Web: abre na mesma gaveta, pela linha (só com manage*); manda a versão lida: mudou no app ou em outra aba, 409 CATALOG_ITEM_CHANGED, nada gravado e a lista relê; fechar com mudança pergunta."
 - id: catalog.form.custom-fields
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8484,10 +8499,47 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Agrupado por seção do ramo, sem nome e valor; grava em customData[fieldName] e migra a chave antiga field.key. Seed atual sem campos extras: hoje só a foto aparece em Mais dados."
+  note: "Agrupado por seção do ramo, sem nome e valor; grava em customData[fieldName] e migra a chave antiga field.key. Seed atual sem campos extras: hoje só a foto aparece em Mais dados. Web: campos service.*/product.* do segmento (text, textarea, number, select, date), por seção, gravados em customData[nome]. O seed do E2E tem service.warranty."
+- id: catalog.list.import
+  screen: firebase/webapp/src/views/catalog/CatalogImportView.vue
+  route: "/catalog/import"
+  action: "Importar serviços e produtos de planilha (CSV ou XLSX) com prévia"
+  kind: flow
+  roles: [owner, admin]
+  segments: all
+  segment_variation: ["labels:product"]
+  i18n: [pt, en, es]
+  states: [empty, error, saving, limit]
+  feature_flags: ["useFinancial"]
+  hardware: [file]
+  data: ["api:POST /v1/app/services/import", "api:POST /v1/app/products/import"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog-import.spec.ts
+  web_exception: null
+  permission: manageServices
+  note: "Só web (extra de mesa). Arquivo lido no navegador; colunas nome, tipo e preço adivinhadas e conferidas; linha sem tipo entra no tipo escolhido. Ficam de fora: sem nome, tipo que não é serviço nem produto, preço que não dá para ler, nome que já está no catálogo (mesmo tipo, sem acento e sem caixa) e nome repetido na planilha. Preço lido como digitado (parseMoney pelo país: 150 é 150) e só para quem tem editPrices (a API recusa value sem ele). Nada grava antes de Importar; até 5.000 linhas, de 200 em 200 com id por linha; o id da importação nasce na prévia, então Importar de novo depois de uma falha não duplica."
+- id: catalog.list.bulk-price
+  screen: firebase/webapp/src/components/catalog/PriceDialog.vue
+  route: "/catalog"
+  action: "Mudar o preço de vários itens de uma vez"
+  kind: flow
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["api:POST /v1/app/services/prices", "api:POST /v1/app/products/prices"]
+  web_status: done
+  e2e: firebase/webapp/e2e/catalog-prices.spec.ts
+  web_exception: null
+  permission: manageServices
+  note: "Só web (extra de mesa). Seleção na lista (manage* e editPrices) → aumentar ou baixar por porcentagem, arredondar para inteiro; prévia com cada item antes e depois, itens sem preço ficam como estão; Aplicar pede confirmação; conta em centavos. A API grava todos ou nenhum: cada mudança leva o preço que a pessoa viu (preço mudado depois → 409 com os ids; já no novo → não repete). Até 500 itens por lote (uma transação); acima disso a tela pede para dividir. Resposta perdida: a prévia fica com o lote enviado e Tentar de novo manda o mesmo (mesma chave batchId e mesmos preços vistos), nunca recalculado; 409 fecha a prévia e a lista mostra os preços novos. Desfazer no aviso segue a mesma regra."
 - id: checklist.list.load
   screen: lib/screens/forms/form_template_list_screen.dart
   route: "/form_template_list"
