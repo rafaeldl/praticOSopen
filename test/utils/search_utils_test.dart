@@ -129,4 +129,27 @@ void main() {
       );
     });
   });
+
+
+  group('customerKeywords (same as the server, D8)', () {
+    test('name without stopwords, full phrase and phone', () {
+      expect(
+        customerKeywords('João da Silva', '(48) 99988-7766'),
+        ['joao', 'silva', 'joao silva', '7766', '99887766', '48999887766'],
+      );
+    });
+
+    test('a short phone adds only the last 4 digits and the number', () {
+      expect(generatePhoneKeywords('12345'), ['2345', '12345']);
+    });
+
+    test('no phone, or fewer than 4 digits, adds nothing', () {
+      expect(customerKeywords('Ana', null), ['ana']);
+      expect(generatePhoneKeywords('123'), isEmpty);
+    });
+
+    test('a name made only of stopwords keeps the words', () {
+      expect(generateSearchKeywords('Da Do'), ['da', 'do']);
+    });
+  });
 }

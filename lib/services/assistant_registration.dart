@@ -59,7 +59,7 @@ class AssistantRegistration {
       ..createdBy = Global.userAggr
       ..updatedAt = now
       ..updatedBy = Global.userAggr
-      ..keywords = generateKeywords(customer.name);
+      ..keywords = customerKeywords(customer.name, customer.phone);
     await (_customers ?? CustomerRepositoryV2()).createItem(
       companyId,
       customer,
