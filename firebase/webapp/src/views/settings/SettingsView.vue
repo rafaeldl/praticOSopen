@@ -56,6 +56,8 @@ async function leave() {
   await signOutEverywhere()
 }
 
+// The app shows "PraticOS {version} ({build})"; the web shows its own build (settings.more-view).
+const WEB_VERSION = __WEB_VERSION__
 </script>
 
 <template>
@@ -152,6 +154,7 @@ async function leave() {
       <div class="set-section">
         <button type="button" class="btn" data-testid="settings-sign-out" @click="leaving = true">{{ t('logout') }}</button>
       </div>
+      <p class="sub set-version" data-testid="settings-version">{{ t('web.settings.version', { version: WEB_VERSION }) }}</p>
     </div>
   </div>
   <ConfirmDialog v-if="leaving" :title="t('logoutConfirm')" :confirm="t('logout')" :keep="t('cancel')" @confirm="leave" @close="leaving = false" />

@@ -674,6 +674,7 @@
   "web.settings.integrationsSub": "Asaas, ChatGPT y Claude",
   "web.settings.registers": "Registros",
   "web.settings.thisBrowser": "En este navegador",
+  "web.settings.version": "PraticOS web {version}",
   "web.team.change": "Cambiar",
   "web.team.saveRole": "Cambiar el rol",
   "web.team.changeRoleTitle": "¿{name} pasa a ser {role}?",
