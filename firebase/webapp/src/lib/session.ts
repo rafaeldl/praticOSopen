@@ -323,6 +323,9 @@ async function clearCacheOfOtherAccount(uid: string): Promise<void> {
  * disabled account. The data must not stay on this computer.
  */
 async function endedSession(): Promise<void> {
+  // "Sair" already clears the cache and starts the page over; a second reload
+  // from here would land on whatever page comes next.
+  if (signingOut) return
   const wasSignedIn = !!session.uid
   clear()
   if (cacheNeedsClearing(readStorage(CACHE_OWNER_KEY), null)) {
@@ -431,8 +434,11 @@ export async function signInWithEmail(email: string, password: string): Promise<
   await hydrate(user)
 }
 
+let signingOut = false
+
 export async function signOutEverywhere(): Promise<void> {
   const [auth, { signOut }] = await Promise.all([authClient(), import('firebase/auth')])
+  signingOut = true
   await signOut(auth)
   clear()
   await clearCachedData()
