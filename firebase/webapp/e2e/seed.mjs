@@ -43,11 +43,21 @@ async function seedSegments() {
   await db.doc('segments/global').set({
     name: 'Global',
     customFields: [
+      { key: 'company.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] } },
       { key: 'customer.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] }, keyboardType: 'phone' },
     ],
   })
   await db.doc('segments/automotive').set({
     name: 'Mecânica',
+    // First access (fatia 01): active, translated name, specialties, segment defaults.
+    active: true,
+    icon: '🚗',
+    nameI18n: { 'pt-BR': 'Mecânica', 'en-US': 'Auto repair', 'es-ES': 'Mecánica' },
+    subspecialties: [
+      { id: 'mechanical', icon: '🔧', name: { 'pt-BR': 'Mecânica geral', 'en-US': 'General repair', 'es-ES': 'Mecánica general' } },
+      { id: 'bodywork', icon: '🎨', name: { 'pt-BR': 'Funilaria', 'en-US': 'Bodywork', 'es-ES': 'Chapa' } },
+    ],
+    defaultTermsOfService: { 'pt-BR': 'Garantia de 90 dias.', 'en-US': '90-day warranty.', 'es-ES': 'Garantía de 90 días.' },
     customFields: [
       label('device._entity', 'Veículo', 'Vehicle', 'Vehículo'),
       label('device._entity_plural', 'Veículos', 'Vehicles', 'Vehículos'),
@@ -70,8 +80,23 @@ async function seedSegments() {
   })
   await db.doc('segments/electronics').set({
     name: 'Eletrônica',
+    active: true,
+    icon: '📱',
+    nameI18n: { 'pt-BR': 'Eletrônica', 'en-US': 'Electronics', 'es-ES': 'Electrónica' },
+    useFinancial: false,
     customFields: [label('device._entity', 'Aparelho', 'Device', 'Aparato')],
   })
+  // Off: never offered in the first access.
+  await db.doc('segments/retired').set({ name: 'Ramo desligado', active: false })
+  // Samples of the first access (BootstrapService on the server).
+  await db.doc('segments/automotive/bootstrap/mechanical').set({
+    services: [{ name: { 'pt-BR': 'Troca de óleo (exemplo)', 'en-US': 'Oil change (sample)', 'es-ES': 'Cambio de aceite (ejemplo)' }, value: 120 }],
+    products: [{ name: { 'pt-BR': 'Filtro de óleo', 'en-US': 'Oil filter', 'es-ES': 'Filtro de aceite' }, value: 40 }],
+    devices: [{ name: 'Gol 2015', manufacturer: 'VW', category: { 'pt-BR': 'Carro', 'en-US': 'Car', 'es-ES': 'Auto' } }],
+    customer: { name: { 'pt-BR': 'Cliente (Exemplo)', 'en-US': 'Customer (Example)', 'es-ES': 'Cliente (Ejemplo)' }, phone: '+5511900000000' },
+  })
+  await db.doc('segments/automotive/bootstrap/bodywork').set({ services: [{ name: { 'pt-BR': 'Pintura (exemplo)' }, value: 900 }] })
+  await db.doc('segments/electronics/bootstrap/_default').set({ services: [{ name: { 'pt-BR': 'Troca de tela (exemplo)' }, value: 300 }] })
 }
 
 async function seedCompanies() {
@@ -106,7 +131,7 @@ async function seedUsers() {
       uid: user.uid,
       email: user.email,
       password: PASSWORD,
-      displayName: user.name,
+      displayName: user.name || undefined,
       emailVerified: user.emailVerified !== false,
     })
     await db.doc(`users/${user.uid}`).set({

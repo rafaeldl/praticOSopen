@@ -64,6 +64,13 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/NoCompanyView.vue'),
     meta: { access: { kind: 'signedIn' }, title: 'web.noCompany.title', bare: true },
   },
+  // First access (docs/ONBOARDING.md): only reached from /no-company, without a company and without invites.
+  {
+    path: '/start',
+    name: 'onboarding',
+    component: () => Promise.all([import('@/views/onboarding/OnboardingView.vue'), loadTexts('onboarding')]).then(([m]) => m),
+    meta: { access: { kind: 'signedIn' }, title: 'pickSegmentTitle', bare: true },
+  },
   {
     path: '/forbidden',
     name: 'forbidden',

@@ -40,10 +40,10 @@ test('next externo não sai do app', async ({ page }) => {
   await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/app\/$/)
 })
 
-test('conta sem empresa vê a explicação e pode sair', async ({ page }) => {
+test('conta sem empresa e sem convite vai ao primeiro acesso e pode sair', async ({ page }) => {
   await login(page, 'noCompany')
-  await expect(page.getByRole('heading', { level: 1, name: 'Sua conta ainda não está em uma empresa' })).toBeVisible()
-  await expect(page).toHaveURL(/no-company/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Qual é o seu ramo?' })).toBeVisible()
+  await expect(page).toHaveURL(/\/start$/)
   await signOut(page)
 })
 

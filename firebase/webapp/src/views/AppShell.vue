@@ -2,7 +2,7 @@
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Menu, Plus, Search, Settings } from '@lucide/vue'
+import { Menu, Plus, Search, Settings, User } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
@@ -13,6 +13,7 @@ import { registerCommand } from '@/lib/commands'
 import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
+import { initials } from '@/lib/initials'
 
 // Opened by a key or a tap, never on the first paint: out of the first download.
 const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
@@ -50,6 +51,9 @@ function onCompanyChange(event: Event) {
 }
 
 const companyLabel = (name: string) => name || t('web.nav.unnamedCompany')
+// Profile button with the company's initials (home.profile.initials); a person without a name.
+const rawCompanyName = computed(() => session.company?.name || session.companies.find((c) => c.id === session.companyId)?.name || '')
+const companyInitials = computed(() => initials(rawCompanyName.value))
 
 const setOnline = () => (online.value = true)
 const setOffline = () => (online.value = false)
@@ -68,7 +72,9 @@ onBeforeUnmount(() => {
     <aside class="side" :aria-label="t('web.nav.label')">
       <div>
         <AppLogo />
-        <div v-if="session.companies.length < 2" class="company">{{ companyName }}</div>
+        <div v-if="session.companies.length < 2" class="company">
+          <span class="initials" aria-hidden="true" data-testid="company-initials">{{ companyInitials }}<User v-if="!companyInitials" :size="14" /></span>{{ companyName }}
+        </div>
         <div v-else class="company-pick">
           <label class="sr" for="company-pick">{{ t('web.nav.company') }}</label>
           <select id="company-pick" class="company-select" :value="session.companyId ?? ''" @change="onCompanyChange">
@@ -112,6 +118,9 @@ onBeforeUnmount(() => {
       <button v-if="canCreate" type="button" class="topbar-btn topbar-add" @click="openNewOrder">
         <Plus :size="18" aria-hidden="true" />{{ t('newOrderButton') }}
       </button>
+      <RouterLink class="topbar-btn" to="/settings" :aria-label="t('profileButtonA11y', { company: companyName })" data-testid="profile-button">
+        <span class="initials" aria-hidden="true">{{ companyInitials }}<User v-if="!companyInitials" :size="16" /></span>
+      </RouterLink>
     </header>
 
     <main class="main">

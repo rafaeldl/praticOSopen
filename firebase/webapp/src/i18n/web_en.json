@@ -39,7 +39,7 @@
   "web.login.sub": "Use the same account as your phone. Everything there shows up here.",
   "web.login.claim": "Your whole shop, on a big screen.",
   "web.noCompany.title": "Your account is not in a company yet",
-  "web.noCompany.body": "Create the company in the phone app or accept the invite you received. Then come back here.",
+  "web.noCompany.body": "Join the team through the invite, or start your own without one.",
   "web.noCompany.check": "I accepted it, check again",
   "web.forbidden.title": "No permission",
   "web.forbidden.heading": "You do not have access to this screen",

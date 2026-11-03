@@ -6,7 +6,7 @@ import { errorMessageKey } from '@/lib/api'
 import { acceptInvite, listPendingInvites, rejectInvite, type Invite } from '@/lib/invites'
 import { showToast } from '@/lib/toast'
 
-const emit = defineEmits<{ accepted: [companyId: string] }>()
+const emit = defineEmits<{ accepted: [companyId: string]; loaded: [count: number]; failed: [] }>()
 const invites = ref<Invite[]>([])
 const loaded = ref(false)
 const busy = ref<string | null>(null)
@@ -23,9 +23,11 @@ const ROLE_LABELS: Record<string, MessageKey> = {
 async function load() {
   try {
     invites.value = await listPendingInvites()
+    emit('loaded', invites.value.length)
   } catch (cause) {
     console.warn('invites: list failed', cause)
     invites.value = []
+    emit('failed')
   } finally {
     loaded.value = true
   }

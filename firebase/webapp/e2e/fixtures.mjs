@@ -29,6 +29,13 @@ export const USERS = {
   unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
   /** Owner of company C, where "Valores e cobrança" is off. */
   noValues: { ...user('novalues', 'Vera Sem Valores'), roles: { [COMPANY_C]: 'owner' } },
+  /** First access (e2e/onboarding.spec.ts): each one creates a company once. */
+  founder: { ...user('founder', 'Fábio Fundador'), roles: {} },
+  founderLean: { ...user('founderlean', 'Lia Sem Exemplos'), roles: {} },
+  /** No name on the account: the name on the order is required. */
+  founderNoName: { ...user('foundernoname', ''), roles: {} },
+  /** No company and outside the access list: never reaches the first access. */
+  strangerNew: { ...user('strangernew', 'Saulo Fora'), roles: {}, blocked: true },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
