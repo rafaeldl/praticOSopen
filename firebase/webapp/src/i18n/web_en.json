@@ -416,6 +416,8 @@
   "web.share.whatsappOpened": "WhatsApp opened with the message",
   "web.customers.changedElsewhere": "Someone else changed this customer while you were editing. Showing the new version; nothing was written over it.",
   "web.devices.changedElsewhere": "Someone else changed this {device} while you were editing. Showing the new version; nothing was written over it.",
+  "web.devices.contracts": "Contracts",
+  "web.devices.contractNext": "Next by contract: {date}",
   "web.customers.deleteLinks": "Has {orders, plural, =0{no orders} =1{1 order} other{{orders} orders}}, {receipts, plural, =0{no receipts} =1{1 receipt} other{{receipts} receipts}} and {charges, plural, =0{no charges} =1{1 charge} other{{charges} charges}}.",
   "web.customers.ordersTruncated": "Showing the {count} most recent orders. Spent and still to receive count only these.",
   "web.catalog.searchLabel": "Search by name",

@@ -416,6 +416,8 @@
   "web.share.whatsappOpened": "WhatsApp aberto com a mensagem",
   "web.customers.changedElsewhere": "Outra pessoa mudou este cliente enquanto você editava. Mostrando a versão nova; nada foi gravado por cima.",
   "web.devices.changedElsewhere": "Outra pessoa mudou este {device} enquanto você editava. Mostrando a versão nova; nada foi gravado por cima.",
+  "web.devices.contracts": "Contratos",
+  "web.devices.contractNext": "Próxima pelo contrato: {date}",
   "web.customers.deleteLinks": "Tem {orders, plural, =0{nenhuma OS} =1{1 OS} other{{orders} OS}}, {receipts, plural, =0{nenhum recibo} =1{1 recibo} other{{receipts} recibos}} e {charges, plural, =0{nenhuma cobrança} =1{1 cobrança} other{{charges} cobranças}}.",
   "web.customers.ordersTruncated": "Mostrando as {count} OS mais recentes. Gastou e falta receber contam só elas.",
   "web.catalog.searchLabel": "Buscar pelo nome",

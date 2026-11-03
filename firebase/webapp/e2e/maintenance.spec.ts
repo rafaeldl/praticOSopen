@@ -2,7 +2,7 @@
 // device.maintenance.answer, device.maintenance.no-repeat, device.maintenance.limit),
 // per role: only who manages devices is asked.
 import { expect, test, type Page } from '@playwright/test'
-import { makeDevice, makeOrder, readDoc } from './data'
+import { makeContract, makeDevice, makeOrder, readDoc } from './data'
 import { login, type UserKey } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -81,6 +81,26 @@ test('três recusas seguidas param a pergunta (device.maintenance.limit)', async
 test('técnico conclui sem a pergunta (não gerencia aparelhos) (device.maintenance.offer, por papel)', async ({ page }) => {
   const { order } = await orderInProgress('technician')
   await finish(page, 'technician', order.id)
+  await expect(panel(page).getByTestId('order-status')).toContainText('Concluído')
+  await expect(question(page)).toHaveCount(0)
+})
+
+test('aparelho com contrato ativo: contratos na ficha, próxima pelo contrato e sem a pergunta ao concluir (device.detail.contracts, device.detail.maintenance-contract)', async ({ page }) => {
+  const { order, device } = await orderInProgress('admin')
+  const aggr = { id: device.id, name: device.name, serial: device.serial }
+  const contract = await makeContract('admin', {}, { device: aggr, devices: [aggr], deviceIds: [device.id] })
+  await login(page, 'admin', `devices?device=${device.id}`)
+  const detail = page.getByTestId('device-detail')
+  const list = detail.getByTestId('device-contracts')
+  await expect(list).toContainText(`${contract.number}`)
+  await expect(detail.getByTestId('device-maintenance')).toContainText('Pelo contrato')
+  await expect(detail.getByTestId('maintenance-set')).toHaveCount(0)
+  await list.getByRole('link').first().click()
+  await expect(page).toHaveURL(new RegExp(`order=${contract.id}`))
+
+  await page.goto(`orders?order=${order.id}`)
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await panel(page).getByTestId('next-step').click()
   await expect(panel(page).getByTestId('order-status')).toContainText('Concluído')
   await expect(question(page)).toHaveCount(0)
 })

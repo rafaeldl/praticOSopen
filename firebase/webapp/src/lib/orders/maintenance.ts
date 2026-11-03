@@ -6,7 +6,8 @@
 // through the API, which keeps the customer and the main service.
 import { loadContractOrder, loadContracts } from '@/lib/contracts/data'
 import { loadDeviceDirectory, setNextMaintenance } from '@/lib/customers/data'
-import { toIsoDay } from '@/lib/format'
+import { addMonths as addMonthsTo } from '@/lib/customers/model'
+import { fromIsoDay, toIsoDay } from '@/lib/format'
 import { can, session } from '@/lib/session'
 import { readStorage, writeStorage } from '@/lib/storage'
 import type { Order } from './model'
@@ -24,12 +25,9 @@ export function resetDeclines(): void {
   writeStorage(key(), '0')
 }
 
-/** Months later, on the last day of the month when it is shorter (31 Jan + 1 month = 28/29 Feb). */
+/** Months later, on the last day of the month when it is shorter (the device screen's addMonths). */
 export function addMonths(day: string, months: number): string {
-  const [y, m, d] = day.split('-').map(Number) as [number, number, number]
-  const first = new Date(Date.UTC(y, m - 1 + months, 1))
-  const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate()
-  return `${first.getUTCFullYear()}-${String(first.getUTCMonth() + 1).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`
+  return toIsoDay(addMonthsTo(fromIsoDay(day) ?? new Date(), months))
 }
 
 /** Within the next 7 days or late: the date this order fulfilled ("Não repetir" takes only that one out). */
