@@ -48,7 +48,7 @@ test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ pag
   // Wide screen: "Quando" is a column; the status column keeps only the status.
   await expect(table(page).getByRole('columnheader', { name: 'Quando' })).toBeVisible()
   await expect(row(page, 502).getByTestId('row-when')).toHaveText(/^Entrega (hoje|amanhã|\d{2}\/\d{2})/)
-  await expect(row(page, 502)).not.toContainText('Na oficina · entrega')
+  await expect(row(page, 502)).not.toContainText('Na oficina · entrega', { useInnerText: true })
   await expect(row(page, 501).getByTestId('row-when')).toHaveClass(/c-when/)
   await expect(row(page, 501).getByTestId('row-when').locator('.is-late')).toHaveCount(1)
   await expect(row(page, 503)).toContainText('Esperando peça · Parada há 2 dias')
@@ -67,8 +67,8 @@ test('tela estreita: sem a coluna Quando, as datas voltam à linha da situação
   await page.setViewportSize({ width: 900, height: 800 })
   await openHome(page, 'admin')
   await expect(table(page).getByRole('columnheader', { name: 'Quando' })).toHaveCount(0)
-  await expect(row(page, 502)).toContainText(/Na oficina · entrega \d{2}\/\d{2}/)
-  await expect(row(page, 506)).toContainText(/visita \d{2}\/\d{2}/)
+  await expect(row(page, 502)).toContainText(/Na oficina\s*· entrega \d{2}\/\d{2}/, { useInnerText: true })
+  await expect(row(page, 506)).toContainText(/visita \d{2}\/\d{2}/, { useInnerText: true })
 })
 
 async function loadAll(page: Page) {

@@ -738,7 +738,7 @@ watch(
             :order="order"
             :can-receive="access.canReceive && !!moneyRowTone"
             :can-discount="access.canDiscount && !!moneyRowTone"
-            :can-attach="access.canReceive && can('attachPhotos')"
+            :can-attach="access.canReceive && !!moneyRowTone && can('attachPhotos')"
             :busy="busy"
             @remove="removePayment"
             @undo-all="undoAllPayments"

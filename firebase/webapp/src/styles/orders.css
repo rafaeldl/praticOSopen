@@ -213,4 +213,9 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ai-plan-row { display: grid; gap: 0.2rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
 .ai-plan-item { padding-left: 0.25rem; }
 .grid .c-when { width: 10rem; }
+.grid .st-narrow { display: none; color: var(--color-muted); }
+@container list (max-width: 63.99rem) {
+  .grid .c-when, .grid .row-plate { display: none; }
+  .grid .st-narrow { display: inline; }
+}
 .grid td.c-when .is-late { color: var(--color-danger-text); font-weight: 700; }

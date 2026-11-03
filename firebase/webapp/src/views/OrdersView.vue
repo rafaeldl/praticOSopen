@@ -365,14 +365,12 @@ onBeforeUnmount(() => {
 
 // The plate (or serial) after the device's name: the user tests looked for it on the row (P3 17 of #515).
 const plateOf = (order: Order) => (order.devices[0]?.name && order.devices[0]?.serial ? order.devices[0].serial : '')
-const rowDetail = (order: Order) => [deviceSummary(order), plateOf(order), servicesSummary(order)].filter(Boolean).join(' · ')
-// "Quando" as its own column from 64rem; below it the dates stay in the status line.
-const wideQuery = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(min-width: 64rem)') : null
-const wide = ref(wideQuery?.matches ?? true)
-const onWide = () => (wide.value = wideQuery?.matches ?? true)
-wideQuery?.addEventListener('change', onWide)
-onBeforeUnmount(() => wideQuery?.removeEventListener('change', onWide))
-const columns = computed(() => 4 + (showsMoney ? 1 : 0) + (wide.value ? 1 : 0))
+const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order)].filter(Boolean).join(' · ')
+// Below 64rem of list the row keeps its short form: the dates go after the status and the plate stays out.
+const rowDates = (order: Order) => (lateText(order, now.value) ? '' : statusLine(order).slice(statusText(order.status).length))
+// "Quando" is its own column when the list is 64rem wide or more (a container query in
+// orders.css, so text at 200% counts); below it the dates stay in the status line.
+const columns = 5 + (showsMoney ? 1 : 0)
 </script>
 
 <template>
@@ -458,7 +456,7 @@ const columns = computed(() => 4 + (showsMoney ? 1 : 0) + (wide.value ? 1 : 0))
               <th class="c-num" scope="col">{{ t('web.orders.number') }}</th>
               <th scope="col">{{ t('customer') }}</th>
               <th scope="col">{{ t('orderStatusLabel') }}</th>
-              <th v-if="wide" class="c-when" scope="col">{{ t('web.orders.when') }}</th>
+              <th class="c-when" scope="col">{{ t('web.orders.when') }}</th>
               <th v-if="showsMoney" class="c-money" scope="col">{{ t('total') }}</th>
             </tr>
           </thead>
@@ -488,13 +486,19 @@ const columns = computed(() => 4 + (showsMoney ? 1 : 0) + (wide.value ? 1 : 0))
                 <button type="button" class="row-btn who" @click.stop="open(order)">
                   {{ order.customer?.name || t('web.orders.noCustomer') }}
                 </button>
-                <span v-if="rowDetail(order)" class="sub row-detail">{{ rowDetail(order) }}</span>
+                <span v-if="rowDetail(order)" class="sub row-detail"
+                  >{{ deviceSummary(order) }}<span v-if="plateOf(order)" class="row-plate"> · {{ plateOf(order) }}</span
+                  >{{ deviceSummary(order) && servicesSummary(order) ? ' · ' : '' }}{{ servicesSummary(order) }}</span
+                >
               </td>
               <td>
-                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="wide ? statusText(order.status) : statusLine(order)" />
+                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusText(order.status)" /><span
+                  v-if="rowDates(order)"
+                  class="st-narrow"
+                >{{ rowDates(order) }}</span>
                 <span v-if="isHeld(order) && holdDays(order, now) !== null" class="sub row-hold">{{ holdText(order, now) }}</span>
               </td>
-              <td v-if="wide" class="c-when" data-testid="row-when">
+              <td class="c-when" data-testid="row-when">
                 <span v-if="whenCell(order, now)" :class="{ 'is-late': whenCell(order, now)?.late }">{{ whenCell(order, now)?.text }}</span>
               </td>
               <td v-if="showsMoney" class="c-money">
