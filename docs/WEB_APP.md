@@ -212,9 +212,11 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 
 Código em `src/views/agenda/`, `src/components/agenda/` e `src/lib/agenda/` (regras puras em `model.ts`, testadas em `tests/agenda-model.test.ts`; textos e datas em `text.ts`; chamadas em `data.ts`). Textos no pedaço `-agenda.json`. Testes: `e2e/agenda.spec.ts`.
 
-**Fuso e formato da empresa.** Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo; se o computador estiver em outro fuso do mesmo país, como Manaus, vale o dele; empresa sem país segue o computador), nunca os do computador: uma visita das 09:00 em São Paulo aparece às 09:00 num computador em Tóquio. O formato (24 h ou AM/PM, nome dos dias) segue o país, e as palavras, o idioma. O texto sem fuso que o app grava (`toIso8601String()`) é lido como hora da empresa; o que a API grava vem em UTC.
+**Fuso e formato da empresa (todo o web).** `lib/zone.ts` guarda o fuso da empresa (`App.vue` acerta ao carregar a empresa); `lib/format.ts`, o dia de atraso, "hoje/amanhã" e o "só o dia" da meia-noite usam esse fuso, na lista, na OS e na agenda. Visita e entrega são gravadas como o app grava: hora da empresa sem fuso (`2026-11-03T14:00:00.000`; "Dia todo" é `T00:00:00.000`), pela agenda, pelo seletor da OS e pela Nova OS. Assim o app lê a mesma hora, o mesmo dia e o mesmo mês (revisão do #521, M1). Limite: a empresa não tem campo de fuso; ele vem do país, e o do navegador vale quando é do mesmo país (uma empresa em Manaus aberta num computador em São Paulo usa São Paulo).
 
-**Tela (`/schedule`).** Semana (padrão na tela grande) ou Dia, com a grade de horas de 7 às 19 (cresce para caber toda visita) e uma faixa "Dia todo" para meia-noite. O mês fica ao lado, com ponto nos dias com OS, inclusive os do mês vizinho. A semana começa no dia do país. Setas, `←` `→`, `T` (hoje) e o dia na URL (`?d=`, `?view=day`, `?who=`). Abrir a OS a põe ao lado (`?order=`); o que muda nela relê a agenda. No celular (abaixo de 48 rem): faixa da semana, "Ver o mês" e a lista do dia com cliente e hora, situação · nº e aparelho · com responsável.
+Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo; se o computador estiver em outro fuso do mesmo país, como Manaus, vale o dele; empresa sem país segue o computador), nunca os do computador: uma visita das 09:00 em São Paulo aparece às 09:00 num computador em Tóquio. O formato (24 h ou AM/PM, nome dos dias) segue o país, e as palavras, o idioma. O texto sem fuso que o app grava (`toIso8601String()`) é lido como hora da empresa; o que a API grava vem em UTC.
+
+**Tela (`/schedule`).** Semana (padrão na tela grande) ou Dia, com a grade de horas de 7 às 19 (cresce para caber toda visita) e uma faixa "Dia todo" para meia-noite. O mês fica ao lado, com ponto nos dias com OS, inclusive os do mês vizinho. A semana começa no dia do país. Setas, `←` `→`, `T` (hoje) e o dia na URL (`?d=`, `?view=day`, `?who=`). Abrir a OS a põe ao lado (`?order=`); o que muda nela relê a agenda. Se o canal ao vivo do Firestore não responde em 6 s, a OS é lida uma vez pelo REST e o canal segue tentando; se essa leitura falha, aparece o erro com "Tentar de novo" (`watchOrder`, revisão B6). No celular (abaixo de 48 rem): faixa da semana, "Ver o mês" e a lista do dia com cliente e hora, situação · nº e aparelho · com responsável.
 
 **Dados.** Pela API para todos os papéis: o servidor aplica quem vê o quê (o técnico vê as que criou e as atribuídas a ele, o que o app não faz) e tira os valores de quem não tem `viewPrices`. Pede a grade inteira do mês, com 14 h de folga de cada lado (o texto sem fuso é comparado como texto), e põe cada OS no dia pelo fuso da empresa. Até 30 páginas de 100; passou disso, um aviso diz que a lista foi cortada. Relê ao voltar à janela.
 
@@ -224,7 +226,7 @@ Código em `src/views/agenda/`, `src/components/agenda/` e `src/lib/agenda/` (re
 
 **De quem.** Admin, gerente e supervisor filtram por responsável (`assignedTo` no servidor). "Só de {nome}" com "Mostrar todos". Trocar de empresa tira o filtro.
 
-**Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push) e o seletor de data da OS no fuso da empresa (ele e a tela da OS ainda usam o fuso do computador, que no Brasil é o mesmo).
+**Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push).
 
 ### Histórico do navegador
 
@@ -387,7 +389,6 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- Fora da agenda, datas e horas ainda usam o fuso do computador (lista, tela da OS, seletor de data).
 - OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.

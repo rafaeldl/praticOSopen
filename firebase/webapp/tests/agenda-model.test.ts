@@ -16,6 +16,7 @@ import {
   snapMinutes,
   step,
   targetInstant,
+  storedText,
   today,
   wallOf,
   weekOf,
@@ -127,6 +128,15 @@ describe('visitas', () => {
     expect(nudge({ day: '2031-03-10', minutes: null }, 'ArrowDown')).toEqual({ day: '2031-03-10', minutes: 480 })
     expect(targetInstant({ day: '2031-03-10', minutes: 570 }, SP).toISOString()).toBe('2031-03-10T12:30:00.000Z')
     expect(targetInstant({ day: '2031-03-10', minutes: null }, SP).toISOString()).toBe('2031-03-10T03:00:00.000Z')
+  })
+
+  test('grava como o app: hora da empresa sem fuso; 21h do último dia do mês e "Dia todo"', () => {
+    expect(storedText({ day: '2031-03-31', minutes: 21 * 60 })).toBe('2031-03-31T21:00:00.000')
+    expect(storedText({ day: '2031-03-10', minutes: null })).toBe('2031-03-10T00:00:00.000')
+    expect(storedText({ day: '2031-03-10', minutes: 9 * 60 + 30 })).toBe('2031-03-10T09:30:00.000')
+    // Read back on the same day and time.
+    const days = placeVisits([{ at: storedText({ day: '2031-03-31', minutes: 21 * 60 }) }], (item) => item.at, SP)
+    expect(days.get('2031-03-31')?.[0]).toMatchObject({ hour: 21, allDay: false })
   })
 
   test('pergunta antes só quando o cliente já contava com a data', () => {

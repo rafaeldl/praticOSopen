@@ -30,6 +30,7 @@ import {
   sameTarget,
   step,
   targetInstant,
+  storedText,
   today,
   visibleDays,
   wallOf,
@@ -230,7 +231,8 @@ let ownEvent = false
 async function save(item: AgendaOrder, target: Target, from: Target, undoing = false) {
   pending.value = null
   asking.value = null
-  const value = targetInstant(target, companyZone.value).toISOString()
+  // As the app writes it: company's local time, no zone (revisão do #521, M1).
+  const value = storedText(target)
   const before = items.value
   replaceItem({ ...item, stored: value })
   try {

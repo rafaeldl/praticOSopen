@@ -6,23 +6,29 @@ import { t } from '@/i18n'
 import { formatDateLong, formatTime } from '@/lib/format'
 import Layer from '@/components/Layer.vue'
 import { country } from '@/lib/orders/text'
+import { instantOf, wallParts } from '@/lib/zone'
 
 const props = defineProps<{ title: string; label: string; value: string | null | undefined; clearLabel: string }>()
 const emit = defineEmits<{ save: [value: string | null]; close: [] }>()
 
 const pad = (n: number) => String(n).padStart(2, '0')
+/** The stored date on the company's clock, for the picker (lib/zone.ts). */
 function toLocalInput(iso: string | null | undefined): string {
   if (!iso) return ''
-  const d = new Date(iso)
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  const p = wallParts(instantOf(iso))
+  return `${p.y}-${pad(p.m)}-${pad(p.d)}T${pad(p.h)}:${pad(p.min)}`
 }
 const text = ref(toLocalInput(props.value))
-const parsed = computed(() => (text.value ? new Date(text.value) : null))
-const valid = computed(() => !!parsed.value && !Number.isNaN(parsed.value.getTime()))
-const preview = computed(() => (valid.value && parsed.value ? `${formatDateLong(parsed.value, country())}, ${formatTime(parsed.value, country())}` : ''))
+const valid = computed(() => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(text.value) && !Number.isNaN(instantOf(text.value).getTime()))
+const preview = computed(() => {
+  if (!valid.value) return ''
+  const at = instantOf(text.value)
+  return `${formatDateLong(at, country())}, ${formatTime(at, country())}`
+})
 
+/** Saved as the app saves it: the company's local time, without a zone (revisão do #521, M1). */
 function save() {
-  if (valid.value && parsed.value) emit('save', parsed.value.toISOString())
+  if (valid.value) emit('save', `${text.value}:00.000`)
 }
 </script>
 

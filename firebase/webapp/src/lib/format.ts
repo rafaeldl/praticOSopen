@@ -1,3 +1,5 @@
+import { currentZone, fromWall, instantOf, wallParts } from './zone'
+
 // Money, dates and numbers follow the company's COUNTRY, not the interface
 // language: one order shows the same value to everyone (business-rules-map, D9).
 interface CountryFormat {
@@ -43,7 +45,9 @@ function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.N
   return formatter
 }
 
-function dateFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+/** Dates in the company's zone (lib/zone.ts), whatever the computer's. */
+function dateFormat(locale: string, base: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const options = { ...base, timeZone: currentZone() }
   const key = `d|${locale}|${JSON.stringify(options)}`
   let formatter = formatters.get(key) as Intl.DateTimeFormat | undefined
   if (!formatter) {
@@ -57,7 +61,7 @@ type DateInput = Date | string | number | null | undefined
 
 function toDate(value: DateInput): Date | null {
   if (value === null || value === undefined || value === '') return null
-  const date = value instanceof Date ? value : new Date(value)
+  const date = value instanceof Date ? value : typeof value === 'string' ? instantOf(value) : new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
 }
 
@@ -190,16 +194,18 @@ export function parseMoney(text: string, country?: string | null): number | null
   return negative ? -rounded : rounded
 }
 
-/** Local calendar day as yyyy-mm-dd. toISOString would move it across midnight. */
+/** The company's calendar day as yyyy-mm-dd. toISOString would move it across midnight. */
 export function toIsoDay(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  const p = wallParts(date)
+  return `${p.y}-${pad(p.m)}-${pad(p.d)}`
 }
 
 /** yyyy-mm-dd as a local date. `new Date('2026-11-02')` would be UTC, the day before in Brazil. */
 export function fromIsoDay(day: string | null | undefined): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day ?? '')
   if (!match) return null
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  // Noon of that day in the company's zone: shown in that zone, it is always that day.
+  const date = fromWall(`${match[1]}-${match[2]}-${match[3]}`, 12, 0, currentZone())
   return Number.isNaN(date.getTime()) ? null : date
 }

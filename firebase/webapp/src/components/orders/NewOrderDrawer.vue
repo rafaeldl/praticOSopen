@@ -223,7 +223,8 @@ function pickItem(picked: ComboboxItem, query = '') {
   announce(t('web.order.itemAdded', { name: item.name }))
 }
 
-const isoOrUndefined = (value: string) => (value ? new Date(value).toISOString() : undefined)
+// The picker gives the company's local time; saved as the app saves it, without a zone (revisão do #521, M1).
+const isoOrUndefined = (value: string) => (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00.000` : undefined)
 
 async function save() {
   if (saving.value) return

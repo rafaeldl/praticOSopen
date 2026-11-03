@@ -1,6 +1,8 @@
 // Order rules shared with the app and the API. docs/web-app/contract-cases/ is
 // the contract: tests/contract-cases.test.ts runs it here, following `correct`
 // when a case documents an app bug. Delete what moves to the API.
+import { instantOf, wallParts } from '@/lib/zone'
+
 export type OrderRole = 'admin' | 'manager' | 'supervisor' | 'consultant' | 'technician'
 
 const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled']
@@ -166,9 +168,10 @@ export function receivePermissions(role: string, isCreator: boolean, useFinancia
   return { canReceive: finance || (useFinancial && r === 'consultant' && isCreator), canDiscount: finance }
 }
 
-/** Local calendar day as a number (yyyymmdd), so two instants compare by day only. */
+/** Calendar day of the company (lib/zone.ts) as a number (yyyymmdd), so two instants compare by day only. */
 export function dayKey(date: Date): number {
-  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+  const p = wallParts(date)
+  return p.y * 10000 + p.m * 100 + p.d
 }
 
 /**
@@ -177,7 +180,7 @@ export function dayKey(date: Date): number {
  */
 export function isOverdue(status: string | null | undefined, dueDate: string | Date | null | undefined, now: Date): boolean {
   if (!dueDate || status === 'done' || status === 'canceled') return false
-  const due = dueDate instanceof Date ? dueDate : new Date(dueDate)
+  const due = dueDate instanceof Date ? dueDate : instantOf(dueDate)
   if (Number.isNaN(due.getTime())) return false
   return dayKey(due) < dayKey(now)
 }

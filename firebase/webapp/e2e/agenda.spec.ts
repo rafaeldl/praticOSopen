@@ -63,6 +63,42 @@ test.describe('fuso da empresa, não o do computador', () => {
     await openAgenda(page, 'admin', 'd=2031-04-08&view=day')
     await expect(block(page, a.id)).toHaveAccessibleName(new RegExp(`^09:30 Cliente 02 OS ${a.number}`))
   })
+
+  test('em Tóquio, mover e o seletor da OS gravam a hora da empresa sem fuso, e o painel mostra a mesma hora (M1, B2)', async ({ page }) => {
+    const a = await makeOrder('admin', { scheduledDate: '2031-04-09T09:30:00.000', customer: null })
+    await openAgenda(page, 'admin', 'd=2031-04-09&view=day')
+    await block(page, a.id).focus()
+    await page.keyboard.press('Shift+ArrowDown')
+    await page.keyboard.press('Enter')
+    await expect.poll(async () => (await readOrder(a.id))?.scheduledDate).toBe('2031-04-09T10:00:00.000')
+    await block(page, a.id).click()
+    const details = panel(page).getByRole('region', { name: 'Detalhes' })
+    await expect(details).toContainText('09/04, 10:00')
+    await details.getByRole('button', { name: /09\/04, 10:00/ }).click()
+    const visit = page.getByRole('dialog', { name: 'Agendar dia e hora' })
+    await expect(visit.getByLabel('Visita')).toHaveValue('2031-04-09T10:00')
+    await visit.getByLabel('Visita').fill('2031-04-09T11:00')
+    await visit.getByRole('button', { name: 'Salvar' }).click()
+    await expect.poll(async () => (await readOrder(a.id))?.scheduledDate).toBe('2031-04-09T11:00:00.000')
+    await expect(details).toContainText('09/04, 11:00')
+    await expect(page.locator(`.tg-col [data-order="${a.id}"]`)).toContainText('11:00')
+  })
+})
+
+test('21h do último dia do mês fica no dia certo e "Dia todo" grava meia-noite sem fuso (M1)', async ({ page }) => {
+  const late = await makeOrder('admin', { scheduledDate: '2031-01-31T19:00:00.000', customer: null })
+  const allDay = await makeOrder('admin', { scheduledDate: '2031-01-30T10:00:00.000', customer: null })
+  await openAgenda(page, 'admin', 'd=2031-01-31')
+  await block(page, late.id).focus()
+  for (let i = 0; i < 4; i++) await page.keyboard.press('Shift+ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect.poll(async () => (await readOrder(late.id))?.scheduledDate).toBe('2031-01-31T21:00:00.000')
+  await expect(page.locator(`.tg-col[data-day="2031-01-31"] [data-order="${late.id}"]`)).toContainText('21:00')
+  // The move above scrolled the grid to 21:00; back to the top, where "Dia todo" is.
+  await page.locator('.ag-scroll').evaluate((element) => (element.scrollTop = 0))
+  await block(page, allDay.id).dragTo(page.locator('.tg-allday[data-allday="2031-01-30"]'))
+  await expect.poll(async () => (await readOrder(allDay.id))?.scheduledDate).toBe('2031-01-30T00:00:00.000')
+  await expect(page.locator(`.tg-allday[data-allday="2031-01-30"] [data-order="${allDay.id}"]`)).toBeVisible()
 })
 
 test('arrastar para outro dia e hora pergunta antes, grava pela API e desfaz (agenda drag)', async ({ page }) => {
@@ -79,10 +115,10 @@ test('arrastar para outro dia e hora pergunta antes, grava pela API e desfaz (ag
   await dragTo(page, block(page, order.id), '2031-04-16', '13:00')
   await page.getByRole('dialog', { name: 'Mudar a visita de Cliente 02?' }).getByRole('button', { name: 'Mudar a data' }).click()
   await expect(page.locator('.toast').filter({ hasText: `OS ${order.number} foi para qua., 16 de abr., 13:00` })).toBeVisible()
-  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-04-16T16:00:00.000Z')
+  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-04-16T13:00:00.000')
   await expect(page.locator(`.tg-col[data-day="2031-04-16"] [data-order="${order.id}"]`)).toBeVisible()
   await page.locator('.toast').getByRole('button', { name: 'Desfazer' }).click()
-  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-04-15T12:00:00.000Z')
+  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-04-15T09:00:00.000')
   await expect(page.locator(`.tg-col[data-day="2031-04-15"] [data-order="${order.id}"]`)).toBeVisible()
 })
 
@@ -104,7 +140,7 @@ test('teclado: Shift e setas mostram para onde vai, Esc desfaz, Enter confirma (
   await expect(page.locator(`.tg-col[data-day="2031-06-11"] [data-order="${order.id}"]`)).toContainText('12:00')
   await page.keyboard.press('Enter')
   await page.getByRole('dialog', { name: 'Mudar a visita de Cliente 02?' }).getByRole('button', { name: 'Mudar a data' }).click()
-  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-06-11T15:00:00.000Z')
+  await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2031-06-11T12:00:00.000')
   await expect(block(page, order.id)).toBeFocused()
 })
 
@@ -114,7 +150,7 @@ test('sem cliente não pergunta; OS que mudou em outro lugar não é gravada por
   await openAgenda(page, 'admin', 'd=2031-07-08')
   await dragTo(page, block(page, free.id), '2031-07-09', '10:00')
   await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect.poll(async () => (await readOrder(free.id))?.scheduledDate).toBe('2031-07-09T13:00:00.000Z')
+  await expect.poll(async () => (await readOrder(free.id))?.scheduledDate).toBe('2031-07-09T10:00:00.000')
 
   // Someone saves the other order after the agenda read it: the move is refused and the agenda reads it again.
   await updateOrderDoc(other.id, { updatedAt: new Date().toISOString(), status: 'progress' })
