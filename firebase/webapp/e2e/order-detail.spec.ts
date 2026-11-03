@@ -249,9 +249,9 @@ test('trocar o cliente pergunta pelo veículo do anterior; escolher veículo (or
   await dialog(page, 'Escolher veículo').getByRole('combobox').fill('Veículo 5')
   await page.keyboard.press('Enter')
   await expect(panel(page)).toContainText('Veículo 5 · TST0005')
-  const saved = await readOrder(order.id)
-  expect((saved?.customer as { id: string }).id).toBe('customer-4')
-  expect(saved?.deviceIds).toEqual(['device-5'])
+  // The screen shows the local write first; the server copy follows.
+  await expect.poll(async () => (await readOrder(order.id))?.deviceIds).toEqual(['device-5'])
+  expect(((await readOrder(order.id))?.customer as { id: string }).id).toBe('customer-4')
 })
 
 test('comentários: prévia, escrever e quem vê (order.comment.*, order.comments.*)', async ({ page }) => {

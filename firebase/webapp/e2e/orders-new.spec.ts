@@ -58,8 +58,11 @@ for (const user of ['owner', 'supervisor', 'consultant'] as const) {
     await home(page, user)
     await page.getByTestId('new-order').click()
     await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
+    await expect(page.getByRole('option', { name: /^Cliente 01/ })).toBeVisible()
     await page.keyboard.press('Enter')
+    await expect(drawer(page).getByRole('button', { name: 'Trocar' }).first()).toBeVisible()
     await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Peça 1')
+    await expect(page.getByRole('option', { name: /^Peça 1/ })).toBeVisible()
     await page.keyboard.press('Enter')
     await expect(drawer(page).getByRole('list', { name: 'O que vai ser feito' })).toContainText('Peça 1')
     // Who does not see values never sees a price here.

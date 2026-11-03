@@ -140,7 +140,8 @@ test.describe('larguras e texto', () => {
       for (const path of ['orders', 'orders?order=scn-owed', 'settings', 'dev/components']) {
         await page.goto(path)
         await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
-        await expect(page.locator('h1')).toBeVisible()
+        // An open order takes the whole phone screen, without the page title.
+        await expect(path.includes('order=') ? page.getByTestId('order-detail') : page.locator('h1')).toBeVisible()
         await expectNoSideScroll(page)
       }
       // Nova OS with text at 200%: the drawer neither clips nor scrolls sideways.
