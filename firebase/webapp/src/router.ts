@@ -1,0 +1,93 @@
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { decideAccess, type RouteAccess } from '@/lib/access'
+import { stripStaleLayers } from '@/lib/route-layer'
+import { session, startSession } from '@/lib/session'
+import { NAV } from '@/navigation'
+import type { MessageKey } from '@/generated/message-keys'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    /** Required on every route. The guard denies a route without it. */
+    access?: RouteAccess
+    title?: MessageKey
+    /** Screens without the navigation shell. */
+    bare?: boolean
+  }
+}
+
+const Placeholder = () => import('@/views/PlaceholderView.vue')
+
+export const routes: RouteRecordRaw[] = [
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { access: { kind: 'public' }, title: 'login', bare: true },
+  },
+  {
+    path: '/no-company',
+    name: 'noCompany',
+    component: () => import('@/views/NoCompanyView.vue'),
+    meta: { access: { kind: 'signedIn' }, title: 'web.noCompany.title', bare: true },
+  },
+  {
+    path: '/forbidden',
+    name: 'forbidden',
+    component: () => import('@/views/ForbiddenView.vue'),
+    meta: { access: { kind: 'signedIn' }, title: 'web.forbidden.title' },
+  },
+  ...NAV.map(
+    (entry): RouteRecordRaw => ({
+      path: entry.path,
+      name: entry.name,
+      component: entry.name === 'orders' ? () => import('@/views/OrdersView.vue') : Placeholder,
+      meta: { access: entry.access, title: entry.label },
+    }),
+  ),
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/SettingsView.vue'),
+    meta: { access: { kind: 'signedIn' }, title: 'settings' },
+  },
+  // Component gallery for tests and design review. Compiled out of production.
+  ...(import.meta.env.VITE_USE_EMULATORS === '1'
+    ? [
+        {
+          path: '/dev/components',
+          name: 'gallery',
+          component: () => import('@/views/GalleryView.vue'),
+          meta: { access: { kind: 'signedIn' }, title: 'web.gallery.title' },
+        } satisfies RouteRecordRaw,
+      ]
+    : []),
+  {
+    path: '/:rest(.*)*',
+    name: 'notFound',
+    component: () => import('@/views/NotFoundView.vue'),
+    meta: { access: { kind: 'signedIn' }, title: 'web.notFound.title' },
+  },
+]
+
+export const router = createRouter({
+  history: createWebHistory('/app/'),
+  routes,
+})
+
+router.beforeEach(stripStaleLayers)
+
+// Every navigation passes here, direct URLs included. The server checks again.
+router.beforeEach(async (to) => {
+  await startSession()
+  const decision = decideAccess(to.meta.access, {
+    signedIn: !!session.uid,
+    companyId: session.companyId,
+    role: session.role,
+    useFinancial: session.company?.useFinancial,
+  })
+  if (decision === 'login') return { name: 'login', query: to.fullPath === '/' ? {} : { next: to.fullPath }, replace: true }
+  if (decision === 'noCompany') return { name: 'noCompany', replace: true }
+  if (decision === 'forbidden') return { name: 'forbidden', query: { from: to.path }, replace: true }
+  if (to.name === 'login' && session.uid) return { path: '/', replace: true }
+  return true
+})
