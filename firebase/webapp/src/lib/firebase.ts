@@ -53,16 +53,25 @@ export function authClient(): Promise<Auth> {
 let firestore: Promise<Firestore> | undefined
 export function firestoreClient(): Promise<Firestore> {
   firestore ??= (async () => {
-    const [instance, { getFirestore, connectFirestoreEmulator }] = await Promise.all([
-      firebaseApp(),
-      import('firebase/firestore'),
-    ])
-    // No persistent cache: the workshop computer is shared (WEB_APP_DESIGN, Sair).
-    const client = getFirestore(instance)
+    const [instance, { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator }] =
+      await Promise.all([firebaseApp(), import('firebase/firestore')])
+    // Persistent cache makes the return visit start from disk. The computer is
+    // shared, so signing out erases it (clearFirestoreCache).
+    const client = initializeFirestore(instance, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    })
     if (usesEmulators) connectFirestoreEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080))
     return client
   })()
   return firestore
+}
+
+/** Erases this browser's copy of the data. The page must reload afterwards. */
+export async function clearFirestoreCache(): Promise<void> {
+  if (!firestore) return
+  const [client, { terminate, clearIndexedDbPersistence }] = await Promise.all([firestore, import('firebase/firestore')])
+  await terminate(client)
+  await clearIndexedDbPersistence(client).catch((error) => console.warn('firestore: cache not cleared', error))
 }
 
 let storage: Promise<FirebaseStorage> | undefined

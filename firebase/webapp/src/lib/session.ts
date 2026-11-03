@@ -4,7 +4,8 @@
 import { reactive } from 'vue'
 import type { User } from 'firebase/auth'
 import { createApi, type ApiOptions } from './api'
-import { authClient, firestoreClient } from './firebase'
+import { authClient, clearFirestoreCache, firestoreClient } from './firebase'
+import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { readStorage, writeStorage } from './storage'
 
@@ -88,9 +89,48 @@ async function readDoc<T>(path: string): Promise<T | null> {
   return snapshot.exists() ? (snapshot.data() as T) : null
 }
 
+/**
+ * This browser's copy first, when it has one, and the server copy right after
+ * through `onFresh`. Returning to the app then waits for the disk, not the network.
+ */
+async function readDocCacheFirst<T>(path: string, onFresh: (value: T | null) => void): Promise<T | null> {
+  const [db, { doc, getDocFromCache }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  try {
+    const cached = await getDocFromCache(doc(db, path))
+    if (cached.exists()) {
+      void readDoc<T>(path).then(onFresh, (error) => console.warn('session: refresh failed', error))
+      return cached.data() as T
+    }
+  } catch {
+    // Not in the cache: read from the server below.
+  }
+  return readDoc<T>(path)
+}
+
 async function loadCompany(companyId: string): Promise<void> {
   const profile = await readDoc<CompanyProfile>(`companies/${companyId}`)
   session.company = profile
+}
+
+export interface SessionHint {
+  uid: string
+  companyId: string
+  role: string
+}
+
+const hintListeners: ((hint: SessionHint) => void)[] = []
+
+/**
+ * Called as soon as the token says which company will open, before the user and
+ * company documents arrive. Lets a screen start its query in the same round trip.
+ */
+export function onSessionHint(listener: (hint: SessionHint) => void): void {
+  hintListeners.push(listener)
+}
+
+/** Same choice pickCompany will make, from the claim alone. */
+export function guessCompany(roles: Record<string, string>, saved: string | null): string | null {
+  return saved && roles[saved] ? saved : (Object.keys(roles)[0] ?? null)
 }
 
 function clear(): void {
@@ -112,19 +152,36 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
   session.email = user.email
   try {
     let token = await user.getIdTokenResult(forceRefresh)
-    const profile = await readDoc<{ name?: string; companies?: unknown }>(`users/${user.uid}`)
+    mark('session:token')
     let roles = (token.claims.roles ?? {}) as Record<string, string>
+    const saved = readStorage(savedCompanyKey(user.uid))
+    // User and company documents in parallel: the claim already names the company.
+    const guess = guessCompany(roles, saved)
+    if (guess) hintListeners.forEach((listener) => listener({ uid: user.uid, companyId: guess, role: roles[guess] as string }))
+    const [profile, guessed] = await Promise.all([
+      readDocCacheFirst<{ name?: string; companies?: unknown }>(`users/${user.uid}`, (fresh) => {
+        if (session.uid !== user.uid) return
+        session.name = fresh?.name ?? user.displayName
+        session.companies = resolveCompanies(fresh?.companies, roles)
+      }),
+      guess
+        ? readDocCacheFirst<CompanyProfile>(`companies/${guess}`, (fresh) => {
+            if (session.companyId === guess) session.company = fresh
+          })
+        : Promise.resolve(null),
+    ])
+    mark('session:docs')
     if (!forceRefresh && tokenIsStale(profile?.companies, roles)) {
       token = await user.getIdTokenResult(true)
       roles = (token.claims.roles ?? {}) as Record<string, string>
     }
     session.name = profile?.name ?? user.displayName
     session.companies = resolveCompanies(profile?.companies, roles)
-    const companyId = pickCompany(session.companies, readStorage(savedCompanyKey(user.uid)))
+    const companyId = pickCompany(session.companies, saved)
     session.companyId = companyId
     session.role = session.companies.find((company) => company.id === companyId)?.role ?? null
-    session.company = null
-    if (companyId) await loadCompany(companyId)
+    session.company = companyId && companyId === guess ? guessed : null
+    if (companyId && companyId !== guess) await loadCompany(companyId)
   } catch (error) {
     console.error('session: could not load account', error)
     session.failed = true
@@ -139,6 +196,7 @@ export function startSession(): Promise<void> {
     const [auth, { onAuthStateChanged }] = await Promise.all([authClient(), import('firebase/auth')])
     await new Promise<void>((resolve) => {
       onAuthStateChanged(auth, (user) => {
+        mark('session:auth')
         void (async () => {
           if (user) await hydrate(user)
           else clear()
@@ -166,6 +224,9 @@ export async function signOutEverywhere(): Promise<void> {
   const [auth, { signOut }] = await Promise.all([authClient(), import('firebase/auth')])
   await signOut(auth)
   clear()
+  await clearFirestoreCache()
+  // Firestore cannot be used after its cache is gone: start the page over.
+  location.assign(`${import.meta.env.BASE_URL}login`)
 }
 
 /** Forces a new token: an accepted invite only reaches the claim on the server. */

@@ -2,7 +2,7 @@
 // Skeleton of the list: real query, side panel in the URL and the `list-visible`
 // mark the performance test reads. No prices here: who cannot see values must
 // get a server projection (ADR-001), so this reads Firestore only for who can.
-import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { X } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -10,21 +10,13 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import { t } from '@/i18n'
-import { firestoreClient } from '@/lib/firebase'
 import { formatDate } from '@/lib/format'
+import { mark } from '@/lib/marks'
+import { FIRST_PAGE, PAGE_SIZE, firstOrdersPage, nextOrdersPage, onFreshFirstPage, type OrderRow } from '@/lib/orders-query'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
 import { announce } from '@/lib/ui'
 
-interface OrderRow {
-  id: string
-  number?: number
-  status?: string
-  customer?: { name?: string }
-  createdAt?: string
-}
-
-const PAGE_SIZE = 100
 const rows = shallowRef<OrderRow[]>([])
 const state = ref<'loading' | 'ready' | 'failed' | 'projectionPending'>('loading')
 const panel = useRoutePanel('order')
@@ -37,23 +29,29 @@ async function load() {
     state.value = 'projectionPending'
     return
   }
+  const query = { companyId: session.companyId as string, createdBy: can('viewAllOrders') ? null : session.uid }
   try {
-    const [db, firestore] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-    const { collection, getDocs, limit, orderBy, query, where } = firestore
-    const orders = collection(db, 'companies', session.companyId as string, 'orders')
-    const own = can('viewAllOrders') ? [] : [where('createdBy.id', '==', session.uid)]
-    const snapshot = await getDocs(query(orders, ...own, orderBy('createdAt', 'desc'), limit(PAGE_SIZE)))
-    rows.value = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as OrderRow)
+    rows.value = await firstOrdersPage(query)
     state.value = 'ready'
-    announce(t('web.orders.count', { count: rows.value.length }))
     await nextTick()
-    requestAnimationFrame(() => performance.mark('list-visible'))
+    requestAnimationFrame(() => mark('list-visible'))
+    // The rest of the page after the first paint.
+    const last = rows.value[rows.value.length - 1]
+    if (last && rows.value.length === FIRST_PAGE) {
+      rows.value = [...rows.value, ...(await nextOrdersPage(query, last, PAGE_SIZE - FIRST_PAGE))]
+    }
+    announce(t('web.orders.count', { count: rows.value.length }))
   } catch (error) {
     console.error('orders: list failed', error)
     state.value = 'failed'
   }
 }
 
+// Shown from this browser's copy: replace the first page when the server answers.
+onFreshFirstPage((fresh) => {
+  rows.value = [...fresh, ...rows.value.slice(fresh.length)]
+})
+onBeforeUnmount(() => onFreshFirstPage(undefined))
 onMounted(load)
 </script>
 
