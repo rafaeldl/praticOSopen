@@ -157,7 +157,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Criar novas OS
 - ✅ Editar suas próprias OS
 - ✅ Deletar OS que criou (apenas quando status = 'Orçamento')
-- ❌ Atribuir técnicos
+- ✅ Indicar o técnico (Responsável) nas OS que criou; nunca nas de outra pessoa
 - ❌ Executar serviços
 - ❌ Visualizar OS de outros (Admin pode reatribuir em caso de férias/ausência)
 
@@ -495,9 +495,11 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Ver OS próprias | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Criar OS | ✅ | ❌ | ✅ | ✅ | ✅ |
 | Editar OS | ✅ | ✅ | ✅ | ✅* | ❌ |
-| Atribuir técnicos | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Atribuir técnicos | ✅ | ❌ | ✅ | ✅** | ❌ |
 | Executar OS | ✅ | ❌ | ✅ | ❌ | ✅ |
 | Deletar OS | ✅ | ✅* | ✅* | ✅* | ✅* |
+
+** Consultor: só nas OS que criou (`assignOrder` com o acesso à OS limitado às próprias). Técnico não repassa a OS. Decisão do dono em 2026-11-03; as regras do Firestore ainda não restringem `assignedTo`.
 
 *Gerente e Supervisor podem deletar apenas se status for 'Orçamento'. Consultor e Técnico podem deletar apenas OS que criaram, em status 'Orçamento'.
 

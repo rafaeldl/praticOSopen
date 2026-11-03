@@ -91,7 +91,8 @@ class OrderPermissions {
   final bool Function(Order order) canEditMainFields;
 
   /// Who takes care of the order ("Responsável"): `assignOrder`, admin and
-  /// supervisor ([AuthorizationService.canAssignOrder]), as the web.
+  /// supervisor on any order, the consultant on the ones they created
+  /// ([AuthorizationService.canAssignOrder]), as the web and the API.
   final bool Function(Order order) canAssign;
 
   /// Add, fill and remove checklists.

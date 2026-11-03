@@ -344,6 +344,14 @@ describe('Consultant and technician on the orders they created', () => {
       expect([finish.status, approve.status, cancel.status]).toEqual([role === 'technician' ? 200 : 403, 200, 403]);
     });
 
+    // Decision (Rafael, 2026-11-03): the consultant picks the technician on
+    // the orders they created; the technician does not pass it on.
+    it(`${role}: picks the responsible of their own order only if consultant`, async () => {
+      const own = await call('patch', `/v1/app/orders/${id}`, { assignedTo: 'tech1' });
+      const others = await call('patch', '/v1/app/orders/o1', { assignedTo: 'tech1' });
+      expect([own.status, others.status]).toEqual([role === 'consultant' ? 200 : 403, 403]);
+    });
+
     it(`${role}: edits items on approved orders only if consultant`, async () => {
       const res = await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1' });
       expect(res.status).toBe(role === 'consultant' ? 200 : 403);

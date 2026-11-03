@@ -85,9 +85,13 @@ export const API_CASES: ApiCase[] = [
     allow: SEE_ALL_ORDERS,
   },
   {
-    id: 'orders.assign', area: 'OS', title: 'escolher o responsável da OS',
+    // assignOrder: admin, supervisor and the consultant, who only sees the
+    // orders they created. On someone else's order only admin and supervisor;
+    // the consultant's own order is in rbac-api.test.ts ("picks the
+    // responsible of their own order").
+    id: 'orders.assign', area: 'OS', title: 'escolher o responsável da OS de outra pessoa',
     method: 'patch', path: `${O}/o1`, body: { assignedTo: 'tech1' },
-    allow: ASSIGNERS, permission: 'assignOrder',
+    allow: ASSIGNERS,
   },
   {
     id: 'orders.dates.approved', area: 'OS', title: 'mudar a data de OS aprovada de outra pessoa',

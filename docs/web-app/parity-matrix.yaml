@@ -2683,7 +2683,7 @@ rows:
   route: null
   action: "Escolher ou tirar responsável"
   kind: picker
-  roles: [owner, admin, supervisor]
+  roles: [owner, admin, supervisor, consultant]
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
@@ -2695,7 +2695,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: assignOrder
-  note: "Só papéis com assignOrder (admin e supervisor; dono conta como admin), como canAssignOrder no web, e só quando pode editar a OS. Vale para o …, a linha em Detalhes e Mais opções da Nova OS (lote 3 do app; versões antigas deixam qualquer editor trocar). No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
+  note: "Só papéis com assignOrder (admin e supervisor em qualquer OS, consultor só nas que criou para indicar o técnico; dono conta como admin; técnico não repassa), regra única em app-permissions.json e order-permissions.json (canAssign), e só quando pode editar a OS. Vale para o …, a linha em Detalhes e Mais opções da Nova OS (lote 3 do app; versões antigas deixam qualquer editor trocar). No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
 - id: order.address.edit
   screen: lib/screens/order/order_screen_v2.dart
   route: null
