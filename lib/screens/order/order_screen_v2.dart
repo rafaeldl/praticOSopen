@@ -645,7 +645,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     addPickToOrder(_store, pick);
   }
 
+  /// A saved order's items change only for who can edit its main fields
+  /// (the same rule as "+ Adicionar"). A new order is always editable.
+  bool get _canEditItems {
+    final order = _store.order;
+    return order == null ||
+        order.id == null ||
+        _permissions.canEditMainFields(order);
+  }
+
   Future<void> _editService(int index) async {
+    if (!_canEditItems) return;
     final item = _store.services![index];
     final edit = await AppSheet.show<OrderItemEdit>(
       context,
@@ -667,6 +677,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Future<void> _editProduct(int index) async {
+    if (!_canEditItems) return;
     final item = _store.products![index];
     final edit = await AppSheet.show<OrderItemEdit>(
       context,

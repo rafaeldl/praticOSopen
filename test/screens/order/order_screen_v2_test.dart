@@ -19,6 +19,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -195,7 +196,9 @@ OrderPermissions _permissions({
   bool Function(Order? order)? receiveOn,
   bool hold = true,
   List<String> statuses = const ['approved', 'progress', 'canceled'],
+  bool edit = true,
 }) => OrderPermissions(
+  canEditMainFields: (_) => edit,
   canChangeHold: (_) => hold,
   canViewPrices: () => prices,
   canReceivePayments: receiveOn ?? (_) => receive,
@@ -1864,6 +1867,37 @@ void main() {
         expect(asked, hasLength(1));
         expect(store.order!.status, 'done');
       });
+    });
+
+    testWidgets('who cannot edit the order does not open its items', (
+      tester,
+    ) async {
+      final saved = order('approved')
+        ..services = [
+          OrderService()
+            ..service = (ServiceAggr()
+              ..id = 's1'
+              ..name = 'Troca de óleo')
+            ..value = 80,
+        ];
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: OrderStore(),
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+          permissions: _permissions(edit: false),
+          actions: FakeActions(),
+          mostUsed: () async => const [],
+        ),
+        args: {'order': saved},
+      );
+      final row = find.text('Troca de óleo');
+      await tester.scrollUntilVisible(row, 200);
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byType(OrderItemSheet), findsNothing);
     });
 
     testWidgets('due earlier today is not late, as in the list', (
