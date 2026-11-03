@@ -9,10 +9,11 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onDocumentDeleted, onDocumentUpdated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import { buildRolesClaim } from './services/membership.service';
+import { countNewOrderPhotos, recountFormTemplates, recountUsers } from './services/usage-counter.service';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
@@ -41,6 +42,9 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     // Never blocks the numbering below.
     await stampCompletedAtOnCreate(context.params.companyId, snapshot.id, data, context.timestamp).catch((error) =>
       console.error('Could not stamp completedAt on order creation', error),
+    );
+    await countNewOrderPhotos(context.params.companyId, undefined, data).catch((error) =>
+      console.error('Could not count the photos of the new order', error),
     );
     if (!data || data.number) return;
 
@@ -154,7 +158,62 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
+    await countNewOrderPhotos(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
+      console.error('Could not count the new photos of the order', error),
+    );
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
+  }
+);
+
+import { cleanupDeletedOrder } from './services/order-cleanup.service';
+
+/**
+ * [V2] Plan usage counters kept by the server (services/usage-counter.service.ts):
+ * team size (members + pending invites) is recounted on every write; active
+ * checklist templates and photos (order triggers above) only while the flag
+ * config/usageCounters.serverOnly is on.
+ */
+export const onFormTemplateWrittenUsage = onDocumentWritten(
+  { document: 'companies/{companyId}/forms/{formId}', region: 'southamerica-east1' },
+  async (event) => {
+    await recountFormTemplates(event.params.companyId);
+  }
+);
+
+export const onMembershipWrittenUsage = onDocumentWritten(
+  { document: 'companies/{companyId}/memberships/{memberId}', region: 'southamerica-east1' },
+  async (event) => {
+    await recountUsers(event.params.companyId);
+  }
+);
+
+export const onInviteWrittenUsage = onDocumentWritten(
+  { document: 'links/invites/tokens/{token}', region: 'southamerica-east1' },
+  async (event) => {
+    const companyIds = new Set(
+      [event.data?.before.data()?.company?.id, event.data?.after.data()?.company?.id]
+        .filter((id): id is string => typeof id === 'string' && id.length > 0 && !id.includes('/')),
+    );
+    for (const companyId of companyIds) await recountUsers(companyId);
+  }
+);
+
+
+/**
+ * [V2] Cleanup of a deleted order. The app deletes orders straight in
+ * Firestore, which leaves subcollections and Storage files behind. This
+ * removes only what is inside the order's own folder (comments, checklists,
+ * photos and `tenants/{companyId}/orders/{orderId}/` in Storage); charges
+ * stay. Logic in services/order-cleanup.service.ts.
+ */
+export const onOrderDeletedCleanup = onDocumentDeleted(
+  {
+    document: 'companies/{companyId}/orders/{orderId}',
+    region: 'southamerica-east1',
+  },
+  async (event) => {
+    const { companyId, orderId } = event.params;
+    await cleanupDeletedOrder(companyId, orderId);
   }
 );
 

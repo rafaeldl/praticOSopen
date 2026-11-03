@@ -576,6 +576,7 @@ export interface ShareToken {
   rejectedAt?: string;
   rejectionReason?: string;
   termsAcceptedAt?: string;
+  revokedAt?: string;                   // replaced by a newer link of the order
 }
 
 export interface ShareTokenAuth {

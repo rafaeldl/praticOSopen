@@ -7,6 +7,7 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/utils/observe_stream.dart';
+import 'package:praticos/utils/order_scope.dart';
 
 /// Serviço de autorização centralizado para o PraticOS.
 ///
@@ -96,9 +97,9 @@ class AuthorizationService {
     if (store == null) return null;
     if (store.user == null) await store.findCurrentUser();
     try {
-      return await observeAsStream(() => roleIn(store.user?.value, companyId))
-          .firstWhere((role) => role != null)
-          .timeout(timeout);
+      return await observeAsStream(
+        () => roleIn(store.user?.value, companyId),
+      ).firstWhere((role) => role != null).timeout(timeout);
     } catch (_) {
       return currentUserRole;
     }
@@ -177,8 +178,8 @@ class AuthorizationService {
   /// Verifica se o usuário atual pode visualizar uma OS específica.
   ///
   /// Same rule as the Firestore order read rule: admin, manager and
-  /// supervisor read every order; consultant and technician only the ones
-  /// they created (assignedTo isn't in the rules yet).
+  /// supervisor read every order; the technician the ones they created or
+  /// that are assigned to them; the consultant only the ones they created.
   bool canAccessOrder(Order order) => canAccessOrderFor(
     role: normalizedRole,
     userId: Global.currentUser?.uid,
@@ -195,13 +196,19 @@ class AuthorizationService {
     if (RolePermissions.hasPermission(role, PermissionType.viewAllOrders)) {
       return true;
     }
-    return order.createdBy?.id == userId;
+    if (order.createdBy?.id == userId) return true;
+    return RolePermissions.hasPermission(
+          role,
+          PermissionType.viewAssignedOrders,
+        ) &&
+        order.assignedTo?.id == userId;
   }
 
-  /// Uid that every order list query must filter `createdBy.id` by, or null
-  /// when the user reads every order. Without the filter the Firestore rules
-  /// deny the whole query for consultant and technician.
-  Future<String?> orderCreatorFilter() async => orderCreatorFilterFor(
+  /// Scope every order list query must filter by (`createdBy.id`, plus
+  /// `assignedTo.id` for the technician), or null when the user reads every
+  /// order. Without it the Firestore rules deny the whole query for
+  /// consultant and technician.
+  Future<OrderScope?> orderCreatorFilter() async => orderCreatorFilterFor(
     role: await resolveCurrentRole(),
     userId: Global.currentUser?.uid,
   );
@@ -210,7 +217,7 @@ class AuthorizationService {
   /// While the role is unknown (user document not loaded yet) it filters,
   /// and switches to "no filter" as soon as an owner/admin role arrives, so
   /// a live query doesn't stay stuck on the provisional filter.
-  Stream<String?> orderCreatorFilterChanges() async* {
+  Stream<OrderScope?> orderCreatorFilterChanges() async* {
     final userId = Global.currentUser?.uid;
     final companyId = Global.companyAggr?.id;
     // Same wait as [orderCreatorFilter], so `.first` keeps its answer.
@@ -228,7 +235,7 @@ class AuthorizationService {
   /// Pure version of [orderCreatorFilterChanges]: the filter for [initial],
   /// then for each value of [roles], without repeating a value. A null role
   /// after a known one (user doc briefly missing) keeps the last filter.
-  static Stream<String?> creatorFilterChanges({
+  static Stream<OrderScope?> creatorFilterChanges({
     required RolesType? initial,
     required Stream<RolesType?> roles,
     required String? userId,
@@ -246,17 +253,26 @@ class AuthorizationService {
     }
   }
 
-  /// Pure version of [orderCreatorFilter]. An unknown role filters too: the
-  /// filtered query is allowed for every member.
-  static String? orderCreatorFilterFor({
+  /// Pure version of [orderCreatorFilter]. An unknown role filters by the
+  /// creator only: that query is allowed for every member.
+  static OrderScope? orderCreatorFilterFor({
     required RolesType? role,
     required String? userId,
   }) {
+    if (userId == null) return null;
     if (role != null &&
         RolePermissions.hasPermission(role, PermissionType.viewAllOrders)) {
       return null;
     }
-    return userId;
+    return OrderScope(
+      userId,
+      assigned:
+          role != null &&
+          RolePermissions.hasPermission(
+            role,
+            PermissionType.viewAssignedOrders,
+          ),
+    );
   }
 
   /// Verifica se o usuário pode editar uma OS específica.
@@ -703,7 +719,8 @@ class AuthorizationService {
   );
 
   /// Pure version of [filterOrdersByPermission]. Mirrors the Firestore order
-  /// read rule: consultant and technician only see the orders they created.
+  /// read rule: the consultant only sees the orders they created, the
+  /// technician also the ones assigned to them.
   static List<Order> filterOrdersFor({
     required RolesType? role,
     required String? userId,
@@ -718,9 +735,13 @@ class AuthorizationService {
         return orders;
 
       case RolesType.consultant:
-      case RolesType.technician:
-        // assignedTo ainda não existe; quando existir, incluir aqui e nas rules
         return orders.where((o) => o.createdBy?.id == userId).toList();
+      case RolesType.technician:
+        return orders
+            .where(
+              (o) => o.createdBy?.id == userId || o.assignedTo?.id == userId,
+            )
+            .toList();
     }
   }
 }

@@ -133,8 +133,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     String orderId,
     OrderHold? hold, {
     UserAggr? actor,
-  }) =>
-      _tenant.setHold(companyId, orderId, hold, actor: actor);
+  }) => _tenant.setHold(companyId, orderId, hold, actor: actor);
 
   // ═══════════════════════════════════════════════════════════════════
   // Ratings Support
@@ -152,10 +151,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
         .doc(companyId)
         .collection('orders')
         .where('status', isEqualTo: 'done');
-    final creator = await TenantOrderRepository.creatorScope();
-    if (creator != null) {
-      query = query.where('createdBy.id', isEqualTo: creator);
-    }
+    query = TenantOrderRepository.applyScope(
+      query,
+      await TenantOrderRepository.creatorScope(),
+    );
     final snapshot = await query.orderBy('createdAt', descending: true).get();
 
     final orders = snapshot.docs
@@ -221,11 +220,11 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       query = query.where('customer.id', isEqualTo: customerId);
     }
 
-    // Consultant/technician: only their own orders (Firestore rules).
-    final creator = await TenantOrderRepository.creatorScope();
-    if (creator != null) {
-      query = query.where('createdBy.id', isEqualTo: creator);
-    }
+    // Consultant/technician: only the orders they may read (Firestore rules).
+    query = TenantOrderRepository.applyScope(
+      query,
+      await TenantOrderRepository.creatorScope(),
+    );
 
     // Ordenação padrão (se não for due_date nem contract)
     if (status != 'due_date' && status != 'contract') {

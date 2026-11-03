@@ -343,6 +343,48 @@ describeEmulator('firestore.rules', () => {
       }
     });
 
+    // Flag config/usageCounters.serverOnly: the server triggers keep the
+    // counters (usage-counter.service.ts) and the client can no longer write them.
+    describe('with server-only usage counters (config/usageCounters.serverOnly)', () => {
+      const setFlag = (serverOnly: boolean) =>
+        env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'config/usageCounters'), { serverOnly }));
+
+      it('owner/admin can no longer change usage', async () => {
+        await setFlag(true);
+        for (const db of [admin(), ownerClaim(), ownerWithoutClaims()]) {
+          await rut.assertFails(fs.updateDoc(company(db), { 'subscription.usage.photosThisMonth': fs.increment(1) }));
+          await rut.assertFails(fs.updateDoc(company(db), { 'subscription.usage.usersActive': 0 }));
+        }
+        await rut.assertFails(fs.updateDoc(company(admin(), 'c3'), { 'subscription.usage.photosThisMonth': fs.increment(1) }));
+      });
+
+      it('other company fields and an unchanged usage still save', async () => {
+        await setFlag(true);
+        await rut.assertSucceeds(fs.updateDoc(company(admin()), { name: 'Renamed' }));
+        await rut.assertSucceeds(
+          fs.setDoc(company(admin()), { name: 'Again', subscription: SERVER_SUBSCRIPTION }, { merge: true }),
+        );
+      });
+
+      it('the legacy merge with another usage is refused (visible change, hence the flag)', async () => {
+        await setFlag(true);
+        await rut.assertFails(
+          fs.setDoc(company(admin()), { name: 'Renamed', subscription: LEGACY_APP_SUBSCRIPTION }, { merge: true }),
+        );
+      });
+
+      it('flag off keeps the client writes as today', async () => {
+        await setFlag(false);
+        await rut.assertSucceeds(fs.updateDoc(company(admin()), { 'subscription.usage.photosThisMonth': fs.increment(1) }));
+      });
+
+      it('nobody reads or writes the flag', async () => {
+        await setFlag(true);
+        await rut.assertFails(fs.getDoc(fs.doc(admin(), 'config/usageCounters')));
+        await rut.assertFails(fs.setDoc(fs.doc(admin(), 'config/usageCounters'), { serverOnly: false }));
+      });
+    });
+
     describe('usage-only subscription (map without plan, created by dotted usage updates)', () => {
       const USAGE_ONLY = { usage: { formTemplates: 1, photosThisMonth: 2 } };
 
