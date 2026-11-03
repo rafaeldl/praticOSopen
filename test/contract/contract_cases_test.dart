@@ -47,6 +47,7 @@ const _statuses = ['quote', 'approved', 'progress', 'done', 'canceled'];
 /// added here, or the "contract files" group fails.
 const _covered = {
   'currency.json',
+  'contract-generation.json', // contract_generation_cases_test.dart
   'order-delete.json',
   'order-items.json',
   'order-permissions.json',

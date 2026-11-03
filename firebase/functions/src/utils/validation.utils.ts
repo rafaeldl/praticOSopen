@@ -109,7 +109,17 @@ export const receiptFileSchema = z.object({
   contentType: z.string().max(100),
 });
 
+/**
+ * Client-generated transaction id (a uuid): letters, digits and dashes, so it
+ * never looks like an Asaas (`asaas_…`), legacy or receipt share id.
+ */
+const clientTransactionIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientTransactionId');
+
+/** Client-generated order id (a uuid), same format as clientTransactionId. */
+const clientOrderIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientOrderId');
+
 export const createOrderSchema = z.object({
+  clientOrderId: clientOrderIdSchema.optional(),
   customerId: idSchema,
   deviceId: idSchema.optional(),
   deviceIds: z.array(idSchema).max(50).optional(),
@@ -155,10 +165,11 @@ export const addOrderProductSchema = z.object({
   deviceId: idSchema.optional(),
 });
 
-/** POST /:id/items: a service or product from the catalog. */
+/** POST /:id/items: a service or product from the catalog, or without catalog (description required). */
 export const addOrderItemSchema = z.object({
   kind: z.enum(['service', 'product']),
-  catalogId: idSchema,
+  /** Absent: an item without catalog, which needs a description. */
+  catalogId: idSchema.optional(),
   description: z.string().max(500).optional(),
   value: moneySchema.nullable().optional(),
   quantity: quantitySchema.optional(),
@@ -168,6 +179,9 @@ export const addOrderItemSchema = z.object({
 }).refine((item) => item.kind === 'product' || (item.quantity === undefined && item.total === undefined), {
   message: 'A service has no quantity or line total',
   path: ['kind'],
+}).refine((item) => item.catalogId !== undefined || !!item.description?.trim(), {
+  message: 'An item without catalogId needs a description',
+  path: ['description'],
 });
 
 /** PATCH /:id/items/:itemId: only what changes. */
@@ -181,12 +195,6 @@ export const updateOrderItemSchema = z.object({
 }).refine((patch) => ['description', 'value', 'quantity', 'total', 'deviceId'].some((key) => key in patch), {
   message: 'Nothing to change',
 });
-
-/**
- * Client-generated transaction id (a uuid): letters, digits and dashes, so it
- * never looks like an Asaas (`asaas_…`), legacy or receipt share id.
- */
-const clientTransactionIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientTransactionId');
 
 /** POST /:id/payments: money received. A discount has its own route. */
 export const receivePaymentSchema = z.object({

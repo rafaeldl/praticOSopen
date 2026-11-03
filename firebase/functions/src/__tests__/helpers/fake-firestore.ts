@@ -428,6 +428,14 @@ export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore(), s
       // Plain object (survives the JSON clone of the fake), same shape as Firestore's.
       fromDate: (date: Date) => ({ seconds: Math.floor(date.getTime() / 1000), nanoseconds: (date.getTime() % 1000) * 1e6 }),
     },
+    // Same as firestore.service: companies/{id}.nextOrderNumber, in a transaction.
+    getNextOrderNumber: (companyId: string) => fake.runTransaction(async (tx: any) => {
+      const ref = fake.collection('companies').doc(companyId);
+      const snap = await tx.get(ref);
+      const current = (snap.exists ? snap.data()?.nextOrderNumber : undefined) || 1;
+      tx.update(ref, { nextOrderNumber: current + 1 });
+      return current;
+    }),
     getRootCollection: (name: string) => fake.collection(name),
     getTenantCollection: (companyId: string, name: string) => fake.collection(`companies/${companyId}/${name}`),
     getDocument: async (collection: FakeCollection, id: string) => {

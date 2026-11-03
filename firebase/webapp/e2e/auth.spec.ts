@@ -130,7 +130,11 @@ test('fora da lista de acesso: tela simples, sem casca nem dados', async ({ page
 test('sair limpa a sessão', async ({ page }) => {
   await login(page, 'admin', 'settings')
   await signOut(page)
-  await page.goto('orders')
+  // The guard may redirect to /login while the navigation is still loading,
+  // which aborts goto(); the URL check below is what matters.
+  await page.goto('orders').catch((error: Error) => {
+    if (!error.message.includes('ERR_ABORTED')) throw error
+  })
   await expect(page).toHaveURL(/login/)
 })
 

@@ -11,7 +11,8 @@ void main() {
   final mine = createdBy('me');
   final other = createdBy('other');
   final orphan = createdBy(null);
-  final orders = [mine, other, orphan];
+  final assigned = createdBy('other')..assignedTo = (UserAggr()..id = 'me');
+  final orders = [mine, other, orphan, assigned];
 
   List<Order> filter(RolesType? role, {String? userId = 'me'}) =>
       AuthorizationService.filterOrdersFor(
@@ -30,10 +31,12 @@ void main() {
     }
   });
 
-  test('consultant and technician see only the orders they created', () {
-    for (final role in [RolesType.consultant, RolesType.technician]) {
-      expect(filter(role), [mine], reason: '$role');
-    }
+  test('the consultant sees only the orders they created', () {
+    expect(filter(RolesType.consultant), [mine]);
+  });
+
+  test('the technician also sees the orders assigned to them', () {
+    expect(filter(RolesType.technician), [mine, assigned]);
   });
 
   test('no role or no user sees nothing', () {

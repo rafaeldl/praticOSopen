@@ -86,7 +86,7 @@ function route(fallback: string, handler: Handler) {
 
 export function sendOrderError(res: Response, error: unknown, fallback: string): void {
   if (error instanceof OrderRuleError) {
-    res.status(error.httpStatus).json({ success: false, error: { code: error.code, message: error.message } });
+    res.status(error.httpStatus).json({ success: false, error: { code: error.code, message: error.message, ...error.details } });
     return;
   }
   const http = toHttpError(error, fallback);
@@ -246,7 +246,7 @@ router.post('/', route('Failed to create order', async (req, res, companyId) => 
     getCompanyAggr(req),
   );
 
-  res.status(201).json({ success: true, data: { id: result.id, number: result.number, status: result.status } });
+  res.status(result.existing ? 200 : 201).json({ success: true, data: { id: result.id, number: result.number, status: result.status } });
 }));
 
 /**
@@ -315,10 +315,14 @@ router.post('/:id/items', requireOrderAccess(), route('Failed to add item', asyn
   if ((item.value !== undefined || item.total !== undefined) && !(await can(req, res, 'editPrices'))) {
     return forbidden(res, "Permission 'editPrices' is required");
   }
-  const catalog = item.kind === 'service'
-    ? await catalogService.getService(companyId, item.catalogId)
-    : await catalogService.getProduct(companyId, item.catalogId);
-  if (!catalog) return notFound(res, 'Catalog item not found');
+  // Without catalogId: an item without catalog (description, own value or none).
+  let catalog = null;
+  if (item.catalogId) {
+    catalog = item.kind === 'service'
+      ? await catalogService.getService(companyId, item.catalogId)
+      : await catalogService.getProduct(companyId, item.catalogId);
+    if (!catalog) return notFound(res, 'Catalog item not found');
+  }
 
   const result = await orderService.addOrderItem(
     companyId,

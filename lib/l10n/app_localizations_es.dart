@@ -6540,4 +6540,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Última: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'No se pudo guardar la OS';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Revisa la conexión y crea la OS de nuevo.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'No se pudo guardar la respuesta. Inténtalo de nuevo.';
+
+  @override
+  String get profileSaveFailed =>
+      'No se pudo guardar el perfil. Inténtalo de nuevo.';
+
+  @override
+  String get saveFailedTryAgain => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get deleteFailedTryAgain => 'No se pudo eliminar. Inténtalo de nuevo.';
 }

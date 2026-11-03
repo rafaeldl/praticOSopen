@@ -95,7 +95,8 @@ class TeamView extends StatelessWidget {
             height: 320,
             child: loading
                 ? const LoadingState()
-                : ErrorState(message: error, onRetry: onRetry ?? () {}),
+                // The store's error is technical: show the plain sentence.
+                : ErrorState(onRetry: onRetry ?? () {}),
           ),
         ],
       );

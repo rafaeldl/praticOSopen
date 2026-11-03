@@ -6523,4 +6523,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Last: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'Couldn\'t save the work order';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Check your connection and create the work order again.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'There may be an open payment link on this work order. Check with whoever handles billing before marking it as received.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'Couldn\'t save the answer. Try again.';
+
+  @override
+  String get profileSaveFailed => 'Couldn\'t save your profile. Try again.';
+
+  @override
+  String get saveFailedTryAgain => 'Couldn\'t save. Try again.';
+
+  @override
+  String get deleteFailedTryAgain => 'Couldn\'t delete. Try again.';
 }

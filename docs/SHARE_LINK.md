@@ -403,6 +403,12 @@ match /links/{linkType}/tokens/{tokenId} {
 2. **Permissões:** Middleware valida permissão antes de cada ação
 3. **Multi-tenancy:** `companyId` isola tokens entre empresas
 4. **Revogação:** Token pode ser revogado a qualquer momento
+5. **Troca do link:** gerar um link novo para a OS marca os links mais antigos da mesma OS com `revokedAt`; eles param de valer na hora. O documento fica, com o histórico de aprovação. Isso vale para todo caminho que gera link:
+   - na folha de compartilhar (`ShareLinkSheet`), mexer na validade ou em um interruptor de permissão gera um link novo;
+   - pelo bot, "compartilhar" a OS também gera um link novo.
+
+   Em todos os casos, **o link que o cliente já recebeu deixa de abrir**: é preciso mandar o novo.
+6. **Lista de links (`GET /v1/orders/:orderId/share` e a lista do bot):** não devolve link revogado. O app compartilha o primeiro link da lista que não venceu, então nenhuma versão compartilha um link que não abre
 
 ## UI: ShareLinkSheet
 

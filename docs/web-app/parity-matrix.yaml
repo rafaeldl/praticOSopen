@@ -10967,3 +10967,19 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+- id: widgets.failure-alert
+  screen: lib/screens/widgets/failure_alert.dart
+  route: null
+  action: "Avisar que salvar ou apagar falhou, mantendo a tela como estava para tentar de novo"
+  kind: component
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "No web, o erro vai no aviso da própria tela ou no toast, sem perder o que foi digitado."

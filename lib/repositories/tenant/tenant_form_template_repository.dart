@@ -7,7 +7,10 @@ import 'package:praticos/repositories/tenant_repository.dart';
 ///
 /// Path: `/companies/{companyId}/forms/{templateId}`
 class TenantFormTemplateRepository extends TenantRepository<FormDefinition?> {
-  TenantFormTemplateRepository() : super('forms');
+  /// Subcollection of the company that holds the checklist templates.
+  static const String collectionName = 'forms';
+
+  TenantFormTemplateRepository() : super(collectionName);
 
   Map<String, dynamic> _convertTimestamps(Map<String, dynamic> data) {
     final converted = Map<String, dynamic>.from(data);

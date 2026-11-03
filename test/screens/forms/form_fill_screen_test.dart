@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +14,11 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 
 class _FakeForms implements FormsService {
+  _FakeForms({this.fail = false});
+
+  final bool fail;
   final saved = <FormResponse>[];
+  final local = <List<FormResponse>?>[];
   final statuses = <FormStatus>[];
 
   @override
@@ -19,9 +26,12 @@ class _FakeForms implements FormsService {
     String companyId,
     String orderId,
     String formId,
-    FormResponse response,
-  ) async {
+    FormResponse response, {
+    List<FormResponse>? localResponses,
+  }) async {
+    if (fail) throw StateError('permission-denied');
     saved.add(response);
+    local.add(localResponses);
   }
 
   @override
@@ -218,6 +228,105 @@ void main() {
     expect(forms.statuses, [FormStatus.completed]);
     // Back to where it was opened from.
     expect(find.byType(FormFillScreen), findsNothing);
+  });
+
+  testWidgets('an answer goes with the local responses (offline queue)', (
+    tester,
+  ) async {
+    final forms = _FakeForms();
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(responses: [FormResponse(itemId: 'a', value: true)]),
+        formsService: forms,
+        photoService: _FakePhotos(),
+      ),
+    );
+    await tester.tap(find.text('Continuar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reserva'));
+    await tester.pumpAndSettle();
+
+    expect(forms.local.last?.map((r) => r.itemId), ['a', 'b']);
+  });
+
+  testWidgets('a refused answer is told, not swallowed', (tester) async {
+    final forms = _FakeForms(fail: true);
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(responses: [FormResponse(itemId: 'a', value: true)]),
+        formsService: forms,
+        photoService: _FakePhotos(),
+      ),
+    );
+    await tester.tap(find.text('Continuar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reserva'));
+    await tester.pump();
+
+    expect(
+      find.text('Não deu para guardar a resposta. Tente de novo.'),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('removing two photos in a row removes the right ones', (
+    tester,
+  ) async {
+    final removed = <String>[];
+    await _open(
+      tester,
+      ChecklistPhotoGallery(
+        photos: const ['p1', 'p2', 'p3'],
+        initialIndex: 0,
+        onDelete: (url) async {
+          removed.add(url);
+          return true;
+        },
+      ),
+    );
+
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.byIcon(CupertinoIcons.trash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+    }
+    expect(removed, ['p1', 'p2']);
+  });
+
+  test('the queued answer never writes the status', () {
+    final update = FormsService.queuedResponsesUpdate([
+      FormResponse(itemId: 'a', value: true),
+    ], DateTime(2026, 11, 3));
+    expect(update.keys, unorderedEquals(['responses', 'updatedAt']));
+  });
+
+  test('offline errors queue the answer; refusals do not', () {
+    expect(FormsService.canQueueOffline(TimeoutException('t')), isTrue);
+    expect(
+      FormsService.canQueueOffline(
+        FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
+      ),
+      isTrue,
+    );
+    for (final code in ['permission-denied', 'aborted', 'not-found']) {
+      expect(
+        FormsService.canQueueOffline(
+          FirebaseException(plugin: 'cloud_firestore', code: code),
+        ),
+        isFalse,
+        reason: code,
+      );
+    }
+    expect(FormsService.canQueueOffline(StateError('x')), isFalse);
   });
 
   testWidgets('completed: read only, "…" reopens', (tester) async {

@@ -8,6 +8,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/utils/order_scope.dart';
 
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
@@ -36,8 +37,8 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  late Future<String?> Function() defaultScope;
-  late Stream<String?> Function() defaultScopeChanges;
+  late Future<OrderScope?> Function() defaultScope;
+  late Stream<OrderScope?> Function() defaultScopeChanges;
   setUpAll(() {
     defaultScope = TenantOrderRepository.creatorScope;
     defaultScopeChanges = TenantOrderRepository.creatorScopeChanges;
@@ -57,8 +58,9 @@ void main() {
   test('reloads when the role arrives after a provisionally filtered page',
       () async {
     // Role not loaded in time: the page was read filtered by the own uid.
-    TenantOrderRepository.creatorScope = () async => 'me';
-    final changes = StreamController<String?>.broadcast();
+    TenantOrderRepository.creatorScope = () async =>
+        const OrderScope('me');
+    final changes = StreamController<OrderScope?>.broadcast();
     TenantOrderRepository.creatorScopeChanges = () => changes.stream;
     final store = OrderStore();
     var fetches = 0;
@@ -70,7 +72,7 @@ void main() {
     await store.loadOrdersInfinite('open');
     expect(fetches, 1);
 
-    changes.add('me'); // same filter: nothing to do
+    changes.add(const OrderScope('me')); // same filter: nothing to do
     await pumpEventQueue();
     expect(fetches, 1);
 

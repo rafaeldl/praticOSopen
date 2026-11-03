@@ -38,8 +38,35 @@ export async function generateShareToken(
   };
 
   await db.collection(SHARE_TOKENS_COLLECTION).doc(token).set(shareToken);
+  await revokeOlderTokens(shareToken);
 
   return shareToken;
+}
+
+/**
+ * A new link replaces the order's previous ones (another validity or
+ * permission): the older tokens of the same order stop working. They are
+ * marked `revokedAt`, not deleted, so approval history stays on them. Only
+ * strictly older tokens: of two links created at once, the newer one stays.
+ */
+async function revokeOlderTokens(current: ShareToken): Promise<void> {
+  const snapshot = await db
+    .collection(SHARE_TOKENS_COLLECTION)
+    .where('orderId', '==', current.orderId)
+    .where('companyId', '==', current.companyId)
+    .get();
+  const revokedAt = new Date().toISOString();
+  for (const doc of snapshot.docs) {
+    const other = doc.data() as ShareToken;
+    if (doc.id === current.token || other.revokedAt) continue;
+    if (!(other.createdAt < current.createdAt)) continue;
+    await doc.ref.update({ revokedAt });
+  }
+}
+
+/** Whether the token was replaced by a newer link of the same order. */
+export function isRevoked(token: Pick<ShareToken, 'revokedAt'>): boolean {
+  return !!token.revokedAt;
 }
 
 /**
@@ -58,6 +85,11 @@ export async function validateShareToken(token: string): Promise<ShareToken | nu
   }
 
   const shareToken = doc.data() as ShareToken;
+
+  // Replaced by a newer link of the same order
+  if (isRevoked(shareToken)) {
+    return null;
+  }
 
   // Check expiration
   const expiresAt = new Date(shareToken.expiresAt);

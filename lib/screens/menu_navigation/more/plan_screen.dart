@@ -10,7 +10,9 @@ import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
@@ -72,7 +74,13 @@ class PlanScreen extends StatefulWidget {
     this.onOpenTeam,
     this.onOpenChecklists,
     this.loadAiStatus,
+    this.hasPermission,
   });
+
+  /// Permission check for the usage rows: Equipe opens only with
+  /// `manageUsers`, Checklists only with `manageForms` (the routes don't
+  /// check). Defaults to the current user.
+  final bool Function(PermissionType permission)? hasPermission;
 
   /// Destinations of the usage rows (defaults: Equipe and Checklists routes).
   final VoidCallback? onOpenTeam;
@@ -86,6 +94,11 @@ class PlanScreen extends StatefulWidget {
 }
 
 class _PlanScreenState extends State<PlanScreen> {
+  bool _can(PermissionType permission) =>
+      (widget.hasPermission ?? AuthorizationService.instance.hasPermission)(
+        permission,
+      );
+
   AiStatus? _ai;
 
   @override
@@ -201,11 +214,21 @@ class _PlanScreenState extends State<PlanScreen> {
                     : l10n.planUsageOf(_count(usage.used), _count(usage.limit)),
                 onTap: switch (usage.resource) {
                   PlanResource.ai => null,
-                  PlanResource.team => widget.onOpenTeam ??
-                      () => Navigator.pushNamed(context, '/collaborator_list'),
+                  PlanResource.team => !_can(PermissionType.manageUsers)
+                      ? null
+                      : widget.onOpenTeam ??
+                            () => Navigator.pushNamed(
+                              context,
+                              '/collaborator_list',
+                            ),
                   PlanResource.photos => null,
-                  PlanResource.checklists => widget.onOpenChecklists ??
-                      () => Navigator.pushNamed(context, '/form_template_list'),
+                  PlanResource.checklists => !_can(PermissionType.manageForms)
+                      ? null
+                      : widget.onOpenChecklists ??
+                            () => Navigator.pushNamed(
+                              context,
+                              '/form_template_list',
+                            ),
                 },
               ),
           ]),
