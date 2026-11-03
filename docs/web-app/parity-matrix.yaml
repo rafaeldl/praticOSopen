@@ -2148,7 +2148,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
-  note: "Consultor só em OS que criou. Web: Receber nunca passa do que falta (como ReceivePaymentSheet), segue o saldo ao vivo e trata 409 PAYMENT_EXCEEDS_BALANCE relendo a OS; manda expectedUpdatedAt (orders-review.spec.ts)."
+  note: "Consultor só em OS que criou. Web: Receber nunca passa do que falta (como ReceivePaymentSheet), segue o saldo ao vivo e trata 409 PAYMENT_EXCEEDS_BALANCE relendo a OS; manda expectedUpdatedAt (orders-review.spec.ts). Desde o lote 3 o app também recusa pagamento acima do que falta (em centavos), com a OS que tem (offline não pergunta ao servidor)."
 - id: order.detail.overdue-line
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2683,7 +2683,7 @@ rows:
   route: null
   action: "Escolher ou tirar responsável"
   kind: picker
-  roles: [owner, admin, supervisor, manager, consultant, technician]
+  roles: [owner, admin, supervisor]
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
@@ -2694,8 +2694,8 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
-  permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
+  permission: assignOrder
+  note: "Só papéis com assignOrder (admin e supervisor; dono conta como admin), como canAssignOrder no web, e só quando pode editar a OS. Vale para o …, a linha em Detalhes e Mais opções da Nova OS (lote 3 do app; versões antigas deixam qualquer editor trocar). No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
 - id: order.address.edit
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4716,7 +4716,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/contracts.spec.ts
   web_exception: null
-  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato. Web: Parar de repetir grava active=false e endDate=hoje, mantém o contrato em Encerrados. Pausar e Retomar ficam de fora até o app reler o modelo dentro da transação ao gerar (lote 3 do app, revisão do #527, A1): hoje o app lê o modelo do cache e regrava o mapa contract inteiro, então criaria OS de um contrato pausado e o reativaria. Parar de repetir grava o mesmo active=false que o app já usa e tem o mesmo risco de hoje entre dois celulares."
+  note: "Não copiar: apaga contract e isContract, então a OS sai de Contratos, não vai para Encerrados e perde o histórico. Na web: marcar active=false e manter o contrato. Web: Parar de repetir grava active=false e endDate=hoje, mantém o contrato em Encerrados. Pausar e Retomar ficam de fora no web por enquanto. O lote 3 do app já relê o modelo dentro da transação ao gerar, grava só os campos contract.* que mudam e conhece pausedAt (contrato pausado não gera, fica em Encerrados e o campo não é apagado). Religar a pausa depois que o app com o lote 3 estiver nas lojas e as versões antigas (que regravam o mapa contract ou a OS inteira) saírem de uso (revisão do #527, A1 e M3). Parar de repetir grava o mesmo active=false que o app já usa e tem o mesmo risco de hoje entre dois celulares."
 - id: contract.config.defaults
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -7930,7 +7930,7 @@ rows:
   e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Web: sem acento, e a série sem hífen e espaço. Divergência para o próximo lote do app: o app grava keywords só do nome (generateKeywords, sem série nem marca, sem tirar stopwords); web e servidor gravam nome, série e marca (generateSearchKeywords). Editar o aparelho no app tira a placa da busca do bot e da API. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
+  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Web: sem acento, e a série sem hífen e espaço. Desde o lote 3 o app grava keywords de nome, série e marca (deviceKeywords = generateSearchKeywords de cada um), igual ao web e ao servidor. Versões antigas do app ainda gravam só o nome ao editar, o que tira a placa da busca do bot e da API. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
 - id: device.list.pick
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -8794,7 +8794,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar. Web preserva a criação e avisa mudanças não salvas. Web: abre na mesma gaveta, pela linha (só com manage*); manda a versão lida: mudou no app ou em outra aba, 409 CATALOG_ITEM_CHANGED, nada gravado e a lista relê; fechar com mudança pergunta."
+  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar. Web preserva a criação e avisa mudanças não salvas. Web: abre na mesma gaveta, pela linha (só com manage*); manda a versão lida: mudou no app ou em outra aba, 409 CATALOG_ITEM_CHANGED, nada gravado e a lista relê; fechar com mudança pergunta. Desde o lote 3 o app grava só os campos que a pessoa mudou (sem desfazer o preço mudado no web) e trocar a foto atualiza updatedAt; versões antigas ainda gravam o item inteiro."
 - id: catalog.form.custom-fields
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -9257,7 +9257,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar. Web: cada resposta numa transação que relê o checklist e muda só aquela pergunta (valor e fotos separados), em fila na ordem dada; checklist concluído recusa resposta até ser reaberto. O web não apaga o que o app grava, mas o app ainda pode apagar o que o web grava: a tela do app não relê o checklist e troca a resposta inteira da pergunta (fotos do web somem, foto tirada no web volta), e a fila offline do app troca a lista inteira. Vai para o lote de correções do app. Sem conexão a transação falha: a resposta fica na tela marcada Não deu para guardar, com Tentar de novo (não há fila offline no web)."
+  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar. Web: cada resposta numa transação que relê o checklist e muda só aquela pergunta (valor e fotos separados), em fila na ordem dada; checklist concluído recusa resposta até ser reaberto. Desde o lote 3 o app também grava cada resposta como mudança numa transação (valor, foto adicionada ou foto tirada; a outra parte e as outras perguntas ficam) e mostra o checklist relido depois de cada resposta. Offline, a fila do app troca só a resposta daquela pergunta (arrayRemove e arrayUnion), nunca a lista nem a situação; se o web mudou a mesma pergunta nesse meio tempo, as duas ficam até a próxima resposta (vale a última). Versões antigas do app ainda trocam a resposta inteira da pergunta e, offline, a lista inteira. Sem conexão a transação falha: a resposta fica na tela marcada Não deu para guardar, com Tentar de novo (não há fila offline no web)."
 - id: checklist.fill.complete
   screen: lib/screens/forms/form_fill_screen.dart
   route: null
@@ -10441,7 +10441,7 @@ rows:
   e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Nome obrigatório. E-mail, site e país ficam em Mais dados, que abre sozinho se algum estiver preenchido. Telefone com máscara company.phone do país. Não copiar: app não valida e-mail nem site; sair sem salvar perde o que foi digitado sem perguntar (ver company.data.discard); a máscara do telefone segue o país já salvo, não o escolhido no formulário. Web: grava só os campos que mudaram e só se ninguém salvou a empresa depois de abrir (transação com updatedAt). O app ainda grava a empresa inteira (M2 da revisão do #528, lote 3 do app)."
+  note: "Nome obrigatório. E-mail, site e país ficam em Mais dados, que abre sozinho se algum estiver preenchido. Telefone com máscara company.phone do país. Não copiar: app não valida e-mail nem site; sair sem salvar perde o que foi digitado sem perguntar (ver company.data.discard); a máscara do telefone segue o país já salvo, não o escolhido no formulário. Web: grava só os campos que mudaram e só se ninguém salvou a empresa depois de abrir (transação com updatedAt). Desde o lote 3 o app também grava só os campos que mudaram, nunca useFinancial, interruptores, plano, uso, dono ou equipe; a logo grava só logo e updatedAt (M2 da revisão do #528). Versões antigas do app ainda gravam a empresa inteira."
 - id: company.data.logo
   screen: lib/screens/menu_navigation/more/company_editors.dart
   route: null

@@ -101,7 +101,7 @@ Nesta ordem, sem pular passos (revisão do #526, A2):
 
 1. **Promover o RC com o #513 para as lojas.** Antes dele, o app gera com id aleatório e sem transação, então job e app criam a mesma OS duas vezes.
 2. **Esperar as versões antigas saírem de uso.** O app antigo também regrava a OS inteira, e isso desfaz o que o job gravou no modelo.
-3. **Corrigir o A1 no app** (lote 3 do app). Em `createContractOrder`, a transação precisa reler o modelo, conferir que ele ainda vence na mesma data e gravar só `contract.lastGeneratedDate`, `contract.nextDueDate`, `contract.generatedCount` e `contract.active`, como faz `contract.service.ts`. Hoje o app lê os modelos do cache ao abrir e regrava o mapa `contract` inteiro: gera uma OS de contrato parado no web e o reativa.
+3. **Corrigir o A1 no app** (feito no lote 3 do app; falta chegar às lojas e as versões antigas saírem de uso). `createContractOrder` relê o modelo na transação, confere que ele ainda vence na mesma data (ativo, sem `pausedAt`, criar sozinha) e grava só `contract.lastGeneratedDate`, `contract.nextDueDate`, `contract.generatedCount` e `contract.active` (só para desligar), como faz `contract.service.ts`. As versões anteriores leem os modelos do cache ao abrir e regravam o mapa `contract` inteiro: geram uma OS de contrato parado no web e o reativam.
 4. **Só então ligar** `config/contracts.jobEnabled` (e `routeEnabled`, se o app passar a chamar a rota).
 
 ## Pendente de decisão

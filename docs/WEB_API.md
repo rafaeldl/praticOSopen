@@ -195,7 +195,7 @@ Testes: `routes/v1/__tests__/app-finance.routes.test.ts`, `__tests__/contract-ca
 
 - `done` não é mais gravado: o app não grava e ninguém lê; `status` é a fonte.
 - Mudar a situação de OS antiga paga antes de existir `paidAmount` mantém a situação de pagamento (igual a `syncPaymentStatusWithTotal`).
-- Pagamento e desconto acima do que falta são recusados em `POST /payments` e `POST /discounts`. O app ainda aceita pagamento a mais (`divergesIn.dart` em `payment-transactions.json`).
+- Pagamento e desconto acima do que falta são recusados em `POST /payments` e `POST /discounts`. O app (desde o lote 3) também recusa, em centavos, com a OS que tem: offline não pergunta ao servidor, então dois aparelhos offline ainda podem somar mais que o total.
 - Marcar e retomar OS parada deixam o mesmo comentário interno do app.
 - Desfazer recibo não apaga o arquivo do comprovante, que é do recibo.
 - Quantidade de produto é inteira (o app lê como inteiro).
