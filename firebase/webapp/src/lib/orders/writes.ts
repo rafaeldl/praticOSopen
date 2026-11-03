@@ -29,9 +29,9 @@ export function newTransactionId(): string {
 /**
  * #516 on the server: POST /items without catalogId (an item outside the catalog,
  * "+ Usar «texto» nesta OS") and `clientOrderId` on POST /orders (a retry after a
- * network failure returns the order already created). Off until #516 is deployed.
+ * network failure returns the order already created). On since #516 is in master.
  */
-export const API_516 = false
+export const API_516 = true
 
 export interface NewOrderInput {
   /** One per Nova OS opened, reused on every retry (sent only with API_516). */

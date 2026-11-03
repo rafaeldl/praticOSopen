@@ -167,12 +167,16 @@ router.get('/', route('Failed to list orders', async (req, res, companyId) => {
   const query = validation.data;
 
   const showPrices = await showPricesOf(req, res);
+  // The technician asking for their own assigned orders gets them whoever created them
+  // (firestore.rules isOrderAssignee; indexes assignedTo.id + status/createdAt).
+  const userId = req.userContext?.userId;
+  const assignedToSelf = !seesAll && !!userId && query.assignedTo === userId && req.userContext?.role === 'technician';
   const result = await orderService.listOrders(companyId, {
     status: query.status as OrderStatus[] | undefined,
     customerId: query.customerId,
     deviceId: query.deviceId,
     assignedTo: query.assignedTo,
-    createdById: seesAll ? undefined : req.userContext?.userId,
+    createdById: seesAll || assignedToSelf ? undefined : userId,
     startDate: query.startDate,
     endDate: query.endDate,
     limit: query.limit,

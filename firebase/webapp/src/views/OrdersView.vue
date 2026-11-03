@@ -372,7 +372,8 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
   <header class="page-head">
     <div>
       <h1 class="page-title" tabindex="-1" data-page-title>{{ title }}</h1>
-      <p v-if="summaryText && !board" class="page-sub page-answer" data-testid="summary">{{ summaryText }}</p>
+      <!-- Always there on the list: the sentence arrives after the rows (what is left to receive) and must not push the screen down. -->
+      <p v-if="!board" class="page-sub page-answer" data-testid="summary">{{ summaryText }}</p>
     </div>
     <div class="tabs" role="group" :aria-label="t('web.orders.viewAs')">
       <button type="button" :aria-pressed="!board" @click="setView('list')">{{ t('web.orders.list') }}</button>

@@ -2,7 +2,7 @@
 // Each test names the item it covers.
 import { expect, test, type Page } from '@playwright/test'
 import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc } from './data'
-import { login, setTheme } from './helpers'
+import { login, setTheme, signOut } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
 const dialog = (page: Page, name: string | RegExp) => page.getByRole('dialog', { name })
@@ -166,8 +166,23 @@ test('M1: quem não vê valores recebe o catálogo sem preço na rede e fora do 
   expect(cached).toBe(0)
 })
 
-test.fixme('M2: o técnico vê em Minhas a OS que o admin criou e atribuiu a ele (depende do #514)', async ({ page }) => {
-  const order = await makeOrder('admin', { status: 'approved', assignedTo: { id: 'e2e-technician', name: 'Tiago Tecnico' } })
+test('M2 (home.filter.mine): o técnico vê em Minhas a OS que o admin criou e atribuiu a ele, e abre', async ({ page }) => {
+  await login(page, 'technician')
+  await expect(page.getByRole('button', { name: 'Minhas', pressed: true })).toBeVisible()
+  await expect(row(page, 508)).toHaveCount(1)
+  await row(page, 508).getByRole('button', { name: 'Cliente 10' }).click()
+  await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 10')
+  await expect(panel(page).getByText('OS não está mais aqui')).toHaveCount(0)
+})
+
+test('M2 (order.responsible.pick): o admin escolhe o técnico e a OS aparece em Minhas dele', async ({ page }) => {
+  const order = await makeOrder('admin', { status: 'approved' })
+  await openOrder(page, 'admin', order.id)
+  await panel(page).getByRole('region', { name: 'Detalhes' }).getByRole('button', { name: 'Ninguém' }).click()
+  await dialog(page, 'Quem é o responsável?').getByRole('button', { name: 'Tiago Tecnico' }).click()
+  await expect.poll(async () => ((await readOrder(order.id))?.assignedTo as { id?: string } | undefined)?.id).toBe('e2e-technician')
+  await page.goto('settings')
+  await signOut(page)
   await login(page, 'technician')
   await expect(page.getByRole('button', { name: 'Minhas', pressed: true })).toBeVisible()
   await expect(row(page, order.number)).toHaveCount(1)
@@ -349,9 +364,9 @@ test.describe('Rodada 2 (usuários)', () => {
   })
 })
 
-// #516 (pagamento até o saldo, clientOrderId e item avulso): turn on writes.API_516 and these run.
-test.describe('Depende do #516', () => {
-  test.fixme('P0 #2: serviço fora do catálogo entra na Nova OS e na OS aberta', async ({ page }) => {
+// #516 (pagamento até o saldo, clientOrderId e item avulso), on with writes.API_516.
+test.describe('Rotas do #516', () => {
+  test('P0 #2 (order.new.add-item): serviço fora do catálogo entra na Nova OS e na OS aberta', async ({ page }) => {
     await login(page, 'admin')
     await page.getByTestId('new-order').click()
     await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
@@ -371,7 +386,7 @@ test.describe('Depende do #516', () => {
     await expect(panel(page).getByTestId('order-line').filter({ hasText: 'Alinhamento' })).toHaveCount(1)
   })
 
-  test.fixme('B4: Salvar de novo depois de a rede cair não cria outra OS (clientOrderId)', async ({ page }) => {
+  test('B4 (order.new.save): Salvar de novo depois de a rede cair não cria outra OS (clientOrderId)', async ({ page }) => {
     await login(page, 'admin')
     let first = true
     const ids: string[] = []

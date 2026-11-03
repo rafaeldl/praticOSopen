@@ -23,8 +23,8 @@ test.describe('lista por papel (home.list.load, home.view.default-technician)', 
     { user: 'supervisor', filter: 'Em aberto', money: false, sees: [501, 506], hides: [504] },
     // Consultant reads only what they created (rules and API).
     { user: 'consultant', filter: 'Em aberto', money: true, sees: [505], hides: [501, 506] },
-    // Technician: "Minhas" by default, own orders assigned to them.
-    { user: 'technician', filter: 'Minhas', money: false, sees: [506], hides: [507, 501] },
+    // Technician: "Minhas" by default: assigned to them, created by anyone (508 is the admin's).
+    { user: 'technician', filter: 'Minhas', money: false, sees: [506, 508], hides: [507, 501] },
   ]
   for (const { user, filter, money, sees, hides } of cases) {
     test(`${user}: abre em ${filter}`, async ({ page }) => {

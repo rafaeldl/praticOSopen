@@ -91,10 +91,10 @@ export type ListLoader = ReturnType<typeof createListLoader>
 
 /**
  * Minhas by `assignedTo` (the technician sees what was given to them, created by
- * anyone). Off until the rules and indexes of #514 are in: then the API list is
+ * anyone). On since the rules and indexes of #514 are in: the API list is
  * asked for `assignedTo=<uid>` instead of the orders the technician created.
  */
-export const ASSIGNED_READS = false
+export const ASSIGNED_READS = true
 
 /** "Primeira vez": has this company ever created an order? Unknown counts as yes. */
 export async function companyHasOrders(ctx: ListContext): Promise<boolean> {

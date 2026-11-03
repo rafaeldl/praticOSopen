@@ -125,7 +125,7 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 
 **Nova OS.** `N`, a paleta ou o "+" da barra no celular. Técnico e gerente não criam (o app tira o técnico em `canCreateOrder`, apesar da matriz de permissões). Cliente, aparelho (o único do cliente entra sozinho; os que ele já trouxe aparecem primeiro), itens com o preço do catálogo, entrega, pedido do cliente e "Mais opções" (situação inicial sem "cancelada", visita, responsável). `Ctrl/⌘ Enter` salva de qualquer campo. Fechar com algo preenchido pergunta (Esc, X, Voltar e recarregar). O pedido do cliente vira o primeiro comentário interno, como no app. As listas são lidas enquanto a pessoa olha a lista, para a gaveta abrir pronta.
 
-**Tela da OS.** Cabeçalho com cliente, aparelho, situação e uma frase (prazo, atraso ou "Falta receber"), o botão azul do próximo passo (aprovar, começar, marcar como pronta, retomar, receber) e "Marcar como parada". Itens agrupados por aparelho, com mudar e tirar; tirar oferece Desfazer. Totais só para quem vê valores. Fotos (escolher, colar, arrastar), comentários com "só a equipe" ou "cliente também vê", Detalhes (entrega, visita, responsável, local). Menu "…" só com o que a OS e o papel permitem, destrutivas por último e com confirmação. Teclas: `A`, `S`, `C`, `D`, `R`. "Imprimir ou salvar PDF" usa uma folha própria de impressão. OS apagada ou sem acesso mostra "não está mais aqui", nunca uma OS vazia.
+**Tela da OS.** Cabeçalho com cliente, aparelho, situação e uma frase (prazo, atraso ou "Falta receber"), o botão azul do próximo passo (aprovar, começar, concluir serviço, retomar, receber) e "Marcar como parada". Itens agrupados por aparelho, com mudar e tirar; tirar oferece Desfazer. Totais só para quem vê valores. Fotos (escolher, colar, arrastar), comentários com "só a equipe" ou "cliente também vê", Detalhes (entrega, visita, responsável, local). Menu "…" só com o que a OS e o papel permitem, destrutivas por último e com confirmação. Teclas: `A`, `S`, `C`, `D`, `R`. "Imprimir ou salvar PDF" usa uma folha própria de impressão. OS apagada ou sem acesso mostra "não está mais aqui", nunca uma OS vazia.
 
 **Gravações.** `expectedUpdatedAt` vai em situação, datas, responsável e itens; um `409 ORDER_CHANGED` mostra o aviso e a versão nova. Pagamento e desconto levam `clientTransactionId` gerado ao abrir o diálogo, então repetir não grava em dobro. Itens lidos do Firestore recebem o mesmo id derivado que o servidor calcula (`lib/orders/line-ids.ts`, igual a `locateLines`). As escritas do painel entram em fila: uma segunda espera a primeira, nunca some.
 
@@ -133,17 +133,18 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 
 **Depois da revisão e do teste de usuários (#515).**
 - Filtros também Atrasadas, Para hoje e Sem receber (com contagem; lido por `payment == 'unpaid'`, indexado com `createdAt`). A busca mostra quantas achou, põe o número exato primeiro e oferece "Procurar em todas". `⌘K` acha OS por número, cliente ou aparelho, e clientes.
-- Nova OS cadastra cliente (`POST /v1/app/customers`) e veículo (`POST /v1/app/devices`) com "+ Cadastrar «nome»", só depois das listas carregadas, para nunca duplicar. Quando o cliente não tem OS que a pessoa lê (consultor), lista os veículos da empresa. Texto digitado e não escolhido trava o salvar com aviso. Enter vazio no veículo vai para o item. Item fora do catálogo está pronto atrás de `FREE_ITEMS` e espera a API.
+- Nova OS cadastra cliente (`POST /v1/app/customers`) e veículo (`POST /v1/app/devices`) com "+ Cadastrar «nome»", só depois das listas carregadas, para nunca duplicar. Quando o cliente não tem OS que a pessoa lê (consultor), lista os veículos da empresa. Texto digitado e não escolhido trava o salvar com aviso. Enter vazio no veículo vai para o item. "+ Usar «texto» nesta OS" põe um serviço fora do catálogo, na Nova OS e na OS aberta (`POST /items` sem `catalogId`, #516). A Nova OS gera um `clientOrderId` ao abrir e o repete em cada tentativa: salvar de novo depois de a rede cair devolve a mesma OS.
 - Receber nunca passa do que falta e acompanha o saldo ao vivo; pagamento e desconto mandam `expectedUpdatedAt`; `409 PAYMENT_EXCEEDS_BALANCE` mostra o aviso e relê a OS.
 - Tirar item só vai ao servidor quando o aviso sai; Desfazer mantém descrição e posição.
 - Fechar "E o veículo?" cancela a troca de cliente. O resumo do cliente gravado leva e-mail e CPF/CNPJ.
 - Quem não tem `viewPrices` lê o catálogo pela REST do Firestore com máscara só do nome: o preço não chega à rede nem ao IndexedDB.
 - Menu "…" preso ao botão (no celular, folha embaixo). Situações na ordem do serviço. Fechar a OS devolve o foco à linha.
-- "Minhas" por `assignedTo` fica atrás de `ASSIGNED_READS` (`lib/orders/data.ts`) até o #514 (regras e índices).
+- "Minhas" pede `assignedTo=<uid>` à API: o técnico vê a OS atribuída a ele, criada por qualquer um (regras e índices do #514; na API, `canSeeOrder` e a lista aceitam o técnico atribuído).
+- A Início abre com "R$ X para receber" no resumo; em Sem receber, buscar um cliente mostra quanto ele deve. O próximo passo de "Na oficina" é "Concluir serviço". Telefone do cliente legível, total da Nova OS acompanha o valor enquanto digita, controles nativos seguem o tema escuro.
 
 **Textos.** Os textos usados só por `src/components/orders/` vão para `generated/i18n/{pt,en,es}-orders.json`, baixados junto com o painel (`loadOrderTexts`), fora do primeiro download.
 
-**Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts` e `e2e/order-detail.spec.ts`, contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
+**Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts`, `e2e/order-detail.spec.ts` e `e2e/orders-review.spec.ts` (um teste por item da revisão e do teste de usuários), contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
 
 ### Histórico do navegador
 
@@ -288,10 +289,7 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
 - OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, mandar ao cliente (link), nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
-- Item avulso ("Usar X nesta OS") não existe: `POST /items` exige item do catálogo.
-- Nova OS sem idempotência: falta `clientOrderId` na API (falha de rede depois de criar + salvar de novo = duas OS).
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
-- Técnico não vê em "Minhas" a OS que outro criou e atribuiu a ele: depende do #514.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download quase no limite: 239,6 de 240 KB.
+- Orçamento do primeiro download quase no limite: 239,0 de 240 KB.

@@ -63,8 +63,8 @@ async function seedCompanies() {
       segment: company.segment,
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
-      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..507), like a real counter.
-      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 507) + 1,
+      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..508), like a real counter.
+      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 508) + 1,
       ...audit(company.owner, 100000),
     })
     // Server-only map: what buildRolesClaim verifies against.
@@ -217,6 +217,11 @@ async function seedScenario() {
     }),
     'scn-tech-quote': base(507, USERS.technician, -50, {
       status: 'quote', customer: customer(9), services: [service(2, 100)], total: 100, payment: null,
+    }),
+    // Created by the admin and given to the technician: shows in their Minhas (#514, assignedTo).
+    'scn-assigned': base(508, USERS.admin, -30, {
+      status: 'approved', customer: customer(10), services: [service(1, 50)], total: 50,
+      assignedTo: aggr(USERS.technician),
     }),
   }
   const batch = db.batch()

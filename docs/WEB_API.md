@@ -59,8 +59,8 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 
 | Rota | Quem | Observação |
 |---|---|---|
-| `GET /orders` | todos | Quem tem `viewAllOrders` vê todas; consultor e técnico, as que criaram. Cursor, filtros e ordem abaixo |
-| `GET /orders/:id` | quem vê a OS | |
+| `GET /orders` | todos | Quem tem `viewAllOrders` vê todas; consultor e técnico, as que criaram; o técnico com `assignedTo=<o próprio uid>` recebe as atribuídas a ele, criadas por qualquer um (como `isOrderAssignee` nas regras). Cursor, filtros e ordem abaixo |
+| `GET /orders/:id` | quem vê a OS | O técnico também vê a OS atribuída a ele |
 | `POST /orders` | `createOrder` | Situação inicial por papel; valor próprio exige `editPrices`; grava `deviceIds`. `clientOrderId` opcional (uuid do cliente, mesmo formato do `clientTransactionId`) vira o id da OS: repetir devolve a OS já criada (200, sem criar outra); se outra pessoa criou com esse id → `409 ORDER_ID_CONFLICT` |
 | `PATCH /orders/:id` | `editOrder` | Situação: fluxo por papel. Datas: `canEditOrderMainFields` (supervisor e técnico só em orçamento). Responsável: `assignOrder`, nome lido do membro. `null` limpa |
 | `DELETE /orders/:id` | `canDeleteOrder` | Mesma regra de `order-delete.json`. Ver "Apagar" |

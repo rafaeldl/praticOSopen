@@ -134,6 +134,21 @@ describe('GET /orders', () => {
     }
   });
 
+  it('técnico pede as atribuídas a ele e recebe também as que outra pessoa criou (como as regras)', async () => {
+    seedOrder('e', { number: 5, createdAt: '2026-10-05T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('f', { number: 6, createdAt: '2026-10-06T10:00:00.000Z', assignedTo: { id: 'other', name: 'Outro' } });
+    const res = await call('technician', 'get', `${O}?assignedTo=tech1`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((o: any) => o.id)).toEqual(['e']);
+    expect((await call('technician', 'get', `${O}/e`)).status).toBe(200);
+    expect((await call('technician', 'get', `${O}/f`)).status).toBe(403);
+    // Another person's assignment keeps the "created by me" filter; the consultant never sees by assignment.
+    expect((await call('technician', 'get', `${O}?assignedTo=other`)).body.data).toEqual([]);
+    seedOrder('g', { number: 7, assignedTo: { id: 'cons1', name: 'Caio' } });
+    expect((await call('consultant', 'get', `${O}?assignedTo=cons1`)).body.data).toEqual([]);
+    expect((await call('consultant', 'get', `${O}/g`)).status).toBe(403);
+  });
+
   it('consultor vê o total das próprias', async () => {
     const res = await call('consultant', 'get', O);
     expect(res.body.data).toEqual([expect.objectContaining({ id: 'd', total: 100 })]);

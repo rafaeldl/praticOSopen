@@ -1138,10 +1138,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
+  web_status: done
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
-  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela. Web: volta a in_progress até o #514 (regras e índices de assignedTo); consulta pronta atrás de ASSIGNED_READS em lib/orders/data.ts; E2E com OS do admin atribuída ao técnico em orders-review.spec.ts (fixme)."
+  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela. Web: Minhas pede assignedTo=<uid> à API (ASSIGNED_READS); com o #514 o técnico lê a OS atribuída criada por qualquer um (regras, API e índices). E2E: OS 508 do admin atribuída ao técnico aparece em Minhas e abre (orders-review.spec.ts)."
 - id: home.filter.done
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1748,11 +1748,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/orders-new.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Item entra com o preço do catálogo (vazio fica sem valor) e quantidade 1; com 2+ aparelhos pergunta para qual antes de entrar. Não copiar: preço, sem valor e total da Nova OS dependem só de viewPrices, sem useFinancial. Web: item fora do catálogo (Usar X nesta OS) pronto atrás de FREE_ITEMS, espera o item avulso em POST /items."
+  note: "Item entra com o preço do catálogo (vazio fica sem valor) e quantidade 1; com 2+ aparelhos pergunta para qual antes de entrar. Não copiar: preço, sem valor e total da Nova OS dependem só de viewPrices, sem useFinancial. Web: \"+ Usar «texto» nesta OS\" na Nova OS e na OS aberta, por POST /items sem catalogId (#516, item avulso: service null e description). E2E em orders-review.spec.ts (P0 #2) e orders-new.spec.ts."
 - id: order.new.request
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1854,11 +1854,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/orders-new.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484). O ✓ fica cinza até ter cliente e enquanto a IA lê; nunca espera campo obrigatório do segmento. Não copiar: o app grava sem esperar e engole a falha (sem error nem denied na tela); o web mostra os dois. Web: falta clientOrderId na API (repetir depois de falha de rede cria duas OS); in_progress até a rota aceitar."
+  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484). O ✓ fica cinza até ter cliente e enquanto a IA lê; nunca espera campo obrigatório do segmento. Não copiar: o app grava sem esperar e engole a falha (sem error nem denied na tela); o web mostra os dois. Web: clientOrderId gerado ao abrir a Nova OS e repetido em cada tentativa (#516): salvar de novo depois de a rede cair devolve a mesma OS. E2E em orders-review.spec.ts (B4) e orders-new.spec.ts."
 - id: order.new.discard
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2687,11 +2687,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/memberships", "companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/order-detail.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia. Web: atribuir funciona pela API, mas o técnico só passa a ver a OS com o #514; in_progress até lá."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts."
 - id: order.address.edit
   screen: lib/screens/order/order_screen_v2.dart
   route: null
