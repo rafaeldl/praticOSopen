@@ -3,13 +3,13 @@ name: Android Build Check
 on:
   pull_request:
     branches: [ master ]
+    # Only native/dependency changes: Dart in lib/ is covered by Code Quality,
+    # and the real catches here came from new plugins (Gradle/Kotlin)
     paths:
       - 'android/**'
-      - 'lib/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
-      # Mudancas no proprio CI precisam ser validadas pelo CI
-      - '.github/workflows/**'
+      - '.github/workflows/android_build_check.yml'
       - '.fvmrc'
   workflow_dispatch:
     inputs:

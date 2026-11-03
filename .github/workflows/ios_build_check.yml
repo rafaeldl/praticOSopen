@@ -1,17 +1,8 @@
 name: iOS Build Check
 
+# Manual only: in Oct/2026 it ran on 221 PRs (~34 min of macOS each) and caught
+# no real error, only cache/CocoaPods hiccups. The RC build covers iOS.
 on:
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'ios/**'
-      - 'lib/**'
-      - 'pubspec.yaml'
-      - 'pubspec.lock'
-      # Mudancas no proprio CI precisam ser validadas pelo CI
-      - '.github/workflows/**'
-      - '.fvmrc'
-      - '.xcode-version'
   workflow_dispatch:
     inputs:
       ref:
@@ -19,9 +10,9 @@ on:
         required: false
         default: 'master'
 
-# Cancel previous runs for the same PR
+# Cancel previous runs for the same ref
 concurrency:
-  group: ios-build-${{ github.head_ref }}
+  group: ios-build-${{ inputs.ref }}
   cancel-in-progress: true
 
 jobs:

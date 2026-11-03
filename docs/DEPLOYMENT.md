@@ -47,9 +47,7 @@ bundle exec fastlane screenshots_all
 ```
 
 ### GitHub Actions (CI/CD)
-O workflow `.github/workflows/android_release.yml` é acionado em:
-- **Push na branch `feature/android-deployment` ou `master`**: Roda a lane `internal` (Upload para trilha interna).
-- **Criação de Tag `v*`**: Roda a lane `deploy_with_metadata track:production` (Upload direto para Produção com metadados).
+O `.github/workflows/android_release.yml` builda o RC e envia para a trilha interna. Ele é disparado pelo workflow **Auto Version**, que agora roda só à mão (Actions → Auto Version → Run workflow). A produção sai pelo **Promote Release**, também manual. Ver `docs/AUTO_VERSIONING.md`.
 
 ---
 
@@ -79,9 +77,7 @@ bundle exec fastlane screenshots_all
 ```
 
 ### GitHub Actions (CI/CD)
-O workflow `.github/workflows/ios_release.yml` é acionado em:
-- **Push na branch `master`**: Envia para TestFlight.
-- **Criação de Tag `v*`**: Envia para App Store (Release).
+O `.github/workflows/ios_release.yml` builda o RC e envia para o TestFlight. Como no Android, é disparado pelo **Auto Version** manual, e a App Store recebe o mesmo binário pelo **Promote Release**. Não há mais build de iOS nos PRs: o `ios_build_check.yml` só roda à mão. Ver `docs/CI_BUDGET.md`.
 
 ---
 

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#
+# pre-push: runs locally the checks that used to run on every push in CI.
+# Only the parts touched by the pushed commits run:
+#   - Flutter (lib/, test/, pubspec, contract cases) -> analyze + test
+#   - Functions (firebase/functions/, contract cases) -> lint + jest
+#   - Web app (firebase/webapp/, contract cases, .arb) -> typecheck + vitest
+#
+# Install once per clone: scripts/install-git-hooks.sh
+# Skip in an emergency: git push --no-verify  (or SKIP_PREPUSH=1 git push)
+#
+# Note: checks run on the working tree, so uncommitted changes count too.
+
+set -uo pipefail
+
+[ "${SKIP_PREPUSH:-}" = "1" ] && exit 0
+
+ROOT=$(git rev-parse --show-toplevel)
+ZERO=0000000000000000000000000000000000000000
+
+changed=""
+while read -r _local_ref local_sha remote_ref remote_sha; do
+  # Branch deletes and tags have nothing to check
+  [ "$local_sha" = "$ZERO" ] && continue
+  case "$remote_ref" in refs/heads/*) ;; *) continue ;; esac
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    # New branch: compare with where it left master
+    base=$(git merge-base "$local_sha" origin/master 2>/dev/null) || base=""
+  else
+    base="$remote_sha"
+  fi
+  [ -z "$base" ] && continue
+  changed+=$(git diff --name-only "$base" "$local_sha")$'\n'
+done
+
+[ -z "${changed//[$'\n']/}" ] && exit 0
+
+touches() { grep -qE "$1" <<< "$changed"; }
+
+failed=()
+step() {
+  local label=$1; shift
+  echo "▶ pre-push: $label"
+  if ! "$@"; then failed+=("$label"); fi
+}
+
+need_npm_ci() {
+  [ -d "$1/node_modules" ] || (cd "$1" && npm ci --no-audit --no-fund)
+}
+
+if touches '^(lib/|test/|pubspec\.(yaml|lock)$|\.fvmrc$|docs/web-app/contract-cases/)'; then
+  flutter=(flutter)
+  command -v fvm >/dev/null && flutter=(fvm flutter)
+  step "flutter analyze" bash -c "cd '$ROOT' && ${flutter[*]} analyze"
+  step "flutter test" bash -c "cd '$ROOT' && ${flutter[*]} test"
+fi
+
+if touches '^(firebase/functions/|docs/web-app/contract-cases/)'; then
+  fn="$ROOT/firebase/functions"
+  step "functions npm ci" need_npm_ci "$fn"
+  step "functions lint" bash -c "cd '$fn' && npm run lint"
+  # Same as CI: no gcloud credentials, so tests can't reach the real Firestore
+  tmp_home=$(mktemp -d)
+  step "functions test" env HOME="$tmp_home" CLOUDSDK_CONFIG="$tmp_home/gcloud" \
+    GOOGLE_APPLICATION_CREDENTIALS= GCE_METADATA_HOST=127.0.0.1:1 \
+    bash -c "cd '$fn' && ./node_modules/.bin/jest"
+  rm -rf "$tmp_home"
+fi
+
+if touches '^(firebase/webapp/|docs/web-app/contract-cases/|lib/l10n/.*\.arb$)'; then
+  wa="$ROOT/firebase/webapp"
+  step "webapp npm ci" need_npm_ci "$wa"
+  step "webapp typecheck" bash -c "cd '$wa' && npm run typecheck"
+  step "webapp test" bash -c "cd '$wa' && npm test"
+fi
+
+if [ ${#failed[@]} -gt 0 ]; then
+  echo
+  echo "✖ pre-push failed: ${failed[*]}"
+  echo "  Fix it, or push anyway with: git push --no-verify"
+  exit 1
+fi
