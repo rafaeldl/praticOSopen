@@ -234,6 +234,8 @@ async function save(item: AgendaOrder, target: Target, from: Target, undoing = f
   // As the app writes it: company's local time, no zone (revisão do #521, M1).
   const value = storedText(target)
   const before = items.value
+  // Where the focus was when the move started: if the person goes on to something else while it saves, it stays there.
+  const focused = document.activeElement
   replaceItem({ ...item, stored: value })
   try {
     const response = await saveDate(item.order, field.value, value)
@@ -249,7 +251,7 @@ async function save(item: AgendaOrder, target: Target, from: Target, undoing = f
     const params = { order: orderShort(), number: item.order.number ?? '' }
     if (undoing) showToast(t('web.agenda.undone', { ...params, when: targetText(target) }))
     else showToast(t('web.agenda.moved', { ...params, when: targetText(target) }), { undo: () => void save(next, from, target, true) })
-    focusBlock(item.order.id)
+    if (document.activeElement === focused || document.activeElement === document.body) focusBlock(item.order.id)
   } catch (error) {
     items.value = before
     showToast(t(errorMessageKey(error)))

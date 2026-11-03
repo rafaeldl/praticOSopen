@@ -64,6 +64,11 @@ export async function updateOrderDoc(id: string, fields: Record<string, unknown>
   await db().doc(`companies/${COMPANY_A}/orders/${id}`).update({ ...fields, updatedAt: new Date().toISOString() })
 }
 
+/** Removes test orders of company A or B, so a repeated run starts from the same screen. */
+export async function deleteOrderDocs(ids: { id: string; company: 'A' | 'B' }[]): Promise<void> {
+  await Promise.all(ids.map(({ id, company }) => db().doc(`companies/${company === 'A' ? COMPANY_A : COMPANY_B}/orders/${id}`).delete()))
+}
+
 /** Like the app writes: the fields as given, updatedAt included (no server time added). */
 export async function writeOrderFieldsRaw(id: string, fields: Record<string, unknown>): Promise<void> {
   await db().doc(`companies/${COMPANY_A}/orders/${id}`).update(fields)

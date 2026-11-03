@@ -3,8 +3,24 @@
 // keyboard, with confirmation and undo. Each test uses its own month far in the
 // future, so the orders other tests create never land on its screen.
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { makeOrder, makeOrderInB, readOrder, updateCompanyB, updateOrderDoc } from './data'
+import { deleteOrderDocs, makeOrder as makeOrderInA, makeOrderInB as makeOrderInBDoc, readOrder, updateCompanyB, updateOrderDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
+
+// Each test removes its orders at the end: the dates are fixed, so --repeat-each must find the same screen.
+const made: { id: string; company: 'A' | 'B' }[] = []
+const makeOrder: typeof makeOrderInA = async (...args) => {
+  const order = await makeOrderInA(...args)
+  made.push({ id: order.id, company: 'A' })
+  return order
+}
+const makeOrderInB: typeof makeOrderInBDoc = async (...args) => {
+  const order = await makeOrderInBDoc(...args)
+  made.push({ id: order.id, company: 'B' })
+  return order
+}
+test.afterEach(async () => {
+  await deleteOrderDocs(made.splice(0))
+})
 
 const grid = (page: Page) => page.locator('.tg')
 const block = (page: Page, id: string) => page.locator(`[data-order="${id}"]`)
@@ -90,11 +106,26 @@ test('21h do último dia do mês fica no dia certo e "Dia todo" grava meia-noite
   const allDay = await makeOrder('admin', { scheduledDate: '2031-01-30T10:00:00.000', customer: null })
   await openAgenda(page, 'admin', 'd=2031-01-31')
   // "Dia todo" first, while the grid is at the top.
-  await block(page, allDay.id).dragTo(page.locator('.tg-allday[data-allday="2031-01-30"]'))
+  // The save answers only after the person went on to another visit: the focus they put there stays.
+  let release: () => void = () => {}
+  const held = new Promise<void>((resolve) => (release = resolve))
+  await page.route('**/v1/app/orders/*', async (route) => {
+    if (route.request().method() === 'PATCH') await held
+    await route.continue()
+  })
+  await block(page, allDay.id).dragTo(page.locator('.tg-allday[data-allday="2031-01-30"]'), { targetPosition: { x: 4, y: 4 } })
+  await block(page, late.id).focus()
+  release()
+  await expect(page.locator('.toast').filter({ hasText: `OS ${allDay.number} foi para` })).toBeVisible()
+  await expect(block(page, late.id)).toBeFocused()
   await expect.poll(async () => (await readOrder(allDay.id))?.scheduledDate).toBe('2031-01-30T00:00:00.000')
   await expect(page.locator(`.tg-allday[data-allday="2031-01-30"] [data-order="${allDay.id}"]`)).toBeVisible()
-  await block(page, late.id).focus()
-  for (let i = 0; i < 4; i++) await page.keyboard.press('Shift+ArrowDown')
+  await page.unroute('**/v1/app/orders/*')
+  for (const time of ['19:30', '20:00', '20:30', '21:00']) {
+    await page.keyboard.press('Shift+ArrowDown')
+    await expect(block(page, late.id)).toBeFocused()
+    await expect(block(page, late.id)).toContainText(time)
+  }
   await page.keyboard.press('Enter')
   await expect.poll(async () => (await readOrder(late.id))?.scheduledDate).toBe('2031-01-31T21:00:00.000')
   await expect(page.locator(`.tg-col[data-day="2031-01-31"] [data-order="${late.id}"]`)).toContainText('21:00')
