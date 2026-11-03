@@ -1,6 +1,7 @@
 import {
   CompanyCatalog,
   LLM_RESPONSE_SCHEMA,
+  LLM_RESPONSE_SCHEMA_WITH_ACTIONS,
   OrderAssistDeps,
   OrderAssistError,
   buildSystemPrompt,
@@ -9,6 +10,7 @@ import {
   orderAssistInputSchema,
   parseLlmDraft,
   runOrderAssist,
+  toActions,
   todayLabel,
 } from '../order-assist.service';
 import { LlmUnavailableError } from '../llm.client';
@@ -139,6 +141,9 @@ describe('prompt', () => {
 
   it('response schema requires operations', () => {
     expect(LLM_RESPONSE_SCHEMA.required).toEqual(['operations']);
+    const actions = (LLM_RESPONSE_SCHEMA_WITH_ACTIONS.properties as Record<string, Record<string, unknown>>).actions;
+    expect(actions.required).toEqual(['payment', 'discount', 'status']);
+    expect(LLM_RESPONSE_SCHEMA_WITH_ACTIONS.required).toEqual(['operations', 'actions']);
   });
 
   it('numbers the lines already in the order and says when there are none', () => {
@@ -365,5 +370,116 @@ describe('runOrderAssist', () => {
       expect(draft.changes).toEqual([]);
       expect(draft.items).toEqual([expect.objectContaining({ name: 'Polimento', catalogId: 's1', description: null })]);
     });
+  });
+});
+
+describe('finance actions', () => {
+  const TODAY = '2026-11-02';
+  const on = { getSettings: jest.fn().mockResolvedValue({ enabled: true, financeActions: true }) };
+  const parsed = (actions: unknown) => parseLlmDraft(JSON.stringify({ operations: [], actions })).actions;
+
+  it.each([
+    ['full', { kind: 'full', value: 999, method: 'pix' }, { kind: 'full', value: null, method: 'pix', paidDate: null }],
+    ['value', { kind: 'value', value: 500 }, { kind: 'value', value: 500, method: null, paidDate: null }],
+    ['percent', { kind: 'percent', value: 50, method: 'cash' }, { kind: 'percent', value: 50, method: 'cash', paidDate: null }],
+    ['leaving', { kind: 'leaving', value: 200 }, { kind: 'leaving', value: 200, method: null, paidDate: null }],
+    ['no amount', { kind: 'value', value: null }, { kind: 'value', value: null, method: null, paidDate: null }],
+    ['impossible share', { kind: 'percent', value: 150 }, { kind: 'percent', value: null, method: null, paidDate: null }],
+  ])('reads a payment: %s', (_, payment, expected) => {
+    expect(toActions(parsed({ payment }), TODAY)?.payment).toEqual(expected);
+  });
+
+  it('keeps a past day and drops one still to come', () => {
+    expect(toActions(parsed({ payment: { kind: 'full', paidDate: '2026-11-01' } }), TODAY)?.payment?.paidDate).toBe('2026-11-01');
+    expect(toActions(parsed({ payment: { kind: 'full', paidDate: TODAY } }), TODAY)?.payment?.paidDate).toBe(TODAY);
+    expect(toActions(parsed({ payment: { kind: 'full', paidDate: '2026-11-03' } }), TODAY)?.payment?.paidDate).toBeNull();
+  });
+
+  it('drops an invalid part without losing the draft or the other parts', () => {
+    const draft = parseLlmDraft(
+      JSON.stringify({
+        operations: [{ action: 'add', kind: 'service', name: 'Polimento' }],
+        actions: { payment: { kind: 'someday', value: 10 }, discount: { kind: 'value', value: -5 }, status: 'done' },
+      }),
+    );
+    expect(draft.operations).toHaveLength(1);
+    expect(toActions(draft.actions, TODAY)).toEqual({ payment: null, discount: null, status: 'done' });
+  });
+
+  it.each(['canceled', 'quote'])('refuses the status %s', (status) => {
+    expect(toActions(parsed({ status }), TODAY)).toBeNull();
+  });
+
+  it('refuses a discount above 100%', () => {
+    expect(toActions(parsed({ discount: { kind: 'percent', value: 120 } }), TODAY)).toBeNull();
+  });
+
+  it('is null when nothing was asked', () => {
+    expect(toActions(undefined, TODAY)).toBeNull();
+    expect(toActions(parsed({}), TODAY)).toBeNull();
+  });
+
+  it('asks the model for actions only with the switch on', async () => {
+    const answer = { operations: [], actions: { payment: { kind: 'full' } } };
+    const off = deps({}, answer);
+    const draft = await runOrderAssist('c1', { text: 'pagou tudo' }, off);
+    expect(draft.actions).toBeNull();
+    const request = off.llm.generateJson.mock.calls[0][0];
+    expect(request.responseSchema).toBe(LLM_RESPONSE_SCHEMA);
+    expect(request.systemPrompt).not.toContain('actions:');
+
+    const enabled = deps(on, answer);
+    const allowed = await runOrderAssist('c1', { text: 'pagou tudo' }, enabled);
+    expect(allowed.actions?.payment?.kind).toBe('full');
+    const asked = enabled.llm.generateJson.mock.calls[0][0];
+    expect(asked.responseSchema).toBe(LLM_RESPONSE_SCHEMA_WITH_ACTIONS);
+    expect(asked.systemPrompt).toContain('money that ALREADY came in');
+  });
+
+  it('reads money only from text, on Claude', async () => {
+    const answer = { operations: [], actions: { payment: { kind: 'full' } } };
+    const text = deps(on, answer);
+    await runOrderAssist('c1', { text: 'pagou tudo' }, text);
+    expect(text.llm.generateJson.mock.calls[0][0].provider).toBe('claude');
+
+    const audio = deps(on, answer);
+    const draft = await runOrderAssist('c1', { audio: { mimeType: 'audio/m4a', data: PHOTO } }, audio);
+    expect(draft.actions).toBeNull();
+    expect(audio.llm.generateJson.mock.calls[0][0].provider).not.toBe('claude');
+  });
+
+  it('never takes an action from a photo alone', async () => {
+    const d = deps(on, { operations: [], actions: { payment: { kind: 'full' } } });
+    const draft = await runOrderAssist('c1', { photos: [{ mimeType: 'image/jpeg', data: PHOTO }] }, d);
+    expect(draft.actions).toBeNull();
+    expect(d.llm.generateJson.mock.calls[0][0].responseSchema).toBe(LLM_RESPONSE_SCHEMA);
+  });
+
+  it('sends the total, the paid amount and the balance nowhere near the model', () => {
+    expect(buildUserText({ text: 'pagou tudo' }, CATALOG)).not.toMatch(/total|balance|paid/i);
+  });
+
+  it('says when a nota goes out by itself, only with actions', async () => {
+    const nfseAutoIssue = jest.fn().mockResolvedValue('paid');
+    const withAction = await runOrderAssist(
+      'c1',
+      { text: 'pagou tudo' },
+      deps({ ...on, nfseAutoIssue }, { operations: [], actions: { payment: { kind: 'full' } } }),
+    );
+    expect(withAction.nfseAutoIssue).toBe('paid');
+
+    nfseAutoIssue.mockClear();
+    const without = await runOrderAssist('c1', { text: 'capô' }, deps({ ...on, nfseAutoIssue }, { operations: [] }));
+    expect(without.nfseAutoIssue).toBeUndefined();
+    expect(nfseAutoIssue).not.toHaveBeenCalled();
+  });
+
+  it('leaves nfseAutoIssue out when the company has none', async () => {
+    const draft = await runOrderAssist(
+      'c1',
+      { text: 'pagou tudo' },
+      deps({ ...on, nfseAutoIssue: jest.fn().mockResolvedValue(null) }, { operations: [], actions: { status: 'done' } }),
+    );
+    expect(draft).not.toHaveProperty('nfseAutoIssue');
   });
 });

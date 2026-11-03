@@ -6438,6 +6438,88 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get aiActionsTitle => 'Confere?';
+
+  @override
+  String aiActionsReceive(String amount) {
+    return 'Receber $amount';
+  }
+
+  @override
+  String get aiActionsReceiveNoAmount => 'Receber';
+
+  @override
+  String aiActionsReceived(String amount) {
+    return 'Recebido $amount';
+  }
+
+  @override
+  String get aiActionsTypeAmount => 'toque para informar o valor';
+
+  @override
+  String aiActionsLeft(String amount) {
+    return 'falta $amount';
+  }
+
+  @override
+  String get aiActionsPaidOff => 'quitada';
+
+  @override
+  String aiActionsDiscount(String amount) {
+    return 'Desconto de $amount';
+  }
+
+  @override
+  String aiActionsNewTotal(String amount) {
+    return 'total $amount';
+  }
+
+  @override
+  String aiActionsMarkAs(String status) {
+    return 'Marcar como $status';
+  }
+
+  @override
+  String get aiActionsIssuesNfse => 'Isso também emite a nota fiscal.';
+
+  @override
+  String get aiActionsCannotReceive =>
+      'Só quem recebe pagamentos pode registrar isso.';
+
+  @override
+  String get aiActionsCannotDiscount =>
+      'Só quem cuida do financeiro pode dar desconto.';
+
+  @override
+  String get aiActionsOrderCanceled => 'Esta OS está cancelada.';
+
+  @override
+  String get aiActionsNothingToReceive => 'Esta OS não tem nada a receber.';
+
+  @override
+  String aiActionsOnlyLeft(String amount) {
+    return 'Falta só $amount.';
+  }
+
+  @override
+  String get aiActionsAfterSave => 'Ao salvar, vou pedir para você conferir.';
+
+  @override
+  String get aiActionsSaving => 'Salvando…';
+
+  @override
+  String get aiActionsSavedOffline =>
+      'OS salva. Registre o recebimento quando estiver online.';
+
+  @override
+  String aiActionsStatusKept(String status) {
+    return 'O status continua $status.';
+  }
+
+  @override
+  String get aiActionsNfseStays => 'A nota fiscal continua emitida.';
+
+  @override
   String get nextMaintenanceQuestion => 'Quando é a próxima manutenção?';
 
   @override

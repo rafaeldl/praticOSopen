@@ -7,6 +7,10 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/screens/device_list_screen.dart'
     show kRemoveDeviceResult;
+import 'package:praticos/screens/order/assistant/ai_actions_plan.dart';
+import 'package:praticos/screens/order/assistant/ai_actions_runner.dart';
+import 'package:praticos/screens/order/assistant/ai_actions_sheet.dart';
+import 'package:praticos/screens/payments/order_payment_actions.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart'
     show HomeRules;
 import 'package:praticos/screens/widgets/app_toast.dart';
@@ -106,6 +110,9 @@ import 'package:provider/provider.dart';
 
 /// How long the "Pronta. Avisar Ana?" note stays up.
 const Duration kNotifyNoteDuration = Duration(seconds: 8);
+
+/// How long "✓" waits for the new order's id before the assistant's card.
+const Duration kAiActionsSaveWait = Duration(seconds: 6);
 
 /// Taps on the blue button ignored after it changes the status.
 const Duration kStatusTapCooldown = Duration(milliseconds: 800);
@@ -227,6 +234,9 @@ class _DraftUndo {
 
   /// Lines it took out, with where they were (in removal order).
   final List<(Object line, int index)> removed = [];
+
+  /// Kept money and status actions for after saving (new order).
+  bool actions = false;
 }
 
 /// Customer the assistant heard but could not pick for sure.
@@ -368,6 +378,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _scroll.dispose();
     _notifyTimer?.cancel();
     _statusCooldown?.cancel();
+    _saveWait?.cancel();
     super.dispose();
   }
 
@@ -419,6 +430,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// What the last draft added, for "Desfazer".
   _DraftUndo? _undo;
+
+  /// Money and status said on a new order: the card opens once it is saved
+  /// (the order must exist first, the automatic nota only follows an update).
+  AiOrderActions? _pendingActions;
+  String? _pendingNfse;
+
+  /// "✓" with actions kept: waiting for the order to have its id.
+  Timer? _saveWait;
+  bool get _savingForActions => _saveWait != null;
+
+  /// What the card did, for "Desfazer".
+  AiActionsOutcome? _actionsDone;
+
+  /// The card's actions could have issued a nota: "Desfazer" says it stays.
+  bool _actionsIssuedNfse = false;
 
   /// Height of what floats at the bottom (bar plus note or transcript), so
   /// the last card can always scroll above it.
@@ -848,9 +874,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// "Falta terminar 1 checklist": blocks "pronta" and opens the first one
   /// still pending.
-  Future<void> _offerPendingChecklist(
-    List<of_model.OrderForm> pending,
-  ) async {
+  Future<void> _offerPendingChecklist(List<of_model.OrderForm> pending) async {
     final l10n = context.l10n;
     final open = await showCupertinoDialog<bool>(
       context: context,
@@ -1576,6 +1600,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   // ─── Save / leave ────────────────────────────────────────────────────────
 
   Future<void> _confirmDiscard() async {
+    if (_savingForActions) return;
     final l10n = context.l10n;
     final leave = await showCupertinoDialog<bool>(
       context: context,
@@ -1754,6 +1779,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ? l10n.orderAssistantReadingPhotos
           : l10n.orderAssistantReadingSpeech;
       _note = null;
+      _actionsDone = null;
     });
     AnalyticsService.logAiEvent('ai_assist_requested', {
       'input': photos.isEmpty
@@ -1791,7 +1817,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (!mounted) return;
     final filled = error == null && await _applyDraft(draft!, sent!);
     if (!mounted) return;
-    if (error == null) result = filled ? 'filled' : 'nothing';
+    final actions = error == null && !_isNew ? draft!.actions : null;
+    if (error == null) {
+      result = filled ? 'filled' : (actions != null ? 'actions' : 'nothing');
+    }
     if (filled) _draftsKept++;
     AnalyticsService.logAiEvent('ai_assist_result', {'result': result});
     setState(() {
@@ -1803,7 +1832,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           undo.lines.isEmpty &&
           (undo.changed.isNotEmpty || undo.removed.isNotEmpty);
       _note = !filled
-          ? error ?? l10n.orderAssistantNothingFound
+          ? (actions != null ? null : error ?? l10n.orderAssistantNothingFound)
+          : _isNew && draft?.actions != null
+          ? l10n.aiActionsAfterSave
           : onlyChanged
           ? l10n.orderAssistantChanged
           : (_isNew ? l10n.orderAssistantFilled : l10n.orderAssistantApplied);
@@ -1816,6 +1847,158 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       });
     }
     if (filled) HapticFeedback.lightImpact();
+    if (actions != null) await _offerActions(actions, draft!.nfseAutoIssue);
+  }
+
+  /// The order as the card needs it, with what was just said already in.
+  AiActionsContext _actionsContext(SegmentConfigProvider config, String? nfse) {
+    final order = _store.order!;
+    final forms = _store.formsStream?.value ?? const <of_model.OrderForm>[];
+    return AiActionsContext(
+      status: _store.status ?? order.status,
+      total: _store.total ?? 0,
+      remaining: _store.remainingBalance,
+      showMoney: _showMoney(config),
+      canReceive: _canReceive(config),
+      canDiscount: _permissions.canGiveDiscount(),
+      canChangeStatus: (status) => _permissions.canChangeStatus(order, status),
+      pendingChecklists: forms
+          .where((f) => f.status != of_model.FormStatus.completed)
+          .length,
+      nfseAutoIssue: nfse,
+    );
+  }
+
+  /// "Confere?": nothing about money or status is saved before the blue
+  /// button. Nothing left to confirm: the note says why.
+  Future<void> _offerActions(AiOrderActions actions, String? nfse) async {
+    final config = context.read<SegmentConfigProvider>();
+    final l10n = context.l10n;
+    final order = _actionsContext(config, nfse);
+    final plan = planAiActions(actions, order);
+    if (!plan.hasSteps) {
+      if (plan.notices.isEmpty) {
+        setState(() {
+          _note ??= l10n.orderAssistantNothingFound;
+        });
+        return;
+      }
+      setState(() {
+        _note = aiActionNoticeText(l10n, plan.notices.first);
+        _noteFilled = false;
+      });
+      return;
+    }
+    AnalyticsService.logAiEvent('ai_action_proposed', {'types': plan.types});
+    final name = _store.customer?.name?.trim();
+    final confirmed = await AiActionsSheet.show(
+      context,
+      actions: actions,
+      order: order,
+      subtitle: [
+        _orderTitle(config),
+        if (name != null && name.isNotEmpty) name,
+      ].join(' · '),
+      statusLabel: config.getStatus,
+      store: _store,
+      customerName: name,
+      canAttach: _permissions.canAttachMedia(),
+    );
+    if (!mounted) return;
+    if (confirmed == null) {
+      AnalyticsService.logAiEvent('ai_action_dismissed');
+      return;
+    }
+    AnalyticsService.logAiEvent('ai_action_confirmed', {
+      'edited': confirmed.edited ? 1 : 0,
+    });
+    final previousStatus = _store.status;
+    final outcome = await runAiActions(
+      _store,
+      confirmed.plan,
+      statusWait: kStatusSaveWait,
+    );
+    if (!mounted) return;
+    if (outcome.failedStep != null) {
+      AnalyticsService.logAiEvent('ai_action_failed', {
+        'step': outcome.failedStep!,
+      });
+    }
+    setState(() {
+      _actionsDone = outcome.changedSomething ? outcome : null;
+      _actionsIssuedNfse = confirmed.plan.issuesNfse;
+      _noteFilled = outcome.changedSomething;
+      _quotaNote = null;
+      _note = _actionsNote(outcome, config);
+    });
+    HapticFeedback.lightImpact();
+    if (outcome.statusAfter case final status?) {
+      if (status == 'done' && previousStatus != 'done') {
+        await _offerMaintenance(_store.order);
+      }
+      await _offerNotifyCustomer(status);
+    }
+  }
+
+  /// "Recebido R$ 300 · falta R$ 500", plus what failed, if something did.
+  String _actionsNote(AiActionsOutcome outcome, SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final remaining = _store.remainingBalance;
+    final done = [
+      if (outcome.discount case final discount?)
+        l10n.aiActionsDiscount(_format.formatCurrency(discount)),
+      if (outcome.payment case final payment?)
+        l10n.aiActionsReceived(_format.formatCurrency(payment)),
+      if (outcome.payment != null || outcome.discount != null)
+        remaining <= 0
+            ? l10n.aiActionsPaidOff
+            : l10n.aiActionsLeft(_format.formatCurrency(remaining)),
+      if (outcome.statusAfter case final status?) config.getStatus(status),
+    ].join(' · ');
+    if (outcome.failedStep == null) return done;
+    final failure = outcome.failedStep == 'status'
+        ? l10n.orderStatusSaveError
+        : paymentFailureMessage(l10n, _store);
+    return done.isEmpty ? failure : '$done. $failure';
+  }
+
+  /// "Desfazer" after the card: its steps, then what the same request put in
+  /// the order. A nota already issued is not canceled, and the note says so.
+  Future<void> _undoActions() async {
+    final done = _actionsDone;
+    if (done == null) return;
+    final l10n = context.l10n;
+    final config = context.read<SegmentConfigProvider>();
+    final order = _store.order!;
+    final (:ok, :statusKept) = await undoAiActions(
+      _store,
+      done,
+      canChangeStatus: (status) => _permissions.canChangeStatus(order, status),
+      statusWait: kStatusSaveWait,
+    );
+    if (!mounted) return;
+    if (!ok) {
+      setState(() {
+        _note = paymentFailureMessage(l10n, _store);
+        _noteFilled = true;
+      });
+      return;
+    }
+    AnalyticsService.logAiEvent('ai_action_undone');
+    final issued = _actionsIssuedNfse;
+    final hadDraft = _undo != null;
+    _actionsDone = null;
+    if (hadDraft) _undoDraft();
+    _hideNotifyNote();
+    final message = [
+      if (statusKept)
+        l10n.aiActionsStatusKept(config.getStatus(_store.status ?? '')),
+      if (issued) l10n.aiActionsNfseStays,
+    ].join(' ');
+    setState(() {
+      _note = message.isEmpty ? null : message;
+      _noteFilled = false;
+    });
   }
 
   /// From 80% of the month's requests on, the note also says what is left.
@@ -1837,6 +2020,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   void _dismissNote() => setState(() {
     _note = null;
     _undo = null;
+    _actionsDone = null;
   });
 
   /// "Desfazer": takes out what the last draft put in the order.
@@ -1845,6 +2029,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (undo != null) {
       _draftsKept--;
       AnalyticsService.logAiEvent('ai_assist_undone');
+      if (undo.actions) {
+        _pendingActions = null;
+        _pendingNfse = null;
+      }
       if (undo.customer) {
         runInAction(() {
           _store.order!.customer = null;
@@ -1911,6 +2099,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _heard = '';
       _note = null;
       _undo = null;
+      _actionsDone = null;
     });
     final ok = await _speech.start(
       localeId: context.l10n.localeName,
@@ -2255,7 +2444,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// (deferSave), a saved order right away. Never replaces a customer already
   /// chosen, a request or a deadline already filled; adds devices and items,
   /// and changes or takes out the lines the user named. Never receives or
-  /// cancels. Returns false when the draft had nothing to use.
+  /// cancels: money and status go through the card ([_offerActions]). Returns
+  /// false when the draft had nothing to use.
   Future<bool> _applyDraft(
     AiOrderDraft draft,
     ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
@@ -2399,6 +2589,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _store.setDueDate(draft.dueDate!);
       _marked.add('due');
       undo.due = true;
+      used = true;
+    }
+    if (_isNew && draft.actions != null) {
+      _pendingActions = draft.actions;
+      _pendingNfse = draft.nfseAutoIssue;
+      undo.actions = true;
       used = true;
     }
     if (used) _undo = undo;
@@ -2848,9 +3044,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final onCreated = _onCreated;
     final onSaved = _onSaved;
     final reminders = _reminders;
+    final actions = _pendingActions;
     _store.deferSave = false;
     _store.updateTotal();
     _registerNew();
+    if (actions != null) {
+      _saveWait = Timer(kAiActionsSaveWait, _closeWithoutActions);
+    }
     _store.createItem(
       onCreated: (orderId) {
         if (_draftsKept > 0) AnalyticsService.logAiEvent('ai_order_saved');
@@ -2865,10 +3065,83 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           );
         }
         _afterCreated(orderId, photos, onCreated);
+        if (actions != null) _openSavedForActions();
       },
-      onError: (_) => showOrderCreateFailed(),
+      onError: (_) {
+        if (actions != null) _dropActionsAfterFailedSave();
+        showOrderCreateFailed();
+      },
     );
+    if (actions != null) {
+      if (_savingForActions) {
+        setState(() {
+          _barMode = AssistantBarMode.reading;
+          _readingLabel = context.l10n.aiActionsSaving;
+          _note = null;
+          _undo = null;
+        });
+      }
+      return;
+    }
     setState(() => _leaving = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _popScreen(true);
+    });
+  }
+
+  /// The new order has its id: this screen goes on as the saved order, and
+  /// the card opens on it.
+  void _openSavedForActions() {
+    final actions = _pendingActions;
+    if (!mounted || actions == null || !_savingForActions) return;
+    final nfse = _pendingNfse;
+    _saveWait?.cancel();
+    final order = _store.order!;
+    setState(() {
+      _saveWait = null;
+      _pendingActions = null;
+      _pendingNfse = null;
+      _isNew = false;
+      _barMode = AssistantBarMode.idle;
+      _marked.clear();
+      _markedDevices.clear();
+      _commentsStream = _actions.watchComments(order).asBroadcastStream();
+    });
+    _savedElsewhere = OrderSavedElsewhere.stream.listen(
+      _store.mergeAttachments,
+    );
+    _offerActions(actions, nfse);
+  }
+
+  /// No id in time (offline): the order is saved and the screen closes as
+  /// usual. Nothing about money goes in without the card, and the toast says
+  /// what is left to do.
+  /// The new order was not saved: no card, and no "register it later"
+  /// toast either, since the failure dialog already tells what happened.
+  void _dropActionsAfterFailedSave() {
+    _saveWait?.cancel();
+    if (!mounted || _pendingActions == null) return;
+    setState(() {
+      _saveWait = null;
+      _pendingActions = null;
+      _leaving = true;
+      _barMode = AssistantBarMode.idle;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _popScreen(true);
+    });
+  }
+
+  void _closeWithoutActions() {
+    if (!mounted) return;
+    final message = context.l10n.aiActionsSavedOffline;
+    setState(() {
+      _saveWait = null;
+      _pendingActions = null;
+      _leaving = true;
+      _barMode = AssistantBarMode.idle;
+    });
+    showAppToast(context, message);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _popScreen(true);
     });
@@ -2967,8 +3240,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// OS" sheet ([fade] gray) and the saved order ([fade] white).
   List<Widget> _buildFloating(Color fade) {
     final l10n = context.l10n;
-    final canUndo = _noteFilled && _undo != null;
-    final showPlans = SubscriptionService.paidPlansEnabled &&
+    final canUndo = _noteFilled && (_undo != null || _actionsDone != null);
+    final showPlans =
+        SubscriptionService.paidPlansEnabled &&
         _note != null &&
         _note == _quotaNote;
     return [
@@ -3021,13 +3295,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                           : l10n.close,
                       onAction: showPlans
                           ? _openPlansFromNote
+                          : _actionsDone != null
+                          ? _undoActions
                           : canUndo
                           ? _undoDraft
                           : _dismissNote,
                       onClose: showPlans ? _dismissNote : null,
                     ),
-                  )
-                else if (_notifyStatus != null)
+                  ),
+                if (_barMode != AssistantBarMode.listening &&
+                    _notifyStatus != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.md),
                     child: AssistantNote(

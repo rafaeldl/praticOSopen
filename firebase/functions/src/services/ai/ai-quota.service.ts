@@ -1,9 +1,9 @@
 /**
  * AI assistant switches and monthly quota (docs/AI_ORDER_ASSIST.md).
  *
- * - config/ai   { enabledForAll?: boolean, defaultProvider?: 'gemini'|'claude' }
+ * - config/ai   { enabledForAll?: boolean, defaultProvider?: 'gemini'|'claude', financeActions?: boolean }
  *   Global switch for every company. Read at most once a minute per instance.
- * - companies/{cid}/settings/ai   { enabled?: boolean, monthlyLimit?: number, provider?: ... }
+ * - companies/{cid}/settings/ai   { enabled?: boolean, monthlyLimit?: number, provider?: ..., financeActions?: boolean }
  *   Per company. Each field it has wins over the global one, so a company can
  *   be turned off (or kept on Gemini) while the rest follows config/ai.
  *   No doc and no global switch → the assistant is off.
@@ -37,6 +37,8 @@ export interface AiSettings {
   monthlyLimit?: number;
   /** Model provider ('gemini' | 'claude'); unset = AI_PROVIDER env, else gemini. */
   provider?: LlmProvider;
+  /** The assistant may propose payments, discounts and status changes. */
+  financeActions?: boolean;
 }
 
 export type QuotaReservation =
@@ -77,10 +79,13 @@ export function resolveAiSettings(
     : isLlmProvider(global?.defaultProvider)
       ? global?.defaultProvider
       : undefined;
+  const financeActions =
+    typeof company?.financeActions === 'boolean' ? company.financeActions : global?.financeActions === true;
   return {
     enabled,
     monthlyLimit: validLimit(company?.monthlyLimit) ? company?.monthlyLimit : undefined,
     provider: provider as LlmProvider | undefined,
+    financeActions,
   };
 }
 

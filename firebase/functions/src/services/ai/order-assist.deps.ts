@@ -6,6 +6,8 @@
 import { getTenantCollection } from '../firestore.service';
 import { findCustomerByPhone, searchCustomers } from '../customer.service';
 import { findDeviceBySerial, searchDevices } from '../device.service';
+import { getPaymentSettings } from '../asaas/connection.service';
+import { getNfseServiceSettings } from '../asaas/invoice.service';
 import { getAiSettings, getAiUsage, releaseAiRequest, reserveAiRequest } from './ai-quota.service';
 import { ClaudeClient } from './claude.client';
 import { VertexGeminiClient } from './gemini.client';
@@ -76,6 +78,12 @@ export function defaultOrderAssistDeps(): OrderAssistDeps {
     getUsage: getAiUsage,
     reserve: (companyId, settings) => reserveAiRequest(companyId, settings),
     release: releaseAiRequest,
+    nfseAutoIssue: async (companyId) => {
+      const settings = await getPaymentSettings(companyId);
+      if (!settings.nfseEnabled || !settings.nfseReady || !settings.asaasConnected) return null;
+      const autoIssue = (await getNfseServiceSettings(companyId))?.autoIssue;
+      return autoIssue === 'paid' || autoIssue === 'completed' ? autoIssue : null;
+    },
     loadCatalog: async (companyId) => {
       const [services, products] = await Promise.all([
         loadEntries(companyId, 'services'),

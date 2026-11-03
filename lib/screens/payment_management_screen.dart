@@ -19,10 +19,10 @@ import 'package:praticos/screens/payments/widgets/receipt_image_viewer.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
+import 'package:praticos/screens/payments/order_payment_actions.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_sheet.dart';
 import 'package:praticos/screens/payments/widgets/receive_summary.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
-import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/services/customer_receipt_service.dart'
     show PickedReceiptFile;
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
@@ -46,7 +46,6 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/asaas_billing.dart';
 import 'package:praticos/utils/order_payment_math.dart';
-import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/widgets/permission_widgets.dart'
     show AccessDeniedScreen;
 import 'package:url_launcher/url_launcher.dart';
@@ -787,13 +786,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
   /// What the amount does: says what stays open on the order.
   String? _preview(double amount, double remaining) {
-    final left = remaining - amount;
-    if (left <= OrderPaymentMath.centTolerance) {
-      return context.l10n.receivePreviewAll(1);
-    }
-    return context.l10n.receivePreviewLeft(
-      FormatService().formatCurrency(left),
-    );
+    return receivePreview(context.l10n, amount, remaining);
   }
 
   /// "Marcar como recebido": the sheet, then saving what came back.
@@ -828,29 +821,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Future<void> _doRegister(ReceiveDraft draft) async {
     final store = _store;
     if (store == null) return;
-    final transaction = await store.addPayment(
-      draft.amount,
-      paidAt: paidAtFor(draft.paidDay),
-      paymentMethod: draft.paymentMethod,
-    );
-    var receiptOk = true;
-    final receipt = draft.receipt;
-    if (transaction != null && receipt != null) {
-      final index = store.transactions.indexWhere(
-        (t) => t.id == transaction.id,
-      );
-      if (index >= 0) {
-        receiptOk = await store.attachReceiptToTransaction(
-          index,
-          receipt.file,
-          receipt.contentType,
-          receipt.name,
-        );
-        if (receiptOk && identical(receipt, _initialReceipt)) {
-          _initialReceipt = null;
-          _onInitialReceiptUsed?.call();
-        }
-      }
+    final (:transaction, :receiptOk) = await registerOrderPayment(store, draft);
+    if (transaction != null &&
+        draft.receipt != null &&
+        receiptOk &&
+        identical(draft.receipt, _initialReceipt)) {
+      _initialReceipt = null;
+      _onInitialReceiptUsed?.call();
     }
     if (!mounted) return;
     if (transaction == null) {
@@ -861,18 +838,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     if (!receiptOk) _showError(_paymentFailureMessage(store));
   }
 
-  /// Localized message for the last failed payment operation of [store].
-  String _paymentFailureMessage(OrderStore store) {
-    switch (store.lastPaymentFailure) {
-      case PaymentUpdateFailure.requiresConnection:
-        return context.l10n.paymentRequiresConnection;
-      case PaymentUpdateFailure.asaasLocked:
-        return context.l10n.asaasTransactionCannotBeRemoved;
-      case PaymentUpdateFailure.failed:
-      case null:
-        return context.l10n.paymentUpdateFailed;
-    }
-  }
+  String _paymentFailureMessage(OrderStore store) =>
+      paymentFailureMessage(context.l10n, store);
 
   // ============================================================
   // "..." MENU: discount and undo payments

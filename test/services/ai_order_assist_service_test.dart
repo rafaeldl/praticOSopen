@@ -200,4 +200,59 @@ void main() {
       expect(status.used, isNull);
     });
   });
+
+  group('actions', () {
+    AiOrderDraft read(Object? actions, {String? nfse}) => AiOrderDraft.fromJson({
+      'actions': actions,
+      'nfseAutoIssue': ?nfse,
+    });
+
+    test('old server: no actions', () {
+      expect(AiOrderDraft.fromJson(const {}).actions, isNull);
+      expect(read(null).actions, isNull);
+    });
+
+    test('reads a payment with day and method', () {
+      final draft = read({
+        'payment': {
+          'kind': 'value',
+          'value': 500,
+          'method': 'pix',
+          'paidDate': '2026-11-01',
+        },
+      }, nfse: 'paid');
+      final payment = draft.actions!.payment!;
+      expect(payment.kind, 'value');
+      expect(payment.value, 500);
+      expect(payment.method, 'pix');
+      expect(payment.paidDay, DateTime(2026, 11, 1));
+      expect(draft.nfseAutoIssue, 'paid');
+    });
+
+    test('reads a discount and a status', () {
+      final actions = read({
+        'discount': {'kind': 'percent', 'value': 10},
+        'status': 'done',
+      }).actions!;
+      expect(actions.discount!.isPercent, isTrue);
+      expect(actions.discount!.value, 10);
+      expect(actions.status, 'done');
+    });
+
+    test('ignores what it does not know', () {
+      expect(read({'status': 'canceled'}).actions, isNull);
+      expect(
+        read({
+          'payment': {'kind': 'someday'},
+        }).actions,
+        isNull,
+      );
+      expect(
+        read({
+          'payment': {'kind': 'full', 'method': 'bitcoin'},
+        }).actions!.payment!.method,
+        isNull,
+      );
+    });
+  });
 }

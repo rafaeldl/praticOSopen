@@ -6432,6 +6432,88 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get aiActionsTitle => 'Look right?';
+
+  @override
+  String aiActionsReceive(String amount) {
+    return 'Receive $amount';
+  }
+
+  @override
+  String get aiActionsReceiveNoAmount => 'Receive';
+
+  @override
+  String aiActionsReceived(String amount) {
+    return 'Received $amount';
+  }
+
+  @override
+  String get aiActionsTypeAmount => 'tap to enter the amount';
+
+  @override
+  String aiActionsLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get aiActionsPaidOff => 'paid off';
+
+  @override
+  String aiActionsDiscount(String amount) {
+    return '$amount discount';
+  }
+
+  @override
+  String aiActionsNewTotal(String amount) {
+    return 'total $amount';
+  }
+
+  @override
+  String aiActionsMarkAs(String status) {
+    return 'Mark as $status';
+  }
+
+  @override
+  String get aiActionsIssuesNfse => 'This also issues the invoice.';
+
+  @override
+  String get aiActionsCannotReceive =>
+      'Only people who receive payments can record this.';
+
+  @override
+  String get aiActionsCannotDiscount =>
+      'Only people who handle finances can give a discount.';
+
+  @override
+  String get aiActionsOrderCanceled => 'This order is canceled.';
+
+  @override
+  String get aiActionsNothingToReceive => 'This order has nothing to receive.';
+
+  @override
+  String aiActionsOnlyLeft(String amount) {
+    return 'Only $amount left.';
+  }
+
+  @override
+  String get aiActionsAfterSave => 'When you save, I\'ll ask you to check it.';
+
+  @override
+  String get aiActionsSaving => 'Saving…';
+
+  @override
+  String get aiActionsSavedOffline =>
+      'Order saved. Record the payment when you\'re online.';
+
+  @override
+  String aiActionsStatusKept(String status) {
+    return 'The status stays $status.';
+  }
+
+  @override
+  String get aiActionsNfseStays => 'The invoice stays issued.';
+
+  @override
   String get nextMaintenanceQuestion => 'When is the next maintenance?';
 
   @override

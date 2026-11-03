@@ -13,12 +13,14 @@ Future<double?> showReceiveDiscountSheet(
   BuildContext context, {
   required double currentTotal,
   required double maxDiscount,
+  double? initial,
 }) {
   return FormSheet.show<double>(
     context,
     (_) => ReceiveDiscountSheet(
       currentTotal: currentTotal,
       maxDiscount: maxDiscount,
+      initial: initial,
     ),
   );
 }
@@ -30,6 +32,7 @@ class ReceiveDiscountSheet extends StatefulWidget {
     super.key,
     required this.currentTotal,
     required this.maxDiscount,
+    this.initial,
   });
 
   final double currentTotal;
@@ -37,12 +40,15 @@ class ReceiveDiscountSheet extends StatefulWidget {
   /// Largest discount allowed (what is still missing to receive).
   final double maxDiscount;
 
+  /// Starts filled (the assistant's card).
+  final double? initial;
+
   @override
   State<ReceiveDiscountSheet> createState() => _ReceiveDiscountSheetState();
 }
 
 class _ReceiveDiscountSheetState extends State<ReceiveDiscountSheet> {
-  double _amount = 0;
+  late double _amount = widget.initial ?? 0;
 
   bool get _tooBig => _amount > widget.maxDiscount;
   bool get _valid => _amount > 0 && !_tooBig;
@@ -63,6 +69,7 @@ class _ReceiveDiscountSheetState extends State<ReceiveDiscountSheet> {
             MoneyField(
               key: const Key('receiveDiscountField'),
               label: l10n.discount,
+              initialValue: widget.initial,
               autofocus: true,
               onChanged: (v) => setState(() => _amount = v),
             ),

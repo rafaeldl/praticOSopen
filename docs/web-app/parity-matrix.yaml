@@ -10,7 +10,7 @@
 #   segment_variation: o que muda por segmento (labels:*, custom_fields:*, masks:*, status_labels, examples_by_segment...).
 #   states: empty, error, loading, offline, retry, refresh, pagination, denied, limit, saving, unsaved, not_found.
 #   feature_flags: useFinancial, useScheduling, useContracts, useDeviceManagement, fieldService (Company); nfseAvailable, nfseReady,
-#          asaasEnabled (settings/payments); aiEnabled (GET /v1/app/ai/status); planLimits:*, paidPlansEnabled; kWhatsAppBotEnabled (off).
+#          asaasEnabled (settings/payments); aiEnabled (GET /v1/app/ai/status); financeActions (settings/ai, padrão desligado); planLimits:*, paidPlansEnabled; kWhatsAppBotEnabled (off).
 #   hardware: null ou lista (camera, gallery, file, mic, phone, maps, clipboard, share_sheet, share_intent, whatsapp, external_browser,
 #          pdf_generation, push, local_notifications, native_sign_in, iap, att, qr_display, contacts).
 #   data: coleções Firestore, storage:* e api:VERBO /caminho. web_status: todo | in_progress | done | excepted.
@@ -3664,6 +3664,70 @@ rows:
   web_exception: null
   permission: chargeOrder
   note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul."
+- id: order.ai.money-card
+  screen: lib/screens/order/assistant/ai_actions_sheet.dart
+  route: null
+  action: "Confirmar receber, desconto e status ditos à IA"
+  kind: sheet
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error, offline]
+  feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
+  hardware: null
+  data: ["api:POST /v1/app/ai/order-assist", "companies/{id}/orders", "companies/{id}/receipts"]
+  web_status: todo
+  web_exception: null
+  note: "Cartão Confere?: nada grava antes de Confirmar; Receber abre a folha de recebimento preenchida. Avisa quando vai emitir nota automática. Só aparece para quem pode receber."
+- id: order.ai.money-plan
+  screen: lib/screens/order/assistant/ai_actions_plan.dart
+  route: null
+  action: "Montar o cartão a partir do que foi dito"
+  kind: logic
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "O modelo só devolve o que foi dito; saldo, aprovar antes de receber em orçamento, valor acima do saldo e aviso de nota saem daqui."
+- id: order.ai.money-run
+  screen: lib/screens/order/assistant/ai_actions_runner.dart
+  route: null
+  action: "Gravar os passos do cartão e desfazer"
+  kind: logic
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [offline, error]
+  feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders", "companies/{id}/receipts"]
+  web_status: todo
+  web_exception: null
+  note: "Desconto, aprovar, receber e status, nesta ordem; para no primeiro erro. Status recusado volta a tela. Desfazer começa pelo último passo."
+- id: pay.order.register-payment
+  screen: lib/screens/payments/order_payment_actions.dart
+  route: null
+  action: "Gravar recebimento e comprovante (folha manual e IA)"
+  kind: logic
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [offline, error]
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders", "companies/{id}/receipts"]
+  web_status: todo
+  web_exception: null
+  note: "Mesmo caminho para Marcar como recebido e para o cartão da IA."
 - id: order.services.bridge
   screen: lib/screens/order/order_screen_services.dart
   route: null

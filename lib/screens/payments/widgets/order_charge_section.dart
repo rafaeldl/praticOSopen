@@ -97,6 +97,9 @@ class OrderChargeController extends ChangeNotifier {
   bool _reloadedOnOpen = false;
   bool _disposed = false;
 
+  /// True once [openCharge] can be trusted: the opposite of [pending].
+  bool get ready => !pending;
+
   /// Company in the Asaas pilot and user allowed to charge.
   bool get enabled => _settings?.asaasEnabled == true;
 

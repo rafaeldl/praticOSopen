@@ -41,7 +41,7 @@ describe('ai quota', () => {
   });
 
   it('getAiSettings: no company doc and no global switch → off; only enabled === true turns it on', async () => {
-    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: false, monthlyLimit: undefined, provider: undefined });
+    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: false, monthlyLimit: undefined, provider: undefined, financeActions: false });
     fake.seed('companies/c1/settings/ai', { enabled: 'yes', monthlyLimit: 2.5 });
     await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: false, monthlyLimit: undefined });
     fake.seed('companies/c1/settings/ai', { enabled: true, monthlyLimit: 20 });
@@ -50,11 +50,19 @@ describe('ai quota', () => {
 
   it('getAiSettings: config/ai turns it on for every company, company fields win', async () => {
     fake.seed('config/ai', { enabledForAll: true, defaultProvider: 'claude' });
-    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: true, monthlyLimit: undefined, provider: 'claude' });
+    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: true, monthlyLimit: undefined, provider: 'claude', financeActions: false });
     fake.seed('companies/c2/settings/ai', { enabled: false });
     await expect(getAiSettings('c2')).resolves.toMatchObject({ enabled: false, provider: 'claude' });
     fake.seed('companies/c3/settings/ai', { provider: 'gemini', monthlyLimit: 5 });
-    await expect(getAiSettings('c3')).resolves.toEqual({ enabled: true, monthlyLimit: 5, provider: 'gemini' });
+    await expect(getAiSettings('c3')).resolves.toEqual({ enabled: true, monthlyLimit: 5, provider: 'gemini', financeActions: false });
+  });
+
+  it('resolveAiSettings: financeActions is off unless a switch turns it on, and the company wins', () => {
+    expect(resolveAiSettings(undefined, undefined).financeActions).toBe(false);
+    expect(resolveAiSettings(undefined, { financeActions: true }).financeActions).toBe(true);
+    expect(resolveAiSettings({ financeActions: true }, undefined).financeActions).toBe(true);
+    expect(resolveAiSettings({ financeActions: false }, { financeActions: true }).financeActions).toBe(false);
+    expect(resolveAiSettings({ financeActions: 'yes' }, undefined).financeActions).toBe(false);
   });
 
   it('resolveAiSettings ignores invalid values', () => {
@@ -62,6 +70,7 @@ describe('ai quota', () => {
       enabled: false,
       monthlyLimit: undefined,
       provider: undefined,
+      financeActions: false,
     });
     expect(resolveAiSettings(undefined, { enabledForAll: true })).toMatchObject({ enabled: true, provider: undefined });
   });

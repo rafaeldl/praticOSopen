@@ -74,7 +74,7 @@ Depois de confirmar, a nota acima da barra mostra "Recebido R$ 300 · falta R$ 5
 | Vai emitir nota automática | "Isso também emite a nota fiscal." |
 | Tem cobrança aberta | O texto atual `receiveChargeAdjusts` |
 
-A nota automática é avisada só quando as ações viram a OS: `nfseAutoIssue: paid` e o saldo chega a zero (por pagamento ou desconto), ou `nfseAutoIssue: completed` e o status vira `done`. A OS que já teve nota não dispara outra, mas a folha não precisa tratar isso: é só um aviso a mais.
+A nota automática é avisada só quando as ações viram a OS: `nfseAutoIssue: paid` e um pagamento zera o saldo (desconto que quita não emite nota: `closedByDiscount` no gatilho), ou `nfseAutoIssue: completed` e o status vira `done`. A OS que já teve nota não dispara outra, mas a folha não precisa tratar isso: é só um aviso a mais.
 
 A tela da OS não conhece a cobrança aberta. A folha cria um `OrderChargeController` para ler `openCharge`, e o Confirmar espera essa leitura.
 
@@ -89,8 +89,8 @@ A IA nunca finge que fez. A folha mostra o motivo no lugar da linha, ou uma nota
 | Empresa sem "Valores e cobrança" | Ignora dinheiro, sem aviso; a empresa não usa essa parte |
 | OS cancelada | "Esta OS está cancelada." |
 | OS sem valor ou já quitada | "Esta OS não tem nada a receber." |
-| Valor acima do saldo | Abre a linha de receber com o saldo e diz "Falta só R$ 300." Nunca grava a mais |
-| Desconto acima do saldo | Abre o desconto com o máximo |
+| Valor acima do saldo | A linha de receber já vem com o saldo e diz "Falta só R$ 300." Nunca grava a mais |
+| Desconto acima do saldo | A linha de desconto já vem com o máximo |
 | Valor em branco ("pagou uma parte") | Abre a linha de receber para digitar |
 | Checklist pendente ao concluir | A linha "Pronta" sai e aparece "Falta terminar 1 checklist." O resto segue |
 | Sem permissão para o status | A linha sai e aparece `permissionDenied` |
@@ -161,7 +161,7 @@ Se um passo falhar, os seguintes não rodam, e a nota diz o que entrou e o que f
 
 ### Nova OS
 
-A OS ainda não existe. As ações ficam guardadas e a folha abre logo depois de "Salvar OS". O "Desfazer" do rascunho descarta as ações junto. Sair sem salvar também.
+A OS ainda não existe. As ações ficam guardadas e a folha abre logo depois de "Salvar OS", com a OS já criada: o gatilho da nota só olha atualizações, e técnico não cria OS com dinheiro. A tela espera o id por até 6 segundos. Offline, fecha como sempre, não grava dinheiro e um aviso pede para registrar depois. O "Desfazer" do rascunho descarta as ações junto. Sair sem salvar também.
 
 ### Desfazer
 
@@ -169,6 +169,7 @@ Na nota, depois de confirmar, por ordem inversa:
 
 - Pagamento e desconto: `removeTransaction`, com o índice achado pelo id da transação. Precisa de internet.
 - Status: volta ao anterior, se `canChangeStatus` permitir. Senão fica, e a nota avisa.
+- O que a mesma frase pôs na OS (itens, cliente) sai junto.
 - Nota já emitida não é cancelada. Com `nfseAutoIssue`, a mensagem de desfazer diz "A nota fiscal continua emitida."
 
 ## 7. Cota, privacidade e custo
@@ -196,6 +197,8 @@ Na nota, depois de confirmar, por ordem inversa:
 | Tipo e valor corretos | 95% |
 
 Se a meta não bater, a função não vai para produção.
+
+**Resultado (2026-11-02):** o Claude bateu a meta, e o Gemini não: 5 promessas viraram pagamento nas 40 frases novas. Por isso as ações usam só texto, sempre no Claude. Números em `docs/AI_ORDER_ASSIST.md`.
 
 ## 9. Lançamento
 

@@ -68,7 +68,7 @@ export function createAiRouter(depsFactory: () => OrderAssistDeps = defaultOrder
     try {
       const draft = await runOrderAssist(companyId, validation.data, depsFactory());
       console.log(
-        `[aiOrderAssist] company=${companyId} items=${draft.items.length} ms=${Date.now() - started}`,
+        `[aiOrderAssist] company=${companyId} items=${draft.items.length} actions=${!!draft.actions} ms=${Date.now() - started}`,
       );
       res.json({ success: true, data: draft });
     } catch (error) {

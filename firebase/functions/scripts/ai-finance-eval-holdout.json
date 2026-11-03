@@ -1,0 +1,379 @@
+[
+ {
+  "id": "pt-h-1",
+  "lang": "pt",
+  "text": "passou tudo no débito",
+  "expect": {
+   "payment": {
+    "kind": "full",
+    "method": "card"
+   }
+  }
+ },
+ {
+  "id": "pt-h-2",
+  "lang": "pt",
+  "text": "acertou comigo em dinheiro",
+  "expect": {
+   "payment": {
+    "kind": "full",
+    "method": "cash"
+   }
+  }
+ },
+ {
+  "id": "pt-h-3",
+  "lang": "pt",
+  "text": "já tá pago",
+  "expect": {
+   "payment": {
+    "kind": "full"
+   }
+  }
+ },
+ {
+  "id": "pt-h-4",
+  "lang": "pt",
+  "text": "me fez um pix de 250",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 250,
+    "method": "pix"
+   }
+  }
+ },
+ {
+  "id": "pt-h-5",
+  "lang": "pt",
+  "text": "adiantou 400",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 400
+   }
+  }
+ },
+ {
+  "id": "pt-h-6",
+  "lang": "pt",
+  "text": "pagou 80 reais agora há pouco",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 80
+   }
+  }
+ },
+ {
+  "id": "pt-h-7",
+  "lang": "pt",
+  "text": "pagou um quarto",
+  "expect": {
+   "payment": {
+    "kind": "percent",
+    "value": 25
+   }
+  }
+ },
+ {
+  "id": "pt-h-8",
+  "lang": "pt",
+  "text": "restou 90 pra pagar",
+  "expect": {
+   "payment": {
+    "kind": "leaving",
+    "value": 90
+   }
+  }
+ },
+ {
+  "id": "pt-h-9",
+  "lang": "pt",
+  "text": "recebi anteontem no boleto",
+  "expect": {
+   "payment": {
+    "kind": "full",
+    "method": "other",
+    "paidDate": "2026-10-31"
+   }
+  },
+  "alt": [
+   {
+    "payment": {
+     "kind": "value",
+     "value": null,
+     "method": "other",
+     "paidDate": "2026-10-31"
+    }
+   }
+  ]
+ },
+ {
+  "id": "pt-h-10",
+  "lang": "pt",
+  "text": "abate 30 reais",
+  "expect": {
+   "discount": {
+    "kind": "value",
+    "value": 30
+   }
+  }
+ },
+ {
+  "id": "pt-h-11",
+  "lang": "pt",
+  "text": "faz 15% pra ele",
+  "expect": {
+   "discount": {
+    "kind": "percent",
+    "value": 15
+   }
+  }
+ },
+ {
+  "id": "pt-h-12",
+  "lang": "pt",
+  "text": "cliente fechou o orçamento",
+  "expect": {
+   "status": "approved"
+  }
+ },
+ {
+  "id": "pt-h-13",
+  "lang": "pt",
+  "text": "já iniciei",
+  "expect": {
+   "status": "progress"
+  }
+ },
+ {
+  "id": "pt-h-14",
+  "lang": "pt",
+  "text": "serviço entregue",
+  "expect": {
+   "status": "done"
+  }
+ },
+ {
+  "id": "pt-h-15",
+  "lang": "pt",
+  "text": "acabei aqui, pagou 120 no cartão e dei 20 de desconto",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 120,
+    "method": "card"
+   },
+   "discount": {
+    "kind": "value",
+    "value": 20
+   },
+   "status": "done"
+  }
+ },
+ {
+  "id": "pt-h-16",
+  "lang": "pt",
+  "text": "fechou e deixou 100 de sinal no pix",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 100,
+    "method": "pix"
+   },
+   "status": "approved"
+  }
+ },
+ {
+  "id": "pt-hf-1",
+  "lang": "pt",
+  "text": "amanhã ele acerta",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-2",
+  "lang": "pt",
+  "text": "combinou de pagar 200 sexta",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-3",
+  "lang": "pt",
+  "text": "vai parcelar em 3x",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-4",
+  "lang": "pt",
+  "text": "vai deixar 100 de sinal",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-5",
+  "lang": "pt",
+  "text": "pagaria 400 se fizer hoje",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-6",
+  "lang": "pt",
+  "text": "fiado, paga fim do mês",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-7",
+  "lang": "pt",
+  "text": "disse que manda o pix depois",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-8",
+  "lang": "pt",
+  "text": "não veio o dinheiro",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-9",
+  "lang": "pt",
+  "text": "cliente ainda deve pagar 200",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hf-10",
+  "lang": "pt",
+  "text": "será que ele pagou?",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "pt-hi-1",
+  "lang": "pt",
+  "text": "saiu por 600",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "pt-hi-2",
+  "lang": "pt",
+  "text": "o total ficou 1200",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "pt-hi-3",
+  "lang": "pt",
+  "text": "mão de obra custa 300",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "pt-hi-4",
+  "lang": "pt",
+  "text": "cobrar 150 da visita",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "pt-hi-5",
+  "lang": "pt",
+  "text": "a peça deu 90",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "en-h-1",
+  "lang": "en",
+  "text": "settled up in cash",
+  "expect": {
+   "payment": {
+    "kind": "full",
+    "method": "cash"
+   }
+  }
+ },
+ {
+  "id": "en-h-2",
+  "lang": "en",
+  "text": "received 300 by card",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 300,
+    "method": "card"
+   }
+  }
+ },
+ {
+  "id": "en-h-3",
+  "lang": "en",
+  "text": "finished the job, customer paid in full",
+  "expect": {
+   "payment": {
+    "kind": "full"
+   },
+   "status": "done"
+  }
+ },
+ {
+  "id": "en-hf-1",
+  "lang": "en",
+  "text": "she is going to pay 200 tomorrow",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "en-hi-1",
+  "lang": "en",
+  "text": "labor came to 400",
+  "expect": {},
+  "tag": "itemPrice"
+ },
+ {
+  "id": "es-h-1",
+  "lang": "es",
+  "text": "me pagó 300 en efectivo",
+  "expect": {
+   "payment": {
+    "kind": "value",
+    "value": 300,
+    "method": "cash"
+   }
+  }
+ },
+ {
+  "id": "es-h-2",
+  "lang": "es",
+  "text": "terminé y pagó todo con tarjeta",
+  "expect": {
+   "payment": {
+    "kind": "full",
+    "method": "card"
+   },
+   "status": "done"
+  }
+ },
+ {
+  "id": "es-hf-1",
+  "lang": "es",
+  "text": "va a dejar 200 de seña",
+  "expect": {},
+  "tag": "future"
+ },
+ {
+  "id": "es-hi-1",
+  "lang": "es",
+  "text": "la mano de obra salió 400",
+  "expect": {},
+  "tag": "itemPrice"
+ }
+]
