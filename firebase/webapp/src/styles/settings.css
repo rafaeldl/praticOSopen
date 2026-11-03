@@ -1,0 +1,76 @@
+/* Configurações, conta, empresa, equipe, plano e integrações. Loaded with
+   their screens, out of the first download. Drawers reuse orders.css. */
+
+.set-page { padding: 0.75rem 1rem 2rem; display: grid; gap: 1.5rem; align-content: start; max-width: 52rem; }
+.set-section { display: grid; gap: 0.4rem; min-width: 0; }
+.set-h { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0; }
+.set-lead { margin: 0; color: var(--color-muted); max-width: 40rem; }
+.set-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.set-list > li { border-bottom: 1px solid var(--color-rule); min-width: 0; }
+.set-row { display: flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; padding: 0.45rem 0.35rem; color: inherit; text-decoration: none; min-width: 0; }
+a.set-row:hover, button.set-row:hover { background: var(--color-paper-2); }
+button.set-row { width: 100%; background: none; border: 0; font: inherit; text-align: left; cursor: pointer; }
+.set-row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.set-text { flex: 1 1 auto; min-width: 0; display: grid; gap: 0.1rem; }
+.set-text .who, .set-text .sub { overflow-wrap: anywhere; }
+.set-end { flex: none; color: var(--color-muted); font-size: 0.875rem; text-align: right; overflow-wrap: anywhere; max-width: 50%; }
+.set-avatar { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; background: var(--color-accent-soft); color: var(--color-ink); font-weight: 700; overflow: hidden; }
+.set-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.set-avatar--big { width: 4rem; height: 4rem; font-size: 1.4rem; }
+.set-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.set-danger { color: var(--color-danger-text, var(--color-danger)); }
+.btn--primary.is-muted { background: var(--color-paper-2); color: var(--color-ink); border-color: var(--color-control-border, var(--color-neutral)); }
+
+/* Switch rows: "Como você trabalha". */
+.set-switch { display: flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; padding: 0.45rem 0.35rem; cursor: pointer; }
+.set-switch input { flex: none; width: 2.6rem; height: 1.5rem; appearance: none; border-radius: 999px; background: var(--color-neutral); position: relative; cursor: pointer; margin: 0; border: 1px solid var(--color-control-border, var(--color-neutral)); }
+.set-switch input::after { content: ''; position: absolute; top: 2px; left: 2px; width: calc(1.5rem - 6px); height: calc(1.5rem - 6px); border-radius: 50%; background: var(--color-card); transition: transform 0.15s; }
+.set-switch input:checked { background: var(--color-success); border-color: var(--color-success); }
+.set-switch input:checked::after { transform: translateX(1.1rem); }
+.set-switch input:disabled { opacity: 0.55; cursor: not-allowed; }
+.set-switch input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* Waiting invite block and status dots. */
+.set-block { border: 1px solid var(--color-rule); border-left: 4px solid var(--color-accent); border-radius: 6px; background: var(--color-card); padding: 0.65rem 0.85rem; display: grid; gap: 0.35rem; }
+.set-block p { margin: 0; }
+.set-block--danger { border-left-color: var(--color-danger); }
+.set-level { display: inline-flex; align-items: center; gap: 0.4rem; }
+.set-level--limit { color: var(--color-danger-text, var(--color-danger)); font-weight: 700; }
+.set-plan-head { margin: 0; color: var(--color-muted); }
+.set-plan-head--issue { color: var(--color-danger-text, var(--color-danger)); font-weight: 700; }
+
+/* Role choice in the invite and member dialogs. */
+.role-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.role-opt { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.5rem 0.65rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); cursor: pointer; min-height: 2.75rem; }
+.role-opt:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.role-opt input { margin-top: 0.25rem; accent-color: var(--color-accent); flex: none; }
+.role-opt span { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.role-note { margin: 0; color: var(--color-muted); font-size: 0.875rem; }
+
+/* Invite code and the MCP URL shown once. */
+.code-box { font-family: var(--font-mono, monospace); font-size: 1.25rem; letter-spacing: 0.05em; padding: 0.5rem 0.75rem; background: var(--color-paper-2); border-radius: 6px; overflow-wrap: anywhere; user-select: all; }
+.code-box--url { font-size: 0.875rem; letter-spacing: 0; }
+
+/* Permission table: big screens only, for the owner to read what each role does. */
+.perm-wrap { display: none; }
+@media (min-width: 64rem) {
+  .perm-wrap { display: grid; gap: 0.5rem; }
+}
+.perm-table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+.perm-table caption { text-align: left; color: var(--color-muted); padding-bottom: 0.4rem; caption-side: top; }
+.perm-table th, .perm-table td { border-bottom: 1px solid var(--color-rule); padding: 0.35rem 0.5rem; text-align: center; }
+.perm-table th[scope='row'] { text-align: left; font-weight: 500; }
+.perm-table thead th { font-weight: 700; vertical-align: bottom; }
+.perm-table tbody th[scope='rowgroup'] { text-align: left; font-weight: 700; color: var(--color-muted); padding-top: 0.75rem; }
+.perm-yes { color: var(--color-success-ink, var(--color-success)); font-weight: 700; }
+.perm-no { color: var(--color-muted); }
+.perm-off { color: var(--color-muted); font-style: italic; }
+
+/* Company logo, whole (contain), never cropped. */
+.logo-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.logo-box { width: 7rem; height: 7rem; border-radius: 8px; background: var(--color-paper-2); display: grid; place-items: center; padding: 0.4rem; flex: none; color: var(--color-muted); }
+.logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.picker-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 60vh; overflow: auto; }
+.picker-list .check-row { min-height: 2.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; }
+.picker-list .check-row:hover { background: var(--color-paper-2); }

@@ -4,7 +4,7 @@
 import { reactive } from 'vue'
 import type { User } from 'firebase/auth'
 import { createApi, type ApiOptions } from './api'
-import { authClient, cacheState, clearFirestoreCache, firestoreLite } from './firebase'
+import { authClient, cacheState, clearFirestoreCache, firestoreClient, firestoreLite } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { readStorage, writeStorage } from './storage'
@@ -21,6 +21,8 @@ export interface CompanyProfile {
   country?: string
   segment?: string
   useFinancial?: boolean
+  /** Device control (Configurações shows the devices list only with it on). */
+  useDeviceManagement?: boolean
   /** Contratos on (company.settings.contracts). */
   useContracts?: boolean
 }
@@ -448,6 +450,40 @@ export async function selectCompany(companyId: string): Promise<void> {
   session.company = null
   session.companyFailed = false
   await loadCompany(companyId)
+}
+
+let stopCompany: (() => void) | null = null
+
+/**
+ * Follows companies/{id} live (one document), after the first screen is up: a
+ * change made by the app or another tab, such as turning "Valores e cobrança"
+ * off, reaches session.company at once, and the open screen is checked again
+ * (App.vue). The first read stays on the REST build; this uses the full client.
+ */
+export async function followCompany(companyId: string | null): Promise<void> {
+  stopCompany?.()
+  stopCompany = null
+  if (!companyId) return
+  try {
+    const [db, { doc, onSnapshot }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+    if (session.companyId !== companyId) return
+    stopCompany = onSnapshot(
+      doc(db, 'companies', companyId),
+      (snapshot) => {
+        if (session.companyId !== companyId || !snapshot.exists()) return
+        const data = snapshot.data() as CompanyProfile
+        const next: CompanyProfile = { ...(session.company ?? {}) }
+        for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement', 'useContracts'] as const) {
+          ;(next as Record<string, unknown>)[key] = data[key] ?? undefined
+        }
+        if (JSON.stringify(next) !== JSON.stringify(session.company)) session.company = next
+        session.companyFailed = false
+      },
+      (error) => console.warn('session: company not followed', error),
+    )
+  } catch (error) {
+    console.warn('session: company not followed', error)
+  }
 }
 
 export function can(permission: Permission): boolean {

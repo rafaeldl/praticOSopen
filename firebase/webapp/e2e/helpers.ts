@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, type Page } from '@playwright/test'
+import { expect, test, type Browser, type Page } from '@playwright/test'
 import { PASSWORD, USERS } from './fixtures.mjs'
 
 export type UserKey = keyof typeof USERS
@@ -20,7 +20,16 @@ export async function login(page: Page, user: UserKey, path = './') {
  */
 export async function signOut(page: Page) {
   const reloaded = page.waitForEvent('load')
-  await page.getByRole('button', { name: 'Sair' }).click()
+  // In Configurações "Sair" asks first (account.sign-out), as the app; the
+  // screens outside the shell (no company, not allowed) sign out at once.
+  await expect(page.getByRole('button', { name: 'Sair' }).first()).toBeVisible()
+  const settings = page.getByTestId('settings-sign-out')
+  if (await settings.count()) {
+    await settings.click()
+    await page.getByRole('dialog', { name: 'Deseja realmente sair?' }).getByRole('button', { name: 'Sair' }).click()
+  } else {
+    await page.getByRole('button', { name: 'Sair' }).click()
+  }
   await reloaded
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
 }
@@ -55,4 +64,11 @@ export async function expectNoSideScroll(page: Page, allowed: string[] = []) {
       .map((element) => `${element.tagName}.${element.className}: ${element.scrollWidth} > ${element.clientWidth}`)
   }, allowed)
   expect(overflow).toEqual([])
+}
+
+/** A second person in the same test: a new browser context with the project's base URL, language and zone. */
+export async function newPersonPage(browser: Browser): Promise<Page> {
+  const { baseURL, locale, timezoneId } = test.info().project.use
+  const context = await browser.newContext({ baseURL, locale, timezoneId })
+  return context.newPage()
 }

@@ -112,6 +112,7 @@ router.get(
         data: {
           invites: invites.map((inv: inviteService.Invite) => ({
             token: inv.token,
+            name: inv.name,
             email: inv.email,
             phone: inv.phone,
             role: inv.role,
@@ -162,7 +163,7 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // Verify invite belongs to this company
-    if (invite.company.id !== companyId) {
+    if (invite.company?.id !== companyId) {
       res.status(404).json({
         success: false,
         error: { code: 'NOT_FOUND', message: 'Invite not found' },
@@ -182,7 +183,8 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const deleted = await inviteService.cancelInvite(token, userId);
+    // The company was checked above: an owner/admin cancels any of its invites.
+    const deleted = await inviteService.cancelInvite(token, userId, { asManager: isAdmin });
 
     if (!deleted) {
       res.status(400).json({
