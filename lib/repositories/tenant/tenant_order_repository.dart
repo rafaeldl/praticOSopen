@@ -219,6 +219,41 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return result;
   }
 
+  /// Creates [order] (its id set by [OrderContract.generatedOrderId]) unless
+  /// it already exists, and writes [contract] on the template, in one
+  /// transaction. Returns whether the order was created here.
+  Future<bool> createContractOrder(
+    String companyId, {
+    required String templateId,
+    required OrderContract contract,
+    required Order order,
+  }) async {
+    final collection = collectionFor(companyId);
+    final orderRef = collection.doc(order.id);
+    final templateRef = collection.doc(templateId);
+    try {
+      return await firestore.runTransaction<bool>((tx) async {
+        final existing = await tx.get(orderRef);
+        if (!existing.exists) {
+          final json = toJson(order)..remove('id');
+          tx.set(orderRef, json);
+        }
+        tx.update(templateRef, {'contract': contract.toJson()});
+        return !existing.exists;
+      });
+    } on FirebaseException catch (e) {
+      // Consultant and technician can't read an order that doesn't exist yet
+      // (the read rule looks at its createdBy), so the transaction is denied.
+      // TODO(rules): let them read it and drop this fallback, which can
+      // still duplicate when two devices generate at once.
+      if (e.code != 'permission-denied') rethrow;
+      order.id = null;
+      await super.createItem(companyId, order);
+      await templateRef.update({'contract': contract.toJson()});
+      return true;
+    }
+  }
+
   /// Offline without cache, `get()` throws: treat as a new order (full write).
   Future<bool> _exists(DocumentReference<Map<String, dynamic>> ref) async {
     try {

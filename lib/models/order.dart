@@ -343,11 +343,43 @@ class OrderContract {
     }
   }
 
-  /// Whether the contract is due (nextDueDate <= now and active)
-  bool get isDue {
-    if (active != true || nextDueDate == null) return false;
-    return nextDueDate!.isBefore(DateTime.now()) ||
-        nextDueDate!.isAtSameMomentAs(DateTime.now());
+  /// Whether the contract is due: active, nextDueDate <= [now] and not after
+  /// the last day of the contract ([endDate]).
+  bool isDueAt(DateTime now) {
+    final due = nextDueDate;
+    if (active != true || due == null) return false;
+    if (due.isAfter(now)) return false;
+    return !_afterEnd(due);
+  }
+
+  /// Whether the contract is due now (see [isDueAt]).
+  bool get isDue => isDueAt(DateTime.now());
+
+  /// [date] falls after the contract's last day.
+  bool _afterEnd(DateTime date) {
+    final end = endDate;
+    if (end == null) return false;
+    final lastDay = DateTime(end.year, end.month, end.day + 1);
+    return !date.isBefore(lastDay);
+  }
+
+  /// After generating the order of [nextDueDate]: the next date counts from
+  /// that due date (not from when the app happened to run), and the contract
+  /// stops when the next date is past [endDate].
+  void advanceAfterGenerating(DateTime now) {
+    lastGeneratedDate = nextDueDate ?? now;
+    generatedCount = (generatedCount ?? 0) + 1;
+    nextDueDate = computeNextDueDate();
+    final next = nextDueDate;
+    if (next == null || _afterEnd(next)) active = false;
+  }
+
+  /// Id of the order generated from contract [templateId] for [due]: the
+  /// same on every device, so two devices generating at once write one
+  /// order, not two.
+  static String generatedOrderId(String templateId, DateTime due) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${templateId}_${due.year}${two(due.month)}${two(due.day)}';
   }
 
   /// Whether the contract has expired (endDate passed)

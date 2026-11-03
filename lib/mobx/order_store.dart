@@ -751,23 +751,21 @@ abstract class _OrderStore with Store {
     }
     newOrder.total = total;
 
-    final tenantRepo = TenantOrderRepository();
-    await tenantRepo.createItem(companyId!, newOrder);
+    final contract = template.contract!;
+    final due = contract.nextDueDate ?? DateTime.now();
+    newOrder.id = OrderContract.generatedOrderId(template.id!, due);
+    contract.advanceAfterGenerating(DateTime.now());
 
-    // Update template contract tracking
-    template.contract!.lastGeneratedDate = DateTime.now();
-    template.contract!.generatedCount =
-        (template.contract!.generatedCount ?? 0) + 1;
-    template.contract!.nextDueDate = template.contract!.computeNextDueDate();
-
-    // Deactivate if expired
-    if (template.contract!.isExpired) {
-      template.contract!.active = false;
-    }
-
-    await tenantRepo.updateItem(companyId!, template);
-
-    return newOrder;
+    // One transaction: the order of this due date is created only if no
+    // other device created it, and only the template's contract is updated
+    // (never the whole template).
+    final created = await TenantOrderRepository().createContractOrder(
+      companyId!,
+      templateId: template.id!,
+      contract: contract,
+      order: newOrder,
+    );
+    return created ? newOrder : null;
   }
 
   /// Check and auto-generate orders for all due contracts (called on app startup)
@@ -806,8 +804,7 @@ abstract class _OrderStore with Store {
 
       int generated = 0;
       for (final template in dueOrders) {
-        await generateOrderFromContract(template);
-        generated++;
+        if (await generateOrderFromContract(template) != null) generated++;
       }
       print('[Contracts] Generated $generated orders');
       return generated;
