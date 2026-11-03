@@ -6,10 +6,12 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/utils/order_scope.dart';
 
-/// Order list queries must match the Firestore rules: consultant and
-/// technician read only the orders they created, so every list query they
-/// run filters `createdBy.id == uid` (otherwise the whole query is denied).
+/// Order list queries must match the Firestore rules: the consultant reads
+/// only the orders they created and the technician also the ones assigned to
+/// them, so every list query they run filters by it (otherwise the whole
+/// query is denied).
 void main() {
   const allRoles = RolesType.values;
   const seeAll = [RolesType.admin, RolesType.manager, RolesType.supervisor];
@@ -26,20 +28,30 @@ void main() {
       }
     });
 
-    test('consultant and technician filter by their own uid', () {
-      for (final role in ownOnly) {
-        expect(
-          AuthorizationService.orderCreatorFilterFor(role: role, userId: 'me'),
-          'me',
-          reason: '$role',
-        );
-      }
+    test('the consultant filters by the orders they created', () {
+      expect(
+        AuthorizationService.orderCreatorFilterFor(
+          role: RolesType.consultant,
+          userId: 'me',
+        ),
+        const OrderScope('me'),
+      );
     });
 
-    test('an unknown role filters too (the filtered query never fails)', () {
+    test('the technician also sees the orders assigned to them', () {
+      expect(
+        AuthorizationService.orderCreatorFilterFor(
+          role: RolesType.technician,
+          userId: 'me',
+        ),
+        const OrderScope('me', assigned: true),
+      );
+    });
+
+    test('an unknown role filters by creator (the query never fails)', () {
       expect(
         AuthorizationService.orderCreatorFilterFor(role: null, userId: 'me'),
-        'me',
+        const OrderScope('me'),
       );
     });
   });
@@ -48,9 +60,19 @@ void main() {
     test('adds createdBy.id when there is a creator', () {
       final args = TenantOrderRepository.scopedArgs([
         QueryArgs('status', 'done'),
-      ], 'me');
+      ], const OrderScope('me'));
       expect(args.map((a) => a.key), ['status', 'createdBy.id']);
       expect(args.last.value, 'me');
+      expect(args.last.oper, 'isEqualTo');
+    });
+
+    test('created by or assigned to the technician', () {
+      final args = TenantOrderRepository.scopedArgs([
+        QueryArgs('status', 'done'),
+      ], const OrderScope('me', assigned: true));
+      expect(args.map((a) => a.key), ['status', 'createdBy.id']);
+      expect(args.last.value, 'me');
+      expect(args.last.oper, TenantOrderRepository.createdOrAssignedOper);
     });
 
     test('keeps the query as is without a creator', () {
@@ -64,7 +86,7 @@ void main() {
     test('does not repeat an existing createdBy.id filter', () {
       final args = TenantOrderRepository.scopedArgs([
         QueryArgs('createdBy.id', 'me'),
-      ], 'me');
+      ], const OrderScope('me', assigned: true));
       expect(args, hasLength(1));
     });
   });
@@ -106,6 +128,26 @@ void main() {
       }
     });
 
+    test('the technician opens the orders assigned to them', () {
+      final assigned = by('other')..assignedTo = (UserAggr()..id = 'me');
+      expect(
+        AuthorizationService.canAccessOrderFor(
+          role: RolesType.technician,
+          userId: 'me',
+          order: assigned,
+        ),
+        isTrue,
+      );
+      expect(
+        AuthorizationService.canAccessOrderFor(
+          role: RolesType.consultant,
+          userId: 'me',
+          order: assigned,
+        ),
+        isFalse,
+      );
+    });
+
     test('no role or no user opens nothing', () {
       expect(
         AuthorizationService.canAccessOrderFor(
@@ -142,7 +184,7 @@ void main() {
   });
 
   group('creatorFilterChanges (role arrives late)', () {
-    Future<List<String?>> run(RolesType? initial, List<RolesType?> roles) =>
+    Future<List<OrderScope?>> run(RolesType? initial, List<RolesType?> roles) =>
         AuthorizationService.creatorFilterChanges(
           initial: initial,
           roles: Stream.fromIterable(roles),
@@ -150,11 +192,21 @@ void main() {
         ).toList();
 
     test('unknown role filters, then drops the filter for an admin', () async {
-      expect(await run(null, [null, RolesType.admin]), ['me', null]);
+      expect(await run(null, [null, RolesType.admin]), [
+        const OrderScope('me'),
+        null,
+      ]);
     });
 
-    test('unknown role that turns out technician keeps the filter', () async {
-      expect(await run(null, [RolesType.technician]), ['me']);
+    test('unknown role that turns out consultant keeps the filter', () async {
+      expect(await run(null, [RolesType.consultant]), [const OrderScope('me')]);
+    });
+
+    test('unknown role that turns out technician adds the assigned', () async {
+      expect(await run(null, [RolesType.technician]), [
+        const OrderScope('me'),
+        const OrderScope('me', assigned: true),
+      ]);
     });
 
     test('known role stays put when the user doc is briefly missing', () async {
@@ -162,10 +214,10 @@ void main() {
     });
 
     test('a role change after load updates the filter', () async {
-      expect(
-        await run(RolesType.admin, [RolesType.technician]),
-        [null, 'me'],
-      );
+      expect(await run(RolesType.admin, [RolesType.technician]), [
+        null,
+        const OrderScope('me', assigned: true),
+      ]);
     });
   });
 }

@@ -18,6 +18,7 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
+import 'package:praticos/utils/order_scope.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
@@ -2390,12 +2391,12 @@ abstract class _OrderStore with Store {
     }
   }
 
-  StreamSubscription<String?>? _scopeWatch;
+  StreamSubscription<OrderScope?>? _scopeWatch;
 
   /// The page may have been read with the provisional `createdBy.id` filter
   /// (role not loaded in time). When the role arrives and the filter is
   /// different, reload instead of keeping owner/admin filtered.
-  void _reloadWhenScopeChanges(String? status, String? usedScope) {
+  void _reloadWhenScopeChanges(String? status, OrderScope? usedScope) {
     _scopeWatch?.cancel();
     _scopeWatch = TenantOrderRepository.creatorScopeChanges()
         .where((scope) => scope != usedScope)

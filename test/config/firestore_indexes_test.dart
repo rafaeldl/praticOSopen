@@ -8,12 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// and the order queries of members without viewAllOrders (#456) need one
 /// index per filter combination led by createdBy.id.
 void main() {
-  final json = jsonDecode(
-    File('firebase/firestore.indexes.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
+  final json =
+      jsonDecode(File('firebase/firestore.indexes.json').readAsStringSync())
+          as Map<String, dynamic>;
   final indexes = (json['indexes'] as List).cast<Map<String, dynamic>>();
-  final overrides =
-      (json['fieldOverrides'] as List).cast<Map<String, dynamic>>();
+  final overrides = (json['fieldOverrides'] as List)
+      .cast<Map<String, dynamic>>();
 
   String signature(Map<String, dynamic> index) {
     final fields = (index['fields'] as List)
@@ -34,28 +34,32 @@ void main() {
     }
   });
 
-  test('orders scoped by createdBy.id have their composite indexes', () {
-    const expected = [
-      'createdAt:DESCENDING,__name__:DESCENDING',
-      'payment:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
-      'status:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
-      'status:ASCENDING,dueDate:ASCENDING,__name__:ASCENDING',
-      'customer.id:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
-      'customer.id:ASCENDING,payment:ASCENDING,createdAt:DESCENDING,'
-          '__name__:DESCENDING',
-      'customer.id:ASCENDING,status:ASCENDING,createdAt:DESCENDING,'
-          '__name__:DESCENDING',
-      'customer.id:ASCENDING,status:ASCENDING,dueDate:ASCENDING,'
-          '__name__:ASCENDING',
-      'dueDate:ASCENDING,__name__:ASCENDING',
-      'scheduledDate:ASCENDING,__name__:ASCENDING',
-    ];
-    final deployed = indexes.map(signature).toSet();
-    for (final fields in expected) {
-      expect(
-        deployed,
-        contains('orders|COLLECTION|createdBy.id:ASCENDING,$fields'),
-      );
-    }
-  });
+  // The technician's queries are `createdBy.id == uid OR assignedTo.id ==
+  // uid`: each side of the OR needs its own index.
+  for (final scope in ['createdBy.id', 'assignedTo.id']) {
+    test('orders scoped by $scope have their composite indexes', () {
+      const expected = [
+        'createdAt:DESCENDING,__name__:DESCENDING',
+        'payment:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
+        'status:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
+        'status:ASCENDING,dueDate:ASCENDING,__name__:ASCENDING',
+        'customer.id:ASCENDING,createdAt:DESCENDING,__name__:DESCENDING',
+        'customer.id:ASCENDING,payment:ASCENDING,createdAt:DESCENDING,'
+            '__name__:DESCENDING',
+        'customer.id:ASCENDING,status:ASCENDING,createdAt:DESCENDING,'
+            '__name__:DESCENDING',
+        'customer.id:ASCENDING,status:ASCENDING,dueDate:ASCENDING,'
+            '__name__:ASCENDING',
+        'dueDate:ASCENDING,__name__:ASCENDING',
+        'scheduledDate:ASCENDING,__name__:ASCENDING',
+      ];
+      final deployed = indexes.map(signature).toSet();
+      for (final fields in expected) {
+        expect(
+          deployed,
+          contains('orders|COLLECTION|$scope:ASCENDING,$fields'),
+        );
+      }
+    });
+  }
 }

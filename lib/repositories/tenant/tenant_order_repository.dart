@@ -7,6 +7,7 @@ import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/order_scope.dart';
 import 'package:praticos/utils/switch_stream.dart';
 
 /// Repository para Orders usando subcollections por tenant.
@@ -27,30 +28,58 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   // Query scope (Firestore rules)
   // ═══════════════════════════════════════════════════════════════════
   //
-  // Consultant and technician read only the orders they created, and the
-  // rules deny any list query that could return someone else's order. So
-  // every list query here gets `createdBy.id == uid` for them.
+  // Consultant and technician read only some orders (the consultant the ones
+  // they created, the technician also the ones assigned to them), and the
+  // rules deny any list query that could return another order. So every
+  // list query here gets the matching filter for them.
 
-  /// Uid to filter list queries by (`createdBy.id`), or null when the user
-  /// reads every order. Replaceable in tests.
-  static Future<String?> Function() creatorScope = () =>
+  /// Scope to filter list queries by, or null when the user reads every
+  /// order. Replaceable in tests.
+  static Future<OrderScope?> Function() creatorScope = () =>
       AuthorizationService.instance.orderCreatorFilter();
 
   /// [creatorScope] now and again whenever it changes (the role arrives
   /// after the query started). Live queries resubscribe on each value.
   /// Replaceable in tests.
-  static Stream<String?> Function() creatorScopeChanges = () =>
+  static Stream<OrderScope?> Function() creatorScopeChanges = () =>
       AuthorizationService.instance.orderCreatorFilterChanges();
 
-  /// [args] plus `createdBy.id == creatorId` (when [creatorId] is set and
-  /// the query doesn't already filter by it).
-  static List<QueryArgs> scopedArgs(List<QueryArgs>? args, String? creatorId) {
+  /// Operator of the [QueryArgs] that filters "created by or assigned to"
+  /// its value (see `TenantRepository`).
+  static const String createdOrAssignedOper = 'createdOrAssigned';
+
+  /// [args] plus the [scope] filter: `createdBy.id == uid`, or
+  /// `createdBy.id == uid OR assignedTo.id == uid` for the technician. Kept
+  /// as is when [scope] is null or the query already filters `createdBy.id`.
+  static List<QueryArgs> scopedArgs(List<QueryArgs>? args, OrderScope? scope) {
     final list = [...?args];
-    if (creatorId == null || list.any((a) => a.key == 'createdBy.id')) {
+    if (scope == null || list.any((a) => a.key == 'createdBy.id')) {
       return list;
     }
-    return list..add(QueryArgs('createdBy.id', creatorId));
+    return list..add(
+      scope.assigned
+          ? QueryArgs('createdBy.id', scope.uid, oper: createdOrAssignedOper)
+          : QueryArgs('createdBy.id', scope.uid),
+    );
   }
+
+  /// [query] filtered by [scope] (same filter as [scopedArgs]).
+  static Query<Map<String, dynamic>> applyScope(
+    Query<Map<String, dynamic>> query,
+    OrderScope? scope,
+  ) {
+    if (scope == null) return query;
+    if (!scope.assigned) {
+      return query.where('createdBy.id', isEqualTo: scope.uid);
+    }
+    return query.where(createdOrAssignedFilter(scope.uid));
+  }
+
+  /// `createdBy.id == uid OR assignedTo.id == uid`.
+  static Filter createdOrAssignedFilter(String uid) => Filter.or(
+    Filter('createdBy.id', isEqualTo: uid),
+    Filter('assignedTo.id', isEqualTo: uid),
+  );
 
   @override
   Future<List<Order?>> getQueryList(
@@ -79,7 +108,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   }) {
     return switchStream(
       creatorScopeChanges(),
-      (String? creator) => super.streamQueryList(
+      (OrderScope? creator) => super.streamQueryList(
         companyId,
         orderBy: orderBy,
         args: scopedArgs(args, creator),
@@ -120,7 +149,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   }) {
     return switchStream(
       creatorScopeChanges(),
-      (String? creator) => super.streamListFromTo(
+      (OrderScope? creator) => super.streamListFromTo(
         companyId,
         field,
         from,
@@ -402,7 +431,11 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         companyId,
         args: [
           QueryArgs('payment', true, oper: 'isNull'),
-          QueryArgs('status', ['approved', 'progress', 'done'], oper: 'whereIn'),
+          QueryArgs('status', [
+            'approved',
+            'progress',
+            'done',
+          ], oper: 'whereIn'),
         ],
       ),
     ]);
