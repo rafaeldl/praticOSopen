@@ -9,7 +9,11 @@ const group = (page: Page, name: string) => page.getByRole('listbox').getByRole(
 async function palette(page: Page, user: UserKey, path: string, query: string) {
   await login(page, user, path)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-  await page.keyboard.press('ControlOrMeta+k')
+  // Under load the shortcut can arrive before the shell registers it: press again until the palette opens.
+  await expect(async () => {
+    if (!(await field(page).isVisible())) await page.keyboard.press('ControlOrMeta+k')
+    await expect(field(page)).toBeVisible({ timeout: 1000 })
+  }).toPass({ timeout: 15_000 })
   await field(page).fill(query)
 }
 
