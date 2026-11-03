@@ -152,4 +152,25 @@ void main() {
       expect(generateSearchKeywords('Da Do'), ['da', 'do']);
     });
   });
+
+  // Same as the server (device.service.ts) and the web: name, serial and
+  // brand, each with generateSearchKeywords. The bot and the API find a
+  // vehicle by plate after it is edited in the app.
+  group('deviceKeywords (same as the server and the web)', () {
+    test('name, serial and brand', () {
+      expect(
+        deviceKeywords('Gol da Silva 2018', 'ABC-1D23', 'Volkswagen'),
+        [
+          'gol', 'silva', '2018', 'gol silva 2018',
+          'abc1d23',
+          'volkswagen',
+        ],
+      );
+    });
+
+    test('missing parts add nothing', () {
+      expect(deviceKeywords('Gol', null, ''), ['gol']);
+      expect(deviceKeywords(null, 'XYZ 9A87', null), ['xyz', '9a87', 'xyz 9a87']);
+    });
+  });
 }

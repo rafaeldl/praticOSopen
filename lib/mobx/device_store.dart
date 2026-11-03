@@ -48,7 +48,11 @@ abstract class _DeviceStore with Store {
     device.company = Global.companyAggr;
     device.updatedAt = DateTime.now();
     device.updatedBy = user?.toAggr();
-    device.keywords = generateKeywords(device.name);
+    device.keywords = deviceKeywords(
+      device.name,
+      device.serial,
+      device.manufacturer,
+    );
 
     if (isEditing) {
       await repository.updateItem(companyId!, device);
