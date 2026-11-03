@@ -14,24 +14,35 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 
 class _FakeForms implements FormsService {
-  _FakeForms({this.fail = false});
+  _FakeForms({this.fail = false, List<FormResponse>? server})
+    : server = server ?? [];
 
   final bool fail;
-  final saved = <FormResponse>[];
-  final local = <List<FormResponse>?>[];
+
+  /// The checklist on the server (the web may have answered too).
+  List<FormResponse> server;
+  final changes = <FormAnswerChange>[];
+  final before = <FormResponse?>[];
   final statuses = <FormStatus>[];
 
+  /// The response of the question changed, as the screen will show it.
+  List<FormResponse> get saved => [
+    for (final c in changes) server.lastWhere((r) => r.itemId == c.itemId),
+  ];
+
   @override
-  Future<void> saveResponse(
+  Future<List<FormResponse>?> saveAnswer(
     String companyId,
     String orderId,
     String formId,
-    FormResponse response, {
-    List<FormResponse>? localResponses,
+    FormAnswerChange change, {
+    FormResponse? localBefore,
   }) async {
     if (fail) throw StateError('permission-denied');
-    saved.add(response);
-    local.add(localResponses);
+    changes.add(change);
+    before.add(localBefore);
+    server = applyAnswerChange(server, change);
+    return server;
   }
 
   @override
@@ -191,7 +202,7 @@ void main() {
   testWidgets('answering until the end saves and completes the checklist', (
     tester,
   ) async {
-    final forms = _FakeForms();
+    final forms = _FakeForms(server: [FormResponse(itemId: 'a', value: true)]);
     final photos = _FakePhotos();
     await _open(
       tester,
@@ -230,10 +241,16 @@ void main() {
     expect(find.byType(FormFillScreen), findsNothing);
   });
 
-  testWidgets('an answer goes with the local responses (offline queue)', (
+  testWidgets('an answer changes only its value, not the photos of the web', (
     tester,
   ) async {
-    final forms = _FakeForms();
+    // The web put a photo on "b" after the app opened the checklist.
+    final forms = _FakeForms(
+      server: [
+        FormResponse(itemId: 'a', value: true),
+        FormResponse(itemId: 'b', photoUrls: ['web/b.jpg']),
+      ],
+    );
     await _open(
       tester,
       FormFillScreen(
@@ -249,7 +266,47 @@ void main() {
     await tester.tap(find.text('Reserva'));
     await tester.pumpAndSettle();
 
-    expect(forms.local.last?.map((r) => r.itemId), ['a', 'b']);
+    final change = forms.changes.single;
+    expect(change, isA<FormValueChange>());
+    expect(change.itemId, 'b');
+    expect((change as FormValueChange).value, 'Reserva');
+    // What the screen had of "b" goes along for the offline queue.
+    expect(forms.before.single, isNull);
+    expect(forms.server.last.photoUrls, ['web/b.jpg']);
+    expect(forms.server.last.value, 'Reserva');
+  });
+
+  testWidgets('a photo goes as a photo added, keeping the value', (
+    tester,
+  ) async {
+    final forms = _FakeForms(
+      server: [FormResponse(itemId: 'c', value: 'nota', photoUrls: ['web/c.jpg'])],
+    );
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          responses: [
+            FormResponse(itemId: 'a', value: true),
+            FormResponse(itemId: 'b', value: 'Cheio'),
+          ],
+        ),
+        formsService: forms,
+        photoService: _FakePhotos(),
+      ),
+    );
+    await tester.tap(find.text('Continuar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tirar foto'));
+    await tester.pumpAndSettle();
+
+    final change = forms.changes.single as FormPhotosAdded;
+    expect(change.itemId, 'c');
+    expect(change.urls, ['https://x/1.jpg']);
+    expect(forms.server.single.photoUrls, ['web/c.jpg', 'https://x/1.jpg']);
+    expect(forms.server.single.value, 'nota');
   });
 
   testWidgets('a refused answer is told, not swallowed', (tester) async {
@@ -300,13 +357,6 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(removed, ['p1', 'p2']);
-  });
-
-  test('the queued answer never writes the status', () {
-    final update = FormsService.queuedResponsesUpdate([
-      FormResponse(itemId: 'a', value: true),
-    ], DateTime(2026, 11, 3));
-    expect(update.keys, unorderedEquals(['responses', 'updatedAt']));
   });
 
   test('offline errors queue the answer; refusals do not', () {
