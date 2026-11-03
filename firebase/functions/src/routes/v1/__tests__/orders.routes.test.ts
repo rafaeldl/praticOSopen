@@ -258,6 +258,27 @@ describe('GET /orders por data da visita (agenda)', () => {
     expect(res.body.data.map((o: any) => o.id)).toEqual(['v2']);
   });
 
+  it('B1: PATCH aceita a data sem fuso que o GET devolve e grava como o app grava', async () => {
+    const read = await call('owner', 'get', `${O}/v2`);
+    const res = await call('owner', 'patch', `${O}/v2`, { scheduledDate: read.body.data.scheduledDate, dueDate: '2031-03-31T21:00:00.000', expectedUpdatedAt: read.body.data.version });
+    expect(res.status).toBe(200);
+    expect(doc('v2').scheduledDate).toBe('2031-03-10T09:30:00.000');
+    expect(doc('v2').dueDate).toBe('2031-03-31T21:00:00.000');
+    // With a zone it is still an instant, saved in UTC.
+    await call('owner', 'patch', `${O}/v1`, { scheduledDate: '2031-03-11T14:00:00-03:00' });
+    expect(doc('v1').scheduledDate).toBe('2031-03-11T17:00:00.000Z');
+    expect((await call('owner', 'patch', `${O}/v1`, { scheduledDate: '2031-03-11 14:00' })).status).toBe(400);
+  });
+
+  it('B1: nova OS aceita visita e entrega sem fuso', async () => {
+    seed('companies/c1/customers/cust1', { name: 'João' });
+    const res = await call('owner', 'post', O, { customerId: 'cust1', scheduledDate: '2031-03-12T08:00:00.000', dueDate: '2031-03-13T00:00:00.000' });
+    expect(res.status).toBe(201);
+    const created = doc(res.body.data.id);
+    expect(created.scheduledDate).toBe('2031-03-12T08:00:00.000');
+    expect(created.dueDate).toBe('2031-03-13T00:00:00.000');
+  });
+
   it('intervalo só com createdAt, scheduledDate ou dueDate', async () => {
     const res = await call('owner', 'get', `${O}?sort=number&startDate=2031-03-09T00:00:00.000Z`);
     expect(res.status).toBe(400);

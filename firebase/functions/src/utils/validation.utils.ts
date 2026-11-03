@@ -93,8 +93,15 @@ export const updateProductSchema = z.object({
   value: z.number().min(0).optional(),
 });
 
-/** ISO date-time with zone (what GET returns in `updatedAt`, `dueDate`...). */
+/** ISO date-time with zone (what GET returns in `updatedAt`). */
 const isoDateTime = z.string().datetime({ offset: true });
+
+/**
+ * Visit and delivery: an instant with a zone, or the company's local time
+ * without one, as the app writes it (Dart toIso8601String) and GET returns it.
+ */
+export const ZONELESS_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?$/;
+const orderDate = z.union([isoDateTime, z.string().regex(ZONELESS_DATE_TIME)]);
 
 /** The `version` the server gave (order-version.ts), sent back as is; an ISO instant with a zone still works. */
 export const orderVersionSchema = z.string().min(1).max(64);
@@ -138,16 +145,16 @@ export const createOrderSchema = z.object({
     total: moneySchema.nullable().optional(),
     description: z.string().max(500).optional(),
   })).max(200).optional(),
-  dueDate: z.string().datetime().optional(),
-  scheduledDate: z.string().datetime().optional(),
+  dueDate: orderDate.optional(),
+  scheduledDate: orderDate.optional(),
   status: z.enum(ORDER_STATUSES).default('quote'),
 });
 
 /** PATCH /:id. null clears a date or the assignee. */
 export const updateOrderSchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),
-  dueDate: isoDateTime.nullable().optional(),
-  scheduledDate: isoDateTime.nullable().optional(),
+  dueDate: orderDate.nullable().optional(),
+  scheduledDate: orderDate.nullable().optional(),
   assignedTo: idSchema.nullable().optional(),
   expectedUpdatedAt: orderVersionSchema.optional(),
 });

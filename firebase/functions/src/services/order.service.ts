@@ -38,6 +38,7 @@ import * as catalogService from './catalog.service';
 import { roundMoney } from '../utils/money';
 import { computeOrderTotal, findLine, ItemKind } from './order-items';
 import { OrderRuleError } from './order-errors';
+import { ZONELESS_DATE_TIME } from '../utils/validation.utils';
 import { orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
 
 export { roundMoney };
@@ -79,6 +80,16 @@ export async function readOrderForWrite(
 
 function audit(actor: UserAggr | undefined, now: string): Record<string, unknown> {
   return { updatedAt: now, ...(actor ? { updatedBy: actor } : {}) };
+}
+
+/**
+ * Visit and delivery as stored: local time without a zone stays as it came (the
+ * app writes and reads it that way; turning it into UTC would move it by the
+ * company's offset in the app). An instant with a zone is saved in UTC.
+ */
+export function storedOrderDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return ZONELESS_DATE_TIME.test(value) ? value : new Date(value).toISOString();
 }
 
 // ============================================================================
@@ -754,8 +765,8 @@ export async function createOrder(
     photos: [],
     total,
     discount: 0,
-    dueDate: input.dueDate ? new Date(input.dueDate).toISOString() : null,
-    scheduledDate: input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null,
+    dueDate: storedOrderDate(input.dueDate),
+    scheduledDate: storedOrderDate(input.scheduledDate),
     status,
     paid: false,
     payment: status === 'quote' || status === 'canceled' ? null : 'unpaid',
@@ -821,10 +832,10 @@ export async function updateOrder(
       }
     }
     if (input.dueDate !== undefined) {
-      updateData.dueDate = input.dueDate ? new Date(input.dueDate).toISOString() : null;
+      updateData.dueDate = storedOrderDate(input.dueDate);
     }
     if (input.scheduledDate !== undefined) {
-      updateData.scheduledDate = input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null;
+      updateData.scheduledDate = storedOrderDate(input.scheduledDate);
     }
     if (input.assignedTo !== undefined) {
       updateData.assignedTo = input.assignedTo;
