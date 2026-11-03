@@ -1,13 +1,21 @@
 import { expect, test, type Page } from '@playwright/test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
-async function auditScreens(page: Page, theme: 'light' | 'dark') {
+// The audit is split in three tests per theme (screens, order screens, components):
+// one test had grown to ~29 s of the 30 s budget on CI, and each axe run adds up.
+type Theme = 'light' | 'dark'
+
+async function start(page: Page, theme: Theme) {
   await page.emulateMedia({ colorScheme: theme })
   await page.goto('login')
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
   await expectNoAxeViolations(page, `login ${theme}`)
   await login(page, 'admin', 'login')
   await setTheme(page, theme)
+}
+
+async function auditScreens(page: Page, theme: Theme) {
+  await start(page, theme)
 
   for (const [path, title] of [
     ['./', 'Início'],
@@ -25,7 +33,48 @@ async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await page.goto('orders?order=order-1')
   await expect(page.getByRole('complementary', { name: 'OS aberta' })).toBeVisible()
   await expectNoAxeViolations(page, `painel ${theme}`)
+}
 
+async function auditOrderScreens(page: Page, theme: Theme) {
+  await start(page, theme)
+  // The order screens: open order with money, its menu and dialogs, Nova OS, board, batch.
+  await page.goto('./?order=scn-owed')
+  const panel = page.getByRole('complementary', { name: 'OS aberta' })
+  await expect(panel.getByTestId('order-totals')).toBeVisible()
+  await expectNoAxeViolations(page, `OS concluída ${theme}`)
+  await panel.getByRole('button', { name: 'Mais ações' }).click()
+  await expectNoAxeViolations(page, `menu da OS ${theme}`)
+  await page.keyboard.press('Escape')
+  await panel.getByTestId('next-step').click()
+  await expect(page.getByRole('dialog', { name: 'Receber' })).toBeVisible()
+  await expectNoAxeViolations(page, `receber ${theme}`)
+  await page.keyboard.press('Escape')
+  await panel.getByRole('button', { name: /^Mudar / }).first().click()
+  await expectNoAxeViolations(page, `item ${theme}`)
+  await page.keyboard.press('Escape')
+  await page.goto('./?order=scn-hold')
+  await expect(page.getByTestId('hold-line')).toBeVisible()
+  await expectNoAxeViolations(page, `OS parada ${theme}`)
+  await page.goto('./')
+  await page.getByTestId('new-order').click()
+  await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente')
+  await expectNoAxeViolations(page, `nova OS ${theme}`)
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Nova OS' })).toHaveCount(0)
+  await page.getByTestId('orders-table').getByRole('checkbox').first().check()
+  await expect(page.getByRole('region', { name: 'Ações nas OS selecionadas' })).toBeVisible()
+  await expectNoAxeViolations(page, `lote ${theme}`)
+  await page.goto('./?view=board')
+  await expect(page.getByTestId('board')).toBeVisible()
+  await expectNoAxeViolations(page, `quadro ${theme}`)
+  await page.goto('./?f=all')
+  await expect(page.getByTestId('orders-table')).toBeVisible()
+  await expectNoAxeViolations(page, `todas por mês ${theme}`)
+}
+
+async function auditComponents(page: Page, theme: Theme) {
+  await start(page, theme)
   await page.goto('dev/components')
   await page.getByRole('button', { name: 'Diálogo' }).click()
   await expectNoAxeViolations(page, `diálogo ${theme}`)
@@ -41,13 +90,19 @@ async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await expectNoAxeViolations(page, `paleta ${theme}`)
 }
 
-test('axe: 0 violações no tema claro', async ({ page }) => {
-  await auditScreens(page, 'light')
-})
+for (const [theme, name] of [['light', 'claro'], ['dark', 'escuro']] as const) {
+  test(`axe: 0 violações no tema ${name}: telas`, async ({ page }) => {
+    await auditScreens(page, theme)
+  })
 
-test('axe: 0 violações no tema escuro', async ({ page }) => {
-  await auditScreens(page, 'dark')
-})
+  test(`axe: 0 violações no tema ${name}: OS`, async ({ page }) => {
+    await auditOrderScreens(page, theme)
+  })
+
+  test(`axe: 0 violações no tema ${name}: componentes`, async ({ page }) => {
+    await auditComponents(page, theme)
+  })
+}
 
 test('foco visível nos links da navegação', async ({ page }) => {
   await login(page, 'admin')
@@ -71,6 +126,12 @@ test.describe('larguras e texto', () => {
       await login(page, 'admin', 'orders')
       await expect(page.getByTestId('orders-table')).toBeVisible()
       await expectNoSideScroll(page)
+      await page.goto('orders?order=scn-late')
+      await expect(page.getByTestId('order-detail')).toBeVisible()
+      await expectNoSideScroll(page)
+      await page.goto('orders?view=board')
+      await expect(page.getByTestId('board')).toBeVisible()
+      await expectNoSideScroll(page, ['.board'])
       await page.goto('settings')
       await expect(page.getByLabel('Tema')).toBeVisible()
       await expectNoSideScroll(page)
@@ -82,7 +143,7 @@ test.describe('larguras e texto', () => {
     await login(page, 'admin')
     await expect(page.getByRole('navigation', { name: 'Abas' })).toBeVisible()
     await expect(page.getByRole('complementary', { name: 'Navegação' })).toBeHidden()
-    await page.getByRole('button', { name: 'Mais' }).click()
+    await page.getByRole('button', { name: 'Mais', exact: true }).click()
     await page.getByRole('link', { name: 'Clientes' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Clientes' })).toBeVisible()
     await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -96,12 +157,24 @@ test.describe('larguras e texto', () => {
       await page.setViewportSize({ width, height })
       await login(page, 'admin')
       await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
-      for (const path of ['orders', 'settings', 'dev/components']) {
+      for (const path of ['orders', 'orders?order=scn-owed', 'settings', 'dev/components']) {
         await page.goto(path)
         await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
-        await expect(page.locator('h1')).toBeVisible()
+        // An open order takes the whole phone screen, without the page title.
+        // The open order is measured with its totals in (they arrive after the header).
+        await expect(path.includes('order=') ? page.getByTestId('order-totals') : page.locator('h1')).toBeVisible()
         await expectNoSideScroll(page)
       }
+      // Nova OS with text at 200%: the drawer neither clips nor scrolls sideways.
+      await page.goto('orders')
+      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
+      await page.getByRole('button', { name: /Nova OS/ }).filter({ visible: true }).first().click()
+      await expect(page.getByRole('dialog', { name: 'Nova OS' })).toBeVisible()
+      const overflow = await page.evaluate(() => {
+        const box = document.querySelector('.layer-box') as HTMLElement
+        return box.scrollWidth - box.clientWidth
+      })
+      expect(overflow).toBeLessThanOrEqual(1)
     })
   }
 })

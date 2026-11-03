@@ -10,6 +10,8 @@ import {
   orderTotal,
   paymentStatus,
   remainingBalance,
+  receivePermissions,
+  isOverdue,
 } from '../src/lib/rules/order-rules'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
@@ -55,6 +57,20 @@ describe('status-transitions', () => {
   test.each(cases('status-transitions.json'))('$id', (c) => {
     const { role, isCreator, from } = c.given
     expect([...allowedTransitions(role, isCreator, from)].sort()).toEqual([...c.expect.allowed].sort())
+  })
+})
+
+describe('order-receive', () => {
+  test.each(cases('order-receive.json'))('$id', (c) => {
+    const want = c.correct ?? c.expect
+    expect(receivePermissions(c.given.role, c.given.isCreator, c.given.useFinancial)).toEqual(want)
+  })
+})
+
+describe('overdue', () => {
+  test.each(cases('overdue.json'))('$id', (c) => {
+    const want = c.correct ?? c.expect
+    expect(isOverdue(c.given.status, c.given.dueDate, new Date(c.given.now))).toBe(want.overdue)
   })
 })
 

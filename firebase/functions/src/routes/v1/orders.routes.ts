@@ -56,6 +56,7 @@ import {
   orderHoldSchema,
   receiptFileSchema,
   listOrdersQuerySchema,
+  orderVersionSchema,
 } from '../../utils/validation.utils';
 import { z } from 'zod';
 
@@ -111,8 +112,8 @@ function validationError(res: Response, errors: string[]): void {
 function expectedUpdatedAtOf(req: Request): string | undefined {
   const raw = (req.body as { expectedUpdatedAt?: unknown } | undefined)?.expectedUpdatedAt ?? req.query.expectedUpdatedAt;
   if (raw === undefined) return undefined;
-  const parsed = z.string().datetime({ offset: true }).safeParse(raw);
-  if (!parsed.success) throw new OrderRuleError('VALIDATION_ERROR', 400, 'expectedUpdatedAt must be an ISO date-time');
+  const parsed = orderVersionSchema.safeParse(raw);
+  if (!parsed.success) throw new OrderRuleError('VALIDATION_ERROR', 400, 'expectedUpdatedAt must be the version of the order');
   return parsed.data;
 }
 
@@ -167,12 +168,26 @@ router.get('/', route('Failed to list orders', async (req, res, companyId) => {
   const query = validation.data;
 
   const showPrices = await showPricesOf(req, res);
+  // Search by number (the list did not load it): only the field's own index, then who may see each one.
+  if (query.number !== undefined) {
+    const found = (await orderService.findOrdersByNumber(companyId, query.number)).filter((order) => canSeeOrder(req, order));
+    res.json({ success: true, data: found.map((o) => projectOrderSummary(o, showPrices)), pagination: { limit: query.limit, hasMore: false, nextCursor: null } });
+    return;
+  }
+  // The technician asking for their own assigned orders gets them whoever created them
+  // (firestore.rules isOrderAssignee; indexes assignedTo.id + status/createdAt).
+  const userId = req.userContext?.userId;
+  const technician = !seesAll && !!userId && req.userContext?.role === 'technician';
+  const assignedToSelf = technician && query.assignedTo === userId;
+  // Without an owner filter, the technician gets what they created and what was given to them (Todas, Paradas…).
+  const createdOrAssigned = technician && query.assignedTo === undefined;
   const result = await orderService.listOrders(companyId, {
     status: query.status as OrderStatus[] | undefined,
     customerId: query.customerId,
     deviceId: query.deviceId,
     assignedTo: query.assignedTo,
-    createdById: seesAll ? undefined : req.userContext?.userId,
+    createdById: seesAll || assignedToSelf || createdOrAssigned ? undefined : userId,
+    createdOrAssignedTo: createdOrAssigned ? userId : undefined,
     startDate: query.startDate,
     endDate: query.endDate,
     limit: query.limit,
@@ -424,7 +439,7 @@ router.post('/:id/payments', requireOrderAccess(), route('Failed to add payment'
   const guard = await receiveGuard(req, res);
   const result = await orderService.addPayment(companyId, param(req, 'id'), data.amount, 'payment', data.description, getUserAggr(req), {
     guard, paidAt: data.paidAt, paymentMethod: data.paymentMethod, receiptFile: data.receiptFile,
-    clientTransactionId: data.clientTransactionId,
+    clientTransactionId: data.clientTransactionId, expectedUpdatedAt: data.expectedUpdatedAt,
   });
   if (!result) return notFound(res);
   const { order, ...summary } = result;
@@ -490,7 +505,7 @@ router.post('/:id/discounts', requireOrderAccess(), route('Failed to add discoun
   if (!validation.success) return validationError(res, validation.errors);
   const result = await orderService.addPayment(
     companyId, param(req, 'id'), validation.data.amount, 'discount', validation.data.description, getUserAggr(req),
-    { guard: await financialGuard(req, res), clientTransactionId: validation.data.clientTransactionId },
+    { guard: await financialGuard(req, res), clientTransactionId: validation.data.clientTransactionId, expectedUpdatedAt: validation.data.expectedUpdatedAt },
   );
   if (!result) return notFound(res);
   const { order, ...summary } = result;

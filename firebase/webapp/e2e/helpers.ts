@@ -13,6 +13,18 @@ export async function login(page: Page, user: UserKey, path = './') {
   await expect(page.getByLabel('E-mail')).toBeHidden()
 }
 
+/**
+ * "Sair" shows the login at once and then starts the page over clean
+ * (signOutEverywhere: location.assign after clearing the cache). Wait for that
+ * new page, or the next goto is aborted by it (ERR_ABORTED).
+ */
+export async function signOut(page: Page) {
+  const reloaded = page.waitForEvent('load')
+  await page.getByRole('button', { name: 'Sair' }).click()
+  await reloaded
+  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+}
+
 /** Owner works in two companies, so the first stop is the company choice. */
 export async function chooseCompany(page: Page, name: string) {
   await expect(page.getByRole('heading', { level: 1, name: 'Onde você vai trabalhar agora?' })).toBeVisible()
@@ -32,12 +44,15 @@ export async function setTheme(page: Page, theme: 'light' | 'dark') {
   }, theme)
 }
 
-export async function expectNoSideScroll(page: Page) {
-  const overflow = await page.evaluate(() => {
-    const roots = [document.documentElement, ...document.querySelectorAll('.main, .list-pane, .workspace, .entry-main')]
+/** `allowed`: containers that scroll sideways on purpose (the board's columns). */
+export async function expectNoSideScroll(page: Page, allowed: string[] = []) {
+  const overflow = await page.evaluate((skip) => {
+    const roots = [document.documentElement, ...document.querySelectorAll('.main, .list-pane, .workspace, .entry-main, .od-scroll, .board-wrap')].filter(
+      (element) => !skip.some((selector) => element.matches(selector)),
+    )
     return roots
       .filter((element) => element.scrollWidth > element.clientWidth + 1)
       .map((element) => `${element.tagName}.${element.className}: ${element.scrollWidth} > ${element.clientWidth}`)
-  })
+  }, allowed)
   expect(overflow).toEqual([])
 }

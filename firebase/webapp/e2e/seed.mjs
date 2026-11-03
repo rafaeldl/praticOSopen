@@ -63,7 +63,8 @@ async function seedCompanies() {
       segment: company.segment,
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
-      nextOrderNumber: 100000,
+      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..509), like a real counter.
+      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 509) + 1,
       ...audit(company.owner, 100000),
     })
     // Server-only map: what buildRolesClaim verifies against.
@@ -163,6 +164,80 @@ async function seedOrders(companyId, count) {
   await writer.close()
 }
 
+// Orders whose dates must sit around the day the tests run (late, today, visit):
+// relative to now, at noon in Brazil, so the day is the same in the browser.
+function brDay(offset) {
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  const date = new Date(`${today}T15:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() + offset)
+  return date.toISOString()
+}
+
+async function seedScenario() {
+  const company = { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }
+  const customer = (n) => ({ id: `customer-${n}`, name: `Cliente ${String(n).padStart(2, '0')}` })
+  const device = (n) => ({ id: `device-${n}`, name: `Veículo ${n}`, serial: `TST${String(n).padStart(4, '0')}` })
+  const service = (n, value) => ({ service: { id: `service-${n}`, name: `Serviço ${n}`, value: n * 50 }, value })
+  // Created "in the future" so they stay on the first page above the orders
+  // the tests make while running (those carry the real now).
+  const AHEAD = -5 * 365 * 24 * 60
+  const base = (number, author, minutesAgo, extra) => ({
+    number,
+    company,
+    products: [],
+    discount: 0,
+    paidAmount: 0,
+    payment: 'unpaid',
+    paid: false,
+    ...audit(author, AHEAD + minutesAgo),
+    ...extra,
+  })
+  const orders = {
+    'scn-late': base(501, USERS.admin, -100, {
+      status: 'approved', customer: customer(3), device: device(3), devices: [device(3)], deviceIds: ['device-3'],
+      services: [service(2, 100)], total: 100, dueDate: brDay(-3),
+    }),
+    'scn-today': base(502, USERS.admin, -90, {
+      status: 'progress', customer: customer(4), device: device(4), devices: [device(4)], deviceIds: ['device-4'],
+      services: [service(1, 50)], total: 50, dueDate: brDay(0),
+    }),
+    'scn-hold': base(503, USERS.admin, -80, {
+      status: 'progress', customer: customer(5), services: [service(3, 150)], total: 150,
+      onHold: { reason: 'part', note: 'Peça chega sexta', since: brDay(-2) },
+    }),
+    'scn-owed': base(504, USERS.admin, -70, {
+      status: 'done', customer: customer(6), services: [service(4, 300)], total: 300, paidAmount: 100, payment: 'unpaid',
+    }),
+    'scn-quote-old': base(505, USERS.consultant, -40, {
+      status: 'quote', customer: customer(7), services: [service(1, 50)], total: 50, payment: null,
+    }),
+    'scn-tech-visit': base(506, USERS.technician, -60, {
+      status: 'approved', customer: customer(8), services: [service(1, 50)], total: 50,
+      assignedTo: aggr(USERS.technician), scheduledDate: brDay(0),
+    }),
+    'scn-tech-quote': base(507, USERS.technician, -50, {
+      status: 'quote', customer: customer(9), services: [service(2, 100)], total: 100, payment: null,
+    }),
+    // Created by the admin and given to the technician: shows in their Minhas (#514, assignedTo).
+    'scn-assigned': base(508, USERS.admin, -30, {
+      status: 'approved', customer: customer(10), services: [service(1, 50)], total: 50,
+      assignedTo: aggr(USERS.technician),
+    }),
+    // Saved by the app: updatedAt in local time without a zone, with microseconds (Dart toIso8601String).
+    'scn-app-saved': base(509, USERS.admin, -20, {
+      status: 'done', customer: customer(1), services: [service(1, 80)], total: 80,
+      updatedAt: '2026-10-01T09:00:00.123456',
+    }),
+  }
+  const batch = db.batch()
+  for (const [id, data] of Object.entries(orders)) batch.set(db.doc(`companies/${COMPANY_A}/orders/${id}`), data)
+  batch.set(db.doc(`companies/${COMPANY_A}/orders/scn-hold/comments/c1`), {
+    text: 'Pedi a peça ao fornecedor', authorType: 'internal', author: { name: USERS.admin.name, userId: USERS.admin.uid },
+    source: 'app', isInternal: true, createdAt: iso(10),
+  })
+  await batch.commit()
+}
+
 // Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
 async function seedWebAccess() {
   const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
@@ -199,4 +274,6 @@ await seedWebAccess()
 await seedInvites()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
+// The big list measures the list alone; the scenarios are for the screen tests.
+if (orders <= DEFAULT_ORDERS) await seedScenario()
 console.log(`seed: ${Object.keys(USERS).length} usuários, ${orders} OS em ${Date.now() - started} ms`)

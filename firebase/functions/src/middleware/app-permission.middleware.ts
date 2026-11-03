@@ -102,11 +102,16 @@ export async function can(
   );
 }
 
-/** Every order, or only the ones the user created (same as firestore.rules). */
-export function canSeeOrder(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
+/**
+ * Every order, or only the ones the user created; the technician also sees the
+ * ones assigned to them (same as firestore.rules, isOrderAssignee).
+ */
+export function canSeeOrder(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy' | 'assignedTo'>>): boolean {
   const role = req.userContext?.role;
   if (role === 'owner' || role === 'admin' || role === 'manager' || role === 'supervisor') return true;
-  return !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
+  const userId = req.userContext?.userId;
+  if (!userId) return false;
+  return order.createdBy?.id === userId || (role === 'technician' && order.assignedTo?.id === userId);
 }
 
 /**

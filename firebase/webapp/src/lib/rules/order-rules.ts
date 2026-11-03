@@ -158,3 +158,26 @@ export function orderPermissions(role: OrderRole, isCreator: boolean, status: st
     canManageForms: canAccess && (full || (role === 'supervisor' ? status !== 'done' && status !== 'canceled' : quote)),
   }
 }
+
+/** "Receber" and "Dar desconto" (contract order-receive.json). `owner` is read as admin. */
+export function receivePermissions(role: string, isCreator: boolean, useFinancial: boolean) {
+  const r = role === 'owner' ? 'admin' : role
+  const finance = useFinancial && (r === 'admin' || r === 'manager')
+  return { canReceive: finance || (useFinancial && r === 'consultant' && isCreator), canDiscount: finance }
+}
+
+/** Local calendar day as a number (yyyymmdd), so two instants compare by day only. */
+export function dayKey(date: Date): number {
+  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+}
+
+/**
+ * Late: the promised day is behind today and the order is not done or canceled.
+ * By day, never by minute, in the list and in the order (contract overdue.json).
+ */
+export function isOverdue(status: string | null | undefined, dueDate: string | Date | null | undefined, now: Date): boolean {
+  if (!dueDate || status === 'done' || status === 'canceled') return false
+  const due = dueDate instanceof Date ? dueDate : new Date(dueDate)
+  if (Number.isNaN(due.getTime())) return false
+  return dayKey(due) < dayKey(now)
+}

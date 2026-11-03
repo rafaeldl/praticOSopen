@@ -5,6 +5,7 @@
  * goes out in any field: totals, line values, line totals, the catalog price
  * inside a line, payments, payment status and payment receipts.
  */
+import { orderVersion } from './order-version';
 import type { Order, OrderProduct, OrderService } from '../models/types';
 import { calculateRemainingBalance } from './order.service';
 import { locateLines, productLineTotal, transactionIds } from './order-items';
@@ -77,6 +78,8 @@ export function projectOrderSummary(order: Order, showPrices: boolean): Json {
     scheduledDate: iso(order.scheduledDate) ?? undefined,
     createdAt: iso(order.createdAt) ?? undefined,
     updatedAt: iso(order.updatedAt) ?? undefined,
+    // Opaque: sent back as expectedUpdatedAt without any conversion (order-version.ts).
+    version: orderVersion(order.updatedAt) ?? undefined,
     ...(showPrices
       ? { total: order.total ?? 0, paidAmount: order.paidAmount ?? 0, payment: order.payment ?? null, paid: order.paid === true }
       : {}),
@@ -106,6 +109,7 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     createdAt: iso(order.createdAt),
     createdBy: order.createdBy,
     updatedAt: iso(order.updatedAt),
+    version: orderVersion(order.updatedAt),
     ...(showPrices
       ? {
         ...money(order),

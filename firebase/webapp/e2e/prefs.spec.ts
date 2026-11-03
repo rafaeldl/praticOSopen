@@ -46,11 +46,14 @@ test('segmento troca o rótulo da situação, com i18n de reserva', async ({ pag
   await expect(page.locator('.status').filter({ hasText: 'Na oficina' }).first()).toBeVisible()
 })
 
-test('atalhos: paleta abre vazia, ? lista, e dá para desligar teclas simples', async ({ page }) => {
+test('atalhos: paleta traz Nova OS, ? lista, e dá para desligar teclas simples', async ({ page }) => {
   await login(page, 'admin')
   await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
   await page.keyboard.press('ControlOrMeta+k')
-  await expect(page.getByRole('dialog', { name: 'Buscar e comandos' })).toBeVisible()
+  const palette = page.getByRole('dialog', { name: 'Buscar e comandos' })
+  await expect(palette).toBeVisible()
+  await expect(palette.getByRole('option', { name: /Nova OS/ })).toBeVisible()
+  await palette.getByRole('combobox').fill('zzz')
   await expect(page.getByText('Nada encontrado.')).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)

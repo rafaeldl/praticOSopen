@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { PASSWORD, USERS } from './fixtures.mjs'
-import { chooseCompany, login } from './helpers'
+import { chooseCompany, login, signOut } from './helpers'
 
 test('entra com e-mail e vê a casca', async ({ page }) => {
   await login(page, 'admin')
@@ -44,8 +44,7 @@ test('conta sem empresa vê a explicação e pode sair', async ({ page }) => {
   await login(page, 'noCompany')
   await expect(page.getByRole('heading', { level: 1, name: 'Sua conta ainda não está em uma empresa' })).toBeVisible()
   await expect(page).toHaveURL(/no-company/)
-  await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await signOut(page)
 })
 
 test('dono de duas empresas troca, e a moeda segue a empresa', async ({ page }) => {
@@ -130,8 +129,7 @@ test('fora da lista de acesso: tela simples, sem casca nem dados', async ({ page
 
 test('sair limpa a sessão', async ({ page }) => {
   await login(page, 'admin', 'settings')
-  await page.getByRole('button', { name: 'Sair' }).click()
-  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await signOut(page)
   // The guard may redirect to /login while the navigation is still loading,
   // which aborts goto(); the URL check below is what matters.
   await page.goto('orders').catch((error: Error) => {

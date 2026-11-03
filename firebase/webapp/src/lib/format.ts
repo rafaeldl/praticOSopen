@@ -102,6 +102,27 @@ export function formatDateTime(value: DateInput, country?: string | null): strin
   }).format(date)
 }
 
+/** "15/10" (or "10/15" in the US): the short date of list rows. */
+export function formatDayMonth(value: DateInput, country?: string | null): string {
+  const date = toDate(value)
+  if (!date) return ''
+  return dateFormat(countryFormat(country).locale, { day: '2-digit', month: '2-digit' }).format(date)
+}
+
+/** "17:00" (24 h where the country uses it). */
+export function formatTime(value: DateInput, country?: string | null): string {
+  const date = toDate(value)
+  if (!date) return ''
+  return dateFormat(countryFormat(country).locale, { hour: '2-digit', minute: '2-digit' }).format(date)
+}
+
+/** "outubro de 2026": month headings of "Todas". */
+export function formatMonthYear(value: DateInput, country?: string | null): string {
+  const date = toDate(value)
+  if (!date) return ''
+  return dateFormat(countryFormat(country).locale, { month: 'long', year: 'numeric' }).format(date)
+}
+
 /** Currency symbol for a field prefix ("R$", "€"). */
 export function currencySymbol(country?: string | null): string {
   const { currency, locale } = countryFormat(country)

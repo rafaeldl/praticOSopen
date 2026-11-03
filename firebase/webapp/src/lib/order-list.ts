@@ -3,7 +3,7 @@
 // shown twice or skipped.
 export interface ListRow {
   id: string
-  createdAt?: string
+  createdAt?: string | null
 }
 
 /** Negative when `a` comes first: newer first, then the larger id (same as the query). */

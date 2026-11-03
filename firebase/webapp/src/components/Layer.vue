@@ -11,12 +11,14 @@ import { ui } from '@/lib/ui'
 
 const props = withDefaults(
   defineProps<{
-    kind?: 'dialog' | 'drawer' | 'sheet' | 'palette' | 'cheat'
+    kind?: 'dialog' | 'drawer' | 'sheet' | 'palette' | 'cheat' | 'menu'
     label: string
     /** Runs before closing. Resolve false to stay, e.g. after "Descartar?". */
     guard?: () => boolean | Promise<boolean>
+    /** Position of the box (a menu held to its button). */
+    boxStyle?: Record<string, string>
   }>(),
-  { kind: 'dialog', guard: undefined },
+  { kind: 'dialog', guard: undefined, boxStyle: undefined },
 )
 const emit = defineEmits<{ close: [] }>()
 
@@ -131,7 +133,7 @@ defineExpose({ close: requestClose })
 <template>
   <Teleport to="body">
     <div ref="root" class="layer" :class="`layer--${kind}`" @mousedown.self="requestClose">
-      <div ref="box" class="layer-box" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" @keydown="onKeydown">
+      <div ref="box" class="layer-box" :style="boxStyle" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" @keydown="onKeydown">
         <slot :close="requestClose" />
       </div>
     </div>

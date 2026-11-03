@@ -16,6 +16,7 @@ declare module 'vue-router' {
 }
 
 const Placeholder = () => import('@/views/PlaceholderView.vue')
+const OrdersView = () => import('@/views/OrdersView.vue')
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -52,10 +53,12 @@ export const routes: RouteRecordRaw[] = [
     (entry): RouteRecordRaw => ({
       path: entry.path,
       name: entry.name,
-      component: entry.name === 'orders' ? () => import('@/views/OrdersView.vue') : Placeholder,
+      component: entry.name === 'home' ? OrdersView : Placeholder,
       meta: { access: entry.access, title: entry.label },
     }),
   ),
+  // Same list under its own name: shared links and the performance test use it.
+  { path: '/orders', name: 'orders', component: OrdersView, meta: { access: NAV[0]!.access, title: 'orders' } },
   {
     path: '/settings',
     name: 'settings',

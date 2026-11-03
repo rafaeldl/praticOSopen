@@ -134,6 +134,52 @@ describe('GET /orders', () => {
     }
   });
 
+  it('técnico pede as atribuídas a ele e recebe também as que outra pessoa criou (como as regras)', async () => {
+    seedOrder('e', { number: 5, createdAt: '2026-10-05T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('f', { number: 6, createdAt: '2026-10-06T10:00:00.000Z', assignedTo: { id: 'other', name: 'Outro' } });
+    const res = await call('technician', 'get', `${O}?assignedTo=tech1`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((o: any) => o.id)).toEqual(['e']);
+    expect((await call('technician', 'get', `${O}/e`)).status).toBe(200);
+    expect((await call('technician', 'get', `${O}/f`)).status).toBe(403);
+    // Another person's assignment keeps the "created by me" filter; the consultant never sees by assignment.
+    expect((await call('technician', 'get', `${O}?assignedTo=other`)).body.data).toEqual([]);
+    seedOrder('g', { number: 7, assignedTo: { id: 'cons1', name: 'Caio' } });
+    expect((await call('consultant', 'get', `${O}?assignedTo=cons1`)).body.data).toEqual([]);
+    expect((await call('consultant', 'get', `${O}/g`)).status).toBe(403);
+  });
+
+  it('N1 e N3: sem filtro de dono, o técnico recebe as que criou e as atribuídas, sem repetir, paginado e sem valores', async () => {
+    // e: admin's, assigned to tech1. h: created by tech1 and assigned to tech1 (must come once). f: someone else's.
+    seedOrder('e', { number: 5, createdAt: '2026-10-05T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' }, status: 'progress' });
+    seedOrder('f', { number: 6, createdAt: '2026-10-06T10:00:00.000Z', assignedTo: { id: 'other', name: 'Outro' } });
+    seedOrder('h', { number: 8, createdAt: '2026-10-08T10:00:00.000Z', createdBy: { id: 'tech1', name: 'Téo' }, assignedTo: { id: 'tech1', name: 'Téo' } });
+    const all = await call('technician', 'get', O);
+    expect(all.status).toBe(200);
+    expect(all.body.data.map((o: any) => o.id)).toEqual(['h', 'e', 'c', 'a']);
+    for (const o of all.body.data) {
+      for (const field of ['total', 'paidAmount', 'payment', 'remainingBalance']) expect(o).not.toHaveProperty(field);
+      expect(o.services?.[0] ?? {}).not.toHaveProperty('value');
+    }
+    // Pages of 2 walk the same list, no repeats, no gaps.
+    const ids: string[] = [];
+    let cursor = '';
+    for (let i = 0; i < 4; i++) {
+      const page = await call('technician', 'get', `${O}?limit=2${cursor ? `&cursor=${cursor}` : ''}`);
+      ids.push(...page.body.data.map((o: any) => o.id));
+      if (!page.body.pagination.hasMore) break;
+      cursor = page.body.pagination.nextCursor;
+    }
+    expect(ids).toEqual(['h', 'e', 'c', 'a']);
+    // Status filters keep the union (Paradas/Em aberto read the open ones).
+    expect((await call('technician', 'get', `${O}?status=progress`)).body.data.map((o: any) => o.id)).toEqual(['e', 'c']);
+    // The assigned order opens for the technician without values (N3).
+    const detail = await call('technician', 'get', `${O}/e`);
+    expect(detail.status).toBe(200);
+    for (const field of ['total', 'paidAmount', 'payment', 'transactions']) expect(detail.body.data[field]).toBeUndefined();
+    expect(detail.body.data.services[0]).not.toHaveProperty('value');
+  });
+
   it('consultor vê o total das próprias', async () => {
     const res = await call('consultant', 'get', O);
     expect(res.body.data).toEqual([expect.objectContaining({ id: 'd', total: 100 })]);
@@ -761,6 +807,24 @@ describe('clientTransactionId', () => {
     expect(doc('o1').transactions).toHaveLength(1);
   });
 
+  it('N2: repetir com o mesmo id depois de a resposta se perder devolve o gravado, mesmo com expectedUpdatedAt velho', async () => {
+    seedOrder('o1');
+    const payment = { amount: 40, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b1', expectedUpdatedAt: T0 };
+    expect((await call('owner', 'post', `${O}/o1/payments`, payment)).status).toBe(200);
+    // The answer was lost: the screen still holds the old updatedAt and sends the same request.
+    const again = await call('owner', 'post', `${O}/o1/payments`, payment);
+    expect(again.status).toBe(200);
+    expect(again.body.data).toMatchObject({ transactionId: payment.clientTransactionId, paidAmount: 40 });
+    const discount = { amount: 5, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b2', expectedUpdatedAt: doc('o1').updatedAt };
+    expect((await call('owner', 'post', `${O}/o1/discounts`, discount)).status).toBe(200);
+    expect((await call('owner', 'post', `${O}/o1/discounts`, discount)).status).toBe(200);
+    expect(doc('o1').transactions).toHaveLength(2);
+    // A new id over an old version is still refused.
+    const stale = await call('owner', 'post', `${O}/o1/payments`, { amount: 1, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000b3', expectedUpdatedAt: T0 });
+    expect(stale.status).toBe(409);
+    expect(stale.body.error.code).toBe('ORDER_CHANGED');
+  });
+
   it('mesmo id com outro valor ou tipo é recusado', async () => {
     seedOrder('o1');
     const id = 'c0ffee00-0000-4000-8000-000000000003';
@@ -945,5 +1009,129 @@ describe('item avulso', () => {
     seedOrder('o1');
     expect((await call('owner', 'post', `${O}/o1/items`, { kind: 'service', value: 10 })).status).toBe(400);
     expect((await call('owner', 'post', `${O}/o1/items`, { kind: 'service', description: '  ', value: 10 })).status).toBe(400);
+  });
+});
+
+// ─── Versão da OS (revisao-pr515-3 A1) ──────────────────────────────────────
+// The app writes updatedAt as local time without a zone (Dart toIso8601String, microseconds),
+// older documents carry a Timestamp, and many have none. `version` is the stored value as is
+// (a Timestamp as its millis): the client sends it back unchanged and nothing is converted by zone.
+// Run with TZ=America/Sao_Paulo and TZ=UTC.
+describe('versão da OS (expectedUpdatedAt opaco)', () => {
+  const LOCAL = '2026-10-01T09:00:00.123456';
+  const STAMP = { seconds: 1790000000, nanoseconds: 123000000 };
+  const DUE = '2026-12-01T12:00:00.000Z';
+
+  it('GET devolve version cru: texto sem fuso continua texto, Timestamp vira millis, sem campo é null', async () => {
+    seedOrder('l', { updatedAt: LOCAL });
+    seedOrder('t', { updatedAt: STAMP });
+    seedOrder('n', { updatedAt: undefined });
+    expect((await call('owner', 'get', `${O}/l`)).body.data.version).toBe(LOCAL);
+    expect((await call('owner', 'get', `${O}/t`)).body.data.version).toBe('1790000000123');
+    expect((await call('owner', 'get', `${O}/n`)).body.data.version ?? null).toBeNull();
+    const list = await call('owner', 'get', O);
+    expect(list.body.data.find((o: any) => o.id === 'l').version).toBe(LOCAL);
+  });
+
+  it('OS salva pelo app (sem fuso, microssegundos): pagamento, desconto, PATCH e itens com o version devolvido passam', async () => {
+    seedOrder('l', { updatedAt: LOCAL, status: 'done' });
+    const version = (await call('owner', 'get', `${O}/l`)).body.data.version;
+    const paid = await call('owner', 'post', `${O}/l/payments`, { amount: 10, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c1', expectedUpdatedAt: version });
+    expect(paid.status).toBe(200);
+    const next = paid.body.data.order.version;
+    expect(typeof next).toBe('string');
+    expect((await call('owner', 'post', `${O}/l/discounts`, { amount: 5, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c2', expectedUpdatedAt: next })).status).toBe(200);
+    seedOrder('m', { updatedAt: LOCAL, status: 'approved' });
+    expect((await call('owner', 'patch', `${O}/m`, { dueDate: DUE, expectedUpdatedAt: LOCAL })).status).toBe(200);
+    seedOrder('i', { updatedAt: LOCAL, status: 'quote', payment: null });
+    expect((await call('owner', 'post', `${O}/i/items`, { kind: 'service', catalogId: 's1', expectedUpdatedAt: LOCAL })).status).toBe(201);
+  });
+
+  it('R1: o web guarda a versão do servidor (…Z), o app grava texto sem fuso, e o envio com a versão velha dá 409', async () => {
+    seedOrder('r', { updatedAt: T0, status: 'done', total: 200, paidAmount: 0 });
+    // 1. The web saw the server's version.
+    const seen = (await call('owner', 'get', `${O}/r`)).body.data.version;
+    expect(seen).toBe(T0);
+    // 2. The app books R$ 100 and saves local time without a zone.
+    seed('companies/c1/orders/r', { ...doc('r'), paidAmount: 100, payment: 'unpaid', updatedAt: '2026-10-01T10:05:00.123456',
+      transactions: [{ id: 'app-1', type: 'payment', amount: 100, createdAt: '2026-10-01T10:05:00.123456' }] });
+    // 3. A screen still on the old version sends the same R$ 100.
+    const late = await call('owner', 'post', `${O}/r/payments`, { amount: 100, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c4', expectedUpdatedAt: seen });
+    expect(late.status).toBe(409);
+    expect(late.body.error.code).toBe('ORDER_CHANGED');
+    expect(doc('r').paidAmount).toBe(100);
+    // The same for PATCH and items.
+    expect((await call('owner', 'patch', `${O}/r`, { dueDate: DUE, expectedUpdatedAt: seen })).status).toBe(409);
+    // Text without a zone read as an instant by a browser is not the version either.
+    const converted = new Date(Date.UTC(2026, 9, 1, 13, 5, 0, 123)).toISOString();
+    expect((await call('owner', 'patch', `${O}/r`, { dueDate: DUE, expectedUpdatedAt: converted })).status).toBe(409);
+  });
+
+  it('Timestamp: millis e ISO com Z do mesmo instante passam; outro instante dá 409', async () => {
+    seedOrder('t', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/t`, { dueDate: DUE, expectedUpdatedAt: '1790000000123' })).status).toBe(200);
+    seedOrder('u', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/u`, { dueDate: DUE, expectedUpdatedAt: new Date(1790000000123).toISOString() })).status).toBe(200);
+    seedOrder('v', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/v`, { dueDate: DUE, expectedUpdatedAt: '1790000000000' })).status).toBe(409);
+  });
+
+  it('outra versão dá 409 (com Z e sem fuso); OS sem updatedAt não recusa', async () => {
+    seedOrder('z', { updatedAt: T0, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/z`, { dueDate: DUE, expectedUpdatedAt: '2026-10-01T10:00:01.000Z' })).status).toBe(409);
+    seedOrder('w', { updatedAt: '2026-10-01T09:00:00.000', status: 'done' });
+    expect((await call('owner', 'patch', `${O}/w`, { dueDate: DUE, expectedUpdatedAt: '2026-10-01T09:00:00.001' })).status).toBe(409);
+    seedOrder('n', { updatedAt: undefined, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/n`, { dueDate: DUE, expectedUpdatedAt: T0 })).status).toBe(200);
+  });
+});
+
+// ─── Busca por número (revisao-pr515-3 A4) ─────────────────────────────────
+describe('GET /orders?number=', () => {
+  it('acha pelo número só a OS que a pessoa vê, projetada sem valores para quem não vê', async () => {
+    seedOrder('mine', { number: 42, createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('given', { number: 43, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('other', { number: 44 });
+    const found = await call('technician', 'get', `${O}?number=42`);
+    expect(found.status).toBe(200);
+    expect(found.body.data.map((o: any) => o.id)).toEqual(['mine']);
+    expect(found.body.data[0]).not.toHaveProperty('total');
+    expect((await call('technician', 'get', `${O}?number=43`)).body.data.map((o: any) => o.id)).toEqual(['given']);
+    expect((await call('technician', 'get', `${O}?number=44`)).body.data).toEqual([]);
+    expect((await call('supervisor', 'get', `${O}?number=44`)).body.data.map((o: any) => o.id)).toEqual(['other']);
+    expect((await call('technician', 'get', `${O}?number=abc`)).status).toBe(400);
+  });
+
+  it('R2: com mais de 10 OS repetidas no número, a da pessoa não fica de fora', async () => {
+    for (let i = 0; i < 120; i++) seedOrder(`dup${String(i).padStart(3, '0')}`, { number: 77 });
+    seedOrder('zz-mine', { number: 77, createdBy: { id: 'tech1', name: 'Téo' } });
+    expect((await call('technician', 'get', `${O}?number=77`)).body.data.map((o: any) => o.id)).toEqual(['zz-mine']);
+  });
+});
+
+// ─── União do técnico (revisao-pr515-3 A2, A3) ─────────────────────────────
+describe('união do técnico: mesma ordem da Firestore', () => {
+  it('datas iguais desempatam pelo id; texto pela ordem lexical; a OS repetida na virada da página aparece uma vez; sem total', async () => {
+    const same = '2026-10-05T10:00:00.000Z';
+    seedOrder('a1', { createdAt: same, createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('b2', { createdAt: same, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('c3', { createdAt: same, createdBy: { id: 'tech1', name: 'Téo' }, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('d4', { createdAt: '2026-10-04T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    // Lexical order of text (as Firestore): "10:00:00Z" > "10:00:00.500Z" ('Z' > '.'), so desc puts e5 first.
+    seedOrder('e5', { createdAt: '2026-10-03T10:00:00Z', createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('f6', { createdAt: '2026-10-03T10:00:00.500Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    const expected = ['c3', 'b2', 'a1', 'd4', 'e5', 'f6'];
+    for (const size of [1, 2, 3]) {
+      const ids: string[] = [];
+      let cursor = '';
+      for (let i = 0; i < 10; i++) {
+        const page = await call('technician', 'get', `${O}?limit=${size}${cursor ? `&cursor=${cursor}` : ''}`);
+        expect(page.body.pagination).not.toHaveProperty('total');
+        ids.push(...page.body.data.map((o: any) => o.id));
+        if (!page.body.pagination.hasMore) break;
+        cursor = page.body.pagination.nextCursor;
+      }
+      expect([size, ids]).toEqual([size, expected]);
+    }
   });
 });

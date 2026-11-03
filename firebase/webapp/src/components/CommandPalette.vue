@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { t } from '@/i18n'
-import { searchCommands, type Command } from '@/lib/commands'
+import { searchAll, type Command } from '@/lib/commands'
 import { shortcutLabel } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
 import Layer from './Layer.vue'
 
 const query = ref('')
 const active = ref(0)
-const results = computed(() => searchCommands(query.value, (key) => t(key)))
+const results = computed(() => searchAll(query.value, (key) => t(key)))
 const optionId = (index: number) => `palette-opt-${index}`
 const activeId = computed(() => (results.value[active.value] ? optionId(active.value) : undefined))
 
@@ -19,7 +19,9 @@ watch(query, () => {
 function run(command: Command | undefined) {
   if (!command) return
   ui.palette = false
-  command.run()
+  // After the palette has left (its history entry is being removed): a command that
+  // navigates, such as opening an order, must not be undone by that removal.
+  void nextTick(() => command.run())
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -66,7 +68,7 @@ function onKeydown(event: KeyboardEvent) {
         @mousemove="active = index"
       >
         <component :is="command.icon" v-if="command.icon" :size="18" aria-hidden="true" />
-        <span class="pal-main">{{ t(command.label) }}</span>
+        <span class="pal-main">{{ command.text ?? t(command.label) }}<small v-if="command.sub"> · {{ command.sub }}</small></span>
         <kbd v-if="command.keys">{{ shortcutLabel(command.keys) }}</kbd>
       </div>
     </div>
