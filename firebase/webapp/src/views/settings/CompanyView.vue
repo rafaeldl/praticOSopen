@@ -90,7 +90,7 @@ async function setFeature(feature: Feature, next: boolean) {
   saving.value = true
   merge({ [feature]: next })
   try {
-    await saveCompany({ [feature]: next })
+    merge({ updatedAt: await saveCompany({ [feature]: next }) })
     announce(t(next ? 'web.company.turnedOn' : 'web.company.turnedOff', { name: switches.value.find((item) => item.feature === feature)?.title ?? '' }))
   } catch (error) {
     console.error('company: switch failed', error)
@@ -131,8 +131,8 @@ async function changeSegment() {
   saving.value = true
   try {
     // A new segment clears the specialties of the previous one, as the app.
-    await saveCompany({ segment: id, subspecialties: null })
-    merge({ segment: id, subspecialties: null })
+    const updatedAt = await saveCompany({ segment: id, subspecialties: null })
+    merge({ segment: id, subspecialties: null, updatedAt })
     showToast(t('web.company.segmentChanged'))
   } catch (error) {
     console.error('company: segment failed', error)
@@ -152,14 +152,23 @@ async function saveSpecialties() {
   editing.value = null
   saving.value = true
   try {
-    await saveCompany({ subspecialties: ids.length ? ids : null })
-    merge({ subspecialties: ids.length ? ids : null })
+    const updatedAt = await saveCompany({ subspecialties: ids.length ? ids : null })
+    merge({ subspecialties: ids.length ? ids : null, updatedAt })
     showToast(t('web.company.saved'))
   } catch (error) {
     console.error('company: specialties failed', error)
     showToast(t('companySettingSaveError'))
   } finally {
     saving.value = false
+  }
+}
+
+/** Someone saved meanwhile: the next edit starts from their version (no loading screen). */
+async function refresh() {
+  try {
+    company.value = await loadCompany()
+  } catch (error) {
+    console.warn('company: refresh failed', error)
   }
 }
 
@@ -244,12 +253,12 @@ onMounted(load)
     </div>
   </div>
 
-  <CompanyDataForm v-if="editing === 'data' && company" :company="company" @saved="saved" @close="editing = null" />
+  <CompanyDataForm v-if="editing === 'data' && company" :company="company" @saved="saved" @stale="refresh" @close="editing = null" />
   <TermsForm
     v-if="editing === 'terms' && company"
     :terms="company.termsOfService ?? ''"
     :default-text="defaultTerms(segment, locale)"
-    @saved="(terms) => saved({ termsOfService: terms })"
+    @saved="(terms, updatedAt) => saved({ termsOfService: terms, updatedAt })"
     @close="editing = null"
   />
   <Layer v-if="editing === 'segment'" kind="dialog" :label="t('pickSegmentTitle')" @close="editing = null">

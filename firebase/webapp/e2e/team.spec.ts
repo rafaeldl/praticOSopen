@@ -22,6 +22,8 @@ test('Equipe: resumo, convite esperando com os dias, vencido à mostra e você p
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await openTeam(page)
   await expect(page.getByTestId('team-summary')).toHaveText('5 pessoas e 2 convites')
+  // The seats count shows; the plan limit never blocks in the browser (the app's rule, M1 of the #528 review).
+  await expect(page.getByTestId('team-seats')).toHaveText('Pessoas na equipe: 6 de 1')
   await expect(page.getByTestId('team-waiting-block')).toContainText('Paula Pendente ainda não entrou. O convite vence em 5 dias.')
   await expect(invites(page).locator(`[data-invite="${TEAM_INVITES.waiting.token}"]`)).toContainText('Convite enviado · vence em 5 dias')
   await expect(invites(page).locator(`[data-invite="${TEAM_INVITES.expired.token}"]`)).toContainText('Convite enviado · venceu')
@@ -59,7 +61,9 @@ test('Convidar: confere e-mail e WhatsApp, cria pela API e a vaga é contada no 
   await expect(form.locator('.field-error', { hasText: 'Telefone inválido' })).toBeVisible()
   await form.getByLabel('Nome (opcional)').fill('João Novo')
   await form.getByLabel('E-mail').fill('Joao.Novo@Praticos.test')
-  await form.getByLabel('WhatsApp (opcional)').fill('(11) 97777-6666')
+  // Masked by the company country (B5 of the #528 review).
+  await form.getByLabel('WhatsApp (opcional)').fill('11977776666')
+  await expect(form.getByLabel('WhatsApp (opcional)')).toHaveValue('(11) 97777-6666')
   await form.getByRole('radio', { name: /Supervisor/ }).check()
   await expect(form.getByTestId('invite-role-note')).toHaveText(/Coordena equipes/)
   await form.getByTestId('send-invite').click()
@@ -106,7 +110,7 @@ test('Convite vencido: "Convidar de novo" cria o novo e só depois cancela o vel
   await dialog.getByTestId('expired-again').click()
   const form = page.getByTestId('invite-form')
   await expect(form.getByLabel('Nome (opcional)')).toHaveValue('Pedro Vencido')
-  await expect(form.getByLabel('WhatsApp (opcional)')).toHaveValue('11988887777')
+  await expect(form.getByLabel('WhatsApp (opcional)')).toHaveValue('(11) 98888-7777')
   await form.getByTestId('send-invite').click()
   const code = (await share(page).getByTestId('invite-code').textContent())!.trim()
   const all = await invitesOf(COMPANY_T)

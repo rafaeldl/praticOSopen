@@ -4,6 +4,10 @@ import { describe, expect, test } from 'vitest'
 import { ROLE_PERMISSIONS } from '../src/generated/permissions'
 import {
   accountApiBase,
+  changedFields,
+  companyCountries,
+  roomForPerson,
+  seatLimit,
   companyFields,
   companyProblems,
   countryOptions,
@@ -27,6 +31,7 @@ import {
   validityDays,
   type InviteInput,
 } from '../src/lib/settings/model'
+import { WEB_PLAN_LIMITS_ENFORCED } from '../src/lib/forms/model'
 
 const NOW = new Date('2026-11-03T12:00:00Z')
 const input = (fields: Partial<InviteInput>): InviteInput => ({ name: '', email: '', phone: '', role: 'technician', ...fields })
@@ -193,5 +198,32 @@ describe('account', () => {
     expect(normalizeInviteCode(' abc123 ')).toBe('INV_ABC123')
     expect(normalizeInviteCode('inv_xyz')).toBe('INV_XYZ')
     expect(normalizeInviteCode('')).toBe('')
+  })
+})
+
+describe('review #528', () => {
+  test('M1: seats follow the app: no limit in the browser unless plan limits are enforced; the count still shows', () => {
+    const plan = planSummary({ plan: 'free', usage: { usersActive: 3 } }, NOW)
+    expect(seatLimit(plan, false)).toBe(-1)
+    expect(roomForPerson(plan, false)).toBe(true)
+    expect(seatLimit(plan, true)).toBe(1)
+    expect(roomForPerson(plan, true)).toBe(false)
+    expect(roomForPerson(planSummary({ plan: 'pro', usage: { usersActive: 4 } }, NOW), true)).toBe(true)
+    expect(WEB_PLAN_LIMITS_ENFORCED).toBe(false)
+  })
+
+  test('B1: only the fields that changed are written', () => {
+    const before = { name: 'Alfa', phone: '(11) 3333-4444', address: '', email: '', site: '', country: 'BR' }
+    expect(changedFields(before, { ...before, name: ' Alfa Nova ', address: 'Rua 1' })).toEqual({ name: 'Alfa Nova', address: 'Rua 1' })
+    expect(changedFields(before, { ...before })).toEqual({})
+    expect(changedFields(before, { ...before, phone: ' ' })).toEqual({ phone: null })
+  })
+
+  test('B2: the countries offered are the ones with a money format and a zone; a stored unknown one stays', () => {
+    const codes = companyCountries(null)
+    expect(codes).toEqual(expect.arrayContaining(['BR', 'US', 'PT', 'ES', 'MX', 'AO', 'MZ']))
+    expect(codes).not.toContain('DE')
+    expect(codes.length).toBe(16)
+    expect(companyCountries('DE')).toContain('DE')
   })
 })

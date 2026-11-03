@@ -11,7 +11,7 @@ import { showToast } from '@/lib/toast'
 import '@/styles/orders.css'
 
 const props = defineProps<{ terms: string; defaultText: string | null }>()
-const emit = defineEmits<{ close: []; saved: [terms: string | null] }>()
+const emit = defineEmits<{ close: []; saved: [terms: string | null, updatedAt: string] }>()
 
 const text = ref(props.terms)
 const layer = ref<InstanceType<typeof Layer> | null>(null)
@@ -31,10 +31,10 @@ async function save() {
   failed.value = ''
   const value = text.value.trim() ? text.value.trim() : null
   try {
-    await saveCompany({ termsOfService: value })
+    const updatedAt = await saveCompany({ termsOfService: value })
     allowClose = true
     showToast(t('web.company.saved'))
-    emit('saved', value)
+    emit('saved', value, updatedAt)
   } catch (error) {
     console.error('company: terms failed', error)
     failed.value = t('companySettingSaveError')

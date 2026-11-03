@@ -51,11 +51,12 @@ export async function listMembers(): Promise<Member[]> {
   })
 }
 
-export async function companyOwnerId(): Promise<string | null> {
+/** Owner and plan of the company, read once for the team screen. */
+export async function teamContext(): Promise<{ ownerId: string | null; subscription: unknown }> {
   const company = await readOne(`companies/${companyId()}`)
   const owner = company?.owner as { id?: unknown } | string | undefined
-  if (typeof owner === 'string') return owner
-  return typeof owner?.id === 'string' ? owner.id : null
+  const ownerId = typeof owner === 'string' ? owner : typeof owner?.id === 'string' ? owner.id : null
+  return { ownerId, subscription: company?.subscription }
 }
 
 export async function listInvites(): Promise<TeamInvite[]> {
@@ -98,6 +99,8 @@ export interface CompanyDoc {
   useContracts?: boolean
   useDeviceManagement?: boolean
   subscription?: unknown
+  /** Version: the other side may have saved after this copy was read. */
+  updatedAt?: unknown
 }
 
 export async function loadCompany(): Promise<CompanyDoc> {
@@ -106,24 +109,65 @@ export async function loadCompany(): Promise<CompanyDoc> {
   return data as CompanyDoc
 }
 
-/** Writes some fields of the company, with who and when (app: updatedAt, updatedBy). */
-export async function saveCompany(fields: Partial<CompanyDoc>): Promise<void> {
-  // E2E only (emulator builds): a write the server refuses, to see the switch go back.
-  if (import.meta.env.VITE_USE_EMULATORS === '1' && sessionStorage.getItem('praticos.e2e.failCompanyWrite')) throw new Error('e2e: company write refused')
-  await update(`companies/${companyId()}`, { ...fields, updatedAt: new Date().toISOString(), updatedBy: me() })
-  // The shell and the money switches read session.company: change it in place, no reload.
-  if (session.company) {
-    for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement'] as const) {
-      if (key in fields) (session.company as Record<string, unknown>)[key] = fields[key] ?? undefined
-    }
+/** Same instant whatever the reader (REST, full client, string). */
+export function stampOf(value: unknown): string {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  const stamp = value as { toMillis?: () => number; seconds?: number; nanoseconds?: number }
+  if (typeof stamp.toMillis === 'function') return String(stamp.toMillis())
+  if (typeof stamp.seconds === 'number') return String(stamp.seconds * 1000 + Math.floor((stamp.nanoseconds ?? 0) / 1e6))
+  return JSON.stringify(value)
+}
+
+export class CompanyChanged extends Error {
+  constructor() {
+    super('settings: company changed meanwhile')
+    this.name = 'CompanyChanged'
   }
 }
 
+/**
+ * Writes only `fields`, and only if nobody saved the company after `expected`
+ * was read (the app or another tab): a transaction reads the version first.
+ * Returns the new version.
+ */
+export async function saveCompanyChecked(fields: Partial<CompanyDoc>, expected: unknown): Promise<string> {
+  if (import.meta.env.VITE_USE_EMULATORS === '1' && sessionStorage.getItem('praticos.e2e.failCompanyWrite')) throw new Error('e2e: company write refused')
+  const [db, { doc, runTransaction }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const ref = doc(db, 'companies', companyId())
+  const updatedAt = new Date().toISOString()
+  await runTransaction(db, async (tx) => {
+    const current = await tx.get(ref)
+    if (stampOf(current.data()?.updatedAt) !== stampOf(expected)) throw new CompanyChanged()
+    tx.update(ref, { ...fields, updatedAt, updatedBy: me() })
+  })
+  applyToSession(fields)
+  return updatedAt
+}
+
+function applyToSession(fields: Partial<CompanyDoc>): void {
+  if (!session.company) return
+  for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement'] as const) {
+    if (key in fields) (session.company as Record<string, unknown>)[key] = fields[key] ?? undefined
+  }
+}
+
+/** Writes some fields of the company, with who and when (app: updatedAt, updatedBy). Returns the new version. */
+export async function saveCompany(fields: Partial<CompanyDoc>): Promise<string> {
+  // E2E only (emulator builds): a write the server refuses, to see the switch go back.
+  if (import.meta.env.VITE_USE_EMULATORS === '1' && sessionStorage.getItem('praticos.e2e.failCompanyWrite')) throw new Error('e2e: company write refused')
+  const updatedAt = new Date().toISOString()
+  await update(`companies/${companyId()}`, { ...fields, updatedAt, updatedBy: me() })
+  // The shell and the money switches read session.company: change it in place, no reload.
+  applyToSession(fields)
+  return updatedAt
+}
+
 /** Same file as the app (tenants/{cid}/logo/logo.jpg); storage.rules lets only owner/admin write it. */
-export async function uploadLogo(file: File): Promise<string> {
+export async function uploadLogo(file: File, expected?: unknown): Promise<{ url: string; updatedAt: string }> {
   const url = await upload(`tenants/${companyId()}/logo/logo.jpg`, file)
-  await saveCompany({ logo: url })
-  return url
+  const updatedAt = expected === undefined ? await saveCompany({ logo: url }) : await saveCompanyChecked({ logo: url }, expected)
+  return { url, updatedAt }
 }
 
 interface SegmentDoc {

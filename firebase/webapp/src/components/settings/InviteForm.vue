@@ -1,14 +1,19 @@
 <script setup lang="ts">
 // "Convidar pessoa" (team.form.invite, team.invite-form.*, team.form.duplicate,
 // team.invite.reinvite). Everything goes through POST /v1/app/invites, which
-// checks role, recipient and limits. Unlike the app, the old invite is only
-// cancelled after the new one exists, so nobody is left without an invite.
+// checks the role of who invites and of the invite. Plan limits are not checked
+// there nor here: like the app, the browser applies none (lib/plan-limits.ts);
+// TeamView shows the seats count. Unlike the app, the old invite is only
+// cancelled after the new one exists, so nobody is left without an invite. The
+// WhatsApp follows the phone mask of the company country.
 import { computed, reactive, ref } from 'vue'
 import { Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import RoleChoice from '@/components/settings/RoleChoice.vue'
 import { t, type MessageKey } from '@/i18n'
 import { ApiError } from '@/lib/api'
+import { applyMask, fieldMasks, segmentField } from '@/lib/segment-fields'
+import { session } from '@/lib/session'
 import { cancelInvite, createInvite } from '@/lib/settings/data'
 import { findDuplicateInvite, inviteBody, inviteProblems, isExpired, ROLE_DESCRIPTION, type AssignableRole, type InviteInput, type TeamInvite } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
@@ -39,6 +44,14 @@ const duplicate = ref<TeamInvite | null>(null)
 let allowClose = false
 
 const problems = computed(() => inviteProblems(form))
+const phoneMasks = computed(() => fieldMasks(segmentField('customer.phone'), session.company?.country ?? null))
+if (form.phone) form.phone = applyMask(form.phone, phoneMasks.value)
+
+function onPhone(event: Event) {
+  const input = event.target as HTMLInputElement
+  form.phone = applyMask(input.value, phoneMasks.value)
+  if (input.value !== form.phone) input.value = form.phone
+}
 const canSave = computed(() => !!(form.email.trim() || form.phone.trim()))
 const dirty = computed(() => JSON.stringify(form) !== initial)
 const problemText: Record<string, MessageKey> = { contact: 'inviteSaveNeedsContact', email: 'invalidEmail', phone: 'invalidPhone' }
@@ -50,7 +63,6 @@ function guard(): boolean {
 
 function errorText(error: unknown): string {
   if (error instanceof ApiError && (error.code === 'FORBIDDEN' || error.status === 403)) return t('teamActionNotAllowed')
-  if (error instanceof ApiError && error.status === 402) return t('web.team.planLimit')
   return t('inviteGenericError')
 }
 
@@ -145,7 +157,8 @@ function onKeydown(event: KeyboardEvent) {
           <label class="field-label" for="inv-phone">{{ t('inviteWhatsAppLabel') }}</label>
           <input
             id="inv-phone"
-            v-model="form.phone"
+            :value="form.phone"
+            @input="onPhone"
             class="field"
             type="tel"
             inputmode="tel"

@@ -655,5 +655,5 @@
   "web.integrations.nameMissing": "Dê um nome para a conexão.",
   "web.integrations.copied": "URL copiada",
   "web.integrations.revokeNamed": "Desligar a conexão {name}",
-  "web.team.planLimit": "A equipe chegou ao limite do plano."
+  "web.company.changedElsewhere": "Alguém salvou os dados da empresa depois que você abriu. Feche e abra de novo para ver o que mudou."
 }

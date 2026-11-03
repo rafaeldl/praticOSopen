@@ -26,6 +26,9 @@ const COUNTRIES: Record<string, CountryFormat> = {
   MZ: { currency: 'MZN', locale: 'pt-MZ' },
 }
 
+/** Countries with a money format of their own: the only ones a company can pick (others would fall back to BRL). */
+export const FORMAT_COUNTRIES: readonly string[] = Object.keys(COUNTRIES)
+
 const DEFAULT_FORMAT: CountryFormat = { currency: 'BRL', locale: 'pt-BR' }
 
 export function countryFormat(country?: string | null): CountryFormat {

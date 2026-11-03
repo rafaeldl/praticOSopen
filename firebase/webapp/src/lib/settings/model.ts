@@ -2,7 +2,9 @@
 // plano). Tested in tests/settings-model.test.ts; nothing here reads Firebase.
 import { FINANCIAL_PERMISSIONS, ROLE_PERMISSIONS } from '@/generated/permissions'
 import type { MessageKey } from '@/generated/message-keys'
+import { FORMAT_COUNTRIES } from '@/lib/format'
 import type { AppRole, Permission } from '@/lib/permissions'
+import { hasCountryZone } from '@/lib/zone'
 
 // ── Roles ────────────────────────────────────────────────────────────────
 
@@ -304,6 +306,21 @@ export function planSummary(subscription: unknown, now: Date): PlanSummary {
   }
 }
 
+/**
+ * People the plan allows, by the same rule as checklists (forms/model
+ * activeLimit): the app applies plan limits only where paid plans can be bought,
+ * never in the browser, so here -1 (no limit) unless `enforced`.
+ */
+export function seatLimit(plan: PlanSummary, enforced: boolean): number {
+  return enforced ? plan.limits.users : -1
+}
+
+/** One more invite fits (members and invites that still work count, recounted by the server). */
+export function roomForPerson(plan: PlanSummary, enforced: boolean): boolean {
+  const limit = seatLimit(plan, enforced)
+  return limit < 0 || plan.usage.users < limit
+}
+
 export type UsageLevel = 'unlimited' | 'ok' | 'near' | 'atLimit'
 
 /** "Quase no limite" from 80% on; -1 is no limit (PlanUsage.level). */
@@ -388,6 +405,24 @@ export function companyFields(data: CompanyData): Record<string, string | null> 
     site: clean(data.site),
     country: clean(data.country),
   }
+}
+
+/** Only what changed since the form opened, cleaned as companyFields: a field changed meanwhile elsewhere is kept. */
+export function changedFields(before: CompanyData, after: CompanyData): Record<string, string | null> {
+  const old = companyFields(before)
+  const next = companyFields(after)
+  return Object.fromEntries(Object.entries(next).filter(([key, value]) => value !== old[key]))
+}
+
+/**
+ * Countries a company can pick: those with a money format and a zone here
+ * (lib/format, lib/zone). Any other would show BRL and the browser's zone. A
+ * country stored by the app outside this list stays, so the form never drops it.
+ */
+export function companyCountries(current: string | null | undefined): string[] {
+  const known = FORMAT_COUNTRIES.filter(hasCountryZone)
+  const stored = current?.toUpperCase()
+  return stored && !known.includes(stored) ? [...known, stored] : [...known]
 }
 
 export type CompanyProblem = 'name' | 'email' | 'site'

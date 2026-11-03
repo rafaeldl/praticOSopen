@@ -65,7 +65,9 @@ test('Nome, logo e contato: confere, máscara pelo país escolhido, logo só ao 
   await form.getByLabel('E-mail').fill('contato@gama.test')
   await form.getByLabel('Site').fill('www.gama.test')
   // The mask follows the country picked here, translated and complete.
-  await expect(form.getByTestId('company-country').locator('option', { hasText: /^Alemanha$/ })).toHaveCount(1)
+  // Only countries with a money format and a zone (B2 of the #528 review): no Germany, Angola yes.
+  await expect(form.getByTestId('company-country').locator('option', { hasText: /^Alemanha$/ })).toHaveCount(0)
+  await expect(form.getByTestId('company-country').locator('option', { hasText: /^Angola$/ })).toHaveCount(1)
   await form.getByTestId('company-country').selectOption('US')
   await form.getByLabel('Telefone').fill('2125550100')
   await expect(form.getByLabel('Telefone')).toHaveValue('(212) 555-0100')
@@ -97,6 +99,30 @@ test('Nome, logo e contato: confere, máscara pelo país escolhido, logo só ao 
   await expect(form).toBeHidden()
   expect((await company())?.name).toBe('Oficina Gama Nova')
   await writePath(`companies/${COMPANY_G}`, { name: 'Oficina Gama', country: 'BR' })
+})
+
+test('Dados da empresa: grava só o que mudou e não grava por cima de quem salvou depois (company.data.edit, B1 da revisão do #528)', async ({ page }) => {
+  await openCompany(page)
+  await page.getByTestId('company-data').click()
+  const form = page.getByTestId('company-form')
+  await form.getByLabel('Nome', { exact: true }).fill('Gama Conflito')
+  // Someone saves from the app while the form is open.
+  await writePath(`companies/${COMPANY_G}`, { address: 'Rua do App, 1', updatedAt: new Date().toISOString() })
+  await form.getByTestId('save-company').click()
+  await expect(form.getByRole('alert')).toHaveText('Alguém salvou os dados da empresa depois que você abriu. Feche e abra de novo para ver o que mudou.')
+  expect((await company())?.name).toBe('Oficina Gama')
+  expect((await company())?.address).toBe('Rua do App, 1')
+  page.once('dialog', (dialog) => dialog.accept())
+  await form.getByLabel('Nome', { exact: true }).focus()
+  await page.keyboard.press('Escape')
+  // Opened again: the new version; saving the name keeps the app's address.
+  await page.getByTestId('company-data').click()
+  await expect(form.getByLabel('Endereço')).toHaveValue('Rua do App, 1')
+  await form.getByLabel('Nome', { exact: true }).fill('Oficina Gama')
+  await form.getByLabel('Endereço').fill('Rua do App, 1')
+  await form.getByTestId('save-company').click()
+  await expect(form).toBeHidden()
+  expect((await company())?.address).toBe('Rua do App, 1')
 })
 
 test('Termos para o cliente: texto padrão do ramo só com o campo vazio; vazio grava nulo (company.terms.edit, company.terms.default)', async ({ page }) => {
@@ -172,6 +198,17 @@ test('Interruptores mudam na hora e voltam com aviso se a gravação falhar (com
   await page.evaluate(() => sessionStorage.removeItem('praticos.e2e.failCompanyWrite'))
   await sw('useScheduling').check()
   await expect.poll(async () => (await company())?.useScheduling).toBe(true)
+})
+
+test('Valores e cobrança desligado em outro lugar (app ou outra aba) some do web aberto na hora (company.settings.financial, M3 da revisão do #528)', async ({ page }) => {
+  await login(page, 'gOwner')
+  await page.evaluate(() => ((window as unknown as { stayed: boolean }).stayed = true))
+  await expect(nav(page).getByRole('link', { name: 'Financeiro' })).toBeVisible()
+  await writePath(`companies/${COMPANY_G}`, { useFinancial: false })
+  await expect(nav(page).getByRole('link', { name: 'Financeiro' })).toHaveCount(0, { timeout: 15_000 })
+  await writePath(`companies/${COMPANY_G}`, { useFinancial: true })
+  await expect(nav(page).getByRole('link', { name: 'Financeiro' })).toBeVisible({ timeout: 15_000 })
+  expect(await page.evaluate(() => (window as unknown as { stayed?: boolean }).stayed)).toBe(true)
 })
 
 test('Valores e cobrança: desligar pergunta e some na hora para todos, sem recarregar; religar volta (company.settings.financial)', async ({ page, browser }) => {

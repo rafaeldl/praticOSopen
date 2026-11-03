@@ -3,20 +3,22 @@
 // company.data.country, company.data.discard). Unlike the app: the logo waits
 // for "Salvar" like the rest, e-mail and site are checked, the phone mask
 // follows the country chosen here, the country list is complete and in the
-// person's language, and closing with changes asks first.
+// person's language, and closing with changes asks first. Only the fields that
+// changed are written, and only if nobody saved the company after this copy was
+// read (B1 of the #528 review); the app still writes the whole company (M2).
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { Building2, Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { applyMask, fieldMasks, segmentField } from '@/lib/segment-fields'
-import { saveCompany, uploadLogo, type CompanyDoc } from '@/lib/settings/data'
-import { companyFields, companyProblems, countryOptions, regionCodes, type CompanyData } from '@/lib/settings/model'
+import { CompanyChanged, saveCompanyChecked, uploadLogo, type CompanyDoc } from '@/lib/settings/data'
+import { changedFields, companyCountries, companyProblems, countryOptions, type CompanyData } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
 import '@/styles/orders.css'
 
 const props = defineProps<{ company: CompanyDoc }>()
-const emit = defineEmits<{ close: []; saved: [fields: Partial<CompanyDoc>] }>()
+const emit = defineEmits<{ close: []; saved: [fields: Partial<CompanyDoc>]; stale: [] }>()
 
 const form = reactive<CompanyData>({
   name: props.company.name ?? '',
@@ -26,6 +28,7 @@ const form = reactive<CompanyData>({
   site: props.company.site ?? '',
   country: props.company.country ?? '',
 })
+const initialData: CompanyData = { ...form }
 const initial = JSON.stringify(form)
 const layer = ref<InstanceType<typeof Layer> | null>(null)
 const tried = ref(false)
@@ -37,7 +40,8 @@ const logoError = ref('')
 const more = ref(!!(props.company.email || props.company.site || props.company.country))
 let allowClose = false
 
-const countries = computed(() => countryOptions(locale.value, regionCodes()))
+// Only countries with a money format and a zone here (B2 of the #528 review).
+const countries = computed(() => countryOptions(locale.value, companyCountries(props.company.country)))
 const problems = computed(() => companyProblems(form))
 const dirty = computed(() => JSON.stringify(form) !== initial || !!logoFile.value)
 // company.phone of the segment (global), by the country chosen in this form.
@@ -81,14 +85,25 @@ async function save() {
   saving.value = true
   failed.value = ''
   try {
-    const fields = companyFields(form)
-    await saveCompany(fields)
+    const fields = changedFields(initialData, form)
+    let version: unknown = props.company.updatedAt
+    if (Object.keys(fields).length) version = await saveCompanyChecked(fields, version)
     let logo: string | undefined
-    if (logoFile.value) logo = await uploadLogo(logoFile.value)
+    if (logoFile.value) {
+      const uploaded = await uploadLogo(logoFile.value, version)
+      logo = uploaded.url
+      version = uploaded.updatedAt
+    }
     allowClose = true
     showToast(t('web.company.saved'))
-    emit('saved', { ...fields, ...(logo ? { logo } : {}) })
+    emit('saved', { ...fields, ...(logo ? { logo } : {}), updatedAt: version })
   } catch (error) {
+    if (error instanceof CompanyChanged) {
+      // Nothing written: what was typed stays, and the screen behind reads the new version.
+      failed.value = t('web.company.changedElsewhere')
+      emit('stale')
+      return
+    }
     console.error('company: save failed', error)
     failed.value = errorMessageKey(error) === 'web.error.generic' ? t('companySettingSaveError') : t(errorMessageKey(error))
   } finally {

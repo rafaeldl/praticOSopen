@@ -16,12 +16,17 @@ import InviteShare from '@/components/settings/InviteShare.vue'
 import MemberDialog from '@/components/settings/MemberDialog.vue'
 import PermissionTable from '@/components/settings/PermissionTable.vue'
 import { locale, t } from '@/i18n'
-import { cancelInvite, companyOwnerId, listInvites, listMembers } from '@/lib/settings/data'
+import { WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
+import { formatNumber } from '@/lib/format'
+import { cancelInvite, listInvites, listMembers, teamContext } from '@/lib/settings/data'
 import {
   daysLeft,
   displayRole,
   inviteExpiry,
   inviteName,
+  planSummary,
+  roomForPerson,
+  type PlanSummary,
   ROLE_LABEL,
   ROLE_SHORT,
   sortMembers,
@@ -35,6 +40,7 @@ import '@/styles/settings.css'
 const members = shallowRef<Member[] | null>(null)
 const invites = shallowRef<TeamInvite[]>([])
 const ownerId = ref<string | null>(null)
+const plan = shallowRef<PlanSummary | null>(null)
 const failed = ref(false)
 const inviting = ref<{ prefill: TeamInvite | null } | null>(null)
 const sharing = ref<TeamInvite | null>(null)
@@ -49,6 +55,22 @@ const summary = computed(() => {
   return invites.value.length ? t('teamSummary', { people, invites: t('teamInvitesCount', { count: invites.value.length }) }) : people
 })
 const waiting = computed(() => invites.value[0] ?? null)
+/** Seats of the plan, counted by the server (members and invites that still work). Shown, never blocking here. */
+const seats = computed(() => {
+  if (!plan.value) return ''
+  const used = formatNumber(plan.value.usage.users, session.company?.country)
+  const limit = plan.value.limits.users
+  return `${t('planUsageTeam')}: ${limit < 0 ? `${used} · ${t('planUsageUnlimited')}` : t('planUsageOf', { used, limit: formatNumber(limit, session.company?.country) })}`
+})
+
+/** The app's rule (lib/plan-limits): no limit in the browser, so this only blocks where limits are enforced. */
+function startInvite(prefill: TeamInvite | null) {
+  if (plan.value && !roomForPerson(plan.value, WEB_PLAN_LIMITS_ENFORCED)) {
+    showToast(t('planLimitTeam', { used: plan.value.usage.users, limit: plan.value.limits.users }))
+    return
+  }
+  inviting.value = { prefill }
+}
 const daysOf = (invite: TeamInvite) => daysLeft(inviteExpiry(invite), now.value)
 
 function blockExpiry(invite: TeamInvite): string {
@@ -74,10 +96,11 @@ async function load() {
   failed.value = false
   members.value = null
   try {
-    const [list, pending, owner] = await Promise.all([listMembers(), listInvites(), companyOwnerId()])
+    const [list, pending, context] = await Promise.all([listMembers(), listInvites(), teamContext()])
     members.value = list
     invites.value = pending
-    ownerId.value = owner
+    ownerId.value = context.ownerId
+    plan.value = planSummary(context.subscription, new Date())
     now.value = new Date()
   } catch (error) {
     console.error('team: load failed', error)
@@ -105,7 +128,7 @@ function resend(invite: TeamInvite) {
 function inviteAgain() {
   const invite = expired.value
   expired.value = null
-  inviting.value = { prefill: invite }
+  startInvite(invite)
 }
 
 function cancelled() {
@@ -141,8 +164,9 @@ onMounted(load)
     <div>
       <h1 class="page-title" tabindex="-1" data-page-title>{{ t('teamTitle') }}</h1>
       <p v-if="members" class="page-sub" data-testid="team-summary">{{ summary }}</p>
+      <p v-if="seats" class="page-sub" data-testid="team-seats">{{ seats }}</p>
     </div>
-    <button v-if="members" type="button" class="btn btn--primary" data-testid="team-invite" @click="inviting = { prefill: null }">
+    <button v-if="members" type="button" class="btn btn--primary" data-testid="team-invite" @click="startInvite(null)">
       {{ members.length <= 1 && !invites.length ? t('teamInviteFirst') : t('teamInviteAnother') }}
     </button>
   </header>
