@@ -136,7 +136,7 @@ def trim_top(shot):
                     rgb[x, y] = fill
         return shot
 
-    rows = (list(gray.crop((0, y, w, y + 1)).getdata()) for y in range(limit))
+    rows = ([px[x, y] for x in range(w)] for y in range(limit))
     first = next((y for y, row in enumerate(rows) if is_ink(row)), 0)
     top = max(0, first - int(h * 0.012))
     return shot.crop((0, top, w, h))
