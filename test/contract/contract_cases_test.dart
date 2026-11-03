@@ -612,17 +612,23 @@ void main() {
                   ..total = _d(o['total'])
                   ..paidAmount = _d(o['paidAmount']),
             ];
-            final plan = buildReceiptPlan(
-              receiptId: 'r1',
-              customer: null,
-              orders: orders,
-              allocations: [
-                for (final a in (g['allocations'] as List).cast<Map>())
-                  PaymentAllocation(orderId: a['orderId'] as String, amount: _d(a['amount'])!),
-              ],
-              paidAt: DateTime.utc(2026, 1, 1),
-              now: DateTime.utc(2026, 1, 1),
-            );
+            final ReceiptPlan plan;
+            try {
+              plan = buildReceiptPlan(
+                receiptId: 'r1',
+                customer: null,
+                orders: orders,
+                allocations: [
+                  for (final a in (g['allocations'] as List).cast<Map>())
+                    PaymentAllocation(orderId: a['orderId'] as String, amount: _d(a['amount'])!),
+                ],
+                paidAt: DateTime.utc(2026, 1, 1),
+                now: DateTime.utc(2026, 1, 1),
+              );
+            } on ReceiptPlanException catch (e) {
+              expect(e.error.name, want['error'], reason: 'the plan refused');
+              return;
+            }
             expect(want['error'], isNull, reason: 'the plan did not refuse');
             expect(plan.receipt.amount, _d(want['amount']));
             final byId = {for (final o in orders) o.id: o};
