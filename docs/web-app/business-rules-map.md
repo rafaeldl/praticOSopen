@@ -60,22 +60,22 @@ O isolamento entre empresas está coberto. Dentro da mesma empresa, parte das re
 | # | Divergência | Evidência |
 |---|---|---|
 | D1 | **Corrigida.** `computeTotal` usa `productLineTotal`; linha sem `total` vale `value × quantity` | `order-totals.json`, `payment-transactions.json`, sem `divergesIn` |
-| D2 | **Aberta no app.** Pagamento em orçamento ou cancelada: decisão é `payment` null e `paid` false. O servidor já faz; o app grava `paid`/`unpaid`, online e offline | `payment-on-a-quote`, `payment-on-a-canceled-order`, `discount-on-a-quote`, `remove-payment-on-a-quote` |
-| D3 | **Aberta no app.** Total nunca negativo. O servidor limita a 0 em `applyPaymentTransaction`, mas não ao remover item. O app grava negativo em todos os caminhos | `discount-above-total`, `discount-above-items-stops-at-zero`, `remove-keeps-total-above-zero` |
-| D4 | **Aberta no link do cliente.** `OrderTotalSection.vue:42` mostra saldo sem piso nem arredondamento. Fora dos casos: é `firebase/web` | `OrderTotalSection.vue:42` |
+| D2 | **Corrigida no app.** Pagamento em orçamento ou cancelada: `payment` null e `paid` false, online e offline, como o servidor | `payment-on-a-quote`, `payment-on-a-canceled-order`, `discount-on-a-quote`, `remove-payment-on-a-quote` |
+| D3 | **Corrigida no app; aberta no servidor ao remover item.** Total nunca negativo. O servidor limita a 0 em `applyPaymentTransaction`, mas não ao remover item | `discount-above-total`, `discount-above-items-stops-at-zero`, `remove-keeps-total-above-zero` |
+| D4 | **Corrigida no app** (`Order.remainingBalance` e `OrderStore.remainingBalance` com piso em 0 e arredondados). **Aberta no link do cliente:** `OrderTotalSection.vue:42` mostra saldo sem piso nem arredondamento. Fora dos casos: é `firebase/web` | `OrderTotalSection.vue:42`, `test/models/order_remaining_balance_test.dart` |
 | D5 | **Resolvida no essencial.** App, `PATCH`, bot e `firestore.rules` usam o mesmo fluxo por perfil. O bot ainda aplica tabela mais estreita (não reabre) e o link do cliente só decide orçamento. Mesmo status: o servidor aceita de propósito (`sameStatus`) | `status-transitions.json`, `enforcedBy` |
 | D6 | **Aberta no servidor.** Consultor recebe nas OS que criou no app e nas regras; `POST /:id/payments` exige `chargeOrder` e devolve 403. Desconto continua só do financeiro | `order-receive.json`, casos `consultant-own-*-values-on` |
 | D7 | **Aberta no servidor.** API não grava `deviceIds` nem `total` da linha, ignora `total` enviado, e item sem preço vira 0 em vez de "sem valor" | `order-totals.json`, `order-items.json`; `deviceIds` em `order.service.ts:382` |
-| D8 | **Aberta.** Cliente do app sem `keywords` de telefone. Fora dos casos | `customer_store.dart:69` |
-| D9 | **Aberta no app.** Moeda pelo país da empresa é a decisão; o app segue o idioma. `getFormatContext` não conhece PY, BO, AO e MZ | `currency.json` |
+| D8 | **Corrigida no app** ao criar cliente: `customerKeywords` grava nome sem stopwords, frase e telefone, como `customer.service.ts`. Editar cliente no app ainda não regrava `keywords`. Fora dos casos | `test/utils/search_utils_test.dart` |
+| D9 | **Aberta no app, de propósito por ora.** Moeda pelo país da empresa é a decisão; o app segue o idioma. O `country` da empresa vem do idioma do app no cadastro (`onboarding_flow.dart:90`), então não é confiável, e a troca mexe em ~28 telas e na leitura dos campos de valor. `getFormatContext` não conhece PY, BO, AO e MZ | `currency.json` |
 | D10 | **Aberta no servidor.** `roundMoney` do JS sobe para zero em meio centavo negativo; o certo é simétrico | `round-money.json` |
 
 Achados novos ao escrever os casos, todos com `divergesIn`:
 
 - **Valor vazando.** `GET /v1/app/orders/:id` tira `value`, mas devolve `products[].total` a quem não vê preço. `POST /:id/services` e `/products` devolvem `newTotal` para técnico e supervisor e com Valores desligado (`visibility.json`).
 - **Telefone.** `normalizePhone` prefixa 55 em número de até 11 dígitos mesmo com `+1`, e transforma vazio em `+55` (`phone.json`).
-- **Apagar OS.** `firestore.rules` recusa apagar OS com dinheiro, exceto admin; a tela oferece e o servidor recusa (`order-delete.json`).
-- **Recibo.** `buildReceiptPlan` não recusa orçamento, cancelada nem valor acima do aberto; quem barra é a tela (`receipts.json`).
+- **Apagar OS.** `firestore.rules` recusa apagar OS com dinheiro, exceto admin; `canDeleteOrder` segue a mesma regra (`order-delete.json`).
+- **Recibo.** `buildReceiptPlan` recusa orçamento, cancelada e valor acima do aberto, como o servidor (`receipts.json`).
 - **Atrasada.** `getOverdueOrders` deixa orçamento de fora; a decisão segue a tela (`overdue.json`).
 
 Sem divergência encontrada: CPF/CNPJ, repartição de pagamento, `isSafeInvoiceUrl`/`sanitizeReceiptUrl`/`asaas_billing.dart`, `showsValues`/`companyShowsValues`, tabela de permissões.
@@ -111,4 +111,4 @@ Ao juntar com o web: `orderTotal` de `runners/order-rules.ts.txt` precisa limita
 5. Contratos recorrentes em job agendado.
 6. Limites de plano no servidor.
 7. Endurecer `firestore.rules` depois de o web gravar via API e de as versões antigas do app saírem. Detalhe fora do repositório.
-8. Corrigir D2 e D3 no app, D10 no servidor e D9 nos dois lados, tirando as entradas de `divergesIn`.
+8. Corrigir D10 no servidor e D9 nos dois lados, tirando as entradas de `divergesIn`.
