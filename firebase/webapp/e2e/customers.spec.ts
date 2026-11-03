@@ -1,7 +1,7 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
 import { expect, test, type Page } from '@playwright/test'
-import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc } from './data'
+import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc } from './data'
 import { chooseCompany, login, signOut } from './helpers'
 
 const list = (page: Page) => page.getByTestId('customers-table')
@@ -245,12 +245,30 @@ test('fechar com algo digitado pergunta antes, também na edição (customer.for
   expect((await readDoc(`customers/${customer.id}`))?.name).toBe(customer.name)
 })
 
+test('outra pessoa salvou enquanto editava: avisa, relê e não grava por cima (revisão M1)', async ({ page }) => {
+  const customer = await makeCustomer({ updatedAt: '2026-10-01T10:00:00.000000' })
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  await panel(page).getByTestId('customer-menu').click()
+  await page.getByRole('button', { name: 'Editar cliente' }).click()
+  const form = page.getByTestId('customer-form')
+  await form.getByLabel('Nome', { exact: true }).fill('Nome da web')
+  await updateCustomerDoc(customer.id, { name: 'Nome do app', updatedAt: '2026-10-02T10:00:00.000000' })
+  await form.getByTestId('save-customer').click()
+  await expect(page.locator('.toast')).toContainText('Outra pessoa mudou este cliente')
+  await expect(form).toHaveCount(0)
+  await expect(panel(page).getByRole('heading', { name: 'Nome do app' })).toBeVisible()
+  expect((await readDoc(`customers/${customer.id}`))?.name).toBe('Nome do app')
+})
+
 test('apagar pede confirmação, avisa e tira da lista (customer.detail.delete, customer.detail.menu)', async ({ page }) => {
   const customer = await makeCustomer()
+  // An order the consultant does not read: the warning still counts it (revisão M2).
+  await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, status: 'quote' })
   await openCustomers(page, 'consultant', `?customer=${customer.id}`)
   await panel(page).getByTestId('customer-menu').click()
   await page.getByRole('button', { name: 'Apagar' }).click()
   const confirm = page.getByRole('dialog', { name: `Apagar ${customer.name}?` })
+  await expect(confirm).toContainText('Tem 1 OS, nenhum recibo e nenhuma cobrança.')
   await expect(confirm).toContainText('As OS continuam salvas.')
   await confirm.getByRole('button', { name: 'Apagar' }).click()
   await expect(page.locator('.toast')).toContainText(`${customer.name} apagado`)

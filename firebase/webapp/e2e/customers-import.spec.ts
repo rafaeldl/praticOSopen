@@ -2,7 +2,7 @@
 // guessed and confirmed, repeated phones out, nothing saved before "Importar".
 import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
-import { makeCustomer } from './data'
+import { countCustomersNamed, makeCustomer } from './data'
 import { login } from './helpers'
 
 test('CSV: prévia, colunas, telefone repetido e sem nome ficam de fora, e só grava ao confirmar', async ({ page }) => {
@@ -38,6 +38,27 @@ test('CSV: prévia, colunas, telefone repetido e sem nome ficam de fora, e só g
   // Nothing saved yet.
   await page.goto(`customers?q=${encodeURIComponent(`Paulo ${stamp}`)}`)
   await expect(page.getByTestId('customers-no-match')).toBeVisible()
+})
+
+test('falha no meio e Importar de novo: nenhuma linha entra duas vezes (revisão A1)', async ({ page }) => {
+  const stamp = Date.now()
+  // 450 lines: two parts (400 + 50). The second one fails the first time.
+  const lines = Array.from({ length: 450 }, (_, i) => `Lote ${stamp} ${String(i).padStart(3, '0')}`)
+  await login(page, 'admin', 'customers/import')
+  await page.getByTestId('import-file').setInputFiles({ name: 'lote.csv', mimeType: 'text/csv', buffer: Buffer.from(['Nome', ...lines].join('\n')) })
+  await page.getByTestId('import-continue').click()
+  await expect(page.getByRole('heading', { level: 1, name: '450 clientes prontos para entrar' })).toBeVisible()
+  let calls = 0
+  await page.route(/\/v1\/app\/customers\/import$/, async (route) => {
+    calls++
+    if (calls === 2) return route.abort()
+    return route.fallback()
+  })
+  await page.getByTestId('import-finish').click()
+  await expect(page.getByTestId('import-message')).toContainText('Parou no meio')
+  await page.getByTestId('import-finish').click()
+  await expect(page.locator('.toast')).toContainText('450 clientes importados')
+  expect(await countCustomersNamed(`Lote ${stamp} `)).toBe(450)
 })
 
 test('CSV: confirmar grava os que entram e volta à lista', async ({ page }) => {
