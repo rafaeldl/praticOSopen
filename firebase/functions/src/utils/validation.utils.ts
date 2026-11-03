@@ -248,10 +248,12 @@ export const listOrdersQuerySchema = z.object({
   assignedTo: idSchema.optional(),
   /** One order by its number (search); the other filters are ignored. */
   number: z.coerce.number().int().min(1).max(1_000_000_000).optional(),
+  /** Inclusive range on the sort field (createdAt, scheduledDate or dueDate). */
   startDate: z.string().datetime({ offset: true }).optional(),
   endDate: z.string().datetime({ offset: true }).optional(),
-}).refine((q) => q.sort === 'createdAt' || (!q.startDate && !q.endDate), {
-  message: 'startDate/endDate filter createdAt: sort by createdAt',
+}).refine((q) => ['createdAt', 'scheduledDate', 'dueDate'].includes(q.sort) || (!q.startDate && !q.endDate), {
+  // The range filters the sorted field (one range per query in Firestore): the agenda asks scheduledDate or dueDate.
+  message: 'startDate/endDate filter the sort field: sort by createdAt, scheduledDate or dueDate',
   path: ['sort'],
 });
 

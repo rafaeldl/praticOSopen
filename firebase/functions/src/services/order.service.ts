@@ -139,10 +139,15 @@ export async function listOrders(companyId: string, params: OrderQueryParams): P
   if (params.customerId) query = query.where('customer.id', '==', params.customerId);
   if (params.deviceId) query = query.where('device.id', '==', params.deviceId);
   if (params.assignedTo) query = query.where('assignedTo.id', '==', params.assignedTo);
-  if (params.startDate) query = query.where('createdAt', '>=', new Date(params.startDate).toISOString());
-  if (params.endDate) query = query.where('createdAt', '<=', new Date(params.endDate).toISOString());
-
   const sort = params.sort ?? 'createdAt';
+  // The range is on the sorted field (Firestore takes one range per query): createdAt
+  // for lists, scheduledDate or dueDate for the agenda. Stored as ISO text, so the
+  // bounds are compared as text; the app writes local time without a zone, so the
+  // caller widens the range and places each order in the company's zone.
+  const rangeField = sort === 'scheduledDate' || sort === 'dueDate' ? sort : 'createdAt';
+  if (params.startDate) query = query.where(rangeField, '>=', new Date(params.startDate).toISOString());
+  if (params.endDate) query = query.where(rangeField, '<=', new Date(params.endDate).toISOString());
+
   const direction = params.direction ?? DEFAULT_DIRECTION[sort];
   const limit = params.limit ?? 20;
 

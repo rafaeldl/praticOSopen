@@ -218,6 +218,52 @@ describe('GET /orders', () => {
   });
 });
 
+// ─── Agenda ───────────────────────────────────────────────────────────────
+describe('GET /orders por data da visita (agenda)', () => {
+  beforeEach(() => {
+    // v1: written by the web (UTC). v2: by the app, local time without a zone. v3: outside the range. v4: no visit.
+    seedOrder('v1', { number: 11, scheduledDate: '2031-03-11T17:00:00.000Z', createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('v2', { number: 12, scheduledDate: '2031-03-10T09:30:00.000', assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('v3', { number: 13, scheduledDate: '2031-04-01T10:00:00.000Z' });
+    seedOrder('v4', { number: 14 });
+    seedOrder('v5', { number: 15, scheduledDate: '2031-03-12T10:00:00.000Z', createdBy: { id: 'cons1', name: 'Caio' } });
+  });
+  const range = 'sort=scheduledDate&startDate=2031-03-09T00:00:00.000Z&endDate=2031-03-16T00:00:00.000Z';
+
+  it('lista só as OS com visita no intervalo, da mais cedo para a mais tarde', async () => {
+    const res = await call('owner', 'get', `${O}?${range}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((o: any) => o.id)).toEqual(['v2', 'v1', 'v5']);
+  });
+
+  it('a hora gravada pelo app sem fuso sai como está; a do web sai em UTC', async () => {
+    const res = await call('owner', 'get', `${O}?${range}`);
+    const byId = Object.fromEntries(res.body.data.map((o: any) => [o.id, o]));
+    expect(byId.v2.scheduledDate).toBe('2031-03-10T09:30:00.000');
+    expect(byId.v1.scheduledDate).toBe('2031-03-11T17:00:00.000Z');
+    expect((await call('owner', 'get', `${O}/v2`)).body.data.scheduledDate).toBe('2031-03-10T09:30:00.000');
+  });
+
+  it('técnico recebe as que criou e as atribuídas a ele, sem valores; consultor só as dele', async () => {
+    const tech = await call('technician', 'get', `${O}?${range}`);
+    expect(tech.body.data.map((o: any) => o.id)).toEqual(['v2', 'v1']);
+    for (const o of tech.body.data) expect(o).not.toHaveProperty('total');
+    // Who created each one travels: consultant and technician may change only their own (canEditOrderMainFields).
+    expect(tech.body.data.find((o: any) => o.id === 'v1').createdBy).toEqual({ id: 'tech1', name: 'Téo' });
+    expect((await call('consultant', 'get', `${O}?${range}`)).body.data.map((o: any) => o.id)).toEqual(['v5']);
+  });
+
+  it('filtro de pessoa pelo responsável', async () => {
+    const res = await call('admin', 'get', `${O}?${range}&assignedTo=tech1`);
+    expect(res.body.data.map((o: any) => o.id)).toEqual(['v2']);
+  });
+
+  it('intervalo só com createdAt, scheduledDate ou dueDate', async () => {
+    const res = await call('owner', 'get', `${O}?sort=number&startDate=2031-03-09T00:00:00.000Z`);
+    expect(res.status).toBe(400);
+  });
+});
+
 // ─── Detalhe ──────────────────────────────────────────────────────────────
 describe('GET /orders/:id', () => {
   beforeEach(() => {
