@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "generatedFrom": "e05d6414",
+  "rule": "Label por segmento: label do segmento no idioma (ou no idioma sem região, ou em português), depois a tradução do app, depois a própria chave.",
+  "runsIn": ["dart", "web"],
+  "sourceOfTruth": ["lib/services/segment_config_service.dart label", "lib/models/custom_field.dart getLabel"],
+  "otherImplementations": ["firebase/web/composables/useOrderI18n.ts"],
+  "cases": [
+    {"id":"segment-wins-over-translation","given":{"customFields":[{"key":"device._entity","type":"label","labels":{"pt-BR":"Veículo","en-US":"Vehicle"}}],"key":"device._entity","locale":"pt-BR"},"expect":{"label":"Veículo"}},
+    {"id":"segment-in-the-app-language","given":{"customFields":[{"key":"device._entity","type":"label","labels":{"pt-BR":"Veículo","en-US":"Vehicle"}}],"key":"device._entity","locale":"en-US"},"expect":{"label":"Vehicle"}},
+    {"id":"language-without-region-finds-its-region","given":{"customFields":[{"key":"device._entity","type":"label","labels":{"pt-BR":"Veículo","en-US":"Vehicle"}}],"key":"device._entity","locale":"en"},"expect":{"label":"Vehicle"}},
+    {"id":"other-region-finds-the-language","given":{"customFields":[{"key":"device._entity","type":"label","labels":{"pt-BR":"Veículo","en-US":"Vehicle"}}],"key":"device._entity","locale":"en-GB"},"expect":{"label":"Vehicle"}},
+    {"id":"language-missing-falls-back-to-portuguese","given":{"customFields":[{"key":"device._entity","type":"label","labels":{"pt-BR":"Veículo","en-US":"Vehicle"}}],"key":"device._entity","locale":"es-ES"},"expect":{"label":"Veículo"}},
+    {"id":"no-segment-label-uses-the-translation","given":{"customFields":[],"key":"device._entity","locale":"pt-BR"},"expect":{"label":"Equipamento"}},
+    {"id":"no-segment-label-uses-the-translation-en","given":{"customFields":[],"key":"device._entity","locale":"en-US"},"expect":{"label":"Device"}},
+    {"id":"no-segment-label-uses-the-translation-es","given":{"customFields":[],"key":"device._entity","locale":"es-ES"},"expect":{"label":"Equipo"}},
+    {"id":"unknown-key-shows-the-key","given":{"customFields":[],"key":"unknown.key","locale":"pt-BR"},"expect":{"label":"unknown.key"}},
+    {"id":"field-without-labels-shows-the-key","given":{"customFields":[{"key":"unknown.key","type":"label","labels":{}}],"key":"unknown.key","locale":"pt-BR"},"expect":{"label":"unknown.key"}}
+  ]
+}
