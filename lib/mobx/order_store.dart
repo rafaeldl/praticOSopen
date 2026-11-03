@@ -23,6 +23,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/utils/contract_generation.dart';
 import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:flutter/foundation.dart'
@@ -731,57 +732,17 @@ abstract class _OrderStore with Store {
   /// Generate an Order from a contract template
   Future<Order?> generateOrderFromContract(Order template) async {
     if (companyId == null || template.id == null) return null;
+    final contract = template.contract;
+    final due = contract?.nextDueDate;
+    if (contract == null || due == null) return null;
 
-    final newOrder = Order()
-      ..company = Global.companyAggr
-      ..status = 'quote'
-      ..payment = 'unpaid'
-      ..createdAt = DateTime.now()
-      ..createdBy = template.createdBy
-      ..updatedAt = DateTime.now()
-      ..updatedBy = template.createdBy
-      ..customer = template.customer
-      ..devices = template.devices != null ? List.from(template.devices!) : null
-      ..device = template.device
-      ..services = template.services
-          ?.map(
-            (s) => OrderService()
-              ..service = s.service
-              ..description = s.description
-              ..value = s.value,
-          )
-          .toList()
-      ..products = template.products
-          ?.map(
-            (p) => OrderProduct()
-              ..product = p.product
-              ..description = p.description
-              ..value = p.value
-              ..quantity = p.quantity
-              ..total = p.total,
-          )
-          .toList()
-      ..assignedTo = template.assignedTo
-      ..contract = (OrderContract()
-        ..parentOrderId = template.id
-        ..parentOrderNumber = template.number);
-
-    newOrder.syncDeviceIds();
-
-    // Calculate total from services + products
-    double total = 0;
-    for (final s in newOrder.services ?? <OrderService>[]) {
-      total += s.value ?? 0;
-    }
-    for (final p in newOrder.products ?? <OrderProduct>[]) {
-      total += p.total ?? (p.value ?? 0) * (p.quantity ?? 1);
-    }
-    newOrder.total = total;
-
-    final contract = template.contract!;
-    final due = contract.nextDueDate ?? DateTime.now();
-    newOrder.id = OrderContract.generatedOrderId(template.id!, due);
-    contract.advanceAfterGenerating(DateTime.now());
+    final now = DateTime.now();
+    final newOrder = buildContractOrder(
+      template,
+      now: now,
+      company: Global.companyAggr,
+    )..id = contractOrderId(template.id!, due);
+    contract.advanceAfterGenerating(now);
 
     // One transaction: the order of this due date is created only if no
     // other device created it, and only the template's contract is updated
@@ -789,6 +750,7 @@ abstract class _OrderStore with Store {
     final created = await TenantOrderRepository().createContractOrder(
       companyId!,
       templateId: template.id!,
+      due: due,
       contract: contract,
       order: newOrder,
     );

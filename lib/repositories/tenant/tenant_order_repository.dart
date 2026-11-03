@@ -279,36 +279,44 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return result;
   }
 
-  /// Creates [order] (its id set by [OrderContract.generatedOrderId]) unless
-  /// it already exists, and writes [contract] on the template, in one
-  /// transaction. Returns whether the order was created here.
+  /// Creates [order] (its id from `contractOrderId`, the same the server job
+  /// uses) unless it already exists, and writes [contract] on the template,
+  /// in one transaction. Returns whether the order was created here. When
+  /// the server job already generated this due date, nothing is created.
   Future<bool> createContractOrder(
     String companyId, {
     required String templateId,
+    required DateTime due,
     required OrderContract contract,
     required Order order,
   }) async {
     final collection = collectionFor(companyId);
     final orderRef = collection.doc(order.id);
     final templateRef = collection.doc(templateId);
+    final json = toJson(order)..remove('id');
     try {
       return await firestore.runTransaction<bool>((tx) async {
         final existing = await tx.get(orderRef);
-        if (!existing.exists) {
-          final json = toJson(order)..remove('id');
-          tx.set(orderRef, json);
-        }
+        if (!existing.exists) tx.set(orderRef, json);
         tx.update(templateRef, {'contract': contract.toJson()});
         return !existing.exists;
       });
     } on FirebaseException catch (e) {
       // Consultant and technician can't read an order that doesn't exist yet
       // (the read rule looks at its createdBy), so the transaction is denied.
-      // TODO(rules): let them read it and drop this fallback, which can
-      // still duplicate when two devices generate at once.
+      // They can read their template: generate only if the server copy is
+      // still due on this same date (nobody generated it yet), with the same
+      // id. TODO(rules): let them read it and drop this path.
       if (e.code != 'permission-denied') rethrow;
-      order.id = null;
-      await super.createItem(companyId, order);
+      final fresh = await templateRef.get(
+        const GetOptions(source: Source.server),
+      );
+      final stored = fresh.data()?['contract'];
+      final storedDue = stored is Map && stored['nextDueDate'] is String
+          ? DateTime.tryParse(stored['nextDueDate'] as String)
+          : null;
+      if (storedDue == null || storedDue != due) return false;
+      await orderRef.set(json);
       await templateRef.update({'contract': contract.toJson()});
       return true;
     }

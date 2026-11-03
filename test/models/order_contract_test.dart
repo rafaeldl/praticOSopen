@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/utils/contract_generation.dart';
 
 OrderContract monthly({
   required DateTime next,
@@ -41,11 +42,11 @@ void main() {
   });
 
   group('advanceAfterGenerating', () {
-    test('the next date counts from the due date, not from today', () {
+    test('the next date keeps the schedule day, not the day the app ran', () {
       final c = monthly(next: DateTime(2026, 11, 10));
       // The app only ran on the 25th.
       c.advanceAfterGenerating(DateTime(2026, 11, 25));
-      expect(c.lastGeneratedDate, DateTime(2026, 11, 10));
+      expect(c.lastGeneratedDate, DateTime(2026, 11, 25));
       expect(c.nextDueDate, DateTime(2026, 12, 10));
       expect(c.generatedCount, 1);
       expect(c.active, isTrue);
@@ -62,12 +63,19 @@ void main() {
     });
   });
 
+  test('missed periods are skipped: one order, next date in the future', () {
+    final c = monthly(next: DateTime(2026, 6, 10));
+    c.advanceAfterGenerating(DateTime(2026, 11, 3));
+    expect(c.nextDueDate, DateTime(2026, 11, 10));
+    expect(c.isDueAt(DateTime(2026, 11, 3)), isFalse);
+  });
+
   test('the generated order id is the same on every device', () {
     final due = DateTime(2026, 3, 5, 14, 30);
-    expect(OrderContract.generatedOrderId('t1', due), 't1_20260305');
+    expect(contractOrderId('t1', due), 'contract_t1_20260305');
     expect(
-      OrderContract.generatedOrderId('t1', DateTime(2026, 3, 5)),
-      OrderContract.generatedOrderId('t1', due),
+      contractOrderId('t1', DateTime(2026, 3, 5)),
+      contractOrderId('t1', due),
     );
   });
 }

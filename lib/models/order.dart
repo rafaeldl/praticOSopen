@@ -327,13 +327,28 @@ class OrderContract {
   DateTime? computeNextDueDate() {
     final base = lastGeneratedDate ?? startDate;
     if (base == null) return null;
-    final step = interval ?? 1;
+    return stepFrom(base);
+  }
 
+  /// One period after [base]: daily and weekly keep the time of day; monthly
+  /// and yearly are midnight, and day 31 rolls into the next month like
+  /// `DateTime` (31 Jan + 1 month is 3 March). Null for an unknown frequency.
+  DateTime? stepFrom(DateTime base) {
+    final step = interval ?? 1;
+    DateTime days(int n) => DateTime(
+      base.year,
+      base.month,
+      base.day + n,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+    );
     switch (frequency) {
       case 'daily':
-        return base.add(Duration(days: step));
+        return days(step);
       case 'weekly':
-        return base.add(Duration(days: 7 * step));
+        return days(7 * step);
       case 'monthly':
         return DateTime(base.year, base.month + step, base.day);
       case 'yearly':
@@ -343,8 +358,22 @@ class OrderContract {
     }
   }
 
-  /// Whether the contract is due: active, nextDueDate <= [now] and not after
-  /// the last day of the contract ([endDate]).
+  /// The first due date after [now], stepping from [nextDueDate]: missed
+  /// periods are skipped, not made up, and the schedule's day is kept.
+  DateTime? nextDueAfter(DateTime now) {
+    final due = nextDueDate;
+    if (due == null) return null;
+    var next = stepFrom(due);
+    // A daily contract unopened for years is a few thousand steps at most.
+    var guard = 0;
+    while (next != null && !next.isAfter(now) && guard++ < 100000) {
+      next = stepFrom(next);
+    }
+    return next;
+  }
+
+  /// Whether the contract is due: active, nextDueDate <= [now] and the due
+  /// day not after the contract's last day ([endDate] is included).
   bool isDueAt(DateTime now) {
     final due = nextDueDate;
     if (active != true || due == null) return false;
@@ -363,23 +392,16 @@ class OrderContract {
     return !date.isBefore(lastDay);
   }
 
-  /// After generating the order of [nextDueDate]: the next date counts from
-  /// that due date (not from when the app happened to run), and the contract
-  /// stops when the next date is past [endDate].
+  /// After generating the order of [nextDueDate] at [now]: lastGeneratedDate
+  /// is [now], the next due date is the first one after [now]
+  /// ([nextDueAfter]) and the contract stops when there is none or it falls
+  /// after [endDate].
   void advanceAfterGenerating(DateTime now) {
-    lastGeneratedDate = nextDueDate ?? now;
+    final next = nextDueAfter(now);
+    lastGeneratedDate = now;
     generatedCount = (generatedCount ?? 0) + 1;
-    nextDueDate = computeNextDueDate();
-    final next = nextDueDate;
+    nextDueDate = next;
     if (next == null || _afterEnd(next)) active = false;
-  }
-
-  /// Id of the order generated from contract [templateId] for [due]: the
-  /// same on every device, so two devices generating at once write one
-  /// order, not two.
-  static String generatedOrderId(String templateId, DateTime due) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${templateId}_${due.year}${two(due.month)}${two(due.day)}';
   }
 
   /// Whether the contract has expired (endDate passed)
