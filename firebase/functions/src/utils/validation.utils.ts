@@ -182,8 +182,15 @@ export const updateOrderItemSchema = z.object({
   message: 'Nothing to change',
 });
 
+/**
+ * Client-generated transaction id (a uuid): letters, digits and dashes, so it
+ * never looks like an Asaas (`asaas_…`), legacy or receipt share id.
+ */
+const clientTransactionIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientTransactionId');
+
 /** POST /:id/payments: money received. A discount has its own route. */
 export const receivePaymentSchema = z.object({
+  clientTransactionId: clientTransactionIdSchema.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
   type: z.literal('payment').optional(),
@@ -194,6 +201,7 @@ export const receivePaymentSchema = z.object({
 
 /** POST /:id/discounts */
 export const discountSchema = z.object({
+  clientTransactionId: clientTransactionIdSchema.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
 });

@@ -32,6 +32,9 @@ const NAMES: Record<string, string> = {
 const O = '/v1/app/orders';
 const CU = '/v1/app/customers';
 const T0 = '2026-10-01T10:00:00.000Z';
+/** Download URL of a file in the project bucket, as getDownloadURL gives it. */
+const storageUrl = (path: string, bucket = 'praticos.appspot.com') =>
+  `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media&token=t`;
 
 function buildApp(): Express {
   const app = express();
@@ -394,7 +397,7 @@ describe('itens', () => {
 
 // ─── Dinheiro ─────────────────────────────────────────────────────────────
 describe('dinheiro', () => {
-  const file = (path: string) => ({ url: 'https://firebasestorage.googleapis.com/x', storagePath: path, contentType: 'image/jpeg' });
+  const file = (path: string) => ({ url: storageUrl(path), storagePath: path, contentType: 'image/jpeg' });
 
   it('consultor recebe na OS que criou e não na dos outros', async () => {
     seedOrder('mine', { createdBy: { id: 'cons1', name: 'Caio' } });
@@ -635,7 +638,7 @@ describe('recibos do cliente', () => {
   });
 
   it('anexa e remove o comprovante do recibo em todas as OS', async () => {
-    const receiptFile = { url: 'https://firebasestorage.googleapis.com/r', storagePath: 'tenants/c1/receipts/r1/f.pdf', contentType: 'application/pdf' };
+    const receiptFile = { url: storageUrl('tenants/c1/receipts/r1/f.pdf'), storagePath: 'tenants/c1/receipts/r1/f.pdf', contentType: 'application/pdf' };
     const put = await call('consultant', 'put', `${CU}/cust1/receipts/r1/file`, { receiptFile });
     expect(put.status).toBe(200);
     expect(read('companies/c1/receipts/r1')).toMatchObject({ receiptFile: { storagePath: 'tenants/c1/receipts/r1/f.pdf' } });
@@ -664,7 +667,7 @@ describe('outra empresa', () => {
     ['delete', `${O}/x/payments/t1`],
     ['post', `${O}/x/payments/mark-paid`, {}],
     ['post', `${O}/x/payments/reset`, {}],
-    ['put', `${O}/x/payments/t1/receipt`, { receiptFile: { url: 'https://a', storagePath: 'tenants/c2/orders/x/payments/t1/a', contentType: 'image/png' } }],
+    ['put', `${O}/x/payments/t1/receipt`, { receiptFile: { url: storageUrl('tenants/c2/orders/x/payments/t1/a'), storagePath: 'tenants/c2/orders/x/payments/t1/a', contentType: 'image/png' } }],
     ['delete', `${O}/x/payments/t1/receipt`],
     ['post', `${O}/x/discounts`, { amount: 1 }],
     ['delete', `${O}/x/discounts/t1`],
@@ -673,7 +676,7 @@ describe('outra empresa', () => {
     ['delete', `${O}/x/hold`],
     ['get', `${CU}/cust1/receipts`],
     ['post', `${CU}/cust1/receipts/r9/cancel`],
-    ['put', `${CU}/cust1/receipts/r9/file`, { receiptFile: { url: 'https://a', storagePath: 'tenants/c2/receipts/r9/a', contentType: 'image/png' } }],
+    ['put', `${CU}/cust1/receipts/r9/file`, { receiptFile: { url: storageUrl('tenants/c2/receipts/r9/a'), storagePath: 'tenants/c2/receipts/r9/a', contentType: 'image/png' } }],
     ['delete', `${CU}/cust1/receipts/r9/file`],
   ];
   // Always three values: jest.each passes `done` to a test with more parameters than values.
@@ -693,9 +696,148 @@ describe('outra empresa', () => {
   });
 
   it.each(ROUTES.filter(([, path]) => path.startsWith(O)))('%s %s: id de OS de c2 em c1 → 404', async (method, path, body) => {
-    const sameCompany = body && JSON.parse(JSON.stringify(body).replace('tenants/c2/', 'tenants/c1/'));
+    const sameCompany = body && JSON.parse(JSON.stringify(body).replace(/tenants(\/|%2F)c2(\/|%2F)/g, 'tenants$1c1$2'));
     const res = await call('owner', method, path, sameCompany ?? undefined, 'c1');
     expect(res.status).toBe(404);
     expect(doc('x', 'c2').transactions).toHaveLength(1);
+  });
+});
+
+// ─── Endurecimento ────────────────────────────────────────────────────────
+describe('arquivos apagados só da pasta da OS', () => {
+  const by = { id: 'owner1', name: 'R' };
+  const docs = [
+    { id: 'own', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o1/payments/t1/a.jpg' },
+    { id: 'foreign', linkedTransactionId: 't1', storagePath: 'tenants/c2/orders/z/secret.pdf' },
+    { id: 'dots', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o1/../o2/b.jpg' },
+    { id: 'sibling', linkedTransactionId: 't1', storagePath: 'tenants/c1/orders/o10/c.jpg' },
+  ];
+  beforeEach(() => seedOrder('o1', {
+    paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10, createdAt: T0, createdBy: by }], documents: docs,
+  }));
+
+  it('tirar pagamento apaga só o arquivo desta OS', async () => {
+    expect((await call('owner', 'delete', `${O}/o1/payments/t1`)).status).toBe(200);
+    expect(fakeStorage.deleted).toEqual(['tenants/c1/orders/o1/payments/t1/a.jpg']);
+  });
+
+  it('zerar pagamentos apaga só o arquivo desta OS', async () => {
+    expect((await call('owner', 'post', `${O}/o1/payments/reset`)).status).toBe(200);
+    expect(fakeStorage.deleted).toEqual(['tenants/c1/orders/o1/payments/t1/a.jpg']);
+  });
+
+  it('trocar comprovante apaga só o arquivo desta OS', async () => {
+    const path = 'tenants/c1/orders/o1/payments/t1/new.jpg';
+    const res = await call('owner', 'put', `${O}/o1/payments/t1/receipt`, {
+      receiptFile: { url: storageUrl(path), storagePath: path, contentType: 'image/jpeg' },
+    });
+    expect(res.status).toBe(200);
+    expect(fakeStorage.deleted).toEqual(['tenants/c1/orders/o1/payments/t1/a.jpg']);
+  });
+});
+
+describe('clientTransactionId', () => {
+  it('pagamento repetido com o mesmo id grava uma vez e devolve o mesmo resultado', async () => {
+    seedOrder('o1');
+    const body = { amount: 40, clientTransactionId: 'c0ffee00-0000-4000-8000-000000000001' };
+    const first = await call('owner', 'post', `${O}/o1/payments`, body);
+    const again = await call('owner', 'post', `${O}/o1/payments`, body);
+    expect(first.status).toBe(200);
+    expect(again.status).toBe(200);
+    expect(again.body.data.transactionId).toBe('c0ffee00-0000-4000-8000-000000000001');
+    expect(again.body.data).toMatchObject({ paidAmount: 40, remainingBalance: 60 });
+    expect(doc('o1').transactions).toHaveLength(1);
+    expect(doc('o1').paidAmount).toBe(40);
+  });
+
+  it('desconto repetido com o mesmo id grava uma vez', async () => {
+    seedOrder('o1');
+    const body = { amount: 10, clientTransactionId: 'c0ffee00-0000-4000-8000-000000000002' };
+    expect((await call('owner', 'post', `${O}/o1/discounts`, body)).status).toBe(200);
+    expect((await call('owner', 'post', `${O}/o1/discounts`, body)).status).toBe(200);
+    expect(doc('o1')).toMatchObject({ total: 90, discount: 10 });
+    expect(doc('o1').transactions).toHaveLength(1);
+  });
+
+  it('mesmo id com outro valor ou tipo é recusado', async () => {
+    seedOrder('o1');
+    const id = 'c0ffee00-0000-4000-8000-000000000003';
+    await call('owner', 'post', `${O}/o1/payments`, { amount: 40, clientTransactionId: id });
+    const other = await call('owner', 'post', `${O}/o1/payments`, { amount: 50, clientTransactionId: id });
+    expect(other.status).toBe(409);
+    expect(other.body.error.code).toBe('TRANSACTION_ID_CONFLICT');
+    expect((await call('owner', 'post', `${O}/o1/discounts`, { amount: 5, clientTransactionId: id })).status).toBe(409);
+    expect(doc('o1').transactions).toHaveLength(1);
+  });
+
+  it('id em formato inválido é recusado', async () => {
+    seedOrder('o1');
+    for (const clientTransactionId of ['asaas_pay_1', 'r1_0', 'x', 'a/b']) {
+      expect((await call('owner', 'post', `${O}/o1/payments`, { amount: 1, clientTransactionId })).status).toBe(400);
+    }
+  });
+});
+
+describe('comprovante e data do pagamento', () => {
+  const path = 'tenants/c1/orders/o1/payments/t/f.jpg';
+  beforeEach(() => seedOrder('o1'));
+
+  it.each([
+    ['outro host', `https://evil.example.com/v0/b/praticos.appspot.com/o/${encodeURIComponent(path)}`],
+    ['outro bucket', storageUrl(path, 'other.appspot.com')],
+    ['outro arquivo', storageUrl('tenants/c1/orders/o1/payments/t/other.jpg')],
+  ])('URL de %s é recusada', async (_label, url) => {
+    const res = await call('owner', 'post', `${O}/o1/payments`, { amount: 1, receiptFile: { url, storagePath: path, contentType: 'image/jpeg' } });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('INVALID_FILE');
+  });
+
+  it('data no futuro é recusada', async () => {
+    const paidAt = new Date(Date.now() + 2 * 3600 * 1000).toISOString();
+    const res = await call('owner', 'post', `${O}/o1/payments`, { amount: 1, paidAt });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('INVALID_PAID_AT');
+  });
+
+  it('data antes da criação da OS é recusada; no mesmo dia, mais cedo, passa', async () => {
+    const before = await call('owner', 'post', `${O}/o1/payments`, { amount: 1, paidAt: '2026-09-20T10:00:00.000Z' });
+    expect(before.status).toBe(400);
+    expect(before.body.error.code).toBe('INVALID_PAID_AT');
+    const markPaid = await call('owner', 'post', `${O}/o1/payments/mark-paid`, { paidAt: '2026-09-20T10:00:00.000Z' });
+    expect(markPaid.status).toBe(400);
+    expect((await call('owner', 'post', `${O}/o1/payments`, { amount: 1, paidAt: '2026-10-01T03:00:00.000Z' })).status).toBe(200);
+  });
+});
+
+describe('apagar OS confere antes de cancelar a cobrança', () => {
+  it('se entrou dinheiro antes da checagem final, recusa sem cancelar a cobrança', async () => {
+    seed('companies/c1/settings/payments', { asaasConnected: true });
+    seedOrder('q', { status: 'quote', payment: null, createdBy: { id: 'tech1', name: 'Téo' } });
+    seed('companies/c1/orders/q/charges/ch1', { status: 'pending', asaasPaymentId: 'pay_1' });
+    const realList = chargeService.listCharges;
+    const spy = jest.spyOn(chargeService, 'listCharges').mockImplementationOnce(async (companyId, orderId) => {
+      seedOrder('q', { status: 'quote', payment: null, paidAmount: 10, createdBy: { id: 'tech1', name: 'Téo' } });
+      return realList(companyId, orderId);
+    });
+    const res = await call('manager', 'delete', `${O}/q`);
+    spy.mockRestore();
+    expect(res.status).toBe(403);
+    expect(cancelOpenCharges).not.toHaveBeenCalled();
+    expect(doc('q')).toBeDefined();
+  });
+});
+
+describe('desfazer recibo com parte antiga', () => {
+  it('parte sem id de transação recusa com erro claro e nada muda', async () => {
+    seedOrder('a', { paidAmount: 50, transactions: [{ id: 'old', type: 'payment', amount: 50, createdAt: T0, createdBy: { id: 'cons1', name: 'Caio' } }] });
+    seed('companies/c1/receipts/r3', {
+      id: 'r3', customer: { id: 'cust1', name: 'João' }, amount: 50, paidAt: T0, status: 'active',
+      allocations: [{ orderId: 'a', amount: 50 }], createdBy: { id: 'cons1', name: 'Caio' }, createdAt: T0,
+    });
+    const res = await call('owner', 'post', `${CU}/cust1/receipts/r3/cancel`);
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('RECEIPT_LEGACY_SHARE');
+    expect(read('companies/c1/receipts/r3')).toMatchObject({ status: 'active' });
+    expect(doc('a').paidAmount).toBe(50);
   });
 });

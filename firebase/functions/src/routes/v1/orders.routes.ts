@@ -420,6 +420,7 @@ router.post('/:id/payments', requireOrderAccess(), route('Failed to add payment'
   const guard = await receiveGuard(req, res);
   const result = await orderService.addPayment(companyId, param(req, 'id'), data.amount, 'payment', data.description, getUserAggr(req), {
     guard, paidAt: data.paidAt, paymentMethod: data.paymentMethod, receiptFile: data.receiptFile,
+    clientTransactionId: data.clientTransactionId,
   });
   if (!result) return notFound(res);
   const { order, ...summary } = result;
@@ -485,7 +486,7 @@ router.post('/:id/discounts', requireOrderAccess(), route('Failed to add discoun
   if (!validation.success) return validationError(res, validation.errors);
   const result = await orderService.addPayment(
     companyId, param(req, 'id'), validation.data.amount, 'discount', validation.data.description, getUserAggr(req),
-    { guard: await financialGuard(req, res) },
+    { guard: await financialGuard(req, res), clientTransactionId: validation.data.clientTransactionId },
   );
   if (!result) return notFound(res);
   const { order, ...summary } = result;

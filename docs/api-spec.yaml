@@ -1142,10 +1142,12 @@ paths:
                 paidAt: { type: string, format: date-time }
                 paymentMethod: { type: string, enum: [pix, cash, card, other] }
                 receiptFile: { $ref: '#/components/schemas/ReceiptFile' }
+                clientTransactionId: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$', description: 'uuid do cliente; repetir com o mesmo id não grava de novo' }
       responses:
         '200': { description: 'transactionId, paidAmount, remainingBalance, isFullyPaid e a OS' }
         '400': { description: VALIDATION_ERROR / INVALID_FILE / INVALID_PAID_AT }
         '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: TRANSACTION_ID_CONFLICT }
 
   /v1/app/orders/{orderId}/payments/mark-paid:
     post:
@@ -1247,10 +1249,12 @@ paths:
               properties:
                 amount: { type: number, minimum: 0.01 }
                 description: { type: string }
+                clientTransactionId: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$', description: 'uuid do cliente; repetir com o mesmo id não grava de novo' }
       responses:
         '200': { $ref: '#/components/responses/AppOrderWritten' }
         '400': { description: VALIDATION_ERROR (acima do que falta) }
         '403': { description: INSUFFICIENT_PERMISSIONS }
+        '409': { description: TRANSACTION_ID_CONFLICT }
     delete:
       tags: [App Orders]
       summary: Tirar todo o desconto (também o que não tem transação)

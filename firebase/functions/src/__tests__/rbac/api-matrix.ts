@@ -57,8 +57,8 @@ const CU = '/v1/app/customers';
 const NF = '/v1/app/nfse';
 
 const receipt = { receiptId: 'r9', paidAt: '2026-10-20', allocations: [{ orderId: 'o1', amount: 10 }] };
-const orderFile = { url: 'https://firebasestorage.googleapis.com/f', storagePath: 'tenants/c1/orders/o1/payments/t1/f.jpg', contentType: 'image/jpeg' };
-const receiptFile = { url: 'https://firebasestorage.googleapis.com/r', storagePath: 'tenants/c1/receipts/r1/f.pdf', contentType: 'application/pdf' };
+const orderFile = { url: 'https://firebasestorage.googleapis.com/v0/b/praticos.appspot.com/o/tenants%2Fc1%2Forders%2Fo1%2Fpayments%2Ft1%2Ff.jpg?alt=media', storagePath: 'tenants/c1/orders/o1/payments/t1/f.jpg', contentType: 'image/jpeg' };
+const receiptFile = { url: 'https://firebasestorage.googleapis.com/v0/b/praticos.appspot.com/o/tenants%2Fc1%2Freceipts%2Fr1%2Ff.pdf?alt=media', storagePath: 'tenants/c1/receipts/r1/f.pdf', contentType: 'application/pdf' };
 
 export const API_CASES: ApiCase[] = [
   // ─── OS ────────────────────────────────────────────────────────────────

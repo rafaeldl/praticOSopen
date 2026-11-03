@@ -7,11 +7,14 @@
  * - an open charge of several orders → refused (CUSTOMER_CHARGE_OPEN): it
  *   covers other orders, so the user decides;
  * - an installment plan with paid installments → refused (INSTALLMENTS_IN_PROGRESS);
+ * - the permission is checked again on the fresh order (money may have
+ *   arrived) right before anything is canceled, so a refusal never leaves the
+ *   order without its charge;
  * - an open charge of this order → canceled in Asaas; when one stays open the
  *   order is kept (ASAAS_UNAVAILABLE), so money never lands on a missing order.
- * Then, in a transaction over the fresh order (the permission is checked
- * again: money may have arrived), the document goes; its subcollections
- * (comments, forms, photos, charges), Storage files and share links follow.
+ * Then, in a transaction over the fresh order (checked once more), the
+ * document goes; its subcollections (comments, forms, photos, charges),
+ * Storage files and share links follow.
  */
 import { db, getTenantCollection, runTransaction, storage } from './firestore.service';
 import { readOrderForWrite } from './order.service';
@@ -32,12 +35,16 @@ async function assertNoActiveInvoice(companyId: string, orderId: string): Promis
   }
 }
 
-async function settleOpenCharges(companyId: string, orderId: string): Promise<void> {
+/** Open charges of the order; refuses an installment plan already being paid. */
+async function openChargesOf(companyId: string, orderId: string) {
   const open = (await listCharges(companyId, orderId)).filter(isOpen);
-  if (open.length === 0) return;
   if (open.some(hasPaidInstallments)) {
     throw new AsaasServiceError('INSTALLMENTS_IN_PROGRESS', 'An installment plan with paid installments cannot be canceled');
   }
+  return open;
+}
+
+async function cancelOpenCharges(companyId: string, orderId: string): Promise<void> {
   // Without Asaas connected nothing can be canceled there and no webhook arrives.
   if (!(await getPaymentSettings(companyId)).asaasConnected) return;
   await cancelOpenChargesForOrder(companyId, orderId);
@@ -68,7 +75,14 @@ export async function deleteOrder(
 
   await assertNoActiveInvoice(companyId, orderId);
   await assertNoOpenCustomerCharge(companyId, orderId);
-  await settleOpenCharges(companyId, orderId);
+  const open = await openChargesOf(companyId, orderId);
+
+  if (open.length > 0) {
+    // Final check on the fresh order before canceling anything in Asaas.
+    const exists = await runTransaction(async (tx) => !!(await readOrderForWrite(tx, ref, { guard })));
+    if (!exists) return false;
+    await cancelOpenCharges(companyId, orderId);
+  }
 
   const deleted = await runTransaction(async (tx) => {
     const order = await readOrderForWrite(tx, ref, { guard });

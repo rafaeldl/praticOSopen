@@ -26,7 +26,7 @@ import {
 import { findTransactionIndex } from './order-items';
 import { OrderRuleError } from './order-errors';
 import { ASAAS_TRANSACTION_PREFIX } from './asaas/order-payment.service';
-import { isSharedReceiptPath, orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
+import { isInsideFolder, isSharedReceiptPath, orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
 import { roundMoney } from '../utils/money';
 import type { Order, OrderDocument, PaymentTransaction, UserAggr } from '../models/types';
 
@@ -128,8 +128,18 @@ function documentsWithout(order: Order, removed: PaymentTransaction[]): { docume
   return { documents, files };
 }
 
-async function deleteFiles(paths: string[]): Promise<void> {
+/**
+ * Deletes the proof files of an order. The paths come from the order's
+ * `documents`, which members can write, so only files inside this order's own
+ * folder are deleted; any other path is skipped and logged.
+ */
+async function deleteFiles(companyId: string, orderId: string, paths: string[]): Promise<void> {
+  const prefix = orderFilesPrefix(companyId, orderId);
   for (const path of paths) {
+    if (!isInsideFolder(prefix, path)) {
+      console.warn(`[OrderFinance] skipped a file outside the order folder: company=${companyId} order=${orderId}`);
+      continue;
+    }
     try {
       await storage.bucket().file(path).delete();
     } catch (error) {
@@ -176,7 +186,7 @@ async function writePayments(
     tx.update(ref, update);
     return { order: { ...order, ...update } as Order };
   });
-  if (result) await deleteFiles(files);
+  if (result) await deleteFiles(companyId, orderId, files);
   return result;
 }
 
@@ -243,6 +253,7 @@ export async function markOrderPaid(
   const paidAt = input.paidAt ? validatePaidAt(input.paidAt) : undefined;
   let transactionId: string | null = null;
   const result = await writePayments(companyId, orderId, actor, options, (order, now) => {
+    if (input.paidAt) validatePaidAt(input.paidAt, order.createdAt);
     const { added, ...state } = markFullyPaid(order, (remaining) => ({
       id: uuidv4(),
       type: 'payment',

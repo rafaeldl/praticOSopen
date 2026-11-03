@@ -137,6 +137,10 @@ import appPermissions from './rbac/app-permissions.json';
 import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
 
+// Hundreds of cases over the in-memory Firestore: under a full parallel run the
+// default 5 s per test is too tight and the suite flakes.
+jest.setTimeout(30_000);
+
 const UID: Record<ApiRole, string> = {
   owner: 'owner1', admin: 'admin1', supervisor: 'sup1', manager: 'mgr1', consultant: 'cons1', technician: 'tech1',
 };

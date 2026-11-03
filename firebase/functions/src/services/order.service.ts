@@ -826,6 +826,12 @@ export interface AddPaymentOptions extends OrderWriteOptions {
   paymentMethod?: string;
   /** Proof already uploaded under tenants/{companyId}/orders/{orderId}/. */
   receiptFile?: ReceiptFileInput;
+  /**
+   * Id the client generated for this transaction (idempotency). When the
+   * order already has a transaction with it, nothing is written and the
+   * current state is returned; with another type or amount → 409.
+   */
+  clientTransactionId?: string;
 }
 
 /** OrderDocument of a payment proof, linked to [transactionId]. */
@@ -877,6 +883,23 @@ export async function addPayment(
     const order = await readOrderForWrite(tx, ref, options);
     if (!order) return null;
 
+    const clientId = options.clientTransactionId;
+    const previous = clientId ? (order.transactions ?? []).find((t) => t.id === clientId) : undefined;
+    if (previous) {
+      if (previous.type !== type || roundMoney(previous.amount) !== roundMoney(amount)) {
+        throw new OrderRuleError('TRANSACTION_ID_CONFLICT', 409, 'Another transaction already has this id');
+      }
+      const paidAmount = roundMoney(Number(order.paidAmount) || 0);
+      return {
+        transactionId: previous.id,
+        paidAmount,
+        remainingBalance: calculateRemainingBalance(order),
+        isFullyPaid: order.paid === true,
+        order,
+      };
+    }
+    if (type === 'payment' && options.paidAt) validatePaidAt(options.paidAt, order.createdAt);
+
     if (type === 'discount') {
       const remaining = calculateRemainingBalance(order);
       if (roundMoney(amount - remaining) > 0.005) {
@@ -886,7 +909,7 @@ export async function addPayment(
 
     const now = new Date().toISOString();
     const transaction: PaymentTransaction = {
-      id: uuidv4(),
+      id: clientId ?? uuidv4(),
       type,
       amount: roundMoney(amount),
       createdAt: now,

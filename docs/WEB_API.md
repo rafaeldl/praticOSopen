@@ -43,7 +43,10 @@ Limite de taxa: 300 pedidos por minuto por usuário, contados depois de conferir
 3. **Total do servidor.** O cliente nunca manda o total da OS. Total = soma dos itens com preço − desconto, arredondado ao centavo, nunca abaixo de 0. Produto vale o `total` da linha quando existe, senão `value × quantity`.
 4. **Item sem preço.** `value: null` fica "sem valor" e fora do total. Nunca vira 0.
 5. **Pago / a pagar.** Segue o total novo. Orçamento e cancelada não têm situação de pagamento (`payment: null`). Quando a situação muda só porque o total mudou, o servidor marca `paymentSyncedAt`, e o gatilho da OS não emite nota "na hora em que for pago" (não entrou dinheiro).
-6. **Valores escondidos.** Sem `viewPrices` (técnico, supervisor, ou "Valores e cobrança" desligado) nenhum valor sai do servidor: total, valor e total da linha, preço de catálogo dentro da linha, pagamentos, situação de pagamento, comprovantes. Vale para lista, detalhe e respostas de escrita.
+6. **Repetir sem gravar em dobro (`clientTransactionId`).** `POST /:id/payments` e `POST /:id/discounts` aceitam um `clientTransactionId` opcional: um uuid gerado pelo cliente (letras, números e hífen, 8 a 64). Ele vira o `id` da transação. Se a OS já tem uma transação com esse id, nada é gravado e a resposta traz o estado atual com o mesmo `transactionId` (duplo clique, nova tentativa depois de queda de rede). Mesmo id com outro tipo ou valor → `409 TRANSACTION_ID_CONFLICT`. O cliente gera um id novo para cada pagamento que o usuário pede, e reusa o mesmo só ao repetir o envio.
+7. **Data e comprovante.** `paidAt` não pode estar no futuro (folga de 5 minutos de relógio) nem antes do dia em que a OS foi criada (folga de 24 h pelo fuso). O comprovante (`receiptFile`) fica na pasta da OS (`tenants/{companyId}/orders/{orderId}/`, ou do recibo), e a `url` tem de ser a URL de download desse mesmo arquivo no bucket do projeto (`firebasestorage.googleapis.com/v0/b/{bucket}/o/…` ou `storage.googleapis.com/{bucket}/…`).
+8. **Arquivo apagado só da pasta da OS.** Ao tirar pagamento, zerar ou trocar comprovante, o servidor só apaga do Storage arquivos dentro da pasta da própria OS. Outro caminho em `documents` é ignorado e registrado em log.
+9. **Valores escondidos.** Sem `viewPrices` (técnico, supervisor, ou "Valores e cobrança" desligado) nenhum valor sai do servidor: total, valor e total da linha, preço de catálogo dentro da linha, pagamentos, situação de pagamento, comprovantes. Vale para lista, detalhe e respostas de escrita.
 
 ### Identificador de item e de pagamento
 
@@ -64,18 +67,18 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `PATCH /orders/:id/items/:itemId` | main fields; só `description`: quem vê a OS | Supervisor e técnico mudam a observação depois de aprovada |
 | `DELETE /orders/:id/items/:itemId` | main fields | |
 | `POST /orders/:id/services`, `/products` | main fields | Para bot, MCP e integrações; respondem `{success, newTotal}` |
-| `POST /orders/:id/payments` | `canReceiveOnOrder` | `{amount, paidAt?, paymentMethod?, receiptFile?, description?}`. Desconto aqui → 400 |
+| `POST /orders/:id/payments` | `canReceiveOnOrder` | `{amount, paidAt?, paymentMethod?, receiptFile?, description?, clientTransactionId?}`. Desconto aqui → 400 |
 | `DELETE /orders/:id/payments/:transactionId` | `canReceiveOnOrder` | Pagamento do Asaas → `409 ASAAS_LOCKED`; parte de recibo → `409 RECEIPT_SHARE` |
 | `POST /orders/:id/payments/mark-paid` | `canReceiveOnOrder` | Lança o que falta e marca paga (OS de valor 0 também) |
 | `POST /orders/:id/payments/reset` | financeiro | Tira pagamentos e descontos feitos à mão; os do Asaas ficam |
 | `PUT`/`DELETE /orders/:id/payments/:transactionId/receipt` | `canReceiveOnOrder` | Comprovante em `tenants/{companyId}/orders/{orderId}/…` |
-| `POST /orders/:id/discounts` | financeiro | Nunca acima do que falta |
+| `POST /orders/:id/discounts` | financeiro | `{amount, description?, clientTransactionId?}`. Nunca acima do que falta |
 | `DELETE /orders/:id/discounts/:transactionId` | financeiro | |
 | `DELETE /orders/:id/discounts` | financeiro | Tira todo o desconto, também o que não tem transação |
 | `POST /orders/:id/hold` | não consultor | `{reason, note?}`; só aprovada ou em andamento (`409 HOLD_NOT_ALLOWED`) |
 | `DELETE /orders/:id/hold` | não consultor | Em qualquer situação; sem marca, nada muda |
 | `GET /customers/:id/receipts` | quem recebe | Financeiro vê todos; consultor, os que registrou |
-| `POST /customers/:id/receipts/:receiptId/cancel` | financeiro ou quem registrou | Desfaz: tira a parte de cada OS e marca `canceled` |
+| `POST /customers/:id/receipts/:receiptId/cancel` | financeiro ou quem registrou | Desfaz: tira a parte de cada OS e marca `canceled`. Parte antiga sem id de transação (ou que não está mais na OS) → `409 RECEIPT_LEGACY_SHARE`, nada muda |
 | `PUT`/`DELETE /customers/:id/receipts/:receiptId/file` | financeiro ou quem registrou | Comprovante em todas as OS do recibo |
 
 **Quem recebe (`canReceiveOnOrder`)**: dono, admin e gerente em qualquer OS; consultor nas OS que criou, com "Valores e cobrança" ligado. Supervisor e técnico nunca. Igual a `canReceiveOnOrderFor` no app e a `canReceiveOnOrder` nas regras do Firestore.
@@ -99,8 +102,8 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 2. Nota fiscal ativa → `409 ORDER_HAS_INVOICE`.
 3. Cobrança de várias OS aberta → `409 CUSTOMER_CHARGE_OPEN` (ela cobre outras OS: quem decide é o usuário).
 4. Parcelamento com parcela paga → `409 INSTALLMENTS_IN_PROGRESS`.
-5. Cobrança aberta só desta OS → cancelada no Asaas. Se não cancelar, a OS fica (`502 ASAAS_UNAVAILABLE`).
-6. A OS sai numa transação (o papel é conferido de novo), depois comentários, formulários, fotos, cobranças, arquivos e links do cliente.
+5. Com cobrança aberta só desta OS, o papel é conferido de novo na OS fresca antes de cancelar qualquer coisa (se entrou dinheiro e o papel não pode mais apagar, recusa e a cobrança fica). Depois a cobrança é cancelada no Asaas. Se não cancelar, a OS fica (`502 ASAAS_UNAVAILABLE`).
+6. A OS sai numa transação (o papel é conferido mais uma vez), depois comentários, formulários, fotos, cobranças, arquivos e links do cliente.
 
 ## Erros
 
@@ -112,11 +115,12 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `INVALID_DEVICE` | 400 | Aparelho do item não está na OS |
 | `INVALID_ASSIGNEE` | 400 | Responsável não é da empresa |
 | `INVALID_CURSOR`, `UNSUPPORTED_QUERY` | 400 | Lista |
-| `INVALID_FILE`, `INVALID_PAID_AT` | 400 | Comprovante fora da pasta, tipo errado; data inválida |
+| `INVALID_FILE`, `INVALID_PAID_AT` | 400 | Comprovante fora da pasta, de outro bucket ou tipo errado; data inválida, no futuro ou antes da OS |
 | `INSUFFICIENT_PERMISSIONS`, `FORBIDDEN` | 403 | Papel |
 | `NOT_FOUND`, `ITEM_NOT_FOUND`, `TRANSACTION_NOT_FOUND`, `RECEIPT_NOT_FOUND` | 404 | |
 | `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente |
-| `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
+| `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `RECEIPT_LEGACY_SHARE`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
+| `TRANSACTION_ID_CONFLICT` | 409 | `clientTransactionId` já usado com outro tipo ou valor |
 | `ORDER_HAS_INVOICE`, `CUSTOMER_CHARGE_OPEN`, `INSTALLMENTS_IN_PROGRESS` | 409 | Apagar |
 | `ASAAS_UNAVAILABLE` | 502 | Não deu para cancelar a cobrança aberta |
 | `RATE_LIMIT_EXCEEDED` | 429 | |
@@ -143,8 +147,8 @@ curl -X POST "$API/v1/app/orders/$ORDER/items" \
 curl -X POST "$API/v1/app/orders/$ORDER/payments" \
   -H "Authorization: Bearer $TOKEN" -H "X-Company-Id: $COMPANY" \
   -H "Content-Type: application/json" \
-  -d '{"amount":50,"paymentMethod":"pix","paidAt":"2026-11-03T12:00:00.000Z",
-       "receiptFile":{"url":"https://firebasestorage.googleapis.com/…","storagePath":"tenants/'$COMPANY'/orders/'$ORDER'/payments/x/comprovante.jpg","contentType":"image/jpeg"}}'
+  -d '{"amount":50,"paymentMethod":"pix","paidAt":"2026-11-03T12:00:00.000Z","clientTransactionId":"'$(uuidgen)'",
+       "receiptFile":{"url":"https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<storagePath codificado>?alt=media&token=…","storagePath":"tenants/'$COMPANY'/orders/'$ORDER'/payments/x/comprovante.jpg","contentType":"image/jpeg"}}'
 ```
 
 ## Testes

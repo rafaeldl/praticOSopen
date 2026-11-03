@@ -135,6 +135,7 @@ export async function registerCustomerReceipt(
         throw new AsaasServiceError('ORDER_NOT_OF_CUSTOMER', 'Order belongs to another customer');
       }
       if (!isPayable(order)) throw new AsaasServiceError('ORDER_NOT_PAYABLE', 'Quotes and canceled orders cannot receive');
+      validatePaidAt(input.paidAt, order.createdAt);
       return order;
     });
     allocations.forEach((a, i) => {
@@ -309,9 +310,16 @@ export async function cancelCustomerReceipt(
 
     for (const allocation of receipt.allocations ?? []) {
       const order = orders.get(allocation.orderId);
-      const transactions = order?.transactions ?? [];
-      const index = transactions.findIndex((t) => t.id === allocation.transactionId);
-      if (!order || index < 0) continue;
+      // A deleted order has nothing to give back.
+      if (!order) continue;
+      const transactions = order.transactions ?? [];
+      const index = allocation.transactionId ? transactions.findIndex((t) => t.id === allocation.transactionId) : -1;
+      // An old share without its transaction id (or no longer on the order)
+      // cannot be found: refuse instead of marking the receipt undone while
+      // the order keeps the money.
+      if (index < 0) {
+        throw new AsaasServiceError('RECEIPT_LEGACY_SHARE', 'A share of this receipt cannot be found on its order: undo it in the order');
+      }
       const share = transactions[index];
       const remaining = transactions.filter((_, i) => i !== index);
       const paidAmount = Math.max(0, roundMoney((Number(order.paidAmount) || 0) - share.amount));
