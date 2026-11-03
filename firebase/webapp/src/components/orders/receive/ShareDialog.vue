@@ -81,11 +81,25 @@ async function load() {
   state.value = 'loading'
   try {
     const [tokens] = await Promise.all([listShareTokens(props.order.id), refreshPhone()])
-    token.value = pickToken(tokens, new Date()) ?? (await createShareToken(props.order.id, PERMISSIONS_OF.all, 7))
+    token.value = pickToken(tokens, new Date()) ?? (await createAndReread())
     state.value = 'ready'
   } catch (error) {
     console.warn('share: link not made', error)
     state.value = 'failed'
+  }
+}
+
+/**
+ * No valid link yet: make one, then read the list again and take the newest
+ * valid one. Two tabs opening at once both create, and the server keeps only
+ * the newest (revokeOlderTokens): both tabs end on the link that still opens.
+ */
+async function createAndReread(): Promise<ShareToken> {
+  const made = await createShareToken(props.order.id, PERMISSIONS_OF.all, 7)
+  try {
+    return pickToken(await listShareTokens(props.order.id), new Date()) ?? made
+  } catch {
+    return made
   }
 }
 

@@ -66,7 +66,7 @@ const problem = computed(() => {
   if (!props.customerId) return t('web.charge.noCustomer')
   const cents = toCents(value.value ?? 0)
   if (cents <= 0) return t('receiveCustomerZero')
-  if (cents > toCents(props.owed) + 1) return t('web.order.receiveTooMuch', { amount: formatMoney(props.owed, BR) })
+  if (cents > toCents(props.owed)) return t('web.order.receiveTooMuch', { amount: formatMoney(props.owed, BR) })
   if (!due.value || due.value < today) return t('web.charge.dueInvalid')
   if (needsTaxId.value && !taxId.value.trim()) return t('chargeTaxIdHint')
   if (needsTaxId.value && !isValidTaxId(taxId.value)) return t('web.charge.taxIdInvalid')

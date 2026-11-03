@@ -21,7 +21,9 @@ import {
   validityDays,
   whatsappLink,
   type OpenOrder,
+  receivableOf,
 } from '@/lib/receive/model'
+import { normalizeOrder } from '@/lib/orders/model'
 
 const order = (id: string, open: number, createdAt: string, number = 1): OpenOrder => ({ id, number, open, createdAt, own: true })
 
@@ -145,5 +147,26 @@ describe('charges', () => {
     expect(initialChargeValue(50, 80)).toBe(50)
     expect(initialChargeValue(90, 80)).toBe(80)
     expect(initialChargeValue(undefined, 80)).toBe(80)
+  })
+})
+
+describe('revisão #518', () => {
+  const row = (status: string, total: number, paidAmount: number) => normalizeOrder('x', { status, total, paidAmount }, true)
+  it('a receber: concluída com saldo e OS aberta com sinal; orçamento, cancelada e aberta sem sinal não', () => {
+    expect(receivableOf(row('done', 100, 30))).toBe(70)
+    expect(receivableOf(row('approved', 100, 30))).toBe(70)
+    expect(receivableOf(row('progress', 80, 0.01))).toBe(79.99)
+    expect(receivableOf(row('progress', 80, 0))).toBeNull()
+    expect(receivableOf(row('quote', 80, 10))).toBeNull()
+    expect(receivableOf(row('canceled', 80, 10))).toBeNull()
+    expect(receivableOf(row('done', 100, 100))).toBeNull()
+  })
+  it('duas abas: o link mais novo dos válidos', () => {
+    const now = new Date('2026-11-03T12:00:00Z')
+    const tokens = [
+      { token: 'old', url: 'u/old', permissions: ['view' as const], expiresAt: '2026-11-20T00:00:00Z', createdAt: '2026-11-03T10:00:00Z' },
+      { token: 'new', url: 'u/new', permissions: ['view' as const], expiresAt: '2026-11-20T00:00:00Z', createdAt: '2026-11-03T11:00:00Z' },
+    ]
+    expect(pickToken(tokens, now)?.token).toBe('new')
   })
 })

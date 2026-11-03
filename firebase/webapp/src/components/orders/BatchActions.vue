@@ -52,7 +52,7 @@ async function printAll() {
   try {
     printing.value = await ordersForPrint(props.orders.map((o) => o.id), props.orders[0]?.showsMoney ?? false)
     await nextTick()
-    window.addEventListener('afterprint', () => (printing.value = []), { once: true })
+    // The sheets stay (hidden on screen) until the next print or until the selection closes: a print dialog that closes at once never empties the page before it prints.
     requestAnimationFrame(() => window.print())
   } catch (error) {
     console.warn('batch: print not loaded', error)

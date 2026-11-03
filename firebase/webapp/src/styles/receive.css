@@ -35,3 +35,7 @@
 /* Batch print and batch receive are extras of a large screen. */
 @media (max-width: 48rem) { .wide-only { display: none; } }
 @media print { .print-sheet + .print-sheet { break-before: page; } }
+/* Rows here are not clickable (the order number is the link): no hover shade, which also kept the link below contrast. */
+.recv .grid tbody tr { cursor: default; }
+.recv .grid tbody tr:hover td { background: transparent; }
+.recv .grid tbody tr.is-selected td { background: var(--color-selected); }

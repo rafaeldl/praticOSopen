@@ -14,13 +14,17 @@ import { orderTitle } from '@/lib/orders/text'
 import { whatsappNumber } from '@/lib/phone'
 import { cancelOrderCharge, watchOrderCharges } from '@/lib/receive/data'
 import { canceledPlanOf, chargeState, localDay, openChargeOf, whatsappLink, type Charge } from '@/lib/receive/model'
+import { loadCustomer } from '@/lib/customers/data'
 import { session } from '@/lib/session'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { showToast } from '@/lib/toast'
 import ChargeDialog from './ChargeDialog.vue'
 import '@/styles/receive.css'
 
-const props = defineProps<{ order: Order; remaining: number }>()
+// canCharge false: who only receives (consultant) sees the open link to read, never acts on it (#513, R4).
+const props = defineProps<{ order: Order; remaining: number; canCharge: boolean }>()
+const emit = defineEmits<{ open: [open: boolean] }>()
+const phone = ref(props.order.customer?.phone ?? '')
 
 const BR = 'BR'
 const charges = shallowRef<Charge[]>([])
@@ -45,7 +49,8 @@ const state = computed(() => (open.value ? chargeState(open.value, props.remaini
 const canceledPlan = computed(() => (open.value ? null : canceledPlanOf(charges.value, props.remaining)))
 const showChanged = computed(() => !!open.value && !!state.value?.changed && !kept.value.includes(open.value.id))
 const name = computed(() => props.order.customer?.name ?? '')
-const wa = computed(() => whatsappNumber(props.order.customer?.phone, session.company?.country))
+// The record's phone, not the copy inside the order (defect 80).
+const wa = computed(() => whatsappNumber(phone.value, session.company?.country))
 const date = (day: string) => formatDate(`${day}T12:00:00`, BR)
 const resend = computed(() => {
   const charge = open.value
@@ -56,8 +61,13 @@ const resend = computed(() => {
 
 let stop: (() => void) | undefined
 onMounted(async () => {
+  if (props.order.customer?.id)
+    void loadCustomer(props.order.customer.id)
+      .then((detail) => detail.customer.phone && (phone.value = detail.customer.phone))
+      .catch(() => {})
   stop = await watchOrderCharges(props.order.id, (list) => {
     charges.value = list
+    emit('open', !!openChargeOf(list))
     loaded.value = true
   })
 })
@@ -95,7 +105,7 @@ async function copy() {
 </script>
 
 <template>
-  <section v-if="loaded" class="charge-card" aria-labelledby="od-charge-title" data-testid="order-charge">
+  <section v-if="loaded && (canCharge || open)" class="charge-card" aria-labelledby="od-charge-title" data-testid="order-charge">
     <h3 id="od-charge-title">{{ t('chargeLinkSection') }}</h3>
     <template v-if="open && state">
       <p :class="{ 'is-late': state.expired }" data-testid="charge-state">
@@ -108,7 +118,7 @@ async function copy() {
       </p>
       <p v-if="open.paidCount && open.installmentCount" class="sub">{{ t('chargeInstallmentsPaid', { paid: open.paidCount, count: open.installmentCount }) }}</p>
       <p v-if="state.outside" class="sub">{{ t('chargeMissingOutsideLink', { value: formatMoney(state.outside, BR) }) }}</p>
-      <div v-if="showChanged" class="charge-warn" role="status" data-testid="charge-changed">
+      <div v-if="showChanged && canCharge" class="charge-warn" role="status" data-testid="charge-changed">
         <strong>{{ t('chargeOrderChanged') }}</strong>
         <p>{{ t('chargeNowMissing', { remaining: formatMoney(remaining, BR), value: formatMoney(open.value, BR) }) }}</p>
         <div class="row-actions">
@@ -119,15 +129,15 @@ async function copy() {
       <div class="row-actions">
         <a v-if="wa && resend" class="btn btn--small" :class="{ 'btn--primary': state.expired && !showChanged }" :href="whatsappLink(wa, resend)" target="_blank" rel="noopener noreferrer" data-testid="charge-resend">{{ t('chargeSendAgainWhatsApp') }}</a>
         <button v-if="open.invoiceUrl" type="button" class="link" @click="copy">{{ t('chargeCopyLink') }}</button>
-        <button v-if="!open.paidCount" type="button" class="link link--danger" :disabled="busy" data-testid="charge-cancel" @click="dialog = 'cancel'">{{ t('chargeCancelLink') }}</button>
+        <button v-if="canCharge && !open.paidCount" type="button" class="link link--danger" :disabled="busy" data-testid="charge-cancel" @click="dialog = 'cancel'">{{ t('chargeCancelLink') }}</button>
       </div>
     </template>
-    <div v-else-if="canceledPlan" class="charge-warn" role="status">
+    <div v-else-if="canceledPlan && canCharge" class="charge-warn" role="status">
       <strong>{{ t('chargeInstallmentsCanceled') }}</strong>
       <p>{{ t('chargeSendNewLink', { value: formatMoney(remaining, BR) }) }}</p>
       <button type="button" class="btn btn--small btn--primary" @click="dialog = 'new'">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
     </div>
-    <button v-else-if="remaining > 0" type="button" class="btn btn--small" data-testid="charge-new" @click="dialog = 'new'">{{ t('chargeSend') }}</button>
+    <button v-else-if="canCharge && remaining > 0" type="button" class="btn btn--small" data-testid="charge-new" @click="dialog = 'new'">{{ t('chargeSend') }}</button>
     <ChargeDialog
       v-if="dialog === 'new'"
       :order-id="order.id"

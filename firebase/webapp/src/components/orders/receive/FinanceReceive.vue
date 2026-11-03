@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// Financeiro > Receber (fin.tab.receivable, fin.tab.pick-order): the done
-// orders that still owe, by customer, the one waiting longest first. Marking
+// Financeiro > Receber (fin.tab.receivable, fin.tab.pick-order): every order
+// that still owes (done with a balance, open with a down payment: not the P1
+// of the user test), by customer, the oldest debt first. Marking
 // orders of one customer opens one receipt or one payment link for them, with
 // the total on screen and a confirmation before anything is saved.
 import { computed, defineAsyncComponent, onMounted, ref, shallowRef } from 'vue'
@@ -11,10 +12,10 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import { t } from '@/i18n'
 import { formatDate } from '@/lib/format'
-import { remainingOnRow, type Order } from '@/lib/orders/model'
-import { country, deviceLabel, money, orderTitle } from '@/lib/orders/text'
-import { unpaidDoneOrders } from '@/lib/receive/data'
-import { fromCents, toCents } from '@/lib/receive/model'
+import type { Order } from '@/lib/orders/model'
+import { country, deviceLabel, money, orderTitle, statusText } from '@/lib/orders/text'
+import { receivableOrders } from '@/lib/receive/data'
+import { fromCents, receivableOf, toCents } from '@/lib/receive/model'
 import '@/styles/receive.css'
 
 const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
@@ -26,7 +27,7 @@ const truncated = ref(false)
 const selected = ref<string[]>([])
 const receiving = ref<{ id: string; name: string; checked: string[] } | null>(null)
 
-const owed = (order: Order) => remainingOnRow(order) ?? 0
+const owed = (order: Order) => receivableOf(order) ?? 0
 const groups = computed(() => {
   const map = new Map<string, { id: string; name: string; orders: Order[]; cents: number; oldest: string }>()
   for (const order of orders.value) {
@@ -51,7 +52,7 @@ const oneCustomer = computed(() => (pickedCustomers.value.size === 1 && picked.v
 async function load() {
   state.value = 'loading'
   try {
-    const result = await unpaidDoneOrders()
+    const result = await receivableOrders()
     orders.value = result.orders
     truncated.value = result.truncated
     selected.value = selected.value.filter((id) => result.orders.some((order) => order.id === id))
@@ -142,6 +143,7 @@ function openOrder(id: string) {
               <td>
                 <button type="button" class="link" @click="openOrder(order.id)">{{ orderTitle(order) }}</button>
                 <span v-if="order.devices[0]" class="sub"> · {{ order.devices[0].name || deviceLabel() }}</span>
+                <span v-if="order.status !== 'done'" class="sub"> · {{ statusText(order.status) }}</span>
                 <span v-if="order.createdAt" class="sub"> · {{ formatDate(order.createdAt, country()) }}</span>
               </td>
               <td class="c-money"><span class="num">{{ money(owed(order)) }}</span></td>

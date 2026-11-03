@@ -12,7 +12,7 @@ import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { country, money, orderShort } from '@/lib/orders/text'
-import { cancelReceipt, listReceipts, type Receipt } from '@/lib/receive/data'
+import { cancelReceipt, listReceipts, openOrders, type Receipt } from '@/lib/receive/data'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
@@ -25,6 +25,14 @@ const router = useRouter()
 
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const receipts = shallowRef<Receipt[]>([])
+/** Open amount per order now; null when it could not be read (the lines then show only number and amount). */
+const balances = shallowRef<Map<string, number> | null>(null)
+function line(part: Receipt['allocations'][number]): string {
+  const params = { number: part.orderNumber ?? '', amount: money(part.amount) }
+  if (!balances.value) return `${orderShort()} ${params.number} · ${params.amount}`
+  const left = balances.value.get(part.orderId) ?? 0
+  return left > 0 ? t('receiptRowOpen', { ...params, left: money(left) }) : t('receiptRowSettled', params)
+}
 const undoing = shallowRef<Receipt | null>(null)
 const printing = shallowRef<Receipt | null>(null)
 const busy = ref(false)
@@ -35,7 +43,10 @@ const canUndo = (receipt: Receipt) => receipt.status === 'active' && !receipt.id
 async function load() {
   state.value = 'loading'
   try {
-    receipts.value = await listReceipts(props.customerId)
+    // What each order still owes today: "quitada" or "falta R$ X" (receipt.detail.view).
+    const [list, open] = await Promise.all([listReceipts(props.customerId), openOrders(props.customerId).catch(() => null)])
+    receipts.value = list
+    balances.value = open ? new Map(open.map((order) => [order.id, order.open])) : null
     state.value = 'ready'
   } catch (error) {
     console.warn('receive: receipts not read', error)
@@ -98,8 +109,7 @@ function openOrder(id: string) {
             <p v-if="receipt.status === 'canceled'" class="sub"><strong>{{ t('web.receive.undone') }}</strong></p>
             <ul class="receipt-orders">
               <li v-for="part in receipt.allocations" :key="part.orderId">
-                <button type="button" class="link" @click="openOrder(part.orderId)">{{ orderShort() }} {{ part.orderNumber ?? '' }}</button>
-                <span class="num"> · {{ money(part.amount) }}</span>
+                <button type="button" class="link" @click="openOrder(part.orderId)">{{ line(part) }}</button>
               </li>
             </ul>
             <p v-if="receipt.createdBy?.name" class="sub">{{ t('pdfReceiptRecordedBy', { name: receipt.createdBy.name }) }}</p>

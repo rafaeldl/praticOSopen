@@ -104,6 +104,22 @@ export function undoAllState(payments: readonly Payment[]): 'none' | 'blocked' |
   return manual.some((p) => p.receiptGroupId) ? 'blocked' : 'allowed'
 }
 
+/**
+ * What an order still owes for Financeiro > Receber: a done order with a
+ * balance, and an open one (approved, in progress) that already got a down
+ * payment (fin.tab.receivable; not the app's P1 of the user test, where the
+ * order with a down payment vanished). Quotes, canceled and open orders with
+ * nothing paid are not owed yet. Cents, like the server.
+ */
+export function receivableOf(order: { status: OrderStatus; total?: number; paidAmount?: number; showsMoney: boolean }): number | null {
+  if (!order.showsMoney || !receivesMoney(order.status)) return null
+  const total = toCents(order.total ?? 0)
+  const paid = toCents(order.paidAmount ?? 0)
+  if (total <= 0 || paid >= total) return null
+  if (order.status !== 'done' && paid <= 0) return null
+  return fromCents(total - paid)
+}
+
 /** Quotes and canceled orders show the history only (pay.order.blocked-status). */
 export const receivesMoney = (status: OrderStatus): boolean => status !== 'quote' && status !== 'canceled'
 
@@ -186,11 +202,20 @@ export interface ShareToken {
   permissions: SharePermission[]
   expiresAt: string
   isExpired?: boolean
+  createdAt?: string
 }
 
-/** The link to send: the first one still valid (the API already drops revoked ones). */
+/**
+ * The link to send: the newest one still valid (the API already drops revoked
+ * ones). Two tabs that each made a link end up on the same one, the one the
+ * server kept (revokeOlderTokens keeps the newest).
+ */
 export function pickToken(tokens: readonly ShareToken[], now: Date): ShareToken | null {
-  return tokens.find((token) => !token.isExpired && Date.parse(token.expiresAt) > now.getTime()) ?? null
+  return (
+    tokens
+      .filter((token) => !token.isExpired && Date.parse(token.expiresAt) > now.getTime())
+      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))[0] ?? null
+  )
 }
 
 export type PermissionKind = 'all' | 'approve' | 'comment' | 'view'

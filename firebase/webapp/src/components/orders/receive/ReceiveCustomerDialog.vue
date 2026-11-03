@@ -13,9 +13,11 @@ import { t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { formatDate, formatMoney } from '@/lib/format'
 import { country, money, orderShort } from '@/lib/orders/text'
-import { cancelCustomerCharge, customerCharges, openOrders, paymentSettings, registerReceipt } from '@/lib/receive/data'
-import { allocate, allocationSummary, localDay, openChargeOf, owedOf, paidAtFor, toCents, type Charge, type OpenOrder } from '@/lib/receive/model'
-import { can } from '@/lib/session'
+import { loadCustomer } from '@/lib/customers/data'
+import { whatsappNumber } from '@/lib/phone'
+import { cancelCustomerCharge, customerCharges, listReceipts, openOrders, paymentSettings, registerReceipt } from '@/lib/receive/data'
+import { allocate, allocationSummary, localDay, openChargeOf, owedOf, paidAtFor, toCents, whatsappLink, type Charge, type OpenOrder } from '@/lib/receive/model'
+import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChargeDialog from './ChargeDialog.vue'
@@ -36,7 +38,13 @@ const saving = ref(false)
 const dialog = ref<null | 'confirm' | 'charge' | 'cancelCharge'>(null)
 const charge = shallowRef<Charge | null>(null)
 const chargesReady = ref(false)
-const receiptId = crypto.randomUUID()
+// One id per receipt the person asks for: repeating the same request after a lost
+// answer sends it again (the server books it once). A new one when the balances
+// changed or the person changed what goes in (R2 of the #518 review).
+let receiptId = crypto.randomUUID()
+const renewReceipt = () => (receiptId = crypto.randomUUID())
+const phone = ref('')
+const charger = can('chargeOrder')
 
 const financial = can('viewFinancialReports')
 // "Outras OS de {nome}": only a consultant without financial access sees them apart (pay.customer.others).
@@ -57,7 +65,16 @@ const problem = computed(() => {
   if (!dayValid.value) return t('web.receive.dayInvalid')
   return ''
 })
-const canCharge = computed(() => chargesReady.value && can('chargeOrder') && !charge.value && chosen.value.length > 0 && chosen.value.every((o) => o.own || financial))
+const wa = computed(() => whatsappNumber(phone.value, session.company?.country))
+/** "Mandar de novo": the Asaas link, the same one the order sends (defect 7), to the record's phone. */
+const resend = computed(() => {
+  const open = charge.value
+  if (!open?.invoiceUrl || !wa.value) return ''
+  const text = `${t('web.share.msgHello', { name: props.customerName })} ${t('web.charge.msg', { amount: formatMoney(open.value, 'BR'), orders: ordersOf(open), date: formatDate(`${open.dueDate}T12:00:00`, 'BR') })}\n${open.invoiceUrl}`
+  return whatsappLink(wa.value, text)
+})
+const ordersOf = (open: Charge) => `${orderShort()} ${(open.orderIds ?? []).map((id) => orders.value.find((o) => o.id === id)?.number ?? '').filter(Boolean).join(', ')}`.trim()
+const canCharge = computed(() => chargesReady.value && charger && !charge.value && chosen.value.length > 0 && chosen.value.every((o) => o.own || financial))
 const numbers = (list: readonly { number: number | null }[]) => list.map((o) => o.number ?? '').join(', ')
 const rowText = (order: OpenOrder) => {
   const part = split.value.find((a) => a.orderId === order.id)
@@ -80,12 +97,14 @@ async function load() {
   }
 }
 
+/** Who receives also sees an open link, read only (like the app after #513); who charges acts on it. */
 async function loadCharges() {
-  if (!can('chargeOrder')) return
   const settings = await paymentSettings()
   if (!settings.ready) return
   try {
-    charge.value = openChargeOf(await customerCharges(props.customerId))
+    const [list, detail] = await Promise.all([customerCharges(props.customerId), loadCustomer(props.customerId).catch(() => null)])
+    charge.value = openChargeOf(list)
+    phone.value = detail?.customer.phone ?? ''
   } catch (error) {
     // Without knowing, never offer a link that could cancel one about to be paid (send_charge_flow).
     console.warn('receive: customer charges not read', error)
@@ -101,6 +120,7 @@ onMounted(() => {
 
 // Marking or unmarking starts the amount again from what the marked orders owe (pay.customer.pick-orders).
 watch(picked, () => (amount.value = owed.value), { deep: true })
+watch([picked, amount, method, day], renewReceipt, { deep: true })
 
 function toggle(id: string) {
   picked.value = picked.value.includes(id) ? picked.value.filter((x) => x !== id) : [...picked.value, id]
@@ -120,6 +140,7 @@ async function save() {
     const fresh = await openOrders(props.customerId)
     const changed = chosen.value.some((o) => toCents(fresh.find((f) => f.id === o.id)?.open ?? 0) !== toCents(o.open))
     if (changed) {
+      renewReceipt()
       orders.value = fresh
       picked.value = picked.value.filter((id) => fresh.some((f) => f.id === id))
       showToast(t('receiveCustomerBalanceChanged'))
@@ -136,8 +157,9 @@ async function save() {
     done(total)
   } catch (error) {
     // The same receipt id came back: the first try was saved, the answer was lost.
-    if (error instanceof ApiError && error.code === 'RECEIPT_EXISTS') return done(amount.value as number)
+    if (error instanceof ApiError && error.code === 'RECEIPT_EXISTS') return savedBefore()
     if (error instanceof ApiError && error.code === 'VALUE_EXCEEDS_BALANCE') {
+      renewReceipt()
       showToast(t('receiveCustomerBalanceChanged'))
       await load()
       return
@@ -146,6 +168,20 @@ async function save() {
   } finally {
     saving.value = false
   }
+}
+
+/** RECEIPT_EXISTS: say what the server really booked under this id, never what is typed now. */
+async function savedBefore() {
+  const id = receiptId
+  try {
+    const saved = (await listReceipts(props.customerId)).find((receipt) => receipt.id === id)
+    if (saved) return done(saved.amount)
+  } catch (error) {
+    console.warn('receive: receipts not read', error)
+  }
+  renewReceipt()
+  showToast(t('receiveCustomerBalanceChanged'))
+  await load()
 }
 
 function done(total: number) {
@@ -221,9 +257,11 @@ const preview = computed(() => {
             <div v-if="charge" class="charge-warn" role="status" data-testid="customer-charge">
               <strong>{{ t('receiveCustomerOpenCharge', { amount: formatMoney(charge.value, 'BR') }) }}</strong>
               <p class="sub">{{ t('chargeDetailUntil', { value: formatMoney(charge.value, 'BR'), date: formatDate(`${charge.dueDate}T12:00:00`, 'BR') }) }}</p>
+              <p class="sub">{{ t('receiveChargeAdjusts', { customer: customerName }) }}</p>
               <div class="row-actions">
+                <a v-if="resend" class="btn btn--small" :href="resend" target="_blank" rel="noopener noreferrer">{{ t('chargeSendAgainWhatsApp') }}</a>
                 <button v-if="charge.invoiceUrl" type="button" class="link" @click="copyCharge">{{ t('chargeCopyLink') }}</button>
-                <button type="button" class="link link--danger" @click="dialog = 'cancelCharge'">{{ t('chargeCancelLink') }}</button>
+                <button v-if="charger" type="button" class="link link--danger" @click="dialog = 'cancelCharge'">{{ t('chargeCancelLink') }}</button>
               </div>
             </div>
             <fieldset class="pick-orders">
@@ -271,7 +309,7 @@ const preview = computed(() => {
           <button v-if="canCharge" type="button" class="btn" data-testid="customer-charge-new" @click="dialog = 'charge'">{{ t('chargeSend') }}</button>
           <span class="spacer"></span>
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
-          <button v-if="orders.length" type="submit" class="btn btn--primary" :disabled="!!problem || saving" data-testid="receive-customer-save">{{ t('receiveMarkReceived') }}</button>
+          <button v-if="orders.length" type="submit" class="btn" :class="{ 'btn--primary': !charge }" :disabled="!!problem || saving" data-testid="receive-customer-save">{{ t('receiveMarkReceived') }}</button>
         </div>
       </form>
     </template>

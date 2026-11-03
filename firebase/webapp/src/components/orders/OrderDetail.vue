@@ -129,8 +129,11 @@ let watcher: ReturnType<typeof watchOrder> | undefined
 const chargesOn = ref(false)
 onMounted(() => {
   watcher = watchOrder(ctx, props.orderId, (next) => (state.value = next))
-  if (can('chargeOrder')) void paymentSettings().then((settings) => (chargesOn.value = settings.ready))
+  // Who receives also reads the open link (the consultant included, #513 / R4); only chargeOrder acts on it.
+  if (can('chargeOrder') || (session.role === 'consultant' && effectiveUseFinancial())) void paymentSettings().then((settings) => (chargesOn.value = settings.ready))
 })
+/** A payment link is open: marking received is no longer the blue step, and the sheet says the link adjusts. */
+const linkOpen = ref(false)
 const showCharge = computed(() => chargesOn.value && !!order.value && receivesMoney(order.value.status) && !!access.value?.canReceive)
 
 async function removePayment(payment: Payment) {
@@ -504,7 +507,7 @@ watch(
           <strong>{{ holdLine.reason }}</strong> · {{ holdLine.days }}<template v-if="holdLine.note"><br /><span class="muted">{{ holdLine.note }}</span></template>
         </p>
         <div class="od-actions">
-          <button v-if="step" type="button" class="btn btn--primary" :disabled="busy" data-testid="next-step" @click="runStep">{{ stepLabel }}</button>
+          <button v-if="step" type="button" class="btn" :class="{ 'btn--primary': !(step.kind === 'receive' && linkOpen) }" :disabled="busy" data-testid="next-step" @click="runStep">{{ stepLabel }}</button>
           <button type="button" class="link" data-testid="share-open" @click="dialog = { kind: 'share' }">{{ t('shareTitle') }}</button>
           <button v-if="access.canChangeHold && !isHeld(order) && isActive(order)" type="button" class="link" @click="dialog = { kind: 'hold' }">{{ t('orderHoldMark') }}</button>
         </div>
@@ -549,7 +552,7 @@ watch(
           <button v-if="access.canReceive && moneyRowTone && money$.remaining > 0 && step?.kind !== 'receive'" type="button" class="link" @click="dialog = { kind: 'receive' }">{{ t('receiveTitle') }}</button>
           <p v-if="!moneyRowTone && order.transactions.length" class="sub" data-testid="blocked-status">{{ t('web.receive.blockedStatus', { status: statusText(order.status) }) }}</p>
           <PaymentHistory :order="order" :can-receive="access.canReceive && !!moneyRowTone" :can-discount="access.canDiscount && !!moneyRowTone" :busy="busy" @remove="removePayment" @undo-all="undoAllPayments" />
-          <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" />
+          <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
         <OrderPhotos :order="order" />
@@ -629,7 +632,7 @@ watch(
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
-    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :created-at="order.createdAt" @save="receive" @close="dialog = null" />
+    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :created-at="order.createdAt" :link-note="linkOpen ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
     <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />

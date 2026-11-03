@@ -283,7 +283,7 @@
   "web.finance.receiveSub": "Mark what was paid, or receive several orders of one customer at once.",
   "web.finance.seeOrders": "See the orders",
   "web.finance.toReceive": "{amount} to receive from {count, plural, =1{1 customer} other{{count} customers}}",
-  "web.finance.truncated": "Showing the 500 newest orders still owing.",
+  "web.finance.truncated": "There are more unpaid orders than fit here: the oldest may be missing.",
   "web.receive.blockedStatus": "{status}: takes no payment. The history stays here.",
   "web.receive.by": "by {name}",
   "web.receive.confirmMethod": "Method: {method}. Day: {date}.",

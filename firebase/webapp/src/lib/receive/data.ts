@@ -3,9 +3,8 @@
 // and the rules let this person read (charges, settings/payments, unpaid orders).
 import { firestoreClient } from '@/lib/firebase'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
-import { remainingOnRow } from '@/lib/orders/model'
 import { api, session } from '@/lib/session'
-import { chargeOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
+import { chargeOf, receivableOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
 
 const order = (id: string) => `/v1/app/orders/${encodeURIComponent(id)}`
 const customer = (id: string) => `/v1/app/customers/${encodeURIComponent(id)}`
@@ -147,20 +146,33 @@ export async function customerCharges(customerId: string): Promise<Charge[]> {
 // ---------------------------------------------------------------------------
 
 /**
- * Done orders that still owe, read through `payment == 'unpaid'` (indexed with
- * createdAt, like "Sem receber"), newest 500. Only financial roles reach it, and
- * they read every order.
+ * Every order that still owes (receivableOf: done with a balance, open with a
+ * down payment), read through `payment == 'unpaid'` (indexed with createdAt,
+ * like "Sem receber") in pages of 500 until the end, so no old debt is cut.
+ * Stops at 20.000 orders read and says so (the oldest would be the ones missing). The screen orders them oldest first.
+ * Only financial roles reach it, and they read every order.
  */
-export async function unpaidDoneOrders(): Promise<{ orders: Order[]; truncated: boolean }> {
-  const [db, { collection, getDocs, limit, orderBy, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-  const max = 500
-  const snap = await getDocs(
-    query(collection(db, 'companies', session.companyId as string, 'orders'), where('payment', '==', 'unpaid'), orderBy('createdAt', 'desc'), limit(max)),
-  )
-  const orders = snap.docs
-    .map((d) => normalizeOrder(d.id, d.data(), true))
-    .filter((o) => o.status === 'done' && (remainingOnRow(o) ?? 0) > 0)
-  return { orders, truncated: snap.docs.length === max }
+export async function receivableOrders(): Promise<{ orders: Order[]; truncated: boolean }> {
+  const [db, { collection, getDocs, limit, orderBy, query, startAfter, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const PAGE = 500
+  const MAX = 20000
+  const base = [where('payment', '==', 'unpaid'), orderBy('createdAt', 'desc')] as const
+  const orders: Order[] = []
+  let last: unknown = null
+  let read = 0
+  for (;;) {
+    const snap = await getDocs(
+      query(collection(db, 'companies', session.companyId as string, 'orders'), ...base, ...(last ? [startAfter(last)] : []), limit(PAGE)),
+    )
+    read += snap.docs.length
+    for (const d of snap.docs) {
+      const order = normalizeOrder(d.id, d.data(), true)
+      if (receivableOf(order) !== null) orders.push(order)
+    }
+    if (snap.docs.length < PAGE) return { orders, truncated: false }
+    if (read >= MAX) return { orders, truncated: true }
+    last = snap.docs[snap.docs.length - 1]
+  }
 }
 
 /** Full orders for printing several at once: Firestore for who sees values, the API projection otherwise. */

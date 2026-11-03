@@ -46,8 +46,13 @@ test('mandar ao cliente: link da API, texto da situação e WhatsApp com o telef
 test('copiar o link e trocar o que o cliente pode fazer desativa o link anterior (order.share-sheet.copy, permissions, expiry)', async ({ page }) => {
   const order = await makeOrder('admin')
   await openOrder(page, 'admin', order.id)
-  await page.keyboard.press('m')
   const sheet = dialog(page, 'Mandar para o cliente')
+  // The page moves focus to its title once after loading; a key pressed in that instant is lost.
+  // Single-key shortcuts stop while a layer is open, so pressing again never opens two.
+  await expect(async () => {
+    await page.keyboard.press('m')
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
   const first = (await sheet.getByTestId('share-url').textContent())!
   await sheet.getByTestId('share-copy').click()
   await expect(page.locator('.toast')).toContainText('Link copiado')
@@ -310,13 +315,16 @@ test('imprimir várias OS selecionadas, uma por página (order.pdf.batch)', asyn
   const customer = await makeCustomer()
   const a = await done(customer, 11)
   const b = await done(customer, 12)
+  // Never the real print dialog: stubbed before the app loads, so a reload or a navigation keeps it.
+  await page.addInitScript(() => (window.print = () => undefined))
   await login(page, 'admin', `orders?f=all&q=${encodeURIComponent(customer.name)}`)
   await page.getByLabel(`Selecionar OS ${a.number}`).check()
   await page.getByLabel(`Selecionar OS ${b.number}`).check()
-  await page.evaluate(() => (window.print = () => undefined))
   await page.getByTestId('batch-print').click()
-  await expect(page.getByTestId('print-sheet')).toHaveCount(2)
-  await expect(page.getByTestId('print-sheet').first()).toContainText(`OS ${a.number}`)
+  const sheets = page.getByTestId('print-sheet')
+  await expect(sheets).toHaveCount(2)
+  await expect(sheets.filter({ hasText: `OS ${a.number}` })).toHaveCount(1)
+  await expect(sheets.filter({ hasText: `OS ${b.number}` })).toHaveCount(1)
 })
 
 // ---------------------------------------------------------------------------
@@ -480,4 +488,145 @@ test('sem rolagem lateral em 320 px: Receber de vários e Financeiro', async ({ 
   await page.getByTestId('customer-receive').click()
   await expect(page.getByTestId('receive-order')).toHaveCount(2)
   await expectNoSideScroll(page)
+})
+
+// ---------------------------------------------------------------------------
+// Revisão do #518
+// ---------------------------------------------------------------------------
+
+test('R2: RECEIPT_EXISTS relê e mostra o que foi gravado, nunca o valor digitado', async ({ page }) => {
+  const customer = await makeCustomer()
+  const a = await done(customer, 100, { createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString() })
+  await done(customer, 50)
+  // The server saves R$ 40 (another try got there first), and this answer says the receipt already exists.
+  await page.route(`**/v1/app/customers/${customer.id}/receipts`, async (route: Route) => {
+    if (route.request().method() !== 'POST') return route.continue()
+    const body = route.request().postDataJSON() as Record<string, unknown>
+    await route.fetch({ postData: JSON.stringify({ ...body, allocations: [{ orderId: a.id, amount: 40 }] }) })
+    return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ success: false, error: { code: 'RECEIPT_EXISTS', message: 'x' } }) })
+  })
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  await page.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 150,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText(`Recebido R$ 40,00 de ${customer.name}`)
+})
+
+test('R2: resposta perdida, saldo mudou: avisa e o próximo recebimento usa outro id', async ({ page }) => {
+  const customer = await makeCustomer()
+  await done(customer, 100, { createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString() })
+  await done(customer, 50)
+  let first = true
+  await page.route(`**/v1/app/customers/${customer.id}/receipts`, async (route: Route) => {
+    if (route.request().method() !== 'POST' || !first) return route.continue()
+    first = false
+    await route.fetch()
+    return route.abort('failed')
+  })
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  await drawer.getByLabel('Quanto recebeu').fill('100')
+  await drawer.getByLabel('Quanto recebeu').blur()
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 100,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText('Sem conexão')
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 100,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText('Os valores mudaram')
+  await expect(drawer.getByTestId('receive-order')).toHaveCount(1)
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 50,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText(`Recebido R$ 50,00 de ${customer.name}`)
+  const receipts = await queryDocs('receipts', 'customer.id', customer.id)
+  expect(receipts.map((r) => r.amount).sort()).toEqual([100, 50].sort())
+})
+
+test('R3: Financeiro > Receber traz OS aberta com sinal, da mais antiga, e o total bate (fin.tab.receivable)', async ({ page }) => {
+  const older = await makeCustomer()
+  const newer = await makeCustomer()
+  const signal = await makeOrder('admin', { customer: older, status: 'approved', total: 100, paidAmount: 30, payment: 'unpaid', createdAt: new Date(Date.now() - 400 * 86_400_000).toISOString() })
+  const progress = await makeOrder('admin', { customer: newer, status: 'progress', total: 80, paidAmount: 0, payment: 'unpaid' })
+  await done(newer, 20)
+  await login(page, 'admin', 'finance')
+  const view = page.getByTestId('finance-receive')
+  // The one with a down payment owes R$ 70; an open order with nothing paid is not owed yet.
+  await expect(view.getByLabel(`Marcar OS ${signal.number}`)).toBeVisible()
+  await expect(view.getByLabel(`Marcar OS ${progress.number}`)).toHaveCount(0)
+  await expect(view.getByTestId('finance-row').filter({ hasText: `OS ${signal.number}` })).toContainText('R$ 70,00')
+  // Oldest debt first.
+  const groups = await view.locator('.recv-group th').allTextContents()
+  expect(groups.findIndex((g) => g.includes(older.name))).toBeLessThan(groups.findIndex((g) => g.includes(newer.name)))
+})
+
+test('R4: consultor vê o link aberto só para ler; Receber não fica azul e avisa (pay.widget.charge-section)', async ({ page }) => {
+  const order = await makeOrder('consultant', { customer: { id: 'customer-9', name: 'Cliente 09' }, status: 'done', total: 60, paidAmount: 0 })
+  await writeDoc(`orders/${order.id}/charges/open1`, { status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single', invoiceUrl: 'https://sandbox.asaas.com/i/open1', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
+  await openOrder(page, 'consultant', order.id)
+  const card = panel(page).getByTestId('order-charge')
+  await expect(card.getByTestId('charge-state')).toHaveText('Esperando Cliente 09 pagar')
+  await expect(card.getByTestId('charge-cancel')).toHaveCount(0)
+  await expect(panel(page).getByTestId('next-step')).not.toHaveClass(/btn--primary/)
+  await panel(page).getByTestId('next-step').click()
+  await expect(dialog(page, 'Receber')).toContainText('A cobrança aberta se ajusta sozinha, sem avisar Cliente 09.')
+})
+
+test('R5: prévia do Receber: "Ficam R$ X" e "Quita a OS" (pay.widget.sheet)', async ({ page }) => {
+  const order = await done({ id: 'customer-10', name: 'Cliente 10' }, 50)
+  await openOrder(page, 'admin', order.id)
+  await panel(page).getByTestId('next-step').click()
+  const sheet = dialog(page, 'Receber')
+  await expect(sheet.getByTestId('receive-preview')).toHaveText('Quita a OS.')
+  await sheet.getByLabel('Quanto recebeu').fill('30')
+  await sheet.getByLabel('Quanto recebeu').blur()
+  await expect(sheet.getByTestId('receive-preview')).toHaveText('Ficam R$ 20,00.')
+})
+
+test('R5: cada linha do recebimento diz quitada ou quanto falta (receipt.detail.view)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const a = await done(customer, 100, { createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString() })
+  const b = await done(customer, 50)
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  await drawer.getByLabel('Quanto recebeu').fill('120')
+  await drawer.getByLabel('Quanto recebeu').blur()
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 120,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText('Recebido R$ 120,00')
+  await page.getByTestId('customer-receipts').click()
+  const list = page.getByTestId('receipts')
+  await expect(list).toContainText(`OS ${a.number} · R$ 100,00 · quitada`)
+  await expect(list).toContainText(`OS ${b.number} · R$ 20,00 · falta R$ 30,00`)
+})
+
+test('R6: cobrança não passa do saldo na tela; Mandar de novo usa o telefone do cadastro', async ({ page }) => {
+  const customer = await makeCustomer({ phone: '+5511990001111', taxId: '52998224725' })
+  const order = await done({ ...customer, phone: '+5511900000000' } as { id: string; name: string }, 300)
+  await writeDoc(`orders/${order.id}/charges/c0`, { status: 'pending', value: 300, dueDate: '2099-01-01', mode: 'single', invoiceUrl: 'https://sandbox.asaas.com/i/c0', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
+  await openOrder(page, 'admin', order.id)
+  const card = panel(page).getByTestId('order-charge')
+  await expect.poll(async () => card.getByTestId('charge-resend').getAttribute('href')).toContain('https://wa.me/5511990001111?text=')
+
+  const fresh = await done(customer, 300)
+  await page.goto(`orders?order=${fresh.id}`)
+  await panel(page).getByTestId('charge-new').click()
+  const sheet = dialog(page, 'Mandar cobrança')
+  await sheet.getByLabel('Valor').fill('300,01')
+  await sheet.getByLabel('Valor').blur()
+  await expect(sheet.getByTestId('charge-problem')).toContainText('Não dá para receber mais do que falta')
+  await expect(sheet.getByTestId('charge-create')).toBeDisabled()
+})
+
+test('R6: gaveta do cliente com link aberto: Mandar de novo e Receber sem azul', async ({ page }) => {
+  const customer = await makeCustomer({ phone: '+5511990002222' })
+  await done(customer, 40)
+  await done(customer, 60)
+  await writeDoc(`customerCharges/cc-${customer.id}`, { customer: { id: customer.id, name: customer.name }, status: 'pending', value: 100, dueDate: '2099-01-01', invoiceUrl: 'https://sandbox.asaas.com/i/ccx', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  const open = page.getByTestId('customer-charge')
+  const href = await open.getByRole('link', { name: 'Mandar de novo pelo WhatsApp' }).getAttribute('href')
+  expect(decodeURIComponent(href!)).toContain('wa.me/5511990002222?text=')
+  await expect(page.getByTestId('receive-customer-save')).not.toHaveClass(/btn--primary/)
 })

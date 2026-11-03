@@ -5040,7 +5040,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Antes de gravar, relê as OS no servidor: se algum saldo mudou, atualiza as linhas, avisa e não grava; offline segue com o que tem. Prévia da divisão das mais antigas para as mais novas. As próprias OS gravam offline (lote); comprovante ou Outras OS exigem conexão. Marcar ou desmarcar apaga o rascunho. Grava a forma de recebimento em cada transação e no recibo; a API aceita paymentMethod. Web: POST /customers/:id/receipts com receiptId gerado ao abrir (repetir não grava em dobro); total e divisão visíveis e confirmação antes de gravar."
+  note: "Antes de gravar, relê as OS no servidor: se algum saldo mudou, atualiza as linhas, avisa e não grava; offline segue com o que tem. Prévia da divisão das mais antigas para as mais novas. As próprias OS gravam offline (lote); comprovante ou Outras OS exigem conexão. Marcar ou desmarcar apaga o rascunho. Grava a forma de recebimento em cada transação e no recibo; a API aceita paymentMethod. Web: POST /customers/:id/receipts com receiptId gerado ao abrir (repetir não grava em dobro); total e divisão visíveis e confirmação antes de gravar. Revisão #518: receiptId novo quando o saldo muda ou a pessoa muda o que entra; RECEIPT_EXISTS relê os recebimentos e mostra o valor gravado."
 - id: pay.customer.send-charge
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -5280,7 +5280,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Financeiro: todos; consultor: os que registrou. Desfeito: Cancelado em negrito e nenhuma ação (sem …, sem Mandar recibo). Linhas OS N · R$ X · quitada ou falta R$ X pelo saldo de agora; OS que não pode ser lida mostra só número e valor e não abre. Não copiar: consultor abrindo recebimento de outra pessoa cai em erro com Tentar de novo, não em sem acesso."
+  note: "Financeiro: todos; consultor: os que registrou. Desfeito: Cancelado em negrito e nenhuma ação (sem …, sem Mandar recibo). Linhas OS N · R$ X · quitada ou falta R$ X pelo saldo de agora; OS que não pode ser lida mostra só número e valor e não abre. Não copiar: consultor abrindo recebimento de outra pessoa cai em erro com Tentar de novo, não em sem acesso. Web: cada linha diz 'quitada' ou 'falta R$ X' pelo saldo de agora (/open-orders)."
 - id: receipt.detail.proof
   screen: lib/screens/payments/receipt_detail_screen.dart
   route: null
@@ -5409,7 +5409,7 @@ rows:
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só assina ajustes com chargeOrder e só lê cobranças com o piloto ligado (as regras negam sem a permissão; erro de leitura conta como sem cobrança). Relê os pagamentos uma vez ao aparecer e quando uma cobrança passa a paga, estornada ou muda a contagem de parcelas pagas. Não copiar: consultor não vê o link aberto na própria OS e pode marcar recebido por cima. Web: só com chargeOrder e settings/payments com asaasEnabled e asaasConnected."
+  note: "Só assina ajustes com chargeOrder e só lê cobranças com o piloto ligado (as regras negam sem a permissão; erro de leitura conta como sem cobrança). Relê os pagamentos uma vez ao aparecer e quando uma cobrança passa a paga, estornada ou muda a contagem de parcelas pagas. Não copiar: consultor não vê o link aberto na própria OS e pode marcar recebido por cima. Web: só com chargeOrder e settings/payments com asaasEnabled e asaasConnected. Web (revisão #518): quem recebe na OS (consultor incluído) vê o link aberto só para ler; com link aberto, Receber deixa de ser azul e o Receber avisa que a cobrança se ajusta. Os pagamentos chegam pelo onSnapshot da OS, sem releitura à parte."
 - id: pay.widget.charge-card
   screen: lib/screens/payments/widgets/order_charge_card.dart
   route: null
@@ -5588,10 +5588,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [camera, gallery, file]
   data: []
-  web_status: done
+  web_status: in_progress
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Sem attachPhotos (gerente), a linha Comprovante some. Não aceita mais que o saldo (compara em centavos). Prévia Quita a OS ou Fica faltando R$ X; com link aberto, nota A cobrança aberta se ajusta sozinha. Rascunho acima do saldo novo volta ao saldo. Mexer no valor, comprovante ou forma conta como alterado. Comprovante vira linha com nome e X para tirar."
+  note: "Sem attachPhotos (gerente), a linha Comprovante some. Não aceita mais que o saldo (compara em centavos). Prévia Quita a OS ou Fica faltando R$ X; com link aberto, nota A cobrança aberta se ajusta sozinha. Rascunho acima do saldo novo volta ao saldo. Mexer no valor, comprovante ou forma conta como alterado. Comprovante vira linha com nome e X para tirar. Web (revisão #518): prévia 'Quita a OS.' / 'Ficam R$ X.' e aviso de link aberto feitos; falta o comprovante (o servidor só aceita URL https do bucket, o emulador serve http: sem E2E possível)."
 - id: pay.widget.method
   screen: lib/screens/payments/widgets/receive_payment_sheet.dart
   route: null
@@ -6300,7 +6300,7 @@ rows:
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500)."
+  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500). Revisão #518: entram as concluídas com saldo e as abertas com sinal (não copia o P1 do teste do Marcos); lê todas as OS sem pagar em páginas de 500, ordena das mais antigas e avisa se passar de 20.000."
 - id: fin.tab.pick-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: null

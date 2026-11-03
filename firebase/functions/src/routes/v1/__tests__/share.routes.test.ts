@@ -45,3 +45,26 @@ describe('GET /v1/orders/:orderId/share (lista que o app usa)', () => {
     expect(res.body.data.map((t: { token: string }) => t.token)).toEqual(['ST_new']);
   });
 });
+
+describe('DELETE /v1/orders/:orderId/share/:token', () => {
+  beforeEach(() => {
+    resetFakeDb();
+    seed('companies/c1/orders/o1', { shareLink: { token: 'ST_a' } });
+    seed('companies/c1/orders/o2', { shareLink: { token: 'ST_b' } });
+    seed('links/share/tokens/ST_a', token('ST_a', '2026-11-01T10:00:00.000Z'));
+    seed('links/share/tokens/ST_b', token('ST_b', '2026-11-01T10:00:00.000Z', { orderId: 'o2' }));
+  });
+
+  it('desativa o link da própria OS', async () => {
+    const res = await request(buildApp()).delete('/o1/share/ST_a');
+    expect(res.status).toBe(200);
+  });
+
+  it('recusa com 404 o link de outra OS da mesma empresa e não mexe nele', async () => {
+    const res = await request(buildApp()).delete('/o1/share/ST_b');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+    const other = await request(buildApp()).get('/o2/share');
+    expect(other.body.data.map((t: { token: string }) => t.token)).toEqual(['ST_b']);
+  });
+});

@@ -283,7 +283,7 @@
   "web.finance.receiveSub": "Marca lo que ya se pagó, o cobra varias órdenes de un cliente de una vez.",
   "web.finance.seeOrders": "Ver las órdenes",
   "web.finance.toReceive": "{amount} por cobrar de {count, plural, =1{1 cliente} other{{count} clientes}}",
-  "web.finance.truncated": "Mostrando las 500 órdenes más nuevas que aún deben.",
+  "web.finance.truncated": "Hay más órdenes sin cobrar de las que caben aquí: pueden faltar las más antiguas.",
   "web.receive.blockedStatus": "{status}: no recibe pagos. El historial sigue aquí.",
   "web.receive.by": "por {name}",
   "web.receive.confirmMethod": "Forma: {method}. Día: {date}.",
