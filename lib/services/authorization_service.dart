@@ -299,15 +299,20 @@ class AuthorizationService {
 
       case RolesType.manager:
       case RolesType.supervisor:
-        // Podem deletar apenas se status for 'quote'
-        return order.status == 'quote';
+        // Only quotes with no money on them (firestore.rules orderHasNoMoney)
+        return order.status == 'quote' && orderHasNoMoney(order);
 
       case RolesType.consultant:
       case RolesType.technician:
-        // Podem deletar apenas OS que criaram, em status 'quote'
-        return isCreator && order.status == 'quote';
+        // Only quotes they created, with no money on them
+        return isCreator && order.status == 'quote' && orderHasNoMoney(order);
     }
   }
+
+  /// No payment received and no payment/discount transaction: same as
+  /// `orderHasNoMoney()` in firestore.rules, which guards deletes by non-admins.
+  static bool orderHasNoMoney(Order order) =>
+      (order.paidAmount ?? 0) == 0 && (order.transactions ?? const []).isEmpty;
 
   /// Verifica se o usuário pode editar campos principais da OS.
   ///
