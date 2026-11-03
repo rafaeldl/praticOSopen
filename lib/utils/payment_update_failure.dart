@@ -13,6 +13,10 @@ enum PaymentUpdateFailure {
   /// Tried to remove a payment received through Asaas (`asaas_*`).
   asaasLocked,
 
+  /// A payment above what is left to receive (the server's
+  /// PAYMENT_EXCEEDS_BALANCE).
+  exceedsBalance,
+
   /// Anything else (permissions, missing order, unexpected errors).
   failed,
 }
@@ -24,6 +28,9 @@ const _offlineFirestoreCodes = {'unavailable', 'deadline-exceeded'};
 PaymentUpdateFailure classifyPaymentUpdateFailure(Object error) {
   if (error is AsaasTransactionLockedException) {
     return PaymentUpdateFailure.asaasLocked;
+  }
+  if (error is PaymentExceedsBalanceException) {
+    return PaymentUpdateFailure.exceedsBalance;
   }
   if (error is FirebaseException &&
       _offlineFirestoreCodes.contains(error.code)) {

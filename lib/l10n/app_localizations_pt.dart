@@ -235,6 +235,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível salvar o pagamento. Verifique sua conexão e tente novamente.';
 
   @override
+  String get paymentExceedsBalance =>
+      'O valor passa do que falta receber. Confira e tente de novo.';
+
+  @override
   String get paymentRequiresConnection =>
       'Sem conexão. Tente de novo quando estiver online.';
 

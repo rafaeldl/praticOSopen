@@ -47,6 +47,8 @@ String paymentFailureMessage(AppLocalizations l10n, OrderStore store) {
       return l10n.paymentRequiresConnection;
     case PaymentUpdateFailure.asaasLocked:
       return l10n.asaasTransactionCannotBeRemoved;
+    case PaymentUpdateFailure.exceedsBalance:
+      return l10n.paymentExceedsBalance;
     case PaymentUpdateFailure.failed:
     case null:
       return l10n.paymentUpdateFailed;

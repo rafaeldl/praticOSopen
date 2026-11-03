@@ -1800,6 +1800,14 @@ abstract class _OrderStore with Store {
   }) async {
     lastPaymentFailure = null;
     if (order == null || companyId == null || amount <= 0) return null;
+    // Same rule as the API (PAYMENT_EXCEEDS_BALANCE), on the order the app
+    // has: never more than what is left to receive.
+    try {
+      OrderPaymentMath.assertPaymentWithinBalance(order!, amount);
+    } on PaymentExceedsBalanceException {
+      lastPaymentFailure = PaymentUpdateFailure.exceedsBalance;
+      return null;
+    }
 
     final actor = Global.userAggr;
     final transaction = PaymentTransaction.payment(

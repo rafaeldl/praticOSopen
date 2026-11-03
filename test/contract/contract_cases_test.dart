@@ -69,18 +69,18 @@ const _covered = {
 class _FirebaseMock extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
-        CoreInitializeResponse(
-          name: defaultFirebaseAppName,
-          options: CoreFirebaseOptions(
-            apiKey: '123',
-            projectId: '123',
-            appId: '123',
-            messagingSenderId: '123',
-            storageBucket: 'test.appspot.com',
-          ),
-          pluginConstants: {},
-        ),
-      ];
+    CoreInitializeResponse(
+      name: defaultFirebaseAppName,
+      options: CoreFirebaseOptions(
+        apiKey: '123',
+        projectId: '123',
+        appId: '123',
+        messagingSenderId: '123',
+        storageBucket: 'test.appspot.com',
+      ),
+      pluginConstants: {},
+    ),
+  ];
 }
 
 class _FakeUser implements auth.User {
@@ -118,8 +118,12 @@ Order _order(Map g) {
   final order = Order()
     ..id = 'o1'
     ..status = g['status'] as String?
-    ..services = [for (final s in (g['services'] ?? []) as List) _service(s as Map)]
-    ..products = [for (final p in (g['products'] ?? []) as List) _product(p as Map)]
+    ..services = [
+      for (final s in (g['services'] ?? []) as List) _service(s as Map),
+    ]
+    ..products = [
+      for (final p in (g['products'] ?? []) as List) _product(p as Map),
+    ]
     ..total = _d(g['total'])
     ..discount = _d(g['discount'])
     ..paidAmount = _d(g['paidAmount'])
@@ -147,7 +151,8 @@ void _setRole(String role) {
         ..role = rolesTypeFromJson(role),
     ];
   AuthorizationService.setUserStore(
-    UserStore()..user = ObservableStream<User>(const Stream.empty(), initialValue: user),
+    UserStore()
+      ..user = ObservableStream<User>(const Stream.empty(), initialValue: user),
   );
 }
 
@@ -156,9 +161,9 @@ Order _orderOf(bool isCreator, String status) => Order()
   ..createdBy = (UserAggr()..id = isCreator ? _uid : 'someone-else');
 
 int _unpriced(Order order) => [
-      ...order.services!.where((s) => s.value == null),
-      ...order.products!.where((p) => p.value == null),
-    ].length;
+  ...order.services!.where((s) => s.value == null),
+  ...order.products!.where((p) => p.value == null),
+].length;
 
 void _applyItemOp(OrderStore store, Map op) {
   final order = store.order!;
@@ -179,7 +184,9 @@ void _applyItemOp(OrderStore store, Map op) {
       final line = order.products![op['index'] as int];
       if (op.containsKey('value')) line.value = _d(op['value']);
       if (op.containsKey('quantity')) line.quantity = op['quantity'] as int?;
-      line.total = line.value == null ? null : line.value! * (line.quantity ?? 1);
+      line.total = line.value == null
+          ? null
+          : line.value! * (line.quantity ?? 1);
       store.refreshLines();
     default:
       fail('unknown op ${op['kind']}');
@@ -197,13 +204,14 @@ void main() {
   });
 
   group('contract files', () {
-    final files = Directory(_dir)
-        .listSync()
-        .whereType<File>()
-        .map((f) => f.uri.pathSegments.last)
-        .where((name) => name.endsWith('.json'))
-        .toList()
-      ..sort();
+    final files =
+        Directory(_dir)
+            .listSync()
+            .whereType<File>()
+            .map((f) => f.uri.pathSegments.last)
+            .where((name) => name.endsWith('.json'))
+            .toList()
+          ..sort();
 
     test('this runner reads every file that names it in runsIn', () {
       final mine = {
@@ -221,14 +229,32 @@ void main() {
         for (final c in cases) {
           final id = c['id'];
           final diverges = (c['divergesIn'] as Map?) ?? const {};
-          expect(c.containsKey('correct') && c.containsKey('expect'), isFalse, reason: '$id: correct or expect');
-          expect(c.containsKey('correct') || c.containsKey('expect'), isTrue, reason: '$id: no result');
+          expect(
+            c.containsKey('correct') && c.containsKey('expect'),
+            isFalse,
+            reason: '$id: correct or expect',
+          );
+          expect(
+            c.containsKey('correct') || c.containsKey('expect'),
+            isTrue,
+            reason: '$id: no result',
+          );
           if (c.containsKey('correct')) {
-            expect(diverges, isNotEmpty, reason: '$id: `correct` without `divergesIn`: move it to `expect`');
+            expect(
+              diverges,
+              isNotEmpty,
+              reason:
+                  '$id: `correct` without `divergesIn`: move it to `expect`',
+            );
           }
-          expect(_languages.containsAll(diverges.keys), isTrue, reason: '$id: unknown language');
+          expect(
+            _languages.containsAll(diverges.keys),
+            isTrue,
+            reason: '$id: unknown language',
+          );
           for (final lang in diverges.keys) {
-            final today = {..._divergence(c, lang as String)!}..remove('offline');
+            final today = {..._divergence(c, lang as String)!}
+              ..remove('offline');
             final base = _base(c);
             final differs = today.entries.any(
               (e) => jsonEncode(e.value) != jsonEncode(base[e.key]),
@@ -252,7 +278,10 @@ void main() {
         final order = _order(g);
         final store = _storeWith(order)..updateTotal();
         expect(order.total, _d(want['total']));
-        expect(OrderPaymentMath.computeTotal(order), _d(want['paymentMathTotal']));
+        expect(
+          OrderPaymentMath.computeTotal(order),
+          _d(want['paymentMathTotal']),
+        );
         expect(_unpriced(order), want['unpricedCount']);
         expect(store.total, _d(want['total']));
       });
@@ -280,8 +309,11 @@ void main() {
         expect(payment == 'paid', want['paid']);
         expect(OrderPaymentMath.remainingBalance(order), _d(want['remaining']));
 
-        final clear = OrderPaymentMath.orderStatusPaymentUpdate(g['status'] as String?);
-        final update = clear ??
+        final clear = OrderPaymentMath.orderStatusPaymentUpdate(
+          g['status'] as String?,
+        );
+        final update =
+            clear ??
             OrderPaymentMath.activeStatusPaymentUpdate(
               total: _d(g['total'])!,
               paidAmount: _d(g['paidAmount'])!,
@@ -303,32 +335,60 @@ void main() {
 
         final baseOffline = c['expectOffline'] as Map?;
         if (baseOffline != null) {
-          final offline = {...baseOffline, ...?(_divergence(c)?['offline'] as Map?)};
+          final offline = {
+            ...baseOffline,
+            ...?(_divergence(c)?['offline'] as Map?),
+          };
           final tx = op['kind'] == 'addPayment'
               ? PaymentTransaction.payment(amount: amount!)
               : PaymentTransaction.discount(amount: amount!);
-          final update = op['kind'] == 'addPayment'
+          Map<String, dynamic> offlineUpdate() => op['kind'] == 'addPayment'
               ? OrderPaymentMath.addPaymentUpdate(current: order, tx: tx)
               : OrderPaymentMath.addDiscountUpdate(current: order, tx: tx);
-          expect(update['payment'], offline['payment']);
-          expect(update['paid'], offline['paid']);
-          if (offline['paidAmountIncrement'] != null) {
-            expect((update['paidAmount'] as IncrementOp).by, _d(offline['paidAmountIncrement']));
-          }
-          if (offline['discountIncrement'] != null) {
-            expect((update['discount'] as IncrementOp).by, _d(offline['discountIncrement']));
-            expect((update['total'] as IncrementOp).by, _d(offline['totalIncrement']));
+          if (offline['error'] == 'exceedsBalance') {
+            expect(
+              offlineUpdate,
+              throwsA(isA<PaymentExceedsBalanceException>()),
+            );
+          } else {
+            final update = offlineUpdate();
+            expect(update['payment'], offline['payment']);
+            expect(update['paid'], offline['paid']);
+            if (offline['paidAmountIncrement'] != null) {
+              expect(
+                (update['paidAmount'] as IncrementOp).by,
+                _d(offline['paidAmountIncrement']),
+              );
+            }
+            if (offline['discountIncrement'] != null) {
+              expect(
+                (update['discount'] as IncrementOp).by,
+                _d(offline['discountIncrement']),
+              );
+              expect(
+                (update['total'] as IncrementOp).by,
+                _d(offline['totalIncrement']),
+              );
+            }
           }
         }
 
         void run() {
           switch (op['kind']) {
             case 'addPayment':
-              OrderPaymentMath.addPayment(order, PaymentTransaction.payment(amount: amount!));
+              OrderPaymentMath.addPayment(
+                order,
+                PaymentTransaction.payment(amount: amount!),
+              );
             case 'addDiscount':
-              OrderPaymentMath.addDiscount(order, PaymentTransaction.discount(amount: amount!));
+              OrderPaymentMath.addDiscount(
+                order,
+                PaymentTransaction.discount(amount: amount!),
+              );
             case 'removeTransaction':
-              final target = order.transactions!.firstWhere((t) => t.id == op['transactionId']);
+              final target = order.transactions!.firstWhere(
+                (t) => t.id == op['transactionId'],
+              );
               OrderPaymentMath.removeTransaction(order, target);
             case 'resetPayments':
               OrderPaymentMath.resetPayments(order);
@@ -346,6 +406,13 @@ void main() {
           expect(run, throwsA(isA<AsaasTransactionLockedException>()));
           return;
         }
+        if (want['error'] == 'exceedsBalance') {
+          expect(run, throwsA(isA<PaymentExceedsBalanceException>()));
+          // Refused before touching the order.
+          expect(order.paidAmount, _d((g['order'] as Map)['paidAmount']));
+          expect(order.transactions, isEmpty);
+          return;
+        }
         run();
         expect(order.total, _d(want['total']));
         expect(order.discount, _d(want['discount']));
@@ -354,7 +421,10 @@ void main() {
         expect(order.paid, want['paid']);
         expect(OrderPaymentMath.remainingBalance(order), _d(want['remaining']));
         if (want['transactionIds'] != null) {
-          expect(order.transactions!.map((t) => t.id).toList(), want['transactionIds']);
+          expect(
+            order.transactions!.map((t) => t.id).toList(),
+            want['transactionIds'],
+          );
         }
         if (want['transactionCount'] != null) {
           expect(order.transactions!.length, want['transactionCount']);
@@ -391,7 +461,10 @@ void main() {
         final order = _orderOf(g['isCreator'] as bool, from);
         final allowed = (_want(c)['allowed'] as List).cast<String>();
         final authorization = AuthorizationService.instance;
-        expect(authorization.getAvailableStatuses(order).toSet(), allowed.toSet());
+        expect(
+          authorization.getAvailableStatuses(order).toSet(),
+          allowed.toSet(),
+        );
         for (final to in _statuses) {
           expect(
             authorization.canChangeOrderStatus(order, to),
@@ -417,7 +490,10 @@ void main() {
         expect(authorization.canExecuteOrder(order), e['canExecute']);
         expect(authorization.canAssignOrder(order), e['canAssign']);
         expect(authorization.canDeleteOrder(order), e['canDelete']);
-        expect(authorization.canEditOrderMainFields(order), e['canEditMainFields']);
+        expect(
+          authorization.canEditOrderMainFields(order),
+          e['canEditMainFields'],
+        );
         expect(authorization.canManageOrderForms(order), e['canManageForms']);
         // These two mirror firestore.rules; `update` is wider on purpose (gap).
         expect(rules['read'], e['canAccess']);
@@ -461,7 +537,10 @@ void main() {
         _setRole(g['role'] as String);
         final order = _orderOf(g['isCreator'] as bool, g['status'] as String)
           ..paidAmount = g['hasMoney'] == true ? 10 : 0;
-        expect(AuthorizationService.instance.canDeleteOrder(order), _want(c)['allowed']);
+        expect(
+          AuthorizationService.instance.canDeleteOrder(order),
+          _want(c)['allowed'],
+        );
       });
     }
   });
@@ -595,15 +674,16 @@ void main() {
           case 'allocate':
             final balances = [
               for (final b in (g['balances'] as List).cast<Map>())
-                OpenBalance(orderId: b['orderId'] as String, open: _d(b['open'])!),
+                OpenBalance(
+                  orderId: b['orderId'] as String,
+                  open: _d(b['open'])!,
+                ),
             ];
             final result = allocatePayment(balances, _d(g['amount'])!);
-            expect(
-              [
-                for (final a in result) {'orderId': a.orderId, 'amount': a.amount},
-              ],
-              want['allocations'],
-            );
+            expect([
+              for (final a in result)
+                {'orderId': a.orderId, 'amount': a.amount},
+            ], want['allocations']);
             expect(totalOpen(balances), _d(want['totalOpen']));
           case 'register':
             final orders = [
@@ -622,7 +702,10 @@ void main() {
                 orders: orders,
                 allocations: [
                   for (final a in (g['allocations'] as List).cast<Map>())
-                    PaymentAllocation(orderId: a['orderId'] as String, amount: _d(a['amount'])!),
+                    PaymentAllocation(
+                      orderId: a['orderId'] as String,
+                      amount: _d(a['amount'])!,
+                    ),
                 ],
                 paidAt: DateTime.utc(2026, 1, 1),
                 now: DateTime.utc(2026, 1, 1),
@@ -634,20 +717,18 @@ void main() {
             expect(want['error'], isNull, reason: 'the plan did not refuse');
             expect(plan.receipt.amount, _d(want['amount']));
             final byId = {for (final o in orders) o.id: o};
-            expect(
-              [
-                for (final entry in plan.orderUpdates.entries)
-                  {
-                    'id': entry.key,
-                    'payment': entry.value['payment'],
-                    'paid': entry.value['paid'],
-                    'paidAmount': OrderPaymentMath.roundMoney(
-                      byId[entry.key]!.paidAmount! + (entry.value['paidAmount'] as IncrementOp).by,
-                    ),
-                  },
-              ],
-              want['orders'],
-            );
+            expect([
+              for (final entry in plan.orderUpdates.entries)
+                {
+                  'id': entry.key,
+                  'payment': entry.value['payment'],
+                  'paid': entry.value['paid'],
+                  'paidAmount': OrderPaymentMath.roundMoney(
+                    byId[entry.key]!.paidAmount! +
+                        (entry.value['paidAmount'] as IncrementOp).by,
+                  ),
+                },
+            ], want['orders']);
           case 'canReceive':
             expect(
               AuthorizationService.canReceivePaymentsFor(

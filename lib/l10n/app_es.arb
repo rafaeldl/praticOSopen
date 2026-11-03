@@ -74,6 +74,7 @@
   "discountCannotExceedBalance": "El descuento no puede exceder el saldo",
   "asaasTransactionCannotBeRemoved": "Los pagos recibidos por Asaas no se pueden eliminar aquí. Para deshacerlo, reembolsa el cobro en Asaas.",
   "paymentUpdateFailed": "No se pudo guardar el pago. Verifica tu conexión e inténtalo de nuevo.",
+  "paymentExceedsBalance": "El valor supera lo que falta cobrar. Revísalo e inténtalo de nuevo.",
   "paymentRequiresConnection": "Sin conexión. Inténtalo de nuevo cuando estés en línea.",
   "history": "Historial",
   "valueMustBeGreaterThanZero": "El valor debe ser mayor que cero",
