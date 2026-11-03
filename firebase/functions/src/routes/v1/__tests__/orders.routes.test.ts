@@ -843,3 +843,107 @@ describe('desfazer recibo com parte antiga', () => {
     expect(doc('a').paidAmount).toBe(50);
   });
 });
+
+// ─── Saldo, OS sem duplicar e item avulso ─────────────────────────────────
+describe('pagamento acima do que falta', () => {
+  it('recusa com 409 e o saldo atual, sem gravar', async () => {
+    seedOrder('o1', { paidAmount: 90 });
+    const res = await call('owner', 'post', `${O}/o1/payments`, { amount: 20 });
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatchObject({ code: 'PAYMENT_EXCEEDS_BALANCE', remainingBalance: 10 });
+    expect(doc('o1')).toMatchObject({ paidAmount: 90, transactions: [] });
+  });
+
+  it('o que falta exato passa, comparado em centavos', async () => {
+    seedOrder('o1', { paidAmount: 90 });
+    expect((await call('owner', 'post', `${O}/o1/payments`, { amount: 10 })).status).toBe(200);
+    seedOrder('f', { services: [{ value: 0.3 }], total: 0.3, paidAmount: 0.1 });
+    expect((await call('owner', 'post', `${O}/f/payments`, { amount: 0.2 })).status).toBe(200);
+    expect(doc('f').payment).toBe('paid');
+  });
+
+  it('OS de valor 0 não recebe pagamento solto (use marcar como pago)', async () => {
+    seedOrder('z', { services: [], total: 0 });
+    expect((await call('owner', 'post', `${O}/z/payments`, { amount: 10 })).status).toBe(409);
+    expect((await call('owner', 'post', `${O}/z/payments/mark-paid`, {})).status).toBe(200);
+  });
+
+  it('dois recebimentos ao mesmo tempo não passam do total', async () => {
+    seedOrder('o1');
+    const [a, b] = await Promise.all([
+      call('owner', 'post', `${O}/o1/payments`, { amount: 60 }),
+      call('manager', 'post', `${O}/o1/payments`, { amount: 60 }),
+    ]);
+    expect([a.status, b.status].sort()).toEqual([200, 409]);
+    expect(doc('o1').paidAmount).toBe(60);
+    expect(doc('o1').transactions).toHaveLength(1);
+  });
+
+  it('repetir com o mesmo clientTransactionId depois de quitar devolve o resultado anterior', async () => {
+    seedOrder('o1');
+    const body = { amount: 100, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000aa' };
+    expect((await call('owner', 'post', `${O}/o1/payments`, body)).status).toBe(200);
+    const again = await call('owner', 'post', `${O}/o1/payments`, body);
+    expect(again.status).toBe(200);
+    expect(doc('o1').transactions).toHaveLength(1);
+  });
+});
+
+describe('clientOrderId', () => {
+  beforeEach(() => seed('companies/c1/customers/cust1', { name: 'João', phone: '+5548999990000' }));
+  const body = { customerId: 'cust1', clientOrderId: 'c0ffee00-0000-4000-8000-0000000000bb' };
+
+  it('repetir com o mesmo id devolve a mesma OS sem criar outra', async () => {
+    const first = await call('owner', 'post', O, body);
+    expect(first.status).toBe(201);
+    const again = await call('owner', 'post', O, body);
+    expect(again.status).toBe(200);
+    expect(again.body.data).toEqual(first.body.data);
+    expect(list('companies/c1/orders')).toHaveLength(1);
+  });
+
+  it('id usado por outra pessoa é recusado', async () => {
+    expect((await call('owner', 'post', O, body)).status).toBe(201);
+    const other = await call('admin', 'post', O, body);
+    expect(other.status).toBe(409);
+    expect(other.body.error.code).toBe('ORDER_ID_CONFLICT');
+    expect(list('companies/c1/orders')).toHaveLength(1);
+  });
+
+  it('id em formato inválido é recusado', async () => {
+    expect((await call('owner', 'post', O, { ...body, clientOrderId: 'a/b' })).status).toBe(400);
+  });
+});
+
+describe('item avulso', () => {
+  it('serviço sem catálogo com descrição e valor entra no total', async () => {
+    seedOrder('o1');
+    const res = await call('owner', 'post', `${O}/o1/items`, { kind: 'service', description: 'Troca de óleo', value: 80 });
+    expect(res.status).toBe(201);
+    expect(doc('o1').services[1]).toMatchObject({ id: res.body.data.itemId, description: 'Troca de óleo', value: 80, service: null });
+    expect(doc('o1').total).toBe(180);
+  });
+
+  it('produto avulso calcula a linha por quantidade', async () => {
+    seedOrder('o1');
+    const res = await call('owner', 'post', `${O}/o1/items`, { kind: 'product', description: 'Filtro', value: 10, quantity: 2 });
+    expect(res.status).toBe(201);
+    expect(doc('o1').products[0]).toMatchObject({ description: 'Filtro', value: 10, quantity: 2, total: 20, product: null });
+    expect(doc('o1').total).toBe(120);
+  });
+
+  it('sem valor fica "sem valor"; valor próprio exige editPrices', async () => {
+    seedOrder('q', { status: 'quote', payment: null, createdBy: { id: 'cons1', name: 'Caio' } });
+    expect((await call('consultant', 'post', `${O}/q/items`, { kind: 'service', description: 'Avaliação', value: 30 })).status).toBe(403);
+    const ok = await call('consultant', 'post', `${O}/q/items`, { kind: 'service', description: 'Avaliação' });
+    expect(ok.status).toBe(201);
+    expect(doc('q').services[1]).toMatchObject({ description: 'Avaliação', value: null });
+    expect(doc('q').total).toBe(100);
+  });
+
+  it('sem catálogo e sem descrição é recusado', async () => {
+    seedOrder('o1');
+    expect((await call('owner', 'post', `${O}/o1/items`, { kind: 'service', value: 10 })).status).toBe(400);
+    expect((await call('owner', 'post', `${O}/o1/items`, { kind: 'service', description: '  ', value: 10 })).status).toBe(400);
+  });
+});

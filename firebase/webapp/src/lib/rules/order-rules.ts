@@ -88,6 +88,10 @@ export function applyPaymentOp(order: OrderState, op: PaymentOp) {
   let forcePaid = false
   switch (op.kind) {
     case 'addPayment':
+      // Never above what is left to receive, compared in cents (POST /:id/payments refuses too).
+      if (Math.round(op.amount * 100) > Math.round(remainingBalance(total, paidAmount) * 100)) {
+        return { error: 'exceedsBalance' as const }
+      }
       paidAmount = roundMoney(paidAmount + op.amount)
       transactions = [...transactions, { type: 'payment', amount: op.amount }]
       break
