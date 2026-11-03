@@ -63,8 +63,8 @@ async function seedCompanies() {
       segment: company.segment,
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
-      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..508), like a real counter.
-      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 508) + 1,
+      // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..509), like a real counter.
+      nextOrderNumber: Math.max(Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS), 509) + 1,
       ...audit(company.owner, 100000),
     })
     // Server-only map: what buildRolesClaim verifies against.
@@ -222,6 +222,11 @@ async function seedScenario() {
     'scn-assigned': base(508, USERS.admin, -30, {
       status: 'approved', customer: customer(10), services: [service(1, 50)], total: 50,
       assignedTo: aggr(USERS.technician),
+    }),
+    // Saved by the app: updatedAt in local time without a zone, with microseconds (Dart toIso8601String).
+    'scn-app-saved': base(509, USERS.admin, -20, {
+      status: 'done', customer: customer(1), services: [service(1, 80)], total: 80,
+      updatedAt: '2026-10-01T09:00:00.123456',
     }),
   }
   const batch = db.batch()

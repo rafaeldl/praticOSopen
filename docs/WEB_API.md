@@ -39,7 +39,7 @@ Limite de taxa: 300 pedidos por minuto por usuário, contados depois de conferir
 ## Regras de cada escrita
 
 1. **Transação.** Toda escrita que lê a OS roda numa transação do Firestore e confere a permissão de novo na OS fresca (`guard`). Duas pessoas salvando ao mesmo tempo não perdem item uma da outra.
-2. **`expectedUpdatedAt` (opcional).** O `updatedAt` que o cliente viu. Se a OS mudou desde então, a resposta é `409 ORDER_CHANGED` e nada é gravado: o cliente recarrega e mostra a versão nova. Vale em `PATCH /:id` e nas rotas de itens. No `DELETE`, vai na query string.
+2. **`expectedUpdatedAt` (opcional): a versão da OS, opaca.** A leitura (`GET /orders`, `GET /orders/:id` e as respostas de escrita) traz `version`: o `updatedAt` gravado como está, sem converter fuso (texto continua texto; Timestamp vira os milissegundos). O cliente devolve esse valor igual em `expectedUpdatedAt`; quem lê do Firestore usa a mesma regra. Se a OS mudou desde então, `409 ORDER_CHANGED` e nada é gravado. Por quê: o app grava `updatedAt` em hora local sem fuso (`toIso8601String()` do Dart, com microssegundos), que o navegador e a Function leriam como instantes diferentes. Compatibilidade: ISO com `Z`/fuso ainda vale contra Timestamp ou texto com fuso do mesmo instante; contra texto sem fuso não há instante para comparar e passa; OS sem `updatedAt` nunca recusa. Vale em `PATCH /:id`, itens, pagamento e desconto. No `DELETE`, vai na query string. Código: `services/order-version.ts`.
 3. **Total do servidor.** O cliente nunca manda o total da OS. Total = soma dos itens com preço − desconto, arredondado ao centavo, nunca abaixo de 0. Produto vale o `total` da linha quando existe, senão `value × quantity`.
 4. **Item sem preço.** `value: null` fica "sem valor" e fora do total. Nunca vira 0.
 5. **Pago / a pagar.** Segue o total novo. Orçamento e cancelada não têm situação de pagamento (`payment: null`). Quando a situação muda só porque o total mudou, o servidor marca `paymentSyncedAt`, e o gatilho da OS não emite nota "na hora em que for pago" (não entrou dinheiro).
@@ -59,7 +59,7 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 
 | Rota | Quem | Observação |
 |---|---|---|
-| `GET /orders` | todos | Quem tem `viewAllOrders` vê todas; consultor, as que criou; técnico, as que criou e as atribuídas a ele (como `isOrderAssignee` nas regras e o `OrderScope` do app), em duas consultas unidas pela mesma ordem e cursor, sem repetir e sem `total`. Com `assignedTo=<o próprio uid>`, só as atribuídas, criadas por qualquer um. Cursor, filtros e ordem abaixo |
+| `GET /orders` | todos | Quem tem `viewAllOrders` vê todas; consultor, as que criou; técnico, as que criou e as atribuídas a ele (como `isOrderAssignee` nas regras e o `OrderScope` do app), em duas consultas unidas pela mesma ordem e cursor, sem repetir e sem `total`. Com `assignedTo=<o próprio uid>`, só as atribuídas, criadas por qualquer um. A união segue a ordem da Firestore (tipo, texto por bytes, depois o id) e não roda `count()`. `number=<n>` acha uma OS pelo número (só o índice do campo; devolve só as que a pessoa vê, projetadas). Cursor, filtros e ordem abaixo |
 | `GET /orders/:id` | quem vê a OS | O técnico também vê a OS atribuída a ele |
 | `POST /orders` | `createOrder` | Situação inicial por papel; valor próprio exige `editPrices`; grava `deviceIds`. `clientOrderId` opcional (uuid do cliente, mesmo formato do `clientTransactionId`) vira o id da OS: repetir devolve a OS já criada (200, sem criar outra); se outra pessoa criou com esse id → `409 ORDER_ID_CONFLICT` |
 | `PATCH /orders/:id` | `editOrder` | Situação: fluxo por papel. Datas: `canEditOrderMainFields` (supervisor e técnico só em orçamento). Responsável: `assignOrder`, nome lido do membro. `null` limpa |
@@ -119,7 +119,7 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `INVALID_FILE`, `INVALID_PAID_AT` | 400 | Comprovante fora da pasta, de outro bucket ou tipo errado; data inválida, no futuro ou antes da OS |
 | `INSUFFICIENT_PERMISSIONS`, `FORBIDDEN` | 403 | Papel |
 | `NOT_FOUND`, `ITEM_NOT_FOUND`, `TRANSACTION_NOT_FOUND`, `RECEIPT_NOT_FOUND` | 404 | |
-| `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente |
+| `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente da `version` atual |
 | `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `RECEIPT_LEGACY_SHARE`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
 | `TRANSACTION_ID_CONFLICT` | 409 | `clientTransactionId` já usado com outro tipo ou valor |
 | `PAYMENT_EXCEEDS_BALANCE` | 409 | Pagamento acima do que falta; `error.remainingBalance` traz o saldo |

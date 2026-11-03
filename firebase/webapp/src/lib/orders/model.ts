@@ -69,6 +69,8 @@ export interface Order {
   scheduledDate?: string | null
   createdAt?: string | null
   updatedAt?: string | null
+  /** Opaque version for expectedUpdatedAt (versionOf): sent back as is, never converted by zone. */
+  version?: string | null
   createdBy?: Aggr | null
   /** Money: absent for who does not see values. */
   showsMoney: boolean
@@ -81,6 +83,25 @@ export interface Order {
 }
 
 type Raw = Record<string, unknown>
+
+/**
+ * The order's version for `expectedUpdatedAt`: what the API sent (`version`),
+ * or the stored `updatedAt` as is (a Timestamp as its millis), the same rule as
+ * the server's order-version.ts. Never read as an instant: the app writes local
+ * time without a zone, which the browser and the server would read differently.
+ */
+export function versionOf(raw: Raw): string | null {
+  if (typeof raw.version === 'string' && raw.version) return raw.version
+  const value = raw.updatedAt
+  if (value === null || value === undefined || value === '') return null
+  if (typeof value === 'string') return value
+  if (typeof value === 'number') return String(value)
+  if (value instanceof Date) return String(value.getTime())
+  const ts = value as { toMillis?: () => number; seconds?: number; nanoseconds?: number }
+  if (typeof ts.toMillis === 'function') return String(ts.toMillis())
+  if (typeof ts.seconds === 'number') return String(ts.seconds * 1000 + Math.floor((ts.nanoseconds ?? 0) / 1e6))
+  return null
+}
 
 /** Firestore Timestamp, Date, ISO string or millis → ISO string. */
 export function isoOf(value: unknown): string | null {
@@ -162,6 +183,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     scheduledDate: isoOf(raw.scheduledDate),
     createdAt: isoOf(raw.createdAt),
     updatedAt: isoOf(raw.updatedAt),
+    version: versionOf(raw),
     createdBy: (raw.createdBy as Aggr | null) ?? null,
     showsMoney,
     total: showsMoney ? (num(raw.total) ?? 0) : undefined,

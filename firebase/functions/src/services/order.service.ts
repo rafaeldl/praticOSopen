@@ -9,6 +9,7 @@
  * Totals are always recomputed from the items (order-items.ts).
  */
 
+import { compareFirestoreValues, versionMatches } from './order-version';
 import { v4 as uuidv4 } from 'uuid';
 import {
   getTenantCollection,
@@ -35,7 +36,6 @@ import {
 } from '../models/types';
 import * as catalogService from './catalog.service';
 import { roundMoney } from '../utils/money';
-import { timestampToDate } from '../utils/date.utils';
 import { computeOrderTotal, findLine, ItemKind } from './order-items';
 import { OrderRuleError } from './order-errors';
 import { orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
@@ -50,7 +50,7 @@ export { computeOrderTotal, productLineTotal, summarizeItems } from './order-ite
 export interface OrderWriteOptions {
   /** Runs on the fresh order inside the transaction; throws (OrderRuleError) to refuse. */
   guard?: (order: Order) => void;
-  /** `updatedAt` the client last saw; another value means someone saved in between (409). */
+  /** `version` the client last saw (order-version.ts); another value means someone saved in between (409). */
   expectedUpdatedAt?: string;
 }
 
@@ -60,11 +60,6 @@ function orderDoc(companyId: string, orderId: string): OrderRef {
   return getTenantCollection(companyId, 'orders').doc(orderId) as unknown as OrderRef;
 }
 
-/** Same instant? Both sides go through the same parse, so ISO strings with or without zone compare alike. */
-function sameInstant(stored: unknown, expected: string): boolean {
-  const current = timestampToDate(stored as string | undefined)?.getTime();
-  return current !== undefined && current === Date.parse(expected);
-}
 
 /** Reads the order in [tx], runs the guard and the `expectedUpdatedAt` check. Null when missing. */
 export async function readOrderForWrite(
@@ -76,7 +71,7 @@ export async function readOrderForWrite(
   if (!snap.exists) return null;
   const order = { ...(snap.data() as Order), id: snap.id };
   options.guard?.(order);
-  if (options.expectedUpdatedAt !== undefined && !sameInstant(order.updatedAt, options.expectedUpdatedAt)) {
+  if (options.expectedUpdatedAt !== undefined && !versionMatches(order.updatedAt, options.expectedUpdatedAt)) {
     throw new OrderRuleError('ORDER_CHANGED', 409, 'The order changed since it was loaded');
   }
   return order;
@@ -105,6 +100,8 @@ export interface OrderQueryParams {
    * by the same order and cursor; no `total` (it would count the overlap twice).
    */
   createdOrAssignedTo?: string;
+  /** Skip the count query (the union discards it). */
+  noTotal?: boolean;
   startDate?: string;
   endDate?: string;
   limit?: number;
@@ -150,7 +147,7 @@ export async function listOrders(companyId: string, params: OrderQueryParams): P
   const limit = params.limit ?? 20;
 
   try {
-    const total = params.cursor ? undefined : (await query.count().get()).data().count;
+    const total = params.cursor || params.noTotal ? undefined : (await query.count().get()).data().count;
     let page = query.orderBy(sort, direction).orderBy('__name__', direction);
     if (params.cursor) {
       const last = await collection.doc(params.cursor).get();
@@ -177,17 +174,6 @@ export async function listOrders(companyId: string, params: OrderQueryParams): P
   }
 }
 
-/** Firestore order of a field value: numbers, ISO strings and Timestamps. */
-function sortKey(value: unknown): number | string {
-  if (typeof value === 'number') return value;
-  if (value && typeof (value as { toMillis?: unknown }).toMillis === 'function') return (value as { toMillis: () => number }).toMillis();
-  if (typeof value === 'string') {
-    const time = Date.parse(value);
-    return /^\d{4}-\d{2}-\d{2}/.test(value) && !Number.isNaN(time) ? time : value;
-  }
-  return '';
-}
-
 /**
  * Created by the user OR assigned to them: one query each (both indexed), each
  * from the same cursor, merged by (sort field, id) like Firestore orders them,
@@ -202,19 +188,19 @@ async function listCreatedOrAssigned(companyId: string, params: OrderQueryParams
   // Each side brings enough for this page (and the offset, when one is used).
   const size = limit + (offset ?? 0);
   const [created, assigned] = await Promise.all([
-    listOrders(companyId, { ...rest, createdById: userId, limit: size }),
-    listOrders(companyId, { ...rest, createdById: undefined, assignedTo: userId, limit: size }),
+    listOrders(companyId, { ...rest, createdById: userId, limit: size, noTotal: true }),
+    listOrders(companyId, { ...rest, createdById: undefined, assignedTo: userId, limit: size, noTotal: true }),
   ]);
   const seen = new Set<string>();
   const sign = direction === 'asc' ? 1 : -1;
   const merged = [...created.data, ...assigned.data]
     .filter((order) => (seen.has(order.id) ? false : (seen.add(order.id), true)))
-    .sort((a, b) => {
-      const x = sortKey((a as unknown as Record<string, unknown>)[sort]);
-      const y = sortKey((b as unknown as Record<string, unknown>)[sort]);
-      if (x !== y) return (x < y ? -1 : 1) * sign;
-      return (a.id < b.id ? -1 : a.id > b.id ? 1 : 0) * sign;
-    });
+    // The same order as each Firestore query (field, then document id), so startAfter
+    // the last one shown neither skips nor repeats at the turn of a page.
+    .sort((a, b) => (
+      compareFirestoreValues((a as unknown as Record<string, unknown>)[sort], (b as unknown as Record<string, unknown>)[sort])
+      || compareFirestoreValues(a.id, b.id)
+    ) * sign);
   const start = offset ?? 0;
   const data = merged.slice(start, start + limit);
   const hasMore = merged.length > start + limit || created.hasMore || assigned.hasMore;
@@ -230,6 +216,12 @@ export async function getOrder(
 ): Promise<Order | null> {
   const collection = getTenantCollection(companyId, 'orders');
   return getDocument<Order>(collection, orderId);
+}
+
+/** Every order with this number (legacy data can repeat one); the caller filters who may see them. */
+export async function findOrdersByNumber(companyId: string, orderNumber: number): Promise<Order[]> {
+  const snapshot = await getTenantCollection(companyId, 'orders').where('number', '==', orderNumber).limit(10).get();
+  return snapshot.docs.map((doc) => ({ ...(doc.data() as Order), id: doc.id }));
 }
 
 /**
@@ -1002,7 +994,7 @@ export async function addPayment(
         order,
       };
     }
-    if (expectedUpdatedAt !== undefined && !sameInstant(order.updatedAt, expectedUpdatedAt)) {
+    if (expectedUpdatedAt !== undefined && !versionMatches(order.updatedAt, expectedUpdatedAt)) {
       throw new OrderRuleError('ORDER_CHANGED', 409, 'The order changed since it was loaded');
     }
     if (type === 'payment' && options.paidAt) validatePaidAt(options.paidAt, order.createdAt);

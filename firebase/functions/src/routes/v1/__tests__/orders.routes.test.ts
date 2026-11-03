@@ -1011,3 +1011,108 @@ describe('item avulso', () => {
     expect((await call('owner', 'post', `${O}/o1/items`, { kind: 'service', description: '  ', value: 10 })).status).toBe(400);
   });
 });
+
+// ─── Versão da OS (revisao-pr515-3 A1) ──────────────────────────────────────
+// The app writes updatedAt as local time without a zone (Dart toIso8601String, microseconds),
+// older documents carry a Timestamp, and many have none. `version` is the stored value as is
+// (a Timestamp as its millis): the client sends it back unchanged and nothing is converted by zone.
+// Run with TZ=America/Sao_Paulo and TZ=UTC.
+describe('versão da OS (expectedUpdatedAt opaco)', () => {
+  const LOCAL = '2026-10-01T09:00:00.123456';
+  const STAMP = { seconds: 1790000000, nanoseconds: 123000000 };
+  const DUE = '2026-12-01T12:00:00.000Z';
+
+  it('GET devolve version cru: texto sem fuso continua texto, Timestamp vira millis, sem campo é null', async () => {
+    seedOrder('l', { updatedAt: LOCAL });
+    seedOrder('t', { updatedAt: STAMP });
+    seedOrder('n', { updatedAt: undefined });
+    expect((await call('owner', 'get', `${O}/l`)).body.data.version).toBe(LOCAL);
+    expect((await call('owner', 'get', `${O}/t`)).body.data.version).toBe('1790000000123');
+    expect((await call('owner', 'get', `${O}/n`)).body.data.version ?? null).toBeNull();
+    const list = await call('owner', 'get', O);
+    expect(list.body.data.find((o: any) => o.id === 'l').version).toBe(LOCAL);
+  });
+
+  it('OS salva pelo app (sem fuso, microssegundos): pagamento, desconto, PATCH e itens com o version devolvido passam', async () => {
+    seedOrder('l', { updatedAt: LOCAL, status: 'done' });
+    const version = (await call('owner', 'get', `${O}/l`)).body.data.version;
+    const paid = await call('owner', 'post', `${O}/l/payments`, { amount: 10, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c1', expectedUpdatedAt: version });
+    expect(paid.status).toBe(200);
+    const next = paid.body.data.order.version;
+    expect(typeof next).toBe('string');
+    expect((await call('owner', 'post', `${O}/l/discounts`, { amount: 5, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c2', expectedUpdatedAt: next })).status).toBe(200);
+    seedOrder('m', { updatedAt: LOCAL, status: 'approved' });
+    expect((await call('owner', 'patch', `${O}/m`, { dueDate: DUE, expectedUpdatedAt: LOCAL })).status).toBe(200);
+    seedOrder('i', { updatedAt: LOCAL, status: 'quote', payment: null });
+    expect((await call('owner', 'post', `${O}/i/items`, { kind: 'service', catalogId: 's1', expectedUpdatedAt: LOCAL })).status).toBe(201);
+  });
+
+  it('o mesmo texto convertido pelo fuso do navegador não vira 409 falso (compatibilidade com ISO e Z)', async () => {
+    seedOrder('l', { updatedAt: LOCAL, status: 'done' });
+    // What the web sent before: the local text read in São Paulo (-03:00) as an instant.
+    const converted = new Date(Date.UTC(2026, 9, 1, 12, 0, 0, 123)).toISOString();
+    expect((await call('owner', 'post', `${O}/l/payments`, { amount: 10, clientTransactionId: 'c0ffee00-0000-4000-8000-0000000000c3', expectedUpdatedAt: converted })).status).toBe(200);
+  });
+
+  it('Timestamp: millis e ISO com Z do mesmo instante passam; outro instante dá 409', async () => {
+    seedOrder('t', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/t`, { dueDate: DUE, expectedUpdatedAt: '1790000000123' })).status).toBe(200);
+    seedOrder('u', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/u`, { dueDate: DUE, expectedUpdatedAt: new Date(1790000000123).toISOString() })).status).toBe(200);
+    seedOrder('v', { updatedAt: STAMP, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/v`, { dueDate: DUE, expectedUpdatedAt: '1790000000000' })).status).toBe(409);
+  });
+
+  it('outra versão dá 409 (com Z e sem fuso); OS sem updatedAt não recusa', async () => {
+    seedOrder('z', { updatedAt: T0, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/z`, { dueDate: DUE, expectedUpdatedAt: '2026-10-01T10:00:01.000Z' })).status).toBe(409);
+    seedOrder('w', { updatedAt: '2026-10-01T09:00:00.000', status: 'done' });
+    expect((await call('owner', 'patch', `${O}/w`, { dueDate: DUE, expectedUpdatedAt: '2026-10-01T09:00:00.001' })).status).toBe(409);
+    seedOrder('n', { updatedAt: undefined, status: 'done' });
+    expect((await call('owner', 'patch', `${O}/n`, { dueDate: DUE, expectedUpdatedAt: T0 })).status).toBe(200);
+  });
+});
+
+// ─── Busca por número (revisao-pr515-3 A4) ─────────────────────────────────
+describe('GET /orders?number=', () => {
+  it('acha pelo número só a OS que a pessoa vê, projetada sem valores para quem não vê', async () => {
+    seedOrder('mine', { number: 42, createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('given', { number: 43, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('other', { number: 44 });
+    const found = await call('technician', 'get', `${O}?number=42`);
+    expect(found.status).toBe(200);
+    expect(found.body.data.map((o: any) => o.id)).toEqual(['mine']);
+    expect(found.body.data[0]).not.toHaveProperty('total');
+    expect((await call('technician', 'get', `${O}?number=43`)).body.data.map((o: any) => o.id)).toEqual(['given']);
+    expect((await call('technician', 'get', `${O}?number=44`)).body.data).toEqual([]);
+    expect((await call('supervisor', 'get', `${O}?number=44`)).body.data.map((o: any) => o.id)).toEqual(['other']);
+    expect((await call('technician', 'get', `${O}?number=abc`)).status).toBe(400);
+  });
+});
+
+// ─── União do técnico (revisao-pr515-3 A2, A3) ─────────────────────────────
+describe('união do técnico: mesma ordem da Firestore', () => {
+  it('datas iguais desempatam pelo id; texto pela ordem lexical; a OS repetida na virada da página aparece uma vez; sem total', async () => {
+    const same = '2026-10-05T10:00:00.000Z';
+    seedOrder('a1', { createdAt: same, createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('b2', { createdAt: same, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('c3', { createdAt: same, createdBy: { id: 'tech1', name: 'Téo' }, assignedTo: { id: 'tech1', name: 'Téo' } });
+    seedOrder('d4', { createdAt: '2026-10-04T10:00:00.000Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    // Lexical order of text (as Firestore): "10:00:00Z" > "10:00:00.500Z" ('Z' > '.'), so desc puts e5 first.
+    seedOrder('e5', { createdAt: '2026-10-03T10:00:00Z', createdBy: { id: 'tech1', name: 'Téo' } });
+    seedOrder('f6', { createdAt: '2026-10-03T10:00:00.500Z', assignedTo: { id: 'tech1', name: 'Téo' } });
+    const expected = ['c3', 'b2', 'a1', 'd4', 'e5', 'f6'];
+    for (const size of [1, 2, 3]) {
+      const ids: string[] = [];
+      let cursor = '';
+      for (let i = 0; i < 10; i++) {
+        const page = await call('technician', 'get', `${O}?limit=${size}${cursor ? `&cursor=${cursor}` : ''}`);
+        expect(page.body.pagination).not.toHaveProperty('total');
+        ids.push(...page.body.data.map((o: any) => o.id));
+        if (!page.body.pagination.hasMore) break;
+        cursor = page.body.pagination.nextCursor;
+      }
+      expect([size, ids]).toEqual([size, expected]);
+    }
+  });
+});

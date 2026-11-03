@@ -81,7 +81,11 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
       return watchFirstRows(query, size, (rows) => onRows(rows.map(toOrder)), onError)
     },
     async byNumber(number: number): Promise<Order[]> {
-      if (!ctx.showsMoney) return []
+      // Who does not see values asks the API (projected, only what the person may see).
+      if (!ctx.showsMoney) {
+        const body = await api<ApiList | Record<string, unknown>[]>(`/v1/app/orders?number=${number}`, { raw: true })
+        return ((Array.isArray(body) ? body : body.data) ?? []).map(toOrder)
+      }
       return (await orderByNumber(query, number)).map(toOrder)
     },
   }

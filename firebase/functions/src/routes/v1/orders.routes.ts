@@ -56,6 +56,7 @@ import {
   orderHoldSchema,
   receiptFileSchema,
   listOrdersQuerySchema,
+  orderVersionSchema,
 } from '../../utils/validation.utils';
 import { z } from 'zod';
 
@@ -111,8 +112,8 @@ function validationError(res: Response, errors: string[]): void {
 function expectedUpdatedAtOf(req: Request): string | undefined {
   const raw = (req.body as { expectedUpdatedAt?: unknown } | undefined)?.expectedUpdatedAt ?? req.query.expectedUpdatedAt;
   if (raw === undefined) return undefined;
-  const parsed = z.string().datetime({ offset: true }).safeParse(raw);
-  if (!parsed.success) throw new OrderRuleError('VALIDATION_ERROR', 400, 'expectedUpdatedAt must be an ISO date-time');
+  const parsed = orderVersionSchema.safeParse(raw);
+  if (!parsed.success) throw new OrderRuleError('VALIDATION_ERROR', 400, 'expectedUpdatedAt must be the version of the order');
   return parsed.data;
 }
 
@@ -167,6 +168,12 @@ router.get('/', route('Failed to list orders', async (req, res, companyId) => {
   const query = validation.data;
 
   const showPrices = await showPricesOf(req, res);
+  // Search by number (the list did not load it): only the field's own index, then who may see each one.
+  if (query.number !== undefined) {
+    const found = (await orderService.findOrdersByNumber(companyId, query.number)).filter((order) => canSeeOrder(req, order));
+    res.json({ success: true, data: found.map((o) => projectOrderSummary(o, showPrices)), pagination: { limit: query.limit, hasMore: false, nextCursor: null } });
+    return;
+  }
   // The technician asking for their own assigned orders gets them whoever created them
   // (firestore.rules isOrderAssignee; indexes assignedTo.id + status/createdAt).
   const userId = req.userContext?.userId;

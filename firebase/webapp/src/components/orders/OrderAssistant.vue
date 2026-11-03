@@ -52,7 +52,7 @@ async function ask() {
       return
     }
     const added: string[] = []
-    let updatedAt = props.order.updatedAt
+    let updatedAt = props.order.version
     for (const item of items) {
       const response = await writes.addItem(props.order.id, {
         kind: item.kind,
@@ -63,7 +63,7 @@ async function ask() {
       if (response.itemId) added.push(response.itemId)
       const fresh = writes.orderOf(response, props.order.showsMoney)
       if (fresh) {
-        updatedAt = fresh.updatedAt
+        updatedAt = fresh.version
         orderChanged(fresh)
       }
     }

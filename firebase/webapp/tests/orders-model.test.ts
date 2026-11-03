@@ -6,6 +6,7 @@ import {
   createStatuses,
   deviceSummary,
   exactFirst,
+  versionOf,
   filtersFor,
   initialsOf,
   lateness,
@@ -179,5 +180,18 @@ describe('line ids', () => {
     const hash = (parts: unknown[]) => createHash('sha256').update(JSON.stringify(parts)).digest('hex').slice(0, 20)
     const signature = hash(['service', 's1', null, 50, null, null, null])
     expect(await lineIds(services, products)).toEqual([`legacy_${signature}_0`, `legacy_${signature}_1`, 'stored'])
+  })
+})
+
+describe('versionOf (revisao-pr515-3 A1)', () => {
+  test('the stored updatedAt as is: local text without a zone is never read as an instant', () => {
+    expect(versionOf({ updatedAt: '2026-10-01T09:00:00.123456' })).toBe('2026-10-01T09:00:00.123456')
+    expect(versionOf({ updatedAt: '2026-10-01T10:00:00.000Z' })).toBe('2026-10-01T10:00:00.000Z')
+  })
+  test('a Timestamp is its millis; nothing is null; the API version wins', () => {
+    expect(versionOf({ updatedAt: { seconds: 1790000000, nanoseconds: 123000000 } })).toBe('1790000000123')
+    expect(versionOf({ updatedAt: { toMillis: () => 5 } })).toBe('5')
+    expect(versionOf({})).toBeNull()
+    expect(versionOf({ updatedAt: '2026-10-01T10:00:00.000Z', version: '2026-10-01T07:00:00.000' })).toBe('2026-10-01T07:00:00.000')
   })
 })

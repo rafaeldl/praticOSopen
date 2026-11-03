@@ -57,7 +57,7 @@ async function move(order: Order, to: OrderStatus) {
     return
   }
   try {
-    const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: to }, order.updatedAt), ctx.showsMoney)
+    const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: to }, order.version), ctx.showsMoney)
     if (fresh) {
       rows.value = mergeById(rows.value, [fresh])
       orderChanged(fresh)

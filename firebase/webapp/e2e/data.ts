@@ -64,6 +64,11 @@ export async function updateOrderDoc(id: string, fields: Record<string, unknown>
   await db().doc(`companies/${COMPANY_A}/orders/${id}`).update({ ...fields, updatedAt: new Date().toISOString() })
 }
 
+/** Like the app writes: the fields as given, updatedAt included (no server time added). */
+export async function writeOrderFieldsRaw(id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/orders/${id}`).update(fields)
+}
+
 export async function readComments(orderId: string): Promise<Record<string, unknown>[]> {
   const snapshot = await db().collection(`companies/${COMPANY_A}/orders/${orderId}/comments`).get()
   return snapshot.docs.map((doc) => doc.data())

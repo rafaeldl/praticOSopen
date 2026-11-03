@@ -95,6 +95,9 @@ export const updateProductSchema = z.object({
 
 /** ISO date-time with zone (what GET returns in `updatedAt`, `dueDate`...). */
 const isoDateTime = z.string().datetime({ offset: true });
+
+/** The `version` the server gave (order-version.ts), sent back as is; an ISO instant with a zone still works. */
+export const orderVersionSchema = z.string().min(1).max(64);
 /** Money sent by a client: never negative, cents. */
 const moneySchema = z.number().min(0).max(1_000_000_000);
 /** The app decodes quantity as an int: a fraction would break old versions. */
@@ -146,7 +149,7 @@ export const updateOrderSchema = z.object({
   dueDate: isoDateTime.nullable().optional(),
   scheduledDate: isoDateTime.nullable().optional(),
   assignedTo: idSchema.nullable().optional(),
-  expectedUpdatedAt: isoDateTime.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
 });
 
 export const addOrderServiceSchema = z.object({
@@ -175,7 +178,7 @@ export const addOrderItemSchema = z.object({
   quantity: quantitySchema.optional(),
   total: moneySchema.nullable().optional(),
   deviceId: idSchema.nullable().optional(),
-  expectedUpdatedAt: isoDateTime.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
 }).refine((item) => item.kind === 'product' || (item.quantity === undefined && item.total === undefined), {
   message: 'A service has no quantity or line total',
   path: ['kind'],
@@ -191,7 +194,7 @@ export const updateOrderItemSchema = z.object({
   quantity: quantitySchema.optional(),
   total: moneySchema.nullable().optional(),
   deviceId: idSchema.nullable().optional(),
-  expectedUpdatedAt: isoDateTime.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
 }).refine((patch) => ['description', 'value', 'quantity', 'total', 'deviceId'].some((key) => key in patch), {
   message: 'Nothing to change',
 });
@@ -200,7 +203,7 @@ export const updateOrderItemSchema = z.object({
 export const receivePaymentSchema = z.object({
   clientTransactionId: clientTransactionIdSchema.optional(),
   /** Refuses a payment over a newer version (409 ORDER_CHANGED), unless it repeats clientTransactionId. */
-  expectedUpdatedAt: isoDateTime.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
   type: z.literal('payment').optional(),
@@ -212,7 +215,7 @@ export const receivePaymentSchema = z.object({
 /** POST /:id/discounts */
 export const discountSchema = z.object({
   clientTransactionId: clientTransactionIdSchema.optional(),
-  expectedUpdatedAt: isoDateTime.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
   description: z.string().max(500).optional(),
 });
@@ -243,6 +246,8 @@ export const listOrdersQuerySchema = z.object({
   customerId: idSchema.optional(),
   deviceId: idSchema.optional(),
   assignedTo: idSchema.optional(),
+  /** One order by its number (search); the other filters are ignored. */
+  number: z.coerce.number().int().min(1).max(1_000_000_000).optional(),
   startDate: z.string().datetime({ offset: true }).optional(),
   endDate: z.string().datetime({ offset: true }).optional(),
 }).refine((q) => q.sort === 'createdAt' || (!q.startDate && !q.endDate), {
