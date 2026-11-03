@@ -47,11 +47,11 @@ function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.N
 
 /** Dates in the company's zone (lib/zone.ts), whatever the computer's. */
 function dateFormat(locale: string, base: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const options = { ...base, timeZone: currentZone() }
-  const key = `d|${locale}|${JSON.stringify(options)}`
+  const timeZone = currentZone()
+  const key = `d|${locale}|${timeZone}|${JSON.stringify(base)}`
   let formatter = formatters.get(key) as Intl.DateTimeFormat | undefined
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, options)
+    formatter = new Intl.DateTimeFormat(locale, { ...base, timeZone })
     formatters.set(key, formatter)
   }
   return formatter

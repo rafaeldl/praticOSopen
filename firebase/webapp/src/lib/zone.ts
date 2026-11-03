@@ -139,7 +139,9 @@ export function parseStored(value: unknown, zone: string): Date | null {
 
 const pad = (value: number, size = 2) => String(value).padStart(size, '0')
 
-export const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
+// Read once: resolvedOptions() builds a formatter, too slow for every date on a list.
+const BROWSER_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone
+export const browserZone = () => BROWSER_ZONE
 
 /** '' while the company's zone is the browser's: local getters, no Intl per call. */
 let zone = ''

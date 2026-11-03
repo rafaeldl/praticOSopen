@@ -89,16 +89,15 @@ test('21h do último dia do mês fica no dia certo e "Dia todo" grava meia-noite
   const late = await makeOrder('admin', { scheduledDate: '2031-01-31T19:00:00.000', customer: null })
   const allDay = await makeOrder('admin', { scheduledDate: '2031-01-30T10:00:00.000', customer: null })
   await openAgenda(page, 'admin', 'd=2031-01-31')
+  // "Dia todo" first, while the grid is at the top.
+  await block(page, allDay.id).dragTo(page.locator('.tg-allday[data-allday="2031-01-30"]'))
+  await expect.poll(async () => (await readOrder(allDay.id))?.scheduledDate).toBe('2031-01-30T00:00:00.000')
+  await expect(page.locator(`.tg-allday[data-allday="2031-01-30"] [data-order="${allDay.id}"]`)).toBeVisible()
   await block(page, late.id).focus()
   for (let i = 0; i < 4; i++) await page.keyboard.press('Shift+ArrowDown')
   await page.keyboard.press('Enter')
   await expect.poll(async () => (await readOrder(late.id))?.scheduledDate).toBe('2031-01-31T21:00:00.000')
   await expect(page.locator(`.tg-col[data-day="2031-01-31"] [data-order="${late.id}"]`)).toContainText('21:00')
-  // The move above scrolled the grid to 21:00; back to the top, where "Dia todo" is.
-  await page.locator('.ag-scroll').evaluate((element) => (element.scrollTop = 0))
-  await block(page, allDay.id).dragTo(page.locator('.tg-allday[data-allday="2031-01-30"]'))
-  await expect.poll(async () => (await readOrder(allDay.id))?.scheduledDate).toBe('2031-01-30T00:00:00.000')
-  await expect(page.locator(`.tg-allday[data-allday="2031-01-30"] [data-order="${allDay.id}"]`)).toBeVisible()
 })
 
 test('arrastar para outro dia e hora pergunta antes, grava pela API e desfaz (agenda drag)', async ({ page }) => {
