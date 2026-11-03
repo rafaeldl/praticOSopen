@@ -263,7 +263,7 @@ Na 1ª visita, o tempo se divide assim:
 
 Com a fatia de OS (filtro Em aberto por padrão, consulta por `status in`), medido em 2026-11-03: **1.379 ms** na 1ª visita e **501 ms** na volta.
 
-Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.355 ms** na 1ª visita e **503 ms** na volta. A paleta, os atalhos e a folha "Mais" passaram a carregar sob demanda e os textos são divididos por funcionalidade; as telas novas usam só a API, sem nada novo no pedaço do Firestore.
+Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª visita e **487 ms** na volta. A paleta, os atalhos e a folha "Mais" passaram a carregar sob demanda e os textos são divididos por funcionalidade; as telas novas usam só a API, sem nada novo no pedaço do Firestore.
 
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
@@ -315,4 +315,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 238,5 de 240 KB depois da fatia de clientes (era 239,0; a paleta, os atalhos e a folha "Mais" saíram do primeiro download e abriram 1,6 KB).
+- Orçamento do primeiro download: 238,7 de 240 KB depois da fatia de clientes (era 239,0; a paleta, os atalhos e a folha "Mais" saíram do primeiro download e abriram 1,6 KB).
