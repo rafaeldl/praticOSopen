@@ -9,6 +9,7 @@ import 'package:praticos/services/photo_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:praticos/utils/audit_stamp.dart';
+import 'package:praticos/utils/field_diff.dart';
 import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,14 +58,28 @@ abstract class _ProductStore with Store {
     productList = repository.streamProducts(companyId!).asObservable();
   }
 
+  /// Saves [product]. An edit of a saved one with [previous] (the product
+  /// as it was read) writes only the fields that changed: a price the web
+  /// changed meanwhile is not put back. Nothing changed, nothing written.
   @action
-  saveProduct(Product product) async {
+  saveProduct(Product product, {Map<String, dynamic>? previous}) async {
     await _companyLoaded;
     if (companyId == null) return;
     User? user = await (userStore.getSingleUserById());
     final isNew = product.id == null || _draftIds.contains(product.id);
     stampAudit(product, isNew: isNew, user: user, companyId: companyId!);
     product.keywords = generateKeywords(product.name);
+    if (!isNew && previous != null) {
+      final fields = catalogChangedFields(previous, product.toJson());
+      if (fields.isEmpty) return;
+      final json = product.toJson();
+      await repository.writeFields(companyId!, product.id!, {
+        ...fields,
+        'updatedAt': json['updatedAt'],
+        if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+      });
+      return;
+    }
     await repository.createItem(companyId!, product);
     _draftIds.remove(product.id);
   }
@@ -104,7 +119,17 @@ abstract class _ProductStore with Store {
       if (url != null) {
         product.photo = url;
         if (!_draftIds.contains(product.id)) {
-          await repository.updateItem(companyId!, product);
+          // Only the photo, with updatedAt so the web sees the change.
+          final user = await userStore.getSingleUserById();
+          product
+            ..updatedAt = DateTime.now()
+            ..updatedBy = user?.toAggr() ?? product.updatedBy;
+          final json = product.toJson();
+          await repository.writeFields(companyId!, product.id!, {
+            'photo': url,
+            'updatedAt': json['updatedAt'],
+            if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+          });
         }
       }
       return url;

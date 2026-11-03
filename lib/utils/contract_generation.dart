@@ -103,3 +103,43 @@ Order buildContractOrder(
   order.total = total;
   return order;
 }
+
+/// What generating the order of [due] writes on the contract template, from
+/// the [template] document read inside the transaction (createContractOrder).
+/// Null when the template no longer generates that date: gone, not a
+/// contract, stopped or paused (maybe on the web, after the app read its
+/// cache), creating orders turned off, or already moved to another date (by
+/// another phone or the server job).
+///
+/// Only the `contract.*` fields that move are written, never the whole map,
+/// so what the web changed (end, pause, schedule) stays. `contract.active`
+/// is written only to turn the contract off. With [orderExists] the count is
+/// kept (same as the server's contract.service.ts).
+Map<String, dynamic>? contractAdvanceUpdate(
+  Map<String, dynamic>? template, {
+  required DateTime due,
+  required DateTime now,
+  required bool orderExists,
+}) {
+  final raw = template?['contract'];
+  if (template == null || template['isContract'] != true || raw is! Map) {
+    return null;
+  }
+  final contract = OrderContract.fromJson(raw.cast<String, dynamic>());
+  final next = contract.nextDueDate;
+  if (contract.autoGenerate != true ||
+      !contract.isDueAt(now) ||
+      next == null ||
+      !next.isAtSameMomentAs(due)) {
+    return null;
+  }
+  final count = contract.generatedCount ?? 0;
+  contract.advanceAfterGenerating(now);
+  final json = contract.toJson();
+  return {
+    'contract.lastGeneratedDate': json['lastGeneratedDate'],
+    'contract.nextDueDate': json['nextDueDate'],
+    'contract.generatedCount': orderExists ? count : contract.generatedCount,
+    if (contract.active == false) 'contract.active': false,
+  };
+}

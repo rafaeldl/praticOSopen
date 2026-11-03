@@ -51,8 +51,10 @@ mixin _$ProductStore on _ProductStore, Store {
   );
 
   @override
-  Future saveProduct(Product product) {
-    return _$saveProductAsyncAction.run(() => super.saveProduct(product));
+  Future saveProduct(Product product, {Map<String, dynamic>? previous}) {
+    return _$saveProductAsyncAction.run(
+      () => super.saveProduct(product, previous: previous),
+    );
   }
 
   late final _$deleteProductAsyncAction = AsyncAction(

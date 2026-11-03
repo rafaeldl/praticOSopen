@@ -53,13 +53,14 @@ class OrderForm {
     return titleI18n![localeCode] ?? titleI18n!['pt'] ?? title;
   }
 
-  /// Retorna a resposta para um determinado item, se existir
+  /// Retorna a resposta para um determinado item, se existir. With the
+  /// question twice in the list, the first one, as the web, the bot and
+  /// older apps read it.
   FormResponse? getResponse(String itemId) {
-    try {
-      return responses.firstWhere((r) => r.itemId == itemId);
-    } catch (_) {
-      return null;
+    for (final r in responses) {
+      if (r.itemId == itemId) return r;
     }
+    return null;
   }
 }
 

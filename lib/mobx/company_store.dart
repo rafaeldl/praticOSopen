@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:praticos/global.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/company_repository.dart';
@@ -11,9 +13,28 @@ part 'company_store.g.dart';
 
 class CompanyStore = _CompanyStore with _$CompanyStore;
 
+/// Writes some fields of `/companies/{companyId}` (an `update`).
+typedef CompanyFieldsUpdate =
+    Future<void> Function(String companyId, Map<String, dynamic> fields);
+
+Future<void> _updateCompanyFields(
+  String companyId,
+  Map<String, dynamic> fields,
+) => FirebaseFirestore.instance
+    .collection('companies')
+    .doc(companyId)
+    .update(fields);
+
 abstract class _CompanyStore with Store {
+  _CompanyStore({PhotoService? photoService, CompanyFieldsUpdate? writeFields})
+    : photoService = photoService ?? PhotoService(),
+      writeFields = writeFields ?? _updateCompanyFields;
+
   final CompanyRepository repository = CompanyRepository();
-  final PhotoService photoService = PhotoService();
+  final PhotoService photoService;
+
+  /// Partial writes (the logo): never the whole company from a copy.
+  final CompanyFieldsUpdate writeFields;
 
   @observable
   bool isUploading = false;
@@ -51,14 +72,18 @@ abstract class _CompanyStore with Store {
       final String? url = await photoService.uploadImage(file: file, storagePath: storagePath);
 
       if (url != null) {
-        company.logo = url;
-        await repository.updateItem(company);
-        
-        // Update global aggregate
-        if (Global.companyAggr != null && company.id == Global.companyAggr!.id) {
-          // You might need to add 'logo' to CompanyAggr if you want it updated globally immediately
-          // But for now, just updating the full company record is enough
-        }
+        company
+          ..logo = url
+          ..updatedAt = DateTime.now()
+          ..updatedBy = Global.userAggr;
+        // Only the logo: the company the screen holds may be old, and
+        // writing it whole would undo what the web changed meanwhile.
+        final json = company.toJson();
+        await writeFields(company.id!, {
+          'logo': url,
+          'updatedAt': json['updatedAt'],
+          if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+        });
       }
       return url;
     } finally {

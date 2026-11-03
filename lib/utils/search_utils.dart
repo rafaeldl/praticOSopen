@@ -98,3 +98,21 @@ List<String> customerKeywords(String? name, String? phone) => [
       ...generateSearchKeywords(name),
       ...generatePhoneKeywords(phone),
     ];
+
+/// Vehicle (device) keywords: name, serial and brand, each with
+/// [generateSearchKeywords], as the server writes them (device.service.ts)
+/// and the web, so the bot and the API find a vehicle by plate after it is
+/// edited in the app.
+///
+/// ```dart
+/// deviceKeywords("Gol", "ABC-1D23", "VW") // ["gol", "abc1d23", "vw"]
+/// ```
+List<String> deviceKeywords(
+  String? name,
+  String? serial,
+  String? manufacturer,
+) => [
+  ...generateSearchKeywords(name),
+  ...generateSearchKeywords(serial),
+  ...generateSearchKeywords(manufacturer),
+];

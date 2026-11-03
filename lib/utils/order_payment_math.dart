@@ -13,6 +13,18 @@ class AsaasTransactionLockedException implements Exception {
   String toString() => 'AsaasTransactionLockedException($transactionId)';
 }
 
+/// Thrown when a payment is above what is left to receive (compared in
+/// cents), as the server's PAYMENT_EXCEEDS_BALANCE. [remaining] is the
+/// balance the order had.
+class PaymentExceedsBalanceException implements Exception {
+  final double remaining;
+
+  const PaymentExceedsBalanceException(this.remaining);
+
+  @override
+  String toString() => 'PaymentExceedsBalanceException($remaining)';
+}
+
 /// Marker for `FieldValue.arrayUnion(values)`; converted by the repository.
 class ArrayUnionOp {
   final List<Object?> values;
@@ -145,7 +157,22 @@ class OrderPaymentMath {
     return order;
   }
 
+  static int _cents(double value) => (roundMoney(value) * 100).round();
+
+  /// Refuses a payment above what is left to receive, compared in cents
+  /// (same as the server's assertPaymentWithinBalance). A zero-total order
+  /// takes no loose payment: "Marcar como pago" uses [markAsFullyPaid].
+  static void assertPaymentWithinBalance(Order order, double amount) {
+    final remaining = remainingBalance(order);
+    if (_cents(amount) > _cents(remaining)) {
+      throw PaymentExceedsBalanceException(remaining);
+    }
+  }
+
+  /// Adds [transaction] as a payment. Throws [PaymentExceedsBalanceException]
+  /// above the remaining balance, without touching [fresh].
   static Order addPayment(Order fresh, PaymentTransaction transaction) {
+    assertPaymentWithinBalance(fresh, transaction.amount);
     fresh.transactions = [...?fresh.transactions, transaction];
     fresh.paidAmount =
         roundMoney((fresh.paidAmount ?? 0.0) + transaction.amount);
@@ -161,12 +188,15 @@ class OrderPaymentMath {
 
   /// Offline-safe update map for adding a payment (applied with field
   /// transforms by the repository). `paid`/`payment` are computed from
-  /// [current] plus the new amount; [current] is not mutated.
+  /// [current] plus the new amount; [current] is not mutated. Throws
+  /// [PaymentExceedsBalanceException] above the remaining balance of
+  /// [current] (the order the app has: offline it can't ask the server).
   static Map<String, dynamic> addPaymentUpdate({
     required Order current,
     required PaymentTransaction tx,
     DateTime? updatedAt,
   }) {
+    assertPaymentWithinBalance(current, tx.amount);
     final newPaid = roundMoney((current.paidAmount ?? 0.0) + tx.amount);
     final status = hasPaymentStatus(current.status)
         ? paymentStatusFor(total: current.total ?? 0.0, paidAmount: newPaid)

@@ -1,6 +1,7 @@
 // Order rules shared with the app and the API. docs/web-app/contract-cases/ is
 // the contract: tests/contract-cases.test.ts runs it here, following `correct`
 // when a case documents an app bug. Delete what moves to the API.
+import { roleHasPermission } from '@/lib/permissions'
 import { instantOf, wallParts } from '@/lib/zone'
 
 export type OrderRole = 'admin' | 'manager' | 'supervisor' | 'consultant' | 'technician'
@@ -154,7 +155,8 @@ export function orderPermissions(role: OrderRole, isCreator: boolean, status: st
     canAccess,
     canEdit: canAccess,
     canExecute: canAccess && role !== 'manager' && role !== 'consultant',
-    canAssign: canAccess && (role === 'admin' || role === 'supervisor'),
+    // assignOrder (app-permissions.json): admin, supervisor and the consultant, who only sees their own orders.
+    canAssign: canAccess && roleHasPermission(role, 'assignOrder'),
     canDelete: canAccess && (role === 'admin' || quote),
     canEditMainFields: canAccess && (full || quote),
     canManageForms: canAccess && (full || (role === 'supervisor' ? status !== 'done' && status !== 'canceled' : quote)),

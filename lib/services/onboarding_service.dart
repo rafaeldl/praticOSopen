@@ -77,11 +77,16 @@ class OnboardingSubspecialty {
   final Map<String, String> names;
   final String? icon;
 
+  /// `name` is a text (pt-BR) or a map by locale; `nameI18n` (the server's
+  /// and the web's format) adds the other languages and wins.
   factory OnboardingSubspecialty.fromMap(Map<String, dynamic> data) {
     final rawName = data['name'];
     return OnboardingSubspecialty(
       id: data['id'] as String,
-      names: rawName is String ? {'pt-BR': rawName} : _stringMap(rawName),
+      names: {
+        ...(rawName is String ? {'pt-BR': rawName} : _stringMap(rawName)),
+        ..._stringMap(data['nameI18n']),
+      },
       icon: data['icon'] as String?,
     );
   }

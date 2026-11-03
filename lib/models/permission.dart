@@ -334,6 +334,8 @@ class RolePermissions {
     PermissionType.viewOwnOrders,
     PermissionType.createOrder,
     PermissionType.editOrder,
+    // Indica o técnico nas OS que criou (canAccessOrder limita às próprias)
+    PermissionType.assignOrder,
     // Visualizar preços para orçamentos
     PermissionType.viewPrices,
     // Cadastros (visualização para criação de OS)

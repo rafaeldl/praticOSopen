@@ -180,7 +180,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
     final visible = orders
         .where(
           (o) =>
-              o.contract != null && (o.contract!.active == true) == showActive,
+              o.contract != null && o.contract!.isRunning == showActive,
         )
         .toList();
 
@@ -227,7 +227,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
     final l10n = context.l10n;
     final format = FormatService();
     final contract = order.contract!;
-    final active = contract.active == true;
+    final active = contract.isRunning;
     final vehicle = order.device?.name;
 
     final firstLine = [

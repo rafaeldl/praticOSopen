@@ -52,7 +52,7 @@ export const APP_ROLE_PERMISSIONS: Record<AppRole, readonly AppPermission[]> = {
     'viewCustomers', 'viewDevices', 'viewOwnOrders', 'viewPhotos', 'viewProducts', 'viewServices',
   ],
   consultant: [
-    'attachPhotos', 'createOrder', 'editOrder', 'fillForms', 'manageCustomers', 'viewCustomers',
+    'assignOrder', 'attachPhotos', 'createOrder', 'editOrder', 'fillForms', 'manageCustomers', 'viewCustomers',
     'viewDevices', 'viewOwnOrders', 'viewPhotos', 'viewPrices', 'viewProducts', 'viewServices',
   ],
   technician: [

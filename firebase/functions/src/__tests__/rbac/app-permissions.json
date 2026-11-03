@@ -78,6 +78,7 @@
       "viewServices"
     ],
     "consultant": [
+      "assignOrder",
       "attachPhotos",
       "createOrder",
       "editOrder",

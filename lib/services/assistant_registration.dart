@@ -78,7 +78,11 @@ class AssistantRegistration {
       ..createdBy = Global.userAggr
       ..updatedAt = now
       ..updatedBy = Global.userAggr
-      ..keywords = generateKeywords(device.name);
+      ..keywords = deviceKeywords(
+        device.name,
+        device.serial,
+        device.manufacturer,
+      );
     await (_devices ?? DeviceRepositoryV2()).createItem(companyId, device);
   }
 }

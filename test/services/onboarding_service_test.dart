@@ -58,6 +58,27 @@ void main() {
           'Split AC');
     });
 
+    // Specialties as the server and the web read them: `name` (text) plus
+    // `nameI18n` (registration.service.ts, webapp settings/data.ts).
+    test('a specialty reads nameI18n, with name as the fallback', () {
+      final s = OnboardingSegment.fromMap('automotive', {
+        'name': 'Mecânica',
+        'subspecialties': [
+          {
+            'id': 'mechanical',
+            'name': 'Oficina Mecânica',
+            'nameI18n': {'en-US': 'Auto Repair Shop', 'es-ES': 'Taller'},
+          },
+          {'id': 'carwash', 'name': 'Lava Car'},
+        ],
+      });
+      final mechanical = s.subspecialties.first;
+      expect(mechanical.nameFor(const Locale('en', 'US')), 'Auto Repair Shop');
+      expect(mechanical.nameFor(const Locale('es')), 'Taller');
+      expect(mechanical.nameFor(const Locale('pt', 'BR')), 'Oficina Mecânica');
+      expect(s.subspecialties.last.nameFor(const Locale('en')), 'Lava Car');
+    });
+
     test('missing fields keep the old defaults (true)', () {
       final s = OnboardingSegment.fromMap('other', {'name': 'Outro'});
       expect(s.fieldServiceDefault, isTrue);

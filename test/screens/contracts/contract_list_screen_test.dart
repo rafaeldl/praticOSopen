@@ -128,6 +128,25 @@ void main() {
     expect(find.text('Ana Ribeiro'), findsNothing);
   });
 
+  testWidgets('a contract paused on the web (pausedAt) is in Encerrados', (
+    tester,
+  ) async {
+    final paused = _order(
+      'p',
+      'Paula Pausada',
+      active: true,
+      next: DateTime(2026, 11, 20),
+    )..contract!.pausedAt = DateTime(2026, 11, 2);
+    await tester.pumpWidget(
+      _app(_FakeDirectory(Stream.value([..._orders, paused])), []),
+    );
+    await tester.pump();
+    expect(find.text('Paula Pausada'), findsNothing);
+    await tester.tap(find.text('Encerrados'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paula Pausada'), findsOneWidget);
+  });
+
   testWidgets('tapping a row opens the order', (tester) async {
     final log = <Object?>[];
     await tester.pumpWidget(_app(_FakeDirectory(Stream.value(_orders)), log));

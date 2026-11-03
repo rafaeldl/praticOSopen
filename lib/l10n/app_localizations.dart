@@ -544,6 +544,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível salvar o pagamento. Verifique sua conexão e tente novamente.'**
   String get paymentUpdateFailed;
 
+  /// No description provided for @paymentExceedsBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor passa do que falta receber. Confira e tente de novo.'**
+  String get paymentExceedsBalance;
+
   /// No description provided for @paymentRequiresConnection.
   ///
   /// In pt, this message translates to:

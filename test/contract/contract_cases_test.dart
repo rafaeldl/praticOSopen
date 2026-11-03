@@ -307,17 +307,22 @@ void main() {
           final tx = op['kind'] == 'addPayment'
               ? PaymentTransaction.payment(amount: amount!)
               : PaymentTransaction.discount(amount: amount!);
-          final update = op['kind'] == 'addPayment'
+          Map<String, dynamic> offlineUpdate() => op['kind'] == 'addPayment'
               ? OrderPaymentMath.addPaymentUpdate(current: order, tx: tx)
               : OrderPaymentMath.addDiscountUpdate(current: order, tx: tx);
-          expect(update['payment'], offline['payment']);
-          expect(update['paid'], offline['paid']);
-          if (offline['paidAmountIncrement'] != null) {
-            expect((update['paidAmount'] as IncrementOp).by, _d(offline['paidAmountIncrement']));
-          }
-          if (offline['discountIncrement'] != null) {
-            expect((update['discount'] as IncrementOp).by, _d(offline['discountIncrement']));
-            expect((update['total'] as IncrementOp).by, _d(offline['totalIncrement']));
+          if (offline['error'] == 'exceedsBalance') {
+            expect(offlineUpdate, throwsA(isA<PaymentExceedsBalanceException>()));
+          } else {
+            final update = offlineUpdate();
+            expect(update['payment'], offline['payment']);
+            expect(update['paid'], offline['paid']);
+            if (offline['paidAmountIncrement'] != null) {
+              expect((update['paidAmount'] as IncrementOp).by, _d(offline['paidAmountIncrement']));
+            }
+            if (offline['discountIncrement'] != null) {
+              expect((update['discount'] as IncrementOp).by, _d(offline['discountIncrement']));
+              expect((update['total'] as IncrementOp).by, _d(offline['totalIncrement']));
+            }
           }
         }
 
@@ -344,6 +349,13 @@ void main() {
 
         if (want['error'] == 'asaasLocked') {
           expect(run, throwsA(isA<AsaasTransactionLockedException>()));
+          return;
+        }
+        if (want['error'] == 'exceedsBalance') {
+          expect(run, throwsA(isA<PaymentExceedsBalanceException>()));
+          // Refused before touching the order.
+          expect(order.paidAmount, _d((g['order'] as Map)['paidAmount']));
+          expect(order.transactions, isEmpty);
           return;
         }
         run();

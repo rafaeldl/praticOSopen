@@ -114,45 +114,45 @@ class _FormFillScreenState extends State<FormFillScreen> {
     _changes.value++;
   }
 
-  void _putResponse(FormResponse response) {
-    final index = _currentForm.responses.indexWhere(
-      (r) => r.itemId == response.itemId,
+  /// Shows [change] on screen right away (only that question changes).
+  void _applyLocally(FormAnswerChange change) {
+    _currentForm.responses = applyAnswerChange(_currentForm.responses, change);
+  }
+
+  /// Saves [change] (only that question, like the web) and shows the
+  /// checklist as the server has it after the change, with what the web
+  /// answered meanwhile. [before] is the screen's responses before the
+  /// change, for the offline queue. Throws when refused.
+  Future<void> _saveChange(
+    FormAnswerChange change,
+    List<FormResponse> before,
+  ) async {
+    final fresh = await _formsService.saveAnswer(
+      widget.companyId,
+      widget.orderId,
+      _currentForm.id,
+      change,
+      localKnown: before,
     );
-    if (index >= 0) {
-      _currentForm.responses[index] = response;
-    } else {
-      _currentForm.responses.add(response);
-    }
+    if (fresh != null) _update(() => _currentForm.responses = fresh);
   }
 
   Future<void> _saveItemResponse(String itemId, dynamic value) async {
     HapticFeedback.selectionClick();
-
-    final currentResponse = _currentForm.getResponse(itemId);
-    final photoUrls = currentResponse?.photoUrls ?? [];
-
-    final newResponse = FormResponse(
-      itemId: itemId,
-      value: value,
-      photoUrls: photoUrls,
-    );
-
-    _update(() => _putResponse(newResponse));
-
-    await _persistResponse(newResponse);
+    final before = List.of(_currentForm.responses);
+    final change = FormValueChange(itemId, value);
+    _update(() => _applyLocally(change));
+    await _persistChange(change, before);
   }
 
-  /// Saves an answer already shown on screen. Offline it is queued (see
-  /// [FormsService.saveResponse]); a refusal is told, never swallowed.
-  Future<void> _persistResponse(FormResponse response) async {
+  /// Saves a change already shown on screen. Offline it is queued (see
+  /// [FormsService.saveAnswer]); a refusal is told, never swallowed.
+  Future<void> _persistChange(
+    FormAnswerChange change,
+    List<FormResponse> before,
+  ) async {
     try {
-      await _formsService.saveResponse(
-        widget.companyId,
-        widget.orderId,
-        _currentForm.id,
-        response,
-        localResponses: List.of(_currentForm.responses),
-      );
+      await _saveChange(change, before);
     } catch (e) {
       debugPrint('Could not save the checklist answer: $e');
       if (mounted) showAppToast(context, context.l10n.checklistAnswerSaveFailed);
@@ -191,26 +191,13 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
       if (url == null) throw Exception('Falha no upload');
 
-      final currentResponse = _currentForm.getResponse(itemId);
-      final List<String> currentPhotos = List.from(
-        currentResponse?.photoUrls ?? [],
-      );
-      currentPhotos.add(url);
-
-      final newResponse = FormResponse(
-        itemId: itemId,
-        value: currentResponse?.value,
-        photoUrls: currentPhotos,
-      );
-
-      await _formsService.saveResponse(
-        widget.companyId,
-        widget.orderId,
-        _currentForm.id,
-        newResponse,
-      );
-
-      _update(() => _putResponse(newResponse));
+      final before = List.of(_currentForm.responses);
+      final change = FormPhotosAdded(itemId, [url]);
+      await _saveChange(change, before);
+      // Offline the photo is queued: show it already.
+      if (_currentForm.getResponse(itemId)?.photoUrls.contains(url) != true) {
+        _update(() => _applyLocally(change));
+      }
 
       HapticFeedback.mediumImpact();
     } catch (e) {
@@ -236,10 +223,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
     });
 
     try {
-      final currentResponse = _currentForm.getResponse(itemId);
-      final List<String> currentPhotos = List.from(
-        currentResponse?.photoUrls ?? [],
-      );
+      final uploaded = <String>[];
       int successCount = 0;
 
       for (final file in files) {
@@ -255,7 +239,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           );
 
           if (url != null) {
-            currentPhotos.add(url);
+            uploaded.add(url);
             successCount++;
           }
         } catch (e) {
@@ -264,20 +248,14 @@ class _FormFillScreenState extends State<FormFillScreen> {
       }
 
       if (successCount > 0) {
-        final newResponse = FormResponse(
-          itemId: itemId,
-          value: currentResponse?.value,
-          photoUrls: currentPhotos,
-        );
-
-        await _formsService.saveResponse(
-          widget.companyId,
-          widget.orderId,
-          _currentForm.id,
-          newResponse,
-        );
-
-        _update(() => _putResponse(newResponse));
+        final before = List.of(_currentForm.responses);
+        final change = FormPhotosAdded(itemId, uploaded);
+        await _saveChange(change, before);
+        // Offline the photos are queued: show them already.
+        final shown = _currentForm.getResponse(itemId)?.photoUrls ?? const [];
+        if (!uploaded.every(shown.contains)) {
+          _update(() => _applyLocally(change));
+        }
 
         HapticFeedback.mediumImpact();
       } else {
@@ -302,21 +280,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
   Future<void> _deletePhoto(String itemId, String url) async {
     HapticFeedback.mediumImpact();
 
-    final currentResponse = _currentForm.getResponse(itemId);
-    if (currentResponse == null) return;
+    if (_currentForm.getResponse(itemId) == null) return;
+    final before = List.of(_currentForm.responses);
 
-    final List<String> currentPhotos = List.from(currentResponse.photoUrls);
-    currentPhotos.remove(url);
-
-    final newResponse = FormResponse(
-      itemId: itemId,
-      value: currentResponse.value,
-      photoUrls: currentPhotos,
-    );
-
-    _update(() => _putResponse(newResponse));
-
-    await _persistResponse(newResponse);
+    final change = FormPhotoRemoved(itemId, url);
+    _update(() => _applyLocally(change));
+    await _persistChange(change, before);
   }
 
   void _showError(String title, String message) {

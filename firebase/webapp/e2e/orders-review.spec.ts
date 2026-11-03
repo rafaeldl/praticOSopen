@@ -249,6 +249,21 @@ test('M2 (order.responsible.pick): o admin escolhe o técnico e a OS aparece em 
   await expect(row(page, order.number)).toHaveCount(1)
 })
 
+// Decision (Rafael, 2026-11-03): the consultant picks the technician on the
+// orders they created, never on someone else's (canAssign in order-permissions.json).
+test('order.responsible.pick: o consultor indica o técnico só na OS que criou', async ({ page }) => {
+  const own = await makeOrder('consultant', { status: 'approved' })
+  const others = await makeOrder('admin', { status: 'approved' })
+  await openOrder(page, 'consultant', own.id)
+  await panel(page).getByRole('region', { name: 'Detalhes' }).getByRole('button', { name: 'Ninguém' }).click()
+  await dialog(page, 'Quem é o responsável?').getByRole('button', { name: 'Tiago Tecnico' }).click()
+  await expect.poll(async () => ((await readOrder(own.id))?.assignedTo as { id?: string } | undefined)?.id).toBe('e2e-technician')
+  // Someone else's order: the consultant does not even open it.
+  await page.goto(`orders?order=${others.id}`)
+  await expect(panel(page).getByRole('button', { name: 'Ninguém' })).toHaveCount(0)
+  expect((await readOrder(others.id))?.assignedTo ?? null).toBeNull()
+})
+
 test.describe('Nova OS (usuários)', () => {
   test('P0: cadastra cliente e veículo novos ali mesmo', async ({ page }) => {
     await login(page, 'admin')

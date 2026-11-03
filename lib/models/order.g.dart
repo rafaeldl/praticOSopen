@@ -235,7 +235,8 @@ OrderContract _$OrderContractFromJson(Map<String, dynamic> json) =>
       ..active = json['active'] as bool?
       ..reminderDaysBefore = (json['reminderDaysBefore'] as num?)?.toInt()
       ..parentOrderId = json['parentOrderId'] as String?
-      ..parentOrderNumber = (json['parentOrderNumber'] as num?)?.toInt();
+      ..parentOrderNumber = (json['parentOrderNumber'] as num?)?.toInt()
+      ..pausedAt = _looseDate(json['pausedAt']);
 
 Map<String, dynamic> _$OrderContractToJson(OrderContract instance) =>
     <String, dynamic>{
@@ -251,6 +252,7 @@ Map<String, dynamic> _$OrderContractToJson(OrderContract instance) =>
       'reminderDaysBefore': instance.reminderDaysBefore,
       'parentOrderId': instance.parentOrderId,
       'parentOrderNumber': instance.parentOrderNumber,
+      'pausedAt': ?instance.pausedAt?.toIso8601String(),
     };
 
 OrderRating _$OrderRatingFromJson(Map<String, dynamic> json) => OrderRating()

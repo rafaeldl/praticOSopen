@@ -9,6 +9,7 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/utils/contract_generation.dart';
 import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/utils/report_week.dart';
 import 'package:praticos/utils/order_payment_math.dart';
@@ -308,29 +309,49 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return result;
   }
 
-  /// Creates [order] (its id from `contractOrderId`, the same the server job
-  /// uses) unless it already exists, and writes [contract] on the template,
-  /// in one transaction. Returns whether the order was created here. When
-  /// the server job already generated this due date, nothing is created.
-  Future<bool> createContractOrder(
+  /// Generates the order of the due date [due] of contract [templateId] in
+  /// one transaction, like the server job (contract.service.ts): reads the
+  /// template again, checks it still generates that date
+  /// ([contractAdvanceUpdate]: running, not paused, same next date), creates
+  /// the order with [build] from the fresh template (id from
+  /// `contractOrderId`, the same the server uses) unless it already exists,
+  /// and writes only the `contract.*` fields that move. Returns the order
+  /// created here, or null.
+  ///
+  /// The list of templates may come from the cache: a contract stopped or
+  /// paused on the web since then gets no order and is not turned back on.
+  Future<Order?> createContractOrder(
     String companyId, {
     required String templateId,
     required DateTime due,
-    required OrderContract contract,
-    required Order order,
+    required DateTime now,
+    required Order Function(Order template) build,
   }) async {
     final collection = collectionFor(companyId);
-    final orderRef = collection.doc(order.id);
+    final orderRef = collection.doc(contractOrderId(templateId, due));
     final templateRef = collection.doc(templateId);
-    final json = toJson(order)..remove('id');
     // Everyone who generates (admin, supervisor or the template's author)
     // can read the order of the due date before it exists (the rules allow
     // `get` of a missing `contract_*` order), so it is always a transaction.
-    return firestore.runTransaction<bool>((tx) async {
+    return firestore.runTransaction<Order?>((tx) async {
+      final templateSnap = await tx.get(templateRef);
       final existing = await tx.get(orderRef);
-      if (!existing.exists) tx.set(orderRef, json);
-      tx.update(templateRef, {'contract': contract.toJson()});
-      return !existing.exists;
+      final data = templateSnap.data();
+      final update = contractAdvanceUpdate(
+        data,
+        due: due,
+        now: now,
+        orderExists: existing.exists,
+      );
+      if (update == null) return null;
+      Order? created;
+      if (!existing.exists) {
+        final template = fromJson({...data!, 'id': templateId});
+        created = build(template)..id = orderRef.id;
+        tx.set(orderRef, toJson(created)..remove('id'));
+      }
+      tx.update(templateRef, update);
+      return created;
     });
   }
 

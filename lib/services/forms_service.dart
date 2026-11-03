@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/utils/form_answer_change.dart';
+
+export 'package:praticos/utils/form_answer_change.dart';
 
 class FormsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -148,81 +151,77 @@ class FormsService {
     return false;
   }
 
-  /// The queued (offline) write: the responses and `updatedAt`, never the
-  /// status.
-  static Map<String, dynamic> queuedResponsesUpdate(
-    List<FormResponse> responses,
-    DateTime now,
-  ) => {
-    'responses': responses.map((r) => r.toJson()).toList(),
-    'updatedAt': now.toIso8601String(),
-  };
-
-  /// Salva a resposta de um item do formulário.
+  /// Saves one answer ([change]) to a checklist of the order, like the web:
+  /// a transaction reads the checklist and changes only that question, and
+  /// inside it only the part touched ([applyAnswerChange]). Answers and
+  /// photos the web (or another phone) gave meanwhile stay. Returns the
+  /// checklist's responses after the change, or null when the answer was
+  /// queued offline (or the checklist is gone).
   ///
-  /// Online, a transaction merges the answer into the current responses.
-  /// Without connection transactions fail, so with [localResponses] (the
-  /// screen's responses, already holding [response]) the answer is queued as
-  /// a plain update and reaches the server when the connection comes back.
-  ///
-  /// The queued write never touches `status` (it could reopen a checklist
-  /// another device finished). Responses are one array in the document, so
-  /// it replaces the whole list: if two devices answer the same checklist
-  /// while one is offline, the last to sync wins.
-  Future<void> saveResponse(
+  /// Without connection transactions fail, so the answer is queued as an
+  /// `arrayRemove` of every response to that question in [localKnown] (the
+  /// screen's responses before the change, so no copy is left behind) and an
+  /// `arrayUnion` of the new one ([queuedAnswerWrite]): only that question,
+  /// never the whole list nor the status (it could reopen a checklist
+  /// another device finished).
+  Future<List<FormResponse>?> saveAnswer(
     String companyId,
     String orderId,
     String formId,
-    FormResponse response, {
-    List<FormResponse>? localResponses,
+    FormAnswerChange change, {
+    List<FormResponse> localKnown = const [],
   }) async {
     final formRef = _getFormsCollection(companyId, orderId).doc(formId);
     try {
-      await _saveResponseInTransaction(formRef, response);
+      return await _saveAnswerInTransaction(formRef, change);
     } catch (e) {
-      if (localResponses == null || !canQueueOffline(e)) rethrow;
+      if (!canQueueOffline(e)) rethrow;
       debugPrint('Checklist answer queued offline: $e');
-      // Not awaited: offline the update completes only once synced.
+      final write = queuedAnswerWrite(localKnown, change);
+      final now = DateTime.now().toIso8601String();
+      final batch = _db.batch();
+      if (write.removed.isNotEmpty) {
+        batch.update(formRef, {
+          'responses': FieldValue.arrayRemove(write.removed),
+        });
+      }
+      batch.update(formRef, {
+        'responses': FieldValue.arrayUnion([write.added]),
+        'updatedAt': now,
+      });
+      // Not awaited: offline the batch completes only once synced.
       unawaited(
-        formRef
-            .update(queuedResponsesUpdate(localResponses, DateTime.now()))
-            .catchError((Object e) {
-              debugPrint('Queued checklist answer failed: $e');
-            }),
+        batch.commit().catchError((Object e) {
+          debugPrint('Queued checklist answer failed: $e');
+        }),
       );
+      return null;
     }
   }
 
-  Future<void> _saveResponseInTransaction(
+  Future<List<FormResponse>?> _saveAnswerInTransaction(
     DocumentReference<Map<String, dynamic>> formRef,
-    FormResponse response,
+    FormAnswerChange change,
   ) {
     return _db.runTransaction(timeout: responseTransactionTimeout, (
       transaction,
     ) async {
       final snapshot = await transaction.get(formRef);
-      if (!snapshot.exists) return;
+      if (!snapshot.exists) return null;
 
       final orderForm = _orderFormFromJson(snapshot.id, snapshot.data()!);
-
-      final index =
-          orderForm.responses.indexWhere((r) => r.itemId == response.itemId);
-      if (index >= 0) {
-        orderForm.responses[index] = response;
-      } else {
-        orderForm.responses.add(response);
-      }
-
-      if (orderForm.status == FormStatus.pending &&
-          orderForm.responses.isNotEmpty) {
-        orderForm.status = FormStatus.inProgress;
+      final responses = applyAnswerChange(orderForm.responses, change);
+      var status = orderForm.status;
+      if (status == FormStatus.pending && responses.isNotEmpty) {
+        status = FormStatus.inProgress;
       }
 
       transaction.update(formRef, {
-        'responses': orderForm.responses.map((e) => e.toJson()).toList(),
-        'status': _statusToString(orderForm.status),
+        'responses': responses.map((e) => e.toJson()).toList(),
+        'status': _statusToString(status),
         'updatedAt': DateTime.now().toIso8601String(),
       });
+      return responses;
     });
   }
 

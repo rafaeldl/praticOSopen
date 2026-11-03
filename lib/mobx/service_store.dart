@@ -9,6 +9,7 @@ import 'package:praticos/services/photo_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:praticos/utils/audit_stamp.dart';
+import 'package:praticos/utils/field_diff.dart';
 import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,14 +58,28 @@ abstract class _ServiceStore with Store {
     serviceList = repository.streamServices(companyId!).asObservable();
   }
 
+  /// Saves [service]. An edit of a saved one with [previous] (the service
+  /// as it was read) writes only the fields that changed: a price the web
+  /// changed meanwhile is not put back. Nothing changed, nothing written.
   @action
-  saveService(Service service) async {
+  saveService(Service service, {Map<String, dynamic>? previous}) async {
     await _companyLoaded;
     if (companyId == null) return;
     User? user = await userStore.getSingleUserById();
     final isNew = service.id == null || _draftIds.contains(service.id);
     stampAudit(service, isNew: isNew, user: user, companyId: companyId!);
     service.keywords = generateKeywords(service.name);
+    if (!isNew && previous != null) {
+      final fields = catalogChangedFields(previous, service.toJson());
+      if (fields.isEmpty) return;
+      final json = service.toJson();
+      await repository.writeFields(companyId!, service.id!, {
+        ...fields,
+        'updatedAt': json['updatedAt'],
+        if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+      });
+      return;
+    }
     await repository.createItem(companyId!, service);
     _draftIds.remove(service.id);
   }
@@ -104,7 +119,18 @@ abstract class _ServiceStore with Store {
       if (url != null) {
         service.photo = url;
         if (!_draftIds.contains(service.id)) {
-          await repository.updateItem(companyId!, service);
+          // Only the photo, with updatedAt so the web sees the change.
+          final now = DateTime.now();
+          final user = await userStore.getSingleUserById();
+          service
+            ..updatedAt = now
+            ..updatedBy = user?.toAggr() ?? service.updatedBy;
+          final json = service.toJson();
+          await repository.writeFields(companyId!, service.id!, {
+            'photo': url,
+            'updatedAt': json['updatedAt'],
+            if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+          });
         }
       }
       return url;
