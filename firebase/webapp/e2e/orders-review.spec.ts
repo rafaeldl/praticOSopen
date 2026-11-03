@@ -59,14 +59,18 @@ test.describe('dinheiro', () => {
 })
 
 test('A4: quem não vê valores também acha pelo número a OS que a lista não carregou (API projetada)', async ({ page }) => {
+  // An order of its own, older than the whole seed, so it is never on the first
+  // page, whatever other tests add (the seed's OS 2 was only off it when they had).
+  const old = await makeOrder('admin', { createdAt: '2020-01-15T15:00:00.000Z', updatedAt: '2020-01-15T15:00:00.000Z' })
   const asked: string[] = []
   page.on('request', (request) => {
-    if (/\/v1\/app\/orders\?number=/.test(request.url())) asked.push(request.url())
+    if (new RegExp(`/v1/app/orders\\?number=${old.number}\\b`).test(request.url())) asked.push(request.url())
   })
   await login(page, 'supervisor', './?f=all')
-  await expect(table(page)).toBeVisible()
-  await page.getByRole('searchbox', { name: /Buscar OS/ }).fill('2')
-  await expect(table(page).locator('tbody tr[data-order] td.c-num').first()).toHaveText('2')
+  await expect(table(page).locator('tbody tr[data-order]').first()).toBeVisible()
+  await expect(table(page).locator('td.c-num', { hasText: new RegExp(`^${old.number}$`) })).toHaveCount(0)
+  await page.getByRole('searchbox', { name: /Buscar OS/ }).fill(String(old.number))
+  await expect(table(page).locator('tbody tr[data-order] td.c-num').first()).toHaveText(String(old.number))
   expect(asked.length).toBeGreaterThan(0)
   await expect(table(page).getByRole('columnheader', { name: 'Total' })).toHaveCount(0)
 })
