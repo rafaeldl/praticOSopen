@@ -107,7 +107,7 @@ test('aparelho com contrato ativo: contratos na ficha, próxima pelo contrato e 
 
 test('Nova OS salva já concluída, com veículo, faz a pergunta (device.maintenance.offer)', async ({ page }) => {
   const device = await makeDevice()
-  const customer = await makeCustomer({ name: 'Concluída Na Hora' })
+  await makeCustomer({ name: 'Concluída Na Hora' })
   await login(page, 'admin')
   await expect(page.getByTestId('orders-table')).toBeVisible()
   await page.locator('h1').click()
