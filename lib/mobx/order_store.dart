@@ -752,24 +752,20 @@ abstract class _OrderStore with Store {
     if (contract == null || due == null) return null;
 
     final now = DateTime.now();
-    final newOrder = buildContractOrder(
-      template,
-      now: now,
-      company: Global.companyAggr,
-    )..id = contractOrderId(template.id!, due);
-    contract.advanceAfterGenerating(now);
+    final company = Global.companyAggr;
 
-    // One transaction: the order of this due date is created only if no
-    // other device created it, and only the template's contract is updated
-    // (never the whole template).
-    final created = await TenantOrderRepository().createContractOrder(
+    // One transaction that reads the template again (the list may come from
+    // the cache): the order of this due date is created only if the contract
+    // still generates it (not stopped or paused on the web, not moved by
+    // another device or the server job) and nobody created it, from the
+    // fresh template; only the `contract.*` fields that move are written.
+    return TenantOrderRepository().createContractOrder(
       companyId!,
       templateId: template.id!,
       due: due,
-      contract: contract,
-      order: newOrder,
+      now: now,
+      build: (fresh) => buildContractOrder(fresh, now: now, company: company),
     );
-    return created ? newOrder : null;
   }
 
   /// Check and auto-generate orders for all due contracts (called on app startup)

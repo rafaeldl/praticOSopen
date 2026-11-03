@@ -185,7 +185,7 @@ class DeviceMaintenanceService {
           .first
           .timeout(kMaintenanceReadWait);
       return contracts.whereType<Order>().where((order) {
-        return order.contract?.active == true;
+        return order.contract?.isRunning == true;
       }).firstOrNull;
     } catch (e) {
       debugPrint('Could not read the device contracts: $e');

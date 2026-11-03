@@ -317,6 +317,12 @@ class OrderContract {
   String? parentOrderId; // For generated orders: ID of the template order
   int? parentOrderNumber; // For generated orders: number of the template order
 
+  /// When the contract was paused (written by the web). A paused contract
+  /// generates nothing and lists as ended, like `active: false`. Kept when
+  /// the app writes the contract back; absent when never paused.
+  @JsonKey(includeIfNull: false, fromJson: _looseDate)
+  DateTime? pausedAt;
+
   OrderContract();
 
   factory OrderContract.fromJson(Map<String, dynamic> json) =>
@@ -372,11 +378,15 @@ class OrderContract {
     return next;
   }
 
-  /// Whether the contract is due: active, nextDueDate <= [now] and the due
-  /// day not after the contract's last day ([endDate] is included).
+  /// Active and not paused: listed in "Ativos" and may generate orders.
+  bool get isRunning => active == true && pausedAt == null;
+
+  /// Whether the contract is due: running ([isRunning]), nextDueDate <=
+  /// [now] and the due day not after the contract's last day ([endDate] is
+  /// included).
   bool isDueAt(DateTime now) {
     final due = nextDueDate;
-    if (active != true || due == null) return false;
+    if (!isRunning || due == null) return false;
     if (due.isAfter(now)) return false;
     return !_afterEnd(due);
   }
@@ -408,6 +418,19 @@ class OrderContract {
   bool get isExpired {
     if (endDate == null) return false;
     return endDate!.isBefore(DateTime.now());
+  }
+}
+
+/// A date written as text (the app's format) or as a Firestore timestamp
+/// (anything with `toDate()`); null when it is neither.
+DateTime? _looseDate(Object? value) {
+  if (value is String) return DateTime.tryParse(value);
+  if (value is DateTime) return value;
+  try {
+    final date = (value as dynamic)?.toDate();
+    return date is DateTime ? date : null;
+  } catch (_) {
+    return null;
   }
 }
 

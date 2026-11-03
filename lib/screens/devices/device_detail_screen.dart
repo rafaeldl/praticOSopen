@@ -500,7 +500,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           }
           final contract = contractSnapshot.data
               ?.whereType<Order>()
-              .where((order) => order.contract?.active == true)
+              .where((order) => order.contract?.isRunning == true)
               .firstOrNull;
           if (contract != null) return _contractMaintenanceRow(contract);
           return _maintenanceRow(deviceSnapshot.data, owner, lastService);
@@ -690,7 +690,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       builder: (context, snapshot) {
         final contracts = snapshot.data
                 ?.whereType<Order>()
-                .where((o) => o.contract?.active == true)
+                .where((o) => o.contract?.isRunning == true)
                 .toList() ??
             [];
         if (contracts.isEmpty) {
