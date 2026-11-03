@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -102,6 +104,7 @@ void main() {
     bool canCharge = false,
     bool? canWatchCharges,
     Object? chargesError,
+    Stream<List<OrderCharge>>? chargesSource,
     PaymentSettings? settings,
     List<OrderCharge> charges = const [],
     AsaasApiService? service,
@@ -129,9 +132,11 @@ void main() {
             settings ??
                 PaymentSettings(asaasEnabled: true, asaasConnected: true),
           ),
-          chargesStream: chargesError != null
-              ? Stream.error(chargesError)
-              : Stream.value(charges),
+          chargesStream:
+              chargesSource ??
+              (chargesError != null
+                  ? Stream.error(chargesError)
+                  : Stream.value(charges)),
           chargeService: service,
           canSendReceipt: canSendReceipt,
           canOpenReceiptGroup: canOpenReceiptGroup ?? (_) => true,
@@ -820,6 +825,27 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('chargeSendLink')), findsNothing);
         expect(find.byKey(const Key('receiveShareOrderLink')), findsOneWidget);
+      });
+
+      testWidgets('no blue button until it knows whether a link is open', (
+        tester,
+      ) async {
+        final charges = StreamController<List<OrderCharge>>();
+        addTearDown(charges.close);
+        await pumpScreen(
+          tester,
+          countingStore([]),
+          canWatchCharges: true,
+          chargesSource: charges.stream,
+        );
+        await tester.pump();
+        expect(find.byType(PrimaryButton), findsNothing);
+        expect(find.byKey(const Key('receiveConfirm')), findsNothing);
+
+        charges.add(const []);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
+        expect(find.byType(PrimaryButton), findsOneWidget);
       });
 
       testWidgets('charges denied by the rules: warns and no blue button', (

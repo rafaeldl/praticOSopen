@@ -54,6 +54,7 @@ class OrderChargeController extends ChangeNotifier {
             ? null
             : PaymentSettingsRepository().watch(companyId));
     if (source == null) return;
+    _watching = true;
     _settingsSubscription = safePaymentSettings(source).listen(_onSettings);
   }
 
@@ -61,6 +62,20 @@ class OrderChargeController extends ChangeNotifier {
 
   /// [PermissionType.chargeOrder]: may create and replace links.
   final bool _canCharge;
+
+  bool _watching = false;
+  bool _chargesArrived = false;
+
+  /// Still finding out whether a link is open: the payment settings or (in
+  /// the pilot) the first answer about the charges have not arrived. The
+  /// screen offers no blue "Marcar como recebido" meanwhile, or a quick tap
+  /// could receive by hand over an open link.
+  bool get pending {
+    if (!_watching) return false;
+    final settings = _settings;
+    if (settings == null) return true;
+    return settings.asaasEnabled && !_chargesArrived;
+  }
 
   /// The charges could not be read (e.g. denied by the rules for this role):
   /// a link may be open without this screen knowing.
@@ -120,6 +135,7 @@ class OrderChargeController extends ChangeNotifier {
         onError: (Object _) {
           _charges = const [];
           _chargesUnknown = true;
+          _chargesArrived = true;
           _notify();
         },
       );
@@ -145,6 +161,7 @@ class OrderChargeController extends ChangeNotifier {
     _previous = {for (final c in charges) c.id ?? '': c};
     _charges = charges;
     _chargesUnknown = false;
+    _chargesArrived = true;
     _notify();
     // The webhook booked or reverted payments on the order.
     if (settled && !_disposed) store.reloadPayments();

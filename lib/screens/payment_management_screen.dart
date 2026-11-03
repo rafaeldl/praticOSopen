@@ -587,7 +587,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     return [
       _actionPadding(
-        _busy
+        _busy || (_charge?.pending ?? false)
             ? const SizedBox(
                 height: AppSizes.primaryButtonHeight,
                 child: Center(child: CupertinoActivityIndicator()),
