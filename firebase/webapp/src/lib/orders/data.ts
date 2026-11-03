@@ -105,7 +105,7 @@ export async function companyHasOrders(ctx: ListContext): Promise<boolean> {
       const body = await api<ApiList | unknown[]>('/v1/app/orders?limit=1', { raw: true })
       return (Array.isArray(body) ? body : (body.data ?? [])).length > 0
     }
-    const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+    const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
     const filters = ctx.seesAll ? [] : [where('createdBy.id', '==', ctx.uid)]
     const snapshot = await getDocs(query(collection(db, 'companies', ctx.companyId, 'orders'), ...filters, limit(1)))
     return !snapshot.empty
@@ -187,6 +187,8 @@ export function watchOrder(ctx: ListContext, id: string, onState: (state: Detail
     stop = onSnapshot(
       doc(db, 'companies', ctx.companyId, 'orders', id),
       (snapshot) => {
+        // A miss in this browser's cache is not "deleted": wait for the server (or the read after the timeout).
+        if (!snapshot.exists() && snapshot.metadata.fromCache) return
         answered = true
         clearTimeout(timer)
         if (!snapshot.exists()) {

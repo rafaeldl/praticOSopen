@@ -1,7 +1,7 @@
 // Reference lists for the order screens: customers, devices, catalog and team.
 // Read once per company and kept in memory (no money in them except catalog
 // prices, which only show for who has viewPrices).
-import { authClient, firestoreClient } from '@/lib/firebase'
+import { authClient, firestoreLite } from '@/lib/firebase'
 import { can, session } from '@/lib/session'
 import { matchesWords } from '@/lib/text'
 
@@ -38,7 +38,7 @@ async function readAll<T>(collectionName: string, map: (id: string, data: Record
   let promise = cache.get(key) as Promise<T[]> | undefined
   if (!promise) {
     promise = (async () => {
-      const [db, { collection, getDocs, limit, query }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+      const [db, { collection, getDocs, limit, query }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
       const snapshot = await getDocs(query(collection(db, 'companies', companyId, collectionName), limit(max)))
       return snapshot.docs.map((doc) => map(doc.id, doc.data())).filter((item): item is T => item !== null)
     })()

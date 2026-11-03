@@ -571,6 +571,16 @@ test('R4: consultor vê o link aberto só para ler; Receber não fica azul e avi
   await expect(dialog(page, 'Receber')).toContainText('A cobrança aberta se ajusta sozinha, sem avisar Cliente 09.')
 })
 
+test('R4 com o canal ao vivo travado: o link aberto aparece mesmo assim (leitura avulsa)', async ({ page }) => {
+  const order = await makeOrder('consultant', { customer: { id: 'customer-9', name: 'Cliente 09' }, status: 'done', total: 60, paidAmount: 0 })
+  await writeDoc(`orders/${order.id}/charges/open1`, { status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single', invoiceUrl: 'https://sandbox.asaas.com/i/open1', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
+  await page.route('**/google.firestore.v1.Firestore/Listen/**', () => {})
+  await login(page, 'consultant', `orders?order=${order.id}`)
+  const card = panel(page).getByTestId('order-charge')
+  await expect(card.getByTestId('charge-state')).toHaveText('Esperando Cliente 09 pagar', { timeout: 20_000 })
+  await expect(panel(page).getByTestId('next-step')).not.toHaveClass(/btn--primary/)
+})
+
 test('R5: prévia do Receber: "Ficam R$ X" e "Quita a OS" (pay.widget.sheet)', async ({ page }) => {
   const order = await done({ id: 'customer-10', name: 'Cliente 10' }, 50)
   await openOrder(page, 'admin', order.id)

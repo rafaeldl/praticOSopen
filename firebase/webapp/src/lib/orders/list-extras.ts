@@ -5,7 +5,7 @@ import { shallowRef } from 'vue'
 import { t } from '@/i18n'
 import { registerSearcher, type Command } from '@/lib/commands'
 import { loadCatalog, loadCustomers, loadDevices, type Customer } from './catalog'
-import { firestoreClient } from '@/lib/firebase'
+import { firestoreLite } from '@/lib/firebase'
 import { roundMoney } from '@/lib/rules/order-rules'
 import type { ListContext } from './data'
 import { deviceSummary, exactFirst, matchesSearch, normalizeOrder, remainingOnRow, type Order } from './model'
@@ -18,7 +18,7 @@ import { orderShort, statusText } from './text'
 async function unpaidOrders(ctx: ListContext): Promise<Order[] | null> {
   if (!ctx.showsMoney) return null
   try {
-    const [db, { collection, getDocs, limit, orderBy, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+    const [db, { collection, getDocs, limit, orderBy, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
     const filters = [where('payment', '==', 'unpaid'), ...(ctx.seesAll ? [] : [where('createdBy.id', '==', ctx.uid)])]
     const snapshot = await getDocs(query(collection(db, 'companies', ctx.companyId, 'orders'), ...filters, orderBy('createdAt', 'desc'), limit(200)))
     return snapshot.docs.map((doc) => normalizeOrder(doc.id, doc.data(), true)).filter((order) => remainingOnRow(order) !== null)

@@ -6,7 +6,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 const listeners: { next: (snap: unknown) => void; error: (e: unknown) => void; stopped: boolean }[] = []
 let settingsFailures = 0
 
-vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(async () => ({})) }))
+const liteGetDocs = vi.fn(async () => snapOf(['open1']))
+vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(async () => ({})), firestoreLite: vi.fn(async () => ({})) }))
+// One-off reads go through the REST build: the full client's getDoc waits on the live channel, which can stall.
+vi.mock('firebase/firestore/lite', () => ({
+  collection: vi.fn(() => ({})),
+  doc: vi.fn(() => ({})),
+  getDocs: (...args: unknown[]) => liteGetDocs(...(args as [])),
+  getDoc: vi.fn(async () => {
+    if (settingsFailures-- > 0) throw new Error('unavailable')
+    return { data: () => ({ asaasEnabled: true, asaasConnected: true }) }
+  }),
+}))
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(() => ({})),
   doc: vi.fn(() => ({})),
@@ -15,20 +26,38 @@ vi.mock('firebase/firestore', () => ({
     listeners.push(entry)
     return () => (entry.stopped = true)
   }),
-  getDoc: vi.fn(async () => {
-    if (settingsFailures-- > 0) throw new Error('unavailable')
-    return { data: () => ({ asaasEnabled: true, asaasConnected: true }) }
-  }),
+  getDoc: vi.fn(async () => new Promise(() => {})),
 }))
 
 import { paymentSettings, watchOrderCharges } from '../src/lib/receive/data'
 
-const snapOf = (ids: string[]) => ({ docs: ids.map((id) => ({ id, data: () => ({ status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single' }) })) })
+function snapOf(ids: string[]) {
+  return { docs: ids.map((id) => ({ id, data: () => ({ status: 'pending', value: 60, dueDate: '2099-01-01', mode: 'single' }) })) }
+}
 
 afterEach(() => {
   listeners.length = 0
   settingsFailures = 0
   vi.useRealTimers()
+})
+
+describe('canal ao vivo travado (CI do #521, R4)', () => {
+  it('cobranças: a cópia vazia do disco não é "sem cobrança"; sem resposta do canal, lê uma vez pelo REST', async () => {
+    vi.useFakeTimers()
+    const seen: string[][] = []
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)))
+    listeners[0]!.next({ docs: [], metadata: { fromCache: true } })
+    expect(seen).toEqual([])
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(seen).toEqual([['open1']])
+    // The channel answering later still updates.
+    listeners[0]!.next({ ...snapOf([]), metadata: { fromCache: false } })
+    expect(seen).toEqual([['open1'], []])
+  })
+
+  it('settings/payments não espera o canal (o getDoc do cliente completo fica preso nele)', async () => {
+    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true })
+  })
 })
 
 describe('leituras do Receber que falham uma vez', () => {

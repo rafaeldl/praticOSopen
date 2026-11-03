@@ -1,7 +1,8 @@
 // Money and links always through the API (WEB_API.md): payments, receipts,
 // charges and the customer link. Firestore only reads what the server writes
+// (one-off reads through the REST build, live ones through the full client)
 // and the rules let this person read (charges, settings/payments, unpaid orders).
-import { firestoreClient } from '@/lib/firebase'
+import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
 import { api, session } from '@/lib/session'
 import { chargeOf, receivableOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
@@ -122,7 +123,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {}): Promise<PaymentSettings> {
   for (let attempt = 0; ; attempt++) {
     try {
-      const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+      // REST build: the full client's getDoc waits on the live channel, which can stall (CI of #521, R4).
+      const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
       const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
       const data = (snap.data() ?? {}) as Record<string, unknown>
       return { ready: data.asaasEnabled === true && data.asaasConnected === true }
@@ -138,22 +140,48 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
   }
 }
 
+/** How long the live channel may stay silent before the charges are read once instead (as watchOrder, B6). */
+export const CHARGES_LIVE_TIMEOUT_MS = 4000
+
 /**
  * Charges of one order, live (owner, admin, manager and the consultant read
  * them, #514). A listener that fails is opened again a few times before the
  * screen reads "no charge": an open link that does not show lets someone
  * receive in blue over it (CI of #520, R4).
+ *
+ * The first answer must come from the server: an empty copy from this
+ * browser's cache is not "no charge". If the live channel says nothing in
+ * CHARGES_LIVE_TIMEOUT_MS (a stalled channel was the R4 failure in CI), the
+ * charges are read once through the REST build and the channel keeps trying.
  */
 export async function watchOrderCharges(orderId: string, onCharges: (charges: Charge[]) => void, { retries = 3, wait = 800 }: ReadRetry = {}): Promise<() => void> {
   const [db, { collection, onSnapshot }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-  const ref = collection(db, 'companies', session.companyId as string, 'orders', orderId, 'charges')
+  const path = ['companies', session.companyId as string, 'orders', orderId, 'charges'] as const
+  const ref = collection(db, ...path)
   let stopped = false
+  let answered = false
   let stop: () => void = () => undefined
   let timer: ReturnType<typeof setTimeout> | undefined
+  const fallback = setTimeout(async () => {
+    if (stopped || answered) return
+    try {
+      const [lite, { collection: liteCollection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+      const snap = await getDocs(liteCollection(lite, ...path))
+      if (!stopped && !answered) onCharges(snap.docs.map((d) => chargeOf(d.id, d.data())))
+    } catch (error) {
+      console.warn('receive: charges not read', error)
+      if (!stopped && !answered) onCharges([])
+    }
+  }, CHARGES_LIVE_TIMEOUT_MS)
   const listen = (attempt: number) => {
     stop = onSnapshot(
       ref,
-      (snap) => onCharges(snap.docs.map((d) => chargeOf(d.id, d.data()))),
+      (snap) => {
+        if (snap.metadata?.fromCache && !snap.docs.length) return
+        answered = true
+        clearTimeout(fallback)
+        onCharges(snap.docs.map((d) => chargeOf(d.id, d.data())))
+      },
       (error) => {
         if (stopped) return
         if (attempt < retries) {
@@ -161,6 +189,8 @@ export async function watchOrderCharges(orderId: string, onCharges: (charges: Ch
           return
         }
         console.warn('receive: charges not read', error)
+        answered = true
+        clearTimeout(fallback)
         onCharges([])
       },
     )
@@ -169,13 +199,14 @@ export async function watchOrderCharges(orderId: string, onCharges: (charges: Ch
   return () => {
     stopped = true
     clearTimeout(timer)
+    clearTimeout(fallback)
     stop()
   }
 }
 
 /** Charges over several orders of a customer (one equality filter, no index). */
 export async function customerCharges(customerId: string): Promise<Charge[]> {
-  const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snap = await getDocs(query(collection(db, 'companies', session.companyId as string, 'customerCharges'), where('customer.id', '==', customerId)))
   return snap.docs.map((d) => chargeOf(d.id, d.data()))
 }
@@ -192,7 +223,7 @@ export async function customerCharges(customerId: string): Promise<Charge[]> {
  * Only financial roles reach it, and they read every order.
  */
 export async function receivableOrders(): Promise<{ orders: Order[]; truncated: boolean }> {
-  const [db, { collection, getDocs, limit, orderBy, query, startAfter, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const [db, { collection, getDocs, limit, orderBy, query, startAfter, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const PAGE = 500
   const MAX = 20000
   const base = [where('payment', '==', 'unpaid'), orderBy('createdAt', 'desc')] as const
@@ -220,7 +251,7 @@ export async function ordersForPrint(ids: readonly string[], showsMoney: boolean
     const rows = await Promise.all(ids.map((id) => api<Record<string, unknown>>(order(id))))
     return rows.map((raw, i) => normalizeOrder(ids[i] as string, raw, false))
   }
-  const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snaps = await Promise.all(ids.map((id) => getDoc(doc(db, 'companies', session.companyId as string, 'orders', id))))
   return snaps.filter((s) => s.exists()).map((s) => normalizeOrder(s.id, s.data() as Record<string, unknown>, true))
 }
