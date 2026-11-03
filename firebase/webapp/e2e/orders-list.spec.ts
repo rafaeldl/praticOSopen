@@ -161,6 +161,8 @@ test('lote: mudar a situação de duas OS de uma vez', async ({ page }) => {
   await expect(batch).toContainText('2 selecionadas')
   await batch.getByRole('button', { name: 'Mudar a situação' }).click()
   await page.getByRole('dialog', { name: 'Qual a situação?' }).getByRole('button', { name: 'Na oficina' }).click()
+  // Asks first, with the count (home.batch.status).
+  await page.getByRole('dialog', { name: 'Mudar 2 OS para Na oficina?' }).getByRole('button', { name: 'Mudar 2 OS' }).click()
   await expect(page.locator('.toast')).toContainText('2 atualizadas')
   await expect(row(page, a.number)).toContainText('Na oficina')
   await expect(row(page, b.number)).toContainText('Na oficina')

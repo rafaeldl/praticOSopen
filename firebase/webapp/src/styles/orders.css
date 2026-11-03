@@ -214,3 +214,10 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .next-visit-label { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 0; }
 .next-visit p { margin: 0; overflow-wrap: anywhere; }
 .visit-time { display: block; font-weight: 700; }
+
+/* Batch: confirmation list, charges per customer, the assistant's plan (home.batch.*, order.ai.batch). */
+.batch-lines { list-style: none; margin: 0; padding: 0; }
+.batch-send { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.batchbar .ai, .ai-plan-row .ai, .layer-title .ai { color: var(--color-accent); }
+.ai-plan-row { display: grid; gap: 0.2rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
+.ai-plan-item { padding-left: 0.25rem; }
