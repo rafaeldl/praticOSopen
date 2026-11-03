@@ -102,6 +102,46 @@ def draw_line(draw, line, f, cx, y):
         x += draw.textlength(w, font=f) + space
 
 
+def is_ink(row):
+    """A row with content: pixels that stand out from the row's main color."""
+    vals = row[::3]
+    main = max(set(vals), key=vals.count)
+    return sum(1 for v in vals if abs(v - main) > 5) > 3
+
+
+def trim_top(shot):
+    """Drops the empty band above the app's top buttons.
+
+    The captures come from the Flutter view, so there is no status bar,
+    only blank space. A fixed cut used to slice through the Back and
+    "..." buttons. Sheets (Nova OS) start under a dark band: cut at the
+    sheet and paint its corners with the sheet color.
+    """
+    shot = shot.convert('RGB')
+    w, h = shot.size
+    gray = shot.convert('L')
+    px = gray.load()
+    limit = int(h * 0.12)
+    edge = int(w * 0.03)
+
+    if px[w // 2, 0] < 60:
+        top = next((y for y in range(limit) if px[edge, y] > 200), 0)
+        shot = shot.crop((0, top, w, h))
+        fill = shot.getpixel((edge, 5))
+        rgb = shot.load()
+        radius = int(w * 0.1)
+        for y in range(radius):
+            for x in list(range(radius)) + list(range(w - radius, w)):
+                if sum(rgb[x, y]) < 300:
+                    rgb[x, y] = fill
+        return shot
+
+    rows = (list(gray.crop((0, y, w, y + 1)).getdata()) for y in range(limit))
+    first = next((y for y, row in enumerate(rows) if is_ink(row)), 0)
+    top = max(0, first - int(h * 0.012))
+    return shot.crop((0, top, w, h))
+
+
 def frame(shot, caption, size):
     W, H = size
     canvas = Image.new('RGB', size, BLUE)
@@ -117,8 +157,7 @@ def frame(shot, caption, size):
 
     # Screenshot: 84% of the width, starts under the text, runs off the
     # bottom edge.
-    # Drop the status bar (and the dark band behind sheets).
-    shot = shot.crop((0, int(shot.height * 0.072), shot.width, shot.height))
+    shot = trim_top(shot)
     sw = int(W * 0.84)
     sh = int(shot.height * sw / shot.width)
     shot = shot.convert('RGB').resize((sw, sh), Image.LANCZOS)
