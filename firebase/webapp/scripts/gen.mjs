@@ -51,6 +51,8 @@ const FEATURES = {
   // Cadastros: customers, devices and the catalog share one chunk (src/i18n/index.ts stays as is).
   customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
   agenda: ['src/components/agenda', 'src/views/agenda'],
+  // Equipe, empresa, plano, conta e integrações (Configurações and what opens from it).
+  settings: ['src/components/settings', 'src/views/settings'],
 }
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
 const inFeature = (file, dirs) => dirs.some((dir) => file.startsWith(resolve(webapp, dir) + '/'))

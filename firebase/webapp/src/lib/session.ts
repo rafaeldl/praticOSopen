@@ -21,6 +21,8 @@ export interface CompanyProfile {
   country?: string
   segment?: string
   useFinancial?: boolean
+  /** Device control (Configurações shows the devices list only with it on). */
+  useDeviceManagement?: boolean
 }
 
 export interface SessionState {
