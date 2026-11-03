@@ -8,14 +8,18 @@
 //   - há `id` repetido;
 //   - `web_status` falta ou está fora de todo|in_progress|done|excepted;
 //   - `web_status: done` vem sem `e2e`;
-//   - `web_exception.status` é diferente de proposed ou approved.
+//   - `web_exception.status` é diferente de proposed ou approved;
+//   - o arquivo não abre num parser de YAML de verdade (js-yaml), ou as linhas
+//     que ele lê não batem com as da leitura por linha.
 //
 // Uso: node scripts/check_parity_matrix.mjs [--root <pasta>] [--matrix <arquivo>]
-// Sem dependências: lê o YAML por regex, então a matriz precisa manter o
-// formato de uma chave por linha.
+// As regras leem o YAML por regex (uma chave por linha). O js-yaml confere que o
+// arquivo é YAML válido: vem de node_modules na raiz (o workflow instala uma
+// versão fixa) ou de firebase/functions ou firebase/webapp.
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const WEB_STATUSES = ['todo', 'in_progress', 'done', 'excepted'];
@@ -102,6 +106,18 @@ function parseAppRoutes(text) {
   return routes;
 }
 
+/** js-yaml from the first place that has it, or null. */
+function loadYamlParser(root) {
+  for (const dir of [root, path.join(root, 'firebase', 'functions'), path.join(root, 'firebase', 'webapp')]) {
+    try {
+      return createRequire(path.join(dir, 'package.json'))('js-yaml');
+    } catch {
+      // Next place.
+    }
+  }
+  return null;
+}
+
 function check({ root, matrixPath }) {
   const text = fs.readFileSync(matrixPath, 'utf8');
   const rows = parseRows(text);
@@ -110,6 +126,23 @@ function check({ root, matrixPath }) {
     if (!problems.has(title)) problems.set(title, []);
     problems.get(title).push(detail);
   };
+
+  // A note with unescaped quotes passes the line reader and breaks every YAML reader.
+  const yaml = loadYamlParser(root);
+  if (!yaml) {
+    report('Parser de YAML ausente', 'instale js-yaml (npm install --no-save js-yaml@4.1.0) ou rode npm ci em firebase/functions');
+  } else {
+    try {
+      const parsed = yaml.load(text);
+      const ids = (parsed?.rows ?? []).map((row) => row?.id);
+      const lineIds = rows.map((row) => row.id);
+      if (ids.length !== lineIds.length || ids.some((id, index) => id !== lineIds[index])) {
+        report('Leitura por linha diferente do YAML', `${lineIds.length} linhas por linha, ${ids.length} no YAML`);
+      }
+    } catch (error) {
+      report('YAML inválido', String(error.message).split('\n')[0]);
+    }
+  }
 
   if (rows.length === 0) report('Matriz sem linhas', matrixPath);
 
