@@ -1,24 +1,26 @@
 # Matriz de paridade do app web do PraticOS.
 # Fonte: código do app em lib/ (RolePermissions, AuthorizationService, telas). Gerada na descoberta; manter à mão.
 # Uma linha por par (tela, ação). Todo arquivo de lib/screens/ tem ao menos uma linha.
+# Checagem: node scripts/check_parity_matrix.mjs (roda no CI em parity_check.yml).
 # Campos:
 #   id: estável e único. screen: arquivo. route: rota nomeada, quando há.
 #   roles: papéis reais (owner, admin, supervisor, manager, consultant, technician); 'owner' é gravado e lido como admin.
 #          Pseudo-papéis: anonymous (sem login), signed_in_no_company (primeiro acesso).
 #   segments: all ou lista de segmentos raiz de firebase/scripts/seed_segments.js.
-#   segment_variation: o que muda por segmento (labels:*, custom_fields:*, masks:*, status_labels, plate...).
+#   segment_variation: o que muda por segmento (labels:*, custom_fields:*, masks:*, status_labels, examples_by_segment...).
 #   states: empty, error, loading, offline, retry, refresh, pagination, denied, limit, saving, unsaved, not_found.
 #   feature_flags: useFinancial, useScheduling, useContracts, useDeviceManagement, fieldService (Company); nfseAvailable, nfseReady,
 #          asaasEnabled (settings/payments); aiEnabled (GET /v1/app/ai/status); planLimits:*, paidPlansEnabled; kWhatsAppBotEnabled (off).
 #   hardware: null ou lista (camera, gallery, file, mic, phone, maps, clipboard, share_sheet, share_intent, whatsapp, external_browser,
-#          pdf_generation, push, local_notifications, native_sign_in, iap, att, qr_display).
+#          pdf_generation, push, local_notifications, native_sign_in, iap, att, qr_display, contacts).
 #   data: coleções Firestore, storage:* e api:VERBO /caminho. web_status: todo | in_progress | done | excepted.
-#   web_exception: null ou {status: proposed, reason}. Só o Rafael aprova.
+#   web_exception: null ou {status: proposed|approved, reason}. Só o Rafael aprova.
+#   e2e: caminho do teste de ponta a ponta. Obrigatório com web_status: done.
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 version: 1
-source_commit: fd9e64da
-generated: 2026-10-31
+source_commit: e05d6414
+generated: 2026-11-02
 rows:
 - id: auth.login.view
   screen: lib/screens/login.dart
@@ -35,6 +37,7 @@ rows:
   data: ["firebase-auth"]
   web_status: todo
   web_exception: null
+  note: "Visual do site: azul-marinho, frase com destaque amarelo, faixa dos ramos (auth.login.hero) e painel inferior."
 - id: auth.login.apple
   screen: lib/screens/login.dart
   route: null
@@ -65,6 +68,7 @@ rows:
   data: ["firebase-auth", "users/{id}"]
   web_status: todo
   web_exception: null
+  note: "Erro do Google aparece na tela: a entrada agora devolve o resultado para quem chamou."
 - id: auth.login.open-email
   screen: lib/screens/login.dart
   route: null
@@ -80,6 +84,7 @@ rows:
   data: ["firebase-auth"]
   web_status: todo
   web_exception: null
+  note: "Registra evento de analytics ao abrir."
 - id: auth.login.privacy
   screen: lib/screens/login.dart
   route: null
@@ -92,6 +97,37 @@ rows:
   states: []
   feature_flags: []
   hardware: [external_browser]
+  data: []
+  web_status: todo
+  web_exception: null
+- id: auth.login.hero
+  screen: lib/screens/widgets/login_hero.dart
+  route: null
+  action: "Ver faixa de fotos dos ramos com a fala da OS sincronizada"
+  kind: component
+  roles: [anonymous]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "Respeita \"reduzir movimento\". Textos e valores são exemplos fixos do i18n."
+- id: auth.login.hero-pause
+  screen: lib/screens/widgets/login_hero.dart
+  route: null
+  action: "Pausar ou continuar a faixa com um toque"
+  kind: action
+  roles: [anonymous]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
   data: []
   web_status: todo
   web_exception: null
@@ -141,6 +177,22 @@ rows:
   data: ["firebase-auth"]
   web_status: todo
   web_exception: null
+- id: auth.email.new-account-hint
+  screen: lib/screens/email_login_screen.dart
+  route: null
+  action: "Ver aviso de que conta nova entra por Apple ou Google"
+  kind: action
+  roles: [anonymous]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "Não há cadastro por e-mail."
 - id: auth.gate.resolve
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -156,7 +208,7 @@ rows:
   data: ["users/{id}", "companies/{id}", "invites", "companies/{id}/orders"]
   web_status: todo
   web_exception: null
-  note: "Empresa sem segmento e empresa não encontrada têm mensagens próprias."
+  note: "Empresa sem segmento e empresa não encontrada têm mensagens próprias. Convites pendentes por e-mail e telefone, sem repetir nem vencidos; falha só na busca por telefone mantém os de e-mail, e erro geral segue para o primeiro acesso."
 - id: auth.gate.retry
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -187,6 +239,22 @@ rows:
   data: ["companies/{id}/notifications", "companies/{id}/orders"]
   web_status: todo
   web_exception: {status: proposed, reason: "Push nativo não existe no navegador da mesma forma; web usa aviso dentro do app e, se aprovado, Web Push."}
+- id: auth.gate.after-invite
+  screen: lib/screens/auth_wrapper.dart
+  route: null
+  action: "Entrar na empresa logo depois de aceitar o convite"
+  kind: flow
+  roles: [signed_in_no_company]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading]
+  feature_flags: []
+  hardware: null
+  data: ["users/{id}", "companies/{id}", "claims"]
+  web_status: todo
+  web_exception: null
+  note: "Recarrega usuário e empresa antes de voltar para o início; sem isso cai no primeiro acesso."
 - id: contract.generate.startup
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -431,7 +499,7 @@ rows:
   data: ["api:POST /v1/app/invites/{token}/accept", "claims"]
   web_status: todo
   web_exception: null
-  note: "Depois de aceitar precisa esperar a claim da empresa antes de ler dados."
+  note: "Depois de aceitar precisa esperar a claim da empresa antes de ler dados. No primeiro acesso, ver auth.gate.after-invite."
 - id: onboarding.invites.reject
   screen: lib/screens/onboarding/pending_invites_screen.dart
   route: null
@@ -800,6 +868,38 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+- id: home.filter.quotes
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver orçamentos sem resposta"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [empty, error, loading, retry, refresh]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Mais antigos primeiro. Filtra no cliente sobre as OS abertas."
+- id: home.filter.on-hold
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver OS paradas"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [empty, error, loading, retry, refresh]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Paradas há mais tempo primeiro. Filtra no cliente sobre as OS abertas."
 - id: home.filter.mine
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -821,7 +921,7 @@ rows:
   route: null
   action: "Ver concluídas"
   kind: action
-  roles: [owner, admin, supervisor, manager, consultant, technician]
+  roles: [owner, admin, supervisor, manager, consultant]
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
@@ -831,6 +931,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Técnico tem só Minhas, Paradas e Todas."
 - id: home.filter.all
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -846,14 +947,30 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+- id: home.filter.scroll
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Filtros em uma linha que rola de lado e mostra o selecionado"
+  kind: component
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "O espaçamento se ajusta para um filtro ficar cortado e indicar que há mais."
 - id: home.search.run
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
-  action: "Buscar OS, cliente ou aparelho"
+  action: "Buscar OS por número, cliente, situação, aparelho ou série"
   kind: action
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: ["labels:device"]
+  segment_variation: ["labels:device", "labels:device.serial"]
   i18n: [pt, en, es]
   states: [empty]
   feature_flags: []
@@ -861,7 +978,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
-  note: "Busca só nas OS já carregadas."
+  note: "Campo sempre visível. Ignora maiúscula e acento. Busca só nas OS já carregadas."
 - id: home.search.older
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -877,10 +994,11 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Não aparece em Concluídas, Orçamentos e Paradas nem com filtro de cliente."
 - id: home.summary.count
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
-  action: "Ver resumo em uma frase (em aberto, atrasadas, com você hoje)"
+  action: "Ver resumo em uma frase (em aberto, atrasadas, com você hoje, orçamentos esperando, paradas)"
   kind: action
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -938,6 +1056,37 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+- id: home.row.visit
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver dia da visita na linha da OS"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Só em OS não finalizada."
+- id: home.row.hold
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver motivo e dias parados na linha, em todos os filtros"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
 - id: home.empty.first-run
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -953,6 +1102,148 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+- id: home.maintenance.list
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver Manutenções chegando (até 7 dias ou atrasadas)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices", "companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Só nas listas de OS abertas, sem busca nem filtro de cliente. Atrasada em vermelho e fica até mudar. Tira aparelho com contrato ativo; técnico e consultor não leem contratos, então para eles esses aparelhos aparecem. Falha só esconde a seção."
+- id: home.maintenance.more
+  screen: lib/screens/menu_navigation/home_content.dart
+  route: null
+  action: "Ver mais manutenções (mostra 3 por padrão)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+- id: home.maintenance.open
+  screen: lib/screens/devices/maintenance_actions.dart
+  route: null
+  action: "Abrir ações da manutenção"
+  kind: sheet
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+  note: "Um item por vez e fecha uma vez só."
+- id: home.maintenance.call
+  screen: lib/screens/devices/maintenance_actions.dart
+  route: null
+  action: "Chamar o cliente no WhatsApp com a mensagem pronta"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: []
+  hardware: [whatsapp]
+  data: ["companies/{id}/customers"]
+  web_status: todo
+  web_exception: null
+  note: "Só com cliente na data. Lê o telefone na hora, cumprimenta pelo primeiro nome e nada é enviado sozinho. Sem número, aviso."
+- id: home.maintenance.new-order
+  screen: lib/screens/devices/maintenance_actions.dart
+  route: "/order"
+  action: "Abrir OS com cliente, aparelho e serviços da última concluída"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [unsaved]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  permission: createOrder
+  note: "Sem fotos. Sem histórico legível abre sem serviços. Nada salva antes do ✓."
+- id: home.maintenance.view-device
+  screen: lib/screens/devices/maintenance_actions.dart
+  route: "/device_detail"
+  action: "Ver o aparelho para mudar ou tirar a data"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+- id: home.courtesy.view
+  screen: lib/screens/widgets/courtesy_banner.dart
+  route: null
+  action: "Ver aviso do fim da cortesia, com uso do mês e plano sugerido"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["paidPlansEnabled"]
+  hardware: null
+  data: ["companies/{id}", "api:GET /v1/app/ai/status", "local"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Só com paidPlansEnabled, falso em kIsWeb; segue a decisão de cobrança na web."}
+  note: "Dos 15 dias finais em diante, só em cortesia. Tem prioridade sobre o banner do bot."
+- id: home.courtesy.plans
+  screen: lib/screens/widgets/courtesy_banner.dart
+  route: null
+  action: "Ver planos pelo aviso"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["paidPlansEnabled"]
+  hardware: [iap]
+  data: ["RevenueCat"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Só com paidPlansEnabled, falso em kIsWeb; segue a decisão de cobrança na web."}
+- id: home.courtesy.dismiss
+  screen: lib/screens/widgets/courtesy_banner.dart
+  route: null
+  action: "Agora não (esconde até os 3 dias finais ou nova data)"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["paidPlansEnabled"]
+  hardware: null
+  data: ["local"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Só com paidPlansEnabled, falso em kIsWeb; segue a decisão de cobrança na web."}
+  note: "Guardado no aparelho, por empresa."
 - id: home.banner.whatsapp
   screen: lib/screens/widgets/whatsapp_setup_banner.dart
   route: null
@@ -971,7 +1262,7 @@ rows:
 - id: home.rules.groups
   screen: lib/screens/menu_navigation/home_groups.dart
   route: null
-  action: "Agrupar e ordenar por urgência (atrasada, hoje, andamento, aprovação, aprovada)"
+  action: "Agrupar por urgência, separar orçamentos e paradas e buscar sem acento"
   kind: logic
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -1017,7 +1308,7 @@ rows:
 - id: order.route.new
   screen: lib/screens/order/order_route.dart
   route: null
-  action: "Abrir folha de nova OS (também com cliente, repetir ou preenchimento)"
+  action: "Abrir folha de nova OS (com cliente, repetir, preenchimento, serviços ou já ouvindo)"
   kind: flow
   roles: [owner, admin, supervisor, consultant, technician]
   segments: all
@@ -1030,6 +1321,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: createOrder
+  note: "Ouvindo: vem de order.ai.intro-try. Preenchimento traz cliente, aparelhos e serviços. Depois do ✓ roda order.new.after-save sem segurar o retorno."
 - id: order.new.pick-customer
   screen: lib/screens/order/order_screen_v2.dart
   route: "/customer_list"
@@ -1085,7 +1377,7 @@ rows:
   kind: action
   roles: [owner, admin, supervisor, consultant]
   segments: [automotive, bicycles]
-  segment_variation: ["custom_fields:service_order.observation"]
+  segment_variation: ["custom_fields:service_order.observation", "examples_by_segment"]
   i18n: [pt, en, es]
   states: []
   feature_flags: []
@@ -1152,14 +1444,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: [saving, error]
+  states: [saving, error, denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: createOrder
-  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\")."
+  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484)."
 - id: order.new.discard
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1176,6 +1468,55 @@ rows:
   web_status: todo
   web_exception: null
   permission: createOrder
+- id: order.new.after-save
+  screen: lib/screens/order/new_order_offers.dart
+  route: null
+  action: "Depois do ✓: próxima manutenção ou checklist, e então notificações"
+  kind: flow
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  permission: createOrder
+  note: "Uma interrupção por vez: quem aceita o checklist deixa as notificações para a próxima OS. Sem id em 3 s (offline), só o que não precisa dele."
+- id: order.offer.checklist
+  screen: lib/screens/order/new_order_offers.dart
+  route: "/order"
+  action: "Oferecer checklist de entrada"
+  kind: sheet
+  roles: [owner, admin, supervisor, consultant]
+  segments: [automotive]
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders/{id}/forms", "local"]
+  web_status: todo
+  web_exception: null
+  note: "Só com veículo, sem contrato e com canManageOrderForms. 3 \"Agora não\" seguidos param a oferta, contando no aparelho."
+- id: order.offer.notifications
+  screen: lib/screens/order/new_order_offers.dart
+  route: null
+  action: "Explicar e pedir permissão de notificação"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: [push]
+  data: ["users/{id}"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Alerta do iPhone; no navegador depende da decisão sobre Web Push."}
+  note: "Só no iPhone que ainda não respondeu; saiu do login. Vem depois de salvar a OS ou marcar visita em OS salva."
 - id: order.detail.view
   screen: lib/screens/order/order_screen_v2.dart
   route: "/order"
@@ -1191,7 +1532,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
-  note: "Consultor e técnico só em OS que criaram (createdBy.id)."
+  note: "Consultor e técnico só em OS que criaram (createdBy.id). OS parada mostra motivo, dias e observação, e o botão azul vira Retomar serviço."
 - id: order.detail.title
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1264,14 +1605,110 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [saving, error]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: executeOrder
-  note: "Avisa checklists pendentes antes de concluir."
+  note: "Com checklist pendente abre order.status.pending-checklist. Espera o servidor por até 3 s: se recusar, a situação volta e aparece aviso; sem resposta, segue. Depois vem device.maintenance.offer."
+- id: order.hold.mark
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Marcar como parada (link abaixo do botão azul ou menu)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, denied, offline]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments"]
+  web_status: todo
+  web_exception: null
+  note: "canChangeOrderHold: só approved e progress, com acesso à OS; consultor não. Mostra na hora e grava sem esperar; recusa desfaz e avisa. Grava comentário interno depois que o servidor aceita. Situação não muda."
+- id: order.hold.sheet
+  screen: lib/screens/order/order_hold_sheet.dart
+  route: null
+  action: "Escolher o motivo da parada"
+  kind: sheet
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "Motivos: peça, cliente, autorização, outro. Tocar no motivo já salva: dois toques desde a OS."
+- id: order.hold.note
+  screen: lib/screens/order/order_hold_sheet.dart
+  route: null
+  action: "Escrever observação da parada"
+  kind: action
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "Opcional, até 500 caracteres, antes do motivo."
+- id: order.hold.view
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Ver motivo, dias parados e observação"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Dias de calendário no fuso do aparelho. Marca fora de approved e progress é ignorada."
+- id: order.hold.resume
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Retomar serviço (botão azul ou menu)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, denied, offline]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments"]
+  web_status: todo
+  web_exception: null
+  note: "Tira a marca sem mudar a situação. Intervalo de 800 ms: toque duplo não conclui a OS. Grava comentário interno com os dias."
+- id: order.hold.clear
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Tirar a marca ao concluir, cancelar ou voltar a orçamento"
+  kind: logic
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "approved para progress mantém. Por API, bot ou app antigo quem limpa é o trigger. Servidor recusar a situação traz a marca de volta. Financeiro e métricas não leem a marca."
 - id: order.detail.next-receive
   screen: lib/screens/order/order_screen_v2.dart
   route: "/payment_management"
@@ -1335,7 +1772,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "getAvailableStatuses: varia por papel, situação atual e criador. Ver order.status.*."
+  note: "getAvailableStatuses: varia por papel, situação atual e criador. Ver order.status.*. Desde #484 o servidor aplica o mesmo fluxo por papel; recusa desfaz na tela."
 - id: order.status.approve
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1392,12 +1829,29 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [saving, error]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Mesmo fluxo de order.detail.next-finish."
+- id: order.status.pending-checklist
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Abrir o checklist que falta ao tentar concluir"
+  kind: action
+  roles: [owner, admin, supervisor, manager, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders/{id}/forms"]
+  web_status: todo
+  web_exception: null
+  note: "Bloqueia a conclusão; Agora não fica na OS."
 - id: order.status.cancel
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1413,7 +1867,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
-  note: "Consultor só a partir de quote."
+  note: "Consultor só a partir de quote. Tira a marca de parada."
 - id: order.status.reopen
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1453,14 +1907,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/services", "companies/{id}/products"]
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
 - id: order.item.edit-service
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1470,14 +1924,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
 - id: order.item.edit-product
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1487,14 +1941,14 @@ rows:
   segments: all
   segment_variation: ["labels:product"]
   i18n: [pt, en, es]
-  states: []
+  states: [denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
 - id: order.item.remove
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1504,14 +1958,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
 - id: order.item.undo-remove
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1521,13 +1975,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: []
+  states: [denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: editOrder
+  note: "Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484)."
 - id: order.item.by-device
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1576,6 +2031,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewPrices
+  note: "Peça sem total usa valor × quantidade, no total e no saldo."
 - id: order.customer.pick
   screen: lib/screens/order/order_screen_v2.dart
   route: "/customer_list"
@@ -1707,7 +2163,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Abre com a dica do lembrete (order.schedule.hint). Em OS salva, pede notificação na primeira vez."
 - id: order.schedule.clear
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1725,6 +2181,37 @@ rows:
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
+- id: order.schedule.hint
+  screen: lib/screens/order/reminder_hint.dart
+  route: null
+  action: "Ver dica do lembrete ao marcar a visita"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useScheduling"]
+  hardware: [local_notifications]
+  data: ["local"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
+  note: "Diz quando avisa, ou que o lembrete ou o celular está desligado. Na OS salva, só para horário futuro."
+- id: order.schedule.adjust
+  screen: lib/screens/order/reminder_hint.dart
+  route: null
+  action: "Ajustar o lembrete a partir da dica"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useScheduling"]
+  hardware: [local_notifications]
+  data: ["local"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
 - id: order.responsible.pick
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1800,13 +2287,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: [error]
+  states: [error, denied]
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
   permission: viewFinancialReports
+  note: "Regras exigem acesso ao financeiro (#484)."
 - id: order.comment.preview
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2110,7 +2598,7 @@ rows:
 - id: order.pdf.view
   screen: lib/screens/order/order_screen_v2.dart
   route: null
-  action: "Ver e compartilhar PDF"
+  action: "Gerar o PDF e abrir para ver"
   kind: action
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -2118,11 +2606,57 @@ rows:
   i18n: [pt, en, es]
   states: [loading, error]
   feature_flags: ["planLimits:pdfWatermark"]
-  hardware: [share_sheet, pdf_generation]
+  hardware: [pdf_generation]
   data: ["companies/{id}/orders", "companies/{id}", "companies/{id}/customers", "companies/{id}/orders/{id}/forms"]
   web_status: todo
   web_exception: null
-  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado."
+  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva."
+- id: order.pdf.viewer
+  screen: lib/screens/order/pdf_viewer_screen.dart
+  route: null
+  action: "Ver o PDF em tela cheia"
+  kind: screen
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["planLimits:pdfWatermark"]
+  hardware: [pdf_generation]
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "Mesma condição de order.pdf.view."
+- id: order.pdf.share
+  screen: lib/screens/order/pdf_viewer_screen.dart
+  route: null
+  action: "Compartilhar o PDF"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: [share_sheet]
+  data: []
+  web_status: todo
+  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
+- id: order.pdf.close
+  screen: lib/screens/order/pdf_viewer_screen.dart
+  route: null
+  action: "Fechar o PDF"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
 - id: order.nfse.issue-menu
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2180,13 +2714,13 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: [error]
+  states: [error, denied]
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
-  note: "canDeleteOrder: admin sempre; gerente e supervisor só quote; consultor e técnico só quote criada por eles."
+  note: "canDeleteOrder: admin sempre; gerente e supervisor só quote; consultor e técnico só quote criada por eles. Regras negam apagar quote com dinheiro recebido, salvo admin; o app não checa antes (#484)."
 - id: order.ai.status
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2202,6 +2736,7 @@ rows:
   data: ["api:GET /v1/app/ai/status"]
   web_status: todo
   web_exception: null
+  note: "Devolve também o uso do mês. Resposta guardada por 5 min por empresa e limpa depois de cada pedido."
 - id: order.ai.talk
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2385,10 +2920,102 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+- id: order.ai.intro
+  screen: lib/screens/order/assistant/ai_intro.dart
+  route: null
+  action: "Ver apresentação do assistente uma vez"
+  kind: sheet
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["api:GET /v1/app/ai/status", "local"]
+  web_status: todo
+  web_exception: null
+  note: "Em Início, depois da carga e só com a tela assentada. Uma vez por aparelho, com qualquer resposta."
+- id: order.ai.intro-try
+  screen: lib/screens/order/assistant/ai_intro.dart
+  route: "/order"
+  action: "Experimentar agora: abre a Nova OS já ouvindo"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["aiEnabled"]
+  hardware: [mic]
+  data: ["api:POST /v1/app/ai/order-assist"]
+  web_status: todo
+  web_exception: null
+  permission: createOrder
+- id: order.ai.intro-later
+  screen: lib/screens/order/assistant/ai_intro.dart
+  route: null
+  action: "Dispensar a apresentação"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["local"]
+  web_status: todo
+  web_exception: null
+- id: order.ai.uses-left
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Ver quantos pedidos restam, a partir de 80% do mês"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [limit]
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["api:POST /v1/app/ai/order-assist"]
+  web_status: todo
+  web_exception: null
+- id: order.ai.quota-plans
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Ver planos ou fechar o aviso quando os pedidos do mês acabam"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [limit]
+  feature_flags: ["aiEnabled", "paidPlansEnabled"]
+  hardware: [iap]
+  data: ["RevenueCat"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Compra é IAP e paidPlansEnabled=false em kIsWeb; na web o aviso só fecha, até decidir a cobrança web."}
+- id: order.ai.funnel
+  screen: lib/screens/order/order_screen_v2.dart
+  route: null
+  action: "Eventos do funil da IA (pedido, resultado, desfazer, OS salva, limite)"
+  kind: logic
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["analytics"]
+  web_status: todo
+  web_exception: null
 - id: order.services.bridge
   screen: lib/screens/order/order_screen_services.dart
   route: null
-  action: "Permissões e efeitos da OS (OrderPermissions, PDF, contrato, checklist, comentários)"
+  action: "Permissões e efeitos da OS (OrderPermissions, PDF, contrato, checklist, comentários, parada, histórico interno)"
   kind: logic
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -2424,7 +3051,7 @@ rows:
   kind: component
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: []
+  segment_variation: ["labels:device"]
   i18n: [pt, en, es]
   states: [loading]
   feature_flags: ["aiEnabled"]
@@ -2432,6 +3059,7 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+  note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha."
 - id: order.sheet.date
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -2447,6 +3075,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Fecha uma vez só e aceita rodapé. Também usada em device.detail.maintenance-edit, só com data."
 - id: order.sheet.address
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -2744,6 +3373,7 @@ rows:
   data: ["companies/{id}/orders/{id}/comments"]
   web_status: todo
   web_exception: null
+  note: "As regras exigem que o autor seja quem está logado."
 - id: order.comments.visibility
   screen: lib/screens/widgets/order_comments_widget.dart
   route: null
@@ -2759,6 +3389,7 @@ rows:
   data: ["companies/{id}/orders/{id}/comments"]
   web_status: todo
   web_exception: null
+  note: "Começa em só a equipe quando há escolha: mostrar ao cliente é decisão de quem escreve. Sem a chave, continua visível."
 - id: order.ai.speech-engine
   screen: lib/screens/order/assistant/speech_listener.dart
   route: null
@@ -3162,7 +3793,7 @@ rows:
 - id: order.ui.list-row
   screen: lib/screens/widgets/order_list_row.dart
   route: null
-  action: "Linha de OS em listas"
+  action: "Linha de OS em listas, com ponto e linha de OS parada"
   kind: component
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -3174,6 +3805,7 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+  note: "Atrasada e parada: ponto vermelho e a linha da parada."
 - id: order.ui.next-step
   screen: lib/screens/widgets/next_step_block.dart
   route: null
@@ -3250,7 +3882,7 @@ rows:
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
   web_status: todo
   web_exception: null
-  note: "Parcial ou total; cobrança aberta se ajusta sozinha. Offline bloqueado."
+  note: "Parcial ou total; cobrança aberta se ajusta sozinha. Offline bloqueado. Grava a forma de recebimento, quando informada."
 - id: pay.order.discount
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -3521,7 +4153,7 @@ rows:
   data: ["companies/{id}/orders", "companies/{id}/receipts", "api:POST /v1/app/customers/{id}/receipts"]
   web_status: todo
   web_exception: null
-  note: "Valores mudaram desde a abertura: pede conferência."
+  note: "Valores mudaram desde a abertura: pede conferência. Grava a forma de recebimento em cada transação e no recibo; a API aceita paymentMethod."
 - id: pay.customer.send-charge
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -3963,7 +4595,7 @@ rows:
 - id: pay.widget.row
   screen: lib/screens/payments/widgets/receive_payment_row.dart
   route: null
-  action: "Linha do pagamento (Pix, boleto, cartão, com comprovante)"
+  action: "Linha do pagamento (forma do Asaas ou a escolhida, com comprovante)"
   kind: component
   roles: [owner, admin, manager, consultant]
   segments: all
@@ -3978,7 +4610,7 @@ rows:
 - id: pay.widget.sheet
   screen: lib/screens/payments/widgets/receive_payment_sheet.dart
   route: null
-  action: "Folha: quanto, quando e comprovante"
+  action: "Folha: quanto, quando, como recebeu e comprovante"
   kind: sheet
   roles: [owner, admin, manager, consultant]
   segments: all
@@ -3990,6 +4622,22 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+- id: pay.widget.method
+  screen: lib/screens/payments/widgets/receive_payment_sheet.dart
+  route: null
+  action: "Escolher como recebeu (opcional)"
+  kind: picker
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders", "companies/{id}/receipts", "api:POST /v1/app/customers/{id}/receipts"]
+  web_status: todo
+  web_exception: null
+  note: "Pix, dinheiro, cartão ou outro. Pagamento antigo fica sem forma; valor desconhecido não quebra a leitura."
 - id: pay.widget.summary
   screen: lib/screens/payments/widgets/receive_summary.dart
   route: null
@@ -4488,6 +5136,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewFinancialReports
+  note: "Recarrega ao voltar para a aba: OS mudam em outras abas."
 - id: fin.tab.month
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -4556,7 +5205,7 @@ rows:
 - id: fin.tab.receivable
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
-  action: "Ver A receber por cliente e abrir a OS"
+  action: "Ver A receber: OS concluídas por cliente e OS em aberto com sinal"
   kind: action
   roles: [owner, admin, manager]
   segments: all
@@ -4569,6 +5218,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewFinancialReports
+  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento."
 - id: fin.tab.pick-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -4588,7 +5238,7 @@ rows:
 - id: fin.tab.progress
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
-  action: "Ver Em andamento com valor"
+  action: "Ver Em andamento sem nada recebido"
   kind: action
   roles: [owner, admin, manager]
   segments: all
@@ -4601,6 +5251,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewFinancialReports
+  note: "Cada OS conta em um lugar só: no primeiro pagamento vai para A receber."
 - id: fin.tab.received
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -5015,11 +5666,11 @@ rows:
 - id: customer.list.search
   screen: lib/screens/menu_navigation/home_customer_list.dart
   route: null
-  action: "Buscar por nome, telefone ou placa"
+  action: "Buscar por nome, telefone ou número de série"
   kind: action
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: ["plate"]
+  segment_variation: ["labels:device.serial"]
   i18n: [pt, en, es]
   states: [empty]
   feature_flags: []
@@ -5083,7 +5734,7 @@ rows:
   kind: picker
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: ["plate"]
+  segment_variation: ["labels:device.serial"]
   i18n: [pt, en, es]
   states: [empty, error]
   feature_flags: []
@@ -5108,6 +5759,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageCustomers
+  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe."
 - id: customer.detail.view
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"
@@ -5156,6 +5808,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewCustomers
+  note: "Número sai de customer.rules.whatsapp-number."
 - id: customer.detail.new-order
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/order"
@@ -5195,7 +5848,7 @@ rows:
   kind: action
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: ["labels:device", "plate"]
+  segment_variation: ["labels:device", "labels:device.serial"]
   i18n: [pt, en, es]
   states: []
   feature_flags: []
@@ -5333,6 +5986,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageCustomers
+  note: "Cliente novo com telefone passa por customer.form.duplicate-check. Nada salva sem o ✓."
 - id: customer.form.more
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -5349,6 +6003,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageCustomers
+  note: "Abre sozinho quando o contato traz e-mail."
 - id: customer.form.map
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -5365,6 +6020,137 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageCustomers
+- id: customer.form.pick-contact
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Escolher dos contatos do aparelho"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: [contacts]
+  data: []
+  web_status: todo
+  web_exception: {status: proposed, reason: "Seletor de contatos do sistema; no navegador a Contact Picker API tem suporte desigual, e digitar cobre a ação."}
+  permission: manageCustomers
+  note: "Só em cliente novo. Sem permissão de contatos. iOS traz telefones e e-mail; Android traz nome e o número escolhido. Sobrescreve nome e telefone; nada salva sem o ✓."
+- id: customer.form.pick-phone
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Escolher o número quando o contato tem vários"
+  kind: picker
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: [contacts]
+  data: []
+  web_status: todo
+  web_exception: {status: proposed, reason: "Só existe depois do seletor de contatos do sistema."}
+  permission: manageCustomers
+- id: customer.form.duplicate-check
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Avisar telefone já cadastrado ao salvar cliente novo"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/customers"]
+  web_status: todo
+  web_exception: null
+  permission: manageCustomers
+  note: "Nunca bloqueia: número pode ser compartilhado. Falha ou mais de 5 s ao ler a lista não impedem salvar. Editar não avisa."
+- id: customer.form.duplicate-open
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: "/customer_detail"
+  action: "Abrir o cliente que já tem o telefone"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/customers"]
+  web_status: todo
+  web_exception: null
+  permission: manageCustomers
+- id: customer.form.duplicate-save
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Salvar mesmo assim"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/customers"]
+  web_status: todo
+  web_exception: null
+  permission: manageCustomers
+- id: customer.rules.phone-match
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Comparar telefones em qualquer formato"
+  kind: logic
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: null
+  note: "phoneMatchKey: número do WhatsApp e, no Brasil, sem o nono dígito."
+- id: customer.rules.whatsapp-number
+  screen: lib/screens/customers/customer_detail_screen.dart
+  route: null
+  action: "Regra única do número do wa.me"
+  kind: logic
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}"]
+  web_status: todo
+  web_exception: null
+  note: "whatsappNumber: com + mantém o país; sem +, usa o país da empresa (Brasil por padrão); inválido volta só com dígitos, salvo celular antigo do Brasil."
+- id: share-in.contact
+  screen: lib/screens/customers/customer_form_screen.dart
+  route: null
+  action: "Receber contato de outro app e abrir cliente novo preenchido"
+  kind: flow
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, denied]
+  feature_flags: []
+  hardware: [share_intent]
+  data: ["companies/{id}/customers"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Share intent do aparelho; na web digita o cliente."}
+  permission: manageCustomers
+  note: "Lê .vcf; com vários contatos usa o primeiro e avisa. Sem permissão ou arquivo ilegível, alerta. A cópia do arquivo é apagada depois."
 - id: device.list.view
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -5372,7 +6158,7 @@ rows:
   kind: screen
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
-  segment_variation: ["labels:device", "plate"]
+  segment_variation: ["labels:device", "labels:device.serial"]
   i18n: [pt, en, es]
   states: [empty, error, loading, retry]
   feature_flags: ["useDeviceManagement"]
@@ -5414,6 +6200,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewDevices
+  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria."
 - id: device.list.create
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -5463,6 +6250,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewDevices
+  note: "Números do segmento são agrupados na leitura (98.000), menos ano; o valor salvo não muda."
 - id: device.detail.customer
   screen: lib/screens/devices/device_detail_screen.dart
   route: "/customer_detail"
@@ -5528,6 +6316,138 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewDevices
+- id: device.detail.maintenance
+  screen: lib/screens/devices/device_detail_screen.dart
+  route: null
+  action: "Ver a próxima manutenção do aparelho"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+  note: "Lê o aparelho na hora: o que veio pela rota pode não ter a data. Sem data, só quem edita aparelhos vê a linha."
+- id: device.detail.maintenance-edit
+  screen: lib/screens/devices/device_detail_screen.dart
+  route: null
+  action: "Definir ou mudar a próxima manutenção"
+  kind: action
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, offline]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+  permission: manageDevices
+  note: "Sugere daqui a 6 meses, só data futura. Grava só os campos da data, um aparelho por vez, e zera as recusas. Dia em texto AAAA-MM-DD."
+- id: device.detail.maintenance-remove
+  screen: lib/screens/devices/device_detail_screen.dart
+  route: null
+  action: "Tirar a próxima manutenção"
+  kind: action
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, offline]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+  permission: manageDevices
+- id: device.detail.maintenance-contract
+  screen: lib/screens/devices/device_detail_screen.dart
+  route: "/order"
+  action: "Ver a data do contrato e abrir a OS dele"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useContracts"]
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  web_exception: null
+  note: "Contrato ativo manda: não pede outra data."
+- id: device.maintenance.offer
+  screen: lib/screens/devices/next_maintenance_offer.dart
+  route: null
+  action: "Perguntar a próxima manutenção ao concluir a OS"
+  kind: picker
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices", "companies/{id}/orders", "local"]
+  web_status: todo
+  web_exception: null
+  permission: manageDevices
+  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída."
+- id: device.maintenance.answer
+  screen: lib/screens/devices/next_maintenance_offer.dart
+  route: null
+  action: "Escolher 3 meses, 6 meses ou 1 ano"
+  kind: action
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, offline]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices"]
+  web_status: todo
+  web_exception: null
+  permission: manageDevices
+  note: "A data vale para todos os aparelhos da OS e guarda cliente e serviço principal. Último dia do mês quando ele é mais curto."
+- id: device.maintenance.no-repeat
+  screen: lib/screens/devices/next_maintenance_offer.dart
+  route: null
+  action: "Não repetir"
+  kind: action
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/devices", "local"]
+  web_status: todo
+  web_exception: null
+  permission: manageDevices
+  note: "Tira só data cumprida por esta OS (atrasada ou nos próximos 7 dias). Voltar sem responder conta como recusa e não muda data."
+- id: device.maintenance.limit
+  screen: lib/screens/devices/next_maintenance_offer.dart
+  route: null
+  action: "Parar a pergunta depois de 3 recusas seguidas"
+  kind: logic
+  roles: [owner, admin, supervisor]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["local"]
+  web_status: todo
+  web_exception: null
+  note: "Conta por empresa, no aparelho; definir uma data zera."
 - id: device.detail.price
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -5594,6 +6514,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageDevices
+  note: "Salva com modelo ou série: a série ficou opcional."
 - id: device.form.more
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -5853,7 +6774,7 @@ rows:
   kind: sheet
   roles: [owner, admin]
   segments: all
-  segment_variation: ["custom_fields:service", "custom_fields:product"]
+  segment_variation: ["custom_fields:service", "custom_fields:product", "examples_by_segment"]
   i18n: [pt, en, es]
   states: [loading, unsaved]
   feature_flags: []
@@ -6045,7 +6966,7 @@ rows:
   kind: action
   roles: [owner, admin, supervisor]
   segments: all
-  segment_variation: []
+  segment_variation: ["examples_by_segment"]
   i18n: [pt, en, es]
   states: []
   feature_flags: []
@@ -6061,7 +6982,7 @@ rows:
   kind: sheet
   roles: [owner, admin, supervisor]
   segments: all
-  segment_variation: []
+  segment_variation: ["examples_by_segment"]
   i18n: [pt, en, es]
   states: []
   feature_flags: []
@@ -6649,6 +7570,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageUsers
+  note: "Número sai de customer.rules.whatsapp-number."
 - id: team.invite-share.copy
   screen: lib/screens/widgets/invite_share_sheet.dart
   route: null
@@ -6742,7 +7664,7 @@ rows:
   data: []
   web_status: todo
   web_exception: null
-  note: "Sem permissão: só depende de useContracts."
+  note: "Aparece com useContracts ou para quem tem manageCompany. Desligado, abre contract.off.view."
 - id: settings.open-company
   screen: lib/screens/menu_navigation/settings.dart
   route: null
@@ -7006,6 +7928,7 @@ rows:
   data: ["api:DELETE /v1/app/account"]
   web_status: todo
   web_exception: null
+  note: "Indicador e diálogos ficam no navegador raiz."
 - id: account.deletion.subscription
   screen: lib/screens/menu_navigation/more/account_deletion.dart
   route: null
@@ -7036,7 +7959,23 @@ rows:
   data: ["firebase-auth"]
   web_status: todo
   web_exception: null
-  note: "Firebase exige login recente."
+  note: "Firebase exige login recente. Usa Google, Apple ou senha e ignora provedor ligado, como telefone."
+- id: account.deletion.password
+  screen: lib/screens/menu_navigation/more/account_deletion.dart
+  route: null
+  action: "Pedir a senha para confirmar (conta de e-mail)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: []
+  hardware: null
+  data: ["firebase-auth"]
+  web_status: todo
+  web_exception: null
+  note: "Senha errada e excesso de tentativas têm mensagem própria."
 - id: profile.edit.save
   screen: lib/screens/user_profile_edit_screen.dart
   route: "/user_profile_edit"
@@ -7289,10 +8228,26 @@ rows:
   states: []
   feature_flags: ["paidPlansEnabled"]
   hardware: null
-  data: ["companies/{id}"]
+  data: ["companies/{id}", "api:GET /v1/app/ai/status"]
   web_status: todo
   web_exception: null
   note: "Com paidPlansEnabled=false só mostra uso sem limite."
+- id: plan.ai-usage
+  screen: lib/screens/menu_navigation/more/plan_screen.dart
+  route: null
+  action: "Ver uso do assistente no mês"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [limit]
+  feature_flags: ["aiEnabled"]
+  hardware: null
+  data: ["api:GET /v1/app/ai/status"]
+  web_status: todo
+  web_exception: null
+  note: "Primeira linha de uso, só com o assistente ligado. No limite mostra o bloco com Ver planos."
 - id: plan.open-limit
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -7383,6 +8338,7 @@ rows:
   data: ["local"]
   web_status: todo
   web_exception: {status: proposed, reason: "Lembretes \"valem só neste celular\"; no navegador só com Web Push."}
+  note: "O lembrete traz hora, OS, cliente e aparelho. OS nova agenda depois do ✓."
 - id: reminders.daily
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
   route: null
@@ -7428,6 +8384,7 @@ rows:
   data: ["local"]
   web_status: todo
   web_exception: {status: proposed, reason: "Local do aparelho."}
+  note: "Conta OS abertas há mais de 7 dias, com ou sem marca de parada."
 - id: reminders.language
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
   route: null
@@ -7491,6 +8448,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Vazio em ativos tem o botão Novo contrato."
 - id: contract.list.switch
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/contract_list"
@@ -7522,7 +8480,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: createOrder
-  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui."
+  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. A folha abre com o título Novo contrato."
 - id: contract.list.open
   screen: lib/screens/contracts/contract_list_screen.dart
   route: "/order"
@@ -7538,6 +8496,39 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: null
+- id: contract.off.view
+  screen: lib/screens/contracts/contracts_off_screen.dart
+  route: null
+  action: "Ver para que serve Contratos com a opção desligada"
+  kind: screen
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}"]
+  web_status: todo
+  web_exception: null
+  permission: manageCompany
+- id: contract.off.turn-on
+  screen: lib/screens/contracts/contracts_off_screen.dart
+  route: "/contract_list"
+  action: "Ligar Contratos"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}"]
+  web_status: todo
+  web_exception: null
+  permission: manageCompany
+  note: "Grava useContracts e abre a lista."
 - id: contract.title.label
   screen: lib/screens/contracts/contracts_title.dart
   route: null
@@ -7569,7 +8560,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: manageCompany
-  note: "Rota sem guarda; gate está na entrada."
+  note: "Vazio explica de onde vêm as avaliações."
 - id: ratings.open
   screen: lib/screens/ratings/ratings_screen.dart
   route: "/order"
@@ -7601,6 +8592,7 @@ rows:
   data: ["companies/{id}/notifications"]
   web_status: todo
   web_exception: null
+  note: "Vazio explica o que aparece ali. O pedido de permissão saiu do login: ver order.offer.notifications."
 - id: notifications.open
   screen: lib/screens/notifications/notification_list_screen.dart
   route: "/order"
@@ -7616,6 +8608,7 @@ rows:
   data: ["companies/{id}/notifications", "companies/{id}/orders"]
   web_status: todo
   web_exception: null
+  note: "Aviso de manutenção não tem OS: só abre o app, e a Início mostra a lista."
 - id: notifications.mark-all
   screen: lib/screens/notifications/notification_list_screen.dart
   route: null
@@ -7631,10 +8624,25 @@ rows:
   data: ["companies/{id}/notifications"]
   web_status: todo
   web_exception: null
+- id: notifications.empty-reminders
+  screen: lib/screens/notifications/notification_list_screen.dart
+  route: null
+  action: "Ajustar lembretes a partir do aviso vazio"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [empty]
+  feature_flags: []
+  hardware: [local_notifications]
+  data: ["local"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Lembretes são locais do aparelho; na web fica só a explicação."}
 - id: notifications.tile
   screen: lib/screens/notifications/notification_list_tile.dart
   route: null
-  action: "Texto do aviso e tempo relativo"
+  action: "Texto do aviso e tempo relativo, inclusive manutenção chegando"
   kind: component
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -7805,6 +8813,7 @@ rows:
   data: ["companies/{id}/orders"]
   web_status: todo
   web_exception: {status: proposed, reason: "Share intent do Android; web usa arrastar e soltar na OS."}
+  note: "Contato sozinho vai para share-in.contact; junto com fotos ou PDFs, ganha o arquivo."
 - id: share-in.new-order
   screen: lib/screens/share/which_order_sheet.dart
   route: null
@@ -7959,7 +8968,7 @@ rows:
 - id: ui.money-field
   screen: lib/screens/widgets/money_field.dart
   route: null
-  action: "Campo de dinheiro"
+  action: "Campo de dinheiro: lê o que foi digitado como valor (250 = 250,00; 250,5 = 250,50)"
   kind: component
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -7971,6 +8980,7 @@ rows:
   data: []
   web_status: todo
   web_exception: null
+  note: "Antes os dígitos eram centavos. Ponto ou vírgula no fim abre os centavos, seja qual for o teclado. Vale também para cobrança e folha de receber."
 - id: ui.more-fields-link
   screen: lib/screens/widgets/more_fields_link.dart
   route: null
