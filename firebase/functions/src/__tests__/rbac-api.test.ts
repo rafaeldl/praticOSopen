@@ -138,6 +138,7 @@ import integrationsRoutes from '../routes/v1/integrations.routes';
 import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
 import nfseRoutes from '../routes/v1/nfse.routes';
 import aiRoutes from '../routes/v1/ai.routes';
+import contractsRoutes from '../routes/v1/contracts.routes';
 import appPermissions from './rbac/app-permissions.json';
 import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
@@ -169,6 +170,7 @@ function seedTenants() {
     });
     seedOrders(cid);
   }
+  seed('config/contracts', { routeEnabled: true });
   for (const role of API_ROLES) {
     seed(`users/${UID[role]}`, {
       name: role,
@@ -223,6 +225,7 @@ function buildApp(): Express {
   app.use('/v1/app/payments/asaas', bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
   app.use('/v1/app/nfse', bearerAuth, resolveCompanyContext, nfseRoutes);
   app.use('/v1/app/ai', bearerAuth, resolveCompanyContext, aiRoutes);
+  app.use('/v1/app/contracts', bearerAuth, resolveCompanyContext, contractsRoutes);
   return app;
 }
 

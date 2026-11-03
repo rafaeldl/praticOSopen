@@ -312,6 +312,36 @@ export const scheduledMaintenanceNotices = onSchedule(
   }
 );
 
+import { generateAllDueOrders, isContractsJobEnabled } from './services/contract.service';
+
+/**
+ * Due recurring-contract orders, the same generation the app runs when it
+ * opens (docs/CONTRACTS_SERVER_JOB.md). Off unless config/contracts.jobEnabled
+ * is true. `now` is the scheduled time, so a daily contract is due again on
+ * the next run, and a retry generates nothing twice.
+ */
+export const scheduledContractOrders = onSchedule(
+  {
+    schedule: '0 2 * * *', // 02:00 America/Sao_Paulo, daily
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 3,
+    memory: '256MiB',
+    timeoutSeconds: 540,
+  },
+  async (event) => {
+    if (!(await isContractsJobEnabled())) {
+      console.log('[Scheduled] Contract orders skipped: config/contracts.jobEnabled is off.');
+      return;
+    }
+    const totals = await generateAllDueOrders(new Date(event.scheduleTime));
+    console.log(
+      `[Scheduled] Contract orders: companies=${totals.companies} generated=${totals.generated} ` +
+        `alreadyGenerated=${totals.alreadyGenerated} errors=${totals.errors}`,
+    );
+  }
+);
+
 // ============================================================================
 // AUTH BLOCKING FUNCTIONS
 // ============================================================================
@@ -430,6 +460,7 @@ import appFinanceRoutes from './routes/v1/app-finance.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
+import contractsRoutes from './routes/v1/contracts.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -650,6 +681,8 @@ app.use('/v1/app/nfse', ...appBearer, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', ...appBearer, aiRoutes);
 app.use('/v1/app/team', ...appBearer, teamRoutes);
+// Recurring contracts: due orders on demand, off unless config/contracts.routeEnabled (docs/CONTRACTS_SERVER_JOB.md)
+app.use('/v1/app/contracts', ...appBearer, contractsRoutes);
 // Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
 app.use('/v1/app/web-access', createWebAccessRouter({
   verifyIdToken: (token) => adminAuth.verifyIdToken(token),

@@ -57,6 +57,7 @@ const _covered = {
   'payment-status.json',
   'payment-transactions.json',
   'phone.json',
+  'plan-limits.json', // plan_limits_cases_test.dart
   'receipts.json',
   'round-money.json',
   'segment-labels.json',

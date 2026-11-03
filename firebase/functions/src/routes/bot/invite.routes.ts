@@ -10,6 +10,7 @@ import * as inviteService from '../../services/invite.service';
 import * as channelLinkService from '../../services/channel-link.service';
 import { validateInput, createInviteSchema, acceptInviteSchema } from '../../utils/validation.utils';
 import { maskTokenForLog } from '../../utils/log-redaction.utils';
+import { requirePlanCapacity } from '../../middleware/plan-limit.middleware';
 
 const router: Router = Router();
 
@@ -40,7 +41,7 @@ export function canInviteRole(inviterRole: string, inviteRole: string): boolean 
  * POST /api/bot/invite/create
  * Create a new invite code (admin/owner only)
  */
-router.post('/create', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/create', requireLinked, requirePlanCapacity('collaborator'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Check if user has permission to invite
     const role = req.userContext?.role;

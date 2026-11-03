@@ -226,6 +226,12 @@ export const API_CASES: ApiCase[] = [
     allow: FINANCIAL, permission: 'viewFinancialReports',
   },
 
+  {
+    id: 'contracts.generateDue', area: 'OS', title: 'gerar as OS de contrato vencidas',
+    method: 'post', path: '/v1/app/contracts/generate-due', body: {},
+    allow: ['owner', 'admin', 'supervisor', 'consultant', 'technician'], permission: 'createOrder',
+  },
+
   // ─── Link do cliente ───────────────────────────────────────────────────
   {
     id: 'share.create.others', area: 'Link do cliente', title: 'criar link de OS de outra pessoa',
