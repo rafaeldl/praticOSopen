@@ -55,6 +55,38 @@ describe('canal ao vivo travado (CI do #521, R4)', () => {
     expect(seen).toEqual([['open1'], []])
   })
 
+  it('cobranças: canal calado e leitura REST com erro dão erro, nunca lista vazia', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockRejectedValueOnce(new Error('unavailable'))
+    const seen: string[][] = []
+    let failed = 0
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { onFailed: () => failed++ })
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(seen).toEqual([])
+    expect(failed).toBe(1)
+  })
+
+  it('cobranças: a cópia do disco com dados aparece na hora, mas a leitura REST só para com a resposta do servidor', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockClear()
+    const seen: string[][] = []
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)))
+    listeners[0]!.next({ ...snapOf(['cached']), metadata: { fromCache: true } })
+    expect(seen).toEqual([['cached']])
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(liteGetDocs).toHaveBeenCalledTimes(1)
+    expect(seen).toEqual([['cached'], ['open1']])
+  })
+
+  it('cobranças: resposta do servidor antes do prazo cancela a leitura REST', async () => {
+    vi.useFakeTimers()
+    liteGetDocs.mockClear()
+    await watchOrderCharges('o1', () => undefined)
+    listeners[0]!.next({ ...snapOf([]), metadata: { fromCache: false } })
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(liteGetDocs).not.toHaveBeenCalled()
+  })
+
   it('settings/payments não espera o canal (o getDoc do cliente completo fica preso nele)', async () => {
     expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true })
   })
@@ -75,14 +107,16 @@ describe('leituras do Receber que falham uma vez', () => {
     expect(listeners[1]!.stopped).toBe(true)
   })
 
-  it('cobranças: depois das novas tentativas, a lista vazia (a tela some com a seção, como o app)', async () => {
+  it('cobranças: depois das novas tentativas, erro e nunca lista vazia (M1 do #518)', async () => {
     vi.useFakeTimers()
     const seen: string[][] = []
-    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { retries: 1, wait: 100 })
+    let failed = 0
+    await watchOrderCharges('o1', (list) => seen.push(list.map((c) => c.id)), { retries: 1, wait: 100, onFailed: () => failed++ })
     listeners[0]!.error(new Error('x'))
     await vi.advanceTimersByTimeAsync(100)
     listeners[1]!.error(new Error('x'))
-    expect(seen).toEqual([[]])
+    expect(seen).toEqual([])
+    expect(failed).toBe(1)
   })
 
   it('cobranças: parar durante a espera não abre outra leitura', async () => {

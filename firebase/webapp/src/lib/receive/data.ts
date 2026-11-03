@@ -143,43 +143,65 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
 /** How long the live channel may stay silent before the charges are read once instead (as watchOrder, B6). */
 export const CHARGES_LIVE_TIMEOUT_MS = 4000
 
+export interface ChargesWatch extends ReadRetry {
+  /**
+   * Neither the channel nor the REST read answered: the screen does not know
+   * whether there is an open link, so it shows the error and never offers
+   * Receber in blue (M1 of #518). Never an empty list instead.
+   */
+  onFailed?: () => void
+}
+
 /**
  * Charges of one order, live (owner, admin, manager and the consultant read
- * them, #514). A listener that fails is opened again a few times before the
- * screen reads "no charge": an open link that does not show lets someone
- * receive in blue over it (CI of #520, R4).
+ * them, #514). A listener that fails is opened again a few times; only then
+ * the screen hears `onFailed` (an open link that does not show lets someone
+ * receive in blue over it: CI of #520, R4).
  *
- * The first answer must come from the server: an empty copy from this
- * browser's cache is not "no charge". If the live channel says nothing in
- * CHARGES_LIVE_TIMEOUT_MS (a stalled channel was the R4 failure in CI), the
- * charges are read once through the REST build and the channel keeps trying.
+ * The server's answer is what counts. A copy from this browser's cache shows
+ * at once when it has charges, but only an answer from the server stops the
+ * REST read; an empty cached copy is not "no charge". If the server says
+ * nothing in CHARGES_LIVE_TIMEOUT_MS (a stalled channel was the R4 failure in
+ * CI), the charges are read once through the REST build, and the channel keeps trying.
  */
-export async function watchOrderCharges(orderId: string, onCharges: (charges: Charge[]) => void, { retries = 3, wait = 800 }: ReadRetry = {}): Promise<() => void> {
+export async function watchOrderCharges(
+  orderId: string,
+  onCharges: (charges: Charge[]) => void,
+  { retries = 3, wait = 800, onFailed = () => undefined }: ChargesWatch = {},
+): Promise<() => void> {
   const [db, { collection, onSnapshot }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   const path = ['companies', session.companyId as string, 'orders', orderId, 'charges'] as const
   const ref = collection(db, ...path)
   let stopped = false
-  let answered = false
+  /** The server answered, through the channel or the REST read. */
+  let known = false
+  let fromServer = false
   let stop: () => void = () => undefined
   let timer: ReturnType<typeof setTimeout> | undefined
   const fallback = setTimeout(async () => {
-    if (stopped || answered) return
+    if (stopped || fromServer) return
     try {
       const [lite, { collection: liteCollection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
       const snap = await getDocs(liteCollection(lite, ...path))
-      if (!stopped && !answered) onCharges(snap.docs.map((d) => chargeOf(d.id, d.data())))
+      if (stopped || fromServer) return
+      known = true
+      onCharges(snap.docs.map((d) => chargeOf(d.id, d.data())))
     } catch (error) {
       console.warn('receive: charges not read', error)
-      if (!stopped && !answered) onCharges([])
+      if (!stopped && !known) onFailed()
     }
   }, CHARGES_LIVE_TIMEOUT_MS)
   const listen = (attempt: number) => {
     stop = onSnapshot(
       ref,
       (snap) => {
-        if (snap.metadata?.fromCache && !snap.docs.length) return
-        answered = true
-        clearTimeout(fallback)
+        const cached = !!snap.metadata?.fromCache
+        if (cached && !snap.docs.length) return
+        if (!cached) {
+          fromServer = true
+          known = true
+          clearTimeout(fallback)
+        }
         onCharges(snap.docs.map((d) => chargeOf(d.id, d.data())))
       },
       (error) => {
@@ -189,9 +211,8 @@ export async function watchOrderCharges(orderId: string, onCharges: (charges: Ch
           return
         }
         console.warn('receive: charges not read', error)
-        answered = true
         clearTimeout(fallback)
-        onCharges([])
+        if (!known) onFailed()
       },
     )
   }

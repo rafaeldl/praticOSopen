@@ -427,5 +427,6 @@
   "web.agenda.block": "{time}, {customer}, {order} {number}, {status}",
   "web.shortcuts.agendaToday": "Voltar para hoje",
   "web.shortcuts.agendaStep": "Dia ou semana anterior e próxima",
-  "web.agenda.dayAt": "{day}, {time}"
+  "web.agenda.dayAt": "{day}, {time}",
+  "web.charge.loadError": "Não deu para ver se há link de pagamento aberto."
 }

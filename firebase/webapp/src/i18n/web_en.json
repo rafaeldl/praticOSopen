@@ -427,5 +427,6 @@
   "web.agenda.block": "{time}, {customer}, {order} {number}, {status}",
   "web.shortcuts.agendaToday": "Back to today",
   "web.shortcuts.agendaStep": "Previous and next day or week",
-  "web.agenda.dayAt": "{day}, {time}"
+  "web.agenda.dayAt": "{day}, {time}",
+  "web.charge.loadError": "Couldn't check for an open payment link."
 }
