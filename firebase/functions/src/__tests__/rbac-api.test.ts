@@ -131,6 +131,7 @@ import customerPaymentsRoutes from '../routes/v1/customer-payments.routes';
 import devicesRoutes from '../routes/v1/devices.routes';
 import appCustomersRoutes from '../routes/v1/app-customers.routes';
 import appDevicesRoutes from '../routes/v1/app-devices.routes';
+import { catalogRoutes } from '../routes/v1/app-catalog.routes';
 import appInviteRoutes from '../routes/v1/invite.routes';
 import integrationsRoutes from '../routes/v1/integrations.routes';
 import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
@@ -213,6 +214,8 @@ function buildApp(): Express {
   app.use('/v1/app/orders', bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
   app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
   app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, appDevicesRoutes, devicesRoutes);
+  app.use('/v1/app/services', bearerAuth, resolveCompanyContext, catalogRoutes('service'));
+  app.use('/v1/app/products', bearerAuth, resolveCompanyContext, catalogRoutes('product'));
   app.use('/v1/app/invites', bearerAuth, resolveCompanyContext, appInviteRoutes);
   app.use('/v1/app/integrations', bearerAuth, resolveCompanyContext, integrationsRoutes);
   app.use('/v1/app/payments/asaas', bearerAuth, resolveCompanyContext, asaasConnectionRoutes);

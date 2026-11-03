@@ -416,6 +416,45 @@ export const API_CASES: ApiCase[] = [
     allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
   },
 
+  // ─── Catálogo (web) ────────────────────────────────────────────────────
+  {
+    id: 'catalog.services.list', area: 'Catálogo', title: 'ver serviços',
+    method: 'get', path: '/v1/app/services', allow: ['owner', 'admin', 'supervisor', 'manager', 'consultant'], permission: 'viewServices',
+  },
+  {
+    id: 'catalog.products.list', area: 'Catálogo', title: 'ver produtos',
+    method: 'get', path: '/v1/app/products', allow: ['owner', 'admin', 'supervisor', 'manager', 'consultant'], permission: 'viewProducts',
+  },
+  {
+    id: 'catalog.services.create', area: 'Catálogo', title: 'cadastrar serviço',
+    method: 'post', path: '/v1/app/services', body: { name: 'Novo' }, allow: ADMINS, permission: 'manageServices',
+  },
+  {
+    id: 'catalog.products.create', area: 'Catálogo', title: 'cadastrar produto',
+    method: 'post', path: '/v1/app/products', body: { name: 'Novo' }, allow: ADMINS, permission: 'manageProducts',
+  },
+  {
+    id: 'catalog.services.price', area: 'Catálogo', title: 'mudar o preço do serviço (manageServices e editPrices)',
+    method: 'patch', path: '/v1/app/services/s1', body: { value: 90 }, allow: ADMINS, permission: 'manageServices',
+  },
+  {
+    id: 'catalog.products.delete', area: 'Catálogo', title: 'apagar produto',
+    method: 'delete', path: '/v1/app/products/p1', allow: ADMINS, permission: 'manageProducts',
+  },
+  {
+    id: 'catalog.services.import', area: 'Catálogo', title: 'importar serviços de planilha',
+    method: 'post', path: '/v1/app/services/import', body: { importId: 'imp-00000001', items: [{ name: 'Rita' }] }, allow: ADMINS, permission: 'manageServices',
+  },
+  {
+    id: 'catalog.services.prices', area: 'Catálogo', title: 'mudar preços em lote (manageServices e editPrices)',
+    method: 'post', path: '/v1/app/services/prices', body: { changes: [{ id: 's1', from: 80, to: 88 }] }, allow: ADMINS, permission: 'manageServices',
+  },
+  {
+    id: 'nofin.catalog.price', area: 'Sem valores', title: 'pôr preço no catálogo com valores desligados',
+    method: 'post', path: '/v1/app/services', body: { name: 'Novo', value: 10 }, company: 'nofin',
+    allow: [],
+  },
+
   // ─── Equipe ────────────────────────────────────────────────────────────
   {
     id: 'invites.create', area: 'Equipe', title: 'convidar colaborador',

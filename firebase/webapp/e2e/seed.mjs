@@ -62,6 +62,10 @@ async function seedSegments() {
       },
       { key: 'device.mileage', type: 'number', labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage', 'es-ES': 'Kilometraje' }, min: 0, max: 9999999, order: 1 },
       { key: 'device.fuel', type: 'select', labels: { 'pt-BR': 'Combustível', 'en-US': 'Fuel', 'es-ES': 'Combustible' }, options: ['Flex', 'Diesel'], order: 2 },
+      // Catalog (fatia 05): products named by the segment, and one segment field of a service.
+      label('product._entity', 'Peça', 'Part', 'Pieza'),
+      label('product._entity_plural', 'Peças', 'Parts', 'Piezas'),
+      { key: 'service.warranty', type: 'text', labels: { 'pt-BR': 'Garantia', 'en-US': 'Warranty', 'es-ES': 'Garantía' }, order: 1 },
     ],
   })
   await db.doc('segments/electronics').set({

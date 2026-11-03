@@ -1,0 +1,36 @@
+/* Catalog: list, editor and bulk price (fatia 05). Loaded with its screens,
+   out of the first download. Reuses the list of orders.css and customers.css. */
+
+/* Thumbnail: the item's photo or an icon by kind (the app's 40 px avatar). */
+.grid .c-thumb { width: 3.25rem; padding-right: 0; }
+.cat-thumb { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 6px; background: var(--color-paper-2); color: var(--color-muted); object-fit: cover; vertical-align: middle; }
+.cat-thumb--big { width: 3.5rem; height: 3.5rem; }
+.cat-table td { vertical-align: middle; }
+.cat-table .who { overflow-wrap: anywhere; }
+.cat-tip { padding: 0.75rem 0.6rem 1rem; }
+/* Services | Products wraps instead of pushing the page sideways at 200% text. */
+/* Big text in a narrow window: each kind keeps its width and goes to the next line,
+   instead of squeezing its text past the edge (CI: 326 > 320 at 200% in 320 px). */
+.cat-kinds { flex-wrap: wrap; max-width: 100%; }
+.cat-kinds button { flex: 0 0 auto; max-width: 100%; white-space: normal; text-align: left; }
+.toolbar .search-mini { max-width: 100%; }
+/* Narrow list or big text (320 px at 200%): the thumbnail goes and the price column takes only what it needs. */
+@container list (max-width: 34rem) {
+  .cat-table .c-thumb { display: none; }
+  .cat-table .c-money { width: auto; }
+  .cat-table td, .cat-table th { padding-inline: 0.4rem; }
+}
+
+.cat-photo { display: grid; gap: 0.35rem; }
+.cat-photo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.cat-photo-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.cat-photo-actions label.btn { cursor: pointer; }
+.cat-photo-actions label.btn:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+.cat-pct { max-width: 12rem; }
+.cat-preview { max-height: 40vh; overflow: auto; border-top: 2px solid var(--color-ink); }
+.cat-preview .grid th { background: var(--color-card); }
+.cat-preview td { overflow-wrap: anywhere; }
+
+.cat-default { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.cat-default .field-label { margin: 0; }

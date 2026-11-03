@@ -2,7 +2,7 @@ import { Server } from 'http';
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import request from 'supertest';
-import { API_CORS_OPTIONS, createAppLimiters } from './app-rate-limit.utils';
+import { API_CORS_OPTIONS, createAppLimiters, noStore } from './app-rate-limit.utils';
 
 /** bearerAuth stand-in: the user comes from the token, like the real one. */
 function fakeBearer(req: Request, _res: Response, next: NextFunction) {
@@ -62,5 +62,18 @@ describe('CORS', () => {
       .set('Access-Control-Request-Headers', 'authorization,x-company-id,content-type');
     expect(res.status).toBe(204);
     expect(res.headers['access-control-allow-headers'].toLowerCase()).toContain('x-company-id');
+  });
+});
+
+describe('noStore (revisão #520 B3)', () => {
+  it('respostas de /v1/app saem com Cache-Control: private, no-store, também as de erro', async () => {
+    const app = express();
+    app.use('/v1/app', noStore, (req: Request, res: Response) => {
+      if (req.path === '/fail') res.status(403).json({ success: false });
+      else res.json({ ok: true, value: 120 });
+    });
+    await new Promise<void>((resolve) => (server = app.listen(0, '127.0.0.1', () => resolve())));
+    expect((await request(server).get('/v1/app/services')).headers['cache-control']).toBe('private, no-store');
+    expect((await request(server).get('/v1/app/fail')).headers['cache-control']).toBe('private, no-store');
   });
 });
