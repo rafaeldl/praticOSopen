@@ -104,6 +104,8 @@ test('salvar sem cliente diz o que falta; sair com algo preenchido pergunta (ord
   await page.getByTestId('new-order').click()
   await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Serviço 1')
   await page.keyboard.press('Enter')
+  // The line is on screen (on a slow runner the catalog may still be loading: the Enter waits for it).
+  await expect(drawer(page).getByRole('list', { name: 'O que vai ser feito' })).toContainText('Serviço 1')
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(drawer(page).getByRole('alert')).toHaveText('Escolha o cliente para salvar.')
   await expect(page.getByRole('combobox', { name: 'Cliente' })).toBeFocused()

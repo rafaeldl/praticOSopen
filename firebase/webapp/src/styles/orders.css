@@ -27,6 +27,17 @@
   .workspace.has-panel > .panel, .board-wrap.has-panel > .panel { grid-column: 1 / -1; }
 }
 
+/* "…" menu held to its button (on phones it stays a sheet at the bottom). */
+.layer--menu { background: transparent; }
+.layer--menu .layer-box { position: fixed; width: min(19rem, calc(100vw - 1rem)); max-height: min(70vh, 34rem); border-radius: 8px; border: 1px solid var(--color-rule); }
+.layer--menu .layer-head { padding-bottom: 0; }
+.layer--menu .layer-title { font-size: 1rem; }
+@media (max-width: 40rem) {
+  .layer--menu { background: oklch(20% 0.05 255 / 0.42); align-items: flex-end; }
+  .layer--menu .layer-box { position: static; width: 100%; border-radius: 14px 14px 0 0; }
+}
+.comment-row select { min-width: 0; }
+
 /* Shared choices */
 .opts { display: grid; gap: 2px; }
 .opt { display: flex; align-items: center; gap: 0.55rem; width: 100%; min-height: 2.75rem; padding: 0.25rem 0.55rem; background: transparent; border: 0; border-radius: 6px; text-align: left; color: var(--color-ink); }
@@ -175,6 +186,16 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 @media (pointer: coarse) {
   .card-move, .opt { min-width: 2.75rem; min-height: 2.75rem; }
+}
+/* Low screens and 200% zoom: the header scrolls away with the list instead of eating the screen. */
+@media (max-height: 32rem) {
+  .main:has(> .workspace) { overflow: auto; }
+  .main > .workspace { flex: 1 0 auto; }
+  .main > .workspace > .list-pane { overflow: visible; }
+}
+/* Filters cut at the edge of a phone: a fade says there are more to the side. */
+@media (max-width: 40rem) {
+  .toolbar .chips { mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
 }
 @media (forced-colors: active) {
   .grid tbody tr.is-selected td:first-child { border-left: 3px solid Highlight; }

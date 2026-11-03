@@ -29,7 +29,7 @@ const props = defineProps<{
   /** The list is still loading: Enter typed meanwhile picks the first match when it arrives. */
   loading?: boolean
 }>()
-const emit = defineEmits<{ pick: [item: ComboboxItem, query: string]; cancel: [] }>()
+const emit = defineEmits<{ pick: [item: ComboboxItem, query: string]; cancel: []; next: [] }>()
 
 const query = ref('')
 const open = ref(false)
@@ -52,12 +52,25 @@ watch(query, (text) => {
   active.value = text || props.preselect ? 0 : -1
 })
 
-let pendingEnter = false
-watch(flat, (items) => {
-  if (pendingEnter && items[0] && (query.value || props.preselect)) {
-    pendingEnter = false
-    pick(items[0])
+// Enter typed while the list loads picks the first match when it arrives, even
+// if the field lost focus meanwhile (Ctrl+Enter blurs it): nothing typed is lost.
+const pendingEnter = ref(false)
+const firstMatch = computed(() => (pendingEnter.value || props.loading ? props.groups(query.value).flatMap((group) => group.items)[0] : undefined))
+watch([firstMatch, () => props.loading], ([item, loading]) => {
+  if (!pendingEnter.value) return
+  if (item && (query.value || props.preselect)) {
+    pendingEnter.value = false
+    pick(item)
+  } else if (!loading) {
+    // Loaded and nothing to pick for an empty field: the Enter goes on to the next field.
+    pendingEnter.value = false
+    if (!query.value) emit('next')
   }
+})
+
+// No suggestion any more (the customer has no device): an empty Enter must not pick the first of the list.
+watch(() => props.preselect, (on) => {
+  if (!on && !query.value) active.value = -1
 })
 
 function onFocus() {
@@ -67,6 +80,8 @@ function onFocus() {
 
 function pick(item: ComboboxItem) {
   emit('pick', item, query.value)
+  // The list stays closed over what was just added (it reopens on typing or arrows).
+  quiet = !!query.value
   query.value = ''
   active.value = -1
   open.value = false
@@ -95,7 +110,12 @@ function onKeydown(event: KeyboardEvent) {
     } else if (props.loading && (query.value || props.preselect)) {
       event.preventDefault()
       event.stopPropagation()
-      pendingEnter = true
+      pendingEnter.value = true
+    } else if (!query.value) {
+      // Nothing to pick and nothing typed: Enter goes on to the next field.
+      event.preventDefault()
+      event.stopPropagation()
+      emit('next')
     }
   } else if (event.key === 'Escape') {
     // First Esc only clears this field; the next one reaches the layer.
@@ -112,7 +132,7 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
-defineExpose({ focus: () => input.value?.focus() })
+defineExpose({ focus: () => input.value?.focus(), pending: () => query.value.trim() })
 </script>
 
 <template>
