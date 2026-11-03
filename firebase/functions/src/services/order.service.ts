@@ -346,7 +346,8 @@ export interface CatalogItemRef {
 
 export interface NewItemInput {
   kind: ItemKind;
-  catalog: CatalogItemRef;
+  /** Null: an item without catalog (`service`/`product` null, as the app saves it). */
+  catalog: CatalogItemRef | null;
   /** Own price (editPrices). Absent: the catalog price; null: no price. */
   value?: number | null;
   quantity?: number;
@@ -393,11 +394,13 @@ function checkDevice(order: Order, deviceId: string | null | undefined, options:
 /** A new line: catalog price unless an own value is given; null stays "sem valor". */
 export function buildLine(input: NewItemInput): OrderServiceItem | OrderProductItem {
   const { catalog } = input;
-  const value = input.value !== undefined ? input.value : isPriced(catalog.value) ? catalog.value : null;
-  const aggr = { id: catalog.id, name: catalog.name, value: isPriced(catalog.value) ? catalog.value : null, photo: catalog.photo ?? null };
+  const value = input.value !== undefined ? input.value : isPriced(catalog?.value) ? catalog?.value : null;
+  const aggr = catalog
+    ? { id: catalog.id, name: catalog.name, value: isPriced(catalog.value) ? catalog.value : null, photo: catalog.photo ?? null }
+    : null;
   const base = {
     id: uuidv4(),
-    description: input.description || catalog.name,
+    description: input.description?.trim() || catalog?.name || '',
     value: isPriced(value) ? roundMoney(value) : null,
     ...(input.deviceId ? { deviceId: input.deviceId } : {}),
   };
@@ -581,6 +584,12 @@ export async function addOrderProduct(
 // ============================================================================
 
 export interface CreateOrderInput {
+  /**
+   * Id the client generated for the order (idempotency). It becomes the
+   * document id: repeating it returns the order already created by the same
+   * user; created by someone else → 409 ORDER_ID_CONFLICT.
+   */
+  clientOrderId?: string;
   customerId: string;
   customer: CustomerAggr;
   deviceId?: string;
@@ -624,8 +633,20 @@ export async function createOrder(
   input: CreateOrderInput,
   createdBy: UserAggr,
   company: CompanyAggr
-): Promise<{ id: string; number: number; status: OrderStatus }> {
+): Promise<{ id: string; number: number; status: OrderStatus; existing?: boolean }> {
   const collection = getTenantCollection(companyId, 'orders');
+  const sameOrder = async (): Promise<{ id: string; number: number; status: OrderStatus; existing: true } | null> => {
+    if (!input.clientOrderId) return null;
+    const snap = await collection.doc(input.clientOrderId).get();
+    if (!snap.exists) return null;
+    const existing = snap.data() as Order;
+    if (existing.createdBy?.id !== createdBy.id) {
+      throw new OrderRuleError('ORDER_ID_CONFLICT', 409, 'Another order already has this id');
+    }
+    return { id: snap.id, number: existing.number, status: existing.status, existing: true };
+  };
+  const before = await sameOrder();
+  if (before) return before;
   const orderNumber = await getNextOrderNumber(companyId);
 
   const orderServices: OrderServiceItem[] = [];
@@ -690,6 +711,18 @@ export async function createOrder(
     updatedBy: createdBy,
   };
 
+  if (input.clientOrderId) {
+    try {
+      await collection.doc(input.clientOrderId).create(orderData);
+    } catch (error) {
+      // Created meanwhile by a repeated request (the number is left unused).
+      if ((error as { code?: unknown }).code !== 6) throw error;
+      const raced = await sameOrder();
+      if (raced) return raced;
+      throw error;
+    }
+    return { id: input.clientOrderId, number: orderNumber, status };
+  }
   const ref = await collection.add(orderData);
   return { id: ref.id, number: orderNumber, status };
 }
@@ -855,6 +888,23 @@ export function receiptDocument(
   };
 }
 
+/** Money in cents, so 0.1 + 0.2 compares equal to 0.3. */
+function cents(value: number): number {
+  return Math.round(roundMoney(value) * 100);
+}
+
+/**
+ * A payment never goes above what is left to receive (compared in cents).
+ * Refuses with 409 PAYMENT_EXCEEDS_BALANCE and the current balance. Only the
+ * app routes: Asaas payments that arrive are always recorded.
+ */
+export function assertPaymentWithinBalance(order: Pick<Order, 'total' | 'paidAmount'>, amount: number): void {
+  const remainingBalance = calculateRemainingBalance(order);
+  if (cents(amount) > cents(remainingBalance)) {
+    throw new OrderRuleError('PAYMENT_EXCEEDS_BALANCE', 409, 'Payment exceeds the remaining balance', { remainingBalance });
+  }
+}
+
 /**
  * Add a payment or discount to an order (inside a Firestore transaction,
  * so it never races with the Asaas webhook). A discount cannot pass the
@@ -899,6 +949,7 @@ export async function addPayment(
       };
     }
     if (type === 'payment' && options.paidAt) validatePaidAt(options.paidAt, order.createdAt);
+    if (type === 'payment') assertPaymentWithinBalance(order, amount);
 
     if (type === 'discount') {
       const remaining = calculateRemainingBalance(order);

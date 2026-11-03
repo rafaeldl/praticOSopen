@@ -43,10 +43,11 @@ Limite de taxa: 300 pedidos por minuto por usuário, contados depois de conferir
 3. **Total do servidor.** O cliente nunca manda o total da OS. Total = soma dos itens com preço − desconto, arredondado ao centavo, nunca abaixo de 0. Produto vale o `total` da linha quando existe, senão `value × quantity`.
 4. **Item sem preço.** `value: null` fica "sem valor" e fora do total. Nunca vira 0.
 5. **Pago / a pagar.** Segue o total novo. Orçamento e cancelada não têm situação de pagamento (`payment: null`). Quando a situação muda só porque o total mudou, o servidor marca `paymentSyncedAt`, e o gatilho da OS não emite nota "na hora em que for pago" (não entrou dinheiro).
-6. **Repetir sem gravar em dobro (`clientTransactionId`).** `POST /:id/payments` e `POST /:id/discounts` aceitam um `clientTransactionId` opcional: um uuid gerado pelo cliente (letras, números e hífen, 8 a 64). Ele vira o `id` da transação. Se a OS já tem uma transação com esse id, nada é gravado e a resposta traz o estado atual com o mesmo `transactionId` (duplo clique, nova tentativa depois de queda de rede). Mesmo id com outro tipo ou valor → `409 TRANSACTION_ID_CONFLICT`. O cliente gera um id novo para cada pagamento que o usuário pede, e reusa o mesmo só ao repetir o envio.
-7. **Data e comprovante.** `paidAt` não pode estar no futuro (folga de 5 minutos de relógio) nem antes do dia em que a OS foi criada (folga de 24 h pelo fuso). O comprovante (`receiptFile`) fica na pasta da OS (`tenants/{companyId}/orders/{orderId}/`, ou do recibo), e a `url` tem de ser a URL de download desse mesmo arquivo no bucket do projeto (`firebasestorage.googleapis.com/v0/b/{bucket}/o/…` ou `storage.googleapis.com/{bucket}/…`).
-8. **Arquivo apagado só da pasta do pagamento.** Ao tirar pagamento, zerar ou trocar comprovante, o servidor só apaga do Storage o comprovante dentro da pasta daquele pagamento (`tenants/{companyId}/orders/{orderId}/payments/{transactionId}/`). Outro caminho em `documents` é mantido e registrado em log.
-9. **Valores escondidos.** Sem `viewPrices` (técnico, supervisor, ou "Valores e cobrança" desligado) nenhum valor sai do servidor: total, valor e total da linha, preço de catálogo dentro da linha, pagamentos, situação de pagamento, comprovantes. Vale para lista, detalhe e respostas de escrita.
+6. **Pagamento até o que falta.** `POST /:id/payments` recusa valor acima do que falta receber, comparando em centavos dentro da transação: `409 PAYMENT_EXCEEDS_BALANCE`, com `error.remainingBalance` (o saldo atual). Assim, web e app recebendo ao mesmo tempo não passam do total. OS de valor 0 não recebe pagamento solto: use `mark-paid`. `mark-paid` lança só o que falta e o recibo do cliente já recusa acima do aberto (`VALUE_EXCEEDS_BALANCE`). Pagamento que chega do Asaas é sempre gravado.
+7. **Repetir sem gravar em dobro (`clientTransactionId`).** `POST /:id/payments` e `POST /:id/discounts` aceitam um `clientTransactionId` opcional: um uuid gerado pelo cliente (letras, números e hífen, 8 a 64). Ele vira o `id` da transação. Se a OS já tem uma transação com esse id, nada é gravado e a resposta traz o estado atual com o mesmo `transactionId` (duplo clique, nova tentativa depois de queda de rede). Mesmo id com outro tipo ou valor → `409 TRANSACTION_ID_CONFLICT`. O cliente gera um id novo para cada pagamento que o usuário pede, e reusa o mesmo só ao repetir o envio.
+8. **Data e comprovante.** `paidAt` não pode estar no futuro (folga de 5 minutos de relógio) nem antes do dia em que a OS foi criada (folga de 24 h pelo fuso). O comprovante (`receiptFile`) fica na pasta da OS (`tenants/{companyId}/orders/{orderId}/`, ou do recibo), e a `url` tem de ser a URL de download desse mesmo arquivo no bucket do projeto (`firebasestorage.googleapis.com/v0/b/{bucket}/o/…` ou `storage.googleapis.com/{bucket}/…`).
+9. **Arquivo apagado só da pasta do pagamento.** Ao tirar pagamento, zerar ou trocar comprovante, o servidor só apaga do Storage o comprovante dentro da pasta daquele pagamento (`tenants/{companyId}/orders/{orderId}/payments/{transactionId}/`). Outro caminho em `documents` é mantido e registrado em log.
+10. **Valores escondidos.** Sem `viewPrices` (técnico, supervisor, ou "Valores e cobrança" desligado) nenhum valor sai do servidor: total, valor e total da linha, preço de catálogo dentro da linha, pagamentos, situação de pagamento, comprovantes. Vale para lista, detalhe e respostas de escrita.
 
 ### Identificador de item e de pagamento
 
@@ -60,10 +61,10 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 |---|---|---|
 | `GET /orders` | todos | Quem tem `viewAllOrders` vê todas; consultor e técnico, as que criaram. Cursor, filtros e ordem abaixo |
 | `GET /orders/:id` | quem vê a OS | |
-| `POST /orders` | `createOrder` | Situação inicial por papel; valor próprio exige `editPrices`; grava `deviceIds` |
+| `POST /orders` | `createOrder` | Situação inicial por papel; valor próprio exige `editPrices`; grava `deviceIds`. `clientOrderId` opcional (uuid do cliente, mesmo formato do `clientTransactionId`) vira o id da OS: repetir devolve a OS já criada (200, sem criar outra); se outra pessoa criou com esse id → `409 ORDER_ID_CONFLICT` |
 | `PATCH /orders/:id` | `editOrder` | Situação: fluxo por papel. Datas: `canEditOrderMainFields` (supervisor e técnico só em orçamento). Responsável: `assignOrder`, nome lido do membro. `null` limpa |
 | `DELETE /orders/:id` | `canDeleteOrder` | Mesma regra de `order-delete.json`. Ver "Apagar" |
-| `POST /orders/:id/items` | main fields | `{kind, catalogId, value?, quantity?, total?, description?, deviceId?}`. Valor ou total próprio exige `editPrices` |
+| `POST /orders/:id/items` | main fields | `{kind, catalogId?, value?, quantity?, total?, description?, deviceId?}`. Valor ou total próprio exige `editPrices`. Sem `catalogId` é item avulso: `description` obrigatória, `service`/`product` gravado como `null` (como o app), sem valor fica "sem valor" |
 | `PATCH /orders/:id/items/:itemId` | main fields; só `description`: quem vê a OS | Supervisor e técnico mudam a observação depois de aprovada |
 | `DELETE /orders/:id/items/:itemId` | main fields | |
 | `POST /orders/:id/services`, `/products` | main fields | Para bot, MCP e integrações; respondem `{success, newTotal}` |
@@ -121,6 +122,8 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente |
 | `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `RECEIPT_LEGACY_SHARE`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
 | `TRANSACTION_ID_CONFLICT` | 409 | `clientTransactionId` já usado com outro tipo ou valor |
+| `PAYMENT_EXCEEDS_BALANCE` | 409 | Pagamento acima do que falta; `error.remainingBalance` traz o saldo |
+| `ORDER_ID_CONFLICT` | 409 | `clientOrderId` de OS criada por outra pessoa |
 | `ORDER_HAS_INVOICE`, `CUSTOMER_CHARGE_OPEN`, `INSTALLMENTS_IN_PROGRESS` | 409 | Apagar |
 | `ASAAS_UNAVAILABLE` | 502 | Não deu para cancelar a cobrança aberta |
 | `RATE_LIMIT_EXCEEDED` | 429 | |
@@ -129,7 +132,7 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 
 - `done` não é mais gravado: o app não grava e ninguém lê; `status` é a fonte.
 - Mudar a situação de OS antiga paga antes de existir `paidAmount` mantém a situação de pagamento (igual a `syncPaymentStatusWithTotal`).
-- Pagamento acima do que falta continua aceito em `POST /payments` (o app também aceita); desconto acima do que falta é recusado.
+- Pagamento e desconto acima do que falta são recusados em `POST /payments` e `POST /discounts`. O app ainda aceita pagamento a mais (`divergesIn.dart` em `payment-transactions.json`).
 - Marcar e retomar OS parada deixam o mesmo comentário interno do app.
 - Desfazer recibo não apaga o arquivo do comprovante, que é do recibo.
 - Quantidade de produto é inteira (o app lê como inteiro).

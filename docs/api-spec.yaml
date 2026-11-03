@@ -978,6 +978,37 @@ paths:
                       nextCursor: { type: string, nullable: true }
         '400': { description: VALIDATION_ERROR / INVALID_CURSOR / UNSUPPORTED_QUERY }
         '403': { description: INSUFFICIENT_PERMISSIONS }
+    post:
+      tags: [App Orders]
+      summary: Criar OS
+      description: Situação inicial por papel; valor próprio exige `editPrices`. Com `clientOrderId`, repetir devolve a OS já criada (200).
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customerId]
+              properties:
+                clientOrderId: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$', description: 'uuid do cliente; vira o id da OS' }
+                customerId: { type: string }
+                deviceId: { type: string }
+                deviceIds: { type: array, items: { type: string } }
+                services: { type: array, items: { type: object } }
+                products: { type: array, items: { type: object } }
+                dueDate: { type: string, format: date-time }
+                scheduledDate: { type: string, format: date-time }
+                status: { type: string, enum: [quote, approved, progress, done, canceled] }
+      responses:
+        '200': { description: 'OS já criada com esse clientOrderId: {id, number, status}' }
+        '201': { description: '{id, number, status}' }
+        '400': { description: VALIDATION_ERROR }
+        '403': { description: INSUFFICIENT_PERMISSIONS }
+        '404': { description: Cliente ou aparelho não encontrado }
+        '409': { description: ORDER_ID_CONFLICT }
 
   /v1/app/orders/{orderId}:
     get:
@@ -1047,8 +1078,8 @@ paths:
   /v1/app/orders/{orderId}/items:
     post:
       tags: [App Orders]
-      summary: Pôr serviço ou produto do catálogo
-      description: Total calculado no servidor. Valor ou total da linha próprio exige `editPrices`. `value null` = sem valor.
+      summary: Pôr serviço ou produto (do catálogo ou avulso)
+      description: Total calculado no servidor. Valor ou total da linha próprio exige `editPrices`. `value null` = sem valor. Sem `catalogId`, item avulso com `description` obrigatória.
       security: [{ BearerAuth: [] }]
       parameters:
         - $ref: '#/components/parameters/AppOrderId'
@@ -1059,10 +1090,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [kind, catalogId]
+              required: [kind]
               properties:
                 kind: { type: string, enum: [service, product] }
-                catalogId: { type: string }
+                catalogId: { type: string, description: Ausente = item avulso (description obrigatória) }
                 description: { type: string, maxLength: 500 }
                 value: { type: number, nullable: true }
                 quantity: { type: integer, minimum: 1, description: Só produto }
@@ -1147,7 +1178,7 @@ paths:
         '200': { description: 'transactionId, paidAmount, remainingBalance, isFullyPaid e a OS' }
         '400': { description: VALIDATION_ERROR / INVALID_FILE / INVALID_PAID_AT }
         '403': { description: INSUFFICIENT_PERMISSIONS }
-        '409': { description: TRANSACTION_ID_CONFLICT }
+        '409': { description: 'TRANSACTION_ID_CONFLICT / PAYMENT_EXCEEDS_BALANCE (error.remainingBalance)' }
 
   /v1/app/orders/{orderId}/payments/mark-paid:
     post:

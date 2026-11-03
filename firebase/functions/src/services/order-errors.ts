@@ -11,6 +11,8 @@ export type OrderErrorCode =
   | 'ITEM_NOT_FOUND'
   | 'TRANSACTION_NOT_FOUND'
   | 'TRANSACTION_ID_CONFLICT'
+  | 'PAYMENT_EXCEEDS_BALANCE'
+  | 'ORDER_ID_CONFLICT'
   | 'ASAAS_LOCKED'
   | 'RECEIPT_SHARE'
   | 'INVALID_DEVICE'
@@ -24,6 +26,8 @@ export class OrderRuleError extends Error {
     readonly code: OrderErrorCode,
     readonly httpStatus: number,
     message: string,
+    /** Extra fields sent in the error body (e.g. the current balance). */
+    readonly details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'OrderRuleError';

@@ -227,10 +227,14 @@ describe('payment-status', () => {
 });
 
 describe('payment-transactions', () => {
-  const ERRORS: Record<string, string> = { ASAAS_LOCKED: 'asaasLocked' };
+  const ERRORS: Record<string, string> = { ASAAS_LOCKED: 'asaasLocked', PAYMENT_EXCEEDS_BALANCE: 'exceedsBalance' };
   const build = (amount: number): any => ({ id: 'new', type: 'payment', amount, createdAt: 'x', createdBy: USER });
   const run: Record<string, (order: any, op: any) => any> = {
-    addPayment: (order, op) => orderService.applyPaymentTransaction(order, { ...build(op.amount), type: 'payment' }),
+    addPayment: (order, op) => {
+      // POST /:id/payments checks the balance before applying the payment.
+      orderService.assertPaymentWithinBalance(order, op.amount);
+      return orderService.applyPaymentTransaction(order, { ...build(op.amount), type: 'payment' });
+    },
     addDiscount: (order, op) => orderService.applyPaymentTransaction(order, { ...build(op.amount), type: 'discount' }),
     removeTransaction: (order, op) =>
       removeTransactionAt(order, (order.transactions ?? []).findIndex((t: any) => t.id === op.transactionId)),
