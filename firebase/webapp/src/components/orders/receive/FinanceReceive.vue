@@ -4,22 +4,26 @@
 // of the user test), by customer, the oldest debt first. Marking
 // orders of one customer opens one receipt or one payment link for them, with
 // the total on screen and a confirmation before anything is saved.
+// The orders come from the server (GET /v1/app/finance/receivable): before, the
+// browser read up to 20.000 unpaid orders on every visit (review of #518).
 import { computed, defineAsyncComponent, onMounted, ref, shallowRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
+import FinanceTabs from '@/components/finance/FinanceTabs.vue'
 import { t } from '@/i18n'
+import { receivableRows, type FinanceRow } from '@/lib/finance/data'
 import { formatDate } from '@/lib/format'
-import type { Order } from '@/lib/orders/model'
-import { country, deviceLabel, money, orderTitle, statusText } from '@/lib/orders/text'
-import { receivableOrders } from '@/lib/receive/data'
-import { fromCents, receivableOf, toCents } from '@/lib/receive/model'
+import { country, money, orderTitle, statusText } from '@/lib/orders/text'
+import { fromCents, toCents } from '@/lib/receive/model'
 import '@/styles/receive.css'
 
 const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
 const router = useRouter()
+const route = useRoute()
+type Order = FinanceRow & { status: NonNullable<FinanceRow['status']> }
 
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const orders = shallowRef<Order[]>([])
@@ -27,7 +31,7 @@ const truncated = ref(false)
 const selected = ref<string[]>([])
 const receiving = ref<{ id: string; name: string; checked: string[] } | null>(null)
 
-const owed = (order: Order) => receivableOf(order) ?? 0
+const owed = (order: Order) => order.open
 const groups = computed(() => {
   const map = new Map<string, { id: string; name: string; orders: Order[]; cents: number; oldest: string }>()
   for (const order of orders.value) {
@@ -52,8 +56,8 @@ const oneCustomer = computed(() => (pickedCustomers.value.size === 1 && picked.v
 async function load() {
   state.value = 'loading'
   try {
-    const result = await receivableOrders()
-    orders.value = result.orders
+    const result = await receivableRows()
+    orders.value = result.orders.filter((row): row is Order => !!row.status)
     truncated.value = result.truncated
     selected.value = selected.value.filter((id) => result.orders.some((order) => order.id === id))
     state.value = 'ready'
@@ -62,7 +66,13 @@ async function load() {
     state.value = 'failed'
   }
 }
-onMounted(load)
+onMounted(async () => {
+  await load()
+  // From Resumo > A receber: the customer's receipt opens at once (fin.tab.receivable).
+  const wanted = typeof route.query.customer === 'string' ? route.query.customer : null
+  const group = wanted ? groups.value.find((g) => g.id === wanted) : null
+  if (group) receiveGroup(group)
+})
 
 const isOn = (order: Order) => selected.value.includes(order.id)
 function toggle(order: Order) {
@@ -99,9 +109,7 @@ function openOrder(id: string) {
 <template>
   <div class="finance" data-testid="finance-receive">
     <PageHead :title="title" :sub="orders.length ? t('web.finance.receiveSub') : undefined" />
-    <nav class="tabs fin-tabs" :aria-label="t('web.finance.parts')">
-      <span aria-current="page" class="fin-tab">{{ t('receiveTitle') }} <span v-if="orders.length" class="num">{{ orders.length }}</span></span>
-    </nav>
+    <FinanceTabs />
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :retry="load" />
     <EmptyState v-else-if="!orders.length" :title="t('receiveAllDone')" :body="t('web.finance.emptyBody')">
@@ -116,7 +124,7 @@ function openOrder(id: string) {
           <button type="button" class="btn btn--ghost" @click="selected = []">{{ t('clear') }}</button>
         </div>
       </div>
-      <p v-if="truncated" class="list-note">{{ t('web.finance.truncated') }}</p>
+      <p v-if="truncated" class="list-note" role="note">{{ t('web.finance.truncated') }}</p>
       <div class="recv">
         <table class="grid">
           <caption class="sr">{{ title }}</caption>
@@ -139,10 +147,10 @@ function openOrder(id: string) {
               <td class="c-money"><span class="num">{{ money(fromCents(group.cents)) }}</span></td>
             </tr>
             <tr v-for="order in group.orders" :key="order.id" :class="{ 'is-selected': isOn(order) }" data-testid="finance-row">
-              <td class="c-check"><input class="check" type="checkbox" :checked="isOn(order)" :aria-label="t('web.finance.pickOrder', { order: orderTitle(order) })" @change="toggle(order)" /></td>
+              <td class="c-check"><input class="check" type="checkbox" :checked="isOn(order)" :aria-label="t('web.finance.pickOrder', { order: orderTitle({ number: order.number ?? undefined }) })" @change="toggle(order)" /></td>
               <td>
-                <button type="button" class="link" @click="openOrder(order.id)">{{ orderTitle(order) }}</button>
-                <span v-if="order.devices[0]" class="sub"> · {{ order.devices[0].name || deviceLabel() }}</span>
+                <button type="button" class="link" @click="openOrder(order.id)">{{ orderTitle({ number: order.number ?? undefined }) }}</button>
+                <span v-if="order.device" class="sub"> · {{ order.device }}</span>
                 <span v-if="order.status !== 'done'" class="sub"> · {{ statusText(order.status) }}</span>
                 <span v-if="order.createdAt" class="sub"> · {{ formatDate(order.createdAt, country()) }}</span>
               </td>

@@ -5,7 +5,7 @@
 import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
 import { api, session } from '@/lib/session'
-import { chargeOf, receivableOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
+import { chargeOf, type Charge, type OpenOrder, type SharePermission, type ShareToken } from './model'
 
 const order = (id: string) => `/v1/app/orders/${encodeURIComponent(id)}`
 const customer = (id: string) => `/v1/app/customers/${encodeURIComponent(id)}`
@@ -106,6 +106,8 @@ export const cancelCustomerCharge = (customerId: string, chargeId: string) =>
 export interface PaymentSettings {
   /** Pilot on for the company and an account connected. */
   ready: boolean
+  /** Notas fiscais on for the company (nfseEnabled with Asaas connected, docs/NFSE_ASAAS.md). */
+  nfse: boolean
 }
 
 /** Tries before giving up on a Firestore read of this screen, and the wait between them. */
@@ -127,7 +129,8 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
       const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
       const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
       const data = (snap.data() ?? {}) as Record<string, unknown>
-      return { ready: data.asaasEnabled === true && data.asaasConnected === true }
+      const ready = data.asaasEnabled === true && data.asaasConnected === true
+      return { ready, nfse: ready && data.nfseEnabled === true }
     } catch (error) {
       if (attempt < retries) {
         await sleep(wait)
@@ -135,7 +138,7 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
       }
       // The app hides the section on a read error (ASAAS_INTEGRATION).
       console.warn('receive: payment settings not read', error)
-      return { ready: false }
+      return { ready: false, nfse: false }
     }
   }
 }
@@ -230,40 +233,6 @@ export async function customerCharges(customerId: string): Promise<Charge[]> {
   const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snap = await getDocs(query(collection(db, 'companies', session.companyId as string, 'customerCharges'), where('customer.id', '==', customerId)))
   return snap.docs.map((d) => chargeOf(d.id, d.data()))
-}
-
-// ---------------------------------------------------------------------------
-// Financeiro > Receber
-// ---------------------------------------------------------------------------
-
-/**
- * Every order that still owes (receivableOf: done with a balance, open with a
- * down payment), read through `payment == 'unpaid'` (indexed with createdAt,
- * like "Sem receber") in pages of 500 until the end, so no old debt is cut.
- * Stops at 20.000 orders read and says so (the oldest would be the ones missing). The screen orders them oldest first.
- * Only financial roles reach it, and they read every order.
- */
-export async function receivableOrders(): Promise<{ orders: Order[]; truncated: boolean }> {
-  const [db, { collection, getDocs, limit, orderBy, query, startAfter, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-  const PAGE = 500
-  const MAX = 20000
-  const base = [where('payment', '==', 'unpaid'), orderBy('createdAt', 'desc')] as const
-  const orders: Order[] = []
-  let last: unknown = null
-  let read = 0
-  for (;;) {
-    const snap = await getDocs(
-      query(collection(db, 'companies', session.companyId as string, 'orders'), ...base, ...(last ? [startAfter(last)] : []), limit(PAGE)),
-    )
-    read += snap.docs.length
-    for (const d of snap.docs) {
-      const order = normalizeOrder(d.id, d.data(), true)
-      if (receivableOf(order) !== null) orders.push(order)
-    }
-    if (snap.docs.length < PAGE) return { orders, truncated: false }
-    if (read >= MAX) return { orders, truncated: true }
-    last = snap.docs[snap.docs.length - 1]
-  }
 }
 
 /** Full orders for printing several at once: Firestore for who sees values, the API projection otherwise. */

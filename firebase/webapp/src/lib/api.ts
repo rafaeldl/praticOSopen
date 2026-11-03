@@ -50,6 +50,8 @@ export class ApiError extends Error {
     readonly code: string,
     readonly status: number,
     readonly messageKey: MessageKey,
+    /** The server's own text about a refusal (Asaas's, for notas). Shown only where a screen asks for it. */
+    readonly detail?: string,
   ) {
     super(`API ${status} ${code}`)
     this.name = 'ApiError'
@@ -84,7 +86,7 @@ export interface ApiOptions {
 interface Envelope<T> {
   success?: boolean
   data?: T
-  error?: { code?: unknown }
+  error?: { code?: unknown; detail?: unknown }
 }
 
 export function createApi(deps: ApiDeps) {
@@ -119,7 +121,8 @@ export function createApi(deps: ApiDeps) {
     }
     if (!response.ok || body?.success === false) {
       const code = typeof body?.error?.code === 'string' ? body.error.code : 'UNKNOWN'
-      throw new ApiError(code, response.status, CODE_MESSAGES[code] ?? statusMessage(response.status))
+      const detail = typeof body?.error?.detail === 'string' ? body.error.detail : undefined
+      throw new ApiError(code, response.status, CODE_MESSAGES[code] ?? statusMessage(response.status), detail)
     }
     return (options.raw ? body : (body?.data ?? body)) as T
   }

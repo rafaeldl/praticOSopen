@@ -456,6 +456,7 @@ import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
 import appCustomersRoutes from './routes/v1/app-customers.routes';
 import appDevicesRoutes from './routes/v1/app-devices.routes';
 import { catalogRoutes } from './routes/v1/app-catalog.routes';
+import appFinanceRoutes from './routes/v1/app-finance.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
@@ -672,6 +673,8 @@ app.use('/v1/app/devices', ...appBearer, appDevicesRoutes, devicesRoutes);
 // Web app catalog (app-catalog.routes.ts): prices only with viewPrices, written only with editPrices.
 app.use('/v1/app/services', ...appBearer, catalogRoutes('service'));
 app.use('/v1/app/products', ...appBearer, catalogRoutes('product'));
+// Web app Financeiro (app-finance.routes.ts): the numbers come from here, never from orders read in the browser.
+app.use('/v1/app/finance', ...appBearer, appFinanceRoutes);
 // Invites: /pending and /:token/accept also serve an account without a company
 mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
 app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);

@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda" e a de "Checklists" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists" e a de "Financeiro e notas fiscais" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -51,6 +51,8 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
 | Agenda: leitura e mudar a data | API (`lib/agenda/data.ts`): `GET /v1/app/orders?sort=scheduledDate&startDate&endDate`, `PATCH /v1/app/orders/:id` com `expectedUpdatedAt` |
 | Telas do catálogo: lista, cadastro, foto, importação, preços em lote | API (`lib/catalog/data.ts`): `/v1/app/services`, `/v1/app/products`; a foto vai para o Storage na pasta do item |
+| Financeiro: Resumo, Receber e Relatório | API (`lib/finance/data.ts`): `GET /v1/app/finance/summary`, `/report`, `/receivable`; nenhuma OS lida no navegador para somar |
+| Notas fiscais | Lista lida do Firestore REST (`invoices` por `effectiveDate`); prévia, emitir e cancelar pela API (`/v1/app/nfse/invoices*`) |
 | Checklists: modelos e respostas na OS | Firestore direto (`lib/forms/data.ts`), cada gravação numa transação; fotos no Storage na pasta do checklist |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
@@ -209,7 +211,7 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 
 **Cobrança (Asaas).** Quem recebe na OS (o consultor também) vê o link aberto só para ler; com link aberto, Receber deixa de ser o botão azul e avisa que a cobrança se ajusta. Criar, cancelar e gerar link novo só para quem tem `chargeOrder`, com `settings/payments.asaasEnabled` e `asaasConnected`. Na OS: cartão do link aberto (esperando, vencido, parcelas, o que falta fora do link), aviso "A OS mudou de valor" com "Gerar link novo" e "Manter o link" (guardado por cobrança neste navegador), parcelamento cancelado pelo servidor, copiar, mandar de novo e cancelar. "Mandar cobrança" pede valor (sempre em R$), vencimento (hoje + 3, nunca no passado), parcelas (só uma OS) e CPF/CNPJ quando o cadastro não tem um válido. Criar e mandar são um passo só: a folha vira "Mandar pelo WhatsApp" com o link do Asaas. Na gaveta do cliente: um link para várias OS, copiar e cancelar. O link mandado de novo é sempre o do Asaas, na OS e no cliente.
 
-**Financeiro > Receber (`/finance`).** Toda OS que ainda deve: concluída com saldo e aberta (aprovada ou em andamento) com sinal, para não repetir o P1 do teste do Marcos. Lê todas as OS sem pagar (`payment == 'unpaid'`) em páginas de 500, por cliente, das dívidas mais antigas; avisa se passar de 20.000. Marcar OS de um cliente abre a gaveta de receber; OS de dois clientes não recebem juntas. O Resumo do Financeiro é da fatia 6.
+**Financeiro > Receber (`/finance/receive`).** Toda OS que ainda deve: concluída com saldo e aberta (aprovada ou em andamento) com sinal, para não repetir o P1 do teste do Marcos. Desde a fatia 6 vem do servidor (`GET /v1/app/finance/receivable`), por cliente, das dívidas mais antigas; antes o navegador lia até 20.000 OS sem pagar a cada visita. Se a empresa passar de 20.000 OS em aberto, um aviso diz que algumas podem faltar (qualquer uma, não necessariamente as mais antigas). Marcar OS de um cliente abre a gaveta de receber; OS de dois clientes não recebem juntas. `?customer=` abre direto o "Receber de" do cliente (vindo do Resumo).
 
 **Imprimir várias OS.** Na seleção da lista (tela grande), cada OS numa página.
 
@@ -236,6 +238,26 @@ Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo
 **De quem.** Admin, gerente e supervisor filtram por responsável (`assignedTo` no servidor). "Só de {nome}" com "Mostrar todos". Trocar de empresa tira o filtro.
 
 **Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push).
+
+### Financeiro e notas fiscais
+
+Código em `src/views/finance/`, `src/components/finance/`, `src/lib/finance/` (período em `period.ts`, palavras em `text.ts`, exportação em `export.ts`, chamadas em `data.ts`) e `src/lib/nfse/` (regras puras em `model.ts`, leituras e chamadas em `data.ts`). Textos no pedaço `-finance.json`. Testes: `tests/finance.test.ts`, `tests/contract-cases.test.ts` (`finance-period.json`) e `e2e/finance.spec.ts`, `e2e/finance-report.spec.ts`, `e2e/invoices.spec.ts`.
+
+**Números do servidor.** O Resumo, o Relatório e o Receber pedem tudo pronto à API (`/v1/app/finance/*`, ver `docs/WEB_API.md`). Quem não tem `viewFinancialReports` (técnico, supervisor, consultor, ou "Valores e cobrança" desligado) não chega às telas e o servidor responde 403 sem número nenhum. O navegador manda o próprio fuso; o servidor só aceita se for do país da empresa.
+
+**Resumo (`/finance`).** Recebido e Vendido do mês escolhido, A receber e Em andamento de hoje, e embaixo a lista do cartão escolhido (`?list=`). Mês na URL (`?month=AAAA-MM`), nunca no futuro; setas e teclas `←` `→`; o rótulo de um mês passado volta para hoje. Trocar de mês mantém os números antigos marcados como ocupados e descarta resposta atrasada. Erro só na primeira carga; relê ao voltar à janela. A receber por cliente abre o "Receber de"; as outras linhas abrem a OS ao lado (`?order=`), e fechar relê os números. "Notas fiscais · N" com a contagem de emitidas no mês e quantas precisam de atenção, nunca dinheiro; leitura que falha tira a linha (o app mostrava 0). "Ver o relatório" e "Outro período".
+
+**Relatório (`/finance/report`).** Período na URL: `?kind=day|week|month|year&offset=-N` ou `?from=&to=` (datas próprias, de 2020 até hoje, as duas pontas incluídas). A semana vai de domingo a sábado, uma conta só para o rótulo, a busca e a exportação (contrato `finance-period.json`). Filtros na URL e só nesta visita: pagamento (`?payment=paid|unpaid`, a legenda; estreita as OS, a composição e os rankings de serviços e produtos, como o app, mas não os totais) e cliente (`?customer=`, o ranking). A OS abre ao lado (`?order=`). Escolher um cliente estreita os números, mas o ranking continua com todos. O rótulo volta ao período atual e tira os filtros. Faturamento, já pago e a receber (rótulos do segmento `financial.total_paid` e `financial.remaining`), OS, média, composição, rankings e as OS do período, 5 de cada com "Ver todos". Carregando, erro com "Tentar de novo" e vazio próprios.
+
+**Exportar e imprimir (tela grande).** "Exportar CSV" (as OS do período, com `;` e vírgula decimal onde o país usa vírgula, BOM para os acentos, célula que começaria fórmula ganha apóstrofo) e "Exportar planilha" (XLSX montado no navegador, sem biblioteca: zip sem compressão com Resumo, OS, Clientes, Serviços e Peças, valores como números). Só sai o que o servidor deu a esse papel. "Imprimir ou salvar PDF" usa folha própria: todas as linhas, sem navegação; desabilitado no período sem OS.
+
+**Notas fiscais (`/invoices`).** Para quem tem `chargeOrder`. Com a nota desligada na empresa (`settings/payments`: `nfseEnabled`, `asaasEnabled`, `asaasConnected`), a tela diz isso em vez de girar. Lista do mês (`?month=`): uma frase com o que saiu (emitidas e com cancelamento negado), "Precisa de atenção" no topo (erro não reemitido, conflito e cancelamento negado, do mês anterior a hoje em diante), a tabela com número, cliente e OS, situação em ponto e texto e valor. Lê `invoices` por `effectiveDate` do início pedido até o fim do mês (o app lia até hoje e o futuro). O seguinte vai até o mês de hoje mais 60 dias (nota agendada). Busca (`?q=`) só com mais de 10 notas, sem acento, por cliente, número e OS. A nota abre ao lado (`?invoice=`): situação e frase, valor, número, data, OS que abrem, motivo, aviso de conflito, PDF e XML da emitida, "Corrigir e emitir" e "Cancelar nota" (confirmação com "Manter nota" no foco; prefeitura que não cancela por aqui abre "Já cancelei na prefeitura").
+
+**Emitir.** Na OS, "…" → "Emitir nota fiscal" (quem tem `chargeOrder`, nota ligada, OS fora de orçamento e cancelada), e "Corrigir e emitir" na nota com erro. A gaveta mostra a prévia do servidor (valor de cada OS, peças fora, desconto repartido, serviço da prefeitura), o texto editável, a data (de hoje até 60 dias; hoje vai vazio), o CPF/CNPJ quando falta e o e-mail e endereço com CEP que a prefeitura pede. "Emitir" fica cinza com o primeiro motivo (OS já com nota, nada a cobrar, CPF/CNPJ, contato). `CUSTOMER_DATA_REQUIRED` reabre a prévia com todos os campos e mantém o texto; erros de configuração mandam configurar no app. Fechar com algo mudado pergunta.
+
+**No E2E** nenhuma nota é emitida: as rotas `/v1/app/nfse/*` são respondidas pelo teste (`page.route`), que grava o documento da nota como o servidor gravaria. O seed liga a nota na empresa A, grava duas notas do mês e um mês fechado com números conhecidos (março de 2026, `seedFinance`); a empresa C tem "Valores e cobrança" desligado.
+
+**Fica para depois.** Próxima cobrança (sugestão, mandar e "Agora não"), configuração da nota (dados fiscais, serviço, quando emitir), uma nota com várias OS do cliente, notas de um cliente, compartilhar o PDF da nota, nota ao vivo na tela (relê ao voltar à janela e depois de cada ação), relatório de um cliente em PDF próprio e a linha "Nota fiscal" na tela da OS.
 
 ### Checklists
 
@@ -372,6 +394,8 @@ Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta 
 | Antes: Firestore completo com cache persistente | 239,1 KB | 1.328 ms | 520 ms |
 | Firestore REST (`lite`) para sessão, rótulos e páginas; completo depois, só para o tempo real | **130,4 KB** | **1.104 ms** | 706 ms |
 
+Com a fatia do Financeiro e das notas fiscais, medido em 2026-11-03: **1.078 ms** na 1ª visita e **702 ms** na volta; JS até a lista 133,0 KB (132,6 antes: rotas novas no `router.ts`, o pedaço de textos `finance` e o `detail` do erro da API). As telas do Financeiro, do relatório e das notas carregam sob demanda.
+
 - **Por que REST e não a API:** `GET /v1/app/orders` também tiraria o Firestore do caminho, mas passa pela Function (partida a frio em produção) e não roda no teste de desempenho, que fica sem o emulador de Functions. O REST lê direto do Firestore, com as mesmas regras, e não abre o canal do cliente completo, que custa idas e voltas.
 - **Auth em pedaço menor:** não muda nada. O Auth já usa `initializeAuth` sem o resolvedor de popup (8,2 KB); o popup só baixa ao entrar.
 - **A volta ficou mais lenta (520 para 706 ms):** antes ela lia a lista do disco (cache persistente). Agora a 1ª página sempre vem do servidor. Continua bem abaixo da meta e a 1ª visita, que é a meta, ficou 220 ms mais rápida. O cache persistente continua no cliente completo (OS aberta) e as regras de apagar ao sair não mudaram.
@@ -424,8 +448,8 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, contrato, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 131,3 de 240 KB desde a fatia da agenda (era 239,1 KB; 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 133,0 de 240 KB desde a fatia do Financeiro (131,3 com a agenda; era 239,1 KB, 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.

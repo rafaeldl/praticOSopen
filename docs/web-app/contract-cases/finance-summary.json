@@ -1,0 +1,81 @@
+{
+  "version": 2,
+  "generatedFrom": "9b0702d9",
+  "rule": "Financeiro e relatório: Recebido pela data de cada pagamento (OS de qualquer mês; dinheiro antigo sem transação conta no dia da OS); Vendido e faturamento sem orçamento nem cancelada; cada OS aberta conta num lugar só (concluída com saldo em A receber, aberta com sinal em A receber, aberta sem nada pago em Em andamento). Dias no fuso da empresa, o último dia do período incluído. No relatório, 'a receber' é tudo que não está pago (também parcial e sem situação), e escolher um cliente não encolhe o ranking. O filtro de pagamento estreita a lista de OS, a composição e os rankings de serviços e produtos, como no app; os totais e o ranking de clientes não mudam com ele.",
+  "runsIn": ["functions"],
+  "sourceOfTruth": ["lib/utils/financial_summary.dart FinancialSummary.compute", "lib/mobx/order_store.dart loadOrdersForDashboardCustomRange"],
+  "otherImplementations": ["firebase/functions/src/services/app-finance.service.ts (rota GET /v1/app/finance/summary e /report, usada pelo web)"],
+  "cases": [
+    {"id":"received-by-payment-date","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"done","createdAt":"2026-02-10T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid","transactions":[{"type":"payment","amount":100,"paidAt":"2026-03-10T12:00:00.000Z","createdAt":"2026-03-10T12:00:00.000Z"}]}
+    ]},"expect":{"received":100,"sold":0,"receivedIds":["a"],"soldIds":[]},"note":"OS de fevereiro paga em março entra no Recebido de março e no Vendido de fevereiro."},
+    {"id":"payment-without-paidAt-uses-createdAt","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":60,"paidAmount":60,"payment":"paid","transactions":[{"type":"payment","amount":60,"createdAt":"2026-04-01T12:00:00.000Z"}]}
+    ]},"expect":{"received":0,"sold":60,"receivedIds":[],"soldIds":["a"]}},
+    {"id":"discount-is-not-received","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":90,"discount":10,"paidAmount":50,"payment":"partial","transactions":[{"type":"discount","amount":10,"createdAt":"2026-03-05T12:00:00.000Z"},{"type":"payment","amount":50,"paidAt":"2026-03-05T12:00:00.000Z"}]}
+    ]},"expect":{"received":50,"receivedIds":["a"]}},
+    {"id":"legacy-paid-without-paidAmount","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-05T12:00:00.000Z","total":80,"payment":"paid"}
+    ]},"expect":{"received":80,"sold":80,"receivedIds":["a"]},"note":"OS antiga paga sem paidAmount nem transação: conta o total no mês em que foi criada."},
+    {"id":"legacy-untracked-part","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-05T12:00:00.000Z","total":200,"paidAmount":100,"payment":"partial","transactions":[{"type":"payment","amount":60,"paidAt":"2026-04-02T12:00:00.000Z"}]}
+    ]},"expect":{"received":40},"note":"Os 40 pagos antes de existir transação contam no dia da OS; os 60 de abril, em abril."},
+    {"id":"sold-skips-quote-and-canceled","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"q","status":"quote","createdAt":"2026-03-05T12:00:00.000Z","total":500,"payment":null},
+      {"id":"c","status":"canceled","createdAt":"2026-03-05T12:00:00.000Z","total":300,"payment":null},
+      {"id":"a","status":"approved","createdAt":"2026-03-06T12:00:00.000Z","total":120,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"sold":120,"soldIds":["a"]}},
+    {"id":"last-day-included-app-format","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"a","status":"approved","createdAt":"2026-03-31T23:30:00.000123","total":70,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"sold":70,"soldIds":["a"]},"note":"O app grava a hora local sem fuso (toIso8601String): é a hora da empresa. O último dia entra (defeito 60 do app)."},
+    {"id":"last-day-included-utc","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"in","status":"approved","createdAt":"2026-04-01T02:30:00.000Z","total":70,"paidAmount":0,"payment":"unpaid"},
+      {"id":"out","status":"approved","createdAt":"2026-04-01T03:00:00.000Z","total":30,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"sold":70,"soldIds":["in"]},"note":"23:30 de 31/03 em São Paulo é 02:30 UTC do dia 1º; meia-noite de 1º/04 já é abril."},
+    {"id":"first-day-by-company-zone","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"feb","status":"approved","createdAt":"2026-03-01T02:00:00.000Z","total":40,"paidAmount":0,"payment":"unpaid"},
+      {"id":"mar","status":"approved","createdAt":"2026-03-01T03:00:00.000Z","total":60,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"sold":60,"soldIds":["mar"]},"note":"02:00 UTC de 1º/03 ainda é 28/02 em São Paulo."},
+    {"id":"open-orders-each-in-one-place","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"done-owed","status":"done","createdAt":"2025-12-01T12:00:00.000Z","total":300,"paidAmount":100,"payment":"partial","customer":{"id":"ana","name":"Ana"}},
+      {"id":"deposit","status":"progress","createdAt":"2026-01-10T12:00:00.000Z","total":200,"paidAmount":50,"payment":"partial","customer":{"id":"ana","name":"Ana"}},
+      {"id":"running","status":"approved","createdAt":"2026-02-10T12:00:00.000Z","total":150,"paidAmount":0,"payment":"unpaid","customer":{"id":"bia","name":"Bia"}},
+      {"id":"no-payment-field","status":"approved","createdAt":"2026-02-11T12:00:00.000Z","total":90,"payment":null,"customer":{"id":"bia","name":"Bia"}},
+      {"id":"paid","status":"done","createdAt":"2026-02-12T12:00:00.000Z","total":80,"paidAmount":80,"payment":"paid"},
+      {"id":"quote","status":"quote","createdAt":"2026-02-13T12:00:00.000Z","total":500,"payment":null},
+      {"id":"zero","status":"done","createdAt":"2026-02-14T12:00:00.000Z","total":0,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"owed":200,"depositOwed":150,"receivable":350,"receivableCustomers":1,"progress":240,"depositIds":["deposit"],"progressIds":["running","no-payment-field"],"debtorKeys":["ana"]},"note":"Concluída com saldo e aberta com sinal vão para A receber; aberta sem nada pago, para Em andamento (também a aprovada sem payment, como o app lê)."},
+    {"id":"debtors-oldest-first-and-without-customer","given":{"op":"summary","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"b1","status":"done","createdAt":"2026-02-01T12:00:00.000Z","total":50,"paidAmount":0,"payment":"unpaid","customer":{"id":"bia","name":"Bia"}},
+      {"id":"n1","status":"done","createdAt":"2026-01-01T12:00:00.000Z","total":30,"paidAmount":0,"payment":"unpaid"},
+      {"id":"a1","status":"done","createdAt":"2026-01-15T12:00:00.000Z","total":20,"paidAmount":0,"payment":"unpaid","customer":{"id":"ana","name":"Ana"}}
+    ]},"expect":{"owed":100,"receivableCustomers":3,"debtorKeys":["_none","ana","bia"]},"note":"A OS sem cliente vira um grupo próprio; a dívida mais antiga vem primeiro."},
+    {"id":"report-totals","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","orders":[
+      {"id":"p","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid","customer":{"id":"ana","name":"Ana"}},
+      {"id":"legacy","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":80,"payment":"paid","customer":{"id":"bia","name":"Bia"}},
+      {"id":"part","status":"progress","createdAt":"2026-03-04T12:00:00.000Z","total":200,"paidAmount":50,"payment":"partial","customer":{"id":"ana","name":"Ana"}},
+      {"id":"none","status":"approved","createdAt":"2026-03-05T12:00:00.000Z","total":60,"payment":null},
+      {"id":"q","status":"quote","createdAt":"2026-03-06T12:00:00.000Z","total":999,"payment":null},
+      {"id":"x","status":"canceled","createdAt":"2026-03-07T12:00:00.000Z","total":999,"payment":null}
+    ]},"expect":{"revenue":440,"paid":230,"remaining":210,"count":4,"paidCount":2,"customerIds":["ana","bia",null]},"note":"Faturamento sem orçamento nem cancelada; pago sem paidAmount conta o total; ranking pelo total."},
+    {"id":"report-unpaid-filter-includes-partial-and-null","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","payment":"unpaid","orders":[
+      {"id":"p","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid"},
+      {"id":"part","status":"progress","createdAt":"2026-03-04T12:00:00.000Z","total":200,"paidAmount":50,"payment":"partial"},
+      {"id":"u","status":"done","createdAt":"2026-03-04T13:00:00.000Z","total":20,"paidAmount":0,"payment":"unpaid"},
+      {"id":"none","status":"approved","createdAt":"2026-03-05T12:00:00.000Z","total":60,"payment":null}
+    ]},"expect":{"orderIds":["none","u","part"],"revenue":380,"count":4},"note":"O app lista só payment == 'unpaid' (defeito 58); aqui a lista bate com o valor a receber. Os totais não mudam com o filtro (defeito D5)."},
+    {"id":"report-customer-filter-keeps-ranking","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","customer":"bia","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid","customer":{"id":"ana","name":"Ana"}},
+      {"id":"b","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":40,"paidAmount":0,"payment":"unpaid","customer":{"id":"bia","name":"Bia"}}
+    ]},"expect":{"revenue":40,"paid":0,"remaining":40,"count":1,"orderIds":["b"],"customerIds":["ana","bia"]},"note":"Com um cliente escolhido os números são só dele, mas o ranking continua com todos (no app ele encolhe, defeito D6)."},
+    {"id":"report-no-customer-filter","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","customer":"none","orders":[
+      {"id":"a","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":100,"paidAmount":100,"payment":"paid","customer":{"id":"ana","name":"Ana"}},
+      {"id":"n","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":25,"paidAmount":0,"payment":"unpaid"}
+    ]},"expect":{"revenue":25,"orderIds":["n"]}},
+    {"id":"report-payment-filter-narrows-composition-and-items","given":{"op":"report","zone":"America/Sao_Paulo","from":"2026-03-01","to":"2026-03-31","payment":"paid","orders":[
+      {"id":"p","status":"done","createdAt":"2026-03-02T12:00:00.000Z","total":150,"paidAmount":150,"payment":"paid","services":[{"service":{"name":"Revisão"},"value":100}],"products":[{"product":{"name":"Filtro"},"value":25,"quantity":2}]},
+      {"id":"u","status":"done","createdAt":"2026-03-03T12:00:00.000Z","total":300,"paidAmount":0,"payment":"unpaid","services":[{"service":{"name":"Pintura"},"value":300}],"products":[]}
+    ]},"expect":{"revenue":450,"count":2,"orderIds":["p"],"compositionServices":100,"compositionProducts":50,"serviceNames":["Revisão"],"productNames":["Filtro"],"customerIds":[null]},"note":"Como o app: os rankings de serviços e produtos leem recentOrders, já filtrado pelo pagamento (financial_report_screen.dart _calculateServicesRanking). Os totais e o ranking de clientes não mudam com o filtro. Revisão do #525, B1."}
+  ]
+}

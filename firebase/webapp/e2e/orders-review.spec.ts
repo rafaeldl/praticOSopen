@@ -311,6 +311,12 @@ test.describe('Início (usuários)', () => {
     await expect(unpaid).toBeVisible()
     await unpaid.click()
     await expect(row(page, 504)).toContainText('falta receber R$ 200,00')
+    // The sentence waits for the whole list: with the parallel tests' orders (and the Financeiro's seed) it can pass one page.
+    const more = page.getByRole('button', { name: 'Mostrar mais' })
+    for (let i = 0; i < 20 && (await more.count()); i++) {
+      await more.click({ timeout: 3000 }).catch(() => {})
+      await page.waitForTimeout(300)
+    }
     await expect(page.getByTestId('summary')).toHaveText(/para receber · R\$/)
     await page.getByRole('button', { name: 'Atrasadas' }).click()
     await expect(row(page, 501)).toHaveCount(1)

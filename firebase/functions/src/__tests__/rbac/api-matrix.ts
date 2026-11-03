@@ -56,6 +56,7 @@ const O = '/v1/app/orders';
 const CU = '/v1/app/customers';
 const NF = '/v1/app/nfse';
 const FT = '/v1/app/forms/templates';
+const FI = '/v1/app/finance';
 
 const receipt = { receiptId: 'r9', paidAt: '2026-10-20', allocations: [{ orderId: 'o1', amount: 10 }] };
 const orderFile = { url: 'https://firebasestorage.googleapis.com/v0/b/praticos.appspot.com/o/tenants%2Fc1%2Forders%2Fo1%2Fpayments%2Ft1%2Ff.jpg?alt=media', storagePath: 'tenants/c1/orders/o1/payments/t1/f.jpg', contentType: 'image/jpeg' };
@@ -392,6 +393,35 @@ export const API_CASES: ApiCase[] = [
     id: 'nofin.customers.receipts', area: 'Sem valores', title: 'ver recibos com valores desligados',
     method: 'get', path: `${CU}/cust1/receipts`, company: 'nofin',
     allow: [],
+  },
+  {
+    id: 'nofin.finance.summary', area: 'Sem valores', title: 'ver o Financeiro com valores desligados',
+    method: 'get', path: `${FI}/summary?month=2026-10`, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.finance.report', area: 'Sem valores', title: 'ver o relatório com valores desligados',
+    method: 'get', path: `${FI}/report?from=2026-10-01&to=2026-10-31`, company: 'nofin',
+    allow: [],
+  },
+  {
+    id: 'nofin.finance.receivable', area: 'Sem valores', title: 'ver o que falta receber com valores desligados',
+    method: 'get', path: `${FI}/receivable`, company: 'nofin',
+    allow: [],
+  },
+
+  // ─── Financeiro (web) ──────────────────────────────────────────────────
+  {
+    id: 'finance.summary', area: 'Financeiro', title: 'ver Recebido, Vendido, A receber e Em andamento',
+    method: 'get', path: `${FI}/summary?month=2026-10`, allow: FINANCIAL, permission: 'viewFinancialReports',
+  },
+  {
+    id: 'finance.report', area: 'Financeiro', title: 'ver o relatório do período',
+    method: 'get', path: `${FI}/report?from=2026-10-01&to=2026-10-31`, allow: FINANCIAL, permission: 'viewFinancialReports',
+  },
+  {
+    id: 'finance.receivable', area: 'Financeiro', title: 'ver o que falta receber',
+    method: 'get', path: `${FI}/receivable`, allow: FINANCIAL, permission: 'viewFinancialReports',
   },
 
   // ─── Cadastros ─────────────────────────────────────────────────────────
