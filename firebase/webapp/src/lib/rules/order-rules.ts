@@ -40,7 +40,7 @@ export function orderTotal(
     if (line === null) unpricedCount++
     else sum += line
   }
-  return { total: roundMoney(sum - discount), unpricedCount }
+  return { total: Math.max(0, roundMoney(sum - discount)), unpricedCount }
 }
 
 export function paymentStatus(
