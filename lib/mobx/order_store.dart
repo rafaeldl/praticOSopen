@@ -50,6 +50,20 @@ bool canGenerateContractOrders(RolesType? role) =>
     role != null &&
     RolePermissions.hasPermission(role, PermissionType.createOrder);
 
+/// Whether [role] (user [userId]) generates the orders of contract
+/// [template]: admin and supervisor (who see every order) generate any;
+/// anyone else only from a template they created. A technician assigned to
+/// an admin's contract sees the template but leaves it alone, silently.
+bool canGenerateFromTemplate({
+  required RolesType? role,
+  required String? userId,
+  required Order template,
+}) {
+  if (!canGenerateContractOrders(role)) return false;
+  if (role == RolesType.admin || role == RolesType.supervisor) return true;
+  return userId != null && template.createdBy?.id == userId;
+}
+
 abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
   final PhotoService photoService = PhotoService();
@@ -781,11 +795,18 @@ abstract class _OrderStore with Store {
         );
       }
 
+      final userId = Global.currentUser?.uid;
       final dueOrders = orders
           .whereType<Order>()
           .where(
             (o) =>
-                o.contract?.isDue == true && o.contract?.autoGenerate == true,
+                o.contract?.isDue == true &&
+                o.contract?.autoGenerate == true &&
+                canGenerateFromTemplate(
+                  role: role,
+                  userId: userId,
+                  template: o,
+                ),
           )
           .toList();
 

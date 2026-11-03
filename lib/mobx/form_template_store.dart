@@ -16,6 +16,13 @@ part 'form_template_store.g.dart';
 
 class FormTemplateStore = _FormTemplateStore with _$FormTemplateStore;
 
+/// Active checklist templates (`isActive != false`, like the server
+/// trigger): all of them minus the ones marked inactive.
+int activeFormTemplateCount({required int all, required int inactive}) {
+  final active = all - inactive;
+  return active < 0 ? 0 : active;
+}
+
 abstract class _FormTemplateStore with Store {
   final FormTemplateRepositoryV2 repository = FormTemplateRepositoryV2();
   final SegmentFormTemplateRepository segmentRepository = SegmentFormTemplateRepository();
@@ -219,16 +226,23 @@ abstract class _FormTemplateStore with Store {
     if (!AuthorizationService.instance.canWriteUsageCounters) return;
 
     try {
-      // Conta templates ativos
-      final snapshot = await FirebaseFirestore.instance
+      // Active = isActive != false, like the server trigger: a template
+      // without the field counts. A Firestore "!=" query skips documents
+      // without the field, so count all and take out the inactive ones.
+      final templates = FirebaseFirestore.instance
           .collection('companies')
           .doc(companyId)
-          .collection(TenantFormTemplateRepository.collectionName)
-          .where('isActive', isEqualTo: true)
+          .collection(TenantFormTemplateRepository.collectionName);
+      final all = await templates.count().get();
+      final inactive = await templates
+          .where('isActive', isEqualTo: false)
           .count()
           .get();
 
-      final activeCount = snapshot.count ?? 0;
+      final activeCount = activeFormTemplateCount(
+        all: all.count ?? 0,
+        inactive: inactive.count ?? 0,
+      );
 
       // Atualiza no Firestore
       await FirebaseFirestore.instance
