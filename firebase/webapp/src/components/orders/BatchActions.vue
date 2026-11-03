@@ -13,7 +13,9 @@ import * as writes from '@/lib/orders/writes'
 import { assistStatus } from '@/lib/orders/assistant'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { ordersForPrint, paymentSettings } from '@/lib/receive/data'
-import { receivesMoney } from '@/lib/receive/model'
+import { receivableOf, receivesMoney } from '@/lib/receive/model'
+import { errorMessageKey } from '@/lib/api'
+import { firestoreLite } from '@/lib/firebase'
 import OrderPrint from './OrderPrint.vue'
 import '@/styles/receive.css'
 import { showToast } from '@/lib/toast'
@@ -56,7 +58,7 @@ const receivable = computed(() => {
 })
 const canPrint = computed(() => can('viewPrices') || !effectiveUseFinancial())
 /** "Mandar cobrança" (home.batch.charge): who charges, with Asaas on, and something owed. */
-const canCharge = computed(() => chargesReady.value && props.orders.some((order) => order.customer?.id && receivesMoney(order.status) && (remainingOnRow(order) ?? 0) > 0))
+const canCharge = computed(() => chargesReady.value && props.orders.some((order) => order.customer?.id && (receivableOf(order) ?? 0) > 0))
 /** The assistant (order.ai.batch): on for the company and every order open to item changes. */
 const canAsk = computed(() => aiReady.value && accesses.value.every((access) => access.canEditMainFields))
 
@@ -104,14 +106,42 @@ interface Pending {
 const pending = shallowRef<Pending | null>(null)
 const line = (order: Order) => `${orderShort()} ${order.number ?? ''} · ${order.customer?.name ?? ''}`
 
-function askStatus(status: OrderStatus) {
+/** Orders with a checklist not completed: they cannot be concluded (order.status.pending-checklist, as the order screen). */
+async function withPendingForms(orders: Order[]): Promise<Set<string>> {
+  const [db, { collection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  const found = await Promise.all(
+    orders.map(async (order) => {
+      const snap = await getDocs(collection(db, 'companies', session.companyId as string, 'orders', order.id, 'forms'))
+      return snap.docs.some((d) => d.data().status !== 'completed') ? order.id : null
+    }),
+  )
+  return new Set(found.filter((id): id is string => !!id))
+}
+
+async function askStatus(status: OrderStatus) {
   dialog.value = null
-  const changes = props.orders.filter((order) => order.status !== status)
+  let changes = props.orders.filter((order) => order.status !== status)
   const same = props.orders.length - changes.length
+  let pendingForms = 0
+  if (status === 'done') {
+    busy.value = true
+    try {
+      const blocked = await withPendingForms(changes)
+      pendingForms = blocked.size
+      changes = changes.filter((order) => !blocked.has(order.id))
+    } catch (error) {
+      // Not knowing is not "no checklist": nothing is concluded.
+      console.warn('batch: checklists not read', error)
+      showToast(t('web.error.generic'))
+      return
+    } finally {
+      busy.value = false
+    }
+  }
   pending.value = {
     title: t('web.batch.statusTitle', { count: changes.length, order: orderShort(), status: statusText(status) }),
     changes: changes.map((order) => ({ order, text: `${statusText(order.status)} → ${statusText(status)}` })),
-    note: same ? t('web.batch.alreadySo', { count: same }) : '',
+    note: [same ? t('web.batch.alreadySo', { count: same }) : '', pendingForms ? t('web.batch.pendingForms', { count: pendingForms }) : ''].filter(Boolean).join(' '),
     apply: (order) => writes.patchOrder(order.id, { status }, order.version),
     // Back only where the role allows the opposite move from the new status.
     back: (before, after) => (accessFor(after).transitions.includes(before.status) ? (version) => writes.patchOrder(after.id, { status: before.status }, version) : null),
@@ -137,10 +167,11 @@ function askAssignee(id: string) {
 
 async function confirmPending() {
   const plan = pending.value
-  if (!plan) return
+  // One run only: a second click finds nothing pending (B1).
+  if (!plan || busy.value) return
   pending.value = null
   busy.value = true
-  let failed = 0
+  const failures: string[] = []
   const ways: { after: Order; go: (version: string | null | undefined) => Promise<{ order?: Record<string, unknown> }> }[] = []
   let undoable = true
   for (const { order } of plan.changes) {
@@ -154,12 +185,13 @@ async function confirmPending() {
       } else undoable = false
     } catch (error) {
       console.warn('batch: order not changed', order.id, error)
-      failed++
+      failures.push(t('web.batch.failedOne', { order: `${orderShort()} ${order.number ?? ''}`, reason: t(errorMessageKey(error)) }))
     }
   }
   busy.value = false
+  const failed = failures.length
   const changed = plan.changes.length - failed
-  const message = failed ? t('web.batch.partial', { changed, failed }) : t('web.batch.done', { count: changed })
+  const message = failed ? [t('web.batch.partial', { changed, failed }), ...failures.slice(0, 3)].join(' ') : t('web.batch.done', { count: changed })
   showToast(message, undoable && ways.length ? { undo: () => void undo(ways) } : {})
   announce(message)
   emit('done')
@@ -226,6 +258,7 @@ async function openAssignee() {
     :lines="pending.changes.map((change) => ({ id: change.order.id, text: line(change.order), right: change.text }))"
     :note="pending.note"
     :confirm="t('web.batch.confirm', { count: pending.changes.length, order: orderShort() })"
+    :disabled="busy"
     @confirm="confirmPending"
     @close="pending = null"
   />

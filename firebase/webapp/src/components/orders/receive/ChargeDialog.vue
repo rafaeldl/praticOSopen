@@ -8,11 +8,11 @@ import { computed, onMounted, ref } from 'vue'
 import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
 import { t } from '@/i18n'
-import { ApiError, errorMessageKey } from '@/lib/api'
+import { ApiError } from '@/lib/api'
 import { loadCustomer } from '@/lib/customers/data'
 import { formatDate, formatMoney } from '@/lib/format'
 import { whatsappNumber } from '@/lib/phone'
-import { createCustomerCharge, createOrderCharge } from '@/lib/receive/data'
+import { chargeErrorKey, createCustomerCharge, createOrderCharge } from '@/lib/receive/data'
 import { addDays, asaasUrl, initialChargeValue, installmentValue, localDay, toCents, whatsappLink } from '@/lib/receive/model'
 import { session } from '@/lib/session'
 import { formatTaxId, isValidTaxId, normalizeTaxId } from '@/lib/tax-id'
@@ -97,21 +97,12 @@ async function save() {
   } catch (error) {
     // A network error may hide a charge already made: stay open, the card shows it when it lands (defect 48).
     if (error instanceof ApiError && error.code === 'NETWORK') maybeCreated.value = true
-    showToast(t(chargeError(error)))
+    showToast(t(chargeErrorKey(error)))
   } finally {
     saving.value = false
   }
 }
 
-function chargeError(error: unknown) {
-  if (!(error instanceof ApiError)) return 'web.error.generic' as const
-  if (error.code === 'TAX_ID_REQUIRED' || error.code === 'INVALID_TAX_ID') return 'web.charge.taxIdInvalid' as const
-  if (error.code === 'ASAAS_NOT_CONNECTED' || error.code === 'ASAAS_NOT_ENABLED') return 'web.charge.notConnected' as const
-  if (error.code === 'CUSTOMER_REQUIRED') return 'web.charge.noCustomer' as const
-  if (error.code === 'INSTALLMENTS_IN_PROGRESS' || error.code === 'CHARGE_SUPERSEDED' || error.code === 'PREVIOUS_LINK_CANCELED') return 'web.charge.tryAgainLink' as const
-  if (error.code === 'INVALID_VALUE' || error.code === 'VALUE_EXCEEDS_BALANCE') return 'web.error.paymentExceeds' as const
-  return errorMessageKey(error)
-}
 
 const wa = computed(() => whatsappNumber(phone.value, session.company?.country))
 const sendText = computed(() =>

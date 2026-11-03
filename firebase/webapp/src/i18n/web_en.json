@@ -280,6 +280,8 @@
   "web.batch.undo": "Undo",
   "web.batch.undone": "Back to how it was.",
   "web.batch.undoPartial": "{count, plural, =1{1 did not go back: someone changed it since.} other{# did not go back: someone changed them since.}}",
+  "web.batch.pendingForms": "{count, plural, =1{1 has a checklist to finish and is left out.} other{# have a checklist to finish and are left out.}}",
+  "web.batch.failedOne": "{order}: {reason}",
   "web.batchCharge.title": "Send a charge for {count} {order}",
   "web.batchCharge.none": "None of the selected can get a link now.",
   "web.batchCharge.leftOut": "{count, plural, =1{Left out:} other{Left out:}}",

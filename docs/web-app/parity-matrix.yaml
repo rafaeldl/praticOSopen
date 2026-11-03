@@ -3099,7 +3099,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/pdf.spec.ts
   web_exception: null
-  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva. Busca empresa, cliente completo (falhou, usa o resumo da OS) e checklists antes de gerar, com indicador que trava a tela. Não copiar: erro genérico Ocorreu um erro. Web (extras de tela grande): Ver PDF no menu … monta o PDF no navegador como o do app (lib/pdf/: cabeçalho, situação, cliente e resumo, blocos por aparelho, QR do link, fotos até 30, termos, assinaturas, uma página por checklist), com rótulos do segmento e textos do .arb; valores só com viewPrices e Valores e cobrança ligado; foto que não baixa fica de fora e o PDF diz que há fotos no sistema. Imprimir ou salvar PDF continua."
+  note: "canShareOrderPdf = viewPrices ou !useFinancial: supervisor e técnico só com financeiro desligado. Compartilhar virou segundo passo (order.pdf.share). Textos mantêm acento; caracteres fora do Latin-1 usam fonte de reserva. Busca empresa, cliente completo (falhou, usa o resumo da OS) e checklists antes de gerar, com indicador que trava a tela. Não copiar: erro genérico Ocorreu um erro. Web (extras de tela grande): Ver PDF no menu … monta o PDF no navegador como o do app (lib/pdf/: cabeçalho, situação, cliente e resumo, blocos por aparelho, QR do link, fotos até 30, termos, assinaturas, uma página por checklist), com rótulos do segmento e textos do .arb; valores só com viewPrices e Valores e cobrança ligado; foto que não baixa fica de fora e o PDF diz que há fotos no sistema. Texto fora do Latin-1 (ex.: μ) sai pela Roboto de reserva do app (assets/fonts), embutida só quando aparece; fontkit e a fonte baixam só nesse caso. Imprimir ou salvar PDF continua."
 - id: order.pdf.viewer
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -3203,7 +3203,7 @@ rows:
   e2e: firebase/webapp/e2e/batch.spec.ts
   web_exception: null
   permission: viewOwnOrders
-  note: "Só web (extra de mesa). Só as situações que todas as selecionadas aceitam pelo papel. Pergunta antes: Mudar N OS para X?, lista cada OS com de → para e diz quantas já estão assim. Cada OS pela API com expectedUpdatedAt; recusa contada no aviso. Desfazer volta cada uma à situação anterior quando o papel permite o caminho de volta; o que alguém mudou depois fica e é dito."
+  note: "Só web (extra de mesa). Só as situações que todas as selecionadas aceitam pelo papel. Pergunta antes: Mudar N OS para X?, lista cada OS com de → para e diz quantas já estão assim. Concluir confere os checklists como a tela da OS: OS com checklist por terminar fica de fora e a confirmação diz quantas. Cada OS pela API com expectedUpdatedAt; recusa contada no aviso com o motivo de cada OS. Desfazer volta cada uma à situação anterior quando o papel permite o caminho de volta; o que alguém mudou depois fica e é dito."
 - id: home.batch.assignee
   screen: firebase/webapp/src/components/orders/BatchActions.vue
   route: "/"
@@ -3239,7 +3239,7 @@ rows:
   e2e: firebase/webapp/e2e/batch.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só web (extra de mesa). Agrupa por cliente: uma OS vira link da OS, várias viram um link do cliente (como na tela do cliente). Antes de criar mostra cada cliente com as OS e o valor e o que fica de fora e por quê (sem cliente, nada a receber, link já aberto, sem CPF/CNPJ válido no cadastro: mandar pela OS). Vencimento hoje + 3, nunca no passado. Cria pela API e mostra Mandar pelo WhatsApp e Copiar por cliente. Desfazer cancela os links criados, com confirmação."
+  note: "Só web (extra de mesa). Agrupa por cliente: uma OS vira link da OS, várias viram um link do cliente (como na tela do cliente). Antes de criar mostra cada cliente com as OS e o valor e o que fica de fora e por quê (sem cliente, nada a receber pela regra do Receber, ou seja, concluída com saldo ou em andamento com sinal; link já aberto da OS ou do cliente em customerCharges; sem CPF/CNPJ válido no cadastro: mandar pela OS). Recusa do servidor aparece com o motivo, por cliente. Criar e Aplicar não repetem em duplo clique. Vencimento hoje + 3, nunca no passado. Cria pela API e mostra Mandar pelo WhatsApp e Copiar por cliente. Desfazer cancela os links criados, com confirmação."
 - id: home.batch.ai
   screen: firebase/webapp/src/components/orders/AiBatchDialog.vue
   route: "/"

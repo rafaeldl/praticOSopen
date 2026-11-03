@@ -27,6 +27,14 @@ export const canOrderPdf = (): boolean => can('viewPrices') || !effectiveUseFina
 /** Who gets prices in it (orderPdfShowsValues with viewPrices). */
 export const pdfShowsValues = (): boolean => can('viewPrices') && effectiveUseFinancial()
 
+/** The app's fallback font (assets/fonts/Roboto-Regular.ttf, Apache 2.0) and fontkit, downloaded only for a PDF that needs them. */
+async function robotoFallback() {
+  const [fontkit, font] = await Promise.all([import('@pdf-lib/fontkit'), import('../../../../../assets/fonts/Roboto-Regular.ttf?url')])
+  const response = await fetch(font.default)
+  if (!response.ok) throw new Error(`pdf: font ${response.status}`)
+  return { fontkit: fontkit.default, bytes: new Uint8Array(await response.arrayBuffer()) }
+}
+
 const tr = (key: Parameters<typeof t>[0]) => t(key)
 
 export function pdfTexts(): PdfTexts {
@@ -217,7 +225,7 @@ export async function ordersPdf(ids: readonly string[]): Promise<OrdersPdf> {
     logo: logo as PdfImage | null,
   }
   const texts = pdfTexts()
-  const bytes = await buildOrdersPdf(found, company, texts, { showValues: show })
+  const bytes = await buildOrdersPdf(found, company, texts, { showValues: show, fallbackFont: robotoFallback })
   return {
     blob: new Blob([bytes as BlobPart], { type: 'application/pdf' }),
     fileName: pdfFileName(texts.serviceOrder, found.map((part) => part.order.number)),

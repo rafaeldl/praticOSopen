@@ -125,3 +125,12 @@ test('várias OS selecionadas num PDF só, cada uma nas suas páginas (order.pdf
   expect(text.match(/Página 1 de 1/g)?.length).toBe(2)
   expect(pdfPageCount(bytes)).toBe(2)
 })
+
+test('B4: caractere fora do Latin-1 sai pela fonte de reserva, não como "?"', async ({ page }) => {
+  const order = await makeOrder('admin', { services: [{ service: { id: 's-mu', name: 'Capacitor 35μF' }, value: 10 }] })
+  await openOrder(page, 'admin', order.id)
+  await (await openMenu(page)).getByRole('button', { name: 'Ver PDF' }).click()
+  const bytes = await download(page)
+  expect(Buffer.from(bytes).toString('latin1')).toContain('/FontFile2')
+  expect(pdfText(bytes)).not.toContain('35?F')
+})

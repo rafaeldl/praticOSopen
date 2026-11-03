@@ -8,7 +8,7 @@
 import { computed, onMounted, ref, shallowRef } from 'vue'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
-import { ApiError } from '@/lib/api'
+import { ApiError, errorMessageKey } from '@/lib/api'
 import { formatMoney } from '@/lib/format'
 import { askAssistant, assistStatus, type DraftItem } from '@/lib/orders/assistant'
 import { orderChanged } from '@/lib/orders/bus'
@@ -89,9 +89,11 @@ async function prepare() {
 }
 
 async function apply() {
+  // One run only: a second click while it saves does nothing (B1).
+  if (state.value !== 'plan') return
   state.value = 'saving'
   const added: { order: Order; ids: string[]; version: string | null | undefined }[] = []
-  let failed = 0
+  const failures: string[] = []
   for (const { order, items } of withItems.value) {
     const ids: string[] = []
     let version = order.version
@@ -116,12 +118,13 @@ async function apply() {
       }
     } catch (error) {
       console.warn('ai batch: order not changed', order.id, error)
-      failed++
+      failures.push(t('web.batch.failedOne', { order: `${orderShort()} ${order.number ?? ''}`, reason: t(errorMessageKey(error)) }))
     }
     if (ids.length) added.push({ order, ids, version })
   }
   const changed = added.length
-  const message = failed ? t('web.batch.partial', { changed, failed }) : t('web.batch.done', { count: changed })
+  const failed = failures.length
+  const message = failed ? [t('web.batch.partial', { changed, failed }), ...failures.slice(0, 3)].join(' ') : t('web.batch.done', { count: changed })
   showToast(message, added.length ? { undo: () => void undo(added) } : {})
   announce(message)
   emit('done')

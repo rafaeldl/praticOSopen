@@ -177,3 +177,107 @@ test('assistente em lote respeita a cota: pede menos OS quando faltam pedidos no
   await expect(sheet.getByRole('button', { name: 'Preparar' })).toBeDisabled()
   expect(asked).toBe(0)
 })
+
+// ---------------------------------------------------------------------------
+// Revisão do #531
+// ---------------------------------------------------------------------------
+
+async function chargeRoutes(page: Page, refuse: (path: string) => { status: number; code: string } | null = () => null) {
+  const created: { path: string; body: Record<string, unknown> }[] = []
+  await page.route(/\/v1\/app\/(orders|customers)\/[^/]+\/charges/, async (route: Route) => {
+    const request = route.request()
+    const path = new URL(request.url()).pathname
+    if (request.method() !== 'POST') return route.fulfill({ status: 200, json: { success: true, data: { status: 'canceled' } } })
+    const refused = refuse(path)
+    if (refused) return route.fulfill({ status: refused.status, json: { success: false, error: { code: refused.code, message: refused.code } } })
+    const body = request.postDataJSON() as Record<string, unknown>
+    created.push({ path, body })
+    // Slow answer: a second click while it runs must not create again (B1).
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    const id = `rc-${created.length}`
+    return route.fulfill({ status: 201, json: { success: true, data: { id, status: 'pending', value: body.value, invoiceUrl: `https://sandbox.asaas.com/i/${id}` } } })
+  })
+  return created
+}
+
+test('M1, B2, B3, B1: link do cliente já aberto fica de fora; em andamento com sinal entra; recusa diz o motivo; duplo clique cria uma vez (home.batch.charge)', async ({ page }) => {
+  const tag = Date.now()
+  const dora = await makeCustomer({ name: `Lote M1 Dora ${tag}`, phone: '+5511990007101', taxId: '52998224725' })
+  const edu = await makeCustomer({ name: `Lote M1 Edu ${tag}`, phone: '+5511990007102', taxId: '52998224725' })
+  const fabi = await makeCustomer({ name: `Lote M1 Fabi ${tag}`, phone: '+5511990007103', taxId: '52998224725' })
+  const order = (customer: { id: string; name: string }, extra: Record<string, unknown>) =>
+    makeOrder('admin', { customer, status: 'done', total: 100, paidAmount: 0, payment: 'unpaid', services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: 100 }], ...extra })
+  const covered = await order(dora, {})
+  // Open link of the customer covering that order (customerCharges).
+  await writeDoc(`customerCharges/cc-m1-${tag}`, { customer: { id: dora.id, name: dora.name }, status: 'pending', value: 100, orderIds: [covered.id], invoiceUrl: 'https://sandbox.asaas.com/i/cc', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
+  // In progress with a down payment: Receber counts it (receivableOf), so the batch does too.
+  const signal = await order(edu, { status: 'progress', paidAmount: 30, payment: 'partial' })
+  const refused = await order(fabi, {})
+  const created = await chargeRoutes(page, (path) => (path.includes(`/orders/${refused.id}/`) ? { status: 400, code: 'INVALID_TAX_ID' } : null))
+  await select(page, 'admin', `Lote M1`, [covered.number, signal.number, refused.number])
+  await bar(page).getByRole('button', { name: 'Mandar cobrança' }).click()
+  const sheet = dialog(page, 'Mandar cobrança de 2 OS')
+  await expect(sheet.getByTestId('batch-charge-left-out')).toContainText('já tem link aberto')
+  await expect(sheet.getByTestId('batch-charge-plan')).toContainText(edu.name)
+  await expect(sheet.getByTestId('batch-charge-plan')).toContainText('R$ 70,00')
+  await sheet.getByRole('button', { name: 'Criar 2 links' }).dblclick()
+  await expect(sheet.getByRole('heading', { name: 'Links de pagamento prontos' })).toBeVisible()
+  expect(created).toHaveLength(1)
+  expect(created[0]?.body).toMatchObject({ value: 70 })
+  await expect(sheet.getByTestId('batch-charge-failed')).toContainText(fabi.name)
+  await expect(sheet.getByTestId('batch-charge-failed')).toContainText('Esse CPF ou CNPJ não confere.')
+})
+
+test('M2: concluir em lote deixa de fora a OS com checklist por terminar e diz por quê (home.batch.status)', async ({ page }) => {
+  const name = `Lote M2 ${Date.now()}`
+  const customer = { id: 'customer-2', name }
+  const ready = await makeOrder('admin', { customer, status: 'progress' })
+  const blocked = await makeOrder('admin', { customer, status: 'progress' })
+  await writeDoc(`orders/${blocked.id}/forms/f1`, { formDefinitionId: 't', title: 'Entrada', status: 'in_progress', items: [], responses: [], startedAt: new Date().toISOString() })
+  await select(page, 'admin', name, [ready.number, blocked.number])
+  await bar(page).getByRole('button', { name: 'Mudar a situação' }).click()
+  await dialog(page, 'Qual a situação?').getByRole('button', { name: 'Concluído' }).click()
+  const confirm = dialog(page, /Mudar 1 OS para Concluído\?/)
+  await expect(confirm).toContainText(`OS ${ready.number}`)
+  await expect(confirm.getByTestId('batch-confirm-lines')).not.toContainText(`OS ${blocked.number}`)
+  await expect(confirm).toContainText('1 tem checklist por terminar e fica de fora')
+  await confirm.getByRole('button', { name: 'Mudar 1 OS' }).dblclick()
+  await expect(toast(page)).toContainText('1 atualizada')
+  await expect.poll(async () => (await readOrder(ready.id))?.status).toBe('done')
+  expect((await readOrder(blocked.id))?.status).toBe('progress')
+})
+
+test('B1: "Aplicar" do assistente em duplo clique põe o item uma vez (order.ai.batch)', async ({ page }) => {
+  const name = `Lote B1 IA ${Date.now()}`
+  const a = await makeOrder('admin', { customer: { id: 'customer-2', name }, status: 'approved' })
+  await page.route(/\/v1\/app\/ai\/status/, (route) => route.fulfill({ json: { success: true, data: { enabled: true, usage: { used: 1, limit: 100 } } } }))
+  await page.route(/\/v1\/app\/ai\/order-assist/, (route) =>
+    route.fulfill({ json: { success: true, data: { items: [{ kind: 'service', name: 'Serviço 3', value: 150, quantity: 1, catalogId: 'service-3', description: null }], changes: [], usage: { used: 2, limit: 100 } } } }),
+  )
+  await select(page, 'admin', name, [a.number])
+  await bar(page).getByRole('button', { name: /Pedir ao assistente/ }).click()
+  const sheet = dialog(page, 'Pedir ao assistente em 1 OS')
+  await sheet.getByLabel('O que fazer nessas OS?').fill('pôr o serviço 3')
+  await sheet.getByRole('button', { name: 'Preparar' }).click()
+  await sheet.getByRole('button', { name: 'Aplicar em 1 OS' }).dblclick()
+  await expect(toast(page)).toContainText('1 atualizada')
+  const names = async () => ((await readOrder(a.id))?.services as { service?: { name?: string } }[]).map((s) => s.service?.name)
+  await expect.poll(names).toContain('Serviço 3')
+  expect((await names()).filter((n) => n === 'Serviço 3')).toHaveLength(1)
+})
+
+test('B3: falha ao gravar no lote diz o motivo de cada OS (home.batch.status)', async ({ page }) => {
+  const name = `Lote B3 ${Date.now()}`
+  const customer = { id: 'customer-2', name }
+  const a = await makeOrder('admin', { customer, status: 'approved' })
+  const b = await makeOrder('admin', { customer, status: 'approved' })
+  await page.route(new RegExp(`/v1/app/orders/${b.id}$`), (route) =>
+    route.request().method() === 'PATCH' ? route.fulfill({ status: 409, json: { success: false, error: { code: 'ORDER_CHANGED' } } }) : route.continue(),
+  )
+  await select(page, 'admin', name, [a.number, b.number])
+  await bar(page).getByRole('button', { name: 'Mudar a situação' }).click()
+  await dialog(page, 'Qual a situação?').getByRole('button', { name: 'Na oficina' }).click()
+  await dialog(page, /Mudar 2 OS/).getByRole('button', { name: 'Mudar 2 OS' }).click()
+  await expect(toast(page)).toContainText(`OS ${b.number}`)
+  await expect(toast(page)).toContainText('mudou')
+})

@@ -7,7 +7,7 @@
 // Pure: texts come resolved (load.ts) and images as bytes, so vitest covers it
 // without a browser. pdf-lib is loaded with this module, never before someone
 // asks for a PDF. Helvetica draws only WinAnsi; what is outside it is simplified
-// (accents dropped) or becomes "?", where the app falls back to Roboto.
+// goes out in Roboto (assets/fonts, as the app), loaded only when needed.
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFPage, type RGB } from 'pdf-lib'
 import qrcode from 'qrcode-generator'
 import type { OrderForm } from '@/lib/forms/model'
@@ -93,6 +93,8 @@ export interface PdfOrderPart {
 export interface PdfOptions {
   /** viewPrices with "Valores e cobrança" on: prices, totals and payments. */
   showValues: boolean
+  /** Loads fontkit and Roboto (assets/fonts, the app's fallback); called only when some text needs it. */
+  fallbackFont?: () => Promise<{ fontkit: unknown; bytes: Uint8Array }>
 }
 
 // PdfStyles of the app.
@@ -148,6 +150,11 @@ function drawable(char: string): boolean {
   return (code >= 0x20 && code <= 0x7e) || (code >= 0xa0 && code <= 0xff) || CP1252_EXTRA.has(char)
 }
 
+/** Has a character Helvetica cannot draw (the app falls back to Roboto for it). */
+export function needsFallback(text: string): boolean {
+  return [...text].some((char) => !/[\t\r\n]/.test(char) && !drawable(char))
+}
+
 /** One line of text Helvetica draws: accents it lacks are dropped, the rest becomes "?". */
 export function pdfSafe(text: string): string {
   let out = ''
@@ -162,10 +169,12 @@ export function pdfSafe(text: string): string {
 }
 
 /** Lines of `text` that fit `width` (paragraphs kept, long words broken). */
-export function wrap(text: string, font: PDFFont, size: number, width: number): string[] {
+export function wrap(text: string, base: PDFFont, size: number, width: number, fallback: PDFFont | null = null): string[] {
   const lines: string[] = []
   for (const paragraph of text.split(/\r?\n/)) {
-    const words = pdfSafe(paragraph).split(' ').filter(Boolean)
+    const odd = !!fallback && needsFallback(paragraph)
+    const font = odd ? (fallback as PDFFont) : base
+    const words = (odd ? paragraph.replace(/\t/g, ' ') : pdfSafe(paragraph)).split(' ').filter(Boolean)
     let line = ''
     for (const word of words) {
       const next = line ? `${line} ${word}` : word
@@ -202,6 +211,14 @@ interface Ctx {
   company: PdfCompany
   logo: PDFImage | null
   images: Map<PdfImage, PDFImage | null>
+  /** Roboto, only when some text needs it (B4). */
+  fallback: PDFFont | null
+}
+
+/** The font and text to draw: Helvetica as the app, Roboto for what Helvetica lacks. */
+function face(ctx: Pick<Ctx, 'font' | 'bold' | 'fallback'>, value: string, bold = false): { font: PDFFont; text: string } {
+  if (ctx.fallback && needsFallback(value)) return { font: ctx.fallback, text: value.replace(/[\t\r\n]+/g, ' ') }
+  return { font: bold ? ctx.bold : ctx.font, text: pdfSafe(value) }
 }
 
 /** Pages of one order, with a cursor that goes down from the top. */
@@ -226,8 +243,7 @@ class Flow {
     if (this.y + height > H - FOOTER - 12) this.newPage()
   }
   text(value: string, x: number, size: number, options: { bold?: boolean; color?: RGB; right?: number; opacity?: number; baseline?: number } = {}) {
-    const font = options.bold ? this.ctx.bold : this.ctx.font
-    const safe = pdfSafe(value)
+    const { font, text: safe } = face(this.ctx, value, options.bold)
     const width = font.widthOfTextAtSize(safe, size)
     const left = options.right !== undefined ? options.right - width : x
     this.page.drawText(safe, { x: left, y: H - (options.baseline ?? this.y) - size * 0.8, size, font, color: options.color ?? C.text, opacity: options.opacity })
@@ -282,8 +298,7 @@ function drawHeader(ctx: Ctx, page: PDFPage, number: string): number {
     x += 52
   }
   const draw = (value: string, size: number, top: number, bold: boolean, opacity = 1, right?: number) => {
-    const font = bold ? ctx.bold : ctx.font
-    const safe = pdfSafe(value)
+    const { font, text: safe } = face(ctx, value, bold)
     const left = right !== undefined ? right - font.widthOfTextAtSize(safe, size) : x
     page.drawText(safe, { x: left, y: H - top - size * 0.8, size, font, color: C.white, opacity })
   }
@@ -298,9 +313,10 @@ function drawFooter(ctx: Ctx, page: PDFPage, left: string, right: string) {
   page.drawRectangle({ x: 0, y: 0, width: W, height: FOOTER, color: C.bgLight })
   page.drawLine({ start: { x: 0, y: FOOTER }, end: { x: W, y: FOOTER }, thickness: 0.5, color: C.border })
   const size = 7
-  page.drawText(pdfSafe(left), { x: PAD, y: 10, size, font: ctx.font, color: C.footer })
-  const safe = pdfSafe(right)
-  page.drawText(safe, { x: W - PAD - ctx.font.widthOfTextAtSize(safe, size), y: 10, size, font: ctx.font, color: C.footer })
+  const l = face(ctx, left)
+  page.drawText(l.text, { x: PAD, y: 10, size, font: l.font, color: C.footer })
+  const r = face(ctx, right)
+  page.drawText(r.text, { x: W - PAD - r.font.widthOfTextAtSize(r.text, size), y: 10, size, font: r.font, color: C.footer })
 }
 
 function sectionTitle(flow: Flow, title: string, x = PAD) {
@@ -330,9 +346,9 @@ function customerCard(ctx: Ctx, part: PdfOrderPart, width: number) {
   const name = part.customer?.name || part.order.customer?.name || ctx.texts.notInformed
   const contact = [part.customer?.phone, part.customer?.email].filter((item): item is string => !!item?.trim()).join(' · ')
   const inner = width - 20
-  const nameLines = wrap(name, ctx.bold, 10, inner)
-  const contactLines = contact ? wrap(contact, ctx.font, 8, inner).slice(0, 2) : []
-  const address = part.order.address?.trim() ? wrap(part.order.address, ctx.font, 8.5, inner) : []
+  const nameLines = wrap(name, ctx.bold, 10, inner, ctx.fallback)
+  const contactLines = contact ? wrap(contact, ctx.font, 8, inner, ctx.fallback).slice(0, 2) : []
+  const address = part.order.address?.trim() ? wrap(part.order.address, ctx.font, 8.5, inner, ctx.fallback) : []
   const height = 16 + nameLines.length * 12 + (contactLines.length ? 3 + contactLines.length * 10 : 0) + (address.length ? 18 + address.length * 11 : 0)
   const draw = (flow: Flow, x: number, top: number, boxHeight: number) => {
     flow.rect(x, top, width, boxHeight, { border: C.border })
@@ -474,7 +490,7 @@ function drawBlocks(ctx: Ctx, flow: Flow, order: Order) {
     if (!block.lines.length) continue
     headerRow()
     for (const line of block.lines) {
-      const descLines = wrap(lineName(line), ctx.font, 8.5, cols[1]! - 12)
+      const descLines = wrap(lineName(line), ctx.font, 8.5, cols[1]! - 12, ctx.fallback)
       const height = 10 + descLines.length * 11
       if (flow.y + height > H - FOOTER - 12) {
         flow.newPage()
@@ -502,7 +518,7 @@ function drawQr(ctx: Ctx, flow: Flow, url: string) {
   qr.addData(url)
   qr.make()
   const count = qr.getModuleCount()
-  const lines = wrap(ctx.texts.trackOnlineDescription, ctx.font, 8, BODY_W - 100)
+  const lines = wrap(ctx.texts.trackOnlineDescription, ctx.font, 8, BODY_W - 100, ctx.fallback)
   const height = Math.max(84, 20 + 13 + lines.length * 10 + 14)
   flow.need(height)
   const top = flow.y
@@ -565,7 +581,7 @@ function drawPhotos(ctx: Ctx, flow: Flow, part: PdfOrderPart) {
 function drawTermsAndSignatures(ctx: Ctx, flow: Flow, part: PdfOrderPart) {
   const terms = ctx.company.terms?.trim()
   if (terms) {
-    const lines = wrap(terms, ctx.font, 7.5, BODY_W - 20)
+    const lines = wrap(terms, ctx.font, 7.5, BODY_W - 20, ctx.fallback)
     flow.need(16 + 12 + Math.min(lines.length, 3) * 10.5)
     sectionTitle(flow, ctx.texts.terms)
     flow.y += 14
@@ -598,7 +614,7 @@ function drawTermsAndSignatures(ctx: Ctx, flow: Flow, part: PdfOrderPart) {
   const left = (W - blockW * 2 - 32) / 2
   const sign = (x: number, label: string, name?: string) => {
     flow.line(x, x + blockW, flow.y, C.muted)
-    const center = (text: string, size: number, bold: boolean) => (blockW - (bold ? ctx.bold : ctx.font).widthOfTextAtSize(pdfSafe(text), size)) / 2
+    const center = (text: string, size: number, bold: boolean) => (blockW - ((f) => f.font.widthOfTextAtSize(f.text, size))(face(ctx, text, bold))) / 2
     flow.text(label, x + center(label, 8.5, true), 8.5, { bold: true, baseline: flow.y + 6 })
     if (name) flow.text(name, x + center(name, 7.5, false), 7.5, { color: C.secondary, baseline: flow.y + 18 })
   }
@@ -639,7 +655,7 @@ function drawForm(ctx: Ctx, part: PdfOrderPart, entry: PdfOrderPart['forms'][num
   const top = flow.y
   const statusColor = FORM_COLOR[form.status]
   const statusText = form.status === 'completed' ? ctx.texts.formCompleted : form.status === 'in_progress' ? ctx.texts.formInProgress : ctx.texts.formPending
-  const title = wrap(ctx.texts.formTitle(form).toLocaleUpperCase(), ctx.bold, 13, BODY_W - 160)
+  const title = wrap(ctx.texts.formTitle(form).toLocaleUpperCase(), ctx.bold, 13, BODY_W - 160, ctx.fallback)
   title.forEach((line, i) => flow.text(line, PAD, 13, { bold: true, color: C.primary, baseline: top + i * 16 }))
   flow.text(ctx.company.name, PAD, 8.5, { color: C.secondary, baseline: top + title.length * 16 + 2 })
   flow.text(`${ctx.texts.serviceOrder.toLocaleUpperCase()} Nº`, 0, 7.5, { color: C.muted, right: W - PAD, baseline: top })
@@ -651,9 +667,9 @@ function drawForm(ctx: Ctx, part: PdfOrderPart, entry: PdfOrderPart['forms'][num
   flow.line(PAD, W - PAD, flow.y, C.border)
   flow.y += 12
   for (const item of form.items) {
-    const label = wrap(ctx.texts.itemLabel(item), ctx.bold, 9, BODY_W - 20)
+    const label = wrap(ctx.texts.itemLabel(item), ctx.bold, 9, BODY_W - 20, ctx.fallback)
     const answer = formAnswer(ctx, form, item)
-    const answerLines = answer && !answer.checks ? wrap(answer.text, ctx.font, 8.5, BODY_W - 20) : []
+    const answerLines = answer && !answer.checks ? wrap(answer.text, ctx.font, 8.5, BODY_W - 20, ctx.fallback) : []
     const checks = answer?.checks ?? []
     const itemPhotos = (photos[item.id] ?? []).filter((photo) => imageOf(ctx, photo))
     const height = 10 + label.length * 11 + 4 + answerLines.length * 11 + checks.length * 11 + 6
@@ -713,6 +729,22 @@ async function embed(doc: PDFDocument, image: PdfImage): Promise<PDFImage | null
   }
 }
 
+/** Roboto embedded (subset) only when the data has a character Helvetica cannot draw. */
+async function fallbackFor(doc: PDFDocument, parts: PdfOrderPart[], company: PdfCompany, options: PdfOptions): Promise<PDFFont | null> {
+  if (!options.fallbackFont) return null
+  const data = JSON.stringify([company.name, company.address, company.phone, company.email, company.terms, parts.map((p) => [p.order, p.customer, p.shareUrl, p.forms.map((f) => f.form)])])
+  if (!needsFallback(data)) return null
+  try {
+    const { fontkit, bytes } = await options.fallbackFont()
+    doc.registerFontkit(fontkit as Parameters<PDFDocument['registerFontkit']>[0])
+    return await doc.embedFont(bytes, { subset: true })
+  } catch (error) {
+    // Like the app: without the fallback the PDF still comes out (simplified text).
+    console.warn('pdf: fallback font not loaded', error)
+    return null
+  }
+}
+
 /** One PDF with every order in `parts`, in that order. */
 export async function buildOrdersPdf(parts: PdfOrderPart[], company: PdfCompany, texts: PdfTexts, options: PdfOptions): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
@@ -724,7 +756,8 @@ export async function buildOrdersPdf(parts: PdfOrderPart[], company: PdfCompany,
   const all = parts.flatMap((part) => [...part.photos, ...part.forms.flatMap((entry) => Object.values(entry.photos).flat())])
   for (const image of all) if (!images.has(image)) images.set(image, await embed(doc, image))
   const logo = company.logo ? await embed(doc, company.logo) : null
-  const ctx: Ctx = { doc, font, bold, texts, show: options.showValues, company, logo, images }
+  const fallback = await fallbackFor(doc, parts, company, options)
+  const ctx: Ctx = { doc, font, bold, texts, show: options.showValues, company, logo, images, fallback }
   for (const part of parts) drawOrder(ctx, part)
   // Plain objects (no object streams): simpler files that any reader opens.
   return doc.save({ useObjectStreams: false })

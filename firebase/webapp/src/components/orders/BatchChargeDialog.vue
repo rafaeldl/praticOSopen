@@ -12,11 +12,11 @@ import { t } from '@/i18n'
 import { firestoreLite } from '@/lib/firebase'
 import { loadCustomer } from '@/lib/customers/data'
 import { formatDate, formatMoney } from '@/lib/format'
-import { remainingOnRow, type Order } from '@/lib/orders/model'
+import type { Order } from '@/lib/orders/model'
 import { orderShort } from '@/lib/orders/text'
 import { whatsappNumber } from '@/lib/phone'
-import { cancelCustomerCharge, cancelOrderCharge, createCustomerCharge, createOrderCharge } from '@/lib/receive/data'
-import { addDays, asaasUrl, chargeOf, fromCents, localDay, openChargeOf, receivesMoney, toCents, whatsappLink } from '@/lib/receive/model'
+import { cancelCustomerCharge, cancelOrderCharge, chargeErrorKey, createCustomerCharge, createOrderCharge, customerCharges } from '@/lib/receive/data'
+import { addDays, asaasUrl, chargeOf, fromCents, isOpenCharge, localDay, openChargeOf, receivableOf, toCents, whatsappLink } from '@/lib/receive/model'
 import { session } from '@/lib/session'
 import { isValidTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
@@ -46,8 +46,9 @@ const groups = shallowRef<Group[]>([])
 const leftOut = shallowRef<{ name: string; why: string }[]>([])
 const due = ref(addDays(today, 3))
 const made = shallowRef<Made[]>([])
-const failed = ref(0)
+const failed = shallowRef<{ name: string; why: string }[]>([])
 const asking = ref(false)
+const undoing = ref(false)
 
 const count = computed(() => groups.value.reduce((sum, group) => sum + group.orders.length, 0))
 const title = computed(() => (count.value ? t('web.batchCharge.title', { count: count.value, order: orderShort() }) : t('chargeLinkTitle')))
@@ -64,15 +65,23 @@ onMounted(async () => {
     const out: { name: string; why: string }[] = []
     const byCustomer = new Map<string, Order[]>()
     for (const order of props.orders) {
-      const owed = remainingOnRow(order) ?? 0
+      // What Receber counts (receivableOf): done with a balance, or in progress with a down payment.
+      const owed = receivableOf(order) ?? 0
       if (!order.customer?.id) out.push({ name: `${orderShort()} ${order.number ?? ''}`, why: t('web.batchCharge.noCustomer') })
-      else if (!receivesMoney(order.status) || toCents(owed) <= 0) out.push({ name: `${orderShort()} ${order.number ?? ''} · ${order.customer.name ?? ''}`, why: t('web.batchCharge.nothingOwed') })
+      else if (toCents(owed) <= 0) out.push({ name: `${orderShort()} ${order.number ?? ''} · ${order.customer.name ?? ''}`, why: t('web.batchCharge.nothingOwed') })
       else byCustomer.set(order.customer.id, [...(byCustomer.get(order.customer.id) ?? []), order])
     }
     const found: Group[] = []
     for (const [customerId, orders] of byCustomer) {
       const name = orders[0]?.customer?.name ?? ''
-      const [record, open] = await Promise.all([loadCustomer(customerId).then((d) => d.customer).catch(() => null), Promise.all(orders.map((o) => hasOpenLink(o.id)))])
+      // An open link of the order or of the customer (customerCharges) covering it: no new one.
+      const [record, own, ofCustomer] = await Promise.all([
+        loadCustomer(customerId).then((d) => d.customer).catch(() => null),
+        Promise.all(orders.map((o) => hasOpenLink(o.id))),
+        customerCharges(customerId).then((list) => list.filter(isOpenCharge)),
+      ])
+      const covered = new Set(ofCustomer.flatMap((charge) => charge.orderIds ?? []))
+      const open = orders.map((o, i) => own[i] || covered.has(o.id))
       const free = orders.filter((_, i) => !open[i])
       orders.filter((_, i) => open[i]).forEach((o) => out.push({ name: `${orderShort()} ${o.number ?? ''} · ${name}`, why: t('web.batchCharge.openLink') }))
       if (!free.length) continue
@@ -80,7 +89,7 @@ onMounted(async () => {
         out.push({ name: record?.name ?? name, why: t('web.batchCharge.noTaxId') })
         continue
       }
-      const cents = free.reduce((sum, o) => sum + toCents(remainingOnRow(o) ?? 0), 0)
+      const cents = free.reduce((sum, o) => sum + toCents(receivableOf(o) ?? 0), 0)
       found.push({ customerId, name: record?.name ?? name, phone: record?.phone ?? '', orders: free, value: fromCents(cents) })
     }
     groups.value = found
@@ -93,10 +102,11 @@ onMounted(async () => {
 })
 
 async function create() {
-  if (!due.value || due.value < today) return
+  // One run only: a second click while it runs does nothing (B1).
+  if (state.value !== 'plan' || !due.value || due.value < today) return
   state.value = 'saving'
   const list: Made[] = []
-  let errors = 0
+  const errors: { name: string; why: string }[] = []
   for (const group of groups.value) {
     try {
       // One order: its own link (as the order screen); several: one link of the customer.
@@ -107,7 +117,7 @@ async function create() {
       list.push({ group, id: String(response.id ?? ''), url: asaasUrl(response.invoiceUrl) ?? null })
     } catch (error) {
       console.warn('batch charge: not created', group.customerId, error)
-      errors++
+      errors.push({ name: `${group.name} · ${ordersText(group.orders)}`, why: t(chargeErrorKey(error)) })
     }
   }
   made.value = list
@@ -135,6 +145,8 @@ async function copy(item: Made) {
 /** Undo: cancels the links just made (a link already paid is refused by the server and said). */
 async function undo() {
   asking.value = false
+  if (undoing.value) return
+  undoing.value = true
   let errors = 0
   for (const item of made.value) {
     try {
@@ -204,7 +216,12 @@ async function undo() {
           <p class="sub">{{ t('web.batchCharge.doneSub', { date: formatDate(`${due}T12:00:00`, BR) }) }}</p>
         </div>
         <div class="layer-body">
-          <p v-if="failed" role="alert">{{ t('web.batchCharge.failed', { count: failed }) }}</p>
+          <div v-if="failed.length" role="alert" data-testid="batch-charge-failed">
+            <p>{{ t('web.batchCharge.failed', { count: failed.length }) }}</p>
+            <ul class="batch-lines">
+              <li v-for="(item, i) in failed" :key="i" class="pay-row"><span>{{ item.name }}</span><span class="muted">{{ item.why }}</span></li>
+            </ul>
+          </div>
           <ul class="batch-lines">
             <li v-for="item in made" :key="item.id" class="pay-row">
               <span>{{ item.group.name }} · {{ formatMoney(item.group.value, BR) }}</span>

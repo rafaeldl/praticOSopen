@@ -184,6 +184,27 @@ describe('buildOrdersPdf', () => {
   })
 })
 
+describe('fonte de reserva (B4)', () => {
+  const roboto = async () => {
+    const [{ readFileSync }, fontkit] = await Promise.all([import('node:fs'), import('@pdf-lib/fontkit')])
+    return { fontkit: fontkit.default, bytes: new Uint8Array(readFileSync(`${process.cwd()}/../../assets/fonts/Roboto-Regular.ttf`)) }
+  }
+
+  it('texto fora do Latin-1 sai pela Roboto, sem virar "?"', async () => {
+    const bytes = await buildOrdersPdf([part(true, { services: [{ service: { name: 'Capacitor 35μF' }, value: 10 }], products: [] })], company, texts, { showValues: true, fallbackFont: roboto })
+    const raw = Buffer.from(bytes).toString('latin1')
+    expect(raw).toContain('/FontFile2')
+    expect(pdfText(bytes)).not.toContain('35?F')
+  })
+
+  it('sem caractere estranho a fonte nem é carregada', async () => {
+    let loaded = false
+    const bytes = await buildOrdersPdf([part(true)], company, texts, { showValues: true, fallbackFont: async () => ((loaded = true), roboto()) })
+    expect(loaded).toBe(false)
+    expect(Buffer.from(bytes).toString('latin1')).not.toContain('/FontFile2')
+  })
+})
+
 describe('pdfSafe', () => {
   it('keeps what Helvetica draws and simplifies the rest', () => {
     expect(pdfSafe('Ação “ok” – 35€')).toBe('Ação “ok” – 35€')

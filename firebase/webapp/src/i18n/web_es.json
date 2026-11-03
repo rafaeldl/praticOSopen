@@ -280,6 +280,8 @@
   "web.batch.undo": "Deshacer",
   "web.batch.undone": "Volvió a como estaba.",
   "web.batch.undoPartial": "{count, plural, =1{1 no volvió: alguien la cambió después.} other{# no volvieron: alguien las cambió después.}}",
+  "web.batch.pendingForms": "{count, plural, =1{1 tiene un checklist por terminar y queda fuera.} other{# tienen un checklist por terminar y quedan fuera.}}",
+  "web.batch.failedOne": "{order}: {reason}",
   "web.batchCharge.title": "Enviar cobro de {count} {order}",
   "web.batchCharge.none": "Ninguna de las seleccionadas puede recibir enlace ahora.",
   "web.batchCharge.leftOut": "{count, plural, =1{Queda fuera:} other{Quedan fuera:}}",
