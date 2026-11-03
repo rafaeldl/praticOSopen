@@ -7,7 +7,7 @@ export type { AppRole, Permission }
 /** 'owner' is read as admin. Unknown roles get nothing. */
 export function appRoleOf(role: string | null | undefined): AppRole | null {
   if (role === 'owner') return 'admin'
-  return role && role in ROLE_PERMISSIONS ? (role as AppRole) : null
+  return role && Object.hasOwn(ROLE_PERMISSIONS, role) ? (role as AppRole) : null
 }
 
 /** `useFinancial` absent means on, like the server. */

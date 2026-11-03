@@ -2,6 +2,7 @@
 import { ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
+import InvitesList from '@/components/InvitesList.vue'
 import { t } from '@/i18n'
 import { refreshClaims, session, signOutEverywhere } from '@/lib/session'
 
@@ -41,7 +42,8 @@ watchEffect(() => {
           <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.noCompany.title') }}</h1>
           <p class="muted">{{ t('web.noCompany.body') }}</p>
         </template>
-        <button type="button" class="btn btn--primary btn--wide" :disabled="busy" @click="check">{{ t('web.noCompany.check') }}</button>
+        <InvitesList @accepted="() => router.replace('/')" />
+        <button type="button" class="btn btn--wide" :disabled="busy" @click="check">{{ t('web.noCompany.check') }}</button>
         <button type="button" class="btn btn--wide" @click="leave">{{ t('logout') }}</button>
       </div>
     </main>

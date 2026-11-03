@@ -28,6 +28,11 @@ export function hasAppHistory(router: Router): boolean {
   return !!router.options.history.state.back
 }
 
+/** Is the history entry behind the panel the list it sits on? */
+export function closeGoesBack(back: unknown, listFullPath: string): boolean {
+  return typeof back === 'string' && back === listFullPath
+}
+
 export function useRoutePanel(name = 'panel') {
   const route = useRoute()
   const router = useRouter()
@@ -38,9 +43,12 @@ export function useRoutePanel(name = 'panel') {
     return value.value ? router.replace({ query }) : router.push({ query })
   }
 
+  // Back only when the entry behind is this same list: opened from a link on
+  // another screen, closing must stay on the list instead of leaving it.
   function close() {
-    if (hasAppHistory(router)) router.back()
-    else void router.replace({ query: withoutParam(route.query, name) })
+    const list = router.resolve({ path: route.path, query: withoutParam(route.query, name), hash: route.hash }).fullPath
+    if (closeGoesBack(router.options.history.state.back, list)) router.back()
+    else void router.replace(list)
   }
 
   // A shared link lands directly on the panel. A list entry is placed behind it,

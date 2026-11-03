@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { locale, t } from '@/i18n'
 import { loadSegmentLabels } from '@/lib/segments'
 import { session } from '@/lib/session'
+import { recheckCurrentRoute } from '@/router'
 import { handleShortcut, registerShortcut } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
 import AppShell from '@/views/AppShell.vue'
@@ -25,6 +26,21 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (session.company) void loadSegmentLabels(session.company.segment, locale.value)
+})
+
+// Company switch, new role or values turned off: the open screen is checked again.
+watch(
+  () => [session.companyId, session.role, session.company?.useFinancial ?? null, !!session.company] as const,
+  () => {
+    if (ready.value) void recheckCurrentRoute()
+  },
+)
+
+// A "no" from the access list can arrive after the start (remembered "yes" revoked).
+watchEffect(() => {
+  if (ready.value && session.uid && session.webAccess === 'denied' && route.name !== 'notAllowed') {
+    void router.replace({ name: 'notAllowed' })
+  }
 })
 
 // Moving between screens must not leave focus on a link that may be gone.

@@ -8,7 +8,9 @@ import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
 import ShortcutsDialog from '@/components/ShortcutsDialog.vue'
 import { t } from '@/i18n'
-import { canAny, selectCompany, session } from '@/lib/session'
+import { errorMessageKey } from '@/lib/api'
+import { canAny, reloadCompany, selectCompany, session } from '@/lib/session'
+import { showToast } from '@/lib/toast'
 import { shortcutLabel } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
@@ -22,11 +24,15 @@ const tabs = computed(() => entries.value.filter((entry) => entry.tab))
 const moreEntries = computed(() => entries.value.filter((entry) => !entry.tab))
 const isCurrent = (path: string) => (path === '/' ? route.path === '/' : route.path.startsWith(path))
 const moreIsCurrent = computed(() => !tabs.value.some((tab) => isCurrent(tab.path)))
-const companyName = computed(() => session.company?.name || session.companies.find((c) => c.id === session.companyId)?.name || '')
+const companyName = computed(() =>
+  companyLabel(session.company?.name || session.companies.find((c) => c.id === session.companyId)?.name || ''),
+)
 
 function onCompanyChange(event: Event) {
-  void selectCompany((event.target as HTMLSelectElement).value)
+  selectCompany((event.target as HTMLSelectElement).value).catch((error) => showToast(t(errorMessageKey(error))))
 }
+
+const companyLabel = (name: string) => name || t('web.nav.unnamedCompany')
 
 const setOnline = () => (online.value = true)
 const setOffline = () => (online.value = false)
@@ -49,7 +55,7 @@ onBeforeUnmount(() => {
         <div v-else class="company-pick">
           <label class="sr" for="company-pick">{{ t('web.nav.company') }}</label>
           <select id="company-pick" class="company-select" :value="session.companyId ?? ''" @change="onCompanyChange">
-            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ company.name }}</option>
+            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ companyLabel(company.name) }}</option>
           </select>
         </div>
       </div>
@@ -90,6 +96,10 @@ onBeforeUnmount(() => {
 
     <main class="main">
       <p v-if="!online" class="offline" role="status">{{ t('web.offline') }}</p>
+      <p v-if="session.companyFailed" class="offline" role="alert">
+        {{ t('web.companyFailed') }}
+        <button type="button" class="link" @click="reloadCompany">{{ t('web.tryAgain') }}</button>
+      </p>
       <RouterView :key="session.companyId ?? ''" />
     </main>
 

@@ -73,6 +73,13 @@ console.log(`JS até a lista (com Firestore): ${kb(list.total)} KB, limite ${LIS
 console.log(`CSS: ${kb(cssBytes)} KB`)
 
 const failures = []
+// The production bundle must not carry the emulator branches (lib/firebase.ts).
+if (!dist.endsWith('dist-e2e')) {
+  const leaked = entries
+    .map(([, item]) => item.file)
+    .filter((file) => file.endsWith('.js') && readFileSync(resolve(dist, file), 'utf8').includes('127.0.0.1'))
+  if (leaked.length) failures.push(`código do emulador no bundle de produção: ${leaked.join(', ')}`)
+}
 if (initial.total > INITIAL_LIMIT_KB * 1024) failures.push(`JS inicial passou de ${INITIAL_LIMIT_KB} KB`)
 if (list.total > LIST_LIMIT_KB * 1024) failures.push(`JS até a lista passou de ${LIST_LIMIT_KB} KB`)
 if (failures.length) {
