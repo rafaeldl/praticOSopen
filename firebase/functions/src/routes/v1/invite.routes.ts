@@ -161,7 +161,7 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // Verify invite belongs to this company
-    if (invite.company.id !== companyId) {
+    if (invite.company?.id !== companyId) {
       res.status(404).json({
         success: false,
         error: { code: 'NOT_FOUND', message: 'Invite not found' },

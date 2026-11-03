@@ -89,6 +89,13 @@ describe('DELETE /v1/app/invites/:token', () => {
     expect(read('links/invites/tokens/INV_A')?.status).toBe('pending');
   });
 
+  it('an old invite saved without company is not found, never a 500', async () => {
+    seed('links/invites/tokens/INV_NOCO', { token: 'INV_NOCO', role: 'technician', status: 'pending', invitedBy: { id: 'owner1', name: 'Owner' } });
+    const res = await del('admin1', 'INV_NOCO');
+    expect(res.status).toBe(404);
+    expect(read('links/invites/tokens/INV_NOCO')?.status).toBe('pending');
+  });
+
   it('an invite of another company is not found', async () => {
     const res = await del('admin1', 'INV_OTHER');
     expect(res.status).toBe(404);
