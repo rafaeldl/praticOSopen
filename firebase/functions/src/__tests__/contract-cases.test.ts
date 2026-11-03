@@ -37,8 +37,11 @@ import { syncPaymentStatusWithTotal } from '../services/asaas/order-payment.serv
 import * as catalogService from '../services/catalog.service';
 import { canReceiveForCustomer, registerCustomerReceipt } from '../services/customer-receipt.service';
 import * as orderService from '../services/order.service';
-import { getFormatContext, normalizePhone } from '../utils/format.utils';
+import { dialCodeOf, getFormatContext, normalizePhone } from '../utils/format.utils';
 import { allocateOldestFirst, totalOpen } from '../utils/payment-allocation';
+import { locateLines } from '../services/order-items';
+import { markFullyPaid, removeTransactionAt, resetPaymentsOf } from '../services/order-finance.service';
+import { OrderRuleError } from '../services/order-errors';
 import { isValidCnpj, isValidCpf, isValidTaxId, normalizeTaxId } from '../utils/tax-id.utils';
 
 const LANG = 'functions';
@@ -50,6 +53,7 @@ const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
 const COVERED = [
   'contract-generation.json', // contract-generation.cases.test.ts
   'currency.json',
+  'order-delete.json',
   'order-items.json',
   'order-permissions.json',
   'order-receive.json',
@@ -126,6 +130,7 @@ function buildApp(): Express {
 let server: Server;
 const get = (role: string, url: string) => request(server).get(url).set('x-test-role', role);
 const post = (role: string, url: string, body: object) => request(server).post(url).set('x-test-role', role).send(body);
+const del = (role: string, url: string) => request(server).delete(url).set('x-test-role', role);
 
 function reqAs(role: string) {
   return { userContext: { companyId: 'c1', userId: USER.id, role } } as any;
@@ -185,7 +190,7 @@ describe('order-totals', () => {
           customerId: 'cust1',
           customer: { id: 'cust1', name: 'Ana' },
           services: services.map((s: any) => ({ serviceId: 's', value: s.value ?? undefined })),
-          products: products.map((p: any) => ({ productId: 'p', quantity: p.quantity, value: p.value ?? undefined })),
+          products: products.map((p: any) => ({ productId: 'p', quantity: p.quantity, value: p.value ?? undefined, total: p.total })),
         },
         USER,
         { id: 'c1', name: 'C' } as any,
@@ -223,23 +228,56 @@ describe('payment-status', () => {
   }
 });
 
-describe('payment-transactions (add payment and discount, the only ones the server has)', () => {
-  const adds = cases('payment-transactions.json').filter((c) => ['addPayment', 'addDiscount'].includes(c.given.op.kind));
-  for (const c of adds) {
+describe('payment-transactions', () => {
+  const ERRORS: Record<string, string> = { ASAAS_LOCKED: 'asaasLocked', PAYMENT_EXCEEDS_BALANCE: 'exceedsBalance' };
+  const build = (amount: number): any => ({ id: 'new', type: 'payment', amount, createdAt: 'x', createdBy: USER });
+  const run: Record<string, (order: any, op: any) => any> = {
+    addPayment: (order, op) => {
+      // POST /:id/payments checks the balance before applying the payment.
+      orderService.assertPaymentWithinBalance(order, op.amount);
+      return orderService.applyPaymentTransaction(order, { ...build(op.amount), type: 'payment' });
+    },
+    addDiscount: (order, op) => orderService.applyPaymentTransaction(order, { ...build(op.amount), type: 'discount' }),
+    removeTransaction: (order, op) =>
+      removeTransactionAt(order, (order.transactions ?? []).findIndex((t: any) => t.id === op.transactionId)),
+    resetPayments: (order) => resetPaymentsOf(order),
+    markAsFullyPaid: (order) => markFullyPaid(order, build),
+  };
+
+  for (const c of cases('payment-transactions.json')) {
     it(c.id, () => {
-      const type = c.given.op.kind === 'addPayment' ? 'payment' : 'discount';
-      const { total, discount, paidAmount, payment, paid, remainingBalance } = orderService.applyPaymentTransaction(c.given.order, {
-        id: 't', type, amount: c.given.op.amount, createdAt: '2026-01-01T00:00:00.000Z', createdBy: { id: 'u', name: 'U' },
-      } as never);
-      expect({ total, discount, paidAmount, payment, paid, remaining: remainingBalance }).toEqual(want(c));
+      const expected = want(c);
+      let result: any;
+      try {
+        result = run[c.given.op.kind](c.given.order, c.given.op);
+      } catch (error) {
+        if (!(error instanceof OrderRuleError)) throw error;
+        expect({ error: ERRORS[error.code] ?? error.code }).toEqual(expected);
+        return;
+      }
+      const { total, discount, paidAmount, payment, paid, transactions } = result;
+      const got: any = { total, discount, paidAmount, payment, paid, remaining: orderService.calculateRemainingBalance({ total, paidAmount }) };
+      if ('transactionIds' in expected) got.transactionIds = transactions.map((t: any) => t.id);
+      if ('transactionCount' in expected) got.transactionCount = transactions.length;
+      expect(got).toEqual(expected);
     });
   }
 });
 
-describe('order-items (add and remove; the server has no edit yet)', () => {
+describe('order-items', () => {
+  /** Id of the n-th line of a kind, as GET /orders/:id gives it to a client. */
+  const itemIdOf = (kind: string, index: number) =>
+    locateLines(read(orderPath()) as any).filter((line) => line.kind === kind)[index].itemId;
+  const edit = (kind: string, op: any) => {
+    const { index, ...patch } = op;
+    delete patch.kind;
+    return orderService.updateOrderItem('c1', 'o1', itemIdOf(kind, index), patch, USER);
+  };
   const run: Record<string, (op: any) => Promise<unknown>> = {
     addService: (op) => orderService.addOrderService('c1', 'o1', 's', op.value ?? undefined, undefined, USER),
-    addProduct: (op) => orderService.addOrderProduct('c1', 'o1', 'p', op.quantity, op.value ?? undefined, undefined, USER),
+    addProduct: (op) => orderService.addOrderProduct('c1', 'o1', 'p', op.quantity, op.value ?? undefined, undefined, USER, { total: op.total }),
+    editService: (op) => edit('service', op),
+    editProduct: (op) => edit('product', op),
     removeService: (op) => orderService.removeServiceFromOrder('c1', 1, op.index, USER),
     removeProduct: (op) => orderService.removeProductFromOrder('c1', 1, op.index, USER),
   };
@@ -301,8 +339,8 @@ describe('order-receive', () => {
       const { role, isCreator, status, useFinancial } = c.given;
       seed('companies/c1', { useFinancial });
       seed(orderPath(), { status, total: 100, discount: 0, paidAmount: 0, transactions: [], ...creatorOf(isCreator) });
-      const pay = async (type: string) => (await post(role, '/orders/o1/payments', { amount: 1, type })).status;
-      const [receive, discount] = [await pay('payment'), await pay('discount')];
+      const receive = (await post(role, '/orders/o1/payments', { amount: 1 })).status;
+      const discount = (await post(role, '/orders/o1/discounts', { amount: 1 })).status;
       expect([200, 403]).toContain(receive);
       expect([200, 403]).toContain(discount);
       expect({ canReceive: receive === 200, canDiscount: discount === 200 }).toEqual(want(c));
@@ -389,7 +427,22 @@ describe('currency', () => {
 describe('phone (normalize, the only one the server has)', () => {
   for (const c of cases('phone.json').filter((item) => item.given.kind === 'normalize')) {
     it(c.id, () => {
-      expect(normalizePhone(c.given.raw).replace(/\D/g, '')).toBe(want(c).number);
+      expect(normalizePhone(c.given.raw, dialCodeOf(c.given.country)).replace(/\D/g, '')).toBe(want(c).number);
+    });
+  }
+});
+
+describe('order-delete', () => {
+  for (const c of cases('order-delete.json')) {
+    it(c.id, async () => {
+      const { role, isCreator, status, hasMoney } = c.given;
+      seed(orderPath(), {
+        status, total: 100, paidAmount: hasMoney ? 10 : 0, transactions: [], ...creatorOf(isCreator),
+      });
+      const res = await del(role, '/orders/o1');
+      expect([200, 403]).toContain(res.status);
+      expect({ allowed: res.status === 200 }).toEqual(want(c));
+      expect(read(orderPath()) === undefined).toBe(res.status === 200);
     });
   }
 });

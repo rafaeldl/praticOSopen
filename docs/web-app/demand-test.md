@@ -1,6 +1,6 @@
 # Teste de demanda do Portão 0
 
-Data: 2026-10-31. Pronto para enviar, mas **nada foi enviado**. Cada envio depende do Rafael. A lista com as empresas fica fora do repositório, em `~/Backups/praticos-insights/web-app-discovery/demand-test/`.
+Data: 2026-10-31. Pronto para enviar, mas **nada foi enviado**. Cada envio depende do Rafael. A lista com as empresas fica fora do repositório.
 
 ## Resposta curta
 

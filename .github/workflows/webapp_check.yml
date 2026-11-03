@@ -1,0 +1,96 @@
+name: Web App Check
+
+on:
+  pull_request:
+    paths:
+      - 'firebase/webapp/**'
+      - 'firebase/firebase.e2e.json'
+      - 'firebase/firebase.json'
+      - 'firebase/functions/src/routes/v1/web-access.routes.ts'
+      - 'firebase/hosting/src/css/tokens.css'
+      - 'docs/web-app/contract-cases/**'
+      - 'lib/l10n/*.arb'
+      - 'firebase/functions/src/__tests__/rbac/app-permissions.json'
+      - '.github/workflows/webapp_check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Gen, types, tests, E2E and Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: firebase/webapp
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            firebase/webapp/package-lock.json
+            firebase/functions/package-lock.json
+            firebase/hosting/package-lock.json
+
+      - name: Setup Java (Firebase emulators)
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate contract
+        run: npm run gen
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and contract tests
+        run: npm test
+
+      - name: Build and bundle budget
+        run: npm run build
+
+      - name: Build Functions for the emulator
+        working-directory: firebase/functions
+        run: |
+          npm ci
+          npm run build
+
+      - name: Cache emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('firebase/webapp/package-lock.json') }}
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E on the Emulator Suite
+        run: npm run e2e
+
+      - name: Lighthouse
+        run: npm run lhci
+
+      - name: Hosting emulator (/app rewrites, headers, CSP, site unchanged)
+        run: |
+          (cd ../hosting && npm ci && npm run build)
+          npm run build:hosting
+          npm run check:hosting
+
+      - name: Keep E2E traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-e2e-traces
+          path: firebase/webapp/test-results
+          retention-days: 7
+          if-no-files-found: ignore

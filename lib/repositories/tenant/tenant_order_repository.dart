@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
@@ -6,7 +9,10 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/utils/order_field_diff.dart';
+import 'package:praticos/utils/report_week.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/order_scope.dart';
 import 'package:praticos/utils/switch_stream.dart';
 
 /// Repository para Orders usando subcollections por tenant.
@@ -27,30 +33,58 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   // Query scope (Firestore rules)
   // ═══════════════════════════════════════════════════════════════════
   //
-  // Consultant and technician read only the orders they created, and the
-  // rules deny any list query that could return someone else's order. So
-  // every list query here gets `createdBy.id == uid` for them.
+  // Consultant and technician read only some orders (the consultant the ones
+  // they created, the technician also the ones assigned to them), and the
+  // rules deny any list query that could return another order. So every
+  // list query here gets the matching filter for them.
 
-  /// Uid to filter list queries by (`createdBy.id`), or null when the user
-  /// reads every order. Replaceable in tests.
-  static Future<String?> Function() creatorScope = () =>
+  /// Scope to filter list queries by, or null when the user reads every
+  /// order. Replaceable in tests.
+  static Future<OrderScope?> Function() creatorScope = () =>
       AuthorizationService.instance.orderCreatorFilter();
 
   /// [creatorScope] now and again whenever it changes (the role arrives
   /// after the query started). Live queries resubscribe on each value.
   /// Replaceable in tests.
-  static Stream<String?> Function() creatorScopeChanges = () =>
+  static Stream<OrderScope?> Function() creatorScopeChanges = () =>
       AuthorizationService.instance.orderCreatorFilterChanges();
 
-  /// [args] plus `createdBy.id == creatorId` (when [creatorId] is set and
-  /// the query doesn't already filter by it).
-  static List<QueryArgs> scopedArgs(List<QueryArgs>? args, String? creatorId) {
+  /// Operator of the [QueryArgs] that filters "created by or assigned to"
+  /// its value (see `TenantRepository`).
+  static const String createdOrAssignedOper = 'createdOrAssigned';
+
+  /// [args] plus the [scope] filter: `createdBy.id == uid`, or
+  /// `createdBy.id == uid OR assignedTo.id == uid` for the technician. Kept
+  /// as is when [scope] is null or the query already filters `createdBy.id`.
+  static List<QueryArgs> scopedArgs(List<QueryArgs>? args, OrderScope? scope) {
     final list = [...?args];
-    if (creatorId == null || list.any((a) => a.key == 'createdBy.id')) {
+    if (scope == null || list.any((a) => a.key == 'createdBy.id')) {
       return list;
     }
-    return list..add(QueryArgs('createdBy.id', creatorId));
+    return list..add(
+      scope.assigned
+          ? QueryArgs('createdBy.id', scope.uid, oper: createdOrAssignedOper)
+          : QueryArgs('createdBy.id', scope.uid),
+    );
   }
+
+  /// [query] filtered by [scope] (same filter as [scopedArgs]).
+  static Query<Map<String, dynamic>> applyScope(
+    Query<Map<String, dynamic>> query,
+    OrderScope? scope,
+  ) {
+    if (scope == null) return query;
+    if (!scope.assigned) {
+      return query.where('createdBy.id', isEqualTo: scope.uid);
+    }
+    return query.where(createdOrAssignedFilter(scope.uid));
+  }
+
+  /// `createdBy.id == uid OR assignedTo.id == uid`.
+  static Filter createdOrAssignedFilter(String uid) => Filter.or(
+    Filter('createdBy.id', isEqualTo: uid),
+    Filter('assignedTo.id', isEqualTo: uid),
+  );
 
   @override
   Future<List<Order?>> getQueryList(
@@ -79,7 +113,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   }) {
     return switchStream(
       creatorScopeChanges(),
-      (String? creator) => super.streamQueryList(
+      (OrderScope? creator) => super.streamQueryList(
         companyId,
         orderBy: orderBy,
         args: scopedArgs(args, creator),
@@ -120,7 +154,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   }) {
     return switchStream(
       creatorScopeChanges(),
-      (String? creator) => super.streamListFromTo(
+      (OrderScope? creator) => super.streamListFromTo(
         companyId,
         field,
         from,
@@ -182,6 +216,122 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return collectionFor(
       companyId,
     ).doc(item?.id).set(json, SetOptions(merge: true));
+  }
+
+  /// Writes only [fields] of an existing order (from
+  /// [OrderFieldDiff.changedFields]), stamping `updatedAt`/`updatedBy` with
+  /// the acting user. Fields written elsewhere (items by the web, payments by
+  /// the server) are left as they are. No transaction: works offline.
+  Future<void> updateFields(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    UserAggr? actor,
+  }) {
+    return collectionFor(
+      companyId,
+    ).doc(orderId).update(fieldUpdateOf(fields, actor: actor ?? Global.userAggr));
+  }
+
+  /// How long [updateMoney] waits for the server before writing offline.
+  static const Duration moneyTransactionTimeout = Duration(seconds: 5);
+
+  /// Whether a failed money transaction means "no server now" (then the
+  /// local copy is written); anything else (rules, missing order) is real.
+  static bool isOfflineFailure(Object error) {
+    if (error is TimeoutException) return true;
+    if (error is FirebaseException) {
+      return const {'unavailable', 'deadline-exceeded'}.contains(error.code);
+    }
+    return false;
+  }
+
+  /// Saves [fields] together with the money of the order. Online, a
+  /// transaction reads the order, applies the items and discount the app
+  /// changed ([appMoney]) and recomputes the total from that
+  /// ([OrderFieldDiff.mergeMoney]): an item added elsewhere stays and the
+  /// total counts it.
+  ///
+  /// Offline the order can't be read in a transaction. Then the four money
+  /// fields go as the app has them ([localMoney]), so the stored total
+  /// always matches the stored items and discount (an item added elsewhere
+  /// in the meantime is replaced, as the old full save did). Not awaited:
+  /// offline the write completes only once synced.
+  Future<void> updateMoney(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    required Map<String, dynamic> appMoney,
+    required Map<String, dynamic> localMoney,
+    UserAggr? actor,
+  }) async {
+    final ref = collectionFor(companyId).doc(orderId);
+    final user = actor ?? Global.userAggr;
+    try {
+      await firestore.runTransaction<void>(timeout: moneyTransactionTimeout, (
+        tx,
+      ) async {
+        final snap = await tx.get(ref);
+        if (!snap.exists) {
+          throw StateError('Order $orderId does not exist');
+        }
+        final money = OrderFieldDiff.mergeMoney(snap.data()!, appMoney);
+        tx.update(ref, fieldUpdateOf({...fields, ...money}, actor: user));
+      });
+    } catch (e) {
+      if (!isOfflineFailure(e)) rethrow;
+      unawaited(
+        ref
+            .update(fieldUpdateOf({...fields, ...localMoney}, actor: user))
+            .catchError((Object e) {
+              debugPrint('Offline order money write failed: $e');
+            }),
+      );
+    }
+  }
+
+  /// Firestore map for [updateFields]: [DeleteFieldOp] becomes
+  /// `FieldValue.delete()`, payment fields are dropped and the audit fields
+  /// are the acting user's.
+  static Map<String, dynamic> fieldUpdateOf(
+    Map<String, dynamic> fields, {
+    UserAggr? actor,
+    DateTime? now,
+  }) {
+    final result = <String, dynamic>{};
+    fields.forEach((key, value) {
+      if (OrderFieldDiff.ignoredFields.contains(key)) return;
+      result[key] = value is DeleteFieldOp ? FieldValue.delete() : value;
+    });
+    result['updatedAt'] = (now ?? DateTime.now()).toIso8601String();
+    if (actor != null) result['updatedBy'] = actor.toJson();
+    return result;
+  }
+
+  /// Creates [order] (its id from `contractOrderId`, the same the server job
+  /// uses) unless it already exists, and writes [contract] on the template,
+  /// in one transaction. Returns whether the order was created here. When
+  /// the server job already generated this due date, nothing is created.
+  Future<bool> createContractOrder(
+    String companyId, {
+    required String templateId,
+    required DateTime due,
+    required OrderContract contract,
+    required Order order,
+  }) async {
+    final collection = collectionFor(companyId);
+    final orderRef = collection.doc(order.id);
+    final templateRef = collection.doc(templateId);
+    final json = toJson(order)..remove('id');
+    // Everyone who generates (admin, supervisor or the template's author)
+    // can read the order of the due date before it exists (the rules allow
+    // `get` of a missing `contract_*` order), so it is always a transaction.
+    return firestore.runTransaction<bool>((tx) async {
+      final existing = await tx.get(orderRef);
+      if (!existing.exists) tx.set(orderRef, json);
+      tx.update(templateRef, {'contract': contract.toJson()});
+      return !existing.exists;
+    });
   }
 
   /// Offline without cache, `get()` throws: treat as a new order (full write).
@@ -328,16 +478,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         break;
 
       case 'semana':
-        int currentWeek =
-            ((now.difference(DateTime(now.year, 1, 1)).inDays) / 7).floor();
-        int targetWeek = currentWeek + offset;
-        startDate = DateTime(
-          now.year,
-          1,
-          1,
-        ).add(Duration(days: targetWeek * 7));
-        startDate = startDate.subtract(Duration(days: startDate.weekday));
-        endDate = startDate.add(Duration(days: 7));
+        final week = reportWeek(now, offset);
+        startDate = week.start;
+        endDate = week.end;
         break;
 
       case 'mês':
@@ -365,23 +508,20 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    try {
-      final List<QueryArgs> filterList = [
-        QueryArgs(
-          'createdAt',
-          startDate.toIso8601String(),
-          oper: 'isGreaterThanOrEqualTo',
-        ),
-        QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan'),
-      ];
+    // Errors are not swallowed: an empty list here showed R$ 0 for a month
+    // that failed to load; callers show the error and offer to retry.
+    final List<QueryArgs> filterList = [
+      QueryArgs(
+        'createdAt',
+        startDate.toIso8601String(),
+        oper: 'isGreaterThanOrEqualTo',
+      ),
+      QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan'),
+    ];
 
-      final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
+    final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
 
-      return await getQueryList(companyId, orderBy: orderBy, args: filterList);
-    } catch (e) {
-      print('Erro ao buscar ordens por intervalo de datas: $e');
-      return [];
-    }
+    return getQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
   /// Busca todas as orders que não estão pagas, de qualquer período. Covers
@@ -402,7 +542,11 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         companyId,
         args: [
           QueryArgs('payment', true, oper: 'isNull'),
-          QueryArgs('status', ['approved', 'progress', 'done'], oper: 'whereIn'),
+          QueryArgs('status', [
+            'approved',
+            'progress',
+            'done',
+          ], oper: 'whereIn'),
         ],
       ),
     ]);

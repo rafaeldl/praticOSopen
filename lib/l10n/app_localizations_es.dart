@@ -6448,6 +6448,89 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get aiActionsTitle => '¿Está bien?';
+
+  @override
+  String aiActionsReceive(String amount) {
+    return 'Recibir $amount';
+  }
+
+  @override
+  String get aiActionsReceiveNoAmount => 'Recibir';
+
+  @override
+  String aiActionsReceived(String amount) {
+    return 'Recibido $amount';
+  }
+
+  @override
+  String get aiActionsTypeAmount => 'toca para indicar el valor';
+
+  @override
+  String aiActionsLeft(String amount) {
+    return 'faltan $amount';
+  }
+
+  @override
+  String get aiActionsPaidOff => 'pagada';
+
+  @override
+  String aiActionsDiscount(String amount) {
+    return 'Descuento de $amount';
+  }
+
+  @override
+  String aiActionsNewTotal(String amount) {
+    return 'total $amount';
+  }
+
+  @override
+  String aiActionsMarkAs(String status) {
+    return 'Marcar como $status';
+  }
+
+  @override
+  String get aiActionsIssuesNfse => 'Esto también emite la factura.';
+
+  @override
+  String get aiActionsCannotReceive =>
+      'Solo quien recibe pagos puede registrar esto.';
+
+  @override
+  String get aiActionsCannotDiscount =>
+      'Solo quien lleva las finanzas puede dar descuento.';
+
+  @override
+  String get aiActionsOrderCanceled => 'Esta orden está cancelada.';
+
+  @override
+  String get aiActionsNothingToReceive =>
+      'Esta orden no tiene nada por recibir.';
+
+  @override
+  String aiActionsOnlyLeft(String amount) {
+    return 'Solo faltan $amount.';
+  }
+
+  @override
+  String get aiActionsAfterSave => 'Al guardar, te pediré que lo confirmes.';
+
+  @override
+  String get aiActionsSaving => 'Guardando…';
+
+  @override
+  String get aiActionsSavedOffline =>
+      'Orden guardada. Registra el pago cuando tengas conexión.';
+
+  @override
+  String aiActionsStatusKept(String status) {
+    return 'El estado sigue $status.';
+  }
+
+  @override
+  String get aiActionsNfseStays => 'La factura sigue emitida.';
+
+  @override
   String get nextMaintenanceQuestion => '¿Cuándo es el próximo mantenimiento?';
 
   @override
@@ -6540,4 +6623,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Última: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'No se pudo guardar la OS';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Revisa la conexión y crea la OS de nuevo.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida.';
+
+  @override
+  String get checklistAnswerSaveFailed =>
+      'No se pudo guardar la respuesta. Inténtalo de nuevo.';
+
+  @override
+  String get profileSaveFailed =>
+      'No se pudo guardar el perfil. Inténtalo de nuevo.';
+
+  @override
+  String get saveFailedTryAgain => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get deleteFailedTryAgain => 'No se pudo eliminar. Inténtalo de nuevo.';
 }

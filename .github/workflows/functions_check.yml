@@ -1,15 +1,11 @@
 name: Functions Check
 
+# PR only: the pre-push hook (.githooks/pre-push) runs lint + tests locally
 on:
-  push:
-    branches-ignore: [ master ]
-    paths:
-      - 'firebase/functions/**'
-      # Casos de contrato: src/__tests__/contract-cases.test.ts lê estes JSON
-      - 'docs/web-app/contract-cases/**'
-      - '.github/workflows/functions_check.yml'
   pull_request:
     paths:
+      # Casos de contrato: src/__tests__/contract-cases.test.ts lê estes JSON
+      - 'docs/web-app/contract-cases/**'
       - 'firebase/firestore.rules'
       - 'firebase/storage.rules'
       - 'firebase/firebase.test.json'
@@ -19,7 +15,6 @@ on:
 jobs:
   check:
     name: Lint + Test
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,7 +41,6 @@ jobs:
 
   rules:
     name: Firestore Rules Test
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     defaults:
       run:

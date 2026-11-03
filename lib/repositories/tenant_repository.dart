@@ -166,7 +166,7 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
     var query = _getCollection(companyId).orderBy(field);
 
     for (final arg in args) {
-      query = query.where(arg.key, isEqualTo: arg.value);
+      query = _applyQueryArg(query, arg);
     }
 
     final snapshot = await query.startAt([from]).endAt([to]).get();
@@ -186,7 +186,7 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
     var ref = _getCollection(companyId).orderBy(field, descending: true);
 
     for (final arg in args) {
-      ref = ref.where(arg.key, isEqualTo: arg.value);
+      ref = _applyQueryArg(ref, arg);
     }
 
     return ref.startAfter([to]).endAt([from]).snapshots().map(
@@ -315,6 +315,15 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
         return query.where(arg.key, whereNotIn: arg.value);
       case 'isNull':
         return query.where(arg.key, isNull: arg.value);
+      // Orders of the technician: created by or assigned to the uid
+      // (TenantOrderRepository.scopedArgs, Firestore order read rule).
+      case 'createdOrAssigned':
+        return query.where(
+          Filter.or(
+            Filter('createdBy.id', isEqualTo: arg.value),
+            Filter('assignedTo.id', isEqualTo: arg.value),
+          ),
+        );
       default:
         return query.where(arg.key, isEqualTo: arg.value);
     }

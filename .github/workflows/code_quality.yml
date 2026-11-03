@@ -1,8 +1,8 @@
 name: Code Quality
 
+# PR only: the pre-push hook (.githooks/pre-push) runs the same checks locally
 on:
-  push:
-    branches: [ "**" ]
+  pull_request:
     paths:
       - 'lib/**'
       - 'test/**'
@@ -10,8 +10,7 @@ on:
       - 'docs/web-app/contract-cases/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
-      # Mudancas no proprio CI precisam ser validadas pelo CI
-      - '.github/workflows/**'
+      - '.github/workflows/code_quality.yml'
       - '.fvmrc'
 
 jobs:

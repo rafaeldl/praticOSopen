@@ -23,6 +23,7 @@ import 'package:praticos/utils/device_suggestions.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/screens/widgets/failure_alert.dart';
 
 /// New / edit vehicle (device) in a single screen.
 ///
@@ -181,10 +182,17 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       } else {
         await _deviceStore.saveDevice(device);
       }
-    } finally {
+    } catch (e) {
+      debugPrint('Could not save the device: $e');
       if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        await showFailureAlert(context, context.l10n.saveFailedTryAgain);
+      }
+      return;
     }
-    if (mounted) Navigator.pop(context, device);
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    Navigator.pop(context, device);
   }
 
   void _pickStatus() {

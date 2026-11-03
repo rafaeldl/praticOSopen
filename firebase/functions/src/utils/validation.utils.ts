@@ -93,42 +93,196 @@ export const updateProductSchema = z.object({
   value: z.number().min(0).optional(),
 });
 
-export const createOrderSchema = z.object({
-  customerId: idSchema,
-  deviceId: idSchema.optional(),
-  services: z.array(z.object({
-    serviceId: idSchema,
-    value: z.number().min(0).optional(),
-    description: z.string().max(500).optional(),
-  })).optional(),
-  products: z.array(z.object({
-    productId: idSchema,
-    quantity: z.number().min(1),
-    value: z.number().min(0).optional(),
-    description: z.string().max(500).optional(),
-  })).optional(),
-  dueDate: z.string().datetime().optional(),
-  status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).default('quote'),
+/** ISO date-time with zone (what GET returns in `updatedAt`). */
+const isoDateTime = z.string().datetime({ offset: true });
+
+/**
+ * Visit and delivery: an instant with a zone, or the company's local time
+ * without one, as the app writes it (Dart toIso8601String) and GET returns it.
+ */
+export const ZONELESS_DATE_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(\.\d{1,6})?)?$/;
+
+/** Zoneless text that is a real moment: month 1-12, a day the month has, hour 0-23, minute and second 0-59. */
+export function isValidZonelessDate(value: string): boolean {
+  const match = ZONELESS_DATE_TIME.exec(value);
+  if (!match) return false;
+  const [year, month, day, hour, minute, second = 0] = match.slice(1, 7).map((part) => Number(part ?? 0));
+  if (month < 1 || month > 12 || day < 1) return false;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day <= daysInMonth && hour <= 23 && minute <= 59 && second <= 59;
+}
+
+/** A visit or delivery the server can save: a real zoneless moment, or anything else Date reads. */
+export function isValidOrderDate(value: string): boolean {
+  if (ZONELESS_DATE_TIME.test(value)) return isValidZonelessDate(value);
+  return !Number.isNaN(Date.parse(value));
+}
+
+const orderDate = z.union([isoDateTime, z.string().regex(ZONELESS_DATE_TIME)]).refine(isValidOrderDate, {
+  message: 'Invalid date',
+});
+/** The bot's free text dates (anything Date reads), without impossible ones. */
+const botOrderDate = z.string().refine(isValidOrderDate, { message: 'Invalid date' });
+
+/** The `version` the server gave (order-version.ts), sent back as is; an ISO instant with a zone still works. */
+export const orderVersionSchema = z.string().min(1).max(64);
+/** Money sent by a client: never negative, cents. */
+const moneySchema = z.number().min(0).max(1_000_000_000);
+/** The app decodes quantity as an int: a fraction would break old versions. */
+const quantitySchema = z.number().int().min(1).max(100_000);
+const ORDER_STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
+export const paymentMethodSchema = z.enum(['pix', 'cash', 'card', 'other']);
+
+export const receiptFileSchema = z.object({
+  url: z.string().url().max(2048),
+  storagePath: z.string().max(512),
+  fileName: z.string().max(256).optional(),
+  contentType: z.string().max(100),
 });
 
+/**
+ * Client-generated transaction id (a uuid): letters, digits and dashes, so it
+ * never looks like an Asaas (`asaas_…`), legacy or receipt share id.
+ */
+const clientTransactionIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientTransactionId');
+
+/** Client-generated order id (a uuid), same format as clientTransactionId. */
+const clientOrderIdSchema = z.string().regex(/^[A-Za-z0-9-]{8,64}$/, 'Invalid clientOrderId');
+
+export const createOrderSchema = z.object({
+  clientOrderId: clientOrderIdSchema.optional(),
+  customerId: idSchema,
+  deviceId: idSchema.optional(),
+  deviceIds: z.array(idSchema).max(50).optional(),
+  services: z.array(z.object({
+    serviceId: idSchema,
+    value: moneySchema.nullable().optional(),
+    description: z.string().max(500).optional(),
+  })).max(200).optional(),
+  products: z.array(z.object({
+    productId: idSchema,
+    quantity: quantitySchema,
+    value: moneySchema.nullable().optional(),
+    total: moneySchema.nullable().optional(),
+    description: z.string().max(500).optional(),
+  })).max(200).optional(),
+  dueDate: orderDate.optional(),
+  scheduledDate: orderDate.optional(),
+  status: z.enum(ORDER_STATUSES).default('quote'),
+});
+
+/** PATCH /:id. null clears a date or the assignee. */
 export const updateOrderSchema = z.object({
-  status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
-  dueDate: z.string().datetime().optional(),
-  scheduledDate: z.string().datetime().optional(),
-  assignedTo: idSchema.optional(),
+  status: z.enum(ORDER_STATUSES).optional(),
+  dueDate: orderDate.nullable().optional(),
+  scheduledDate: orderDate.nullable().optional(),
+  assignedTo: idSchema.nullable().optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
 });
 
 export const addOrderServiceSchema = z.object({
   serviceId: idSchema,
-  value: z.number().min(0).optional(),
+  value: moneySchema.nullable().optional(),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
 });
 
 export const addOrderProductSchema = z.object({
   productId: idSchema,
-  quantity: z.number().min(1),
-  value: z.number().min(0).optional(),
+  quantity: quantitySchema,
+  value: moneySchema.nullable().optional(),
+  total: moneySchema.nullable().optional(),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
+});
+
+/** POST /:id/items: a service or product from the catalog, or without catalog (description required). */
+export const addOrderItemSchema = z.object({
+  kind: z.enum(['service', 'product']),
+  /** Absent: an item without catalog, which needs a description. */
+  catalogId: idSchema.optional(),
+  description: z.string().max(500).optional(),
+  value: moneySchema.nullable().optional(),
+  quantity: quantitySchema.optional(),
+  total: moneySchema.nullable().optional(),
+  deviceId: idSchema.nullable().optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
+}).refine((item) => item.kind === 'product' || (item.quantity === undefined && item.total === undefined), {
+  message: 'A service has no quantity or line total',
+  path: ['kind'],
+}).refine((item) => item.catalogId !== undefined || !!item.description?.trim(), {
+  message: 'An item without catalogId needs a description',
+  path: ['description'],
+});
+
+/** PATCH /:id/items/:itemId: only what changes. */
+export const updateOrderItemSchema = z.object({
+  description: z.string().max(500).optional(),
+  value: moneySchema.nullable().optional(),
+  quantity: quantitySchema.optional(),
+  total: moneySchema.nullable().optional(),
+  deviceId: idSchema.nullable().optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
+}).refine((patch) => ['description', 'value', 'quantity', 'total', 'deviceId'].some((key) => key in patch), {
+  message: 'Nothing to change',
+});
+
+/** POST /:id/payments: money received. A discount has its own route. */
+export const receivePaymentSchema = z.object({
+  clientTransactionId: clientTransactionIdSchema.optional(),
+  /** Refuses a payment over a newer version (409 ORDER_CHANGED), unless it repeats clientTransactionId. */
+  expectedUpdatedAt: orderVersionSchema.optional(),
+  amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
+  description: z.string().max(500).optional(),
+  type: z.literal('payment').optional(),
+  paidAt: z.string().min(10).max(40).optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+  receiptFile: receiptFileSchema.optional(),
+});
+
+/** POST /:id/discounts */
+export const discountSchema = z.object({
+  clientTransactionId: clientTransactionIdSchema.optional(),
+  expectedUpdatedAt: orderVersionSchema.optional(),
+  amount: z.number().min(0.01, 'Amount must be greater than 0').max(1_000_000_000),
+  description: z.string().max(500).optional(),
+});
+
+/** POST /:id/payments/mark-paid */
+export const markPaidSchema = z.object({
+  description: z.string().max(500).optional(),
+  paidAt: z.string().min(10).max(40).optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+});
+
+/** POST /:id/hold */
+export const orderHoldSchema = z.object({
+  reason: z.enum(['part', 'customer', 'authorization', 'other']),
+  note: z.string().max(500).optional(),
+});
+
+/** GET /orders query string. */
+export const listOrdersQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).max(10_000).optional(),
+  cursor: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).optional(),
+  status: z.string().max(200).optional()
+    .transform((value) => (value ? value.split(',').map((s) => s.trim()).filter(Boolean) : undefined))
+    .pipe(z.array(z.enum(ORDER_STATUSES)).min(1).max(5).optional()),
+  sort: z.enum(['createdAt', 'updatedAt', 'dueDate', 'scheduledDate', 'number']).default('createdAt'),
+  direction: z.enum(['asc', 'desc']).optional(),
+  customerId: idSchema.optional(),
+  deviceId: idSchema.optional(),
+  assignedTo: idSchema.optional(),
+  /** One order by its number (search); the other filters are ignored. */
+  number: z.coerce.number().int().min(1).max(1_000_000_000).optional(),
+  /** Inclusive range on the sort field (createdAt, scheduledDate or dueDate). */
+  startDate: z.string().datetime({ offset: true }).optional(),
+  endDate: z.string().datetime({ offset: true }).optional(),
+}).refine((q) => ['createdAt', 'scheduledDate', 'dueDate'].includes(q.sort) || (!q.startDate && !q.endDate), {
+  // The range filters the sorted field (one range per query in Firestore): the agenda asks scheduledDate or dueDate.
+  message: 'startDate/endDate filter the sort field: sort by createdAt, scheduledDate or dueDate',
+  path: ['sort'],
 });
 
 export const addPaymentSchema = z.object({
@@ -228,8 +382,8 @@ export const createFullOrderSchema = z.object({
     description: z.string().max(500).optional(),
   })).optional(),
 
-  dueDate: z.string().optional(),
-  scheduledDate: z.string().optional(),
+  dueDate: botOrderDate.optional(),
+  scheduledDate: botOrderDate.optional(),
   status: z.enum(['quote', 'approved', 'progress']).default('quote'),
 });
 
@@ -239,8 +393,8 @@ export const createFullOrderSchema = z.object({
  */
 export const updateBotOrderSchema = z.object({
   status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
-  dueDate: z.string().optional().nullable(),
-  scheduledDate: z.string().optional().nullable(),
+  dueDate: botOrderDate.optional().nullable(),
+  scheduledDate: botOrderDate.optional().nullable(),
   assignedTo: idSchema.optional().nullable(),
 }).refine(data => Object.values(data).some(v => v !== undefined), {
   message: 'At least one field must be provided',
@@ -357,7 +511,7 @@ export const updateFormStatusSchema = z.object({
  * Validate and parse input with Zod schema
  */
 export function validateInput<T>(
-  schema: z.ZodType<T>,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   data: unknown
 ): { success: true; data: T } | { success: false; errors: string[] } {
   const result = schema.safeParse(data);

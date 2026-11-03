@@ -79,7 +79,7 @@ export function roleHasPermission(
 }
 
 /** Reads `useFinancial` of the request's company once per request. */
-async function companyUsesFinancial(req: AuthenticatedRequest, res: Response): Promise<boolean | undefined> {
+export async function companyUsesFinancial(req: AuthenticatedRequest, res: Response): Promise<boolean | undefined> {
   if (!('useFinancial' in res.locals)) {
     const companyId = req.userContext?.companyId;
     const snap = companyId ? await db.collection('companies').doc(companyId).get() : null;
@@ -102,11 +102,16 @@ export async function can(
   );
 }
 
-/** Every order, or only the ones the user created (same as firestore.rules). */
-export function canSeeOrder(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
+/**
+ * Every order, or only the ones the user created; the technician also sees the
+ * ones assigned to them (same as firestore.rules, isOrderAssignee).
+ */
+export function canSeeOrder(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy' | 'assignedTo'>>): boolean {
   const role = req.userContext?.role;
   if (role === 'owner' || role === 'admin' || role === 'manager' || role === 'supervisor') return true;
-  return !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
+  const userId = req.userContext?.userId;
+  if (!userId) return false;
+  return order.createdBy?.id === userId || (role === 'technician' && order.assignedTo?.id === userId);
 }
 
 /**
@@ -149,6 +154,73 @@ export function canEditOrderMainFields(req: AuthenticatedRequest, order: Pick<Or
   const role = appRoleOf(req.userContext?.role);
   if (!role || !canSeeOrder(req, order)) return false;
   return (role !== 'supervisor' && role !== 'technician') || order.status === 'quote';
+}
+
+/**
+ * Who registers money received on [order] ("Receber"), same as the app's
+ * AuthorizationService.canReceiveOnOrderFor and `canReceiveOnOrder` in
+ * firestore.rules: financial access (owner, admin, manager) on any order; a
+ * consultant on the orders they created, when the company uses values.
+ * Supervisor and technician never. Discount stays with financial access.
+ */
+export function canReceiveOnOrder(
+  req: AuthenticatedRequest,
+  order: Partial<Pick<Order, 'createdBy'>> | null | undefined,
+  useFinancial: boolean | undefined,
+): boolean {
+  const role = req.userContext?.role;
+  if (roleHasPermission(role, 'viewFinancialReports', useFinancial)) return true;
+  const userId = req.userContext?.userId;
+  return appRoleOf(role) === 'consultant'
+    && roleHasPermission(role, 'viewPrices', useFinancial)
+    && !!userId
+    && order?.createdBy?.id === userId;
+}
+
+/** Discount and money of others: financial access only (viewFinancialReports, company option included). */
+export function canGiveDiscount(req: AuthenticatedRequest, useFinancial: boolean | undefined): boolean {
+  return roleHasPermission(req.userContext?.role, 'viewFinancialReports', useFinancial);
+}
+
+/** Money on the order: a payment or a transaction (same as orderHasNoMoney in firestore.rules). */
+export function orderHasMoney(order: Partial<Pick<Order, 'paidAmount' | 'transactions'>>): boolean {
+  return (Number(order.paidAmount) || 0) !== 0 || (order.transactions ?? []).length > 0;
+}
+
+/**
+ * Who deletes an order (AuthorizationService.canDeleteOrder + firestore.rules
+ * `allow delete`, contract order-delete.json): admin always; manager and
+ * supervisor a quote without money; consultant and technician a quote without
+ * money that they created.
+ */
+export function canDeleteOrder(
+  req: AuthenticatedRequest,
+  order: Pick<Order, 'status' | 'createdBy'> & Partial<Pick<Order, 'paidAmount' | 'transactions'>>,
+): boolean {
+  const role = appRoleOf(req.userContext?.role);
+  if (!role || !canSeeOrder(req, order)) return false;
+  if (role === 'admin') return true;
+  if (order.status !== 'quote' || orderHasMoney(order)) return false;
+  if (role === 'manager' || role === 'supervisor') return true;
+  return !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
+}
+
+/** Statuses an order can be marked "parada" in (docs/ORDER_ON_HOLD.md). */
+export const HOLD_STATUSES: readonly string[] = ['approved', 'progress'];
+
+/**
+ * Who removes the "parada" mark: whoever changes the status of an active
+ * order (financial or operator), in any status (`orderHoldChangeAllowed`).
+ * The consultant only decides quotes, so never.
+ */
+export function canRemoveOrderHold(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
+  const role = appRoleOf(req.userContext?.role);
+  return !!role && role !== 'consultant' && canSeeOrder(req, order);
+}
+
+/** Who marks it (canChangeOrderHoldFor). The status is checked apart (409 instead of 403). */
+export function canChangeOrderHold(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
+  return canRemoveOrderHold(req, order);
 }
 
 /** Same body as requirePermission in auth.middleware (older apps read it). */

@@ -455,7 +455,7 @@ router.delete('/:number/photos/:photoId', requireLinked, async (req: Authenticat
 
     // Delete from storage
     if (photoToDelete.storagePath) {
-      await photoService.deletePhoto(photoToDelete.storagePath);
+      await photoService.deletePhoto(companyId, order.id, photoToDelete.storagePath);
     }
 
     // Remove from order

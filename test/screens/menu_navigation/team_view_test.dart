@@ -72,6 +72,31 @@ void main() {
     expect(find.text('Convidar outra pessoa'), findsOneWidget);
   });
 
+  testWidgets('a load error shows the plain sentence, never the exception', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        TeamView(
+          members: const [],
+          invites: const [],
+          currentUserId: 'u1',
+          canManage: true,
+          now: _now,
+          error: '[cloud_firestore/permission-denied] Missing permissions',
+          onRetry: () {},
+          onResendInvite: (_) {},
+          onInvite: () {},
+        ),
+      ),
+    );
+    expect(find.textContaining('permission-denied'), findsNothing);
+    expect(
+      find.text('Não deu para carregar. Verifique a internet e tente de novo.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('rows open their menus, except the user own row', (tester) async {
     final tapped = <String>[];
     var invited = 0;

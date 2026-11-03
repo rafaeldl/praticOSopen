@@ -193,7 +193,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 ### Permissões
 
 #### Ordens de Serviço
-- ✅ Visualizar todas as OS da empresa (assignedTo ainda não implementado restritivamente)
+- ✅ Visualizar as OS que criou e as atribuídas a ele (`assignedTo`); as listas filtram `createdBy.id` OU `assignedTo.id`
 - ✅ Criar novas OS (Inicia em 'Orçamento' para precificação posterior)
 - ✅ Editar OS **apenas quando status = 'Orçamento'**
   - ✅ Adicionar/editar/remover serviços e produtos

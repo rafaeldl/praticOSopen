@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "compiledAt": "2026-10-09T20:00:00.000Z",
+  "compiledAt": "2026-11-02T22:00:00.000Z",
   "compiledBy": "claude",
   "sources": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "eb964b75a72c770515137d469c8580afe0605cecf16078e2ae425666e8d78cf2",
+      "sha": "9fcaae8152670ea9acdbfde07aed89fd9f4aadd66a73e852813fd2510f1fc318",
       "scope": "**/*"
     },
     {
@@ -1018,6 +1018,205 @@
       "check": {
         "type": "deferred",
         "reason": "needs the whole screen layout, not one hunk"
+      },
+      "status": "active"
+    },
+    {
+      "id": "touch-target-size",
+      "text": "Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 234
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add a tappable widget (button, GestureDetector, row) given a fixed height, width or minSize below 44, or a primary button with a literal height instead of AppSizes.primaryButtonHeight?",
+          "criteria": {
+            "true": "SizedBox(height: 32, child: CupertinoButton(...))",
+            "false": "SizedBox(height: AppSizes.primaryButtonHeight, child: CupertinoButton.filled(...))"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-11-02T21:23:47.051Z",
+        "hunks": 7,
+        "median": 0.04,
+        "min": 0.03,
+        "max": 0.06,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "plain-portuguese-copy",
+      "text": "Português do dia a dia (\"Falta receber R$ 166\"), sem siglas nem jargão",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 226
+      },
+      "scope": [
+        "lib/l10n/app_pt.arb"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Among the added user-visible strings, is there at least one using a technical word or abbreviation an owner of a repair shop would not say, such as registro, campo, status, sincronizar, parâmetro, inválido or NFS-e?",
+          "criteria": {
+            "true": "\"Status do pagamento inválido\"",
+            "false": "\"Falta receber R$ 166\""
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-11-02T21:23:47.051Z",
+        "hunks": 1,
+        "median": 0.2,
+        "min": 0.2,
+        "max": 0.2,
+        "fired": 0,
+        "verdict": "skipped"
+      }
+    },
+    {
+      "id": "native-component-first",
+      "text": "Componente nativo do iPhone quando existe (interruptor, menu \"…\", \"Continuar com Apple\"); não desenhar uma versão própria",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 242
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change hand-draw a control that iOS already provides, such as a switch built from AnimatedContainer, or a custom popup menu, instead of using CupertinoSwitch or showPullDownMenu?"
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-11-02T21:23:47.051Z",
+        "hunks": 7,
+        "median": 0.04,
+        "min": 0.04,
+        "max": 0.06,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "one-question-per-screen",
+      "text": "Uma pergunta por tela (\"o que eu faço agora?\"), respondida no topo em uma frase",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 224
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs the whole rendered screen, not a diff"
+      },
+      "status": "active"
+    },
+    {
+      "id": "show-only-what-exists",
+      "text": "Mostrar só o que o registro tem; recurso ocasional entra pelo menu \"…\"/\"+\" ou pelo assistente",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 227
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs to know how often each feature is used and the whole screen"
+      },
+      "status": "active"
+    },
+    {
+      "id": "no-legacy-colors-on-redesigned-screens",
+      "text": "`CupertinoColors` direto e `lib/theme/app_theme.dart` são o padrão antigo, que só continua nas telas ainda não redesenhadas.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 253
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs the list of screens already redesigned"
+      },
+      "status": "active"
+    },
+    {
+      "id": "read-design-system-first",
+      "text": "`docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou redesenhar tela)",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 221
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about what the agent reads, not the code"
+      },
+      "status": "active"
+    },
+    {
+      "id": "test-theme-after-color-change",
+      "text": "Ao mudar uma cor, rodar `fvm flutter test test/theme/`.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 253
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about running a command"
+      },
+      "status": "active"
+    },
+    {
+      "id": "run-checks-before-pr",
+      "text": "Rodar `fvm flutter analyze`, `fvm flutter test` e, se mexer em Functions, `npm test` em `firebase/functions`.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 576
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about running commands"
+      },
+      "status": "active"
+    },
+    {
+      "id": "fix-ci-before-next-issue",
+      "text": "Se o CI falhar, corrigir no mesmo PR antes de pegar outra issue.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 578
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about process"
+      },
+      "status": "active"
+    },
+    {
+      "id": "needs-human-label",
+      "text": "Bloqueio em passo manual (lojas, consoles, contas, credenciais): label `needs-human`, comentário curto dizendo exatamente o que falta, e seguir para a próxima issue.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 583
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about process"
       },
       "status": "active"
     }

@@ -1,29 +1,18 @@
 name: Auto Version
 
+# Manual only: each RC builds iOS on macOS (~37 min) and Android, so it runs
+# when we decide to ship, not on every merge to master.
 on:
-  push:
-    branches:
-      - master
-    paths:
-      # App code
-      - 'lib/**'
-      - 'pubspec.yaml'
-      - 'pubspec.lock'
-      # Native code
-      - 'android/**'
-      - 'ios/**'
-      # Assets
-      - 'assets/**'
-      # Tests
-      - 'test/**'
-      - 'integration_test/**'
   workflow_dispatch:
+
+# A second dispatch waits instead of racing for the same tag
+concurrency:
+  group: auto-version
+  cancel-in-progress: false
 
 jobs:
   version:
     runs-on: ubuntu-latest
-    # Skip if commit is from this workflow (version bump commit)
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     permissions:
       contents: write
@@ -100,6 +89,7 @@ jobs:
           echo "🔄 Bump type: $BUMP_TYPE"
 
       - name: Calculate new version
+        if: steps.analyze.outputs.bump_type != 'none'
         id: version
         run: |
           LATEST_VERSION="${{ steps.latest_tag.outputs.latest_version }}"
@@ -135,6 +125,7 @@ jobs:
           echo "✅ New version: $NEW_VERSION (tag: $NEW_TAG)"
 
       - name: Update pubspec.yaml
+        if: steps.analyze.outputs.bump_type != 'none'
         run: |
           NEW_VERSION="${{ steps.version.outputs.version }}"
 
@@ -149,6 +140,7 @@ jobs:
           grep "^version:" pubspec.yaml
 
       - name: Commit version bump
+        if: steps.analyze.outputs.bump_type != 'none'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -163,6 +155,7 @@ jobs:
           git push origin HEAD:refs/heads/master
 
       - name: Create and push tag
+        if: steps.analyze.outputs.bump_type != 'none'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -177,6 +170,7 @@ jobs:
           echo "🏷️ Created and pushed tag: $NEW_TAG"
 
       - name: Trigger release workflows
+        if: steps.analyze.outputs.bump_type != 'none'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -203,4 +197,8 @@ jobs:
           echo "| New Version | ${{ steps.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| New Tag | ${{ steps.version.outputs.new_tag }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflows will be triggered automatically by the new tag." >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.analyze.outputs.bump_type }}" = "none" ]; then
+            echo "No commits since the last RC: nothing was released." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Android and iOS release workflows were dispatched for the new tag." >> $GITHUB_STEP_SUMMARY
+          fi

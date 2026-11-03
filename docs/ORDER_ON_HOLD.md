@@ -40,7 +40,7 @@ Sem marca, o campo não existe: retomar apaga o campo.
 | Permissão | `AuthorizationService.canChangeOrderHold`, `OrderPermissions.canChangeHold` |
 | Tela da OS | `lib/screens/order/order_screen_v2.dart`, `lib/screens/order/order_hold_sheet.dart` |
 | Início | `HomeView.onHold`, `HomeRules.stopped`, `OrderListRow.holdText`, `OrderHoldStyle` (`lib/theme/status_style.dart`) |
-| Servidor | `firebase/functions/src/services/order-hold.service.ts`, chamado por `handleOrderUpdatedAsaas` |
+| Servidor | `firebase/functions/src/services/order-hold.service.ts`: limpeza chamada por `handleOrderUpdatedAsaas`; `setOrderHold`/`removeOrderHold` para `POST`/`DELETE /v1/app/orders/:id/hold` (app web, `docs/WEB_API.md`) |
 | Regras | `orderHoldValid` e `orderHoldChangeAllowed` em `firebase/firestore.rules` |
 
 ### Por que `onHold` fica fora do `toJson`
@@ -126,6 +126,6 @@ OrderHoldStyle.line(l10n, order.onHold!, DateTime.now());
 
 ## Limites conhecidos
 
-- API, bot e MCP não mostram nem mudam a marca: eles só a perdem quando a situação sai de `approved` e `progress`.
+- Bot e MCP não mostram nem mudam a marca: eles só a perdem quando a situação sai de `approved` e `progress`. A API do app web marca e retoma (`/v1/app/orders/:id/hold`), com a mesma permissão e o mesmo comentário interno.
 - A data de início é o momento da marcação: não dá para informar uma data passada.
 - O aviso "OS paradas" de Lembretes é outra coisa: conta OS abertas há mais de 7 dias, marcadas ou não.

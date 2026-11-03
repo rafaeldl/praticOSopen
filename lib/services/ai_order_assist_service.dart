@@ -232,6 +232,89 @@ class AiDeviceHit {
   );
 }
 
+/// A payment the user said already happened. No amount is calculated on the
+/// server: [kind] and [value] are what was said (spec
+/// 2026-11-02-ia-financeiro-os).
+class AiPaymentAction {
+  const AiPaymentAction({
+    required this.kind,
+    this.value,
+    this.method,
+    this.paidDay,
+  });
+
+  /// 'full', 'value', 'percent' or 'leaving'.
+  final String kind;
+
+  /// Null when no amount was said ("pagou uma parte").
+  final double? value;
+
+  /// `PaymentMethod`, when said.
+  final String? method;
+
+  /// The day it was paid, when said.
+  final DateTime? paidDay;
+
+  static AiPaymentAction? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final kind = json['kind'];
+    if (!const ['full', 'value', 'percent', 'leaving'].contains(kind)) {
+      return null;
+    }
+    final method = json['method'];
+    final day = parseDueDate(json['paidDate']);
+    return AiPaymentAction(
+      kind: kind as String,
+      value: (json['value'] as num?)?.toDouble(),
+      method: const ['pix', 'cash', 'card', 'other'].contains(method)
+          ? method as String
+          : null,
+      paidDay: day == null ? null : DateTime(day.year, day.month, day.day),
+    );
+  }
+}
+
+/// A discount the user asked for.
+class AiDiscountAction {
+  const AiDiscountAction({required this.isPercent, required this.value});
+
+  final bool isPercent;
+  final double value;
+
+  static AiDiscountAction? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final value = (json['value'] as num?)?.toDouble();
+    if (value == null || value <= 0) return null;
+    return AiDiscountAction(isPercent: json['kind'] == 'percent', value: value);
+  }
+}
+
+/// What the user asked to do with money and status. Nothing here is saved
+/// without the confirmation card.
+class AiOrderActions {
+  const AiOrderActions({this.payment, this.discount, this.status});
+
+  final AiPaymentAction? payment;
+  final AiDiscountAction? discount;
+
+  /// 'approved', 'progress' or 'done'.
+  final String? status;
+
+  static AiOrderActions? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final payment = AiPaymentAction.fromJson(json['payment']);
+    final discount = AiDiscountAction.fromJson(json['discount']);
+    final status = json['status'];
+    final validStatus = const ['approved', 'progress', 'done'].contains(status);
+    if (payment == null && discount == null && !validStatus) return null;
+    return AiOrderActions(
+      payment: payment,
+      discount: discount,
+      status: validStatus ? status as String : null,
+    );
+  }
+}
+
 /// Structured draft returned by `aiOrderAssist`: what to add ([items]) and
 /// what to change in the lines already in the order ([changes]). The function
 /// saves nothing: the app applies it on screen.
@@ -251,6 +334,8 @@ class AiOrderDraft {
     this.changes = const [],
     this.notes,
     this.dueDate,
+    this.actions,
+    this.nfseAutoIssue,
     this.used,
     this.limit,
   });
@@ -280,6 +365,12 @@ class AiOrderDraft {
 
   /// When the customer wants it ready. Without a spoken time it is 18:00.
   final DateTime? dueDate;
+
+  /// Money and status the user asked for; they go through the card.
+  final AiOrderActions? actions;
+
+  /// 'paid' or 'completed' when the company issues notas by itself.
+  final String? nfseAutoIssue;
   final int? used;
 
   /// -1 = unlimited.
@@ -329,6 +420,8 @@ class AiOrderDraft {
       ],
       notes: json['notes'] as String?,
       dueDate: parseDueDate(json['dueDate']),
+      actions: AiOrderActions.fromJson(json['actions']),
+      nfseAutoIssue: json['nfseAutoIssue'] as String?,
       used: (usage?['used'] as num?)?.toInt(),
       limit: (usage?['limit'] as num?)?.toInt(),
     );

@@ -81,7 +81,11 @@ const ownDone = (uid: string) => `${C}/orders/done_${uid}`;
 const ownOnHold = (uid: string) => `${C}/orders/hold_${uid}`;
 const ownPaidQuote = (uid: string) => `${C}/orders/paidq_${uid}`;
 const ownPaidDone = (uid: string) => `${C}/orders/paidd_${uid}`;
+const assigned = (uid: string) => `${C}/orders/asg_${uid}`;
 const GHOST_ORDER = `${C}/orders/ghost_quote`;
+const MISSING_CONTRACT_ORDER = `${C}/orders/contract_tpl1_20261201`;
+const GHOST_CONTRACT_ORDER = `${C}/orders/contract_tpl1_20261101`;
+const SEE_ASSIGNED: Actor[] = [...SEE_ALL_ORDERS, 'technician'];
 const GHOST_APPROVED = `${C}/orders/ghost_approved`;
 const GHOST_ON_HOLD = `${C}/orders/ghost_hold`;
 const HOLD = { reason: 'part', since: '2026-11-02T12:00:00.000Z' };
@@ -124,6 +128,55 @@ export const CASES: RulesCase[] = [
     id: 'orders.read.others', area: 'OS', title: 'abrir OS de outra pessoa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, GHOST_ORDER)),
     allow: SEE_ALL_ORDERS, permission: 'viewAllOrders',
+  },
+  {
+    id: 'orders.read.ownWithValues', area: 'OS', title: 'abrir OS que criou, com os valores',
+    run: ({ db, fs, uid }) => fs.getDoc(fs.doc(db, ownApproved(uid))),
+    allow: MEMBERS, permission: 'viewPrices',
+    gap: 'Técnico e supervisor não têm viewPrices no app, mas a regra é por documento: quem abre a OS recebe os valores. Bloquear quebra o app em uso; fica para decisão (projeção ou subcoleção de valores).',
+  },
+  {
+    // An admin creates the order and assigns it (assignedTo): the technician
+    // has to see it. The consultant only sees the orders they created.
+    id: 'orders.read.assigned', area: 'OS', title: 'abrir OS de outra pessoa atribuída a mim',
+    run: ({ db, fs, uid }) => fs.getDoc(fs.doc(db, assigned(uid))),
+    allow: SEE_ASSIGNED, permission: 'viewAssignedOrders',
+  },
+  {
+    // The list query the app runs for the technician: created by or
+    // assigned to them (OR), on top of the screen's own filters.
+    id: 'orders.list.assignedScoped', area: 'OS', title: 'listar as OS que criei ou que me atribuíram',
+    run: ({ db, fs, uid }) =>
+      fs.getDocs(fs.query(fs.collection(db, `${C}/orders`),
+        fs.and(
+          fs.where('status', 'in', ['quote', 'approved', 'progress']),
+          fs.or(fs.where('createdBy.id', '==', uid), fs.where('assignedTo.id', '==', uid)),
+        ),
+        fs.orderBy('createdAt', 'desc'), fs.limit(10))),
+    allow: SEE_ASSIGNED, permission: 'viewAssignedOrders',
+  },
+  {
+    id: 'orders.list.assignedOnly', area: 'OS', title: 'listar só as OS atribuídas a mim',
+    run: ({ db, fs, uid }) =>
+      fs.getDocs(fs.query(fs.collection(db, `${C}/orders`), fs.where('assignedTo.id', '==', uid))),
+    allow: SEE_ASSIGNED, permission: 'viewAssignedOrders',
+  },
+  {
+    // Contract generation reads the order of the due date inside a
+    // transaction before creating it; the document doesn't exist yet.
+    id: 'orders.contract.readMissing', area: 'OS', title: 'conferir se a OS do contrato já foi gerada (ainda não existe)',
+    run: ({ db, fs }) => fs.getDoc(fs.doc(db, MISSING_CONTRACT_ORDER)),
+    allow: MEMBERS,
+  },
+  {
+    id: 'orders.contract.readOthers', area: 'OS', title: 'abrir OS de contrato já gerada de outra pessoa',
+    run: ({ db, fs }) => fs.getDoc(fs.doc(db, GHOST_CONTRACT_ORDER)),
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.read.missing', area: 'OS', title: 'abrir OS que não existe (id que não é de contrato)',
+    run: ({ db, fs }) => fs.getDoc(fs.doc(db, `${C}/orders/missing_x`)),
+    allow: SEE_ALL_ORDERS,
   },
   {
     id: 'orders.list.all', area: 'OS', title: 'listar todas as OS',
@@ -194,6 +247,23 @@ export const CASES: RulesCase[] = [
     run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_ORDER), { dueDate: '2026-12-01T00:00:00.000' }),
     allow: SEE_ALL_ORDERS,
   },
+  {
+    id: 'orders.update.assigned', area: 'OS', title: 'iniciar OS atribuída a mim',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, assigned(uid)), { status: 'progress' }),
+    allow: SEE_ASSIGNED,
+  },
+  {
+    id: 'orders.delete.assigned', area: 'OS', title: 'apagar orçamento de outra pessoa atribuído a mim',
+    run: ({ db, fs, uid }) => fs.deleteDoc(fs.doc(db, `${C}/orders/asgq_${uid}`)),
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.money.receiveAssigned', area: 'OS', title: 'lançar recebimento em OS atribuída a mim',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, assigned(uid)), {
+      paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10 }],
+    }),
+    allow: FINANCIAL,
+  },
   // ─── Orders: field rules (mirrors AuthorizationService) ─────────────────
   {
     id: 'orders.status.approveOthersQuote', area: 'OS', title: 'aprovar orçamento de outra pessoa',
@@ -236,6 +306,13 @@ export const CASES: RulesCase[] = [
       paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10 }],
     }),
     allow: FINANCIAL, permission: 'chargeOrder',
+  },
+  {
+    // The consultant receives on the orders they created: they must see the
+    // open Asaas charge too, or they receive twice.
+    id: 'orders.charges.readOwn', area: 'Cobrança', title: 'ver cobrança Asaas da OS que criou',
+    run: ({ db, fs, uid }) => fs.getDocs(fs.collection(db, `${own(uid)}/charges`)),
+    allow: RECEIVE_OWN,
   },
   {
     id: 'orders.money.receiveOwn', area: 'OS', title: 'lançar recebimento na OS que criou',
@@ -690,6 +767,16 @@ export const CASES: RulesCase[] = [
     allow: SIGNED_IN,
   },
   {
+    id: 'webAppAccess.read', area: 'Global', title: 'ler a lista de acesso do app web',
+    run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'config/webApp')),
+    allow: [],
+  },
+  {
+    id: 'webAppAccess.write', area: 'Global', title: 'se colocar na lista de acesso do app web',
+    run: ({ db, fs }) => fs.setDoc(fs.doc(db, 'config/webApp'), { open: true }),
+    allow: [],
+  },
+  {
     id: 'shareTokens.read', area: 'Link do cliente', title: 'ler token de link da empresa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'links/share/tokens/ST_c1')),
     allow: [],
@@ -733,6 +820,12 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
     set(`${C}/orders/done_${uid}`, { status: 'done', total: 100, createdBy: by });
     set(`${C}/orders/paidq_${uid}`, { ...money, status: 'quote', paid: false, payment: null, createdBy: by });
     set(`${C}/orders/paidd_${uid}`, { ...money, status: 'done', createdBy: by });
+    set(`${C}/orders/asg_${uid}`, {
+      status: 'approved', total: 100, paid: false, payment: 'unpaid',
+      createdBy: { id: 'ghost', name: 'Ghost' }, assignedTo: by,
+    });
+    set(`${C}/orders/asgq_${uid}`, { status: 'quote', createdBy: { id: 'ghost', name: 'Ghost' }, assignedTo: by });
+    set(`${C}/orders/own_${uid}/charges/ch_${uid}`, { value: 100, status: 'PENDING' });
     set(`${C}/notifications/n_${uid}`, { recipientId: uid, read: false });
     const role = ACTOR_INFO[actor].roles.c1;
     if (role) set(`${C}/memberships/${uid}`, { user: { id: uid, name: uid }, role });
@@ -740,6 +833,7 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
   set(GHOST_ORDER, { status: 'quote', createdBy: { id: 'ghost', name: 'Ghost' } });
   set(GHOST_APPROVED, { status: 'approved', total: 100, createdBy: { id: 'ghost', name: 'Ghost' } });
   set(GHOST_ON_HOLD, { status: 'progress', total: 100, onHold: HOLD, createdBy: { id: 'ghost', name: 'Ghost' } });
+  set(GHOST_CONTRACT_ORDER, { status: 'quote', createdBy: { id: 'ghost', name: 'Ghost' } });
   set(`${GHOST_ORDER}/photos/p1`, { url: 'x' });
   set(`${GHOST_ORDER}/comments/cm1`, { text: 'oi', author: { userId: 'ghost' } });
   set(`${GHOST_ORDER}/charges/ch1`, { value: 100 });
@@ -762,6 +856,7 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
   set(`${C}/private/members`, { owner1: 'owner' });
   set('users/ghost', { id: 'ghost', companies: [] });
   set('segments/automotive', { name: 'Mecânica' });
+  set('config/webApp', { open: false, allowedEmailHashes: [] });
   set('links/share/tokens/ST_c1', { companyId: 'c1', orderId: 'ghost_quote' });
   set('links/invites/tokens/INV_c1', {
     company: { id: 'c1' }, role: 'technician', email: 'invitee@example.com', status: 'pending',

@@ -49,3 +49,52 @@ List<String> generateKeywords(String? name) {
       .where((w) => w.isNotEmpty)
       .toList();
 }
+
+/// Portuguese stopwords left out of search keywords (same list as the
+/// server's search.utils.ts).
+const _stopwords = {
+  'de', 'da', 'do', 'das', 'dos',
+  'e', 'ou', 'em', 'no', 'na', 'nos', 'nas',
+  'um', 'uma', 'uns', 'umas',
+  'o', 'a', 'os', 'as',
+  'para', 'por', 'com', 'sem',
+};
+
+/// Words without stopwords plus the full phrase (same as the server's
+/// generateSearchKeywords).
+///
+/// ```dart
+/// generateSearchKeywords("João da Silva") // ["joao", "silva", "joao silva"]
+/// ```
+List<String> generateSearchKeywords(String? text) {
+  final all = generateKeywords(text);
+  if (all.isEmpty) return [];
+  final meaningful = all.where((w) => !_stopwords.contains(w)).toList();
+  if (meaningful.isEmpty) return all;
+  return [...meaningful, if (meaningful.length > 1) meaningful.join(' ')];
+}
+
+/// Last 4 digits, last 8 digits and the full number (same as the server's
+/// generatePhoneKeywords).
+///
+/// ```dart
+/// generatePhoneKeywords("(48) 99988-7766") // ["7766", "99887766", "48999887766"]
+/// ```
+List<String> generatePhoneKeywords(String? phone) {
+  if (phone == null) return [];
+  final digits = phone.replaceAll(RegExp(r'\D'), '');
+  if (digits.length < 4) return [];
+  return [
+    digits.substring(digits.length - 4),
+    if (digits.length >= 8) digits.substring(digits.length - 8),
+    digits,
+  ];
+}
+
+/// Customer keywords: name and phone, as the server writes them
+/// (customer.service.ts), so the bot and the API find app-made customers
+/// by phone too.
+List<String> customerKeywords(String? name, String? phone) => [
+      ...generateSearchKeywords(name),
+      ...generatePhoneKeywords(phone),
+    ];

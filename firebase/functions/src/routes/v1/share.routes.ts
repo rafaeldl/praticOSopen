@@ -121,8 +121,10 @@ router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: Authent
 
     const orderId = String(req.params.orderId);
 
-    // Get all tokens for this order
-    const tokens = await shareTokenService.getTokensForOrder(orderId, companyId);
+    // Tokens of this order, without the ones replaced by a newer link: the
+    // app shares the first one not expired, and a revoked one never opens.
+    const tokens = (await shareTokenService.getTokensForOrder(orderId, companyId))
+      .filter((t) => !shareTokenService.isRevoked(t));
 
     const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
 
@@ -168,9 +170,10 @@ router.delete('/:orderId/share/:token', requireOrderAccess('orderId'), async (re
 
     const token = String(req.params.token);
 
-    // Verify token exists and belongs to this company
+    // Verify token exists and belongs to this company and to this order: access
+    // to one order must not turn off another order's link.
     const shareToken = await shareTokenService.getShareToken(token);
-    if (!shareToken || shareToken.companyId !== companyId) {
+    if (!shareToken || shareToken.companyId !== companyId || shareToken.orderId !== String(req.params.orderId)) {
       res.status(404).json({
         success: false,
         error: { code: 'NOT_FOUND', message: 'Share token not found' },

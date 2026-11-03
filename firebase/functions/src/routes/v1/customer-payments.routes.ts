@@ -6,6 +6,9 @@
  * - POST /:customerId/receipts               receipt over orders incl. others' (consultant)
  * - POST /:customerId/charges                one Asaas charge for several orders ('chargeOrder')
  * - DELETE /:customerId/charges/:chargeId    cancel it ('chargeOrder')
+ * - GET  /:customerId/receipts               receipts (financial: all; consultant: own)
+ * - POST /:customerId/receipts/:id/cancel    undo a receipt ("Desfazer recebimento")
+ * - PUT/DELETE /:customerId/receipts/:id/file  attach or remove its proof
  *
  * Receiving: owner, admin, manager, or consultant, when the company uses
  * values and billing (same as the app's `canReceivePayments`).
@@ -13,9 +16,9 @@
 import { Router, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../../models/types';
-import { requireAppPermission } from '../../middleware/app-permission.middleware';
+import { can, requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
-import { validateInput } from '../../utils/validation.utils';
+import { receiptFileSchema, validateInput } from '../../utils/validation.utils';
 import { db } from '../../services/firestore.service';
 import { toHttpError } from '../../services/asaas/errors';
 import {
@@ -26,9 +29,13 @@ import {
 } from '../../services/asaas/customer-charge.service';
 import {
   canReceiveForCustomer,
+  cancelCustomerReceipt,
   listCustomerOpenOrders,
+  listCustomerReceipts,
   MAX_RECEIPT_ORDERS,
+  ReceiptAccess,
   registerCustomerReceipt,
+  setCustomerReceiptFile,
 } from '../../services/customer-receipt.service';
 
 const router: Router = Router();
@@ -43,14 +50,7 @@ export const customerReceiptSchema = z.object({
     .array(z.object({ orderId: id, amount: z.number().positive() }))
     .min(1)
     .max(MAX_RECEIPT_ORDERS),
-  receiptFile: z
-    .object({
-      url: z.string().url().max(2048),
-      storagePath: z.string().max(512),
-      fileName: z.string().max(256).optional(),
-      contentType: z.string().max(100),
-    })
-    .optional(),
+  receiptFile: receiptFileSchema.optional(),
   paymentMethod: z.enum(['pix', 'cash', 'card', 'other']).optional(),
 });
 
@@ -168,5 +168,80 @@ router.delete(
     }
   },
 );
+
+// ----------------------------------------------------------------------------
+// Receipts of the customer: list, undo, proof (web). Financial access sees
+// and changes every receipt; a consultant, the ones they registered
+// (AuthorizationService.canManageReceiptFor, firestore.rules receipts).
+// ----------------------------------------------------------------------------
+
+async function receiptAccess(req: AuthenticatedRequest, res: Response): Promise<ReceiptAccess> {
+  const financial = await can(req, res, 'viewFinancialReports');
+  const userId = req.userContext?.userId;
+  return (receipt) => financial || (!!userId && receipt.createdBy?.id === userId);
+}
+
+function receiptId(req: AuthenticatedRequest, res: Response): string | null {
+  const id = param(req.params.receiptId);
+  if (ID_PATTERN.test(id)) return id;
+  res.status(404).json({ success: false, error: { code: 'RECEIPT_NOT_FOUND', message: 'Receipt not found' } });
+  return null;
+}
+
+router.get('/:customerId/receipts', requireReceive, async (req: AuthenticatedRequest, res: Response) => {
+  const customerId = param(req.params.customerId);
+  if (!ID_PATTERN.test(customerId)) return customerNotFound(res);
+  try {
+    const receipts = await listCustomerReceipts(req.userContext!.companyId, customerId, await receiptAccess(req, res));
+    res.json({ success: true, data: receipts });
+  } catch (error) {
+    console.error('List receipts error:', (error as Error).name);
+    const { status, body } = toHttpError(error, 'Failed to list receipts');
+    res.status(status).json(body);
+  }
+});
+
+router.post('/:customerId/receipts/:receiptId/cancel', requireReceive, async (req: AuthenticatedRequest, res: Response) => {
+  const customerId = param(req.params.customerId);
+  if (!ID_PATTERN.test(customerId)) return customerNotFound(res);
+  const id = receiptId(req, res);
+  if (!id) return;
+  try {
+    const receipt = await cancelCustomerReceipt(
+      req.userContext!.companyId, customerId, id, getUserAggr(req), await receiptAccess(req, res),
+    );
+    res.json({ success: true, data: receipt });
+  } catch (error) {
+    console.error('Cancel receipt error:', (error as Error).name);
+    const { status, body } = toHttpError(error, 'Failed to cancel receipt');
+    res.status(status).json(body);
+  }
+});
+
+async function setFile(req: AuthenticatedRequest, res: Response, attach: boolean): Promise<void> {
+  const customerId = param(req.params.customerId);
+  if (!ID_PATTERN.test(customerId)) return customerNotFound(res);
+  const id = receiptId(req, res);
+  if (!id) return;
+  let file: z.infer<typeof receiptFileSchema> | null = null;
+  if (attach) {
+    const validation = validateInput(z.object({ receiptFile: receiptFileSchema }), req.body);
+    if (!validation.success) return validationError(res, validation.errors);
+    file = validation.data.receiptFile;
+  }
+  try {
+    const receipt = await setCustomerReceiptFile(
+      req.userContext!.companyId, customerId, id, file, getUserAggr(req), await receiptAccess(req, res),
+    );
+    res.json({ success: true, data: receipt });
+  } catch (error) {
+    console.error('Receipt file error:', (error as Error).name);
+    const { status, body } = toHttpError(error, 'Failed to change the receipt file');
+    res.status(status).json(body);
+  }
+}
+
+router.put('/:customerId/receipts/:receiptId/file', requireReceive, (req: AuthenticatedRequest, res: Response) => setFile(req, res, true));
+router.delete('/:customerId/receipts/:receiptId/file', requireReceive, (req: AuthenticatedRequest, res: Response) => setFile(req, res, false));
 
 export default router;

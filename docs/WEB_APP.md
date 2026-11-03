@@ -1,0 +1,431 @@
+# WEB_APP.md
+
+## Visão Geral
+
+App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
+
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda" e a de "Checklists" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+
+Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
+
+## Arquitetura
+
+```
+firebase/webapp/
+├── scripts/gen.mjs        # contrato: permissões e textos → src/generated/
+├── scripts/check-budget.mjs  # orçamento de tamanho, roda no build
+├── src/
+│   ├── i18n/              # t(), web_{pt,en,es}.json
+│   ├── lib/               # firebase, api, session, permissions, format, segments…
+│   ├── lib/rules/         # regras de OS cobertas pelos casos de contrato
+│   ├── components/        # Layer, Combobox, MoneyInput, DateField, StatusLabel…
+│   ├── views/             # casca e telas
+│   ├── navigation.ts      # entradas do menu, com a permissão de cada uma
+│   └── router.ts          # rotas e guarda
+├── tests/                 # vitest
+└── e2e/                   # Playwright + Emulator Suite
+```
+
+### Contrato gerado
+
+`npm run gen` lê:
+
+- `firebase/functions/src/__tests__/rbac/app-permissions.json`: matriz de permissões.
+- `lib/l10n/app_{pt,en,es}.arb` e `src/i18n/web_{pt,en,es}.json`: textos. O ICU (placeholders e plurais) é compilado aqui, então não há parser no navegador.
+
+Falha se os idiomas divergirem em chave ou parâmetro, se uma chave web não começar com `web.` ou se repetir uma chave do app.
+
+A saída fica em `src/generated/`, **fora do git**. Motivo: são 1.800 textos em 3 idiomas que mudariam a cada alteração nos `.arb`, gerando conflito e ruído num repositório público, e a fonte já está versionada. `dev`, `build`, `test` e `typecheck` rodam o gerador antes.
+
+Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o que corta cerca de 30 KB do download. Por isso **`t()` sempre recebe a chave literal**. Montar a chave em tempo de execução (`` t(`status${x}`) ``) não passa no tipo e sumiria no build.
+
+### Dados
+
+| Operação | Caminho |
+|---|---|
+| Sessão, empresa, rótulos do ramo e páginas da lista de quem vê valores | Firestore REST (`firebase/firestore/lite`), leitura única |
+| Linhas ao vivo da lista e OS de quem vê valores | Firestore completo, com `onSnapshot`, carregado depois da lista aparecer |
+| Lista e OS de quem não tem `viewPrices` | Projeção da API (`GET /v1/app/orders`, `/:id`), sem nenhum valor |
+| Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
+| Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
+| Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
+| Agenda: leitura e mudar a data | API (`lib/agenda/data.ts`): `GET /v1/app/orders?sort=scheduledDate&startDate&endDate`, `PATCH /v1/app/orders/:id` com `expectedUpdatedAt` |
+| Telas do catálogo: lista, cadastro, foto, importação, preços em lote | API (`lib/catalog/data.ts`): `/v1/app/services`, `/v1/app/products`; a foto vai para o Storage na pasta do item |
+| Checklists: modelos e respostas na OS | Firestore direto (`lib/forms/data.ts`), cada gravação numa transação; fotos no Storage na pasta do checklist |
+
+Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
+
+### Sessão e permissões
+
+O papel vem do claim `roles` do token, a mesma fonte das regras do Firestore. O documento `users/{uid}` só dá nome e ordem das empresas. Se ele listar uma empresa que o token ainda não conhece, o token é renovado. `refreshClaims()` força isso depois de aceitar convite.
+
+`owner` é lido como `admin` e papel desconhecido não recebe nada, como no servidor. Sem `useFinancial`, as permissões financeiras somem.
+
+A tela só decide o que mostrar. Quem protege é o servidor e as regras.
+
+### Entrada
+
+Mesmas portas do app (`lib/screens/login.dart`): Google, Apple e "Já tenho conta com e-mail", com senha e "Esqueceu a senha?". Conta nova só por Google ou Apple, como no app. O app não tem entrada por link de e-mail, então o web também não tem.
+
+Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.web.app`, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
+
+O handler está cadastrado nos consoles (passo manual, feito em 03/11/2026):
+
+- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origem `https://praticos.web.app` e retorno `https://praticos.web.app/__/auth/handler`.
+- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.web.app` e `praticos.firebaseapp.com` e os dois handlers.
+- **Firebase Auth**, domínios autorizados: `praticos.web.app` já estava.
+
+O `praticos.firebaseapp.com` continua cadastrado nos três, então voltar o `authDomain` para ele funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros.
+
+Quem trabalha em mais de uma empresa escolhe onde entrar (`/app/choose-company`). A escolha fica lembrada neste navegador e pode ser trocada no menu.
+
+### Convites
+
+Convites pendentes aparecem na tela "sem empresa" e em Configurações. A lista vem do Firestore (`links/invites/tokens`, pelo e-mail verificado). O aceite passa por `POST /v1/app/invites/:token/accept`. Depois o web espera o claim novo no token e entra na empresa.
+
+**Limitação do servidor:** `/v1/app/invites` fica atrás de `bearerAuth`, que responde 403 para quem ainda não tem empresa. Por isso o primeiro convite de uma conta nova não é aceito pelo web. O app chama a mesma rota, então deve ter o mesmo problema. O teste está em `e2e/invites.spec.ts` como `fixme`. Quem já tem empresa aceita normalmente.
+
+### Lista de acesso
+
+O web abre só para contas liberadas. `GET /v1/app/web-access` (`firebase/functions/src/routes/v1/web-access.routes.ts`) lê `config/webApp`:
+
+```json
+{ "open": false, "allowedEmailHashes": ["<sha256 do e-mail em minúsculas>"] }
+```
+
+- Sem documento, sem e-mail ou com e-mail não verificado, o acesso é negado.
+- `open: true` libera todo mundo.
+- O cliente não lê nem grava `config/webApp` (regra do Firestore).
+- A rota tem limite próprio por IP e guarda a leitura do documento por 30 s.
+
+Na SPA:
+
+- Um "sim" fica guardado por 12 horas e é conferido de novo em segundo plano a cada 10 minutos.
+- Um horário no futuro guardado é tratado como inválido.
+- Ao trocar de conta, a resposta começa do zero.
+- Numa falha de rede, só um "sim" ainda válido da mesma conta continua valendo; sem ele, aparece um erro com "Tentar de novo".
+- Um "não" fecha o app na hora.
+
+Quem não está na lista vê só a tela "ainda não foi liberado". Se o que falta é confirmar o e-mail, a tela diz isso e oferece mandar o e-mail de novo. Isso fecha as telas; os dados continuam protegidos pelas regras e pela API.
+
+O documento `config/webApp` não existe até alguém rodar o script. Sem ele, o web fica fechado para todos. O primeiro `--email` cria o documento com `open: false`.
+
+Para liberar alguém (nunca rode sem saber qual projeto):
+
+```bash
+cd firebase/functions
+npm run webapp:access -- --email pessoa@exemplo.com --project <projeto>
+npm run webapp:access -- --email pessoa@exemplo.com --remove --project <projeto>
+npm run webapp:access -- --show --project <projeto>
+npm run webapp:access -- --open --project <projeto>     # abre para todos
+```
+
+`--dry-run` mostra o que mudaria. Sem `--project`, o script recusa, exceto no emulador.
+
+### Moeda e datas
+
+`lib/format.ts` usa o **país da empresa**, não o idioma. Uma OS brasileira aberta em inglês continua em R$ e com vírgula. `parseMoney` lê o que foi digitado: `150` é 150, nunca 1,50.
+
+### Ordens de serviço
+
+Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/orders-model.test.ts`) e `src/components/orders/`.
+
+**Início (`/`, também `/orders`).** É a lista de OS, como no app. Filtros do app: Em aberto, Orçamentos, Paradas, Concluídas e Todas; o técnico vê Minhas, Paradas e Todas e abre em Minhas. Orçamentos, Paradas e Minhas filtram as OS abertas no navegador, como o app. A ordem de Em aberto é atrasadas (promessa mais antiga primeiro), de hoje e o resto. "Atrasada" compara por dia, na lista e na OS (`isOverdue`, contrato `overdue.json`). A frase de resumo aparece só com a lista toda carregada. A linha mostra aparelho e serviços, situação com entrega e visita, parada com motivo e dias, valor e "falta receber". Todas é separada por mês. Filtro, busca e OS aberta ficam na URL (`?f=`, `?q=`, `?order=`). A busca procura nas OS carregadas (número, cliente, situação, aparelho, placa, sem acento); "Buscar nas mais antigas" pede o número ao Firestore e as páginas seguintes. A lista se atualiza sozinha: as 30 primeiras linhas por `onSnapshot`, e o que muda no painel, na Nova OS ou no lote atualiza a linha no lugar (`lib/orders/bus.ts`), sem perder página nem rolagem.
+
+**Quadro.** Aba da lista (`?view=board`). Mover o cartão arrastando, pelo botão "…" ou com Shift e seta. Só oferece o que o papel permite.
+
+**Lote.** Selecionar linhas troca a barra de filtros pelas ações: mudar a situação (só as que todas as selecionadas aceitam) e responsável. Cada OS vai pela API; o que o servidor recusa é contado no aviso.
+
+**Nova OS.** `N`, a paleta ou o "+" da barra no celular. Técnico e gerente não criam (o app tira o técnico em `canCreateOrder`, apesar da matriz de permissões). Cliente, aparelho (o único do cliente entra sozinho; os que ele já trouxe aparecem primeiro), itens com o preço do catálogo, entrega, pedido do cliente e "Mais opções" (situação inicial sem "cancelada", visita, responsável). `Ctrl/⌘ Enter` salva de qualquer campo. Fechar com algo preenchido pergunta (Esc, X, Voltar e recarregar). O pedido do cliente vira o primeiro comentário interno, como no app. As listas são lidas enquanto a pessoa olha a lista, para a gaveta abrir pronta.
+
+**Tela da OS.** Cabeçalho com cliente, aparelho, situação e uma frase (prazo, atraso ou "Falta receber"), o botão azul do próximo passo (aprovar, começar, concluir serviço, retomar, receber) e "Marcar como parada". Itens agrupados por aparelho, com mudar e tirar; tirar oferece Desfazer. Totais só para quem vê valores. Fotos (escolher, colar, arrastar), comentários com "só a equipe" ou "cliente também vê", Detalhes (entrega, visita, responsável, local). Menu "…" só com o que a OS e o papel permitem, destrutivas por último e com confirmação. Teclas: `A`, `S`, `C`, `D`, `R`. "Imprimir ou salvar PDF" usa uma folha própria de impressão. OS apagada ou sem acesso mostra "não está mais aqui", nunca uma OS vazia.
+
+**Gravações.** `expectedUpdatedAt` vai em situação, datas, responsável, itens, pagamento e desconto, com a `version` da OS como veio (`versionOf` em `lib/orders/model.ts`), nunca convertida pelo fuso do navegador; um `409 ORDER_CHANGED` mostra o aviso e a versão nova. Pagamento e desconto levam `clientTransactionId` gerado ao abrir o diálogo, então repetir não grava em dobro. Itens lidos do Firestore recebem o mesmo id derivado que o servidor calcula (`lib/orders/line-ids.ts`, igual a `locateLines`). As escritas do painel entram em fila: uma segunda espera a primeira, nunca some.
+
+**Assistente.** Barra "Peça ao assistente" no pé da OS, só para quem edita os itens e com `GET /v1/app/ai/status` ligado. Põe na OS os itens do catálogo que entendeu (`POST /v1/app/ai/order-assist` e depois `POST /items`), marca com ✦ e oferece Desfazer. No E2E a resposta do modelo é simulada com `page.route`.
+
+**Depois da revisão e do teste de usuários (#515).**
+- Filtros também Atrasadas, Para hoje e Sem receber (com contagem; lido por `payment == 'unpaid'`, indexado com `createdAt`). A busca mostra quantas achou, põe o número exato primeiro e oferece "Procurar em todas". `⌘K` acha OS por número, cliente ou aparelho, e clientes.
+- Nova OS cadastra cliente (`POST /v1/app/customers`) e veículo (`POST /v1/app/devices`) com "+ Cadastrar «nome»", só depois das listas carregadas, para nunca duplicar. Quando o cliente não tem OS que a pessoa lê (consultor), lista os veículos da empresa. Texto digitado e não escolhido trava o salvar com aviso. Enter vazio no veículo vai para o item. "+ Usar «texto» nesta OS" põe um serviço fora do catálogo, na Nova OS e na OS aberta (`POST /items` sem `catalogId`, #516). A Nova OS gera um `clientOrderId` ao abrir e o repete em cada tentativa: salvar de novo depois de a rede cair devolve a mesma OS.
+- Receber nunca passa do que falta e acompanha o saldo ao vivo; pagamento e desconto mandam `expectedUpdatedAt`; `409 PAYMENT_EXCEEDS_BALANCE` mostra o aviso e relê a OS.
+- Tirar item só vai ao servidor quando o aviso sai; Desfazer mantém descrição e posição.
+- Fechar "E o veículo?" cancela a troca de cliente. O resumo do cliente gravado leva e-mail e CPF/CNPJ.
+- Quem não tem `viewPrices` lê o catálogo pela REST do Firestore com máscara só do nome: o preço não chega à rede nem ao IndexedDB.
+- Menu "…" preso ao botão (no celular, folha embaixo). Situações na ordem do serviço. Fechar a OS devolve o foco à linha.
+- "Minhas" pede `assignedTo=<uid>` à API: o técnico vê a OS atribuída a ele, criada por qualquer um (regras e índices do #514; na API, `canSeeOrder` e a lista aceitam o técnico atribuído).
+- A Início abre com "R$ X para receber" no resumo; em Sem receber, buscar um cliente mostra quanto ele deve. O próximo passo de "Na oficina" é "Concluir serviço". Telefone do cliente legível, total da Nova OS acompanha o valor enquanto digita, controles nativos seguem o tema escuro.
+
+**Textos.** Os textos usados só por uma funcionalidade vão para um arquivo próprio por idioma (`FEATURES` em `scripts/gen.mjs`): `src/components/orders/` em `generated/i18n/{pt,en,es}-orders.json` e as telas de clientes em `-customers.json`. Cada tela carrega o seu com `loadTexts` antes de aparecer, fora do primeiro download.
+
+**Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts`, `e2e/order-detail.spec.ts` e `e2e/orders-review.spec.ts` (um teste por item da revisão e do teste de usuários), contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
+
+### Clientes e aparelhos
+
+Código em `src/views/customers/`, `src/components/customers/` e `src/lib/customers/` (regras puras em `model.ts`, importação em `import.ts`, chamadas em `data.ts`). Testes: `tests/customers.test.ts` e `e2e/customers*.spec.ts`, `e2e/devices.spec.ts`.
+
+**Dados pela API.** Lista, tela do cliente e do aparelho vêm de `/v1/app/customers` e `/v1/app/devices` (ver `docs/WEB_API.md`), filtradas pelo papel no servidor: consultor e técnico contam só as OS que leem e a tela diz isso. No app essas consultas são negadas pelas regras e a tela fica sem selo, sem busca por placa ou com erro (defeitos 1, 2 e 9 da fatia 03). Nenhuma tela desta fatia usa o Firestore.
+
+**Clientes (`/customers`).** Todos de uma vez, 200 linhas por vez na tela, por inicial sem acento ("#" no fim). Selos "N atrasadas" (vence) e "N em aberto" (aprovada e na oficina). A busca acha nome e e-mail sem acento, telefone pelos dígitos e placa a partir de 3 caracteres, sem hífen; o acerto da placa abre o dono, cliente da OS mais recente. `/` foca a busca e `⌘K` acha cliente e placa. O cliente aberto fica ao lado (`?customer=`), com contato, CPF/CNPJ, endereço com mapa, campos do segmento, "Falta receber" com "Receber", "gastou", aparelhos tirados das OS e as OS com os nomes de situação do segmento. "Nova OS para Ana" leva só o cliente. Ligar e WhatsApp só com telefone (`tel:` só com dígitos e "+"; `wa.me` pela regra de `lib/phone.ts`).
+
+**Cadastro.** Gaveta com nome e telefone (máscara `customer.phone` do segmento pelo país); "Mais dados" com e-mail, CPF/CNPJ (só Brasil ou empresa sem país), endereço e campos do segmento, aberto sozinho quando há algum. "Salvar" cinza até ter nome. Cliente novo com telefone de outro pergunta antes ("Abrir cliente" ou "Salvar mesmo assim"), comparando como o app (sem o nono dígito). Fechar com algo digitado pergunta, também ao editar. Editar manda a versão lida: se alguém (web ou app) salvou depois, nada é gravado, a tela avisa e relê. Apagar diz quantas OS, recibos e cobranças o cliente tem, contando também o que o papel não vê.
+
+**Campos do segmento.** `lib/segment-fields.ts` lê os mesmos `segments/{id}.customFields` do app (global e depois o do segmento; mesma chave, vale o do segmento): text, textarea, number (só inteiro, mínimo e máximo), select e date (gravada como o app, ISO com hora). Lê `customData[nome]` e `customData[chave]`, grava só o nome. `required` vale para todos os tipos (o app ignora em textarea, select e date). Máscaras no formato do `easy_mask` (9, A, N, X).
+
+**Aparelhos (`/devices`).** Aba ao lado de Clientes, com o nome do segmento ("Veículos"). Modelo, placa, situação (com `useDeviceManagement`) e próxima manutenção; editar e apagar na linha só para quem pode. A tela do aparelho (`?device=`) abre para todos os papéis, com dono, OS e a próxima manutenção (marcar, mudar e tirar só com `manageDevices`). O cadastro aceita modelo ou placa; a placa segue a máscara e o `pattern` do segmento e vai em maiúsculas; o modelo sugere os já cadastrados e traz marca e categoria.
+
+**Importar planilha (`/customers/import`).** CSV (vírgula, ponto e vírgula ou tab) ou XLSX lido no navegador, sem biblioteca (zip pelo `DecompressionStream`). Colunas adivinhadas e conferidas; a prévia diz o que entra e o que fica de fora (sem nome, CPF/CNPJ inválido, telefone de um cliente, telefone repetido na planilha). Grava só ao confirmar, de 100 em 100; cada linha tem id próprio e o id da importação nasce na prévia, então "Importar" de novo depois de uma falha não duplica nada.
+
+**Uma fonte só.** Permissões pelo contrato gerado; telefone (`lib/phone.ts`) e CPF/CNPJ (`lib/tax-id.ts`) passam pelos casos de contrato `phone.json` e `tax-id.json`, os mesmos do app e do servidor; máscaras e campos vêm do segmento; textos pelos `.arb` e `web_*.json`.
+
+**Fica para depois.** Seletores da OS ("Qual cliente?" com Recentes e placa, "Qual veículo?" com Nenhum), vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho, recebimentos e notas do cliente, contratos do aparelho e a pergunta da próxima manutenção ao concluir a OS.
+
+### Catálogo
+
+Código em `src/views/catalog/`, `src/components/catalog/` e `src/lib/catalog/` (regras puras em `model.ts`, chamadas em `data.ts`). Testes: `tests/catalog.test.ts` e `e2e/catalog*.spec.ts`. Os textos ficam no mesmo pedaço dos de clientes (`-customers.json`), para não mexer no `src/i18n/index.ts` do primeiro download.
+
+**Dados pela API.** `/v1/app/services` e `/v1/app/products` (ver `docs/WEB_API.md`). Quem não tem `viewPrices` (supervisor, ou "Valores e cobrança" desligado) recebe a lista sem o campo `value`: o preço não chega à rede nem a cache nenhum. Nenhuma tela desta fatia usa o Firestore. A Nova OS continua lendo o catálogo como antes (`lib/orders/catalog.ts`).
+
+**Lista (`/catalog`).** Só com `viewServices` ou `viewProducts`; o técnico é barrado na rota (no app a rota aberta direto ainda assina serviços). Serviços (N) | Produtos (N), com o nome que o segmento dá aos produtos (`product._entity_plural`, ex. "Peças"); some quando o papel vê um tipo só. Tipo e busca na URL (`?kind=product`, `?q=`). Busca por nome, "contém", sem acento e sem caixa; ordem alfabética sem caixa (o app põe minúsculas e acentuados no fim). "Mais usados" do tipo no topo, sem busca. Preço só para quem vê valores, "sem valor" quando vazio. A linha abre o cadastro só para quem gerencia o tipo (só dono e admin); para os outros é só leitura. Vazio, erro com "Tentar de novo" e carregando por tipo. Dica do app no fim.
+
+**Cadastro.** Gaveta com nome (exemplo por ramo), preço só para quem tem `editPrices` (`MoneyInput`: 150 é 150) e "Foto e mais dados" com a foto e os campos `service.*`/`product.*` do segmento. Salvar cinza até ter nome, `Ctrl/⌘ Enter`. A foto (escolher, colar ou arrastar, até 10 MB) espera no navegador e sobe para `tenants/{empresa}/{services|products}/{id}/photo.jpg` só depois de o item existir: cancelar não deixa item sem nome (defeito C9 do app). Editar manda a versão lida; se alguém salvou depois, nada é gravado e a lista relê. "Tirar a foto" manda também a foto vista e o servidor apaga só esse arquivo. Fechar com mudança pergunta (o app descarta a edição sem perguntar). Apagar fica no menu "…", com a confirmação do app, e leva a foto junto. Erro ao salvar ou apagar sempre aparece.
+
+**Importar planilha (`/catalog/import`).** Igual à de clientes: CSV ou XLSX no navegador, colunas adivinhadas (nome, tipo, preço) e conferidas, linhas sem tipo no tipo escolhido. Ficam de fora: sem nome, tipo que não é serviço nem produto, preço que não dá para ler, nome que já está no catálogo (mesmo tipo, sem acento e sem caixa) e nome repetido na planilha. O preço é lido como digitado, pelo país da empresa ("R$ 1.234,56" é 1234,56) e só entra para quem tem `editPrices`. Nada grava antes de "Importar"; vai de 200 em 200 com id por linha, e o id da importação nasce na prévia: "Importar" de novo depois de uma falha não duplica.
+
+**Preços em lote.** Na lista, para quem gerencia e tem `editPrices`: selecionar linhas, "Mudar preços", aumentar ou baixar por porcentagem (baixar até 100%), arredondar para inteiro. A prévia mostra cada item antes e depois; itens sem preço ficam como estão. "Aplicar" pede confirmação. A conta é em centavos. Até 500 itens por vez, num pedido e numa transação: o servidor grava todos ou nenhum (acima disso a tela pede para dividir). Cada mudança leva o preço que a pessoa viu e o lote leva uma chave (`batchId`). Se a resposta se perde, a prévia fica com o lote enviado e "Tentar de novo" manda exatamente o mesmo, nunca recalculado da lista relida: o que já mudou não muda outra vez. Um 409 (alguém mudou um preço) fecha a prévia, limpa a seleção e a lista mostra os preços novos. "Desfazer" no aviso segue a mesma regra. Fechar com resultado desconhecido relê a lista e pede para conferir.
+
+**Fica para depois.** Abrir o cadastro do catálogo de dentro da Nova OS ("Novo item" → "Serviço ou produto?") e preços em lote dos dois tipos juntos (a seleção é por tipo). Toda gravação aqui esquece as listas da Nova OS (`forgetLists`), que relê o catálogo na próxima vez.
+
+### Mandar ao cliente, receber e cobrar
+
+Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/model.ts` (dinheiro em centavos, testadas em `tests/receive-model.test.ts`) e chamadas em `src/lib/receive/data.ts`. Os textos ficam no pedaço de OS (`-orders.json`), fora do primeiro download. Testes: `e2e/receive.spec.ts`.
+
+**Mandar para o cliente.** No cabeçalho da OS, no menu "…" e na tecla `M`, para todos os papéis. Usa o primeiro link válido de `GET /v1/app/orders/:id/share` ou gera um (`POST`, ver, aprovar e comentar, 7 dias); a URL é a que a API devolve, nunca montada no navegador. A mensagem segue a situação, o que o link permite, o rótulo do segmento e o idioma (`web.share.*`), com o nome da empresa na assinatura, e pode ser editada. "Mandar pelo WhatsApp" abre `wa.me` em nova aba com o telefone do cadastro do cliente (não a cópia guardada na OS); sem telefone, o botão azul copia a mensagem. Trocar o que o cliente pode fazer ou a validade gera um link novo, e o servidor desativa os anteriores. "Desativar o link" pede confirmação. OS sem cliente diz o que falta e oferece escolher o cliente.
+
+**Receber de uma OS.** O "Receber" (`MoneyDialog`) pergunta quanto, como (nada vem marcado) e quando (nem no futuro nem antes da OS). "Já recebido" mostra cada pagamento e desconto, do dia mais novo, com forma, quem anotou e o comprovante. "Remover" e "Desfazer pagamentos" pedem confirmação e vão pela API (`DELETE /payments/:id`, `DELETE /discounts/:id`, `POST /payments/reset`). Pagamento do Asaas e parte de um recebimento de várias OS não saem daqui. OS em orçamento ou cancelada mostra só o histórico.
+
+**Receber de um cliente em várias OS.** Gaveta "Receber de {nome}", aberta pelo cliente, pela seleção de OS de um mesmo cliente na lista (tela grande) e pelo Financeiro. Lista as OS em aberto (`GET /customers/:id/open-orders`), divide o valor da mais antiga para a mais nova e mostra a divisão e o total antes de gravar; uma confirmação repete os dois. Antes de gravar, relê os saldos: se algo mudou, avisa e não grava. O `receiptId` é gerado ao abrir e renovado quando o saldo muda ou a pessoa muda o que entra: repetir o mesmo pedido depois de a resposta se perder não grava em dobro, e um `RECEIPT_EXISTS` relê os recebimentos e mostra o valor gravado, nunca o digitado. O consultor vê as OS de outra pessoa à parte e desmarcadas.
+
+**Recebimentos.** Na tela do cliente: lista (`GET /customers/:id/receipts`), recibo impresso pelo navegador e "Desfazer recebimento", com confirmação. O recibo não tem "Ainda falta": o recebimento não guarda o saldo daquele dia, e o saldo de hoje mudaria um recibo antigo.
+
+**Cobrança (Asaas).** Quem recebe na OS (o consultor também) vê o link aberto só para ler; com link aberto, Receber deixa de ser o botão azul e avisa que a cobrança se ajusta. Criar, cancelar e gerar link novo só para quem tem `chargeOrder`, com `settings/payments.asaasEnabled` e `asaasConnected`. Na OS: cartão do link aberto (esperando, vencido, parcelas, o que falta fora do link), aviso "A OS mudou de valor" com "Gerar link novo" e "Manter o link" (guardado por cobrança neste navegador), parcelamento cancelado pelo servidor, copiar, mandar de novo e cancelar. "Mandar cobrança" pede valor (sempre em R$), vencimento (hoje + 3, nunca no passado), parcelas (só uma OS) e CPF/CNPJ quando o cadastro não tem um válido. Criar e mandar são um passo só: a folha vira "Mandar pelo WhatsApp" com o link do Asaas. Na gaveta do cliente: um link para várias OS, copiar e cancelar. O link mandado de novo é sempre o do Asaas, na OS e no cliente.
+
+**Financeiro > Receber (`/finance`).** Toda OS que ainda deve: concluída com saldo e aberta (aprovada ou em andamento) com sinal, para não repetir o P1 do teste do Marcos. Lê todas as OS sem pagar (`payment == 'unpaid'`) em páginas de 500, por cliente, das dívidas mais antigas; avisa se passar de 20.000. Marcar OS de um cliente abre a gaveta de receber; OS de dois clientes não recebem juntas. O Resumo do Financeiro é da fatia 6.
+
+**Imprimir várias OS.** Na seleção da lista (tela grande), cada OS numa página.
+
+**No E2E** o WhatsApp nunca abre (os testes leem o link) e o Asaas é simulado: as rotas de cobrança são respondidas pelo teste, que grava o documento da cobrança como o servidor gravaria. O seed liga `settings/payments` na empresa A.
+
+**Fica para depois.** Anexar e trocar comprovante (o servidor só aceita URL https do bucket e o emulador serve http, então não há E2E possível; `pay.widget.sheet` volta a `in_progress`), "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
+
+### Agenda
+
+Código em `src/views/agenda/`, `src/components/agenda/` e `src/lib/agenda/` (regras puras em `model.ts`, testadas em `tests/agenda-model.test.ts`; textos e datas em `text.ts`; chamadas em `data.ts`). Textos no pedaço `-agenda.json`. Testes: `e2e/agenda.spec.ts`.
+
+**Fuso e formato da empresa (todo o web).** `lib/zone.ts` guarda o fuso da empresa (`App.vue` acerta ao carregar a empresa); `lib/format.ts`, o dia de atraso, "hoje/amanhã" e o "só o dia" da meia-noite usam esse fuso, na lista, na OS e na agenda. Visita e entrega são gravadas como o app grava: hora da empresa sem fuso (`2026-11-03T14:00:00.000`; "Dia todo" é `T00:00:00.000`), pela agenda, pelo seletor da OS e pela Nova OS. Assim o app lê a mesma hora, o mesmo dia e o mesmo mês (revisão do #521, M1). Limite: a empresa não tem campo de fuso; ele vem do país, e o do navegador vale quando é do mesmo país (uma empresa em Manaus aberta num computador em São Paulo usa São Paulo).
+
+Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo; se o computador estiver em outro fuso do mesmo país, como Manaus, vale o dele; empresa sem país segue o computador), nunca os do computador: uma visita das 09:00 em São Paulo aparece às 09:00 num computador em Tóquio. O formato (24 h ou AM/PM, nome dos dias) segue o país, e as palavras, o idioma. O texto sem fuso que o app grava (`toIso8601String()`) é lido como hora da empresa; o que a API grava vem em UTC.
+
+**Tela (`/schedule`).** Semana (padrão na tela grande) ou Dia, com a grade de horas de 7 às 19 (cresce para caber toda visita) e uma faixa "Dia todo" para meia-noite. O mês fica ao lado, com ponto nos dias com OS, inclusive os do mês vizinho. A semana começa no dia do país. Setas, `←` `→`, `T` (hoje) e o dia na URL (`?d=`, `?view=day`, `?who=`). Abrir a OS a põe ao lado (`?order=`); o que muda nela relê a agenda. Se o canal ao vivo do Firestore não responde em 6 s, a OS é lida uma vez pelo REST e o canal segue tentando; se essa leitura falha, aparece o erro com "Tentar de novo" (`watchOrder`, revisão B6). No celular (abaixo de 48 rem): faixa da semana, "Ver o mês" e a lista do dia com cliente e hora, situação · nº e aparelho · com responsável.
+
+**Dados.** Pela API para todos os papéis: o servidor aplica quem vê o quê (o técnico vê as que criou e as atribuídas a ele, o que o app não faz) e tira os valores de quem não tem `viewPrices`. Pede a grade inteira do mês, com 14 h de folga de cada lado (o texto sem fuso é comparado como texto), e põe cada OS no dia pelo fuso da empresa. Até 30 páginas de 100; passou disso, um aviso diz que a lista foi cortada. Relê ao voltar à janela.
+
+**Mudar a data (tela grande).** Arrastar o bloco para outra hora ou dia (de meia em meia hora) ou para "Dia todo". Pelo teclado, com o bloco em foco: `Shift` + `↑` `↓` meia hora, `Shift` + `←` `→` um dia; o bloco vai para onde ficaria, `Enter` confirma e `Esc` desfaz. Mudar uma visita que o cliente já esperava (tinha data, tem cliente, não está concluída nem cancelada) pergunta antes, com a data antiga e a nova e o lembrete de avisar o cliente. Depois de gravar, o aviso tem "Desfazer". Grava só a data (`PATCH /v1/app/orders/:id`, que confere `canEditOrderMainFields`), com a `version` lida; `409 ORDER_CHANGED` mostra o aviso e relê. Quem não pode mudar a data (supervisor e técnico fora do orçamento, consultor e técnico em OS de outra pessoa) não arrasta, e o teclado avisa.
+
+**Sem agendamento.** Com `useScheduling` desligado na empresa, a agenda mostra as entregas (`dueDate`), todas como "Dia todo".
+
+**De quem.** Admin, gerente e supervisor filtram por responsável (`assignedTo` no servidor). "Só de {nome}" com "Mostrar todos". Trocar de empresa tira o filtro.
+
+**Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push).
+
+### Checklists
+
+Código em `src/views/forms/`, `src/components/forms/` e `src/lib/forms/` (regras puras em `model.ts`, testadas em `tests/forms-model.test.ts`; Firestore e Storage em `data.ts`; oferta depois da Nova OS em `offer.ts`). Textos no pedaço de OS (`-orders.json`): o checklist abre dentro da OS e `src/i18n/index.ts` não muda. Testes: `e2e/forms.spec.ts` e `e2e/forms-a11y.spec.ts`. Não há protótipo destas telas; seguem `WEB_APP_DESIGN.md` e o app (`docs/formularios_dinamicos.md`).
+
+**Formato.** O mesmo do app: modelos em `/companies/{cid}/forms/{id}` com as chaves de `FormDefinition.toJson` (`id`, `title`, `description`, `isActive`, `items`, `titleI18n`, `descriptionI18n`, `company`, `createdAt/By`, `updatedAt/By`), lidos também no formato antigo (`name`, `fields`, `requiresPhoto`). Na OS, `/companies/{cid}/orders/{oid}/forms/{iid}` com a cópia das perguntas (`formDefinitionId`, `title`, `status` `pending`/`in_progress`/`completed`, `items`, `responses`, `startedAt`, `completedAt`, `updatedAt`, `titleI18n`, `deviceId`). Resposta: `{ itemId, value, photoUrls }`; sim/não é `bool`, escolha é a opção original do modelo (mostrada traduzida), várias é a lista, texto e número são texto (número validado pelo país da empresa e gravado como digitado, como o app lê). Fotos em `tenants/{cid}/orders/{oid}/forms/{iid}/{itemId}_{ms}_{n}.{ext}`, o caminho do app: `storage.rules` libera só um nível abaixo do checklist, então `.../items/{itemId}/` seria recusado.
+
+**App e web ao mesmo tempo.** Cada resposta é uma transação que relê o checklist e muda só a pergunta respondida (`applyChange`): valor novo mantém as fotos que outro pôs, foto nova mantém o valor, tirar foto tira só ela. Nada a migrar: o formato é o mesmo. As respostas de uma tela vão em fila, na ordem dada. Checklist concluído recusa resposta até ser reaberto (também a que estava sendo digitada). O web não apaga o que o app grava; o app ainda pode apagar o que o web grava: a tela do app não relê o checklist e troca a resposta inteira da pergunta (foto posta no web some, foto tirada no web volta), e a fila offline do app regrava a lista inteira. Isso vai para o lote de correções do app. Toda gravação do web é transação que lê antes: sem conexão ela falha e a tela diz, em vez de ficar na fila do navegador e aparecer como feita (a resposta fica marcada "Não deu para guardar", com "Tentar de novo").
+
+**Checklists (`/checklists`).** Só com `manageForms` (dono, admin e supervisor), pela rota e pelo link em Configurações; o app abre para qualquer papel (defeito 27). "Seus checklists" ao vivo e "Prontos para usar" do segmento, cada um com carregando e erro. O pronto já copiado (mesmo id ou mesmo título) não aparece de novo. Ver o pronto, Usar (com confirmação, id novo e aviso). Apagar na linha, com a confirmação de apagar do app; se falhar, a linha fica.
+
+**Editor.** Gaveta com nome, descrição e perguntas. Diz o que falta (nome, pergunta ou os dois). A pergunta (diálogo): texto, tipo (padrão Sim ou não, o primeiro da lista), opções uma por linha (2 ou mais), obrigatória e "Pode pôr foto"; "Só foto" nunca é obrigatória; tradução só fica com o mesmo texto. Reordenar arrastando, pelos botões ou com Alt + ↑/↓, no novo e na edição. Apagar pergunta com Desfazer dentro da gaveta. "…" com Parar de usar / Voltar a usar (na hora) e Apagar. Fechar com mudança pergunta, também ao sair da página. Salvar e Parar/Voltar a usar mandam a versão lida: se o app salvou depois, nada é gravado, a gaveta fica aberta com o que foi digitado e oferece "Recarregar" (descarta o texto e traz a versão salva) e "Copiar minhas perguntas".
+
+**Limite do plano.** Igual ao app: o app só aplica limite onde há planos pagos para comprar (`FeatureGateService.planLimitsEnforced = paidPlansEnabled`, falso no navegador), então o web não trava (`WEB_PLAN_LIMITS_ENFORCED = false`) e uma empresa Free não fica sem saída. A regra do número (ativos `isActive != false` na lista; limite de `companies/{id}.subscription`, vencido vale Free) está em `activeLimit`, e enquanto o plano não for lido nada é bloqueado. Não há trava no servidor; o contador de uso continua com a Function `onFormTemplateWrittenUsage`.
+
+**Na OS.** Seção "Checklists" com "x de y respondidas" ou "Completo", o aparelho e Remover (com confirmação). Adicionar segue `canManageOrderForms` (técnico só em orçamento, supervisor até concluir): com 2 ou mais aparelhos pergunta qual (ou Geral), depois "Qual checklist?" (ativos da empresa e prontos do segmento ainda não copiados, como o app, com "Da empresa" e "Globais" quando há os dois; por título, busca com mais de 10, erro com Tentar de novo) e "Novo checklist" para quem gerencia, que volta já escolhido. O pronto entra direto na OS, sem cópia, também para quem não tem `manageForms`.
+
+**Preencher.** Gaveta com todas as perguntas, respondidas no lugar. Tab passa de pergunta, setas escolhem, espaço ou o número marca (1 é a primeira), Enter segue. Responder passa para a próxima sem resposta; sem nada faltando, o checklist é concluído e fecha (como o app depois da última). Começar/Continuar/Concluir em azul, "Concluir assim mesmo" só com opcionais faltando, obrigatória vazia lista o que falta. Fotos (JPEG, PNG ou WebP abaixo de 10 MB): escolher, colar (com a pergunta em foco) ou arrastar, ver uma a uma (← →), tirar com confirmação, e o arquivo sai do Storage. Concluído é só leitura; reabrem admin, gerente e supervisor. Responder segue `fillForms`: o gerente só lê (no app ele responde).
+
+**Concluir a OS.** Com checklist que não está completo, o botão azul e "Mudar situação" param em "Falta terminar N checklist" e oferecem abrir o primeiro.
+
+**Depois da Nova OS.** Com veículo e não concluída, a OS aberta pergunta "Fazer o checklist de entrada?". Três "Agora não" seguidos param a pergunta (por empresa, neste navegador). O app só pergunta no ramo automotivo; o web pergunta onde a empresa tem checklist ativo, porque o segmento não tem um campo para isso.
+
+**Desempenho.** Medido em 2026-11-03: **1.088 ms** na 1ª visita e **704 ms** na volta. O caminho até a lista foi de 132,8 para 132,9 KB (a rota `/checklists` e o seu título no núcleo); as telas e os textos ficam fora do primeiro download.
+
+**Fica para depois.** Câmera (exceção proposta: no computador é arquivo), conferir checklists pendentes no quadro e no lote, campo do segmento para a oferta do checklist.
+
+### Histórico do navegador
+
+Voltar fecha o que estiver aberto. O painel lateral usa `useRoutePanel`, com o id na URL. Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado.
+
+## Como rodar
+
+Requer Node 22 e, para os emuladores, Java 21 ou mais novo. Na máquina do Rafael:
+
+```bash
+export PATH=/opt/homebrew/opt/openjdk@27/bin:$PATH JAVA_TOOL_OPTIONS=-Duser.language=en
+```
+
+```bash
+cd firebase/webapp
+npm ci
+npm run gen          # contrato
+npm test             # vitest, inclui docs/web-app/contract-cases
+npm run typecheck
+npm run build        # build com orçamento (falha acima do limite)
+```
+
+Desenvolvimento, sempre contra o emulador (`demo-praticos`):
+
+```bash
+(cd ../functions && npm ci && npm run build)   # uma vez
+npm run emulators    # terminal 1: suíte + seed
+npm run dev          # terminal 2: http://localhost:5180/app/
+```
+
+Usuários do seed: `e2e/fixtures.mjs`, um por papel mais um sem empresa, com a senha do emulador que está nesse arquivo. Nada disso existe fora do emulador.
+
+Testes de ponta a ponta:
+
+```bash
+npm run e2e                      # build, emulador, seed, Playwright
+PW_ARGS=e2e/auth npm run e2e     # um arquivo
+E2E_ONLY=auth,firestore,storage npm run e2e   # sem Functions (mais rápido)
+npm run e2e:perf                 # 10 mil OS, Fast 4G + CPU 4x
+npm run lhci                     # Lighthouse (precisa de build:e2e)
+```
+
+`E2E_ORDERS=10000` gera a lista grande no seed. Com outra cópia do repositório rodando os mesmos testes, `E2E_PORT_OFFSET=1000 npm run e2e` desloca todas as portas (emuladores e página); a configuração e o `.env.e2e.local` gerados saem no fim. O emulador sobe com `firebase/firebase.e2e.json`, em portas próprias, para não colidir com `firebase.test.json`. Segredos das Functions são falsos, criados só durante a execução.
+
+A rota `/app/dev/components` mostra os componentes base. Existe só nos builds de emulador.
+
+### Deploy
+
+**Ordem:** a Function `api`, com a rota `/v1/app/web-access`, precisa estar no ar **antes** do Hosting com o `/app`. Sem a rota, toda conta cai em "não deu certo" na entrada. O deploy das Functions (`firebase-functions-deploy.yml`) e o do Hosting são workflows separados: no primeiro merge, confirme que o das Functions terminou antes de liberar alguém pelo script.
+
+`firebase-hosting-deploy.yml` compila o site e, em seguida, a SPA (`npm run build:hosting`), que vai para `firebase/hosting/public/app`. O workflow dispara também com mudanças em `firebase/webapp/**`.
+
+`firebase/firebase.json`:
+
+| Caminho | O que faz |
+|---|---|
+| `^/app/[^.]*$` | rewrite para `/app/index.html`, antes dos outros rewrites. Só caminhos sem extensão: um asset que não existe (aba aberta antes de um deploy) dá 404, e não o `index.html` |
+| `/app/assets/**` | `Cache-Control: public, max-age=31536000, immutable` |
+| rotas do app e `index.html` | `Cache-Control: no-cache` |
+| `/app/**` | CSP, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` |
+
+Uma aba aberta antes de um deploy pede chunks que já não existem. O app recarrega a página uma vez (`vite:preloadError` e erro de rota lazy, em `lib/stale-build.ts`). Se falhar de novo em menos de um minuto, o erro aparece, sem recarregar em loop.
+
+A CSP libera os dois scripts inline do `index.html` por hash. Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
+
+A configuração de produção fica em `.env.production`: só valores públicos, os mesmos do `firebase/web`.
+
+`npm run check:hosting` sobe o emulador de Hosting com o `firebase.json` real e confere:
+
+- `/app/orders/x` serve a SPA, com os cabeçalhos certos;
+- os assets vêm com cache imutável;
+- a tela de entrada abre sem bloqueio da CSP;
+- o site, `/pricing` e `/robots.txt` continuam iguais.
+
+`/q`, `/pro`, `/admin` e `/mcp` vão para o Cloud Run ou para as Functions. O script confere esses caminhos pela configuração, sem fazer requisição.
+
+### Desempenho da lista
+
+Fast 4G, CPU 4x, 10 mil OS, p75 de 7 rodadas, `npm run e2e:perf`. Cada passo é uma marca (`performance.mark`).
+
+**O 1,4 s é de uma visita com login salvo:** sem cache HTTP nem do Firestore, mas com a sessão do Auth e o "sim" da lista de acesso guardados no navegador. É a visita normal de quem já usa o web.
+
+| Caminho tentado | 1ª visita | Volta |
+|---|---|---|
+| Base: sessão em série, servida sem compressão | 2.603 ms | 2.208 ms |
+| Servida com brotli, como o Hosting | 2.104 ms | 1.362 ms |
+| Usuário e empresa em paralelo, consulta junto com o token, modulepreload, 1ª página de 30 | 1.324 ms | 880 ms |
+| Mais cache persistente do Firestore, lendo da rede | 1.375 ms | 949 ms |
+| Mais leitura do disco primeiro na volta | **1.400 ms** | **519 ms** |
+
+Na 1ª visita, o tempo se divide assim:
+
+- até `session:auth`: cerca de 830 ms, entre download, execução com CPU 4x e início do Auth;
+- usuário, empresa e lista no Firestore: cerca de 520 ms, quase todo em idas e voltas da conexão.
+
+Com a fatia de OS (filtro Em aberto por padrão, consulta por `status in`), medido em 2026-11-03: **1.379 ms** na 1ª visita e **501 ms** na volta.
+
+Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª visita e **487 ms** na volta. A paleta, os atalhos e a folha "Mais" passaram a carregar sob demanda e os textos são divididos por funcionalidade; as telas novas usam só a API, sem nada novo no pedaço do Firestore.
+
+Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1ª visita e **487 ms** na volta.
+
+Com a fatia do catálogo, medido em 2026-11-03 com a máquina carregada (outros emuladores rodando): **1.334 ms** na 1ª visita e **659 ms** na volta. As telas do catálogo são rotas sob demanda e só usam a API; no caminho até a lista entram só as duas rotas novas no `router.ts` (239,3 KB contra 239,1 KB da master).
+
+Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta máquina: **1.104 ms** na 1ª visita e **706 ms** na volta. Na mesma máquina e no mesmo dia, antes da mudança: 1.328 ms e 520 ms. O caminho até a lista caiu de 239,1 KB para 130,4 KB (brotli); com a agenda (atalhos e textos no núcleo), 131,1 KB.
+
+| Caminho medido | JS até a lista | 1ª visita | Volta |
+|---|---|---|---|
+| Antes: Firestore completo com cache persistente | 239,1 KB | 1.328 ms | 520 ms |
+| Firestore REST (`lite`) para sessão, rótulos e páginas; completo depois, só para o tempo real | **130,4 KB** | **1.104 ms** | 706 ms |
+
+- **Por que REST e não a API:** `GET /v1/app/orders` também tiraria o Firestore do caminho, mas passa pela Function (partida a frio em produção) e não roda no teste de desempenho, que fica sem o emulador de Functions. O REST lê direto do Firestore, com as mesmas regras, e não abre o canal do cliente completo, que custa idas e voltas.
+- **Auth em pedaço menor:** não muda nada. O Auth já usa `initializeAuth` sem o resolvedor de popup (8,2 KB); o popup só baixa ao entrar.
+- **A volta ficou mais lenta (520 para 706 ms):** antes ela lia a lista do disco (cache persistente). Agora a 1ª página sempre vem do servidor. Continua bem abaixo da meta e a 1ª visita, que é a meta, ficou 220 ms mais rápida. O cache persistente continua no cliente completo (OS aberta) e as regras de apagar ao sair não mudaram.
+- **Sem dados velhos na 1ª página:** como ela não vem mais do disco, o aviso "pode estar desatualizado" só aparece quando falha uma página seguinte.
+
+O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
+
+**Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
+
+**Cache persistente:**
+
+- É apagado ao sair pelo botão.
+- É apagado quando a sessão termina de outro jeito: outra aba, token que não renova, conta desativada (`onAuthStateChanged` com `null`).
+- É apagado quando entra outra conta.
+- O dono do cache fica guardado (`praticos.cacheOwner`) até a exclusão dar certo, então uma falha é tentada de novo na próxima carga.
+- Enquanto a exclusão não sai, o cliente completo fica só na memória e não lê o disco. A sessão e a lista nunca leem o disco (Firestore REST).
+
+**Lista:** páginas e linhas ao vivo se juntam por id, em ordem de data e id. A paginação usa data e id no cursor, então nenhuma OS se repete nem some entre páginas. Se uma página seguinte falha, aparece um aviso de que os dados podem estar desatualizados, com "Tentar de novo".
+
+### Metas e guardas
+
+| Guarda | Onde | Limite |
+|---|---|---|
+| JS da tela de entrada (brotli) | `scripts/check-budget.mjs` | 200 KB |
+| JS até a lista, com Firestore REST | `scripts/check-budget.mjs` | 240 KB |
+| Firestore completo fora do caminho até a lista | `scripts/check-budget.mjs` | sim |
+| Acessibilidade, LCP, CLS, TBT | `lighthouserc.json` | 100, 2,5 s, 0,1, 300 ms |
+| axe em claro e escuro | `e2e/a11y.spec.ts` | 0 violações |
+| Lista visível, p75, 1ª visita | `e2e/perf/list-visible.spec.ts` | 1,5 s |
+| Scripts inline com hash na CSP | `scripts/check-csp.mjs` | todos |
+| `/app` no emulador de Hosting | `scripts/check-hosting.mjs` | todos os itens |
+
+CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de contrato, os `.arb` ou a matriz de permissões.
+
+## Como adicionar uma tela
+
+1. Crie `src/views/MinhaView.vue`, começando por `PageHead`, com a resposta da tela no título.
+2. Em `src/navigation.ts`, adicione a entrada com `access: { kind: 'member', anyOf: [...] }`. Se a tela não entra no menu, crie a rota em `src/router.ts`.
+3. **Toda rota declara `meta.access`.** Sem isso a guarda nega, e `tests/access.test.ts` falha.
+4. Em `src/router.ts`, aponte `component` para a nova view, com `import()`.
+5. Textos: reuse as chaves do app quando o sentido for igual. Texto só do web vai nos três `src/i18n/web_*.json`, com prefixo `web.`.
+6. Rótulo que muda por ramo usa `resolveLabel` de `lib/segments.ts`.
+7. Dinheiro e datas sempre por `lib/format.ts`, com `session.company?.country`.
+8. Cores só pelos tokens. Status com `StatusLabel`.
+9. Atalho: `registerShortcut`. Comando da paleta: `registerCommand`. Remova os dois ao desmontar.
+10. Cubra vazio, erro e carregando com `EmptyState`, `ErrorState` e `LoadingState`. Erro de API: `t(errorMessageKey(error))`, nunca o texto cru.
+11. Adicione a tela a `e2e/a11y.spec.ts` e `e2e/guard.spec.ts`, e atualize `docs/web-app/parity-matrix.yaml`.
+
+## Limitações
+
+- Sem criação de empresa no web.
+- Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
+- O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
+- Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
+- Orçamento do primeiro download: 131,3 de 240 KB desde a fatia da agenda (era 239,1 KB; 239,3 com o catálogo antes da agenda). As telas novas ficam fora do primeiro download.

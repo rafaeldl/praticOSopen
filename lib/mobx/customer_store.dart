@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
+import 'package:praticos/utils/audit_stamp.dart';
 import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,14 +62,11 @@ abstract class _CustomerStore with Store {
     await _companyLoaded;
     if (companyId == null) throw StateError('No company to save the customer');
     User? user = await (userStore.getSingleUserById());
-    customer.createdAt = DateTime.now();
-    customer.createdBy = user?.toAggr();
-    customer.company = user?.companies![0].company;
-    customer.updatedAt = DateTime.now();
-    customer.updatedBy = user?.toAggr();
-    customer.keywords = generateKeywords(customer.name);
+    final isNew = customer.id == null;
+    stampAudit(customer, isNew: isNew, user: user, companyId: companyId!);
+    customer.keywords = customerKeywords(customer.name, customer.phone);
     await repository.createItem(companyId!, customer);
-    _onCreated(customer);
+    if (isNew) _onCreated(customer);
   }
 
   @action

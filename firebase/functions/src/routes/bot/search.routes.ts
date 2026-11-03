@@ -10,7 +10,7 @@ import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
 import * as vcardService from '../../services/vcard.service';
 import { validateInput, optionalSearchQuerySchema } from '../../utils/validation.utils';
-import { normalizePhone } from '../../utils/format.utils';
+import { dialCodeOf, normalizePhone } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -53,7 +53,7 @@ router.get('/search', requireLinked, async (req: AuthenticatedRequest, res: Resp
 
       if (isPhoneQuery) {
         // Search by phone
-        const normalizedPhone = normalizePhone(q);
+        const normalizedPhone = normalizePhone(q, dialCodeOf(req.auth?.companyCountry));
         const byPhone = await customerService.findCustomerByPhone(companyId, normalizedPhone);
 
         if (byPhone) {

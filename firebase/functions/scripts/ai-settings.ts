@@ -6,14 +6,16 @@
  *   the global switch. `follow` deletes the company's `enabled`/`provider` so
  *   it goes back to following config/ai (keeps monthlyLimit).
  * - Global (--all): merges config/ai { enabledForAll, defaultProvider }.
+ * - --finance on|off: the assistant may propose payments, discounts and status
+ *   changes (financeActions), separate from the switch of the assistant itself.
  * The Function reads config/ai at most once a minute, so a global change takes
  * up to a minute to reach every instance. No deploy and no app release needed.
  *
  *   npm run ai -- show   --project praticos [--company <id>]
- *   npm run ai -- on     --project praticos --company <id> [--provider claude] [--limit 50] --yes
+ *   npm run ai -- on     --project praticos --company <id> [--provider claude] [--limit 50] [--finance on] --yes
  *   npm run ai -- off    --project praticos --company <id> --yes
  *   npm run ai -- follow --project praticos --company <id> --yes
- *   npm run ai -- on     --project praticos --all [--provider claude] --yes
+ *   npm run ai -- on     --project praticos --all [--provider claude] [--finance on] --yes
  *   npm run ai -- off    --project praticos --all --yes
  *
  * Without --yes it only prints the plan (dry-run). Production needs an explicit
@@ -33,6 +35,7 @@ export interface Args {
   all: boolean;
   provider?: Provider;
   limit?: number;
+  finance?: boolean;
   project?: string;
   dryRun: boolean;
   yes: boolean;
@@ -40,7 +43,7 @@ export interface Args {
 
 export const USAGE =
   'Usage: ai-settings.ts <show|on|off|follow> (--company <id>... | --all) ' +
-  '[--provider gemini|claude] [--limit <n>] [--dry-run] [--project <projectId> --yes]';
+  '[--provider gemini|claude] [--limit <n>] [--finance on|off] [--dry-run] [--project <projectId> --yes]';
 
 export function parseArgs(argv: string[]): Args {
   const [action, ...rest] = argv;
@@ -51,7 +54,7 @@ export function parseArgs(argv: string[]): Args {
     if (flag === '--all') args.all = true;
     else if (flag === '--yes') args.yes = true;
     else if (flag === '--dry-run') args.dryRun = true;
-    else if (['--company', '--project', '--provider', '--limit'].includes(flag)) {
+    else if (['--company', '--project', '--provider', '--limit', '--finance'].includes(flag)) {
       const value = rest[i + 1];
       if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`);
       i++;
@@ -60,6 +63,9 @@ export function parseArgs(argv: string[]): Args {
       else if (flag === '--provider') {
         if (!(PROVIDERS as readonly string[]).includes(value)) throw new Error(`unknown provider: ${value}`);
         args.provider = value as Provider;
+      } else if (flag === '--finance') {
+        if (value !== 'on' && value !== 'off') throw new Error('--finance must be on or off');
+        args.finance = value === 'on';
       } else {
         const limit = Number(value);
         if (!Number.isInteger(limit) || limit < -1) throw new Error('--limit must be an integer >= -1 (-1 = unlimited)');
@@ -75,8 +81,8 @@ export function parseArgs(argv: string[]): Args {
   }
   if (args.all && args.action === 'follow') throw new Error('follow is per company');
   if (args.all && args.limit !== undefined) throw new Error('--limit is per company');
-  if (args.action !== 'on' && (args.provider || args.limit !== undefined)) {
-    throw new Error('--provider and --limit only go with on');
+  if (args.action !== 'on' && (args.provider || args.limit !== undefined || args.finance !== undefined)) {
+    throw new Error('--provider, --limit and --finance only go with on');
   }
   return args;
 }
@@ -105,16 +111,18 @@ export function buildGlobalUpdate(args: Args): Record<string, unknown> {
   return {
     enabledForAll: args.action === 'on',
     ...(args.provider ? { defaultProvider: args.provider } : {}),
+    ...(args.finance !== undefined ? { financeActions: args.finance } : {}),
   };
 }
 
 /** What to merge into companies/{id}/settings/ai. `null` = delete the field. */
 export function buildCompanyUpdate(args: Args): Record<string, unknown> {
-  if (args.action === 'follow') return { enabled: null, provider: null };
+  if (args.action === 'follow') return { enabled: null, provider: null, financeActions: null };
   return {
     enabled: args.action === 'on',
     ...(args.provider ? { provider: args.provider } : {}),
     ...(args.limit !== undefined ? { monthlyLimit: args.limit } : {}),
+    ...(args.finance !== undefined ? { financeActions: args.finance } : {}),
   };
 }
 

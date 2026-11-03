@@ -44,6 +44,17 @@ class FakeSource implements CatalogSource {
   ) async => null;
 }
 
+/// Source whose writes are refused.
+class FailingSource extends FakeSource {
+  @override
+  Future<void> save(CatalogKind kind, CatalogItem item) async =>
+      throw StateError('permission-denied');
+
+  @override
+  Future<void> delete(CatalogKind kind, CatalogItem item) async =>
+      throw StateError('permission-denied');
+}
+
 CatalogItem item(String id, String name, [double? value]) =>
     CatalogItem(id: id, name: name, value: value, origin: Object());
 
@@ -465,6 +476,20 @@ void main() {
       await tester.pump();
       expect(saveEnabled(tester), isTrue);
       expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
+    });
+
+    testWidgets('a failed save tells it and keeps the sheet open', (
+      tester,
+    ) async {
+      await openSheet(tester, FailingSource());
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Revisão');
+      await tester.pump();
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
     });
 
     testWidgets('with something typed, X asks before discarding', (

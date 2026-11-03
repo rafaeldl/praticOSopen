@@ -162,5 +162,16 @@ describe('Bot Photos Routes', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.formatContext).toBeUndefined();
     });
+
+    it('apaga o arquivo só dentro da pasta da OS (empresa e OS do pedido)', async () => {
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockPhotoService.deletePhoto.mockResolvedValue(undefined as any);
+      mockOrderService.removePhotoFromOrder.mockResolvedValue(undefined as any);
+
+      const app = buildApp(router);
+      await request(app).delete('/1/photos/ph1');
+
+      expect(mockPhotoService.deletePhoto).toHaveBeenCalledWith('comp1', 'ord1', 'tenants/comp1/ph1');
+    });
   });
 });

@@ -121,6 +121,21 @@ describe('GET /public/orders/:token — useFinancial', () => {
     mockGetSettings.mockResolvedValue({ asaasEnabled: true, asaasConnected: true });
   });
 
+  it('names an item without catalog by its description', async () => {
+    mockCompanyData = { name: 'Oficina Teste', country: 'BR' };
+    mockGetOrder.mockResolvedValue({
+      ...fakeOrder,
+      services: [{ service: null, value: 80, description: 'Troca de óleo' }],
+      products: [{ product: null, value: 10, quantity: 2, description: 'Filtro' }],
+    });
+
+    const res = await request(buildApp()).get('/public/orders/tok123');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.order.services[0].name).toBe('Troca de óleo');
+    expect(res.body.data.order.products[0].name).toBe('Filtro');
+  });
+
   it('keeps every value when useFinancial is absent (old companies)', async () => {
     mockCompanyData = { name: 'Oficina Teste', country: 'BR' };
 

@@ -6,6 +6,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
@@ -138,12 +139,24 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
     _update(() => _putResponse(newResponse));
 
-    await _formsService.saveResponse(
-      widget.companyId,
-      widget.orderId,
-      _currentForm.id,
-      newResponse,
-    );
+    await _persistResponse(newResponse);
+  }
+
+  /// Saves an answer already shown on screen. Offline it is queued (see
+  /// [FormsService.saveResponse]); a refusal is told, never swallowed.
+  Future<void> _persistResponse(FormResponse response) async {
+    try {
+      await _formsService.saveResponse(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        response,
+        localResponses: List.of(_currentForm.responses),
+      );
+    } catch (e) {
+      debugPrint('Could not save the checklist answer: $e');
+      if (mounted) showAppToast(context, context.l10n.checklistAnswerSaveFailed);
+    }
   }
 
   Future<void> _addPhoto(String itemId, ImageSource source) async {
@@ -303,12 +316,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
     _update(() => _putResponse(newResponse));
 
-    await _formsService.saveResponse(
-      widget.companyId,
-      widget.orderId,
-      _currentForm.id,
-      newResponse,
-    );
+    await _persistResponse(newResponse);
   }
 
   void _showError(String title, String message) {
@@ -430,13 +438,14 @@ class _FormFillScreenState extends State<FormFillScreen> {
     Navigator.push(
       context,
       CupertinoPageRoute(
-        builder: (context) => _PhotoGalleryScreen(
+        builder: (context) => ChecklistPhotoGallery(
           photos: photos,
           initialIndex: photoIndex,
+          // By url: after a removal the gallery's indexes no longer match
+          // the original list.
           onDelete: _isCompleted
               ? null
-              : (index) async {
-                  final url = photos[index];
+              : (url) async {
                   await _deletePhoto(itemId, url);
                   return true;
                 },
@@ -843,22 +852,22 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
 /// Photos of a question in full screen (black, like the iPhone's photo
 /// viewer), swipe between them, trash to remove.
-class _PhotoGalleryScreen extends StatefulWidget {
+class ChecklistPhotoGallery extends StatefulWidget {
   final List<String> photos;
   final int initialIndex;
-  final Future<bool> Function(int index)? onDelete;
+  final Future<bool> Function(String url)? onDelete;
 
-  const _PhotoGalleryScreen({
+  const ChecklistPhotoGallery({
     required this.photos,
     required this.initialIndex,
     this.onDelete,
   });
 
   @override
-  _PhotoGalleryScreenState createState() => _PhotoGalleryScreenState();
+  _ChecklistPhotoGalleryState createState() => _ChecklistPhotoGalleryState();
 }
 
-class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
+class _ChecklistPhotoGalleryState extends State<ChecklistPhotoGallery> {
   late PageController _pageController;
   late int _currentIndex;
   late List<String> _photos;
@@ -981,7 +990,9 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
               onPressed: () async {
                 Navigator.pop(dialogContext);
                 if (widget.onDelete != null) {
-                  final success = await widget.onDelete!(_currentIndex);
+                  final success = await widget.onDelete!(
+                    _photos[_currentIndex],
+                  );
 
                   if (mounted && success) {
                     setState(() {

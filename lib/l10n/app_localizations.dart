@@ -10478,6 +10478,132 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{Retomada no mesmo dia} =1{Retomada depois de 1 dia parada} other{Retomada depois de {count} dias parada}}'**
   String orderHoldLogResumed(int count);
 
+  /// No description provided for @aiActionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confere?'**
+  String get aiActionsTitle;
+
+  /// No description provided for @aiActionsReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber {amount}'**
+  String aiActionsReceive(String amount);
+
+  /// No description provided for @aiActionsReceiveNoAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber'**
+  String get aiActionsReceiveNoAmount;
+
+  /// No description provided for @aiActionsReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido {amount}'**
+  String aiActionsReceived(String amount);
+
+  /// No description provided for @aiActionsTypeAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'toque para informar o valor'**
+  String get aiActionsTypeAmount;
+
+  /// No description provided for @aiActionsLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta {amount}'**
+  String aiActionsLeft(String amount);
+
+  /// No description provided for @aiActionsPaidOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'quitada'**
+  String get aiActionsPaidOff;
+
+  /// No description provided for @aiActionsDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto de {amount}'**
+  String aiActionsDiscount(String amount);
+
+  /// No description provided for @aiActionsNewTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {amount}'**
+  String aiActionsNewTotal(String amount);
+
+  /// No description provided for @aiActionsMarkAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como {status}'**
+  String aiActionsMarkAs(String status);
+
+  /// No description provided for @aiActionsIssuesNfse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso também emite a nota fiscal.'**
+  String get aiActionsIssuesNfse;
+
+  /// No description provided for @aiActionsCannotReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só quem recebe pagamentos pode registrar isso.'**
+  String get aiActionsCannotReceive;
+
+  /// No description provided for @aiActionsCannotDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só quem cuida do financeiro pode dar desconto.'**
+  String get aiActionsCannotDiscount;
+
+  /// No description provided for @aiActionsOrderCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS está cancelada.'**
+  String get aiActionsOrderCanceled;
+
+  /// No description provided for @aiActionsNothingToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS não tem nada a receber.'**
+  String get aiActionsNothingToReceive;
+
+  /// No description provided for @aiActionsOnlyLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta só {amount}.'**
+  String aiActionsOnlyLeft(String amount);
+
+  /// No description provided for @aiActionsAfterSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao salvar, vou pedir para você conferir.'**
+  String get aiActionsAfterSave;
+
+  /// No description provided for @aiActionsSaving.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvando…'**
+  String get aiActionsSaving;
+
+  /// No description provided for @aiActionsSavedOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS salva. Registre o recebimento quando estiver online.'**
+  String get aiActionsSavedOffline;
+
+  /// No description provided for @aiActionsStatusKept.
+  ///
+  /// In pt, this message translates to:
+  /// **'O status continua {status}.'**
+  String aiActionsStatusKept(String status);
+
+  /// No description provided for @aiActionsNfseStays.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota fiscal continua emitida.'**
+  String get aiActionsNfseStays;
+
   /// No description provided for @nextMaintenanceQuestion.
   ///
   /// In pt, this message translates to:
@@ -10619,6 +10745,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Última: {service}'**
   String maintenanceLastService(String service);
+
+  /// No description provided for @orderCreateFailedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar a OS'**
+  String get orderCreateFailedTitle;
+
+  /// No description provided for @orderCreateFailedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira a internet e crie a OS de novo.'**
+  String get orderCreateFailedMessage;
+
+  /// No description provided for @receiveChargeMaybeOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.'**
+  String get receiveChargeMaybeOpen;
+
+  /// No description provided for @checklistAnswerSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar a resposta. Tente de novo.'**
+  String get checklistAnswerSaveFailed;
+
+  /// No description provided for @profileSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar o perfil. Tente de novo.'**
+  String get profileSaveFailed;
+
+  /// No description provided for @saveFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Tente de novo.'**
+  String get saveFailedTryAgain;
+
+  /// No description provided for @deleteFailedTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para apagar. Tente de novo.'**
+  String get deleteFailedTryAgain;
 }
 
 class _AppLocalizationsDelegate

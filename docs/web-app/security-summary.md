@@ -58,7 +58,7 @@ anônimo só acessa OS por magic link válido.
 ## Resultado
 
 - Nenhuma quebra de isolamento **entre empresas** encontrada, nem escalonamento para outra empresa.
-- **Dentro da mesma empresa** há restrições por perfil aplicadas só pelo cliente. O web não pode depender delas: dinheiro, status e valores passam pela API. Precisam de correção própria, com aprovação.
+- **Dentro da mesma empresa**, o web não depende da tela: dinheiro, status e valores passam pela API, com a mesma matriz de papéis.
 - Suíte de regras existente verde (Firestore e Storage).
 - Teste novo de isolamento web adicionado (`firebase/functions/src/__tests__/web-isolation.rules.test.ts`,
   38 casos), cobrindo o acesso cruzado a outra empresa e a escrita de campos
@@ -66,10 +66,6 @@ anônimo só acessa OS por magic link válido.
 
 ### Achados
 
-Contagens e reprodução ficam no registro privado. Há achados de severidade alta dentro da mesma empresa, fora do teste entre empresas, e o relatório de descoberta os trata como pré-requisito do web.
+Contagens e reprodução ficam no registro privado.
 
 _Rodar:_ `cd firebase/functions && npm run test:rules` (requer Java 21+).
-
-## Exposição real (revisão de 31/10)
-
-A severidade dos achados dentro da empresa não muda, mas a exposição hoje é pequena: 738 de 753 membros reais são `admin`, 11 têm papel restrito, e cobrança Asaas e nota fiscal não têm uso real. A correção precisa vir antes de ampliar esses recursos, de abrir papéis no web ou de incentivar equipes.

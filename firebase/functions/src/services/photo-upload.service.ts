@@ -7,6 +7,7 @@
 import { storage } from './firestore.service';
 import { UserAggr, OrderPhoto } from '../models/types';
 import { assertPublicHttpUrl } from './url-guard';
+import { orderFilesPrefix } from './payment-input';
 
 // ============================================================================
 // Configuration
@@ -238,9 +239,22 @@ export async function uploadPhotoFromUrl(
 }
 
 /**
- * Delete photo from storage
+ * Delete a photo file from storage. The path comes from the order document,
+ * which members can write, so only a file inside the order's own folder
+ * (`tenants/{companyId}/orders/{orderId}/`) is deleted; anything else is
+ * ignored.
  */
-export async function deletePhoto(storagePath: string): Promise<void> {
+export async function deletePhoto(companyId: string, orderId: string, storagePath: string): Promise<void> {
+  const prefix = orderFilesPrefix(companyId, orderId);
+  const inside = typeof storagePath === 'string'
+    && storagePath.startsWith(prefix)
+    && storagePath.length > prefix.length
+    && !storagePath.split('/').some((part) => part === '..' || part === '.');
+  if (!companyId || !orderId || !inside) {
+    console.warn('[Photos] Refused to delete a file outside the order folder');
+    return;
+  }
+
   const bucket = storage.bucket();
   const file = bucket.file(storagePath);
 

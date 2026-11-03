@@ -184,13 +184,13 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
             }));
           })(),
           services: order.services?.map((s) => ({
-            name: s.service.name,
+            name: s.service?.name ?? s.description ?? '',
             ...(showValues ? { value: s.value } : {}),
             description: s.description,
             deviceId: s.deviceId || null,
           })),
           products: order.products?.map((p) => ({
-            name: p.product.name,
+            name: p.product?.name ?? p.description ?? '',
             ...(showValues ? { value: p.value } : {}),
             quantity: p.quantity,
             description: p.description,

@@ -18,6 +18,15 @@ part 'user_store.g.dart';
 
 class UserStore = _UserStore with _$UserStore;
 
+/// The name to write on [existing] when it has none and the auth profile
+/// now has [displayName]; null when there is nothing to fill.
+String? missingUserNameFor(User? existing, String? displayName) {
+  if (existing == null) return null;
+  if ((existing.name ?? '').trim().isNotEmpty) return null;
+  final name = displayName?.trim() ?? '';
+  return name.isEmpty ? null : name;
+}
+
 abstract class _UserStore with Store {
   final CompanyStore companyStore = CompanyStore();
   final UserRepository repository = UserRepository();
@@ -61,7 +70,17 @@ abstract class _UserStore with Store {
   /// [initialLocale] is the real device locale (BCP47, e.g. "fr-FR").
   createUserIfNotExist(auth.User firebaseUser, {String? initialLocale}) async {
     User? existingUser = await repository.findUserById(firebaseUser.uid);
-    if (existingUser != null) return;
+    if (existingUser != null) {
+      // Apple gives the name only on the first sign-in, and it reaches the
+      // auth profile after this document may already exist without it.
+      final name = missingUserNameFor(existingUser, firebaseUser.displayName);
+      if (name != null) {
+        await _db.collection('users').doc(firebaseUser.uid).update({
+          'name': name,
+        });
+      }
+      return;
+    }
 
     // Cria apenas o documento do usuário (sem empresa)
     User newUser = _fillUserFields(firebaseUser);

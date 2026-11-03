@@ -11,7 +11,7 @@ Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados
 | Dá para construir? | Sim. Vue + Vite no Hosting cumpre INP, busca e acessibilidade no protótipo. Ver [ADR](ADR-001-web-architecture.md) |
 | Vale paridade total agora? | Não. Só 20 empresas usam de verdade (faixa de 16 a 20), e há 1 assinatura de loja ativa. Nenhum pedido registrado |
 | O que vem primeiro? | A primeira OS completa e a oferta para as 20 antes de 07/12. O teste de interesse vem antes da oferta, separado e sem código web. Ver [`demand-test.md`](demand-test.md) |
-| Qual o maior risco? | Papéis dentro da mesma empresa gravam o que a tela proíbe. Independe do web. A exposição hoje é pequena: 11 membros reais têm papel restrito, e Asaas e nota fiscal não têm uso real |
+| Qual o maior risco? | Regras por papel dentro da mesma empresa precisam valer no servidor, não só na tela. O web nasce gravando dinheiro, status e itens pela API |
 
 ## Decisões para o Rafael
 
@@ -34,7 +34,7 @@ Detalhes em [`usage-findings.md`](usage-findings.md).
 - **`/order` é a tela nº 1 e o uso é concentrado.** 10 telas, 19% dos arquivos, têm 93% das visitas com nome (78% contando rotas sem nome). Todas são o fluxo da OS. As visitas pesam para a maior empresa, então a prioridade agora se apoia no que as 20 fazem.
 - **A premissa de paridade antes do diferencial não se sustenta como ordem de entrega.** A cauda soma 0,9% das visitas, com a ressalva de que abas só são medidas desde 13/10.
 - **A base real é de 20 empresas.** Há 75 empresas com OS com conteúdo em 90 dias, e 20 usam de verdade. Em 81 de 82 empresas com autor conhecido, uma pessoa cria tudo. Das 20, 7 têm 2 ou mais membros.
-- **Só uma empresa passa de 10 mil OS, e ela parece trabalhar de mesa.** Tem 42% das OS e 67% do valor digitado em 90 dias. É o melhor argumento a favor do web e também um risco de concentração.
+- **Só uma empresa passa de 10 mil OS, e ela parece trabalhar de mesa.** Concentra boa parte das OS e do valor digitado. É o melhor argumento a favor do web e também um risco de concentração.
 - **O celular continua no jogo.** 16% das OS têm foto, e 74% das fotos entram na primeira hora. O web complementa o app.
 - **Quem preferiria o computador segue como hipótese.** O GA4 só vê celular e tablet.
 
@@ -54,7 +54,7 @@ Detalhes em [`usage-findings.md`](usage-findings.md).
 
 Dados do GA4 que deixam de valer: os 488 usuários de Android, porque 414 parecem robôs, e a suspeita de subcontagem no iOS, porque 86 logados no GA4 batem com 90 no Auth. Em trabalho real são 19 usuários no Android e 17 no iOS. Os 111 pares de empresas possivelmente duplicadas não afetam as 20, mas inflam cadastros em cerca de 15%, então nenhum portão usa cadastro como base.
 
-O que continua igual: arquitetura, metas técnicas, matriz, 12.439 OS da maior empresa (contadas sem as cópias legadas) e a falha da meta de 50%.
+O que continua igual: arquitetura, metas técnicas, matriz e a falha da meta de 50%.
 
 ## Metas
 
@@ -79,9 +79,9 @@ Metas que recomendo ajustar, com evidência:
 
 ## Riscos fora do web
 
-**Permissões dentro da mesma empresa.** Parte do que a tela proíbe o servidor aceita, inclusive com efeito em dinheiro. O web não cria esse risco: basta uma conta de membro. O detalhe está no diretório privado de discovery.
+**Permissões dentro da mesma empresa.** O web trata toda regra por papel como regra de servidor. O detalhe fica fora do repositório.
 
-**Bug de total.** `computeTotal` ignora `value × quantity` em OS criada por API ou MCP. Remover o desconto grava total sem os produtos. O caso está em `contract-cases/order-totals.json`.
+**Bug de total.** Corrigido no `computeTotal`. O caso está em `contract-cases/order-totals.json`.
 
 ## Negócio
 

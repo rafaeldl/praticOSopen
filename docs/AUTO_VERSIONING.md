@@ -11,7 +11,7 @@ Automatic versioning system based on Conventional Commits that manages version b
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         auto-version.yml                         │
-│  Trigger: push to master (only app/metadata changes)             │
+│  Trigger: workflow_dispatch (manual, when we decide to ship)     │
 │  Actions: Analyze commits → Bump version → Update pubspec.yaml   │
 │           → Create v*-rc tag → Trigger releases                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -42,27 +42,16 @@ Automatic versioning system based on Conventional Commits that manages version b
 | `.github/workflows/android_release.yml` | Builds Android, uploads to Internal, saves AAB |
 | `.github/workflows/ios_release.yml` | Builds iOS, uploads to TestFlight, saves IPA |
 | `.github/workflows/promote-release.yml` | Promotes RC to production using saved artifacts |
-| `.github/workflows/android_build_check.yml` | PR build check for Android |
-| `.github/workflows/ios_build_check.yml` | PR build check for iOS |
+| `.github/workflows/android_build_check.yml` | PR build check for Android (only `android/**`, `pubspec`, `.fvmrc`) |
+| `.github/workflows/ios_build_check.yml` | iOS build check, manual only (`workflow_dispatch`) |
 
-## Path Filters
+## Manual Trigger
 
-The auto-version workflow only triggers when relevant files change:
+The RC is created on demand, not on every merge. Run **Actions → Auto Version → Run workflow** on `master` when the merged changes are ready for TestFlight/Internal testing.
 
-| Path | Description |
-|------|-------------|
-| `lib/**` | Flutter app code |
-| `pubspec.yaml` / `pubspec.lock` | Dependencies |
-| `android/**` | Android native code + metadata |
-| `ios/**` | iOS native code + metadata |
-| `assets/**` | App assets |
-| `test/**` / `integration_test/**` | Tests |
+Why manual: each RC builds iOS on macOS (~37 min) plus Android. In Oct/2026 one RC per merge produced 94 RCs in 30 days, and 30 iOS builds were cancelled by the next merge (~680 macOS minutes thrown away). See `docs/CI_BUDGET.md`.
 
-**Ignored paths** (no version bump):
-- `.github/**` - Workflow changes
-- `docs/**` - Documentation
-- `*.md` - Markdown files
-- `firebase/**` - Hosting/Functions
+The bump still comes from the Conventional Commits since the last RC tag. If there is no commit since the last RC, the run ends without bumping, tagging or building.
 
 ## Concurrency
 
@@ -252,10 +241,10 @@ When multiple commits are analyzed, the highest priority bump wins:
 Developer creates PR
          │
          ▼
-PR merged to master
+PR merged to master (one or more)
          │
          ▼
-auto-version.yml triggers (if paths match)
+Run "Auto Version" manually (workflow_dispatch)
          │
          ├─► Finds latest RC tag (v1.0.0-rc)
          │
@@ -342,7 +331,7 @@ Developer triggers promote-release.yml
 5. **Same Binary**: Production uses the exact same binary that was tested
 6. **No Rebuild**: Promotion downloads pre-built artifacts, never rebuilds
 7. **Concurrency**: New releases cancel previous ones (same platform)
-8. **Path Filtering**: Only app/metadata changes trigger version bumps
+8. **Manual RC**: Version bumps only happen when Auto Version is run by hand
 
 ## Version Format
 
@@ -385,6 +374,7 @@ git commit -m "feat: add dark mode toggle"
 git push origin feature/dark-mode
 
 # Create PR, get reviews, merge to master
+# Run Actions → Auto Version → Run workflow
 # → auto-version.yml creates v1.1.0-rc
 # → Builds go to TestFlight/Internal (binary only)
 
@@ -400,7 +390,7 @@ git checkout -b fix/login-crash
 git commit -m "fix: resolve crash when email is empty"
 git push origin fix/login-crash
 
-# Merge to master
+# Merge to master, then run Auto Version
 # → auto-version.yml creates v1.1.1-rc (patch bump)
 ```
 
@@ -411,7 +401,7 @@ git commit -m "feat!: new authentication system
 
 BREAKING CHANGE: removed password-only login"
 
-# → auto-version.yml creates v2.0.0-rc (major bump)
+# Run Auto Version → creates v2.0.0-rc (major bump)
 ```
 
 ### CI-Only Changes (No Version Bump)
@@ -420,8 +410,8 @@ BREAKING CHANGE: removed password-only login"
 git commit -m "ci: add build caching"
 git commit -m "fix(ci): improve workflow concurrency"
 
-# → auto-version.yml does NOT trigger (path filter)
-# → No new version created
+# → Nothing happens on merge; if Auto Version is run with only
+#   these commits since the last RC, it still makes a patch bump
 ```
 
 ## Troubleshooting
@@ -431,7 +421,7 @@ git commit -m "fix(ci): improve workflow concurrency"
 1. Check commit message format (must follow Conventional Commits)
 2. Verify commits are since the last RC tag
 3. Check workflow logs for commit analysis output
-4. Ensure changes are in paths that trigger auto-version
+4. Confirm Auto Version was run after the merge (it no longer runs on its own)
 
 ### Promotion fails
 

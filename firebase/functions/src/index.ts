@@ -9,10 +9,11 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onDocumentDeleted, onDocumentUpdated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import { buildRolesClaim } from './services/membership.service';
+import { countNewOrderPhotos, recountFormTemplates, recountUsers } from './services/usage-counter.service';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
@@ -41,6 +42,9 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     // Never blocks the numbering below.
     await stampCompletedAtOnCreate(context.params.companyId, snapshot.id, data, context.timestamp).catch((error) =>
       console.error('Could not stamp completedAt on order creation', error),
+    );
+    await countNewOrderPhotos(context.params.companyId, undefined, data).catch((error) =>
+      console.error('Could not count the photos of the new order', error),
     );
     if (!data || data.number) return;
 
@@ -154,7 +158,62 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
+    await countNewOrderPhotos(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
+      console.error('Could not count the new photos of the order', error),
+    );
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
+  }
+);
+
+import { cleanupDeletedOrder } from './services/order-cleanup.service';
+
+/**
+ * [V2] Plan usage counters kept by the server (services/usage-counter.service.ts):
+ * team size (members + pending invites) is recounted on every write; active
+ * checklist templates and photos (order triggers above) only while the flag
+ * config/usageCounters.serverOnly is on.
+ */
+export const onFormTemplateWrittenUsage = onDocumentWritten(
+  { document: 'companies/{companyId}/forms/{formId}', region: 'southamerica-east1' },
+  async (event) => {
+    await recountFormTemplates(event.params.companyId);
+  }
+);
+
+export const onMembershipWrittenUsage = onDocumentWritten(
+  { document: 'companies/{companyId}/memberships/{memberId}', region: 'southamerica-east1' },
+  async (event) => {
+    await recountUsers(event.params.companyId);
+  }
+);
+
+export const onInviteWrittenUsage = onDocumentWritten(
+  { document: 'links/invites/tokens/{token}', region: 'southamerica-east1' },
+  async (event) => {
+    const companyIds = new Set(
+      [event.data?.before.data()?.company?.id, event.data?.after.data()?.company?.id]
+        .filter((id): id is string => typeof id === 'string' && id.length > 0 && !id.includes('/')),
+    );
+    for (const companyId of companyIds) await recountUsers(companyId);
+  }
+);
+
+
+/**
+ * [V2] Cleanup of a deleted order. The app deletes orders straight in
+ * Firestore, which leaves subcollections and Storage files behind. This
+ * removes only what is inside the order's own folder (comments, checklists,
+ * photos and `tenants/{companyId}/orders/{orderId}/` in Storage); charges
+ * stay. Logic in services/order-cleanup.service.ts.
+ */
+export const onOrderDeletedCleanup = onDocumentDeleted(
+  {
+    document: 'companies/{companyId}/orders/{orderId}',
+    region: 'southamerica-east1',
+  },
+  async (event) => {
+    const { companyId, orderId } = event.params;
+    await cleanupDeletedOrder(companyId, orderId);
   }
 );
 
@@ -377,6 +436,7 @@ import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 import { globalErrorHandler } from './middleware/error-handler.middleware';
 import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
+import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 
 // Routes - API Core v1
 import authRoutes from './routes/v1/auth.routes';
@@ -388,11 +448,14 @@ import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
-import appInviteRoutes from './routes/v1/invite.routes';
+import { mountAppInviteRoutes } from './routes/v1/app-invites.mount';
 import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
 import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
+import appCustomersRoutes from './routes/v1/app-customers.routes';
+import appDevicesRoutes from './routes/v1/app-devices.routes';
+import { catalogRoutes } from './routes/v1/app-catalog.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
@@ -400,6 +463,7 @@ import contractsRoutes from './routes/v1/contracts.routes';
 import orderPhotosRoutes from './routes/v1/order-photos.routes';
 import formTemplatesRoutes from './routes/v1/form-templates.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
+import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
 import { auth as adminAuth } from './services/firestore.service';
 
@@ -441,13 +505,8 @@ const app = express();
 // Make req.ip the real client IP (rate limiter keys) — see trust-proxy.utils.ts
 configureTrustProxy(app);
 
-// CORS configuration
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-API-Secret', 'X-WhatsApp-Number'],
-  credentials: true,
-}));
+// CORS configuration (the web app sends X-Company-Id) — see app-rate-limit.utils.ts
+app.use(cors(API_CORS_OPTIONS));
 
 // Parse JSON bodies (larger limit for base64 image uploads)
 app.use(express.json({ limit: '15mb' }));
@@ -505,6 +564,12 @@ const apiCoreLimiter = rateLimit({
     return req.headers['x-api-key'] as string || req.ip || 'unknown';
   },
 });
+
+// Rate limiters for the app's API (Firebase ID token): per user after the
+// token is verified (a team shares the office IP), plus a wide per-IP cap
+// before it — see app-rate-limit.utils.ts
+const { ipLimiter: appIpLimiter, userLimiter: appUserLimiter } = createAppLimiters();
+const appBearer = [appIpLimiter, bearerAuth, appUserLimiter, resolveCompanyContext];
 
 // Rate limiter for Bot API
 const botLimiter = rateLimit({
@@ -597,24 +662,36 @@ app.use('/v1/company', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, compan
 app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, analyticsRoutes);
 
 // Bearer token routes (for Flutter app)
+// Prices and customer data: never in the browser cache of a shared computer.
+app.use('/v1/app', noStore);
 // Single mount so the rate limit and token check run once per request.
-app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
-app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
-app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
-app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
-app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
-app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
-app.use('/v1/app/nfse', apiCoreLimiter, bearerAuth, resolveCompanyContext, nfseRoutes);
+app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
+// Web app reads and writes of customers and devices (app-*.routes.ts) answer before the generic ones.
+app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
+app.use('/v1/app/devices', ...appBearer, appDevicesRoutes, devicesRoutes);
+// Web app catalog (app-catalog.routes.ts): prices only with viewPrices, written only with editPrices.
+app.use('/v1/app/services', ...appBearer, catalogRoutes('service'));
+app.use('/v1/app/products', ...appBearer, catalogRoutes('product'));
+// Invites: /pending and /:token/accept also serve an account without a company
+mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
+app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);
+app.use('/v1/app/payments/asaas', ...appBearer, asaasConnectionRoutes);
+app.use('/v1/app/nfse', ...appBearer, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
-app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
-app.use('/v1/app/team', apiCoreLimiter, bearerAuth, resolveCompanyContext, teamRoutes);
-// Recurring contracts: due orders on demand (docs/CONTRACTS_SERVER_JOB.md)
-app.use('/v1/app/contracts', apiCoreLimiter, bearerAuth, resolveCompanyContext, contractsRoutes);
+app.use('/v1/app/ai', ...appBearer, aiRoutes);
+app.use('/v1/app/team', ...appBearer, teamRoutes);
+// Recurring contracts: due orders on demand, off unless config/contracts.routeEnabled (docs/CONTRACTS_SERVER_JOB.md)
+app.use('/v1/app/contracts', ...appBearer, contractsRoutes);
 // Form templates (checklists); plan limit on create/import/activate (docs/PLAN_LIMITS_SERVER.md)
-app.use('/v1/app/forms/templates', apiCoreLimiter, bearerAuth, resolveCompanyContext, formTemplatesRoutes);
+app.use('/v1/app/forms/templates', ...appBearer, formTemplatesRoutes);
+// Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
+app.use('/v1/app/web-access', createWebAccessRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token),
+  readConfig: async () => (await db.collection('config').doc('webApp').get()).data() ?? null,
+}));
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
-app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
+app.use('/user/link', ...appBearer, userLinkRoutes);
 
 // API Bot Routes
 app.use('/bot/link', botLimiter, botAuth, linkRoutes);

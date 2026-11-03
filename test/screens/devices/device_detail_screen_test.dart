@@ -22,16 +22,23 @@ import 'package:provider/provider.dart';
 
 /// Serves a fixed order history instead of querying Firestore.
 class _FakeOrderRepository extends TenantOrderRepository {
-  _FakeOrderRepository(this.orders, {this.contracts = const []});
+  _FakeOrderRepository(
+    this.orders, {
+    this.contracts = const [],
+    this.historyFails = false,
+  });
 
   final List<Order?> orders;
   final List<Order?> contracts;
+  final bool historyFails;
 
   @override
   Stream<List<Order?>> streamOrdersByDevice(
     String companyId,
     String deviceId,
-  ) => Stream.value(orders);
+  ) => historyFails
+      ? Stream.error(StateError('permission-denied'))
+      : Stream.value(orders);
 
   @override
   Stream<List<Order?>> streamContractsByDevice(
@@ -119,6 +126,34 @@ void main() {
     expect(pushed.single.name, '/order');
     expect(appRoutes.containsKey(pushed.single.name), isTrue);
     expect((pushed.single.arguments as Map)['order'], same(order));
+  });
+
+  testWidgets('a failed history keeps "Nova OS" and shows the error in the '
+      'list', (tester) async {
+    final device = Device()
+      ..id = 'd1'
+      ..name = 'Fiat Uno';
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SegmentConfigProvider>(
+        create: (_) => SegmentConfigProvider(),
+        child: CupertinoApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
+          home: DeviceDetailScreen(
+            device: device,
+            orderRepository: _FakeOrderRepository(const [], historyFails: true),
+            deviceRepository: _FakeDeviceRepository(device),
+            canManageDevices: false,
+            showPrices: true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nova OS'), findsOneWidget);
+    expect(find.byKey(const ValueKey('device_history_error')), findsOneWidget);
   });
 
   group('formatDeviceNumber', () {

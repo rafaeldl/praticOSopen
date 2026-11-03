@@ -20,23 +20,11 @@ jest.mock('../services/firestore.service', () => ({
   auth: { verifyIdToken: async (token: string) => ({ uid: token }) },
 }));
 
+// Orders are real documents (seedOrders): the write routes run their transactions.
 jest.mock('../services/order.service', () => ({
   ...jest.requireActual('../services/order.service'),
   listOrders: jest.fn(async () => ({ data: [], total: 0, hasMore: false })),
-  getOrder: jest.fn(async (_c: string, id: string) => ({
-    // `quote_`, `done_` and `ownquote_` set the status; every other order is approved.
-    id, number: 1, status: /^(own)?quote_/.test(id) ? 'quote' : id.startsWith('done_') ? 'done' : 'approved',
-    total: 100, discount: 0, paidAmount: 0,
-    customer: { id: 'cust1', name: 'Ana', phone: '+5511999990000' },
-    services: [{ service: { id: 's1', name: 'Polimento', value: 80 }, value: 100 }],
-    // `own_<uid>` is an order created by that user; any other id, by someone else.
-    createdBy: /^own(quote)?_/.test(id) ? { id: id.replace(/^own(quote)?_/, ''), name: 'Own' } : { id: 'ghost', name: 'Ghost' },
-  })),
   createOrder: jest.fn(async () => ({ id: 'new1', number: 2, status: 'quote' })),
-  updateOrder: jest.fn(async () => true),
-  addOrderService: jest.fn(async () => ({ success: true, newTotal: 999 })),
-  addOrderProduct: jest.fn(async () => ({ success: true, newTotal: 999 })),
-  addPayment: jest.fn(async () => ({ paidAmount: 10 })),
   updateOrderShareLink: jest.fn(async () => undefined),
   addPhotoToOrder: jest.fn(async () => undefined),
 }));
@@ -62,13 +50,20 @@ jest.mock('../services/device.service', () => ({
 jest.mock('../services/share-token.service', () => ({
   generateShareToken: jest.fn(async () => ({ token: 't1', permissions: ['view'], expiresAt: '2030-01-01T00:00:00Z' })),
   getTokensForOrder: jest.fn(async () => []),
-  getShareToken: jest.fn(async (token: string) => ({ token, companyId: 'c1', orderId: 'o1' })),
+  // A token belongs to one order: `tok_<orderId>` names its order, any other one is of o1.
+  getShareToken: jest.fn(async (token: string) => ({ token, companyId: 'c1', orderId: token.startsWith('tok_') ? token.slice(4) : 'o1' })),
   revokeShareToken: jest.fn(async () => undefined),
 }));
 
 jest.mock('../services/asaas/charge.service', () => ({
   createOrderCharge: jest.fn(async () => ({ id: 'ch1' })),
   cancelOrderCharge: jest.fn(async () => ({ id: 'ch1' })),
+  // DELETE /orders/:id: no open charge.
+  listCharges: jest.fn(async () => []),
+  isOpen: () => false,
+  isCancelable: () => false,
+  hasPaidInstallments: () => false,
+  cancelOpenChargesForOrder: jest.fn(async () => undefined),
 }));
 
 jest.mock('../services/asaas/customer-charge.service', () => ({
@@ -140,6 +135,9 @@ import chargesRoutes from '../routes/v1/charges.routes';
 import customersRoutes from '../routes/v1/customers.routes';
 import customerPaymentsRoutes from '../routes/v1/customer-payments.routes';
 import devicesRoutes from '../routes/v1/devices.routes';
+import appCustomersRoutes from '../routes/v1/app-customers.routes';
+import appDevicesRoutes from '../routes/v1/app-devices.routes';
+import { catalogRoutes } from '../routes/v1/app-catalog.routes';
 import appInviteRoutes from '../routes/v1/invite.routes';
 import integrationsRoutes from '../routes/v1/integrations.routes';
 import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
@@ -151,6 +149,10 @@ import formTemplatesRoutes from '../routes/v1/form-templates.routes';
 import appPermissions from './rbac/app-permissions.json';
 import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
+
+// Hundreds of cases over the in-memory Firestore: under a full parallel run the
+// default 5 s per test is too tight and the suite flakes.
+jest.setTimeout(30_000);
 
 const UID: Record<ApiRole, string> = {
   owner: 'owner1', admin: 'admin1', supervisor: 'sup1', manager: 'mgr1', consultant: 'cons1', technician: 'tech1',
@@ -167,6 +169,14 @@ function seedTenants() {
     seed(`companies/${cid}`, data);
     seed(`companies/${cid}/private/membership`, { members });
     seed(`companies/${cid}/forms/f1`, { title: 'Vistoria', isActive: true });
+    seed(`companies/${cid}/services/s1`, { name: 'Polimento', value: 80 });
+    seed(`companies/${cid}/products/p1`, { name: 'Cera', value: 10 });
+    seed(`companies/${cid}/customers/cust1`, { name: 'Ana' });
+    seed(`companies/${cid}/devices/d1`, { name: 'Uno' });
+    seed(`companies/${cid}/receipts/r1`, {
+      customer: { id: 'cust1', name: 'Ana' }, amount: 0, status: 'active', allocations: [], createdBy: { id: 'ghost', name: 'Ghost' },
+    });
+    seedOrders(cid);
   }
   seed('segments/hvac/forms/g1', { title: 'Vistoria do ramo', isActive: true, items: [] });
   for (const role of API_ROLES) {
@@ -177,13 +187,46 @@ function seedTenants() {
   }
 }
 
+/**
+ * Orders of the matrix: `quote_`, `done_` and `ownquote_` set the status, every
+ * other one is approved; `own_<uid>`/`ownquote_<uid>` were created by that
+ * user, the rest by someone else. `o1` carries a payment `t1` and a discount `d1`.
+ */
+function seedOrders(cid: string) {
+  const ids = ['o1', 'quote_1', 'done_1', ...Object.values(UID).flatMap((uid) => [`own_${uid}`, `ownquote_${uid}`])];
+  for (const id of ids) {
+    const money = id === 'o1'
+      ? {
+        paidAmount: 10, discount: 5, total: 95,
+        transactions: [
+          { id: 't1', type: 'payment', amount: 10, createdAt: '2026-10-01T10:00:00.000Z', createdBy: { id: 'ghost', name: 'Ghost' } },
+          { id: 'd1', type: 'discount', amount: 5, createdAt: '2026-10-01T10:00:00.000Z', createdBy: { id: 'ghost', name: 'Ghost' } },
+        ],
+      }
+      : { paidAmount: 0, discount: 0, total: 100, transactions: [] };
+    const status = /^(own)?quote_/.test(id) ? 'quote' : id.startsWith('done_') ? 'done' : 'approved';
+    seed(`companies/${cid}/orders/${id}`, {
+      number: 1, status, payment: status === 'quote' ? null : 'unpaid', paid: false, ...money,
+      customer: { id: 'cust1', name: 'Ana', phone: '+5511999990000' },
+      device: { id: 'd1', name: 'Uno' }, devices: [{ id: 'd1', name: 'Uno' }],
+      services: [{ id: 'l1', service: { id: 's1', name: 'Polimento', value: 80 }, value: 100 }],
+      products: [],
+      createdBy: /^own(quote)?_/.test(id) ? { id: id.replace(/^own(quote)?_/, ''), name: 'Own' } : { id: 'ghost', name: 'Ghost' },
+      createdAt: '2026-10-01T10:00:00.000Z',
+      updatedAt: '2026-10-01T10:00:00.000Z',
+    });
+  }
+}
+
 /** Same mounts, order and middleware as index.ts (rate limiters left out). */
 function buildApp(): Express {
   const app = express();
   app.use(express.json());
   app.use('/v1/app/orders', bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
-  app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
-  app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, devicesRoutes);
+  app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
+  app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, appDevicesRoutes, devicesRoutes);
+  app.use('/v1/app/services', bearerAuth, resolveCompanyContext, catalogRoutes('service'));
+  app.use('/v1/app/products', bearerAuth, resolveCompanyContext, catalogRoutes('product'));
   app.use('/v1/app/invites', bearerAuth, resolveCompanyContext, appInviteRoutes);
   app.use('/v1/app/integrations', bearerAuth, resolveCompanyContext, integrationsRoutes);
   app.use('/v1/app/payments/asaas', bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
@@ -288,11 +331,11 @@ describe('Consultant and technician on the orders they created', () => {
     it(`${role}: opens, edits and shares their own order`, async () => {
       const results = {
         get: (await call('get', `/v1/app/orders/${id}`)).status,
-        patch: (await call('patch', `/v1/app/orders/${id}`, { scheduledDate: '2026-11-02T10:00:00Z' })).status,
+        patch: (await call('patch', `/v1/app/orders/ownquote_${UID[role]}`, { scheduledDate: '2026-11-02T10:00:00Z' })).status,
         service: (await call('post', `/v1/app/orders/ownquote_${UID[role]}/services`, { serviceId: 's1' })).status,
         shareCreate: (await call('post', `/v1/app/orders/${id}/share`, { permissions: ['view'] })).status,
         shareList: (await call('get', `/v1/app/orders/${id}/share`)).status,
-        shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/t1`)).status,
+        shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/tok_${id}`)).status,
       };
       expect(results).toEqual({ get: 200, patch: 200, service: 200, shareCreate: 201, shareList: 200, shareRevoke: 200 });
     });
@@ -321,7 +364,7 @@ describe('Consultant and technician on the orders they created', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).not.toHaveProperty('total');
     expect(res.body.data).not.toHaveProperty('paidAmount');
-    expect(res.body.data.services).toEqual([{ service: { id: 's1', name: 'Polimento' } }]);
+    expect(res.body.data.services).toEqual([{ id: 'l1', service: { id: 's1', name: 'Polimento' } }]);
   });
 
   it('consultant sees the amounts of their own order', async () => {

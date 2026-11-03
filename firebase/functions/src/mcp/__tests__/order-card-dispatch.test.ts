@@ -209,7 +209,7 @@ describe('order card through the real SDK dispatch (tools/list + tools/call)', (
       status: orderForCreate.status,
     });
     mockOrderService.addServiceToOrderByNumber.mockResolvedValue({ success: true, newTotal: 350 });
-    mockOrderService.updateOrder.mockResolvedValue(true);
+    mockOrderService.updateOrder.mockResolvedValue({ id: 'o1' } as never);
 
     mockShareTokenService.getTokensForOrder.mockResolvedValue([activeToken]);
   });

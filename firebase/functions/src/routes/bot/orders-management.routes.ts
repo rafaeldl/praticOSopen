@@ -15,7 +15,8 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest, OrderStatus } from '../../models/types';
+import { AuthenticatedRequest, OrderProduct, OrderService, OrderStatus } from '../../models/types';
+import { computeOrderTotal } from '../../services/order-items';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import {
@@ -253,36 +254,34 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       // Replace services if provided
       if (orderServices.length > 0) {
         const resolvedServices = [];
-        let servicesTotal = 0;
         for (const s of orderServices) {
           const svc = await catalogService.getService(companyId, s.serviceId);
           if (svc) {
-            const value = s.value ?? svc.value ?? 0;
+            const value = s.value ?? svc.value ?? null;
             resolvedServices.push({
               service: { id: svc.id, name: svc.name, value: svc.value, photo: svc.photo ?? null },
               description: s.description || svc.name,
               value,
             });
-            servicesTotal += value;
           }
         }
         updatePayload.services = resolvedServices;
 
-        // Recalculate total
-        const existingProductsTotal = (existingOrder.products || []).reduce(
-          (sum: number, p: { value?: number; quantity?: number }) => sum + (p.value || 0) * (p.quantity || 1), 0
-        );
-        updatePayload.total = servicesTotal + existingProductsTotal;
+        // Recalculate total from the items (line totals, discount, never below 0)
+        updatePayload.total = computeOrderTotal({
+          services: resolvedServices as OrderService[],
+          products: existingOrder.products,
+          discount: existingOrder.discount,
+        });
       }
 
       // Replace products if provided
       if (orderProducts.length > 0) {
         const resolvedProducts = [];
-        let productsTotal = 0;
         for (const p of orderProducts) {
           const prod = await catalogService.getProduct(companyId, p.productId);
           if (prod) {
-            const value = p.value ?? prod.value ?? 0;
+            const value = p.value ?? prod.value ?? null;
             const quantity = p.quantity || 1;
             resolvedProducts.push({
               product: { id: prod.id, name: prod.name, value: prod.value, photo: prod.photo ?? null },
@@ -290,16 +289,16 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
               value,
               quantity,
             });
-            productsTotal += value * quantity;
           }
         }
         updatePayload.products = resolvedProducts;
 
         // Recalculate total (use updated services if both changed)
-        const svcTotal = updatePayload.services
-          ? (updatePayload.services as Array<{ value: number }>).reduce((sum, s) => sum + s.value, 0)
-          : (existingOrder.services || []).reduce((sum: number, s: { value?: number }) => sum + (s.value || 0), 0);
-        updatePayload.total = svcTotal + productsTotal;
+        updatePayload.total = computeOrderTotal({
+          services: (updatePayload.services as OrderService[] | undefined) ?? existingOrder.services,
+          products: resolvedProducts as OrderProduct[],
+          discount: existingOrder.discount,
+        });
       }
 
       if (data.status) {
@@ -419,8 +418,8 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
-    const serviceValue = data.value !== undefined ? data.value : (service.value ?? 0);
+    // Value with fallback to catalog; none on either side stays "sem valor" (null). 0 is a valid gift/courtesy.
+    const serviceValue = data.value !== undefined ? data.value : (service.value ?? null);
 
     // Add service to order
     const result = await orderService.addServiceToOrderByNumber(
@@ -519,8 +518,8 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
-    const productValue = data.value !== undefined ? data.value : (product.value ?? 0);
+    // Value with fallback to catalog; none on either side stays "sem valor" (null). 0 is a valid gift/courtesy.
+    const productValue = data.value !== undefined ? data.value : (product.value ?? null);
 
     // Add product to order
     const result = await orderService.addProductToOrderByNumber(

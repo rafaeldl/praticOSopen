@@ -18,6 +18,7 @@
     "e2e:asaas": "ts-node scripts/asaas-sandbox-e2e.ts",
     "asaas:pilot": "ts-node scripts/enable-asaas-pilot.ts",
     "ai": "ts-node scripts/ai-settings.ts",
+    "webapp:access": "ts-node scripts/webapp-access.ts",
     "claims:recompute": "ts-node scripts/recompute-claims.ts",
     "memberships:seed": "ts-node scripts/seed-private-membership.ts",
     "subscriptions:grace": "ts-node scripts/grant-grace-period.ts",

@@ -159,4 +159,43 @@ void main() {
       throwsArgumentError,
     );
   });
+
+
+  group('refuses what the server refuses', () {
+    ReceiptPlanError? refusal(Order order, double amount) {
+      try {
+        buildReceiptPlan(
+          receiptId: 'r1',
+          customer: customer,
+          orders: [order],
+          allocations: [PaymentAllocation(orderId: order.id!, amount: amount)],
+          paidAt: paidAt,
+          now: now,
+        );
+        return null;
+      } on ReceiptPlanException catch (e) {
+        expect(e.orderId, order.id);
+        return e.error;
+      }
+    }
+
+    test('a quote is not payable', () {
+      expect(refusal(_order('a', 1, 100)..status = 'quote', 40), ReceiptPlanError.notPayable);
+    });
+
+    test('a canceled order is not payable', () {
+      expect(refusal(_order('a', 1, 100)..status = 'canceled', 40), ReceiptPlanError.notPayable);
+    });
+
+    test('more than the open amount is refused', () {
+      expect(
+        refusal(_order('a', 1, 100, paid: 90)..status = 'done', 20),
+        ReceiptPlanError.exceedsBalance,
+      );
+    });
+
+    test('exactly the open amount, with float noise, goes through', () {
+      expect(refusal(_order('a', 1, 0.3, paid: 0.1)..status = 'done', 0.2), isNull);
+    });
+  });
 }

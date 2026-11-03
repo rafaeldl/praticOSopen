@@ -8,6 +8,7 @@ on:
       - master  # Ou a branch que você usa como principal
     paths:
       - 'firebase/hosting/**' # Executa a action se houver mudanças na pasta do site
+      - 'firebase/webapp/**' # App web servido em /app (docs/WEB_APP.md)
       - 'firebase/firebase.json' # Ou se mudar rewrites/headers/config do hosting
 
 jobs:
@@ -20,9 +21,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
-          cache-dependency-path: firebase/hosting/package-lock.json
+          cache-dependency-path: |
+            firebase/hosting/package-lock.json
+            firebase/webapp/package-lock.json
 
       - name: Install dependencies
         working-directory: firebase/hosting
@@ -31,6 +34,13 @@ jobs:
       - name: Build site
         working-directory: firebase/hosting
         run: npm run build
+
+      # After the site: Eleventy writes hosting/public, the SPA goes to public/app.
+      - name: Build web app
+        working-directory: firebase/webapp
+        run: |
+          npm ci
+          npm run build:hosting
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0

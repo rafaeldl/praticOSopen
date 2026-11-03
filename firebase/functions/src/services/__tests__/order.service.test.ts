@@ -2,14 +2,10 @@ jest.mock('uuid', () => ({ v4: () => 'txn-1' }));
 
 const mockTxGet = jest.fn();
 const mockTxUpdate = jest.fn();
-const mockGetDocument = jest.fn();
-const mockUpdateDocument = jest.fn();
 const mockOrderRef = { id: 'order1' };
 
 jest.mock('../firestore.service', () => ({
   getTenantCollection: jest.fn(() => ({ doc: jest.fn(() => mockOrderRef) })),
-  getDocument: (...args: unknown[]) => mockGetDocument(...args),
-  updateDocument: (...args: unknown[]) => mockUpdateDocument(...args),
   runTransaction: jest.fn((fn: (tx: unknown) => Promise<unknown>) =>
     fn({ get: mockTxGet, update: mockTxUpdate })
   ),
@@ -140,36 +136,48 @@ describe('applyPaymentTransaction', () => {
 describe('updateOrder', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('mudar a situação recalcula payment e paid', async () => {
-    mockGetDocument.mockResolvedValue({ status: 'quote', total: 100, paidAmount: 100 });
+  it('mudar a situação recalcula payment e paid, sem gravar `done`', async () => {
+    mockTxGet.mockResolvedValue(snapshot({ status: 'quote', total: 100, paidAmount: 100 }));
 
     await updateOrder('comp1', 'order1', { status: 'approved' }, user);
 
-    expect(mockUpdateDocument).toHaveBeenCalledWith(
-      expect.anything(),
-      'order1',
-      expect.objectContaining({ status: 'approved', done: false, paid: true, payment: 'paid' }),
-    );
+    const update = mockTxUpdate.mock.calls[0][1];
+    expect(update).toEqual(expect.objectContaining({ status: 'approved', paid: true, payment: 'paid' }));
+    expect(update).not.toHaveProperty('done');
   });
 
   it('cancelar tira a situação de pagamento', async () => {
-    mockGetDocument.mockResolvedValue({ status: 'approved', total: 100, paidAmount: 0 });
+    mockTxGet.mockResolvedValue(snapshot({ status: 'approved', total: 100, paidAmount: 0 }));
 
     await updateOrder('comp1', 'order1', { status: 'canceled' }, user);
 
-    expect(mockUpdateDocument).toHaveBeenCalledWith(
-      expect.anything(),
-      'order1',
-      expect.objectContaining({ paid: false, payment: null }),
-    );
+    expect(mockTxUpdate).toHaveBeenCalledWith(mockOrderRef, expect.objectContaining({ paid: false, payment: null }));
   });
 
   it('sem mudar a situação, não mexe em pagamento', async () => {
-    mockGetDocument.mockResolvedValue({ status: 'approved', total: 100, paidAmount: 100 });
+    mockTxGet.mockResolvedValue(snapshot({ status: 'approved', total: 100, paidAmount: 100 }));
 
     await updateOrder('comp1', 'order1', { scheduledDate: null }, user);
 
-    expect(mockUpdateDocument.mock.calls[0][2]).not.toHaveProperty('payment');
+    expect(mockTxUpdate.mock.calls[0][1]).not.toHaveProperty('payment');
+    expect(mockTxUpdate.mock.calls[0][1].scheduledDate).toBeNull();
+  });
+
+  it('OS antiga paga antes de existir paidAmount continua paga ao mudar de situação', async () => {
+    mockTxGet.mockResolvedValue(snapshot({ status: 'progress', total: 100, payment: 'paid' } as Partial<Order>));
+
+    await updateOrder('comp1', 'order1', { status: 'done' }, user);
+
+    expect(mockTxUpdate.mock.calls[0][1]).not.toHaveProperty('payment');
+  });
+
+  it('guard recusa dentro da transação e nada é gravado', async () => {
+    mockTxGet.mockResolvedValue(snapshot({ status: 'approved', total: 100 }));
+
+    await expect(updateOrder('comp1', 'order1', { status: 'done' }, user, {
+      guard: () => { throw new Error('no'); },
+    })).rejects.toThrow('no');
+    expect(mockTxUpdate).not.toHaveBeenCalled();
   });
 });
 
@@ -188,7 +196,7 @@ describe('addPayment', () => {
 
     const result = await addPayment('comp1', 'order1', 10, 'discount', 'Desconto', user);
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       transactionId: 'txn-1',
       paidAmount: 20,
       remainingBalance: 70,

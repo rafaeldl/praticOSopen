@@ -10,11 +10,11 @@ Janela: 02/08 a 31/10/2026 (90 dias), salvo indicação. Fontes: Firestore de pr
 | Ativas em 90 dias | 118 com qualquer OS | 103 com trabalho, 75 com OS com conteúdo | 118 inclui OS vazias e de exemplo |
 | Usam de verdade | 17 com 4+ semanas | 20 (faixa de 16 a 20), com 5 recorrentes, 11 regulares e 4 novas | É a base certa para portões |
 | OS em 90 dias | 1.232 | 1.116 | Sem OS internas e de exemplo |
-| Maior empresa | 38% das OS | 42% das OS, 67% do valor digitado | Concentração maior |
+| Maior empresa | Concentração alta | Concentração maior no valor digitado que nas OS | Concentração maior |
 | Equipe | 3 de 118 com 2+ agindo | 7 das 20 com 2+ membros, e 1 de 15 membros fora de `admin` criou OS em 28 dias | Consistentes: equipe cadastrada, mas quase sem papel próprio |
 | Android no GA4 | Sem filtro | 414 de 488 parecem robôs, 48 logados | Totais de usuários do GA4 não servem de base |
 | iOS e ATT | Suspeita de subcontagem | Não há: `analytics_storage` ligado, 86 logados no GA4 e 90 no Auth | Lacuna encerrada |
-| Peso nas visitas | Visitas por tela | Um modelo de iPhone tem 12.545 de 25.929 eventos do iOS, em 3 usuários, provavelmente a maior empresa [I] | A ordem das telas reflete muito essa empresa |
+| Peso nas visitas | Visitas por tela | Poucos usuários concentram boa parte dos eventos do iOS, provavelmente a maior empresa [I] | A ordem das telas reflete muito essa empresa |
 
 **O que as 20 usam, em 90 dias:** OS com conteúdo 20, cliente novo 20, link 18, pagamento 16, link aberto pelo cliente 16, OS com data 14, foto 8, comentário interno 8, aprovação pelo link 6, formulário 6. Financeiro 0, Asaas 0, bot 0, contratos 1, IA 1. O dado de IA ainda não prova rejeição, porque ela está ligada há 14 dias e parte dos usuários segue em versões sem IA.
 
@@ -32,24 +32,24 @@ Legenda: **[M]** medido, **[E]** estimativa com a conta explicada, **[I]** infer
 
 ## Top 10 tarefas
 
-Volume em 90 dias. "Sem a nº 1" exclui a maior empresa. Visitas são do GA4, nos dois sistemas. Papel: quase tudo é `admin`, então a coluna diz quem faz na prática [I].
+Volume em 90 dias. Visitas são do GA4, nos dois sistemas. Papel: quase tudo é `admin`, então a coluna diz quem faz na prática [I].
 
-| # | Tarefa | Volume [M] | Sem a nº 1 [M] | Quem | Depende do celular? [I] |
-|---|---|---|---|---|---|
-| 1 | Abrir e consultar OS | 15.889 visitas a `/order` (~6 mil aberturas [E]) | n/d | Dono | Não |
-| 2 | Lançar serviço na OS | 2.166 linhas; 9.329 visitas | 935 linhas | Dono | Não |
-| 3 | Criar OS | 1.232 | 769 | Dono | Não, mas parte é feita em campo |
-| 4 | Lançar veículo/aparelho | 697 cadastros; 5.169 visitas | 227 cadastros | Dono | Não |
-| 5 | Registrar pagamento ou desconto | 793 + 142 | 356 + 60 | Dono | Não |
-| 6 | Escolher ou cadastrar cliente | 607 cadastros; 2.831 visitas | 597 cadastros | Dono | Não |
-| 7 | Enviar a OS ao cliente | 1.208 aberturas da tela de compartilhar (só iOS); 195 OS com link | 189 OS com link | Dono | Em parte: hoje passa pela tela nativa e pelo WhatsApp |
-| 8 | Anexar foto | 512 fotos em 190 OS | 508 fotos em 188 OS | Dono/técnico | **Sim** |
-| 9 | Lançar peça/produto | 383 linhas; 1.972 visitas | 368 linhas | Dono | Não |
-| 10 | Agendar | 360 OS com data, 218 para o futuro | as mesmas 360 | Dono | Não para marcar; consultar pode ser em campo |
+| # | Tarefa | Volume [M] | Quem | Depende do celular? [I] |
+|---|---|---|---|---|
+| 1 | Abrir e consultar OS | 15.889 visitas a `/order` (~6 mil aberturas [E]) | Dono | Não |
+| 2 | Lançar serviço na OS | 2.166 linhas; 9.329 visitas | Dono | Não |
+| 3 | Criar OS | 1.232 | Dono | Não, mas parte é feita em campo |
+| 4 | Lançar veículo/aparelho | 697 cadastros; 5.169 visitas | Dono | Não |
+| 5 | Registrar pagamento ou desconto | 793 + 142 | Dono | Não |
+| 6 | Escolher ou cadastrar cliente | 607 cadastros; 2.831 visitas | Dono | Não |
+| 7 | Enviar a OS ao cliente | 1.208 aberturas da tela de compartilhar (só iOS); 195 OS com link | Dono | Em parte: hoje passa pela tela nativa e pelo WhatsApp |
+| 8 | Anexar foto | 512 fotos em 190 OS | Dono/técnico | **Sim** |
+| 9 | Lançar peça/produto | 383 linhas; 1.972 visitas | Dono | Não |
+| 10 | Agendar | 360 OS com data, 218 para o futuro | Dono | Não para marcar; consultar pode ser em campo |
 
 Abaixo do top 10: 281 comentários internos, 90 do cliente pelo link, 69 checklists (21 empresas, 131 fotos) [M]. Checklist depende do celular [I].
 
-**Dependência real do celular:** [M] 16% das OS têm foto ou checklist com foto (25% sem a nº 1), em 37 empresas para foto. Entre as 16 empresas regulares fora a nº 1, 5 fotografam em 50% ou mais das OS e 11 em até 14%. Quando há foto, 74% entram na primeira hora da OS. No iOS, a galeria abriu 208 vezes e a câmera 17: boa parte da foto já está no aparelho quando é anexada [M/I].
+**Dependência real do celular:** [M] 16% das OS têm foto ou checklist com foto, em 37 empresas para foto. Entre as 16 empresas regulares fora a nº 1, 5 fotografam em 50% ou mais das OS e 11 em até 14%. Quando há foto, 74% entram na primeira hora da OS. No iOS, a galeria abriu 208 vezes e a câmera 17: boa parte da foto já está no aparelho quando é anexada [M/I].
 
 ## O dia de cada um
 
@@ -87,7 +87,7 @@ Em OS no total, 766 empresas reais. [M]
 | Ativas em 90 dias, OS no período (118) | 2 | 30 | n/d |
 
 - Faixas: 43 empresas com 10 OS ou mais, 11 com 50 ou mais, 5 com 100 ou mais, 1 com 500 ou mais.
-- Por OS: 2,07 itens em média (p95 6), 1,69 sem a nº 1.
+- Por OS: cerca de 2 itens em média (p95 6).
 - Cadastros fora da nº 1, p50/p95/máximo: clientes 1/21/105, veículos ou aparelhos 1/37/108, produtos 2/37/170, serviços 2/30/118.
 - Na maior empresa, a maioria dos clientes citados nas OS não tem documento em `customers`: a busca no web precisa olhar os dados gravados na OS.
 

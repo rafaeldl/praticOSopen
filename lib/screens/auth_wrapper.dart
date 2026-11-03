@@ -19,6 +19,16 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/utils/startup_company.dart';
 
+/// Whether [store] has pending invites. Throws when they could not be loaded
+/// (the caller shows "Tentar de novo" instead of going on to create a
+/// company).
+Future<bool> hasPendingInvites(InviteStore store) async {
+  await store.loadPendingInvites();
+  final error = store.errorMessage;
+  if (error != null) throw StateError('Could not load the invites: $error');
+  return store.pendingInvites.isNotEmpty;
+}
+
 /// After accepting an invite the store still holds "no company", so it must
 /// reload before restarting at '/', or the user lands on onboarding.
 Future<void> enterCompanyAfterInvite(
@@ -183,6 +193,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
           return const LoadingScreen();
         }
 
+        // Could not tell whether there are invites: creating a company now
+        // could duplicate the one the person was invited to.
+        if (inviteSnapshot.hasError) {
+          return AuthLoadErrorView(
+            message: context.l10n.networkError,
+            onRetry: () => setState(() => _pendingInvitesFuture = null),
+          );
+        }
+
         final hasPendingInvites = inviteSnapshot.data ?? false;
 
         if (hasPendingInvites) {
@@ -208,11 +227,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   /// Verifica se o usuário tem convites pendentes
-  Future<bool> _checkPendingInvites() async {
-    final store = InviteStore.instance;
-    await store.loadPendingInvites();
-    return store.errorMessage == null && store.pendingInvites.isNotEmpty;
-  }
+  Future<bool> _checkPendingInvites() =>
+      hasPendingInvites(InviteStore.instance);
 
   /// Verifica se o usuário tem empresa associada e se ela tem segmento definido
   Future<_CompanyCheckResult> _checkUserCompany() async {
