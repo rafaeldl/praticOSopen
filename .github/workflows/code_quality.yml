@@ -5,6 +5,9 @@ on:
     branches: [ "**" ]
     paths:
       - 'lib/**'
+      - 'test/**'
+      # Casos de contrato: test/contract/contract_cases_test.dart lê estes JSON
+      - 'docs/web-app/contract-cases/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       # Mudancas no proprio CI precisam ser validadas pelo CI
