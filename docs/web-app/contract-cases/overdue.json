@@ -6,7 +6,7 @@
   "sourceOfTruth": ["lib/screens/menu_navigation/home_groups.dart HomeRules.isOverdue"],
   "otherImplementations": ["firebase/functions/src/services/order.service.ts getOverdueOrders"],
   "cases": [
-    {"id":"past-due-quote","given":{"status":"quote","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"correct":{"overdue":true},"divergesIn":{"functions":{"overdue":false}},"note":"A Início mostra orçamento vencido como atrasado; getOverdueOrders só olha approved e progress."},
+    {"id":"past-due-quote","given":{"status":"quote","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true},"note":"A Início mostra orçamento vencido como atrasado; getOverdueOrders só olha approved e progress."},
     {"id":"past-due-approved","given":{"status":"approved","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}},
     {"id":"past-due-progress","given":{"status":"progress","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}},
     {"id":"past-due-done","given":{"status":"done","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
