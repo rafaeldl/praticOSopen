@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import InvitesList from '@/components/InvitesList.vue'
 import PageHead from '@/components/PageHead.vue'
 import { t } from '@/i18n'
 import { prefs } from '@/lib/prefs'
@@ -38,6 +39,7 @@ async function leave() {
         <input v-model="prefs.singleKeyShortcuts" class="check" type="checkbox" />
         <span>{{ t('web.settings.singleKeys') }}</span>
       </label>
+      <InvitesList />
       <button type="button" class="btn" @click="leave">{{ t('logout') }}</button>
     </div>
   </div>

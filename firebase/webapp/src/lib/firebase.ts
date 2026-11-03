@@ -6,14 +6,16 @@ import type { Firestore } from 'firebase/firestore'
 import type { FirebaseStorage } from 'firebase/storage'
 
 const env = import.meta.env
-export const usesEmulators = env.VITE_USE_EMULATORS === '1'
+// Read import.meta.env.VITE_USE_EMULATORS inline at each use: Vite replaces it
+// with a literal, so the emulator branches disappear from the production bundle.
+export const usesEmulators = import.meta.env.VITE_USE_EMULATORS === '1'
 const EMULATOR_HOST = '127.0.0.1'
 
 function options(): FirebaseOptions {
   const projectId = env.VITE_FIREBASE_PROJECT_ID
   if (!projectId) throw new Error('VITE_FIREBASE_PROJECT_ID is missing')
   // A typo here must never point local tooling at a real project.
-  if (usesEmulators && !projectId.startsWith('demo-')) {
+  if (import.meta.env.VITE_USE_EMULATORS === '1' && !projectId.startsWith('demo-')) {
     throw new Error('Emulator mode only runs on a demo- project')
   }
   return {
@@ -40,7 +42,7 @@ export function authClient(): Promise<Auth> {
     ])
     // initializeAuth without a popup resolver keeps the sign-in widgets out of the bundle.
     const client = initializeAuth(instance, { persistence: browserLocalPersistence })
-    if (usesEmulators) {
+    if (import.meta.env.VITE_USE_EMULATORS === '1') {
       connectAuthEmulator(client, `http://${EMULATOR_HOST}:${env.VITE_EMULATOR_AUTH_PORT ?? 9099}`, {
         disableWarnings: true,
       })
@@ -53,16 +55,35 @@ export function authClient(): Promise<Auth> {
 let firestore: Promise<Firestore> | undefined
 export function firestoreClient(): Promise<Firestore> {
   firestore ??= (async () => {
-    const [instance, { getFirestore, connectFirestoreEmulator }] = await Promise.all([
-      firebaseApp(),
-      import('firebase/firestore'),
-    ])
-    // No persistent cache: the workshop computer is shared (WEB_APP_DESIGN, Sair).
-    const client = getFirestore(instance)
-    if (usesEmulators) connectFirestoreEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080))
+    const [instance, { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator }] =
+      await Promise.all([firebaseApp(), import('firebase/firestore')])
+    // Persistent cache makes the return visit start from disk. The computer is
+    // shared, so signing out erases it (clearFirestoreCache).
+    const client = initializeFirestore(instance, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    })
+    if (import.meta.env.VITE_USE_EMULATORS === '1') connectFirestoreEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080))
     return client
   })()
   return firestore
+}
+
+/**
+ * False while the cache may still hold another account's data (a deletion
+ * failed): reads then skip the disk and go to the server.
+ */
+export const cacheState = { trusted: true }
+
+/**
+ * Erases this browser's copy of the data. Throws when it could not, so the
+ * caller can try again on the next load. The next firestoreClient() call
+ * builds a new, empty instance.
+ */
+export async function clearFirestoreCache(): Promise<void> {
+  const [client, { terminate, clearIndexedDbPersistence }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  firestore = undefined
+  await terminate(client)
+  await clearIndexedDbPersistence(client)
 }
 
 let storage: Promise<FirebaseStorage> | undefined
@@ -73,7 +94,7 @@ export function storageClient(): Promise<FirebaseStorage> {
       import('firebase/storage'),
     ])
     const client = getStorage(instance)
-    if (usesEmulators) connectStorageEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_STORAGE_PORT ?? 9199))
+    if (import.meta.env.VITE_USE_EMULATORS === '1') connectStorageEmulator(client, EMULATOR_HOST, Number(env.VITE_EMULATOR_STORAGE_PORT ?? 9199))
     return client
   })()
   return storage

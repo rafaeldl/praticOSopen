@@ -16,6 +16,21 @@ export const USERS = {
   consultant: { ...user('consultant', 'Carla Consultora'), roles: { [COMPANY_A]: 'consultant' } },
   technician: { ...user('technician', 'Tiago Tecnico'), roles: { [COMPANY_A]: 'technician' } },
   noCompany: { ...user('nocompany', 'Nina Sem Empresa'), roles: {} },
+  /** Technician of company A, but outside the web access list. */
+  outsider: { ...user('outsider', 'Otto Fora Da Lista'), roles: { [COMPANY_A]: 'technician' }, blocked: true },
+  /** Only for the invite tests, so accepting does not change other tests' users. */
+  invitee: { ...user('invitee', 'Ivo Convidado'), roles: { [COMPANY_A]: 'technician' } },
+  newcomer: { ...user('newcomer', 'Nara Nova'), roles: {} },
+  /** Administrator in A, technician in B: switching must re-check the open screen. */
+  mixed: { ...user('mixed', 'Mauro Dois Papeis'), roles: { [COMPANY_A]: 'admin', [COMPANY_B]: 'technician' } },
+  /** On the list, but the e-mail was never confirmed: the server says no. */
+  unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
+}
+
+/** Pending invites: one for who has no company, one for who already works in A. */
+export const INVITES = {
+  newcomer: { token: 'INV_E2E_NEWCOMER', company: COMPANY_A, role: 'technician', email: 'newcomer@praticos.test' },
+  invitee: { token: 'INV_E2E_INVITEE_B', company: COMPANY_B, role: 'supervisor', email: 'invitee@praticos.test' },
 }
 
 export const COMPANIES = {

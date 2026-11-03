@@ -46,7 +46,7 @@ if (createdSecrets) {
 const test = serve
   ? `node -e "setInterval(() => {}, 1 << 30)"`
   : perf
-    ? 'E2E_PERF=1 npx playwright test e2e/perf'
+    ? `E2E_PERF=1 ${process.env.PERF_COLD ? 'PERF_COLD=1 ' : ''}npx playwright test e2e/perf`
     : `npx playwright test ${process.env.PW_ARGS ?? ''}`
 
 // Ctrl+C reaches the emulators too; stay alive to remove the fake secrets.

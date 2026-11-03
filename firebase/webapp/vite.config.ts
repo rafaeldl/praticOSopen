@@ -1,10 +1,13 @@
 import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
+import { preloadCritical } from './scripts/preload-plugin'
+
+const BASE = '/app/'
 
 export default defineConfig({
-  base: '/app/',
-  plugins: [vue()],
+  base: BASE,
+  plugins: [vue(), preloadCritical(BASE)],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   // tokens.css lives in firebase/hosting and the contracts in the repo root.
   server: { fs: { allow: ['../..'] } },

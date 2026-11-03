@@ -38,7 +38,6 @@
   "web.login.title": "Sign in to PraticOS",
   "web.login.sub": "Use the same account as your phone. Everything there shows up here.",
   "web.login.claim": "Your whole shop, on a big screen.",
-  "web.login.invalid": "Email or password do not match.",
   "web.noCompany.title": "Your account is not in a company yet",
   "web.noCompany.body": "Create the company in the phone app or accept the invite you received. Then come back here.",
   "web.noCompany.check": "I accepted it, check again",
@@ -65,5 +64,18 @@
   "web.gallery.api": "Call API",
   "web.gallery.discard": "Discard what you typed?",
   "web.gallery.emptyTitle": "Nothing here",
-  "web.gallery.emptyBody": "Sample text."
+  "web.gallery.emptyBody": "Sample text.",
+  "web.chooseCompany.title": "Where will you work now?",
+  "web.chooseCompany.sub": "You can switch later, from the menu.",
+  "web.notAllowed.title": "PraticOS on the computer is not open to you yet",
+  "web.notAllowed.body": "We are opening it little by little. Meanwhile, keep using the phone app: everything is there.",
+  "web.invites.rejected": "Invite declined",
+  "web.nav.unnamedCompany": "Unnamed company",
+  "web.companyFailed": "Could not load the company. Amounts stay hidden until it loads.",
+  "web.gallery.openOrder": "Open order 1 in the list",
+  "web.orders.stale": "Showing the last copy saved on this computer. It may be out of date.",
+  "web.notAllowed.verifyTitle": "Your e-mail still needs confirming",
+  "web.notAllowed.verifyBody": "Open the confirmation e-mail we sent and tap the link. Then come back and tap \"Try again\".",
+  "web.notAllowed.resend": "Send the e-mail again",
+  "web.notAllowed.sent": "Confirmation e-mail sent"
 }
