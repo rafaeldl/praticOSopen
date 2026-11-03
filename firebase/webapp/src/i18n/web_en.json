@@ -71,6 +71,7 @@
   "web.notAllowed.body": "We are opening it little by little. Meanwhile, keep using the phone app: everything is there.",
   "web.invites.rejected": "Invite declined",
   "web.nav.unnamedCompany": "Unnamed company",
+  "web.nav.profile": "{company}: settings",
   "web.companyFailed": "Could not load the company. Amounts stay hidden until it loads.",
   "web.gallery.openOrder": "Open order 1 in the list",
   "web.orders.stale": "Showing the last copy saved on this computer. It may be out of date.",

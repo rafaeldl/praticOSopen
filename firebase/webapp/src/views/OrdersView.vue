@@ -5,6 +5,7 @@
 // pickers load on demand so the first paint stays inside the budget.
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Bell } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -66,6 +67,8 @@ const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const stale = ref(false)
 const firstRun = ref(false)
 const unpaid = ref<{ count: number; amount: number } | null>(null)
+/** New notices of this person (home.notifications.badge); read after the list paints. */
+const unread = ref(0)
 let stopSearch: (() => void) | undefined
 const selected = ref<string[]>([])
 const searchEl = ref<HTMLInputElement | null>(null)
@@ -166,6 +169,11 @@ async function load() {
     if (!rows.value.length && (filter.value === 'all' || filter.value === 'open' || filter.value === 'mine')) {
       firstRun.value = !(await companyHasOrders(ctx))
     }
+    // After the paint: the bell's count (lib/notifications, its own chunk).
+    void import('@/lib/notifications')
+      .then((notices) => notices.unreadCount())
+      .then((count) => token === loadToken && (unread.value = count))
+      .catch((error) => console.warn('orders: notices not counted', error))
     // After the paint: Sem receber count, ⌘K search and the lists of Nova OS (list-extras.ts).
     void import('@/lib/orders/list-extras').then((extras) => {
       if (token !== loadToken) return
@@ -376,6 +384,11 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
       <!-- Always there on the list: the sentence arrives after the rows (what is left to receive) and must not push the screen down. -->
       <p v-if="!board" class="page-sub page-answer" data-testid="summary">{{ summaryText }}</p>
     </div>
+    <RouterLink class="btn btn--ghost bell" to="/notifications" data-testid="bell">
+      <Bell :size="18" aria-hidden="true" />
+      <span class="sr">{{ unread ? t('notificationsA11y', { count: unread }) : t('noticesTitle') }}</span>
+      <span v-if="unread" class="bell-count num" aria-hidden="true" data-testid="bell-count">{{ unread > 99 ? '99+' : unread }}</span>
+    </RouterLink>
     <div class="tabs" role="group" :aria-label="t('web.orders.viewAs')">
       <button type="button" :aria-pressed="!board" @click="setView('list')">{{ t('web.orders.list') }}</button>
       <button type="button" :aria-pressed="board" @click="setView('board')">{{ t('web.orders.board') }}</button>

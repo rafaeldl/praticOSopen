@@ -106,6 +106,13 @@ export const routes: RouteRecordRaw[] = [
     component: ChecklistsView,
     meta: { access: { kind: 'member', anyOf: ['manageForms'] }, title: 'checklistsTitle' },
   },
+  // Avisos, from the bell on Início (home.notifications.open).
+  {
+    path: '/notifications',
+    name: 'notifications',
+    component: () => Promise.all([import('@/views/notifications/NotificationsView.vue'), loadOrderTexts()]).then(([m]) => m),
+    meta: { access: NAV[0]!.access, title: 'noticesTitle' },
+  },
   {
     path: '/finance/receive',
     name: 'financeReceive',

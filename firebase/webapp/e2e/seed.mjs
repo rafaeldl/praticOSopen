@@ -2,7 +2,7 @@
 // Refuses to run unless every Admin SDK client points at a local emulator.
 import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
 import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_D, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
 
@@ -423,6 +423,19 @@ async function seedMaintenance() {
     devices: [{ id: 'd-contract', name: 'Corsa Contrato', serial: null }], deviceIds: ['d-contract'], services: [], products: [], total: 0,
     company, ...audit(owner, 4000),
   })
+  // Avisos as notification.service.ts writes them (createdAt by the server, a Timestamp).
+  const ago = (minutes) => Timestamp.fromMillis(Date.now() - minutes * 60000)
+  const notice = (id, recipient, minutes, fields) =>
+    batch.set(db.doc(`companies/${COMPANY_D}/notifications/${id}`), {
+      recipientId: recipient.uid, read: false, readAt: null, company: { id: COMPANY_D }, createdAt: ago(minutes), ...fields,
+    })
+  const bell = USERS.bellUser
+  notice('n-approved', bell, 5, { type: 'order_approved', title: 'Orçamento Aprovado! ✅', body: 'Ana aprovou o orçamento da OS #1', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-comment', bell, 120, { type: 'new_comment', title: 'Novo comentário 💬', body: 'Carlos: Pode trocar o filtro?', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-paid', bell, 60 * 24 * 2, { type: 'payment_received', title: 'Pagamento recebido 💰', body: 'OS #1 – R$ 150,00', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-maint', bell, 60 * 24 * 40, { type: 'maintenance_due', title: 'Manutenção chegando', body: 'Gol Chegando em 05/11', read: true })
+  notice('n-other', USERS.maintOwner, 5, { type: 'order_approved', title: 'Orçamento Aprovado!', body: 'Outra pessoa aprovou', orderId: 'd-order-gol', orderNumber: 1 })
+  for (let i = 0; i < 120; i++) notice(`n-busy-${i}`, USERS.bellBusy, i + 1, { type: 'status_changed', title: 'Situação mudou', body: `A OS #${i} mudou` })
   await batch.commit()
 }
 

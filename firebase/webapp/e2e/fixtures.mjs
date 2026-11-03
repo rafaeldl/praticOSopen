@@ -39,6 +39,9 @@ export const USERS = {
   /** Owner and technician of company D (maintenances). */
   maintOwner: { ...user('maintowner', 'Mara Dona Delta'), roles: { [COMPANY_D]: 'owner' } },
   maintTech: { ...user('mainttech', 'Tito Tecnico Delta'), roles: { [COMPANY_D]: 'technician' } },
+  /** Avisos (e2e/notifications.spec.ts): three new and one read; the other one has 120 new. */
+  bellUser: { ...user('belluser', 'Bela Avisos'), roles: { [COMPANY_D]: 'admin' } },
+  bellBusy: { ...user('bellbusy', 'Beto Muitos Avisos'), roles: { [COMPANY_D]: 'manager' } },
   /** No company and outside the access list: never reaches the first access. */
   strangerNew: { ...user('strangernew', 'Saulo Fora'), roles: {}, blocked: true },
 }
