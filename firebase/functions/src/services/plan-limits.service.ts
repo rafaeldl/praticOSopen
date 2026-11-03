@@ -11,7 +11,7 @@
  * like an app build without the key.
  */
 
-import { db, getRootCollection, getTenantCollection, storage } from './firestore.service';
+import { db, getRootCollection, getTenantCollection } from './firestore.service';
 import { PLAN_LIMITS } from './subscription-plans';
 import { instantOfWall, wallClockOf } from './contract-generation';
 import type { SubscriptionLimits, SubscriptionPlan } from '../models/types';
@@ -172,27 +172,23 @@ export async function countFormTemplates(companyId: string): Promise<number> {
 }
 
 /**
- * Order photos stored this month (Storage objects under
- * tenants/{id}/orders/{orderId}/photos/, by creation time, which no client
- * can set). Covers every role and every client, unlike the counter the app
- * increments only for admins. A photo deleted this month no longer counts.
+ * Order photos this month: `subscription.usage.photosThisMonth`, the counter
+ * the order triggers keep (usage-counter.service.ts, countNewOrderPhotos) and
+ * the monthly job resets. One document read: Storage is never listed (M2 of
+ * the #526 review). The triggers count only with
+ * `config/usageCounters.serverOnly` on; with it off the app writes the counter
+ * (admin only), so turn that flag on before PLAN_LIMITS_ENABLED.
  */
-export async function countPhotosThisMonth(companyId: string, now: Date): Promise<number> {
-  const prefix = `tenants/${companyId}/orders/`;
-  const photo = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^/]+/photos/[^/]+$`);
-  const since = monthStart(now).getTime();
-  const [files] = await storage.bucket().getFiles({ prefix });
-  return files.filter((file) => {
-    if (!photo.test(file.name)) return false;
-    const created = Date.parse(String(file.metadata?.timeCreated ?? ''));
-    return !Number.isNaN(created) && created >= since;
-  }).length;
+export async function countPhotosThisMonth(companyId: string): Promise<number> {
+  const company = await getRootCollection('companies').doc(companyId).get();
+  const value = Number((company.exists ? company.data()?.subscription?.usage?.photosThisMonth : 0) ?? 0);
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : 0;
 }
 
 export async function countUsage(companyId: string, resource: PlanResource, now: Date): Promise<number> {
   switch (resource) {
     case 'photo':
-      return countPhotosThisMonth(companyId, now);
+      return countPhotosThisMonth(companyId);
     case 'formTemplate':
       return countFormTemplates(companyId);
     case 'collaborator':

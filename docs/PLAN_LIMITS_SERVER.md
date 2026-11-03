@@ -21,7 +21,7 @@ companies/{id}.subscription            plan, expiresAt, limits
 companies/{id}/memberships/*           pessoas
 links/invites/tokens/*                 convites pendentes (company.id, status, expiresAt)
 companies/{id}/forms/*                 modelos de checklist (isActive)
-Storage tenants/{id}/orders/*/photos/* fotos de OS (timeCreated)
+companies/{id}.subscription.usage     photosThisMonth (contador dos gatilhos da OS)
 ```
 
 ## Regras de Negócio
@@ -46,7 +46,7 @@ Os contadores que o app grava (`subscription.usage.*`) não são lidos.
 |---|---|---|
 | `collaborator` | `memberships` + convites `pending` não vencidos da empresa | Igual ao `CollaboratorStore`. O app só atualiza o contador quando um admin mexe na equipe |
 | `formTemplate` | `companies/{id}/forms` com `isActive != false` | O contador do app consulta `formTemplates`, coleção que não existe nas regras; a falha é engolida e o contador nunca sai do valor gravado. **No app o limite de checklist praticamente não barra** |
-| `photo` | Objetos em `tenants/{id}/orders/{os}/photos/` criados desde a meia-noite do dia 1 (Brasília), pela data do Storage | O app só soma quando quem sobe é admin (TODO #458) e nunca desconta. Aqui conta todo perfil e todo cliente, e foto apagada no mês deixa de contar. Fotos de checklist não contam (o app também não barra nem conta) |
+| `photo` | `subscription.usage.photosThisMonth`, o contador que os gatilhos da OS somam (`countNewOrderPhotos`, #514) e o job do dia 1 zera. Uma leitura só: o Storage nunca é listado | Os gatilhos só contam com `config/usageCounters.serverOnly` ligado. Desligado, quem grava é o app, e só quando sobe um admin (TODO #458). Foto apagada não desconta. Fotos de checklist não contam |
 
 Com plano ilimitado no recurso, ou chave desligada, nada é contado.
 
@@ -56,13 +56,10 @@ Com plano ilimitado no recurso, ou chave desligada, nada é contado.
 |---|---|---|
 | `POST /v1/app/invites` (app e web) | `collaborator` | Sempre |
 | `POST /bot/invite/create` | `collaborator` | Sempre |
-| `POST /v1/app/orders/:id/photos` (nova) | `photo` | Sempre |
 | `POST /bot/orders/:number/photos` e `/photos/upload` (usadas pelo MCP) | `photo` | Sempre |
-| `POST /v1/app/forms/templates` (nova) | `formTemplate` | Sempre, mesmo salvo inativo (como `saveTemplate`) |
-| `POST /v1/app/forms/templates/import` (nova) | `formTemplate` | Sempre (como `importGlobalTemplate`) |
-| `PATCH /v1/app/forms/templates/:id` (nova) | `formTemplate` | Só ao ligar um modelo desligado (como `toggleTemplateStatus`) |
+Aceitar convite não conta (convite pendente vira membro).
 
-`DELETE /v1/app/forms/templates/:id` não conta. Aceitar convite não conta (convite pendente vira membro).
+As rotas `POST /v1/app/orders/:id/photos` e `/v1/app/forms/templates` saíram deste PR (revisão do #526, M1): nenhuma tela usa, porque o app e o web gravam fotos no Storage e checklists no Firestore direto. Ficam fora até uma tela precisar delas, e aí entram atrás de uma flag desligada. `src/__tests__/app-routes-mounted.test.ts` falha se alguma for montada. Enquanto isso, o limite de checklist (`formTemplate`) existe na conta, mas nenhuma rota o aplica.
 
 Resposta no limite, HTTP 402:
 
@@ -101,7 +98,7 @@ Conferir e gravar não é atômico: duas fotos enviadas no mesmo instante no lim
 - **Ligar** (decisão do dono): pôr `PLAN_LIMITS_ENABLED=true` no ambiente do deploy das Functions e publicar, depois `config/paidPlans { enabled: true }` no Firestore. O deploy do CI (`firebase-functions-deploy.yml`) não tem `.env` (o arquivo fica fora do repositório), então ligar pede um passo no workflow que escreva `firebase/functions/.env.praticos` com essa linha. Para desligar sem deploy, basta voltar `config/paidPlans.enabled` para `false`.
 - **Efeito de ligar `config/paidPlans.enabled`.** Com a chave ligada, o convite pelo app (`POST /v1/app/invites`, que o app já usa) passa a ser barrado pelo uso real. Empresa Free com convite pendente ou com o contador do app desatualizado vai receber 402 onde hoje o app deixa. A cortesia Pro de lançamento vai até 07/12/2026; depois disso, empresas Free vão bater no limite.
 - Checklist: o servidor conta os modelos de verdade e o app não. Ligar a chave faz o web barrar checklists que o app deixa criar. Corrigir o contador do app (`formTemplates` → `forms`) é outra tarefa.
-- Fotos: a contagem pelo Storage lista todos os arquivos das OS da empresa a cada envio (paginado de mil em mil). Para empresa Free com histórico grande, uma alternativa é um contador mantido por gatilho do Storage.
+- Fotos: o limite lê o contador `subscription.usage.photosThisMonth`. **Antes de ligar `PLAN_LIMITS_ENABLED`, ligue `config/usageCounters.serverOnly`**: sem ele, o contador é o do app, que só soma fotos de admin, e o limite de foto quase não barra. O contador não desconta foto apagada no mês.
 - O app continua sem gravar os contadores certos. Gravar o uso contado pelo servidor em `subscription.usage` faria o app barrar com o número real; isso muda o app e ficou de fora.
 - Plano no web: sem compra pela web, o usuário do web no limite precisa assinar pelo app.
 

@@ -461,8 +461,6 @@ import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import contractsRoutes from './routes/v1/contracts.routes';
-import orderPhotosRoutes from './routes/v1/order-photos.routes';
-import formTemplatesRoutes from './routes/v1/form-templates.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -666,7 +664,7 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 // Prices and customer data: never in the browser cache of a shared computer.
 app.use('/v1/app', noStore);
 // Single mount so the rate limit and token check run once per request.
-app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes, orderPhotosRoutes);
+app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes);
 // Web app reads and writes of customers and devices (app-*.routes.ts) answer before the generic ones.
 app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
 app.use('/v1/app/devices', ...appBearer, appDevicesRoutes, devicesRoutes);
@@ -685,8 +683,6 @@ app.use('/v1/app/ai', ...appBearer, aiRoutes);
 app.use('/v1/app/team', ...appBearer, teamRoutes);
 // Recurring contracts: due orders on demand, off unless config/contracts.routeEnabled (docs/CONTRACTS_SERVER_JOB.md)
 app.use('/v1/app/contracts', ...appBearer, contractsRoutes);
-// Form templates (checklists); plan limit on create/import/activate (docs/PLAN_LIMITS_SERVER.md)
-app.use('/v1/app/forms/templates', ...appBearer, formTemplatesRoutes);
 // Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
 app.use('/v1/app/web-access', createWebAccessRouter({
   verifyIdToken: (token) => adminAuth.verifyIdToken(token),

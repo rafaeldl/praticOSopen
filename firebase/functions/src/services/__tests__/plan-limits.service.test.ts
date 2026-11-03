@@ -1,6 +1,7 @@
 /**
  * plan-limits.service usage counting and the routes that apply it, over the
- * in-memory Firestore and a fake Storage listing. The check itself is
+ * in-memory Firestore. Storage must never be listed (M2 of the #526 review):
+ * the fake listing fails the test if anything calls it. The check itself is
  * covered by the shared cases (__tests__/plan-limits.cases.test.ts).
  */
 import { Server } from 'http';
@@ -20,18 +21,7 @@ jest.mock('../invite.service', () => ({
   createInvite: jest.fn(async () => ({ token: 'INV_X', expiresAt: new Date('2030-01-01T00:00:00Z') })),
 }));
 
-jest.mock('../photo-upload.service', () => ({
-  uploadPhotoFromBase64: jest.fn(async () => ({ id: 'ph1', url: 'https://x/ph1.jpg', storagePath: 'p', createdAt: '' })),
-  uploadPhotoFromUrl: jest.fn(),
-}));
-
-jest.mock('../order.service', () => ({
-  ...jest.requireActual('../order.service'),
-  getOrder: jest.fn(async (_c: string, id: string) => ({ id, createdBy: { id: 'someone', name: 'X' } })),
-  addPhotoToOrder: jest.fn(async () => undefined),
-}));
-
-import { read, resetFakeDb, seed } from '../../__tests__/helpers/fake-firestore';
+import { resetFakeDb, seed } from '../../__tests__/helpers/fake-firestore';
 import {
   checkCompanyPlanLimit,
   countCollaborators,
@@ -40,8 +30,6 @@ import {
   monthStart,
 } from '../plan-limits.service';
 import appInviteRoutes from '../../routes/v1/invite.routes';
-import formTemplatesRoutes from '../../routes/v1/form-templates.routes';
-import orderPhotosRoutes from '../../routes/v1/order-photos.routes';
 
 const NOW = new Date('2026-11-20T15:00:00.000Z');
 const FREE = { name: 'Clima', subscription: { plan: 'free', status: 'active', usage: { usersActive: 0, formTemplatesActive: 0, photosThisMonth: 0 } } };
@@ -72,17 +60,18 @@ describe('usage counted on the server', () => {
     expect(await countFormTemplates('c1')).toBe(2);
   });
 
-  it('photos: order photos created this month (Brasília calendar), not checklist photos nor documents', async () => {
-    const at = (iso: string) => ({ timeCreated: iso });
-    mockFiles.push(
-      { name: 'tenants/c1/orders/o1/photos/1.jpg', metadata: at('2026-11-02T10:00:00.000Z') },
-      { name: 'tenants/c1/orders/o2/photos/2.jpg', metadata: at('2026-11-01T03:00:00.000Z') },
-      { name: 'tenants/c1/orders/o2/photos/3.jpg', metadata: at('2026-11-01T02:59:59.000Z') }, // 31/10 23:59 BRT
-      { name: 'tenants/c1/orders/o1/forms/i1/items/x/4.jpg', metadata: at('2026-11-05T10:00:00.000Z') },
-      { name: 'tenants/c1/orders/o1/documents/5.pdf', metadata: at('2026-11-05T10:00:00.000Z') },
-    );
-    expect(await countPhotosThisMonth('c1', NOW)).toBe(2);
-    expect(mockGetFiles).toHaveBeenCalledWith({ prefix: 'tenants/c1/orders/' });
+  it('photos: subscription.usage.photosThisMonth kept by the order triggers; Storage is never listed', async () => {
+    seed('companies/c1', { subscription: { plan: 'free', usage: { photosThisMonth: 12 } } });
+    mockFiles.push({ name: 'tenants/c1/orders/o1/photos/1.jpg', metadata: { timeCreated: '2026-11-02T10:00:00.000Z' } });
+    expect(await countPhotosThisMonth('c1')).toBe(12);
+    expect(mockGetFiles).not.toHaveBeenCalled();
+  });
+
+  it('photos: no counter yet counts as none', async () => {
+    seed('companies/c1', { subscription: { plan: 'free' } });
+    expect(await countPhotosThisMonth('c1')).toBe(0);
+    seed('companies/c2', { name: 'Sem plano' });
+    expect(await countPhotosThisMonth('c2')).toBe(0);
   });
 
   it('the month starts at midnight in Brasília', () => {
@@ -105,6 +94,13 @@ describe('checkCompanyPlanLimit', () => {
     seed('companies/c1/memberships/owner1', { role: 'owner' });
     const check = await checkCompanyPlanLimit('c1', 'collaborator', 1, NOW);
     expect(check).toMatchObject({ allowed: false, limit: 1, usage: 1, plan: 'free' });
+  });
+
+  it('on, photos: at the counter limit is refused, without listing Storage', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seed('companies/c1', { subscription: { plan: 'free', usage: { photosThisMonth: 30 } } });
+    expect(await checkCompanyPlanLimit('c1', 'photo', 1, NOW)).toMatchObject({ allowed: false, limit: 30, usage: 30 });
+    expect(mockGetFiles).not.toHaveBeenCalled();
   });
 
   it('on, unlimited plan: allowed without counting', async () => {
@@ -130,8 +126,6 @@ describe('routes return PLAN_LIMIT', () => {
       next();
     });
     app.use('/invites', appInviteRoutes);
-    app.use('/forms', formTemplatesRoutes);
-    app.use('/orders', orderPhotosRoutes);
     server = app.listen(0, '127.0.0.1', done);
   });
   afterAll((done) => {
@@ -156,36 +150,6 @@ describe('routes return PLAN_LIMIT', () => {
     seed('companies/c1', { subscription: { plan: 'starter' } });
     const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
     expect(res.status).toBe(201);
-  });
-
-  it('form template: the second one is refused, even saved inactive (like the app)', async () => {
-    seed('companies/c1/forms/f1', { title: 'A', isActive: true });
-    const res = await request(server).post('/forms').send({ title: 'B', isActive: false });
-    expect(res.status).toBe(402);
-    expect(res.body.error).toMatchObject({ resource: 'formTemplate', limit: 1, usage: 1 });
-  });
-
-  it('form template: turning one on at the limit is refused, editing its title is not', async () => {
-    seed('companies/c1/forms/f1', { title: 'A', isActive: true });
-    seed('companies/c1/forms/f2', { title: 'B', isActive: false });
-    expect((await request(server).patch('/forms/f2').send({ isActive: true })).status).toBe(402);
-    expect((await request(server).patch('/forms/f2').send({ title: 'B2' })).status).toBe(200);
-    expect((read('companies/c1/forms/f2') as any).title).toBe('B2');
-  });
-
-  it('photo at the monthly limit: 402', async () => {
-    for (let i = 0; i < 30; i++) {
-      mockFiles.push({ name: `tenants/c1/orders/o1/photos/${i}.jpg`, metadata: { timeCreated: new Date().toISOString() } });
-    }
-    const res = await request(server).post('/orders/o1/photos').send({ base64: 'aGk=' });
-    expect(res.status).toBe(402);
-    expect(res.body.error).toMatchObject({ resource: 'photo', limit: 30, usage: 30 });
-  });
-
-  it('photo under the limit is stored', async () => {
-    const res = await request(server).post('/orders/o1/photos').send({ base64: 'aGk=' });
-    expect(res.status).toBe(201);
-    expect(res.body.data.photo.id).toBe('ph1');
   });
 
   it('deploy switch off (PLAN_LIMITS_ENABLED unset): at the limit still goes through', async () => {

@@ -95,6 +95,15 @@ Desligado por padrão: o deploy sobe o job, mas ele sai sem fazer nada enquanto 
 
 A rota também nasce desligada (`config/contracts.routeEnabled`). O web não chama a rota nem gera OS: quem gera é o app ou o job. Ligar a rota só faz sentido quando o app passar a chamá-la em vez de gerar sozinho.
 
+### Ordem para ligar
+
+Nesta ordem, sem pular passos (revisão do #526, A2):
+
+1. **Promover o RC com o #513 para as lojas.** Antes dele, o app gera com id aleatório e sem transação, então job e app criam a mesma OS duas vezes.
+2. **Esperar as versões antigas saírem de uso.** O app antigo também regrava a OS inteira, e isso desfaz o que o job gravou no modelo.
+3. **Corrigir o A1 no app** (lote 3 do app). Em `createContractOrder`, a transação precisa reler o modelo, conferir que ele ainda vence na mesma data e gravar só `contract.lastGeneratedDate`, `contract.nextDueDate`, `contract.generatedCount` e `contract.active`, como faz `contract.service.ts`. Hoje o app lê os modelos do cache ao abrir e regrava o mapa `contract` inteiro: gera uma OS de contrato parado no web e o reativa.
+4. **Só então ligar** `config/contracts.jobEnabled` (e `routeEnabled`, se o app passar a chamar a rota).
+
 ## Pendente de decisão
 
 - Quando ligar o job e a rota (`config/contracts { jobEnabled: true, routeEnabled: true }`) e o que fazer com as versões antigas do app (acima). Decisão do dono.
