@@ -6,7 +6,12 @@ export const COMPANY_A = 'company-alpha'
 export const COMPANY_B = 'company-beta'
 /** "Valores e cobrança" off (useFinancial: false): nobody sees money, not even the owner. */
 export const COMPANY_C = 'company-gamma'
-/** "Manutenções chegando" (e2e/maintenance.spec.ts): its own devices, so counts do not move. */
+/** Fatia 07 (equipe, empresa, plano): companies of their own, so switching values off or
+ * changing roles never reaches the screens other tests read. */
+export const COMPANY_G = 'company-settings'
+export const COMPANY_T = 'company-team'
+/** "Manutenções chegando", sino and Agora (e2e/maintenance.spec.ts, notifications.spec.ts): its own devices, so counts do not move. */
+export const COMPANY_M = 'company-maint'
 export const COMPANY_D = 'company-delta'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
@@ -37,26 +42,52 @@ export const USERS = {
   /** No name on the account: the name on the order is required. */
   founderNoName: { ...user('foundernoname', ''), roles: {} },
   /** Owner and technician of company D (maintenances). */
-  maintOwner: { ...user('maintowner', 'Mara Dona Delta'), roles: { [COMPANY_D]: 'owner' } },
-  maintTech: { ...user('mainttech', 'Tito Tecnico Delta'), roles: { [COMPANY_D]: 'technician' } },
+  maintOwner: { ...user('maintowner', 'Mara Dona Manutencao'), roles: { [COMPANY_M]: 'owner' } },
+  maintTech: { ...user('mainttech', 'Tito Tecnico Manutencao'), roles: { [COMPANY_M]: 'technician' } },
   /** Avisos (e2e/notifications.spec.ts): three new and one read; the other one has 120 new. */
-  bellUser: { ...user('belluser', 'Bela Avisos'), roles: { [COMPANY_D]: 'admin' } },
-  bellBusy: { ...user('bellbusy', 'Beto Muitos Avisos'), roles: { [COMPANY_D]: 'manager' } },
+  bellUser: { ...user('belluser', 'Bela Avisos'), roles: { [COMPANY_M]: 'admin' } },
+  bellBusy: { ...user('bellbusy', 'Beto Muitos Avisos'), roles: { [COMPANY_M]: 'manager' } },
   /** No company and outside the access list: never reaches the first access. */
   strangerNew: { ...user('strangernew', 'Saulo Fora'), roles: {}, blocked: true },
+  // Company gamma: settings, plan and integrations (its owner switches values off and on).
+  gOwner: { ...user('g-owner', 'Gina Dona'), roles: { [COMPANY_G]: 'owner' } },
+  gAdmin: { ...user('g-admin', 'Gil Admin'), roles: { [COMPANY_G]: 'admin' } },
+  gManager: { ...user('g-manager', 'Gabi Gerente'), roles: { [COMPANY_G]: 'manager' } },
+  gTech: { ...user('g-tech', 'Guto Tecnico'), roles: { [COMPANY_G]: 'technician' } },
+  // Company team: roles changed and people removed by the team tests.
+  tOwner: { ...user('t-owner', 'Tereza Dona'), roles: { [COMPANY_T]: 'owner' } },
+  tAdmin: { ...user('t-admin', 'Tadeu Admin'), roles: { [COMPANY_T]: 'admin' } },
+  tTech1: { ...user('t-tech1', 'Tomas Tecnico'), roles: { [COMPANY_T]: 'technician' } },
+  tTech2: { ...user('t-tech2', 'Tania Tecnica'), roles: { [COMPANY_T]: 'technician' } },
+  tSuper: { ...user('t-super', 'Teo Supervisor'), roles: { [COMPANY_T]: 'supervisor' } },
+  // Account deletion: sole owner of company delta, and someone with no company.
+  dOwner: { ...user('d-owner', 'Dora Sozinha'), roles: { [COMPANY_D]: 'owner' } },
+  dAlone: { ...user('d-alone', 'Davi Sem Empresa'), roles: {} },
+  /** Joins company B with an invite code typed in Sua conta. */
+  joiner: { ...user('joiner', 'Joana Codigo'), roles: { [COMPANY_G]: 'technician' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
 export const INVITES = {
   newcomer: { token: 'INV_E2E_NEWCOMER', company: COMPANY_A, role: 'technician', email: 'newcomer@praticos.test' },
   invitee: { token: 'INV_E2E_INVITEE_B', company: COMPANY_B, role: 'supervisor', email: 'invitee@praticos.test' },
+  joiner: { token: 'INV_E2E_JOINER_B', company: COMPANY_B, role: 'technician', email: 'joiner@praticos.test' },
 }
 
 export const COMPANIES = {
   [COMPANY_A]: { name: 'Oficina Alfa', country: 'BR', segment: 'automotive', owner: USERS.owner },
   [COMPANY_B]: { name: 'Beta Repairs', country: 'US', segment: 'electronics', owner: USERS.owner },
   [COMPANY_C]: { name: 'Gama Sem Valores', country: 'BR', segment: 'automotive', owner: USERS.noValues, useFinancial: false },
-  [COMPANY_D]: { name: 'Delta Manutenção', country: 'BR', segment: 'automotive', owner: USERS.maintOwner },
+  [COMPANY_M]: { name: 'Oficina Manutenção', country: 'BR', segment: 'automotive', owner: USERS.maintOwner },
+  [COMPANY_G]: { name: 'Oficina Gama', country: 'BR', segment: 'automotive', owner: USERS.gOwner },
+  [COMPANY_T]: { name: 'Equipe Teta', country: 'BR', segment: 'automotive', owner: USERS.tOwner },
+  [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },
+}
+
+/** Invites of the team company: one waiting, one expired (the app hides it; the web offers "Convidar de novo"). */
+export const TEAM_INVITES = {
+  waiting: { token: 'INV_E2E_TEAM_WAIT', name: 'Paula Pendente', email: 'paula@praticos.test', role: 'consultant', days: 5 },
+  expired: { token: 'INV_E2E_TEAM_OLD', name: 'Pedro Vencido', phone: '11988887777', role: 'technician', days: -2 },
 }
 
 export const DEFAULT_ORDERS = 30

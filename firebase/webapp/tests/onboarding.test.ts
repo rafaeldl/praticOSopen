@@ -9,6 +9,7 @@ import {
   orderedPick,
   pickName,
   segmentName,
+  subspecialtyName,
   termsFor,
   toSegment,
 } from '@/lib/onboarding/model'
@@ -22,6 +23,7 @@ const automotive = toSegment('automotive', {
   subspecialties: [
     { id: 'mechanical', name: { 'pt-BR': 'Mecânica geral', 'en-US': 'General' } },
     { id: 'bodywork', name: 'Funilaria' },
+    { id: 'bikes', name: 'Motos', nameI18n: { 'en-US': 'Motorcycles' } },
     { name: 'sem id' },
   ],
   defaultTermsOfService: { 'pt-BR': 'Garantia de 90 dias', 'en-US': '90-day warranty' },
@@ -29,7 +31,8 @@ const automotive = toSegment('automotive', {
 
 describe('first access (onboarding_service.dart)', () => {
   it('reads the segment like OnboardingSegment.fromMap', () => {
-    expect(automotive.subspecialties.map((sub) => sub.id)).toEqual(['mechanical', 'bodywork'])
+    expect(automotive.subspecialties.map((sub) => sub.id)).toEqual(['mechanical', 'bodywork', 'bikes'])
+    expect(subspecialtyName(automotive.subspecialties[2]!, 'en-US')).toBe('Motorcycles')
     expect(automotive.subspecialties[1]!.names).toEqual({ 'pt-BR': 'Funilaria' })
     expect(automotive.fieldServiceDefault).toBe(false)
     expect(automotive.useFinancialDefault).toBe(true)

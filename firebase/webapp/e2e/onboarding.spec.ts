@@ -19,9 +19,9 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
 
   await list.getByRole('button', { name: /Mecânica/ }).click()
   await expect(heading(page, 'O que você atende?')).toBeVisible()
-  await expect(page.getByRole('checkbox', { name: 'Mecânica geral' })).toBeChecked()
-  await expect(page.getByRole('checkbox', { name: 'Funilaria' })).toBeChecked()
-  await page.getByRole('checkbox', { name: 'Funilaria' }).uncheck()
+  await expect(page.getByRole('checkbox', { name: 'Carros' })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Motos' })).toBeChecked()
+  await page.getByRole('checkbox', { name: 'Motos' }).uncheck()
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   await expect(heading(page, 'Para o cliente')).toBeVisible()
@@ -29,7 +29,7 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
   // The browser's Back goes one step back and keeps what was chosen (onboarding.flow.back).
   await page.goBack()
   await expect(heading(page, 'O que você atende?')).toBeVisible()
-  await expect(page.getByRole('checkbox', { name: 'Funilaria' })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Motos' })).not.toBeChecked()
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   await page.getByLabel('Nome que aparece na OS').fill('Oficina do Fábio')
@@ -48,12 +48,12 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
     name: 'Oficina do Fábio',
     phone: '(11) 98765-4321',
     segment: 'automotive',
-    subspecialties: ['mechanical'],
+    subspecialties: ['cars'],
     useScheduling: true,
     fieldService: true,
     useFinancial: true,
     country: 'BR',
-    termsOfService: 'Garantia de 90 dias.',
+    termsOfService: 'Garantia de 90 dias para o serviço.',
   })
   // Checklists of the segment, samples only of the picked specialty, four orders.
   // (The checklist tests may add ready-made ones to the segment meanwhile.)
@@ -67,9 +67,10 @@ test('começar sem exemplos: só os checklists, e a Início abre em "Comece por 
   test.setTimeout(90_000)
   await login(page, 'founderLean')
   await page.getByRole('list', { name: 'Qual é o seu ramo?' }).getByRole('button', { name: /Eletrônica/ }).click()
-  // No specialties in this segment: straight to the last step, values off as the segment says.
+  // No specialties in this segment: straight to the last step. Values start as the segment says (on); turned off here.
   await expect(heading(page, 'Para o cliente')).toBeVisible()
-  await expect(page.getByRole('switch', { name: 'Valores e cobrança' })).not.toBeChecked()
+  await expect(page.getByRole('switch', { name: 'Valores e cobrança' })).toBeChecked()
+  await page.getByRole('switch', { name: 'Valores e cobrança' }).uncheck()
   // Name left blank: the person's own name goes on the order.
   await page.getByRole('button', { name: 'Começar sem exemplos' }).click()
 
@@ -181,7 +182,7 @@ for (const [language, title, specialties, business, create] of [
     await expect(heading(page, title)).toBeVisible()
     await page.getByRole('list', { name: title }).getByRole('button', { name: language === 'en' ? /Auto repair/ : /Mecánica/ }).click()
     await expect(heading(page, specialties)).toBeVisible()
-    await expect(page.getByRole('checkbox', { name: language === 'en' ? 'Bodywork' : 'Chapa' })).toBeChecked()
+    await expect(page.getByRole('checkbox', { name: language === 'en' ? 'Motorcycles' : 'Motos' })).toBeChecked()
     await page.getByRole('button', { name: language === 'en' ? 'Continue' : 'Continuar' }).click()
     await expect(heading(page, business)).toBeVisible()
     await expect(page.getByRole('button', { name: create })).toBeVisible()

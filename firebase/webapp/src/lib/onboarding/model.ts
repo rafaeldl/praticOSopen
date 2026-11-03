@@ -37,7 +37,8 @@ export function toSegment(id: string, data: Record<string, unknown>): Onboarding
       .filter((sub): sub is Record<string, unknown> => !!sub && typeof sub === 'object' && typeof (sub as { id?: unknown }).id === 'string')
       .map((sub) => ({
         id: sub.id as string,
-        names: typeof sub.name === 'string' ? { 'pt-BR': sub.name } : stringMap(sub.name),
+        // A map of names (seed_segments.js); a plain name is pt-BR, with nameI18n when there is one.
+        names: typeof sub.name === 'string' ? { 'pt-BR': sub.name, ...stringMap(sub.nameI18n) } : stringMap(sub.name),
         icon: typeof sub.icon === 'string' ? sub.icon : null,
       })),
     fieldServiceDefault: typeof data.fieldService === 'boolean' ? data.fieldService : true,

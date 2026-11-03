@@ -9408,7 +9408,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/memberships", "api:GET /v1/app/invites"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
   note: "Rota sem ProtectedRoute: gate fica na entrada e em canManageCollaborators; a linha Equipe do Plano abre a tela para qualquer papel (sem ações). Não copiar: o erro mostra e.toString() no ErrorState e nos avisos; na web, guardar a rota e frase fixa."
@@ -9425,7 +9426,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:PATCH /v1/app/team/members/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageRoles
   note: "Dono e único admin protegidos."
@@ -9442,7 +9444,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/team/members/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
 - id: team.invite.new
@@ -9458,10 +9461,11 @@ rows:
   feature_flags: ["planLimits:collaborator"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Confere o limite antes de abrir o formulário. Erro do servidor vira inviteGenericError; fechar a folha de compartilhar volta para a lista. Prazo de 7 dias na folha é fixo no cliente; na web, vir da API. Ver team.counter.seats."
+  note: "Confere o limite antes de abrir o formulário. Erro do servidor vira inviteGenericError; fechar a folha de compartilhar volta para a lista. Prazo de 7 dias na folha é fixo no cliente; na web, vir da API. Ver team.counter.seats. Web: não confere o limite, porque o app não aplica limite de plano no navegador (WEB_PLAN_LIMITS_ENFORCED, a mesma regra dos checklists); a Equipe mostra a contagem de vagas do servidor. O servidor também não confere: limite no servidor é decisão do dono."
 - id: team.invite.expired
   screen: lib/screens/menu_navigation/collaborator_list_screen.dart
   route: "/collaborator_list"
@@ -9475,10 +9479,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Não copiar: loadPendingInvites tira os vencidos da lista, então este fluxo quase nunca aparece e ninguém é avisado. Na web: mostrar o vencido e oferecer Convidar de novo."
+  note: "Não copiar: loadPendingInvites tira os vencidos da lista, então este fluxo quase nunca aparece e ninguém é avisado. Na web: mostrar o vencido e oferecer Convidar de novo. Web: o vencido aparece na lista com Convidar de novo e Cancelar convite."
 - id: team.invite.cancel
   screen: lib/screens/menu_navigation/collaborator_list_screen.dart
   route: "/collaborator_list"
@@ -9492,7 +9497,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/invites/{token}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
 - id: team.invite.reinvite
@@ -9508,10 +9514,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/invites"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Não copiar: cancela o convite antes de abrir o formulário; fechar deixa a pessoa sem convite. Na web: criar o novo e só então cancelar o velho."
+  note: "Não copiar: cancela o convite antes de abrir o formulário; fechar deixa a pessoa sem convite. Na web: criar o novo e só então cancelar o velho. Web: cria o convite novo e só depois cancela o velho."
 - id: team.counter.seats
   screen: lib/screens/menu_navigation/collaborator_list_screen.dart
   route: "/collaborator_list"
@@ -9525,10 +9532,11 @@ rows:
   feature_flags: ["planLimits:collaborator"]
   hardware: null
   data: ["companies/{id}/memberships", "links/invites/tokens", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Convite pendente ocupa vaga. Limite conferido antes de abrir o formulário e de novo no store. Não copiar: aceitar ou vencer convite não recalcula o contador. Na web: contar no servidor."
+  note: "Convite pendente ocupa vaga. Limite conferido antes de abrir o formulário e de novo no store. Não copiar: aceitar ou vencer convite não recalcula o contador. Na web: contar no servidor. Web: o web não grava o contador; o servidor reconta usersActive (membros mais convites que valem) a cada mudança de vínculo ou convite, e a Equipe mostra a contagem sem bloquear (WEB_PLAN_LIMITS_ENFORCED)."
 - id: team.view.list
   screen: lib/screens/menu_navigation/team_view.dart
   route: null
@@ -9542,7 +9550,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/memberships"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
   note: "Resumo N pessoas e M convites. A pessoa logada vem primeiro como Você e não abre; papel vazio aparece como técnico. Cada convite: Enviado · vence em N dias. Botão Convidar a primeira pessoa ou Convidar outra pessoa."
@@ -9559,7 +9568,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:GET /v1/app/invites"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
   note: "Só o primeiro convite tem o bloco com os dias que faltam e Reenviar. Sem data de vencimento a linha diz vence hoje e o bloco não diz nada."
@@ -9576,7 +9586,8 @@ rows:
   feature_flags: ["planLimits:collaborator"]
   hardware: null
   data: ["api:POST /v1/app/invites"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
 - id: team.form.duplicate
@@ -9592,10 +9603,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Opções Reenviar, Cancelar e criar novo, Cancelar. Não copiar: só compara com os convites pendentes carregados, nunca com quem já está na equipe; Cancelar e criar novo cancela antes de criar, com o cancelamento fora do try (a pessoa pode ficar sem convite)."
+  note: "Opções Reenviar, Cancelar e criar novo, Cancelar. Não copiar: só compara com os convites pendentes carregados, nunca com quem já está na equipe; Cancelar e criar novo cancela antes de criar, com o cancelamento fora do try (a pessoa pode ficar sem convite). Web: compara com os convites pendentes da empresa (os que GET /v1/app/invites devolve, vencidos inclusive), como o app, sem olhar quem já está na equipe; Cancelar e criar novo cria antes de cancelar."
 - id: team.form.whatsapp
   screen: lib/screens/menu_navigation/collaborator_form_screen.dart
   route: null
@@ -9626,10 +9638,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Nome opcional; e-mail ou WhatsApp obrigatório; grava e-mail em minúsculas e telefone só com dígitos. Não copiar: e-mail só precisa de @ e telefone vale com 10 a 15 dígitos, sem máscara; na web, validar o e-mail e mascarar pelo país."
+  note: "Nome opcional; e-mail ou WhatsApp obrigatório; grava e-mail em minúsculas e telefone só com dígitos. Não copiar: e-mail só precisa de @ e telefone vale com 10 a 15 dígitos, sem máscara; na web, validar o e-mail e mascarar pelo país. Web: e-mail conferido de verdade; WhatsApp com a máscara de telefone do país da empresa (customer.phone do segmento) e de 10 a 15 dígitos."
 - id: team.invite-form.role
   screen: lib/screens/menu_navigation/invite_form.dart
   route: null
@@ -9643,7 +9656,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageRoles
   note: "Papel padrão técnico; a frase longa do papel fica sob o cartão. Convite e troca de papel sempre listam admin, supervisor, gerente, consultor e técnico, mesmo com Valores e cobrança desligado."
@@ -9676,7 +9690,8 @@ rows:
   feature_flags: []
   hardware: [whatsapp]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
   note: "Número do telefone do convite (normalizado por whatsappNumber); sem telefone abre wa.me só com o texto. Não copiar: sem fallback, se o WhatsApp não abre nada acontece."
@@ -9693,7 +9708,8 @@ rows:
   feature_flags: []
   hardware: [clipboard]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
 - id: team.invite-share.cancel
@@ -9709,7 +9725,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/invites/{token}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
 - id: settings.view
@@ -9725,7 +9742,8 @@ rows:
   feature_flags: ["useContracts", "useDeviceManagement"]
   hardware: null
   data: ["users/{id}", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Título fixo Minha empresa; Plano mostra o nome do plano efetivo. Contratos usa o rótulo de OS do ramo no título; subtítulo do Catálogo usa produtos do i18n. Clientes com viewCustomers; Sua empresa e Avaliações com manageCompany; Equipe com manageUsers; Checklists com manageForms; Contratos com useContracts ou manageCompany; Catálogo com viewServices ou viewProducts; Avançado só com integrações ou aparelhos. Permissões leem o cadastro da pessoa: enquanto não chega, as linhas por papel ficam escondidas. Web mostra esqueleto de carregamento, não lista menor."
 - id: settings.open-account
@@ -9741,7 +9759,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
 - id: settings.open-customers
   screen: lib/screens/menu_navigation/settings.dart
@@ -9756,7 +9775,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   permission: viewCustomers
 - id: settings.open-contracts
@@ -9789,7 +9809,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: settings.open-team
@@ -9805,7 +9826,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   permission: manageUsers
 - id: settings.open-plan
@@ -9821,7 +9843,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
 - id: settings.open-catalog
   screen: lib/screens/menu_navigation/settings.dart
@@ -9836,7 +9859,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   permission: viewServices
   note: "Aparece com viewServices ou viewProducts; sem viewServices abre /product_list."
@@ -9902,9 +9926,10 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Integrações aparece com manageUsers; aparelhos (rótulo do ramo no plural) com useDeviceManagement e viewDevices; sem nenhum dos dois a linha some."
+  note: "Integrações aparece com manageUsers; aparelhos (rótulo do ramo no plural) com useDeviceManagement e viewDevices; sem nenhum dos dois a linha some. Web: sem a tela Avançado; Integrações e a lista de aparelhos ficam direto em Configurações."
 - id: settings.more-view
   screen: lib/screens/menu_navigation/more/more_view.dart
   route: null
@@ -9934,7 +9959,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
 - id: account.view
   screen: lib/screens/menu_navigation/more/account_screen.dart
@@ -9949,7 +9975,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Mostra papel e empresa. Foto (ícone de pessoa enquanto carrega ou se falha), e-mail e empresa · papel em linhas separadas. Só abre pelo perfil."
 - id: account.edit-profile
@@ -9965,7 +9992,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
 - id: account.switch-company
   screen: lib/screens/menu_navigation/more/account_screen.dart
@@ -9980,7 +10008,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Só com mais de uma empresa; recarrega tudo. Lista vem de users.companies (nome agregado; Empresa sem nome se faltar), ✓ na atual. Trocar grava a empresa local, religa a assinatura e reinicia na Início. Não copiar: sem tratamento de erro nem conferência da claim, e nome pode estar velho; web lista pelas memberships atuais e trata falha."
 - id: account.invite-code
@@ -9996,9 +10025,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:GET /v1/app/invites/{token}", "api:POST /v1/app/invites/{token}/accept", "claims"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Volta à Início na mesma empresa: não troca nem recarrega; a nova só aparece depois na troca de empresa. Não copiar: web pergunta se quer ir para a empresa nova e recarrega a lista."
+  note: "Volta à Início na mesma empresa: não troca nem recarrega; a nova só aparece depois na troca de empresa. Não copiar: web pergunta se quer ir para a empresa nova e recarrega a lista. Web: pergunta antes de entrar e vai para a empresa nova."
 - id: account.sign-out
   screen: lib/screens/menu_navigation/more/account_screen.dart
   route: null
@@ -10012,7 +10042,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Pede confirmação (ação destrutiva) antes de sair. Limpeza em auth.session.sign-out-cleanup."
 - id: account.delete
@@ -10028,7 +10059,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/account"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/account-delete.spec.ts
   web_exception: null
 - id: auth.session.sign-out-cleanup
   screen: lib/screens/menu_navigation/more/account_screen.dart
@@ -10059,9 +10091,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/account"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/account-delete.spec.ts
   web_exception: null
-  note: "Indicador e diálogos ficam no navegador raiz. Depois de entrar de novo, pede a confirmação final outra vez. Erros: dono com outros membros e dono divergente, tempo limite (está demorando), permissão negada, senha errada, excesso de tentativas, rede. Não copiar: mensagens do servidor em português sem i18n e erro técnico cru no resto; web traduz todos."
+  note: "Indicador e diálogos ficam no navegador raiz. Depois de entrar de novo, pede a confirmação final outra vez. Erros: dono com outros membros e dono divergente, tempo limite (está demorando), permissão negada, senha errada, excesso de tentativas, rede. Não copiar: mensagens do servidor em português sem i18n e erro técnico cru no resto; web traduz todos. Web: confirmação forte (escrever o próprio e-mail) e frase própria para cada recusa."
 - id: account.deletion.subscription
   screen: lib/screens/menu_navigation/more/account_deletion.dart
   route: null
@@ -10091,7 +10124,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/account-delete.spec.ts
   web_exception: null
   note: "Firebase exige login recente. Usa Google, Apple ou senha e ignora provedor ligado, como telefone."
 - id: account.deletion.password
@@ -10107,7 +10141,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/account-delete.spec.ts
   web_exception: null
   note: "Senha errada e excesso de tentativas têm mensagem própria."
 - id: profile.edit.save
@@ -10123,7 +10158,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Nome obrigatório; Salvar no topo, escondido enquanto carrega; e-mail aparece como frase, sem edição. Grava só users/{id} e dispara a atualização de claims; nome em membros, OS e conta do Firebase não muda. Não copiar: falha ao salvar não mostra nada (sem tratamento de erro); web mostra o erro."
 - id: profile.edit.photo
@@ -10139,9 +10175,10 @@ rows:
   feature_flags: []
   hardware: [camera, gallery]
   data: ["storage:tenants/{id}/users/{id}/photo.jpg", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Grava na hora, antes do Salvar; foto guardada por empresa; sem empresa não faz nada. Folha só com Tirar foto e Escolher da galeria, sem Remover. Não copiar: falha no envio não mostra nada."
+  note: "Grava na hora, antes do Salvar; foto guardada por empresa; sem empresa não faz nada. Folha só com Tirar foto e Escolher da galeria, sem Remover. Não copiar: falha no envio não mostra nada. Web: a foto espera o Salvar e a falha aparece."
 - id: company.settings.view
   screen: lib/screens/menu_navigation/more/my_company_screen.dart
   route: null
@@ -10155,7 +10192,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
   note: "Não copiar: falha ao carregar a empresa é silenciosa e as linhas ficam sem ação; web mostra erro com Tentar de novo."
@@ -10172,10 +10210,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}", "segments/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Limpa as especialidades, grava na hora e recarrega a config do ramo; não copia catálogo nem checklists (os prontos vêm do ramo novo) e não troca os termos. Lista de ramos ativos: sem lista carregada o toque não faz nada; ramo desativado fica sem nome."
+  note: "Limpa as especialidades, grava na hora e recarrega a config do ramo; não copia catálogo nem checklists (os prontos vêm do ramo novo) e não troca os termos. Lista de ramos ativos: sem lista carregada o toque não faz nada; ramo desativado fica sem nome. Web: pede confirmação antes de trocar."
 - id: company.settings.subspecialties
   screen: lib/screens/menu_navigation/more/my_company_screen.dart
   route: null
@@ -10189,7 +10228,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
   note: "Só aparece quando o ramo tem subcategorias e está na lista de ramos ativos; tela de escolher múltipla, grava ao confirmar e vazio vira nulo."
@@ -10206,10 +10246,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Desligar pede confirmação; nega permissões financeiras a todos."
+  note: "Desligar pede confirmação; nega permissões financeiras a todos. Web: some na hora também quando a mudança vem do app ou de outra aba (companies/{id} escutado ao vivo)."
 - id: company.settings.scheduling
   screen: lib/screens/menu_navigation/more/my_company_screen.dart
   route: null
@@ -10223,7 +10264,8 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.settings.field-service
@@ -10239,7 +10281,8 @@ rows:
   feature_flags: ["fieldService"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.settings.contracts
@@ -10255,7 +10298,8 @@ rows:
   feature_flags: ["useContracts"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.settings.devices
@@ -10271,7 +10315,8 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.settings.revert-on-fail
@@ -10287,7 +10332,8 @@ rows:
   feature_flags: ["useFinancial", "useScheduling", "fieldService", "useContracts", "useDeviceManagement"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
   note: "Trava os interruptores enquanto salva; erro em alerta. Controle de aparelhos some quando o segmento não tem rótulo de aparelho. Na web: erro em aviso, não alerta."
@@ -10304,10 +10350,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Nome obrigatório. E-mail, site e país ficam em Mais dados, que abre sozinho se algum estiver preenchido. Telefone com máscara company.phone do país. Não copiar: app não valida e-mail nem site; sair sem salvar perde o que foi digitado sem perguntar (ver company.data.discard); a máscara do telefone segue o país já salvo, não o escolhido no formulário."
+  note: "Nome obrigatório. E-mail, site e país ficam em Mais dados, que abre sozinho se algum estiver preenchido. Telefone com máscara company.phone do país. Não copiar: app não valida e-mail nem site; sair sem salvar perde o que foi digitado sem perguntar (ver company.data.discard); a máscara do telefone segue o país já salvo, não o escolhido no formulário. Web: grava só os campos que mudaram e só se ninguém salvou a empresa depois de abrir (transação com updatedAt). O app ainda grava a empresa inteira (M2 da revisão do #528, lote 3 do app)."
 - id: company.data.logo
   screen: lib/screens/menu_navigation/more/company_editors.dart
   route: null
@@ -10321,10 +10368,11 @@ rows:
   feature_flags: []
   hardware: [camera, gallery]
   data: ["storage:tenants/{id}/logo/logo.jpg"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Grava na hora, antes do Salvar; logo mostrada inteira. Sem opção de remover. Não copiar: logo nova não volta para a empresa em memória (só nome e país)."
+  note: "Grava na hora, antes do Salvar; logo mostrada inteira. Sem opção de remover. Não copiar: logo nova não volta para a empresa em memória (só nome e país). Web: a logo espera o Salvar."
 - id: company.data.country
   screen: lib/screens/menu_navigation/more/company_editors.dart
   route: null
@@ -10338,10 +10386,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "BR, US, PT, ES, MX primeiro e depois ordem alfabética. País novo troca as máscaras na hora. Não copiar: lista cortada em 50 e nomes só em português para 15 códigos; web usa nomes traduzidos e lista completa."
+  note: "BR, US, PT, ES, MX primeiro e depois ordem alfabética. País novo troca as máscaras na hora. Não copiar: lista cortada em 50 e nomes só em português para 15 códigos; web usa nomes traduzidos e lista completa. Web: só os países com moeda e fuso conhecidos (lib/format.ts e lib/zone.ts), com nome traduzido; um país gravado pelo app fora da lista continua aparecendo."
 - id: company.terms.edit
   screen: lib/screens/menu_navigation/more/company_editors.dart
   route: null
@@ -10355,7 +10404,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.terms.default
@@ -10371,7 +10421,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
 - id: company.data.discard
@@ -10387,7 +10438,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: manageCompany
   note: "O app não tem (sem PopScope, perde o que foi digitado). A web deve ter."
@@ -10404,9 +10456,10 @@ rows:
   feature_flags: ["paidPlansEnabled"]
   hardware: null
   data: ["companies/{id}", "api:GET /v1/app/ai/status"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Com paidPlansEnabled=false mostra só a frase do plano; a seção de uso some. O bloco de limite mostra só o primeiro recurso que bateu (IA, equipe, fotos do mês, checklists)."
+  note: "Com paidPlansEnabled=false mostra só a frase do plano; a seção de uso some. O bloco de limite mostra só o primeiro recurso que bateu (IA, equipe, fotos do mês, checklists). Web: só leitura, com o uso sempre à mostra; sem compra, preço nem Ver planos."
 - id: plan.ai-usage
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -10420,9 +10473,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["api:GET /v1/app/ai/status"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Primeira linha de uso, só com planos pagos e o assistente ligado. No limite mostra o bloco com Ver planos. Status fica em cache 5 min por empresa. Não copiar: erro ou demora viram assistente desligado e a linha some calada; web mostra que não deu para carregar."
+  note: "Primeira linha de uso, só com planos pagos e o assistente ligado. No limite mostra o bloco com Ver planos. Status fica em cache 5 min por empresa. Não copiar: erro ou demora viram assistente desligado e a linha some calada; web mostra que não deu para carregar. Web: erro do assistente aparece com Tentar de novo."
 - id: plan.open-limit
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -10436,7 +10490,8 @@ rows:
   feature_flags: ["paidPlansEnabled"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Linhas de uso de equipe e checklists abrem Equipe e Checklists; IA e fotos do mês não abrem nada. Não copiar: app não confere papel antes de abrir; web só liga a linha para manageUsers e manageForms."
 - id: plan.paywall
@@ -10513,7 +10568,8 @@ rows:
   feature_flags: ["paidPlansEnabled", "aiEnabled"]
   hardware: null
   data: ["companies/{id}", "api:GET /v1/app/ai/status"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Quase no limite a partir de 80% (âmbar); no limite em vermelho e negrito. -1 é ilimitado e mostra só o número usado."
 - id: plan.header-status
@@ -10529,7 +10585,8 @@ rows:
   feature_flags: ["paidPlansEnabled"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
   note: "Problema no pagamento (vermelho e negrito), cortesia até a data, renova em, válido até; no plano grátis ou sem data, só o nome do plano."
 - id: reminders.schedule-minutes
@@ -10625,7 +10682,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: advanced.devices
@@ -10641,7 +10699,8 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: viewDevices
 - id: contract.list.view
@@ -10926,7 +10985,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:GET /v1/app/integrations/tokens"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: integrations.new
@@ -10942,7 +11002,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/integrations/tokens"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: integrations.copy
@@ -10958,7 +11019,8 @@ rows:
   feature_flags: []
   hardware: [clipboard]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: integrations.revoke
@@ -10974,7 +11036,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/integrations/tokens/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: asaas.section
@@ -10990,7 +11053,8 @@ rows:
   feature_flags: ["asaasEnabled"]
   hardware: null
   data: ["companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: asaas.connect
@@ -11006,7 +11070,8 @@ rows:
   feature_flags: ["asaasEnabled"]
   hardware: null
   data: ["api:POST /v1/app/payments/asaas/connect"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: asaas.open-panel
@@ -11022,7 +11087,8 @@ rows:
   feature_flags: []
   hardware: [external_browser]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: asaas.status
@@ -11038,7 +11104,8 @@ rows:
   feature_flags: ["asaasEnabled"]
   hardware: null
   data: ["companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: asaas.disconnect
@@ -11054,7 +11121,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/payments/asaas/connect"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/integrations.spec.ts
   web_exception: null
   permission: manageUsers
 - id: share-in.which-order

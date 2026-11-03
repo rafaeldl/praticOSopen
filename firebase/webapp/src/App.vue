@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { locale, t } from '@/i18n'
 import { loadSegmentLabels } from '@/lib/segments'
 import { companyZone, setZone } from '@/lib/zone'
-import { session } from '@/lib/session'
+import { followCompany, session } from '@/lib/session'
 import { recheckCurrentRoute } from '@/router'
 import { handleShortcut, registerShortcut } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
@@ -37,6 +37,18 @@ watch(
   () => {
     if (ready.value) void recheckCurrentRoute()
   },
+)
+
+// The company document live, once the first screen is up (out of the path to the list).
+let followTimer: ReturnType<typeof setTimeout> | undefined
+watch(
+  () => (session.webAccess === 'allowed' ? session.companyId : null),
+  (companyId) => {
+    clearTimeout(followTimer)
+    void followCompany(null)
+    if (companyId) followTimer = setTimeout(() => void followCompany(companyId), 1500)
+  },
+  { immediate: true },
 )
 
 // A "no" from the access list can arrive after the start (remembered "yes" revoked).

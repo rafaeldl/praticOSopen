@@ -52,6 +52,8 @@ const FEATURES = {
   customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
   agenda: ['src/components/agenda', 'src/views/agenda'],
   finance: ['src/components/finance', 'src/views/finance', 'src/lib/finance', 'src/lib/nfse'],
+  // Equipe, empresa, plano, conta e integrações (Configurações and what opens from it).
+  settings: ['src/components/settings', 'src/views/settings'],
   onboarding: ['src/views/onboarding'],
 }
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))

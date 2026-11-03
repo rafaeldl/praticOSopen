@@ -3,6 +3,8 @@
 // lib/models/order_form.dart (answers of an order, /companies/{cid}/orders/{oid}/forms).
 // Firestore and Storage are in data.ts.
 
+import { WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
+
 export const ITEM_TYPES = ['boolean', 'select', 'checklist', 'text', 'number', 'photo_only'] as const
 export type ItemType = (typeof ITEM_TYPES)[number]
 
@@ -373,13 +375,8 @@ export function planLimit(subscription: unknown, now: Date): number {
   return typeof stored === 'number' ? stored : (PLAN_LIMITS[plan] as number)
 }
 
-/**
- * The app applies plan limits only where paid plans can be bought
- * (FeatureGateService.planLimitsEnforced = SubscriptionService.paidPlansEnabled),
- * and that is false in a browser (kIsWeb). The web follows: no checklist limit,
- * so a Free company is never stuck without a place to buy a plan.
- */
-export const WEB_PLAN_LIMITS_ENFORCED = false
+// No plan limit in the browser, as the app (lib/plan-limits.ts).
+export { WEB_PLAN_LIMITS_ENFORCED }
 
 /** Active checklists allowed here: -1 (no limit) unless plan limits are enforced. */
 export function activeLimit(subscription: unknown, now: Date, enforced = WEB_PLAN_LIMITS_ENFORCED): number {
