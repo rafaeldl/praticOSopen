@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -44,10 +44,20 @@ async function seedSegments() {
     name: 'Global',
     customFields: [
       { key: 'customer.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] }, keyboardType: 'phone' },
+      // Company phone (Sua empresa), as firebase/scripts/seed_segments.js.
+      { key: 'company.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'], PT: ['999 999 999'] }, keyboardType: 'phone' },
     ],
   })
   await db.doc('segments/automotive').set({
     name: 'Mecânica',
+    // Active segments with names, specialties and default terms: what Sua empresa reads.
+    active: true,
+    nameI18n: { 'pt-BR': 'Mecânica', 'en-US': 'Auto repair', 'es-ES': 'Mecánica' },
+    subspecialties: [
+      { id: 'cars', name: 'Carros', nameI18n: { 'pt-BR': 'Carros', 'en-US': 'Cars', 'es-ES': 'Autos' } },
+      { id: 'motorcycles', name: 'Motos', nameI18n: { 'pt-BR': 'Motos', 'en-US': 'Motorcycles', 'es-ES': 'Motos' } },
+    ],
+    defaultTermsOfService: { 'pt-BR': 'Garantia de 90 dias para o serviço.', 'en-US': '90-day warranty on the service.', 'es-ES': 'Garantía de 90 días para el servicio.' },
     customFields: [
       label('device._entity', 'Veículo', 'Vehicle', 'Vehículo'),
       label('device._entity_plural', 'Veículos', 'Vehicles', 'Vehículos'),
@@ -70,6 +80,8 @@ async function seedSegments() {
   })
   await db.doc('segments/electronics').set({
     name: 'Eletrônica',
+    active: true,
+    nameI18n: { 'pt-BR': 'Eletrônica', 'en-US': 'Electronics', 'es-ES': 'Electrónica' },
     customFields: [label('device._entity', 'Aparelho', 'Device', 'Aparato')],
   })
 }
@@ -369,6 +381,37 @@ async function seedWebAccess() {
   })
 }
 
+// Fatia 07: the plan, the payments pilot and the team company's invites.
+async function seedSettings() {
+  const future = new Date(Date.now() + 40 * 86400000).toISOString()
+  await db.doc(`companies/${COMPANY_G}`).set(
+    {
+      useScheduling: true,
+      phone: '(11) 3333-4444',
+      // Starter in force: the team at the limit (members are recounted by the server), photos near it.
+      subscription: { plan: 'starter', status: 'active', source: 'store', expiresAt: future, usage: { usersActive: 4, photosThisMonth: 170, formTemplatesActive: 1 } },
+    },
+    { merge: true },
+  )
+  await db.doc(`companies/${COMPANY_G}/settings/payments`).set({ asaasEnabled: true, asaasConnected: false })
+  for (const invite of Object.values(TEAM_INVITES)) {
+    const created = new Date(Date.now() + (invite.days - 7) * 86400000).toISOString()
+    await db.doc(`links/invites/tokens/${invite.token}`).set({
+      token: invite.token,
+      company: { id: COMPANY_T, name: COMPANIES[COMPANY_T].name },
+      role: invite.role,
+      name: invite.name,
+      ...(invite.email ? { email: invite.email } : {}),
+      ...(invite.phone ? { phone: invite.phone } : {}),
+      invitedBy: aggr(USERS.tOwner),
+      channel: 'app',
+      status: 'pending',
+      createdAt: created,
+      expiresAt: new Date(Date.now() + invite.days * 86400000 + 3600000).toISOString(),
+    })
+  }
+}
+
 async function seedInvites() {
   for (const invite of Object.values(INVITES)) {
     const company = COMPANIES[invite.company]
@@ -394,6 +437,7 @@ await seedUsers()
 await seedCatalog()
 await seedWebAccess()
 await seedInvites()
+await seedSettings()
 await seedForms()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)

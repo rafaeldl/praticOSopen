@@ -455,11 +455,14 @@ export async function listByInviter(userId: string): Promise<Invite[]> {
 }
 
 /**
- * Cancel an invite
+ * Cancel an invite. The creator can; so can an owner/admin of the invite's
+ * company (`asManager`, checked by the caller), the same rule the app route
+ * documents: an admin must be able to cancel an invite the owner sent.
  */
 export async function cancelInvite(
   token: string,
-  requestingUserId: string
+  requestingUserId: string,
+  options: { asManager?: boolean } = {}
 ): Promise<boolean> {
   const invite = await getByToken(token);
 
@@ -467,8 +470,7 @@ export async function cancelInvite(
     return false;
   }
 
-  // Only the creator can cancel the invite
-  if (invite.invitedBy.id !== requestingUserId) {
+  if (!options.asManager && invite.invitedBy?.id !== requestingUserId) {
     return false;
   }
 

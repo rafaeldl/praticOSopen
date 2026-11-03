@@ -39,7 +39,12 @@ const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/Catalo
 const ChecklistsView = () => Promise.all([import('@/views/forms/ChecklistsView.vue'), loadOrderTexts()]).then(([m]) => m)
 // Contracts open orders beside the list and Nova OS: their texts are in the orders chunk.
 const ContractsView = () => Promise.all([import('@/views/contracts/ContractsView.vue'), loadOrderTexts()]).then(([m]) => m)
-const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, invoices: InvoicesView, catalog: CatalogView }
+// Configurações and what opens from it (equipe, empresa, plano, conta, integrações): own texts chunk.
+const withSettingsTexts = <T>(view: () => Promise<T>) => () => Promise.all([view(), loadTexts('settings')]).then(([m]) => m)
+const SettingsView = withSettingsTexts(() => import('@/views/settings/SettingsView.vue'))
+const TeamView = withSettingsTexts(() => import('@/views/settings/TeamView.vue'))
+const ANY_MEMBER = { kind: 'member', anyOf: ['viewAllOrders', 'viewOwnOrders', 'viewAssignedOrders'] } as const
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, invoices: InvoicesView, catalog: CatalogView, team: TeamView }
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -129,8 +134,35 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/settings',
     name: 'settings',
-    component: () => import('@/views/SettingsView.vue'),
+    component: SettingsView,
     meta: { access: { kind: 'signedIn' }, title: 'settings' },
+  },
+  {
+    path: '/settings/account',
+    name: 'account',
+    component: withSettingsTexts(() => import('@/views/settings/AccountView.vue')),
+    meta: { access: { kind: 'signedIn' }, title: 'yourAccount' },
+  },
+  // Owner and admin, as the app (manageCompany).
+  {
+    path: '/settings/company',
+    name: 'company',
+    component: withSettingsTexts(() => import('@/views/settings/CompanyView.vue')),
+    meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'web.company.title' },
+  },
+  // Every role reads the plan; nothing is bought here.
+  {
+    path: '/settings/plan',
+    name: 'plan',
+    component: withSettingsTexts(() => import('@/views/settings/PlanView.vue')),
+    meta: { access: ANY_MEMBER, title: 'planTitle' },
+  },
+  // Asaas and MCP connections: owner and admin, the same guard the API keeps.
+  {
+    path: '/settings/integrations',
+    name: 'integrations',
+    component: withSettingsTexts(() => import('@/views/settings/IntegrationsView.vue')),
+    meta: { access: { kind: 'member', anyOf: ['manageUsers'] }, title: 'integrations' },
   },
   // Component gallery for tests and design review. Compiled out of production.
   ...(import.meta.env.VITE_USE_EMULATORS === '1'

@@ -45,6 +45,9 @@ const COUNTRY_ZONES: Record<string, string[]> = {
   CL: ['America/Santiago', 'America/Punta_Arenas'],
 }
 
+/** The country has a zone of its own here (else the company follows the browser). */
+export const hasCountryZone = (country: string): boolean => !!COUNTRY_ZONE[country.toUpperCase()]
+
 /** The company's zone. A company without a country follows the browser. */
 export function companyZone(country: string | null | undefined, browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone): string {
   const code = country?.toUpperCase() ?? ''
