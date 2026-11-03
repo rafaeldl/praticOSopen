@@ -126,8 +126,11 @@ function check({ root, matrixPath }) {
     } else if (!WEB_STATUSES.includes(row.webStatus)) {
       report('web_status inválido', `${where}: "${row.webStatus}" (use ${WEB_STATUSES.join(', ')})`);
     }
-    if (row.webStatus === 'done' && isEmpty(row.e2e)) {
+    if (row.webStatus === 'done' && (isEmpty(row.e2e) || row.e2e === '[]')) {
       report('web_status: done sem e2e', where);
+    }
+    if (row.webStatus === 'excepted' && row.exception?.status !== 'approved') {
+      report('web_status: excepted sem exceção aprovada', where);
     }
     if (row.exception && !EXCEPTION_STATUSES.includes(row.exception.status)) {
       report(
@@ -137,7 +140,7 @@ function check({ root, matrixPath }) {
     }
     if (isEmpty(row.screen)) {
       report('Linha sem screen', where);
-    } else if (!fs.existsSync(path.join(root, row.screen))) {
+    } else if (!fs.statSync(path.join(root, row.screen), { throwIfNoEntry: false })?.isFile()) {
       report('screen aponta para arquivo que não existe', `${where}: ${row.screen}`);
     }
   }

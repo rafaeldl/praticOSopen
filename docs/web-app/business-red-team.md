@@ -30,7 +30,7 @@ Leitura: a "recepção" do objetivo quase não existe na base, pois a base é de
 
 A favor do web:
 
-- A maior empresa cria cerca de 7 OS por dia em horário comercial, 98% em dias úteis, quase sem foto. Parece trabalho de mesa.
+- A maior empresa concentra a criação de OS em horário comercial e em dias úteis, quase sem foto. Parece trabalho de mesa.
 - Concorrentes como o Jobber têm web completo. Empresas maiores podem exigir isso, mas ainda não medi quantas.
 - O plano de venda por fora (nota, boleto, Hotmart) precisa de um lugar que não seja o app.
 
