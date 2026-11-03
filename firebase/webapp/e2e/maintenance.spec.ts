@@ -100,3 +100,19 @@ test('320 px e texto a 200%: manutenções sem rolagem lateral', async ({ page }
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
   await expectNoSideScroll(page)
 })
+
+test('técnico: "Agora" com a próxima visita de hoje, e Minhas com a hora no lugar do valor', async ({ page }) => {
+  await login(page, 'maintTech')
+  const now = page.getByTestId('next-visit')
+  await expect(now).toContainText('Agora')
+  await expect(now).toContainText('Próximo: Bia, Gol Chegando, às 23:30.')
+  // The visit of "Agora" is not repeated in the list; the one already started shows its hour.
+  const table = page.getByTestId('orders-table')
+  await expect(table.locator('[data-order="d-visit-next"]')).toHaveCount(0)
+  await expect(table.locator('[data-order="d-visit-started"]').getByTestId('visit-time')).toHaveText('08:00')
+  await now.getByRole('button', { name: 'Abrir OS 3' }).click()
+  await expect(page).toHaveURL(/order=d-visit-next/)
+  // Searching hides it.
+  await page.locator('#orders-search').fill('Ana')
+  await expect(page.getByTestId('next-visit')).toHaveCount(0)
+})

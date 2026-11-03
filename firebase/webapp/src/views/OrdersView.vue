@@ -11,7 +11,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import { loadOrderTexts, t } from '@/i18n'
-import { formatMonthYear } from '@/lib/format'
+import { formatMonthYear, formatTime } from '@/lib/format'
 import { mark } from '@/lib/marks'
 import { applyFreshFirstPage, mergeById } from '@/lib/order-list'
 import { onOrderEvent } from '@/lib/orders/bus'
@@ -26,7 +26,9 @@ import {
   isHeld,
   matchesSearch,
   monthGroups,
+  nextVisit,
   queryStatuses,
+  sameDay,
   remainingOnRow,
   rowsFor,
   servicesSummary,
@@ -80,10 +82,24 @@ let loadToken = 0
 const showsMoney = ctx.showsMoney
 const canCreate = computed(() => canCreateOrders(session.role, can('createOrder')))
 const filterRows = computed(() => rowsFor(filter.value, rows.value, now.value, session.uid))
+/** "Agora" of the technician in Minhas, never while searching (home.next.card). */
+const agora = computed(() => (filter.value === 'mine' && !search.value.trim() && state.value === 'ready' ? nextVisit(rows.value, now.value, session.uid) : null))
 const visible = computed(() => {
   const query = search.value.trim()
-  return query ? exactFirst(filterRows.value.filter((order) => matchesSearch(order, query, statusText(order.status))), query) : filterRows.value
+  if (query) return exactFirst(filterRows.value.filter((order) => matchesSearch(order, query, statusText(order.status))), query)
+  // The visit of "Agora" is not repeated in the list.
+  return agora.value ? filterRows.value.filter((order) => order.id !== agora.value?.id) : filterRows.value
 })
+/** "Próximo: Ana, Gol, às 14:00." with the first name and, when the segment shows it, the device. */
+const agoraText = computed(() => {
+  const order = agora.value
+  if (!order) return ''
+  const customer = (order.customer?.name ?? '').trim().split(/\s+/)[0] ?? ''
+  const time = formatTime(order.scheduledDate, country())
+  const device = deviceSummary(order)
+  return device ? t('nextVisitDevice', { customer, device, time }) : t('nextVisit', { customer, time })
+})
+const visitTime = (order: Order) => (filter.value === 'mine' && sameDay(order.scheduledDate, now.value) ? formatTime(order.scheduledDate, country()) : '')
 const groups = computed(() =>
   filter.value === 'all' && !search.value.trim()
     ? monthGroups(visible.value).map((group) => ({ ...group, title: group.month ? formatMonthYear(group.month, country()) : '' }))
@@ -443,6 +459,11 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
           <button type="button" class="link" @click="load">{{ t('web.tryAgain') }}</button>
         </p>
         <Maintenances v-if="showsMaintenances" />
+        <section v-if="agora" class="next-visit" aria-labelledby="next-visit-label" data-testid="next-visit">
+          <h2 id="next-visit-label" class="next-visit-label">{{ t('nextVisitLabel') }}</h2>
+          <p>{{ agoraText }}</p>
+          <button type="button" class="btn btn--primary" @click="open(agora)">{{ t('openOrderNumber', { number: agora.number ?? '' }) }}</button>
+        </section>
         <LoadingState v-if="state === 'loading'" />
         <ErrorState v-else-if="state === 'failed'" :body="t('loadOrdersError')" :retry="load" />
         <FirstRun v-else-if="firstRun" :can-create="canCreate" />
@@ -498,6 +519,7 @@ const rowDetail = (order: Order) => [deviceSummary(order), servicesSummary(order
                 <span v-if="rowDetail(order)" class="sub row-detail">{{ rowDetail(order) }}</span>
               </td>
               <td>
+                <span v-if="visitTime(order)" class="num visit-time" data-testid="visit-time">{{ visitTime(order) }}</span>
                 <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusLine(order)" />
                 <span v-if="isHeld(order) && holdDays(order, now) !== null" class="sub row-hold">{{ holdText(order, now) }}</span>
               </td>

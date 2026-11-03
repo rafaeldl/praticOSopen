@@ -423,6 +423,15 @@ async function seedMaintenance() {
     devices: [{ id: 'd-contract', name: 'Corsa Contrato', serial: null }], deviceIds: ['d-contract'], services: [], products: [], total: 0,
     company, ...audit(owner, 4000),
   })
+  // Today's visits of the technician (home.next.card, home.mine.visit-time): one started, one still to start.
+  const tech = aggr(USERS.maintTech)
+  const visit = (id, number, status, time, customer) =>
+    batch.set(db.doc(`companies/${COMPANY_D}/orders/${id}`), {
+      number, status, customer, device: { id: 'd-soon', name: 'Gol Chegando', serial: null }, devices: [{ id: 'd-soon', name: 'Gol Chegando', serial: null }],
+      deviceIds: ['d-soon'], services: [], products: [], total: 0, assignedTo: tech, scheduledDate: `${day(0)}T${time}:00.000`, company, ...audit(owner, 3000),
+    })
+  visit('d-visit-started', 2, 'progress', '08:00', { id: 'd-cust-ana', name: 'Ana Lima' })
+  visit('d-visit-next', 3, 'approved', '23:30', { id: 'd-cust-bia', name: 'Bia Souza' })
   // Avisos as notification.service.ts writes them (createdAt by the server, a Timestamp).
   const ago = (minutes) => Timestamp.fromMillis(Date.now() - minutes * 60000)
   const notice = (id, recipient, minutes, fields) =>
