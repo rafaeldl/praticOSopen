@@ -9,8 +9,12 @@ import {
   newPrice,
   parseKind,
   percentOk,
+  MAX_PRICE_BATCH,
   pickKind,
+  priceBatch,
+  priceBatchBody,
   priceChanges,
+  reverseBatch,
   reviewCatalogRows,
   sortByName,
   visibleKinds,
@@ -137,5 +141,29 @@ describe('importar planilha', () => {
   test('preço em país com ponto decimal (US)', () => {
     const review = reviewCatalogRows([['Screen', '', '$1,234.50']], ['name', 'kind', 'value'], { service: [], product: [] }, { defaultKind: 'product', country: 'US', prices: true })
     expect(review[0]?.value).toBe(1234.5)
+  })
+})
+
+describe('lote de preços (revisão A1)', () => {
+  const change = (id: string, from: number, to: number) => ({ item: item(id, id, from), from, to })
+
+  test('o corpo leva a chave e os preços vistos; repetir o lote manda o mesmo corpo', () => {
+    let n = 0
+    const batch = priceBatch('service', [change('a', 100, 110)], () => `lote-${++n}`.padEnd(8, '0'))
+    expect(priceBatchBody(batch)).toEqual({ batchId: 'lote-100', changes: [{ id: 'a', from: 100, to: 110 }] })
+    expect(priceBatchBody(batch)).toEqual(priceBatchBody(batch))
+  })
+
+  test('desfazer volta de cada preço novo ao antigo, com chave própria', () => {
+    const batch = priceBatch('product', [change('a', 100, 110), change('b', 35.5, 39.05)], () => 'ida-00000')
+    const back = reverseBatch(batch, () => 'volta-0000')
+    expect(back.kind).toBe('product')
+    expect(priceBatchBody(back)).toEqual({ batchId: 'volta-0000', changes: [{ id: 'a', from: 110, to: 100 }, { id: 'b', from: 39.05, to: 35.5 }] })
+  })
+
+  test('acima de 500 itens não monta o lote: todos ou nenhum vale só numa transação', () => {
+    const many = Array.from({ length: MAX_PRICE_BATCH + 1 }, (_, i) => change(`i${i}`, 1, 2))
+    expect(() => priceBatch('service', many)).toThrow()
+    expect(priceBatch('service', many.slice(0, MAX_PRICE_BATCH)).changes).toHaveLength(MAX_PRICE_BATCH)
   })
 })

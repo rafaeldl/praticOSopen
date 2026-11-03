@@ -96,6 +96,30 @@ export function priceChanges(items: CatalogItem[], rule: PriceRule, digits = 2):
   return { changes, withoutPrice, same }
 }
 
+/** One transaction on the server: up to 500 items, so a batch is all or nothing. */
+export const MAX_PRICE_BATCH = 500
+
+/** What goes to POST /prices. Frozen once sent: a retry resends it as it is (revisão A1). */
+export interface PriceBatch {
+  kind: CatalogKind
+  /** Same key on every retry of the same batch. */
+  batchId: string
+  changes: PriceChange[]
+}
+
+export function priceBatch(kind: CatalogKind, changes: PriceChange[], newId: () => string = () => crypto.randomUUID()): PriceBatch {
+  if (changes.length > MAX_PRICE_BATCH) throw new Error('batch too big')
+  return { kind, batchId: newId(), changes: changes.map((change) => ({ ...change })) }
+}
+
+/** The way back: each item from the new price to the one it had, under a key of its own. */
+export function reverseBatch(batch: PriceBatch, newId: () => string = () => crypto.randomUUID()): PriceBatch {
+  return { kind: batch.kind, batchId: newId(), changes: batch.changes.map((change) => ({ item: change.item, from: change.to, to: change.from })) }
+}
+
+/** Body of POST /prices. */
+export const priceBatchBody = (batch: PriceBatch) => ({ batchId: batch.batchId, changes: batch.changes.map((change) => ({ id: change.item.id, from: change.from, to: change.to })) })
+
 // ─── Spreadsheet import ─────────────────────────────────────────────────────
 
 export type CatalogField = '' | 'name' | 'kind' | 'value'

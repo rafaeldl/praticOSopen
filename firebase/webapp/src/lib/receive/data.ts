@@ -107,31 +107,70 @@ export interface PaymentSettings {
   ready: boolean
 }
 
-/** settings/payments (members read): charges only with the pilot on and the account connected. */
-export async function paymentSettings(): Promise<PaymentSettings> {
-  try {
-    const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-    const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
-    const data = (snap.data() ?? {}) as Record<string, unknown>
-    return { ready: data.asaasEnabled === true && data.asaasConnected === true }
-  } catch (error) {
-    // The app hides the section on a read error (ASAAS_INTEGRATION).
-    console.warn('receive: payment settings not read', error)
-    return { ready: false }
+/** Tries before giving up on a Firestore read of this screen, and the wait between them. */
+export interface ReadRetry {
+  retries?: number
+  wait?: number
+}
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * settings/payments (members read): charges only with the pilot on and the
+ * account connected. A read that fails once is tried again: reading it as "off"
+ * hides an open link (CI of #520).
+ */
+export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {}): Promise<PaymentSettings> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const [db, { doc, getDoc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+      const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
+      const data = (snap.data() ?? {}) as Record<string, unknown>
+      return { ready: data.asaasEnabled === true && data.asaasConnected === true }
+    } catch (error) {
+      if (attempt < retries) {
+        await sleep(wait)
+        continue
+      }
+      // The app hides the section on a read error (ASAAS_INTEGRATION).
+      console.warn('receive: payment settings not read', error)
+      return { ready: false }
+    }
   }
 }
 
-/** Charges of one order, live (owner, admin, manager and the consultant read them, #514). */
-export async function watchOrderCharges(orderId: string, onCharges: (charges: Charge[]) => void): Promise<() => void> {
+/**
+ * Charges of one order, live (owner, admin, manager and the consultant read
+ * them, #514). A listener that fails is opened again a few times before the
+ * screen reads "no charge": an open link that does not show lets someone
+ * receive in blue over it (CI of #520, R4).
+ */
+export async function watchOrderCharges(orderId: string, onCharges: (charges: Charge[]) => void, { retries = 3, wait = 800 }: ReadRetry = {}): Promise<() => void> {
   const [db, { collection, onSnapshot }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
-  return onSnapshot(
-    collection(db, 'companies', session.companyId as string, 'orders', orderId, 'charges'),
-    (snap) => onCharges(snap.docs.map((d) => chargeOf(d.id, d.data()))),
-    (error) => {
-      console.warn('receive: charges not read', error)
-      onCharges([])
-    },
-  )
+  const ref = collection(db, 'companies', session.companyId as string, 'orders', orderId, 'charges')
+  let stopped = false
+  let stop: () => void = () => undefined
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const listen = (attempt: number) => {
+    stop = onSnapshot(
+      ref,
+      (snap) => onCharges(snap.docs.map((d) => chargeOf(d.id, d.data()))),
+      (error) => {
+        if (stopped) return
+        if (attempt < retries) {
+          timer = setTimeout(() => !stopped && listen(attempt + 1), wait)
+          return
+        }
+        console.warn('receive: charges not read', error)
+        onCharges([])
+      },
+    )
+  }
+  listen(0)
+  return () => {
+    stopped = true
+    clearTimeout(timer)
+    stop()
+  }
 }
 
 /** Charges over several orders of a customer (one equality filter, no index). */

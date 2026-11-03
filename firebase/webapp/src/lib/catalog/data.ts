@@ -6,7 +6,7 @@
 import { ApiError } from '@/lib/api'
 import { storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
-import type { CatalogItem, CatalogKind } from './model'
+import { MAX_PRICE_BATCH, priceBatchBody, type CatalogItem, type CatalogKind, type PriceBatch } from './model'
 
 const BASE: Record<CatalogKind, string> = { service: '/v1/app/services', product: '/v1/app/products' }
 const COLLECTION: Record<CatalogKind, string> = { service: 'services', product: 'products' }
@@ -51,6 +51,8 @@ export interface CatalogInput {
   value?: number | null
   customData?: Record<string, unknown> | null
   photo?: { url: string; storagePath: string } | null
+  /** With `photo: null`: the photo the person saw. */
+  photoSeen?: string | null
   version?: string
 }
 
@@ -82,18 +84,16 @@ export async function importItems(kind: CatalogKind, importId: string, items: { 
   return result
 }
 
-/** Many prices at once; each says the price the person saw. Repeating is safe. */
-export async function applyPrices(kind: CatalogKind, changes: { id: string; from: number | null; to: number }[]): Promise<{ updated: number; unchanged: number }> {
-  let updated = 0
-  let unchanged = 0
+/**
+ * One batch, one request, one transaction (up to 500 items): all or nothing.
+ * Each change says the price the person saw and the batch carries its key, so
+ * sending the same batch again never applies it twice.
+ */
+export async function applyPrices(batch: PriceBatch): Promise<{ updated: number; unchanged: number }> {
+  if (batch.changes.length > MAX_PRICE_BATCH) throw new Error('batch too big')
   try {
-    for (let start = 0; start < changes.length; start += 500) {
-      const result = await api<{ updated: number; unchanged: number }>(`${BASE[kind]}/prices`, { method: 'POST', body: { changes: changes.slice(start, start + 500) } })
-      updated += result.updated
-      unchanged += result.unchanged
-    }
+    return await api<{ updated: number; unchanged: number }>(`${BASE[batch.kind]}/prices`, { method: 'POST', body: priceBatchBody(batch) })
   } finally {
     forgetCatalog()
   }
-  return { updated, unchanged }
 }

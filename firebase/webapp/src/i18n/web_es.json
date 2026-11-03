@@ -395,5 +395,9 @@
   "web.catalogImport.badPrice": "Queda fuera: no se pudo leer el precio",
   "web.catalogImport.duplicate": "Queda fuera: ya está en el catálogo",
   "web.catalogImport.repeated": "Queda fuera: mismo nombre que la fila {line}",
-  "web.catalogImport.pricesOff": "Los precios de la planilla no entran: en esta empresa no cambias precios."
+  "web.catalogImport.pricesOff": "Los precios de la planilla no entran: en esta empresa no cambias precios.",
+  "web.catalog.retrySame": "No se pudo saber si los precios cambiaron. Intentar de nuevo manda el mismo pedido: lo que ya cambió no vuelve a cambiar.",
+  "web.catalog.undoFailed": "No se pudo deshacer. Deshacer de nuevo manda el mismo pedido.",
+  "web.catalog.checkPrices": "Revisa los precios: el último pedido puede haberse guardado.",
+  "web.catalog.tooMany": "Hasta {max} ítems por vez, para cambiar todos o ninguno. Selecciona menos y hazlo por partes."
 }

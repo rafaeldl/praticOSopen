@@ -149,7 +149,8 @@ async function save() {
       // Only who changes prices sends one: otherwise the price kept stays (catalog.form.price).
       ...(canPrice && (!editing || form.value !== initial.value) ? { value: form.value } : {}),
       ...(customData !== undefined ? { customData } : {}),
-      ...(editing && removePhoto.value && !photo.value ? { photo: null } : {}),
+      // Removing the photo says which one the person saw: a photo the app put there since stays (revisão M2).
+      ...(editing && removePhoto.value && !photo.value ? { photo: null, photoSeen: props.item?.photo ?? null } : {}),
       ...(editing && props.item?.version ? { version: props.item.version } : {}),
     })
     allowClose = true

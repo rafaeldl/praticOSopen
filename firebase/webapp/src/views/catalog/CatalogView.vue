@@ -14,9 +14,8 @@ import LoadingState from '@/components/LoadingState.vue'
 import CatalogForm from '@/components/catalog/CatalogForm.vue'
 import PriceDialog from '@/components/catalog/PriceDialog.vue'
 import { t } from '@/i18n'
-import { errorMessageKey } from '@/lib/api'
 import { applyPrices, changedSince, loadCatalogList, type CatalogList } from '@/lib/catalog/data'
-import { itemMatches, pickKind, sortByName, visibleKinds, type CatalogItem, type CatalogKind, type PriceChange } from '@/lib/catalog/model'
+import { itemMatches, pickKind, priceBatch, reverseBatch, sortByName, visibleKinds, type CatalogItem, type CatalogKind, type PriceBatch, type PriceChange } from '@/lib/catalog/model'
 import { money } from '@/lib/orders/text'
 import { forgetLists } from '@/lib/orders/catalog'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -142,34 +141,67 @@ async function onRemoved() {
   await afterWrite()
 }
 
-/** Sends the changes; on success offers to put the old prices back. */
-async function sendPrices(which: CatalogKind, changes: { id: string; from: number | null; to: number }[]) {
-  return applyPrices(which, changes)
+/**
+ * The batch on its way (revisão A1). Once sent it never changes: a retry after
+ * an unknown result sends the same key and the same prices "seen", so the
+ * server leaves alone what already changed. It is never recalculated from the
+ * list read again, or +10% would turn into +21%.
+ */
+const pending = shallowRef<PriceBatch | null>(null)
+
+/** A 409 means someone changed a price since: close, clear and show the new prices. */
+async function onBatchChanged() {
+  pending.value = null
+  pricing.value = false
+  selected.value = new Set()
+  showToast(t('web.catalog.pricesChanged'))
+  await afterWrite()
 }
 
 async function onApply(changes: PriceChange[]) {
   if (!kind.value || priceBusy.value) return
-  const which = kind.value
+  const batch = pending.value ?? priceBatch(kind.value, changes)
+  pending.value = batch
   priceBusy.value = true
   priceError.value = ''
   try {
-    const sent = changes.map((change) => ({ id: change.item.id, from: change.from, to: change.to }))
-    await sendPrices(which, sent)
+    await applyPrices(batch)
+    pending.value = null
     pricing.value = false
     selected.value = new Set()
-    const message = t('web.catalog.pricesDone', { count: changes.length })
+    const message = t('web.catalog.pricesDone', { count: batch.changes.length })
     announce(message)
-    showToast(message, {
-      undo: () =>
-        void sendPrices(which, sent.map((change) => ({ id: change.id, from: change.to, to: change.from as number })))
-          .then(() => showToast(t('web.catalog.pricesUndone')))
-          .catch((error) => showToast(changedSince(error) ? t('web.catalog.pricesChanged') : t(errorMessageKey(error))))
-          .finally(() => afterWrite()),
-    })
+    showToast(message, { undo: () => void undo(reverseBatch(batch)) })
+    await afterWrite()
   } catch (error) {
-    priceError.value = changedSince(error) ? t('web.catalog.pricesChanged') : `${t('web.catalog.pricesFailed')} ${t(errorMessageKey(error))}`
+    if (changedSince(error)) return void (await onBatchChanged())
+    // Unknown result: the preview keeps the batch sent and "Tentar de novo" resends it as it is.
+    priceError.value = `${t('web.catalog.pricesFailed')} ${t('web.catalog.retrySame')}`
   } finally {
     priceBusy.value = false
+  }
+}
+
+/** Undo follows the same rule: one batch, resent as it is after an unknown result. */
+async function undo(batch: PriceBatch) {
+  try {
+    await applyPrices(batch)
+    showToast(t('web.catalog.pricesUndone'))
+  } catch (error) {
+    if (changedSince(error)) showToast(t('web.catalog.pricesChanged'))
+    else showToast(t('web.catalog.undoFailed'), { undo: () => void undo(batch) })
+  }
+  await afterWrite()
+}
+
+/** Closing with a batch of unknown result: the list is read again and the selection cleared. */
+async function closePricing() {
+  const unknown = !!pending.value
+  pricing.value = false
+  pending.value = null
+  if (unknown) {
+    selected.value = new Set()
+    showToast(t('web.catalog.checkPrices'))
     await afterWrite()
   }
 }
@@ -228,7 +260,7 @@ onBeforeUnmount(() => {
       <button type="button" class="btn btn--primary" data-testid="change-prices" @click="priceError = ''; pricing = true">{{ t('web.catalog.changePrices') }}</button>
       <button type="button" class="btn btn--ghost" @click="selected = new Set()">{{ t('web.catalog.clearSelection') }} <kbd>Esc</kbd></button>
     </div>
-    <div v-else-if="kinds.length > 1" class="tabs" role="group" :aria-label="t('web.catalog.kinds')" data-testid="catalog-kinds">
+    <div v-else-if="kinds.length > 1" class="tabs cat-kinds" role="group" :aria-label="t('web.catalog.kinds')" data-testid="catalog-kinds">
       <button v-for="which in kinds" :key="which" type="button" :aria-pressed="kind === which" :data-testid="`kind-${which}`" @click="setKind(which)">
         {{ lists[which] ? t('catalogKindWithCount', { kind: plural(which), count: lists[which]!.items.length }) : plural(which) }}
       </button>
@@ -313,5 +345,13 @@ onBeforeUnmount(() => {
     @removed="onRemoved"
     @close="form = null"
   />
-  <PriceDialog v-if="pricing" :items="selectedItems" :busy="priceBusy" :error="priceError" @apply="onApply" @close="pricing = false" />
+  <PriceDialog
+    v-if="pricing"
+    :items="selectedItems"
+    :frozen="pending?.changes ?? null"
+    :busy="priceBusy"
+    :error="priceError"
+    @apply="onApply"
+    @close="closePricing"
+  />
 </template>

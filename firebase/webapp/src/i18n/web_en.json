@@ -395,5 +395,9 @@
   "web.catalogImport.badPrice": "Left out: price could not be read",
   "web.catalogImport.duplicate": "Left out: already in the catalog",
   "web.catalogImport.repeated": "Left out: same name as line {line}",
-  "web.catalogImport.pricesOff": "Prices in the spreadsheet do not come in: you do not change prices in this company."
+  "web.catalogImport.pricesOff": "Prices in the spreadsheet do not come in: you do not change prices in this company.",
+  "web.catalog.retrySame": "Could not tell whether the prices changed. Try again sends the same request: what already changed does not change again.",
+  "web.catalog.undoFailed": "Could not undo. Undo again sends the same request.",
+  "web.catalog.checkPrices": "Check the prices: the last request may have been saved.",
+  "web.catalog.tooMany": "Up to {max} items at a time, so all change or none. Select fewer and do it in parts."
 }

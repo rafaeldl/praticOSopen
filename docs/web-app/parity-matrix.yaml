@@ -8413,7 +8413,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Abre pelo catálogo e pela busca de itens da OS (Novo item pergunta Serviço ou produto?; o item criado volta para a OS). ✓ azul quando há nome, aviso Escreva o nome para salvar., foco no nome, exemplo do nome por ramo; cartão Mais dados com foto e campos do ramo, aberto se houver dados; X pergunta quando algo foi preenchido (ui.form-sheet). Nome sem espaços nas pontas; customData vazio vira null. Seed atual não define campos extras de serviço/produto. Edição: catalog.form.edit. Não copiar: erro ao salvar não mostra nada; salvar sobrescreve createdAt/createdBy e grava company de companies[0]. Web: gaveta com X, Salvar cinza até ter nome, Ctrl/⌘ Enter, foco no nome, exemplo por ramo, Foto e mais dados; erro sempre aparece; fechar com algo digitado pergunta; criação grava company da sessão e createdAt/createdBy só uma vez."
+  note: "Abre pelo catálogo e pela busca de itens da OS (Novo item pergunta Serviço ou produto?; o item criado volta para a OS). ✓ azul quando há nome, aviso Escreva o nome para salvar., foco no nome, exemplo do nome por ramo; cartão Mais dados com foto e campos do ramo, aberto se houver dados; X pergunta quando algo foi preenchido (ui.form-sheet). Nome sem espaços nas pontas; customData vazio vira null. Seed atual não define campos extras de serviço/produto. Edição: catalog.form.edit. (Erro ao salvar, createdAt/createdBy e company de companies[0] já corrigidos no app em #513.) Web: gaveta com X, Salvar cinza até ter nome, Ctrl/⌘ Enter, foco no nome, exemplo por ramo, Foto e mais dados; erro sempre aparece; fechar com algo digitado pergunta; criação grava company da sessão e createdAt/createdBy só uma vez."
 - id: catalog.form.price
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8449,7 +8449,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Link + Adicionar foto ou miniatura 56 + Trocar foto; spinner enquanto sobe; grava na hora, antes do Salvar; sem opção de remover. Não copiar: em item novo cria o documento sem nome antes do ✓ (item órfão se cancelar); erro no upload não é tratado; action sheet em vez do menu do design system. Web: escolher, colar ou arrastar; a foto espera no navegador e sobe só depois de o item existir (cancelar não deixa item sem nome, C9); a API aceita só arquivo da pasta do item; Tirar a foto apaga a pasta."
+  note: "Link + Adicionar foto ou miniatura 56 + Trocar foto; spinner enquanto sobe; grava na hora, antes do Salvar; sem opção de remover. Não copiar: erro no upload não é tratado; action sheet em vez do menu do design system. Web: escolher, colar ou arrastar; a foto espera no navegador e sobe só depois de o item existir; a API aceita só arquivo da pasta do item; Tirar a foto manda a foto vista (photoSeen) e apaga só esse arquivo, nunca a pasta."
 - id: catalog.form.delete
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8467,7 +8467,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "'…' da edição, depois Apagar serviço/produto e alerta Apagar {nome}? (as OS que já usam continuam salvas). Não copiar: erro não é tratado no app; não apaga a foto do Storage. Web: menu … da gaveta, confirmação com o texto do app; apaga também a foto; erro aparece."
+  note: "'…' da edição, depois Apagar serviço/produto e alerta Apagar {nome}? (as OS que já usam continuam salvas). (Erro e foto no Storage já corrigidos no app em #513.) Web: menu … da gaveta, confirmação com o texto do app; apaga também a foto; erro aparece."
 - id: catalog.form.edit
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8485,7 +8485,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar; erro ao salvar não aparece; createdAt/createdBy sobrescritos. Web preserva a criação e avisa mudanças não salvas. Web: abre na mesma gaveta, pela linha (só com manage*); manda a versão lida: mudou no app ou em outra aba, 409 CATALOG_ITEM_CHANGED, nada gravado e a lista relê; fechar com mudança pergunta."
+  note: "Abre ao tocar a linha do catálogo, só com manageServices (manageProducts para produto). Título = nome; botão azul Salvar serviço/produto; '…' com Apagar; campos do ramo em seções e foto no fim. Não copiar: voltar descarta sem perguntar. Web preserva a criação e avisa mudanças não salvas. Web: abre na mesma gaveta, pela linha (só com manage*); manda a versão lida: mudou no app ou em outra aba, 409 CATALOG_ITEM_CHANGED, nada gravado e a lista relê; fechar com mudança pergunta."
 - id: catalog.form.custom-fields
   screen: lib/screens/catalog/catalog_item_form.dart
   route: null
@@ -8539,7 +8539,7 @@ rows:
   e2e: firebase/webapp/e2e/catalog-prices.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Só web (extra de mesa). Seleção na lista (manage* e editPrices) → aumentar ou baixar por porcentagem, arredondar para inteiro; prévia com cada item antes e depois, itens sem preço ficam como estão; Aplicar pede confirmação; conta em centavos. A API grava todos ou nenhum: cada mudança leva o preço que a pessoa viu (preço mudado depois → 409 com os ids; já no novo → não repete). Desfazer no aviso devolve os preços."
+  note: "Só web (extra de mesa). Seleção na lista (manage* e editPrices) → aumentar ou baixar por porcentagem, arredondar para inteiro; prévia com cada item antes e depois, itens sem preço ficam como estão; Aplicar pede confirmação; conta em centavos. A API grava todos ou nenhum: cada mudança leva o preço que a pessoa viu (preço mudado depois → 409 com os ids; já no novo → não repete). Até 500 itens por lote (uma transação); acima disso a tela pede para dividir. Resposta perdida: a prévia fica com o lote enviado e Tentar de novo manda o mesmo (mesma chave batchId e mesmos preços vistos), nunca recalculado; 409 fecha a prévia e a lista mostra os preços novos. Desfazer no aviso segue a mesma regra."
 - id: checklist.list.load
   screen: lib/screens/forms/form_template_list_screen.dart
   route: "/form_template_list"

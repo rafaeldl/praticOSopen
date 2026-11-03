@@ -8,6 +8,16 @@
 .cat-table td { vertical-align: middle; }
 .cat-table .who { overflow-wrap: anywhere; }
 .cat-tip { padding: 0.75rem 0.6rem 1rem; }
+/* Services | Products wraps instead of pushing the page sideways at 200% text. */
+.cat-kinds { flex-wrap: wrap; max-width: 100%; }
+.cat-kinds button { white-space: normal; text-align: left; }
+.toolbar .search-mini { max-width: 100%; }
+/* Narrow list or big text (320 px at 200%): the thumbnail goes and the price column takes only what it needs. */
+@container list (max-width: 34rem) {
+  .cat-table .c-thumb { display: none; }
+  .cat-table .c-money { width: auto; }
+  .cat-table td, .cat-table th { padding-inline: 0.4rem; }
+}
 
 .cat-photo { display: grid; gap: 0.35rem; }
 .cat-photo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }

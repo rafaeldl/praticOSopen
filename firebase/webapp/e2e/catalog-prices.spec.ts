@@ -80,9 +80,43 @@ test('alguém mudou um preço enquanto a prévia estava aberta: nada é gravado'
   await updateCatalogItem('product', b.id, { value: 250 })
   await page.getByTestId('price-apply').click()
   await page.getByRole('dialog', { name: 'Mudar o preço de 3 itens?' }).getByRole('button', { name: 'Mudar preços' }).click()
-  await expect(page.getByTestId('price-error')).toContainText('Alguém mudou algum desses preços')
+  // 409: the preview closes and the list shows the new prices (revisão A1).
+  await expect(page.locator('.toast')).toContainText('Alguém mudou algum desses preços')
+  await expect(page.getByTestId('price-dialog')).toBeHidden()
+  await expect(page.getByTestId('catalog-batch')).toHaveCount(0)
+  await expect(table(page).getByRole('row').filter({ hasText: `${stamp} B` })).toContainText('R$ 250,00')
   expect((await readCatalogItem('product', a.id))?.value).toBe(100)
   expect((await readCatalogItem('product', b.id))?.value).toBe(250)
+})
+
+test('a resposta se perde depois de gravar: Tentar de novo manda o mesmo lote e não aplica duas vezes (revisão A1)', async ({ page }) => {
+  const stamp = `Zeta Perdida ${Date.now()}`
+  const a = await makeCatalogItem('service', { name: `${stamp} A`, value: 100 })
+  const b = await makeCatalogItem('service', { name: `${stamp} B`, value: 200 })
+  await makeCatalogItem('service', { name: `${stamp} C`, value: null })
+  await selectStamp(page, stamp)
+  const bodies: unknown[] = []
+  await page.route(/\/v1\/app\/services\/prices$/, async (route) => {
+    bodies.push(route.request().postDataJSON())
+    if (bodies.length === 1) {
+      // The server saves; the answer never reaches the browser.
+      await route.fetch()
+      return route.abort('failed')
+    }
+    return route.fallback()
+  })
+  await page.getByTestId('price-apply').click()
+  await page.getByRole('dialog', { name: 'Mudar o preço de 2 itens?' }).getByRole('button', { name: 'Mudar preços' }).click()
+  await expect(page.getByTestId('price-error')).toContainText('Tentar de novo manda o mesmo pedido')
+  expect((await readCatalogItem('service', a.id))?.value).toBe(110)
+  // The preview keeps what was sent, never recalculated from the saved prices.
+  await expect(dialog(page).getByTestId('price-preview').getByRole('row').filter({ hasText: `${stamp} A` })).toContainText(/R\$\s100,00.*R\$\s110,00/)
+  await page.getByTestId('price-apply').click()
+  await expect(page.locator('.toast')).toContainText('Preço de 2 itens mudou')
+  expect(bodies).toHaveLength(2)
+  expect(bodies[1]).toEqual(bodies[0])
+  expect((await readCatalogItem('service', a.id))?.value).toBe(110)
+  expect((await readCatalogItem('service', b.id))?.value).toBe(220)
 })
 
 test('consultor e supervisor não selecionam linhas para mudar preço', async ({ page }) => {
