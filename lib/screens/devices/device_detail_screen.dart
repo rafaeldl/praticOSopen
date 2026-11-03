@@ -311,11 +311,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             StreamBuilder<List<Order?>>(
               stream: _orderStream,
               builder: (context, snapshot) {
+                // The history failed (e.g. a role the rules deny): "Nova OS"
+                // and the maintenance stay; only the list shows the error.
                 if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 200,
-                      child: ErrorState(onRetry: _loadOrders),
+                  return SliverList(
+                    delegate: SliverChildListDelegate(
+                      _buildContent(
+                        config,
+                        const <Order>[],
+                        historyFailed: true,
+                      ),
                     ),
                   );
                 }
@@ -339,7 +344,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     );
   }
 
-  List<Widget> _buildContent(SegmentConfigProvider config, List<Order> orders) {
+  List<Widget> _buildContent(
+    SegmentConfigProvider config,
+    List<Order> orders, {
+    bool historyFailed = false,
+  }) {
     final l10n = context.l10n;
     final device = _device!;
     final owner = _ownerFrom(orders);
@@ -436,7 +445,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       ),
       ..._buildInfoRows(config),
       SectionLabel(l10n.ordersOfDevice(deviceLower)),
-      if (orders.isEmpty)
+      if (historyFailed)
+        SizedBox(
+          key: const ValueKey('device_history_error'),
+          height: 200,
+          child: ErrorState(onRetry: _loadOrders),
+        )
+      else if (orders.isEmpty)
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.pageMargin,
