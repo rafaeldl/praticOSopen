@@ -16,6 +16,8 @@ export const ui = reactive({
     device?: { id: string; name: string; serial?: string | null }
     /** Services of the device's last finished order, with its value ("Abrir OS" of a maintenance). */
     items?: { id: string; name: string; value: number | null }[]
+    /** "Novo contrato" (contract.list.new): Nova OS with Repetir on. */
+    repeat?: boolean
   },
 })
 

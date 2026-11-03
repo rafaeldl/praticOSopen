@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import { Check, Trash2, X } from '@lucide/vue'
 import Combobox, { type ComboboxGroup, type ComboboxItem } from '@/components/Combobox.vue'
 import Layer from '@/components/Layer.vue'
+import RepeatFields, { type RepeatForm } from '@/components/contracts/RepeatFields.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
@@ -16,6 +17,9 @@ import { orderCreated } from '@/lib/orders/bus'
 import { markOffer } from '@/lib/forms/offer'
 import { forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
+import { startContract } from '@/lib/contracts/data'
+import { newContract } from '@/lib/contracts/model'
+import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { api, can, session } from '@/lib/session'
@@ -62,7 +66,11 @@ const showsMoney = can('viewPrices')
 const editPrices = showsMoney && can('editPrices')
 const statuses = createStatuses(session.role)
 const useScheduling = (session.company as { useScheduling?: boolean } | null)?.useScheduling !== false
-const title = computed(() => t('orderNewTitle', { order: orderShort() }))
+// "Novo contrato" from Contratos: the order is created and then gets its contract (order.new.repeat).
+const repeat = !!ui.newOrderSeed?.repeat
+const today = toIsoDay(new Date())
+const repeatForm = ref<RepeatForm>({ repeat: { frequency: 'monthly', interval: 1 }, startDay: today, endDay: null, autoGenerate: true })
+const title = computed(() => (repeat ? t('contractNew') : t('orderNewTitle', { order: orderShort() })))
 const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value))
 const total = computed(() => lines.value.reduce((sum, line) => sum + (line.value ?? 0) * line.quantity, 0))
 const unpriced = computed(() => lines.value.filter((line) => line.value === null).length)
@@ -275,6 +283,7 @@ async function save() {
     }
     if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
     if (request.value.trim()) after.push(writes.addComment(created.id, request.value.trim(), true))
+    if (repeat) after.push(startContract(created.id, newContract(repeatForm.value, today)))
     const results = await Promise.allSettled(after)
     allowClose = true
     orderCreated(created.id)
@@ -284,7 +293,7 @@ async function save() {
     showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
     announce(message)
     // The drawer's history entry becomes the new order: Voltar goes to the list, not to an empty drawer.
-    await router.replace({ path: '/', query: { order: created.id } })
+    await router.replace({ path: repeat ? '/contracts' : '/', query: { order: created.id } })
     ui.newOrder = false
   } catch (error) {
     console.warn('new order: not saved', error)
@@ -366,6 +375,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
           <label class="field-label" for="no-request">{{ t('orderCustomerRequestTitle') }}</label>
           <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
         </div>
+        <section v-if="repeat" class="step" aria-labelledby="no-repeat-title" data-testid="new-order-repeat">
+          <h3 id="no-repeat-title" class="form-section">{{ t('orderRepeatRow') }}</h3>
+          <RepeatFields v-model="repeatForm" id-prefix="no" :today="today" />
+        </section>
         <details class="step more-options" :open="more" @toggle="more = ($event.target as HTMLDetailsElement).open">
           <summary>{{ t('orderMoreOptions') }} <span class="sub">{{ moreSummary }}</span></summary>
           <div class="more-body">

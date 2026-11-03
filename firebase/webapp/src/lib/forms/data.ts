@@ -249,7 +249,8 @@ export async function saveAnswer(orderId: string, formId: string, change: Answer
       }
       data.status = status
       transaction.update(ref, data)
-      return { ...next, status }
+      // The version written, so the screen knows when its live copy has caught up.
+      return { ...next, status, updatedAt: now }
     }),
   )
 }

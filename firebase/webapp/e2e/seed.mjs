@@ -107,7 +107,8 @@ async function seedCompanies() {
       country: company.country,
       segment: company.segment,
       // Device status and its list column (fatia 03); only the first company.
-      ...(id === COMPANY_A ? { useDeviceManagement: true } : {}),
+      // Contratos on (fatia 07); company C keeps it off for contract.off.*.
+      ...(id === COMPANY_A ? { useDeviceManagement: true, useContracts: true } : {}),
       ...(company.useFinancial === false ? { useFinancial: false } : {}),
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),

@@ -39,6 +39,7 @@ async function leave() {
         <input v-model="prefs.singleKeyShortcuts" class="check" type="checkbox" />
         <span>{{ t('web.settings.singleKeys') }}</span>
       </label>
+      <RouterLink v-if="session.company?.useContracts === true || can('manageCompany')" class="btn" to="/contracts" data-testid="settings-contracts">{{ t('contracts') }}</RouterLink>
       <RouterLink v-if="can('manageForms')" class="btn" to="/checklists" data-testid="settings-checklists">{{ t('checklistsTitle') }}</RouterLink>
       <InvitesList />
       <button type="button" class="btn" @click="leave">{{ t('logout') }}</button>

@@ -2,9 +2,9 @@
 
 ## Visão Geral
 
-App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
+App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app` (https://praticos.app/app; ver "Domínios"), código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists" e a de "Financeiro e notas fiscais" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists", a de "Contratos" e a de "Financeiro e notas fiscais" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -54,6 +54,7 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Financeiro: Resumo, Receber e Relatório | API (`lib/finance/data.ts`): `GET /v1/app/finance/summary`, `/report`, `/receivable`; nenhuma OS lida no navegador para somar |
 | Notas fiscais | Lista lida do Firestore REST (`invoices` por `effectiveDate`); prévia, emitir e cancelar pela API (`/v1/app/nfse/invoices*`) |
 | Checklists: modelos e respostas na OS | Firestore direto (`lib/forms/data.ts`), cada gravação numa transação; fotos no Storage na pasta do checklist |
+| Contratos: lista, contrato da OS e OS criadas por ele | Firestore REST com máscara de campos (`lib/contracts/data.ts`): nenhum valor da OS chega ao navegador; gravação só dos campos do contrato, com a versão lida como pré-condição |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
 
@@ -69,15 +70,29 @@ A tela só decide o que mostrar. Quem protege é o servidor e as regras.
 
 Mesmas portas do app (`lib/screens/login.dart`): Google, Apple e "Já tenho conta com e-mail", com senha e "Esqueceu a senha?". Conta nova só por Google ou Apple, como no app. O app não tem entrada por link de e-mail, então o web também não tem.
 
-Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.web.app`, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
+Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.app`, o domínio principal, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
 
-O handler está cadastrado nos consoles (passo manual, feito em 03/11/2026):
+#### Domínios
 
-- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origem `https://praticos.web.app` e retorno `https://praticos.web.app/__/auth/handler`.
-- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.web.app` e `praticos.firebaseapp.com` e os dois handlers.
-- **Firebase Auth**, domínios autorizados: `praticos.web.app` já estava.
+O app web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` e `praticos.firebaseapp.com`. Quem abre o `/app` num desses domínios antigos vai para `https://praticos.app` com o mesmo caminho, query e hash (`location.replace`). O script fica inline no `index.html`, logo depois do `charset`, e roda antes de o Firebase carregar (`scripts/legacy-host-plugin.ts`). `/q`, `/__/auth` e o site não mudam. O script só entra no build de produção: dev, emulador e build do E2E ficam onde estão.
 
-O `praticos.firebaseapp.com` continua cadastrado nos três, então voltar o `authDomain` para ele funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros.
+Por que mandar para um domínio só:
+
+- **Entrada:** o `authDomain` é `praticos.app`. Fora desse site, o popup funciona, mas o redirect de reserva (popup bloqueado) cai em armazenamento entre sites e pode falhar no Safari.
+- **Sessão:** login, empresa escolhida, cache da lista de acesso e cache do Firestore ficam guardados por origem. Quem já tinha entrado em `praticos.web.app` entra de novo em `praticos.app`, uma vez.
+
+Outros pontos:
+
+- **CSP:** `frame-src` libera `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com` (o iframe escondido do Firebase Auth vem do `authDomain`). Tirar `praticos.web.app` e `praticos.firebaseapp.com` só quando o app deixar de ser servido neles.
+- **API e lista de acesso:** não dependem do domínio. O CORS da `api` aceita qualquer origem (`origin: true`; quem protege é o token), e `config/webApp` decide pelo e-mail verificado do token.
+
+O handler está cadastrado nos consoles (passo manual):
+
+- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origens `https://praticos.app` e `https://praticos.web.app`, retornos `https://praticos.app/__/auth/handler` e `https://praticos.web.app/__/auth/handler`.
+- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com` e os handlers de cada um.
+- **Firebase Auth**, domínios autorizados: `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com`.
+
+`praticos.web.app` e `praticos.firebaseapp.com` continuam cadastrados nos três, então voltar o `authDomain` para um deles funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros, de uma entrada em `frame-src` e de trocar `VITE_FIREBASE_AUTH_DOMAIN`.
 
 Quem trabalha em mais de uma empresa escolhe onde entrar (`/app/choose-company`). A escolha fica lembrada neste navegador e pode ser trocada no menu.
 
@@ -99,6 +114,7 @@ O web abre só para contas liberadas. `GET /v1/app/web-access` (`firebase/functi
 - `open: true` libera todo mundo.
 - O cliente não lê nem grava `config/webApp` (regra do Firestore).
 - A rota tem limite próprio por IP e guarda a leitura do documento por 30 s.
+- Não depende do domínio: a mesma lista vale em `praticos.app` e em `praticos.web.app`.
 
 Na SPA:
 
@@ -285,6 +301,34 @@ Código em `src/views/forms/`, `src/components/forms/` e `src/lib/forms/` (regra
 
 **Fica para depois.** Câmera (exceção proposta: no computador é arquivo), conferir checklists pendentes no quadro e no lote, campo do segmento para a oferta do checklist.
 
+### Contratos
+
+Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contracts/` (regras puras em `model.ts`, testadas em `tests/contracts-model.test.ts`; REST do Firestore em `data.ts`; textos em `text.ts`). Textos no pedaço de OS (`-orders.json`). Testes: `e2e/contracts.spec.ts` e `e2e/contracts-a11y.spec.ts`.
+
+**Formato.** O do app: o contrato mora na OS que se repete (`isContract: true` e o mapa `contract` de `OrderContract.toJson`: `frequency`, `interval`, `startDate`, `endDate`, `nextDueDate`, `lastGeneratedDate`, `generatedCount`, `autoGenerate`, `active`, `reminderDaysBefore`, `parentOrderId`, `parentOrderNumber`). Datas como o app grava, hora da empresa sem fuso (`2026-12-03T00:00:00.000`), e a conta de calendário é feita nesse texto, sem passar pelo fuso do navegador (mensal no dia 31 rola como o `DateTime` do Dart). A OS criada por um contrato tem `contract.parentOrderId`. O web não acrescenta campo nenhum.
+
+**Regra única: o web não cria OS.** Quem cria a OS do contrato é o app, ao abrir, ou o job do servidor (`docs/CONTRACTS_SERVER_JOB.md`, desligado). Nenhuma tela do web chama a geração. Quando a data passou e a OS ainda não nasceu, a linha diz "Ela nasce quando alguém da equipe abrir o app".
+
+**Leitura.** `runQuery` e `GET` do REST do Firestore com máscara: só número, situação, cliente, aparelhos, autor, `isContract` e `contract`. Nenhum preço ou pagamento chega à rede, para nenhum papel (supervisor e técnico não veem valores), e nada vai para o cache do navegador. Consultor e técnico consultam com `createdBy.id`, como as regras pedem e como o app. Sem tempo real: a lista relê ao voltar à janela, depois de gravar e quando uma OS é criada ou muda no web.
+
+**Gravação.** `documents:commit` com `updateMask` só dos campos do contrato que mudaram, mais `updatedAt`/`updatedBy`, e `currentDocument.updateTime` da leitura. Se a OS foi salva depois (pelo app ou outra aba), o web relê: se os campos do contrato que ele muda continuam iguais, grava sobre a versão nova; se mudaram, não grava, mostra "Alguém mudou este contrato" e põe a versão nova na tela. Sem conexão, a gravação falha e a tela diz (não fica em fila). As regras do Firestore não mudaram: quem pode editar a OS pode editar o contrato.
+
+**Contratos (`/contracts`).** Pelo link em Ajustes (com `useContracts` ou para quem tem `manageCompany`) e pela URL, para qualquer papel que vê OS. Título "Contratos", ou "{OS} que se repetem" quando o ramo chama a OS de Contrato. Ativos e Encerrados, como no app (`active` diferente de `true` é Encerrado). Linha: cliente, frequência, aparelho e número da OS; ligado mostra a próxima OS, encerrado a data do fim. A linha abre a OS ao lado (`?order=`). "Ajustar" só para quem edita os campos principais daquela OS (técnico só em orçamento, consultor e técnico só nas suas). Vazio, erro com "Tentar de novo" e carregando. "Novo contrato" só com `canCreateOrder` (técnico e gerente não veem; no app o "+" não conferia, defeito 36).
+
+**Contratos desligado.** Para que serve e "Usar contratos" para quem tem `manageCompany`, que grava só `useContracts` e mostra a lista. Os outros papéis leem que está desligado.
+
+**Novo contrato.** A Nova OS com a seção Repetir (padrão do app: todo mês, começa hoje, sem término, criar sozinha). A OS é criada pela API e o contrato é gravado logo depois, com `generatedCount: 0`, `reminderDaysBefore: 3` e a próxima OS um período depois do começo. Se o contrato falhar, a OS fica e o aviso diz que nem tudo foi salvo; a seção Contrato da OS oferece "Repetir esta OS".
+
+**Ajustar (gaveta).** Com que frequência (as 8 do app, mais a atual se for outra), começa, termina ou "Sem data para terminar" (o término nunca antes do começo; sugestão começo + 1 ano) e "Criar a OS sozinha", com a próxima OS calculada antes de salvar. "Salvar" grava de uma vez (o app grava a cada toque). A próxima OS conta os períodos a partir do começo e é a primeira de hoje em diante, depois da última criada: períodos perdidos não são repostos. "Avisar antes" não aparece: o app grava e nada lê (exceção proposta na matriz).
+
+**Parar de repetir.** Pede confirmação e grava `active: false` e `endDate` de hoje: o contrato fica em Encerrados com o histórico (o app apaga o contrato, defeito 62). Grava o mesmo `active` que o app já usa, com o mesmo risco de hoje entre dois celulares.
+
+**Sem pausa, por enquanto** (revisão do #527, A1 e M3). Ao abrir, o app lê os modelos do cache e, ao gerar, regrava o mapa `contract` inteiro, sem reler o modelo na transação. Um contrato pausado no web ganharia uma OS e voltaria a ativo, e um `pausedAt` que o app não conhece seria apagado. Pausar e Retomar voltam quando o app reler o modelo dentro da transação (lote 3 do app).
+
+**Na OS.** Seção "Contrato": a frequência, a próxima OS, "Ajustar" e as OS criadas por ele (da mais nova), cada uma abrindo ao lado. Na OS criada, "Criada pelo contrato da OS N" abre a de origem. Sem contrato, "Repetir esta OS" para quem edita a OS, com Contratos ligado.
+
+**Fica para depois.** Pausar e retomar (acima), contratos do aparelho (`device.detail.contracts`), a data da próxima manutenção pelo contrato, ligar e desligar Contratos nos dados da empresa, e o aviso antes da data.
+
 ### Histórico do navegador
 
 Voltar fecha o que estiver aberto. O painel lateral usa `useRoutePanel`, com o id na URL. Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado.
@@ -347,7 +391,7 @@ A rota `/app/dev/components` mostra os componentes base. Existe só nos builds d
 
 Uma aba aberta antes de um deploy pede chunks que já não existem. O app recarrega a página uma vez (`vite:preloadError` e erro de rota lazy, em `lib/stale-build.ts`). Se falhar de novo em menos de um minuto, o erro aparece, sem recarregar em loop.
 
-A CSP libera os dois scripts inline do `index.html` por hash. Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
+A CSP libera os três scripts inline do `index.html` por hash (domínio antigo, tema e preload). Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
 
 A configuração de produção fica em `.env.production`: só valores públicos, os mesmos do `firebase/web`.
 
@@ -356,6 +400,7 @@ A configuração de produção fica em `.env.production`: só valores públicos,
 - `/app/orders/x` serve a SPA, com os cabeçalhos certos;
 - os assets vêm com cache imutável;
 - a tela de entrada abre sem bloqueio da CSP;
+- `/app` em `praticos.firebaseapp.com` (apontado para o emulador) vai para `praticos.app` com caminho, query e hash, sem pedir nada fora antes, e o site nesse domínio fica onde está. O teste usa `firebaseapp.com` porque o navegador só abre `web.app` por https (HSTS);
 - o site, `/pricing` e `/robots.txt` continuam iguais.
 
 `/q`, `/pro`, `/admin` e `/mcp` vão para o Cloud Run ou para as Functions. O script confere esses caminhos pela configuração, sem fazer requisição.
@@ -448,7 +493,7 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, contrato, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.

@@ -37,6 +37,8 @@ const CatalogView = withCustomerTexts(() => import('@/views/catalog/CatalogView.
 const CatalogImportView = withCustomerTexts(() => import('@/views/catalog/CatalogImportView.vue'))
 // Checklists: their texts are in the orders chunk (scripts/gen.mjs FEATURES).
 const ChecklistsView = () => Promise.all([import('@/views/forms/ChecklistsView.vue'), loadOrderTexts()]).then(([m]) => m)
+// Contracts open orders beside the list and Nova OS: their texts are in the orders chunk.
+const ContractsView = () => Promise.all([import('@/views/contracts/ContractsView.vue'), loadOrderTexts()]).then(([m]) => m)
 const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, schedule: AgendaView, customers: CustomersView, finance: FinanceView, invoices: InvoicesView, catalog: CatalogView }
 
 export const routes: RouteRecordRaw[] = [
@@ -124,6 +126,13 @@ export const routes: RouteRecordRaw[] = [
     name: 'financeReport',
     component: ReportView,
     meta: { access: { kind: 'member', anyOf: ['viewFinancialReports'] }, title: 'financialReport' },
+  },
+  // From Ajustes, as in the app (settings.open-contracts): any role that sees orders.
+  {
+    path: '/contracts',
+    name: 'contracts',
+    component: ContractsView,
+    meta: { access: { kind: 'member', anyOf: ['viewOwnOrders', 'viewAllOrders', 'viewAssignedOrders'] }, title: 'contracts' },
   },
   {
     path: '/devices',

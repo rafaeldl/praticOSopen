@@ -105,6 +105,29 @@ try {
     await browser.close()
   }
 
+  // An old domain sends /app to praticos.app with path, query and hash, before
+  // Firebase loads. praticos.firebaseapp.com is pointed at this emulator (web.app is
+  // HSTS-preloaded, so the browser would not ask it over http); praticos.app is stubbed.
+  const old = 'praticos.firebaseapp.com'
+  const legacy = await chromium.launch({ args: [`--host-resolver-rules=MAP ${old} 127.0.0.1`] })
+  try {
+    const page = await legacy.newPage()
+    const outside = []
+    await page.route('https://praticos.app/**', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>novo</h1>' }))
+    await page.route(/^https?:\/\/(?!127\.0\.0\.1|praticos\.firebaseapp\.com|praticos\.app\/)/, (route) => {
+      outside.push(route.request().url())
+      return route.abort()
+    })
+    await page.goto(`http://${old}:${PORT}/app/orders?order=1#x`)
+    await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
+    check(page.url() === 'https://praticos.app/app/orders?order=1#x', `${old}/app vai para praticos.app (${page.url()})`)
+    check(outside.length === 0, `sem carregar o Firebase antes de sair${outside.length ? `: ${outside.join(' | ')}` : ''}`)
+    await page.goto(`http://${old}:${PORT}/`)
+    check(page.url() === `http://${old}:${PORT}/`, `site em ${old} fica onde está`)
+  } finally {
+    await legacy.close()
+  }
+
   // A tab from before a deploy asks for an old chunk: 404, never the index cached for a year.
   const gone = await get('/app/assets/index-ffffffff.js')
   const goneBody = await gone.text()
