@@ -73,10 +73,15 @@ Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue 
 
 #### Domínios
 
-O app web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` (e `praticos.firebaseapp.com`), então `https://praticos.web.app/app` continua abrindo o mesmo build. Diferenças entre os dois:
+O app web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` e `praticos.firebaseapp.com`. Quem abre o `/app` num desses domínios antigos vai para `https://praticos.app` com o mesmo caminho, query e hash (`location.replace`). O script fica inline no `index.html`, logo depois do `charset`, e roda antes de o Firebase carregar (`scripts/legacy-host-plugin.ts`). `/q`, `/__/auth` e o site não mudam. O script só entra no build de produção: dev, emulador e build do E2E ficam onde estão.
 
-- **Entrada:** o `authDomain` é `praticos.app`. Em `praticos.app` o popup e o redirect funcionam em qualquer navegador. Em `praticos.web.app` o popup funciona, mas o redirect de reserva (popup bloqueado) cai em armazenamento entre sites e pode falhar no Safari. Por isso o link que se divulga é o de `praticos.app`.
-- **Sessão:** login, empresa escolhida, cache da lista de acesso e cache do Firestore ficam guardados por origem. Quem entrou em `praticos.web.app` precisa entrar de novo em `praticos.app`, uma vez.
+Por que mandar para um domínio só:
+
+- **Entrada:** o `authDomain` é `praticos.app`. Fora desse site, o popup funciona, mas o redirect de reserva (popup bloqueado) cai em armazenamento entre sites e pode falhar no Safari.
+- **Sessão:** login, empresa escolhida, cache da lista de acesso e cache do Firestore ficam guardados por origem. Quem já tinha entrado em `praticos.web.app` entra de novo em `praticos.app`, uma vez.
+
+Outros pontos:
+
 - **CSP:** `frame-src` libera `praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com` (o iframe escondido do Firebase Auth vem do `authDomain`). Tirar `praticos.web.app` e `praticos.firebaseapp.com` só quando o app deixar de ser servido neles.
 - **API e lista de acesso:** não dependem do domínio. O CORS da `api` aceita qualquer origem (`origin: true`; quem protege é o token), e `config/webApp` decide pelo e-mail verificado do token.
 
@@ -357,7 +362,7 @@ A rota `/app/dev/components` mostra os componentes base. Existe só nos builds d
 
 Uma aba aberta antes de um deploy pede chunks que já não existem. O app recarrega a página uma vez (`vite:preloadError` e erro de rota lazy, em `lib/stale-build.ts`). Se falhar de novo em menos de um minuto, o erro aparece, sem recarregar em loop.
 
-A CSP libera os dois scripts inline do `index.html` por hash. Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
+A CSP libera os três scripts inline do `index.html` por hash (domínio antigo, tema e preload). Se um deles mudar, `npm run build` falha (`scripts/check-csp.mjs`) e mostra o hash novo para colar em `firebase.json`.
 
 A configuração de produção fica em `.env.production`: só valores públicos, os mesmos do `firebase/web`.
 
@@ -366,6 +371,7 @@ A configuração de produção fica em `.env.production`: só valores públicos,
 - `/app/orders/x` serve a SPA, com os cabeçalhos certos;
 - os assets vêm com cache imutável;
 - a tela de entrada abre sem bloqueio da CSP;
+- `/app` em `praticos.firebaseapp.com` (apontado para o emulador) vai para `praticos.app` com caminho, query e hash, sem pedir nada fora antes, e o site nesse domínio fica onde está. O teste usa `firebaseapp.com` porque o navegador só abre `web.app` por https (HSTS);
 - o site, `/pricing` e `/robots.txt` continuam iguais.
 
 `/q`, `/pro`, `/admin` e `/mcp` vão para o Cloud Run ou para as Functions. O script confere esses caminhos pela configuração, sem fazer requisição.
