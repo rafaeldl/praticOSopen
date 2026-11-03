@@ -257,5 +257,9 @@
   "web.import.noName": "Stays out: no name",
   "web.import.badTaxId": "Stays out: CPF or CNPJ does not check out",
   "web.import.duplicate": "Stays out: phone already belongs to {name}",
-  "web.import.repeated": "Stays out: same phone as line {line}"
+  "web.import.repeated": "Stays out: same phone as line {line}",
+  "web.customers.changedElsewhere": "Someone else changed this customer while you were editing. Showing the new version; nothing was written over it.",
+  "web.devices.changedElsewhere": "Someone else changed this {device} while you were editing. Showing the new version; nothing was written over it.",
+  "web.customers.deleteLinks": "Has {orders, plural, =0{no orders} =1{1 order} other{{orders} orders}}, {receipts, plural, =0{no receipts} =1{1 receipt} other{{receipts} receipts}} and {charges, plural, =0{no charges} =1{1 charge} other{{charges} charges}}.",
+  "web.customers.ordersTruncated": "Showing the {count} most recent orders. Spent and still to receive count only these."
 }

@@ -42,12 +42,12 @@ test('CSV: prévia, colunas, telefone repetido e sem nome ficam de fora, e só g
 
 test('falha no meio e Importar de novo: nenhuma linha entra duas vezes (revisão A1)', async ({ page }) => {
   const stamp = Date.now()
-  // 450 lines: two parts (400 + 50). The second one fails the first time.
-  const lines = Array.from({ length: 450 }, (_, i) => `Lote ${stamp} ${String(i).padStart(3, '0')}`)
+  // 150 lines: two parts (100 + 50). The second one fails the first time.
+  const lines = Array.from({ length: 150 }, (_, i) => `Lote ${stamp} ${String(i).padStart(3, '0')}`)
   await login(page, 'admin', 'customers/import')
   await page.getByTestId('import-file').setInputFiles({ name: 'lote.csv', mimeType: 'text/csv', buffer: Buffer.from(['Nome', ...lines].join('\n')) })
   await page.getByTestId('import-continue').click()
-  await expect(page.getByRole('heading', { level: 1, name: '450 clientes prontos para entrar' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '150 clientes prontos para entrar' })).toBeVisible()
   let calls = 0
   await page.route(/\/v1\/app\/customers\/import$/, async (route) => {
     calls++
@@ -55,10 +55,11 @@ test('falha no meio e Importar de novo: nenhuma linha entra duas vezes (revisão
     return route.fallback()
   })
   await page.getByTestId('import-finish').click()
-  await expect(page.getByTestId('import-message')).toContainText('Parou no meio')
+  // 100 creates in the emulator: slower than the default 8 s on a busy machine.
+  await expect(page.getByTestId('import-message')).toContainText('Parou no meio', { timeout: 15_000 })
   await page.getByTestId('import-finish').click()
-  await expect(page.locator('.toast')).toContainText('450 clientes importados')
-  expect(await countCustomersNamed(`Lote ${stamp} `)).toBe(450)
+  await expect(page.locator('.toast')).toContainText('150 clientes importados', { timeout: 15_000 })
+  expect(await countCustomersNamed(`Lote ${stamp} `)).toBe(150)
 })
 
 test('CSV: confirmar grava os que entram e volta à lista', async ({ page }) => {

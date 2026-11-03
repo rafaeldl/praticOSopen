@@ -10,7 +10,7 @@ import { Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { saveCustomer, type CustomerDetail } from '@/lib/customers/data'
+import { changedSince, saveCustomer, type CustomerDetail } from '@/lib/customers/data'
 import { findByPhone, mapsUrl, type CustomerRow } from '@/lib/customers/model'
 import { applyMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -22,12 +22,14 @@ import CustomFieldInput from './CustomFieldInput.vue'
 const props = defineProps<{
   /** Editing this one; without it, a new customer. */
   customer?: CustomerDetail['customer'] | null
+  /** Version read with it: a save over a newer one is refused. */
+  version?: string | null
   /** What the search had ("Cadastrar «texto»"). */
   draft?: { name: string; phone: string }
   /** Every customer, for the repeated phone. */
   directory: CustomerRow[]
 }>()
-const emit = defineEmits<{ saved: [id: string]; open: [id: string]; close: [] }>()
+const emit = defineEmits<{ saved: [id: string]; open: [id: string]; changed: []; close: [] }>()
 
 const BUILT_IN = ['customer.name', 'customer.phone', 'customer.email', 'customer.address', 'customer.taxId']
 const editing = !!props.customer
@@ -106,10 +108,17 @@ async function save(skipDuplicate = false) {
       address: form.address.trim() || null,
       ...(usesTaxId(country) ? { taxId: normalizeTaxId(form.taxId) || null } : {}),
       ...(fields.length || props.customer?.customData ? { customData: writeCustom(props.customer?.customData, fields, form.custom) } : {}),
+      ...(editing && props.version ? { version: props.version } : {}),
     })
     allowClose = true
     emit('saved', id)
   } catch (error) {
+    // Saved by someone else since it opened: nothing is written over it; the screen reads the new one.
+    if (changedSince(error)) {
+      allowClose = true
+      emit('changed')
+      return
+    }
     console.warn('customer: not saved', error)
     failed.value = t('customerSaveError')
     if (errorMessageKey(error) !== 'web.error.generic') failed.value = `${t('customerSaveError')} ${t(errorMessageKey(error))}`

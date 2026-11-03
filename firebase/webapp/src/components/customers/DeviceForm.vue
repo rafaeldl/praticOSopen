@@ -10,7 +10,7 @@ import { Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { saveDevice, type DeviceDetail } from '@/lib/customers/data'
+import { changedSince, saveDevice, type DeviceDetail } from '@/lib/customers/data'
 import { DEVICE_STATUSES, modelSuggestions, serialError, type DeviceRow, type DeviceStatus } from '@/lib/customers/model'
 import { applyMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -20,12 +20,13 @@ import CustomFieldInput from './CustomFieldInput.vue'
 
 const props = defineProps<{
   device?: DeviceDetail['device'] | null
+  version?: string | null
   /** The company's devices, for the model suggestions. */
   devices: DeviceRow[]
   /** Typed in a search ("Cadastrar «texto»"). */
   draft?: { name: string; serial: string }
 }>()
-const emit = defineEmits<{ saved: [id: string]; close: [] }>()
+const emit = defineEmits<{ saved: [id: string]; changed: []; close: [] }>()
 
 const BUILT_IN = ['device.category', 'device.brand', 'device.model', 'device.serial']
 const editing = !!props.device
@@ -114,10 +115,16 @@ async function save() {
       description: form.description.trim() || null,
       ...(editing && management && form.status ? { status: form.status } : {}),
       ...(fields.length || props.device?.customData ? { customData: writeCustom(props.device?.customData, fields, form.custom) } : {}),
+      ...(editing && props.version ? { version: props.version } : {}),
     })
     allowClose = true
     emit('saved', saved.id)
   } catch (error) {
+    if (changedSince(error)) {
+      allowClose = true
+      emit('changed')
+      return
+    }
     console.warn('device: not saved', error)
     failed.value = `${t('saveFailedTryAgain')} ${errorMessageKey(error) !== 'web.error.generic' ? t(errorMessageKey(error)) : ''}`.trim()
   } finally {

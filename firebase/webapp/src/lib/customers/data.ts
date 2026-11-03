@@ -2,6 +2,7 @@
 // reads that depend on orders come filtered by the role on the server, and
 // every write goes there too. No Firestore here, so these screens add nothing
 // to the Firestore chunk of the first download.
+import { ApiError } from '@/lib/api'
 import { api, session } from '@/lib/session'
 import type { CustomerRow, DeviceRow, DeviceStatus } from './model'
 
@@ -20,6 +21,11 @@ export interface OrderSummary {
 }
 
 export interface CustomerDetail {
+  /** Opaque version, sent back on save: 409 when someone saved since. */
+  version: string | null
+  ordersTruncated: boolean
+  /** Every order, receipt and charge of the customer, whoever reads them (told before deleting). */
+  links: { orders: number; receipts: number; charges: number }
   customer: {
     id: string
     name: string
@@ -40,6 +46,7 @@ export interface CustomerDetail {
 }
 
 export interface DeviceDetail {
+  version: string | null
   device: {
     id: string
     name: string | null
@@ -103,6 +110,9 @@ export const loadDeviceDirectory = (fresh = false): Promise<Directory<DeviceRow>
 export const loadCustomer = (id: string) => api<CustomerDetail>(`/v1/app/customers/${encodeURIComponent(id)}`)
 export const loadDevice = (id: string) => api<DeviceDetail>(`/v1/app/devices/${encodeURIComponent(id)}`)
 
+/** Someone saved the record since it was read (CUSTOMER_CHANGED, DEVICE_CHANGED). */
+export const changedSince = (error: unknown) => error instanceof ApiError && error.status === 409 && /_CHANGED$/.test(error.code)
+
 export interface CustomerInput {
   name?: string
   phone?: string | null
@@ -112,7 +122,7 @@ export interface CustomerInput {
   customData?: Record<string, unknown> | null
 }
 
-export async function saveCustomer(id: string | null, input: CustomerInput): Promise<string> {
+export async function saveCustomer(id: string | null, input: CustomerInput & { version?: string }): Promise<string> {
   const result = id
     ? await api<{ id: string }>(`/v1/app/customers/${encodeURIComponent(id)}`, { method: 'PATCH', body: input })
     : await api<{ id: string }>('/v1/app/customers', { method: 'POST', body: input })
@@ -139,7 +149,7 @@ export interface DeviceInput {
   customData?: Record<string, unknown> | null
 }
 
-export async function saveDevice(id: string | null, input: DeviceInput): Promise<{ id: string; name?: string | null; serial?: string | null }> {
+export async function saveDevice(id: string | null, input: DeviceInput & { version?: string }): Promise<{ id: string; name?: string | null; serial?: string | null }> {
   const result = id
     ? await api<{ id: string }>(`/v1/app/devices/${encodeURIComponent(id)}`, { method: 'PATCH', body: input })
     : await api<{ id: string; name: string | null; serial: string | null }>('/v1/app/devices', { method: 'POST', body: input })

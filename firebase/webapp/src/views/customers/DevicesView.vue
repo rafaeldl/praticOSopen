@@ -35,7 +35,7 @@ const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const shown = ref(PAGE)
 const searchEl = ref<HTMLInputElement | null>(null)
-const form = ref<{ device: Detail['device'] | null; draft?: { name: string; serial: string } } | null>(null)
+const form = ref<{ device: Detail['device'] | null; version?: string | null; draft?: { name: string; serial: string } } | null>(null)
 const removing = ref<DeviceRow | null>(null)
 
 const canManage = can('manageDevices')
@@ -72,7 +72,8 @@ function startCreate(fromSearch = false) {
 
 async function startEdit(row: DeviceRow) {
   try {
-    form.value = { device: (await loadDevice(row.id)).device }
+    const detail = await loadDevice(row.id)
+    form.value = { device: detail.device, version: detail.version }
   } catch (error) {
     showToast(t(errorMessageKey(error)))
   }
@@ -100,6 +101,12 @@ async function remove() {
     removing.value = null
     showToast(t(errorMessageKey(error)))
   }
+}
+
+async function onChangedElsewhere() {
+  form.value = null
+  showToast(t('web.devices.changedElsewhere', { device: deviceWord.value.toLocaleLowerCase() }))
+  await load(true)
 }
 
 async function onRemoved() {
@@ -235,7 +242,7 @@ onBeforeUnmount(() => {
     </aside>
   </div>
 
-  <DeviceForm v-if="form" :device="form.device" :draft="form.draft" :devices="rows" @saved="onSaved" @close="form = null" />
+  <DeviceForm v-if="form" :device="form.device" :version="form.version" :draft="form.draft" :devices="rows" @saved="onSaved" @changed="onChangedElsewhere" @close="form = null" />
   <ConfirmDialog
     v-if="removing"
     :title="t('deleteDeviceTitle', { name: removing.name || removing.serial || deviceWord })"

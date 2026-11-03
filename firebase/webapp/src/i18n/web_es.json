@@ -257,5 +257,9 @@
   "web.import.noName": "Queda afuera: sin nombre",
   "web.import.badTaxId": "Queda afuera: CPF o CNPJ no es válido",
   "web.import.duplicate": "Queda afuera: el teléfono ya es de {name}",
-  "web.import.repeated": "Queda afuera: mismo teléfono que la línea {line}"
+  "web.import.repeated": "Queda afuera: mismo teléfono que la línea {line}",
+  "web.customers.changedElsewhere": "Otra persona cambió este cliente mientras usted editaba. Mostrando la versión nueva; no se grabó nada encima.",
+  "web.devices.changedElsewhere": "Otra persona cambió este {device} mientras usted editaba. Mostrando la versión nueva; no se grabó nada encima.",
+  "web.customers.deleteLinks": "Tiene {orders, plural, =0{ninguna OS} =1{1 OS} other{{orders} OS}}, {receipts, plural, =0{ningún recibo} =1{1 recibo} other{{receipts} recibos}} y {charges, plural, =0{ningún cobro} =1{1 cobro} other{{charges} cobros}}.",
+  "web.customers.ordersTruncated": "Mostrando las {count} OS más recientes. Gastó y falta cobrar cuentan solo esas."
 }

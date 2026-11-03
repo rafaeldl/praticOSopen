@@ -11,7 +11,7 @@ async function seedOne() {
   return { customer, device }
 }
 
-async function screens(page: Page, label: string, ids: Awaited<ReturnType<typeof seedOne>>) {
+async function customerScreens(page: Page, label: string, ids: Awaited<ReturnType<typeof seedOne>>) {
   await page.goto('customers')
   await expect(page.getByTestId('customers-table')).toBeVisible()
   await expectNoAxeViolations(page, `clientes ${label}`)
@@ -23,7 +23,9 @@ async function screens(page: Page, label: string, ids: Awaited<ReturnType<typeof
   await page.getByRole('button', { name: 'Editar cliente' }).click()
   await page.getByTestId('customer-form').getByText('Mais dados').click()
   await expectNoAxeViolations(page, `cadastro de cliente ${label}`)
-  await page.keyboard.press('Escape')
+}
+
+async function deviceAndImportScreens(page: Page, label: string, ids: Awaited<ReturnType<typeof seedOne>>) {
   await page.goto(`devices?device=${ids.device.id}`)
   await expect(page.getByTestId('device-detail')).toBeVisible()
   await expect(page.getByTestId('devices-table')).toBeVisible()
@@ -46,16 +48,62 @@ async function screens(page: Page, label: string, ids: Awaited<ReturnType<typeof
   await expectNoAxeViolations(page, `prévia ${label}`)
 }
 
+// Two tests per theme, inside the 30 s budget (each axe run takes about 1 s on CI).
 for (const theme of ['light', 'dark'] as const) {
-  test(`axe: 0 violações nas telas de clientes e veículos, tema ${theme === 'light' ? 'claro' : 'escuro'}`, async ({ page }) => {
-    test.setTimeout(60_000)
-    const ids = await seedOne()
-    await page.emulateMedia({ colorScheme: theme })
-    await login(page, 'admin', 'login')
-    await setTheme(page, theme)
-    await screens(page, theme, ids)
-  })
+  const name = theme === 'light' ? 'claro' : 'escuro'
+  for (const [part, audit] of [
+    ['clientes', customerScreens],
+    ['veículos e importação', deviceAndImportScreens],
+  ] as const) {
+    test(`axe: 0 violações em ${part}, tema ${name}`, async ({ page }) => {
+      const ids = await seedOne()
+      await page.emulateMedia({ colorScheme: theme })
+      await login(page, 'admin', 'login')
+      await setTheme(page, theme)
+      await audit(page, theme, ids)
+    })
+  }
 }
+
+/** DOM changes in `ms` with nobody touching the page: a screen that keeps rendering shows here. */
+async function mutationsWhileIdle(page: Page, ms: number): Promise<number> {
+  return page.evaluate(
+    (wait) =>
+      new Promise<number>((done) => {
+        let count = 0
+        const observer = new MutationObserver((list) => (count += list.length))
+        observer.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true })
+        setTimeout(() => {
+          observer.disconnect()
+          done(count)
+        }, wait)
+      }),
+    ms,
+  )
+}
+
+test('nenhuma tela fica renderizando sem parar', async ({ page }) => {
+  const ids = await seedOne()
+  await login(page, 'admin', 'orders')
+  for (const [path, testId] of [
+    ['orders', 'orders-table'],
+    ['orders?order=scn-owed', 'order-detail'],
+    ['customers', 'customers-table'],
+    [`customers?customer=${ids.customer.id}`, 'customer-contact'],
+    [`devices?device=${ids.device.id}`, 'device-detail'],
+    ['customers/import', 'import-file'],
+  ] as const) {
+    await page.goto(path)
+    await expect(page.getByTestId(testId)).toBeAttached()
+    // The first reads still land after the content shows (list behind the panel,
+    // segment labels, the announcement). A screen that settles has a quiet window
+    // within a few seconds; one that keeps rendering never does. (Not networkidle:
+    // Firestore's live connection never goes quiet.)
+    const windows: number[] = []
+    for (let i = 0; i < 6 && windows.at(-1) !== 0; i++) windows.push(await mutationsWhileIdle(page, 700))
+    expect(windows.at(-1), `${path} sem parar: ${windows.join(', ')}`).toBe(0)
+  }
+})
 
 for (const [width, height] of [
   [320, 640],
