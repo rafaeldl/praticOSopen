@@ -102,6 +102,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.canGiveDiscount,
     this.onOpenExternalUrl,
     this.canCharge,
+    this.canWatchCharges,
     this.paymentSettingsStream,
     this.chargesStream,
     this.chargeService,
@@ -132,6 +133,10 @@ class PaymentManagementScreen extends StatefulWidget {
   /// permission, the company payment settings, the order charges and
   /// [AsaasApiService.instance].
   final bool? canCharge;
+
+  /// Test seam: whether the charges are watched without [canCharge]
+  /// (defaults to who can receive on the order).
+  final bool? canWatchCharges;
   final Stream<PaymentSettings>? paymentSettingsStream;
   final Stream<List<OrderCharge>>? chargesStream;
   final AsaasApiService? chargeService;
@@ -222,6 +227,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         _charge = OrderChargeController(
           store: store,
           canCharge: widget.canCharge,
+          canWatch: widget.canWatchCharges,
           settingsStream: widget.paymentSettingsStream,
           chargesStream: widget.chargesStream,
         );
@@ -550,6 +556,35 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       ];
     }
 
+    // A link may be open that this user can't see: receiving by hand is not
+    // the main action, or the customer could pay twice.
+    if (applies && _charge!.chargesUnknown) {
+      return [
+        Padding(
+          key: const Key('receiveChargeUnknown'),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.sm,
+          ),
+          child: Text(
+            l10n.receiveChargeMaybeOpen,
+            style: AppTypography.body.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
+        ),
+        _actionPadding(
+          SecondaryButton(
+            key: const Key('receiveConfirm'),
+            label: l10n.receiveMarkReceived,
+            onPressed: _busy ? null : _openReceive,
+          ),
+        ),
+      ];
+    }
+
     return [
       _actionPadding(
         _busy
@@ -573,7 +608,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                 : () => _onSendLinkPressed(remaining),
           ),
         )
-      else if (!applies && store.order?.id != null)
+      // No Asaas, or Asaas without a connected account: the order link is
+      // still a way to send something to the customer.
+      else if (!connected && store.order?.id != null)
         _actionPadding(
           SecondaryButton(
             key: const Key('receiveShareOrderLink'),

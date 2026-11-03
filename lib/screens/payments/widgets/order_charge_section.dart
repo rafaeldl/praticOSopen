@@ -22,17 +22,31 @@ import 'package:praticos/services/authorization_service.dart';
 /// rules deny reading `charges` to users without the permission. Creating a
 /// link needs `asaasConnected`; an open charge stays visible after
 /// disconnecting.
+///
+/// Whoever can receive on the order ([AuthorizationService.canReceiveOnOrder],
+/// e.g. a consultant on an order they created) also watches the charges,
+/// read-only: marking money as received while a link is open would charge
+/// the customer twice. When the charges can't be read (rules), [chargesUnknown]
+/// is true and the screen must not offer "Marcar como recebido" as the main
+/// action.
 class OrderChargeController extends ChangeNotifier {
   OrderChargeController({
     required this.store,
     bool? canCharge,
+    bool? canWatch,
     Stream<PaymentSettings>? settingsStream,
     Stream<List<OrderCharge>>? chargesStream,
-  }) : _chargesSource = chargesStream {
-    final allowed =
-        canCharge ??
-        AuthorizationService.instance.hasPermission(PermissionType.chargeOrder);
-    if (!allowed) return;
+  }) : _chargesSource = chargesStream,
+       _canCharge =
+           canCharge ??
+           AuthorizationService.instance.hasPermission(
+             PermissionType.chargeOrder,
+           ) {
+    final watching =
+        _canCharge ||
+        (canWatch ??
+            AuthorizationService.instance.canReceiveOnOrder(store.order));
+    if (!watching) return;
     final companyId = store.companyId;
     final source =
         settingsStream ??
@@ -44,6 +58,14 @@ class OrderChargeController extends ChangeNotifier {
   }
 
   final OrderStore store;
+
+  /// [PermissionType.chargeOrder]: may create and replace links.
+  final bool _canCharge;
+
+  /// The charges could not be read (e.g. denied by the rules for this role):
+  /// a link may be open without this screen knowing.
+  bool get chargesUnknown => enabled && _chargesUnknown;
+  bool _chargesUnknown = false;
 
   /// Test seam; defaults to [OrderChargeRepository.watch].
   final Stream<List<OrderCharge>>? _chargesSource;
@@ -63,8 +85,9 @@ class OrderChargeController extends ChangeNotifier {
   /// Company in the Asaas pilot and user allowed to charge.
   bool get enabled => _settings?.asaasEnabled == true;
 
-  /// Asaas account connected: new links can be created.
-  bool get connected => enabled && _settings!.asaasConnected;
+  /// Asaas account connected and user allowed to charge: new links can be
+  /// created.
+  bool get connected => enabled && _canCharge && _settings!.asaasConnected;
 
   /// The open (pending/overdue) charge, if any.
   OrderCharge? get openCharge {
@@ -96,6 +119,7 @@ class OrderChargeController extends ChangeNotifier {
         // E.g. permission denied by the rules: behave as "no charge".
         onError: (Object _) {
           _charges = const [];
+          _chargesUnknown = true;
           _notify();
         },
       );
@@ -120,6 +144,7 @@ class OrderChargeController extends ChangeNotifier {
         charges.any((c) => chargeSettled(previous[c.id], c));
     _previous = {for (final c in charges) c.id ?? '': c};
     _charges = charges;
+    _chargesUnknown = false;
     _notify();
     // The webhook booked or reverted payments on the order.
     if (settled && !_disposed) store.reloadPayments();

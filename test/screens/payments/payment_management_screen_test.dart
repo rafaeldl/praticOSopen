@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/widgets/secondary_button.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/global.dart';
@@ -99,6 +100,8 @@ void main() {
     bool canView = true,
     List<Uri>? opened,
     bool canCharge = false,
+    bool? canWatchCharges,
+    Object? chargesError,
     PaymentSettings? settings,
     List<OrderCharge> charges = const [],
     AsaasApiService? service,
@@ -121,11 +124,14 @@ void main() {
           canGiveDiscount: canDiscount,
           onOpenExternalUrl: (uri) async => opened?.add(uri),
           canCharge: canCharge,
+          canWatchCharges: canWatchCharges,
           paymentSettingsStream: Stream.value(
             settings ??
                 PaymentSettings(asaasEnabled: true, asaasConnected: true),
           ),
-          chargesStream: Stream.value(charges),
+          chargesStream: chargesError != null
+              ? Stream.error(chargesError)
+              : Stream.value(charges),
           chargeService: service,
           canSendReceipt: canSendReceipt,
           canOpenReceiptGroup: canOpenReceiptGroup ?? (_) => true,
@@ -788,6 +794,47 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('chargeSendLink')), findsNothing);
+        // Something can still be sent to the customer: the order link.
+        expect(find.byKey(const Key('receiveShareOrderLink')), findsOneWidget);
+      });
+
+      testWidgets('who receives without chargeOrder sees the open link and '
+          'gets no blue "Marcar como recebido"', (tester) async {
+        await pumpScreen(
+          tester,
+          countingStore([]),
+          canWatchCharges: true,
+          charges: [charge()],
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(OrderChargeStatus), findsOneWidget);
+        expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
+        expect(find.byType(PrimaryButton), findsNothing);
+        expect(find.byKey(const Key('chargeSendLink')), findsNothing);
+      });
+
+      testWidgets('who receives without chargeOrder can\'t create a link', (
+        tester,
+      ) async {
+        await pumpScreen(tester, countingStore([]), canWatchCharges: true);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chargeSendLink')), findsNothing);
+        expect(find.byKey(const Key('receiveShareOrderLink')), findsOneWidget);
+      });
+
+      testWidgets('charges denied by the rules: warns and no blue button', (
+        tester,
+      ) async {
+        await pumpScreen(
+          tester,
+          countingStore([]),
+          canWatchCharges: true,
+          chargesError: StateError('permission-denied'),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('receiveChargeUnknown')), findsOneWidget);
+        expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
+        expect(find.byType(PrimaryButton), findsNothing);
       });
 
       testWidgets('hidden without the chargeOrder permission', (tester) async {

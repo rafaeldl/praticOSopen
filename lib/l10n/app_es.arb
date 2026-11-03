@@ -2642,5 +2642,6 @@
   "maintenanceLastService": "Última: {service}",
   "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
   "orderCreateFailedTitle": "No se pudo guardar la OS",
-  "orderCreateFailedMessage": "Revisa la conexión y crea la OS de nuevo."
+  "orderCreateFailedMessage": "Revisa la conexión y crea la OS de nuevo.",
+  "receiveChargeMaybeOpen": "Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida."
 }

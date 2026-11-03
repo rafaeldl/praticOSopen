@@ -6530,4 +6530,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get orderCreateFailedMessage =>
       'Check your connection and create the work order again.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'There may be an open payment link on this work order. Check with whoever handles billing before marking it as received.';
 }

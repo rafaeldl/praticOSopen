@@ -2642,5 +2642,6 @@
   "maintenanceLastService": "Last: {service}",
   "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
   "orderCreateFailedTitle": "Couldn't save the work order",
-  "orderCreateFailedMessage": "Check your connection and create the work order again."
+  "orderCreateFailedMessage": "Check your connection and create the work order again.",
+  "receiveChargeMaybeOpen": "There may be an open payment link on this work order. Check with whoever handles billing before marking it as received."
 }

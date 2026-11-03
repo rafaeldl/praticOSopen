@@ -6537,4 +6537,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get orderCreateFailedMessage =>
       'Confira a internet e crie a OS de novo.';
+
+  @override
+  String get receiveChargeMaybeOpen =>
+      'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.';
 }

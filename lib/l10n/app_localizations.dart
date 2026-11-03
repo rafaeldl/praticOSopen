@@ -10631,6 +10631,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Confira a internet e crie a OS de novo.'**
   String get orderCreateFailedMessage;
+
+  /// No description provided for @receiveChargeMaybeOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.'**
+  String get receiveChargeMaybeOpen;
 }
 
 class _AppLocalizationsDelegate
