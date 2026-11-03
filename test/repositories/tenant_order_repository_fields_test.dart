@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
@@ -65,6 +67,27 @@ void main() {
       }, now: now);
       expect(out.keys, unorderedEquals(['total', 'updatedAt']));
     });
+  });
+
+  test('only "no server" sends the local money copy; refusals are errors', () {
+    expect(
+      TenantOrderRepository.isOfflineFailure(
+        FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
+      ),
+      isTrue,
+    );
+    expect(
+      TenantOrderRepository.isOfflineFailure(TimeoutException('slow')),
+      isTrue,
+    );
+    for (final code in ['permission-denied', 'aborted', 'not-found']) {
+      expect(
+        TenantOrderRepository.isOfflineFailure(
+          FirebaseException(plugin: 'cloud_firestore', code: code),
+        ),
+        isFalse,
+      );
+    }
   });
 
   test('a month that fails to load is an error, not R\$ 0', () async {

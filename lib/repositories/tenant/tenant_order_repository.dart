@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
@@ -199,6 +202,63 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return collectionFor(
       companyId,
     ).doc(orderId).update(fieldUpdateOf(fields, actor: actor ?? Global.userAggr));
+  }
+
+  /// How long [updateMoney] waits for the server before writing offline.
+  static const Duration moneyTransactionTimeout = Duration(seconds: 5);
+
+  /// Whether a failed money transaction means "no server now" (then the
+  /// local copy is written); anything else (rules, missing order) is real.
+  static bool isOfflineFailure(Object error) {
+    if (error is TimeoutException) return true;
+    if (error is FirebaseException) {
+      return const {'unavailable', 'deadline-exceeded'}.contains(error.code);
+    }
+    return false;
+  }
+
+  /// Saves [fields] together with the money of the order. Online, a
+  /// transaction reads the order, applies the items and discount the app
+  /// changed ([appMoney]) and recomputes the total from that
+  /// ([OrderFieldDiff.mergeMoney]): an item added elsewhere stays and the
+  /// total counts it.
+  ///
+  /// Offline the order can't be read in a transaction. Then the four money
+  /// fields go as the app has them ([localMoney]), so the stored total
+  /// always matches the stored items and discount (an item added elsewhere
+  /// in the meantime is replaced, as the old full save did). Not awaited:
+  /// offline the write completes only once synced.
+  Future<void> updateMoney(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    required Map<String, dynamic> appMoney,
+    required Map<String, dynamic> localMoney,
+    UserAggr? actor,
+  }) async {
+    final ref = collectionFor(companyId).doc(orderId);
+    final user = actor ?? Global.userAggr;
+    try {
+      await firestore.runTransaction<void>(timeout: moneyTransactionTimeout, (
+        tx,
+      ) async {
+        final snap = await tx.get(ref);
+        if (!snap.exists) {
+          throw StateError('Order $orderId does not exist');
+        }
+        final money = OrderFieldDiff.mergeMoney(snap.data()!, appMoney);
+        tx.update(ref, fieldUpdateOf({...fields, ...money}, actor: user));
+      });
+    } catch (e) {
+      if (!isOfflineFailure(e)) rethrow;
+      unawaited(
+        ref
+            .update(fieldUpdateOf({...fields, ...localMoney}, actor: user))
+            .catchError((Object e) {
+              debugPrint('Offline order money write failed: $e');
+            }),
+      );
+    }
   }
 
   /// Firestore map for [updateFields]: [DeleteFieldOp] becomes

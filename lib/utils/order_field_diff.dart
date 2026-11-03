@@ -34,6 +34,37 @@ class OrderFieldDiff {
 
   static const _equality = DeepCollectionEquality();
 
+  /// Fields that make up the money of an order: they are written together.
+  static const Set<String> moneyFields = {
+    'services',
+    'products',
+    'discount',
+    'total',
+  };
+
+  /// Money fields the person edits; `total` is derived from them.
+  static const Set<String> moneyInputs = {'services', 'products', 'discount'};
+
+  /// The four money fields after applying [appMoney] (items or discount the
+  /// app changed) over [server] (the order as stored), with the total
+  /// recomputed from the result: never a total of old items.
+  static Map<String, dynamic> mergeMoney(
+    Map<String, dynamic> server,
+    Map<String, dynamic> appMoney,
+  ) {
+    final merged = <String, dynamic>{
+      for (final key in moneyInputs)
+        key: appMoney.containsKey(key) ? appMoney[key] : server[key],
+    };
+    final order = Order.fromJson({
+      'services': merged['services'],
+      'products': merged['products'],
+      'discount': merged['discount'],
+    });
+    merged['total'] = OrderPaymentMath.computeTotal(order);
+    return merged;
+  }
+
   /// Deep copy of the order's JSON, without [ignoredFields]. The copy must be
   /// deep: the screens change nested maps and lists of the order in place.
   static Map<String, dynamic> snapshotOf(Order order) {

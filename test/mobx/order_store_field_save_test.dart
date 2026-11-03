@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/utils/order_field_diff.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 
 /// Firebase core mock whose default app has a storage bucket.
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
@@ -57,6 +60,9 @@ void main() {
   late Map<String, dynamic> serverDoc;
   late List<Map<String, dynamic>> writes;
 
+  /// When true, the money transaction can't reach the server (offline).
+  var offline = false;
+
   Order loaded() => Order.fromJson({
     ...serverDoc,
     'id': 'o1',
@@ -65,6 +71,7 @@ void main() {
   setUp(() {
     Global.companyAggr = CompanyAggr()..id = 'c1';
     writes = [];
+    offline = false;
     serverDoc = {
       'status': 'approved',
       'total': 100.0,
@@ -78,7 +85,18 @@ void main() {
       ..writeOrderFields = (companyId, orderId, fields) async {
         writes.add(fields);
         applyUpdate(serverDoc, fields);
-      };
+      }
+      // Same decision as TenantOrderRepository.updateMoney: online the
+      // transaction merges with the server copy; offline the local four go.
+      ..writeOrderMoney =
+          (companyId, orderId, fields, appMoney, localMoney) async {
+            final money = offline
+                ? localMoney
+                : OrderFieldDiff.mergeMoney(serverDoc, appMoney);
+            final update = {...fields, ...money};
+            writes.add(update);
+            applyUpdate(serverDoc, update);
+          };
     store.order = loaded();
     store.rememberSaved();
   });
@@ -96,6 +114,77 @@ void main() {
     final services = serverDoc['services'] as List;
     expect(services.map((s) => (s as Map)['service']['id']), ['s1', 's2']);
     expect(writes.single.keys, ['scheduledDate']);
+  });
+
+  group('web adds an item, the app changes only the discount', () {
+    setUp(() {
+      (serverDoc['services'] as List).add(serviceJson('s2', 'Filtro', 40.0));
+      serverDoc['total'] = 140.0;
+      store.order!.discount = 10.0;
+      store.updateTotal();
+    });
+
+    test('online: the item stays and the total counts it', () async {
+      await store.createItem();
+      expect((serverDoc['services'] as List), hasLength(2));
+      expect(serverDoc['discount'], 10.0);
+      expect(serverDoc['total'], 130.0);
+      // Items, discount and total went in the same write.
+      expect(
+        writes.single.keys,
+        containsAll(['services', 'products', 'discount', 'total']),
+      );
+    });
+
+    test('offline: the four go as the app has them, total matches', () async {
+      offline = true;
+      await store.createItem();
+      final stored = Order.fromJson(serverDoc);
+      expect(stored.discount, 10.0);
+      // Never a total of other items: it matches what was stored.
+      expect(stored.total, OrderPaymentMath.computeTotal(stored));
+      expect(stored.total, 90.0);
+    });
+  });
+
+  test('mergeMoney recomputes the total from the merged items', () {
+    final merged = OrderFieldDiff.mergeMoney(
+      {
+        'services': [serviceJson('s1', 'A', 100.0), serviceJson('s2', 'B', 40.0)],
+        'products': <Map<String, dynamic>>[],
+        'discount': 5.0,
+        'total': 999.0,
+      },
+      {'discount': 20.0},
+    );
+    expect(merged['total'], 120.0);
+    expect(merged['discount'], 20.0);
+    expect(merged['services'], hasLength(2));
+  });
+
+  test('a late refusal only touches the snapshot of the same order', () async {
+    late void Function(Object) refuse;
+    store.writeOrderFields = (companyId, orderId, fields) {
+      final c = Completer<void>();
+      refuse = c.completeError;
+      return c.future;
+    };
+    store.order!.status = 'progress';
+    final saving = store.createItem()!;
+
+    // The store moves to another order before the refusal arrives.
+    store.order = Order.fromJson({...serverDoc, 'id': 'o2', 'status': 'done'});
+    store.rememberSaved();
+    refuse(StateError('permission-denied'));
+    await expectLater(saving, throwsStateError);
+
+    // o2's snapshot was not touched: saving o2 unchanged writes nothing.
+    writes.clear();
+    store.writeOrderFields = (companyId, orderId, fields) async {
+      writes.add(fields);
+    };
+    await store.createItem();
+    expect(writes, isEmpty);
   });
 
   test('writes nothing when nothing changed', () async {

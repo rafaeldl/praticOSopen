@@ -86,6 +86,28 @@ abstract class _OrderStore with Store {
     actor: Global.userAggr,
   );
 
+  /// Writes a save that touches the money fields: [fields] plus the items
+  /// and discount the app changed ([appMoney]), with the total recomputed
+  /// from the server copy in a transaction. Offline, [localMoney] (the four
+  /// money fields as the app has them) goes instead. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields,
+    Map<String, dynamic> appMoney,
+    Map<String, dynamic> localMoney,
+  )
+  writeOrderMoney = (companyId, orderId, fields, appMoney, localMoney) =>
+      repository.updateMoney(
+        companyId,
+        orderId,
+        fields,
+        appMoney: appMoney,
+        localMoney: localMoney,
+        actor: Global.userAggr,
+      );
+
   /// While true, changes stay local and nothing is written to Firestore.
   /// The new order screen sets it for a blank order and clears it on
   /// "Salvar OS" (then calls [createItem]).
@@ -2085,11 +2107,10 @@ abstract class _OrderStore with Store {
   /// (order never read here), falls back to the full save. A refused write
   /// puts its fields back as unsaved, so the next save retries them.
   Future<void> _saveChangedFields() {
-    // A snapshot of another order (the order was swapped without setOrder)
-    // is no base: fall back to the full save.
-    final base = _savedSnapshotId == null || _savedSnapshotId == order!.id
-        ? _savedSnapshot
-        : null;
+    // Only a snapshot of this same order is a base (the order may have been
+    // swapped without setOrder): otherwise fall back to the full save.
+    final orderId = order!.id!;
+    final base = _savedSnapshotId == orderId ? _savedSnapshot : null;
     if (base == null) {
       return repository.updateItem(companyId!, order).then((_) {
         rememberSaved();
@@ -2103,11 +2124,35 @@ abstract class _OrderStore with Store {
         if (base.containsKey(key)) key: base[key],
     };
     _savedSnapshot = current;
-    return writeOrderFields(companyId!, order!.id!, changed).catchError((
-      Object e,
-    ) {
+
+    final Future<void> write;
+    if (changed.keys.any(OrderFieldDiff.moneyFields.contains)) {
+      // Items, discount and total go together, with the total recomputed
+      // from what the server has (see TenantOrderRepository.updateMoney).
+      final fields = Map.of(changed)
+        ..removeWhere((key, _) => OrderFieldDiff.moneyFields.contains(key));
+      final appMoney = {
+        for (final key in OrderFieldDiff.moneyInputs)
+          if (changed.containsKey(key)) key: changed[key],
+      };
+      final localMoney = {
+        for (final key in OrderFieldDiff.moneyFields) key: current[key],
+      };
+      write = writeOrderMoney(
+        companyId!,
+        orderId,
+        fields,
+        appMoney,
+        localMoney,
+      );
+    } else {
+      write = writeOrderFields(companyId!, orderId, changed);
+    }
+    return write.catchError((Object e) {
+      // A refusal can arrive late (offline, at sync): it only puts the
+      // fields back as unsaved when the store still holds this order.
       final snapshot = _savedSnapshot;
-      if (snapshot != null) {
+      if (snapshot != null && _savedSnapshotId == orderId) {
         for (final key in changed.keys) {
           if (previous.containsKey(key)) {
             snapshot[key] = previous[key];

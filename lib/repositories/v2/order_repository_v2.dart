@@ -94,6 +94,24 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     UserAggr? actor,
   }) => _tenant.updateFields(companyId, orderId, fields, actor: actor);
 
+  /// Grava itens, desconto e total juntos. Ver
+  /// [TenantOrderRepository.updateMoney].
+  Future<void> updateMoney(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    required Map<String, dynamic> appMoney,
+    required Map<String, dynamic> localMoney,
+    UserAggr? actor,
+  }) => _tenant.updateMoney(
+    companyId,
+    orderId,
+    fields,
+    appMoney: appMoney,
+    localMoney: localMoney,
+    actor: actor,
+  );
+
   /// Lê a OS do servidor, ignorando o cache local.
   /// Ver [TenantOrderRepository.getFromServer].
   Future<Order?> getFromServer(String companyId, String orderId) =>
