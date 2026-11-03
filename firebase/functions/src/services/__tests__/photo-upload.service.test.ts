@@ -1,8 +1,10 @@
 const mockSave = jest.fn();
 const mockMakePublic = jest.fn();
-const mockFile = jest.fn(() => ({
+const mockDelete = jest.fn();
+const mockFile = jest.fn((_path?: string) => ({
   save: mockSave,
   makePublic: mockMakePublic,
+  delete: mockDelete,
 }));
 const mockBucket = jest.fn(() => ({
   name: 'test-bucket',
@@ -22,7 +24,7 @@ jest.mock('dns', () => ({
   },
 }));
 
-import { uploadPhotoFromUrl } from '../photo-upload.service';
+import { deletePhoto, uploadPhotoFromUrl } from '../photo-upload.service';
 
 const GIF_BYTES = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00]);
 
@@ -351,5 +353,32 @@ describe('photo-upload.service - uploadPhotoFromUrl', () => {
     ).rejects.toThrow('Image too large');
     expect(cancel).toHaveBeenCalled();
     expect(reads).toBe(3);
+  });
+});
+
+describe('photo-upload.service - deletePhoto', () => {
+  beforeEach(() => {
+    mockFile.mockClear();
+    mockDelete.mockReset();
+  });
+
+  it('apaga o arquivo que está na pasta da OS', async () => {
+    await deletePhoto('c1', 'o1', 'tenants/c1/orders/o1/photos/p1.jpg');
+    expect(mockFile).toHaveBeenCalledWith('tenants/c1/orders/o1/photos/p1.jpg');
+    expect(mockDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    'tenants/c1/orders/o2/photos/p1.jpg',
+    'tenants/c1/orders/o10/photos/p1.jpg',
+    'tenants/c2/orders/o1/photos/p1.jpg',
+    'tenants/c1/orders/o1/../o2/payments/t1/receipt.pdf',
+    'tenants/c1/receipts/r1/receipt.pdf',
+    'tenants/c1/orders/o1/',
+    '',
+  ])('não apaga caminho fora da pasta da OS: %p', async (path) => {
+    await deletePhoto('c1', 'o1', path);
+    expect(mockFile).not.toHaveBeenCalled();
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });
