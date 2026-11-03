@@ -4,7 +4,7 @@ import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './he
 async function auditScreens(page: Page, theme: 'light' | 'dark') {
   await page.emulateMedia({ colorScheme: theme })
   await page.goto('login')
-  await expect(page.getByLabel('E-mail')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
   await expectNoAxeViolations(page, `login ${theme}`)
   await login(page, 'admin', 'login')
   await setTheme(page, theme)

@@ -3,7 +3,8 @@
 import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
-import { COMPANIES, COMPANY_A, COMPANY_B, DEFAULT_ORDERS, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
+import { createHash } from 'node:crypto'
+import { COMPANIES, COMPANY_A, COMPANY_B, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -156,12 +157,40 @@ async function seedOrders(companyId, count) {
   await writer.close()
 }
 
+// Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
+async function seedWebAccess() {
+  const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
+  await db.doc('config/webApp').set({
+    open: false,
+    allowedEmailHashes: Object.values(USERS).filter((user) => !user.blocked).map((user) => hash(user.email)),
+  })
+}
+
+async function seedInvites() {
+  for (const invite of Object.values(INVITES)) {
+    const company = COMPANIES[invite.company]
+    await db.doc(`links/invites/tokens/${invite.token}`).set({
+      token: invite.token,
+      company: { id: invite.company, name: company.name },
+      role: invite.role,
+      email: invite.email,
+      invitedBy: aggr(company.owner),
+      channel: 'app',
+      status: 'pending',
+      createdAt: iso(60),
+      expiresAt: '2099-01-01T00:00:00.000Z',
+    })
+  }
+}
+
 const orders = Number(process.env.E2E_ORDERS ?? DEFAULT_ORDERS)
 const started = Date.now()
 await seedSegments()
 await seedCompanies()
 await seedUsers()
 await seedCatalog()
+await seedWebAccess()
+await seedInvites()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 console.log(`seed: ${Object.keys(USERS).length} usuários, ${orders} OS em ${Date.now() - started} ms`)

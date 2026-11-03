@@ -8,6 +8,7 @@ import { authClient, clearFirestoreCache, firestoreClient } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { readStorage, writeStorage } from './storage'
+import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, type WebAccess } from './web-access'
 
 export interface CompanyEntry {
   id: string
@@ -34,6 +35,12 @@ export interface SessionState {
   companyId: string | null
   company: CompanyProfile | null
   role: string | null
+  /** Web app access list (lib/web-access.ts). */
+  webAccess: WebAccess
+  /** More than one company and none chosen yet in this browser. */
+  needsCompanyChoice: boolean
+  /** Sign-in that came back from a redirect and failed. */
+  signInError: string | null
 }
 
 export const session = reactive<SessionState>({
@@ -46,6 +53,9 @@ export const session = reactive<SessionState>({
   companyId: null,
   company: null,
   role: null,
+  webAccess: 'unknown',
+  needsCompanyChoice: false,
+  signInError: null,
 })
 
 interface UserCompanyEntry {
@@ -143,7 +153,32 @@ function clear(): void {
     companyId: null,
     company: null,
     role: null,
+    webAccess: 'unknown',
+    needsCompanyChoice: false,
   })
+}
+
+/**
+ * A remembered "yes" lets the start go on and is confirmed in the background;
+ * otherwise the start waits for the answer.
+ */
+async function checkWebAccess(uid: string): Promise<void> {
+  const ask = async () => {
+    try {
+      const allowed = await fetchWebAccess((path) => api(path, { noCompany: true }))
+      rememberAccess(uid, allowed)
+      if (session.uid === uid) session.webAccess = allowed ? 'allowed' : 'denied'
+    } catch (error) {
+      console.warn('session: web access not checked', error)
+      if (session.uid === uid && session.webAccess !== 'allowed') session.webAccess = 'error'
+    }
+  }
+  if (rememberedAccess(uid)) {
+    session.webAccess = 'allowed'
+    if (shouldRecheck(uid)) void ask()
+    return
+  }
+  await ask()
 }
 
 async function hydrate(user: User, forceRefresh = false): Promise<void> {
@@ -153,6 +188,7 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
   try {
     let token = await user.getIdTokenResult(forceRefresh)
     mark('session:token')
+    const access = checkWebAccess(user.uid)
     let roles = (token.claims.roles ?? {}) as Record<string, string>
     const saved = readStorage(savedCompanyKey(user.uid))
     // User and company documents in parallel: the claim already names the company.
@@ -181,7 +217,8 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     session.companyId = companyId
     session.role = session.companies.find((company) => company.id === companyId)?.role ?? null
     session.company = companyId && companyId === guess ? guessed : null
-    if (companyId && companyId !== guess) await loadCompany(companyId)
+    session.needsCompanyChoice = session.companies.length > 1 && !session.companies.some((company) => company.id === saved)
+    await Promise.all([access, companyId && companyId !== guess ? loadCompany(companyId) : null])
   } catch (error) {
     console.error('session: could not load account', error)
     session.failed = true
@@ -193,6 +230,7 @@ let started: Promise<void> | undefined
 /** Resolves after the first auth answer. Safe to call many times. */
 export function startSession(): Promise<void> {
   started ??= (async () => {
+    await finishRedirect()
     const [auth, { onAuthStateChanged }] = await Promise.all([authClient(), import('firebase/auth')])
     await new Promise<void>((resolve) => {
       onAuthStateChanged(auth, (user) => {
@@ -211,6 +249,67 @@ export function startSession(): Promise<void> {
     session.ready = true
   })
   return started
+}
+
+export type ProviderKind = 'google' | 'apple'
+const REDIRECT_FLAG = 'praticos.signInRedirect'
+
+/** Popups that cannot open fall back to a full-page redirect. */
+export function shouldRedirect(code: string | undefined): boolean {
+  return (
+    code === 'auth/popup-blocked' ||
+    code === 'auth/operation-not-supported-in-this-environment' ||
+    code === 'auth/web-storage-unsupported'
+  )
+}
+
+/** Google or Apple. Resolves 'cancelled' when the person closed the window. */
+export async function signInWithProvider(kind: ProviderKind): Promise<'done' | 'cancelled' | 'redirecting'> {
+  const [auth, firebaseAuth] = await Promise.all([authClient(), import('firebase/auth')])
+  const { GoogleAuthProvider, OAuthProvider, browserPopupRedirectResolver, signInWithPopup, signInWithRedirect } = firebaseAuth
+  let provider: InstanceType<typeof GoogleAuthProvider> | InstanceType<typeof OAuthProvider>
+  if (kind === 'google') {
+    provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
+  } else {
+    provider = new OAuthProvider('apple.com')
+    provider.addScope('email')
+    provider.addScope('name')
+  }
+  try {
+    const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver)
+    await hydrate(user)
+    return 'done'
+  } catch (error) {
+    const code = (error as { code?: string }).code
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'cancelled'
+    if (!shouldRedirect(code)) throw error
+    writeStorage(REDIRECT_FLAG, kind)
+    await signInWithRedirect(auth, provider, browserPopupRedirectResolver)
+    return 'redirecting'
+  }
+}
+
+/** Back from a redirect sign-in: finish it before reading the session. */
+async function finishRedirect(): Promise<void> {
+  const kind = readStorage(REDIRECT_FLAG)
+  if (!kind) return
+  writeStorage(REDIRECT_FLAG, '')
+  try {
+    const [auth, { getRedirectResult, browserPopupRedirectResolver }] = await Promise.all([
+      authClient(),
+      import('firebase/auth'),
+    ])
+    await getRedirectResult(auth, browserPopupRedirectResolver)
+  } catch (error) {
+    console.warn('session: redirect sign-in failed', error)
+    session.signInError = kind
+  }
+}
+
+export async function sendPasswordReset(email: string): Promise<void> {
+  const [auth, { sendPasswordResetEmail }] = await Promise.all([authClient(), import('firebase/auth')])
+  await sendPasswordResetEmail(auth, email)
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<void> {
@@ -239,6 +338,7 @@ export async function selectCompany(companyId: string): Promise<void> {
   const entry = session.companies.find((company) => company.id === companyId)
   if (!entry || !session.uid) return
   writeStorage(savedCompanyKey(session.uid), companyId)
+  session.needsCompanyChoice = false
   session.companyId = companyId
   session.role = entry.role
   session.company = null

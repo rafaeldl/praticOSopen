@@ -25,6 +25,18 @@ export const routes: RouteRecordRaw[] = [
     meta: { access: { kind: 'public' }, title: 'login', bare: true },
   },
   {
+    path: '/not-allowed',
+    name: 'notAllowed',
+    component: () => import('@/views/NotAllowedView.vue'),
+    meta: { access: { kind: 'outsideList' }, title: 'web.notAllowed.title', bare: true },
+  },
+  {
+    path: '/choose-company',
+    name: 'chooseCompany',
+    component: () => import('@/views/ChooseCompanyView.vue'),
+    meta: { access: { kind: 'signedIn' }, title: 'web.chooseCompany.title', bare: true },
+  },
+  {
     path: '/no-company',
     name: 'noCompany',
     component: () => import('@/views/NoCompanyView.vue'),
@@ -57,7 +69,8 @@ export const routes: RouteRecordRaw[] = [
           path: '/dev/components',
           name: 'gallery',
           component: () => import('@/views/GalleryView.vue'),
-          meta: { access: { kind: 'signedIn' }, title: 'web.gallery.title' },
+          // Uses the company's country, so it needs a chosen company.
+          meta: { access: { kind: 'member', anyOf: ['viewOwnOrders', 'viewAllOrders', 'viewAssignedOrders'] }, title: 'web.gallery.title' },
         } satisfies RouteRecordRaw,
       ]
     : []),
@@ -84,8 +97,12 @@ router.beforeEach(async (to) => {
     companyId: session.companyId,
     role: session.role,
     useFinancial: session.company?.useFinancial,
+    webAccess: session.webAccess,
+    needsCompanyChoice: session.needsCompanyChoice,
   })
   if (decision === 'login') return { name: 'login', query: to.fullPath === '/' ? {} : { next: to.fullPath }, replace: true }
+  if (decision === 'notAllowed') return { name: 'notAllowed', replace: true }
+  if (decision === 'chooseCompany') return { name: 'chooseCompany', query: { next: to.fullPath }, replace: true }
   if (decision === 'noCompany') return { name: 'noCompany', replace: true }
   if (decision === 'forbidden') return { name: 'forbidden', query: { from: to.path }, replace: true }
   if (to.name === 'login' && session.uid) return { path: '/', replace: true }

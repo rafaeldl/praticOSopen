@@ -14,7 +14,13 @@ vi.mock('../src/lib/firebase', () => ({
   usesEmulators: false,
 }))
 
-const member = (role: string, useFinancial?: boolean): AccessContext => ({ signedIn: true, companyId: 'c1', role, useFinancial })
+const member = (role: string, useFinancial?: boolean): AccessContext => ({
+  signedIn: true,
+  companyId: 'c1',
+  role,
+  useFinancial,
+  webAccess: 'allowed',
+})
 
 describe('permissions match the contract', () => {
   const contract = JSON.parse(
@@ -54,8 +60,22 @@ describe('route decisions', () => {
   })
 
   test('no company goes to the explanation', () => {
-    expect(decideAccess(finance, { signedIn: true, companyId: null, role: null })).toBe('noCompany')
-    expect(decideAccess({ kind: 'signedIn' }, { signedIn: true, companyId: null, role: null })).toBe('allow')
+    const none: AccessContext = { signedIn: true, companyId: null, role: null, webAccess: 'allowed' }
+    expect(decideAccess(finance, none)).toBe('noCompany')
+    expect(decideAccess({ kind: 'signedIn' }, none)).toBe('allow')
+  })
+
+  test.each(['unknown', 'denied', 'error'] as const)('access list %s keeps everything closed', (webAccess) => {
+    const context = { ...member('owner'), webAccess }
+    expect(decideAccess(finance, context)).toBe('notAllowed')
+    expect(decideAccess({ kind: 'signedIn' }, context)).toBe('notAllowed')
+    expect(decideAccess({ kind: 'outsideList' }, context)).toBe('allow')
+    expect(decideAccess({ kind: 'public' }, context)).toBe('allow')
+  })
+
+  test('several companies and none chosen asks first', () => {
+    expect(decideAccess(finance, { ...member('owner'), needsCompanyChoice: true })).toBe('chooseCompany')
+    expect(decideAccess({ kind: 'signedIn' }, { ...member('owner'), needsCompanyChoice: true })).toBe('allow')
   })
 
   test.each([
@@ -119,5 +139,62 @@ describe('session companies', () => {
     expect(pickCompany(list, 'b')).toBe('b')
     expect(pickCompany(list, 'gone')).toBe('a')
     expect(pickCompany([], 'a')).toBeNull()
+  })
+})
+
+describe('sign-in helpers', () => {
+  test('popup that cannot open falls back to redirect', async () => {
+    const { shouldRedirect } = await import('../src/lib/session')
+    expect(shouldRedirect('auth/popup-blocked')).toBe(true)
+    expect(shouldRedirect('auth/operation-not-supported-in-this-environment')).toBe(true)
+    expect(shouldRedirect('auth/popup-closed-by-user')).toBe(false)
+    expect(shouldRedirect('auth/internal-error')).toBe(false)
+  })
+
+  test('company guess from the claim follows the saved choice', async () => {
+    const { guessCompany } = await import('../src/lib/session')
+    expect(guessCompany({ a: 'admin', b: 'owner' }, 'b')).toBe('b')
+    expect(guessCompany({ a: 'admin' }, 'gone')).toBe('a')
+    expect(guessCompany({}, null)).toBeNull()
+  })
+
+  test('e-mail errors use the app texts', async () => {
+    const { emailErrorKey } = await import('../src/lib/auth-errors')
+    expect(emailErrorKey('auth/invalid-credential')).toBe('emailLoginWrongCredentials')
+    expect(emailErrorKey('auth/too-many-requests')).toBe('emailLoginTooManyAttempts')
+    expect(emailErrorKey('auth/whatever')).toBe('emailLoginGenericError')
+  })
+})
+
+describe('web access memory', () => {
+  test('a yes lasts 12 hours, a no is not remembered as yes', async () => {
+    const { ALLOWED_TTL_MS, rememberAccess, rememberedAccess } = await import('../src/lib/web-access')
+    rememberAccess('u1', true, 1000)
+    expect(rememberedAccess('u1', 1000 + ALLOWED_TTL_MS - 1)).toBe(true)
+    expect(rememberedAccess('u1', 1000 + ALLOWED_TTL_MS)).toBe(false)
+    rememberAccess('u1', false, 2000)
+    expect(rememberedAccess('u1', 2001)).toBe(false)
+    expect(rememberedAccess('other', 2001)).toBe(false)
+  })
+
+  test('only allowed: true opens', async () => {
+    const { fetchWebAccess } = await import('../src/lib/web-access')
+    await expect(fetchWebAccess(async () => ({ allowed: true }))).resolves.toBe(true)
+    await expect(fetchWebAccess(async () => ({}))).resolves.toBe(false)
+    await expect(fetchWebAccess(async () => { throw new Error('down') })).rejects.toThrow('down')
+  })
+})
+
+describe('invites', () => {
+  test('expired or broken invites are dropped', async () => {
+    const { toInvite } = await import('../src/lib/invites')
+    const now = new Date('2026-11-01T00:00:00Z')
+    expect(toInvite('t', { company: { id: 'c', name: 'C' }, role: 'technician', expiresAt: '2026-12-01T00:00:00Z' }, now)).toMatchObject({
+      token: 't',
+      companyId: 'c',
+      role: 'technician',
+    })
+    expect(toInvite('t', { company: { id: 'c' }, expiresAt: '2026-10-01T00:00:00Z' }, now)).toBeNull()
+    expect(toInvite('t', { role: 'admin' }, now)).toBeNull()
   })
 })

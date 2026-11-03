@@ -419,6 +419,12 @@ service cloud.firestore {
     }
 
     // Segments - global collection (read-only para usuários autenticados)
+    // Lista de acesso do app web: só o servidor (rota /v1/app/web-access e
+    // script webapp-access) lê e grava. Guarda hashes de e-mail.
+    match /config/webApp {
+      allow read, write: if false;
+    }
+
     match /segments/{segmentId} {
       allow read: if request.auth != null;
       allow write: if false; // Apenas via Admin SDK (script de seed)

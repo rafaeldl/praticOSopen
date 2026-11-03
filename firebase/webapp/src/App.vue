@@ -27,6 +27,13 @@ watchEffect(() => {
   if (session.company) void loadSegmentLabels(session.company.segment, locale.value)
 })
 
+// A "no" from the access list can arrive after the start (remembered "yes" revoked).
+watchEffect(() => {
+  if (ready.value && session.uid && session.webAccess === 'denied' && route.name !== 'notAllowed') {
+    void router.replace({ name: 'notAllowed' })
+  }
+})
+
 // Moving between screens must not leave focus on a link that may be gone.
 const stopFocus = router.afterEach((to, from) => {
   if (from.matched.length === 0 || to.path === from.path) return

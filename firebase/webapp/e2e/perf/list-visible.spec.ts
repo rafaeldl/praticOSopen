@@ -41,6 +41,10 @@ const summary = (runs: Record<string, number>[]) =>
 
 test('lista visível em Fast 4G + CPU 4x', async ({ browser }) => {
   const setup = await browser.newContext()
+  // Perf runs without the Functions emulator (10 thousand triggers would skew the
+  // numbers), so the access list answer is the remembered "yes" every allowed
+  // person has after the first visit.
+  await setup.addInitScript(() => localStorage.setItem('praticos.webAccess.e2e-admin', String(Date.now())))
   const setupPage = await setup.newPage()
   await login(setupPage, 'admin', 'orders')
   await expect(setupPage.getByTestId('orders-table')).toBeVisible()

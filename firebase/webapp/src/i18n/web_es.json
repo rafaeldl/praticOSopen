@@ -38,7 +38,6 @@
   "web.login.title": "Entrar en PraticOS",
   "web.login.sub": "Usa la misma cuenta del celular. Todo lo que está allí aparece aquí.",
   "web.login.claim": "Todo tu taller, en una pantalla grande.",
-  "web.login.invalid": "El correo o la contraseña no coinciden.",
   "web.noCompany.title": "Tu cuenta aún no está en una empresa",
   "web.noCompany.body": "Crea la empresa en la app del celular o acepta la invitación que recibiste. Después, vuelve aquí.",
   "web.noCompany.check": "Ya acepté, verificar de nuevo",
@@ -65,5 +64,10 @@
   "web.gallery.api": "Llamar API",
   "web.gallery.discard": "¿Descartar lo escrito?",
   "web.gallery.emptyTitle": "Nada por aquí",
-  "web.gallery.emptyBody": "Texto de ejemplo."
+  "web.gallery.emptyBody": "Texto de ejemplo.",
+  "web.chooseCompany.title": "¿Dónde vas a trabajar ahora?",
+  "web.chooseCompany.sub": "Puedes cambiarlo después, en el menú.",
+  "web.notAllowed.title": "PraticOS en la computadora aún no está habilitado para ti",
+  "web.notAllowed.body": "Lo estamos abriendo de a poco. Mientras tanto, sigue con la app del celular: todo está allí.",
+  "web.invites.rejected": "Invitación rechazada"
 }
