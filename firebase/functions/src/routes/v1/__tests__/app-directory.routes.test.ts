@@ -319,6 +319,55 @@ describe('POST e PATCH /devices', () => {
   });
 });
 
+// ─── Revisão do #517 ────────────────────────────────────────────────────────
+describe('versão opaca no cliente e no aparelho (M1)', () => {
+  test('GET devolve a versão; PATCH com a versão antiga dá 409 e não grava', async () => {
+    seed('companies/c1/customers/ed', { name: 'Ed', updatedAt: '2026-10-01T10:00:00.000000' });
+    const read1 = await call('admin', 'get', `${CU}/ed`);
+    expect(read1.body.data.version).toBe('2026-10-01T10:00:00.000000');
+    seed('companies/c1/customers/ed', { name: 'Ed no app', updatedAt: '2026-10-02T09:00:00.000000' });
+    const stale = await call('admin', 'patch', `${CU}/ed`, { name: 'Edu', version: read1.body.data.version });
+    expect(stale.status).toBe(409);
+    expect(stale.body.error.code).toBe('CUSTOMER_CHANGED');
+    expect((read('companies/c1/customers/ed') as any).name).toBe('Ed no app');
+    const fresh = await call('admin', 'patch', `${CU}/ed`, { name: 'Edu', version: '2026-10-02T09:00:00.000000' });
+    expect(fresh.status).toBe(200);
+    expect(fresh.body.data.version).toEqual(expect.any(String));
+  });
+
+  test('aparelho: mesma regra', async () => {
+    seed('companies/c1/devices/uno', { name: 'Uno', updatedAt: '2026-10-02T09:00:00.000Z' });
+    expect((await call('admin', 'get', `${DE}/uno`)).body.data.version).toBe('2026-10-02T09:00:00.000Z');
+    const stale = await call('admin', 'patch', `${DE}/uno`, { name: 'Uno 2', version: '2026-10-01T09:00:00.000Z' });
+    expect(stale.status).toBe(409);
+    expect(stale.body.error.code).toBe('DEVICE_CHANGED');
+    expect((await call('admin', 'patch', `${DE}/uno`, { name: 'Uno 2', version: '2026-10-02T09:00:00.000Z' })).status).toBe(200);
+  });
+});
+
+describe('o que o cliente tem antes de apagar (M2)', () => {
+  test('conta todas as OS, recibos e cobranças, também as que o papel não vê', async () => {
+    seedOrder('o1', { createdBy: { id: 'cons1', name: 'Caio' } });
+    seedOrder('o2', { createdBy: { id: 'someone', name: 'X' } });
+    seed('companies/c1/receipts/r1', { customer: { id: 'ana', name: 'Ana' }, status: 'active' });
+    seed('companies/c1/customerCharges/k1', { customer: { id: 'ana', name: 'Ana' } });
+    seed('companies/c1/receipts/r2', { customer: { id: 'bia', name: 'Bia' }, status: 'active' });
+    const res = await call('consultant', 'get', `${CU}/ana`);
+    expect(res.body.data.orders.map((o: any) => o.id)).toEqual(['o1']);
+    expect(res.body.data.links).toEqual({ orders: 2, receipts: 1, charges: 1 });
+  });
+});
+
+describe('cliente com muitas OS (B2)', () => {
+  test('as 500 mais recentes, em ordem, com aviso de que cortou', async () => {
+    for (let i = 0; i < 501; i++) seedOrder(`m${String(i).padStart(3, '0')}`, { createdAt: new Date(Date.UTC(2026, 0, 1) + i * 60000).toISOString() });
+    const res = await call('admin', 'get', `${CU}/ana`);
+    expect(res.body.data.orders).toHaveLength(500);
+    expect(res.body.data.orders[0].id).toBe('m500');
+    expect(res.body.data.ordersTruncated).toBe(true);
+  });
+});
+
 describe('DELETE /devices/:id', () => {
   test('apaga; só quem edita aparelhos', async () => {
     expect((await call('consultant', 'delete', `${DE}/uno`)).status).toBe(403);
