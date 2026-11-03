@@ -58,7 +58,7 @@ import OrderPhotos from './OrderPhotos.vue'
 import OrderPrint from './OrderPrint.vue'
 import OrderAssistant from './OrderAssistant.vue'
 import PaymentHistory from './receive/PaymentHistory.vue'
-import { paymentSettings, removeTransaction, resetPayments } from '@/lib/receive/data'
+import { paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
 import { receivesMoney, type Payment } from '@/lib/receive/model'
 // Opened on demand: the order shows without them.
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
@@ -209,7 +209,7 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
     return true
   } catch (error) {
     console.warn('order: write failed', error)
-    showToast(t(errorMessageKey(error)))
+    showToast(error instanceof ProofUploadError ? t('receiveCustomerUploadFailed') : t(errorMessageKey(error)))
     if (error instanceof ApiError && ['ORDER_CHANGED', 'ITEM_NOT_FOUND', 'PAYMENT_EXCEEDS_BALANCE'].includes(error.code)) await watcher?.refresh()
     return false
   } finally {
@@ -267,9 +267,30 @@ async function assign(id: string) {
   await run(() => writes.patchOrder(order.value!.id, { assignedTo: id === 'none' ? null : id }, expected()), t('web.saved'))
 }
 
-async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }) {
-  const ok = await run(() => writes.receivePayment(order.value!.id, value, expected()), t('web.order.received', { amount: money(value.amount) }))
+async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; proof?: File }) {
+  const { proof, ...body } = value
+  const id = order.value!.id
+  const ok = await run(async () => {
+    // The file goes first (to the payment's folder), then the payment carries it.
+    const receiptFile = proof ? await uploadProof(id, body.clientTransactionId, proof).catch(() => Promise.reject(new ProofUploadError())) : undefined
+    return writes.receivePayment(id, { ...body, ...(receiptFile ? { receiptFile } : {}) }, expected())
+  }, t('web.order.received', { amount: money(value.amount) }))
   if (ok) dialog.value = null
+}
+
+class ProofUploadError extends Error {}
+
+/** Attach or replace (the server deletes the old file) and take out the proof of a payment. */
+async function attachProof(payment: Payment, file: File) {
+  const id = order.value!.id
+  await run(async () => {
+    const receiptFile = await uploadProof(id, payment.id as string, file).catch(() => Promise.reject(new ProofUploadError()))
+    return setProof(id, payment.id as string, receiptFile)
+  }, t('web.receive.proofSaved'))
+}
+
+async function detachProof(payment: Payment) {
+  await run(() => removeProof(order.value!.id, payment.id as string), t('web.receive.proofRemoved'))
 }
 
 async function discount(value: { amount: number; clientTransactionId: string }) {
@@ -601,7 +622,17 @@ watch(
           <p v-if="money$.unpricedCount" class="sub">{{ t('orderUnpricedCount', { count: money$.unpricedCount }) }}</p>
           <button v-if="access.canReceive && moneyRowTone && money$.remaining > 0 && step?.kind !== 'receive'" type="button" class="link" @click="dialog = { kind: 'receive' }">{{ t('receiveTitle') }}</button>
           <p v-if="!moneyRowTone && order.transactions.length" class="sub" data-testid="blocked-status">{{ t('web.receive.blockedStatus', { status: statusText(order.status) }) }}</p>
-          <PaymentHistory :order="order" :can-receive="access.canReceive && !!moneyRowTone" :can-discount="access.canDiscount && !!moneyRowTone" :busy="busy" @remove="removePayment" @undo-all="undoAllPayments" />
+          <PaymentHistory
+            :order="order"
+            :can-receive="access.canReceive && !!moneyRowTone"
+            :can-discount="access.canDiscount && !!moneyRowTone"
+            :can-attach="access.canReceive && can('attachPhotos')"
+            :busy="busy"
+            @remove="removePayment"
+            @undo-all="undoAllPayments"
+            @attach="attachProof"
+            @detach="detachProof"
+          />
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
@@ -693,7 +724,7 @@ watch(
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
-    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
+    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
     <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />

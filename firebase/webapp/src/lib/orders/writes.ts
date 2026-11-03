@@ -96,7 +96,11 @@ export function removeItem(id: string, itemId: string, expectedUpdatedAt?: strin
 }
 
 /** expectedUpdatedAt: a payment over a newer version is refused (two screens receiving the same balance). */
-export function receivePayment(id: string, body: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }, expectedUpdatedAt?: string | null) {
+export function receivePayment(
+  id: string,
+  body: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; receiptFile?: { url: string; storagePath: string; fileName: string; contentType: string } },
+  expectedUpdatedAt?: string | null,
+) {
   return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } })
 }
 
