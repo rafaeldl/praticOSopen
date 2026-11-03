@@ -1,7 +1,7 @@
 // Fixes from the red team (revisao-pr515) and the simulated users (usuarios-pr515).
 // Each test names the item it covers.
 import { expect, test, type Page } from '@playwright/test'
-import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc } from './data'
+import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc, writeOrderFieldsRaw } from './data'
 import { login, setTheme, signOut } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -55,6 +55,46 @@ test.describe('dinheiro', () => {
     await expect(page.locator('.toast')).toContainText('O que falta receber mudou enquanto você recebia')
     expect(sent.expectedUpdatedAt).toBeTruthy()
     expect(sent.clientTransactionId).toMatch(/^[0-9a-f-]{36}$/)
+  })
+})
+
+test('A4: quem não vê valores também acha pelo número a OS que a lista não carregou (API projetada)', async ({ page }) => {
+  const asked: string[] = []
+  page.on('request', (request) => {
+    if (/\/v1\/app\/orders\?number=/.test(request.url())) asked.push(request.url())
+  })
+  await login(page, 'supervisor', './?f=all')
+  await expect(table(page)).toBeVisible()
+  await page.getByRole('searchbox', { name: /Buscar OS/ }).fill('2')
+  await expect(table(page).locator('tbody tr[data-order] td.c-num').first()).toHaveText('2')
+  expect(asked.length).toBeGreaterThan(0)
+  await expect(table(page).getByRole('columnheader', { name: 'Total' })).toHaveCount(0)
+})
+
+// revisao-pr515-3 A1: the app saves updatedAt as local time without a zone. The browser runs in
+// another zone than the server (Tokyo here), so reading it as an instant would refuse every write.
+test.describe('OS salva pelo app (updatedAt sem fuso)', () => {
+  test.use({ timezoneId: 'Asia/Tokyo' })
+  test('A1: recebe em duas vezes, sem 409, mandando a versão como veio', async ({ page }) => {
+    const LOCAL = '2026-10-01T09:00:00.123456'
+    await writeOrderFieldsRaw('scn-app-saved', { updatedAt: LOCAL, paidAmount: 0, payment: 'unpaid', paid: false, transactions: [] })
+    const sent: unknown[] = []
+    page.on('request', (request) => {
+      if (/\/payments$/.test(request.url()) && request.method() === 'POST') sent.push(request.postDataJSON().expectedUpdatedAt)
+    })
+    await openOrder(page, 'admin', 'scn-app-saved')
+    await panel(page).getByTestId('next-step').click()
+    const box = dialog(page, 'Receber')
+    await box.getByLabel('Quanto recebeu').fill('30')
+    await box.getByRole('button', { name: 'Marcar como recebido' }).click()
+    await expect(box).toHaveCount(0)
+    await expect.poll(async () => (await readOrder('scn-app-saved'))?.paidAmount).toBe(30)
+    await expect(panel(page).getByTestId('next-step')).toHaveText('Receber R$ 50,00')
+    await panel(page).getByTestId('next-step').click()
+    await dialog(page, 'Receber').getByRole('button', { name: 'Marcar como recebido' }).click()
+    await expect.poll(async () => (await readOrder('scn-app-saved'))?.paidAmount).toBe(80)
+    expect(sent[0]).toBe(LOCAL)
+    expect(sent).toHaveLength(2)
   })
 })
 
@@ -173,6 +213,27 @@ test('M2 (home.filter.mine): o técnico vê em Minhas a OS que o admin criou e a
   await row(page, 508).getByRole('button', { name: 'Cliente 10' }).click()
   await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 10')
   await expect(panel(page).getByText('OS não está mais aqui')).toHaveCount(0)
+})
+
+test('N1: a OS atribuída ao técnico aparece também em Paradas e Todas, sem valores', async ({ page }) => {
+  const order = await makeOrder('admin', {
+    status: 'progress',
+    assignedTo: { id: 'e2e-technician', name: 'Tiago Tecnico' },
+    onHold: { reason: 'part', since: new Date(Date.now() - 86400000).toISOString() },
+  })
+  const lists: string[] = []
+  page.on('response', async (response) => {
+    if (/\/v1\/app\/orders\?/.test(response.url())) lists.push(await response.text())
+  })
+  await login(page, 'technician')
+  await page.getByRole('button', { name: 'Paradas' }).click()
+  await expect(row(page, order.number)).toHaveCount(1)
+  await page.getByRole('button', { name: 'Todas' }).click()
+  await expect(row(page, order.number)).toHaveCount(1)
+  // Once each, and no money in the projection (N3).
+  await expect(table(page).locator('td.c-num', { hasText: new RegExp(`^${order.number}$`) })).toHaveCount(1)
+  expect(lists.length).toBeGreaterThan(0)
+  for (const body of lists) expect(JSON.stringify(JSON.parse(body).data)).not.toMatch(/"(total|paidAmount|payment|value)"/)
 })
 
 test('M2 (order.responsible.pick): o admin escolhe o técnico e a OS aparece em Minhas dele', async ({ page }) => {

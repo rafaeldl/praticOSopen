@@ -54,10 +54,10 @@ async function apply(change: (order: Order) => Promise<{ order?: Record<string, 
 }
 
 const setStatus = (status: OrderStatus) =>
-  apply((order) => writes.patchOrder(order.id, { status }, order.updatedAt), (order) => order.status === status)
+  apply((order) => writes.patchOrder(order.id, { status }, order.version), (order) => order.status === status)
 
 const assign = (id: string) =>
-  apply((order) => writes.patchOrder(order.id, { assignedTo: id === 'none' ? null : id }, order.updatedAt), () => false)
+  apply((order) => writes.patchOrder(order.id, { assignedTo: id === 'none' ? null : id }, order.version), () => false)
 
 async function openAssignee() {
   try {

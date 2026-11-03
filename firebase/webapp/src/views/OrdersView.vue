@@ -311,6 +311,14 @@ watch(search, (text) => {
   typing = setTimeout(() => {
     setQuery({ q: text.trim() || undefined })
     if (text.trim()) announce(t('web.orders.count', { count: visible.value.length }))
+    // A number typed and not among the loaded rows: ask for it, so the exact one still comes first.
+    const number = Number(text.trim())
+    if (loader && Number.isInteger(number) && number > 0 && !rows.value.some((row) => row.number === number)) {
+      const token = loadToken
+      void loader.byNumber(number).then((found) => {
+        if (token === loadToken && found.length) rows.value = mergeById(rows.value, found)
+      }).catch(() => {})
+    }
   }, 250)
 })
 watch(() => [filter.value, board.value, session.companyId], () => void load())

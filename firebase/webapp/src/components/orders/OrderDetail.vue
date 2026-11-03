@@ -138,11 +138,12 @@ function run(action: () => Promise<{ order?: Record<string, unknown> } | void>, 
 
 async function write(action: () => Promise<{ order?: Record<string, unknown> } | void>, done?: string): Promise<boolean> {
   busy.value = true
+  const over = order.value?.version ?? null
   try {
     const response = await action()
     const fresh = response && response.order ? writes.orderOf(response, ctx.showsMoney) : null
     // The next write in the queue sends this version even if the listener is late (B5).
-    if (fresh?.updatedAt) lastSaved = fresh.updatedAt
+    if (fresh?.version) saved = { version: fresh.version, over }
     if (fresh) {
       // Firestore users get the change from the listener (with item ids); the API is read again.
       if (!ctx.showsMoney) state.value = { kind: 'ready', order: fresh }
@@ -163,11 +164,15 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
   }
 }
 
-let lastSaved: string | null = null
-/** The newest version this screen knows: the listener's or the last response's. */
+/**
+ * The version to send (opaque, never compared as a date). The last response's,
+ * while the listener still shows the version that write replaced (B5); once the
+ * listener moves on, its own.
+ */
+let saved: { version: string; over: string | null } | null = null
 const expected = () => {
-  const seen = order.value?.updatedAt ?? null
-  return lastSaved && (!seen || lastSaved > seen) ? lastSaved : seen
+  const seen = order.value?.version ?? null
+  return saved && seen === saved.over ? saved.version : seen
 }
 
 async function setStatus(status: OrderStatus) {
