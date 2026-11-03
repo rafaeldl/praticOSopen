@@ -23,6 +23,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:flutter/foundation.dart'
     show VoidCallback, debugPrint, visibleForTesting;
@@ -55,6 +56,31 @@ abstract class _OrderStore with Store {
   final AuthorizationService _authService = AuthorizationService.instance;
 
   Order? order;
+
+  /// The order's fields as last read from or written to Firestore
+  /// ([OrderFieldDiff.snapshotOf]). A save writes only what differs from it.
+  Map<String, dynamic>? _savedSnapshot;
+
+  /// Remembers the current order as the saved state (next save writes only
+  /// what changes from here).
+  @visibleForTesting
+  void rememberSaved() {
+    _savedSnapshot = order == null ? null : OrderFieldDiff.snapshotOf(order!);
+  }
+
+  /// Writes the changed fields of an existing order. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields,
+  )
+  writeOrderFields = (companyId, orderId, fields) => repository.updateFields(
+    companyId,
+    orderId,
+    fields,
+    actor: Global.userAggr,
+  );
 
   /// While true, changes stay local and nothing is written to Firestore.
   /// The new order screen sets it for a blank order and clears it on
@@ -320,6 +346,43 @@ abstract class _OrderStore with Store {
       // Atualiza o número da OS a partir do stream
       order!.number = orderStream!.data.number;
     });
+    reaction<Order?>(
+      (_) => orderStream?.value,
+      (server) => runInAction(() => applyServerOrder(server)),
+    );
+  }
+
+  /// Item lists the app adopts from the server when it hasn't changed them
+  /// itself (an item added by the web shows up and is kept by the next save).
+  static const _serverOwnedLists = ['services', 'products'];
+
+  /// Brings items written elsewhere into the open order, for each list the
+  /// app didn't change since its last save.
+  @visibleForTesting
+  void applyServerOrder(Order? server) {
+    final base = _savedSnapshot;
+    final local = order;
+    if (server == null || local == null || base == null || deferSave) return;
+    if (server.id == null || server.id != local.id) return;
+    final remote = OrderFieldDiff.snapshotOf(server);
+    final current = OrderFieldDiff.snapshotOf(local);
+    var adopted = false;
+    for (final key in _serverOwnedLists) {
+      if (!OrderFieldDiff.same(current[key], base[key])) continue;
+      if (OrderFieldDiff.same(remote[key], base[key])) continue;
+      if (key == 'services') {
+        local.services = server.services ?? [];
+        services = local.services!.asObservable();
+      } else {
+        local.products = server.products ?? [];
+        products = local.products!.asObservable();
+      }
+      base[key] = OrderFieldDiff.deepCopy(remote[key]);
+      adopted = true;
+    }
+    if (!adopted) return;
+    base['total'] = remote['total'];
+    updateTotal();
   }
 
   String? get companyId => Global.companyAggr?.id;
@@ -370,6 +433,8 @@ abstract class _OrderStore with Store {
     String? orderId = order.id;
 
     this.order = order;
+    // Before the defaults below: whatever they change goes in the next save.
+    rememberSaved();
 
     // Garante que a order tenha o company setado
     if (this.order!.company == null) {
@@ -1928,61 +1993,125 @@ abstract class _OrderStore with Store {
   /// [onCreated] runs once a new order has its id (used to add the
   /// customer's request as the first comment). On an existing order, resolves
   /// when the update reached the server.
-  Future<void>? createItem({void Function(String orderId)? onCreated}) {
+  Future<void>? createItem({
+    void Function(String orderId)? onCreated,
+    void Function(Object error)? onError,
+  }) {
     if (deferSave || order == null || companyId == null) return null;
     order!.syncDeviceIds();
 
     if (order!.id == null) {
-      // Para nova OS, verifica duplicação pelo número
-      if (order!.number != null) {
-        // Verifica se existe OS com o mesmo número
-        repository.getOrderByNumber(companyId!, order!.number!).then((
-          existingOrder,
-        ) {
-          if (existingOrder != null) {
-            // Se encontrou, usa o ID da existente
-            order!.id = existingOrder.id;
-            repository.updateItem(companyId!, order);
-            if (order!.id != null) onCreated?.call(order!.id!);
-            orderStream = repository
-                .streamSingle(companyId!, order!.id)
-                .asObservable();
-          } else {
-            // Cria nova se não encontrou
-            repository.createItem(companyId!, order).then((_) {
-              if (order!.id != null) {
-                orderStream = repository
-                    .streamSingle(companyId!, order!.id)
-                    .asObservable();
-                _logOrderCreated();
-                onCreated?.call(order!.id!);
-              }
-            });
-          }
-        });
-      } else {
-        // Cria nova OS sem número
-        repository.createItem(companyId!, order).then((_) {
-          if (order!.id != null) {
-            orderStream = repository
-                .streamSingle(companyId!, order!.id)
-                .asObservable();
-            _logOrderCreated();
-            onCreated?.call(order!.id!);
-          }
-        });
-      }
+      // The new-order sheet has already closed: errors go to [onError]
+      // (and Crashlytics) instead of being lost.
+      _createNewOrder(onCreated).catchError((Object e, StackTrace stack) {
+        _logSaveError(e, stack, 'createOrder');
+        onError?.call(e);
+      });
     } else {
-      // Atualiza OS existente
-      return repository.updateItem(companyId!, order).then((_) {
+      // Atualiza OS existente: só os campos que mudaram desde a última
+      // leitura ou gravação, para não apagar o que outro lado gravou.
+      return _saveChangedFields().then((_) {
         if (orderStream == null || orderStream!.value?.id != order!.id) {
-          orderStream = repository
-              .streamSingle(companyId!, order!.id)
-              .asObservable();
+          orderStream = streamOrder(companyId!, order!.id).asObservable();
         }
       });
     }
     return null;
+  }
+
+  /// Creates the order (or reuses the one with the same number) and starts
+  /// listening to it. Errors propagate to [createItem].
+  Future<void> _createNewOrder(void Function(String orderId)? onCreated) async {
+    final company = companyId!;
+    final current = order!;
+    if (current.number != null) {
+      final existing = await findOrderByNumber(company, current.number!);
+      if (existing != null) {
+        current.id = existing.id;
+        await repository.updateItem(company, current);
+        _afterOrderCreated(company, current, onCreated, created: false);
+        return;
+      }
+    }
+    await createOrderDoc(company, current);
+    _afterOrderCreated(company, current, onCreated, created: true);
+  }
+
+  void _afterOrderCreated(
+    String company,
+    Order saved,
+    void Function(String orderId)? onCreated, {
+    required bool created,
+  }) {
+    final id = saved.id;
+    if (id == null) return;
+    if (identical(order, saved)) {
+      rememberSaved();
+      orderStream = streamOrder(company, id).asObservable();
+    }
+    if (created) _logOrderCreated();
+    onCreated?.call(id);
+  }
+
+  /// Live copy of a saved order. Replaceable in tests.
+  @visibleForTesting
+  late Stream<Order?> Function(String companyId, String? orderId) streamOrder =
+      repository.streamSingle;
+
+  /// Finds an order by number. Replaceable in tests.
+  @visibleForTesting
+  late Future<Order?> Function(String companyId, int number)
+  findOrderByNumber = repository.getOrderByNumber;
+
+  /// Writes a new order. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(String companyId, Order order) createOrderDoc =
+      (companyId, order) => repository.createItem(companyId, order);
+
+  void _logSaveError(Object e, StackTrace stack, String where) {
+    debugPrint('OrderStore.$where failed: $e');
+    try {
+      unawaited(
+        FirebaseCrashlytics.instance
+            .recordError(e, stack, reason: 'OrderStore.$where', fatal: false)
+            .catchError((_) {}),
+      );
+    } catch (_) {}
+  }
+
+  /// Writes the fields that differ from [_savedSnapshot]. Without a snapshot
+  /// (order never read here), falls back to the full save. A refused write
+  /// puts its fields back as unsaved, so the next save retries them.
+  Future<void> _saveChangedFields() {
+    final base = _savedSnapshot;
+    if (base == null) {
+      return repository.updateItem(companyId!, order).then((_) {
+        rememberSaved();
+      });
+    }
+    final current = OrderFieldDiff.snapshotOf(order!);
+    final changed = OrderFieldDiff.changedFields(base, current);
+    if (changed.isEmpty) return Future.value();
+    final previous = {
+      for (final key in changed.keys)
+        if (base.containsKey(key)) key: base[key],
+    };
+    _savedSnapshot = current;
+    return writeOrderFields(companyId!, order!.id!, changed).catchError((
+      Object e,
+    ) {
+      final snapshot = _savedSnapshot;
+      if (snapshot != null) {
+        for (final key in changed.keys) {
+          if (previous.containsKey(key)) {
+            snapshot[key] = previous[key];
+          } else {
+            snapshot.remove(key);
+          }
+        }
+      }
+      throw e;
+    });
   }
 
   void _logOrderCreated() {

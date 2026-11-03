@@ -6523,4 +6523,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Last: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'Couldn\'t save the work order';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Check your connection and create the work order again.';
 }

@@ -6,6 +6,7 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/switch_stream.dart';
 
@@ -182,6 +183,39 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return collectionFor(
       companyId,
     ).doc(item?.id).set(json, SetOptions(merge: true));
+  }
+
+  /// Writes only [fields] of an existing order (from
+  /// [OrderFieldDiff.changedFields]), stamping `updatedAt`/`updatedBy` with
+  /// the acting user. Fields written elsewhere (items by the web, payments by
+  /// the server) are left as they are. No transaction: works offline.
+  Future<void> updateFields(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    UserAggr? actor,
+  }) {
+    return collectionFor(
+      companyId,
+    ).doc(orderId).update(fieldUpdateOf(fields, actor: actor ?? Global.userAggr));
+  }
+
+  /// Firestore map for [updateFields]: [DeleteFieldOp] becomes
+  /// `FieldValue.delete()`, payment fields are dropped and the audit fields
+  /// are the acting user's.
+  static Map<String, dynamic> fieldUpdateOf(
+    Map<String, dynamic> fields, {
+    UserAggr? actor,
+    DateTime? now,
+  }) {
+    final result = <String, dynamic>{};
+    fields.forEach((key, value) {
+      if (OrderFieldDiff.ignoredFields.contains(key)) return;
+      result[key] = value is DeleteFieldOp ? FieldValue.delete() : value;
+    });
+    result['updatedAt'] = (now ?? DateTime.now()).toIso8601String();
+    if (actor != null) result['updatedBy'] = actor.toJson();
+    return result;
   }
 
   /// Offline without cache, `get()` throws: treat as a new order (full write).

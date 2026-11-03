@@ -10619,6 +10619,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Última: {service}'**
   String maintenanceLastService(String service);
+
+  /// No description provided for @orderCreateFailedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar a OS'**
+  String get orderCreateFailedTitle;
+
+  /// No description provided for @orderCreateFailedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira a internet e crie a OS de novo.'**
+  String get orderCreateFailedMessage;
 }
 
 class _AppLocalizationsDelegate

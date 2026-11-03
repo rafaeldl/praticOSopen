@@ -2640,5 +2640,7 @@
   "maintenanceWhatsappMessageNoName": "Hi! The maintenance of {device} is coming up, planned for {date}. Can we pick a day?",
   "@maintenanceWhatsappMessageNoName": {"placeholders": {"device": {"type": "String"}, "date": {"type": "String"}}},
   "maintenanceLastService": "Last: {service}",
-  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}}
+  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
+  "orderCreateFailedTitle": "Couldn't save the work order",
+  "orderCreateFailedMessage": "Check your connection and create the work order again."
 }

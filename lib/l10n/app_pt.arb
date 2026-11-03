@@ -3019,5 +3019,7 @@
   "maintenanceWhatsappMessageNoName": "Olá! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?",
   "@maintenanceWhatsappMessageNoName": {"placeholders": {"device": {"type": "String"}, "date": {"type": "String"}}},
   "maintenanceLastService": "Última: {service}",
-  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}}
+  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}},
+  "orderCreateFailedTitle": "Não deu para salvar a OS",
+  "orderCreateFailedMessage": "Confira a internet e crie a OS de novo."
 }

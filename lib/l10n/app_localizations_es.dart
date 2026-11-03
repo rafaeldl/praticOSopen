@@ -6540,4 +6540,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Última: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'No se pudo guardar la OS';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Revisa la conexión y crea la OS de nuevo.';
 }

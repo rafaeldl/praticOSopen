@@ -6530,4 +6530,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String maintenanceLastService(String service) {
     return 'Última: $service';
   }
+
+  @override
+  String get orderCreateFailedTitle => 'Não deu para salvar a OS';
+
+  @override
+  String get orderCreateFailedMessage =>
+      'Confira a internet e crie a OS de novo.';
 }

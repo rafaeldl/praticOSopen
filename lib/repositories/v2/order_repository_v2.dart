@@ -85,6 +85,15 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     UserAggr? actor,
   }) => _tenant.updatePayments(companyId, orderId, mutate, actor: actor);
 
+  /// Grava só os campos da OS que mudaram.
+  /// Ver [TenantOrderRepository.updateFields].
+  Future<void> updateFields(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> fields, {
+    UserAggr? actor,
+  }) => _tenant.updateFields(companyId, orderId, fields, actor: actor);
+
   /// Lê a OS do servidor, ignorando o cache local.
   /// Ver [TenantOrderRepository.getFromServer].
   Future<Order?> getFromServer(String companyId, String orderId) =>
