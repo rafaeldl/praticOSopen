@@ -59,6 +59,7 @@ void main() {
 
     await _waitFor(tester, () => _byIdPrefix(tester, 'order_card_') != null);
     await _wait(tester, 3);
+    await _dismissAiIntro(tester);
     await _dismissBanners(tester);
 
     if (_videoMode) {
@@ -78,7 +79,14 @@ void main() {
       await _waitImages(tester);
       await _shot(binding, tester, '03_order');
 
-      final form = _firstKeyPrefix(tester, 'form_');
+      // The checklist row sits below the fold and the list builds lazily:
+      // scroll down until it exists.
+      var form = _firstKeyPrefix(tester, 'form_');
+      for (var i = 0; form == null && i < 8; i++) {
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -400));
+        await _wait(tester, 1);
+        form = _firstKeyPrefix(tester, 'form_');
+      }
       if (form != null) {
         await tester.ensureVisible(form);
         await _wait(tester, 1);
@@ -333,6 +341,18 @@ Future<void> _pop(WidgetTester tester) async {
 
 /// Closes one-off banners (WhatsApp setup, tips) so Início shows the
 /// orders.
+/// The first-use AI sheet (ai_intro.dart) lands on Início a few seconds
+/// after sign-in, once the server says the assistant is on. It covers the
+/// list: wait for it and answer "Agora não".
+Future<void> _dismissAiIntro(WidgetTester tester) async {
+  final later = find.byKey(const ValueKey('ai_intro_later'));
+  await _waitFor(tester, () => later.evaluate().isNotEmpty, seconds: 15);
+  if (later.evaluate().isNotEmpty) {
+    await tester.tap(later.first);
+    await _wait(tester, 2);
+  }
+}
+
 Future<void> _dismissBanners(WidgetTester tester) async {
   final close = find.byIcon(CupertinoIcons.xmark);
   if (close.evaluate().isNotEmpty) {
