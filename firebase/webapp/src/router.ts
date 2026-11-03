@@ -3,6 +3,7 @@ import { decideAccess, type RouteAccess } from '@/lib/access'
 import { stripStaleLayers } from '@/lib/route-layer'
 import { effectiveUseFinancial, session, startSession } from '@/lib/session'
 import { NAV } from '@/navigation'
+import { readPending } from '@/lib/onboarding/pending'
 import { loadOrderTexts, loadTexts } from '@/i18n'
 import type { MessageKey } from '@/generated/message-keys'
 
@@ -71,6 +72,13 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/NoCompanyView.vue'),
     meta: { access: { kind: 'signedIn' }, title: 'web.noCompany.title', bare: true },
   },
+  // First access (docs/ONBOARDING.md): only reached from /no-company, without a company and without invites.
+  {
+    path: '/start',
+    name: 'onboarding',
+    component: () => Promise.all([import('@/views/onboarding/OnboardingView.vue'), loadTexts('onboarding')]).then(([m]) => m),
+    meta: { access: { kind: 'signedIn' }, title: 'pickSegmentTitle', bare: true },
+  },
   {
     path: '/forbidden',
     name: 'forbidden',
@@ -105,6 +113,13 @@ export const routes: RouteRecordRaw[] = [
     name: 'checklists',
     component: ChecklistsView,
     meta: { access: { kind: 'member', anyOf: ['manageForms'] }, title: 'checklistsTitle' },
+  },
+  // Avisos, from the bell on Início (home.notifications.open).
+  {
+    path: '/notifications',
+    name: 'notifications',
+    component: () => Promise.all([import('@/views/notifications/NotificationsView.vue'), loadOrderTexts()]).then(([m]) => m),
+    meta: { access: NAV[0]!.access, title: 'noticesTitle' },
   },
   {
     path: '/finance/receive',
@@ -227,5 +242,7 @@ router.beforeEach(async (to) => {
   if (decision === 'noCompany') return { name: 'noCompany', replace: true }
   if (decision === 'forbidden') return { name: 'forbidden', query: { from: to.path }, replace: true }
   if (to.name === 'login' && session.uid) return { path: '/', replace: true }
+  // A first access stopped after creating the company (reload): finish it before anything else.
+  if (session.uid && to.name !== 'onboarding' && readPending(session.uid)) return { name: 'onboarding', replace: true }
   return true
 })

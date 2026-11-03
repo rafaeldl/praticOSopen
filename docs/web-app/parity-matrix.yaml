@@ -418,7 +418,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}", "companies/{id}", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.flow.back
   screen: lib/screens/onboarding/onboarding_flow.dart
@@ -433,7 +434,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.flow.sign-out
   screen: lib/screens/onboarding/onboarding_flow.dart
@@ -448,7 +450,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.flow.whatsapp-step
   screen: lib/screens/onboarding/onboarding_flow.dart
@@ -478,7 +481,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.segment.have-invite
   screen: lib/screens/onboarding/select_segment_screen.dart
@@ -508,7 +512,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.subspecialties.choose
   screen: lib/screens/onboarding/select_subspecialties_screen.dart
@@ -523,7 +528,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "Só aparece quando o ramo tem subcategorias. Todas vêm marcadas e dá para desmarcar todas; sem nenhuma, grava null e usa exemplos de todas."
 - id: onboarding.business.create
@@ -539,7 +545,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}", "users/{id}", "companies/{id}/memberships", "claims"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "Roda BootstrapService no cliente: copia catálogo, checklists e exemplos do segmento. Nome opcional quando a conta tem nome (em branco usa o da pessoa); telefone opcional com máscara do país do aparelho. Nova tentativa reaproveita a empresa já salva. Checklists do ramo entram sempre; exemplos só no botão principal. Grava agenda ligada e atendimento no local pelo padrão do ramo. Não copiar: idioma dos exemplos e termos vem do aparelho, não do idioma do app, e o país não é gravado; web usa o idioma ativo e grava o país."
 - id: onboarding.business.use-financial
@@ -555,7 +562,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.business.sample-data
   screen: lib/screens/onboarding/your_business_screen.dart
@@ -570,7 +578,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}/bootstrap", "companies/{id}/orders", "companies/{id}/customers", "companies/{id}/devices", "companies/{id}/services", "companies/{id}/products", "companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "Checklists do segmento são copiados nos dois casos (ver onboarding.seed.checklists); só serviços, produtos, aparelhos, cliente e OS dependem dos exemplos. Sem especialidade marcada, exemplos de todas."
 - id: onboarding.business.retry
@@ -586,7 +595,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "Tela cheia Preparando…; no erro, Tentar de novo repete a última escolha (com ou sem exemplos) e reaproveita a empresa já salva. Voltar leva ao formulário com os campos preservados, não ao passo anterior."
 - id: onboarding.business.claims-wait
@@ -602,7 +612,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["claims", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "A claim é atualizada no servidor ao gravar users/{id}. O app renova o token a cada 500 ms por até 10 s. Vale também ao aceitar convite. Não copiar: tempo esgotado é ignorado e segue gravando exemplos, que falham com erro genérico; web trata o tempo esgotado."
 - id: onboarding.seed.checklists
@@ -618,7 +629,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["segments/{id}/forms", "companies/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "Sempre, com ou sem exemplos; filtra por especialidade (nenhuma = todas); mesmo id do segmento; grava o texto traduzido, sem i18n. Não copiar: idioma do aparelho em vez do idioma do app; não passa pelo limite nem pelo contador."
 - id: onboarding.invites.list
@@ -697,7 +709,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: onboarding.invites.other-code
   screen: lib/screens/onboarding/pending_invites_screen.dart
@@ -1025,7 +1038,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
 - id: home.whatsapp.button
   screen: lib/screens/menu_navigation/home.dart
@@ -1256,7 +1270,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   note: "Depende só de visita marcada hoje (scheduledDate), não de useScheduling: primeira de hoje não iniciada, senão a primeira em andamento. Some com busca."
 - id: home.row.price
@@ -1340,7 +1355,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
 - id: home.maintenance.list
   screen: lib/screens/menu_navigation/home_content.dart
@@ -1355,7 +1371,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   note: "Só nas listas de OS abertas, sem busca nem filtro de cliente. Atrasada em vermelho e fica até mudar. Tira aparelho com contrato ativo; técnico e consultor não leem contratos, então para eles esses aparelhos aparecem. Falha só esconde a seção."
 - id: home.maintenance.more
@@ -1371,7 +1388,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
 - id: home.empty.views
   screen: lib/screens/menu_navigation/home_content.dart
@@ -1472,9 +1490,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
-  note: "Acima de 99 mostra 99+. Rótulo de acessibilidade com a contagem."
+  note: "Acima de 99 mostra 99+. Rótulo de acessibilidade com a contagem. Web: conta no servidor até 500; o app conta no máximo 50 (limite do stream), então o 99+ dele nunca aparece."
 - id: home.profile.initials
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1488,9 +1507,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
-  note: "Primeira e última palavra, pulando da/de/do/das/dos/e/&/y. Sem nome, ícone de pessoa."
+  note: "Primeira e última palavra, pulando da/de/do/das/dos/e/&/y. Sem nome, ícone de pessoa. Web: o botão com as iniciais leva a Ajustes."
 - id: home.mine.visit-time
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1504,7 +1524,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   note: "Depois as demais na ordem de Em aberto. A visita do bloco Agora não se repete na lista."
 - id: home.maintenance.open
@@ -1520,7 +1541,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   note: "Um item por vez e fecha uma vez só. Título = aparelho; mensagem = cliente · dia (formatDate). Chamar cliente só aparece com id do cliente na data, não basta o nome."
 - id: home.maintenance.call
@@ -1536,7 +1558,8 @@ rows:
   feature_flags: []
   hardware: [whatsapp]
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   note: "Só com cliente na data. Lê o telefone na hora, cumprimenta pelo primeiro nome e nada é enviado sozinho. A mensagem usa mês/ano. Dois avisos: sem número (maintenanceNoPhone) e WhatsApp que não abriu (maintenanceWhatsappError). Não copiar: cliente apagado deixa nextMaintenanceCustomer apontando para id inexistente e cai em sem número; na web, avisar que o cliente foi apagado."
 - id: home.maintenance.new-order
@@ -1552,7 +1575,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
   permission: createOrder
   note: "Sem fotos. Sem histórico legível abre sem serviços. Nada salva antes do ✓. Copia também o valor de cada serviço da última OS concluída."
@@ -1569,7 +1593,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/maintenance.spec.ts
   web_exception: null
 - id: home.courtesy.view
   screen: lib/screens/widgets/courtesy_banner.dart
@@ -8152,7 +8177,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: viewDevices
   note: "Só contratos ativos, 'OS #n · repetição' com o próximo vencimento; cada um abre a OS. Some quando não há. Web: lido do REST do Firestore com máscara (sem valores); falha esconde a seção."
@@ -8222,7 +8247,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   note: "Contrato ativo manda: não pede outra data."
 - id: device.maintenance.offer
@@ -8239,7 +8264,7 @@ rows:
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders", "local"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
   note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo."
@@ -8257,7 +8282,7 @@ rows:
   hardware: null
   data: ["companies/{id}/devices"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
   note: "A data vale para todos os aparelhos da OS e guarda cliente e serviço principal. Último dia do mês quando ele é mais curto. Cada opção mostra o mês/ano em que cai; o subtítulo traz os aparelhos e, se já há data, 'agora: mês de ano' (nextMaintenanceCurrent). Web: 3 meses, 6 meses, 1 ano (com o mês/ano) pela API PUT /devices/:id/next-maintenance, um por aparelho."
@@ -8275,7 +8300,7 @@ rows:
   hardware: null
   data: ["companies/{id}/devices", "local"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
   note: "Tira só data cumprida por esta OS (atrasada ou nos próximos 7 dias). Voltar sem responder conta como recusa e não muda data."
@@ -8293,7 +8318,7 @@ rows:
   hardware: null
   data: ["local"]
   web_status: done
-  e2e: firebase/webapp/e2e/maintenance.spec.ts
+  e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   note: "Conta por empresa, no aparelho; definir uma data zera. Web: contagem em localStorage por empresa; marcar a data na ficha zera."
 - id: device.detail.price
@@ -10997,7 +11022,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
   note: "Vazio explica o que aparece ali. O pedido de permissão saiu do login: ver order.offer.notifications."
 - id: notifications.open
@@ -11013,7 +11039,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
   note: "Aviso de manutenção não tem OS: só abre o app, e a Início mostra a lista."
 - id: notifications.mark-all
@@ -11029,7 +11056,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
 - id: notifications.empty-reminders
   screen: lib/screens/notifications/notification_list_screen.dart
@@ -11059,7 +11087,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
 - id: notifications.payment-received
   screen: lib/screens/notifications/notification_list_tile.dart
@@ -11074,7 +11103,8 @@ rows:
   feature_flags: ["asaasEnabled"]
   hardware: [push]
   data: ["companies/{id}/notifications"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/notifications.spec.ts
   web_exception: null
   note: "O servidor manda push e grava no sino para dono, admin e gerente quando o Asaas confirma o pagamento; o sino reescreve o texto com noticePaymentReceived e o toque abre a OS. Web mostra o mesmo aviso no sino."
 - id: integrations.list

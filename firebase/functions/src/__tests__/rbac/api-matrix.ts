@@ -79,6 +79,13 @@ export const API_CASES: ApiCase[] = [
     method: 'post', path: O, body: { customerId: 'cust1' },
     allow: ['owner', 'admin', 'supervisor', 'consultant', 'technician'], permission: 'createOrder',
   },
+
+  // ─── Primeiro acesso ───────────────────────────────────────────────────
+  {
+    id: 'onboarding.seed', area: 'Primeiro acesso', title: 'copiar checklists e exemplos do ramo',
+    method: 'post', path: '/v1/app/onboarding/seed', body: { withSamples: false, locale: 'pt-BR' },
+    allow: ADMINS, permission: 'manageCompany',
+  },
   {
     id: 'orders.update.others', area: 'OS', title: 'mudar situação de OS de outra pessoa',
     method: 'patch', path: `${O}/o1`, body: { status: 'progress' },

@@ -99,6 +99,11 @@ onMounted(async () => {
     devices.value = d
     catalog.value = k
     loading.value = false
+    // A maintenance's "Abrir OS": the services of the last finished order, with the value it had.
+    for (const seeded of seed?.items ?? []) {
+      const item = k.find((entry) => entry.kind === 'service' && entry.id === seeded.id)
+      if (item) lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: showsMoney ? (seeded.value ?? item.value) : item.value, quantity: 1 }]
+    }
     // "Recentes" and "Mais usados" come after the lists; a failure only hides the section.
     void recentCustomers().then((list) => (recents.value = list), () => {})
     void mostUsedKeys().then((keys) => (mostUsed.value = keys), () => {})

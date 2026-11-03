@@ -401,6 +401,15 @@ const byDate = (key: 'dueDate' | 'scheduledDate' | 'createdAt', dir = 1) => (a: 
   ((a[key] ?? '').localeCompare(b[key] ?? '') || a.id.localeCompare(b.id)) * dir
 
 /**
+ * The technician's "Agora" (HomeRules.nextVisit, home.next.card): of their open
+ * orders with a visit today, the first not started yet, else the first running.
+ */
+export function nextVisit(rows: Order[], now: Date, uid: string | null): Order | null {
+  const today = rows.filter((o) => isOpen(o) && o.assignedTo?.id === uid && sameDay(o.scheduledDate, now)).sort(byDate('scheduledDate'))
+  return today.find((o) => o.status !== 'progress') ?? today[0] ?? null
+}
+
+/**
  * Rows of a filter in screen order (home.rules.groups):
  * open: late (oldest promise first), then today, then server order.
  * quotes: oldest first. onHold: stopped longest first. mine: today's visits by hour first.

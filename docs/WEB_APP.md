@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app` (https://praticos.app/app; ver "Domínios"), código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists", a de "Contratos", a de "Financeiro e notas fiscais" e a de "Equipe, empresa e configurações" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists", a de "Contratos", a de "Financeiro e notas fiscais" a de "Equipe, empresa e configurações" e o "Primeiro acesso" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -177,9 +177,9 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 - Lista: a placa vem depois do veículo; de 64rem para cima, a coluna "Quando" mostra a visita (com a hora) ou a entrega, em vermelho quando atrasada, e a situação fica só com o nome. Abaixo disso as datas continuam na linha da situação.
 - Seletores (`lib/orders/pickers.ts`): "Recentes" (5 clientes das últimas 50 OS, por `GET /v1/app/orders?limit=50`, então o consultor vê os das OS dele), "Pela placa ou série" a partir de 3 caracteres (escolher traz o dono, cliente da OS mais recente do aparelho, e o veículo juntos) e "Mais usados" no item da Nova OS (`meta.mostUsed` da rota do catálogo, um de cada tipo por vez). Na OS, o nome do veículo abre a troca: ✓ no atual, outro substitui no mesmo lugar e "Nenhum veículo" tira.
 - Tela da OS: "Mais dados" com os campos `service_order.*` do segmento (`OrderCustomFields.vue`; só quem edita a OS muda, com obrigatório, mínimo, máximo e máscara conferidos antes de gravar). Local em Detalhes: "Pôr o local" (com `fieldService`), "Mudar endereço" e "Tirar endereço"; texto novo apaga `latitude` e `longitude`. "Apagar foto" no visualizador, com confirmação: uma transação tira só aquela foto e o arquivo sai do Storage. Com 2 ou mais veículos, "Mudar" no item diz de qual (ou Geral), pela API (`PATCH /items` com `deviceId`).
-- Ao concluir (botão azul ou situação), depois de o servidor aceitar: "Quando é a próxima manutenção?" (`lib/orders/maintenance.ts`), com as regras do app (`docs/DEVICE_NEXT_MAINTENANCE.md`): só com `manageDevices`, OS com veículo e sem contrato, veículos de contrato ativo fora, 3 recusas seguidas param a pergunta (por empresa, neste navegador), "Não repetir" tira só a data que esta OS cumpriu. A data vai por `PUT /v1/app/devices/:id/next-maintenance`.
+- Ao concluir (botão azul ou situação), depois de o servidor aceitar: "Quando é a próxima manutenção?" (`lib/orders/maintenance-offer.ts`), com as regras do app (`docs/DEVICE_NEXT_MAINTENANCE.md`): só com `manageDevices`, OS com veículo e sem contrato, veículos de contrato ativo fora, 3 recusas seguidas param a pergunta (por empresa, neste navegador), "Não repetir" tira só a data que esta OS cumpriu. A data vai por `PUT /v1/app/devices/:id/next-maintenance`.
 - Servidor: a projeção da OS para quem não vê valores (`projectOrder`) passa a levar `address`, `latitude`, `longitude` e `customData` (sem dinheiro).
-- Testes: `e2e/pickers.spec.ts`, `e2e/order-extras.spec.ts`, `e2e/maintenance.spec.ts` e as linhas novas de `e2e/orders-list.spec.ts`.
+- Testes: `e2e/pickers.spec.ts`, `e2e/order-extras.spec.ts`, `e2e/maintenance-offer.spec.ts` e as linhas novas de `e2e/orders-list.spec.ts`.
 
 **Textos.** Os textos usados só por uma funcionalidade vão para um arquivo próprio por idioma (`FEATURES` em `scripts/gen.mjs`): `src/components/orders/` em `generated/i18n/{pt,en,es}-orders.json` e as telas de clientes em `-customers.json`. Cada tela carrega o seu com `loadTexts` antes de aparecer, fora do primeiro download.
 
@@ -362,6 +362,37 @@ Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contra
 **Na OS.** Seção "Contrato": a frequência, a próxima OS, "Ajustar" e as OS criadas por ele (da mais nova), cada uma abrindo ao lado. Na OS criada, "Criada pelo contrato da OS N" abre a de origem. Sem contrato, "Repetir esta OS" para quem edita a OS, com Contratos ligado.
 
 **Fica para depois.** Pausar e retomar (acima), contratos do aparelho (`device.detail.contracts`), a data da próxima manutenção pelo contrato, ligar e desligar Contratos nos dados da empresa, e o aviso antes da data.
+
+### Primeiro acesso
+
+Código em `src/views/onboarding/` e `src/lib/onboarding/` (regras puras em `model.ts`, testadas em `tests/onboarding.test.ts`; Firebase e API em `data.ts`). Textos no pedaço `-onboarding.json`. Testes: `e2e/onboarding.spec.ts`. Mesmo fluxo de `docs/ONBOARDING.md`.
+
+**Portão.** Quem entra na lista de acesso sem empresa cai em `/no-company`, que lê os convites: com convite, mostra o convite antes, com "Começar sem convite"; sem nenhum, vai a `/start`. Erro ao ler os convites mostra erro com "Tentar de novo" e nunca manda criar empresa (fatia 01, 72). Quem está fora da lista não chega a nenhuma das duas.
+
+**Passos (`/start?step=`).** "Qual é o seu ramo?" (só ramos `active`, por nome, nome no idioma), "O que você atende?" (só ramo com especialidades, todas marcadas) e "Para o cliente" (nome opcional quando a conta tem nome, telefone com a máscara `company.phone` do país, "Valores e cobrança" no padrão do ramo). Cada passo fica na URL, então o Voltar do navegador volta um passo. "Sair" no primeiro passo. Recarregar volta ao ramo.
+
+**Criar.** "Criar meu PraticOS" ou "Começar sem exemplos":
+
+1. Grava a empresa com o mesmo lote do app (`UserStore.createCompanyForUser` → `AuthService.signup`): `users/{uid}` (com `companies` e, se não existir, o cadastro), `companies/{id}` e `companies/{id}/memberships/{uid}` com papel admin, sob as mesmas regras. Os campos são os de `applyBusiness`, mais o país (o app não grava, defeito D8): região do navegador, senão a do idioma. Termos do ramo no idioma ativo.
+2. Espera a claim (token renovado a cada 500 ms, até 20 s). Tempo esgotado é erro, não segue (D9).
+3. `POST /v1/app/onboarding/seed` (ver `docs/WEB_API.md`): checklists sempre, exemplos só no botão azul, no idioma ativo.
+4. Relê o token e entra na empresa, na Início.
+
+Erro em qualquer passo mostra "Não deu para terminar…" com "Tentar de novo" (repete a última escolha) e "‹ Para o cliente" (volta ao formulário com o que foi digitado). A empresa salva fica guardada: tentar de novo completa a mesma, nunca cria outra. O id dela e a escolha ficam no `sessionStorage` (`lib/onboarding/pending.ts`): recarregar a página leva de volta ao primeiro acesso, que termina a mesma empresa (o roteador manda para lá enquanto houver pendência). Depois de pedir a cópia dos dados, o formulário não volta mais ao ramo. Um `409 ONBOARDING_ALREADY_SEEDED` conta como pronto.
+
+**Fica para depois.** "Recebi um código de convite" (a tela de código não existe no web), empresa que já existe sem ramo (o app retoma o primeiro acesso para ela; o web abre normalmente) e os eventos de analytics (`tutorial_begin`, `company_created`, `tutorial_complete`).
+
+### Início: manutenções, avisos e Agora
+
+**Manutenções chegando** (`src/components/orders/Maintenances.vue`, `src/lib/orders/maintenance.ts`). Nas listas abertas (Em aberto, Minhas, Orçamentos, Paradas), sem busca: aparelhos com manutenção atrasada ou em até 7 dias, lidos pelo REST do Firestore depois da lista aparecer, sem os que têm contrato ativo (quem não lê contratos, técnico e consultor, vê todos, como no app). 3 de cada vez, "Ver mais N", atrasada em vermelho. A linha abre: "Chamar cliente" (só com cliente na data; telefone lido na hora; `wa.me` com a mensagem pronta, nada é enviado sozinho; sem telefone ou cliente apagado, um aviso), "Abrir OS" (quem cria OS: Nova OS com cliente, aparelho e os serviços da última OS concluída com o valor dela, lida pela API) e "Ver {aparelho}". Falha só esconde a seção.
+
+**Sino e Avisos** (`src/lib/notifications/`, `src/views/notifications/`). O sino da Início mostra os avisos novos da pessoa (99+ acima de 99; o app conta no máximo 50), contados no servidor depois da lista. `/notifications` lista os 50 mais recentes em Novos e Antes, com o texto do app (aprovação sem o "da OS #", comentário, pagamento recebido, manutenção) e o tempo ("há 5 minutos", a data depois de um mês). Abrir marca como lido e abre a OS ao lado na Início (manutenção vai à Início). "Marcar todos como lidos" marca todos os novos, também os além dos 50. Os lembretes do app são do aparelho: o web não tem "Ajustar lembretes".
+
+**Agora** (técnico, em Minhas, sem busca). A primeira visita de hoje ainda não começada, senão a em andamento, com "Abrir OS N"; ela não se repete na lista. As visitas de hoje em Minhas mostram a hora.
+
+**Desempenho.** Medido em 2026-11-03 com esta fatia: **1.079 ms** na 1ª visita e **826 ms** na volta (`npm run e2e:perf`, p75). JS até a lista: 136,7 KB (134,6 na master com Configurações). O primeiro acesso, as manutenções e os avisos carregam sob demanda; no caminho até a lista entram só o sino, as iniciais, o "Agora" e as rotas novas.
+
+**Iniciais.** O botão do perfil (no celular, no topo; no computador, ao lado do nome da empresa) mostra as iniciais da empresa (primeira e última palavra, sem "da/de/do/e"). No web ele leva a Ajustes.
 
 ### Equipe, empresa e configurações
 
@@ -553,9 +584,9 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 ## Limitações
 
-- Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, documentos e linha "Nota fiscal" com a situação.
+- Primeiro acesso: falta o código de convite e a empresa sem ramo (ver "Primeiro acesso").
+- OS: falta documentos e linha "Nota fiscal" com a situação.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.

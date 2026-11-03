@@ -2,9 +2,9 @@
 // Refuses to run unless every Admin SDK client points at a local emulator.
 import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -43,6 +43,7 @@ async function seedSegments() {
   await db.doc('segments/global').set({
     name: 'Global',
     customFields: [
+      { key: 'company.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] } },
       { key: 'customer.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'] }, keyboardType: 'phone' },
       // Company phone (Sua empresa), as firebase/scripts/seed_segments.js.
       { key: 'company.phone', type: 'text', labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }, masksByCountry: { BR: ['(99) 9999-9999', '(99) 99999-9999'], US: ['(999) 999-9999'], PT: ['999 999 999'] }, keyboardType: 'phone' },
@@ -52,6 +53,7 @@ async function seedSegments() {
     name: 'Mecânica',
     // Active segments with names, specialties and default terms: what Sua empresa reads.
     active: true,
+    icon: '🚗',
     nameI18n: { 'pt-BR': 'Mecânica', 'en-US': 'Auto repair', 'es-ES': 'Mecánica' },
     subspecialties: [
       { id: 'cars', name: 'Carros', nameI18n: { 'pt-BR': 'Carros', 'en-US': 'Cars', 'es-ES': 'Autos' } },
@@ -83,9 +85,21 @@ async function seedSegments() {
   await db.doc('segments/electronics').set({
     name: 'Eletrônica',
     active: true,
+    icon: '📱',
     nameI18n: { 'pt-BR': 'Eletrônica', 'en-US': 'Electronics', 'es-ES': 'Electrónica' },
     customFields: [label('device._entity', 'Aparelho', 'Device', 'Aparato')],
   })
+  // Off: never offered in the first access.
+  await db.doc('segments/retired').set({ name: 'Ramo desligado', active: false })
+  // Samples of the first access (BootstrapService on the server).
+  await db.doc('segments/automotive/bootstrap/cars').set({
+    services: [{ name: { 'pt-BR': 'Troca de óleo (exemplo)', 'en-US': 'Oil change (sample)', 'es-ES': 'Cambio de aceite (ejemplo)' }, value: 120 }],
+    products: [{ name: { 'pt-BR': 'Filtro de óleo', 'en-US': 'Oil filter', 'es-ES': 'Filtro de aceite' }, value: 40 }],
+    devices: [{ name: 'Gol 2015', manufacturer: 'VW', category: { 'pt-BR': 'Carro', 'en-US': 'Car', 'es-ES': 'Auto' } }],
+    customer: { name: { 'pt-BR': 'Cliente (Exemplo)', 'en-US': 'Customer (Example)', 'es-ES': 'Cliente (Ejemplo)' }, phone: '+5511900000000' },
+  })
+  await db.doc('segments/automotive/bootstrap/motorcycles').set({ services: [{ name: { 'pt-BR': 'Pintura (exemplo)' }, value: 900 }] })
+  await db.doc('segments/electronics/bootstrap/_default').set({ services: [{ name: { 'pt-BR': 'Troca de tela (exemplo)' }, value: 300 }] })
 }
 
 async function seedCompanies() {
@@ -121,7 +135,7 @@ async function seedUsers() {
       uid: user.uid,
       email: user.email,
       password: PASSWORD,
-      displayName: user.name,
+      displayName: user.name || undefined,
       emailVerified: user.emailVerified !== false,
     })
     await db.doc(`users/${user.uid}`).set({
@@ -375,6 +389,69 @@ async function seedForms() {
 }
 
 // Same hash as web-access.routes.ts. Everyone but the outsider is on the list.
+// "Manutenções chegando" in company D, relative to the real today (the list compares with now).
+async function seedMaintenance() {
+  const day = (offset) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+    const date = new Date(`${today}T12:00:00.000Z`)
+    date.setUTCDate(date.getUTCDate() + offset)
+    return date.toISOString().slice(0, 10)
+  }
+  const company = { id: COMPANY_M, name: COMPANIES[COMPANY_M].name, country: 'BR' }
+  const owner = USERS.maintOwner
+  const batch = db.batch()
+  const device = (id, name, offset, extra = {}) =>
+    batch.set(db.doc(`companies/${COMPANY_M}/devices/${id}`), {
+      id, name, serial: null, company, ...(offset === null ? {} : { nextMaintenanceDate: day(offset) }), ...audit(owner, 5000), ...extra,
+    })
+  device('d-late', 'Uno Atrasado', -3, { nextMaintenanceCustomer: { id: 'd-cust-ana', name: 'Ana Lima' }, nextMaintenanceLastService: 'Troca de óleo' })
+  device('d-today', 'Palio Hoje', 0)
+  device('d-soon', 'Gol Chegando', 2, { nextMaintenanceCustomer: { id: 'd-cust-bia', name: 'Bia Souza' } })
+  device('d-week', 'Fox Semana', 7, { nextMaintenanceCustomer: { id: 'd-cust-gone', name: 'Cliente Apagado' } })
+  device('d-far', 'Celta Longe', 8)
+  device('d-contract', 'Corsa Contrato', 1)
+  device('d-none', 'Sem Data', null)
+  batch.set(db.doc(`companies/${COMPANY_M}/customers/d-cust-ana`), { id: 'd-cust-ana', name: 'Ana Lima', phone: null, company, ...audit(owner, 5000) })
+  batch.set(db.doc(`companies/${COMPANY_M}/customers/d-cust-bia`), { id: 'd-cust-bia', name: 'Bia Souza', phone: '(11) 99000-1111', company, ...audit(owner, 5000) })
+  batch.set(db.doc(`companies/${COMPANY_M}/services/d-svc-oil`), { id: 'd-svc-oil', name: 'Troca de óleo', value: 120, company, ...audit(owner, 5000) })
+  // Last finished order of the Gol: "Abrir OS" copies its services, with its value.
+  batch.set(db.doc(`companies/${COMPANY_M}/orders/d-order-gol`), {
+    number: 1, status: 'done', customer: { id: 'd-cust-bia', name: 'Bia Souza' },
+    device: { id: 'd-soon', name: 'Gol Chegando', serial: null }, devices: [{ id: 'd-soon', name: 'Gol Chegando', serial: null }], deviceIds: ['d-soon'],
+    services: [{ service: { id: 'd-svc-oil', name: 'Troca de óleo', value: 120 }, value: 150 }], products: [],
+    total: 150, paidAmount: 150, payment: 'paid', company, ...audit(owner, 4000),
+  })
+  // An active contract covers the Corsa: hidden for who reads contracts.
+  batch.set(db.doc(`companies/${COMPANY_M}/orders/d-contract-corsa`), {
+    status: 'approved', isContract: true, contract: { active: true, frequency: 'monthly' }, customer: { id: 'd-cust-ana', name: 'Ana Lima' },
+    devices: [{ id: 'd-contract', name: 'Corsa Contrato', serial: null }], deviceIds: ['d-contract'], services: [], products: [], total: 0,
+    company, ...audit(owner, 4000),
+  })
+  // Today's visits of the technician (home.next.card, home.mine.visit-time): one started, one still to start.
+  const tech = aggr(USERS.maintTech)
+  const visit = (id, number, status, time, customer) =>
+    batch.set(db.doc(`companies/${COMPANY_M}/orders/${id}`), {
+      number, status, customer, device: { id: 'd-soon', name: 'Gol Chegando', serial: null }, devices: [{ id: 'd-soon', name: 'Gol Chegando', serial: null }],
+      deviceIds: ['d-soon'], services: [], products: [], total: 0, assignedTo: tech, scheduledDate: `${day(0)}T${time}:00.000`, company, ...audit(owner, 3000),
+    })
+  visit('d-visit-started', 2, 'progress', '08:00', { id: 'd-cust-ana', name: 'Ana Lima' })
+  visit('d-visit-next', 3, 'approved', '23:30', { id: 'd-cust-bia', name: 'Bia Souza' })
+  // Avisos as notification.service.ts writes them (createdAt by the server, a Timestamp).
+  const ago = (minutes) => Timestamp.fromMillis(Date.now() - minutes * 60000)
+  const notice = (id, recipient, minutes, fields) =>
+    batch.set(db.doc(`companies/${COMPANY_M}/notifications/${id}`), {
+      recipientId: recipient.uid, read: false, readAt: null, company: { id: COMPANY_M }, createdAt: ago(minutes), ...fields,
+    })
+  const bell = USERS.bellUser
+  notice('n-approved', bell, 5, { type: 'order_approved', title: 'Orçamento Aprovado! ✅', body: 'Ana aprovou o orçamento da OS #1', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-comment', bell, 120, { type: 'new_comment', title: 'Novo comentário 💬', body: 'Carlos: Pode trocar o filtro?', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-paid', bell, 60 * 24 * 2, { type: 'payment_received', title: 'Pagamento recebido 💰', body: 'OS #1 – R$ 150,00', orderId: 'd-order-gol', orderNumber: 1 })
+  notice('n-maint', bell, 60 * 24 * 40, { type: 'maintenance_due', title: 'Manutenção chegando', body: 'Gol Chegando em 05/11', read: true })
+  notice('n-other', USERS.maintOwner, 5, { type: 'order_approved', title: 'Orçamento Aprovado!', body: 'Outra pessoa aprovou', orderId: 'd-order-gol', orderNumber: 1 })
+  for (let i = 0; i < 120; i++) notice(`n-busy-${i}`, USERS.bellBusy, i + 1, { type: 'status_changed', title: 'Situação mudou', body: `A OS #${i} mudou` })
+  await batch.commit()
+}
+
 async function seedWebAccess() {
   const hash = (email) => createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
   await db.doc('config/webApp').set({
@@ -441,6 +518,7 @@ await seedWebAccess()
 await seedInvites()
 await seedSettings()
 await seedForms()
+await seedMaintenance()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 // The big list measures the list alone; the scenarios are for the screen tests.

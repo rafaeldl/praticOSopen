@@ -10,6 +10,8 @@ export const COMPANY_C = 'company-gamma'
  * changing roles never reaches the screens other tests read. */
 export const COMPANY_G = 'company-settings'
 export const COMPANY_T = 'company-team'
+/** "Manutenções chegando", sino and Agora (e2e/maintenance.spec.ts, notifications.spec.ts): its own devices, so counts do not move. */
+export const COMPANY_M = 'company-maint'
 export const COMPANY_D = 'company-delta'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
@@ -34,6 +36,22 @@ export const USERS = {
   unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
   /** Owner of company C, where "Valores e cobrança" is off. */
   noValues: { ...user('novalues', 'Vera Sem Valores'), roles: { [COMPANY_C]: 'owner' } },
+  /** First access (e2e/onboarding.spec.ts): each one creates a company once. */
+  founder: { ...user('founder', 'Fábio Fundador'), roles: {} },
+  founderLean: { ...user('founderlean', 'Lia Sem Exemplos'), roles: {} },
+  /** No name on the account: the name on the order is required. */
+  founderNoName: { ...user('foundernoname', ''), roles: {} },
+  /** Reloads between creating the company and seeding it; loses the seed's answer. */
+  founderReload: { ...user('founderreload', 'Rui Recarrega'), roles: {} },
+  founderTwice: { ...user('foundertwice', 'Teca Duas Vezes'), roles: {} },
+  /** Owner and technician of company D (maintenances). */
+  maintOwner: { ...user('maintowner', 'Mara Dona Manutencao'), roles: { [COMPANY_M]: 'owner' } },
+  maintTech: { ...user('mainttech', 'Tito Tecnico Manutencao'), roles: { [COMPANY_M]: 'technician' } },
+  /** Avisos (e2e/notifications.spec.ts): three new and one read; the other one has 120 new. */
+  bellUser: { ...user('belluser', 'Bela Avisos'), roles: { [COMPANY_M]: 'admin' } },
+  bellBusy: { ...user('bellbusy', 'Beto Muitos Avisos'), roles: { [COMPANY_M]: 'manager' } },
+  /** No company and outside the access list: never reaches the first access. */
+  strangerNew: { ...user('strangernew', 'Saulo Fora'), roles: {}, blocked: true },
   // Company gamma: settings, plan and integrations (its owner switches values off and on).
   gOwner: { ...user('g-owner', 'Gina Dona'), roles: { [COMPANY_G]: 'owner' } },
   gAdmin: { ...user('g-admin', 'Gil Admin'), roles: { [COMPANY_G]: 'admin' } },
@@ -63,6 +81,7 @@ export const COMPANIES = {
   [COMPANY_A]: { name: 'Oficina Alfa', country: 'BR', segment: 'automotive', owner: USERS.owner },
   [COMPANY_B]: { name: 'Beta Repairs', country: 'US', segment: 'electronics', owner: USERS.owner },
   [COMPANY_C]: { name: 'Gama Sem Valores', country: 'BR', segment: 'automotive', owner: USERS.noValues, useFinancial: false },
+  [COMPANY_M]: { name: 'Oficina Manutenção', country: 'BR', segment: 'automotive', owner: USERS.maintOwner },
   [COMPANY_G]: { name: 'Oficina Gama', country: 'BR', segment: 'automotive', owner: USERS.gOwner },
   [COMPANY_T]: { name: 'Equipe Teta', country: 'BR', segment: 'automotive', owner: USERS.tOwner },
   [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },

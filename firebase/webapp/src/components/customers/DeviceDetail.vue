@@ -29,7 +29,7 @@ import DeviceForm from './DeviceForm.vue'
 import { loadOrderTexts } from '@/i18n'
 import { loadContracts, type ContractOrder } from '@/lib/contracts/data'
 import { dayText, repeatText } from '@/lib/contracts/text'
-import { resetDeclines } from '@/lib/orders/maintenance'
+import { resetDeclines } from '@/lib/orders/maintenance-offer'
 
 const props = defineProps<{ deviceId: string; devices: DeviceRow[] }>()
 const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
