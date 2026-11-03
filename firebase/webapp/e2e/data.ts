@@ -123,6 +123,34 @@ export async function makeLateOrderInB(customer: { id: string; name: string }): 
     })
 }
 
+/** Fields of company B's document (merge). Tests that change it put it back. */
+export async function updateCompanyB(fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_B}`).set(fields, { merge: true })
+}
+
+/** An order in company B (United States), for the country format tests. */
+export async function makeOrderInB(data: Record<string, unknown>): Promise<TestOrder> {
+  const id = `t-${randomUUID().slice(0, 8)}`
+  const number = 800000 + Math.floor(Math.random() * 99999)
+  const now = new Date().toISOString()
+  await db()
+    .doc(`companies/${COMPANY_B}/orders/${id}`)
+    .set({
+      number,
+      status: 'approved',
+      company: { id: COMPANY_B, name: COMPANIES[COMPANY_B].name },
+      customer: { id: 'cust-us', name: 'Dana Customer' },
+      services: [],
+      products: [],
+      total: 0,
+      createdAt: now,
+      createdBy: aggr('owner'),
+      updatedAt: now,
+      ...data,
+    })
+  return { id, number }
+}
+
 /** A fresh device in company A, with a unique serial (three letters and four digits). */
 export async function makeDevice(data: Record<string, unknown> = {}): Promise<{ id: string; name: string; serial: string }> {
   const id = `d-${randomUUID().slice(0, 8)}`

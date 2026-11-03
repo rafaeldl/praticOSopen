@@ -2639,7 +2639,8 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
   permission: editOrder
   note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram."
@@ -6685,9 +6686,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: [local_notifications]
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Consultor e técnico veem só OS que criaram (createdBy), não as atribuídas a eles. Carrega só o mês do dia escolhido, com limites ISO na hora local (gerar no mesmo formato e fuso). Estado (dia, semana/mês, filtro) fica na store do app entre visitas. Vazio muda com useScheduling. Cada carga reagenda lembretes locais de todas as OS futuras do mês (grupo de lembretes locais). Não copiar: erro e falta de empresa viram o vazio, sem tentar de novo; vazio aparece por baixo enquanto carrega."
+  note: "Consultor e técnico veem só OS que criaram (createdBy), não as atribuídas a eles. Carrega só o mês do dia escolhido, com limites ISO na hora local (gerar no mesmo formato e fuso). Estado (dia, semana/mês, filtro) fica na store do app entre visitas. Vazio muda com useScheduling. Cada carga reagenda lembretes locais de todas as OS futuras do mês (grupo de lembretes locais). Não copiar: erro e falta de empresa viram o vazio, sem tentar de novo; vazio aparece por baixo enquanto carrega. Web (/schedule): semana ou dia com a grade de horas e o mês ao lado, no fuso e no formato do país da empresa (texto sem fuso do app é hora da empresa). Lê pela API (GET /v1/app/orders?sort=scheduledDate com intervalo), para todos os papéis: o técnico vê as que criou e as atribuídas a ele (o app só as criadas, defeito A4), sem valores para quem não tem viewPrices. Erro com Tentar de novo e carregando sem vazio por baixo (defeitos A1, A11). Atualiza ao voltar à janela e quando a OS ao lado muda. Não copiar: lembretes locais (grupo de lembretes, só no app)."
 - id: agenda.toggle-month
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6701,9 +6703,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Item do menu '…', rótulo alterna Mostrar mês / Mostrar semana. Não copiar: semana sempre começa no domingo; web segue o locale."
+  note: "Item do menu '…', rótulo alterna Mostrar mês / Mostrar semana. Não copiar: semana sempre começa no domingo; web segue o locale. Web: Dia e Semana nas abas; o mês fica sempre ao lado na tela grande e no celular abre por Ver o mês / Ver a semana. Semana começa no dia do país (getWeekInfo, CLDR)."
 - id: agenda.day
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6717,9 +6720,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Dia de outro mês troca o mês e recarrega. Hoje em accentText e negrito; escolhido em pílula accentSoft na faixa e círculo accent no mês; leitor de tela diz que o dia tem OS e o estado selecionado."
+  note: "Dia de outro mês troca o mês e recarrega. Hoje em accentText e negrito; escolhido em pílula accentSoft na faixa e círculo accent no mês; leitor de tela diz que o dia tem OS e o estado selecionado. Web: dia no mês ao lado (e na faixa da semana no celular) ou no cabeçalho da coluna (Ver só o dia). Hoje em azul e negrito, escolhido preenchido, leitor de tela diz que o dia tem serviço e o estado. A URL guarda o dia (?d=)."
 - id: agenda.today
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6733,9 +6737,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Item do menu '…', só aparece quando o dia escolhido não é hoje."
+  note: "Item do menu '…', só aparece quando o dia escolhido não é hoje. Web: botão Hoje sempre à vista e tecla T."
 - id: agenda.step
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6749,9 +6754,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Semana anda 7 dias; mês mantém o dia com limite (31/out vai a 30/nov). Também arrastando o calendário do mês (web: setas e teclado). Rótulos de acessibilidade mudam entre semana e mês. Calendário de 2020 a 2035. Não copiar: título mostra só o mês do dia escolhido numa semana que cruza meses."
+  note: "Semana anda 7 dias; mês mantém o dia com limite (31/out vai a 30/nov). Também arrastando o calendário do mês (web: setas e teclado). Rótulos de acessibilidade mudam entre semana e mês. Calendário de 2020 a 2035. Não copiar: título mostra só o mês do dia escolhido numa semana que cruza meses. Web: setas e teclas ← →; semana anda 7 dias, dia anda 1; mês ao lado mantém o dia com limite (31/out vai a 30/nov). Rótulos mudam entre dia e semana. Sem limite de 2020 a 2035."
 - id: agenda.filter-person
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6765,9 +6771,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/memberships", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Código testa isAdmin, isManager, isSupervisor. Item De quem: {nome} no menu '…' abre o picker De quem mostrar? com Toda a equipe no topo, ✓ no atual e membros com userId (sem nome vira Sem nome). Filtra por assignedTo.id: OS sem responsável somem; os pontos do calendário seguem o filtro. Não copiar: o filtro continua ao trocar de empresa; web zera."
+  note: "Código testa isAdmin, isManager, isSupervisor. Item De quem: {nome} no menu '…' abre o picker De quem mostrar? com Toda a equipe no topo, ✓ no atual e membros com userId (sem nome vira Sem nome). Filtra por assignedTo.id: OS sem responsável somem; os pontos do calendário seguem o filtro. Não copiar: o filtro continua ao trocar de empresa; web zera. Web: botão De quem: {nome} abre De quem mostrar? com Toda a equipe no topo e ✓ no atual. Filtra por assignedTo no servidor (OS sem responsável saem, como no app); os pontos do mês seguem. Trocar de empresa tira o filtro (defeito F1)."
 - id: agenda.open-order
   screen: lib/screens/agenda/agenda_screen.dart
   route: "/order"
@@ -6781,9 +6788,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Abre no navegador raiz (cobre as abas) com voltar Agenda; ao voltar a lista já reflete a mudança (stream do mês)."
+  note: "Abre no navegador raiz (cobre as abas) com voltar Agenda; ao voltar a lista já reflete a mudança (stream do mês). Web: abre a OS ao lado (?order=), como a lista; mudanças nela atualizam a agenda."
 - id: agenda.row
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6797,9 +6805,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Cliente + hora; status · nº; aparelho +N · com {responsável} (some vazia). Atrasada usa dueDate, mesmo com useScheduling; concluída e cancelada nunca; texto Atrasada N dias/meses/anos em danger e negrito. 00:00 ou sem useScheduling = Dia todo; com hora primeiro. Aparelho aparece sempre, sem depender de useDeviceManagement nem de rótulo do ramo."
+  note: "Cliente + hora; status · nº; aparelho +N · com {responsável} (some vazia). Atrasada usa dueDate, mesmo com useScheduling; concluída e cancelada nunca; texto Atrasada N dias/meses/anos em danger e negrito. 00:00 ou sem useScheduling = Dia todo; com hora primeiro. Aparelho aparece sempre, sem depender de useDeviceManagement nem de rótulo do ramo. Web: bloco com hora, cliente, nº · situação (Atrasada N dias por dueDate, em vermelho), e no Dia aparelho +N · com {responsável}; na Semana isso vai só para o leitor de tela. 00:00 é Dia todo, numa faixa acima das horas. No celular, a lista do dia com as três linhas do app."
 - id: agenda.mode-due
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6813,9 +6822,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Ramo sem useScheduling; hoje inalcançável porque a aba some junto."
+  note: "Ramo sem useScheduling; hoje inalcançável porque a aba some junto. Web: sem useScheduling na empresa, a agenda mostra as entregas (dueDate), todas como Dia todo, e arrastar muda só o dia. No app é inalcançável porque a aba some."
 - id: agenda.day-markers
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6829,9 +6839,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Segue o filtro De quem. Não copiar: só o mês do dia escolhido é carregado, então dias de outro mês na mesma semana ficam sem ponto; web carrega o intervalo visível."
+  note: "Segue o filtro De quem. Não copiar: só o mês do dia escolhido é carregado, então dias de outro mês na mesma semana ficam sem ponto; web carrega o intervalo visível. Web: ponto no mês ao lado e na faixa da semana; carrega a grade inteira do mês, então dias do mês vizinho também têm ponto (defeito A7 corrigido)."
 - id: agenda.filter-clear
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6845,9 +6856,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Linha Só de {nome} com o link Mostrar todos, só com filtro ativo."
+  note: "Linha Só de {nome} com o link Mostrar todos, só com filtro ativo. Web: linha Só de {nome} com Mostrar todos, só com filtro."
 - id: agenda.day-header
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -6861,9 +6873,10 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Data curta + N marcados (plural ICU), marcado como título para leitor de tela; spinner pequeno ao lado enquanto carrega."
+  note: "Data curta + N marcados (plural ICU), marcado como título para leitor de tela; spinner pequeno ao lado enquanto carrega. Web: cabeçalho de cada coluna com o dia e N marcados (plural ICU), como título (h2) para o leitor de tela; a frase do topo resume o dia ou a semana."
 - id: customer.list.view
   screen: lib/screens/menu_navigation/home_customer_list.dart
   route: null

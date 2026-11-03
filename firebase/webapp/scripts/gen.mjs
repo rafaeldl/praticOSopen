@@ -48,6 +48,7 @@ const files = sourceFiles(resolve(webapp, 'src'))
 const FEATURES = {
   orders: ['src/components/orders'],
   customers: ['src/components/customers', 'src/views/customers'],
+  agenda: ['src/components/agenda', 'src/views/agenda'],
 }
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
 const inFeature = (file, dirs) => dirs.some((dir) => file.startsWith(resolve(webapp, dir) + '/'))

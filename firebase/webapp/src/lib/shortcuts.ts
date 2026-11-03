@@ -48,5 +48,5 @@ export function handleShortcut(event: KeyboardEvent): void {
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
 export function shortcutLabel(keys: string): string {
-  return keys.replace('mod+', isMac ? '⌘ ' : 'Ctrl ').toUpperCase()
+  return keys.replace('mod+', isMac ? '⌘ ' : 'Ctrl ').replace('arrowleft', '←').replace('arrowright', '→').toUpperCase()
 }

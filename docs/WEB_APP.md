@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), e a fatia "Clientes e aparelhos" (ver a seção com esse nome). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, e a "Agenda" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -49,6 +49,7 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
 | Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
+| Agenda: leitura e mudar a data | API (`lib/agenda/data.ts`): `GET /v1/app/orders?sort=scheduledDate&startDate&endDate`, `PATCH /v1/app/orders/:id` com `expectedUpdatedAt` |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
 
@@ -189,6 +190,24 @@ Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/mo
 **No E2E** o WhatsApp nunca abre (os testes leem o link) e o Asaas é simulado: as rotas de cobrança são respondidas pelo teste, que grava o documento da cobrança como o servidor gravaria. O seed liga `settings/payments` na empresa A.
 
 **Fica para depois.** Anexar e trocar comprovante (o servidor só aceita URL https do bucket e o emulador serve http, então não há E2E possível; `pay.widget.sheet` volta a `in_progress`), "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
+
+### Agenda
+
+Código em `src/views/agenda/`, `src/components/agenda/` e `src/lib/agenda/` (regras puras em `model.ts`, testadas em `tests/agenda-model.test.ts`; textos e datas em `text.ts`; chamadas em `data.ts`). Textos no pedaço `-agenda.json`. Testes: `e2e/agenda.spec.ts`.
+
+**Fuso e formato da empresa.** Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo; se o computador estiver em outro fuso do mesmo país, como Manaus, vale o dele; empresa sem país segue o computador), nunca os do computador: uma visita das 09:00 em São Paulo aparece às 09:00 num computador em Tóquio. O formato (24 h ou AM/PM, nome dos dias) segue o país, e as palavras, o idioma. O texto sem fuso que o app grava (`toIso8601String()`) é lido como hora da empresa; o que a API grava vem em UTC.
+
+**Tela (`/schedule`).** Semana (padrão na tela grande) ou Dia, com a grade de horas de 7 às 19 (cresce para caber toda visita) e uma faixa "Dia todo" para meia-noite. O mês fica ao lado, com ponto nos dias com OS, inclusive os do mês vizinho. A semana começa no dia do país. Setas, `←` `→`, `T` (hoje) e o dia na URL (`?d=`, `?view=day`, `?who=`). Abrir a OS a põe ao lado (`?order=`); o que muda nela relê a agenda. No celular (abaixo de 48 rem): faixa da semana, "Ver o mês" e a lista do dia com cliente e hora, situação · nº e aparelho · com responsável.
+
+**Dados.** Pela API para todos os papéis: o servidor aplica quem vê o quê (o técnico vê as que criou e as atribuídas a ele, o que o app não faz) e tira os valores de quem não tem `viewPrices`. Pede a grade inteira do mês, com 14 h de folga de cada lado (o texto sem fuso é comparado como texto), e põe cada OS no dia pelo fuso da empresa. Até 30 páginas de 100; passou disso, um aviso diz que a lista foi cortada. Relê ao voltar à janela.
+
+**Mudar a data (tela grande).** Arrastar o bloco para outra hora ou dia (de meia em meia hora) ou para "Dia todo". Pelo teclado, com o bloco em foco: `Shift` + `↑` `↓` meia hora, `Shift` + `←` `→` um dia; o bloco vai para onde ficaria, `Enter` confirma e `Esc` desfaz. Mudar uma visita que o cliente já esperava (tinha data, tem cliente, não está concluída nem cancelada) pergunta antes, com a data antiga e a nova e o lembrete de avisar o cliente. Depois de gravar, o aviso tem "Desfazer". Grava só a data (`PATCH /v1/app/orders/:id`, que confere `canEditOrderMainFields`), com a `version` lida; `409 ORDER_CHANGED` mostra o aviso e relê. Quem não pode mudar a data (supervisor e técnico fora do orçamento, consultor e técnico em OS de outra pessoa) não arrasta, e o teclado avisa.
+
+**Sem agendamento.** Com `useScheduling` desligado na empresa, a agenda mostra as entregas (`dueDate`), todas como "Dia todo".
+
+**De quem.** Admin, gerente e supervisor filtram por responsável (`assignedTo` no servidor). "Só de {nome}" com "Mostrar todos". Trocar de empresa tira o filtro.
+
+**Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push) e o seletor de data da OS no fuso da empresa (ele e a tela da OS ainda usam o fuso do computador, que no Brasil é o mesmo).
 
 ### Histórico do navegador
 
@@ -349,6 +368,7 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
+- Fora da agenda, datas e horas ainda usam o fuso do computador (lista, tela da OS, seletor de data).
 - OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
