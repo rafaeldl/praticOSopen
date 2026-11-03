@@ -76,12 +76,19 @@ const moreSummary = computed(() => {
 })
 
 onMounted(async () => {
+  // Opened from a customer or device screen: it comes with them (customer.detail.new-order, device.detail.new-order).
+  const seed = ui.newOrderSeed
+  ui.newOrderSeed = null
+  if (seed?.customer) customer.value = { ...seed.customer }
+  if (seed?.device) device.value = { ...seed.device }
   try {
     const [c, d, k] = await Promise.all([loadCustomers(), loadDevices(), loadCatalog()])
     customers.value = c
     devices.value = d
     catalog.value = k
     loading.value = false
+    // Only the customer: their devices are suggested first, none is picked (the app's rule).
+    if (seed?.customer && !seed.device) customerDevices.value = await devicesOf(seed.customer.id)
     if (can('assignOrder')) team.value = await loadTeam()
   } catch (error) {
     console.warn('new order: lists not loaded', error)

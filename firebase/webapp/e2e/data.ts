@@ -3,7 +3,7 @@
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { randomUUID } from 'node:crypto'
-import { COMPANIES, COMPANY_A, PROJECT_ID, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, PROJECT_ID, USERS } from './fixtures.mjs'
 
 function db() {
   if (!process.env.FIRESTORE_EMULATOR_HOST) throw new Error('FIRESTORE_EMULATOR_HOST ausente: os testes só rodam no emulador.')
@@ -88,4 +88,60 @@ export async function countOrders(field: string, value: unknown): Promise<number
 
 export async function readOrder(id: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${COMPANY_A}/orders/${id}`).get()).data()
+}
+
+/** A fresh customer in company A, with a unique name (fatia 03 tests write and run in parallel). */
+export async function makeCustomer(data: Record<string, unknown> = {}, company: string = COMPANY_A): Promise<{ id: string; name: string }> {
+  const id = `c-${randomUUID().slice(0, 8)}`
+  const name = (data.name as string) ?? `Freguês ${id.slice(2)}`
+  await db()
+    .doc(`companies/${company}/customers/${id}`)
+    .set({ name, phone: null, company: { id: company, name: COMPANIES[company as keyof typeof COMPANIES].name }, createdAt: new Date().toISOString(), createdBy: aggr('owner'), ...data })
+  return { id, name }
+}
+
+/**
+ * A late order in company B. The order list tests count the late ones of
+ * company A ("1 atrasada"), so a test that needs another one makes it here.
+ */
+export async function makeLateOrderInB(customer: { id: string; name: string }): Promise<void> {
+  const now = new Date().toISOString()
+  await db()
+    .doc(`companies/${COMPANY_B}/orders/t-${randomUUID().slice(0, 8)}`)
+    .set({
+      number: 800000 + Math.floor(Math.random() * 99999),
+      status: 'approved',
+      company: { id: COMPANY_B, name: COMPANIES[COMPANY_B].name },
+      customer,
+      dueDate: brDay(-3),
+      services: [],
+      products: [],
+      total: 0,
+      createdAt: now,
+      createdBy: aggr('owner'),
+      updatedAt: now,
+    })
+}
+
+/** A fresh device in company A, with a unique serial (three letters and four digits). */
+export async function makeDevice(data: Record<string, unknown> = {}): Promise<{ id: string; name: string; serial: string }> {
+  const id = `d-${randomUUID().slice(0, 8)}`
+  const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
+  const serial = (data.serial as string) ?? `${letters}${Math.floor(1000 + Math.random() * 8999)}`
+  // Sorted after the seed's "Veículo N": the order tests list the first devices of the company.
+  const name = (data.name as string) ?? `Yaris ${id.slice(2)}`
+  await db()
+    .doc(`companies/${COMPANY_A}/devices/${id}`)
+    .set({ name, serial, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, createdAt: new Date().toISOString(), createdBy: aggr('owner'), ...data })
+  return { id, name, serial }
+}
+
+/** Customers of company A whose name starts with `prefix`. */
+export async function countCustomersNamed(prefix: string): Promise<number> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/customers`).where('name', '>=', prefix).where('name', '<', `${prefix}`).get()
+  return snapshot.size
+}
+
+export async function readDoc(path: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
 }

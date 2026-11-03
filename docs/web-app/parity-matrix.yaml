@@ -1141,7 +1141,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
-  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela. Web: Minhas pede assignedTo=<uid> à API (ASSIGNED_READS); com o #514 o técnico lê a OS atribuída criada por qualquer um (regras, API e índices). E2E: OS 508 do admin atribuída ao técnico aparece em Minhas e abre (orders-review.spec.ts)."
+  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Web: Minhas pede assignedTo=<uid> à API (ASSIGNED_READS); com o #514 o técnico lê a OS atribuída criada por qualquer um (regras, API e índices). E2E: OS 508 do admin atribuída ao técnico aparece em Minhas e abre (orders-review.spec.ts). Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela."
 - id: home.filter.done
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1752,7 +1752,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Item entra com o preço do catálogo (vazio fica sem valor) e quantidade 1; com 2+ aparelhos pergunta para qual antes de entrar. Não copiar: preço, sem valor e total da Nova OS dependem só de viewPrices, sem useFinancial. Web: \"+ Usar «texto» nesta OS\" na Nova OS e na OS aberta, por POST /items sem catalogId (#516, item avulso: service null e description). E2E em orders-review.spec.ts (P0 #2) e orders-new.spec.ts."
+  note: "Item entra com o preço do catálogo (vazio fica sem valor) e quantidade 1; com 2+ aparelhos pergunta para qual antes de entrar. Web: \"+ Usar «texto» nesta OS\" na Nova OS e na OS aberta, por POST /items sem catalogId (#516, item avulso: service null e description). E2E em orders-review.spec.ts (P0 #2) e orders-new.spec.ts. Não copiar: preço, sem valor e total da Nova OS dependem só de viewPrices, sem useFinancial."
 - id: order.new.request
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1858,7 +1858,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484). O ✓ fica cinza até ter cliente e enquanto a IA lê; nunca espera campo obrigatório do segmento. Não copiar: o app grava sem esperar e engole a falha (sem error nem denied na tela); o web mostra os dois. Web: clientOrderId gerado ao abrir a Nova OS e repetido em cada tentativa (#516): salvar de novo depois de a rede cair devolve a mesma OS. E2E em orders-review.spec.ts (B4) e orders-new.spec.ts."
+  note: "Salva sem cliente é bloqueado (\"Escolha o cliente para salvar\"). Agenda o lembrete local assim que a OS ganha id. As regras recusam número, empresa, autor ou situação fora do que o papel pode criar (#484). O ✓ fica cinza até ter cliente e enquanto a IA lê; nunca espera campo obrigatório do segmento. Web: clientOrderId gerado ao abrir a Nova OS e repetido em cada tentativa (#516): salvar de novo depois de a rede cair devolve a mesma OS. E2E em orders-review.spec.ts (B4) e orders-new.spec.ts. Não copiar: o app grava sem esperar e engole a falha (sem error nem denied na tela); o web mostra os dois."
 - id: order.new.discard
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2507,7 +2507,7 @@ rows:
   e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Também pelo link Escolher cliente no topo quando falta (só quem edita). Trocar traz o endereço do cliente se a OS não tem local. Não copiar: trocar o cliente mantém os aparelhos do anterior sem aviso. Web: fechar a pergunta do veículo cancela a troca; o resumo gravado leva e-mail e CPF/CNPJ."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Também pelo link Escolher cliente no topo quando falta (só quem edita). Trocar traz o endereço do cliente se a OS não tem local. Web: fechar a pergunta do veículo cancela a troca; o resumo gravado leva e-mail e CPF/CNPJ. Não copiar: trocar o cliente mantém os aparelhos do anterior sem aviso."
 - id: order.customer.open
   screen: lib/screens/order/order_screen_v2.dart
   route: "/customer_detail"
@@ -2691,7 +2691,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. No … só em OS salva e sem responsável; com responsável, pela linha em Detalhes. Lista da equipe (nome ou e-mail), ✓ no atual, Tirar responsável; equipe vazia não abre nada. Web: atribuir pela API (assignOrder); com o #514 o técnico passa a ver a OS. E2E: admin escolhe o Tiago e a OS aparece em Minhas do técnico (orders-review.spec.ts); datas e responsável em order-detail.spec.ts. Não copiar: atribuir não dá acesso ao técnico (regras leem createdBy), então Minhas fica vazia."
 - id: order.address.edit
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2758,7 +2758,7 @@ rows:
   e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Regras exigem acesso ao financeiro (#484). Só OS salva, fora de quote e canceled, com saldo > 0; máximo = saldo. Exige viewPrices e viewFinancialReports. Não copiar: erro genérico Ocorreu um erro. Web: manda expectedUpdatedAt."
+  note: "Regras exigem acesso ao financeiro (#484). Só OS salva, fora de quote e canceled, com saldo > 0; máximo = saldo. Exige viewPrices e viewFinancialReports. Web: manda expectedUpdatedAt. Não copiar: erro genérico Ocorreu um erro."
 - id: order.comment.preview
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4387,7 +4387,7 @@ rows:
   data: []
   web_status: todo
   web_exception: null
-  note: "Texto por situação (aprovada, em andamento, concluída ou genérico), por idioma e com ou sem nome da empresa; WhatsApp abre wa.me/{número}?text=. OS nunca segue o rótulo do segmento (resumo do Receber, recibo, assunto e frase da folha usam orderShort). Não copiar: texto fixo no ShareLinkService fora do i18n, diz OS fixo, artigo feminino fixo antes da empresa, promete aprovar e comentar mesmo quando o link só deixa ver, e sem nome sai Olá !; a folha aberta da OS, de Receber e do Financeiro não passa o nome da empresa. Web: i18n, rótulo do segmento e o que o link permite."
+  note: "Texto por situação (aprovada, em andamento, concluída ou genérico), por idioma e com ou sem nome da empresa; WhatsApp abre wa.me/{número}?text=. OS nunca segue o rótulo do segmento (resumo do Receber, recibo, assunto e frase da folha usam orderShort). Web: i18n, rótulo do segmento e o que o link permite. Não copiar: texto fixo no ShareLinkService fora do i18n, diz OS fixo, artigo feminino fixo antes da empresa, promete aprovar e comentar mesmo quando o link só deixa ver, e sem nome sai Olá !; a folha aberta da OS, de Receber e do Financeiro não passa o nome da empresa."
 - id: share.analytics
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -6438,7 +6438,7 @@ rows:
   web_status: todo
   web_exception: null
   permission: viewFinancialReports
-  note: "Presets do menu … zeram o offset mas mantêm filtro de pagamento e cliente. Rótulo muda por tipo (Hoje ou data, intervalo da semana, Mês atual ou mês, Ano atual ou ano). Não copiar: Esta semana busca uma semana diferente da mostrada (três contas de semana entre repositório, tela e PDF); chaves de período em português e rótulo do PDF em pt_BR fixo. Web: enum em inglês e uma função de semana pelo locale."
+  note: "Presets do menu … zeram o offset mas mantêm filtro de pagamento e cliente. Rótulo muda por tipo (Hoje ou data, intervalo da semana, Mês atual ou mês, Ano atual ou ano). Web: enum em inglês e uma função de semana pelo locale. Não copiar: Esta semana busca uma semana diferente da mostrada (três contas de semana entre repositório, tela e PDF); chaves de período em português e rótulo do PDF em pt_BR fixo."
 - id: fin.report.step
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6829,10 +6829,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Linha 'N clientes' no topo e grupos por inicial sem acento ('#' para outros). Vazio oferece 'Cadastrar primeiro cliente' só com manageCustomers; depois de salvar (vazio ou '+'), abre o cliente novo. Não copiar: o app assina a coleção inteira em tempo real e a busca por placa carrega todos os aparelhos; na web, busca e paginação no servidor."
+  note: "Linha 'N clientes' no topo e grupos por inicial sem acento ('#' para outros). Vazio oferece 'Cadastrar primeiro cliente' só com manageCustomers; depois de salvar (vazio ou '+'), abre o cliente novo. Web: lista inteira pela API (GET /v1/app/customers), 200 linhas por vez, grupos por inicial. Não copiar: o app assina a coleção inteira em tempo real e a busca por placa carrega todos os aparelhos; na web, busca e paginação no servidor."
 - id: customer.list.search
   screen: lib/screens/menu_navigation/home_customer_list.dart
   route: null
@@ -6846,10 +6847,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Placa só com 3+ caracteres, sem hífen, espaço ou caixa; acerto no topo com 'placa · modelo', no máximo 5. Dono = cliente da OS mais recente com o aparelho. Telefone compara só dígitos quando o texto parece telefone. Não copiar: texto não ignora acento; consultor e técnico ficam sem placa (consulta de OS sem createdBy é negada e o erro é engolido). Na web, a API resolve o dono pelo papel."
+  note: "Placa só com 3+ caracteres, sem hífen, espaço ou caixa; acerto no topo com 'placa · modelo', no máximo 5. Dono = cliente da OS mais recente com o aparelho. Telefone compara só dígitos quando o texto parece telefone. Web: nome e e-mail sem acento, telefone por dígitos e placa a partir de 3 caracteres; o acerto da placa abre o dono (cliente da OS mais recente) para todo papel. Não copiar: texto não ignora acento; consultor e técnico ficam sem placa (consulta de OS sem createdBy é negada e o erro é engolido). Na web, a API resolve o dono pelo papel."
 - id: customer.list.create
   screen: lib/screens/menu_navigation/home_customer_list.dart
   route: "/customer_form"
@@ -6863,9 +6865,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
+  note: "Web: abre o cliente novo depois de salvar."
 - id: customer.list.open
   screen: lib/screens/menu_navigation/home_customer_list.dart
   route: "/customer_detail"
@@ -6879,7 +6883,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
 - id: customer.list.badges
@@ -6895,10 +6900,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Atrasada (dueDate antes de agora, ponto de atraso) vence aberta (ponto âmbar); aberta = approved ou progress. Não copiar: consultor e técnico não veem selo (consulta sem createdBy é negada, erro engolido). Na web, vem da API filtrada pelo papel."
+  note: "Atrasada (dueDate antes de agora, ponto de atraso) vence aberta (ponto âmbar); aberta = approved ou progress. Web: contados no servidor com as OS que o papel lê; consultor e técnico veem “As OS em aberto contam só as suas”. Não copiar: consultor e técnico não veem selo (consulta sem createdBy é negada, erro engolido). Na web, vem da API filtrada pelo papel."
 - id: customer.picker.choose
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -6912,10 +6918,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/devices"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome."
+  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem “Recentes”; fica para a próxima fatia de OS."
 - id: customer.picker.create
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_form"
@@ -6929,10 +6936,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido."
+  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na lista de clientes, “Cadastrar «texto»” já vira telefone ou nome e some com nome existente (customers.spec.ts); no seletor da Nova OS ainda não."
 - id: customer.picker.plate
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -6946,10 +6954,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "3+ caracteres, sem hífen, espaço ou caixa; no máximo 5 acertos no topo com 'placa · modelo'. Dono = cliente da OS mais recente com o aparelho. Não copiar: no app falha calada para consultor e técnico; na web a API resolve."
+  note: "3+ caracteres, sem hífen, espaço ou caixa; no máximo 5 acertos no topo com 'placa · modelo'. Dono = cliente da OS mais recente com o aparelho. Web: a lista de clientes e o ⌘K acham pela placa e abrem o dono; o seletor da Nova OS ainda não. Não copiar: no app falha calada para consultor e técnico; na web a API resolve."
 - id: customer.picker.recents
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -6963,10 +6972,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê."
+  note: "5 clientes distintos das últimas 50 OS por createdAt. Some com busca. Web: falta “Recentes” no seletor da Nova OS. Não copiar: some para consultor e técnico (consulta sem createdBy negada); na web usar as OS que o papel lê."
 - id: customer.picker.auto-device
   screen: lib/screens/customers/customer_list_screen.dart
   route: null
@@ -6980,9 +6990,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Só quando a OS ainda não tem aparelho. Espera até 3 s sem indicador; se demorar ou falhar, escolhe só o cliente. Aparelhos = os das OS do cliente."
+  note: "Só quando a OS ainda não tem aparelho. Espera até 3 s sem indicador; se demorar ou falhar, escolhe só o cliente. Aparelhos = os das OS do cliente. Web: a Nova OS já sugere o único aparelho ao escolher o cliente; vindo da tela do cliente não escolhe (regra do app). Falta E2E próprio."
 - id: customer.detail.view
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"
@@ -6996,10 +7007,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Mostra telefone, 'gastou' (soma das concluídas, com viewPrices, maior que 0) e 'falta receber'. Frase 'O que fazer para {nome}?' acima do botão azul. Não copiar: não mostra e-mail, CPF/CNPJ, endereço nem campos do segmento (quem não edita nunca vê); consultor e técnico só contam as OS que criaram, sem aviso; cliente é foto do argumento da rota, não tempo real; sem argumento a tela fica em branco. Na web, ler por id e mostrar não encontrado."
+  note: "Mostra telefone, 'gastou' (soma das concluídas, com viewPrices, maior que 0) e 'falta receber'. Frase 'O que fazer para {nome}?' acima do botão azul. Web: lido por id na API; mostra e-mail, CPF/CNPJ, endereço e campos do segmento; “não está mais aqui” para cliente apagado; consultor e técnico veem que a lista é parcial. Não copiar: não mostra e-mail, CPF/CNPJ, endereço nem campos do segmento (quem não edita nunca vê); consultor e técnico só contam as OS que criaram, sem aviso; cliente é foto do argumento da rota, não tempo real; sem argumento a tela fica em branco. Na web, ler por id e mostrar não encontrado."
 - id: customer.detail.call
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"
@@ -7013,7 +7025,8 @@ rows:
   feature_flags: []
   hardware: [phone]
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
   note: "Só com telefone; limpa para dígitos e +."
@@ -7030,7 +7043,8 @@ rows:
   feature_flags: []
   hardware: [whatsapp]
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
   note: "Número sai de customer.rules.whatsapp-number. Só com telefone; abre sem mensagem pronta."
@@ -7047,10 +7061,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. Rótulo 'Nova OS para {primeiro nome}'. Leva só o cliente, nunca o aparelho."
+  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. Rótulo 'Nova OS para {primeiro nome}'. Leva só o cliente, nunca o aparelho. Web: só quem cria OS vê o botão (gerente não; técnico não, como a Nova OS do web)."
 - id: customer.detail.receive
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/receive_customer"
@@ -7064,9 +7079,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro."
+  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro. Web: com uma OS abre ela; com várias abre Início em “Sem receber” buscando o cliente, até a tela “Receber de Ana” (fatia 04)."
 - id: customer.detail.devices
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/device_detail"
@@ -7080,7 +7096,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewDevices
   note: "Lista vem das OS do cliente (distinctVehicles), não de devices: aparelho sem OS não aparece. Subtítulo 'série · N OS'. Parcial para consultor e técnico."
@@ -7097,10 +7114,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: in_progress
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Depois de salvar abre a tela do aparelho com o cliente como dono e o nome dele no voltar. Não copiar: o aparelho não fica ligado ao cliente (não há campo de dono); reaberto, o dono some, e ele some da lista do cliente até entrar numa OS. Na web, decidir o vínculo (mudança de modelo, risk:high)."
+  note: "Depois de salvar abre a tela do aparelho com o cliente como dono e o nome dele no voltar. Web: cadastra e abre o aparelho (devices.spec.ts), mas ele não fica ligado ao cliente até entrar numa OS: falta decidir o campo de dono (mudança de modelo). Não copiar: o aparelho não fica ligado ao cliente (não há campo de dono); reaberto, o dono some, e ele some da lista do cliente até entrar numa OS. Na web, decidir o vínculo (mudança de modelo, risk:high)."
 - id: customer.detail.orders
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7114,10 +7132,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
+  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
 - id: customer.detail.receipts
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7182,7 +7201,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
 - id: customer.detail.delete
@@ -7198,10 +7218,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "OS continuam salvas, com o cliente embutido. Apaga de vez. Não copiar: o app não trata erro (exceção solta, sem aviso); aparelhos com nextMaintenanceCustomer dele ficam apontando para id que não existe."
+  note: "OS continuam salvas, com o cliente embutido. Apaga de vez. Web: DELETE /v1/app/customers/:id; erro vira aviso; aparelhos com a próxima manutenção dele perdem o id e ficam com o nome. O diálogo diz quantas OS, recibos e cobranças o cliente tem, contados no servidor sobre tudo (também o que o papel não vê), sem detalhe. A regra de quem apaga não muda. Não copiar: o app não trata erro (exceção solta, sem aviso); aparelhos com nextMaintenanceCustomer dele ficam apontando para id que não existe."
 - id: customer.form.save
   screen: lib/screens/customers/customer_form_screen.dart
   route: "/customer_form"
@@ -7215,10 +7236,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Cliente novo com telefone passa por customer.form.duplicate-check. Nada salva sem o ✓. ✓ cinza até ter nome, com dica customerSaveNeedsName; na edição empurrada Salvar fica ativo e nome vazio vira erro no campo. Erro abre alerta customerSaveError. Telefone gravado como digitado com máscara; customData vazio vira null. Não copiar: editar regrava createdAt/createdBy, grava company com a primeira empresa do usuário e repete o analytics de cliente criado; a edição empurrada sai sem perguntar; o endereço muda o objeto a cada tecla."
+  note: "Cliente novo com telefone passa por customer.form.duplicate-check. Nada salva sem o ✓. ✓ cinza até ter nome, com dica customerSaveNeedsName; na edição empurrada Salvar fica ativo e nome vazio vira erro no campo. Erro abre alerta customerSaveError. Telefone gravado como digitado com máscara; customData vazio vira null. Web: criar e editar são rotas diferentes; editar não regrava createdAt/createdBy; fechar com mudança pergunta também na edição. Editar manda a versão lida (version, opaca como nas OS): se alguém salvou depois, 409 CUSTOMER_CHANGED, nada é gravado e a tela relê o cliente com aviso. Não copiar: editar regrava createdAt/createdBy, grava company com a primeira empresa do usuário e repete o analytics de cliente criado; a edição empurrada sai sem perguntar; o endereço muda o objeto a cada tecla."
 - id: customer.form.more
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -7232,7 +7254,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Abre sozinho quando o cliente já tem e-mail, CPF/CNPJ, endereço ou campo do segmento, ou quando o contato traz e-mail. CPF/CNPJ em customer.form.tax-id. E-mail sem validação."
@@ -7249,10 +7272,11 @@ rows:
   feature_flags: []
   hardware: [maps]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Só aparece com endereço ou lat/lng; lat/lng não se edita aqui. Gerente e técnico não chegam ao mapa (o formulário exige manageCustomers e a tela do cliente não mostra endereço)."
+  note: "Só aparece com endereço ou lat/lng; lat/lng não se edita aqui. Gerente e técnico não chegam ao mapa (o formulário exige manageCustomers e a tela do cliente não mostra endereço). Web: link para o mapa também na tela do cliente."
 - id: customer.form.pick-contact
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -7299,10 +7323,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Nunca bloqueia: número pode ser compartilhado. Falha ou mais de 5 s ao ler a lista não impedem salvar. Editar não avisa."
+  note: "Nunca bloqueia: número pode ser compartilhado. Falha ou mais de 5 s ao ler a lista não impedem salvar. Editar não avisa. Web: compara com a lista já carregada, sem espera."
 - id: customer.form.duplicate-open
   screen: lib/screens/customers/customer_form_screen.dart
   route: "/customer_detail"
@@ -7316,7 +7341,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
 - id: customer.form.duplicate-save
@@ -7332,7 +7358,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
 - id: customer.rules.phone-match
@@ -7348,9 +7375,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "phoneMatchKey: número do WhatsApp e, no Brasil, sem o nono dígito."
+  note: "phoneMatchKey: número do WhatsApp e, no Brasil, sem o nono dígito. Web: lib/phone.ts, casos de contrato phone.json no vitest."
 - id: customer.rules.whatsapp-number
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7364,9 +7392,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "whatsappNumber: com + mantém o país; sem +, usa o país da empresa (Brasil por padrão); inválido volta só com dígitos, salvo celular antigo do Brasil."
+  note: "whatsappNumber: com + mantém o país; sem +, usa o país da empresa (Brasil por padrão); inválido volta só com dígitos, salvo celular antigo do Brasil. Web: lib/phone.ts, casos de contrato phone.json no vitest."
 - id: customer.detail.menu
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7380,9 +7409,10 @@ rows:
   feature_flags: ["nfseAvailable"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Só com nota fiscal ligada ou manageCustomers. Ordem: nota com várias OS, Editar, Apagar (vermelho). Técnico nunca vê. Não copiar: é CupertinoActionSheet com Cancelar, não o menu … do design system."
+  note: "Só com nota fiscal ligada ou manageCustomers. Ordem: nota com várias OS, Editar, Apagar (vermelho). Técnico nunca vê. Web: menu “…” do design system, só com manageCustomers (Editar, Apagar). Não copiar: é CupertinoActionSheet com Cancelar, não o menu … do design system."
 - id: customer.detail.owed
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -7396,7 +7426,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewPrices
   note: "Só quando maior que 0. Aparece com viewPrices mesmo para quem não pode receber (sem o link). Regra em customer.rules.spent-owed."
@@ -7413,9 +7444,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "gastou = soma de total das OS done. falta receber = soma de max(total - paidAmount, 0) das OS fora de quote e canceled com payment diferente de paid, de qualquer mês (customer_utils totalSpent e customerOwed). Não copiar: consultor vê só as próprias OS sem aviso; na web dizer 'nas suas OS'."
+  note: "gastou = soma de total das OS done. falta receber = soma de max(total - paidAmount, 0) das OS fora de quote e canceled com payment diferente de paid, de qualquer mês (customer_utils totalSpent e customerOwed). Web: calculado no servidor (app-directory.service.ts, testes em app-directory.routes.test.ts). Não copiar: consultor vê só as próprias OS sem aviso; na web dizer 'nas suas OS'."
 - id: share-in.contact
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -7446,10 +7478,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Só quando o país da empresa é BR ou vazio. Opcional; valida CPF e CNPJ (inclusive alfanumérico); maiúsculas, sem máscara ao digitar; grava normalizado ou null. A cobrança Asaas exige."
+  note: "Só quando o país da empresa é BR ou vazio. Opcional; valida CPF e CNPJ (inclusive alfanumérico); maiúsculas, sem máscara ao digitar; grava normalizado ou null. A cobrança Asaas exige. Web: lib/tax-id.ts com tax-id.json; o servidor também valida (400)."
 - id: customer.form.custom-fields
   screen: lib/screens/customers/customer_form_screen.dart
   route: null
@@ -7463,10 +7496,47 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "DynamicFieldBuilder por seção, sem os campos fixos (nome, telefone, e-mail, endereço, CPF/CNPJ). Tipos text, textarea, number (só inteiro, min/max), select e date. Text valida required, minLength e pattern. Data gravada em ISO 8601 com hora. Lê customData[fieldName] e customData[key]; grava só fieldName e apaga key. Não copiar: textarea, select e date ignoram required; select e data abrem menu de ações/popup em vez da tela de escolher."
+  note: "DynamicFieldBuilder por seção, sem os campos fixos (nome, telefone, e-mail, endereço, CPF/CNPJ). Tipos text, textarea, number (só inteiro, min/max), select e date. Text valida required, minLength e pattern. Data gravada em ISO 8601 com hora. Lê customData[fieldName] e customData[key]; grava só fieldName e apaga key. Web: required vale para todos os tipos; select é a lista do navegador. Não copiar: textarea, select e date ignoram required; select e data abrem menu de ações/popup em vez da tela de escolher."
+- id: customer.list.import
+  screen: firebase/webapp/src/views/customers/ImportView.vue
+  route: "/customers/import"
+  action: "Importar clientes de planilha (CSV ou XLSX) com prévia"
+  kind: flow
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [empty, error, saving, limit]
+  feature_flags: []
+  hardware: [file]
+  data: ["api:POST /v1/app/customers/import"]
+  web_status: done
+  e2e: firebase/webapp/e2e/customers-import.spec.ts
+  web_exception: null
+  permission: manageCustomers
+  note: "Só web (extra de mesa). Arquivo lido no navegador; colunas adivinhadas e conferidas; sem nome, CPF/CNPJ inválido, telefone de cliente que já existe ou repetido na planilha ficam de fora; nada grava antes de Importar. Até 5.000 linhas, enviadas de 100 em 100 com id por linha; o id da importação nasce na prévia e é o mesmo no Importar de novo depois de uma falha, então nada entra duas vezes."
+- id: customer.list.quick-search
+  screen: firebase/webapp/src/views/customers/CustomersView.vue
+  route: "/customers"
+  action: "Busca rápida (⌘K e /) de clientes, placas e aparelhos"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["labels:device.serial"]
+  i18n: [pt, en, es]
+  states: [empty]
+  feature_flags: []
+  hardware: null
+  data: ["api:GET /v1/app/customers", "api:GET /v1/app/devices"]
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_exception: null
+  permission: viewCustomers
+  note: "Só web (extra de mesa). / foca a busca da lista; ⌘K acha cliente por nome ou telefone e a placa abre o dono."
 - id: device.list.view
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -7480,10 +7550,11 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Entrada pelo perfil só com useDeviceManagement. Sem useDeviceManagement, tocar abre a edição; com ela, abre a tela do aparelho. Não copiar: tocar sem useDeviceManagement abre o formulário para todos os papéis; vazio diz 'toque + para adicionar' mesmo sem o '+', com texto montado por concatenação (quebra en/es)."
+  note: "Entrada pelo perfil só com useDeviceManagement. Sem useDeviceManagement, tocar abre a edição; com ela, abre a tela do aparelho. Web: aba “Veículos” ao lado de “Clientes” (/devices); tocar abre a tela do aparelho para todos; vazio diz o que fazer só a quem pode. Não copiar: tocar sem useDeviceManagement abre o formulário para todos os papéis; vazio diz 'toque + para adicionar' mesmo sem o '+', com texto montado por concatenação (quebra en/es)."
 - id: device.list.search
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -7497,10 +7568,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
+  note: "Procura em modelo, série e marca; não em categoria nem campos do segmento. Web: sem acento, e a série sem hífen e espaço. Divergência para o próximo lote do app: o app grava keywords só do nome (generateKeywords, sem série nem marca, sem tirar stopwords); web e servidor gravam nome, série e marca (generateSearchKeywords). Editar o aparelho no app tira a placa da busca do bot e da API. Não copiar: não ignora acento, e a série não ignora hífen nem espaço (ao contrário da busca por placa dos clientes)."
 - id: device.list.pick
   screen: lib/screens/device_list_screen.dart
   route: "/device_list"
@@ -7514,10 +7586,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: in_progress
   web_exception: null
   permission: viewDevices
-  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho."
+  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa “do cliente” de “outros” pelas regras daqui."
 - id: device.list.create
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -7531,7 +7603,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
 - id: device.list.delete
@@ -7547,10 +7620,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Vira botão na web. Não copiar: a linha some antes de gravar (onDismissed sem await nem erro); se a regra negar, volta pelo stream sem explicação."
+  note: "Vira botão na web. Web: botão na linha, a linha só sai depois que o servidor confirma. Não copiar: a linha some antes de gravar (onDismissed sem await nem erro); se a regra negar, volta pelo stream sem explicação."
 - id: device.list.status
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -7564,10 +7638,11 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Texto no subtítulo e ponto no canto da foto: ativo, em manutenção, inativo, desativado. Não aparece no seletor nem na tela do aparelho."
+  note: "Texto no subtítulo e ponto no canto da foto: ativo, em manutenção, inativo, desativado. Não aparece no seletor nem na tela do aparelho. Web: coluna “Situação” (texto e ponto) com useDeviceManagement."
 - id: device.list.edit-swipe
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -7581,10 +7656,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Não copiar: no app abre para todos os papéis e só a gravação é negada. Na web vira botão, só com manageDevices."
+  note: "Web: botão “Editar” na linha, só com manageDevices. Não copiar: no app abre para todos os papéis e só a gravação é negada. Na web vira botão, só com manageDevices."
 - id: device.list.pick-none
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -7598,9 +7674,9 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: in_progress
   web_exception: null
-  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult."
+  note: "Só quando a OS já tem aparelho e a busca está vazia. Devolve kRemoveDeviceResult. Web: falta “Nenhum …” na troca de aparelho da OS."
 - id: device.list.pick-create
   screen: lib/screens/device_list_screen.dart
   route: null
@@ -7614,10 +7690,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: in_progress
   web_exception: null
   permission: manageDevices
-  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web."
+  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web. Web: na lista de aparelhos, placa BR vira série e o resto modelo; no seletor da OS ainda não."
 - id: device.detail.view
   screen: lib/screens/devices/device_detail_screen.dart
   route: "/device_detail"
@@ -7631,10 +7707,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Números do segmento são agrupados na leitura (98.000), menos ano; o valor salvo não muda. Campos do segmento lidos por fieldName ou key. Sem modelo, o título vira o rótulo do segmento. Situação não aparece. Não copiar: consultor e técnico recebem erro na tela toda (OS do aparelho consultadas sem createdBy, regra nega; somem Nova OS e manutenção); sem argumento fica carregando para sempre; menu … é CupertinoActionSheet. Na web, abrir com as OS que o papel lê."
+  note: "Números do segmento são agrupados na leitura (98.000), menos ano; o valor salvo não muda. Campos do segmento lidos por fieldName ou key. Sem modelo, o título vira o rótulo do segmento. Situação não aparece. Web: abre para consultor e técnico com as OS que eles leem. Não copiar: consultor e técnico recebem erro na tela toda (OS do aparelho consultadas sem createdBy, regra nega; somem Nova OS e manutenção); sem argumento fica carregando para sempre; menu … é CupertinoActionSheet. Na web, abrir com as OS que o papel lê."
 - id: device.detail.customer
   screen: lib/screens/devices/device_detail_screen.dart
   route: "/customer_detail"
@@ -7648,7 +7725,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewCustomers
 - id: device.detail.new-order
@@ -7664,10 +7742,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui."
+  note: "Botão não checa permissão: gerente vê e a gravação é negada; técnico consegue criar por aqui. Web: leva o dono e o veículo; só quem cria OS vê."
 - id: device.detail.orders
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -7681,7 +7760,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewDevices
 - id: device.detail.contracts
@@ -7714,7 +7794,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   note: "Lê o aparelho na hora: o que veio pela rota pode não ter a data. Sem data, só quem edita aparelhos vê a linha."
 - id: device.detail.maintenance-edit
@@ -7730,10 +7811,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Sugere daqui a 6 meses, só data futura. Grava só os campos da data, um aparelho por vez, e zera as recusas. Dia em texto AAAA-MM-DD. Também apaga nextMaintenanceNoticeFor (o aviso diário volta a valer). Sem dono conhecido mantém o cliente antigo; tirar a data apaga cliente e serviço; aparelho apagado é pulado. Serviço = principal da última OS concluída que a pessoa lê."
+  note: "Sugere daqui a 6 meses, só data futura. Grava só os campos da data, um aparelho por vez, e zera as recusas. Dia em texto AAAA-MM-DD. Também apaga nextMaintenanceNoticeFor (o aviso diário volta a valer). Sem dono conhecido mantém o cliente antigo; tirar a data apaga cliente e serviço; aparelho apagado é pulado. Serviço = principal da última OS concluída que a pessoa lê. Web: PUT /v1/app/devices/:id/next-maintenance; o servidor acha o dono e o último serviço e apaga nextMaintenanceNoticeFor."
 - id: device.detail.maintenance-remove
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -7747,7 +7829,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
 - id: device.detail.maintenance-contract
@@ -7846,7 +7929,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: viewPrices
 - id: device.detail.edit
@@ -7862,10 +7946,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "App mostra a todos; só gravar é negado a quem não tem manageDevices. Não copiar: na web, esconder pelo papel."
+  note: "App mostra a todos; só gravar é negado a quem não tem manageDevices. Web: menu “…” só com manageDevices. Não copiar: na web, esconder pelo papel."
 - id: device.detail.delete
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -7879,10 +7964,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Menu aparece a todos; checa no toque. Não copiar: gravação sem tratamento de erro (sem rede ou regra negada = exceção solta)."
+  note: "Menu aparece a todos; checa no toque. Web: só com manageDevices; erro vira aviso. Não copiar: gravação sem tratamento de erro (sem rede ou regra negada = exceção solta)."
 - id: device.detail.owner
   screen: lib/screens/devices/device_detail_screen.dart
   route: null
@@ -7896,9 +7982,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
-  note: "Cliente que veio pela rota; se não veio, o cliente da OS mais recente (createdAt). Vale para o link 'de {cliente}', para a Nova OS e para o cliente da próxima manutenção. Não há campo de dono no aparelho."
+  note: "Cliente que veio pela rota; se não veio, o cliente da OS mais recente (createdAt). Vale para o link 'de {cliente}', para a Nova OS e para o cliente da próxima manutenção. Não há campo de dono no aparelho. Web: calculado no servidor com todas as OS (dono é dado de cliente, que todo membro lê)."
 - id: device.form.save
   screen: lib/screens/device_form_screen.dart
   route: "/device_form"
@@ -7912,10 +7999,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Salva com modelo ou série: a série ficou opcional (regras em device.form.serial-rules). Não grava valores salvos (accumulatedFields). Não copiar: erro ao gravar não mostra nada (try/finally sem catch); a edição empurrada sai sem perguntar; situação e campos do segmento mudam o objeto antes do Salvar."
+  note: "Salva com modelo ou série: a série ficou opcional (regras em device.form.serial-rules). Não grava valores salvos (accumulatedFields). Web: erro aparece no formulário; fechar com mudança pergunta também na edição. O app mostra alerta quando a gravação falha (showFailureAlert). Editar manda a versão lida: 409 DEVICE_CHANGED relê e avisa. Não copiar: a edição empurrada sai sem perguntar; situação e campos do segmento mudam o objeto antes do Salvar."
 - id: device.form.more
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -7929,7 +8017,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
 - id: device.form.photo
@@ -7945,10 +8034,10 @@ rows:
   feature_flags: []
   hardware: [camera, gallery]
   data: ["storage:tenants/{id}/devices/{id}/photo.jpg"]
-  web_status: todo
+  web_status: in_progress
   web_exception: null
   permission: manageDevices
-  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado."
+  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: foto do aparelho ainda não; precisa de envio ao Storage e de a API aceitar a URL da pasta do aparelho. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado."
 - id: device.form.autocomplete
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -7962,7 +8051,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
   note: "Até 5 sugestões, distintas por modelo, marca e categoria, ordenadas por quantidade de aparelhos, achando por modelo ou marca. Não usa accumulatedFields."
@@ -7979,9 +8069,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
-  note: "Opcional; exigida só sem modelo. Salva trim e maiúsculas. Valida o pattern do campo device.serial do segmento (formato inválido). Teclado do segmento."
+  note: "Opcional; exigida só sem modelo. Salva trim e maiúsculas. Valida o pattern do campo device.serial do segmento (formato inválido). Teclado do segmento. Web: máscara do segmento ao digitar e maiúsculas também no servidor."
 - id: device.form.status
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -7995,10 +8086,11 @@ rows:
   feature_flags: ["useDeviceManagement"]
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Só em aparelho que já existe. Valores active, maintenance, inactive, decommissioned. Não copiar: no app é menu de ações; na web, tela de escolher."
+  note: "Só em aparelho que já existe. Valores active, maintenance, inactive, decommissioned. Web: escolha em lista (rádio), não menu de ações. Não copiar: no app é menu de ações; na web, tela de escolher."
 - id: device.form.custom-fields
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -8012,7 +8104,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/devices.spec.ts
   web_exception: null
   permission: manageDevices
   note: "Mesmo DynamicFieldBuilder do cliente, por seção, sem modelo, série, marca e categoria. Lê customData[fieldName] e customData[key]; grava só fieldName. Algum preenchido abre Mais dados sozinho. Não copiar: textarea, select e date ignoram required."

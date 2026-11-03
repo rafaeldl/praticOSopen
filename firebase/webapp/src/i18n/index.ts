@@ -47,16 +47,24 @@ export function render(message: Compiled, params: Params, locale: string): strin
   return walk(message)
 }
 
-// Texts only the order screens use, in their own chunk (scripts/gen.mjs).
-const ORDER_LOADERS: Record<Locale, () => Promise<{ default: unknown }>> = {
-  pt: () => import('@/generated/i18n/pt-orders.json'),
-  en: () => import('@/generated/i18n/en-orders.json'),
-  es: () => import('@/generated/i18n/es-orders.json'),
+// Texts only one feature uses, in their own chunks (scripts/gen.mjs FEATURES).
+export type Feature = 'orders' | 'customers'
+const FEATURE_LOADERS: Record<Feature, Record<Locale, () => Promise<{ default: unknown }>>> = {
+  orders: {
+    pt: () => import('@/generated/i18n/pt-orders.json'),
+    en: () => import('@/generated/i18n/en-orders.json'),
+    es: () => import('@/generated/i18n/es-orders.json'),
+  },
+  customers: {
+    pt: () => import('@/generated/i18n/pt-customers.json'),
+    en: () => import('@/generated/i18n/en-customers.json'),
+    es: () => import('@/generated/i18n/es-customers.json'),
+  },
 }
 
 export const locale = ref<Locale>('pt')
 const catalog = ref<Catalog>({})
-let withOrders = false
+const loaded = new Set<Feature>()
 
 export function t(key: MessageKey, params: Params = {}): string {
   const message = catalog.value[key]
@@ -64,19 +72,22 @@ export function t(key: MessageKey, params: Params = {}): string {
 }
 
 export async function setLocale(next: Locale): Promise<void> {
-  const [loaded, extra] = await Promise.all([LOADERS[next](), withOrders ? ORDER_LOADERS[next]() : null])
-  catalog.value = { ...(loaded.default as Catalog), ...((extra?.default as Catalog) ?? {}) }
+  const features = [...loaded]
+  const [main, ...extra] = await Promise.all([LOADERS[next](), ...features.map((name) => FEATURE_LOADERS[name][next]())])
+  catalog.value = Object.assign({}, main.default as Catalog, ...extra.map((part) => part.default as Catalog))
   locale.value = next
   document.documentElement.lang = HTML_LANG[next]
 }
 
-/** Before an order screen renders: its texts join the catalog (and follow language changes). */
-export async function loadOrderTexts(): Promise<void> {
-  if (withOrders) return
-  const extra = await ORDER_LOADERS[locale.value]()
-  withOrders = true
+/** Before a feature's screen renders: its texts join the catalog (and follow language changes). */
+export async function loadTexts(feature: Feature): Promise<void> {
+  if (loaded.has(feature)) return
+  const extra = await FEATURE_LOADERS[feature][locale.value]()
+  loaded.add(feature)
   catalog.value = { ...catalog.value, ...(extra.default as Catalog) }
 }
+
+export const loadOrderTexts = (): Promise<void> => loadTexts('orders')
 
 function wantedLocale(): Locale {
   return prefs.language === 'system' ? detectLocale(navigator.languages ?? [navigator.language]) : prefs.language

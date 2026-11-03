@@ -10,6 +10,11 @@ export const ui = reactive({
   shortcuts: false,
   /** Nova OS drawer, over any screen (key N, the + of the shell). */
   newOrder: false,
+  /** What Nova OS opens with, from a customer or a device screen. */
+  newOrderSeed: null as null | {
+    customer?: { id: string; name: string; phone?: string }
+    device?: { id: string; name: string; serial?: string | null }
+  },
 })
 
 export function announce(text: string): void {

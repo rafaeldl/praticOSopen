@@ -3,10 +3,7 @@
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, Plus, Search, Settings } from '@lucide/vue'
-import CommandPalette from '@/components/CommandPalette.vue'
 import AppLogo from '@/components/AppLogo.vue'
-import Layer from '@/components/Layer.vue'
-import ShortcutsDialog from '@/components/ShortcutsDialog.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { can, canAny, reloadCompany, selectCompany, session } from '@/lib/session'
@@ -17,6 +14,10 @@ import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
 
+// Opened by a key or a tap, never on the first paint: out of the first download.
+const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
+const ShortcutsDialog = defineAsyncComponent(() => import('@/components/ShortcutsDialog.vue'))
+const Layer = defineAsyncComponent(() => import('@/components/Layer.vue'))
 const NewOrderDrawer = defineAsyncComponent(() =>
   Promise.all([import('@/components/orders/NewOrderDrawer.vue'), loadOrderTexts()]).then(([m]) => m),
 )

@@ -380,6 +380,41 @@ export const API_CASES: ApiCase[] = [
     method: 'patch', path: '/v1/app/devices/d1', body: { name: 'Uno 2' },
     allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
   },
+  {
+    id: 'customers.list', area: 'Cadastros', title: 'ver clientes',
+    method: 'get', path: CU, allow: MEMBERS, permission: 'viewCustomers',
+  },
+  {
+    id: 'customers.detail', area: 'Cadastros', title: 'abrir cliente',
+    method: 'get', path: `${CU}/cust1`, allow: MEMBERS, permission: 'viewCustomers',
+  },
+  {
+    id: 'customers.delete', area: 'Cadastros', title: 'apagar cliente',
+    method: 'delete', path: `${CU}/cust1`,
+    allow: ['owner', 'admin', 'supervisor', 'consultant'], permission: 'manageCustomers',
+  },
+  {
+    id: 'customers.import', area: 'Cadastros', title: 'importar clientes de planilha',
+    method: 'post', path: `${CU}/import`, body: { importId: 'imp-00000001', customers: [{ name: 'Rita' }] },
+    allow: ['owner', 'admin', 'supervisor', 'consultant'], permission: 'manageCustomers',
+  },
+  {
+    id: 'devices.list', area: 'Cadastros', title: 'ver aparelhos/veículos',
+    method: 'get', path: '/v1/app/devices', allow: MEMBERS, permission: 'viewDevices',
+  },
+  {
+    id: 'devices.detail', area: 'Cadastros', title: 'abrir aparelho/veículo',
+    method: 'get', path: '/v1/app/devices/d1', allow: MEMBERS, permission: 'viewDevices',
+  },
+  {
+    id: 'devices.delete', area: 'Cadastros', title: 'apagar aparelho/veículo',
+    method: 'delete', path: '/v1/app/devices/d1', allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
+  },
+  {
+    id: 'devices.maintenance', area: 'Cadastros', title: 'marcar a próxima manutenção',
+    method: 'put', path: '/v1/app/devices/d1/next-maintenance', body: { date: '2099-01-01' },
+    allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
+  },
 
   // ─── Equipe ────────────────────────────────────────────────────────────
   {

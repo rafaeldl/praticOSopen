@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4183
+// E2E_PORT_OFFSET in e2e/run.mjs moves it when another worktree uses 4183.
+const PORT = Number(process.env.PW_PORT ?? 4183)
 
 export default defineConfig({
   testDir: 'e2e',

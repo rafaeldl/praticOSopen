@@ -3,6 +3,7 @@ import { decideAccess, type RouteAccess } from '@/lib/access'
 import { stripStaleLayers } from '@/lib/route-layer'
 import { effectiveUseFinancial, session, startSession } from '@/lib/session'
 import { NAV } from '@/navigation'
+import { loadOrderTexts, loadTexts } from '@/i18n'
 import type { MessageKey } from '@/generated/message-keys'
 
 declare module 'vue-router' {
@@ -17,6 +18,12 @@ declare module 'vue-router' {
 
 const Placeholder = () => import('@/views/PlaceholderView.vue')
 const OrdersView = () => import('@/views/OrdersView.vue')
+// Customer screens come with their texts (and the order ones: they open orders and Nova OS).
+const withCustomerTexts = <T>(view: () => Promise<T>) => () => Promise.all([view(), loadTexts('customers'), loadOrderTexts()]).then(([m]) => m)
+const CustomersView = withCustomerTexts(() => import('@/views/customers/CustomersView.vue'))
+const DevicesView = withCustomerTexts(() => import('@/views/customers/DevicesView.vue'))
+const ImportView = withCustomerTexts(() => import('@/views/customers/ImportView.vue'))
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView }
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -53,12 +60,24 @@ export const routes: RouteRecordRaw[] = [
     (entry): RouteRecordRaw => ({
       path: entry.path,
       name: entry.name,
-      component: entry.name === 'home' ? OrdersView : Placeholder,
+      component: SCREENS[entry.name] ?? Placeholder,
       meta: { access: entry.access, title: entry.label },
     }),
   ),
   // Same list under its own name: shared links and the performance test use it.
   { path: '/orders', name: 'orders', component: OrdersView, meta: { access: NAV[0]!.access, title: 'orders' } },
+  {
+    path: '/customers/import',
+    name: 'customersImport',
+    component: ImportView,
+    meta: { access: { kind: 'member', anyOf: ['manageCustomers'] }, title: 'web.import.title' },
+  },
+  {
+    path: '/devices',
+    name: 'devices',
+    component: DevicesView,
+    meta: { access: { kind: 'member', anyOf: ['viewDevices'] }, title: 'devices' },
+  },
   {
     path: '/settings',
     name: 'settings',

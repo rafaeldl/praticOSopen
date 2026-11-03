@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
-// The audit is split in three tests per theme (screens, order screens, components):
+// The audit is split in four tests per theme (screens, open order, order lists, components):
 // one test had grown to ~29 s of the 30 s budget on CI, and each axe run adds up.
 type Theme = 'light' | 'dark'
 
@@ -52,6 +52,15 @@ async function auditOrderScreens(page: Page, theme: Theme) {
   await panel.getByRole('button', { name: /^Mudar / }).first().click()
   await expectNoAxeViolations(page, `item ${theme}`)
   await page.keyboard.press('Escape')
+}
+
+/**
+ * The list side of the order screens (held order, Nova OS, batch, board, months).
+ * Its own test: with the open order and its dialogs it passed 30 s on CI, where
+ * the sign-in alone took 5.5 s and each axe run about 1 s (#517).
+ */
+async function auditOrderLists(page: Page, theme: Theme) {
+  await start(page, theme)
   await page.goto('./?order=scn-hold')
   await expect(page.getByTestId('hold-line')).toBeVisible()
   await expectNoAxeViolations(page, `OS parada ${theme}`)
@@ -95,8 +104,12 @@ for (const [theme, name] of [['light', 'claro'], ['dark', 'escuro']] as const) {
     await auditScreens(page, theme)
   })
 
-  test(`axe: 0 violações no tema ${name}: OS`, async ({ page }) => {
+  test(`axe: 0 violações no tema ${name}: OS aberta`, async ({ page }) => {
     await auditOrderScreens(page, theme)
+  })
+
+  test(`axe: 0 violações no tema ${name}: lista, quadro e Nova OS`, async ({ page }) => {
+    await auditOrderLists(page, theme)
   })
 
   test(`axe: 0 violações no tema ${name}: componentes`, async ({ page }) => {

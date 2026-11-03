@@ -3,12 +3,12 @@ import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.
 const MATRIX: Record<string, { allowed: string[]; denied: string[] }> = {
-  owner: { allowed: ['finance', 'team', 'catalog', 'customers', 'invoices'], denied: [] },
-  admin: { allowed: ['finance', 'team', 'catalog', 'customers', 'invoices'], denied: [] },
-  manager: { allowed: ['finance', 'catalog', 'customers', 'invoices'], denied: ['team'] },
-  supervisor: { allowed: ['customers', 'orders'], denied: ['finance', 'team', 'invoices'] },
-  consultant: { allowed: ['customers', 'orders'], denied: ['finance', 'team', 'invoices'] },
-  technician: { allowed: ['customers', 'orders'], denied: ['finance', 'team', 'catalog', 'invoices'] },
+  owner: { allowed: ['finance', 'team', 'catalog', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  admin: { allowed: ['finance', 'team', 'catalog', 'customers', 'customers/import', 'devices', 'invoices'], denied: [] },
+  manager: { allowed: ['finance', 'catalog', 'customers', 'devices', 'invoices'], denied: ['team', 'customers/import'] },
+  supervisor: { allowed: ['customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices'] },
+  consultant: { allowed: ['customers', 'customers/import', 'devices', 'orders'], denied: ['finance', 'team', 'invoices'] },
+  technician: { allowed: ['customers', 'devices', 'orders'], denied: ['finance', 'team', 'catalog', 'invoices', 'customers/import'] },
 }
 
 for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {

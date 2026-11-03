@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base e a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), e a fatia "Clientes e aparelhos" (ver a seção com esse nome). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -47,6 +47,7 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Lista e OS de quem não tem `viewPrices` | Projeção da API (`GET /v1/app/orders`, `/:id`), sem nenhum valor |
 | Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
 | Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
+| Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Cache persistente fica desligado, porque o computador da oficina é compartilhado.
 
@@ -142,9 +143,29 @@ Código em `src/lib/orders/` (regras puras em `model.ts`, testadas em `tests/ord
 - "Minhas" pede `assignedTo=<uid>` à API: o técnico vê a OS atribuída a ele, criada por qualquer um (regras e índices do #514; na API, `canSeeOrder` e a lista aceitam o técnico atribuído).
 - A Início abre com "R$ X para receber" no resumo; em Sem receber, buscar um cliente mostra quanto ele deve. O próximo passo de "Na oficina" é "Concluir serviço". Telefone do cliente legível, total da Nova OS acompanha o valor enquanto digita, controles nativos seguem o tema escuro.
 
-**Textos.** Os textos usados só por `src/components/orders/` vão para `generated/i18n/{pt,en,es}-orders.json`, baixados junto com o painel (`loadOrderTexts`), fora do primeiro download.
+**Textos.** Os textos usados só por uma funcionalidade vão para um arquivo próprio por idioma (`FEATURES` em `scripts/gen.mjs`): `src/components/orders/` em `generated/i18n/{pt,en,es}-orders.json` e as telas de clientes em `-customers.json`. Cada tela carrega o seu com `loadTexts` antes de aparecer, fora do primeiro download.
 
 **Testes.** `e2e/orders-list.spec.ts`, `e2e/orders-new.spec.ts`, `e2e/order-detail.spec.ts` e `e2e/orders-review.spec.ts` (um teste por item da revisão e do teste de usuários), contra o Emulator Suite. As OS que um teste muda são criadas por ele (`e2e/data.ts`); as do cenário fixo ficam em `seedScenario` (`e2e/seed.mjs`). A Nova OS por teclado (cliente, veículo, item e valor) é cronometrada e falha acima de 45 s.
+
+### Clientes e aparelhos
+
+Código em `src/views/customers/`, `src/components/customers/` e `src/lib/customers/` (regras puras em `model.ts`, importação em `import.ts`, chamadas em `data.ts`). Testes: `tests/customers.test.ts` e `e2e/customers*.spec.ts`, `e2e/devices.spec.ts`.
+
+**Dados pela API.** Lista, tela do cliente e do aparelho vêm de `/v1/app/customers` e `/v1/app/devices` (ver `docs/WEB_API.md`), filtradas pelo papel no servidor: consultor e técnico contam só as OS que leem e a tela diz isso. No app essas consultas são negadas pelas regras e a tela fica sem selo, sem busca por placa ou com erro (defeitos 1, 2 e 9 da fatia 03). Nenhuma tela desta fatia usa o Firestore.
+
+**Clientes (`/customers`).** Todos de uma vez, 200 linhas por vez na tela, por inicial sem acento ("#" no fim). Selos "N atrasadas" (vence) e "N em aberto" (aprovada e na oficina). A busca acha nome e e-mail sem acento, telefone pelos dígitos e placa a partir de 3 caracteres, sem hífen; o acerto da placa abre o dono, cliente da OS mais recente. `/` foca a busca e `⌘K` acha cliente e placa. O cliente aberto fica ao lado (`?customer=`), com contato, CPF/CNPJ, endereço com mapa, campos do segmento, "Falta receber" com "Receber", "gastou", aparelhos tirados das OS e as OS com os nomes de situação do segmento. "Nova OS para Ana" leva só o cliente. Ligar e WhatsApp só com telefone (`tel:` só com dígitos e "+"; `wa.me` pela regra de `lib/phone.ts`).
+
+**Cadastro.** Gaveta com nome e telefone (máscara `customer.phone` do segmento pelo país); "Mais dados" com e-mail, CPF/CNPJ (só Brasil ou empresa sem país), endereço e campos do segmento, aberto sozinho quando há algum. "Salvar" cinza até ter nome. Cliente novo com telefone de outro pergunta antes ("Abrir cliente" ou "Salvar mesmo assim"), comparando como o app (sem o nono dígito). Fechar com algo digitado pergunta, também ao editar. Editar manda a versão lida: se alguém (web ou app) salvou depois, nada é gravado, a tela avisa e relê. Apagar diz quantas OS, recibos e cobranças o cliente tem, contando também o que o papel não vê.
+
+**Campos do segmento.** `lib/segment-fields.ts` lê os mesmos `segments/{id}.customFields` do app (global e depois o do segmento; mesma chave, vale o do segmento): text, textarea, number (só inteiro, mínimo e máximo), select e date (gravada como o app, ISO com hora). Lê `customData[nome]` e `customData[chave]`, grava só o nome. `required` vale para todos os tipos (o app ignora em textarea, select e date). Máscaras no formato do `easy_mask` (9, A, N, X).
+
+**Aparelhos (`/devices`).** Aba ao lado de Clientes, com o nome do segmento ("Veículos"). Modelo, placa, situação (com `useDeviceManagement`) e próxima manutenção; editar e apagar na linha só para quem pode. A tela do aparelho (`?device=`) abre para todos os papéis, com dono, OS e a próxima manutenção (marcar, mudar e tirar só com `manageDevices`). O cadastro aceita modelo ou placa; a placa segue a máscara e o `pattern` do segmento e vai em maiúsculas; o modelo sugere os já cadastrados e traz marca e categoria.
+
+**Importar planilha (`/customers/import`).** CSV (vírgula, ponto e vírgula ou tab) ou XLSX lido no navegador, sem biblioteca (zip pelo `DecompressionStream`). Colunas adivinhadas e conferidas; a prévia diz o que entra e o que fica de fora (sem nome, CPF/CNPJ inválido, telefone de um cliente, telefone repetido na planilha). Grava só ao confirmar, de 100 em 100; cada linha tem id próprio e o id da importação nasce na prévia, então "Importar" de novo depois de uma falha não duplica nada.
+
+**Uma fonte só.** Permissões pelo contrato gerado; telefone (`lib/phone.ts`) e CPF/CNPJ (`lib/tax-id.ts`) passam pelos casos de contrato `phone.json` e `tax-id.json`, os mesmos do app e do servidor; máscaras e campos vêm do segmento; textos pelos `.arb` e `web_*.json`.
+
+**Fica para depois.** Seletores da OS ("Qual cliente?" com Recentes e placa, "Qual veículo?" com Nenhum), vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho, recebimentos e notas do cliente, contratos do aparelho e a pergunta da próxima manutenção ao concluir a OS.
 
 ### Histórico do navegador
 
@@ -187,7 +208,7 @@ npm run e2e:perf                 # 10 mil OS, Fast 4G + CPU 4x
 npm run lhci                     # Lighthouse (precisa de build:e2e)
 ```
 
-`E2E_ORDERS=10000` gera a lista grande no seed. O emulador sobe com `firebase/firebase.e2e.json`, em portas próprias, para não colidir com `firebase.test.json`. Segredos das Functions são falsos, criados só durante a execução.
+`E2E_ORDERS=10000` gera a lista grande no seed. Com outra cópia do repositório rodando os mesmos testes, `E2E_PORT_OFFSET=1000 npm run e2e` desloca todas as portas (emuladores e página); a configuração e o `.env.e2e.local` gerados saem no fim. O emulador sobe com `firebase/firebase.e2e.json`, em portas próprias, para não colidir com `firebase.test.json`. Segredos das Functions são falsos, criados só durante a execução.
 
 A rota `/app/dev/components` mostra os componentes base. Existe só nos builds de emulador.
 
@@ -242,6 +263,8 @@ Na 1ª visita, o tempo se divide assim:
 
 Com a fatia de OS (filtro Em aberto por padrão, consulta por `status in`), medido em 2026-11-03: **1.379 ms** na 1ª visita e **501 ms** na volta.
 
+Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª visita e **487 ms** na volta. A paleta, os atalhos e a folha "Mais" passaram a carregar sob demanda e os textos são divididos por funcionalidade; as telas novas usam só a API, sem nada novo no pedaço do Firestore.
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -292,4 +315,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download quase no limite: 239,0 de 240 KB.
+- Orçamento do primeiro download: 238,7 de 240 KB depois da fatia de clientes (era 239,0; a paleta, os atalhos e a folha "Mais" saíram do primeiro download e abriram 1,6 KB).

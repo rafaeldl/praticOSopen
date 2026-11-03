@@ -55,7 +55,7 @@ Cada linha da resposta tem `id`. Linhas gravadas pela API guardam um `id` própr
 
 ## Rotas
 
-Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
+Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos) e `/v1/app/devices` (aparelhos).
 
 | Rota | Quem | Observação |
 |---|---|---|
@@ -81,6 +81,26 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `GET /customers/:id/receipts` | quem recebe | Financeiro vê todos; consultor, os que registrou |
 | `POST /customers/:id/receipts/:receiptId/cancel` | financeiro ou quem registrou | Desfaz: tira a parte de cada OS e marca `canceled`. Parte antiga sem id de transação (ou que não está mais na OS) → `409 RECEIPT_LEGACY_SHARE`, nada muda |
 | `PUT`/`DELETE /customers/:id/receipts/:receiptId/file` | financeiro ou quem registrou | Comprovante em todas as OS do recibo |
+
+### Clientes e aparelhos
+
+`routes/v1/app-customers.routes.ts` e `app-devices.routes.ts`, com a lógica em `services/app-directory.service.ts`. Montadas antes das rotas genéricas: `/v1/customers` e `/v1/devices` (chave de API do bot e do MCP) não mudam. O app Flutter não chama estas rotas.
+
+| Rota | Quem | Observação |
+|---|---|---|
+| `GET /customers` | `viewCustomers` | Todos os clientes (até 5.000; `meta.truncated` acima) com `open` e `late`: OS aprovadas e na oficina que o papel lê, atrasada pela promessa (`dueDate` antes de agora). `meta.partial` quando o papel não lê todas as OS |
+| `GET /customers/:id` | `viewCustomers` | Cliente com e-mail, CPF/CNPJ, endereço e `customData`; `orders` (até 500, as que o papel lê, sem valores sem `viewPrices`); `devices` das OS com quantas OS; `spent` (soma das concluídas) e `owed` (aberto das que não são orçamento, cancelada nem paga), `null` sem `viewPrices`; `receivable`: as OS em que a pessoa pode receber, da mais antiga; `version` (opaca, como nas OS); `ordersTruncated` quando há mais de 500 (são as mais recentes por `createdAt`); `links`: total de OS, recibos e cobranças do cliente, também o que o papel não vê, sem detalhe (dito antes de apagar) |
+| `POST /customers` | `manageCustomers` | `{name, phone?, email?, address?, taxId?, customData?}`. `taxId` normalizado e validado (CPF ou CNPJ, também alfanumérico): inválido → 400 |
+| `PATCH /customers/:id` | `manageCustomers` | Mesmos campos; `null` limpa; `customData` troca o mapa inteiro. Nunca regrava `createdAt`/`createdBy`. `version` (a lida no GET): se alguém salvou depois, `409 CUSTOMER_CHANGED` e nada é gravado; a resposta traz a versão nova |
+| `DELETE /customers/:id` | `manageCustomers` | As OS ficam com a cópia do cliente. Aparelhos com `nextMaintenanceCustomer.id` dele ficam só com o nome |
+| `POST /customers/import` | `manageCustomers` | `{importId, customers: [...]}`, até 500 por chamada; cada linha vira o documento `{importId}-{n}`, então repetir devolve `existing` em vez de criar de novo. Uma linha inválida recusa a chamada (400) |
+| `GET /devices` | `viewDevices` | Todos os aparelhos com situação e `nextMaintenanceDate` |
+| `GET /devices/:id` | `viewDevices` | Aparelho com `customData` e a próxima manutenção; `orders` que o papel lê (por `deviceIds` e pelo `device` antigo); `owner` = cliente da OS mais recente entre todas; `lastService` = serviço principal da última concluída |
+| `POST /devices`, `PATCH /devices/:id` | `manageDevices` | Modelo ou série obrigatório; série com `trim` e maiúsculas; `status` em `active`, `maintenance`, `inactive`, `decommissioned`. Editar nunca mexe na próxima manutenção. `version` no PATCH: `409 DEVICE_CHANGED` quando mudou |
+| `DELETE /devices/:id` | `manageDevices` | |
+| `PUT /devices/:id/next-maintenance` | `manageDevices` | `{date: 'AAAA-MM-DD' \| null}`; só de hoje (Brasília) em diante. Grava dono e último serviço, ou mantém o cliente antigo sem dono conhecido, e apaga `nextMaintenanceNoticeFor`. `null` tira data, cliente e serviço |
+
+Testes: `routes/v1/__tests__/app-directory.routes.test.ts` e os casos `customers.*`/`devices.*` de `__tests__/rbac/api-matrix.ts`.
 
 **Quem recebe (`canReceiveOnOrder`)**: dono, admin e gerente em qualquer OS; consultor nas OS que criou, com "Valores e cobrança" ligado. Supervisor e técnico nunca. Igual a `canReceiveOnOrderFor` no app e a `canReceiveOnOrder` nas regras do Firestore.
 
@@ -116,10 +136,12 @@ Base: `/v1/app/orders` (OS) e `/v1/app/customers` (recibos).
 | `INVALID_DEVICE` | 400 | Aparelho do item não está na OS |
 | `INVALID_ASSIGNEE` | 400 | Responsável não é da empresa |
 | `INVALID_CURSOR`, `UNSUPPORTED_QUERY` | 400 | Lista |
+| `CUSTOMER_NOT_FOUND`, `DEVICE_NOT_FOUND` | 404 | Clientes e aparelhos |
 | `INVALID_FILE`, `INVALID_PAID_AT` | 400 | Comprovante fora da pasta, de outro bucket ou tipo errado; data inválida, no futuro ou antes da OS |
 | `INSUFFICIENT_PERMISSIONS`, `FORBIDDEN` | 403 | Papel |
 | `NOT_FOUND`, `ITEM_NOT_FOUND`, `TRANSACTION_NOT_FOUND`, `RECEIPT_NOT_FOUND` | 404 | |
 | `ORDER_CHANGED` | 409 | `expectedUpdatedAt` diferente da `version` atual |
+| `CUSTOMER_CHANGED`, `DEVICE_CHANGED` | 409 | `version` do cliente ou do aparelho diferente |
 | `ASAAS_LOCKED`, `RECEIPT_SHARE`, `RECEIPT_CANCELED`, `RECEIPT_LEGACY_SHARE`, `HOLD_NOT_ALLOWED` | 409 | Ver rotas |
 | `TRANSACTION_ID_CONFLICT` | 409 | `clientTransactionId` já usado com outro tipo ou valor |
 | `PAYMENT_EXCEEDS_BALANCE` | 409 | Pagamento acima do que falta; `error.remainingBalance` traz o saldo |

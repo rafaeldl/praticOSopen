@@ -9,6 +9,8 @@ export interface CustomField {
   key: string
   type?: string
   labels?: Record<string, string>
+  /** Form fields only (lib/segment-fields.ts). */
+  [setting: string]: unknown
 }
 
 export interface SegmentDoc {
@@ -84,6 +86,8 @@ export function resolveLabel(
 const state = reactive({
   loadedKey: '',
   labels: {} as Record<string, string>,
+  /** [global, segment], for the form fields (lib/segment-fields.ts). */
+  docs: [] as (SegmentDoc | null)[],
 })
 
 async function readSegment(id: string): Promise<SegmentDoc | null> {
@@ -103,13 +107,23 @@ export async function loadSegmentLabels(segmentId: string | null | undefined, lo
       id === 'global' ? null : readSegment('global'),
       readSegment(id),
     ])
-    if (state.loadedKey === key) state.labels = buildLabels([global, segment], locale)
+    if (state.loadedKey === key) {
+      state.labels = buildLabels([global, segment], locale)
+      state.docs = [global, segment]
+    }
   } catch (error) {
     console.warn('segments: labels not loaded', error)
-    if (state.loadedKey === key) state.labels = {}
+    if (state.loadedKey === key) {
+      state.labels = {}
+      state.docs = []
+    }
   }
 }
 
 export function segmentLabels(): Record<string, string> {
   return state.labels
+}
+
+export function segmentDocs(): readonly (SegmentDoc | null)[] {
+  return state.docs
 }

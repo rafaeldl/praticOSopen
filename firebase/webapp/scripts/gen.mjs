@@ -41,23 +41,36 @@ function sourceFiles(dir) {
 }
 const prune = process.argv.includes('--prune')
 const files = sourceFiles(resolve(webapp, 'src'))
-// Texts only the order screens use (src/components/orders/, loaded on demand)
-// go to a second file per language, out of the list's first download.
-const ORDERS_DIR = resolve(webapp, 'src/components/orders')
+// Texts only one feature uses (its screens load on demand, i18n loadTexts) go to
+// a file of their own per language, out of the list's first download. A text
+// two features share goes to both; a text the rest of the app uses stays in the
+// main file. Each feature is a set of folders under src/.
+const FEATURES = {
+  orders: ['src/components/orders'],
+  customers: ['src/components/customers', 'src/views/customers'],
+}
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
+const inFeature = (file, dirs) => dirs.some((dir) => file.startsWith(resolve(webapp, dir) + '/'))
+const featureFiles = Object.fromEntries(Object.entries(FEATURES).map(([name, dirs]) => [name, files.filter((file) => inFeature(file, dirs))]))
+const coreFiles = files.filter((file) => !Object.values(FEATURES).some((dirs) => inFeature(file, dirs)))
 const keep = prune ? read(files) : null
-const outsideOrders = prune ? read(files.filter((file) => !file.startsWith(ORDERS_DIR))) : null
-const ordersOnly = prune ? new Set([...read(files.filter((file) => file.startsWith(ORDERS_DIR)))].filter((key) => !outsideOrders.has(key))) : new Set()
+const core = prune ? read(coreFiles) : null
+const featureKeys = Object.fromEntries(
+  Object.entries(featureFiles).map(([name, list]) => [name, prune ? new Set([...read(list)].filter((key) => !core.has(key))) : new Set()]),
+)
+const featureOnly = new Set(Object.values(featureKeys).flatMap((keys) => [...keys]))
 const pick = (messages) =>
   keep
-    ? Object.fromEntries(Object.entries(messages).filter(([key]) => (keep.has(key) || key.startsWith('web.')) && !ordersOnly.has(key)))
+    ? Object.fromEntries(Object.entries(messages).filter(([key]) => (keep.has(key) || key.startsWith('web.')) && !featureOnly.has(key)))
     : messages
-const pickOrders = (messages) => Object.fromEntries(Object.entries(messages).filter(([key]) => ordersOnly.has(key)))
+const pickFeature = (messages, name) => Object.fromEntries(Object.entries(messages).filter(([key]) => featureKeys[name].has(key)))
 
 mkdirSync(resolve(out, 'i18n'), { recursive: true })
 for (const locale of LOCALES) {
   writeFileSync(resolve(out, `i18n/${locale}.json`), JSON.stringify(pick(merged[locale])))
-  writeFileSync(resolve(out, `i18n/${locale}-orders.json`), JSON.stringify(pickOrders(merged[locale])))
+  for (const name of Object.keys(FEATURES)) {
+    writeFileSync(resolve(out, `i18n/${locale}-${name}.json`), JSON.stringify(pickFeature(merged[locale], name)))
+  }
 }
 writeFileSync(resolve(out, 'message-keys.ts'), keysModule(Object.keys(merged[LOCALES[0]])))
 writeFileSync(
