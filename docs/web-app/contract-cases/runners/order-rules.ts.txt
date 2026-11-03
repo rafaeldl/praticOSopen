@@ -1,0 +1,135 @@
+// Proposed location: firebase/web/utils/order-rules.ts
+// Reference for the web client. Passes docs/web-app/contract-cases/ with
+// `correct ?? expect`. Delete what moves to the API.
+export type Role = 'admin' | 'manager' | 'supervisor' | 'consultant' | 'technician'
+
+const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled']
+
+/** Half away from zero, like Dart's roundToDouble. Math.round alone differs below zero. */
+export function roundMoney(value: number): number {
+  return (Math.sign(value) * Math.round(Math.abs(value) * 100)) / 100
+}
+
+export interface ProductLine { value?: number | null; quantity?: number | null; total?: number | null }
+export interface ServiceLine { value?: number | null }
+
+export function productLineTotal(p: ProductLine): number | null {
+  if (p.value === null || p.value === undefined) return null
+  return p.total ?? p.value * (p.quantity ?? 1)
+}
+
+export function orderTotal(services: ServiceLine[], products: ProductLine[], discount = 0): { total: number; unpricedCount: number } {
+  let sum = 0
+  let unpricedCount = 0
+  for (const s of services) {
+    if (s.value === null || s.value === undefined) unpricedCount++
+    else sum += s.value
+  }
+  for (const p of products) {
+    const line = productLineTotal(p)
+    if (line === null) unpricedCount++
+    else sum += line
+  }
+  return { total: roundMoney(sum - discount), unpricedCount }
+}
+
+export function paymentStatus(status: string | null | undefined, total: number, paidAmount: number): { payment: 'paid' | 'unpaid' | null; paid: boolean } {
+  if (status === 'quote' || status === 'canceled') return { payment: null, paid: false }
+  const paid = total > 0 && roundMoney(paidAmount) >= roundMoney(total)
+  return { payment: paid ? 'paid' : 'unpaid', paid }
+}
+
+export function remainingBalance(total: number, paidAmount: number): number {
+  return Math.max(0, roundMoney(total - paidAmount))
+}
+
+export interface Tx { id?: string; type: 'payment' | 'discount'; amount: number }
+export interface OrderState {
+  status?: string | null
+  services: ServiceLine[]
+  products: ProductLine[]
+  total: number
+  discount: number
+  paidAmount: number
+  payment?: string | null
+  transactions: Tx[]
+}
+export type PaymentOp =
+  | { kind: 'addPayment'; amount: number }
+  | { kind: 'addDiscount'; amount: number }
+  | { kind: 'removeTransaction'; transactionId: string }
+  | { kind: 'resetPayments' }
+  | { kind: 'markAsFullyPaid' }
+
+const isAsaas = (t: Tx) => (t.id ?? '').startsWith('asaas_')
+const netTotal = (o: OrderState, discount: number) => Math.max(0, orderTotal(o.services, o.products, discount).total)
+
+export function applyPaymentOp(o: OrderState, op: PaymentOp) {
+  let { total, discount, paidAmount, transactions } = o
+  let forcePaid = false
+  switch (op.kind) {
+    case 'addPayment':
+      paidAmount = roundMoney(paidAmount + op.amount)
+      transactions = [...transactions, { type: 'payment', amount: op.amount }]
+      break
+    case 'addDiscount':
+      discount = roundMoney(discount + op.amount)
+      total = netTotal(o, discount)
+      transactions = [...transactions, { type: 'discount', amount: op.amount }]
+      break
+    case 'removeTransaction': {
+      const target = transactions.find((t) => t.id === op.transactionId)
+      if (!target) break
+      if (isAsaas(target)) return { error: 'asaasLocked' as const }
+      transactions = transactions.filter((t) => t !== target)
+      if (target.type === 'payment') paidAmount = Math.max(0, roundMoney(paidAmount - target.amount))
+      else {
+        discount = Math.max(0, roundMoney(discount - target.amount))
+        total = netTotal(o, discount)
+      }
+      break
+    }
+    case 'resetPayments':
+      transactions = transactions.filter(isAsaas)
+      paidAmount = roundMoney(transactions.reduce((sum, t) => sum + (t.type === 'payment' ? t.amount : 0), 0))
+      discount = 0
+      total = netTotal(o, 0)
+      break
+    case 'markAsFullyPaid': {
+      const remaining = remainingBalance(total, paidAmount)
+      if (remaining > 0) {
+        paidAmount = roundMoney(paidAmount + remaining)
+        transactions = [...transactions, { type: 'payment', amount: remaining }]
+      }
+      forcePaid = true
+      break
+    }
+  }
+  const status = forcePaid ? { payment: 'paid' as const, paid: true } : paymentStatus(o.status, total, paidAmount)
+  return { total, discount, paidAmount, ...status, remaining: remainingBalance(total, paidAmount), transactions }
+}
+
+export function allowedTransitions(role: Role, isCreator: boolean, from: string): string[] {
+  if ((role === 'consultant' || role === 'technician') && !isCreator) return []
+  if (role === 'admin' || role === 'manager') return STATUSES.filter((s) => s !== from)
+  if (role === 'consultant') return from === 'quote' ? ['approved', 'canceled'] : []
+  if (from === 'quote') return isCreator ? ['approved', 'progress'] : []
+  if (from === 'approved') return ['progress', 'done']
+  if (from === 'progress') return ['done']
+  return []
+}
+
+export function orderPermissions(role: Role, isCreator: boolean, status: string) {
+  const canAccess = !(role === 'consultant' || role === 'technician') || isCreator
+  const quote = status === 'quote'
+  const full = role === 'admin' || role === 'manager' || role === 'consultant'
+  return {
+    canAccess,
+    canEdit: canAccess,
+    canExecute: canAccess && role !== 'manager' && role !== 'consultant',
+    canAssign: canAccess && (role === 'admin' || role === 'supervisor'),
+    canDelete: canAccess && (role === 'admin' || quote),
+    canEditMainFields: canAccess && (full || quote),
+    canManageForms: canAccess && (full || (role === 'supervisor' ? status !== 'done' && status !== 'canceled' : quote)),
+  }
+}

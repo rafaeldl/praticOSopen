@@ -755,6 +755,8 @@ Antes de finalizar uma feature, verificar:
 - `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
 - `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
+- `docs/WEB_APP_DESIGN.md` - Padrão do app web: tokens, mestre-detalhe, teclado
+- `docs/web-app/discovery-report.md` - Descoberta do app web: uso real, arquitetura, matriz de paridade e roteiro
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
