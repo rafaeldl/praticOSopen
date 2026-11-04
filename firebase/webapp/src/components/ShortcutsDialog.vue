@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { t } from '@/i18n'
-import { shortcutLabel, shortcuts } from '@/lib/shortcuts'
+import { shortcutRows } from '@/lib/shortcuts'
 import { ui } from '@/lib/ui'
 import Layer from './Layer.vue'
 
-const list = computed(() => [...shortcuts.values()])
+const list = computed(() => shortcutRows())
 </script>
 
 <template>
@@ -14,9 +14,9 @@ const list = computed(() => [...shortcuts.values()])
       <h2 class="layer-title">{{ t('web.shortcuts.title') }}</h2>
     </div>
     <div class="layer-body cheat">
-      <div v-for="item in list" :key="item.keys">
+      <div v-for="item in list" :key="`${item.label} ${item.keys}`">
         <span>{{ t(item.label) }}</span>
-        <kbd>{{ shortcutLabel(item.keys) }}</kbd>
+        <kbd>{{ item.keys }}</kbd>
       </div>
     </div>
     <div class="layer-foot">

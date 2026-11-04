@@ -49,9 +49,9 @@ test('do orçamento ao recebido, pelo botão azul (approve, start, finish, recei
   await expect(nextStep(page)).toHaveText('Concluir serviço')
   await nextStep(page).click()
   await expect(status(page)).toHaveText('Concluído')
-  // With a vehicle, the admin is asked for the next maintenance (device.maintenance.offer); closing is a refusal.
-  await expect(page.getByRole('dialog', { name: 'Quando é a próxima manutenção?' })).toBeVisible()
-  await page.keyboard.press('Escape')
+  // With a vehicle, the admin is asked for the next maintenance (device.maintenance.offer), inside the order: nothing to dismiss.
+  await expect(page.getByTestId('maintenance-offer')).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(nextStep(page)).toHaveText('Receber R$ 50,00')
   await nextStep(page).click()
   const receive = dialog(page, 'Receber')

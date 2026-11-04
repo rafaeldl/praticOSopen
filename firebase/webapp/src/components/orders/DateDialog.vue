@@ -1,8 +1,12 @@
 <script setup lang="ts">
-// Promised date or visit: native date and time picker, nothing filled in by
-// itself (the app starts at the current minute: defect 8), and "Tirar" clears it.
+// Promised date or visit: nothing filled in by itself (the app starts at the
+// current minute: defect 8), and "Tirar" clears it. The cursor starts on a short
+// field that understands "amanhã 14h", "+3", "seg 8:30" or "9/5 14h", with ↑/↓ for
+// a day and Shift+↑/↓ for half an hour (timed-comparison T7); the native picker
+// below stays for the mouse and shows what was understood.
 import { computed, ref } from 'vue'
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
+import { parseQuickWhen, shiftWhen } from '@/lib/quick-when'
 import { formatDateLong, formatTime } from '@/lib/format'
 import Layer from '@/components/Layer.vue'
 import { country } from '@/lib/orders/text'
@@ -19,7 +23,29 @@ function toLocalInput(iso: string | null | undefined): string {
   return `${p.y}-${pad(p.m)}-${pad(p.d)}T${pad(p.h)}:${pad(p.min)}`
 }
 const text = ref(toLocalInput(props.value))
-const valid = computed(() => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(text.value) && !Number.isNaN(instantOf(text.value).getTime()))
+const quick = ref('')
+const quickError = ref(false)
+/** What was there before typing: a typed day keeps its time, a typed time keeps its day. */
+const base = toLocalInput(props.value)
+
+function onQuick() {
+  if (!quick.value.trim()) {
+    quickError.value = false
+    text.value = base
+    return
+  }
+  const parsed = parseQuickWhen(quick.value, wallParts(new Date()), base, locale.value)
+  quickError.value = !parsed
+  if (parsed) text.value = parsed
+}
+
+function onQuickKey(event: KeyboardEvent) {
+  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+  event.preventDefault()
+  const start = text.value || toLocalInput(new Date().toISOString())
+  text.value = shiftWhen(start, event.shiftKey ? 'time' : 'day', event.key === 'ArrowUp' ? 1 : -1)
+}
+const valid = computed(() => !quickError.value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(text.value) && !Number.isNaN(instantOf(text.value).getTime()))
 const preview = computed(() => {
   if (!valid.value) return ''
   const at = instantOf(text.value)
@@ -40,9 +66,23 @@ function save() {
           <h2 class="layer-title">{{ title }}</h2>
         </div>
         <div class="layer-body">
+          <label class="field-label" for="order-date-quick">{{ t('web.when.quickLabel') }}</label>
+          <input
+            id="order-date-quick"
+            v-model="quick"
+            class="field"
+            type="text"
+            autocomplete="off"
+            data-autofocus
+            :aria-invalid="quickError"
+            aria-describedby="order-date-hint order-date-preview"
+            @input="onQuick"
+            @keydown="onQuickKey"
+          />
+          <p id="order-date-hint" class="sub field-hint">{{ quickError ? t('web.when.quickError') : t('web.when.quickHint') }}</p>
           <label class="field-label" for="order-date">{{ label }}</label>
-          <input id="order-date" v-model="text" class="field" type="datetime-local" data-autofocus :aria-describedby="preview ? 'order-date-preview' : undefined" />
-          <p v-if="preview" id="order-date-preview" class="sub">{{ preview }}</p>
+          <input id="order-date" v-model="text" class="field" type="datetime-local" :aria-describedby="preview ? 'order-date-preview' : undefined" />
+          <p id="order-date-preview" class="sub" aria-live="polite">{{ preview }}</p>
         </div>
         <div class="layer-foot">
           <button v-if="value" type="button" class="btn btn--ghost btn--danger" @click="emit('save', null)">{{ clearLabel }}</button>

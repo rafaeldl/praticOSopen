@@ -13,12 +13,13 @@ import { localDay, paidAtFor, toCents } from '@/lib/receive/model'
 import { proofProblem } from '@/lib/receive/proof'
 import '@/styles/receive.css'
 
-const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean; createdAt?: string | null; linkNote?: string; canAttach?: boolean }>()
+const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean; createdAt?: string | null; linkNote?: string; canAttach?: boolean; method?: string }>()
 const emit = defineEmits<{ save: [value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; proof?: File }]; close: [] }>()
 
 const transactionId = newTransactionId()
 const amount = ref<number | null>(props.kind === 'receive' ? props.remaining : null)
-const method = ref('')
+// Suggested by the order's last payment or the last one used here (lib/orders/suggest.ts): Enter confirms.
+const method = ref(props.method ?? '')
 // Proof (pay.widget.sheet): an image or PDF, sent with the payment. Without attachPhotos the row is not there.
 const proof = shallowRef<File | null>(null)
 const proofError = ref('')

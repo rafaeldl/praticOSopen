@@ -28,6 +28,11 @@ const props = defineProps<{
   preselect?: boolean
   /** The list is still loading: Enter typed meanwhile picks the first match when it arrives. */
   loading?: boolean
+  /**
+   * Optional field: with nothing typed and nothing suggested, Enter goes on to the
+   * next field instead of taking the first of the list (the device of a customer without one).
+   */
+  skippable?: boolean
 }>()
 const emit = defineEmits<{ pick: [item: ComboboxItem, query: string]; cancel: []; next: [] }>()
 
@@ -41,6 +46,18 @@ const flat = computed(() => sections.value.flatMap((group) => group.items))
 const optionId = (index: number) => `${props.id}-opt-${index}`
 const activeId = computed(() => (open.value && flat.value[active.value] ? optionId(active.value) : undefined))
 
+/**
+ * Where the highlight starts with nothing typed: the current choice (✓), else the
+ * first suggestion (Recentes, Mais usados), so Enter picks it (timed-comparison T1, T9).
+ * An optional field without a suggestion starts with none.
+ */
+function startIndex(): number {
+  const selected = props.selectedId ? flat.value.findIndex((item) => item.id === props.selectedId) : -1
+  if (selected >= 0) return selected
+  return props.preselect || !props.skippable ? 0 : -1
+}
+const autoFirst = () => !!query.value || !!props.preselect || !props.skippable
+
 // Clearing by Esc must not reopen the list (the next Esc then reaches the layer).
 let quiet = false
 watch(query, (text) => {
@@ -49,7 +66,7 @@ watch(query, (text) => {
     return
   }
   open.value = true
-  active.value = text || props.preselect ? 0 : -1
+  active.value = text ? 0 : startIndex()
 })
 
 // Enter typed while the list loads picks the first match when it arrives, even
@@ -58,7 +75,7 @@ const pendingEnter = ref(false)
 const firstMatch = computed(() => (pendingEnter.value || props.loading ? props.groups(query.value).flatMap((group) => group.items)[0] : undefined))
 watch([firstMatch, () => props.loading], ([item, loading]) => {
   if (!pendingEnter.value) return
-  if (item && (query.value || props.preselect)) {
+  if (item && autoFirst()) {
     pendingEnter.value = false
     pick(item)
   } else if (!loading) {
@@ -70,12 +87,12 @@ watch([firstMatch, () => props.loading], ([item, loading]) => {
 
 // No suggestion any more (the customer has no device): an empty Enter must not pick the first of the list.
 watch(() => props.preselect, (on) => {
-  if (!on && !query.value) active.value = -1
+  if (!on && !query.value && props.skippable) active.value = -1
 })
 
 function onFocus() {
   open.value = true
-  if (props.preselect && active.value < 0) active.value = 0
+  if (active.value < 0) active.value = startIndex()
 }
 
 function pick(item: ComboboxItem) {
@@ -107,7 +124,7 @@ function onKeydown(event: KeyboardEvent) {
       event.preventDefault()
       event.stopPropagation()
       pick(item)
-    } else if (props.loading && (query.value || props.preselect)) {
+    } else if (props.loading && autoFirst()) {
       event.preventDefault()
       event.stopPropagation()
       pendingEnter.value = true
@@ -153,7 +170,7 @@ defineExpose({ focus: () => input.value?.focus(), pending: () => query.value.tri
       :aria-activedescendant="activeId"
       :data-autofocus="autofocus ? '' : undefined"
       @focus="onFocus"
-      @click="open = true"
+      @click="onFocus"
       @blur="open = false"
       @keydown="onKeydown"
     />

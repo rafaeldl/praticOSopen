@@ -1,12 +1,13 @@
 // "Quando é a próxima manutenção?" after the order is done (device.maintenance.offer,
 // device.maintenance.answer, device.maintenance.no-repeat, device.maintenance.limit),
-// per role: only who manages devices is asked.
+// per role: only who manages devices is asked. The question sits inside the order
+// (not over it), so going on needs no dismissal; "Agora não" is the refusal.
 import { expect, test, type Page } from '@playwright/test'
 import { makeContract, makeCustomer, makeDevice, makeOrder, readDoc } from './data'
 import { login, type UserKey } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
-const question = (page: Page) => page.getByRole('dialog', { name: 'Quando é a próxima manutenção?' })
+const question = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' }).getByTestId('maintenance-offer')
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
 function addMonths(day: string, months: number): string {
@@ -67,7 +68,7 @@ test('três recusas seguidas param a pergunta (device.maintenance.limit)', async
       await panel(page).getByTestId('next-step').click()
     }
     await expect(question(page)).toBeVisible()
-    await page.keyboard.press('Escape')
+    await question(page).getByRole('button', { name: 'Agora não' }).click()
     await expect(question(page)).toHaveCount(0)
   }
   const last = await orderInProgress('admin')

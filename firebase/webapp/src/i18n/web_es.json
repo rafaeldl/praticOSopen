@@ -768,5 +768,17 @@
   "web.integrations.nameMissing": "Dale un nombre a la conexión.",
   "web.integrations.copied": "URL copiada",
   "web.integrations.revokeNamed": "Desactivar la conexión {name}",
-  "web.company.changedElsewhere": "Alguien guardó los datos de la empresa después de que los abriste. Cierra y abre de nuevo para ver qué cambió."
+  "web.company.changedElsewhere": "Alguien guardó los datos de la empresa después de que los abriste. Cierra y abre de nuevo para ver qué cambió.",
+  "web.shortcuts.findNumber": "Buscar la OS por número",
+  "web.shortcuts.nextStep": "Siguiente paso (el botón azul)",
+  "web.shortcuts.whatsapp": "Enviar por WhatsApp",
+  "web.shortcuts.discount": "Dar descuento",
+  "web.palette.discount": "Dar descuento",
+  "web.palette.reschedule": "Reprogramar la visita",
+  "web.palette.newCustomer": "Nuevo cliente",
+  "web.palette.createCustomer": "Registrar cliente «{name}»",
+  "web.palette.create": "Registrar",
+  "web.when.quickLabel": "Escribe el día y la hora",
+  "web.when.quickHint": "Ej.: mañana 14h, +3, lun 8:30, 9/5 14h. ↑ ↓ cambia el día; Shift ↑ ↓, media hora.",
+  "web.when.quickError": "No lo entendí. Prueba: mañana 14h, +3, lun 8:30 o 9/5 14h."
 }

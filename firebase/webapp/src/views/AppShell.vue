@@ -2,7 +2,7 @@
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Menu, Plus, Search, Settings, User } from '@lucide/vue'
+import { Menu, Plus, Search, Settings, User, UserPlus } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
@@ -10,6 +10,7 @@ import { can, canAny, reloadCompany, selectCompany, session } from '@/lib/sessio
 import { showToast } from '@/lib/toast'
 import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
+import { canOpen, router } from '@/router'
 import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
@@ -32,6 +33,25 @@ const openNewOrder = () => {
 const removeNewOrderKeys = [
   registerShortcut({ keys: 'n', label: 'web.shortcuts.newOrder', run: openNewOrder }),
   registerCommand({ id: 'new-order', label: 'newOrderButton', icon: Plus, keys: 'N', run: openNewOrder }),
+  registerCommand({
+    id: 'new-customer',
+    label: 'web.palette.newCustomer',
+    icon: UserPlus,
+    when: () => canOpen('/customers') && can('manageCustomers'),
+    run: () => void router.push({ path: '/customers', query: { new: '' } }),
+  }),
+  // A digit on any screen starts the search with it: an order by its number (timed-comparison T2).
+  ...'0123456789'.split('').map((digit) =>
+    registerShortcut({
+      keys: digit,
+      label: 'web.shortcuts.findNumber',
+      display: '0–9',
+      run: () => {
+        ui.paletteQuery = digit
+        ui.palette = true
+      },
+    }),
+  ),
 ]
 onBeforeUnmount(() => removeNewOrderKeys.forEach((remove) => remove()))
 const moreOpen = ref(false)

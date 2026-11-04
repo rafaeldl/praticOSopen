@@ -2,7 +2,7 @@
 // the catalog and the screens, each only for who may open it (canOpen, the same
 // guard as the routes). The data comes from the API, already cut by role on the
 // server; prices only arrive for who sees them. Loaded with the palette.
-import { ClipboardList, FileText, Hash, Settings, Tags, Upload, User, Wallet, Wrench, type LucideIcon } from '@lucide/vue'
+import { ClipboardList, FileText, Hash, Settings, Tags, Upload, User, UserPlus, Wallet, Wrench, type LucideIcon } from '@lucide/vue'
 import { t, type MessageKey } from '@/i18n'
 import { loadCatalogList } from '@/lib/catalog/data'
 import { itemMatches, visibleKinds, type CatalogItem, type CatalogKind } from '@/lib/catalog/model'
@@ -19,8 +19,8 @@ import { can, session } from '@/lib/session'
 import { canOpen, router } from '@/router'
 import { NAV } from '@/navigation'
 
-export type Group = 'orders' | 'customers' | 'devices' | 'catalog' | 'actions'
-export const GROUPS: Group[] = ['orders', 'customers', 'devices', 'catalog', 'actions']
+export { GROUPS, groupOf, type Group } from './palette-order'
+import type { Group } from './palette-order'
 const PER_GROUP = 6
 const tr = (key: MessageKey) => t(key)
 
@@ -34,19 +34,11 @@ export function groupLabel(group: Group): string {
       return resolveLabel('device._entity_plural', segmentLabels(), tr)
     case 'catalog':
       return t('web.nav.catalog')
+    case 'create':
+      return t('web.palette.create')
     default:
       return t('web.palette.actions')
   }
-}
-
-/** The group of a result, by its id ("order:…", "customer:…", "plate:…", "device:…", "catalog:…"). */
-export function groupOf(command: Pick<Command, 'id'>): Group {
-  const kind = command.id.split(':')[0]
-  if (kind === 'order') return 'orders'
-  if (kind === 'customer') return 'customers'
-  if (kind === 'plate' || kind === 'device') return 'devices'
-  if (kind === 'catalog') return 'catalog'
-  return 'actions'
 }
 
 /** Screens with the order panel beside them keep the person where they are. */
@@ -162,3 +154,24 @@ export async function ordersByNumber(query: string): Promise<Command[]> {
   }))
 }
 
+
+/**
+ * "Cadastrar cliente «…»": what was typed becomes a new customer (name, or the
+ * phone when only digits), for who registers customers. A number alone stays a
+ * search for an order, and an exact name already there is not offered again.
+ */
+export function createResults(directory: Directory, query: string): Command[] {
+  const text = query.trim()
+  if (!text || /^#?\d{1,9}$/.test(text) || !canOpen('/customers') || !can('manageCustomers')) return []
+  const same = (name: string) => name.localeCompare(text, undefined, { sensitivity: 'base' }) === 0
+  if (directory.customers.some((row) => same(row.name))) return []
+  return [
+    {
+      id: 'create:customer',
+      label: 'search' as const,
+      text: t('web.palette.createCustomer', { name: text }),
+      icon: UserPlus,
+      run: () => void router.push({ path: '/customers', query: { new: text } }),
+    },
+  ]
+}

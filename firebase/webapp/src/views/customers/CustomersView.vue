@@ -161,8 +161,19 @@ watch(search, (text) => {
 })
 
 const removers: (() => void)[] = []
+/** ⌘K "Cadastrar cliente «…»" (and "Novo cliente") arrive as ?new=: the form opens with what was typed. */
+async function createFromQuery() {
+  const text = route.query.new
+  if (typeof text !== 'string' || !canManage.value) return
+  const { new: _drop, ...rest } = route.query
+  await router.replace({ query: rest })
+  form.value = { draft: text.trim() ? draftFromSearch(text) : { name: '', phone: '' } }
+}
+watch(() => route.query.new, () => void createFromQuery())
+
 onMounted(() => {
   void load()
+  void createFromQuery()
   window.addEventListener('keydown', onKeys)
   removers.push(registerShortcut({ keys: '/', label: 'web.shortcuts.filter', run: () => searchEl.value?.focus() }))
   // ⌘K finds customers by name, phone or plate (busca rápida).

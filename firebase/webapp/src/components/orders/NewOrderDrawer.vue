@@ -398,7 +398,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
             <span><span class="field-label">{{ deviceLabel() }}</span>{{ device.name }} <span v-if="device.serial" class="num">{{ device.serial }}</span></span>
             <button type="button" class="link" @click="device = null; $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
-          <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" :preselect="devicesLoading || customerDevices.length > 0" @pick="pickDevice" @next="itemRef?.focus()" />
+          <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" :preselect="devicesLoading || customerDevices.length > 0" skippable @pick="pickDevice" @next="itemRef?.focus()" />
         </div>
         <div class="step">
           <Combobox id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
