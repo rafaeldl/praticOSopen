@@ -83,8 +83,23 @@ export interface Order {
   documents?: unknown[]
   address?: string | null
   customData?: Record<string, unknown>
+  /** Files attached to the order (nota, contrato, garantia, outro): never a payment proof (order.document.open). */
+  attachments: OrderAttachment[]
   /** What the customer rated on the share link (1 to 5), when there is a valid score. */
   rating?: { score: number; comment?: string } | null
+}
+
+export type AttachmentType = 'receipt' | 'invoice' | 'contract' | 'warranty' | 'other'
+export const ATTACHMENT_TYPES: AttachmentType[] = ['receipt', 'invoice', 'contract', 'warranty', 'other']
+export interface OrderAttachment {
+  id: string
+  url: string
+  storagePath?: string
+  fileName?: string
+  contentType?: string
+  fileSize?: number
+  type: AttachmentType
+  createdAt?: string | null
 }
 
 type Raw = Record<string, unknown>
@@ -200,6 +215,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     paidAmount: showsMoney ? (num(raw.paidAmount) ?? 0) : undefined,
     transactions: showsMoney && Array.isArray(raw.transactions) ? (raw.transactions as OrderTransaction[]) : [],
     documents: showsMoney && Array.isArray(raw.documents) ? (raw.documents as unknown[]) : undefined,
+    attachments: attachmentsOf(raw.documents, showsMoney),
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
     rating: ratingOf(raw.rating),
@@ -556,4 +572,47 @@ export function initialsOf(name: string | null | undefined): string {
   const first = words[0] as string
   const last = words.length > 1 ? (words[words.length - 1] as string) : ''
   return (first.charAt(0) + last.charAt(0)).toUpperCase()
+}
+
+/**
+ * The order's documents (OrderDocument in the app) that are not a payment proof:
+ * a file linked to a transaction belongs to "Já recebido". Only http(s) links.
+ */
+/**
+ * A payment proof: type receipt or linked to a payment. The same rule as the
+ * server's projection (order-projection.ts attachedDocuments): money, so only
+ * for who sees values.
+ */
+export const isPaymentProof = (doc: { type?: unknown; linkedTransactionId?: unknown }): boolean => doc.type === 'receipt' || !!doc.linkedTransactionId
+
+export function attachmentsOf(value: unknown, showsMoney = false): OrderAttachment[] {
+  if (!Array.isArray(value)) return []
+  return (value as Raw[])
+    // A proof linked to a payment lives in "Já recebido"; a "Comprovante" attached by hand only for who sees values.
+    .filter((doc) => doc && typeof doc.id === 'string' && !doc.linkedTransactionId && (showsMoney || !isPaymentProof(doc)) && typeof doc.url === 'string' && /^https?:\/\//.test(doc.url))
+    .map((doc) => ({
+      id: doc.id as string,
+      url: doc.url as string,
+      storagePath: typeof doc.storagePath === 'string' ? doc.storagePath : undefined,
+      fileName: typeof doc.fileName === 'string' ? doc.fileName : undefined,
+      contentType: typeof doc.contentType === 'string' ? doc.contentType : undefined,
+      fileSize: typeof doc.fileSize === 'number' ? doc.fileSize : undefined,
+      type: ATTACHMENT_TYPES.includes(doc.type as AttachmentType) ? (doc.type as AttachmentType) : 'other',
+      createdAt: isoOf(doc.createdAt),
+    }))
+}
+
+/** What the Storage takes for an order document (isValidDocument): image, PDF or Word, below 10 MB. */
+export function attachmentProblem(file: { type: string; size: number }): 'type' | 'size' | null {
+  const allowed = /^image\/[a-z0-9.+-]+$/i.test(file.type) || ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)
+  if (!allowed) return 'type'
+  return file.size >= 10 * 1024 * 1024 ? 'size' : null
+}
+
+/** "320 KB", "1,4 MB": the size by the company's country. */
+export function fileSizeParts(bytes: number | undefined): { value: number; unit: 'B' | 'KB' | 'MB' } | null {
+  if (typeof bytes !== 'number' || bytes < 0) return null
+  if (bytes < 1024) return { value: bytes, unit: 'B' }
+  if (bytes < 1024 * 1024) return { value: Math.round(bytes / 1024), unit: 'KB' }
+  return { value: Math.round((bytes / (1024 * 1024)) * 10) / 10, unit: 'MB' }
 }

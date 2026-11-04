@@ -200,3 +200,53 @@ export async function uploadPhoto(orderId: string, file: File): Promise<void> {
     updatedBy: author(),
   })
 }
+
+/**
+ * order.media.add-document: the file goes to the order's documents folder (the
+ * app's path), then into `documents` with arrayUnion (others' documents stay).
+ */
+export async function uploadDocument(orderId: string, file: File, type: string): Promise<void> {
+  const companyId = session.companyId as string
+  const id = crypto.randomUUID()
+  const extension = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const path = `tenants/${companyId}/orders/${orderId}/documents/${id}.${extension}`
+  const [storage, { ref, uploadBytes, getDownloadURL, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
+  const target = ref(storage, path)
+  await uploadBytes(target, file, { contentType: file.type })
+  const url = await getDownloadURL(target)
+  const { ref: docRef, firestore } = await orderDoc(orderId)
+  const now = new Date().toISOString()
+  try {
+    await firestore.updateDoc(docRef, {
+      documents: firestore.arrayUnion({ id, url, storagePath: path, fileName: file.name, contentType: file.type, fileSize: file.size, type, createdAt: now, createdBy: author() }),
+      updatedAt: now,
+      updatedBy: author(),
+    })
+  } catch (error) {
+    // Refused (no longer allowed, order gone): the file is nobody's document.
+    await deleteObject(target).catch(() => {})
+    throw error
+  }
+}
+
+/**
+ * order.document.delete: a transaction rereads the list and drops only this one
+ * (never a payment proof), then the file leaves the Storage when it is in this
+ * order's documents folder (a customer receipt file is shared: never touched).
+ */
+export async function deleteDocument(orderId: string, document: { id: string; storagePath?: string }): Promise<void> {
+  const { ref: docRef, firestore } = await orderDoc(orderId)
+  const db = await firestoreClient()
+  await firestore.runTransaction(db, async (tx) => {
+    const snap = await tx.get(docRef)
+    const list = (snap.data()?.documents ?? []) as { id?: string; linkedTransactionId?: string }[]
+    const documents = list.filter((item) => item.id !== document.id || !!item.linkedTransactionId)
+    if (documents.length === list.length) return
+    tx.update(docRef, { documents, updatedAt: new Date().toISOString(), updatedBy: author() })
+  })
+  if (!document.storagePath || !document.storagePath.startsWith(`tenants/${session.companyId}/orders/${orderId}/documents/`) || document.storagePath.includes('..')) return
+  const [storage, { ref, deleteObject }] = await Promise.all([storageClient(), import('firebase/storage')])
+  await deleteObject(ref(storage, document.storagePath)).catch((error: { code?: string }) => {
+    if (error?.code !== 'storage/object-not-found') console.warn('documents: file not deleted', error)
+  })
+}

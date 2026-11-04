@@ -251,3 +251,6 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ai-steps > li { display: grid; gap: 0.35rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
 .ai-steps small { display: block; }
 .ai-intro-mark { font-size: 1.5rem; color: var(--color-accent); }
+.doc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.doc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: center; min-height: 2.75rem; }
+.doc-main { display: grid; min-width: 0; overflow-wrap: anywhere; }

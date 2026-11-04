@@ -2941,10 +2941,11 @@ rows:
   feature_flags: []
   hardware: [file]
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: attachPhotos
-  note: "Enviando... com indicador enquanto sobe foto ou documento."
+  note: "Enviando... com indicador enquanto sobe foto ou documento. Web: imagem, PDF ou Word até 10 MB, conferido antes de subir; \"Enviando…\" no link; falha diz que não foi."
 - id: order.photo.add-camera
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3010,9 +3011,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: viewPhotos
+  note: "Web: abre em aba nova. A API manda os documentos (sem comprovante) também para quem não vê valores."
 - id: order.document.delete
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3026,10 +3029,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: attachPhotos
-  note: "Também arrastando a linha em Detalhes, com confirmação; no web, ação visível na linha."
+  note: "Também arrastando a linha em Detalhes, com confirmação; no web, ação visível na linha. Web: botão Excluir na linha, com confirmação; transação que tira só esse; o arquivo sai só da pasta documents desta OS."
 - id: order.contract.enable
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3752,10 +3756,10 @@ rows:
   feature_flags: ["useScheduling", "fieldService", "useContracts"]
   hardware: null
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: in_progress
+  web_status: done
   e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
-  note: "Só o que a OS tem. Dica do lembrete só para visita futura. Responsável com nome ou e-mail. Contrato com resumo e próxima data, ou OS de origem. Linhas editáveis só para quem edita. As flags só escondem a entrada: OS que já tem visita, local ou contrato mostra a linha mesmo com a flag desligada."
+  note: "Só o que a OS tem. Dica do lembrete só para visita futura. Responsável com nome ou e-mail. Contrato com resumo e próxima data, ou OS de origem. Linhas editáveis só para quem edita. As flags só escondem a entrada: OS que já tem visita, local ou contrato mostra a linha mesmo com a flag desligada. Web: entrega, visita, responsável (nome ou e-mail), local (order-extras.spec.ts), contrato (contracts.spec.ts) e documentos (order-documents.spec.ts). A dica do lembrete é de notificação local do aparelho (o web não tem lembretes)."
 - id: order.menu.view
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4433,9 +4437,11 @@ rows:
   feature_flags: []
   hardware: [camera, gallery, file]
   data: ["storage:tenants/{id}/orders/{id}/photos", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: attachPhotos
+  note: "Web: \"Adicionar foto\" (escolher, arrastar ou colar; no celular o navegador oferece a câmera) e \"Adicionar Documento\" (arquivo)."
 - id: order.media.document-type
   screen: lib/screens/widgets/order_media_actions.dart
   route: null
@@ -4449,7 +4455,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: attachPhotos
 - id: order.media.document-view
@@ -4465,9 +4472,11 @@ rows:
   feature_flags: []
   hardware: [external_browser]
   data: ["storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: viewPhotos
+  note: "Web: imagem e PDF abrem no navegador, em aba nova."
 - id: order.media.document-delete
   screen: lib/screens/widgets/order_media_actions.dart
   route: null
@@ -4481,7 +4490,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "storage:tenants/{id}/orders/{id}/documents"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-documents.spec.ts
   web_exception: null
   permission: attachPhotos
 - id: order.photo.viewer
