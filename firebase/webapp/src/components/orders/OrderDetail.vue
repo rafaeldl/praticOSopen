@@ -15,6 +15,7 @@ import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { canRegisterItem, loadCatalog, loadCustomers, registerItem, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
+import { loadLegacyRequest, readRequest, requestField, withRequest } from '@/lib/orders/request'
 import {
   accessOf,
   holdDays,
@@ -117,6 +118,7 @@ type Dialog =
   | { kind: 'addItem' }
   | { kind: 'customer' }
   | { kind: 'address' }
+  | { kind: 'request' }
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share'; send?: boolean }
@@ -159,6 +161,33 @@ const canAddItems = computed(() => !!access.value?.canEditMainFields && (can('vi
 const showItems = computed(() => !!order.value && (order.value.lines.length > 0 || !!access.value?.canEditMainFields))
 const groups = computed(() => (order.value ? linesByDevice({ ...order.value, lines: order.value.lines.filter((line) => !line.id || !hiddenLines.value.includes(line.id)) }) : []))
 const useScheduling = computed(() => session.company && (session.company as { useScheduling?: boolean }).useScheduling !== false)
+/**
+ * "O que o cliente pediu" (order.request.edit): the segment's field, as the app.
+ * While the field is empty, the request the old web Nova OS saved as a comment
+ * is shown in its place (read only; the comment stays where it is).
+ */
+const reqField = computed(() => requestField())
+const savedRequest = computed(() => (reqField.value && order.value ? readRequest(order.value.customData, reqField.value) : ''))
+const oldRequest = ref('')
+const requestText = computed(() => savedRequest.value || oldRequest.value)
+watch(
+  () => [order.value?.id, !!reqField.value, !!savedRequest.value] as const,
+  async ([id, has, saved]) => {
+    oldRequest.value = ''
+    if (!id || !has || saved || !order.value) return
+    const text = await loadLegacyRequest(order.value)
+    if (order.value?.id === id) oldRequest.value = text
+  },
+  { immediate: true },
+)
+
+async function saveRequest(text: string) {
+  dialog.value = null
+  const o = order.value as Order
+  const field = reqField.value
+  if (!field || text.trim() === requestText.value) return
+  await run(() => writes.updateOrderFields(o.id, { customData: withRequest(o.customData, field, text) }), t('web.saved'))
+}
 const canPrint = computed(() => can('viewPrices') || !effectiveUseFinancial())
 const moneyRowTone = computed(() => order.value && order.value.status !== 'quote' && order.value.status !== 'canceled')
 const holdLine = computed(() => {
@@ -747,6 +776,8 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.transitions.some((status) => status !== 'canceled')) list.push({ id: 'status', label: t('orderMenuChangeStatus') })
   if (a.canChangeHold) list.push({ id: isHeld(o) ? 'resume' : 'hold', label: isHeld(o) ? t('orderHoldResume') : t('orderHoldMark') })
   if (canDiscountNow.value) list.push({ id: 'discount', label: t('orderAddDiscount') })
+  // Not copied from the app: there an empty request can never be written on a saved order.
+  if (a.canEditMainFields && reqField.value && !requestText.value) list.push({ id: 'request', label: t('web.order.requestAdd') })
   if (a.canEditMainFields && !o.dueDate) list.push({ id: 'due', label: t('orderAddDueDate') })
   if (a.canEditMainFields && !o.scheduledDate && useScheduling.value) list.push({ id: 'schedule', label: t('orderAddSchedule') })
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
@@ -771,6 +802,7 @@ function onMenu(id: string) {
   else if (id === 'hold') dialog.value = { kind: 'hold' }
   else if (id === 'resume') void run(() => writes.resumeOrder(order.value!.id), t('web.order.resumed'))
   else if (id === 'discount') dialog.value = { kind: 'discount' }
+  else if (id === 'request') dialog.value = { kind: 'request' }
   else if (id === 'due') dialog.value = { kind: 'due' }
   else if (id === 'schedule') dialog.value = { kind: 'schedule' }
   else if (id === 'assignee') void openPicker('assignee')
@@ -919,6 +951,13 @@ watch(
       </header>
 
       <div class="od-body">
+        <section v-if="reqField && requestText" class="od-sec" aria-labelledby="od-request-title" data-testid="order-request">
+          <h3 id="od-request-title">
+            {{ t('orderCustomerRequestTitle') }}
+            <button v-if="access.canEditMainFields" type="button" class="link" :aria-label="t('web.order.requestChange')" @click="dialog = { kind: 'request' }">{{ t('web.order.change') }}</button>
+          </h3>
+          <p class="od-request">{{ requestText }}</p>
+        </section>
         <section v-if="showItems" class="od-sec od-sec--items" aria-labelledby="od-items-title">
           <h3 id="od-items-title">
             {{ t('orderServicesAndParts') }}
@@ -1087,6 +1126,16 @@ watch(
       :label="t('orderAddressLabel')"
       :value="order.address ?? ''"
       @save="saveAddress"
+      @close="dialog = null"
+    />
+    <TextDialog
+      v-else-if="dialog.kind === 'request'"
+      :title="t('orderCustomerRequestTitle')"
+      :label="t('orderCustomerRequestTitle')"
+      :value="requestText"
+      :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"
+      multiline
+      @save="saveRequest"
       @close="dialog = null"
     />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />

@@ -1837,7 +1837,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
-  note: "O cartão aparece em todo segmento. Com service_order.observation grava no campo; sem ele vira o primeiro comentário interno depois que a OS ganha id. Não copiar: o pedido sem campo fica escondido nos comentários; dar lugar próprio."
+  note: "O cartão aparece em todo segmento. Com service_order.observation grava no campo; sem ele vira o primeiro comentário interno depois que a OS ganha id. Não copiar: o pedido sem campo fica escondido nos comentários; dar lugar próprio. Web: com o campo grava em customData.observation (junto com os outros campos do ramo), sem ele vira o 1º comentário interno, como o app."
 - id: order.new.delivery
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2667,10 +2667,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-request.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Só aparece em segmento com o campo e quando já tem texto. Não copiar: com o campo vazio não há como escrever depois na OS salva (só a IA preenche)."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Só aparece em segmento com o campo e quando já tem texto. Não copiar: com o campo vazio não há como escrever depois na OS salva (só a IA preenche). Web: lê e grava customData.observation (como o app, apagando a chave antiga service_order.observation), por Firestore, com a regra canEditMainFields; com o campo vazio, \"Escrever o que o cliente pediu\" no menu \"…\". O pedido que a Nova OS do web gravava como 1º comentário interno aparece no lugar enquanto o campo está vazio (só leitura; mudar grava no campo e o comentário fica)."
 - id: order.due.set
   screen: lib/screens/order/order_screen_v2.dart
   route: null
