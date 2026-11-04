@@ -8,7 +8,7 @@
         <polyline points="9 12 11 14 15 10"/>
       </svg>
       <span class="text-xs text-[#5A7184]">{{ t.poweredBy }}</span>
-      <a href="https://praticos.web.app" target="_blank" class="text-xs font-bold text-[#1B5E7B] transition-colors hover:text-[#0D3B4F]">PraticOS</a>
+      <a href="https://praticos.app" target="_blank" class="text-xs font-bold text-[#1B5E7B] transition-colors hover:text-[#0D3B4F]">PraticOS</a>
     </div>
     <!-- Secure link text -->
     <p class="mt-2 text-center text-[10px] text-[#A0AEC0]">

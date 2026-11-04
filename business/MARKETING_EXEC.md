@@ -37,7 +37,7 @@ Ter todos os assets e informações prontos para execução.
 - [ ] App Store Connect (pra eu ver métricas ASO)
 - [ ] Google Play Console (pra eu ver métricas ASO)
 - [ ] Google Analytics / Firebase Analytics
-- [ ] Repositório do site (praticos.web.app)
+- [ ] Repositório do site (praticos.app)
 - [ ] Redes sociais (criar se não existir):
   - [ ] Instagram @praticosapp
   - [ ] TikTok @praticosapp
@@ -45,7 +45,7 @@ Ter todos os assets e informações prontos para execução.
 
 #### 0.3 Definições
 - [ ] Confirmar nome nas lojas: "PraticOS - Ordem de Serviço"?
-- [ ] Domínio principal: praticos.web.app ou comprar praticos.com.br?
+- [ ] Domínio principal: praticos.app ou comprar praticos.com.br?
 - [ ] Tom de voz: técnico mas acessível? Informal?
 
 ---
@@ -122,7 +122,7 @@ Baixe agora e pare de perder OS no papel!
 
 **Estrutura:**
 ```
-praticos.web.app/
+praticos.app/
 ├── / (home - atualizar)
 ├── /precos (CRIAR)
 ├── /celular (CRIAR - landing segmento)
@@ -329,7 +329,7 @@ Semana 8+:
 1. [ ] Confirmar nome do app nas lojas
 2. [ ] Criar/compartilhar acesso às contas sociais
 3. [ ] Definir quem tira screenshots (precisa de dados fake realistas)
-4. [ ] Confirmar domínio (praticos.web.app ou outro?)
+4. [ ] Confirmar domínio (praticos.app ou outro?)
 5. [ ] Dar acesso ao repositório do site pra eu editar
 
 ---

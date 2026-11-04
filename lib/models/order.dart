@@ -294,7 +294,7 @@ class OrderShareLink {
   }
 
   /// Retorna a URL completa do link
-  String? get url => token != null ? 'https://praticos.web.app/q/$token' : null;
+  String? get url => token != null ? 'https://praticos.app/q/$token' : null;
 
   factory OrderShareLink.fromJson(Map<String, dynamic> json) =>
       _$OrderShareLinkFromJson(json);

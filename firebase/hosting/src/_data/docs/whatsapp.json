@@ -95,7 +95,7 @@
         ],
         "infoCard": {
           "title": "Exemplo de Mensagem",
-          "content": "\"Olá João! Segue o link para acompanhar sua OS #42 da Oficina do Carlos: https://praticos.web.app/q/... Através deste link você pode visualizar os detalhes e aprovar o orçamento.\""
+          "content": "\"Olá João! Segue o link para acompanhar sua OS #42 da Oficina do Carlos: https://praticos.app/q/... Através deste link você pode visualizar os detalhes e aprovar o orçamento.\""
         }
       },
       {
@@ -226,7 +226,7 @@
         ],
         "infoCard": {
           "title": "Message Example",
-          "content": "\"Hi John! Here is the link to track your SO #42 from Carlos Workshop: https://praticos.web.app/q/... Through this link you can view details and approve the quote.\""
+          "content": "\"Hi John! Here is the link to track your SO #42 from Carlos Workshop: https://praticos.app/q/... Through this link you can view details and approve the quote.\""
         }
       },
       {
@@ -357,7 +357,7 @@
         ],
         "infoCard": {
           "title": "Ejemplo de Mensaje",
-          "content": "\"¡Hola Juan! Aquí está el enlace para seguir tu OS #42 del Taller de Carlos: https://praticos.web.app/q/... A través de este enlace puedes ver los detalles y aprobar el presupuesto.\""
+          "content": "\"¡Hola Juan! Aquí está el enlace para seguir tu OS #42 del Taller de Carlos: https://praticos.app/q/... A través de este enlace puedes ver los detalles y aprobar el presupuesto.\""
         }
       },
       {

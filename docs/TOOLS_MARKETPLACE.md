@@ -530,7 +530,7 @@ O profissional hoje não tem presença digital. O PraticOS poderia gerar automat
 
 **O que inclui:**
 - Página pública com serviços oferecidos, avaliações, certificações, fotos de trabalhos
-- Link compartilhável (praticos.web.app/pro/joao-refrigeracao) - profissional coloca no Instagram, cartão de visita, WhatsApp
+- Link compartilhável (praticos.app/pro/joao-refrigeracao) - profissional coloca no Instagram, cartão de visita, WhatsApp
 - Agendamento online - cliente final acessa o perfil e agenda direto
 - SEO local - profissional aparece no Google quando alguém busca "técnico de refrigeração em [cidade]"
 

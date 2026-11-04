@@ -2,7 +2,7 @@
 
 **Criado:** 2026-01-25  
 **Status:** Em planejamento  
-**Site:** praticos.web.app
+**Site:** praticos.app
 
 ---
 

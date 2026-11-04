@@ -32,7 +32,7 @@ class _FakeService extends ShareLinkService {
     generatedDays.add(expiresInDays);
     return ShareLinkResult()
       ..token = 'tok${generated.length}'
-      ..url = 'https://praticos.web.app/q/tok${generated.length}'
+      ..url = 'https://praticos.app/q/tok${generated.length}'
       ..permissions = permissions
       ..expiresAt = DateTime(2026, 10, 21);
   }
@@ -111,11 +111,11 @@ void main() {
     expect(find.text('Mandar de outro jeito'), findsOneWidget);
     // The old controls are gone: no switches, no visible link.
     expect(find.byType(CupertinoSwitch), findsNothing);
-    expect(find.textContaining('praticos.web.app'), findsNothing);
+    expect(find.textContaining('praticos.app'), findsNothing);
 
     await tester.tap(find.byKey(const Key('shareLinkPrimary')));
     await tester.pump();
-    expect(service.whatsapp, ['https://praticos.web.app/q/tok1']);
+    expect(service.whatsapp, ['https://praticos.app/q/tok1']);
   });
 
   testWidgets('without a phone the blue button shares the link', (

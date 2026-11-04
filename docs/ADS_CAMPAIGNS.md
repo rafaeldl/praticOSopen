@@ -85,7 +85,7 @@
 - **Tipo**: Search
 - **Bidding**: Maximize Conversions
 - **Budget**: R$10/dia
-- **URL**: https://praticos.web.app
+- **URL**: https://praticos.app
 - **Ad Group**: Grupo de anúncios 1
 - **Anúncio**: RSA (Responsive Search Ad) - APPROVED
 - **Sitelinks**: 6 configurados

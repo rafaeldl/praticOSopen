@@ -3,11 +3,11 @@
     <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-5 lg:px-10">
       <!-- Left: Logo + Links -->
       <div class="flex items-center gap-8">
-        <a href="https://praticos.web.app" class="text-lg font-bold text-[#2563EB]">PraticOS</a>
+        <a href="https://praticos.app" class="text-lg font-bold text-[#2563EB]">PraticOS</a>
         <div class="hidden items-center gap-6 sm:flex">
-          <a href="https://praticos.web.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navExplore }}</a>
-          <a href="https://praticos.web.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navCategories }}</a>
-          <a href="https://praticos.web.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navHowItWorks }}</a>
+          <a href="https://praticos.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navExplore }}</a>
+          <a href="https://praticos.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navCategories }}</a>
+          <a href="https://praticos.app" class="text-sm text-[#71717A] transition-colors hover:text-[#18181B]">{{ t.navHowItWorks }}</a>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
           >
         </div>
         <a
-          href="https://praticos.web.app"
+          href="https://praticos.app"
           class="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8]"
         >
           {{ t.navSignIn }}

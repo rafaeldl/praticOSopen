@@ -8,8 +8,8 @@
 
 Gerar automaticamente uma página pública para cada profissional/empresa do PraticOS, criando presença digital sem esforço. O perfil se constrói a partir do uso do app no dia a dia.
 
-**URL:** `praticos.web.app/pro/{slug}`
-Ex: `praticos.web.app/pro/joao-refrigeracao-sp`
+**URL:** `praticos.app/pro/{slug}`
+Ex: `praticos.app/pro/joao-refrigeracao-sp`
 
 ---
 
@@ -230,7 +230,7 @@ Tela de preview no app (vê como vai ficar)
     ↓
 Escolhe o que mostrar (serviços, fotos, preços)
     ↓
-Ativa → perfil vai ao ar em praticos.web.app/pro/{slug}
+Ativa → perfil vai ao ar em praticos.app/pro/{slug}
     ↓
 Recebe kit de divulgação (QR code, adesivo, posts)
     ↓
@@ -295,7 +295,7 @@ Dashboard no app: "Seu perfil teve 45 visitas esta semana"
 ### Fluxo de request
 
 ```
-Usuário acessa: praticos.web.app/pro/joao-refrigeracao
+Usuário acessa: praticos.app/pro/joao-refrigeracao
     ↓
 Firebase Hosting (CDN) → verifica cache
     ↓ cache miss
@@ -320,7 +320,7 @@ Próximos acessos: servido direto do CDN
 | Cloud Functions com Express.js | Existe | `firebase/functions/` |
 | Firestore com dados de empresas | Existe | `/companies/{companyId}/` |
 | Firebase Storage (fotos) | Existe | `tenants/{companyId}/` |
-| Share links funcionando | Existe | `praticos.web.app/q/{token}` |
+| Share links funcionando | Existe | `praticos.app/q/{token}` |
 | LGPD masking utilities | Existe | Cloud Functions |
 
 ### Estrutura do projeto Nuxt
@@ -659,7 +659,7 @@ Configurações da Empresa (existente)
 | # | Decisão | Opções | Impacto |
 |---|---------|--------|---------|
 | 1 | ~~Tecnologia de renderização~~ | ~~SSR (Cloud Functions) / Pre-rendering / SPA~~ | **Decidido: Nuxt.js SSR no Cloud Run** |
-| 2 | Domínio | Subpath (`praticos.web.app/pro/`) / Subdomínio (`pro.praticos.com.br`) | Define branding e SEO |
+| 2 | Domínio | Subpath (`praticos.app/pro/`) / Subdomínio (`pro.praticos.com.br`) | Define branding e SEO |
 | 3 | Agendamento online | Simples (abre WhatsApp com mensagem) / Completo (agenda integrada) | Define complexidade da v1 |
 | 4 | Moderação de conteúdo | Manual / Automática / Híbrida | Define operação e qualidade |
 | 5 | Perfil gratuito vs. pago | Totalmente grátis / Freemium (básico grátis + pro pago) | Define modelo de negócio |

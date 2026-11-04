@@ -11,7 +11,7 @@ const texts: PdfTexts = {
   newOrder: 'NOVA',
   notInformed: 'Não informado',
   generatedBy: 'Gerado por PraticOS',
-  site: 'praticos.web.app',
+  site: 'praticos.app',
   description: 'DESCRIÇÃO',
   quantity: 'Qtd',
   unitValue: 'Valor Unit.',
@@ -164,13 +164,13 @@ describe('buildOrdersPdf', () => {
     })
     const photo = { bytes: PNG, kind: 'png' as const }
     const bytes = await buildOrdersPdf(
-      [part(true, {}, { photos: [photo, photo], missingPhotos: 1, shareUrl: 'https://praticos.web.app/q/abc', forms: [{ form, photos: { i1: [photo] } }] })],
+      [part(true, {}, { photos: [photo, photo], missingPhotos: 1, shareUrl: 'https://praticos.app/q/abc', forms: [{ form, photos: { i1: [photo] } }] })],
       company,
       texts,
       { showValues: true },
     )
     const text = pdfText(bytes)
-    for (const expected of ['FOTOS ANEXADAS (2)', 'Fotos disponíveis no sistema digital', 'Acompanhe online', 'https://praticos.web.app/q/abc', 'ENTRADA DO VEÍCULO', 'Pneus bons?', 'X SIM', '[X] Estepe', '[ ] Macaco', 'Não Respondido', 'CONCLUÍDO', 'Formulário: Entrada do veículo']) {
+    for (const expected of ['FOTOS ANEXADAS (2)', 'Fotos disponíveis no sistema digital', 'Acompanhe online', 'https://praticos.app/q/abc', 'ENTRADA DO VEÍCULO', 'Pneus bons?', 'X SIM', '[X] Estepe', '[ ] Macaco', 'Não Respondido', 'CONCLUÍDO', 'Formulário: Entrada do veículo']) {
       expect(text).toContain(expected)
     }
     expect(pdfPageCount(bytes)).toBe(2)

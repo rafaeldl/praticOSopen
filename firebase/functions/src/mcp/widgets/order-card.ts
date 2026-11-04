@@ -53,7 +53,7 @@ ${ORDER_CARD_CSS}</style>
 // unique per app). Set through the ChatGPT alias rather than `ui.domain`:
 // the spec leaves the domain format to each host, so a ChatGPT-style origin
 // in the standard key could be rejected by Claude.
-export const ORDER_CARD_DOMAIN = 'https://praticos.web.app';
+export const ORDER_CARD_DOMAIN = 'https://praticos.app';
 
 // The card makes no network calls; it only loads the cover photo from
 // Firebase Storage. Keep this list as narrow as the card's real behavior —

@@ -8,7 +8,7 @@
 ## Estrutura das URLs
 
 ```
-praticos.web.app/
+praticos.app/
 ├── / (home genérica)
 ├── /precos
 ├── /segmentos/

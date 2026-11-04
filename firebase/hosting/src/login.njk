@@ -6,6 +6,7 @@ permalink: /login/index.html
 
 <head>
     <meta charset="UTF-8">
+    {% include "partials/legacy-host.njk" %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - PraticOS</title>
     <meta name="description" content="Acesse o PraticOS - Sistema de gestao de ordens de servico">
@@ -364,7 +365,7 @@ permalink: /login/index.html
 
             // Set up button URLs
             const appUrl = 'praticos://login?token=' + encodeURIComponent(token);
-            const webUrl = 'https://praticos.web.app/login?token=' + encodeURIComponent(token);
+            const webUrl = 'https://praticos.app/login?token=' + encodeURIComponent(token);
 
             // Open in app button
             openAppBtn.href = appUrl;

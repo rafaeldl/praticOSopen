@@ -38,7 +38,7 @@
 
 **Objetivo:** Ter onde vender
 
-- [ ] Página de preços clara (praticos.web.app/precos)
+- [ ] Página de preços clara (praticos.app/precos)
 - [ ] Landing page com benefícios
 - [ ] Screenshots/vídeo demo
 - [ ] SEO básico

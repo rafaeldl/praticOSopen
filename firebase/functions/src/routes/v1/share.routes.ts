@@ -72,7 +72,7 @@ router.post('/:orderId/share', requireOrderAccess('orderId'), async (req: Authen
     );
 
     // Build share URL
-    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.app';
     const shareUrl = `${baseUrl}/q/${shareToken.token}`;
 
     // Save share link reference to order document
@@ -126,7 +126,7 @@ router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: Authent
     const tokens = (await shareTokenService.getTokensForOrder(orderId, companyId))
       .filter((t) => !shareTokenService.isRevoked(t));
 
-    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.app';
 
     res.json({
       success: true,

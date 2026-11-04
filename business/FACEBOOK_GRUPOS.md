@@ -23,7 +23,7 @@ Documento com textos promocionais prontos para envio em grupos especializados de
 
 ## Segmento: Oficina Mecanica
 
-**URL:** https://praticos.web.app/segmentos/automotivo.html
+**URL:** https://praticos.app/segmentos/automotivo.html
 
 **Grupos alvo:**
 - Mecanicos e donos de oficina
@@ -32,7 +32,7 @@ Documento com textos promocionais prontos para envio em grupos especializados de
 - Grupos de auto centers
 
 ### Mensagem Curta (para comentarios)
-Uso o PraticOS na minha oficina e acabou com a papelada. Cliente acompanha pelo celular e parou de ligar toda hora. Gratis pra comecar: praticos.web.app/segmentos/automotivo.html
+Uso o PraticOS na minha oficina e acabou com a papelada. Cliente acompanha pelo celular e parou de ligar toda hora. Gratis pra comecar: praticos.app/segmentos/automotivo.html
 
 ### Mensagem Media (para posts)
 Quem mais perde orcamento no WhatsApp e no final do mes nao sabe quanto lucrou?
@@ -42,7 +42,7 @@ Na minha oficina isso era rotina ate comecar a usar o PraticOS. Agora tenho:
 - Cliente acompanha pelo celular (parou de ligar)
 - Dashboard pra saber quanto lucrei no mes
 
-Tem plano gratis de verdade: praticos.web.app/segmentos/automotivo.html
+Tem plano gratis de verdade: praticos.app/segmentos/automotivo.html
 
 ### Mensagem Longa (para posts detalhados)
 Vou compartilhar algo que mudou minha oficina...
@@ -61,7 +61,7 @@ Comecei a usar o PraticOS e resolveu tudo:
 
 O melhor: tem plano gratis que funciona de verdade, sem limite de tempo.
 
-Quem quiser testar: praticos.web.app/segmentos/automotivo.html
+Quem quiser testar: praticos.app/segmentos/automotivo.html
 
 ### Hashtags
 #oficinamecanica #gestaooficina #sistemaoficinamecanica #ordemdeservico #mecanico #oficina #automotivo
@@ -70,7 +70,7 @@ Quem quiser testar: praticos.web.app/segmentos/automotivo.html
 
 ## Segmento: Assistencia Tecnica de Celular
 
-**URL:** https://praticos.web.app/segmentos/assistencia-celular.html
+**URL:** https://praticos.app/segmentos/assistencia-celular.html
 
 **Grupos alvo:**
 - Tecnicos de celular e smartphone
@@ -79,7 +79,7 @@ Quem quiser testar: praticos.web.app/segmentos/automotivo.html
 - Grupos de manutencao de smartphones
 
 ### Mensagem Curta (para comentarios)
-Cansado de cliente ligando 5x por dia? Uso o PraticOS e mando um link pro cliente acompanhar sozinho. Acabou a dor de cabeca. Gratis: praticos.web.app/segmentos/assistencia-celular.html
+Cansado de cliente ligando 5x por dia? Uso o PraticOS e mando um link pro cliente acompanhar sozinho. Acabou a dor de cabeca. Gratis: praticos.app/segmentos/assistencia-celular.html
 
 ### Mensagem Media (para posts)
 Quem ai ja perdeu 2 horas do dia atendendo ligacao de cliente perguntando se o celular ficou pronto?
@@ -89,7 +89,7 @@ Descobri o PraticOS e acabou isso. Agora:
 - Cliente recebe link e acompanha sozinho
 - Checklist de entrada me protege de reclamacao falsa
 
-Tem versao gratis sem enrolacao: praticos.web.app/segmentos/assistencia-celular.html
+Tem versao gratis sem enrolacao: praticos.app/segmentos/assistencia-celular.html
 
 ### Mensagem Longa (para posts detalhados)
 Deixa eu contar como parei de perder tempo com ligacao de cliente...
@@ -108,7 +108,7 @@ Comecei a usar o PraticOS e mudou tudo:
 
 Detalhe: plano gratis de verdade, uso ha meses sem pagar nada.
 
-Link: praticos.web.app/segmentos/assistencia-celular.html
+Link: praticos.app/segmentos/assistencia-celular.html
 
 ### Hashtags
 #assistenciatecnica #consertodecelular #tecnicodecelular #reparodecelular #manutencaocelular #assistenciacelular
@@ -117,7 +117,7 @@ Link: praticos.web.app/segmentos/assistencia-celular.html
 
 ## Segmento: Refrigeracao e Ar-Condicionado
 
-**URL:** https://praticos.web.app/segmentos/refrigeracao.html
+**URL:** https://praticos.app/segmentos/refrigeracao.html
 
 **Grupos alvo:**
 - Tecnicos de refrigeracao
@@ -126,7 +126,7 @@ Link: praticos.web.app/segmentos/assistencia-celular.html
 - Comunidades de climatizacao
 
 ### Mensagem Curta (para comentarios)
-Uso o PraticOS pra organizar manutenções. Historico completo de cada equipamento e nunca mais esqueci agendamento. Gratis: praticos.web.app/segmentos/refrigeracao.html
+Uso o PraticOS pra organizar manutenções. Historico completo de cada equipamento e nunca mais esqueci agendamento. Gratis: praticos.app/segmentos/refrigeracao.html
 
 ### Mensagem Media (para posts)
 Quem ja perdeu cliente porque esqueceu da manutencao preventiva?
@@ -138,7 +138,7 @@ Comecei a usar o PraticOS e resolveu:
 - Agenda inteligente que nunca esquece
 - Cliente acompanha pelo celular
 
-Versao gratis de verdade: praticos.web.app/segmentos/refrigeracao.html
+Versao gratis de verdade: praticos.app/segmentos/refrigeracao.html
 
 ### Mensagem Longa (para posts detalhados)
 Vou compartilhar como organizei minha empresa de refrigeracao...
@@ -157,7 +157,7 @@ Com o PraticOS:
 
 Ganhei 50% de produtividade facil. E tem plano gratis sem limite de tempo.
 
-Link: praticos.web.app/segmentos/refrigeracao.html
+Link: praticos.app/segmentos/refrigeracao.html
 
 ### Hashtags
 #refrigeracao #arcondicionado #tecnicoderefrigeracao #HVAC #climatizacao #manutencaopreventiva #instaladordearcondicionado
@@ -166,7 +166,7 @@ Link: praticos.web.app/segmentos/refrigeracao.html
 
 ## Segmento: Assistencia Tecnica de Eletrodomesticos
 
-**URL:** https://praticos.web.app/segmentos/eletrodomesticos.html
+**URL:** https://praticos.app/segmentos/eletrodomesticos.html
 
 **Grupos alvo:**
 - Tecnicos de linha branca
@@ -175,7 +175,7 @@ Link: praticos.web.app/segmentos/refrigeracao.html
 - Comunidades de field service
 
 ### Mensagem Curta (para comentarios)
-Trabalho com atendimento externo e uso o PraticOS. Rota otimizada, historico do cliente e cliente para de ligar perguntando onde esta o tecnico. Gratis: praticos.web.app/segmentos/eletrodomesticos.html
+Trabalho com atendimento externo e uso o PraticOS. Rota otimizada, historico do cliente e cliente para de ligar perguntando onde esta o tecnico. Gratis: praticos.app/segmentos/eletrodomesticos.html
 
 ### Mensagem Media (para posts)
 Quem trabalha com atendimento externo sabe a dor...
@@ -189,7 +189,7 @@ Comecei a usar o PraticOS e organizou tudo:
 - Cliente recebe notificacao automatica pelo WhatsApp
 - Controle de pecas por tecnico
 
-Versao gratis: praticos.web.app/segmentos/eletrodomesticos.html
+Versao gratis: praticos.app/segmentos/eletrodomesticos.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem gerencia equipe de tecnicos externos...
@@ -208,7 +208,7 @@ Como resolvi:
 
 60% menos ligacoes de cliente. Plano gratis funciona de verdade.
 
-Link: praticos.web.app/segmentos/eletrodomesticos.html
+Link: praticos.app/segmentos/eletrodomesticos.html
 
 ### Hashtags
 #eletrodomesticos #linhabranca #assistenciatecnica #tecnicoexterno #fieldservice #atendimentoexterno
@@ -217,7 +217,7 @@ Link: praticos.web.app/segmentos/eletrodomesticos.html
 
 ## Segmento: Assistencia Tecnica de Eletronica
 
-**URL:** https://praticos.web.app/segmentos/eletronica.html
+**URL:** https://praticos.app/segmentos/eletronica.html
 
 **Grupos alvo:**
 - Tecnicos de eletronica
@@ -226,7 +226,7 @@ Link: praticos.web.app/segmentos/eletrodomesticos.html
 - Grupos de reparo de monitores
 
 ### Mensagem Curta (para comentarios)
-Cansado de TV abandonada na oficina? Uso o PraticOS e ele gera termo de abandono automatico. Foto de entrada obrigatoria me salvou de varias reclamacoes. Gratis: praticos.web.app/segmentos/eletronica.html
+Cansado de TV abandonada na oficina? Uso o PraticOS e ele gera termo de abandono automatico. Foto de entrada obrigatoria me salvou de varias reclamacoes. Gratis: praticos.app/segmentos/eletronica.html
 
 ### Mensagem Media (para posts)
 Quem mais tem TV acumulada na oficina ha meses?
@@ -238,7 +238,7 @@ Com o PraticOS:
 - Foto de entrada obrigatoria (me salvou de reclamacao falsa)
 - Controle de pecas importadas com rastreio
 
-Tem versao gratis: praticos.web.app/segmentos/eletronica.html
+Tem versao gratis: praticos.app/segmentos/eletronica.html
 
 ### Mensagem Longa (para posts detalhados)
 Problema classico de quem trabalha com eletronica: equipamento abandonado.
@@ -257,7 +257,7 @@ Com o PraticOS:
 
 Reducao de 80% em disputas. Plano gratis sem enrolacao.
 
-Link: praticos.web.app/segmentos/eletronica.html
+Link: praticos.app/segmentos/eletronica.html
 
 ### Hashtags
 #assistenciatecnica #consertodetv #eletronicageral #tecnicodeeletronica #reparoeletronico #oficinadeeletronica
@@ -266,7 +266,7 @@ Link: praticos.web.app/segmentos/eletronica.html
 
 ## Segmento: Assistencia Tecnica de Informatica
 
-**URL:** https://praticos.web.app/segmentos/informatica.html
+**URL:** https://praticos.app/segmentos/informatica.html
 
 **Grupos alvo:**
 - Tecnicos de informatica
@@ -275,7 +275,7 @@ Link: praticos.web.app/segmentos/eletronica.html
 - Comunidades de manutencao de PCs
 
 ### Mensagem Curta (para comentarios)
-Usa caderninho pra anotar OS? Eu usava tambem ate descobrir o PraticOS. Agora cada equipamento tem foto e numero de serie, e cliente acompanha sozinho. Gratis: praticos.web.app/segmentos/informatica.html
+Usa caderninho pra anotar OS? Eu usava tambem ate descobrir o PraticOS. Agora cada equipamento tem foto e numero de serie, e cliente acompanha sozinho. Gratis: praticos.app/segmentos/informatica.html
 
 ### Mensagem Media (para posts)
 Quem ai perde equipamento na bancada ou esquece de quem e qual?
@@ -290,7 +290,7 @@ Comecei a usar o PraticOS:
 - Cliente recebe link e acompanha sozinho
 - Historico completo de cada cliente
 
-70% menos ligacoes. Gratis: praticos.web.app/segmentos/informatica.html
+70% menos ligacoes. Gratis: praticos.app/segmentos/informatica.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com assistencia de informatica e vive no caos...
@@ -310,7 +310,7 @@ Solucao: PraticOS
 
 Minha produtividade triplicou. E o plano gratis funciona de verdade, sem truque.
 
-Link: praticos.web.app/segmentos/informatica.html
+Link: praticos.app/segmentos/informatica.html
 
 ### Hashtags
 #assistenciadeinformatica #tecnicodeinformatica #consertopc #manutencaocomputador #suportetecnico #informatica
@@ -319,7 +319,7 @@ Link: praticos.web.app/segmentos/informatica.html
 
 ## Segmento: Eletricista
 
-**URL:** https://praticos.web.app/segmentos/eletrica.html
+**URL:** https://praticos.app/segmentos/eletrica.html
 
 **Grupos alvo:**
 - Eletricistas autonomos e empresas
@@ -328,7 +328,7 @@ Link: praticos.web.app/segmentos/informatica.html
 - Grupos de profissionais eletricos
 
 ### Mensagem Curta (para comentarios)
-Cansado de dar preco no chute e trabalhar no prejuizo? Uso o PraticOS com calculadora de custos. Agora sei exatamente meu lucro. Gratis: praticos.web.app/segmentos/eletrica.html
+Cansado de dar preco no chute e trabalhar no prejuizo? Uso o PraticOS com calculadora de custos. Agora sei exatamente meu lucro. Gratis: praticos.app/segmentos/eletrica.html
 
 ### Mensagem Media (para posts)
 Quem mais da preco no chute e depois descobre que trabalhou de graca?
@@ -338,7 +338,7 @@ Era minha rotina ate comecar a usar o PraticOS:
 - Orcamento profissional em 2 minutos
 - Controle financeiro separado do pessoal
 
-Aumentei 40% meu lucro. Versao gratis: praticos.web.app/segmentos/eletrica.html
+Aumentei 40% meu lucro. Versao gratis: praticos.app/segmentos/eletrica.html
 
 ### Mensagem Longa (para posts detalhados)
 Vou ser sincero: eu trabalhava no prejuizo sem saber.
@@ -353,7 +353,7 @@ Descobri o PraticOS e mudou tudo:
 
 Os clientes elogiam o profissionalismo dos orcamentos. E o melhor: plano gratis de verdade.
 
-Link: praticos.web.app/segmentos/eletrica.html
+Link: praticos.app/segmentos/eletrica.html
 
 ### Hashtags
 #eletricista #servicoseletricos #instalacaoeletrica #eletricapredial #eletricaresidencial #eletricistaprofissional
@@ -362,7 +362,7 @@ Link: praticos.web.app/segmentos/eletrica.html
 
 ## Segmento: Integrador de Energia Solar
 
-**URL:** https://praticos.web.app/segmentos/energia-solar.html
+**URL:** https://praticos.app/segmentos/energia-solar.html
 
 **Grupos alvo:**
 - Integradores de energia solar
@@ -371,7 +371,7 @@ Link: praticos.web.app/segmentos/eletrica.html
 - Comunidades de energia solar
 
 ### Mensagem Curta (para comentarios)
-Perdia leads no WhatsApp o tempo todo. Comecei a usar o PraticOS e organizou todo meu funil. Historico de cada instalacao documentado. Gratis: praticos.web.app/segmentos/energia-solar.html
+Perdia leads no WhatsApp o tempo todo. Comecei a usar o PraticOS e organizou todo meu funil. Historico de cada instalacao documentado. Gratis: praticos.app/segmentos/energia-solar.html
 
 ### Mensagem Media (para posts)
 Quantos leads voce perde no WhatsApp por semana?
@@ -384,7 +384,7 @@ Com o PraticOS:
 - Checklist de instalacao com fotos
 - Cliente acompanha pelo celular
 
-40% mais conversao. Gratis: praticos.web.app/segmentos/energia-solar.html
+40% mais conversao. Gratis: praticos.app/segmentos/energia-solar.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com energia solar e vive no caos do WhatsApp...
@@ -403,7 +403,7 @@ Com o PraticOS:
 
 Aumentei 40% a taxa de conversao. Plano gratis funciona de verdade.
 
-Link: praticos.web.app/segmentos/energia-solar.html
+Link: praticos.app/segmentos/energia-solar.html
 
 ### Hashtags
 #energiasolar #integradorofsolar #fotovoltaico #energiarenovavel #painelsolar #instalacaosolar
@@ -412,7 +412,7 @@ Link: praticos.web.app/segmentos/energia-solar.html
 
 ## Segmento: Empresa de CFTV e Seguranca
 
-**URL:** https://praticos.web.app/segmentos/seguranca-cftv.html
+**URL:** https://praticos.app/segmentos/seguranca-cftv.html
 
 **Grupos alvo:**
 - Instaladores de cameras e CFTV
@@ -421,7 +421,7 @@ Link: praticos.web.app/segmentos/energia-solar.html
 - Comunidades de seguranca patrimonial
 
 ### Mensagem Curta (para comentarios)
-Perdia horas montando relatorio fotografico. Agora uso o PraticOS e gera automatico em 1 clique. QR code no equipamento mostra todo historico. Gratis: praticos.web.app/segmentos/seguranca-cftv.html
+Perdia horas montando relatorio fotografico. Agora uso o PraticOS e gera automatico em 1 clique. QR code no equipamento mostra todo historico. Gratis: praticos.app/segmentos/seguranca-cftv.html
 
 ### Mensagem Media (para posts)
 Quem mais perde tempo montando relatorio fotografico manualmente?
@@ -434,7 +434,7 @@ Com o PraticOS:
 - Rota otimizada do dia
 - Cliente recebe link e acompanha em tempo real
 
-60% menos tempo administrativo. Gratis: praticos.web.app/segmentos/seguranca-cftv.html
+60% menos tempo administrativo. Gratis: praticos.app/segmentos/seguranca-cftv.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com CFTV e perde tempo com burocracia...
@@ -453,7 +453,7 @@ Com o PraticOS:
 
 Ganhei 2 horas por dia no minimo. Plano gratis sem enrolacao.
 
-Link: praticos.web.app/segmentos/seguranca-cftv.html
+Link: praticos.app/segmentos/seguranca-cftv.html
 
 ### Hashtags
 #cftv #segurancaeletronica #cameras #instaladordecameras #alarme #monitoramento #segurancapatrimonial
@@ -462,7 +462,7 @@ Link: praticos.web.app/segmentos/seguranca-cftv.html
 
 ## Segmento: Integrador de Automacao Residencial
 
-**URL:** https://praticos.web.app/segmentos/automacao.html
+**URL:** https://praticos.app/segmentos/automacao.html
 
 **Grupos alvo:**
 - Integradores de automacao residencial
@@ -471,7 +471,7 @@ Link: praticos.web.app/segmentos/seguranca-cftv.html
 - Comunidades de domotica
 
 ### Mensagem Curta (para comentarios)
-Cliente ligou 2 anos depois com problema e eu nao tinha documentacao nenhuma. Agora uso o PraticOS e tenho tudo: equipamentos, senhas, configuracoes. Gratis: praticos.web.app/segmentos/automacao.html
+Cliente ligou 2 anos depois com problema e eu nao tinha documentacao nenhuma. Agora uso o PraticOS e tenho tudo: equipamentos, senhas, configuracoes. Gratis: praticos.app/segmentos/automacao.html
 
 ### Mensagem Media (para posts)
 Quem mais faz orcamento no Excel e projeto no WhatsApp?
@@ -484,7 +484,7 @@ Com o PraticOS:
 - Orcamento profissional em minutos
 - Cliente acompanha pelo celular
 
-40% mais faturamento. Gratis: praticos.web.app/segmentos/automacao.html
+40% mais faturamento. Gratis: praticos.app/segmentos/automacao.html
 
 ### Mensagem Longa (para posts detalhados)
 Problema real de integrador de automacao: pos-venda.
@@ -504,7 +504,7 @@ Com o PraticOS:
 
 Aumentei 40% meu faturamento. Plano gratis real.
 
-Link: praticos.web.app/segmentos/automacao.html
+Link: praticos.app/segmentos/automacao.html
 
 ### Hashtags
 #automacaoresidencial #casainteligente #smarthome #domotica #integradorresiencial #automacao
@@ -513,7 +513,7 @@ Link: praticos.web.app/segmentos/automacao.html
 
 ## Segmento: Manutencao de Elevadores
 
-**URL:** https://praticos.web.app/segmentos/elevadores.html
+**URL:** https://praticos.app/segmentos/elevadores.html
 
 **Grupos alvo:**
 - Tecnicos de elevadores
@@ -522,7 +522,7 @@ Link: praticos.web.app/segmentos/automacao.html
 - Comunidades de instalacao de elevadores
 
 ### Mensagem Curta (para comentarios)
-Contrato vencendo e voce so lembra quando cliente reclama? Uso o PraticOS e recebo alerta automatico. Checklist conforme ABNT. Gratis: praticos.web.app/segmentos/elevadores.html
+Contrato vencendo e voce so lembra quando cliente reclama? Uso o PraticOS e recebo alerta automatico. Checklist conforme ABNT. Gratis: praticos.app/segmentos/elevadores.html
 
 ### Mensagem Media (para posts)
 Quem mais esquece de avisar cliente que contrato esta vencendo?
@@ -535,7 +535,7 @@ Com o PraticOS:
 - Historico completo de cada elevador
 - Checklist conforme ABNT NBR 16083
 
-Nunca mais perca contrato. Gratis: praticos.web.app/segmentos/elevadores.html
+Nunca mais perca contrato. Gratis: praticos.app/segmentos/elevadores.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com elevadores e vive apagando incendio...
@@ -554,7 +554,7 @@ Com o PraticOS:
 
 Organizacao total. Plano gratis de verdade.
 
-Link: praticos.web.app/segmentos/elevadores.html
+Link: praticos.app/segmentos/elevadores.html
 
 ### Hashtags
 #elevadores #manutencaodeelevadores #conservadoraelevadores #tecnicodeelevadores #elevador #predial
@@ -563,7 +563,7 @@ Link: praticos.web.app/segmentos/elevadores.html
 
 ## Segmento: Dedetizacao e Controle de Pragas
 
-**URL:** https://praticos.web.app/segmentos/dedetizacao.html
+**URL:** https://praticos.app/segmentos/dedetizacao.html
 
 **Grupos alvo:**
 - Empresas de dedetizacao
@@ -572,7 +572,7 @@ Link: praticos.web.app/segmentos/elevadores.html
 - Comunidades de desinsetizacao
 
 ### Mensagem Curta (para comentarios)
-Certificado demorava 2 dias pra gerar. Agora uso o PraticOS e gera automatico no final do servico. Cliente corporativo adora. Gratis: praticos.web.app/segmentos/dedetizacao.html
+Certificado demorava 2 dias pra gerar. Agora uso o PraticOS e gera automatico no final do servico. Cliente corporativo adora. Gratis: praticos.app/segmentos/dedetizacao.html
 
 ### Mensagem Media (para posts)
 Quem mais perde tempo gerando certificado manualmente?
@@ -585,7 +585,7 @@ Com o PraticOS:
 - Rastreamento do tecnico em tempo real
 - OS digital com fotos
 
-Clientes corporativos amam. Gratis: praticos.web.app/segmentos/dedetizacao.html
+Clientes corporativos amam. Gratis: praticos.app/segmentos/dedetizacao.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com dedetizacao e perde tempo com burocracia...
@@ -605,7 +605,7 @@ Com o PraticOS:
 
 Impressiona cliente corporativo e reduz retrabalho.
 
-Link: praticos.web.app/segmentos/dedetizacao.html
+Link: praticos.app/segmentos/dedetizacao.html
 
 ### Hashtags
 #dedetizacao #controledepragas #desinsetizacao #sanitizacao #dedetizadora #pragas
@@ -614,7 +614,7 @@ Link: praticos.web.app/segmentos/dedetizacao.html
 
 ## Segmento: Empresa de Limpeza
 
-**URL:** https://praticos.web.app/segmentos/limpeza.html
+**URL:** https://praticos.app/segmentos/limpeza.html
 
 **Grupos alvo:**
 - Empresas de limpeza
@@ -623,7 +623,7 @@ Link: praticos.web.app/segmentos/dedetizacao.html
 - Comunidades de higienizacao
 
 ### Mensagem Curta (para comentarios)
-Funcionario fantasma era meu pesadelo. Agora uso o PraticOS com check-in por geolocalizacao. Sei exatamente quem esta trabalhando onde. Gratis: praticos.web.app/segmentos/limpeza.html
+Funcionario fantasma era meu pesadelo. Agora uso o PraticOS com check-in por geolocalizacao. Sei exatamente quem esta trabalhando onde. Gratis: praticos.app/segmentos/limpeza.html
 
 ### Mensagem Media (para posts)
 Quem mais sofre com funcionario fantasma?
@@ -636,7 +636,7 @@ Com o PraticOS:
 - Fotos antes e depois
 - Relatorio automatico pro cliente
 
-Controle total da equipe. Gratis: praticos.web.app/segmentos/limpeza.html
+Controle total da equipe. Gratis: praticos.app/segmentos/limpeza.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem gerencia equipe de limpeza e vive no escuro...
@@ -655,7 +655,7 @@ Com o PraticOS:
 
 Acabou a discussao com cliente. Plano gratis funciona.
 
-Link: praticos.web.app/segmentos/limpeza.html
+Link: praticos.app/segmentos/limpeza.html
 
 ### Hashtags
 #empresadelimpeza #limpezaprofissional #facilities #higienizacao #limpeza #servicosdelimpeza
@@ -664,7 +664,7 @@ Link: praticos.web.app/segmentos/limpeza.html
 
 ## Segmento: Montagem e Manutencao de Moveis
 
-**URL:** https://praticos.web.app/segmentos/moveis.html
+**URL:** https://praticos.app/segmentos/moveis.html
 
 **Grupos alvo:**
 - Montadores de moveis
@@ -673,7 +673,7 @@ Link: praticos.web.app/segmentos/limpeza.html
 - Comunidades de montagem
 
 ### Mensagem Curta (para comentarios)
-Agenda lotada e desorganizada? Uso o PraticOS e organiza tudo. Rota otimizada, checklist com foto e assinatura digital. Gratis: praticos.web.app/segmentos/moveis.html
+Agenda lotada e desorganizada? Uso o PraticOS e organiza tudo. Rota otimizada, checklist com foto e assinatura digital. Gratis: praticos.app/segmentos/moveis.html
 
 ### Mensagem Media (para posts)
 Quem mais trabalha pra varias lojas e vive no caos?
@@ -686,7 +686,7 @@ Com o PraticOS:
 - Checklist com foto antes e depois
 - Assinatura digital do cliente
 
-Deslocamento reduzido, cobranca organizada. Gratis: praticos.web.app/segmentos/moveis.html
+Deslocamento reduzido, cobranca organizada. Gratis: praticos.app/segmentos/moveis.html
 
 ### Mensagem Longa (para posts detalhados)
 Para quem trabalha com montagem de moveis e atende varias lojas...
@@ -708,7 +708,7 @@ Com o PraticOS:
 
 Reduzi deslocamento e organizei cobranca. Plano gratis de verdade.
 
-Link: praticos.web.app/segmentos/moveis.html
+Link: praticos.app/segmentos/moveis.html
 
 ### Hashtags
 #montagemmoveis #montadormoveis #assistenciatecnicamoveis #marceneiro #moveis #instalacaomoveis
@@ -719,17 +719,17 @@ Link: praticos.web.app/segmentos/moveis.html
 
 | Segmento | URL |
 |----------|-----|
-| Oficina Mecanica | praticos.web.app/segmentos/automotivo.html |
-| Assistencia de Celular | praticos.web.app/segmentos/assistencia-celular.html |
-| Refrigeracao/Ar-Condicionado | praticos.web.app/segmentos/refrigeracao.html |
-| Eletrodomesticos | praticos.web.app/segmentos/eletrodomesticos.html |
-| Eletronica | praticos.web.app/segmentos/eletronica.html |
-| Informatica | praticos.web.app/segmentos/informatica.html |
-| Eletrica | praticos.web.app/segmentos/eletrica.html |
-| Energia Solar | praticos.web.app/segmentos/energia-solar.html |
-| Seguranca/CFTV | praticos.web.app/segmentos/seguranca-cftv.html |
-| Automacao | praticos.web.app/segmentos/automacao.html |
-| Elevadores | praticos.web.app/segmentos/elevadores.html |
-| Dedetizacao | praticos.web.app/segmentos/dedetizacao.html |
-| Limpeza | praticos.web.app/segmentos/limpeza.html |
-| Moveis | praticos.web.app/segmentos/moveis.html |
+| Oficina Mecanica | praticos.app/segmentos/automotivo.html |
+| Assistencia de Celular | praticos.app/segmentos/assistencia-celular.html |
+| Refrigeracao/Ar-Condicionado | praticos.app/segmentos/refrigeracao.html |
+| Eletrodomesticos | praticos.app/segmentos/eletrodomesticos.html |
+| Eletronica | praticos.app/segmentos/eletronica.html |
+| Informatica | praticos.app/segmentos/informatica.html |
+| Eletrica | praticos.app/segmentos/eletrica.html |
+| Energia Solar | praticos.app/segmentos/energia-solar.html |
+| Seguranca/CFTV | praticos.app/segmentos/seguranca-cftv.html |
+| Automacao | praticos.app/segmentos/automacao.html |
+| Elevadores | praticos.app/segmentos/elevadores.html |
+| Dedetizacao | praticos.app/segmentos/dedetizacao.html |
+| Limpeza | praticos.app/segmentos/limpeza.html |
+| Moveis | praticos.app/segmentos/moveis.html |

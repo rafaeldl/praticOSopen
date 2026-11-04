@@ -14,7 +14,7 @@ O Share Link permite que técnicos e empresas compartilhem ordens de serviço co
 
 | Ambiente | URL Base |
 |----------|----------|
-| Web App | `https://praticos.web.app/q/{token}` |
+| Web App | `https://praticos.app/q/{token}` |
 | API (Prod) | `https://southamerica-east1-praticos.cloudfunctions.net/api` |
 | API (Dev) | `http://localhost:5000/praticos/southamerica-east1/api` |
 
@@ -147,7 +147,7 @@ User → ShareLinkSheet → ShareLinkService.generateShareLink()
 ### 2. Acesso via Link (Cliente sem Auth)
 
 ```
-Browser → https://praticos.web.app/q/{token}
+Browser → https://praticos.app/q/{token}
                     ↓
           GET /public/orders/{token}
                     ↓
@@ -164,7 +164,7 @@ Browser → https://praticos.web.app/q/{token}
 
 A página `/q/{token}` (Nuxt, Cloud Run `praticos-web`) carrega a OS com `useFetch('/api/orders/{token}')`.
 No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar, avaliar ou quando a aba volta a ficar visível com cobrança Asaas pendente/vencida, via `useRefreshOnVisible`/`createVisibilityRefresher`, no máximo 1 vez a cada 10 s; esses refreshes em segundo plano também contam como visualização: incrementam `viewCount` e atualizam `lastViewedAt`, então enquanto há cobrança aberta o contador sobe a cada retorno à aba, respeitando o intervalo de 10 s)
-faz GET em `https://praticos.web.app/api/orders/{token}`. Por isso `firebase/firebase.json` precisa do rewrite
+faz GET em `https://praticos.app/api/orders/{token}`. Por isso `firebase/firebase.json` precisa do rewrite
 `/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
 404 e a página cai na tela de erro.
 
@@ -220,7 +220,7 @@ Gera um novo link de compartilhamento.
 ```json
 {
   "token": "ST_...",
-  "url": "https://praticos.web.app/q/ST_...",
+  "url": "https://praticos.app/q/ST_...",
   "permissions": ["view", "approve", "comment"],
   "expiresAt": "2025-01-22T10:00:00Z",
   "customer": {
@@ -551,7 +551,7 @@ final result = await service.generateShareLink(
 );
 
 print('Link: ${result.url}');
-// https://praticos.web.app/q/ST_a1b2c3d4-...
+// https://praticos.app/q/ST_a1b2c3d4-...
 ```
 
 ### Compartilhar via WhatsApp

@@ -196,7 +196,7 @@ The WhatsApp share feature integrates with the existing Share Link system. When 
 
 ```
 Olá {customerName}! Segue o link para acompanhar sua OS #{orderNumber} da {companyName}:
-https://praticos.web.app/q/{token}
+https://praticos.app/q/{token}
 
 Através deste link você pode visualizar os detalhes e aprovar o orçamento.
 ```

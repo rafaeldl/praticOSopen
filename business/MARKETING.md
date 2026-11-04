@@ -66,7 +66,7 @@ Descoberta → Download → Cadastro → Uso Free → Limite → Upgrade
 ### Estrutura do Site
 
 ```
-praticos.web.app/
+praticos.app/
 ├── / (home - landing page)
 ├── /precos (tabela de planos)
 ├── /funcionalidades

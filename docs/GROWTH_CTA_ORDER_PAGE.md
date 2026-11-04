@@ -22,7 +22,7 @@ function renderFooter() {
     const footer = document.createElement('div');
     footer.className = 'order-footer';
     footer.innerHTML = `
-        ${text.poweredBy} <a href="https://praticos.web.app" target="_blank">PraticOS</a>
+        ${text.poweredBy} <a href="https://praticos.app" target="_blank">PraticOS</a>
     `;
     orderContent.appendChild(footer);
 }
@@ -174,7 +174,7 @@ function renderFooter() {
     const whatsappLink = `https://wa.me/${botNumber}?text=${whatsappMsg}`;
 
     // Site link with UTM
-    const siteLink = `https://praticos.web.app?${utmParams}`;
+    const siteLink = `https://praticos.app?${utmParams}`;
 
     footer.innerHTML = `
         <div class="cta-card">
@@ -330,7 +330,7 @@ Estas conexões são melhorias futuras — o CTA funciona 100% de forma independ
 - [ ] Footer da página `/q/{token}` mostra card CTA com headline, subtext, botão WhatsApp e link "saiba mais"
 - [ ] Textos aparecem em português quando `lang=pt`, inglês quando `lang=en`, espanhol quando `lang=es`
 - [ ] Botão WhatsApp abre `wa.me/554888794742` com mensagem pré-preenchida no idioma correto
-- [ ] Link "Saiba mais" abre `praticos.web.app` com UTM params corretos
+- [ ] Link "Saiba mais" abre `praticos.app` com UTM params corretos
 - [ ] CTA respeita dark/light mode (usa CSS vars do design system)
 - [ ] Layout responsivo: card centralizado em desktop, full-width em mobile
 - [ ] "Powered by PraticOS" permanece visível abaixo do card CTA (com UTM params)

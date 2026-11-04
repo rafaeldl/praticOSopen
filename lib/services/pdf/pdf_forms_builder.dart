@@ -524,7 +524,7 @@ class PdfFormsBuilder {
   ) {
     const appStoreUrl = 'https://apps.apple.com/br/app/praticos/id1534604555';
     const playStoreUrl = 'https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
-    const siteUrl = 'https://praticos.web.app';
+    const siteUrl = 'https://praticos.app';
 
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 20),
@@ -585,7 +585,7 @@ class PdfFormsBuilder {
               pw.UrlLink(
                 destination: siteUrl,
                 child: pw.Text(
-                  'https://praticos.web.app',
+                  'https://praticos.app',
                   style: pw.TextStyle(
                     font: boldFont,
                     fontSize: 7,

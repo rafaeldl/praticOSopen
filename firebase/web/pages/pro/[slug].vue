@@ -17,7 +17,7 @@
       <h2 class="mb-3 text-2xl font-semibold text-[#18181B]">{{ t.notFoundTitle }}</h2>
       <p class="mb-8 max-w-[400px] text-[#71717A]">{{ t.notFoundDesc }}</p>
       <a
-        href="https://praticos.web.app"
+        href="https://praticos.app"
         class="inline-flex items-center gap-2 rounded-[10px] bg-[#2563EB] px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
       >
         {{ t.backHome }}
@@ -71,7 +71,7 @@
       <!-- Footer -->
       <footer class="border-t border-[#E4E4E7]">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 lg:px-10">
-          <a href="https://praticos.web.app" class="text-sm font-bold text-[#2563EB]">PraticOS</a>
+          <a href="https://praticos.app" class="text-sm font-bold text-[#2563EB]">PraticOS</a>
           <span class="text-xs text-[#A1A1AA]">{{ t.footerCopy }}</span>
         </div>
       </footer>

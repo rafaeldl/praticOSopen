@@ -130,7 +130,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         final token = active.first;
         _useExisting(
           token: token.token,
-          url: 'https://praticos.web.app/q/${token.token}',
+          url: 'https://praticos.app/q/${token.token}',
           permissions: token.permissions,
           expiresAt: token.expiresAt,
         );

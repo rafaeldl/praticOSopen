@@ -57,7 +57,7 @@ describe('CORS', () => {
     await listen(10, 10);
     const res = await request(server)
       .options('/v1/app/x')
-      .set('Origin', 'https://praticos.web.app')
+      .set('Origin', 'https://praticos.app')
       .set('Access-Control-Request-Method', 'PATCH')
       .set('Access-Control-Request-Headers', 'authorization,x-company-id,content-type');
     expect(res.status).toBe(204);

@@ -67,7 +67,7 @@ class AuthRepository {
       webAuthenticationOptions: WebAuthenticationOptions(
         clientId: 'br.com.rafsoft.praticos.app',
         redirectUri: Uri.parse(
-          'https://praticos.firebaseapp.com/__/auth/handler',
+          'https://praticos.app/__/auth/handler',
         ),
       ),
     );
@@ -221,7 +221,7 @@ class AuthRepository {
           webAuthenticationOptions: WebAuthenticationOptions(
             clientId: 'br.com.rafsoft.praticos.app',
             redirectUri: Uri.parse(
-              'https://praticos.firebaseapp.com/__/auth/handler',
+              'https://praticos.app/__/auth/handler',
             ),
           ),
         );

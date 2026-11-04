@@ -28,7 +28,7 @@ describe('integrations.routes', () => {
     mockService.createIntegrationToken.mockResolvedValue({
       id: 'tok1',
       token: 'mcp_x',
-      url: 'https://praticos.web.app/mcp/t/mcp_x',
+      url: 'https://praticos.app/mcp/t/mcp_x',
       expiresAt: '2026-12-11T00:00:00.000Z',
     });
 
@@ -37,7 +37,7 @@ describe('integrations.routes', () => {
       .send({ name: 'Meu ChatGPT' });
 
     expect(res.status).toBe(201);
-    expect(res.body.data.url).toBe('https://praticos.web.app/mcp/t/mcp_x');
+    expect(res.body.data.url).toBe('https://praticos.app/mcp/t/mcp_x');
   });
 
   it('bloqueia técnico com 403', async () => {
