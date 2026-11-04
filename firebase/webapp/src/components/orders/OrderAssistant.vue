@@ -22,6 +22,7 @@ import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { currentToast, showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import AiActionsDialog from './AiActionsDialog.vue'
+import AssistTalk from './AssistTalk.vue'
 import ChoiceDialog from './ChoiceDialog.vue'
 
 const props = defineProps<{ order: Order; pendingChecklists?: number }>()
@@ -29,7 +30,9 @@ const props = defineProps<{ order: Order; pendingChecklists?: number }>()
 const emit = defineEmits<{ added: [ids: string[]]; undone: [ids: string[]]; hide: [ids: string[]]; unhide: [ids: string[]] }>()
 const enabled = ref(false)
 const text = ref('')
-const reading = ref<'' | 'text' | 'photos'>('')
+const reading = ref<'' | 'text' | 'photos' | 'speech'>('')
+/** Falar is listening: the bar shows only Cancelar and Parar e preencher. */
+const listening = ref(false)
 const note = ref('')
 const usesLeft = ref<number | null>(null)
 /** The month's limit, for "Você já usou os {limit} pedidos" (from the last status or answer). */
@@ -195,12 +198,13 @@ async function undoDraft(undo: Undo) {
   emit('undone', undo.added)
 }
 
-async function run(input: { text?: string; files?: File[] }) {
+async function run(input: { text?: string; files?: File[]; audio?: { mimeType: string; data: string } }) {
   if (reading.value) return
-  const value = input.text?.trim() ?? ''
+  // What was said goes alone; the typed text stays in the box.
+  const value = input.audio ? '' : (input.text?.trim() ?? '')
   const files = (input.files ?? []).filter((file) => file.type.startsWith('image/'))
-  if (!value && !files.length) return
-  reading.value = files.length ? 'photos' : 'text'
+  if (!value && !files.length && !input.audio) return
+  reading.value = input.audio ? 'speech' : files.length ? 'photos' : 'text'
   note.value = ''
   const undo = emptyUndo()
   try {
@@ -211,12 +215,12 @@ async function run(input: { text?: string; files?: File[] }) {
       photos.push(await assistPhoto(file))
     }
     const sent = props.order
-    const draft = await askAssistant(value, sent, photos)
+    const draft = await askAssistant(value, sent, photos, input.audio)
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const { filled, onlyChanges } = await apply(draft, sent, undo)
     holdRemovals(undo)
-    text.value = ''
+    if (!input.audio) text.value = ''
     emit('added', undo.added)
     const actions = draft.actions ?? null
     const key = noteKey({ filled, hasActions: !!actions, isNew: false, onlyChanges })
@@ -257,13 +261,14 @@ function cardDone(text: string, undoActions: (() => Promise<void>) | null) {
     <form @submit.prevent="run({ text })">
       <span class="ai" aria-hidden="true">✦</span>
       <label class="sr" for="od-assist">{{ t('web.order.askAssistant') }}</label>
-      <input id="od-assist" v-model="text" class="field" maxlength="2000" :placeholder="t('web.order.askAssistantHint')" :disabled="!!reading" />
-      <label v-if="canPhoto" class="btn assist-photo" :title="t('orderAssistantPhoto')">
+      <input v-show="!listening" id="od-assist" v-model="text" class="field" maxlength="2000" :placeholder="t('web.order.askAssistantHint')" :disabled="!!reading" />
+      <AssistTalk :disabled="!!reading" @audio="(audio) => run({ audio })" @note="(message) => (note = message)" @listening="(on) => (listening = on)" />
+      <label v-if="canPhoto && !listening" class="btn assist-photo" :title="t('orderAssistantPhoto')">
         <ImagePlus :size="16" aria-hidden="true" />
         <span class="sr">{{ t('web.assist.photo') }}</span>
         <input class="sr" type="file" accept="image/*" multiple :disabled="!!reading" data-testid="assistant-photo" @change="run({ text, files: [...(($event.target as HTMLInputElement).files ?? [])] }); ($event.target as HTMLInputElement).value = ''" />
       </label>
-      <button type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading ? t('web.order.reading') : t('web.order.send') }}</button>
+      <button v-if="!listening" type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading === 'speech' ? t('orderAssistantReadingSpeech') : reading ? t('web.order.reading') : t('web.order.send') }}</button>
     </form>
   </div>
   <ChoiceDialog

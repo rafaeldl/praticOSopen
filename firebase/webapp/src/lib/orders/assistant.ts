@@ -37,7 +37,13 @@ export interface AssistLine {
  * Asks with the text, the photos (base64 JPEG, assist-photo.ts) and the lines
  * on screen, in their order: the answer's changes point at them by index.
  */
-export async function requestAssist(input: { text?: string; photos?: { mimeType: string; data: string }[]; lines: AssistLine[] }): Promise<AssistDraft> {
+export async function requestAssist(input: {
+  text?: string
+  photos?: { mimeType: string; data: string }[]
+  /** What was said on Falar (talk.ts): webm, ogg or mp4 in base64, at most 3 MB. */
+  audio?: { mimeType: string; data: string }
+  lines: AssistLine[]
+}): Promise<AssistDraft> {
   cached = null
   const line = (l: AssistLine) => ({
     name: l.name.slice(0, 200) || '-',
@@ -52,6 +58,7 @@ export async function requestAssist(input: { text?: string; photos?: { mimeType:
     body: {
       ...(input.text?.trim() ? { text: input.text.trim() } : {}),
       ...(input.photos?.length ? { photos: input.photos } : {}),
+      ...(input.audio ? { audio: input.audio } : {}),
       locale: locale.value,
       ...(services.length || products.length ? { order: { services, products } } : {}),
     },
@@ -59,6 +66,6 @@ export async function requestAssist(input: { text?: string; photos?: { mimeType:
   return normalizeDraft(raw)
 }
 
-export async function askAssistant(text: string, order: Order, photos?: { mimeType: string; data: string }[]): Promise<AssistDraft> {
-  return requestAssist({ text, photos, lines: order.lines.map((l) => ({ kind: l.kind, name: l.name, description: l.description, value: l.value, quantity: l.quantity })) })
+export async function askAssistant(text: string, order: Order, photos?: { mimeType: string; data: string }[], audio?: { mimeType: string; data: string }): Promise<AssistDraft> {
+  return requestAssist({ text, photos, audio, lines: order.lines.map((l) => ({ kind: l.kind, name: l.name, description: l.description, value: l.value, quantity: l.quantity })) })
 }
