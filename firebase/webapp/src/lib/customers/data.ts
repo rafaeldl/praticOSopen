@@ -3,6 +3,7 @@
 // every write goes there too. No Firestore here, so these screens add nothing
 // to the Firestore chunk of the first download.
 import { ApiError } from '@/lib/api'
+import { storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
 import type { CustomerRow, DeviceRow, DeviceStatus } from './model'
 
@@ -147,6 +148,8 @@ export interface DeviceInput {
   description?: string | null
   status?: DeviceStatus | null
   customData?: Record<string, unknown> | null
+  /** Only on PATCH: a file of the device's own folder (uploadDevicePhoto). Replaced, never removed (as the app). */
+  photo?: { url: string; storagePath: string }
 }
 
 export async function saveDevice(id: string | null, input: DeviceInput & { version?: string }): Promise<{ id: string; name?: string | null; serial?: string | null }> {
@@ -155,6 +158,15 @@ export async function saveDevice(id: string | null, input: DeviceInput & { versi
     : await api<{ id: string; name: string | null; serial: string | null }>('/v1/app/devices', { method: 'POST', body: input })
   forgetDirectory()
   return result
+}
+
+/** The photo in the device's folder (tenants/{company}/devices/{id}/photo.jpg, as the app). Only after the device exists. */
+export async function uploadDevicePhoto(id: string, file: Blob): Promise<{ url: string; storagePath: string }> {
+  const storagePath = `tenants/${session.companyId}/devices/${id}/photo.jpg`
+  const [storage, { ref, uploadBytes, getDownloadURL }] = await Promise.all([storageClient(), import('firebase/storage')])
+  const target = ref(storage, storagePath)
+  await uploadBytes(target, file, { contentType: file.type || 'image/jpeg' })
+  return { url: await getDownloadURL(target), storagePath }
 }
 
 export async function deleteDevice(id: string): Promise<void> {

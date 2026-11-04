@@ -4,13 +4,17 @@
 // the company's own devices and fill brand and category. The status (with
 // useDeviceManagement, on an existing device) is a list to choose from, not a
 // menu of actions (defect 18). Nothing is saved before "Salvar", and an error
-// is shown (the app shows nothing, defect 6).
-import { computed, reactive, ref, toRef, watch } from 'vue'
-import { Check, X } from '@lucide/vue'
+// is shown (the app shows nothing, defect 6). The photo (device.form.photo)
+// waits in the browser and goes up only after the device exists, so closing
+// with X never leaves a device behind (the app creates it on picking a photo);
+// the button says it is uploading, and a failed upload is said (the app is silent).
+// Only replaced, never removed, as the app.
+import { computed, onBeforeUnmount, reactive, ref, toRef, watch } from 'vue'
+import { Camera, Check, ImagePlus, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { changedSince, saveDevice, type DeviceDetail } from '@/lib/customers/data'
+import { changedSince, saveDevice, uploadDevicePhoto, type DeviceDetail } from '@/lib/customers/data'
 import { DEVICE_STATUSES, modelSuggestions, serialError, type DeviceRow, type DeviceStatus } from '@/lib/customers/model'
 import { useMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -26,7 +30,8 @@ const props = defineProps<{
   /** Typed in a search ("Cadastrar «texto»"). */
   draft?: { name: string; serial: string }
 }>()
-const emit = defineEmits<{ saved: [id: string]; changed: []; close: [] }>()
+/** saved: `notice` replaces "Salvo" (the device was saved, the photo was not). */
+const emit = defineEmits<{ saved: [id: string, notice?: string]; changed: []; close: [] }>()
 
 const BUILT_IN = ['device.category', 'device.brand', 'device.model', 'device.serial']
 const editing = !!props.device
@@ -57,7 +62,11 @@ watch(fieldList, (list) => {
     form.custom[name] = value
   }
 })
-const more = ref(!!(initial.manufacturer || initial.category || initial.description || Object.values(initial.custom).some((v) => v !== null && v !== '')))
+const MAX_PHOTO = 10 * 1024 * 1024
+const photo = ref<{ file: File; url: string } | null>(null)
+const photoError = ref('')
+const uploading = ref(false)
+const more = ref(!!(props.device?.photo || initial.manufacturer || initial.category || initial.description || Object.values(initial.custom).some((v) => v !== null && v !== '')))
 const saving = ref(false)
 const failed = ref('')
 const tried = ref(false)
@@ -66,7 +75,8 @@ const layer = ref<InstanceType<typeof Layer> | null>(null)
 let allowClose = false
 
 const title = computed(() => (editing ? t('web.devices.edit', { device: label('device._entity') }) : t('web.devices.new', { device: label('device._entity') })))
-const dirty = computed(() => JSON.stringify(form) !== JSON.stringify(initial))
+const dirty = computed(() => JSON.stringify(form) !== JSON.stringify(initial) || !!photo.value)
+const shownPhoto = computed(() => photo.value?.url ?? props.device?.photo ?? null)
 const serialProblem = computed(() => serialError(form.serial, form.name, serialFieldRef.value?.pattern))
 const suggestions = computed(() => (suggestOpen.value ? modelSuggestions(props.devices, form.name) : []))
 const fieldErrors = computed(() => Object.fromEntries(fieldList.value.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
@@ -90,6 +100,29 @@ function pickSuggestion(item: { name: string; manufacturer: string | null; categ
   suggestOpen.value = false
 }
 
+function choosePhoto(file: File | null | undefined) {
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    photoError.value = t('web.catalog.photoNotImage')
+    return
+  }
+  if (file.size >= MAX_PHOTO) {
+    photoError.value = t('web.catalog.photoTooBig')
+    return
+  }
+  photoError.value = ''
+  if (photo.value) URL.revokeObjectURL(photo.value.url)
+  photo.value = { file, url: URL.createObjectURL(file) }
+}
+
+function onPaste(event: ClipboardEvent) {
+  const file = [...(event.clipboardData?.files ?? [])].find((item) => item.type.startsWith('image/'))
+  if (file) {
+    event.preventDefault()
+    choosePhoto(file)
+  }
+}
+
 function errorText(error: FieldError, min?: number, max?: number, minLength?: number): string {
   if (error === 'required') return t('required')
   if (error === 'pattern' || error === 'number') return t('invalidFormat')
@@ -111,6 +144,7 @@ async function save() {
     if (!serialProblem.value) more.value = true
     return
   }
+  if (saving.value) return
   saving.value = true
   failed.value = ''
   try {
@@ -125,7 +159,21 @@ async function save() {
       ...(editing && props.version ? { version: props.version } : {}),
     })
     allowClose = true
-    emit('saved', saved.id)
+    let notice: string | undefined
+    if (photo.value) {
+      uploading.value = true
+      try {
+        const uploaded = await uploadDevicePhoto(saved.id, photo.value.file)
+        await saveDevice(saved.id, { photo: uploaded })
+      } catch (error) {
+        // The device is saved either way: the screen says the photo did not go instead of "Salvo".
+        console.warn('device: photo not saved', error)
+        notice = t('web.devices.photoFailed')
+      } finally {
+        uploading.value = false
+      }
+    }
+    emit('saved', saved.id, notice)
   } catch (error) {
     if (changedSince(error)) {
       allowClose = true
@@ -153,11 +201,15 @@ function guard(): boolean {
   if (ok) allowClose = true
   return ok
 }
+
+onBeforeUnmount(() => {
+  if (photo.value) URL.revokeObjectURL(photo.value.url)
+})
 </script>
 
 <template>
   <Layer ref="layer" kind="drawer" :label="title" :guard="guard" @close="emit('close')">
-    <form class="drawer" data-testid="device-form" novalidate @submit.prevent="save()" @keydown="onKeydown">
+    <form class="drawer" data-testid="device-form" novalidate @submit.prevent="save()" @keydown="onKeydown" @paste="onPaste">
       <div class="drawer-head">
         <button type="button" class="icon-btn" :aria-label="t('close')" @click="layer?.close()"><X :size="18" aria-hidden="true" /></button>
         <h2 class="layer-title">{{ title }}</h2>
@@ -210,8 +262,21 @@ function guard(): boolean {
           </label>
         </fieldset>
         <details class="more-options" :open="more" @toggle="more = ($event.target as HTMLDetailsElement).open">
-          <summary>{{ t('web.customers.moreData') }} <span class="sub">{{ label('device.brand') }}, {{ t('deviceCategory').toLocaleLowerCase() }}</span></summary>
+          <summary>{{ t('web.customers.moreData') }} <span class="sub">{{ t('photo') }}, {{ label('device.brand').toLocaleLowerCase() }}, {{ t('deviceCategory').toLocaleLowerCase() }}</span></summary>
           <div class="more-body">
+            <div class="dev-photo" data-testid="device-photo" @dragover.prevent @drop.prevent="choosePhoto($event.dataTransfer?.files[0])">
+              <span class="field-label">{{ t('photo') }}</span>
+              <div class="dev-photo-row">
+                <img v-if="shownPhoto" class="dev-thumb" :src="shownPhoto" width="56" height="56" :alt="t('web.catalog.photoPreview')" data-testid="device-photo-preview" />
+                <span v-else class="dev-thumb" aria-hidden="true"><Camera :size="22" /></span>
+                <label class="btn">
+                  <ImagePlus :size="15" aria-hidden="true" />{{ shownPhoto ? t('web.catalog.photoChange') : t('web.catalog.photoPick') }}
+                  <input class="sr" type="file" accept="image/*" data-testid="device-photo-file" aria-describedby="df-photo-hint" :disabled="saving" @change="choosePhoto(($event.target as HTMLInputElement).files?.[0])" />
+                </label>
+              </div>
+              <p id="df-photo-hint" class="sub field-hint">{{ t('web.catalog.photoHint') }}</p>
+              <p v-if="photoError" class="field-error" role="alert">{{ photoError }}</p>
+            </div>
             <div>
               <label class="field-label" for="df-brand">{{ label('device.brand') }}</label>
               <input id="df-brand" v-model="form.manufacturer" class="field" autocomplete="off" />
@@ -240,7 +305,7 @@ function guard(): boolean {
       <div class="drawer-foot">
         <span class="hint" aria-live="polite">{{ !form.name.trim() && !form.serial.trim() ? needsAny : '' }}</span>
         <button type="submit" class="btn btn--primary" :aria-disabled="saving" data-testid="save-device">
-          <Check :size="16" aria-hidden="true" />{{ saving ? t('web.newOrder.saving') : t('save') }} <kbd>{{ saveKey }}</kbd>
+          <Check :size="16" aria-hidden="true" />{{ uploading ? t('web.devices.photoUploading') : saving ? t('web.newOrder.saving') : t('save') }} <kbd>{{ saveKey }}</kbd>
         </button>
       </div>
     </form>
