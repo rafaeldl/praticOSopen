@@ -11,12 +11,18 @@ const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta
 const dialog = (page: Page, name: string | RegExp) => page.getByRole('dialog', { name })
 const palette = (page: Page) => page.getByRole('combobox', { name: /Buscar/ })
 
+/**
+ * The order is on screen: its status shows only once the order is read, and the
+ * panel registers its keys before that. ("Carregando…" gone is not enough: right
+ * after a navigation nothing is on screen yet, so it passes at once.)
+ */
+async function orderReady(page: Page) {
+  await expect(panel(page).getByTestId('order-status')).toBeVisible()
+}
+
 async function openOrder(page: Page, id: string) {
   await login(page, 'admin', `orders?order=${id}`)
-  await expect(panel(page)).toBeVisible()
-  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
-  // Shortcuts registered and the focus outside any field (the page title).
-  await page.waitForTimeout(400)
+  await orderReady(page)
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -91,8 +97,7 @@ test('P faz o próximo passo; depois de ir de Aprovado a Concluído, P já suger
   // Straight from Aprovado to Concluído once: the step remembers it.
   const second = await makeOrder('admin', { status: 'approved' })
   await page.goto(`orders?order=${second.id}`)
-  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
-  await page.waitForTimeout(400)
+  await orderReady(page)
   await page.keyboard.press('s')
   await expect(dialog(page, 'Qual a situação?')).toBeVisible()
   await page.keyboard.press('c')
@@ -102,9 +107,8 @@ test('P faz o próximo passo; depois de ir de Aprovado a Concluído, P já suger
 
   const third = await makeOrder('admin', { status: 'approved' })
   await page.goto(`orders?order=${third.id}`)
-  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await orderReady(page)
   await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
-  await page.waitForTimeout(300)
   await page.keyboard.press('p')
   await expect.poll(async () => (await readOrder(third.id))?.status).toBe('done')
 })

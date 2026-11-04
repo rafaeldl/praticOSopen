@@ -119,8 +119,8 @@ function dayFromToday(days: number): string {
 async function openOrder(page: Page, id: string, signIn = true) {
   if (signIn) await login(page, 'admin', `orders?order=${id}`)
   else await page.goto(`orders?order=${id}`)
-  await expect(panel(page)).toBeVisible()
-  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  // The status shows only once the order is read ("Carregando…" gone passes at once right after a navigation).
+  await expect(panel(page).getByTestId('order-status')).toBeVisible()
   // Opened by URL the focus goes to the page title. In use the order is picked in the list,
   // and Enter takes the focus to the panel: start from there (not counted).
   await page.waitForTimeout(800)
