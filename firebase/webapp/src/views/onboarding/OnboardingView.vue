@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { locale, t } from '@/i18n'
+import { ApiError } from '@/lib/api'
 import { companyPhoneMasks, enterCompany, listSegments, saveCompany, seedCompany, waitForClaim } from '@/lib/onboarding/data'
 import {
   countryFor,
@@ -119,7 +120,7 @@ async function create(withSamples: boolean) {
     })
     savedId = id
     // A reload from here on continues the same company (the router sends it back here).
-    writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value })
+    writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value, existing: resuming.value })
     await finish(id, withSamples, tag.value)
   } catch (error) {
     console.error('onboarding: company setup failed', error)
@@ -131,8 +132,15 @@ async function create(withSamples: boolean) {
 async function finish(id: string, withSamples: boolean, localeTag: string) {
   await waitForClaim(id)
   seedTried.value = true
-  writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true })
-  await seedCompany(id, withSamples, localeTag)
+  writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true, existing: resuming.value })
+  try {
+    await seedCompany(id, withSamples, localeTag)
+  } catch (error) {
+    // An old company completed here: the server seeds only companies just created
+    // (ONBOARDING_NOT_NEW). The segment is saved; checklists and samples do not come.
+    if (!(resuming.value && error instanceof ApiError && error.code === 'ONBOARDING_NOT_NEW')) throw error
+    console.warn('onboarding: old company completed without the seed')
+  }
   await enterCompany(id)
   writePending(null)
   await router.replace('/')
@@ -144,6 +152,7 @@ async function resume() {
   if (!pending) return
   savedId = pending.companyId
   seedTried.value = pending.seedTried
+  resuming.value = !!pending.existing
   lastWithSamples.value = pending.withSamples
   status.value = 'saving'
   try {

@@ -4,6 +4,7 @@
 import { locale } from '@/i18n'
 import { api, session } from '@/lib/session'
 import type { Order } from './model'
+import { normalizeDraft, type AssistDraft } from './assist-draft'
 
 export interface AssistStatus {
   enabled: boolean
@@ -21,37 +22,43 @@ export async function assistStatus(): Promise<AssistStatus> {
   return value
 }
 
-export interface DraftItem {
+export type { AssistDraft as Draft, DraftItem } from './assist-draft'
+
+/** A line as the server reads it (name, description, value, quantity of parts; up to 50 of each). */
+export interface AssistLine {
   kind: 'service' | 'product'
   name: string
-  value: number | null
-  quantity: number
-  catalogId: string | null
+  description?: string | null
+  value?: number | null
+  quantity?: number
 }
 
-export interface Draft {
-  items: DraftItem[]
-  changes: { action: 'update' | 'remove'; line: { kind: 'service' | 'product'; index: number } | null; name: string }[]
-  usage?: { used: number; limit: number }
-}
-
-export async function askAssistant(text: string, order: Order): Promise<Draft> {
+/**
+ * Asks with the text, the photos (base64 JPEG, assist-photo.ts) and the lines
+ * on screen, in their order: the answer's changes point at them by index.
+ */
+export async function requestAssist(input: { text?: string; photos?: { mimeType: string; data: string }[]; lines: AssistLine[] }): Promise<AssistDraft> {
   cached = null
-  const line = (l: Order['lines'][number]) => ({
+  const line = (l: AssistLine) => ({
     name: l.name.slice(0, 200) || '-',
     ...(l.description && l.description !== l.name ? { description: l.description.slice(0, 200) } : {}),
     ...(typeof l.value === 'number' ? { value: l.value } : {}),
-    ...(l.kind === 'product' ? { quantity: l.quantity ?? 1 } : {}),
+    ...(l.kind === 'product' && (l.quantity ?? 1) > 0 ? { quantity: l.quantity ?? 1 } : {}),
   })
-  return api<Draft>('/v1/app/ai/order-assist', {
+  const services = input.lines.filter((l) => l.kind === 'service').slice(0, 50).map(line)
+  const products = input.lines.filter((l) => l.kind === 'product').slice(0, 50).map(line)
+  const raw = await api<Record<string, unknown>>('/v1/app/ai/order-assist', {
     method: 'POST',
     body: {
-      text,
+      ...(input.text?.trim() ? { text: input.text.trim() } : {}),
+      ...(input.photos?.length ? { photos: input.photos } : {}),
       locale: locale.value,
-      order: {
-        services: order.lines.filter((l) => l.kind === 'service').map(line),
-        products: order.lines.filter((l) => l.kind === 'product').map(line),
-      },
+      ...(services.length || products.length ? { order: { services, products } } : {}),
     },
   })
+  return normalizeDraft(raw)
+}
+
+export async function askAssistant(text: string, order: Order, photos?: { mimeType: string; data: string }[]): Promise<AssistDraft> {
+  return requestAssist({ text, photos, lines: order.lines.map((l) => ({ kind: l.kind, name: l.name, description: l.description, value: l.value, quantity: l.quantity })) })
 }

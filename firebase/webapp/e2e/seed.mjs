@@ -111,7 +111,8 @@ async function seedCompanies() {
     await db.doc(`companies/${id}`).set({
       name: company.name,
       country: company.country,
-      segment: company.segment,
+      ...(company.segment ? { segment: company.segment } : {}),
+      ...(company.phone ? { phone: company.phone } : {}),
       // Device status and its list column (fatia 03); only the first company.
       // Contratos on (fatia 07); company C keeps it off for contract.off.*.
       ...(id === COMPANY_A ? { useDeviceManagement: true, useContracts: true } : {}),

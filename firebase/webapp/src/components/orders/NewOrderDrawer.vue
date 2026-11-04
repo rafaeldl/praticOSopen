@@ -3,13 +3,19 @@
 // cursor on Cliente; Enter picks; the device is suggested; each item enters with
 // the catalog price; Ctrl+Enter saves from any field. Nothing is saved before
 // that. Closing with something filled in asks first (also the browser's Voltar).
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { Check, Trash2, X } from '@lucide/vue'
 import Combobox, { type ComboboxGroup, type ComboboxItem } from '@/components/Combobox.vue'
 import Layer from '@/components/Layer.vue'
 import RepeatFields, { type RepeatForm } from '@/components/contracts/RepeatFields.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
+import NewOrderAssist, { type AssistForm } from './NewOrderAssist.vue'
+import NewOrderCustomFields from './NewOrderCustomFields.vue'
+import { newOrderFields } from '@/lib/orders/new-order-fields'
+import NewOrderPhotos from './NewOrderPhotos.vue'
+import type { NewDevice } from '@/lib/orders/assist-draft'
+import { fieldName, validateField, writeCustom } from '@/lib/segment-fields'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { orderCreated } from '@/lib/orders/bus'
@@ -64,6 +70,19 @@ const assignee = ref('')
 const address = ref('')
 // Absent on the company: the segment's default, like the order's own Local (auth.gate.feature-defaults).
 const fieldService = featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService())
+// Photos before the ✓ (order.new.photos), the assistant's marks and what it heard (order.ai.*).
+const photos = ref<File[]>([])
+const marked = reactive(new Set<string>())
+const newCustomer = ref<{ name: string; phone?: string } | null>(null)
+const newDevice = ref<NewDevice | null>(null)
+const aiActions = shallowRef<AssistForm['actions']>(null)
+const assistForm = reactive({ customer, device, lines, request, due, photos, marked, newCustomer, newDevice, actions: aiActions }) as AssistForm
+const startInAssistant = !!ui.newOrderSeed?.assist
+// The segment's fields of the order (order.new.custom-fields), checked before the ✓.
+const customFields = newOrderFields()
+const customValues = reactive<Record<string, unknown>>({})
+const customTried = ref(false)
+const customInvalid = () => customFields.some((field) => !!validateField(field, customValues[fieldName(field)]))
 const more = ref(false)
 const saving = ref(false)
 const failed = ref('')
@@ -80,7 +99,7 @@ const repeat = !!ui.newOrderSeed?.repeat
 const today = toIsoDay(new Date())
 const repeatForm = ref<RepeatForm>({ repeat: { frequency: 'monthly', interval: 1 }, startDay: today, endDay: null, autoGenerate: true })
 const title = computed(() => (repeat ? t('contractNew') : t('orderNewTitle', { order: orderShort() })))
-const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value || address.value.trim()))
+const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value || address.value.trim() || photos.value.length || Object.values(customValues).some((v) => v !== null && v !== undefined && v !== '')))
 const total = computed(() => lines.value.reduce((sum, line) => sum + (line.value ?? 0) * line.quantity, 0))
 const unpriced = computed(() => lines.value.filter((line) => line.value === null).length)
 const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
@@ -306,9 +325,29 @@ async function save() {
     ;(pendingDevice ? deviceRef : itemRef).value?.focus()
     return
   }
+  // The segment's fields are checked before anything is saved (the app never checks them).
+  if (customInvalid()) {
+    customTried.value = true
+    failed.value = t('web.newOrder.fixFields')
+    return
+  }
   saving.value = true
   failed.value = ''
   try {
+    // Heard by the assistant and not in the register: registered only now, at the ✓ (AssistantRegistration).
+    if (newCustomer.value && !customer.value.id) {
+      const created = await api<{ id: string; name: string }>('/v1/app/customers', { method: 'POST', body: { name: newCustomer.value.name, ...(newCustomer.value.phone ? { phone: newCustomer.value.phone } : {}) } })
+      customer.value = { ...customer.value, id: created.id }
+      newCustomer.value = null
+      forgetLists()
+    }
+    if (newDevice.value && device.value && !device.value.id) {
+      const nd = newDevice.value
+      const created = await api<{ id: string; name: string }>('/v1/app/devices', { method: 'POST', body: { name: nd.name, ...(nd.serial ? { serial: nd.serial } : {}), ...(nd.manufacturer ? { manufacturer: nd.manufacturer } : {}) } })
+      device.value = { ...device.value, id: created.id }
+      newDevice.value = null
+      forgetLists()
+    }
     // Own price only when it differs from the catalog (and only who may edit prices).
     const own = (line: Line) => (editPrices && line.value !== line.item.value ? { value: line.value } : {})
     const catalogLines = lines.value.filter((l) => !l.free)
@@ -330,6 +369,10 @@ async function save() {
       after.push(free.reduce<Promise<unknown>>((chain, line) => chain.then(() => writes.addItem(created.id, { kind: 'service', description: line.item.name, ...own(line) })), Promise.resolve()))
     }
     if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
+    // Photos go up once the order has its id, one after the other; a failure is counted, never swallowed.
+    if (photos.value.length) after.push(photos.value.reduce<Promise<unknown>>((chain, file) => chain.then(() => writes.uploadPhoto(created.id, file)), Promise.resolve()))
+    const customData = customFields.length ? writeCustom(null, customFields, customValues) : null
+    if (customData) after.push(writes.updateOrderFields(created.id, { customData }))
     // The place: typed in "Mais opções", else the customer's address with its coordinates (order.customer.address-from-customer).
     const place = address.value.trim()
     if (place) after.push(writes.updateOrderFields(created.id, { address: place }))
@@ -338,6 +381,8 @@ async function save() {
     if (repeat) after.push(startContract(created.id, newContract(repeatForm.value, today)))
     const results = await Promise.allSettled(after)
     allowClose = true
+    // Money said to the assistant: the "Confere?" card opens on the saved order (order.ai.money-card).
+    if (aiActions.value) ui.aiActionsFor = { orderId: created.id, ...aiActions.value }
     orderCreated(created.id)
     // With a device and not saved done: the order asks for the check-in checklist (order.offer.checklist).
     if (device.value && status.value !== 'done') markOffer(created.id)
@@ -395,17 +440,26 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
       </div>
       <div class="drawer-body">
         <p v-if="failed" class="field-error" role="alert">{{ failed }}</p>
+        <NewOrderAssist
+          :form="assistForm"
+          :catalog="catalog"
+          :autofocus="startInAssistant"
+          @other-customer="customer = null; $nextTick(() => customerRef?.focus())"
+          @other-device="device = null; $nextTick(() => deviceRef?.focus())"
+        />
         <div class="step">
           <div v-if="customer" class="chosen">
-            <span><span class="field-label">{{ t('customer') }}</span><strong>{{ customer.name }}</strong></span>
-            <button type="button" class="link" @click="customer = null; device = null; $nextTick(() => customerRef?.focus())">{{ t('web.newOrder.change') }}</button>
+            <span><span class="field-label">{{ t('customer') }}</span><span v-if="marked.has('customer')" class="ai" :title="t('orderAssistantMarked')">✦ </span><strong>{{ customer.name }}</strong>
+              <small v-if="newCustomer" class="sub"> · {{ [formatPhone(customer.phone), t('orderAssistantNewCustomer')].filter(Boolean).join(' · ') }}</small></span>
+            <button type="button" class="link" @click="customer = null; device = null; newCustomer = null; newDevice = null; marked.delete('customer'); $nextTick(() => customerRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
-          <Combobox v-else id="no-customer" ref="customerRef" :label="t('customer')" :placeholder="t('web.newOrder.customerHint')" :groups="customerGroups" :loading="loading" autofocus @pick="pickCustomer" />
+          <Combobox v-else id="no-customer" ref="customerRef" :label="t('customer')" :placeholder="t('web.newOrder.customerHint')" :groups="customerGroups" :loading="loading" :autofocus="!startInAssistant" @pick="pickCustomer" />
         </div>
         <div v-if="customer" class="step">
           <div v-if="device" class="chosen">
-            <span><span class="field-label">{{ deviceLabel() }}</span>{{ device.name }} <span v-if="device.serial" class="num">{{ device.serial }}</span></span>
-            <button type="button" class="link" @click="device = null; $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
+            <span><span class="field-label">{{ deviceLabel() }}</span><span v-if="marked.has('device')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ device.name }} <span v-if="device.serial" class="num">{{ device.serial }}</span>
+              <small v-if="newDevice" class="sub"> · {{ t('orderAssistantNewDevice') }}</small></span>
+            <button type="button" class="link" @click="device = null; newDevice = null; marked.delete('device'); $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
           <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" :preselect="devicesLoading || customerDevices.length > 0" skippable @pick="pickDevice" @next="itemRef?.focus()" />
         </div>
@@ -413,7 +467,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
           <Combobox id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
           <ul v-if="lines.length" class="drawer-items" :aria-label="t('orderItemsSection')">
             <li v-for="line in lines" :key="line.key">
-              <span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>
+              <span><span v-if="marked.has(line.key)" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>
               <MoneyInput v-if="editPrices" :id="`no-price-${line.key}`" v-model="line.value" class="line-price" :label="t('web.newOrder.priceOf', { name: line.item.name })" :country="country()" />
               <span v-else-if="showsMoney" class="num">{{ line.value === null ? t('catalogNoPrice') : money(line.value) }}</span>
               <span v-else></span>
@@ -422,13 +476,15 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
           </ul>
         </div>
         <div class="step">
-          <label class="field-label" for="no-due">{{ t('web.newOrder.due') }}</label>
+          <label class="field-label" for="no-due"><span v-if="marked.has('due')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('web.newOrder.due') }}</label>
           <input id="no-due" v-model="due" class="field" type="datetime-local" />
         </div>
         <div class="step">
-          <label class="field-label" for="no-request">{{ t('orderCustomerRequestTitle') }}</label>
+          <label class="field-label" for="no-request"><span v-if="marked.has('request')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('orderCustomerRequestTitle') }}</label>
           <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
         </div>
+        <NewOrderPhotos v-if="can('attachPhotos')" v-model="photos" />
+        <NewOrderCustomFields v-if="customFields.length" :values="customValues" :tried="customTried" />
         <section v-if="repeat" class="step" aria-labelledby="no-repeat-title" data-testid="new-order-repeat">
           <h3 id="no-repeat-title" class="form-section">{{ t('orderRepeatRow') }}</h3>
           <RepeatFields v-model="repeatForm" id-prefix="no" :today="today" />

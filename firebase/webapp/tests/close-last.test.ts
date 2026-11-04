@@ -227,3 +227,37 @@ describe('customer.picker.choose', () => {
     expect(currentCustomerId(null, list)).toBeNull()
   })
 })
+
+describe('auth.gate.resume-company', () => {
+  it('a company without segment resumes the first access, only for owner or admin', async () => {
+    const { resumesCompany } = await import('@/lib/onboarding/model')
+    expect(resumesCompany({ companyId: 'c1', company: { segment: '' }, role: 'admin' })).toBe(true)
+    expect(resumesCompany({ companyId: 'c1', company: {}, role: 'owner' })).toBe(true)
+    expect(resumesCompany({ companyId: 'c1', company: { segment: 'automotive' }, role: 'admin' })).toBe(false)
+    expect(resumesCompany({ companyId: 'c1', company: {}, role: 'technician' })).toBe(false)
+    // While the company has not loaded nothing is decided.
+    expect(resumesCompany({ companyId: 'c1', company: null, role: 'admin' })).toBe(false)
+    expect(resumesCompany({ companyId: null, company: {}, role: 'admin' })).toBe(false)
+  })
+})
+
+describe('order.ai.intro', () => {
+  beforeEach(() => localStorage.clear())
+  it('shows once per browser, only with the assistant on and the screen settled', async () => {
+    const { shouldShowAiIntro } = await import('@/lib/orders/ai-intro')
+    expect(await shouldShowAiIntro(() => true, async () => false)).toBe(false)
+    expect(await shouldShowAiIntro(() => false, async () => true)).toBe(false)
+    expect(await shouldShowAiIntro(() => true, async () => Promise.reject(new Error('x')))).toBe(false)
+    expect(await shouldShowAiIntro(() => true, async () => true)).toBe(true)
+    expect(await shouldShowAiIntro(() => true, async () => true)).toBe(false)
+  })
+})
+
+describe('order.ai.photo', () => {
+  it('fits 1600 px keeping the shape', async () => {
+    const { fitSize } = await import('@/lib/orders/assist-photo')
+    expect(fitSize(4000, 3000)).toEqual({ width: 1600, height: 1200 })
+    expect(fitSize(800, 600)).toEqual({ width: 800, height: 600 })
+    expect(fitSize(1000, 5000)).toEqual({ width: 320, height: 1600 })
+  })
+})

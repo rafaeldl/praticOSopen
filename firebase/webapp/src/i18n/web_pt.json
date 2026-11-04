@@ -793,5 +793,10 @@
   "web.newOrder.itemRegistered": "{name} cadastrado no catálogo e posto na OS",
   "web.order.devicesOf": "De {name}",
   "web.login.signupBlocked": "O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.",
-  "web.invites.joining": "Entrando…"
+  "web.invites.joining": "Entrando…",
+  "web.aiIntro.title": "Crie sua próxima {order} escrevendo",
+  "web.aiIntro.body": "Escreva o cliente e o serviço, ou mande uma foto. O PraticOS preenche e você só confere antes de salvar.",
+  "web.newOrder.assistHint": "Ex.: OS da Juliana, Corsa placa ABC1234, troca de óleo, pronto sexta",
+  "web.assist.photo": "Mandar foto para o assistente ler",
+  "web.newOrder.fixFields": "Confira os campos marcados antes de salvar."
 }

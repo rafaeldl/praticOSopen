@@ -8,6 +8,8 @@ export interface PendingOnboarding {
   localeTag: string
   /** The seed was asked for: the segment cannot change any more (its checklists may be in). */
   seedTried: boolean
+  /** Completing a company that existed without a segment (auth.gate.resume-company). */
+  existing?: boolean
 }
 
 const KEY = 'praticos.onboarding'
