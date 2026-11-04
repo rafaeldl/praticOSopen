@@ -282,7 +282,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 ### PDF, impressão e paleta
 
 - **PDF da OS** (`src/lib/pdf/`): "Ver PDF" na OS e "PDF" no lote. Montado no navegador com `pdf-lib` e `qrcode-generator`, baixados só nesse momento. Mesmo desenho do app (`docs/PDF_GENERATION.md`), com os textos `pdf*` dos `.arb`. Sem `viewPrices`, sai sem valores. Caracteres fora do WinAnsi usam a Roboto do app, embutida só quando precisa.
-- **Fotos no PDF** exigem CORS no bucket do Storage (`gsutil cors set` com `GET` para `praticos.app` e `praticos.web.app`). Sem CORS, o PDF diz "Fotos disponíveis no sistema digital". Baixar e compartilhar uma foto como arquivo também dependem disso; sem CORS, compartilhar manda o link da foto.
+- **Fotos no PDF** funcionam: o CORS do bucket `praticos.appspot.com` já aceita `GET` e `HEAD` de qualquer origem, então o navegador baixa as fotos. Baixar e compartilhar uma foto como arquivo usam o mesmo CORS. Se um dia o CORS do bucket mudar e bloquear o domínio do web, o PDF sai com "Fotos disponíveis no sistema digital" no lugar das fotos e compartilhar manda o link da foto.
 - **Impressão**: "Imprimir ou salvar PDF" usa folha própria (`@media print`), na OS, no lote e no Relatório.
 - **Paleta `⌘K`** (`src/lib/global-search.ts`, `CommandPalette.vue`): OS pelo número, clientes, aparelhos, catálogo e ações, cada grupo só para quem abre a tela (`canOpen`, a mesma guarda das rotas).
 
