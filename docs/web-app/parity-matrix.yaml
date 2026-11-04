@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 72 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 67 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -3450,9 +3450,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Voz é opcional no computador; caixa de texto cobre a ação e o microfone entra onde o navegador permitir."}
-  note: "Na OS salva aplica e grava na hora; nunca troca cliente, pedido ou prazo já preenchidos. Não copiar: na OS salva não checa canEditOrderMainFields."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Falar na barra do assistente da OS grava pelo microfone do navegador (MediaRecorder, webm/ogg/mp4) e manda o áudio na mesma chamada do texto; o servidor transcreve. Pede o microfone só ao tocar; bloqueado mostra como liberar no cadeado; navegador sem gravação fica só com a caixa de texto. Na OS salva aplica e grava na hora; nunca troca cliente, pedido ou prazo já preenchidos. Não copiar: na OS salva não checa canEditOrderMainFields."
 - id: order.ai.cancel-talk
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3466,8 +3467,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Fala pelo microfone do celular; o assistente do web é digitado (order.ai.type)."}
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Cancelar (ou Esc) para de ouvir e joga fora o áudio; nada vai ao servidor."
 - id: order.ai.stop-fill
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3481,8 +3484,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Parar de ouvir e preencher só existe na fala pelo microfone; no web o pedido é digitado e enviado com Enter (order.ai.type)."}
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Parar e preencher a OS manda o áudio gravado; parar sem ter ouvido nada mostra aviso e não manda."
 - id: order.ai.type
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4043,9 +4048,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic, camera]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "A barra Foto/Falar depende do microfone e da câmera do celular. No web o assistente é a barra de texto \"Peça ao assistente\" na OS, com o mesmo aviso e Desfazer (order.ai.type, order-detail.spec.ts)."}
-  note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha. Web: na Nova OS a barra tem texto, Foto (arquivo) e Falar; o aviso fica no topo do formulário com Desfazer (o formulário é modal)."
 - id: order.sheet.date
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -4433,9 +4439,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Depende do speech_to_text; no navegador só Web Speech, com suporte desigual."}
-  note: "Sem permissão mostra aviso para liberar nos Ajustes. Sem microfone a barra vira campo de texto com o aviso. Para após 20 s sem palavras novas ou 5 min, emenda as sessões do sistema e mantém a tela acesa; parar sem ter ouvido nada mostra aviso."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: grava no navegador (talk.ts, carregado só ao tocar em Falar) e o servidor transcreve o áudio (até 3 MB, 32 kbps). Para após 20 s sem som (AnalyserNode) ou 5 min; parar sem ter ouvido nada mostra aviso. Sem permissão: aviso para liberar no cadeado da barra de endereço. Sem MediaRecorder/getUserMedia: sem Falar, fica a caixa de texto."
 - id: order.media.sheet
   screen: lib/screens/widgets/order_media_actions.dart
   route: null
