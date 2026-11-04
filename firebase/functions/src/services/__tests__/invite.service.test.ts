@@ -1,7 +1,10 @@
-jest.mock('../firestore.service', () =>
+const mockSetClaims = jest.fn(async (_uid: string, _claims: unknown) => undefined);
+
+jest.mock('../firestore.service', () => ({
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
-);
+  ...require('../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
+  auth: { setCustomUserClaims: (uid: string, claims: unknown) => mockSetClaims(uid, claims) },
+}));
 
 jest.mock('../channel-link.service', () => ({
   getWhatsAppLink: jest.fn(async () => null),
@@ -152,6 +155,7 @@ describe('invite.service', () => {
       expect(fake.read('companies/c1/private/membership')?.members).toEqual({ wa_user_1: 'technician' });
       expect(fake.read(INVITE_PATH)?.status).toBe('accepted');
       expect(mockChannel.linkWhatsApp).toHaveBeenCalled();
+      expect(mockSetClaims).toHaveBeenCalledWith('wa_user_1', { roles: { c1: 'technician' } });
     });
 
     it('rejects an existing member with ALREADY_MEMBER without linking or changing the role', async () => {
