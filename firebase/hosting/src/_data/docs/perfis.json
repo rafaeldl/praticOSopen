@@ -84,7 +84,7 @@
               "label": "Técnico",
               "cells": [
                 {
-                  "text": "Faz o serviço: preenche checklists e tira fotos. Não vê preços e só vê as OS que ele abriu."
+                  "text": "Faz o serviço: preenche checklists e tira fotos. Não vê preços, não abre OS nova e só vê as OS que ele abriu."
                 }
               ]
             }
@@ -123,7 +123,7 @@
                     "class": "yes"
                   },
                   {
-                    "class": "yes"
+                    "class": "no"
                   }
                 ]
               },
@@ -644,7 +644,7 @@
               "label": "Technician",
               "cells": [
                 {
-                  "text": "Does the work: fills in checklists and takes photos. Doesn't see prices and only sees the orders they opened."
+                  "text": "Does the work: fills in checklists and takes photos. Doesn't see prices, doesn't open new orders and only sees the orders they opened."
                 }
               ]
             }
@@ -683,7 +683,7 @@
                     "class": "yes"
                   },
                   {
-                    "class": "yes"
+                    "class": "no"
                   }
                 ]
               },
@@ -1204,7 +1204,7 @@
               "label": "Técnico",
               "cells": [
                 {
-                  "text": "Hace el trabajo: completa checklists y saca fotos. No ve precios y solo ve las OS que él abrió."
+                  "text": "Hace el trabajo: completa checklists y saca fotos. No ve precios, no abre OS nuevas y solo ve las OS que él abrió."
                 }
               ]
             }
@@ -1243,7 +1243,7 @@
                     "class": "yes"
                   },
                   {
-                    "class": "yes"
+                    "class": "no"
                   }
                 ]
               },

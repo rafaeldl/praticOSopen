@@ -1,5 +1,6 @@
 {
   "_comment": "Golden copy of lib/models/permission.dart (RolePermissions). Checked by test/models/permission_matrix_test.dart (app) and rbac-app-consistency.test.ts (rules). Change both together.",
+  "_createOrder": "The technician keeps createOrder in RolePermissions, but does NOT open a new order: the app checks AuthorizationService.canCreateOrder (!isTechnician && createOrder) and the web checks canCreateOrders (firebase/webapp/src/lib/orders/model.ts). The public Perfis page says the same.",
   "financialPermissions": [
     "chargeOrder",
     "editPrices",
