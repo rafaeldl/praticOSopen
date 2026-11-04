@@ -834,5 +834,6 @@
   "web.nfse.percentInvalid": "Use a number from 0 to 100, like 2 or 2.5.",
   "web.nfse.autoConfirmTitle": "Issue notas automatically?",
   "web.nfse.autoConfirm": "Issue automatically",
-  "web.nfse.rowError": "couldn't load this order's notas"
+  "web.nfse.rowError": "couldn't load this order's notas",
+  "web.push.promptMessage": "PraticOS tells you in this browser when a customer approves a quote, comments on an order or pays. Your browser will ask if it can send these notifications."
 }

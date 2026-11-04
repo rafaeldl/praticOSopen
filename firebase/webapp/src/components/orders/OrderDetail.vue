@@ -58,6 +58,7 @@ import { announce, ui } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
 import * as maintenance from '@/lib/orders/maintenance-offer'
+import { askNotificationsOnce } from '@/lib/push'
 import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
 import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
 import TextDialog from './TextDialog.vue'
@@ -443,7 +444,9 @@ async function hold(reason: HoldReason, note: string) {
 
 async function saveDate(field: 'dueDate' | 'scheduledDate', value: string | null) {
   dialog.value = null
-  await run(() => writes.patchOrder(order.value!.id, { [field]: value }, expected()), t('web.saved'))
+  const ok = await run(() => writes.patchOrder(order.value!.id, { [field]: value }, expected()), t('web.saved'))
+  // A visit marked on a saved order: the browser's notifications, the first time (order.offer.notifications).
+  if (ok && field === 'scheduledDate' && value) askNotificationsOnce()
 }
 
 async function assign(id: string) {

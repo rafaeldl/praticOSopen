@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 59 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -289,8 +289,10 @@ rows:
   feature_flags: []
   hardware: [push]
   data: ["companies/{id}/notifications", "companies/{id}/orders"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Push nativo não existe no navegador da mesma forma; web usa aviso dentro do app e, se aprovado, Web Push."}
+  web_status: done
+  e2e: firebase/webapp/e2e/push.spec.ts
+  web_exception: null
+  note: "Web: aviso do navegador (Web Push pelo FCM, só com a chave VAPID configurada). Clicar foca a aba aberta e abre a OS, ou abre /app/?order={id}&company={id}; OS de outra empresa é ignorada, como o app (fica no Início). Sem OS (manutenção, cortesia), abre o Início. Com a página na tela, o aviso aparece dentro dela e o sino conta de novo."
 - id: auth.gate.after-invite
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -919,7 +921,7 @@ rows:
   hardware: [local_notifications]
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Notificação local do aparelho; não se aplica ao navegador."}
+  web_exception: {status: proposed, reason: "Agenda os lembretes locais (resumo do dia, dias sem abrir, OS paradas) ao voltar ao app. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: nav.tracking.att
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
@@ -1995,9 +1997,10 @@ rows:
   feature_flags: []
   hardware: [push]
   data: ["users/{id}"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Alerta do iPhone; no navegador depende da decisão sobre Web Push."}
-  note: "Só no iPhone que ainda não respondeu; saiu do login. Vem depois de salvar a OS ou marcar visita em OS salva."
+  web_status: done
+  e2e: firebase/webapp/e2e/push.spec.ts
+  web_exception: null
+  note: "Web: depois de salvar a Nova OS (sem veículo, para não somar com checklist ou manutenção) ou de marcar visita numa OS salva, uma vez por navegador enquanto ele não respondeu, explica e então o navegador pergunta. Nunca na entrada. \"Continuar\" e \"Agora não\" (o web aceita Esc em qualquer diálogo). Com permissão, o token vai para users/{uid}.fcmTokens com platform 'web' e sai ao sair da conta."
 - id: order.detail.view
   screen: lib/screens/order/order_screen_v2.dart
   route: "/order"
@@ -2741,7 +2744,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
+  web_exception: {status: proposed, reason: "A dica diz quando o lembrete local do celular toca. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Diz quando avisa, ou que o lembrete ou o celular está desligado. Na OS salva, só para horário futuro."
 - id: order.schedule.adjust
   screen: lib/screens/order/reminder_hint.dart
@@ -2757,7 +2760,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
+  web_exception: {status: proposed, reason: "\"Ajustar\" abre Lembretes, que são do celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: order.responsible.pick
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -10233,7 +10236,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes são notificações locais do celular (reminders.* já propostos como exceção); no navegador só com Web Push. O idioma, que no Android mora nessa tela, está em Configurações › Neste navegador (reminders.language)."}
+  web_exception: {status: proposed, reason: "Lembretes são do celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente. O idioma, que no Android mora nessa tela, está em Configurações › Neste navegador (reminders.language)."}
 - id: settings.open-advanced
   screen: lib/screens/menu_navigation/settings.dart
   route: null
@@ -10927,7 +10930,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes \"valem só neste celular\"; no navegador só com Web Push."}
+  web_exception: {status: proposed, reason: "Lembretes \"valem só neste celular\". O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "O lembrete traz hora, OS, cliente e aparelho. OS nova agenda depois do ✓. Opções 0, 15, 30, 60, 120 minutos (0 desliga), padrão 30. Os três avisos (resumo do dia, dias sem abrir, OS paradas) são por aparelho e começam ligados; desligar cancela os já marcados. Não copiar: mudar os minutos não remarca o que já está agendado."
 - id: reminders.daily
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10943,7 +10946,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Local do aparelho."}
+  web_exception: {status: proposed, reason: "Resumo do dia às 9h, agendado no celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Às 9h; padrão ligado; preferência no aparelho; desligar cancela o pendente. Não copiar: ligar só grava a preferência e o agendamento espera o app voltar ao primeiro plano; a tela não confere a permissão de notificação do sistema (negada, tudo parece ligado e nada chega)."
 - id: reminders.inactivity
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10959,7 +10962,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Sem sentido no navegador."}
+  web_exception: {status: proposed, reason: "Conta os dias sem abrir o app neste celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Avisos em 3, 5 e 7 dias sem abrir; padrão ligado; desligar cancela os pendentes."
 - id: reminders.pending
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10975,7 +10978,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Local do aparelho."}
+  web_exception: {status: proposed, reason: "Resumo das OS paradas, agendado no celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Conta OS em quote ou approved criadas há mais de 7 dias (createdAt), com ou sem marca de parada; um resumo no dia seguinte às 10h. Padrão ligado; desligar cancela o pendente."
 - id: reminders.language
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -11265,7 +11268,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes são locais do aparelho; na web fica só a explicação."}
+  web_exception: {status: proposed, reason: "O atalho leva a Lembretes, que são do celular; no web o sino vazio fica só com a explicação. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: notifications.tile
   screen: lib/screens/notifications/notification_list_tile.dart
   route: null

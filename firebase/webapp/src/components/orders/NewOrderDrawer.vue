@@ -30,6 +30,7 @@ import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { askWhenOpened } from '@/lib/orders/maintenance-offer'
+import { askNotificationsOnce } from '@/lib/push'
 import { byName, createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
@@ -397,6 +398,9 @@ async function save() {
     if (device.value && status.value !== 'done') markOffer(created.id)
     // Saved already done with a device: the order asks for the next maintenance (device.maintenance.offer).
     if (device.value && status.value === 'done') askWhenOpened(created.id)
+    // Then the browser's notifications, the first time (order.offer.notifications). One question at a
+    // time: when the order will ask for a checklist or a maintenance, this waits for the next order.
+    if (!device.value) askNotificationsOnce()
     const message = t('web.newOrder.created', { order: `${orderShort()} ${created.number}` })
     showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
     announce(message)
