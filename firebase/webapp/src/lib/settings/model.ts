@@ -5,6 +5,7 @@ import type { MessageKey } from '@/generated/message-keys'
 import { FORMAT_COUNTRIES } from '@/lib/format'
 import type { AppRole, Permission } from '@/lib/permissions'
 import { hasCountryZone } from '@/lib/zone'
+import { whatsappUrl } from '@/lib/share'
 
 // ── Roles ────────────────────────────────────────────────────────────────
 
@@ -166,7 +167,7 @@ export function leavesNoAdmin(members: Member[], ownerId: string | null, targetI
 
 /** WhatsApp link with the invite message: wa.me with the number (lib/phone whatsappNumber), or only the text. */
 export function inviteWhatsAppUrl(message: string, number: string): string {
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
+  return whatsappUrl(number, message)
 }
 
 // ── Permissions table ────────────────────────────────────────────────────

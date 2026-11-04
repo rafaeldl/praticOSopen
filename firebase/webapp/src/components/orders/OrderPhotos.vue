@@ -1,17 +1,22 @@
-<script setup lang="ts">
+    else if (!openTab(viewing.value?.url)) showToast(t('web.share.downloadFailed'))<script setup lang="ts">
 // Photos: see them (viewPhotos), add by choosing, dragging or pasting
 // (attachPhotos). "Enviando…" while they go up; a failure says so (the app
 // swallows it: defect 18). Photos saved elsewhere arrive through the listener.
 // The viewer passes between photos (buttons and ← →) and makes one the cover
 // (the first photo, as the app's coverPhotoUrl: order.photo.viewer, order.photo.cover).
+// Sending one (order.photo.share): the browser's sheet with the file where it
+// takes files, "Baixar", "Copiar o link" and WhatsApp with the link to the customer.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ChevronLeft, ChevronRight, ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
+import ShareButtons from '@/components/ShareButtons.vue'
 import type { Order, OrderPhoto } from '@/lib/orders/model'
 import { deletePhoto, setCoverPhoto, uploadPhoto } from '@/lib/orders/writes'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { can } from '@/lib/session'
+import { orderShort } from '@/lib/orders/text'
+import { downloadFile, fileFromUrl } from '@/lib/share'
 import { showToast } from '@/lib/toast'
 import { ui } from '@/lib/ui'
 
@@ -73,6 +78,31 @@ async function remove() {
     deleting.value = false
   }
 }
+/** The photo as a file (for the sheet and "Baixar"); null when the browser cannot read it. */
+function photoName(): string {
+  return `${orderShort()}-${props.order.number ?? ''}-${(viewingIndex.value ?? 0) + 1}.jpg`.replace(/\s+/g, '-')
+}
+const photoFile = () => (viewing.value ? fileFromUrl(viewing.value.url, photoName()) : Promise.resolve(null))
+const photoText = computed(() => (viewing.value ? t('web.share.photoText', { order: orderShort(), number: props.order.number ?? '', url: viewing.value.url }) : ''))
+const downloading = ref(false)
+function openTab(url: string | undefined): boolean {
+  const tab = url ? window.open(url, '_blank') : null
+  if (tab) tab.opener = null
+  return !!tab
+}
+async function download() {
+  if (downloading.value) return
+  downloading.value = true
+  try {
+    const file = await photoFile()
+    if (file) downloadFile(file, file.name)
+    // Not readable here (no CORS on the bucket): the photo opens in a tab, to save from there.
+    else if (!openTab(viewing.value?.url)) showToast(t('web.share.downloadFailed'))
+  } finally {
+    downloading.value = false
+  }
+}
+
 const canAttach = computed(() => can('attachPhotos'))
 const canView = computed(() => can('viewPhotos') || canAttach.value)
 
@@ -145,6 +175,17 @@ onBeforeUnmount(() => {
         <button v-if="canAttach" type="button" class="btn btn--ghost btn--danger" :disabled="deleting" @click="asking = true">{{ t('web.order.deletePhoto') }}</button>
         <button v-if="canAttach && viewingIndex" type="button" class="btn btn--ghost" :disabled="covering" @click="makeCover">{{ t('setAsCover') }}</button>
         <span class="spacer"></span>
+        <button type="button" class="btn" :disabled="downloading" data-testid="photo-download" @click="download">{{ t('web.share.download') }}</button>
+        <ShareButtons
+          context="order.photo"
+          :text="photoText"
+          :title="orderShort()"
+          :copy="viewing.url"
+          :phone="order.customer?.phone"
+          :customer-id="order.customer?.id"
+          :file="photoFile"
+          testid="photo-share"
+        />
         <button type="button" class="btn" @click="close()">{{ t('close') }}</button>
       </div>
     </template>
