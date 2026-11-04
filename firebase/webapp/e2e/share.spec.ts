@@ -46,6 +46,18 @@ async function openOrder(page: Page, user: UserKey, id: string) {
   await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
 }
 
+/**
+ * "Começar serviço". Under load the order's first write can be refused as
+ * changed elsewhere (a trigger touches the new order); then it is clicked again.
+ */
+async function startService(page: Page) {
+  const step = panel(page).getByTestId('next-step')
+  await expect(async () => {
+    if ((await step.textContent())?.trim() === 'Começar serviço' && (await step.isEnabled())) await step.click()
+    await expect(step).toHaveText('Concluir serviço', { timeout: 5000 })
+  }).toPass({ timeout: 25_000 })
+}
+
 test('avisar o cliente depois de mudar a situação: nota com "Avisar", WhatsApp com o link e o texto da situação, uma vez por OS (order.status.notify, order.share.native)', async ({ page }) => {
   await stubShare(page)
   const customer = await makeCustomer({ phone: '+5511990007001' })
@@ -74,8 +86,7 @@ test('avisar o cliente depois de mudar a situação: nota com "Avisar", WhatsApp
 test('sem telefone, a nota não aparece (order.status.notify)', async ({ page }) => {
   const noPhone = await makeOrder('admin', { customer: { id: 'customer-2', name: 'Cliente 02' }, status: 'approved' })
   await openOrder(page, 'admin', noPhone.id)
-  await panel(page).getByTestId('next-step').click()
-  await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
+  await startService(page)
   await expect(panel(page).getByTestId('notify-note')).toHaveCount(0)
 })
 
@@ -86,8 +97,7 @@ test('com link ativo, a nota não aparece (order.status.notify)', async ({ page 
     shareLink: { token: `tok-${randomUUID().slice(0, 6)}`, expiresAt: new Date(Date.now() + 5 * 86_400_000).toISOString(), permissions: ['view'] },
   })
   await openOrder(page, 'admin', linked.id)
-  await panel(page).getByTestId('next-step').click()
-  await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
+  await startService(page)
   await expect(panel(page).getByTestId('notify-note')).toHaveCount(0)
 })
 
