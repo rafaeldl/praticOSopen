@@ -1,11 +1,12 @@
 <script setup lang="ts">
-// One text of the order (order.sheet.text, order.sheet.address): a field and
-// Salvar; Enter saves, closing with a change asks (Layer guard).
+// One text of the order (order.sheet.text, order.sheet.address,
+// order.request.edit): a field and Salvar; Enter saves (a multiline text keeps
+// Enter for new lines), closing with a change asks (Layer guard).
 import { ref } from 'vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
 
-const props = defineProps<{ title: string; label: string; value: string }>()
+const props = defineProps<{ title: string; label: string; value: string; multiline?: boolean; placeholder?: string }>()
 const emit = defineEmits<{ save: [text: string]; close: [] }>()
 const text = ref(props.value)
 </script>
@@ -19,7 +20,8 @@ const text = ref(props.value)
         </div>
         <div class="layer-body">
           <label class="field-label" for="text-dialog-field">{{ label }}</label>
-          <input id="text-dialog-field" v-model="text" class="field" maxlength="500" data-autofocus />
+          <textarea v-if="multiline" id="text-dialog-field" v-model="text" class="field" rows="4" maxlength="2000" :placeholder="placeholder" data-autofocus></textarea>
+          <input v-else id="text-dialog-field" v-model="text" class="field" maxlength="500" :placeholder="placeholder" data-autofocus />
         </div>
         <div class="layer-foot">
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
