@@ -116,3 +116,8 @@ export async function createDeviceFrom(text: string): Promise<Device> {
   forgetLists()
   return { id: created.id, name: created.name || serial || typed, ...(serial ? { serial } : {}) }
 }
+
+/** The company's devices in the app's order (TenantDeviceRepository orderBy name), not the storage's id order. */
+export function byName<T extends { name?: string | null }>(list: readonly T[]): T[] {
+  return [...list].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'pt', { sensitivity: 'base', numeric: true }))
+}

@@ -28,7 +28,7 @@ import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { askWhenOpened } from '@/lib/orders/maintenance-offer'
-import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { byName, createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
@@ -232,7 +232,7 @@ const deviceGroups = (query: string): ComboboxGroup[] => {
   if (devicesLoading.value) return []
   const own = search(customerDevices.value, query, (d) => d.serial ?? '', 5)
   // Without known devices of this customer (the consultant only reads their own orders), list the company's.
-  const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '', query || !own.length ? 6 : 0)
+  const others = search(byName(devices.value.filter((d) => !own.some((o) => o.id === d.id))), query, (d) => d.serial ?? '', query || !own.length ? 6 : 0)
   const row = (d: Device) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })
   return [
     { title: own.length ? t('web.newOrder.fromCustomer') : undefined, items: own.map(row) },

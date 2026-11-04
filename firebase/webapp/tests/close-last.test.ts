@@ -288,3 +288,11 @@ describe('revisão do #543', () => {
     expect(seen).toHaveLength(1)
   })
 })
+
+describe('Nova OS: veículos da empresa (P1 do consultor)', () => {
+  it('na ordem do nome, como o app, e não na ordem dos ids', async () => {
+    const { byName } = await import('@/lib/orders/pickers')
+    const list = [{ id: 'Zx9', name: 'Veículo 10' }, { id: 'a1', name: 'corsa' }, { id: 'device-2', name: 'Veículo 2' }, { id: 'b', name: '' }]
+    expect(byName(list).map((d) => d.name)).toEqual(['', 'corsa', 'Veículo 2', 'Veículo 10'])
+  })
+})

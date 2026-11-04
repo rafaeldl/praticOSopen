@@ -211,6 +211,8 @@ test('Nova OS: fotos antes do ✓, Remover Foto, e sobem depois do id (order.new
   await input.setInputFiles([{ name: 'a.png', mimeType: 'image/png', buffer: PNG }, { name: 'b.png', mimeType: 'image/png', buffer: PNG }])
   const photos = d.getByTestId('new-order-photos').locator('button.photo')
   await expect(photos).toHaveCount(2)
+  // The vehicle's list is still open after the customer: leave it first, as a person would.
+  await d.getByLabel(/O que o cliente pediu/).click()
   await photos.first().click()
   await dialog(page, 'Remover Foto').getByRole('button', { name: 'Remover Foto' }).click()
   await expect(photos).toHaveCount(1)
