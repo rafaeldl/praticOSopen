@@ -31,7 +31,7 @@ export function projectBucket(): string {
  * emulator (FUNCTIONS_EMULATOR is never set in Cloud Functions). Null in
  * production, so only https URLs of the bucket pass there.
  */
-function emulatorStorageHost(): string | null {
+export function emulatorStorageHost(): string | null {
   if (process.env.FUNCTIONS_EMULATOR !== 'true') return null;
   return process.env.FIREBASE_STORAGE_EMULATOR_HOST || null;
 }

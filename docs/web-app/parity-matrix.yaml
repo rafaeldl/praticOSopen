@@ -8615,11 +8615,12 @@ rows:
   states: []
   feature_flags: []
   hardware: [camera, gallery]
-  data: ["storage:tenants/{id}/devices/{id}/photo.jpg"]
-  web_status: in_progress
+  data: ["storage:tenants/{id}/devices/{id}/photo.jpg", "api:PATCH /v1/app/devices/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/device-photo.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: foto do aparelho ainda não; precisa de envio ao Storage e de a API aceitar a URL da pasta do aparelho. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado. Fechamento: continua sem foto; a rota PUT /devices não aceita a foto (precisa da mesma regra do catálogo: pasta do aparelho, photoSeen e apagar o antigo)."
+  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: em \"Mais dados\", escolher, arrastar ou colar uma imagem (até 10 MB); só trocar, sem tirar, como o app. A foto espera no navegador e sobe só depois do ✓ para tenants/{empresa}/devices/{id}/photo.jpg (aparelho novo: cria primeiro, depois a foto), com \"Enviando a foto…\" no botão; falha no envio deixa o aparelho salvo e avisa. PATCH /v1/app/devices/{id} aceita {photo: {url, storagePath}} só da pasta daquele aparelho no bucket do projeto (mesma checagem do catálogo); trocar apaga o arquivo antigo se for outro da mesma pasta. A foto aparece na ficha. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado."
 - id: device.form.autocomplete
   screen: lib/screens/device_form_screen.dart
   route: null

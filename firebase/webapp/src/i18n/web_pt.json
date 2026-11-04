@@ -225,6 +225,8 @@
   "web.customers.discardBody": "Nada foi salvo ainda.",
   "web.devices.new": "Novo {device}",
   "web.devices.edit": "Editar {device}",
+  "web.devices.photoFailed": "Cadastro salvo, mas a foto não subiu. Abra o cadastro e troque a foto de novo.",
+  "web.devices.photoUploading": "Enviando a foto…",
   "web.devices.count": "{count, plural, =0{Nenhum} =1{1} other{{count}}} {devices}",
   "web.devices.empty": "Nenhum dos {devices} cadastrado ainda",
   "web.devices.emptyBody": "Cadastre aqui ou na hora de criar a OS.",
