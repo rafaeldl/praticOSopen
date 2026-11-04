@@ -3358,9 +3358,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices", "api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
+  note: "Web: no menu … só quando a OS pode ter nota (serviços com valor, fora de orçamento e cancelada) e não tem nota ativa (nfse-more.spec.ts)."
 - id: order.nfse.row
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3374,9 +3376,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
+  note: "Web: linha \"Nota fiscal\" com a situação ao vivo (invoices com orderIds array-contains), abre a nota em Notas fiscais no mês dela."
 - id: order.nfse.issue-row
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3390,7 +3394,8 @@ rows:
   feature_flags: ["useFinancial", "nfseReady"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: order.delete
@@ -3874,10 +3879,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable", "nfseReady"]
   hardware: null
   data: ["companies/{id}/invoices", "api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul."
+  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul. Web: só para quem tem chargeOrder; o botão fica desligado enquanto grava (busy)."
 - id: order.ai.money-card
   screen: lib/screens/order/assistant/ai_actions_sheet.dart
   route: null
@@ -5994,10 +6000,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Entrada pela linha de notas do cliente. Abre no mês da nota mais recente; título Notas de X; número da nota como título da linha; sem menu Configurar."
+  note: "Entrada pela linha de notas do cliente. Abre no mês da nota mais recente; título Notas de X; número da nota como título da linha; sem menu Configurar. Web: /invoices?customer=id, título \"Notas de X\", abre no mês da nota mais recente, sem \"Configurar\"."
 - id: nfse.list.month
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: null
@@ -6083,9 +6090,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:GET /v1/app/nfse/setup"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
+  note: "Web: link \"Configurar nota fiscal\" em Notas fiscais para quem tem manageCompany; tela em /invoices/setup."
 - id: nfse.list.rules
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: "/nfse_list"
@@ -6153,10 +6162,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só admin vê \"Configurar\"; gerente vê \"peça ao dono\"."
+  note: "Só admin vê \"Configurar\"; gerente vê \"peça ao dono\". Web: a folha de emitir confere nfseReady antes da prévia e diz o mesmo quando o servidor recusa (NFSE_NOT_READY e afins): admin tem \"Configurar\", gerente \"peça ao dono\"."
 - id: nfse.orders.eligibility
   screen: lib/screens/nfse/nfse_access.dart
   route: null
@@ -6332,10 +6342,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable", "nfseReady"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só OS que podem ter nota e ainda não têm nota ativa; escolha múltipla; ✓ com uma ou mais; busca só pelo número da OS; subtítulo com valor da nota e data. Sem OS elegível o chamador mostra aviso e não abre; nota não pronta abre Falta configurar."
+  note: "Só OS que podem ter nota e ainda não têm nota ativa; escolha múltipla; ✓ com uma ou mais; busca só pelo número da OS; subtítulo com valor da nota e data. Sem OS elegível o chamador mostra aviso e não abre; nota não pronta abre Falta configurar. Web: a lista do cliente traz o total, não as linhas: OS só de produtos aparece e a prévia do servidor diz que não tem serviço. Busca pelo número só com mais de 10."
 - id: nfse.invoice.view
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: "/nfse_invoice"
@@ -6474,10 +6485,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:GET /v1/app/nfse/setup"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Botão azul abre o próximo passo na ordem dados fiscais, painel do Asaas, serviço, e some quando pronto. Servidor só aceita dono e admin em /setup. Não copiar: voltar diz Asaas fixo mesmo vindo da lista de notas ou da sheet de emitir."
+  note: "Botão azul abre o próximo passo na ordem dados fiscais, painel do Asaas, serviço, e some quando pronto. Servidor só aceita dono e admin em /setup. Não copiar: voltar diz Asaas fixo mesmo vindo da lista de notas ou da sheet de emitir. Web: \"Voltar\" volta para onde a pessoa estava (não diz Asaas fixo)."
 - id: nfse.setup.fiscal
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6491,7 +6503,8 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/setup/fiscal-info"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
 - id: nfse.setup.service
@@ -6507,7 +6520,8 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:PUT /v1/app/nfse/setup/service"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
   note: "Serviço por busca ou por código e nome; ISS sugerido pelo serviço quando o campo estava vazio; ISS retido; PIS, COFINS, CSLL, INSS e IR num card recolhível; percentuais com vírgula ou ponto, de 0 a 100; modelo do texto com {os} e {servicos}, vazio volta ao padrão. Salvar sem autoIssue mantém a escolha salva."
@@ -6524,10 +6538,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:GET /v1/app/nfse/setup/municipal-services"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Busca com espera de 400 ms. Link alterna entre buscar e digitar; digitando, ✓ exige código e nome."
+  note: "Busca com espera de 400 ms. Link alterna entre buscar e digitar; digitando, ✓ exige código e nome. Web: busca dentro da gaveta do serviço, com espera de 400 ms; \"Digitar o código\" alterna."
 - id: nfse.setup.auto-issue
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6541,10 +6556,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:PUT /v1/app/nfse/setup/service"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Só aparece depois do serviço salvo e grava na hora. Com quando paga ou quando concluída o servidor emite sozinho (gatilho da OS); a web herda sem código, mas precisa mostrar notas automáticas com erro."
+  note: "Só aparece depois do serviço salvo e grava na hora. Com quando paga ou quando concluída o servidor emite sozinho (gatilho da OS); a web herda sem código, mas precisa mostrar notas automáticas com erro. Web: três opções com a explicação, gravadas na hora; as automáticas com erro aparecem em \"Precisa de atenção\" (invoices.spec.ts)."
 - id: nfse.setup.city-access
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6558,10 +6574,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: [external_browser]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Texto muda pelo tipo de acesso (certificado, token, usuário e senha, nenhum; preencha os dados fiscais antes). Linha tocável só quando falta. URL do sandbox no sandbox. Aviso quando a prefeitura não cancela por API."
+  note: "Texto muda pelo tipo de acesso (certificado, token, usuário e senha, nenhum; preencha os dados fiscais antes). Linha tocável só quando falta. URL do sandbox no sandbox. Aviso quando a prefeitura não cancela por API. Web: painel do Asaas em aba nova (sandbox quando a conta é sandbox)."
 - id: nfse.setup.recheck
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6575,10 +6592,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:GET /v1/app/nfse/setup"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Só aparece quando falta o acesso à prefeitura. Não copiar: não confere sozinho ao voltar do painel; web confere quando a aba volta ao foco."
+  note: "Só aparece quando falta o acesso à prefeitura. Não copiar: não confere sozinho ao voltar do painel; web confere quando a aba volta ao foco. Web: \"Já enviei, conferir de novo\" e também ao voltar para a aba (focus)."
 - id: nfse.setup.fiscal-regime
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6592,7 +6610,8 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/setup/fiscal-info"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
   note: "Só quando a prefeitura usa regime especial; Nenhum tira. Item da lista de serviço também só aparece quando a prefeitura usa. Simples Nacional vem ligado."
@@ -7671,7 +7690,8 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
   note: "Linha só quando o cliente tem nota; o número conta só as emitidas."
@@ -7688,10 +7708,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable", "nfseReady"]
   hardware: null
   data: ["companies/{id}/invoices", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Sem configuração pronta abre showNfseNotReady (sandbox ou não). Elegível = orderCanHaveNfse e sem nota ativa, entre as OS carregadas. Nenhuma elegível = aviso. Ao enviar, aviso de sucesso."
+  note: "Sem configuração pronta abre showNfseNotReady (sandbox ou não). Elegível = orderCanHaveNfse e sem nota ativa, entre as OS carregadas. Nenhuma elegível = aviso. Ao enviar, aviso de sucesso. Web: sem configuração pronta a folha de emitir diz \"Falta configurar\" primeiro; nenhuma OS elegível vira aviso."
 - id: customer.detail.edit
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_form"

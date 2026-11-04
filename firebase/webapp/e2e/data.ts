@@ -54,6 +54,11 @@ export async function makeOrder(author: UserKey, data: Record<string, unknown> =
       createdBy: aggr(author),
       updatedAt: now,
       updatedBy: aggr(author),
+      // Born done: the date of completion is already there, so the create trigger's
+      // stamp finds nothing to write and no update trigger follows. The emulator runs
+      // the triggers one at a time: each extra one delays the claims of an invite
+      // accepted in another test (CI of #542: 23 s behind order triggers).
+      ...(data.status === 'done' && !('completedAt' in data) ? { completedAt: new Date(Date.now() + 120_000).toISOString() } : {}),
       ...data,
     })
   return { id, number }
