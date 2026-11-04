@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 67 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 59 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -2403,9 +2403,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar link, WhatsApp web ou Web Share quando houver."}
-  note: "Nota de 8 s, só aprovada, em andamento ou concluída, OS salva, cliente com telefone e sem link ativo, uma vez por OS enquanto a tela está aberta."
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Nota de 8 s, só aprovada, em andamento ou concluída, OS salva, cliente com telefone e sem link ativo, uma vez por OS enquanto a tela está aberta. Web: a mesma regra (lib/orders/notify), nota sob os botões por 8 s que pausa com o ponteiro ou o foco; Avisar abre o WhatsApp com o link e o texto da situação para o telefone do cadastro."
 - id: order.item.add
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3222,9 +3223,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
-  note: "Web: Baixar entrega o arquivo; Mandar para o cliente manda o link."
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Compartilhar manda o arquivo pela folha do navegador quando ela aceita arquivos (navigator.canShare); Mandar pelo WhatsApp baixa o PDF para anexar e abre o WhatsApp com o link da OS para o telefone do cadastro; Baixar fica como botão azul."
 - id: order.pdf.close
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -4544,9 +4546,11 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar e copiar link."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
   permission: viewPhotos
+  note: "Web: no visualizador, Compartilhar (arquivo pela folha do navegador quando ela aceita; senão o texto com o link), Baixar, Copiar o link e Mandar pelo WhatsApp com o link da foto para o telefone do cadastro do cliente."
 - id: order.photo.cover
   screen: lib/screens/widgets/photo_viewer_screen.dart
   route: null
@@ -4596,8 +4600,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar e WhatsApp web."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Avisar (order.status.notify) abre o WhatsApp direto com o link e o texto da situação para o telefone do cadastro do cliente (folha Mandar para o cliente com envio); com a aba bloqueada, a folha fica aberta com o botão no foco. Ponto único de contagem em lib/share onShare."
 - id: order.share-sheet.view
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4645,8 +4651,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar link."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Mandar de outro jeito abre a folha do navegador (Web Share API) com o texto e o link; o botão só aparece quando o navegador tem a folha. Copiar e WhatsApp ficam sempre."
 - id: order.share-sheet.copy
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -5738,9 +5746,9 @@ rows:
   hardware: [share_sheet, pdf_generation]
   data: ["companies/{id}", "companies/{id}/receipts"]
   web_status: done
-  e2e: firebase/webapp/e2e/receive.spec.ts
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
-  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal. Web: recibo impresso pelo navegador (salvar como PDF)."
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal. Web: recibo impresso pelo navegador (salvar como PDF). Web: em cada recibo, Mandar pelo WhatsApp com as palavras do recibo (nº, frase, OS, total, empresa) para o telefone do cadastro, e Compartilhar pela folha do navegador quando há; impressão em receive.spec.ts."
 - id: receipt.pdf.content
   screen: lib/screens/payments/receipt_share.dart
   route: null
@@ -6420,10 +6428,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: [share_sheet]
   data: ["companies/{id}/invoices"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
   permission: chargeOrder
-  note: "Botão azul só com nota emitida e com PDF. Se o download falhar, compartilha o link."
+  note: "Botão azul só com nota emitida e com PDF. Se o download falhar, compartilha o link. Web: Compartilhar PDF manda o arquivo pela folha do navegador quando dá para ler o PDF; senão o link (como o app quando o download falha). Copiar o link e Mandar pelo WhatsApp com o link para o telefone do cadastro."
 - id: nfse.invoice.open-pdf
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -9983,9 +9992,11 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar."}
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
+  web_exception: null
   permission: manageUsers
+  note: "Web: Copiar código fica como botão azul; Compartilhar convite abre a folha do navegador com a mensagem quando ele tem; WhatsApp ao lado."
 - id: team.invite-share.whatsapp
   screen: lib/screens/widgets/invite_share_sheet.dart
   route: null

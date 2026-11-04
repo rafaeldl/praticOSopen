@@ -9,7 +9,6 @@ import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
-import { logShare } from '@/lib/analytics'
 import { errorMessageKey } from '@/lib/api'
 import { loadCustomer } from '@/lib/customers/data'
 import { formatDate } from '@/lib/format'
@@ -19,6 +18,7 @@ import { whatsappNumber } from '@/lib/phone'
 import { createShareToken, listShareTokens, revokeShareToken } from '@/lib/receive/data'
 import { messageKind, permissionKind, PERMISSIONS_OF, pickToken, validityDays, whatsappLink, type PermissionKind, type ShareToken } from '@/lib/receive/model'
 import { session } from '@/lib/session'
+import { canShareSheet, copyText, onShare, openWhatsapp, shareSheet } from '@/lib/share'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import '@/styles/receive.css'
@@ -42,7 +42,9 @@ const kind = computed<PermissionKind>(() => permissionKind(token.value?.permissi
 // Measured when the link arrives: a link made after the dialog opened is not counted a day longer.
 const days = computed(() => (token.value ? validityDays(token.value, new Date()) : 7))
 const wa = computed(() => whatsappNumber(phone.value, country()))
-const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+const canShare = canShareSheet()
+/** Where the sends of this sheet are counted (lib/share onShare). */
+const CONTEXT = 'order'
 const VALIDITIES = [7, 14, 30]
 
 const who = computed(() => {
@@ -157,29 +159,20 @@ async function revoke() {
 }
 
 async function copy(value: string, done: string) {
-  try {
-    await navigator.clipboard.writeText(value)
-    logShare('clipboard', 'order')
-    copied.value = true
-    setTimeout(() => (copied.value = false), 2000)
-    showToast(done)
-    announce(done)
-  } catch {
-    showToast(t('web.share.copyFailed'))
-  }
+  if (!(await copyText(value, CONTEXT))) return showToast(t('web.share.copyFailed'))
+  copied.value = true
+  setTimeout(() => (copied.value = false), 2000)
+  showToast(done)
+  announce(done)
 }
 
+/** "Mandar de outro jeito" (order.share-sheet.other): the browser's sheet; closed by the person says nothing. */
 async function shareOther() {
-  try {
-    await navigator.share({ title: orderTitle(props.order), text: text.value })
-    logShare('sheet', 'order')
-  } catch {
-    // Closed by the person: nothing to say.
-  }
+  if ((await shareSheet({ title: orderTitle(props.order), text: text.value }, CONTEXT)) === 'failed') showToast(t('web.share.sheetFailed'))
 }
 
 function sentByWhatsApp() {
-  logShare('whatsapp', 'order')
+  onShare('whatsapp', CONTEXT)
   announce(t('web.share.whatsappOpened'))
 }
 
@@ -194,10 +187,7 @@ function ready() {
   const inField = focused instanceof HTMLElement && focused.matches('input, textarea, select')
   if (!inField) sendButton.value?.focus()
   if (!props.send || !wa.value || !token.value) return
-  const opened = window.open(whatsappLink(wa.value, text.value), '_blank')
-  if (!opened) return
-  opened.opener = null
-  logShare('whatsapp', 'order')
+  if (!openWhatsapp(wa.value, text.value, CONTEXT)) return
   announce(t('web.share.whatsappOpened'))
   emit('close')
 }
@@ -254,7 +244,7 @@ onBeforeUnmount(() => (copied.value = false))
         </template>
       </div>
       <div v-if="state === 'ready' && token" class="layer-foot share-foot">
-        <button v-if="canShare" type="button" class="btn" @click="shareOther">{{ t('shareSendOtherWay') }}</button>
+        <button v-if="canShare" type="button" class="btn" data-testid="share-other" @click="shareOther">{{ t('shareSendOtherWay') }}</button>
         <button type="button" class="btn" data-testid="share-copy" @click="copy(token.url, t('shareLinkCopied'))">{{ copied ? t('web.share.copied') : t('shareCopyLink') }}</button>
         <a
           v-if="wa"

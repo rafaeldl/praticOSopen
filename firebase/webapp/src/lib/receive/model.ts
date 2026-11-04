@@ -2,6 +2,7 @@
 // by tests/receive-model.test.ts. Money is compared in cents, like the server
 // (toCents in order-payment math): never "100 vezes menor", never a float drift.
 import type { OrderStatus } from '@/lib/orders/model'
+import { whatsappUrl } from '@/lib/share'
 
 export const toCents = (value: number): number => Math.round((Number.isFinite(value) ? value : 0) * 100)
 export const fromCents = (cents: number): number => cents / 100
@@ -247,7 +248,7 @@ export function messageKind(status: OrderStatus): 'approved' | 'progress' | 'don
 
 /** wa.me with the text; without a number WhatsApp asks for the contact. */
 export function whatsappLink(number: string, text: string): string {
-  return `https://wa.me/${number}?text=${encodeURIComponent(text)}`
+  return whatsappUrl(number, text)
 }
 
 // ---------------------------------------------------------------------------
