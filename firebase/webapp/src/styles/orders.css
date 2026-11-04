@@ -256,3 +256,11 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .doc-main { display: grid; min-width: 0; overflow-wrap: anywhere; }
 .od-nfse { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; min-height: 2.75rem; flex-wrap: wrap; }
 .od-nfse .status { display: inline-flex; align-items: center; gap: 0.35rem; }
+/* Falar in the assistant's bar (order.ai.talk): while it listens, the status and the two buttons fill the bar. */
+.assist-talk { flex: none; }
+.assist-talking { display: flex; flex: 1 1 auto; flex-wrap: wrap; gap: 0.4rem; align-items: center; min-width: 0; }
+.assist-talking-status { display: inline-flex; flex: 1 1 auto; align-items: center; gap: 0.4rem; }
+.assist-talking-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--color-neutral); }
+.assist-talking-dot.is-heard { background: var(--color-accent); }
+@media (prefers-reduced-motion: no-preference) { .assist-talking-dot.is-heard { animation: assist-pulse 1.2s ease-in-out infinite; } }
+@keyframes assist-pulse { 50% { opacity: 0.35; } }
