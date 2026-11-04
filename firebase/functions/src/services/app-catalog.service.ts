@@ -15,7 +15,9 @@ import type { CompanyAggr, Order, UserAggr } from '../models/types';
 import { generateSearchKeywords } from '../utils/search.utils';
 import { orderVersion, versionMatches } from './order-version';
 import { OrderRuleError } from './order-errors';
-import { projectBucket, isInsideFolder } from './payment-input';
+import { deletePhotoFileIn, recordPhotoFolder, validPhotoIn, type PhotoInput } from './record-photo';
+
+export type { PhotoInput };
 import { scopedOrders, newestFirst, type OrderScope } from './app-directory.service';
 
 type Json = Record<string, unknown>;
@@ -94,11 +96,6 @@ export async function mostUsed(companyId: string, kind: CatalogKind, scope: Orde
     .map(([id]) => id);
 }
 
-export interface PhotoInput {
-  url: string;
-  storagePath: string;
-}
-
 export interface CatalogInput {
   name?: string;
   value?: number | null;
@@ -107,51 +104,19 @@ export interface CatalogInput {
 }
 
 /** Folder the Storage rules give to one item (the app writes photo.jpg there). */
-export const photoFolder = (companyId: string, kind: CatalogKind, id: string) => `tenants/${companyId}/${CATALOG_COLLECTION[kind]}/${id}/`;
-
-/**
- * Path of a download URL of the project bucket. The Storage emulator serves
- * http on its own host; that form is accepted only while the emulator is on.
- */
-function storagePathOfUrl(raw: string): string | null {
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return null;
-  }
-  const bucket = projectBucket();
-  const emulator = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
-  let prefix: string | null = null;
-  if (url.protocol === 'https:' && url.hostname === 'firebasestorage.googleapis.com') prefix = `/v0/b/${bucket}/o/`;
-  else if (url.protocol === 'https:' && url.hostname === 'storage.googleapis.com') prefix = `/${bucket}/`;
-  else if (emulator && url.protocol === 'http:' && url.host === emulator.replace(/^https?:\/\//, '')) prefix = `/v0/b/${bucket}/o/`;
-  if (!prefix || !url.pathname.startsWith(prefix)) return null;
-  try {
-    return decodeURIComponent(url.pathname.slice(prefix.length));
-  } catch {
-    return null;
-  }
-}
+export const photoFolder = (companyId: string, kind: CatalogKind, id: string) => recordPhotoFolder(companyId, CATALOG_COLLECTION[kind], id);
 
 /** The photo must be a file in the item's own folder, and its URL that same file. */
 export function validPhoto(companyId: string, kind: CatalogKind, id: string, photo: PhotoInput): boolean {
-  return isInsideFolder(photoFolder(companyId, kind, id), photo.storagePath) && storagePathOfUrl(photo.url) === photo.storagePath;
+  return validPhotoIn(photoFolder(companyId, kind, id), photo);
 }
 
 /**
  * Deletes only the file the document pointed to, inside the item's folder. A
  * photo the app uploaded meanwhile (same folder) is never taken along (review M2).
  */
-async function deletePhotoFile(companyId: string, kind: CatalogKind, id: string, storedUrl: unknown): Promise<void> {
-  const path = typeof storedUrl === 'string' ? storagePathOfUrl(storedUrl) : null;
-  if (!path || !isInsideFolder(photoFolder(companyId, kind, id), path)) return;
-  try {
-    await storage.bucket().file(path).delete();
-  } catch (error) {
-    console.warn('catalog: photo file not deleted', (error as Error)?.name);
-  }
-}
+const deletePhotoFile = (companyId: string, kind: CatalogKind, id: string, storedUrl: unknown) =>
+  deletePhotoFileIn(photoFolder(companyId, kind, id), storedUrl, 'catalog');
 
 async function deletePhotos(companyId: string, kind: CatalogKind, id: string): Promise<void> {
   try {

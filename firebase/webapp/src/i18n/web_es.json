@@ -223,6 +223,8 @@
   "web.customers.discardBody": "Todavía no se guardó nada.",
   "web.devices.new": "Nuevo {device}",
   "web.devices.edit": "Editar {device}",
+  "web.devices.photoFailed": "Registro guardado, pero la foto no se subió. Ábrelo de nuevo y cambia la foto.",
+  "web.devices.photoUploading": "Subiendo la foto…",
   "web.devices.count": "{count, plural, =0{Ningún} =1{1} other{{count}}} {devices}",
   "web.devices.empty": "Ningún {devices} registrado todavía",
   "web.devices.emptyBody": "Regístrelo aquí o al crear la OS.",

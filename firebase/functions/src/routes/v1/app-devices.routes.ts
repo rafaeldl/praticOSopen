@@ -5,6 +5,7 @@
  * - GET /                         every device, with status and next maintenance
  * - GET /:id                      device, owner, orders the person reads, last service
  * - POST /, PATCH /:id            model or serial required; serial uppercase; status; segment fields
+ *                                 PATCH also takes the photo: a file of this device's Storage folder
  * - DELETE /:id                   delete
  * - PUT /:id/next-maintenance     {date: 'YYYY-MM-DD' | null}
  */
@@ -14,6 +15,7 @@ import type { AuthenticatedRequest } from '../../models/types';
 import { can, forbidden } from '../../middleware/app-permission.middleware';
 import { getCompanyAggr, getUserAggr } from '../../middleware/company.middleware';
 import * as directory from '../../services/app-directory.service';
+import { validPhotoIn } from '../../services/record-photo';
 import { validateInput } from '../../utils/validation.utils';
 import { orderScopeOf } from './app-customers.routes';
 import { sendOrderError } from './orders.routes';
@@ -58,7 +60,9 @@ const deviceBody = {
     .optional(),
 };
 const createSchema = z.object(deviceBody).refine((value) => !!value.name?.trim() || !!value.serial?.trim(), 'Model or serial is required');
-const updateSchema = z.object({ ...deviceBody, version: z.string().min(1).max(64).optional() });
+/** The photo is only replaced, never removed (device.form.photo, as the app). */
+const photo = z.object({ url: z.string().max(2000), storagePath: z.string().max(500) }).optional();
+const updateSchema = z.object({ ...deviceBody, photo, version: z.string().min(1).max(64).optional() });
 /** orderId: the order just done (device.maintenance.answer); customer and main service come from it, as in the app. */
 const maintenanceSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(), orderId: z.string().min(1).max(200).regex(/^[^/]+$/).optional() });
 
@@ -88,7 +92,9 @@ router.patch('/:id', route('Failed to update device', async (req, res, companyId
   const validation = validateInput(updateSchema, req.body);
   if (!validation.success) return void validationError(res, validation.errors);
   const { version, ...input } = validation.data;
-  const result = await directory.updateDevice(companyId, param(req, 'id'), input, getUserAggr(req), version);
+  const id = param(req, 'id');
+  if (input.photo && !validPhotoIn(directory.devicePhotoFolder(companyId, id), input.photo)) return void validationError(res, ['photo must be a file of this device']);
+  const result = await directory.updateDevice(companyId, id, input, getUserAggr(req), version);
   if (result === 'not_found') return void notFound(res);
   if (result === 'empty') return void validationError(res, ['Model or serial is required']);
   res.json({ success: true, data: { id: param(req, 'id'), updated: true } });
