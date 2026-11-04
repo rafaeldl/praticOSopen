@@ -8,7 +8,7 @@
 // Needs the default seed (scenario orders), so it only runs when asked:
 // CMP=1 E2E_PERF=1 PW_ARGS=e2e/perf/timed-comparison npm run e2e  (or with the suite up: CMP=1 E2E_PERF=1 npx playwright test e2e/perf/timed-comparison --workers=1)
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { makeOrder, readOrder } from '../data'
+import { makeDevice, makeOrder, readOrder } from '../data'
 import { login } from '../helpers'
 
 const RUNS = Number(process.env.CMP_RUNS ?? 5)
@@ -93,6 +93,13 @@ class Steps {
   }
 }
 
+/** Own vehicle: Veículo 2 can be under a contract made by other tests, and then the maintenance question never comes. */
+async function orderWithOwnDevice(status: string) {
+  const device = await makeDevice()
+  const aggr = { id: device.id, name: device.name, serial: device.serial }
+  return makeOrder('admin', { status, device: aggr, devices: [aggr], deviceIds: [device.id] })
+}
+
 async function startOnHome(page: Page) {
   await login(page, 'admin')
   await expect(page.getByTestId('orders-table')).toBeVisible()
@@ -163,7 +170,7 @@ for (let run = 1; run <= RUNS; run++) {
     })
 
     test('T3 Mudar a situação para Concluído (primeira vez: S, C, Enter)', async ({ page }) => {
-      const order = await makeOrder('admin', { status: 'approved' })
+      const order = await orderWithOwnDevice('approved')
       await openOrder(page, order.id)
       const s = new Steps(page)
       s.start()
@@ -192,7 +199,7 @@ for (let run = 1; run <= RUNS; run++) {
       await expect(dialog(page, 'Qual a situação?').getByRole('button', { name: /^Concluído/ })).toBeFocused()
       await page.keyboard.press('Enter')
       await expect.poll(async () => (await readOrder(before.id))?.status).toBe('done')
-      const order = await makeOrder('admin', { status: 'approved' })
+      const order = await orderWithOwnDevice('approved')
       await openOrder(page, order.id, false)
       await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
       const s = new Steps(page)

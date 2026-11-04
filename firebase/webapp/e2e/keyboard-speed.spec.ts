@@ -4,7 +4,7 @@
 // payment method, ⌘K actions before records and "Cadastrar cliente «…»", and the
 // next-maintenance question inside the order instead of over it. axe on each.
 import { expect, test, type Page } from '@playwright/test'
-import { makeOrder, readOrder } from './data'
+import { makeDevice, makeOrder, readOrder } from './data'
 import { expectNoAxeViolations, login } from './helpers'
 
 const panel = (page: Page) => page.getByRole('complementary', { name: 'OS aberta' })
@@ -45,8 +45,19 @@ test('Nova OS: com o campo vazio, Enter escolhe o primeiro cliente sugerido', as
   await expect(page.getByTestId('new-order-drawer').locator('.chosen').first()).toContainText(name)
 })
 
+/**
+ * An order with a vehicle of its own. The seed's Veículo 2 (makeOrder's default) is
+ * put under an active contract by the contract tests (makeContract), and a device
+ * with an active contract is never asked about (device.detail.maintenance-contract).
+ */
+async function orderWithOwnDevice(status: string) {
+  const device = await makeDevice()
+  const aggr = { id: device.id, name: device.name, serial: device.serial }
+  return makeOrder('admin', { status, device: aggr, devices: [aggr], deviceIds: [device.id] })
+}
+
 test('Situação: S, a primeira letra e Enter; a pergunta da manutenção fica na OS, sem diálogo', async ({ page }) => {
-  const order = await makeOrder('admin', { status: 'approved' })
+  const order = await orderWithOwnDevice('approved')
   await openOrder(page, order.id)
   await page.keyboard.press('s')
   const picker = dialog(page, 'Qual a situação?')
