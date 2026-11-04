@@ -79,6 +79,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-offer-title { font-size: 1rem; margin: 0; }
 .od-offer-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
 .od-offer-opts .btn { min-height: 2.75rem; }
+.od-notify { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.75rem 0 0; padding: 0.5rem 0.75rem; border: 1px solid var(--color-rule); border-radius: var(--radius); background: var(--color-card); }
+.od-notify .btn { min-height: 2.75rem; }
 .od-body { display: flex; flex-direction: column; }
 .od-sec { padding: 0.75rem 1rem; border-top: 1px solid var(--color-rule); min-width: 0; }
 .od-sec h3 { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; }

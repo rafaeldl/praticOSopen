@@ -10,6 +10,7 @@ import { canCreateOrders } from '@/lib/orders/model'
 import { customerPhone, firstName, isLate, lastServices, loadMaintenances, SHOWN, type Maintenance } from '@/lib/orders/maintenance'
 import { country, deviceLabel } from '@/lib/orders/text'
 import { whatsappNumber } from '@/lib/phone'
+import { whatsappUrl } from '@/lib/share'
 import { LAYER_PARAM, queryValues } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
@@ -48,7 +49,7 @@ async function choose(item: Maintenance) {
     const found = await customerPhone(id)
     if (open.value?.id !== item.id) return
     const number = found.kind === 'phone' ? whatsappNumber(found.phone, country()) : ''
-    phone.value = { state: 'ready', href: number ? `https://wa.me/${number}?text=${encodeURIComponent(message(item))}` : null, gone: found.kind === 'gone' }
+    phone.value = { state: 'ready', href: number ? whatsappUrl(number, message(item)) : null, gone: found.kind === 'gone' }
   } catch (error) {
     console.warn('maintenance: phone not read', error)
     if (open.value?.id === item.id) phone.value = { state: 'ready', href: null, gone: false }

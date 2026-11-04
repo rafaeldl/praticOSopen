@@ -2,16 +2,19 @@
 // "Recebimentos" of a customer (customer.detail.receipts, receipt.detail.*):
 // each receipt with its orders, the printable receipt (the browser saves it as
 // PDF) and "Desfazer recebimento", asked first with what it changes. An undone
-// receipt shows "Desfeito" and no action. The list comes filtered by the server:
+// receipt shows "Desfeito" and no action. Sending it (receipt.share.pdf): the
+// receipt's words by WhatsApp to the customer's record phone, or the browser's sheet. The list comes filtered by the server:
 // financial roles see all, a consultant the ones they registered.
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import Layer from '@/components/Layer.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
+import ShareButtons from '@/components/ShareButtons.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { country, money, orderShort } from '@/lib/orders/text'
+import { loadCustomer } from '@/lib/customers/data'
 import { cancelReceipt, listReceipts, openOrders, type Receipt } from '@/lib/receive/data'
 import { safeUrl } from '@/lib/receive/model'
 import { can, session } from '@/lib/session'
@@ -46,6 +49,12 @@ const sorted = computed(() =>
 const proofOf = (receipt: Receipt) => safeUrl(receipt.receiptFile?.url)
 const canUndo = (receipt: Receipt) => receipt.status === 'active' && !receipt.id.startsWith('asaas_') && (financial || receipt.createdBy?.id === session.uid)
 
+/** The customer's record phone, read once for all the receipts (receipt.share.pdf). */
+const phone = ref<string | null>(null)
+loadCustomer(props.customerId)
+  .then((detail) => (phone.value = detail.customer.phone || null))
+  .catch(() => undefined)
+
 async function load() {
   state.value = 'loading'
   try {
@@ -77,6 +86,14 @@ async function undo() {
   } finally {
     busy.value = false
   }
+}
+
+/** The receipt in words, as printed (ReceiptPrint): title and number, the sentence, each order and who runs the company. */
+function receiptText(receipt: Receipt): string {
+  const head = `${t('pdfReceiptTitle')} ${t('pdfReceiptNumber', { number: receipt.id.slice(0, 8).toUpperCase() })}`
+  const sentence = t('pdfReceiptSentence', { name: receipt.customer?.name || props.customerName, amount: money(receipt.amount), date: receipt.paidAt ? formatDate(receipt.paidAt, country()) : '' })
+  const lines = receipt.allocations.map((part) => `${orderShort()} ${part.orderNumber ?? ''} · ${money(part.amount)}`)
+  return [head, sentence, ...lines, `${t('pdfReceiptTotal')}: ${money(receipt.amount)}`, session.company?.name ?? ''].filter(Boolean).join('\n')
 }
 
 async function print(receipt: Receipt) {
@@ -126,6 +143,15 @@ async function openOrder(id: string) {
               <a v-if="proofOf(receipt)" class="link" :href="proofOf(receipt)" target="_blank" rel="noopener noreferrer">{{ t('receiveViewReceipt') }}</a>
               <button v-if="canUndo(receipt)" type="button" class="link link--danger" :disabled="busy" @click="undoing = receipt">{{ t('receiptUndo') }}</button>
             </div>
+            <ShareButtons
+              v-if="receipt.status === 'active'"
+              class="receipt-share"
+              context="receipt"
+              :text="receiptText(receipt)"
+              :title="t('pdfReceiptTitle')"
+              :phone="phone"
+              testid="receipt-share"
+            />
           </li>
         </ul>
       </div>

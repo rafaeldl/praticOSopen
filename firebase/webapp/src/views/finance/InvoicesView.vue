@@ -12,6 +12,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
+import ShareButtons from '@/components/ShareButtons.vue'
 import { t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays, monthOf, shiftMonth } from '@/lib/finance/period'
@@ -23,6 +24,7 @@ import { DOT, invoiceStatusText } from '@/lib/nfse/text'
 import { SEARCH_FROM, canCancel, canFix, matches, monthList, orderNumbers, type NfseInvoice } from '@/lib/nfse/model'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { registerShortcut } from '@/lib/shortcuts'
+import { fileFromUrl } from '@/lib/share'
 import { showToast } from '@/lib/toast'
 import '@/styles/finance.css'
 
@@ -111,6 +113,18 @@ const searchable = computed(() => result.value.rows.length + result.value.attent
 const rows = computed(() => (searchable.value && query.value ? result.value.rows.filter((i) => matches(i, query.value)) : result.value.rows))
 const attention = computed(() => (searchable.value && query.value ? result.value.attention.filter((i) => matches(i, query.value)) : result.value.attention))
 const opened = computed(() => (openId.value ? (invoices.value.find((i) => i.id === openId.value) ?? null) : null))
+
+/**
+ * nfse.invoice.share-pdf: the PDF as a file in the browser's sheet when the
+ * browser can read it, else the link (as the app when the download fails);
+ * WhatsApp to the customer's record phone with the link.
+ */
+function nfseText(invoice: NfseInvoice): string {
+  const hello = invoice.customerName ? t('web.share.msgHello', { name: invoice.customerName }) : t('web.share.msgHelloNoName')
+  const body = invoice.number ? t('web.share.nfseText', { number: invoice.number }) : t('web.share.nfseTextNoNumber')
+  return `${hello} ${body}\n${invoice.pdfUrl ?? ''}`
+}
+const nfseFile = (invoice: NfseInvoice) => () => (invoice.pdfUrl ? fileFromUrl(invoice.pdfUrl, `nota-${invoice.number ?? invoice.id}.pdf`) : Promise.resolve(null))
 
 const customerName = computed(() => invoices.value.find((i) => i.customerName)?.customerName ?? '')
 const title = computed(() =>
@@ -302,6 +316,18 @@ async function fixed() {
             <button v-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
             <a v-if="opened.status === 'authorized' && opened.pdfUrl" class="btn btn--primary" :href="opened.pdfUrl" target="_blank" rel="noopener noreferrer" data-testid="nfse-pdf">{{ t('nfseOpenPdf') }}</a>
             <a v-if="opened.status === 'authorized' && opened.xmlUrl" class="btn" :href="opened.xmlUrl" target="_blank" rel="noopener noreferrer" data-testid="nfse-xml">{{ t('nfseOpenXml') }}</a>
+            <ShareButtons
+              v-if="opened.status === 'authorized' && opened.pdfUrl"
+              :key="opened.id"
+              context="invoice"
+              :text="nfseText(opened)"
+              :title="label(opened)"
+              :copy="opened.pdfUrl"
+              :customer-id="opened.customerId"
+              :file="nfseFile(opened)"
+              :sheet-label="t('nfseSharePdf')"
+              testid="nfse-share"
+            />
           </div>
         </header>
         <dl class="nfse-facts">
