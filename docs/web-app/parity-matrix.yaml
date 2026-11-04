@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 69 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 65 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -408,9 +408,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "O web não carrega Firebase Analytics nem GA4 (limite da tela de entrada, CSP e consentimento). O funil do web sai do servidor: users/{uid} criado pelo web, empresas do primeiro acesso e convites aceitos pela API."}
-  note: "email_login_opened, sign_up, login (com hasCompany), identifyUser, tutorial_begin (variant setup), company_created, tutorial_complete, invite_accepted. Manter os nomes para o funil web."
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web (lib/analytics.ts) manda ao GA4 do projeto praticos os mesmos eventos do app: email_login_opened, login (method, has_company), sign_up (quando cria users/{uid}), tutorial_begin (variant setup), company_created, tutorial_complete, invite_accepted e identifyUser (userId = uid, company_id, segment, user_role). Só depois do 'Aceitar' do aviso de estatísticas; o client vem depois da primeira tela."
 - id: auth.loading.view
   screen: lib/screens/loading_screen.dart
   route: null
@@ -967,8 +968,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Os nomes das abas só servem ao analytics do app; o web não tem analytics (auth.analytics.events), e cada tela já tem rota e título próprios."}
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null
@@ -3737,8 +3740,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Eventos do Firebase Analytics do app. O web não tem analytics (sem GA4, CSP fechada, sem banner de consentimento); o uso do assistente já é contado no servidor (cota mensal)."}
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra ai_intro_shown/accepted/dismissed, ai_assist_requested (input), ai_assist_result (filled, actions, nothing, quota, error), ai_assist_undone, ai_order_saved, ai_action_proposed/dismissed/confirmed/failed/undone e upgrade_modal_shown (ai_limit_100), na OS aberta e na Nova OS."
 - id: order.new.photos
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4758,9 +4763,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "O web não tem analytics: nenhum GA4 no código, a CSP não libera googletagmanager nem google-analytics e ligar exigiria banner de consentimento (LGPD). Os links e pagamentos ficam registrados nos próprios documentos (links/share, transações)."}
-  note: "logShare com método sheet, whatsapp ou clipboard e logPaymentAdded no app; a web manda os mesmos eventos ao GA4."
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra share (method sheet, whatsapp ou clipboard; content_type order) no Mandar para o cliente e payment_added (amount) em cada recebimento de uma OS, pela mão ou pelo assistente. logShare(method, contentType) exportado em lib/analytics.ts para outros pontos de envio."
 - id: order.device-picker.one
   screen: lib/screens/widgets/device_picker_sheet.dart
   route: null

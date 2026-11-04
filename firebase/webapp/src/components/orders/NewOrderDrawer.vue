@@ -18,6 +18,7 @@ import NewOrderPhotos from './NewOrderPhotos.vue'
 import type { NewDevice } from '@/lib/orders/assist-draft'
 import { fieldName, validateField, writeCustom } from '@/lib/segment-fields'
 import { t } from '@/i18n'
+import { logAiEvent } from '@/lib/analytics'
 import { errorMessageKey } from '@/lib/api'
 import { orderCreated } from '@/lib/orders/bus'
 import { markOffer } from '@/lib/forms/offer'
@@ -363,6 +364,8 @@ async function save() {
       ...(due.value ? { dueDate: isoOrUndefined(due.value) } : {}),
       ...(visit.value ? { scheduledDate: isoOrUndefined(visit.value) } : {}),
     })
+    // The app's ai_order_saved: a new order saved with something the assistant filled (still marked ✦).
+    if (marked.size) logAiEvent('ai_order_saved')
     // The rest after the id: a failure here says what did not stay, the order is already saved.
     const after: Promise<unknown>[] = []
     // Items outside the catalog, one after the other so they keep their order.

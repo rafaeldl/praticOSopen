@@ -279,6 +279,17 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Lembretes não vêm:** os do app (antes da visita, resumo do dia, dias sem abrir, OS paradas) são agendados no próprio celular. Mandar pelo servidor duplicaria no celular; para ter no web, os lembretes do app precisariam ir para o servidor.
 - **Teste:** o emulador não entrega push. O build E2E usa um token fixo, o E2E (`e2e/push.spec.ts`) testa o pedido, o token, o clique e o aviso com a página na tela; o service worker é testado em `tests/push.test.ts`.
 
+### Estatísticas de uso (GA4)
+
+`src/lib/analytics.ts`, `src/lib/analytics-client.ts`, `src/components/AnalyticsConsent.vue`.
+
+- **Mesmos nomes do app** (`docs/FIREBASE_ANALYTICS.md`): entrada e primeiro acesso, `screen_view` com os nomes das abas e rotas do app, o funil do assistente, `share` (sheet, whatsapp, clipboard) e `payment_added`. `logShare(method, contentType)` é exportada para qualquer novo ponto de envio.
+- **Consentimento:** depois da primeira tela aparece uma vez o aviso "Estatísticas de uso" com "Recusar" e "Aceitar". Nada sai antes do "Aceitar" e o `firebase/analytics` nem baixa. A resposta fica no navegador (`praticos.analyticsConsent`) e muda em Configurações › Neste navegador.
+- **Sem dado pessoal:** só as chaves da lista `ALLOWED_PARAMS` saem; nome, telefone e e-mail nunca. O usuário é o uid. O endereço enviado é o da rota, sem id de OS nem busca. Anúncios, sinais do Google e personalização ficam desligados.
+- **Configuração:** `VITE_FIREBASE_APP_ID` e `VITE_FIREBASE_MEASUREMENT_ID` em `.env.production` (app web "PraticOS Website" do projeto `praticos`, o mesmo fluxo GA4 do site). Sem eles, tudo desligado e sem aviso.
+- **Orçamento e CSP:** o client vem depois da primeira tela; `check-budget.mjs` falha se ele entrar no caminho da entrada ou da lista. A CSP do `/app` libera só `www.googletagmanager.com` (script) e `*.google-analytics.com`, `*.analytics.google.com` (envio).
+- **Testes:** no build e2e os eventos vão para `window.__analytics`, e só quando o teste pede (`praticos.analyticsE2E`): `e2e/analytics.spec.ts` e `tests/analytics.test.ts`.
+
 ### PDF, impressão e paleta
 
 - **PDF da OS** (`src/lib/pdf/`): "Ver PDF" na OS e "PDF" no lote. Montado no navegador com `pdf-lib` e `qrcode-generator`, baixados só nesse momento. Mesmo desenho do app (`docs/PDF_GENERATION.md`), com os textos `pdf*` dos `.arb`. Sem `viewPrices`, sai sem valores. Caracteres fora do WinAnsi usam a Roboto do app, embutida só quando precisa.
@@ -401,12 +412,13 @@ Do dono:
 - **Abrir para todos e anunciar.** Hoje só a lista de acesso entra. Abrir é `npm run webapp:access -- --open`; anunciar é ligar `site.flags.webApp` (o artigo `/docs/computador*.html` entra no hub e no índice) e decidir menu e home.
 - **Compra e gestão de plano no web.** Hoje o Plano é só leitura.
 - **Limite de plano no web e limite de convites no servidor.** Hoje nenhum dos dois trava.
+- **Texto da política de privacidade sobre estatísticas no navegador.** O web pede consentimento para o Google Analytics, mas a política (`firebase/hosting/src/_data/legal.json`) ainda não fala de cookies nem de estatísticas de uso no navegador.
 - **Tirar `praticos.web.app` e `praticos.firebaseapp.com`** da CSP e dos consoles, quando o app deixar de ser servido neles.
 
 Técnicas, esperando outra peça:
 
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
-- **Avisos do navegador:** gerar o par de chaves Web Push no console do Firebase (Cloud Messaging), registrar o app web e pôr `VITE_FIREBASE_VAPID_KEY`, `VITE_FIREBASE_MESSAGING_SENDER_ID` e `VITE_FIREBASE_APP_ID` em `.env.production`.
+- **Avisos do navegador:** gerar o par de chaves Web Push no console do Firebase (Cloud Messaging) e pôr a chave pública em `VITE_FIREBASE_VAPID_KEY` no `.env.production` (o app id e o número do projeto já estão lá).
 - **Lembretes no web:** no app são notificações locais do celular; para chegarem ao navegador, os lembretes do app teriam de ir para o servidor (senão o celular recebe dois).
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
-- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
+- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular.

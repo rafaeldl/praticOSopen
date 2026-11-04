@@ -17,12 +17,15 @@ import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
 import { acceptOffer, declineOffer, listenToWorker, pushOffer, syncThisBrowser, type ForegroundNotice } from '@/lib/push'
 import { linkToPath } from '@/lib/push/open'
+import { needsConsent, startAnalytics } from '@/lib/analytics'
 
 // Opened by a key or a tap, never on the first paint: out of the first download.
 const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
 const ShortcutsDialog = defineAsyncComponent(() => import('@/components/ShortcutsDialog.vue'))
 const ConfirmDialog = defineAsyncComponent(() => import('@/components/orders/ConfirmDialog.vue'))
 const Layer = defineAsyncComponent(() => import('@/components/Layer.vue'))
+// Statistics: the notice and the client come after the first screen, never on the way to it.
+const AnalyticsConsent = defineAsyncComponent(() => import('@/components/AnalyticsConsent.vue'))
 const NewOrderDrawer = defineAsyncComponent(() =>
   Promise.all([import('@/components/orders/NewOrderDrawer.vue'), loadOrderTexts()]).then(([m]) => m),
 )
@@ -96,12 +99,19 @@ const stopWorker = listenToWorker({
 // "Continuar" fails only when the token could not be saved: the browser already answered.
 const allowNotifications = () => void acceptOffer().catch((error) => console.warn('push: not registered', error))
 
+const afterFirstScreen = ref(false)
+let analyticsTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
+  analyticsTimer = setTimeout(() => {
+    afterFirstScreen.value = true
+    void startAnalytics()
+  }, 2500)
   window.addEventListener('online', setOnline)
   window.addEventListener('offline', setOffline)
   syncThisBrowser()
 })
 onBeforeUnmount(() => {
+  clearTimeout(analyticsTimer)
   window.removeEventListener('online', setOnline)
   window.removeEventListener('offline', setOffline)
   stopWorker()
@@ -212,4 +222,5 @@ onBeforeUnmount(() => {
     @confirm="allowNotifications"
     @close="declineOffer"
   />
+  <AnalyticsConsent v-if="afterFirstScreen && needsConsent()" />
 </template>

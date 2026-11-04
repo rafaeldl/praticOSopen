@@ -70,11 +70,13 @@ export function newUserDoc(user: NewUser, browserLanguage: string, now: string):
  * Creates users/{uid} when it does not exist yet, inside a transaction: an
  * invite accepted at the same moment (which writes `companies`) is never undone.
  */
-export async function ensureUserDoc(user: NewUser): Promise<void> {
+export async function ensureUserDoc(user: NewUser): Promise<boolean> {
   const [db, { doc, runTransaction }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const ref = doc(db, 'users', user.uid)
-  await runTransaction(db, async (tx) => {
-    if ((await tx.get(ref)).exists()) return
+  /** True when this call created it (the app's sign_up). */
+  return runTransaction(db, async (tx) => {
+    if ((await tx.get(ref)).exists()) return false
     tx.set(ref, newUserDoc(user, navigator.language, new Date().toISOString()))
+    return true
   })
 }

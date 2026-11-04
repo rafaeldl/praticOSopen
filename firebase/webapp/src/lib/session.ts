@@ -3,6 +3,7 @@
 // reads. The `companies` list of the user document only gives names and order.
 import { reactive } from 'vue'
 import type { User } from 'firebase/auth'
+import { authMethod, clearUser, logLogin, logSignUp } from './analytics'
 import { createApi, type ApiOptions } from './api'
 import { authClient, cacheState, clearFirestoreCache, firestoreClient, firestoreLite } from './firebase'
 import { mark } from './marks'
@@ -211,6 +212,13 @@ async function checkWebAccess(uid: string): Promise<void> {
   await ask()
 }
 
+const methodOf = (user: User) => authMethod((user.providerData ?? []).map((provider) => provider.providerId))
+
+/** A sign-in made now (not a page opened with a saved session): the app's login, after the company is known. */
+function loggedIn(user: User): void {
+  if (session.uid === user.uid) logLogin(methodOf(user), session.companies.length > 0)
+}
+
 async function hydrate(user: User, forceRefresh = false): Promise<void> {
   session.failed = false
   // Another account: nothing of the previous one (access answer, cached data) carries over.
@@ -252,7 +260,10 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     // First sign-in on the web: the app's users/{uid} (without waiting); otherwise the account's language.
     if (!profile) {
       const fresh = { uid: user.uid, name: user.displayName, email: user.email }
-      void import('./user-profile').then((m) => m.ensureUserDoc(fresh)).catch((error) => console.warn('session: user not created', error))
+      void import('./user-profile')
+        .then((m) => m.ensureUserDoc(fresh))
+        .then((created) => created && logSignUp(methodOf(user)))
+        .catch((error) => console.warn('session: user not created', error))
     } else if (profile.preferredLanguage) {
       const tag = profile.preferredLanguage
       void import('./user-profile').then((m) => m.applyAccountLanguage(tag))
@@ -337,8 +348,12 @@ export function startSession(): Promise<void> {
       onAuthStateChanged(auth, (user) => {
         mark('session:auth')
         void (async () => {
-          if (user) await hydrate(user)
-          else await endedSession()
+          if (user) {
+            await hydrate(user)
+            // Back from a Google or Apple redirect: that was a sign-in.
+            if (redirectedIn) loggedIn(user)
+            redirectedIn = false
+          } else await endedSession()
           session.ready = true
           resolve()
         })()
@@ -380,6 +395,7 @@ export async function signInWithProvider(kind: ProviderKind): Promise<'done' | '
   try {
     const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver)
     await hydrate(user)
+    loggedIn(user)
     return 'done'
   } catch (error) {
     const code = (error as { code?: string }).code
@@ -391,6 +407,8 @@ export async function signInWithProvider(kind: ProviderKind): Promise<'done' | '
   }
 }
 
+let redirectedIn = false
+
 /** Back from a redirect sign-in: finish it before reading the session. */
 async function finishRedirect(): Promise<void> {
   const kind = readStorage(REDIRECT_FLAG)
@@ -401,7 +419,7 @@ async function finishRedirect(): Promise<void> {
       authClient(),
       import('firebase/auth'),
     ])
-    await getRedirectResult(auth, browserPopupRedirectResolver)
+    redirectedIn = !!(await getRedirectResult(auth, browserPopupRedirectResolver))
   } catch (error) {
     console.warn('session: redirect sign-in failed', error)
     session.signInError = kind
@@ -423,6 +441,7 @@ export async function signInWithEmail(email: string, password: string): Promise<
   const { user } = await signInWithEmailAndPassword(auth, email, password)
   // onAuthStateChanged also fires; awaiting here lets the login screen navigate on loaded data.
   await hydrate(user)
+  loggedIn(user)
 }
 
 let signingOut = false
@@ -436,6 +455,7 @@ export async function signOutEverywhere(): Promise<void> {
     const forget = import('@/lib/push').then((push) => push.forgetThisBrowser(uid))
     await Promise.race([forget, new Promise((done) => setTimeout(done, 3000))]).catch((error) => console.warn('push: not forgotten', error))
   }
+  clearUser()
   await signOut(auth)
   clear()
   await clearCachedData()
