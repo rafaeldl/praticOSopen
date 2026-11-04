@@ -124,6 +124,8 @@
   "web.order.askAssistant": "Pedir ao assistente",
   "web.order.askAssistantHint": "Peça ao assistente: troca de óleo e filtro",
   "web.order.change": "Mudar",
+  "web.order.requestAdd": "Escrever o que o cliente pediu",
+  "web.order.requestChange": "Mudar o que o cliente pediu",
   "web.order.changeCustomer": "Trocar o cliente {name}",
   "web.order.clearDue": "Tirar a data",
   "web.order.commentVisibility": "Quem vê o comentário",
