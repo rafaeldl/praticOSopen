@@ -51,6 +51,8 @@ async function seedSegments() {
   })
   await db.doc('segments/automotive').set({
     name: 'Mecânica',
+    // Workshop: the customer brings the vehicle (seed_segments.js); companies without the field follow it.
+    fieldService: false,
     // Active segments with names, specialties and default terms: what Sua empresa reads.
     active: true,
     icon: '🚗',
@@ -84,6 +86,7 @@ async function seedSegments() {
   })
   await db.doc('segments/electronics').set({
     name: 'Eletrônica',
+    fieldService: false,
     active: true,
     icon: '📱',
     nameI18n: { 'pt-BR': 'Eletrônica', 'en-US': 'Electronics', 'es-ES': 'Electrónica' },
@@ -138,15 +141,18 @@ async function seedUsers() {
       displayName: user.name || undefined,
       emailVerified: user.emailVerified !== false,
     })
-    await db.doc(`users/${user.uid}`).set({
-      id: user.uid,
-      name: user.name,
-      email: user.email,
-      companies: Object.entries(user.roles).map(([id, role]) => ({
-        company: { id, name: COMPANIES[id].name },
-        role,
-      })),
-    })
+    if (!user.noUserDoc) {
+      await db.doc(`users/${user.uid}`).set({
+        id: user.uid,
+        name: user.name,
+        email: user.email,
+        companies: Object.entries(user.roles).map(([id, role]) => ({
+          company: { id, name: COMPANIES[id].name },
+          role,
+        })),
+        ...(user.preferredLanguage ? { preferredLanguage: user.preferredLanguage } : {}),
+      })
+    }
     await auth.setCustomUserClaims(user.uid, { roles: rolesClaim(user) })
   }
 }
@@ -491,6 +497,21 @@ async function seedSettings() {
   }
 }
 
+// Avaliações (e2e/entry.spec.ts): two rated orders in company M, one without a rating.
+async function seedRatings() {
+  const company = { id: COMPANY_M, name: COMPANIES[COMPANY_M].name }
+  const done = (number, extra) => ({
+    number, company, status: 'done', total: 100, paidAmount: 100, payment: 'paid', paid: true,
+    customer: { id: 'rating-customer', name: 'Rui Avaliador' }, services: [], products: [],
+    ...audit(USERS.maintOwner, 400000 + number), ...extra,
+  })
+  const batch = db.batch()
+  batch.set(db.doc(`companies/${COMPANY_M}/orders/rated-5`), done(9301, { rating: { score: 5, comment: 'Serviço rápido', customerName: 'Rui A.', createdAt: '2026-10-10T15:00:00.000Z' } }))
+  batch.set(db.doc(`companies/${COMPANY_M}/orders/rated-4`), done(9302, { rating: { score: 4, createdAt: '2026-10-12T15:00:00.000Z' } }))
+  batch.set(db.doc(`companies/${COMPANY_M}/orders/not-rated`), done(9303, {}))
+  await batch.commit()
+}
+
 async function seedInvites() {
   for (const invite of Object.values(INVITES)) {
     const company = COMPANIES[invite.company]
@@ -519,6 +540,7 @@ await seedInvites()
 await seedSettings()
 await seedForms()
 await seedMaintenance()
+await seedRatings()
 await seedOrders(COMPANY_A, orders)
 await seedOrders(COMPANY_B, 5)
 // The big list measures the list alone; the scenarios are for the screen tests.

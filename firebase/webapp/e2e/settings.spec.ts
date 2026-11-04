@@ -11,11 +11,11 @@ const toast = (page: Page) => page.locator('.toast')
 
 // What each role finds in Configurações (settings.view and the settings.open-* rows).
 const ROWS: Record<string, { shown: string[]; hidden: string[] }> = {
-  gOwner: { shown: ['settings-account', 'settings-company', 'settings-team', 'settings-plan', 'settings-integrations', 'settings-customers', 'settings-catalog', 'settings-checklists'], hidden: [] },
-  gAdmin: { shown: ['settings-company', 'settings-team', 'settings-plan', 'settings-integrations', 'settings-catalog', 'settings-checklists'], hidden: [] },
-  gManager: { shown: ['settings-plan', 'settings-customers', 'settings-catalog'], hidden: ['settings-company', 'settings-team', 'settings-integrations', 'settings-checklists'] },
-  gTech: { shown: ['settings-account', 'settings-plan', 'settings-customers'], hidden: ['settings-company', 'settings-team', 'settings-integrations', 'settings-catalog', 'settings-checklists'] },
-  tSuper: { shown: ['settings-plan', 'settings-customers', 'settings-catalog', 'settings-checklists'], hidden: ['settings-company', 'settings-team', 'settings-integrations'] },
+  gOwner: { shown: ['settings-account', 'settings-company', 'settings-team', 'settings-plan', 'settings-ratings', 'settings-integrations', 'settings-customers', 'settings-catalog', 'settings-checklists'], hidden: [] },
+  gAdmin: { shown: ['settings-company', 'settings-team', 'settings-plan', 'settings-ratings', 'settings-integrations', 'settings-catalog', 'settings-checklists'], hidden: [] },
+  gManager: { shown: ['settings-plan', 'settings-customers', 'settings-catalog'], hidden: ['settings-company', 'settings-team', 'settings-ratings', 'settings-integrations', 'settings-checklists'] },
+  gTech: { shown: ['settings-account', 'settings-plan', 'settings-customers'], hidden: ['settings-company', 'settings-team', 'settings-ratings', 'settings-integrations', 'settings-catalog', 'settings-checklists'] },
+  tSuper: { shown: ['settings-plan', 'settings-customers', 'settings-catalog', 'settings-checklists'], hidden: ['settings-company', 'settings-team', 'settings-ratings', 'settings-integrations'] },
 }
 
 for (const [user, { shown, hidden }] of Object.entries(ROWS)) {
@@ -144,8 +144,9 @@ test.describe('Plano', () => {
     await expect(usage.locator('[data-usage="photos"]')).toContainText('Quase no limite')
     await expect(usage.locator('[data-usage="checklists"]')).toContainText('1 de 3')
     await expect(page.getByTestId('plan-limit')).toContainText('Você usou 400 de 400 pedidos do assistente neste mês.')
-    // Nothing to buy and no row opens for a manager.
+    // Nothing to buy and no row opens for a manager, who is told to ask (plan.non-admin-note).
     await expect(page.getByRole('button', { name: /plano/i })).toHaveCount(0)
+    await expect(page.getByTestId('plan-ask-admin')).toHaveText('Peça ao administrador da conta para mudar de plano.')
     await expect(usage.getByRole('link')).toHaveCount(0)
   })
 

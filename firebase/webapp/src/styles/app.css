@@ -206,6 +206,9 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
 .entry-main { display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
 .entry-box, .entry-form { width: 100%; max-width: 25rem; display: grid; gap: 0.7rem; }
 .entry-btns, .entry-mail { display: grid; gap: 0.5rem; }
+.entry-password { position: relative; }
+.entry-password .field { padding-right: 7.5rem; }
+.entry-reveal { position: absolute; inset-block: 0; right: 0.25rem; min-height: 2.75rem; padding: 0 0.6rem; }
 @media (max-width: 48rem) {
   .entry { grid-template-columns: minmax(0, 1fr); }
   .entry-side { display: none; }

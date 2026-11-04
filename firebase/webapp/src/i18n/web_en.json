@@ -797,5 +797,7 @@
   "web.order.documentDeleteFailed": "Couldn't delete the document. Check your internet and try again.",
   "web.order.deleteDocument": "Delete",
   "web.order.deleteDocumentOf": "Delete {name}",
-  "web.order.noDocuments": "No documents. Invoices, contracts or warranties go here."
+  "web.order.noDocuments": "No documents. Invoices, contracts or warranties go here.",
+  "web.login.signupBlocked": "The sign-up was not accepted. If you already have an account, sign in with it; if not, contact PraticOS support.",
+  "web.invites.joining": "Joining…"
 }

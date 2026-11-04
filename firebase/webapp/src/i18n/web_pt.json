@@ -797,5 +797,7 @@
   "web.order.documentDeleteFailed": "Não deu para excluir o documento. Confira a internet e tente de novo.",
   "web.order.deleteDocument": "Excluir",
   "web.order.deleteDocumentOf": "Excluir {name}",
-  "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui."
+  "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui.",
+  "web.login.signupBlocked": "O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.",
+  "web.invites.joining": "Entrando…"
 }

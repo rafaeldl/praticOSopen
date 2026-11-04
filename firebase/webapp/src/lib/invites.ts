@@ -1,9 +1,28 @@
 // Invites the signed-in person received, same flow as the app (InviteStore):
 // list by verified e-mail from Firestore, accept through the API, wait for the
 // token to carry the new company, reject by updating the invite.
+import type { MessageKey } from '@/generated/message-keys'
+import { ApiError } from './api'
 import { firestoreClient, firestoreLite } from './firebase'
 import { api, refreshClaims, selectCompany, session } from './session'
 import { authClient } from './firebase'
+
+/**
+ * One sentence per invite error, from the API's code (never the server's text):
+ * the pending list, the code in Sua conta and the code of the first access
+ * (onboarding.invites.error-map; the app matches English pieces of the message).
+ */
+export function inviteErrorKey(error: unknown): MessageKey {
+  const status = error instanceof ApiError ? error.status : 0
+  const code = error instanceof ApiError ? error.code : ''
+  if (code === 'EXPIRED') return 'inviteExpired'
+  if (code === 'ALREADY_MEMBER') return 'web.account.alreadyMember'
+  if (code === 'RATE_LIMIT_EXCEEDED' || status === 429) return 'emailLoginTooManyAttempts'
+  if (code === 'FORBIDDEN') return 'web.account.inviteNotForYou'
+  if (code === 'NETWORK') return 'networkError'
+  if (status === 404 || status === 400) return 'web.account.inviteInvalid'
+  return 'web.error.generic'
+}
 
 export interface Invite {
   token: string

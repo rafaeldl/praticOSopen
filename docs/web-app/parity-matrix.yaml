@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 67 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 76 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -38,9 +38,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Visual do site: azul-marinho, frase com destaque amarelo, faixa dos ramos (auth.login.hero) e painel inferior."
+  note: "Visual do site: azul-marinho, frase com destaque amarelo, faixa dos ramos (auth.login.hero) e painel inferior. Web: entrada com a lateral da marca (Google, Apple, e-mail), sem a faixa de fotos (auth.login.hero)."
 - id: auth.login.apple
   screen: lib/screens/login.dart
   route: null
@@ -54,9 +55,10 @@ rows:
   feature_flags: []
   hardware: [native_sign_in]
   data: ["firebase-auth", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
-  note: "Fechar a folha não é erro. Nome só vem na primeira entrada. Botão branco no escuro e preto no claro. Fora do iPhone usa o fluxo web da Apple; na web, entrar pela Apple exige o domínio do app web autorizado na Apple e no Firebase Auth. Não copiar: o nome da Apple pode não chegar a users/{id} (cadastro criado antes de atualizar o perfil); web grava ou atualiza o nome depois."
+  note: "Fechar a folha não é erro. Nome só vem na primeira entrada. Botão branco no escuro e preto no claro. Fora do iPhone usa o fluxo web da Apple; na web, entrar pela Apple exige o domínio do app web autorizado na Apple e no Firebase Auth. Não copiar: o nome da Apple pode não chegar a users/{id} (cadastro criado antes de atualizar o perfil); web grava ou atualiza o nome depois. Web: popup com redirect de reserva (lib/session.ts); conta já criada com Google ainda cai na frase genérica da Apple."
 - id: auth.login.google
   screen: lib/screens/login.dart
   route: null
@@ -70,9 +72,10 @@ rows:
   feature_flags: []
   hardware: [native_sign_in]
   data: ["firebase-auth", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
-  note: "Erro do Google aparece na tela: a entrada agora devolve o resultado para quem chamou. Fechar a folha do provedor não é erro (nada aparece). Cadastro recusado pelo servidor cai na frase genérica (auth.signup.blocked). Mesmo e-mail já usado com Apple não é tratado (sem vincular contas): web deve dizer com qual provedor a conta foi criada. Não copiar: os três caminhos travam sem indicador; web mostra Entrando… e botões desabilitados de forma clara."
+  note: "Erro do Google aparece na tela: a entrada agora devolve o resultado para quem chamou. Fechar a folha do provedor não é erro (nada aparece). Cadastro recusado pelo servidor cai na frase genérica (auth.signup.blocked). Mesmo e-mail já usado com Apple não é tratado (sem vincular contas): web deve dizer com qual provedor a conta foi criada. Não copiar: os três caminhos travam sem indicador; web mostra Entrando… e botões desabilitados de forma clara. Web: popup com redirect de reserva; fechar o popup não é erro; cadastro recusado tem frase própria (auth.signup.blocked)."
 - id: auth.login.open-email
   screen: lib/screens/login.dart
   route: null
@@ -86,9 +89,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Registra evento de analytics ao abrir."
+  note: "Registra evento de analytics ao abrir. Web: sem analytics (auth.analytics.events)."
 - id: auth.login.privacy
   screen: lib/screens/login.dart
   route: null
@@ -102,8 +106,10 @@ rows:
   feature_flags: []
   hardware: [external_browser]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
+  note: "Web: /privacy.html em outra aba."
 - id: auth.session.user-bootstrap
   screen: lib/screens/login.dart
   route: null
@@ -117,9 +123,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}", "analytics"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "users/{id} com nome, e-mail, companies vazio e preferredLanguage do aparelho; nenhuma empresa é criada aqui. preferredLanguage da conta manda na interface; sem ele, grava o do aparelho. Foto do provedor não vai para users. Evento sign_up."
+  note: "users/{id} com nome, e-mail, companies vazio e preferredLanguage do aparelho; nenhuma empresa é criada aqui. preferredLanguage da conta manda na interface; sem ele, grava o do aparelho. Foto do provedor não vai para users. Evento sign_up. Web: sem users/{uid}, cria numa transação (companies vazio, idioma do navegador), sem esperar; o idioma da conta vale enquanto ninguém escolheu neste navegador (lib/user-profile.ts)."
 - id: auth.signup.blocked
   screen: lib/screens/login.dart
   route: null
@@ -133,9 +140,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "O servidor pode recusar um cadastro novo (proteção contra abuso). O app mostra a frase genérica do provedor. Não copiar: web diz que o cadastro não foi aceito, com mensagem própria."
+  note: "O servidor pode recusar um cadastro novo (proteção contra abuso). O app mostra a frase genérica do provedor. Não copiar: web diz que o cadastro não foi aceito, com mensagem própria. Web: auth/internal-error da função de bloqueio ou auth/admin-restricted-operation viram \"O cadastro não foi aceito…\" (isSignupBlocked)."
 - id: auth.login.hero
   screen: lib/screens/widgets/login_hero.dart
   route: null
@@ -150,7 +158,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "A faixa de fotos é a vitrine do app no celular. No computador a entrada usa a lateral com a frase da marca (docs/WEB_APP_DESIGN.md); as fotos pesariam a tela de entrada (limite de 200 KB de JS e LCP de 2,5 s no Lighthouse), e o site praticos.app já faz essa vitrine."}
   note: "Respeita \"reduzir movimento\". Textos e valores são exemplos fixos do i18n."
 - id: auth.login.hero-pause
   screen: lib/screens/widgets/login_hero.dart
@@ -166,7 +174,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Sem a faixa animada no web (auth.login.hero), não há o que pausar."}
 - id: auth.email.signin
   screen: lib/screens/email_login_screen.dart
   route: null
@@ -180,9 +188,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Erros: credencial, excesso de tentativas, sem internet, e-mail inválido e genérico. Usuário inexistente e senha errada dão a mesma frase (não revela se a conta existe). Validação local: e-mail obrigatório com @ e ponto, senha obrigatória. Botão vira Entrando… e Enter na senha envia."
+  note: "Erros: credencial, excesso de tentativas, sem internet, e-mail inválido e genérico. Usuário inexistente e senha errada dão a mesma frase (não revela se a conta existe). Validação local: e-mail obrigatório com @ e ponto, senha obrigatória. Botão vira Entrando… e Enter na senha envia. Web: e-mail sem @ ou ponto e senha vazia avisados antes de chamar o Auth; senha errada em auth.spec.ts."
 - id: auth.email.toggle-password
   screen: lib/screens/email_login_screen.dart
   route: null
@@ -196,7 +205,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: auth.email.forgot
   screen: lib/screens/email_login_screen.dart
@@ -211,9 +221,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Diálogo abre com o e-mail já digitado; sucesso e erro têm diálogo próprio. Não copiar: Enviar não faz nada com e-mail vazio ou sem @; web mostra erro no campo."
+  note: "Diálogo abre com o e-mail já digitado; sucesso e erro têm diálogo próprio. Não copiar: Enviar não faz nada com e-mail vazio ou sem @; web mostra erro no campo. Web: e-mail vazio ou sem @ e ponto mostra o erro no campo e não manda nada."
 - id: auth.email.new-account-hint
   screen: lib/screens/email_login_screen.dart
   route: null
@@ -227,7 +238,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
   note: "Não há cadastro por e-mail."
 - id: auth.gate.resolve
@@ -243,9 +255,10 @@ rows:
   feature_flags: ["useContracts", "useDeviceManagement", "useFinancial", "useScheduling", "fieldService"]
   hardware: null
   data: ["users/{id}", "companies/{id}", "links/invites/tokens", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
-  note: "Empresa sem ramo não tem mensagem própria: retoma o primeiro acesso completando a mesma empresa (auth.gate.resume-company). No carregador do ramo, empresa sem ramo ou não encontrada mostram a mesma frase genérica, com Tentar de novo; nunca o texto da exceção. Convites vêm do Firestore (links/invites/tokens) e só aparecem para quem não tem empresa. Não copiar: falha ao buscar convites leva direto a criar empresa; web mostra erro com Tentar de novo antes."
+  note: "Empresa sem ramo não tem mensagem própria: retoma o primeiro acesso completando a mesma empresa (auth.gate.resume-company). No carregador do ramo, empresa sem ramo ou não encontrada mostram a mesma frase genérica, com Tentar de novo; nunca o texto da exceção. Convites vêm do Firestore (links/invites/tokens) e só aparecem para quem não tem empresa. Não copiar: falha ao buscar convites leva direto a criar empresa; web mostra erro com Tentar de novo antes. Web: a guarda das rotas decide (lib/access.ts): convites antes do primeiro acesso; falha ao ler convites nunca manda criar empresa."
 - id: auth.gate.retry
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -259,9 +272,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Não copiar: duas leituras do mesmo cadastro no início e tentar de novo sem esperar a recarga; web usa uma fonte só de sessão."
+  note: "Não copiar: duas leituras do mesmo cadastro no início e tentar de novo sem esperar a recarga; web usa uma fonte só de sessão. Web: conta que não carregou mostra \"Tentar de novo\" (relê a sessão); empresa que não carregou mostra o aviso com \"Tentar de novo\" na casca."
 - id: auth.gate.notification-open
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -290,9 +304,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}", "companies/{id}", "claims"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Recarrega usuário e empresa antes de voltar para o início; sem isso cai no primeiro acesso."
+  note: "Recarrega usuário e empresa antes de voltar para o início; sem isso cai no primeiro acesso. Web: espera a claim da empresa, renova o token e entra na Início."
 - id: contract.generate.startup
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -307,7 +322,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Decisão de 03/11: o web não gera OS de contrato. Quem gera é o app ao abrir ou o job do servidor (scheduledContractOrders, desligado em config/contracts.jobEnabled); o web chamar generate-due com app antigo gerando daria OS em dobro. A tela de contratos diz quando a OS ainda não nasceu."}
   permission: createOrder
   note: "checkAndGenerateDueOrders no cliente. Sem função no servidor: sem app aberto, nada é gerado; gerente nunca gera. A OS gerada sai como orçamento e a receber, com cliente, aparelhos, serviços, produtos e responsável copiados, createdBy de quem criou o contrato, total sem desconto e contract.parentOrderId/parentOrderNumber; sem data marcada, checklist nem foto. Não copiar: uma OS por abertura mesmo com vários períodos perdidos; a próxima data parte do momento de gerar (escorrega; dia 29 a 31 pula mês); isDue não olha endDate e gera uma depois do término; sem trava, dois aparelhos duplicam. Na web: gerar no servidor, com trava, no dia combinado e respeitando o término."
 - id: auth.session.company-pick
@@ -323,9 +338,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}", "companies/{id}", "local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
-  note: "Última empresa salva se ainda é membro, depois a ordem de users.companies; pula empresa apagada ou deixada; por fim busca por dono. Erro de rede vai para tentar de novo, nunca para o primeiro acesso. Empresa que sumiu é esquecida. Liga assinatura e identifyUser com empresa, segmento e papel."
+  note: "Última empresa salva se ainda é membro, depois a ordem de users.companies; pula empresa apagada ou deixada; por fim busca por dono. Erro de rede vai para tentar de novo, nunca para o primeiro acesso. Empresa que sumiu é esquecida. Liga assinatura e identifyUser com empresa, segmento e papel. Web: /app/choose-company com mais de uma empresa; a escolha fica lembrada neste navegador."
 - id: auth.session.role
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -339,9 +355,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/guard.spec.ts
   web_exception: null
-  note: "O papel vem do agregado users.companies, não da membership. owner vira admin e papel desconhecido vira técnico (menor privilégio). Web segue a mesma leitura ou lê da membership e documenta a diferença."
+  note: "O papel vem do agregado users.companies, não da membership. owner vira admin e papel desconhecido vira técnico (menor privilégio). Web segue a mesma leitura ou lê da membership e documenta a diferença. Web: o papel vem do claim roles do token (a fonte das regras), não de users.companies; owner lido como admin e papel desconhecido sem nenhuma permissão (docs/WEB_APP.md)."
 - id: auth.gate.feature-defaults
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -355,9 +372,10 @@ rows:
   feature_flags: ["useScheduling", "fieldService", "useContracts", "useDeviceManagement", "useFinancial"]
   hardware: null
   data: ["companies/{id}", "segments/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "fieldService e useFinancial: empresa, senão padrão do ramo; useScheduling padrão true; aparelhos e contratos padrão false. País da empresa define as máscaras de telefone. Avisos ligam só depois da empresa carregar. Não copiar: grava fieldService e useScheduling que faltam ao abrir, sem esperar, com qualquer papel; web faz isso no servidor ou só para admin."
+  note: "fieldService e useFinancial: empresa, senão padrão do ramo; useScheduling padrão true; aparelhos e contratos padrão false. País da empresa define as máscaras de telefone. Avisos ligam só depois da empresa carregar. Não copiar: grava fieldService e useScheduling que faltam ao abrir, sem esperar, com qualquer papel; web faz isso no servidor ou só para admin. Web: lib/company-features.ts resolve igual (empresa, ramo, padrão do app) e nunca grava o que falta."
 - id: auth.gate.resume-company
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -388,7 +406,7 @@ rows:
   hardware: null
   data: ["analytics"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "O web não carrega Firebase Analytics nem GA4 (limite da tela de entrada, CSP e consentimento). O funil do web sai do servidor: users/{uid} criado pelo web, empresas do primeiro acesso e convites aceitos pela API."}
   note: "email_login_opened, sign_up, login (com hasCompany), identifyUser, tutorial_begin (variant setup), company_created, tutorial_complete, invite_accepted. Manter os nomes para o funil web."
 - id: auth.loading.view
   screen: lib/screens/loading_screen.dart
@@ -403,7 +421,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
 - id: onboarding.flow.run
   screen: lib/screens/onboarding/onboarding_flow.dart
@@ -497,7 +516,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: onboarding.segment.sign-out
   screen: lib/screens/onboarding/select_segment_screen.dart
@@ -646,9 +666,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["links/invites/tokens"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invites.spec.ts
   web_exception: null
-  note: "Só abre pelo portão de entrada. Convites lidos do Firestore por e-mail (minúsculas) e telefone (só dígitos), sem repetidos nem vencidos. Um convite: título com a empresa, botão azul e link Recusar; vários: lista e toque abre o detalhe; vazio depois de recusar. Não copiar: a tela não tem Sair nem voltar; web põe Sair no topo."
+  note: "Só abre pelo portão de entrada. Convites lidos do Firestore por e-mail (minúsculas) e telefone (só dígitos), sem repetidos nem vencidos. Um convite: título com a empresa, botão azul e link Recusar; vários: lista e toque abre o detalhe; vazio depois de recusar. Não copiar: a tela não tem Sair nem voltar; web põe Sair no topo. Web: aceitar o primeiro convite sem empresa em entry.spec.ts."
 - id: onboarding.invites.detail
   screen: lib/screens/onboarding/pending_invites_screen.dart
   route: null
@@ -662,8 +683,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["links/invites/tokens"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
+  note: "Web: a própria linha já mostra empresa, papel e quem convidou, com Aceitar e Recusar."
 - id: onboarding.invites.accept
   screen: lib/screens/onboarding/pending_invites_screen.dart
   route: null
@@ -677,9 +700,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/invites/{token}/accept", "claims"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Depois de aceitar precisa esperar a claim da empresa antes de ler dados. No primeiro acesso, ver auth.gate.after-invite. Erros viram frase fixa: vencido, já usado, cancelado, não encontrado, sem rede, genérico. Não copiar: a tela inteira vira spinner ao aceitar; web mostra carregando no botão."
+  note: "Depois de aceitar precisa esperar a claim da empresa antes de ler dados. No primeiro acesso, ver auth.gate.after-invite. Erros viram frase fixa: vencido, já usado, cancelado, não encontrado, sem rede, genérico. Não copiar: a tela inteira vira spinner ao aceitar; web mostra carregando no botão. Web: carregando só no botão."
 - id: onboarding.invites.reject
   screen: lib/screens/onboarding/pending_invites_screen.dart
   route: null
@@ -693,9 +717,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["links/invites/tokens"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Grava status rejected no Firestore, sem API, e recarrega a lista. Pede confirmação destrutiva com o nome da empresa. Não copiar: o detalhe fecha antes de a gravação terminar."
+  note: "Grava status rejected no Firestore, sem API, e recarrega a lista. Pede confirmação destrutiva com o nome da empresa. Não copiar: o detalhe fecha antes de a gravação terminar. Web: pergunta com o nome da empresa; a linha só some depois de gravar."
 - id: onboarding.invites.skip
   screen: lib/screens/onboarding/pending_invites_screen.dart
   route: null
@@ -725,7 +750,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: onboarding.invites.error-map
   screen: lib/screens/onboarding/pending_invites_screen.dart
@@ -740,9 +766,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/invites/{token}/accept"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Vale também no código (accept_invite_screen). Não copiar: o app procura pedaços de texto em inglês na mensagem (utils/invite_error.dart); se o servidor mudar o texto, cai no genérico. Na web: usar o código de erro da API."
+  note: "Vale também no código (accept_invite_screen). Não copiar: o app procura pedaços de texto em inglês na mensagem (utils/invite_error.dart); se o servidor mudar o texto, cai no genérico. Na web: usar o código de erro da API. Web: inviteErrorKey (lib/invites.ts) pelo código da API."
 - id: onboarding.code.lookup
   screen: lib/screens/onboarding/accept_invite_screen.dart
   route: null
@@ -756,7 +783,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:GET /v1/app/invites/{token}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
   note: "Código com trim, maiúsculas e prefixo INV_ quando falta; vazio mostra Digite o código; Enter busca; campo mono centralizado."
 - id: onboarding.code.accept
@@ -772,7 +800,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/invites/{token}/accept", "claims"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: onboarding.code.search-again
   screen: lib/screens/onboarding/accept_invite_screen.dart
@@ -787,7 +816,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: onboarding.whatsapp.link
   screen: lib/screens/onboarding/whatsapp_onboarding_screen.dart
@@ -832,10 +862,11 @@ rows:
   feature_flags: ["useScheduling", "useFinancial"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/guard.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Agenda some sem useScheduling; Financeiro exige viewFinancialReports e useFinancial."
+  note: "Agenda some sem useScheduling; Financeiro exige viewFinancialReports e useFinancial. Web: menu lateral no computador e abas no celular, filtrados pela mesma regra. Diferença: sem useScheduling a Agenda continua, mostrando as entregas (agenda.mode-due)."
 - id: nav.tabs.new-order
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
@@ -849,7 +880,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
   note: "Técnico tem createOrder, mas a UI esconde o \"+\"."
@@ -866,9 +898,11 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/guard.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: link escondido e URL direta vai para \"Você não tem acesso a esta tela\"."
 - id: nav.engagement.schedule
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
@@ -912,9 +946,11 @@ rows:
   feature_flags: ["useScheduling", "useFinancial"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: src/navigation.ts na ordem Início, Agenda, Financeiro."
 - id: nav.tabs.analytics-names
   screen: lib/screens/menu_navigation/tab_routes.dart
   route: null
@@ -929,7 +965,7 @@ rows:
   hardware: null
   data: ["analytics"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Os nomes das abas só servem ao analytics do app; o web não tem analytics (auth.analytics.events), e cada tela já tem rota e título próprios."}
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null
@@ -993,7 +1029,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Inalcançável no app: nada grava OrderStore.customerFilter com um cliente (só setCustomerFilter(null), em home.dart). No web, as OS de um cliente ficam na ficha dele (customer.detail.orders)."}
 - id: home.list.load-more
   screen: lib/screens/menu_navigation/home.dart
   route: null
@@ -1023,8 +1059,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
+  note: "Web: o botão do perfil abre Configurações, com Clientes, Catálogo, Equipe e Sua empresa."
 - id: home.notifications.open
   screen: lib/screens/menu_navigation/home.dart
   route: "/notifications"
@@ -1203,9 +1241,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "O espaçamento se ajusta para um filtro ficar cortado e indicar que há mais."
+  note: "O espaçamento se ajusta para um filtro ficar cortado e indicar que há mais. Web: no celular a linha rola de lado e o filtro escolhido (também pela URL) é trazido para a vista."
 - id: home.search.run
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1236,10 +1275,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Não aparece em Concluídas, Orçamentos e Paradas nem com filtro de cliente."
+  note: "Não aparece em Concluídas, Orçamentos e Paradas nem com filtro de cliente. Web: aparece sempre que há mais páginas; número exato vem direto do servidor."
 - id: home.summary.count
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -10098,7 +10137,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
   permission: manageCompany
 - id: settings.open-reminders
@@ -10115,7 +10155,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Lembretes são notificações locais do celular (reminders.* já propostos como exceção); no navegador só com Web Push. O idioma, que no Android mora nessa tela, está em Configurações › Neste navegador (reminders.language)."}
 - id: settings.open-advanced
   screen: lib/screens/menu_navigation/settings.dart
   route: null
@@ -10279,9 +10319,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["firebase-auth", "local", "analytics", "RevenueCat"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
-  note: "Apaga empresa e usuário lembrados, limpa o usuário do analytics e desliga a assinatura. Falha ao sair do Google é ignorada; a do Firebase não."
+  note: "Apaga empresa e usuário lembrados, limpa o usuário do analytics e desliga a assinatura. Falha ao sair do Google é ignorada; a do Firebase não. Web: apaga o cache do Firestore e a empresa lembrada e recomeça a página; sem analytics nem assinatura no navegador."
 - id: account.deletion.flow
   screen: lib/screens/menu_navigation/more/account_deletion.dart
   route: null
@@ -10757,7 +10798,8 @@ rows:
   feature_flags: ["paidPlansEnabled"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: plan.usage-levels
   screen: lib/screens/menu_navigation/more/plan_screen.dart
@@ -10870,9 +10912,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["local", "users/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
-  note: "Só Android; iOS segue o aparelho. Web precisa do seletor. Três opções (pt-BR, en-US, es-ES) com bandeira; salva no aparelho e grava users.preferredLanguage sem esperar (erro só no log)."
+  note: "Só Android; iOS segue o aparelho. Web precisa do seletor. Três opções (pt-BR, en-US, es-ES) com bandeira; salva no aparelho e grava users.preferredLanguage sem esperar (erro só no log). Web: o seletor fica em Configurações › Neste navegador e grava users.preferredLanguage sem esperar."
 - id: advanced.integrations
   screen: lib/screens/menu_navigation/more/advanced_screen.dart
   route: "/integrations"
@@ -11058,10 +11101,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Vazio explica de onde vêm as avaliações."
+  note: "Vazio explica de onde vêm as avaliações. Web: lê só as OS com rating.score >= 1, não todas as concluídas."
 - id: ratings.open
   screen: lib/screens/ratings/ratings_screen.dart
   route: "/order"
@@ -11075,7 +11119,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
   permission: manageCompany
 - id: notifications.view
@@ -11375,7 +11420,7 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Faz parte da folha de compartilhar do celular (share-in.which-order, já proposta). No web o arquivo vai solto na OS aberta, e a OS se acha pela paleta ⌘K por número, cliente ou placa."}
   note: "Carrega na primeira busca as 300 últimas por createdAt (concluídas entram); número com ou sem #, aparelho ou placa sem pontuação e sem acento."
 - id: share-in.file-kind
   screen: lib/screens/share/receipt_question.dart
@@ -11454,7 +11499,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: ui.app-form-field
   screen: lib/screens/widgets/app_form_field.dart
@@ -11469,7 +11515,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
 - id: ui.app-list-row
   screen: lib/screens/widgets/app_list_row.dart
@@ -11484,7 +11531,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
 - id: ui.app-sheet
   screen: lib/screens/widgets/app_sheet.dart
@@ -11499,8 +11547,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/layers.spec.ts
   web_exception: null
+  note: "Web: Layer (gaveta, folha ou diálogo)."
 - id: ui.app-toast
   screen: lib/screens/widgets/app_toast.dart
   route: null
@@ -11514,8 +11564,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/layers.spec.ts
   web_exception: null
+  note: "Web: ToastHost."
 - id: ui.form-sheet
   screen: lib/screens/widgets/form_sheet.dart
   route: null
@@ -11529,8 +11581,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/layers.spec.ts
   web_exception: null
+  note: "Web: Layer com guard (\"Descartar?\") e Nova OS em gaveta."
 - id: ui.glass-bar-button
   screen: lib/screens/widgets/glass_bar_button.dart
   route: null
@@ -11545,7 +11599,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Vidro (Liquid Glass) é componente nativo do iPhone e o design do web proíbe glassmorphism (docs/WEB_APP_DESIGN.md). A navegação do web é o menu lateral e a barra do topo, cobertos em guard.spec.ts e a11y.spec.ts."}
 - id: ui.list-states
   screen: lib/screens/widgets/list_states.dart
   route: null
@@ -11559,8 +11613,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/layers.spec.ts
   web_exception: null
+  note: "Web: EmptyState, ErrorState e LoadingState."
 - id: ui.money-field
   screen: lib/screens/widgets/money_field.dart
   route: null
@@ -11574,9 +11630,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Antes os dígitos eram centavos. Ponto ou vírgula no fim abre os centavos, seja qual for o teclado. Vale também para cobrança e folha de receber."
+  note: "Antes os dígitos eram centavos. Ponto ou vírgula no fim abre os centavos, seja qual for o teclado. Vale também para cobrança e folha de receber. Web: MoneyInput e parseMoney (tests/format.test.ts)."
 - id: ui.more-fields-link
   screen: lib/screens/widgets/more_fields_link.dart
   route: null
@@ -11590,7 +11647,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
 - id: ui.period-stepper
   screen: lib/screens/widgets/period_stepper.dart
@@ -11605,7 +11663,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
 - id: ui.picker-screen
   screen: lib/screens/widgets/picker_screen.dart
@@ -11620,7 +11679,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/pickers.spec.ts
   web_exception: null
 - id: ui.primary-button
   screen: lib/screens/widgets/primary_button.dart
@@ -11635,7 +11695,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: ui.pull-down-menu
   screen: lib/screens/widgets/pull_down_menu.dart
@@ -11650,8 +11711,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
+  note: "Web: Menu \"…\"."
 - id: ui.secondary-button
   screen: lib/screens/widgets/secondary_button.dart
   route: null
@@ -11665,7 +11728,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: ui.section-label
   screen: lib/screens/widgets/section_label.dart
@@ -11680,7 +11744,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
 - id: ui.suggest-field
   screen: lib/screens/widgets/suggest_field.dart
@@ -11695,8 +11760,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/layers.spec.ts
   web_exception: null
+  note: "Web: Combobox."
 - id: ui.text-link
   screen: lib/screens/widgets/text_link.dart
   route: null
@@ -11710,7 +11777,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/entry.spec.ts
   web_exception: null
 - id: widgets.failure-alert
   screen: lib/screens/widgets/failure_alert.dart
@@ -11725,6 +11793,7 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "No web, o erro vai no aviso da própria tela ou no toast, sem perder o que foi digitado."

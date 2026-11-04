@@ -797,5 +797,7 @@
   "web.order.documentDeleteFailed": "No se pudo eliminar el documento. Revise su internet e intente de nuevo.",
   "web.order.deleteDocument": "Eliminar",
   "web.order.deleteDocumentOf": "Eliminar {name}",
-  "web.order.noDocuments": "Ningún documento. Factura, contrato o garantía van aquí."
+  "web.order.noDocuments": "Ningún documento. Factura, contrato o garantía van aquí.",
+  "web.login.signupBlocked": "El registro no fue aceptado. Si ya tienes cuenta, entra con ella; si no, habla con el soporte de PraticOS.",
+  "web.invites.joining": "Entrando…"
 }
