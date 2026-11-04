@@ -8,6 +8,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
+import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import { contextOf, offerOf, planAiActions, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
 import { noticeText } from '@/lib/orders/ai-actions-text'
@@ -96,6 +97,13 @@ function errorNote(error: unknown): string {
   return t('orderAssistantErrorUnavailable')
 }
 
+/** The app's ai_assist_result for a refused answer, and the limit note as upgrade_modal_shown. */
+function logFailure(error: unknown) {
+  const result = aiResult({ errorCode: error instanceof ApiError ? error.code : null, failed: true })
+  logAiEvent('ai_assist_result', { result })
+  if (result === 'quota') logAiEvent('upgrade_modal_shown', { trigger: 'ai_limit_100' })
+}
+
 function pickLine(change: DraftChange, lines: OrderLine[]): Promise<OrderLine | null> {
   return new Promise((resolve) => (asking.value = { change, lines, resolve }))
 }
@@ -182,6 +190,7 @@ function holdRemovals(undo: Undo) {
 }
 
 async function undoDraft(undo: Undo) {
+  logAiEvent('ai_assist_undone')
   for (const id of undo.added) await writes.removeItem(props.order.id, id).catch(() => {})
   for (const item of undo.changed) {
     const patch = { ...(item.before.value !== undefined && can('editPrices') ? { value: item.before.value } : {}), ...(item.before.quantity ? { quantity: item.before.quantity } : {}), description: item.before.description ?? '' }
@@ -202,6 +211,7 @@ async function run(input: { text?: string; files?: File[] }) {
   if (!value && !files.length) return
   reading.value = files.length ? 'photos' : 'text'
   note.value = ''
+  logAiEvent('ai_assist_requested', { input: aiInput(value, files.length) })
   const undo = emptyUndo()
   try {
     // The photo goes into the order first, then it is read (there is no photo just for the assistant).
@@ -219,6 +229,7 @@ async function run(input: { text?: string; files?: File[] }) {
     text.value = ''
     emit('added', undo.added)
     const actions = draft.actions ?? null
+    logAiEvent('ai_assist_result', { result: aiResult({ filled, actions: !!actions }) })
     const key = noteKey({ filled, hasActions: !!actions, isNew: false, onlyChanges })
     if (key) note.value = t(key)
     // Nothing the person may do with the money: the reason in the note, no card (offerActions).
@@ -230,6 +241,7 @@ async function run(input: { text?: string; files?: File[] }) {
   } catch (error) {
     console.warn('assistant: failed', error)
     note.value = errorNote(error)
+    logFailure(error)
     // What was saved before the error can still be undone.
     if (hasUndo(undo)) {
       holdRemovals(undo)

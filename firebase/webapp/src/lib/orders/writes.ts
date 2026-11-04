@@ -3,6 +3,7 @@
 // (409 ORDER_CHANGED); payments and discounts carry a `clientTransactionId`, so
 // a retry or a double click never books twice. Customer, device, comments and
 // photos carry no money and go to Firestore, like the app (only changed fields).
+import { logPaymentAdded } from '@/lib/analytics'
 import { firestoreClient, storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
 import { normalizeOrder, type HoldReason, type Order, type OrderStatus } from './model'
@@ -101,7 +102,11 @@ export function receivePayment(
   body: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; receiptFile?: { url: string; storagePath: string; fileName: string; contentType: string } },
   expectedUpdatedAt?: string | null,
 ) {
-  return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } })
+  return api<OrderResponse>(`${base(id)}/payments`, { method: 'POST', body: { ...body, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) } }).then((response) => {
+    // The app's payment_added (OrderStore.addPayment): every payment of one order, by hand or by the assistant.
+    logPaymentAdded(body.amount)
+    return response
+  })
 }
 
 export function giveDiscount(id: string, body: { amount: number; clientTransactionId: string }, expectedUpdatedAt?: string | null) {

@@ -5,15 +5,17 @@
 // seen before it shows, so any answer is final. "Experimentar agora" opens Nova
 // OS with the cursor in the assistant (the computer has no "já ouvindo": the
 // person types or sends a photo).
-import { nextTick } from 'vue'
+import { nextTick, onMounted } from 'vue'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
+import { logAiEvent } from '@/lib/analytics'
 import { orderShort } from '@/lib/orders/text'
 import { ui } from '@/lib/ui'
 
 const emit = defineEmits<{ close: [] }>()
 
 let tried = false
+onMounted(() => logAiEvent('ai_intro_shown'))
 function tryNow(close: () => void) {
   tried = true
   close()
@@ -21,6 +23,7 @@ function tryNow(close: () => void) {
 /** Nova OS opens only after this layer left the history (or its Voltar would close the drawer). */
 async function onClose() {
   emit('close')
+  logAiEvent(tried ? 'ai_intro_accepted' : 'ai_intro_dismissed')
   if (!tried) return
   await nextTick()
   ui.newOrderSeed = { ...(ui.newOrderSeed ?? {}), assist: true }

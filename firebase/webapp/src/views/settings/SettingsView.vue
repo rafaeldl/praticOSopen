@@ -9,6 +9,7 @@ import InvitesList from '@/components/InvitesList.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import PageHead from '@/components/PageHead.vue'
 import { t } from '@/i18n'
+import { analyticsAvailable, analyticsState, setConsent, startAnalytics } from '@/lib/analytics'
 import { prefs } from '@/lib/prefs'
 import { chooseLanguage } from '@/lib/user-profile'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -24,6 +25,13 @@ interface Row {
 }
 
 const leaving = ref(false)
+// Usage statistics (the notice's answer), only where analytics runs.
+const showsAnalytics = analyticsAvailable()
+function onAnalytics(event: Event) {
+  const on = (event.target as HTMLInputElement).checked
+  setConsent(on ? 'granted' : 'denied')
+  if (on) void startAnalytics()
+}
 const companyName = computed(() => session.company?.name || session.companies.find((item) => item.id === session.companyId)?.name || '')
 const roleText = computed(() => (session.role ? t(session.role === 'owner' ? 'owner' : ROLE_LABEL[displayRole(session.role)]) : ''))
 const accountSub = computed(() => [session.email ?? '', [companyName.value, roleText.value].filter(Boolean).join(' · ')].filter((line) => !!line))
@@ -148,6 +156,10 @@ const WEB_VERSION = __WEB_VERSION__
           <label class="check-row hide-phone">
             <input v-model="prefs.singleKeyShortcuts" class="check" type="checkbox" />
             <span>{{ t('web.settings.singleKeys') }}</span>
+          </label>
+          <label v-if="showsAnalytics" class="check-row">
+            <input class="check" type="checkbox" :checked="analyticsState.consent === 'granted'" data-testid="settings-analytics" @change="onAnalytics" />
+            <span>{{ t('web.analytics.setting') }}</span>
           </label>
         </div>
       </section>
