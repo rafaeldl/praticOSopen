@@ -232,7 +232,7 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     const guess = guessCompany(roles, saved)
     if (guess) hintListeners.forEach((listener) => listener({ uid: user.uid, companyId: guess, role: roles[guess] as string }))
     const [profile, guessed] = await Promise.all([
-      readDoc<{ name?: string; companies?: unknown }>(`users/${user.uid}`),
+      readDoc<{ name?: string; companies?: unknown; preferredLanguage?: string }>(`users/${user.uid}`),
       guess
         ? readDoc<CompanyProfile>(`companies/${guess}`).catch((error) => {
             console.warn('session: company not loaded', error)
@@ -249,6 +249,14 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
       roles = (token.claims.roles ?? {}) as Record<string, string>
     }
     session.name = profile?.name ?? user.displayName
+    // First sign-in on the web: the app's users/{uid} (without waiting); otherwise the account's language.
+    if (!profile) {
+      const fresh = { uid: user.uid, name: user.displayName, email: user.email }
+      void import('./user-profile').then((m) => m.ensureUserDoc(fresh)).catch((error) => console.warn('session: user not created', error))
+    } else if (profile.preferredLanguage) {
+      const tag = profile.preferredLanguage
+      void import('./user-profile').then((m) => m.applyAccountLanguage(tag))
+    }
     session.companies = resolveCompanies(profile?.companies, roles)
     const companyId = pickCompany(session.companies, saved)
     session.companyId = companyId

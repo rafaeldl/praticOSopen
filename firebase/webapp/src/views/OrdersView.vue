@@ -370,11 +370,25 @@ const stopBus = onOrderEvent(({ order, removedId, createdId }) => {
   }
 })
 
+/**
+ * On a phone the filters are one row that scrolls sideways (home.filter.scroll):
+ * the chosen one is brought into view, also when it comes from the URL.
+ */
+function showChosenFilter() {
+  const row = document.querySelector<HTMLElement>('.toolbar .chips')
+  const chosen = row?.querySelector<HTMLElement>('[aria-pressed="true"]')
+  if (!row || !chosen || row.scrollWidth <= row.clientWidth) return
+  const left = chosen.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft
+  if (left < row.scrollLeft || left + chosen.offsetWidth > row.scrollLeft + row.clientWidth) row.scrollLeft = Math.max(0, left - 16)
+}
+watch(filter, () => void nextTick(showChosenFilter))
+
 let observer: ReturnType<typeof watchListEnd> | undefined
 const clock = setInterval(() => (now.value = new Date()), 60_000)
 const removers: (() => void)[] = []
 onMounted(() => {
   void load()
+  void nextTick(showChosenFilter)
   window.addEventListener('keydown', onKeys)
   removers.push(registerShortcut({ keys: '/', label: 'web.shortcuts.filter', run: () => searchEl.value?.focus() }))
   // Infinite scroll: more rows before the end shows (home.list.load-more).

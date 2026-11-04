@@ -45,6 +45,8 @@ import {
 import * as writes from '@/lib/orders/writes'
 import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
+import { featureOn } from '@/lib/company-features'
+import { segmentFieldService } from '@/lib/segments'
 import { registerShortcut } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { preferredStep, rememberMethod, rememberTransition, suggestedMethod } from '@/lib/orders/suggest'
@@ -485,7 +487,8 @@ async function applyCustomer(customer: Customer, dropDevices: boolean) {
   await run(() => writes.updateOrderFields(o.id, fields), t('web.saved'))
 }
 
-const fieldService = computed(() => !!(session.company as { fieldService?: boolean } | null)?.fieldService)
+// Absent on the company: the segment's default, as the app (auth.gate.feature-defaults).
+const fieldService = computed(() => featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService()))
 
 /**
  * The place of the order (order.address.edit / remove): a new text drops the

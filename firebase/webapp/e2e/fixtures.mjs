@@ -68,6 +68,17 @@ export const USERS = {
   dAlone: { ...user('d-alone', 'Davi Sem Empresa'), roles: {} },
   /** Joins company B with an invite code typed in Sua conta. */
   joiner: { ...user('joiner', 'Joana Codigo'), roles: { [COMPANY_G]: 'technician' } },
+  // Entry (e2e/entry.spec.ts): each one changes only itself.
+  /** No company; joins company B by typing a code in the first access. */
+  codeNew: { ...user('codenew', 'Caio Codigo Novo'), roles: {} },
+  /** No company; accepts the invite on the list and lands in company B. */
+  firstAccept: { ...user('firstaccept', 'Flora Primeiro Convite'), roles: {} },
+  /** No company; refuses the invite after the question. */
+  rejecter: { ...user('rejecter', 'Rosa Recusa'), roles: {} },
+  /** No company; the account says Spanish (users.preferredLanguage). */
+  polyglot: { ...user('polyglot', 'Paco Idiomas'), roles: {}, preferredLanguage: 'es-ES' },
+  /** Signs in for the first time on the web: no users/{uid} yet. */
+  fresh: { ...user('fresh', 'Fabi Primeira Vez'), roles: {}, noUserDoc: true },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -75,6 +86,10 @@ export const INVITES = {
   newcomer: { token: 'INV_E2E_NEWCOMER', company: COMPANY_A, role: 'technician', email: 'newcomer@praticos.test' },
   invitee: { token: 'INV_E2E_INVITEE_B', company: COMPANY_B, role: 'supervisor', email: 'invitee@praticos.test' },
   joiner: { token: 'INV_E2E_JOINER_B', company: COMPANY_B, role: 'technician', email: 'joiner@praticos.test' },
+  firstAccept: { token: 'INV_E2E_FIRST_B', company: COMPANY_B, role: 'technician', email: 'firstaccept@praticos.test' },
+  rejecter: { token: 'INV_E2E_REJECT_B', company: COMPANY_B, role: 'technician', email: 'rejecter@praticos.test' },
+  /** Sent to someone else's e-mail: only the code reaches codeNew. */
+  codeNew: { token: 'INV_E2E_CODE_NEW', company: COMPANY_B, role: 'technician', email: 'someone-else@praticos.test' },
 }
 
 export const COMPANIES = {

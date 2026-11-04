@@ -780,5 +780,7 @@
   "web.palette.create": "Add",
   "web.when.quickLabel": "Type the day and time",
   "web.when.quickHint": "E.g. tomorrow 2pm, +3, mon 8:30, 5/9 2pm. ↑ ↓ change the day; Shift ↑ ↓, half an hour.",
-  "web.when.quickError": "Not understood. Try: tomorrow 2pm, +3, mon 8:30 or 5/9 2pm."
+  "web.when.quickError": "Not understood. Try: tomorrow 2pm, +3, mon 8:30 or 5/9 2pm.",
+  "web.login.signupBlocked": "The sign-up was not accepted. If you already have an account, sign in with it; if not, contact PraticOS support.",
+  "web.invites.joining": "Joining…"
 }
