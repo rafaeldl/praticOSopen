@@ -31,6 +31,7 @@ const FinanceView = withFinanceTexts(() => import('@/views/finance/FinanceView.v
 const FinanceReceiveView = withFinanceTexts(() => import('@/components/orders/receive/FinanceReceive.vue'))
 const ReportView = withFinanceTexts(() => import('@/views/finance/ReportView.vue'))
 const InvoicesView = withFinanceTexts(() => import('@/views/finance/InvoicesView.vue'))
+const NfseSetupView = withFinanceTexts(() => import('@/views/finance/NfseSetupView.vue'))
 // Agenda opens orders beside it, so it brings their texts too.
 const AgendaView = () => Promise.all([import('@/views/agenda/AgendaView.vue'), loadTexts('agenda'), loadOrderTexts()]).then(([m]) => m)
 // The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
@@ -126,6 +127,13 @@ export const routes: RouteRecordRaw[] = [
     name: 'financeReceive',
     component: FinanceReceiveView,
     meta: { access: { kind: 'member', anyOf: ['viewFinancialReports'] }, title: 'receiveTitle' },
+  },
+  // Nota fiscal setup (nfse.setup.view): owner and admin, like the server's /nfse/setup.
+  {
+    path: '/invoices/setup',
+    name: 'nfseSetup',
+    component: NfseSetupView,
+    meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'nfseListSetup' },
   },
   {
     path: '/finance/report',

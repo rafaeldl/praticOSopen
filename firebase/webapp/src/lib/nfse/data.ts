@@ -3,13 +3,15 @@
 // routes the app already uses (/v1/app/nfse/*). Nothing here issues a nota by itself.
 import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
-import { invoiceOf, queryUntil, querySince, type Contact, type NfseInvoice, type Preview } from './model'
+import { invoiceOf, queryUntil, querySince, type Contact, type FiscalInfo, type MunicipalService, type NfseInvoice, type NfseSetup, type Preview, type ServiceSettings } from './model'
 
 export interface NfseSettings {
   /** nfseEnabled, Asaas on and connected: the notas exist for this company. */
   available: boolean
   /** The configuration is done: a nota can be issued. */
   ready: boolean
+  /** The Asaas account is the sandbox (its panel is another address). */
+  sandbox?: boolean
 }
 
 /** settings/payments (members read it). A failed read is an error, never "off" (D23 shows nothing forever). */
@@ -18,7 +20,7 @@ export async function nfseSettings(): Promise<NfseSettings> {
   const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
   const data = (snap.data() ?? {}) as Record<string, unknown>
   const available = data.nfseEnabled === true && data.asaasEnabled === true && data.asaasConnected === true
-  return { available, ready: available && data.nfseReady === true }
+  return { available, ready: available && data.nfseReady === true, sandbox: data.asaasEnvironment === 'sandbox' }
 }
 
 /**
@@ -68,3 +70,37 @@ export function issueInvoice(input: IssueInput) {
 
 export const cancelInvoice = (id: string, onlyOnAsaas = false) =>
   api<Record<string, unknown>>(`/v1/app/nfse/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: onlyOnAsaas ? { onlyOnAsaas: true } : {} })
+
+/**
+ * The notas of an order (orderIds array-contains) or of a customer, live: the
+ * webhook changes them while the screen is open. Single-field filters only
+ * (automatic indexes, as the app's nfse_invoice_repository).
+ */
+export async function watchInvoicesOf(
+  scope: { orderId: string } | { customerId: string },
+  onInvoices: (invoices: NfseInvoice[]) => void,
+  onError: () => void,
+): Promise<() => void> {
+  const [db, { collection, onSnapshot, query, where }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
+  const ref = collection(db, 'companies', session.companyId as string, 'invoices')
+  const filter = 'orderId' in scope ? where('orderIds', 'array-contains', scope.orderId) : where('customer.id', '==', scope.customerId)
+  return onSnapshot(
+    query(ref, filter),
+    (snap) => onInvoices(snap.docs.map((d) => invoiceOf(d.id, d.data() as Record<string, unknown>))),
+    () => onError(),
+  )
+}
+
+/** The notas of one customer, once (the list "Notas de X"). */
+export async function customerInvoices(customerId: string): Promise<NfseInvoice[]> {
+  const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  const snap = await getDocs(query(collection(db, 'companies', session.companyId as string, 'invoices'), where('customer.id', '==', customerId)))
+  return snap.docs.map((d) => invoiceOf(d.id, d.data()))
+}
+
+// Setup (owner and admin only; the server says 403 to anyone else).
+export const nfseSetup = () => api<NfseSetup>('/v1/app/nfse/setup')
+export const saveFiscalInfo = (body: Required<Pick<FiscalInfo, 'email'>> & { simplesNacional: boolean; municipalInscription?: string; cnae?: string; specialTaxRegime?: string; serviceListItem?: string }) =>
+  api<NfseSetup>('/v1/app/nfse/setup/fiscal-info', { method: 'POST', body })
+export const municipalServices = (q: string) => api<MunicipalService[]>(`/v1/app/nfse/setup/municipal-services?q=${encodeURIComponent(q.slice(0, 100))}`)
+export const saveService = (body: ServiceSettings) => api<NfseSetup>('/v1/app/nfse/setup/service', { method: 'PUT', body })

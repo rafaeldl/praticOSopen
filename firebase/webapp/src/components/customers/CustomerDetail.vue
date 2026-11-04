@@ -12,7 +12,7 @@ import LoadingState from '@/components/LoadingState.vue'
 import OrderStatus from './OrderStatus.vue'
 import ChoiceDialog, { type Choice } from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
-import { locale, t } from '@/i18n'
+import { loadTexts, locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { deleteCustomer, loadCustomer, type CustomerDetail } from '@/lib/customers/data'
 import { firstName, mapsUrl, type CustomerRow } from '@/lib/customers/model'
@@ -31,6 +31,8 @@ import DeviceForm from './DeviceForm.vue'
 // Several orders in one receipt, and the customer's receipts (pay.customer.view, customer.detail.receipts).
 const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
 const ReceiptsDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiptsDialog.vue'))
+// The customer's notas (customer.detail.nfse-*): their own chunk and texts, only for who issues.
+const CustomerNfse = defineAsyncComponent(() => Promise.all([import('@/components/finance/CustomerNfse.vue'), loadTexts('finance')]).then(([m]) => m))
 
 const props = defineProps<{ customerId: string; directory: CustomerRow[] }>()
 const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
@@ -198,6 +200,7 @@ onMounted(load)
           <span v-if="spent > 0" class="muted">{{ t('customerSpentValue', { value: money(spent) }) }}</span>
           <button v-if="canReceipts" type="button" class="link" data-testid="customer-receipts" @click="dialog = 'receipts'">{{ t('receiptsSection') }}</button>
         </div>
+        <CustomerNfse v-if="can('chargeOrder') && effectiveUseFinancial()" :key="customer.id" :customer-id="customer.id" :customer-name="customer.name" :orders="detail.orders" />
         <p v-if="detail.partial" class="sub">{{ t('web.customers.partial') }}</p>
         <p v-if="canCreate" class="od-ask">{{ t('askOrderForCustomer', { name: firstName(customer.name) }) }}</p>
         <div class="od-actions">

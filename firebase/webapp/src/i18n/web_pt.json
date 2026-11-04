@@ -644,7 +644,6 @@
   "web.nfse.taxId": "CPF ou CNPJ do cliente",
   "web.nfse.addressNumber": "Número",
   "web.nfse.discard": "Fechar sem emitir? O que você mudou na nota se perde.",
-  "web.nfse.setupInApp": "Confira a configuração da nota no app, em Integrações, Asaas.",
   "web.nfse.offBody": "Quando a nota fiscal for ligada no app (Integrações, Asaas), as notas aparecem aqui.",
   "web.nfse.emptyHint": "Para emitir, abra a OS e escolha “Emitir nota fiscal” no “…”.",
   "web.nfse.status": "Situação",
@@ -797,5 +796,8 @@
   "web.order.documentDeleteFailed": "Não deu para excluir o documento. Confira a internet e tente de novo.",
   "web.order.deleteDocument": "Excluir",
   "web.order.deleteDocumentOf": "Excluir {name}",
-  "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui."
+  "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui.",
+  "web.nfse.issuedCount": "{count, plural, =0{nenhuma emitida} =1{1 emitida} other{{count} emitidas}}",
+  "web.nfse.searchOrder": "Número da OS",
+  "web.nfse.pickContinue": "{count, plural, =0{Escolha as OS} =1{Continuar com 1 OS} other{Continuar com {count} OS}}"
 }

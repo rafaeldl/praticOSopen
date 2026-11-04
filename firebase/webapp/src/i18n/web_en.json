@@ -644,7 +644,6 @@
   "web.nfse.taxId": "Customer CPF or CNPJ",
   "web.nfse.addressNumber": "Number",
   "web.nfse.discard": "Close without issuing? What you changed is lost.",
-  "web.nfse.setupInApp": "Check the invoice setup in the app, under Integrations, Asaas.",
   "web.nfse.offBody": "When invoices are turned on in the app (Integrations, Asaas), they show here.",
   "web.nfse.emptyHint": "To issue one, open the order and choose “Issue invoice” in the “…” menu.",
   "web.nfse.status": "Status",
@@ -797,5 +796,8 @@
   "web.order.documentDeleteFailed": "Couldn't delete the document. Check your internet and try again.",
   "web.order.deleteDocument": "Delete",
   "web.order.deleteDocumentOf": "Delete {name}",
-  "web.order.noDocuments": "No documents. Invoices, contracts or warranties go here."
+  "web.order.noDocuments": "No documents. Invoices, contracts or warranties go here.",
+  "web.nfse.issuedCount": "{count, plural, =0{none issued} =1{1 issued} other{{count} issued}}",
+  "web.nfse.searchOrder": "Order number",
+  "web.nfse.pickContinue": "{count, plural, =0{Choose the orders} =1{Continue with 1 order} other{Continue with {count} orders}}"
 }

@@ -266,3 +266,139 @@ export const ALL_FIELDS: CustomerField[] = ['email', 'postalCode', 'address', 'a
 
 /** Errors that the configuration fixes: the owner can open it in the app. */
 export const SETUP_ERRORS = new Set(['NFSE_SETUP_REJECTED', 'NFSE_NOT_READY', 'NFSE_SETUP_NEEDED', 'NFSE_RECONNECT_NEEDED'])
+
+// ---------------------------------------------------------------------------
+// The nota of an order and of a customer (order.nfse.*, nfse.orders.pick)
+// ---------------------------------------------------------------------------
+
+/** The nota that stands for an order: the newest active one, else the newest (never a stale "creating"). The app's currentInvoiceOf. */
+export function currentInvoiceOf(invoices: NfseInvoice[], now = Date.now()): NfseInvoice | null {
+  if (!invoices.length) return null
+  const sorted = [...invoices].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+  const active = sorted.find((invoice) => isActive(invoice, now))
+  if (active) return active
+  const latest = sorted[0] as NfseInvoice
+  return latest.status === 'creating' ? null : latest
+}
+
+export interface NfseOrderLike {
+  status: string
+  discount?: number
+  lines: { kind: 'service' | 'product'; value?: number | null; quantity?: number; total?: number | null }[]
+}
+
+/** The services' part of the order after its share of the discount (the app's nfseValueOfOrder): products never go in a nota. */
+export function nfseValueOf(order: NfseOrderLike): number {
+  const services = order.lines.filter((l) => l.kind === 'service').reduce((sum, l) => sum + (l.value ?? 0), 0)
+  const products = order.lines.filter((l) => l.kind === 'product' && l.value !== null && l.value !== undefined).reduce((sum, l) => sum + (l.total ?? (l.value as number) * (l.quantity ?? 1)), 0)
+  const gross = services + products
+  const discount = Math.min(Math.max(order.discount ?? 0, 0), Math.max(gross, 0))
+  const share = gross > 0 ? services / gross : 0
+  const value = services - discount * share
+  return value <= 0 ? 0 : Math.round(value * 100) / 100
+}
+
+/** Not a quote, not canceled, with services of some value (orderCanHaveNfse). */
+export const canHaveNfse = (order: NfseOrderLike): boolean => order.status !== 'quote' && order.status !== 'canceled' && nfseValueOf(order) > 0
+
+/**
+ * The blue step of a finished, paid order (order.nfse.next-step): issue, or
+ * "Corrigir e emitir" after a refused nota. Nothing with an active nota, after
+ * one canceled on purpose, or before the setup is done.
+ */
+export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, remaining: number, now = Date.now()): 'issue' | 'fix' | null {
+  if (!ready || order.status !== 'done' || remaining > 0 || !canHaveNfse(order)) return null
+  if (!current) return 'issue'
+  if (isActive(current, now)) return null
+  return current.status === 'error' ? 'fix' : null
+}
+
+/** Orders that may go in a nota now: can have one and no active nota (nfse.orders.pick). */
+export function eligibleOrderIds(orders: { id: string; order: NfseOrderLike }[], invoices: NfseInvoice[], now = Date.now()): string[] {
+  const taken = new Set(invoices.filter((invoice) => isActive(invoice, now)).flatMap((invoice) => invoice.orderIds))
+  return orders.filter(({ id, order }) => canHaveNfse(order) && !taken.has(id)).map(({ id }) => id)
+}
+
+// ---------------------------------------------------------------------------
+// Setup (nfse.setup.*): GET /v1/app/nfse/setup and what it says is missing
+// ---------------------------------------------------------------------------
+
+export type SetupMissing = 'fiscalInfo' | 'cityAccess' | 'service'
+export type AutoIssue = 'manual' | 'paid' | 'completed'
+export interface FiscalInfo {
+  email?: string | null
+  municipalInscription?: string | null
+  simplesNacional?: boolean | null
+  cnae?: string | null
+  specialTaxRegime?: string | null
+  serviceListItem?: string | null
+}
+export interface CityOptions {
+  authenticationType?: string | null
+  supportsCancellation?: boolean | null
+  usesSpecialTaxRegimes?: boolean | null
+  usesServiceListItem?: boolean | null
+  specialTaxRegimesList?: { label: string; value: string }[] | null
+}
+export interface Taxes {
+  retainIss: boolean
+  iss: number
+  pis: number
+  cofins: number
+  csll: number
+  inss: number
+  ir: number
+}
+export interface ServiceSettings {
+  municipalServiceId?: string | null
+  municipalServiceCode?: string | null
+  municipalServiceName: string
+  taxes: Taxes
+  descriptionTemplate: string
+  autoIssue?: AutoIssue
+}
+export interface NfseSetup {
+  ready: boolean
+  missing: SetupMissing[]
+  fiscalInfo: FiscalInfo | null
+  municipalOptions: CityOptions | null
+  service: ServiceSettings | null
+}
+export interface MunicipalService {
+  id: string
+  description: string
+  issTax?: number | null
+}
+
+/** The server's default text of a nota (DEFAULT_DESCRIPTION_TEMPLATE): an empty field goes back to it. */
+export const DEFAULT_TEMPLATE = '{servicos}'
+
+/** What the blue button opens: fiscal info, then the Asaas panel (city access), then the service. */
+export function nextSetupStep(missing: SetupMissing[]): SetupMissing | null {
+  for (const step of ['fiscalInfo', 'cityAccess', 'service'] as const) if (missing.includes(step)) return step
+  return null
+}
+
+/** Which sentence explains the city access (the app's _cityAccessText). */
+export function cityAccessKind(setup: Pick<NfseSetup, 'fiscalInfo' | 'municipalOptions'>): 'first' | 'certificate' | 'token' | 'password' | 'none' {
+  if (!setup.fiscalInfo) return 'first'
+  switch (setup.municipalOptions?.authenticationType) {
+    case 'CERTIFICATE':
+      return 'certificate'
+    case 'TOKEN':
+      return 'token'
+    case 'USER_AND_PASSWORD':
+      return 'password'
+    default:
+      return 'none'
+  }
+}
+
+/** A percent typed with comma or point ("2,5", "2.5 %"); invalid or empty is 0, kept between 0 and 100. */
+export function parsePercent(text: string): number {
+  const value = Number.parseFloat(text.trim().replace('%', '').replace(',', '.'))
+  if (!Number.isFinite(value)) return 0
+  return Math.min(100, Math.max(0, value))
+}
+
+export const isEmail = (text: string): boolean => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(text.trim())
