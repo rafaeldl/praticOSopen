@@ -5,7 +5,7 @@
  * another record or outside the project bucket.
  */
 import { storage } from './firestore.service';
-import { projectBucket, isInsideFolder } from './payment-input';
+import { emulatorStorageHost, projectBucket, isInsideFolder } from './payment-input';
 
 export interface PhotoInput {
   url: string;
@@ -17,7 +17,8 @@ export const recordPhotoFolder = (companyId: string, collection: string, id: str
 
 /**
  * Path of a download URL of the project bucket. The Storage emulator serves
- * http on its own host; that form is accepted only while the emulator is on.
+ * http on its own host; that form is accepted only inside the Functions
+ * emulator (same guard as payment proofs), never in production.
  */
 export function storagePathOfUrl(raw: string): string | null {
   let url: URL;
@@ -27,7 +28,7 @@ export function storagePathOfUrl(raw: string): string | null {
     return null;
   }
   const bucket = projectBucket();
-  const emulator = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+  const emulator = emulatorStorageHost();
   let prefix: string | null = null;
   if (url.protocol === 'https:' && url.hostname === 'firebasestorage.googleapis.com') prefix = `/v0/b/${bucket}/o/`;
   else if (url.protocol === 'https:' && url.hostname === 'storage.googleapis.com') prefix = `/${bucket}/`;
