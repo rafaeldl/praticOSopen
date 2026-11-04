@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { locale, t } from '@/i18n'
+import { identifyUser, logScreenView } from '@/lib/analytics'
 import { loadSegmentLabels } from '@/lib/segments'
 import { companyZone, setZone } from '@/lib/zone'
 import { followCompany, session } from '@/lib/session'
@@ -58,6 +59,20 @@ watchEffect(() => {
   }
 })
 
+// The app's userId and user properties (identifyUser): the uid, never a name or e-mail.
+watchEffect(() => {
+  if (session.uid && session.companyId) {
+    identifyUser({ userId: session.uid, companyId: session.companyId, segment: session.company?.segment ?? null, userRole: session.role })
+  }
+})
+
+// One screen_view per screen, with the app's names (lib/analytics.ts). The route's
+// pattern stands for the address: never an order id or a search.
+const stopScreens = router.afterEach((to, from, failure) => {
+  if (failure || !to.name || (to.name === from.name && from.matched.length)) return
+  logScreenView(String(to.name), to.matched.at(-1)?.path ?? '/')
+})
+
 // Moving between screens must not leave focus on a link that may be gone.
 const stopFocus = router.afterEach((to, from) => {
   if (from.matched.length === 0 || to.path === from.path) return
@@ -74,6 +89,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleShortcut)
   removers.forEach((remove) => remove())
   stopFocus()
+  stopScreens()
 })
 </script>
 

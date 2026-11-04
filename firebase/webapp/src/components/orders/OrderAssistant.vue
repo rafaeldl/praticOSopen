@@ -8,6 +8,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
+import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import { contextOf, offerOf, planAiActions, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
 import { noticeText } from '@/lib/orders/ai-actions-text'
@@ -22,6 +23,7 @@ import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { currentToast, showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import AiActionsDialog from './AiActionsDialog.vue'
+import AssistTalk from './AssistTalk.vue'
 import ChoiceDialog from './ChoiceDialog.vue'
 
 const props = defineProps<{ order: Order; pendingChecklists?: number }>()
@@ -29,7 +31,9 @@ const props = defineProps<{ order: Order; pendingChecklists?: number }>()
 const emit = defineEmits<{ added: [ids: string[]]; undone: [ids: string[]]; hide: [ids: string[]]; unhide: [ids: string[]] }>()
 const enabled = ref(false)
 const text = ref('')
-const reading = ref<'' | 'text' | 'photos'>('')
+const reading = ref<'' | 'text' | 'photos' | 'speech'>('')
+/** Falar is listening: the bar shows only Cancelar and Parar e preencher. */
+const listening = ref(false)
 const note = ref('')
 const usesLeft = ref<number | null>(null)
 /** The month's limit, for "Você já usou os {limit} pedidos" (from the last status or answer). */
@@ -94,6 +98,13 @@ function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
   if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota', { limit: monthLimit.value })
   return t('orderAssistantErrorUnavailable')
+}
+
+/** The app's ai_assist_result for a refused answer, and the limit note as upgrade_modal_shown. */
+function logFailure(error: unknown) {
+  const result = aiResult({ errorCode: error instanceof ApiError ? error.code : null, failed: true })
+  logAiEvent('ai_assist_result', { result })
+  if (result === 'quota') logAiEvent('upgrade_modal_shown', { trigger: 'ai_limit_100' })
 }
 
 function pickLine(change: DraftChange, lines: OrderLine[]): Promise<OrderLine | null> {
@@ -182,6 +193,7 @@ function holdRemovals(undo: Undo) {
 }
 
 async function undoDraft(undo: Undo) {
+  logAiEvent('ai_assist_undone')
   for (const id of undo.added) await writes.removeItem(props.order.id, id).catch(() => {})
   for (const item of undo.changed) {
     const patch = { ...(item.before.value !== undefined && can('editPrices') ? { value: item.before.value } : {}), ...(item.before.quantity ? { quantity: item.before.quantity } : {}), description: item.before.description ?? '' }
@@ -195,13 +207,15 @@ async function undoDraft(undo: Undo) {
   emit('undone', undo.added)
 }
 
-async function run(input: { text?: string; files?: File[] }) {
+async function run(input: { text?: string; files?: File[]; audio?: { mimeType: string; data: string } }) {
   if (reading.value) return
-  const value = input.text?.trim() ?? ''
+  // What was said goes alone; the typed text stays in the box.
+  const value = input.audio ? '' : (input.text?.trim() ?? '')
   const files = (input.files ?? []).filter((file) => file.type.startsWith('image/'))
-  if (!value && !files.length) return
-  reading.value = files.length ? 'photos' : 'text'
+  if (!value && !files.length && !input.audio) return
+  reading.value = input.audio ? 'speech' : files.length ? 'photos' : 'text'
   note.value = ''
+  logAiEvent('ai_assist_requested', { input: aiInput(value, files.length) })
   const undo = emptyUndo()
   try {
     // The photo goes into the order first, then it is read (there is no photo just for the assistant).
@@ -211,14 +225,15 @@ async function run(input: { text?: string; files?: File[] }) {
       photos.push(await assistPhoto(file))
     }
     const sent = props.order
-    const draft = await askAssistant(value, sent, photos)
+    const draft = await askAssistant(value, sent, photos, input.audio)
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const { filled, onlyChanges } = await apply(draft, sent, undo)
     holdRemovals(undo)
-    text.value = ''
+    if (!input.audio) text.value = ''
     emit('added', undo.added)
     const actions = draft.actions ?? null
+    logAiEvent('ai_assist_result', { result: aiResult({ filled, actions: !!actions }) })
     const key = noteKey({ filled, hasActions: !!actions, isNew: false, onlyChanges })
     if (key) note.value = t(key)
     // Nothing the person may do with the money: the reason in the note, no card (offerActions).
@@ -230,6 +245,7 @@ async function run(input: { text?: string; files?: File[] }) {
   } catch (error) {
     console.warn('assistant: failed', error)
     note.value = errorNote(error)
+    logFailure(error)
     // What was saved before the error can still be undone.
     if (hasUndo(undo)) {
       holdRemovals(undo)
@@ -257,13 +273,14 @@ function cardDone(text: string, undoActions: (() => Promise<void>) | null) {
     <form @submit.prevent="run({ text })">
       <span class="ai" aria-hidden="true">✦</span>
       <label class="sr" for="od-assist">{{ t('web.order.askAssistant') }}</label>
-      <input id="od-assist" v-model="text" class="field" maxlength="2000" :placeholder="t('web.order.askAssistantHint')" :disabled="!!reading" />
-      <label v-if="canPhoto" class="btn assist-photo" :title="t('orderAssistantPhoto')">
+      <input v-show="!listening" id="od-assist" v-model="text" class="field" maxlength="2000" :placeholder="t('web.order.askAssistantHint')" :disabled="!!reading" />
+      <AssistTalk :disabled="!!reading" @audio="(audio) => run({ audio })" @note="(message) => (note = message)" @listening="(on) => (listening = on)" />
+      <label v-if="canPhoto && !listening" class="btn assist-photo" :title="t('orderAssistantPhoto')">
         <ImagePlus :size="16" aria-hidden="true" />
         <span class="sr">{{ t('web.assist.photo') }}</span>
         <input class="sr" type="file" accept="image/*" multiple :disabled="!!reading" data-testid="assistant-photo" @change="run({ text, files: [...(($event.target as HTMLInputElement).files ?? [])] }); ($event.target as HTMLInputElement).value = ''" />
       </label>
-      <button type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading ? t('web.order.reading') : t('web.order.send') }}</button>
+      <button v-if="!listening" type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading === 'speech' ? t('orderAssistantReadingSpeech') : reading ? t('web.order.reading') : t('web.order.send') }}</button>
     </form>
   </div>
   <ChoiceDialog

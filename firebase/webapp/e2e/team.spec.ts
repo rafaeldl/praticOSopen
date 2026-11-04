@@ -47,6 +47,29 @@ test('Equipe: resumo, convite esperando com os dias, vencido à mostra e você p
   expect(decodeURIComponent(whatsapp!)).toContain(TEAM_INVITES.waiting.token)
 })
 
+test('Compartilhar convite: a folha do navegador com a mensagem e o código, quando ele tem (team.invite-share.share)', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __shared: ShareData[] }
+    w.__shared = []
+    Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: async (data: ShareData) => void w.__shared.push({ text: data.text }) })
+  })
+  await openTeam(page)
+  await page.getByTestId('team-resend').click()
+  await share(page).getByTestId('invite-sheet').click()
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __shared: ShareData[] }).__shared.length)).toBe(1)
+  const text = await page.evaluate(() => (window as unknown as { __shared: ShareData[] }).__shared[0]?.text)
+  expect(text).toContain(TEAM_INVITES.waiting.token)
+})
+
+test('Convite sem a folha do navegador: copiar e WhatsApp, sem Compartilhar (team.invite-share.share)', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: undefined }))
+  await openTeam(page)
+  await page.getByTestId('team-resend').click()
+  await expect(share(page).getByTestId('invite-copy')).toBeVisible()
+  await expect(share(page).getByTestId('invite-whatsapp')).toBeVisible()
+  await expect(share(page).getByTestId('invite-sheet')).toHaveCount(0)
+})
+
 test('Convidar: confere e-mail e WhatsApp, cria pela API e a vaga é contada no servidor (team.invite.new, team.form.invite, team.invite-form.fields, team.invite-form.role, team.counter.seats, team.invite-share.whatsapp)', async ({ page }) => {
   await openTeam(page)
   await page.getByTestId('team-invite').click()

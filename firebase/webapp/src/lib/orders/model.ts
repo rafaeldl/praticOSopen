@@ -87,6 +87,8 @@ export interface Order {
   attachments: OrderAttachment[]
   /** What the customer rated on the share link (1 to 5), when there is a valid score. */
   rating?: { score: number; comment?: string } | null
+  /** The customer link kept on the order (OrderShareLink): only to know if one is active. */
+  shareLink?: { token: string | null; expiresAt: string | null } | null
 }
 
 export type AttachmentType = 'receipt' | 'invoice' | 'contract' | 'warranty' | 'other'
@@ -219,7 +221,14 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
     rating: ratingOf(raw.rating),
+    shareLink: shareLinkOf(raw.shareLink),
   }
+}
+
+function shareLinkOf(value: unknown): Order['shareLink'] {
+  const raw = (value ?? null) as { token?: unknown; expiresAt?: unknown } | null
+  if (!raw || typeof raw !== 'object') return null
+  return { token: typeof raw.token === 'string' && raw.token ? raw.token : null, expiresAt: isoOf(raw.expiresAt) }
 }
 
 /** The app's OrderRating.hasRating: a whole score from 1 to 5, else nothing. */

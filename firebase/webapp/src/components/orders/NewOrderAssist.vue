@@ -10,6 +10,7 @@
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
+import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import type { DraftActions, NfseMoment } from '@/lib/orders/ai-actions'
 import { assistValue, changeTarget, customerStep, deviceStep, dueFromDraft, noteKey, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
@@ -20,6 +21,7 @@ import { deviceLabel, money } from '@/lib/orders/text'
 import { formatPhone } from '@/lib/phone'
 import { can, session } from '@/lib/session'
 import { announce } from '@/lib/ui'
+import AssistTalk from './AssistTalk.vue'
 import ChoiceDialog from './ChoiceDialog.vue'
 
 export interface FormLine {
@@ -51,7 +53,9 @@ const emit = defineEmits<{ otherCustomer: []; otherDevice: [] }>()
 
 const enabled = ref(false)
 const text = ref('')
-const reading = ref<'' | 'text' | 'photos'>('')
+const reading = ref<'' | 'text' | 'photos' | 'speech'>('')
+/** Falar is listening: the bar shows only Cancelar and Parar e preencher. */
+const listening = ref(false)
 const note = ref('')
 const usesLeft = ref<number | null>(null)
 const monthLimit = ref(0)
@@ -112,19 +116,21 @@ interface Undo {
   asks: { customer: typeof customerAsk.value; device: typeof deviceAsk.value }
 }
 
-async function run(files: File[] = []) {
-  const value = text.value.trim()
+async function run(files: File[] = [], audio?: { mimeType: string; data: string }) {
+  // What was said goes alone; the typed text stays in the box.
+  const value = audio ? '' : text.value.trim()
   const images = files.filter((file) => file.type.startsWith('image/')).slice(0, ASSIST_MAX_PHOTOS)
-  if (reading.value || (!value && !images.length)) return
-  reading.value = images.length ? 'photos' : 'text'
+  if (reading.value || (!value && !images.length && !audio)) return
+  reading.value = audio ? 'speech' : images.length ? 'photos' : 'text'
   note.value = ''
+  logAiEvent('ai_assist_requested', { input: aiInput(value, images.length) })
   const f = props.form
   try {
     // The photo goes into the Nova OS first (order.new.photos), then it is read.
     if (images.length) f.photos = [...f.photos, ...images]
     const photos = await Promise.all(images.map((file) => assistPhoto(file)))
     const sent = { services: f.lines.filter((l) => l.item.kind === 'service'), products: f.lines.filter((l) => l.item.kind === 'product') }
-    const draft = await requestAssist({ text: value, photos, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, value: l.value, quantity: l.quantity })) })
+    const draft = await requestAssist({ text: value, photos, audio, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, value: l.value, quantity: l.quantity })) })
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const undo: Undo = { customer: f.customer, device: f.device, added: [], changed: [], removed: [], request: null, due: null, asks: { customer: customerAsk.value, device: deviceAsk.value } }
@@ -196,10 +202,11 @@ async function run(files: File[] = []) {
     }
     // 6. Money waits for the order (order.ai.money-card).
     if (draft.actions) f.actions = { actions: draft.actions, nfse: draft.nfseAutoIssue ?? null }
-    text.value = ''
+    if (!audio) text.value = ''
     const filled =
       f.customer !== undo.customer || f.device !== undo.device || undo.added.length + undo.changed.length + undo.removed.length > 0 || !!undo.request || !!undo.due || !!draft.actions || customerAsk.value !== undo.asks.customer || deviceAsk.value !== undo.asks.device
     const onlyChanges = !undo.added.length && (undo.changed.length > 0 || undo.removed.length > 0) && f.customer === undo.customer
+    logAiEvent('ai_assist_result', { result: aiResult({ filled }) })
     const key = noteKey({ filled, hasActions: !!draft.actions, isNew: true, onlyChanges })
     note.value = key ? t(key) : ''
     // Desfazer sits in the note: the drawer is modal, a toast behind it could not be reached.
@@ -208,6 +215,9 @@ async function run(files: File[] = []) {
   } catch (error) {
     console.warn('new order assistant: failed', error)
     note.value = errorNote(error)
+    const result = aiResult({ errorCode: error instanceof ApiError ? error.code : null, failed: true })
+    logAiEvent('ai_assist_result', { result })
+    if (result === 'quota') logAiEvent('upgrade_modal_shown', { trigger: 'ai_limit_100' })
   } finally {
     reading.value = ''
   }
@@ -226,6 +236,7 @@ function setNewDevice(device: NewDevice) {
 
 /** Takes back only what this answer did; what the person changed afterwards stays. */
 function undoDraft(undo: Undo) {
+  logAiEvent('ai_assist_undone')
   const f = props.form
   f.actions = null
   if (f.customer !== undo.customer && f.marked.has('customer')) {
@@ -306,13 +317,14 @@ defineExpose({
     <form class="assist-new-bar" @submit.prevent="run()">
       <span class="ai" aria-hidden="true">✦</span>
       <label class="sr" for="no-assist">{{ t('web.order.askAssistant') }}</label>
-      <input id="no-assist" ref="input" v-model="text" class="field" maxlength="2000" :placeholder="t('web.newOrder.assistHint')" :disabled="!!reading" />
-      <label v-if="canPhoto" class="btn assist-photo" :title="t('orderAssistantPhoto')">
+      <input v-show="!listening" id="no-assist" ref="input" v-model="text" class="field" maxlength="2000" :placeholder="t('web.newOrder.assistHint')" :disabled="!!reading" />
+      <AssistTalk :disabled="!!reading" @audio="(audio) => run([], audio)" @note="(message) => (note = message)" @listening="(on) => (listening = on)" />
+      <label v-if="canPhoto && !listening" class="btn assist-photo" :title="t('orderAssistantPhoto')">
         <ImagePlus :size="16" aria-hidden="true" />
         <span class="sr">{{ t('web.assist.photo') }}</span>
         <input class="sr" type="file" accept="image/*" multiple :disabled="!!reading" data-testid="new-order-assistant-photo" @change="run([...(($event.target as HTMLInputElement).files ?? [])]); ($event.target as HTMLInputElement).value = ''" />
       </label>
-      <button type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading ? t('orderAssistantReadingSpeech') : t('web.order.send') }}</button>
+      <button v-if="!listening" type="submit" class="btn" :disabled="!text.trim() || !!reading">{{ reading === 'photos' ? t('orderAssistantReadingPhotos') : reading === 'speech' ? t('orderAssistantReadingSpeech') : reading ? t('web.order.reading') : t('web.order.send') }}</button>
     </form>
     <p v-if="note" class="assist-note small" role="status">
       <span data-testid="new-order-assistant-note">{{ note }}</span>

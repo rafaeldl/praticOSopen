@@ -1,6 +1,6 @@
 // Nova OS (order.new.*, order.route.new): keyboard only, timed, per role.
 import { expect, test, type Page } from '@playwright/test'
-import { readOrder } from './data'
+import { readComments, readOrder } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
 const drawer = (page: Page) => page.getByRole('dialog', { name: 'Nova OS' })
@@ -73,10 +73,13 @@ for (const user of ['owner', 'supervisor', 'consultant'] as const) {
     await expect(page.locator('.toast')).toContainText(/OS \d+ criada/)
     const id = await savedId(page)
     await expect(panel(page)).toContainText('Cliente 01')
-    await expect(panel(page).getByTestId('comments')).toContainText('Barulho ao frear')
+    // Into the segment's field, as the app (order.new.request); never a comment.
+    await expect(panel(page).getByTestId('order-request')).toContainText('Barulho ao frear')
+    await expect.poll(async () => ((await readOrder(id))?.customData as { observation?: string } | undefined)?.observation).toBe('Barulho ao frear')
     const saved = await readOrder(id)
     expect((saved?.createdBy as { id: string }).id).toBe(`e2e-${user}`)
     expect((saved?.products as unknown[]).length).toBe(1)
+    expect(await readComments(id)).toEqual([])
   })
 }
 

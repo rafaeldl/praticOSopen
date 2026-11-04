@@ -155,7 +155,7 @@ for (const [language, orders, actions, goTo, confirm] of [
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await page.keyboard.press('ControlOrMeta+k')
     await page.getByRole('combobox').fill('501')
-    await expect(page.getByRole('listbox').getByRole('group', { name: orders })).toBeVisible()
+    await expect(page.getByRole('listbox').getByRole('group', { name: orders, exact: true })).toBeVisible()
     await page.getByRole('combobox').fill(language === 'en' ? 'catalog' : 'catálogo')
     await expect(page.getByRole('listbox').getByRole('group', { name: actions }).getByRole('option', { name: new RegExp(goTo) })).toBeVisible()
   })

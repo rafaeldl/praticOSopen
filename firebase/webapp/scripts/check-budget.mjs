@@ -72,6 +72,15 @@ if (closure(listKeys).has(full)) {
   process.exit(1)
 }
 const later = size([full])
+// Analytics (GA4) loads only after consent and the first screen (lib/analytics.ts): never on the way to the login or the list.
+const analyticsKeys = entries.map(([key]) => key).filter((key) => key.endsWith('lib/analytics-client.ts') || /node_modules\/(@firebase|firebase)\/analytics\//.test(key))
+if (!analyticsKeys.length) console.warn('Aviso: chunk do Firebase Analytics não encontrado')
+const initialKeys = [entry, findKey((key) => key.endsWith('generated/i18n/pt.json')), pkg('firebase/app'), pkg('firebase/auth'), findKey((key) => key.endsWith('views/LoginView.vue'))]
+const early = new Set([...closure(listKeys), ...closure(initialKeys)])
+if (analyticsKeys.some((key) => early.has(key))) {
+  console.error('O Firebase Analytics entrou no caminho até a entrada ou a lista')
+  process.exit(1)
+}
 
 const css = entries.filter(([, item]) => item.isEntry).flatMap(([, item]) => item.css ?? [])
 const cssBytes = css.reduce((sum, file) => sum + brotliBytes(file), 0)
@@ -93,6 +102,9 @@ if (!dist.endsWith('dist-e2e')) {
     .filter((file) => file.endsWith('.js') && readFileSync(resolve(dist, file), 'utf8').includes('127.0.0.1'))
   if (leaked.length) failures.push(`código do emulador no bundle de produção: ${leaked.join(', ')}`)
 }
+// Browser notifications (lib/push/token.ts) load Messaging only once allowed.
+const messaging = entries.find(([key]) => key.includes('node_modules/firebase/messaging/'))?.[0]
+if (messaging && closure(listKeys).has(messaging)) failures.push('Firebase Messaging entrou no caminho até a lista')
 if (initial.total > INITIAL_LIMIT_KB * 1024) failures.push(`JS inicial passou de ${INITIAL_LIMIT_KB} KB`)
 if (list.total > LIST_LIMIT_KB * 1024) failures.push(`JS até a lista passou de ${LIST_LIMIT_KB} KB`)
 if (failures.length) {

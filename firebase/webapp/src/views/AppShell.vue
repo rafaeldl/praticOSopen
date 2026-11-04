@@ -15,11 +15,17 @@ import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
+import { acceptOffer, declineOffer, listenToWorker, pushOffer, syncThisBrowser, type ForegroundNotice } from '@/lib/push'
+import { linkToPath } from '@/lib/push/open'
+import { needsConsent, startAnalytics } from '@/lib/analytics'
 
 // Opened by a key or a tap, never on the first paint: out of the first download.
 const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
 const ShortcutsDialog = defineAsyncComponent(() => import('@/components/ShortcutsDialog.vue'))
+const ConfirmDialog = defineAsyncComponent(() => import('@/components/orders/ConfirmDialog.vue'))
 const Layer = defineAsyncComponent(() => import('@/components/Layer.vue'))
+// Statistics: the notice and the client come after the first screen, never on the way to it.
+const AnalyticsConsent = defineAsyncComponent(() => import('@/components/AnalyticsConsent.vue'))
 const NewOrderDrawer = defineAsyncComponent(() =>
   Promise.all([import('@/components/orders/NewOrderDrawer.vue'), loadOrderTexts()]).then(([m]) => m),
 )
@@ -77,13 +83,38 @@ const companyInitials = computed(() => initials(rawCompanyName.value))
 
 const setOnline = () => (online.value = true)
 const setOffline = () => (online.value = false)
+
+// Browser notifications (lib/push): a click opens the order here; one that
+// arrives with the page on screen becomes a notice and the bell counts again.
+async function onNotice(notice: ForegroundNotice) {
+  const [{ noticeText }] = await Promise.all([import('@/lib/notifications'), loadOrderTexts()])
+  const text = noticeText({ type: notice.data.type ?? null, title: notice.title, body: notice.body })
+  showToast(text)
+  ui.noticesChanged++
+}
+const stopWorker = listenToWorker({
+  open: (link) => void router.push(linkToPath(link)),
+  notice: (notice) => void onNotice(notice).catch((error) => console.warn('push: notice not shown', error)),
+})
+// "Continuar" fails only when the token could not be saved: the browser already answered.
+const allowNotifications = () => void acceptOffer().catch((error) => console.warn('push: not registered', error))
+
+const afterFirstScreen = ref(false)
+let analyticsTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
+  analyticsTimer = setTimeout(() => {
+    afterFirstScreen.value = true
+    void startAnalytics()
+  }, 2500)
   window.addEventListener('online', setOnline)
   window.addEventListener('offline', setOffline)
+  syncThisBrowser()
 })
 onBeforeUnmount(() => {
+  clearTimeout(analyticsTimer)
   window.removeEventListener('online', setOnline)
   window.removeEventListener('offline', setOffline)
+  stopWorker()
 })
 </script>
 
@@ -182,4 +213,14 @@ onBeforeUnmount(() => {
   <NewOrderDrawer v-if="ui.newOrder && canCreate" />
   <CommandPalette v-if="ui.palette" />
   <ShortcutsDialog v-if="ui.shortcuts" />
+  <ConfirmDialog
+    v-if="pushOffer.open"
+    :title="t('notificationPromptTitle')"
+    :body="t('web.push.promptMessage')"
+    :confirm="t('continueAction')"
+    :keep="t('notNow')"
+    @confirm="allowNotifications"
+    @close="declineOffer"
+  />
+  <AnalyticsConsent v-if="afterFirstScreen && needsConsent()" />
 </template>

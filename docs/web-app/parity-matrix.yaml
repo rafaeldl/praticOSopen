@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 76 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -289,8 +289,10 @@ rows:
   feature_flags: []
   hardware: [push]
   data: ["companies/{id}/notifications", "companies/{id}/orders"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Push nativo não existe no navegador da mesma forma; web usa aviso dentro do app e, se aprovado, Web Push."}
+  web_status: done
+  e2e: firebase/webapp/e2e/push.spec.ts
+  web_exception: null
+  note: "Web: aviso do navegador (Web Push pelo FCM, só com a chave VAPID configurada). Clicar foca a aba aberta e abre a OS, ou abre /app/?order={id}&company={id}; OS de outra empresa é ignorada, como o app (fica no Início). Sem OS (manutenção, cortesia), abre o Início. Com a página na tela, o aviso aparece dentro dela e o sino conta de novo."
 - id: auth.gate.after-invite
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -392,7 +394,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Empresa sem segment abre o primeiro acesso com nome e telefone dela e atualiza a mesma empresa, sem criar outra. Web: só dono e admin (o app manda qualquer membro e a gravação falha). Empresa criada há pouco recebe checklists e exemplos; empresa antiga completa o ramo sem eles, porque o servidor só semeia empresa nova (ONBOARDING_NOT_NEW). Igualar ao app pede liberar o seed no servidor para empresa sem ramo (decisão)."
+  note: "Empresa sem segment abre o primeiro acesso com nome e telefone dela e atualiza a mesma empresa, sem criar outra. Web: só dono e admin (o app manda qualquer membro e a gravação falha). Empresa criada há pouco recebe checklists e exemplos; empresa antiga completa o ramo sem eles, porque o servidor só semeia empresa nova (ONBOARDING_NOT_NEW). Decisão do dono 2026-11-04: empresa antiga sem ramo continua sem exemplos (o seed do servidor não é liberado para ela)."
 - id: auth.analytics.events
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -406,9 +408,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "O web não carrega Firebase Analytics nem GA4 (limite da tela de entrada, CSP e consentimento). O funil do web sai do servidor: users/{uid} criado pelo web, empresas do primeiro acesso e convites aceitos pela API."}
-  note: "email_login_opened, sign_up, login (com hasCompany), identifyUser, tutorial_begin (variant setup), company_created, tutorial_complete, invite_accepted. Manter os nomes para o funil web."
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web (lib/analytics.ts) manda ao GA4 do projeto praticos os mesmos eventos do app: email_login_opened, login (method, has_company), sign_up (quando cria users/{uid}), tutorial_begin (variant setup), company_created, tutorial_complete, invite_accepted e identifyUser (userId = uid, company_id, segment, user_role). Só depois do 'Aceitar' do aviso de estatísticas; o client vem depois da primeira tela."
 - id: auth.loading.view
   screen: lib/screens/loading_screen.dart
   route: null
@@ -867,7 +870,7 @@ rows:
   e2e: firebase/webapp/e2e/guard.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Agenda some sem useScheduling; Financeiro exige viewFinancialReports e useFinancial. Web: menu lateral no computador e abas no celular, filtrados pela mesma regra. Diferença: sem useScheduling a Agenda continua, mostrando as entregas (agenda.mode-due)."
+  note: "Agenda some sem useScheduling; Financeiro exige viewFinancialReports e useFinancial. Web: menu lateral no computador e abas no celular, filtrados pela mesma regra. Diferença: sem useScheduling a Agenda continua, mostrando as entregas (agenda.mode-due); decisão do dono 2026-11-04."
 - id: nav.tabs.new-order
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
@@ -918,7 +921,7 @@ rows:
   hardware: [local_notifications]
   data: ["companies/{id}/orders"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Notificação local do aparelho; não se aplica ao navegador."}
+  web_exception: {status: proposed, reason: "Agenda os lembretes locais (resumo do dia, dias sem abrir, OS paradas) ao voltar ao app. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: nav.tracking.att
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
@@ -965,8 +968,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Os nomes das abas só servem ao analytics do app; o web não tem analytics (auth.analytics.events), e cada tela já tem rota e título próprios."}
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null
@@ -1835,7 +1840,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-new.spec.ts
   web_exception: null
   permission: createOrder
-  note: "O cartão aparece em todo segmento. Com service_order.observation grava no campo; sem ele vira o primeiro comentário interno depois que a OS ganha id. Não copiar: o pedido sem campo fica escondido nos comentários; dar lugar próprio."
+  note: "O cartão aparece em todo segmento. Com service_order.observation grava no campo; sem ele vira o primeiro comentário interno depois que a OS ganha id. Não copiar: o pedido sem campo fica escondido nos comentários; dar lugar próprio. Web: com o campo grava em customData.observation (junto com os outros campos do ramo), sem ele vira o 1º comentário interno, como o app."
 - id: order.new.delivery
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1992,9 +1997,10 @@ rows:
   feature_flags: []
   hardware: [push]
   data: ["users/{id}"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Alerta do iPhone; no navegador depende da decisão sobre Web Push."}
-  note: "Só no iPhone que ainda não respondeu; saiu do login. Vem depois de salvar a OS ou marcar visita em OS salva."
+  web_status: done
+  e2e: firebase/webapp/e2e/push.spec.ts
+  web_exception: null
+  note: "Web: depois de salvar a Nova OS (sem veículo, para não somar com checklist ou manutenção) ou de marcar visita numa OS salva, uma vez por navegador enquanto ele não respondeu, explica e então o navegador pergunta. Nunca na entrada. \"Continuar\" e \"Agora não\" (o web aceita Esc em qualquer diálogo). Com permissão, o token vai para users/{uid}.fcmTokens com platform 'web' e sai ao sair da conta."
 - id: order.detail.view
   screen: lib/screens/order/order_screen_v2.dart
   route: "/order"
@@ -2400,9 +2406,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar link, WhatsApp web ou Web Share quando houver."}
-  note: "Nota de 8 s, só aprovada, em andamento ou concluída, OS salva, cliente com telefone e sem link ativo, uma vez por OS enquanto a tela está aberta."
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Nota de 8 s, só aprovada, em andamento ou concluída, OS salva, cliente com telefone e sem link ativo, uma vez por OS enquanto a tela está aberta. Web: a mesma regra (lib/orders/notify), nota sob os botões por 8 s que pausa com o ponteiro ou o foco; Avisar abre o WhatsApp com o link e o texto da situação para o telefone do cadastro."
 - id: order.item.add
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2664,10 +2671,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-request.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Só aparece em segmento com o campo e quando já tem texto. Não copiar: com o campo vazio não há como escrever depois na OS salva (só a IA preenche)."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Só aparece em segmento com o campo e quando já tem texto. Não copiar: com o campo vazio não há como escrever depois na OS salva (só a IA preenche). Web: lê e grava customData.observation (como o app, apagando a chave antiga service_order.observation), por Firestore, com a regra canEditMainFields; com o campo vazio, \"Escrever o que o cliente pediu\" no menu \"…\". O pedido que a Nova OS do web gravava como 1º comentário interno aparece no lugar enquanto o campo está vazio (só leitura; mudar grava no campo e o comentário fica)."
 - id: order.due.set
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2736,7 +2744,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
+  web_exception: {status: proposed, reason: "A dica diz quando o lembrete local do celular toca. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Diz quando avisa, ou que o lembrete ou o celular está desligado. Na OS salva, só para horário futuro."
 - id: order.schedule.adjust
   screen: lib/screens/order/reminder_hint.dart
@@ -2752,7 +2760,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembrete é local do aparelho; acompanha a decisão sobre Web Push."}
+  web_exception: {status: proposed, reason: "\"Ajustar\" abre Lembretes, que são do celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: order.responsible.pick
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3218,9 +3226,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
-  note: "Web: Baixar entrega o arquivo; Mandar para o cliente manda o link."
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Compartilhar manda o arquivo pela folha do navegador quando ela aceita arquivos (navigator.canShare); Mandar pelo WhatsApp baixa o PDF para anexar e abre o WhatsApp com o link da OS para o telefone do cadastro; Baixar fica como botão azul."
 - id: order.pdf.close
   screen: lib/screens/order/pdf_viewer_screen.dart
   route: null
@@ -3446,9 +3455,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Voz é opcional no computador; caixa de texto cobre a ação e o microfone entra onde o navegador permitir."}
-  note: "Na OS salva aplica e grava na hora; nunca troca cliente, pedido ou prazo já preenchidos. Não copiar: na OS salva não checa canEditOrderMainFields."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Falar na barra do assistente da OS grava pelo microfone do navegador (MediaRecorder, webm/ogg/mp4) e manda o áudio na mesma chamada do texto; o servidor transcreve. Pede o microfone só ao tocar; bloqueado mostra como liberar no cadeado; navegador sem gravação fica só com a caixa de texto. Na OS salva aplica e grava na hora; nunca troca cliente, pedido ou prazo já preenchidos. Não copiar: na OS salva não checa canEditOrderMainFields."
 - id: order.ai.cancel-talk
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3462,8 +3472,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Fala pelo microfone do celular; o assistente do web é digitado (order.ai.type)."}
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Cancelar (ou Esc) para de ouvir e joga fora o áudio; nada vai ao servidor."
 - id: order.ai.stop-fill
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3477,8 +3489,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Parar de ouvir e preencher só existe na fala pelo microfone; no web o pedido é digitado e enviado com Enter (order.ai.type)."}
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: Parar e preencher a OS manda o áudio gravado; parar sem ter ouvido nada mostra aviso e não manda."
 - id: order.ai.type
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3728,8 +3742,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Eventos do Firebase Analytics do app. O web não tem analytics (sem GA4, CSP fechada, sem banner de consentimento); o uso do assistente já é contado no servidor (cota mensal)."}
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra ai_intro_shown/accepted/dismissed, ai_assist_requested (input), ai_assist_result (filled, actions, nothing, quota, error), ai_assist_undone, ai_order_saved, ai_action_proposed/dismissed/confirmed/failed/undone e upgrade_modal_shown (ai_limit_100), na OS aberta e na Nova OS."
 - id: order.new.photos
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4037,9 +4053,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic, camera]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "A barra Foto/Falar depende do microfone e da câmera do celular. No web o assistente é a barra de texto \"Peça ao assistente\" na OS, com o mesmo aviso e Desfazer (order.ai.type, order-detail.spec.ts)."}
-  note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha. Web: na Nova OS a barra tem texto, Foto (arquivo) e Falar; o aviso fica no topo do formulário com Desfazer (o formulário é modal)."
 - id: order.sheet.date
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -4427,9 +4444,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Depende do speech_to_text; no navegador só Web Speech, com suporte desigual."}
-  note: "Sem permissão mostra aviso para liberar nos Ajustes. Sem microfone a barra vira campo de texto com o aviso. Para após 20 s sem palavras novas ou 5 min, emenda as sessões do sistema e mantém a tela acesa; parar sem ter ouvido nada mostra aviso."
+  web_status: done
+  e2e: firebase/webapp/e2e/ai-talk.spec.ts
+  web_exception: null
+  note: "Web: grava no navegador (talk.ts, carregado só ao tocar em Falar) e o servidor transcreve o áudio (até 3 MB, 32 kbps). Para após 20 s sem som (AnalyserNode) ou 5 min; parar sem ter ouvido nada mostra aviso. Sem permissão: aviso para liberar no cadeado da barra de endereço. Sem MediaRecorder/getUserMedia: sem Falar, fica a caixa de texto."
 - id: order.media.sheet
   screen: lib/screens/widgets/order_media_actions.dart
   route: null
@@ -4531,9 +4549,11 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar e copiar link."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
   permission: viewPhotos
+  note: "Web: no visualizador, Compartilhar (arquivo pela folha do navegador quando ela aceita; senão o texto com o link), Baixar, Copiar o link e Mandar pelo WhatsApp com o link da foto para o telefone do cadastro do cliente."
 - id: order.photo.cover
   screen: lib/screens/widgets/photo_viewer_screen.dart
   route: null
@@ -4583,8 +4603,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar e WhatsApp web."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Avisar (order.status.notify) abre o WhatsApp direto com o link e o texto da situação para o telefone do cadastro do cliente (folha Mandar para o cliente com envio); com a aba bloqueada, a folha fica aberta com o botão no foco. Ponto único de contagem em lib/share onShare."
 - id: order.share-sheet.view
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4632,8 +4654,10 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar link."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Web: Mandar de outro jeito abre a folha do navegador (Web Share API) com o texto e o link; o botão só aparece quando o navegador tem a folha. Copiar e WhatsApp ficam sempre."
 - id: order.share-sheet.copy
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4747,9 +4771,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["analytics"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "O web não tem analytics: nenhum GA4 no código, a CSP não libera googletagmanager nem google-analytics e ligar exigiria banner de consentimento (LGPD). Os links e pagamentos ficam registrados nos próprios documentos (links/share, transações)."}
-  note: "logShare com método sheet, whatsapp ou clipboard e logPaymentAdded no app; a web manda os mesmos eventos ao GA4."
+  web_status: done
+  web_exception: null
+  e2e: firebase/webapp/e2e/analytics.spec.ts
+  note: "Web registra share (method sheet, whatsapp ou clipboard; content_type order) no Mandar para o cliente e payment_added (amount) em cada recebimento de uma OS, pela mão ou pelo assistente. logShare(method, contentType) exportado em lib/analytics.ts para outros pontos de envio."
 - id: order.device-picker.one
   screen: lib/screens/widgets/device_picker_sheet.dart
   route: null
@@ -5724,9 +5749,9 @@ rows:
   hardware: [share_sheet, pdf_generation]
   data: ["companies/{id}", "companies/{id}/receipts"]
   web_status: done
-  e2e: firebase/webapp/e2e/receive.spec.ts
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
-  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal. Web: recibo impresso pelo navegador (salvar como PDF)."
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
+  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal. Web: recibo impresso pelo navegador (salvar como PDF). Web: em cada recibo, Mandar pelo WhatsApp com as palavras do recibo (nº, frase, OS, total, empresa) para o telefone do cadastro, e Compartilhar pela folha do navegador quando há; impressão em receive.spec.ts."
 - id: receipt.pdf.content
   screen: lib/screens/payments/receipt_share.dart
   route: null
@@ -6406,10 +6431,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: [share_sheet]
   data: ["companies/{id}/invoices"]
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por baixar."}
+  web_status: done
+  e2e: firebase/webapp/e2e/share.spec.ts
+  web_exception: null
   permission: chargeOrder
-  note: "Botão azul só com nota emitida e com PDF. Se o download falhar, compartilha o link."
+  note: "Botão azul só com nota emitida e com PDF. Se o download falhar, compartilha o link. Web: Compartilhar PDF manda o arquivo pela folha do navegador quando dá para ler o PDF; senão o link (como o app quando o download falha). Copiar o link e Mandar pelo WhatsApp com o link para o telefone do cadastro."
 - id: nfse.invoice.open-pdf
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -7317,7 +7343,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/agenda.spec.ts
   web_exception: null
-  note: "Ramo sem useScheduling; hoje inalcançável porque a aba some junto. Web: sem useScheduling na empresa, a agenda mostra as entregas (dueDate), todas como Dia todo, e arrastar muda só o dia. No app é inalcançável porque a aba some."
+  note: "Ramo sem useScheduling; hoje inalcançável porque a aba some junto. Web: sem useScheduling na empresa, a agenda mostra as entregas (dueDate), todas como Dia todo, e arrastar muda só o dia. No app é inalcançável porque a aba some. Decisão do dono 2026-11-04: no web a Agenda continua mostrando as entregas quando a empresa não usa agendamento."
 - id: agenda.day-markers
   screen: lib/screens/agenda/agenda_screen.dart
   route: null
@@ -8427,7 +8453,7 @@ rows:
   e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul, P ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo. No web a pergunta fica dentro da OS (não por cima): seguir não pede dispensar; 'Agora não' ou sair da OS sem responder conta como recusa."
+  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul, P ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo. No web a pergunta fica dentro da OS (não por cima): seguir não pede dispensar; 'Agora não' ou sair da OS sem responder conta como recusa. Decisão do dono 2026-11-04: no web a pergunta fica dentro da OS."
 - id: device.maintenance.answer
   screen: lib/screens/devices/next_maintenance_offer.dart
   route: null
@@ -8598,11 +8624,12 @@ rows:
   states: []
   feature_flags: []
   hardware: [camera, gallery]
-  data: ["storage:tenants/{id}/devices/{id}/photo.jpg"]
-  web_status: in_progress
+  data: ["storage:tenants/{id}/devices/{id}/photo.jpg", "api:PATCH /v1/app/devices/{id}"]
+  web_status: done
+  e2e: firebase/webapp/e2e/device-photo.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: foto do aparelho ainda não; precisa de envio ao Storage e de a API aceitar a URL da pasta do aparelho. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado. Fechamento: continua sem foto; a rota PUT /devices não aceita a foto (precisa da mesma regra do catálogo: pasta do aparelho, photoSeen e apagar o antigo)."
+  note: "Menu com Câmera ou Galeria; só troca, sem opção de tirar a foto. Web: em \"Mais dados\", escolher, arrastar ou colar uma imagem (até 10 MB); só trocar, sem tirar, como o app. A foto espera no navegador e sobe só depois do ✓ para tenants/{empresa}/devices/{id}/photo.jpg (aparelho novo: cria primeiro, depois a foto), com \"Enviando a foto…\" no botão; falha no envio deixa o aparelho salvo e avisa. PATCH /v1/app/devices/{id} aceita {photo: {url, storagePath}} só da pasta daquele aparelho no bucket do projeto (mesma checagem do catálogo); trocar apaga o arquivo antigo se for outro da mesma pasta. A foto aparece na ficha. Não copiar: em aparelho novo grava o aparelho antes do ✓ (fechar com X deixa ele criado) e a foto sobe na hora; o indicador de envio não aparece (sem Observer) e erro de envio não é tratado."
 - id: device.form.autocomplete
   screen: lib/screens/device_form_screen.dart
   route: null
@@ -9968,9 +9995,11 @@ rows:
   feature_flags: []
   hardware: [share_sheet]
   data: []
-  web_status: todo
-  web_exception: {status: proposed, reason: "Sheet nativa troca por copiar."}
+  web_status: done
+  e2e: firebase/webapp/e2e/team.spec.ts
+  web_exception: null
   permission: manageUsers
+  note: "Web: Copiar código fica como botão azul; Compartilhar convite abre a folha do navegador com a mensagem quando ele tem; WhatsApp ao lado."
 - id: team.invite-share.whatsapp
   screen: lib/screens/widgets/invite_share_sheet.dart
   route: null
@@ -10207,7 +10236,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes são notificações locais do celular (reminders.* já propostos como exceção); no navegador só com Web Push. O idioma, que no Android mora nessa tela, está em Configurações › Neste navegador (reminders.language)."}
+  web_exception: {status: proposed, reason: "Lembretes são do celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente. O idioma, que no Android mora nessa tela, está em Configurações › Neste navegador (reminders.language)."}
 - id: settings.open-advanced
   screen: lib/screens/menu_navigation/settings.dart
   route: null
@@ -10901,7 +10930,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes \"valem só neste celular\"; no navegador só com Web Push."}
+  web_exception: {status: proposed, reason: "Lembretes \"valem só neste celular\". O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "O lembrete traz hora, OS, cliente e aparelho. OS nova agenda depois do ✓. Opções 0, 15, 30, 60, 120 minutos (0 desliga), padrão 30. Os três avisos (resumo do dia, dias sem abrir, OS paradas) são por aparelho e começam ligados; desligar cancela os já marcados. Não copiar: mudar os minutos não remarca o que já está agendado."
 - id: reminders.daily
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10917,7 +10946,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Local do aparelho."}
+  web_exception: {status: proposed, reason: "Resumo do dia às 9h, agendado no celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Às 9h; padrão ligado; preferência no aparelho; desligar cancela o pendente. Não copiar: ligar só grava a preferência e o agendamento espera o app voltar ao primeiro plano; a tela não confere a permissão de notificação do sistema (negada, tudo parece ligado e nada chega)."
 - id: reminders.inactivity
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10933,7 +10962,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Sem sentido no navegador."}
+  web_exception: {status: proposed, reason: "Conta os dias sem abrir o app neste celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Avisos em 3, 5 e 7 dias sem abrir; padrão ligado; desligar cancela os pendentes."
 - id: reminders.pending
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -10949,7 +10978,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Local do aparelho."}
+  web_exception: {status: proposed, reason: "Resumo das OS paradas, agendado no celular. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
   note: "Conta OS em quote ou approved criadas há mais de 7 dias (createdAt), com ou sem marca de parada; um resumo no dia seguinte às 10h. Padrão ligado; desligar cancela o pendente."
 - id: reminders.language
   screen: lib/screens/menu_navigation/more/reminders_screen.dart
@@ -11239,7 +11268,7 @@ rows:
   hardware: [local_notifications]
   data: ["local"]
   web_status: todo
-  web_exception: {status: proposed, reason: "Lembretes são locais do aparelho; na web fica só a explicação."}
+  web_exception: {status: proposed, reason: "O atalho leva a Lembretes, que são do celular; no web o sino vazio fica só com a explicação. O app agenda no próprio celular (notificação local, preferência no aparelho). O navegador não agenda com a aba fechada, e mandar pelo servidor (Web Push) duplicaria o aviso no celular, que já agenda o seu. Para ter no web, seria preciso mover os lembretes do app para o servidor (um job que mande a todos os aparelhos) e o app parar de agendar localmente."}
 - id: notifications.tile
   screen: lib/screens/notifications/notification_list_tile.dart
   route: null

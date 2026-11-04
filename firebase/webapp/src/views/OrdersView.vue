@@ -366,6 +366,15 @@ watch(search, (text) => {
   }, 250)
 })
 watch(() => [filter.value, board.value, session.companyId], () => void load())
+// A notification arrived with the page on screen (lib/push): the bell counts again.
+watch(
+  () => ui.noticesChanged,
+  () =>
+    void import('@/lib/notifications')
+      .then((notices) => notices.unreadCount())
+      .then((count) => (unread.value = count))
+      .catch((error) => console.warn('orders: notices not counted', error)),
+)
 watch(
   () => route.query.q,
   (q) => {

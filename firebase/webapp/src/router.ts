@@ -4,6 +4,7 @@ import { stripStaleLayers } from '@/lib/route-layer'
 import { effectiveUseFinancial, session, startSession } from '@/lib/session'
 import { NAV } from '@/navigation'
 import { readPending } from '@/lib/onboarding/pending'
+import { noticeRedirect } from '@/lib/push/open'
 import { resumesCompany } from '@/lib/onboarding/model'
 import { loadOrderTexts, loadTexts } from '@/i18n'
 import type { MessageKey } from '@/generated/message-keys'
@@ -262,5 +263,8 @@ router.beforeEach(async (to) => {
   if (session.uid && to.name !== 'onboarding' && readPending(session.uid)) return { name: 'onboarding', replace: true }
   // A company without a segment finishes its first access before any company screen (auth.gate.resume-company).
   if (to.meta.access?.kind === 'member' && resumesCompany(session)) return { name: 'onboarding', replace: true }
+  // A browser notification's link (auth.gate.notification-open): the order of another company is ignored.
+  const fromNotice = noticeRedirect(to.query, session.companyId)
+  if (fromNotice) return { path: fromNotice.order ? to.path : '/', query: fromNotice, hash: to.hash, replace: true }
   return true
 })

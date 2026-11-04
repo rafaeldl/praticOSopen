@@ -18,6 +18,7 @@ import { generatePhoneKeywords, generateSearchKeywords } from '../utils/search.u
 import { timestampToDate } from '../utils/date.utils';
 import { orderVersion, versionMatches } from './order-version';
 import { OrderRuleError } from './order-errors';
+import { deletePhotoFileIn, recordPhotoFolder, storagePathOfUrl, type PhotoInput } from './record-photo';
 
 type Json = Record<string, unknown>;
 
@@ -377,7 +378,12 @@ export interface DeviceInput {
   description?: string | null;
   status?: string | null;
   customData?: Record<string, unknown> | null;
+  /** Only replaced, never removed (as the app). The route checks it is a file of this device. */
+  photo?: PhotoInput;
 }
+
+/** Folder the Storage rules give to one device (the app writes photo.jpg there). */
+export const devicePhotoFolder = (companyId: string, deviceId: string) => recordPhotoFolder(companyId, 'devices', deviceId);
 
 function deviceFields(input: DeviceInput, current: Json = {}): Json {
   const out: Json = {};
@@ -387,6 +393,7 @@ function deviceFields(input: DeviceInput, current: Json = {}): Json {
   // Serial: trimmed and uppercase (device.form.serial-rules).
   if (input.serial !== undefined) out.serial = input.serial ? input.serial.trim().toUpperCase() || null : null;
   if (input.customData !== undefined) out.customData = input.customData && Object.keys(input.customData).length ? input.customData : null;
+  if (input.photo) out.photo = input.photo.url;
   if (input.name !== undefined) out.nameLower = typeof out.name === 'string' ? out.name.toLowerCase() : null;
   if (input.name !== undefined || input.serial !== undefined || input.manufacturer !== undefined) {
     const pick = (key: string) => (key in out ? out[key] : current[key]) as string | undefined;
@@ -398,7 +405,7 @@ function deviceFields(input: DeviceInput, current: Json = {}): Json {
 export async function createDevice(companyId: string, input: DeviceInput, createdBy: UserAggr, company: CompanyAggr): Promise<{ id: string; name: string | null; serial: string | null }> {
   const ref = getTenantCollection(companyId, 'devices').doc();
   const now = new Date().toISOString();
-  const fields = deviceFields(input);
+  const fields = deviceFields({ ...input, photo: undefined }); // the photo needs the id (its folder): set afterwards
   await ref.create({ name: null, serial: null, manufacturer: null, category: null, description: null, ...fields, company, createdBy, createdAt: now, updatedBy: createdBy, updatedAt: now });
   return { id: ref.id, name: (fields.name as string | null) ?? null, serial: (fields.serial as string | null) ?? null };
 }
@@ -406,7 +413,8 @@ export async function createDevice(companyId: string, input: DeviceInput, create
 /** Never touches the next maintenance fields: only setNextMaintenance writes them. */
 export async function updateDevice(companyId: string, deviceId: string, input: DeviceInput, updatedBy: UserAggr, version?: string): Promise<'ok' | 'not_found' | 'empty'> {
   const ref = getTenantCollection(companyId, 'devices').doc(deviceId);
-  return db.runTransaction(async (tx) => {
+  let replaced: unknown = null;
+  const result = await db.runTransaction(async (tx) => {
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) return 'not_found' as const;
     const current = snapshot.data() ?? {};
@@ -417,9 +425,15 @@ export async function updateDevice(companyId: string, deviceId: string, input: D
     const name = 'name' in fields ? fields.name : current.name;
     const serial = 'serial' in fields ? fields.serial : current.serial;
     if (!name && !serial) return 'empty' as const;
+    replaced = input.photo && current.photo !== input.photo.url ? current.photo : null;
     tx.update(ref, { ...fields, updatedBy, updatedAt: new Date().toISOString() });
     return 'ok' as const;
   });
+  // The old file goes only when it is another file of this device's folder (photo.jpg overwritten stays).
+  if (result === 'ok' && replaced && input.photo) {
+    if (storagePathOfUrl(String(replaced)) !== input.photo.storagePath) await deletePhotoFileIn(devicePhotoFolder(companyId, deviceId), replaced, 'device');
+  }
+  return result;
 }
 
 export async function deleteDevice(companyId: string, deviceId: string): Promise<boolean> {
