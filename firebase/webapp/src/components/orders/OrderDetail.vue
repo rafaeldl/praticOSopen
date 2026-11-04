@@ -67,6 +67,7 @@ import ItemDialog from './ItemDialog.vue'
 import MoneyDialog from './MoneyDialog.vue'
 import OrderComments from './OrderComments.vue'
 import OrderPhotos from './OrderPhotos.vue'
+import OrderDocuments from './OrderDocuments.vue'
 import OrderPrint from './OrderPrint.vue'
 import OrderAssistant from './OrderAssistant.vue'
 import PaymentHistory from './receive/PaymentHistory.vue'
@@ -926,6 +927,7 @@ watch(
         </section>
 
         <OrderPhotos :order="order" />
+        <OrderDocuments :order="order" :can-edit="true" />
         <OrderComments :order-id="order.id" />
         <section v-if="order.rating" class="od-sec" aria-labelledby="od-rating-title" data-testid="order-rating">
           <h3 id="od-rating-title">{{ t('rating') }}</h3>

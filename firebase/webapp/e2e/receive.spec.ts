@@ -43,7 +43,7 @@ test('mandar ao cliente: link da API, texto da situação e WhatsApp com o telef
   expect(await sheet.getByTestId('share-whatsapp').getAttribute('target')).toBe('_blank')
 })
 
-test('copiar o link e trocar o que o cliente pode fazer desativa o link anterior (order.share-sheet.copy, permissions, expiry)', async ({ page }) => {
+test('copiar o link e trocar o que o cliente pode fazer desativa o link anterior (order.share-sheet.copy, permissions)', async ({ page }) => {
   const order = await makeOrder('admin')
   await openOrder(page, 'admin', order.id)
   const sheet = dialog(page, 'Mandar para o cliente')
@@ -63,13 +63,27 @@ test('copiar o link e trocar o que o cliente pode fazer desativa o link anterior
   await expect(sheet.getByTestId('share-who')).toContainText('Cliente 02 abre a OS pelo link.')
   const old = await readShareToken(first.split('/q/')[1]!)
   expect(old?.revokedAt).toBeTruthy()
+  const view = await readShareToken((await sheet.getByTestId('share-url').textContent())!.split('/q/')[1]!)
+  expect(view?.permissions).toEqual(['view'])
+})
 
+// Apart from the test above: four link writes in a row did not fit one test's
+// time on a loaded CI (each write also runs the order's Asaas trigger).
+test('trocar a validade e gerar link novo desativam o anterior (order.share-sheet.expiry, order.share-sheet.regenerate)', async ({ page }) => {
+  const order = await makeOrder('admin')
+  await openOrder(page, 'admin', order.id)
+  const sheet = dialog(page, 'Mandar para o cliente')
+  await expect(async () => {
+    await page.keyboard.press('m')
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
   const second = (await sheet.getByTestId('share-url').textContent())!
   await sheet.getByLabel('Vale por quanto tempo?').selectOption('30')
   await expect(sheet.getByTestId('share-url')).not.toHaveText(second)
   await expect(sheet.getByLabel('Vale por quanto tempo?')).toHaveValue('30')
   const current = await readShareToken((await sheet.getByTestId('share-url').textContent())!.split('/q/')[1]!)
-  expect(current?.permissions).toEqual(['view'])
+  expect(current?.revokedAt ?? null).toBeNull()
+  expect((await readShareToken(second.split('/q/')[1]!))?.revokedAt).toBeTruthy()
   expect(Date.parse(String(current?.expiresAt)) - Date.now()).toBeGreaterThan(29 * 86_400_000)
 
   // "Gerar link novo" keeps the rules and turns the previous link off (order.share-sheet.regenerate).
@@ -629,16 +643,22 @@ test('R5: cada linha do recebimento diz quitada ou quanto falta (receipt.detail.
   await expect(list).toContainText(`OS ${b.number} · R$ 20,00 · falta R$ 30,00`)
 })
 
-test('R6: cobrança não passa do saldo na tela; Mandar de novo usa o telefone do cadastro', async ({ page }) => {
+test('R6: Mandar de novo usa o telefone do cadastro', async ({ page }) => {
   const customer = await makeCustomer({ phone: '+5511990001111', taxId: '52998224725' })
   const order = await done({ ...customer, phone: '+5511900000000' } as { id: string; name: string }, 300)
   await writeDoc(`orders/${order.id}/charges/c0`, { status: 'pending', value: 300, dueDate: '2099-01-01', mode: 'single', invoiceUrl: 'https://sandbox.asaas.com/i/c0', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() })
   await openOrder(page, 'admin', order.id)
   const card = panel(page).getByTestId('order-charge')
   await expect.poll(async () => card.getByTestId('charge-resend').getAttribute('href')).toContain('https://wa.me/5511990001111?text=')
+})
 
+// Apart from the test above: with the live channel stalled on a loaded CI, the
+// charges come by the one-off read after a wait, and two orders in a row did
+// not fit one test's time.
+test('R6: cobrança não passa do saldo na tela', async ({ page }) => {
+  const customer = await makeCustomer({ phone: '+5511990001112', taxId: '52998224725' })
   const fresh = await done(customer, 300)
-  await page.goto(`orders?order=${fresh.id}`)
+  await openOrder(page, 'admin', fresh.id)
   await panel(page).getByTestId('charge-new').click()
   const sheet = dialog(page, 'Mandar cobrança')
   await sheet.getByLabel('Valor').fill('300,01')

@@ -212,8 +212,15 @@ test('busca nas mais antigas traz a OS que não estava carregada (home.search.ol
   await login(page, 'admin', './?f=all')
   await expect(page.getByTestId('orders-table')).toBeVisible()
   await page.getByLabel(/^Buscar OS/).fill('9101')
-  await page.getByRole('button', { name: 'Buscar nas mais antigas' }).click()
-  await expect(page.getByTestId('orders-table').locator('.c-num', { hasText: /^9101$/ })).toBeVisible()
+  const row = page.getByTestId('orders-table').locator('.c-num', { hasText: /^9101$/ })
+  const older = page.getByRole('button', { name: 'Buscar nas mais antigas' })
+  // The end of the list in view also loads the next page by itself (watchListEnd): the
+  // order can arrive while the button is being clicked, and the button then leaves the
+  // screen. Click it only while the order is not there yet, and never wait on a button gone.
+  await expect(async () => {
+    if (!(await row.isVisible()) && (await older.isEnabled().catch(() => false))) await older.click({ timeout: 1000 }).catch(() => {})
+    await expect(row).toBeVisible({ timeout: 1000 })
+  }).toPass()
 })
 
 test.describe('Avaliações', () => {
