@@ -12,7 +12,7 @@ jest.mock('../../../services/firestore.service', () => ({
   auth: { verifyIdToken: async (token: string) => ({ uid: token }) },
 }));
 
-import { list, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
+import { fakeStorage, list, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { bearerAuth } from '../../../middleware/auth.middleware';
 import { resolveCompanyContext } from '../../../middleware/company.middleware';
 import appCustomersRoutes from '../app-customers.routes';
@@ -25,6 +25,11 @@ const UID: Record<Role, string> = {
 const CU = '/v1/app/customers';
 const DE = '/v1/app/devices';
 const T0 = '2026-10-01T10:00:00.000Z';
+const BUCKET = 'praticos.appspot.com';
+const photoOf = (path: string) => ({
+  storagePath: path,
+  url: `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(path)}?alt=media&token=t`,
+});
 
 function buildApp(): Express {
   const app = express();
@@ -316,6 +321,59 @@ describe('POST e PATCH /devices', () => {
     for (const role of ['consultant', 'manager', 'technician'] as Role[]) {
       expect((await call(role, 'post', DE, { name: 'X' })).status).toBe(403);
     }
+  });
+});
+
+describe('foto do aparelho (device.form.photo)', () => {
+  test('aceita só arquivo da pasta do próprio aparelho no bucket do projeto', async () => {
+    const good = photoOf('tenants/c1/devices/uno/photo.jpg');
+    expect((await call('supervisor', 'patch', `${DE}/uno`, { photo: good })).status).toBe(200);
+    expect((read('companies/c1/devices/uno') as any).photo).toBe(good.url);
+    for (const bad of [
+      photoOf('tenants/c1/devices/gol/photo.jpg'),
+      photoOf('tenants/c2/devices/uno/photo.jpg'),
+      photoOf('tenants/c1/services/uno/photo.jpg'),
+      photoOf('tenants/c1/devices/uno/../../x.jpg'),
+      { storagePath: 'tenants/c1/devices/uno/photo.jpg', url: 'https://example.test/tenants/c1/devices/uno/photo.jpg' },
+      { storagePath: 'tenants/c1/devices/uno/photo.jpg', url: `https://firebasestorage.googleapis.com/v0/b/outro.appspot.com/o/tenants%2Fc1%2Fdevices%2Funo%2Fphoto.jpg` },
+      { storagePath: 'tenants/c1/devices/uno/photo.jpg', url: `http://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/tenants%2Fc1%2Fdevices%2Funo%2Fphoto.jpg` },
+    ]) {
+      expect((await call('admin', 'patch', `${DE}/uno`, { photo: bad })).status).toBe(400);
+    }
+    expect((read('companies/c1/devices/uno') as any).photo).toBe(good.url);
+  });
+
+  test('só troca: sem remover a foto (como o app)', async () => {
+    expect((await call('admin', 'patch', `${DE}/uno`, { photo: null })).status).toBe(400);
+  });
+
+  test('trocar apaga o arquivo antigo da pasta, nunca o de fora ou o novo', async () => {
+    seed('companies/c1/devices/uno', { name: 'Uno', photo: photoOf('tenants/c1/devices/uno/old.jpg').url });
+    const res = await call('owner', 'patch', `${DE}/uno`, { photo: photoOf('tenants/c1/devices/uno/photo.jpg') });
+    expect(res.status).toBe(200);
+    expect(fakeStorage.deleted).toEqual(['tenants/c1/devices/uno/old.jpg']);
+    fakeStorage.reset();
+    // Same file again (photo.jpg overwritten): nothing deleted.
+    await call('owner', 'patch', `${DE}/uno`, { photo: photoOf('tenants/c1/devices/uno/photo.jpg') });
+    seed('companies/c1/devices/gol', { name: 'Gol', photo: 'https://example.test/foto.jpg' });
+    await call('owner', 'patch', `${DE}/gol`, { photo: photoOf('tenants/c1/devices/gol/photo.jpg') });
+    expect(fakeStorage.deleted).toEqual([]);
+  });
+
+  test('consultor, gerente e técnico não põem foto; outra empresa não acha o aparelho', async () => {
+    const good = photoOf('tenants/c1/devices/uno/photo.jpg');
+    for (const role of ['consultant', 'manager', 'technician'] as Role[]) {
+      expect((await call(role, 'patch', `${DE}/uno`, { photo: good })).status).toBe(403);
+    }
+    expect((await call('other2', 'patch', `${DE}/uno`, { photo: photoOf('tenants/c2/devices/uno/photo.jpg') }, 'c2')).status).toBe(404);
+    expect((read('companies/c1/devices/uno') as any).photo).toBeUndefined();
+  });
+
+  test('a foto aparece na lista e na tela do aparelho', async () => {
+    const good = photoOf('tenants/c1/devices/uno/photo.jpg');
+    await call('admin', 'patch', `${DE}/uno`, { photo: good });
+    expect((await call('consultant', 'get', DE)).body.data.find((d: any) => d.id === 'uno').photo).toBe(good.url);
+    expect((await call('consultant', 'get', `${DE}/uno`)).body.data.device.photo).toBe(good.url);
   });
 });
 

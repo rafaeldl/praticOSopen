@@ -189,6 +189,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Clientes (`/customers`)**: por inicial, selos "N atrasadas" e "N em aberto", busca por nome, e-mail, telefone e placa. Ficha ao lado com contato, CPF/CNPJ, endereço, campos do segmento, "Falta receber", aparelhos, OS, recebimentos e "Nova OS para…".
 - **Cadastro**: nome e telefone (máscara do segmento pelo país), "Mais dados" com o resto. Telefone de outro cliente pergunta antes. Editar manda a versão lida: se alguém salvou depois, nada é gravado.
 - **Aparelhos (`/devices`)**: aba ao lado de Clientes com o nome do ramo, com a ficha, os contratos ativos e a próxima manutenção.
+- **Foto do aparelho**: no cadastro ("Mais dados"), escolher, arrastar ou colar uma imagem (até 10 MB). Só trocar, sem tirar, como o app. Nada é gravado antes do ✓: em aparelho novo, o aparelho é criado primeiro e a foto sobe depois para `tenants/{empresa}/devices/{id}/photo.jpg`, com "Enviando a foto…" no botão. Se o envio falhar, o aparelho fica salvo e um aviso diz que a foto não foi. A API só aceita arquivo da pasta daquele aparelho. A foto aparece na ficha.
 - **Importar planilha (`/customers/import`)**: CSV ou XLSX lido no navegador, sem biblioteca (zip pelo `DecompressionStream`), ou linhas coladas. Colunas adivinhadas e conferidas, prévia do que entra e do que fica de fora, grava só ao confirmar, de 100 em 100, com id por linha: repetir não duplica.
 
 ### Catálogo

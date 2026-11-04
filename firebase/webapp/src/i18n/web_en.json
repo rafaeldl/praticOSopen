@@ -231,6 +231,8 @@
   "web.customers.discardBody": "Nothing has been saved yet.",
   "web.devices.new": "New {device}",
   "web.devices.edit": "Edit {device}",
+  "web.devices.photoFailed": "Saved, but the photo did not upload. Open it again and change the photo.",
+  "web.devices.photoUploading": "Uploading the photo…",
   "web.devices.count": "{count, plural, =0{No} =1{1} other{{count}}} {devices}",
   "web.devices.empty": "No {devices} added yet",
   "web.devices.emptyBody": "Add one here or when creating an order.",

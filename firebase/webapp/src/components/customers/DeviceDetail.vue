@@ -172,9 +172,9 @@ async function onChangedElsewhere() {
   emit('changed')
 }
 
-async function onEdited() {
+async function onEdited(_id: string, notice?: string) {
   dialog.value = null
-  showToast(t('web.customers.saved'))
+  showToast(notice ?? t('web.customers.saved'))
   await load()
   emit('changed')
 }
@@ -207,6 +207,7 @@ onMounted(load)
 
     <div v-else-if="device && detail" class="od-scroll" tabindex="-1" data-od-focus>
       <header class="od-head">
+        <img v-if="device.photo" class="dev-thumb" :src="device.photo" width="72" height="72" alt="" data-testid="device-detail-photo" />
         <h2 class="od-h"><span class="od-name">{{ title }}</span></h2>
         <p class="od-device-line" data-testid="device-owner">
           <template v-if="device.serial"><span class="num">{{ device.serial }}</span></template>

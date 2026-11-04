@@ -79,11 +79,11 @@ async function startEdit(row: DeviceRow) {
   }
 }
 
-async function onSaved(id: string) {
+async function onSaved(id: string, notice?: string) {
   const isNew = !form.value?.device
   if (isNew) await router.replace({ path: '/devices', query: { device: id } })
   form.value = null
-  showToast(t('web.customers.saved'))
+  showToast(notice ?? t('web.customers.saved'))
   await load(true)
 }
 

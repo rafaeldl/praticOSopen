@@ -161,10 +161,11 @@ async function onEdited() {
   emit('changed')
 }
 
-async function onDeviceSaved(id: string) {
+async function onDeviceSaved(id: string, notice?: string) {
   // The new device opens. It is not tied to this customer until it enters an order (no owner field yet).
   await router.replace({ path: '/devices', query: { device: id } })
   dialog.value = null
+  if (notice) showToast(notice)
 }
 
 onMounted(load)
