@@ -791,5 +791,11 @@
   "web.receive.byAsaas": "Registrado automáticamente en Asaas",
   "web.newOrder.registerItem": "+ Registrar “{name}” en el catálogo",
   "web.newOrder.itemRegistered": "{name} registrado en el catálogo y puesto en la OS",
-  "web.order.devicesOf": "De {name}"
+  "web.order.devicesOf": "De {name}",
+  "web.order.documentType": "Elija una imagen, un PDF o un documento de Word.",
+  "web.order.documentDeleted": "Documento eliminado",
+  "web.order.documentDeleteFailed": "No se pudo eliminar el documento. Revise su internet e intente de nuevo.",
+  "web.order.deleteDocument": "Eliminar",
+  "web.order.deleteDocumentOf": "Eliminar {name}",
+  "web.order.noDocuments": "Ningún documento. Factura, contrato o garantía van aquí."
 }

@@ -73,6 +73,12 @@ function money(order: Order): Json {
   };
 }
 
+/** Documents that are not a payment proof (type receipt or linked to a transaction). Undefined when none. */
+function attachedDocuments(order: Order): Json[] | undefined {
+  const list = (order.documents ?? []).filter((d) => d.type !== 'receipt' && !d.linkedTransactionId);
+  return list.length ? (list as unknown as Json[]) : undefined;
+}
+
 /** One row of GET /orders. */
 export function projectOrderSummary(order: Order, showPrices: boolean): Json {
   return compact({
@@ -120,6 +126,9 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? null,
     rating: order.rating,
+    // Attached files (nota, contrato, garantia): to everyone who reads the order.
+    // Payment proofs are money: only with prices, below.
+    documents: showPrices ? undefined : attachedDocuments(order),
     dueDate: wallTime(order.dueDate),
     scheduledDate: wallTime(order.scheduledDate),
     completedAt: order.completedAt,
@@ -131,7 +140,7 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
       ? {
         ...money(order),
         transactions: (order.transactions ?? []).map((t, i) => ({ ...t, id: ids[i] })),
-        documents: (order.documents ?? []).filter((d) => d.type === 'receipt'),
+        documents: order.documents ?? [],
       }
       : {}),
   });

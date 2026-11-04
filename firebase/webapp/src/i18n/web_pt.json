@@ -791,5 +791,11 @@
   "web.receive.byAsaas": "Registrado automaticamente no Asaas",
   "web.newOrder.registerItem": "+ Cadastrar “{name}” no catálogo",
   "web.newOrder.itemRegistered": "{name} cadastrado no catálogo e posto na OS",
-  "web.order.devicesOf": "De {name}"
+  "web.order.devicesOf": "De {name}",
+  "web.order.documentType": "Escolha uma imagem, um PDF ou um documento do Word.",
+  "web.order.documentDeleted": "Documento excluído",
+  "web.order.documentDeleteFailed": "Não deu para excluir o documento. Confira a internet e tente de novo.",
+  "web.order.deleteDocument": "Excluir",
+  "web.order.deleteDocumentOf": "Excluir {name}",
+  "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui."
 }

@@ -791,5 +791,11 @@
   "web.receive.byAsaas": "Recorded automatically by Asaas",
   "web.newOrder.registerItem": "+ Add “{name}” to the catalog",
   "web.newOrder.itemRegistered": "{name} added to the catalog and to the order",
-  "web.order.devicesOf": "{name}'s"
+  "web.order.devicesOf": "{name}'s",
+  "web.order.documentType": "Choose an image, a PDF or a Word document.",
+  "web.order.documentDeleted": "Document deleted",
+  "web.order.documentDeleteFailed": "Couldn't delete the document. Check your internet and try again.",
+  "web.order.deleteDocument": "Delete",
+  "web.order.deleteDocumentOf": "Delete {name}",
+  "web.order.noDocuments": "No documents. Invoices, contracts or warranties go here."
 }
