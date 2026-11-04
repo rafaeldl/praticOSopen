@@ -215,7 +215,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     paidAmount: showsMoney ? (num(raw.paidAmount) ?? 0) : undefined,
     transactions: showsMoney && Array.isArray(raw.transactions) ? (raw.transactions as OrderTransaction[]) : [],
     documents: showsMoney && Array.isArray(raw.documents) ? (raw.documents as unknown[]) : undefined,
-    attachments: attachmentsOf(raw.documents),
+    attachments: attachmentsOf(raw.documents, showsMoney),
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
     rating: ratingOf(raw.rating),
@@ -578,10 +578,18 @@ export function initialsOf(name: string | null | undefined): string {
  * The order's documents (OrderDocument in the app) that are not a payment proof:
  * a file linked to a transaction belongs to "Já recebido". Only http(s) links.
  */
-export function attachmentsOf(value: unknown): OrderAttachment[] {
+/**
+ * A payment proof: type receipt or linked to a payment. The same rule as the
+ * server's projection (order-projection.ts attachedDocuments): money, so only
+ * for who sees values.
+ */
+export const isPaymentProof = (doc: { type?: unknown; linkedTransactionId?: unknown }): boolean => doc.type === 'receipt' || !!doc.linkedTransactionId
+
+export function attachmentsOf(value: unknown, showsMoney = false): OrderAttachment[] {
   if (!Array.isArray(value)) return []
   return (value as Raw[])
-    .filter((doc) => doc && typeof doc.id === 'string' && !doc.linkedTransactionId && typeof doc.url === 'string' && /^https?:\/\//.test(doc.url))
+    // A proof linked to a payment lives in "Já recebido"; a "Comprovante" attached by hand only for who sees values.
+    .filter((doc) => doc && typeof doc.id === 'string' && !doc.linkedTransactionId && (showsMoney || !isPaymentProof(doc)) && typeof doc.url === 'string' && /^https?:\/\//.test(doc.url))
     .map((doc) => ({
       id: doc.id as string,
       url: doc.url as string,

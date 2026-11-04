@@ -73,7 +73,10 @@ function money(order: Order): Json {
   };
 }
 
-/** Documents that are not a payment proof (type receipt or linked to a transaction). Undefined when none. */
+/**
+ * Documents that are not a payment proof (type receipt or linked to a
+ * transaction): the same rule as the web's isPaymentProof (webapp/src/lib/orders/model.ts). Undefined when none.
+ */
 function attachedDocuments(order: Order): Json[] | undefined {
   const list = (order.documents ?? []).filter((d) => d.type !== 'receipt' && !d.linkedTransactionId);
   return list.length ? (list as unknown as Json[]) : undefined;

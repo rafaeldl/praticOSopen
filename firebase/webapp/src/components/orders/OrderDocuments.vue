@@ -33,7 +33,8 @@ const TYPE_TEXT: Record<AttachmentType, () => string> = {
   warranty: () => t('warranty'),
   other: () => t('other'),
 }
-const typeChoices = ATTACHMENT_TYPES.map((type) => ({ id: type, label: TYPE_TEXT[type]() }))
+// "Comprovante" is money: only for who sees values (the same rule that hides it from the others, isPaymentProof).
+const typeChoices = computed(() => ATTACHMENT_TYPES.filter((type) => type !== 'receipt' || can('viewPrices')).map((type) => ({ id: type, label: TYPE_TEXT[type]() })))
 
 function size(doc: OrderAttachment): string {
   const parts = fileSizeParts(doc.fileSize)
