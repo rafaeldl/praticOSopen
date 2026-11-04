@@ -35,7 +35,9 @@ const tax = ref<Record<Exclude<keyof Taxes, 'retainIss'>, string>>({
 })
 const OTHER = ['pis', 'cofins', 'csll', 'inss', 'ir'] as const
 const template = ref(props.current?.descriptionTemplate ?? DEFAULT_TEMPLATE)
-const valid = computed(() => (typing.value ? !!code.value.trim() && !!name.value.trim() : !!serviceId.value))
+/** Fields whose percent is not a number from 0 to 100 (B6): said on the field, nothing saved. */
+const badTax = computed(() => (Object.keys(tax.value) as (keyof typeof tax.value)[]).filter((key) => parsePercent(tax.value[key]) === null))
+const valid = computed(() => (typing.value ? !!code.value.trim() && !!name.value.trim() : !!serviceId.value) && !badTax.value.length)
 const saving = ref(false)
 const failed = ref('')
 const layer = ref<InstanceType<typeof Layer> | null>(null)
@@ -97,12 +99,12 @@ async function save() {
       municipalServiceName: typing.value ? name.value.trim() : serviceName.value,
       taxes: {
         retainIss: retainIss.value,
-        iss: parsePercent(tax.value.iss),
-        pis: parsePercent(tax.value.pis),
-        cofins: parsePercent(tax.value.cofins),
-        csll: parsePercent(tax.value.csll),
-        inss: parsePercent(tax.value.inss),
-        ir: parsePercent(tax.value.ir),
+        iss: parsePercent(tax.value.iss) as number,
+        pis: parsePercent(tax.value.pis) as number,
+        cofins: parsePercent(tax.value.cofins) as number,
+        csll: parsePercent(tax.value.csll) as number,
+        inss: parsePercent(tax.value.inss) as number,
+        ir: parsePercent(tax.value.ir) as number,
       },
       descriptionTemplate: template.value.trim() || DEFAULT_TEMPLATE,
     })
@@ -151,18 +153,20 @@ async function save() {
         <p><button type="button" class="link" data-testid="nfse-service-toggle" @click="toggleTyping">{{ typing ? t('nfseServicePickTitle') : t('nfseServiceTypeCode') }}</button></p>
         <div>
           <label class="field-label" for="ns-iss">{{ t('nfseIss') }}</label>
-          <input id="ns-iss" v-model="tax.iss" class="field" inputmode="decimal" placeholder="0" />
+          <input id="ns-iss" v-model="tax.iss" class="field" inputmode="decimal" placeholder="0" :aria-invalid="badTax.includes('iss')" :aria-describedby="badTax.includes('iss') ? 'ns-iss-error' : undefined" />
+          <p v-if="badTax.includes('iss')" id="ns-iss-error" class="field-error">{{ t('web.nfse.percentInvalid') }}</p>
         </div>
         <label class="check-row">
           <input v-model="retainIss" class="check" type="checkbox" />
           <span>{{ t('nfseRetainIss') }}</span>
         </label>
-        <details class="more-options">
+        <details class="more-options" :open="OTHER.some((key) => badTax.includes(key)) || undefined">
           <summary>{{ t('nfseOtherTaxes') }}</summary>
           <p class="field-hint">{{ t('nfseTaxesNote') }}</p>
           <div v-for="key in OTHER" :key="key">
             <label class="field-label" :for="`ns-${key}`">{{ key.toUpperCase() }}</label>
-            <input :id="`ns-${key}`" v-model="tax[key]" class="field" inputmode="decimal" placeholder="0" />
+            <input :id="`ns-${key}`" v-model="tax[key]" class="field" inputmode="decimal" placeholder="0" :aria-invalid="badTax.includes(key)" :aria-describedby="badTax.includes(key) ? `ns-${key}-error` : undefined" />
+            <p v-if="badTax.includes(key)" :id="`ns-${key}-error`" class="field-error">{{ t('web.nfse.percentInvalid') }}</p>
           </div>
         </details>
         <div>
@@ -172,7 +176,7 @@ async function save() {
         </div>
       </div>
       <div class="drawer-foot">
-        <span class="hint" aria-live="polite">{{ valid ? '' : t('nfseServiceMissing') }}</span>
+        <span class="hint" aria-live="polite">{{ valid ? '' : badTax.length ? t('web.nfse.percentInvalid') : t('nfseServiceMissing') }}</span>
         <button type="submit" class="btn btn--primary" :disabled="saving || !valid" data-testid="nfse-service-save">
           <Check :size="16" aria-hidden="true" />{{ saving ? t('web.newOrder.saving') : t('save') }}
         </button>

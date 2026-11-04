@@ -7,20 +7,13 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
 import { formatDate } from '@/lib/format'
-import { nfseSettings, watchInvoicesOf } from '@/lib/nfse/data'
-import { isActive, isIssued, type NfseInvoice } from '@/lib/nfse/model'
+import { customerOrdersForNfse, nfseSettings, watchInvoicesOf } from '@/lib/nfse/data'
+import { canHaveNfse, eligibleOrderIds, isIssued, nfseValueOf, type NfseInvoice } from '@/lib/nfse/model'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { showToast } from '@/lib/toast'
 import IssueInvoiceDialog from './IssueInvoiceDialog.vue'
 
-interface Summary {
-  id: string
-  number?: number
-  status: string
-  total?: number
-  createdAt?: string
-}
-const props = defineProps<{ customerId: string; customerName: string; orders: Summary[] }>()
+const props = defineProps<{ customerId: string; customerName: string }>()
 
 const invoices = shallowRef<NfseInvoice[]>([])
 const ready = ref(true)
@@ -33,21 +26,20 @@ onMounted(async () => {
   available.value = true
   ready.value = settings.ready
   stop = await watchInvoicesOf({ customerId: props.customerId }, (list) => (invoices.value = list), () => {})
+  full.value = await customerOrdersForNfse(props.customerId).catch(() => [])
 })
 onBeforeUnmount(() => stop?.())
 
 const issued = computed(() => invoices.value.filter(isIssued).length)
-/**
- * May go in a nota now: not a quote nor canceled, with some value, and no
- * active nota. The customer's list carries totals, not lines: an order of
- * products only is shown and the server's preview says it has no services.
- */
+/** The customer's orders with their lines (the API's list has only totals). */
+const full = shallowRef<Awaited<ReturnType<typeof customerOrdersForNfse>>>([])
+/** May go in a nota now: services of some value, not a quote nor canceled, no active nota (B7, as the app). */
 const eligible = computed(() => {
-  const taken = new Set(invoices.value.filter((invoice) => isActive(invoice)).flatMap((invoice) => invoice.orderIds))
-  return props.orders.filter((o) => o.status !== 'quote' && o.status !== 'canceled' && (o.total ?? 0) > 0 && !taken.has(o.id))
+  const ids = new Set(eligibleOrderIds(full.value, invoices.value))
+  return full.value.filter((o) => ids.has(o.id)).sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
 })
 /** Some order could ever have a nota (the button stays; all already with a nota says so). */
-const anyBillable = computed(() => props.orders.some((o) => o.status !== 'quote' && o.status !== 'canceled' && (o.total ?? 0) > 0))
+const anyBillable = computed(() => full.value.some((o) => canHaveNfse(o.order)))
 const picking = ref(false)
 const picked = ref<string[]>([])
 const query = ref('')
@@ -107,7 +99,7 @@ function done() {
           <input :id="`np-${order.id}`" class="check" type="checkbox" :checked="picked.includes(order.id)" @change="toggle(order.id)" />
           <label :for="`np-${order.id}`">
             {{ orderShort() }} {{ order.number }}
-            <span class="sub"> · {{ money(order.total ?? 0) }}<template v-if="order.createdAt"> · {{ formatDate(order.createdAt, country()) }}</template></span>
+            <span class="sub"> · {{ t('nfsePickOrderSubtitle', { value: money(nfseValueOf(order.order)), date: order.createdAt ? formatDate(order.createdAt, country()) : '' }) }}</span>
           </label>
         </div>
       </div>

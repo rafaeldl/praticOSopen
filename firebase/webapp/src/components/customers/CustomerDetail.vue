@@ -200,7 +200,7 @@ onMounted(load)
           <span v-if="spent > 0" class="muted">{{ t('customerSpentValue', { value: money(spent) }) }}</span>
           <button v-if="canReceipts" type="button" class="link" data-testid="customer-receipts" @click="dialog = 'receipts'">{{ t('receiptsSection') }}</button>
         </div>
-        <CustomerNfse v-if="can('chargeOrder') && effectiveUseFinancial()" :key="customer.id" :customer-id="customer.id" :customer-name="customer.name" :orders="detail.orders" />
+        <CustomerNfse v-if="can('chargeOrder') && effectiveUseFinancial()" :key="customer.id" :customer-id="customer.id" :customer-name="customer.name" />
         <p v-if="detail.partial" class="sub">{{ t('web.customers.partial') }}</p>
         <p v-if="canCreate" class="od-ask">{{ t('askOrderForCustomer', { name: firstName(customer.name) }) }}</p>
         <div class="od-actions">

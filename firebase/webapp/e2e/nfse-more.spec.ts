@@ -107,6 +107,13 @@ test('configurar: passos na ordem, dados fiscais, acesso à prefeitura, serviço
   await expect.poll(() => searches.at(-1)).toBe('assist')
   await service.getByRole('button', { name: '14.02 Assistência técnica' }).click()
   await expect(service.getByLabel('ISS (%)')).toHaveValue('3')
+  // B6: a percent that is not 0 to 100 says so on the field and nothing is saved.
+  await service.getByLabel('ISS (%)').fill('abc')
+  await expect(service.getByText('Use um número de 0 a 100, como 2 ou 2,5.').first()).toBeVisible()
+  await expect(service.getByTestId('nfse-service-save')).toBeDisabled()
+  await service.getByLabel('ISS (%)').fill('150')
+  await expect(service.getByTestId('nfse-service-save')).toBeDisabled()
+  await service.getByLabel('ISS (%)').fill('3')
   await service.getByLabel('O cliente retém o ISS').check()
   await service.getByText('Outros impostos (%)').click()
   await service.getByLabel('PIS').fill('0,65')
@@ -124,8 +131,21 @@ test('configurar: passos na ordem, dados fiscais, acesso à prefeitura, serviço
   await expect(screen).toContainText('Tudo pronto.')
   await expect(page.getByTestId('nfse-setup-next')).toHaveCount(0)
 
-  await page.getByTestId('nfse-auto-issue').getByLabel(/Quando a OS for paga/).check()
+  // B5: marking (mouse or arrow keys) saves nothing; "Salvar" asks first when leaving "Só quando eu pedir".
+  const auto = page.getByTestId('nfse-auto-issue')
+  await auto.getByLabel(/Só quando eu pedir/).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(auto.getByLabel(/Quando a OS for paga/)).toBeChecked()
+  await auto.getByLabel(/Quando a OS for paga/).check()
+  expect(sent).toHaveLength(2)
+  await auto.getByTestId('nfse-auto-save').click()
+  const confirm = page.getByRole('dialog', { name: 'Emitir as notas sozinho?' })
+  await confirm.getByRole('button', { name: 'Cancelar' }).click()
+  expect(sent).toHaveLength(2)
+  await auto.getByTestId('nfse-auto-save').click()
+  await confirm.getByRole('button', { name: 'Emitir sozinho' }).click()
   await expect.poll(() => (sent[2] as { service?: { autoIssue?: string } } | undefined)?.service?.autoIssue).toBe('paid')
+  await expect(auto.getByTestId('nfse-auto-save')).toHaveCount(0)
 
   // Typed code and name instead of the city's list.
   await page.getByTestId('nfse-step-service').click()
@@ -229,6 +249,8 @@ test('cliente: notas emitidas abrem "Notas de X"; uma nota com várias OS escolh
   const a = await makeOrder('admin', { ...PAID, customer })
   const b = await makeOrder('admin', { ...PAID, customer })
   const c = await makeOrder('admin', { ...PAID, customer })
+  // B7: an order of products only has nothing for a nota (the services' value, as the app).
+  const parts = await makeOrder('admin', { ...PAID, customer, total: 200, services: [], products: [{ product: { id: 'product-1', name: 'Peça 1' }, value: 200, quantity: 1, total: 200 }] })
   await makeNota({ number: '777', orderIds: [c.id], orders: [{ orderId: c.id, orderNumber: c.number, value: 50 }], customer: { id: customer.id, name: customer.name } })
   let asked: Record<string, unknown> | null = null
   await page.route('**/v1/app/nfse/invoices/preview', async (route) => {
@@ -243,6 +265,8 @@ test('cliente: notas emitidas abrem "Notas de X"; uma nota com várias OS escolh
   const pick = page.getByRole('dialog', { name: 'Quais OS entram na nota?' })
   // The order that already has a nota is not offered.
   await expect(pick.getByLabel(new RegExp(`OS ${c.number}`))).toHaveCount(0)
+  await expect(pick.getByLabel(new RegExp(`OS ${parts.number}`))).toHaveCount(0)
+  await expect(pick.getByLabel(new RegExp(`OS ${a.number}`))).toBeVisible()
   await expect(pick.getByTestId('nfse-pick-ok')).toBeDisabled()
   await pick.getByLabel(new RegExp(`OS ${a.number}`)).check()
   await pick.getByLabel(new RegExp(`OS ${b.number}`)).check()
@@ -270,3 +294,17 @@ for (const theme of ['light', 'dark'] as const) {
     await expectNoAxeViolations(page, `configurar nota ${theme}`)
   })
 }
+
+test('notas da OS ainda não lidas: nada oferece "Emitir nota fiscal" (B8)', async ({ page }) => {
+  const order = await makeOrder('admin', PAID)
+  // The live channel stalls: the order opens by a one-off read, the notas never arrive.
+  await page.route('**/google.firestore.v1.Firestore/Listen/**', () => {})
+  await login(page, 'admin', `orders?order=${order.id}`)
+  await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 02', { timeout: 20_000 })
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await expect(panel(page).getByTestId('order-totals')).toContainText('Tudo pago')
+  await expect(panel(page).getByTestId('next-step')).toHaveCount(0)
+  await panel(page).getByRole('button', { name: 'Mais ações' }).click()
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Imprimir ou salvar PDF' })).toBeVisible()
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Emitir nota fiscal' })).toHaveCount(0)
+})

@@ -13,31 +13,52 @@ import { DOT, invoiceStatusText } from '@/lib/nfse/text'
 import type { Order } from '@/lib/orders/model'
 
 const props = defineProps<{ order: Order; ready: boolean; remaining: number }>()
-const emit = defineEmits<{ issue: []; current: [invoice: NfseInvoice | null] }>()
+const emit = defineEmits<{ issue: []; current: [invoice: NfseInvoice | null]; loaded: [loaded: boolean] }>()
 
 const invoices = shallowRef<NfseInvoice[]>([])
+/**
+ * The order's notas read at least once (B8). Until then, or when the read
+ * failed, nothing offers "Emitir": a nota already issued could be issued again.
+ */
+const loaded = shallowRef(false)
 const failed = shallowRef(false)
 let stop: (() => void) | undefined
-onMounted(async () => {
-  stop = await watchInvoicesOf(
-    { orderId: props.order.id },
-    (list) => {
-      invoices.value = list
-      failed.value = false
-    },
-    () => (failed.value = true),
-  )
-})
+async function listen() {
+  stop?.()
+  failed.value = false
+  try {
+    stop = await watchInvoicesOf(
+      { orderId: props.order.id },
+      (list) => {
+        invoices.value = list
+        failed.value = false
+        loaded.value = true
+      },
+      () => {
+        failed.value = true
+        loaded.value = false
+      },
+    )
+  } catch {
+    failed.value = true
+  }
+}
+onMounted(listen)
 onBeforeUnmount(() => stop?.())
+watch(loaded, (value) => emit('loaded', value), { immediate: true })
 
 const current = computed(() => currentInvoiceOf(invoices.value))
 watch(current, (value) => emit('current', value), { immediate: true })
 /** A finished order that can have a nota and has no active one. */
-const canIssue = computed(() => props.ready && props.order.status === 'done' && canHaveNfse(props.order) && !(current.value && isActive(current.value)))
+const canIssue = computed(() => loaded.value && props.ready && props.order.status === 'done' && canHaveNfse(props.order) && !(current.value && isActive(current.value)))
 const day = today()
 </script>
 
 <template>
+  <div v-if="failed" class="od-nfse" role="alert" data-testid="order-nfse-error">
+    <span>{{ t('nfseRowTitle') }} · {{ t('web.nfse.rowError') }}</span>
+    <button type="button" class="link" @click="listen">{{ t('web.tryAgain') }}</button>
+  </div>
   <div v-if="current" class="od-nfse" data-testid="order-nfse">
     <span>{{ t('nfseRowTitle') }}</span>
     <RouterLink class="status link-plain" :to="{ path: '/invoices', query: { invoice: current.id, ...(current.effectiveDate && monthOf(current.effectiveDate) !== monthOf(day) ? { month: monthOf(current.effectiveDate) } : {}) } }">

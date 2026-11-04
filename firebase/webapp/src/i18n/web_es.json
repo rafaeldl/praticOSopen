@@ -801,5 +801,9 @@
   "web.nfse.searchOrder": "Número de la OS",
   "web.nfse.pickContinue": "{count, plural, =0{Elija las OS} =1{Continuar con 1 OS} other{Continuar con {count} OS}}",
   "web.login.signupBlocked": "El registro no fue aceptado. Si ya tienes cuenta, entra con ella; si no, habla con el soporte de PraticOS.",
-  "web.invites.joining": "Entrando…"
+  "web.invites.joining": "Entrando…",
+  "web.nfse.percentInvalid": "Use un número de 0 a 100, como 2 o 2,5.",
+  "web.nfse.autoConfirmTitle": "¿Emitir las notas automáticamente?",
+  "web.nfse.autoConfirm": "Emitir automáticamente",
+  "web.nfse.rowError": "no se pudieron ver las notas de esta OS"
 }

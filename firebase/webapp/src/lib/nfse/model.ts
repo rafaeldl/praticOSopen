@@ -394,11 +394,17 @@ export function cityAccessKind(setup: Pick<NfseSetup, 'fiscalInfo' | 'municipalO
   }
 }
 
-/** A percent typed with comma or point ("2,5", "2.5 %"); invalid or empty is 0, kept between 0 and 100. */
-export function parsePercent(text: string): number {
-  const value = Number.parseFloat(text.trim().replace('%', '').replace(',', '.'))
-  if (!Number.isFinite(value)) return 0
-  return Math.min(100, Math.max(0, value))
+/**
+ * A percent typed with comma or point ("2,5", "2.5 %"). Empty is 0; anything
+ * else that is not a number from 0 to 100 is null: the field says so and
+ * nothing is saved (the app turns "abc" into 0 and 150 into 100 in silence).
+ */
+export function parsePercent(text: string): number | null {
+  const clean = text.trim().replace(/\s*%$/, '').replace(',', '.')
+  if (!clean) return 0
+  if (!/^\d+(\.\d+)?$/.test(clean)) return null
+  const value = Number(clean)
+  return value >= 0 && value <= 100 ? value : null
 }
 
 export const isEmail = (text: string): boolean => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(text.trim())

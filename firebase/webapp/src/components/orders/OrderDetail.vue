@@ -136,7 +136,7 @@ const step = computed(() => {
   if (!order.value || !access.value) return null
   const base = nextStep(order.value, access.value)
   // Finished and paid: the nota is the next step, for who issues (order.nfse.next-step).
-  if (!base && nfseOn.value && can('chargeOrder')) {
+  if (!base && nfseOn.value && nfseLoaded.value && can('chargeOrder')) {
     const nota = nfseNextStep(order.value, nfseCurrent.value, nfseReady.value, money$.value?.remaining ?? 0)
     if (nota) return { kind: 'nfse' as const, fix: nota === 'fix' }
   }
@@ -176,6 +176,8 @@ const nfseOn = ref(false)
 const nfseReady = ref(false)
 /** The order's current nota, as OrderNfse reads it (live). */
 const nfseCurrent = shallowRef<NfseInvoice | null>(null)
+/** The order's notas were read (B8): before that, or after a failed read, no "Emitir". */
+const nfseLoaded = ref(false)
 const issuing = ref(false)
 const pdfOpen = ref(false)
 /** The receipt over several orders that a payment belongs to (pay.order.open-receipt-group). */
@@ -728,7 +730,7 @@ const menuChoices = computed<Choice[]>(() => {
   if (canPrint.value) list.push({ id: 'pdf', label: t('web.order.pdf') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
   // The server decides the rest (already has a nota, no service with value, not set up) and the dialog says why.
-  if (nfseOn.value && can('chargeOrder') && canHaveNfse(o) && !(nfseCurrent.value && nfseIsActive(nfseCurrent.value))) list.push({ id: 'invoice', label: t('nfseIssueAction') })
+  if (nfseOn.value && nfseLoaded.value && can('chargeOrder') && canHaveNfse(o) && !(nfseCurrent.value && nfseIsActive(nfseCurrent.value))) list.push({ id: 'invoice', label: t('nfseIssueAction') })
   if (a.transitions.includes('canceled')) list.push({ id: 'cancel', label: t('orderMenuCancel', { order: orderShort() }), danger: true })
   if (a.canDelete) list.push({ id: 'delete', label: t('orderMenuDelete', { order: orderShort() }), danger: true })
   return list
@@ -940,7 +942,7 @@ watch(
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
-        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" />
+        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
         <OrderPhotos :order="order" />
         <OrderDocuments :order="order" :can-edit="true" />
         <OrderComments :order-id="order.id" />

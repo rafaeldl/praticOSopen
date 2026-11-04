@@ -36,6 +36,14 @@ describe('nota da OS (order.nfse.*)', () => {
     expect(nfseNextStep(order('progress', [100]), null, true, 0)).toBeNull()
   })
 
+  test('várias OS do cliente: elegível pelo valor dos serviços, como o app (B7)', () => {
+    const list = [
+      { id: 'servico', order: order('done', [80]) },
+      { id: 'produto', order: order('done', [], [{ value: 200 }]) },
+    ]
+    expect(eligibleOrderIds(list, [])).toEqual(['servico'])
+  })
+
   test('OS que podem entrar numa nota: sem nota ativa (nfse.orders.pick)', () => {
     const list = [
       { id: 'o1', order: order('done', [100]) },
@@ -58,12 +66,14 @@ describe('configurar a nota (nfse.setup.*)', () => {
     expect(cityAccessKind({ fiscalInfo: { email: 'a@b.c' }, municipalOptions: { authenticationType: 'CERTIFICATE' } })).toBe('certificate')
     expect(cityAccessKind({ fiscalInfo: { email: 'a@b.c' }, municipalOptions: null })).toBe('none')
   })
-  test('percentual com vírgula ou ponto, de 0 a 100', () => {
+  test('percentual com vírgula ou ponto, de 0 a 100; vazio é 0; inválido não vira número (B6)', () => {
     expect(parsePercent('2,5')).toBe(2.5)
     expect(parsePercent('2.5 %')).toBe(2.5)
     expect(parsePercent('')).toBe(0)
-    expect(parsePercent('abc')).toBe(0)
-    expect(parsePercent('150')).toBe(100)
-    expect(parsePercent('-3')).toBe(0)
+    expect(parsePercent('abc')).toBeNull()
+    expect(parsePercent('2,5abc')).toBeNull()
+    expect(parsePercent('150')).toBeNull()
+    expect(parsePercent('-3')).toBeNull()
+    expect(parsePercent('100')).toBe(100)
   })
 })

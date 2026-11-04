@@ -11,6 +11,7 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import NfseFiscalForm from '@/components/finance/NfseFiscalForm.vue'
 import NfseServiceForm from '@/components/finance/NfseServiceForm.vue'
+import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { nfseSettings, nfseSetup, saveService } from '@/lib/nfse/data'
@@ -75,6 +76,19 @@ const AUTO: Record<AutoIssue, { label: () => string; hint: () => string }> = {
   completed: { label: () => t('nfseAutoIssueCompleted'), hint: () => t('nfseAutoIssueCompletedHint') },
 }
 const autoIssue = computed<AutoIssue>(() => setup.value?.service?.autoIssue ?? 'manual')
+/**
+ * The choice on screen (B5): picking (also with the arrow keys) only marks it;
+ * "Salvar" saves, and leaving "Só quando eu pedir" asks first, because from
+ * then on the server issues notas by itself.
+ */
+const autoChoice = ref<AutoIssue | null>(null)
+const autoPicked = computed<AutoIssue>(() => autoChoice.value ?? autoIssue.value)
+const askingAuto = ref(false)
+function saveAuto() {
+  if (autoPicked.value === autoIssue.value) return
+  if (autoIssue.value === 'manual') askingAuto.value = true
+  else void chooseAuto(autoPicked.value)
+}
 
 function next() {
   const step = nextSetupStep(missing.value)
@@ -91,6 +105,7 @@ function saved(next: NfseSetup, what: 'fiscal' | 'service') {
 
 /** nfse.setup.auto-issue: saved at once, with the service as it is. */
 async function chooseAuto(value: AutoIssue) {
+  askingAuto.value = false
   const service = setup.value?.service
   if (!service || value === autoIssue.value || busy.value) return
   busy.value = true
@@ -103,6 +118,7 @@ async function chooseAuto(value: AutoIssue) {
       descriptionTemplate: service.descriptionTemplate,
       autoIssue: value,
     })
+    autoChoice.value = null
     showToast(t('web.saved'))
   } catch (error) {
     showToast(t(errorMessageKey(error)))
@@ -150,9 +166,10 @@ function back() {
       <fieldset v-if="setup.service" class="nfse-auto" :disabled="busy" data-testid="nfse-auto-issue">
         <legend class="field-label">{{ t('nfseAutoIssueQuestion') }}</legend>
         <label v-for="(item, key) in AUTO" :key="key" class="check-row nfse-auto-row">
-          <input class="check" type="radio" name="nfse-auto" :value="key" :checked="autoIssue === key" @change="chooseAuto(key)" />
+          <input class="check" type="radio" name="nfse-auto" :value="key" :checked="autoPicked === key" @change="autoChoice = key" />
           <span>{{ item.label() }}<small class="sub"> · {{ item.hint() }}</small></span>
         </label>
+        <p v-if="autoPicked !== autoIssue"><button type="button" class="btn btn--primary" :disabled="busy" data-testid="nfse-auto-save" @click="saveAuto">{{ t('save') }}</button></p>
       </fieldset>
       <section class="nfse-city" aria-labelledby="nfse-city-title">
         <h2 id="nfse-city-title" class="form-section">{{ t('nfseSetupCityAccess') }}</h2>
@@ -165,6 +182,15 @@ function back() {
       </section>
     </template>
   </div>
+  <ConfirmDialog
+    v-if="askingAuto"
+    :title="t('web.nfse.autoConfirmTitle')"
+    :body="autoPicked === 'paid' ? t('nfseAutoIssuePaidHint') : t('nfseAutoIssueCompletedHint')"
+    :confirm="t('web.nfse.autoConfirm')"
+    :keep="t('cancel')"
+    @confirm="chooseAuto(autoPicked)"
+    @close="askingAuto = false"
+  />
   <NfseFiscalForm v-if="open === 'fiscal' && setup" :current="setup.fiscalInfo" :options="setup.municipalOptions" @saved="(next) => saved(next, 'fiscal')" @close="open = null" />
   <NfseServiceForm v-if="open === 'service' && setup" :current="setup.service" @saved="(next) => saved(next, 'service')" @close="open = null" />
 </template>
