@@ -12,7 +12,7 @@ import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
 import { ApiError } from '@/lib/api'
 import type { DraftActions, NfseMoment } from '@/lib/orders/ai-actions'
-import { changeTarget, customerStep, deviceStep, dueFromDraft, noteKey, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
+import { assistValue, changeTarget, customerStep, deviceStep, dueFromDraft, noteKey, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
 import { ASSIST_MAX_PHOTOS, assistPhoto } from '@/lib/orders/assist-photo'
 import { assistStatus, requestAssist } from '@/lib/orders/assistant'
 import type { CatalogItem, Customer, Device } from '@/lib/orders/catalog'
@@ -56,6 +56,7 @@ const note = ref('')
 const usesLeft = ref<number | null>(null)
 const monthLimit = ref(0)
 const canPhoto = computed(() => can('attachPhotos'))
+const editPrices = can('viewPrices') && can('editPrices')
 const input = ref<HTMLInputElement | null>(null)
 /** "Ouvi “Juliene”": the rows that ask (order.ai.ask-customer / ask-device). */
 const customerAsk = shallowRef<{ name: string; phone?: string; options: CustomerHit[] } | null>(null)
@@ -143,10 +144,13 @@ async function run(files: File[] = []) {
         f.marked.delete(current.key)
         continue
       }
-      if (change.value === undefined && change.quantity === undefined) continue
+      // The price only for who edits prices (the ✓ sends only theirs).
+      const newValue = change.value !== undefined && editPrices ? change.value : undefined
+      const newQuantity = change.quantity !== undefined && current.item.kind === 'product' ? change.quantity : undefined
+      if (newValue === undefined && newQuantity === undefined) continue
       undo.changed.push({ key: current.key, value: current.value, quantity: current.quantity })
-      if (change.value !== undefined) current.value = change.value
-      if (change.quantity !== undefined && current.item.kind === 'product') current.quantity = change.quantity
+      if (newValue !== undefined) current.value = newValue
+      if (newQuantity !== undefined) current.quantity = newQuantity
       f.marked.add(current.key)
     }
     // 1. Customer, only when none is chosen.
@@ -172,8 +176,8 @@ async function run(files: File[] = []) {
     for (const item of draft.items) {
       const known = item.catalogId ? props.catalog.find((entry) => entry.id === item.catalogId && entry.kind === item.kind) : null
       const line: FormLine = known
-        ? { key: crypto.randomUUID(), item: known, value: item.value ?? known.value, quantity: item.kind === 'product' ? Math.max(1, Math.round(item.quantity || 1)) : 1 }
-        : { key: crypto.randomUUID(), item: { id: '', kind: 'service', name: item.name, value: null }, value: item.value, quantity: 1, free: true }
+        ? { key: crypto.randomUUID(), item: known, value: assistValue(item.value, known.value, editPrices), quantity: item.kind === 'product' ? Math.max(1, Math.round(item.quantity || 1)) : 1 }
+        : { key: crypto.randomUUID(), item: { id: '', kind: 'service', name: item.name, value: null }, value: assistValue(item.value, null, editPrices), quantity: 1, free: true }
       f.lines = [...f.lines, line]
       f.marked.add(line.key)
       undo.added.push(line.key)

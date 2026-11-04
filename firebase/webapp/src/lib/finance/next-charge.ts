@@ -96,3 +96,14 @@ export function snoozeNextCharge(companyId: string, debtorKey: string, now: Date
 export function sendPath(debtor: Debtor, customerChargeReady: boolean): 'customer' | 'order' {
   return debtor.orders.length > 1 && !!debtor.customer?.id && customerChargeReady ? 'customer' : 'order'
 }
+
+/** Runs a step of "Mandar cobrança": a failure says so (onError), never stays silent (B6 of #543). */
+export async function withNotice<T>(task: () => Promise<T>, onError: (error: unknown) => void): Promise<T | undefined> {
+  try {
+    return await task()
+  } catch (error) {
+    console.warn('next charge: failed', error)
+    onError(error)
+    return undefined
+  }
+}

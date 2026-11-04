@@ -44,6 +44,8 @@ const singleLinks = shallowRef(new Map<string, Charge>())
 let startedCharge = false
 const charge = shallowRef<Charge | null>(null)
 const chargesReady = ref(false)
+/** The payment links could not be read: no charge is offered until they are (Tentar de novo). */
+const chargesFailed = ref(false)
 // One id per receipt the person asks for: repeating the same request after a lost
 // answer sends it again (the server books it once). A new one when the balances
 // changed or the person changed what goes in (R2 of the #518 review).
@@ -113,28 +115,27 @@ async function loadCharges() {
     phone.value = detail?.customer.phone ?? ''
     if (charger) singleLinks.value = await orderLinks(orders.value.length ? orders.value.map((o) => o.id) : (await openOrders(props.customerId)).map((o) => o.id))
   } catch (error) {
-    // Without knowing, never offer a link that could cancel one about to be paid (send_charge_flow).
+    // Without knowing, never offer a link that could cancel one about to be paid (send_charge_flow):
+    // the drawer says so, with Tentar de novo (B2 of #543).
     console.warn('receive: customer charges not read', error)
+    chargesFailed.value = true
     return
   }
+  chargesFailed.value = false
   chargesReady.value = true
 }
 
-/** The open link of each order (the newest open one), read once. A failed read leaves the row without the line. */
+/** The open link of each order (the newest open one), read once. A failed read throws: loadCharges says so. */
 async function orderLinks(ids: readonly string[]): Promise<Map<string, Charge>> {
   const found = new Map<string, Charge>()
-  try {
-    const [db, { collection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-    await Promise.all(
-      ids.map(async (id) => {
-        const snap = await getDocs(collection(db, 'companies', session.companyId as string, 'orders', id, 'charges'))
-        const open = openChargeOf(snap.docs.map((d) => chargeOf(d.id, d.data())))
-        if (open) found.set(id, open)
-      }),
-    )
-  } catch (error) {
-    console.warn('receive: order links not read', error)
-  }
+  const [db, { collection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  await Promise.all(
+    ids.map(async (id) => {
+      const snap = await getDocs(collection(db, 'companies', session.companyId as string, 'orders', id, 'charges'))
+      const open = openChargeOf(snap.docs.map((d) => chargeOf(d.id, d.data())))
+      if (open) found.set(id, open)
+    }),
+  )
   return found
 }
 
@@ -305,6 +306,10 @@ const preview = computed(() => {
             <p>{{ t('web.receive.nothingOwed', { name: customerName }) }}</p>
           </div>
           <template v-else>
+            <div v-if="chargesFailed" class="charge-warn" role="alert" data-testid="customer-links-failed">
+              <p>{{ t('web.receive.linksFailed') }}</p>
+              <button type="button" class="btn btn--small" @click="loadCharges">{{ t('web.tryAgain') }}</button>
+            </div>
             <div v-if="charge" class="charge-warn" role="status" data-testid="customer-charge">
               <strong>{{ t('receiveCustomerOpenCharge', { amount: formatMoney(charge.value, 'BR') }) }}</strong>
               <p class="sub">{{ t('chargeDetailUntil', { value: formatMoney(charge.value, 'BR'), date: formatDate(`${charge.dueDate}T12:00:00`, 'BR') }) }}</p>

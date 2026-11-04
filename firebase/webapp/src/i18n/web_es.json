@@ -798,5 +798,8 @@
   "web.aiIntro.body": "Escribe el cliente y el servicio, o envía una foto. PraticOS lo completa y tú solo revisas antes de guardar.",
   "web.newOrder.assistHint": "Ej.: OS de Juliana, Corsa placa ABC1234, cambio de aceite, lista el viernes",
   "web.assist.photo": "Enviar foto para que el asistente la lea",
-  "web.newOrder.fixFields": "Revisa los campos marcados antes de guardar."
+  "web.newOrder.fixFields": "Revisa los campos marcados antes de guardar.",
+  "web.order.itemRemoveFailed": "No se pudo quitar el ítem. Volvió a la OS.",
+  "web.receive.linksFailed": "No se pudo ver si hay un enlace de pago abierto en estas OS. Para no cancelar un enlace sin aviso, el cobro espera.",
+  "web.onboarding.resumedNoSeed": "Rubro guardado. Los ejemplos y checklists listos solo entran en una empresa nueva; crea los tuyos cuando quieras."
 }

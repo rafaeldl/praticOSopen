@@ -8,7 +8,7 @@ import { defineAsyncComponent, ref, shallowRef, watch } from 'vue'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import type { Debtor, FinanceRow, FinanceSummary } from '@/lib/finance/data'
-import { nextChargeCandidates, openOrdersOf, resolveNextCharge, sendPath, snoozeNextCharge, snoozedKeys } from '@/lib/finance/next-charge'
+import { withNotice, nextChargeCandidates, openOrdersOf, resolveNextCharge, sendPath, snoozeNextCharge, snoozedKeys } from '@/lib/finance/next-charge'
 import { formatDate, formatDayMonth } from '@/lib/format'
 import { firestoreLite } from '@/lib/firebase'
 import type { Order } from '@/lib/orders/model'
@@ -79,7 +79,7 @@ async function send() {
   if (!debtor || sending.value) return
   sending.value = true
   step.value = null
-  try {
+  await withNotice(async () => {
     await loadOrderTexts()
     const settings = await paymentSettings()
     const asaas = settings.ready && can('chargeOrder')
@@ -89,10 +89,10 @@ async function send() {
     }
     if (debtor.orders.length === 1) await sendOrder(debtor.orders[0] as FinanceRow, asaas)
     else step.value = 'which'
-  } finally {
-    sending.value = false
-  }
+  }, failed)
+  sending.value = false
 }
+const failed = (error: unknown) => showToast(t(errorMessageKey(error)))
 
 async function sendOrder(row: FinanceRow, asaas = false) {
   order.value = row
@@ -115,8 +115,7 @@ async function pickOrder(id: string) {
   const row = next.value?.orders.find((o) => o.id === id)
   step.value = null
   if (!row) return
-  const settings = await paymentSettings()
-  await sendOrder(row, settings.ready && can('chargeOrder'))
+  await withNotice(async () => sendOrder(row, (await paymentSettings()).ready && can('chargeOrder')), failed)
 }
 
 function done() {

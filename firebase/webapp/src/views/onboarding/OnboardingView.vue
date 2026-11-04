@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { locale, t } from '@/i18n'
 import { ApiError } from '@/lib/api'
+import { showToast } from '@/lib/toast'
 import { companyPhoneMasks, enterCompany, listSegments, saveCompany, seedCompany, waitForClaim } from '@/lib/onboarding/data'
 import {
   countryFor,
@@ -133,6 +134,7 @@ async function finish(id: string, withSamples: boolean, localeTag: string) {
   await waitForClaim(id)
   seedTried.value = true
   writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true, existing: resuming.value })
+  let unseeded = false
   try {
     await seedCompany(id, withSamples, localeTag)
   } catch (error) {
@@ -140,10 +142,13 @@ async function finish(id: string, withSamples: boolean, localeTag: string) {
     // (ONBOARDING_NOT_NEW). The segment is saved; checklists and samples do not come.
     if (!(resuming.value && error instanceof ApiError && error.code === 'ONBOARDING_NOT_NEW')) throw error
     console.warn('onboarding: old company completed without the seed')
+    unseeded = true
   }
   await enterCompany(id)
   writePending(null)
   await router.replace('/')
+  // Said on Início: the segment is saved, but samples and ready checklists only come to a new company (B5 of #543).
+  if (unseeded) showToast(t('web.onboarding.resumedNoSeed'))
 }
 
 /** After a reload: the company exists, the rest goes on with what was chosen then. */

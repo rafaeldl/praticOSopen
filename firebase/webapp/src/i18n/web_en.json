@@ -798,5 +798,8 @@
   "web.aiIntro.body": "Type the customer and the service, or send a photo. PraticOS fills it in and you just check before saving.",
   "web.newOrder.assistHint": "E.g.: order for Julia, Corsa plate ABC1234, oil change, ready Friday",
   "web.assist.photo": "Send a photo for the assistant to read",
-  "web.newOrder.fixFields": "Check the marked fields before saving."
+  "web.newOrder.fixFields": "Check the marked fields before saving.",
+  "web.order.itemRemoveFailed": "Could not remove the item. It is back in the order.",
+  "web.receive.linksFailed": "Could not check for open payment links on these orders. So that no link is canceled without warning, the charge waits.",
+  "web.onboarding.resumedNoSeed": "Line of work saved. Samples and ready checklists only come with a new company; create your own whenever you like."
 }

@@ -261,3 +261,30 @@ describe('order.ai.photo', () => {
     expect(fitSize(1000, 5000)).toEqual({ width: 320, height: 1600 })
   })
 })
+
+describe('revisão do #543', () => {
+  it('B1: sem passo permitido, o cartão não abre e o motivo vai para a nota', async () => {
+    const { offerOf, planAiActions } = await import('@/lib/orders/ai-actions')
+    const said = { payment: { kind: 'full' as const, value: null, method: null, paidDate: null }, discount: null, status: null }
+    expect(offerOf(planAiActions(said, ctx()))).toEqual({ kind: 'card' })
+    expect(offerOf(planAiActions(said, ctx({ canReceive: false })))).toEqual({ kind: 'note', notice: { kind: 'cannotReceive' } })
+    // Without values (useFinancial off): nothing to do, nothing to say.
+    expect(offerOf(planAiActions(said, ctx({ showMoney: false })))).toEqual({ kind: 'note', notice: null })
+  })
+
+  it('B4: o preço dito só entra para quem edita preço', async () => {
+    const { assistValue } = await import('@/lib/orders/assist-draft')
+    expect(assistValue(999, 150, true)).toBe(999)
+    expect(assistValue(null, 150, true)).toBe(150)
+    expect(assistValue(999, 150, false)).toBe(150)
+    expect(assistValue(999, null, false)).toBeNull()
+  })
+
+  it('B6: uma falha em Mandar cobrança avisa', async () => {
+    const { withNotice } = await import('@/lib/finance/next-charge')
+    const seen: unknown[] = []
+    expect(await withNotice(async () => 1, (e) => seen.push(e))).toBe(1)
+    expect(await withNotice(async () => Promise.reject(new Error('x')), (e) => seen.push(e))).toBeUndefined()
+    expect(seen).toHaveLength(1)
+  })
+})

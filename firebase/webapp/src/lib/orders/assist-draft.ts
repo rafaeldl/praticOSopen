@@ -159,3 +159,11 @@ export function currentCustomerId(
   const only = sameName.length === 1 ? sameName[0] : null
   return only && !whatsappNumber(only.phone, country) ? only.id : null
 }
+
+/**
+ * The price the assistant may put on a line: the one said only for who edits
+ * prices (the ✓ would send the catalog's anyway); otherwise the catalog's.
+ */
+export function assistValue(said: number | null | undefined, catalog: number | null, editPrices: boolean): number | null {
+  return editPrices ? (said ?? catalog) : catalog
+}

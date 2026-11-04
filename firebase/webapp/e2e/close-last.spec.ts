@@ -385,8 +385,86 @@ test('empresa sem ramo: o primeiro acesso volta com o nome e o telefone dela e c
   await expect(page.getByTestId('onboarding-invite-code')).toHaveCount(0)
   await page.getByRole('button', { name: 'Criar meu PraticOS' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible({ timeout: 45_000 })
+  // An old company: the segment is saved, samples and checklists do not come, and the screen says so (B5).
+  await expect(page.locator('.toast')).toContainText('Exemplos e checklists prontos só entram em empresa nova')
   const company = await readCompany('company-resume')
   expect(company).toMatchObject({ name: 'Retoma Sem Ramo', segment: 'automotive', useScheduling: true })
   // The same company: nothing new was created for this person.
   expect(((await readUser('e2e-resumer'))?.companies as unknown[]).length).toBe(1)
+})
+
+// ---------------------------------------------------------------------------
+// Revisão do #543
+// ---------------------------------------------------------------------------
+
+test('B1: dinheiro dito na Nova OS sem passo possível não abre "Confere?" (empresa sem valores)', async ({ page }) => {
+  await assistantOn(page, [
+    () => ({
+      customer: { match: { id: 'customer-1', name: 'Cliente 01' }, guess: null, alternatives: [] },
+      actions: { payment: { kind: 'full', value: null, method: 'pix', paidDate: null }, discount: null, status: null },
+    }),
+  ])
+  await login(page, 'noValues')
+  await page.getByTestId('new-order').click()
+  await ask(page, 'cliente 01 pagou tudo')
+  await drawer(page).getByTestId('save-order').click()
+  await savedId(page)
+  await expect(panel(page)).toBeVisible()
+  await expect(panel(page).getByTestId('assistant')).toBeVisible()
+  await page.waitForTimeout(500)
+  await expect(dialog(page, 'Confere?')).toHaveCount(0)
+})
+
+test('B3: erro no meio guarda o Desfazer; tirar só vai ao servidor quando o aviso sai', async ({ page }) => {
+  await assistantOn(page, [
+    () => ({
+      changes: [
+        { action: 'remove', line: { kind: 'service', index: 0 }, candidates: [], name: 'Serviço 1' },
+        { action: 'remove', line: { kind: 'service', index: 0 }, candidates: [], name: 'Serviço 1' },
+      ],
+      items: [{ kind: 'service', name: 'Serviço 3', value: 150, quantity: 1, catalogId: 'service-3', description: null, alternatives: [] }],
+    }),
+  ])
+  const order = await makeOrder('admin', { status: 'approved' })
+  const deletes: string[] = []
+  page.on('request', (r) => r.method() === 'DELETE' && r.url().includes('/items/') && deletes.push(r.url()))
+  await page.route(/\/v1\/app\/orders\/[^/]+\/items$/, (route) => (route.request().method() === 'POST' ? route.fulfill({ status: 500, json: { success: false, error: { code: 'INTERNAL_ERROR' } } }) : route.continue()))
+  await login(page, 'admin', `orders?order=${order.id}`)
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await panel(page).getByLabel('Pedir ao assistente').fill('tira o serviço 1 e põe o 3')
+  await panel(page).getByTestId('assistant').getByRole('button', { name: 'Enviar' }).click()
+  const line = panel(page).getByTestId('order-line').filter({ hasText: 'Serviço 1' })
+  await expect(line).toHaveCount(0)
+  await page.locator('.toast').getByRole('button', { name: 'Desfazer' }).click()
+  await expect(line).toHaveCount(1)
+  expect(deletes).toEqual([])
+  expect(((await readOrder(order.id))?.services as unknown[]).length).toBe(1)
+})
+
+test('B4: sem editar preço, o valor dito à IA não aparece na Nova OS (consultor)', async ({ page }) => {
+  await assistantOn(page, [() => ({ items: [{ kind: 'service', name: 'Serviço 3', value: 999, quantity: 1, catalogId: 'service-3', description: null, alternatives: [] }] })])
+  await newOrder(page, 'consultant')
+  await ask(page, 'serviço 3 por 999')
+  const items = drawer(page).locator('.drawer-items')
+  await expect(items).toContainText('Serviço 3')
+  await expect(items).toContainText('R$ 150,00')
+  await expect(items).not.toContainText('999')
+})
+
+test('B2: sem ler os links das OS, a gaveta avisa e não oferece a cobrança', async ({ page }) => {
+  const a = await makeCustomer()
+  await done(a, 100)
+  await done(a, 50)
+  let fail = true
+  await page.route(/\/orders\/[^/:]+:runQuery/, (route) => (fail ? route.abort() : route.continue()))
+  await login(page, 'admin', `customers?customer=${a.id}`)
+  await expect(page.getByTestId('customer-detail').getByText('Carregando…')).toHaveCount(0)
+  await page.getByTestId('customer-receive').click()
+  const d = page.getByTestId('receive-customer')
+  await expect(d.getByTestId('customer-links-failed')).toBeVisible()
+  await expect(d.getByTestId('customer-charge-new')).toHaveCount(0)
+  fail = false
+  await d.getByTestId('customer-links-failed').getByRole('button', { name: 'Tentar de novo' }).click()
+  await expect(d.getByTestId('customer-links-failed')).toHaveCount(0)
+  await expect(d.getByTestId('customer-charge-new')).toBeVisible()
 })

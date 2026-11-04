@@ -185,3 +185,12 @@ export function paymentAmount(step: PaymentStep, currentRemaining: number): numb
   const amount = step.amount ?? 0
   return step.settlesAll || amount > currentRemaining + CENT ? round(currentRemaining) : amount
 }
+
+/**
+ * What the money said does (the app's _offerActions): the card only when there
+ * is a step this person may take; otherwise the first reason goes in the note,
+ * or nothing was found.
+ */
+export function offerOf(plan: ActionsPlan): { kind: 'card' } | { kind: 'note'; notice: Notice | null } {
+  return plan.hasSteps ? { kind: 'card' } : { kind: 'note', notice: plan.notices[0] ?? null }
+}

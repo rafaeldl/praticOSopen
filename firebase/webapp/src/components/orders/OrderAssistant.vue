@@ -5,11 +5,11 @@
 // marks with ✦ and offers Desfazer; errors go in the note, never in an alert.
 // It never receives, cancels or deletes on its own: a line leaves only when the
 // person asked ("tira a lavação"), and money waits for the "Confere?" card.
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
 import { ApiError } from '@/lib/api'
-import { contextOf, planAiActions, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
+import { contextOf, offerOf, planAiActions, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
 import { noticeText } from '@/lib/orders/ai-actions-text'
 import { changeTarget, dueFromDraft, noteKey, usesLeft as usesLeftOf, type AssistDraft, type DraftChange } from '@/lib/orders/assist-draft'
 import { ASSIST_MAX_PHOTOS, assistPhoto } from '@/lib/orders/assist-photo'
@@ -19,13 +19,14 @@ import type { Order, OrderLine } from '@/lib/orders/model'
 import { money, orderShort } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
-import { showToast } from '@/lib/toast'
+import { currentToast, showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import AiActionsDialog from './AiActionsDialog.vue'
 import ChoiceDialog from './ChoiceDialog.vue'
 
 const props = defineProps<{ order: Order; pendingChecklists?: number }>()
-const emit = defineEmits<{ added: [ids: string[]]; undone: [ids: string[]] }>()
+/** hide/unhide: a line asked out leaves the screen at once and the server only hears it when the notice goes (as "Tirar" in the order). */
+const emit = defineEmits<{ added: [ids: string[]]; undone: [ids: string[]]; hide: [ids: string[]]; unhide: [ids: string[]] }>()
 const enabled = ref(false)
 const text = ref('')
 const reading = ref<'' | 'text' | 'photos'>('')
@@ -48,13 +49,46 @@ onMounted(async () => {
   } catch {
     enabled.value = false
   }
-  // Nova OS with money said: the card opens once the order exists (order.ai.money-card).
+  // Nova OS with money said: the card opens once the order exists (order.ai.money-card),
+  // only with the assistant on and a step this person may take; otherwise the reason in the note.
   const left = ui.aiActionsFor
   if (left && left.orderId === props.order.id) {
     ui.aiActionsFor = null
-    card.value = { actions: left.actions, nfse: left.nfse, undoDraft: null }
+    if (enabled.value) offer(left.actions, left.nfse, null)
   }
 })
+
+/** The card, or the reason in the note (offerOf). Returns whether the card opened. */
+function offer(actions: DraftActions, nfse: NfseMoment | null, undoDraftFn: (() => Promise<void>) | null): boolean {
+  const plan = planAiActions(actions, contextOf(props.order, session.role, session.uid, effectiveUseFinancial(), props.pendingChecklists ?? 0, nfse))
+  const result = offerOf(plan)
+  if (result.kind === 'card') {
+    card.value = { actions, nfse, undoDraft: undoDraftFn }
+    return true
+  }
+  if (result.notice) note.value = noticeText(result.notice)
+  else if (!undoDraftFn) note.value = t('orderAssistantNothingFound')
+  return false
+}
+
+// Lines asked out wait for the notice to go: Desfazer then writes nothing (no price is lost).
+const pending: { orderId: string; ids: string[] }[] = []
+const ownToasts = new Set<number>()
+function commitRemovals() {
+  for (const batch of pending.splice(0)) for (const id of batch.ids) void writes.removeItem(batch.orderId, id).catch((error) => {
+    console.warn('assistant: line not removed', error)
+    emit('unhide', [id])
+    showToast(t('web.order.itemRemoveFailed'))
+  })
+}
+watch(currentToast, (toast) => {
+  if (pending.length && !(toast && ownToasts.has(toast.id))) commitRemovals()
+})
+onBeforeUnmount(commitRemovals)
+function ownToast(message: string, undo?: () => void) {
+  showToast(message, undo ? { undo } : {})
+  if (currentToast.value) ownToasts.add(currentToast.value.id)
+}
 
 function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
@@ -78,8 +112,11 @@ interface Undo {
   due: boolean
 }
 
-async function apply(draft: AssistDraft, sent: Order): Promise<{ undo: Undo; filled: boolean; onlyChanges: boolean }> {
-  const undo: Undo = { added: [], changed: [], removed: [], due: false }
+const emptyUndo = (): Undo => ({ added: [], changed: [], removed: [], due: false })
+const hasUndo = (undo: Undo) => undo.added.length + undo.changed.length + undo.removed.length > 0 || undo.due
+
+/** Fills `undo` as each write lands, so an error halfway still undoes what was saved. */
+async function apply(draft: AssistDraft, sent: Order, undo: Undo): Promise<{ filled: boolean; onlyChanges: boolean }> {
   let version = props.order.version
   const take = (response: Parameters<typeof writes.orderOf>[0]) => {
     const fresh = writes.orderOf(response, props.order.showsMoney)
@@ -98,8 +135,8 @@ async function apply(draft: AssistDraft, sent: Order): Promise<{ undo: Undo; fil
     }
     if (!line?.id || !props.order.lines.some((l) => l.id === line?.id)) continue
     if (change.action === 'remove') {
-      take(await writes.removeItem(props.order.id, line.id, version))
-      undo.removed.push(line)
+      // The same line asked out twice is one removal.
+      if (!undo.removed.some((l) => l.id === line?.id)) undo.removed.push(line)
       continue
     }
     const patch: { value?: number | null; quantity?: number; description?: string } = {}
@@ -133,7 +170,15 @@ async function apply(draft: AssistDraft, sent: Order): Promise<{ undo: Undo; fil
     undo.due = true
   }
   const onlyChanges = !draft.items.length && !undo.due && (undo.changed.length > 0 || undo.removed.length > 0)
-  return { undo, filled: undo.added.length + undo.changed.length + undo.removed.length > 0 || undo.due, onlyChanges }
+  return { filled: hasUndo(undo), onlyChanges }
+}
+
+/** The removals of this answer leave the screen now and the server later (commitRemovals). */
+function holdRemovals(undo: Undo) {
+  const ids = undo.removed.map((l) => l.id).filter((id): id is string => !!id)
+  if (!ids.length) return
+  pending.push({ orderId: props.order.id, ids })
+  emit('hide', ids)
 }
 
 async function undoDraft(undo: Undo) {
@@ -142,18 +187,10 @@ async function undoDraft(undo: Undo) {
     const patch = { ...(item.before.value !== undefined && can('editPrices') ? { value: item.before.value } : {}), ...(item.before.quantity ? { quantity: item.before.quantity } : {}), description: item.before.description ?? '' }
     await writes.updateItem(props.order.id, item.id, patch).catch(() => {})
   }
-  for (const line of undo.removed) {
-    await writes
-      .addItem(props.order.id, {
-        kind: line.catalogId ? line.kind : 'service',
-        ...(line.catalogId ? { catalogId: line.catalogId } : { description: line.name }),
-        ...(line.catalogId && line.description ? { description: line.description } : {}),
-        ...(can('editPrices') && line.value !== undefined ? { value: line.value } : {}),
-        ...(line.catalogId && line.kind === 'product' ? { quantity: line.quantity ?? 1 } : {}),
-        ...(line.deviceId ? { deviceId: line.deviceId } : {}),
-      })
-      .catch(() => {})
-  }
+  // Removals were never sent: they only come back to the screen.
+  const ids = undo.removed.map((l) => l.id).filter((id): id is string => !!id)
+  for (const batch of pending) batch.ids = batch.ids.filter((id) => !ids.includes(id))
+  if (ids.length) emit('unhide', ids)
   if (undo.due) await writes.patchOrder(props.order.id, { dueDate: null }).catch(() => {})
   emit('undone', undo.added)
 }
@@ -165,6 +202,7 @@ async function run(input: { text?: string; files?: File[] }) {
   if (!value && !files.length) return
   reading.value = files.length ? 'photos' : 'text'
   note.value = ''
+  const undo = emptyUndo()
   try {
     // The photo goes into the order first, then it is read (there is no photo just for the assistant).
     const photos = []
@@ -176,25 +214,27 @@ async function run(input: { text?: string; files?: File[] }) {
     const draft = await askAssistant(value, sent, photos)
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
-    const { undo, filled, onlyChanges } = await apply(draft, sent)
+    const { filled, onlyChanges } = await apply(draft, sent, undo)
+    holdRemovals(undo)
     text.value = ''
     emit('added', undo.added)
     const actions = draft.actions ?? null
     const key = noteKey({ filled, hasActions: !!actions, isNew: false, onlyChanges })
     if (key) note.value = t(key)
-    if (actions) {
-      // Nothing the person may do: the reason in the note, no card (offerActions).
-      const plan = planAiActions(actions, contextOf(props.order, session.role, session.uid, effectiveUseFinancial(), props.pendingChecklists ?? 0, draft.nfseAutoIssue ?? null))
-      if (plan.hasSteps) card.value = { actions, nfse: draft.nfseAutoIssue ?? null, undoDraft: filled ? () => undoDraft(undo) : null }
-      else if (!filled) note.value = plan.notices[0] ? noticeText(plan.notices[0]) : t('orderAssistantNothingFound')
-    }
+    // Nothing the person may do with the money: the reason in the note, no card (offerActions).
+    if (actions) offer(actions, draft.nfseAutoIssue ?? null, filled ? () => undoDraft(undo) : null)
     if (filled) {
       announce(note.value)
-      showToast(note.value, { undo: () => void undoDraft(undo).then(() => (note.value = '')) })
+      ownToast(note.value, () => void undoDraft(undo).then(() => (note.value = '')))
     }
   } catch (error) {
     console.warn('assistant: failed', error)
     note.value = errorNote(error)
+    // What was saved before the error can still be undone.
+    if (hasUndo(undo)) {
+      holdRemovals(undo)
+      ownToast(note.value, () => void undoDraft(undo).then(() => (note.value = '')))
+    }
   } finally {
     reading.value = ''
   }
@@ -206,7 +246,7 @@ function cardDone(text: string, undoActions: (() => Promise<void>) | null) {
   if (!text) return
   note.value = text
   announce(text)
-  showToast(text, undoActions ? { undo: () => void undoActions().then(() => undoDraftFn?.()) } : {})
+  ownToast(text, undoActions ? () => void undoActions().then(() => undoDraftFn?.()) : undefined)
 }
 </script>
 
