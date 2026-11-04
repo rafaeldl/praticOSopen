@@ -16,7 +16,7 @@
  */
 
 import { auth, db, FieldValue } from './firestore.service';
-import { buildRolesClaim, memberRole, ownerId, privateMembershipRef } from './membership.service';
+import { memberRole, ownerId, privateMembershipRef, refreshRolesClaim } from './membership.service';
 import { getMembershipRef, unlinkUserChannels, updateLinkedChannelRole } from './company.service';
 import { Company, RoleType, UserAggr } from '../models/types';
 
@@ -81,16 +81,6 @@ function adminsAfter(
   admins.delete(targetUserId);
   if (newRole && ADMIN_ROLES.includes(newRole)) admins.add(targetUserId);
   return admins.size;
-}
-
-/** Rebuilds the member's `roles` claim from their (already updated) companies list. */
-async function refreshRolesClaim(userId: string, companies: CompanyEntry[]): Promise<void> {
-  try {
-    await auth.setCustomUserClaims(userId, { roles: await buildRolesClaim(userId, companies) });
-  } catch (error) {
-    if ((error as { code?: string })?.code === 'auth/user-not-found') return;
-    throw error;
-  }
 }
 
 /**
