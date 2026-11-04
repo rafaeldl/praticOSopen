@@ -5,7 +5,7 @@
 // what they got (the link, the text, the file).
 import { randomUUID } from 'node:crypto'
 import { expect, test, type Page } from '@playwright/test'
-import { makeCustomer, makeOrder, writeDoc } from './data'
+import { makeCustomer, makeOrder, readOrder, writeDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] })
@@ -66,7 +66,8 @@ test('avisar o cliente depois de mudar a situação: nota com "Avisar", WhatsApp
   await expect(dialog(page, 'Mandar para o cliente')).toHaveCount(0)
   // Once per order on this screen: concluding does not ask again.
   await panel(page).getByTestId('next-step').click()
-  await expect(panel(page).getByTestId('maintenance-offer')).toBeVisible()
+  // Saved as done (the maintenance question depends on the shared vehicle, so it is not waited for).
+  await expect.poll(async () => (await readOrder(order.id))?.status).toBe('done')
   await expect(panel(page).getByTestId('notify-note')).toHaveCount(0)
 })
 
