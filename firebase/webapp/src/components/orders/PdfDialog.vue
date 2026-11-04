@@ -51,7 +51,7 @@ const size = computed(() => {
 
 async function share() {
   if (!result.value) return
-  if ((await shareSheet({ files: [result.value.file], title: title.value }, 'order.pdf')) === 'failed') showToast(t('web.share.sheetFailed'))
+  if ((await shareSheet({ files: [result.value.file], title: title.value }, 'pdf')) === 'failed') showToast(t('web.share.sheetFailed'))
 }
 
 /** The file goes to Downloads to be attached; WhatsApp opens with the order's link. */

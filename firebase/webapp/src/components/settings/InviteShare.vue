@@ -29,7 +29,7 @@ const days = computed(() => {
 const message = computed(() => t('inviteWhatsAppMessage', { code: props.invite.token }))
 const whatsapp = computed(() => inviteWhatsAppUrl(message.value, whatsappNumber(props.invite.phone, session.company?.country)))
 
-const CONTEXT = 'team.invite'
+const CONTEXT = 'invite'
 const hasSheet = canShareSheet()
 
 async function copy() {

@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
         <span class="spacer"></span>
         <button type="button" class="btn" :disabled="downloading" data-testid="photo-download" @click="download">{{ t('web.share.download') }}</button>
         <ShareButtons
-          context="order.photo"
+          context="photo"
           :text="photoText"
           :title="orderShort()"
           :copy="viewing.url"

@@ -4,21 +4,26 @@
 // browser takes files. The number goes already normalized (lib/phone
 // whatsappNumber); without one, WhatsApp asks for the contact.
 //
-// onShare is the single point every way of sending passes through: the
-// analytics "share" event (method sheet | whatsapp | clipboard) is wired here.
+// onShare is the single point every way of sending passes through: it sends the
+// analytics "share" event (method sheet | whatsapp | clipboard, content_type
+// what was sent), once per send.
+import { logShare, type ShareMethod } from '@/lib/analytics'
 
-export type ShareMethod = 'sheet' | 'whatsapp' | 'clipboard'
+export type { ShareMethod }
+/** What was sent (content_type): the app sends "order" for the order's link; the web adds the others. */
+export type ShareContent = 'order' | 'pdf' | 'photo' | 'receipt' | 'invoice' | 'invite'
 export type ShareListener = (method: ShareMethod, context: string) => void
 
 let listener: ShareListener | null = null
 
-/** Who hears each share (analytics). One at a time; null takes it off. */
+/** Also hears each share (tests). One at a time; null takes it off. */
 export function setShareListener(next: ShareListener | null): void {
   listener = next
 }
 
-/** Something was sent: method and where (context, as "order.link", "team.invite"). */
+/** Something was sent: method and what (content_type). */
 export function onShare(method: ShareMethod, context: string): void {
+  logShare(method, context)
   try {
     listener?.(method, context)
   } catch (error) {

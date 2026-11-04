@@ -4,10 +4,11 @@
 // the API and in the app's order, discount, approve, payment and status, stopping
 // at the first refusal. "Desfazer" starts from the last step; an issued nota is
 // never canceled. Only with financeActions on (the server sends `actions`).
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
 import { t } from '@/i18n'
+import { logAiEvent } from '@/lib/analytics'
 import { errorMessageKey } from '@/lib/api'
 import { contextOf, paymentAmount, planAiActions, stepsOf, type ActionsEdits, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
 import { noticeText } from '@/lib/orders/ai-actions-text'
@@ -28,6 +29,18 @@ const edits = reactive<ActionsEdits>({})
 const ctx = computed(() => contextOf(props.order, session.role, session.uid, effectiveUseFinancial(), props.pendingChecklists, props.nfse))
 const plan = computed(() => planAiActions(props.actions, ctx.value, edits))
 const running = ref(false)
+/** Confirmar was pressed: the close that follows is not "Agora não". */
+let confirmed = false
+
+// The app's ai_action_proposed: the kinds of step, never the amounts (AiActionsPlan.types).
+onMounted(() => {
+  const types = [plan.value.payment && 'payment', plan.value.discount && 'discount', (plan.value.approveFirst || plan.value.status) && 'status'].filter(Boolean).join(',')
+  logAiEvent('ai_action_proposed', { types })
+})
+function onClose() {
+  if (!confirmed) logAiEvent('ai_action_dismissed')
+  emit('close')
+}
 const today = localDay(new Date())
 
 const METHODS = [
@@ -63,6 +76,8 @@ async function confirm() {
   const current = plan.value
   if (!current.canConfirm || running.value) return
   running.value = true
+  confirmed = true
+  logAiEvent('ai_action_confirmed', { edited: Object.keys(edits).length ? 1 : 0 })
   const done: Done = {}
   let failed: string | null = null
   let order = props.order
@@ -101,6 +116,8 @@ async function confirm() {
       }
     } catch (error) {
       console.warn('ai actions: step failed', step, error)
+      // The app's step names: approving is a status change there.
+      logAiEvent('ai_action_failed', { step: step === 'approve' ? 'status' : step })
       failed = step === 'status' || step === 'approve' ? t('orderStatusSaveError') : t(errorMessageKey(error))
       break
     }
@@ -121,6 +138,7 @@ async function confirm() {
 
 /** Last step first: payment, status, discount. A status the person cannot bring back stays, and says so. */
 async function undo(order: Order, done: Done, couldIssue: boolean) {
+  logAiEvent('ai_action_undone')
   const notes: string[] = []
   try {
     if (done.paymentId) await removeTransaction(order.id, done.paymentId, 'payment')
@@ -138,7 +156,7 @@ async function undo(order: Order, done: Done, couldIssue: boolean) {
 </script>
 
 <template>
-  <Layer kind="sheet" :label="t('aiActionsTitle')" :guard="() => !running" @close="emit('close')">
+  <Layer kind="sheet" :label="t('aiActionsTitle')" :guard="() => !running" @close="onClose">
     <template #default="{ close }">
       <div class="layer-head">
         <h2 class="layer-title">{{ t('aiActionsTitle') }}</h2>

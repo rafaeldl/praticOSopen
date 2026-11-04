@@ -44,7 +44,7 @@ const days = computed(() => (token.value ? validityDays(token.value, new Date())
 const wa = computed(() => whatsappNumber(phone.value, country()))
 const canShare = canShareSheet()
 /** Where the sends of this sheet are counted (lib/share onShare). */
-const CONTEXT = 'order.link'
+const CONTEXT = 'order'
 const VALIDITIES = [7, 14, 30]
 
 const who = computed(() => {
@@ -171,6 +171,11 @@ async function shareOther() {
   if ((await shareSheet({ title: orderTitle(props.order), text: text.value }, CONTEXT)) === 'failed') showToast(t('web.share.sheetFailed'))
 }
 
+function sentByWhatsApp() {
+  onShare('whatsapp', CONTEXT)
+  announce(t('web.share.whatsappOpened'))
+}
+
 const sendButton = ref<HTMLElement | null>(null)
 /**
  * Ready: the focus goes to "Mandar pelo WhatsApp" (or "Copiar texto" without a
@@ -249,7 +254,7 @@ onBeforeUnmount(() => (copied.value = false))
           rel="noopener noreferrer"
           ref="sendButton"
           data-testid="share-whatsapp"
-          @click="onShare('whatsapp', CONTEXT); announce(t('web.share.whatsappOpened'))"
+          @click="sentByWhatsApp"
         >{{ t('shareSendWhatsApp') }}</a>
         <button v-else ref="sendButton" type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
       </div>

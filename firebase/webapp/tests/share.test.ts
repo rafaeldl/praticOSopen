@@ -2,6 +2,16 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import { shouldOfferStatusShare } from '../src/lib/orders/notify'
 import type { Order } from '../src/lib/orders/model'
 import { canShareFiles, canShareSheet, copyText, onShare, setShareListener, shareSheet, whatsappUrl } from '../src/lib/share'
+import { logShare } from '../src/lib/analytics'
+
+vi.mock('../src/lib/analytics', () => ({ logShare: vi.fn() }))
+
+test('onShare sends the analytics share event once, with the content type', () => {
+  vi.mocked(logShare).mockClear()
+  onShare('whatsapp', 'receipt')
+  expect(logShare).toHaveBeenCalledTimes(1)
+  expect(logShare).toHaveBeenCalledWith('whatsapp', 'receipt')
+})
 
 const nav = globalThis.navigator as unknown as Record<string, unknown>
 const saved = { share: nav.share, canShare: nav.canShare, clipboard: nav.clipboard }

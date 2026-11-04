@@ -319,7 +319,7 @@ async function fixed() {
             <ShareButtons
               v-if="opened.status === 'authorized' && opened.pdfUrl"
               :key="opened.id"
-              context="nfse.invoice"
+              context="invoice"
               :text="nfseText(opened)"
               :title="label(opened)"
               :copy="opened.pdfUrl"

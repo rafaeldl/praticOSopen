@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { locale, t } from '@/i18n'
+import { logCompanyCreated, logTutorialBegin, logTutorialComplete } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import { showToast } from '@/lib/toast'
 import { companyPhoneMasks, enterCompany, listSegments, saveCompany, seedCompany, waitForClaim } from '@/lib/onboarding/data'
@@ -77,7 +78,11 @@ async function loadSegments() {
   }
 }
 
+/** The app's tutorial_begin (variant setup): the first segment tapped. */
+let begun = false
 function pick(next: OnboardingSegment) {
+  if (!begun) logTutorialBegin('setup')
+  begun = true
   if (segment.value?.id !== next.id) {
     // Specialties all checked (reasonable default); values and billing from the segment.
     picked.value = new Set(next.subspecialties.map((sub) => sub.id))
@@ -119,6 +124,8 @@ async function create(withSamples: boolean) {
       localeTag: tag.value,
       savedId,
     })
+    // A company just made (not one completed or saved before a retry): the app's company_created.
+    if (!savedId && !resuming.value) logCompanyCreated(id, segment.value?.id)
     savedId = id
     // A reload from here on continues the same company (the router sends it back here).
     writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value, existing: resuming.value })
@@ -146,6 +153,7 @@ async function finish(id: string, withSamples: boolean, localeTag: string) {
   }
   await enterCompany(id)
   writePending(null)
+  logTutorialComplete()
   await router.replace('/')
   // Said on Início: the segment is saved, but samples and ready checklists only come to a new company (B5 of #543).
   if (unseeded) showToast(t('web.onboarding.resumedNoSeed'))

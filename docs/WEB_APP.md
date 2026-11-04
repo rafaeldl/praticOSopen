@@ -206,7 +206,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 `src/components/orders/receive/`, `src/lib/receive/` (centavos, `tests/receive-model.test.ts`).
 
 - **Mandar para o cliente** (`M`): usa o link da API (`/orders/:id/share`), mensagem pela situação e pelo ramo, "Mandar pelo WhatsApp" com o telefone do cadastro do cliente.
-- **Compartilhar** (`src/lib/share.ts`, `src/components/ShareButtons.vue`): onde o app abre a folha do sistema, o web oferece "Mandar pelo WhatsApp" (`wa.me/<número>?text=`, número do cadastro do cliente com o DDI do país da empresa; sem telefone, `wa.me/?text=` e a pessoa escolhe), "Copiar o link" e, quando o navegador tem, a folha dele (`navigator.share`, com o arquivo quando `navigator.canShare({ files })`). Vale para o link da OS ("Mandar de outro jeito"), o PDF da OS (WhatsApp baixa o PDF para anexar e manda o link), a foto, o recibo, o PDF da nota (sem conseguir ler o PDF, manda o link) e o convite da equipe. Toda forma de mandar passa por `onShare(method, context)`: é ali que o evento `share` (`sheet`, `whatsapp`, `clipboard`) do analytics vai ser ligado.
+- **Compartilhar** (`src/lib/share.ts`, `src/components/ShareButtons.vue`): onde o app abre a folha do sistema, o web oferece "Mandar pelo WhatsApp" (`wa.me/<número>?text=`, número do cadastro do cliente com o DDI do país da empresa; sem telefone, `wa.me/?text=` e a pessoa escolhe), "Copiar o link" e, quando o navegador tem, a folha dele (`navigator.share`, com o arquivo quando `navigator.canShare({ files })`). Vale para o link da OS ("Mandar de outro jeito"), o PDF da OS (WhatsApp baixa o PDF para anexar e manda o link), a foto, o recibo, o PDF da nota (sem conseguir ler o PDF, manda o link) e o convite da equipe. Toda forma de mandar passa por `onShare(method, context)`: ele manda uma vez o evento `share` do analytics (`logShare`), com `method` `sheet`, `whatsapp` ou `clipboard` e `content_type` `order` (link da OS, como o app), `pdf`, `photo`, `receipt`, `invoice` ou `invite`.
 - **Avisar o cliente** (`src/lib/orders/notify.ts`): depois de mudar para aprovada, em andamento ou concluída, com cliente com telefone e sem link ativo, uma nota "Na oficina. Avisar Ana?" fica 8 s sob os botões (pausa com o ponteiro ou o foco), uma vez por OS. "Avisar" abre o WhatsApp com o link e o texto da situação.
 - **Receber de uma OS**: quanto, como e quando; "Já recebido" com remover e desfazer, "Imprimir recibo" de um pagamento manual e, na parte de um recebimento de várias OS, "Abrir recebimento"; comprovante (imagem ou PDF até 10 MB) para quem tem `attachPhotos`. Recusas do Asaas e da nota usam as mesmas frases do app (`lib/api.ts`, conferidas em `tests/payment-errors.test.ts`).
 - **Receber de um cliente em várias OS**: divide da mais antiga para a mais nova, relê os saldos antes de gravar, `receiptId` contra gravação em dobro. Recibo impresso pela ficha do cliente.
@@ -267,6 +267,17 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Avaliações (`/settings/ratings`)**: dono e admin (`manageCompany`). Média ("4,5 de 5") e as últimas, a linha abre a OS. Lê só as OS com `rating.score >= 1` (`lib/settings/ratings.ts`).
 - **Sua conta**: perfil, trocar de empresa, código de convite, sair e apagar a conta (pela função `accountApi`, `docs/ACCOUNT_DELETION.md`).
 - **Integrações**: Asaas (piloto) e conexões do ChatGPT e do Claude.
+
+### Estatísticas de uso (GA4)
+
+`src/lib/analytics.ts`, `src/lib/analytics-client.ts`, `src/components/AnalyticsConsent.vue`.
+
+- **Mesmos nomes do app** (`docs/FIREBASE_ANALYTICS.md`): entrada e primeiro acesso, `screen_view` com os nomes das abas e rotas do app, o funil do assistente, `share` (sheet, whatsapp, clipboard) e `payment_added`. `logShare(method, contentType)` é exportada para qualquer novo ponto de envio.
+- **Consentimento:** depois da primeira tela aparece uma vez o aviso "Estatísticas de uso" com "Recusar" e "Aceitar". Nada sai antes do "Aceitar" e o `firebase/analytics` nem baixa. A resposta fica no navegador (`praticos.analyticsConsent`) e muda em Configurações › Neste navegador.
+- **Sem dado pessoal:** só as chaves da lista `ALLOWED_PARAMS` saem; nome, telefone e e-mail nunca. O usuário é o uid. O endereço enviado é o da rota, sem id de OS nem busca. Anúncios, sinais do Google e personalização ficam desligados.
+- **Configuração:** `VITE_FIREBASE_APP_ID` e `VITE_FIREBASE_MEASUREMENT_ID` em `.env.production` (app web "PraticOS Website" do projeto `praticos`, o mesmo fluxo GA4 do site). Sem eles, tudo desligado e sem aviso.
+- **Orçamento e CSP:** o client vem depois da primeira tela; `check-budget.mjs` falha se ele entrar no caminho da entrada ou da lista. A CSP do `/app` libera só `www.googletagmanager.com` (script) e `*.google-analytics.com`, `*.analytics.google.com` (envio).
+- **Testes:** no build e2e os eventos vão para `window.__analytics`, e só quando o teste pede (`praticos.analyticsE2E`): `e2e/analytics.spec.ts` e `tests/analytics.test.ts`.
 
 ### PDF, impressão e paleta
 
@@ -390,6 +401,7 @@ Do dono:
 - **Abrir para todos e anunciar.** Hoje só a lista de acesso entra. Abrir é `npm run webapp:access -- --open`; anunciar é ligar `site.flags.webApp` (o artigo `/docs/computador*.html` entra no hub e no índice) e decidir menu e home.
 - **Compra e gestão de plano no web.** Hoje o Plano é só leitura.
 - **Limite de plano no web e limite de convites no servidor.** Hoje nenhum dos dois trava.
+- **Texto da política de privacidade sobre estatísticas no navegador.** O web pede consentimento para o Google Analytics, mas a política (`firebase/hosting/src/_data/legal.json`) ainda não fala de cookies nem de estatísticas de uso no navegador.
 - **Tirar `praticos.web.app` e `praticos.firebaseapp.com`** da CSP e dos consoles, quando o app deixar de ser servido neles.
 
 Técnicas, esperando outra peça:
@@ -397,4 +409,4 @@ Técnicas, esperando outra peça:
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
 - **Lembretes:** no app são notificações locais; no web, só com Web Push.
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
-- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
+- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular.

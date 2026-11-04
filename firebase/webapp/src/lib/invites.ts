@@ -2,6 +2,7 @@
 // list by verified e-mail from Firestore, accept through the API, wait for the
 // token to carry the new company, reject by updating the invite.
 import type { MessageKey } from '@/generated/message-keys'
+import { logInviteAccepted } from './analytics'
 import { ApiError } from './api'
 import { firestoreClient, firestoreLite } from './firebase'
 import { api, refreshClaims, selectCompany, session } from './session'
@@ -92,6 +93,7 @@ export async function waitForCompanyClaim(companyId: string, timeoutMs = 20000, 
 export async function acceptInvite(invite: Invite): Promise<void> {
   await api(`/v1/app/invites/${encodeURIComponent(invite.token)}/accept`, { method: 'POST' })
   await waitForCompanyClaim(invite.companyId)
+  logInviteAccepted(invite.companyId)
   await refreshClaims()
   await selectCompany(invite.companyId)
 }
