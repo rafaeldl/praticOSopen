@@ -35,8 +35,12 @@ test('Nova OS só com teclado: cliente, veículo, item e valor em menos de 45 s'
   await expect(item).toBeFocused()
   await page.keyboard.type('Serviço 2')
   await page.keyboard.press('Enter')
+  // Tab only after the line is on screen: on a slow runner the price field can
+  // render after the key, and Tab then skips it.
+  const price = page.getByRole('textbox', { name: 'Valor de Serviço 2' })
+  await expect(price).toBeVisible()
   await page.keyboard.press('Tab')
-  await expect(page.getByRole('textbox', { name: 'Valor de Serviço 2' })).toBeFocused()
+  await expect(price).toBeFocused()
   await page.keyboard.type('180')
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(panel(page)).toBeVisible()

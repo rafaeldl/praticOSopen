@@ -13,8 +13,8 @@ Este documento fornece contexto e diretrizes para Claude Code trabalhar no proje
 - **Fastlane**: Automação de deploy (iOS/Android)
 
 ### URLs do Projeto
-- **Web App (Cliente)**: `https://praticos.web.app/`
-- **Share Links**: `https://praticos.web.app/q/{token}`
+- **Web App (Cliente)**: `https://praticos.app/` (os domínios antigos `praticos.web.app` e `praticos.firebaseapp.com` só redirecionam, ver `docs/DOMAIN.md`)
+- **Share Links**: `https://praticos.app/q/{token}`
 
 ### Arquitetura em Camadas
 
@@ -754,6 +754,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - `docs/CUSTOMER_CONTACTS.md` - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
+- `docs/DOMAIN.md` - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
 - `docs/ACCOUNT_DELETION.md` - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)

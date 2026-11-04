@@ -18,7 +18,7 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://southamerica-east1-praticos.cloudfunctions.net/api',
       firebaseConfig: {
         apiKey: 'AIzaSyCzd0yGNoLaj3KGkrACvLy4lP_ynAYcFms',
-        authDomain: 'praticos.firebaseapp.com',
+        authDomain: 'praticos.app',
         projectId: 'praticos',
         storageBucket: 'praticos.appspot.com',
       },

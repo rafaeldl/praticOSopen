@@ -60,8 +60,8 @@ export function callRoute(
       query: options.query ?? {},
       body: options.body ?? {},
       headers: {},
-      get: (name: string) => (name.toLowerCase() === 'host' ? 'praticos.web.app' : undefined),
-      header: (name: string) => (name.toLowerCase() === 'host' ? 'praticos.web.app' : undefined),
+      get: (name: string) => (name.toLowerCase() === 'host' ? 'praticos.app' : undefined),
+      header: (name: string) => (name.toLowerCase() === 'host' ? 'praticos.app' : undefined),
       auth: options.source.auth,
       userContext: options.source.userContext,
     };

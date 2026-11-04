@@ -387,7 +387,7 @@ Cada perfil de empresa deve incluir schema markup para Google:
     "ratingValue": "4.8",
     "reviewCount": "23"
   },
-  "url": "https://praticos.web.app/d/oficina-do-joao-florianopolis"
+  "url": "https://praticos.app/d/oficina-do-joao-florianopolis"
 }
 </script>
 ```
@@ -404,7 +404,7 @@ Criar endpoint ou Cloud Function que gera `/sitemap-directory.xml` com todos os 
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemapindex.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://praticos.web.app/d/oficina-do-joao-florianopolis</loc>
+    <loc>https://praticos.app/d/oficina-do-joao-florianopolis</loc>
     <lastmod>2026-02-20</lastmod>
     <changefreq>weekly</changefreq>
   </url>
@@ -414,7 +414,7 @@ Criar endpoint ou Cloud Function que gera `/sitemap-directory.xml` com todos os 
 
 Adicionar referência no `robots.txt`:
 ```
-Sitemap: https://praticos.web.app/sitemap-directory.xml
+Sitemap: https://praticos.app/sitemap-directory.xml
 ```
 
 ## Conexão com o Marketplace Futuro
@@ -511,7 +511,7 @@ CupertinoListSection.insetGrouped(
       CupertinoFormRow(
         prefix: Text(context.l10n.profileUrl),
         child: Text(
-          'praticos.web.app/d/${_company?.publicSlug ?? "..."}',
+          'praticos.app/d/${_company?.publicSlug ?? "..."}',
           style: TextStyle(
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
           ),

@@ -80,7 +80,7 @@ Tela escura premium (fundo #0A0E17) com o logo do PraticOS animado. Texto aparec
 3. *"Sem app extra. Sem complicacao."*
 
 Botao CTA verde WhatsApp: **"Comece gratis pelo WhatsApp"**
-Logo PraticOS + URL praticos.web.app
+Logo PraticOS + URL praticos.app
 
 ---
 

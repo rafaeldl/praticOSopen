@@ -829,4 +829,4 @@ Retorna pendências formatadas para WhatsApp.
 ## Suporte
 
 - Issues: https://github.com/rafaeldl/praticos/issues
-- Documentação: https://praticos.web.app/docs
+- Documentação: https://praticos.app/docs

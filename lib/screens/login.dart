@@ -271,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    final uri = Uri.parse('https://praticos.web.app/privacy.html');
+    final uri = Uri.parse('https://praticos.app/privacy.html');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }

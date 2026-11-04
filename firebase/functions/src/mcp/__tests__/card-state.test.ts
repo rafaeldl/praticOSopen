@@ -29,7 +29,7 @@ describe('card-state: availableActions', () => {
     ['done', { approve: false, markDone: false, copyLink: true }],
     ['canceled', { approve: false, markDone: false, copyLink: true }],
   ] as const)('com shareUrl, status=%s', (status, expected) => {
-    expect(availableActions(order(status, 'https://praticos.web.app/q/tok123'))).toEqual(expected);
+    expect(availableActions(order(status, 'https://praticos.app/q/tok123'))).toEqual(expected);
   });
 });
 
@@ -41,13 +41,13 @@ describe('card-state: applyStatusResult', () => {
     // actually reads `structuredContent.order`, not if it falls back to
     // spreading `current` optimistically (that path could not invent a
     // shareUrl out of nothing). This is what the lock-proof below breaks.
-    const returned = order('approved', 'https://praticos.web.app/q/tok123');
+    const returned = order('approved', 'https://praticos.app/q/tok123');
     const result = { structuredContent: { order: returned } };
 
     const outcome = applyStatusResult(current, result, 'approved');
 
     expect(outcome.order.status).toBe('approved');
-    expect(outcome.order.shareUrl).toBe('https://praticos.web.app/q/tok123');
+    expect(outcome.order.shareUrl).toBe('https://praticos.app/q/tok123');
     expect(outcome.error).toBeFalsy();
     expect(availableActions(outcome.order)).toEqual({ approve: false, markDone: true, copyLink: true });
   });
@@ -90,7 +90,7 @@ describe('card-state: applyStatusResult', () => {
 describe('card-state: receiveOrder (novo tool-result para a mesma OS)', () => {
   it('substitui o pedido local pelo que chegou, inclusive quando o modelo muda o status pelo chat', () => {
     const current = order('quote');
-    const incoming = { ...order('done', 'https://praticos.web.app/q/tok123'), total: 250 };
+    const incoming = { ...order('done', 'https://praticos.app/q/tok123'), total: 250 };
 
     const next = receiveOrder({ order: current, pending: null, message: null }, incoming);
 

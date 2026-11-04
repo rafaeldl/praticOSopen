@@ -81,7 +81,7 @@ describe('order card (MCP Apps)', () => {
         connect_domains: [],
         resource_domains: ['https://storage.googleapis.com', 'https://firebasestorage.googleapis.com'],
       });
-      expect(meta['openai/widgetDomain']).toBe('https://praticos.web.app');
+      expect(meta['openai/widgetDomain']).toBe('https://praticos.app');
     }
   });
 
@@ -113,7 +113,7 @@ describe('order card (MCP Apps)', () => {
       photosCount: 3,
       mainPhotoUrl: '/bot/orders/7734/photos/main.jpg',
       coverPhotoUrl: 'https://storage.googleapis.com/praticos/tenants/comp1/orders/7734/photos/main.jpg',
-      shareUrl: 'https://praticos.web.app/q/tok123',
+      shareUrl: 'https://praticos.app/q/tok123',
     };
 
     const result = withOrderCard(order, 'OS #7734 — Em andamento');
@@ -128,7 +128,7 @@ describe('order card (MCP Apps)', () => {
         number: 7734,
         status: 'progress',
         total: 390,
-        shareUrl: 'https://praticos.web.app/q/tok123',
+        shareUrl: 'https://praticos.app/q/tok123',
         coverPhotoUrl: 'https://storage.googleapis.com/praticos/tenants/comp1/orders/7734/photos/main.jpg',
         photosCount: 3,
         customer: { name: 'Cliente Improvavel' },

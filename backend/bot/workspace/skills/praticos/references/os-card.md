@@ -79,7 +79,7 @@ Montar o texto a partir dos campos do `order`:
   • Diagnóstico - R$ 50,00
 
 💰 *Total:* R$ 340,00
-🔗 *Link:* https://praticos.web.app/q/abc123
+🔗 *Link:* https://praticos.app/q/abc123
 ```
 
 ## Passo 4 — Enviar

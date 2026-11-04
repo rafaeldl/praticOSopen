@@ -7,7 +7,9 @@ export default defineConfig({
   testDir: 'e2e',
   testIgnore: process.env.E2E_PERF ? undefined : ['perf/**'],
   timeout: process.env.E2E_PERF ? 180_000 : 30_000,
-  expect: { timeout: 8_000 },
+  // CI runs 3 workers next to the emulators on a shared runner: Firestore
+  // listeners there can take over 8 s, which failed random tests (#552).
+  expect: { timeout: process.env.CI ? 15_000 : 8_000 },
   fullyParallel: !process.env.E2E_PERF,
   workers: process.env.E2E_PERF ? 1 : 3,
   retries: 0,

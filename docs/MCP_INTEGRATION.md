@@ -8,7 +8,7 @@ Cada empresa gera, dentro do próprio app PraticOS, uma URL de conexão única. 
 
 Pontos centrais:
 
-- **Endpoint**: `https://praticos.web.app/mcp/t/{token}` - rewrite do Firebase Hosting para a Cloud Function `api`, falando MCP via Streamable HTTP, em modo stateless (`sessionIdGenerator: undefined`).
+- **Endpoint**: `https://praticos.app/mcp/t/{token}` - rewrite do Firebase Hosting para a Cloud Function `api`, falando MCP via Streamable HTTP, em modo stateless (`sessionIdGenerator: undefined`).
 - **Token de conexão**: gerado no app em **Ajustes → Integrações**. Formato `mcp_` + 48 caracteres hexadecimais. A URL completa é exibida **uma única vez**, expira em 90 dias e pode ser revogada a qualquer momento na mesma tela.
 - **Reaproveitamento de lógica**: as tools não reimplementam regra de negócio - elas despacham, em processo, para os mesmos roteadores Express que já atendem o bot de WhatsApp (`routes/bot/*`).
 - **Fase 1 usa URL como segredo**: não há OAuth ainda. Isso tem uma limitação de segurança conhecida, documentada abaixo.
@@ -127,7 +127,7 @@ Toda tool de listagem usa `DEFAULT_LIMIT = 20` e `MAX_LIMIT = 50` (`tools/read.t
 - Nunca dar `height: 100%` / `100vh` a `html`, `body` ou `#root`: a ponte mede o tamanho observando `document.documentElement` para enviar `ui/notifications/size-changed`, e isso só reflete a altura do conteúdo enquanto nada estica esses elementos (há teste em `widgets.test.ts`).
 - `structuredContent` segue um **allowlist** explícito (`toCardData` em `widgets/order-card.ts`): número, status, total, `shareUrl`, `coverPhotoUrl`, `photosCount`, nome do cliente, nome/serial dos dispositivos, itens (nome/valor/quantidade). Telefone do cliente e URL interna de foto do bot (`mainPhotoUrl`) nunca saem do servidor.
 - Foto de capa no card: Quando a OS possui fotos, a URL pública (`coverPhotoUrl`) é enviada no `structuredContent.order` e renderizada no topo do card. O domínio do Firebase Storage está liberado em `_meta.ui.csp.resourceDomains: ['https://storage.googleapis.com']`.
-- CSP e domínio do widget: ficam no `_meta` do **resource** (em `resources/list` e em `resources/read`), não no `_meta` da tool — é onde a spec MCP Apps e o ChatGPT leem. O resource declara `ui.csp` (padrão), `openai/widgetCSP` (espelho para runtimes antigos do ChatGPT) e `openai/widgetDomain: 'https://praticos.web.app'`, domínio exclusivo exigido pelo ChatGPT para submeter o app. O domínio usa a chave do ChatGPT, e não `ui.domain`, porque o formato é definido por cada host e um valor no formato do ChatGPT poderia ser recusado pelo Claude.
+- CSP e domínio do widget: ficam no `_meta` do **resource** (em `resources/list` e em `resources/read`), não no `_meta` da tool — é onde a spec MCP Apps e o ChatGPT leem. O resource declara `ui.csp` (padrão), `openai/widgetCSP` (espelho para runtimes antigos do ChatGPT) e `openai/widgetDomain: 'https://praticos.app'`, domínio exclusivo exigido pelo ChatGPT para submeter o app. O domínio usa a chave do ChatGPT, e não `ui.domain`, porque o formato é definido por cada host e um valor no formato do ChatGPT poderia ser recusado pelo Claude.
 - Um host sem suporte a MCP Apps simplesmente ignora o recurso e mostra apenas o texto da resposta - que é sempre completo, nunca um resumo pensado só para acompanhar o card.
 
 ### Auditoria de escrita
@@ -229,7 +229,7 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
      --project=praticos --freshness=15m --limit=5 --format='value(timestamp)'
    ```
 
-   Não use um caminho qualquer em `praticos.web.app` como controle: o Hosting responde estático sem chegar ao Cloud Run, e aí o controle não aparece no log de jeito nenhum. Dê margem de propagação: mudanças no sink levam alguns minutos para valer.
+   Não use um caminho qualquer em `praticos.app` como controle: o Hosting responde estático sem chegar ao Cloud Run, e aí o controle não aparece no log de jeito nenhum. Dê margem de propagação: mudanças no sink levam alguns minutos para valer.
 
 5. **Entradas já gravadas não são apagadas pela exclusão.** Elas somem quando vencem os 30 dias de retenção do bucket `_Default`. Para fechar essa janela antes, revogue e recrie as conexões em Ajustes → Integrações. Não use `gcloud logging logs delete run.googleapis.com/requests`: esse comando apaga o log de requisição de **todos** os serviços Cloud Run do projeto, incluindo `praticos-web`.
 
@@ -250,7 +250,7 @@ cd firebase && npm run deploy:indexes
 ### URL do connector
 
 ```
-https://praticos.web.app/mcp/t/mcp_1a2b3c4d5e6f...   (48 caracteres hex após "mcp_")
+https://praticos.app/mcp/t/mcp_1a2b3c4d5e6f...   (48 caracteres hex após "mcp_")
 ```
 
 Essa é a URL completa mostrada uma única vez em Ajustes → Integrações → Nova conexão.

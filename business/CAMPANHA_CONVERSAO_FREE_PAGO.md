@@ -142,7 +142,7 @@ Template: Email 8 e Email 9 do EMAIL_SEQUENCES.md
 **Descrição 1:** Fotos ilimitadas, link mágico, suporte por WhatsApp. Cancele quando quiser.
 **Descrição 2:** 15x mais barato que Contele. Sem fidelidade. Comece agora.
 
-**URL:** praticos.web.app/pricing.html
+**URL:** praticos.app/pricing.html
 
 ---
 

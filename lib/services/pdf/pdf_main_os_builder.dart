@@ -988,9 +988,9 @@ class PdfMainOsBuilder {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.UrlLink(
-            destination: 'https://praticos.web.app',
+            destination: 'https://praticos.app',
             child: pw.Text(
-              '${localizations.generatedByPraticos} · praticos.web.app',
+              '${localizations.generatedByPraticos} · praticos.app',
               style: pw.TextStyle(
                 font: baseFont,
                 fontSize: 7,

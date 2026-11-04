@@ -50,7 +50,7 @@ Quando o usuario quer indicar o PraticOS pra um colega, gerar uma msg formatada 
 
 Exemplo pt-BR (adaptar ao idioma do usuario):
 ```
-message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
+message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
 ```
 
 Depois, orientar o usuario NO SEU IDIOMA a encaminhar a mensagem e compartilhar o contato do bot.

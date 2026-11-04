@@ -65,7 +65,7 @@ module.exports = function(eleventyConfig) {
 
   // Generate absolute URL with base URL
   eleventyConfig.addFilter("siteUrl", function(path, baseUrl) {
-    let cleanPath = (path || "").replace(/^\/+/, "");
+    let cleanPath = (path || "").replace(/^\.\//, "").replace(/^\/+/, "");
     // If baseUrl already ends with slash, remove it to be consistent
     let base = (baseUrl || "").replace(/\/+$/, "");
     return base + "/" + cleanPath;

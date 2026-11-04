@@ -61,7 +61,7 @@ test('admin: PDF da OS com valores, fotos, link e checklist; abrir e fechar (ord
   await expect(dialog).toBeVisible()
   const bytes = await download(page)
   const text = pdfText(bytes)
-  for (const expected of [`#${order.number}`, 'Oficina Alfa', 'Cliente 02', 'Veículo 2', 'TST0002', 'Serviço 1', 'R$ 50,00', 'TOTAL', 'Técnico: Tiago Tecnico', 'Rua do Teste, 42', 'FOTOS ANEXADAS (1)', 'Fotos disponíveis no sistema digital', 'Acompanhe online', 'https://praticos.web.app/q/tok-pdf-e2e', 'ENTRADA DO VEÍCULO', 'X SIM', 'Página 1 de 1']) {
+  for (const expected of [`#${order.number}`, 'Oficina Alfa', 'Cliente 02', 'Veículo 2', 'TST0002', 'Serviço 1', 'R$ 50,00', 'TOTAL', 'Técnico: Tiago Tecnico', 'Rua do Teste, 42', 'FOTOS ANEXADAS (1)', 'Fotos disponíveis no sistema digital', 'Acompanhe online', 'https://praticos.app/q/tok-pdf-e2e', 'ENTRADA DO VEÍCULO', 'X SIM', 'Página 1 de 1']) {
     expect(text, expected).toContain(expected)
   }
   expect(pdfPageCount(bytes)).toBe(2)

@@ -92,7 +92,7 @@ router.post('/:number/share', async (req: AuthenticatedRequest, res: Response) =
     });
 
     // Build share URL
-    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.app';
     const shareUrl = `${baseUrl}/q/${shareToken.token}`;
 
     // Format expiration date
@@ -177,7 +177,7 @@ router.get('/:number/share', async (req: AuthenticatedRequest, res: Response) =>
     // Get all tokens for this order
     const tokens = await shareTokenService.getTokensForOrder(order.id, companyId);
 
-    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.app';
     const now = new Date();
 
     // Filter to only active (non-expired) tokens

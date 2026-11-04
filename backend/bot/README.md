@@ -257,7 +257,7 @@ message(action="send", message="📋 *O.S. Pendentes:*\n1. *#152* - João Silva\
 **Exemplo 2 — Criar OS (áudio confirmando):**
 
 ```
-message(action="send", message="✅ *O.S. #154 criada!*\n*Cliente:* João Silva\n*Serviço:* Troca de tela - R$ 350\n\n🔗 Link: https://praticos.web.app/q/abc123")
+message(action="send", message="✅ *O.S. #154 criada!*\n*Cliente:* João Silva\n*Serviço:* Troca de tela - R$ 350\n\n🔗 Link: https://praticos.app/q/abc123")
 [[tts:text]]Pronto, criei a O.S. do João! Mandei o link pra compartilhar[[/tts:text]]
 ```
 
@@ -533,7 +533,7 @@ Perguntar ao usuário:
 1. **"Já uso o PraticOS"** → "Gera o código em Configurações > WhatsApp e manda aqui"
 2. **"Recebi um convite"** → "Manda o código que eu vinculo"
 3. **"Quero criar uma conta"** → Iniciar auto-cadastro
-4. **"Quero conhecer"** → Sugerir https://praticos.web.app ou compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
+4. **"Quero conhecer"** → Sugerir https://praticos.app ou compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
 
 **Regra:** Mensagens curtas, 1-2 frases. Tom casual.
 
@@ -545,14 +545,14 @@ Quando o usuário quer indicar o PraticOS para um colega, o bot envia uma **mens
 
 1. Bot envia mensagem encaminhável via `message()`:
    ```
-   message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
+   message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
    ```
 2. Bot orienta: "Encaminha essa mensagem pro seu colega! Se quiser, compartilha meu contato também (toca no meu nome > Encaminhar Contato)"
 
 **Dados do bot:**
 - **Número WhatsApp:** +554888794742
 - **Link wa.me:** https://wa.me/554888794742
-- **Site:** https://praticos.web.app
+- **Site:** https://praticos.app
 
 **Regras:**
 - SEMPRE enviar a mensagem formatada via `message()` — ela é o "cartão de visita" encaminhável

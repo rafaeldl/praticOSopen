@@ -42,4 +42,4 @@ DO SEU JEITO
 PLANOS E ASSINATURAS
 O PraticOS é gratuito para começar. O plano Gratuito tem limites mensais de fotos, checklists, uso da IA e pessoas na conta. Os planos Starter, Pro e Business aumentam esses limites e são assinaturas mensais com renovação automática, compradas dentro do app pelo Google Play. Cancele quando quiser em Pagamentos e assinaturas, no Google Play.
 
-Política de Privacidade: https://praticos.web.app/privacy.html
+Política de Privacidade: https://praticos.app/privacy.html

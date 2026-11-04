@@ -80,7 +80,7 @@ export async function buildOrderDetail(
     : null;
 
   // Fetch active share token; auto-create if customer exists and no active token
-  const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+  const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.app';
   let shareUrl: string | null = null;
   const tokens = await shareTokenService.getTokensForOrder(order.id, companyId);
   const activeToken = tokens.find((t: any) => !t.revokedAt && new Date(t.expiresAt) > new Date());

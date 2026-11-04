@@ -24,7 +24,7 @@ const orderDetail: OrderDetail = {
   rating: undefined,
   photosCount: 1,
   mainPhotoUrl: 'https://example.com/photo.jpg',
-  shareUrl: 'https://praticos.web.app/q/ST_x',
+  shareUrl: 'https://praticos.app/q/ST_x',
 };
 
 const todaySummary: TodaySummaryData = {
@@ -108,7 +108,7 @@ describe('formatOrder', () => {
   });
 
   it('inclui o link de compartilhamento quando existe', () => {
-    expect(formatOrder(orderDetail)).toContain('https://praticos.web.app/q/ST_x');
+    expect(formatOrder(orderDetail)).toContain('https://praticos.app/q/ST_x');
   });
 
   it('não quebra quando a OS não tem dispositivo', () => {

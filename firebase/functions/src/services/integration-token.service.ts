@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { db } from './firestore.service';
 import { ApiKeyData, toDate } from '../models/types';
 
-const HOSTING_ORIGIN = 'https://praticos.web.app';
+const HOSTING_ORIGIN = 'https://praticos.app';
 const TOKEN_TTL_DAYS = 90;
 
 export interface CreatedToken {

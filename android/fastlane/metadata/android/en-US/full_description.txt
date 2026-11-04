@@ -42,4 +42,4 @@ YOUR WAY
 PLANS AND SUBSCRIPTIONS
 PraticOS is free to start. The Free plan has monthly limits on photos, checklists, AI use and people on the account. The Starter, Pro and Business plans raise these limits and are auto-renewable monthly subscriptions purchased in the app through Google Play. Cancel anytime in Payments & subscriptions on Google Play.
 
-Privacy Policy: https://praticos.web.app/privacy.html
+Privacy Policy: https://praticos.app/privacy.html

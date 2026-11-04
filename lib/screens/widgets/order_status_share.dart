@@ -48,7 +48,7 @@ Future<String?> orderShareUrl(Order order) async {
     final tokens = await service.getShareTokens(order.id!);
     final active = tokens.where((t) => !t.isExpired).toList();
     if (active.isNotEmpty) {
-      return 'https://praticos.web.app/q/${active.first.token}';
+      return 'https://praticos.app/q/${active.first.token}';
     }
   } catch (_) {
     // Generates a new link below.

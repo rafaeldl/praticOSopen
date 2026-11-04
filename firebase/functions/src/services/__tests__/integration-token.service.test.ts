@@ -28,7 +28,7 @@ describe('integration-token.service', () => {
     const result = await createIntegrationToken('comp1', 'user1', 'Meu ChatGPT');
 
     expect(result.token).toMatch(/^mcp_[0-9a-f]{48}$/);
-    expect(result.url).toBe(`https://praticos.web.app/mcp/t/${result.token}`);
+    expect(result.url).toBe(`https://praticos.app/mcp/t/${result.token}`);
     expect(result.id).toBe('tok1');
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({

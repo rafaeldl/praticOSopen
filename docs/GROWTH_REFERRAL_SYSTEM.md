@@ -304,7 +304,7 @@ A seção "INDICAÇÃO / REFERRAL" (linha 40) atualmente gera uma mensagem gené
 2. Usar o `code` e `link` retornados na mensagem formatada
 
 Exemplo pt-BR:
-message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: {link}\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
+message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: {link}\n🌐 Ou acesse: https://praticos.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
 
 3. Após enviar, orientar o usuário a encaminhar e compartilhar contato do bot
 ```

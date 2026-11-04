@@ -55,14 +55,14 @@ void main() {
         'data': {
           'id': 'tok1',
           'token': 'mcp_abc',
-          'url': 'https://praticos.web.app/mcp/t/mcp_abc',
+          'url': 'https://praticos.app/mcp/t/mcp_abc',
           'expiresAt': '2026-12-11T10:00:00.000Z',
         },
       });
 
       final created = IntegrationApiService.parseCreated(body);
 
-      expect(created.url, 'https://praticos.web.app/mcp/t/mcp_abc');
+      expect(created.url, 'https://praticos.app/mcp/t/mcp_abc');
     });
 
     test('list() faz GET com autorização', () async {
@@ -109,7 +109,7 @@ void main() {
               'success': true,
               'data': {
                 'id': 'tok1',
-                'url': 'https://praticos.web.app/mcp/t/mcp_abc',
+                'url': 'https://praticos.app/mcp/t/mcp_abc',
                 'expiresAt': '2026-12-11T10:00:00.000Z',
               },
             }),
@@ -121,7 +121,7 @@ void main() {
 
       final created = await service.create(name: 'Meu ChatGPT');
 
-      expect(created.url, 'https://praticos.web.app/mcp/t/mcp_abc');
+      expect(created.url, 'https://praticos.app/mcp/t/mcp_abc');
     });
 
     test('revoke() faz DELETE', () async {

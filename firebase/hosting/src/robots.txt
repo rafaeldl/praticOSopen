@@ -4,4 +4,4 @@ Allow: /
 Disallow: /login
 Disallow: /order/
 
-Sitemap: https://praticos.web.app/sitemap.xml
+Sitemap: https://praticos.app/sitemap.xml
