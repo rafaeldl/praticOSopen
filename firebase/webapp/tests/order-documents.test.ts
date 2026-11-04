@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { attachmentProblem, attachmentsOf, fileSizeParts, normalizeOrder } from '../src/lib/orders/model'
+import { attachmentProblem, attachmentsOf, fileSizeParts, isPaymentProof, normalizeOrder } from '../src/lib/orders/model'
 
 describe('documentos da OS (order.document.open)', () => {
   test('lista só os documentos, nunca o comprovante ligado a um pagamento, e só link http(s)', () => {
@@ -35,5 +35,21 @@ describe('documentos da OS (order.document.open)', () => {
     expect(fileSizeParts(2048)).toEqual({ value: 2, unit: 'KB' })
     expect(fileSizeParts(1.45 * 1024 * 1024)).toEqual({ value: 1.5, unit: 'MB' })
     expect(fileSizeParts(undefined)).toBeNull()
+  })
+})
+
+describe('uma regra só para "é comprovante" (B2)', () => {
+  test('comprovante = tipo receipt ou ligado a pagamento: some para quem não vê valores, como no servidor', () => {
+    const docs = [
+      { id: 'nf', url: 'https://x/nf.pdf', type: 'invoice' },
+      { id: 'cp', url: 'https://x/cp.pdf', type: 'receipt' },
+      { id: 'pr', url: 'https://x/pr.pdf', type: 'other', linkedTransactionId: 'tx1' },
+    ]
+    expect(attachmentsOf(docs, false).map((d) => d.id)).toEqual(['nf'])
+    // Who sees values also sees a "Comprovante" attached by hand; a proof of a payment stays in "Já recebido".
+    expect(attachmentsOf(docs, true).map((d) => d.id)).toEqual(['nf', 'cp'])
+    expect(isPaymentProof({ type: 'receipt' })).toBe(true)
+    expect(isPaymentProof({ linkedTransactionId: 'x' })).toBe(true)
+    expect(isPaymentProof({ type: 'warranty' })).toBe(false)
   })
 })

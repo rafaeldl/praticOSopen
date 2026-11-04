@@ -77,3 +77,13 @@ for (const theme of ['light', 'dark'] as const) {
     await expectNoAxeViolations(page, `documentos ${theme}`)
   })
 }
+
+test('"Comprovante" só é oferecido a quem vê valores (B1, por papel)', async ({ page }) => {
+  const order = await makeOrder('admin', { status: 'approved' })
+  await openOrder(page, 'supervisor', order.id)
+  const docs = panel(page).getByTestId('order-documents')
+  await docs.getByTestId('document-input').setInputFiles({ name: 'contrato.pdf', mimeType: 'application/pdf', buffer: PDF })
+  const type = dialog(page, 'Que documento é este?')
+  await expect(type.getByRole('button', { name: 'Contrato' })).toBeVisible()
+  await expect(type.getByRole('button', { name: 'Comprovante' })).toHaveCount(0)
+})
