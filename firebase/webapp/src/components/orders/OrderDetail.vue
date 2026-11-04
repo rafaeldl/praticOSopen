@@ -203,6 +203,8 @@ onBeforeUnmount(() => clearInterval(clock))
  * (never dropped). The response refreshes the screen and the list row.
  */
 let queue: Promise<unknown> = Promise.resolve()
+/** Why the last write failed: a refusal by the server (ApiError) or the request never answered (left the page, offline). */
+let lastError: unknown = null
 function run(action: () => Promise<{ order?: Record<string, unknown> } | void>, done?: string): Promise<boolean> {
   const next = queue.then(() => write(action, done))
   queue = next.catch(() => {})
@@ -228,6 +230,7 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
     }
     return true
   } catch (error) {
+    lastError = error
     console.warn('order: write failed', error)
     showToast(error instanceof ProofUploadError ? t('receiveCustomerUploadFailed') : t(errorMessageKey(error)))
     if (error instanceof ApiError && ['ORDER_CHANGED', 'ITEM_NOT_FOUND', 'PAYMENT_EXCEEDS_BALANCE'].includes(error.code)) await watcher?.refresh()
@@ -262,8 +265,11 @@ async function setStatus(status: OrderStatus) {
     return
   }
   const was = order.value.status
+  // Remembered when chosen, not after the answer: leaving the order right away must not lose it.
+  const forget = rememberTransition(session.companyId, was, status)
   const ok = await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
-  if (ok) rememberTransition(session.companyId, was, status)
+  // Only a refusal by the server takes it back; a request cut by leaving the page (NETWORK, status 0) keeps the choice.
+  if (!ok && lastError instanceof ApiError && lastError.status > 0) forget()
   // Done now (the server took it): when is the next maintenance? (device.maintenance.offer)
   if (ok && status === 'done' && was !== 'done' && order.value) await offerMaintenance()
 }

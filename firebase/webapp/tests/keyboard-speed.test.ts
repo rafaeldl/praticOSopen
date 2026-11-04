@@ -4,7 +4,7 @@
 // what was done before, and the palette's actions before the records.
 import { mount } from '@vue/test-utils'
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { computed, nextTick } from 'vue'
 import Combobox from '../src/components/Combobox.vue'
 import ChoiceList from '../src/components/ChoiceList.vue'
 import { setLocale } from '../src/i18n'
@@ -172,6 +172,23 @@ describe('suggestions from what was done before', () => {
     rememberTransition('c1', 'approved', 'quote')
     rememberTransition('c1', 'approved', 'canceled')
     expect(preferredStep('c1', 'approved', ['progress', 'done', 'quote', 'canceled'])).toBe('done')
+  })
+})
+
+describe('next step memory follows at once (CI #538: the page left before the server answered)', () => {
+  test('a screen showing the step sees the memory as soon as it is written, with no reload', () => {
+    const shown = computed(() => preferredStep('c1', 'approved', ['progress', 'done']))
+    expect(shown.value).toBeNull()
+    rememberTransition('c1', 'approved', 'done')
+    expect(shown.value).toBe('done')
+  })
+
+  test('written when chosen; a refused write puts the previous memory back', () => {
+    rememberTransition('c1', 'approved', 'progress')
+    const undo = rememberTransition('c1', 'approved', 'done')
+    expect(preferredStep('c1', 'approved', ['progress', 'done'])).toBe('done')
+    undo()
+    expect(preferredStep('c1', 'approved', ['progress', 'done'])).toBe('progress')
   })
 })
 

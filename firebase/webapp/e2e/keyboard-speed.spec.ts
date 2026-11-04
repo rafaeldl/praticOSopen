@@ -25,6 +25,12 @@ async function openOrder(page: Page, id: string) {
   await orderReady(page)
 }
 
+// E2E_CPU_THROTTLE=4: a slower machine (Chromium's CPU throttling), to catch races like CI's.
+test.beforeEach(async ({ page }) => {
+  const rate = Number(process.env.E2E_CPU_THROTTLE ?? 0)
+  if (rate > 1) await (await page.context().newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate })
+})
+
 const pad = (n: number) => String(n).padStart(2, '0')
 /** Today + days on the company's clock (São Paulo), as yyyy-mm-dd. */
 function dayFromToday(days: number): string {
@@ -94,8 +100,16 @@ test('P faz o próximo passo; depois de ir de Aprovado a Concluído, P já suger
   await page.keyboard.press('p')
   await expect.poll(async () => (await readOrder(first.id))?.status).toBe('done')
 
-  // Straight from Aprovado to Concluído once: the step remembers it.
+  // Straight from Aprovado to Concluído once: the step remembers it, even when the
+  // page is left before the server's answer arrives (CI #538): the answer comes late here.
   const second = await makeOrder('admin', { status: 'approved' })
+  await page.route('**/v1/app/orders/*', async (route) => {
+    if (route.request().method() !== 'PATCH') return route.fallback()
+    const response = await route.fetch().catch(() => null)
+    if (!response) return
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    await route.fulfill({ response }).catch(() => {})
+  })
   await page.goto(`orders?order=${second.id}`)
   await orderReady(page)
   await page.keyboard.press('s')
@@ -106,7 +120,9 @@ test('P faz o próximo passo; depois de ir de Aprovado a Concluído, P já suger
   await expect.poll(async () => (await readOrder(second.id))?.status).toBe('done')
 
   const third = await makeOrder('admin', { status: 'approved' })
+  // Leave while the answer is still held back (the race of CI #538), then stop holding answers.
   await page.goto(`orders?order=${third.id}`)
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
   await orderReady(page)
   await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
   await page.keyboard.press('p')
