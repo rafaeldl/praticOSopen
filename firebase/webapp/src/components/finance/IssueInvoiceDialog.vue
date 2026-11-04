@@ -3,13 +3,14 @@
 // order, what is left out, the text and what is missing), then one request.
 // "Emitir" stays grey with the first reason (nfse.issue.blockers). Refusals open
 // what fixes them (nfse.issue.refusal). Nothing is sent before "Emitir".
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
+import { useRouter } from 'vue-router'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays } from '@/lib/finance/period'
 import { today } from '@/lib/finance/text'
-import { issueInvoice, previewInvoice } from '@/lib/nfse/data'
+import { issueInvoice, nfseSettings, previewInvoice } from '@/lib/nfse/data'
 import { ALL_FIELDS, SETUP_ERRORS, askedFields, blockerOf, normalizeTaxId, type Contact, type CustomerField, type Preview } from '@/lib/nfse/model'
 import { money, orderShort } from '@/lib/orders/text'
 import { session } from '@/lib/session'
@@ -19,6 +20,13 @@ import '@/styles/finance.css'
 
 const props = defineProps<{ orderIds: string[]; customerId?: string | null }>()
 const emit = defineEmits<{ done: []; close: [] }>()
+const router = useRouter()
+/** Closed first (the drawer takes its history entry out on unmount), then the setup opens. */
+async function openSetup() {
+  emit('close')
+  await nextTick()
+  await router.push('/invoices/setup')
+}
 
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const preview = shallowRef<Preview | null>(null)
@@ -48,7 +56,20 @@ async function load(keepText = false) {
     state.value = 'failed'
   }
 }
-onMounted(() => void load())
+/**
+ * nfse.access.not-ready: with the setup not done, say so before asking the
+ * server for a preview (the app's showNfseNotReady). A failed read goes on to
+ * the preview, which refuses with the same sentence.
+ */
+onMounted(async () => {
+  const settings = await nfseSettings().catch(() => null)
+  if (settings && settings.available && !settings.ready) {
+    refusal.value = { text: t('nfseNotReadyTitle'), setup: true }
+    state.value = 'failed'
+    return
+  }
+  void load()
+})
 
 function stripEmpty(value: Contact): Contact {
   return Object.fromEntries(Object.entries(value).filter(([, v]) => typeof v === 'string' && v.trim())) as Contact
@@ -146,7 +167,10 @@ const mark = () => (touched.value = true)
           <p v-if="state === 'loading'" role="status">{{ t('web.loading') }}</p>
           <template v-else-if="state === 'failed'">
             <p class="field-error" role="alert" data-testid="nfse-refusal">{{ refusal?.text }}</p>
-            <p v-if="refusal?.setup" class="sub">{{ isAdmin ? t('web.nfse.setupInApp') : t('nfseNotReadyOther') }}</p>
+            <p v-if="refusal?.setup" class="sub" data-testid="nfse-setup-hint">
+              <template v-if="isAdmin">{{ t('nfseNotReadyAdmin') }} <button type="button" class="link" @click="openSetup">{{ t('nfseSetupAction') }}</button></template>
+              <template v-else>{{ t('nfseNotReadyOther') }}</template>
+            </p>
           </template>
           <template v-else-if="preview">
             <p class="sub">{{ t('web.nfse.goesToCity') }}</p>
@@ -197,7 +221,10 @@ const mark = () => (touched.value = true)
             <div v-if="refusal" class="field-error" role="alert" data-testid="nfse-refusal">
               <p>{{ refusal.text }}</p>
               <p v-if="refusal.detail" class="sub">{{ refusal.detail }}</p>
-              <p v-if="refusal.setup" class="sub">{{ isAdmin ? t('web.nfse.setupInApp') : t('nfseNotReadyOther') }}</p>
+              <p v-if="refusal.setup" class="sub">
+                <template v-if="isAdmin">{{ t('nfseNotReadyAdmin') }} <button type="button" class="link" @click="openSetup">{{ t('nfseSetupAction') }}</button></template>
+                <template v-else>{{ t('nfseNotReadyOther') }}</template>
+              </p>
             </div>
             <p v-else-if="blockerText" class="sub" role="status" data-testid="nfse-blocker">{{ blockerText }}</p>
           </template>

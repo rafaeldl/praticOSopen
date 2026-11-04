@@ -73,7 +73,7 @@ Regra geral: **dinheiro, situação e tudo que o servidor precisa conferir vão 
 | Lista de OS de quem vê valores | Firestore REST para as páginas; cliente completo com `onSnapshot` para as 30 primeiras linhas, carregado depois da lista aparecer | — |
 | Lista e OS de quem não tem `viewPrices` | API (`GET /v1/app/orders`, `/:id`), projeção sem nenhum valor | — |
 | OS: dinheiro, situação, itens, datas, responsável, parada, apagar | — | API (`lib/orders/writes.ts`), com `expectedUpdatedAt` |
-| OS: cliente e aparelho, comentários, fotos | — | Firestore direto, só os campos que mudam (sem dinheiro) |
+| OS: cliente e aparelho, comentários, fotos, documentos | — | Firestore direto, só os campos que mudam (sem dinheiro) |
 | Clientes, aparelhos, importação, próxima manutenção | API (`/v1/app/customers`, `/devices`), cortada pelo papel no servidor | API |
 | Catálogo | API (`/v1/app/services`, `/products`), sem `value` para quem não vê preço | API; foto no Storage na pasta do item |
 | Agenda | API (`GET /v1/app/orders?sort=scheduledDate…`) | API (`PATCH /v1/app/orders/:id`) |
@@ -172,7 +172,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Quadro** (`?view=board`): aba da lista; mover arrastando, pelo "…" ou com `Shift` + seta, só para onde o papel deixa.
 - **Lote** (tela grande): situação, responsável, cobrança (um link Asaas por cliente), assistente (até 10 OS, pergunta antes de aplicar), receber de um cliente, PDF e imprimir. Toda mudança mostra antes de → para e quantas já estão assim; o recusado pelo servidor é contado com o motivo; "Desfazer" volta o que o papel permite.
 - **Nova OS** (`N`, gaveta): cliente com Recentes e busca pela placa, veículo (do cliente primeiro; placa digitada vira veículo novo com a placa), itens com preço do catálogo e "Mais usados", "+ Cadastrar «nome»", "+ Usar «texto» nesta OS" (item fora do catálogo) e "+ Cadastrar «texto» no catálogo", entrega, pedido do cliente (vira o primeiro comentário interno, como no app) e "Mais opções" (situação, visita, responsável e, com Atendimento no local, o Local). Sem Local, a OS leva o endereço do cliente com a coordenada. Cronometrada no E2E: falha acima de 45 s.
-- **OS no painel**: cabeçalho com uma frase e o botão do próximo passo, itens por aparelho, totais só para quem vê valores, fotos (colar, arrastar, apagar), comentários internos ou para o cliente, Detalhes (entrega, visita, responsável, local), "Mais dados" do segmento, checklists, contrato, avaliação do cliente. Fotos em tela cheia com setas e "Definir como capa" (a primeira foto). O menu … abre a ficha do cliente e de cada aparelho. Teclas `A`, `S`, `C`, `D`, `M`, `R`. OS apagada ou sem acesso mostra "não está mais aqui".
+- **OS no painel**: cabeçalho com uma frase e o botão do próximo passo, itens por aparelho, totais só para quem vê valores, fotos (colar, arrastar, apagar), comentários internos ou para o cliente, Detalhes (entrega, visita, responsável, local), "Mais dados" do segmento, checklists, contrato, avaliação do cliente, Documentos (nota, contrato, garantia: "Que documento é este?" antes de subir, abrir em aba nova, excluir com confirmação; pasta `documents/` do app, nunca o comprovante de pagamento). Fotos em tela cheia com setas e "Definir como capa" (a primeira foto). O menu … abre a ficha do cliente e de cada aparelho. Teclas `A`, `S`, `C`, `D`, `M`, `R`. OS apagada ou sem acesso mostra "não está mais aqui".
 - **Ao concluir**: pergunta a próxima manutenção (`lib/orders/maintenance-offer.ts`, regras de `docs/DEVICE_NEXT_MAINTENANCE.md`) e trava se houver checklist por terminar.
 - **Assistente**: barra "Peça ao assistente" para quem edita itens, com `GET /v1/app/ai/status` ligado. Põe itens do catálogo (`POST /v1/app/ai/order-assist`), marca com ✦ e oferece Desfazer. Nunca recebe, cancela nem apaga.
 - **Início, extras**: "Manutenções chegando" (atrasadas ou em até 7 dias, sem as de contrato ativo), o sino com os avisos (`/notifications`) e "Agora" para o técnico (a visita de hoje).
@@ -221,7 +221,8 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Números do servidor** (`/v1/app/finance/*`): quem não tem `viewFinancialReports` não chega às telas e o servidor responde 403. O navegador manda o fuso; o servidor só aceita o do país da empresa.
 - **Resumo (`/finance`)**: Recebido e Vendido do mês, A receber e Em andamento, `?month=`.
 - **Relatório (`/finance/report`)**: dia, semana (domingo a sábado, contrato `finance-period.json`), mês, ano ou datas próprias; filtros por pagamento e cliente. "Exportar CSV" (BOM, `;` onde o país usa vírgula, proteção contra fórmula), "Exportar planilha" (XLSX montado no navegador) e "Imprimir ou salvar PDF".
-- **Notas fiscais (`/invoices`)**: para quem tem `chargeOrder`, com a nota ligada (`docs/NFSE_ASAAS.md`). Lista do mês com "Precisa de atenção", nota ao lado, emitir pela OS com prévia do servidor, corrigir e cancelar.
+- **Notas fiscais (`/invoices`)**: para quem tem `chargeOrder`, com a nota ligada (`docs/NFSE_ASAAS.md`). Lista do mês com "Precisa de atenção", nota ao lado, emitir pela OS com prévia do servidor, corrigir e cancelar. "Notas de X" em `/invoices?customer=`. Na OS, a linha "Nota fiscal" com a situação ao vivo e, concluída e paga, "Emitir nota fiscal" como botão azul. No cliente, "Notas fiscais · N emitidas" e "Emitir uma nota com várias OS".
+- **Configurar a nota (`/invoices/setup`)**: dono e admin (`manageCompany`), pelas rotas `/v1/app/nfse/setup*`. Dados fiscais, acesso à prefeitura (painel do Asaas, confere de novo ao voltar à aba), serviço buscado na lista da prefeitura ou digitado, impostos e quando emitir. Sem configuração pronta, a folha de emitir diz o que falta antes da prévia.
 
 ### Checklists
 
@@ -383,4 +384,4 @@ Técnicas, esperando outra peça:
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
 - **Lembretes:** no app são notificações locais; no web, só com Web Push.
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
-- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), Próxima cobrança, configuração da nota fiscal, uma nota com várias OS, faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
+- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), Próxima cobrança, faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.

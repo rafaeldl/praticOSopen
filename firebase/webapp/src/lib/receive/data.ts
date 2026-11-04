@@ -165,6 +165,8 @@ export interface PaymentSettings {
   ready: boolean
   /** Notas fiscais on for the company (nfseEnabled with Asaas connected, docs/NFSE_ASAAS.md). */
   nfse: boolean
+  /** The nota setup is done (nfseReady): it can be issued. */
+  nfseReady: boolean
 }
 
 /** Tries before giving up on a Firestore read of this screen, and the wait between them. */
@@ -187,7 +189,7 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
       const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
       const data = (snap.data() ?? {}) as Record<string, unknown>
       const ready = data.asaasEnabled === true && data.asaasConnected === true
-      return { ready, nfse: ready && data.nfseEnabled === true }
+      return { ready, nfse: ready && data.nfseEnabled === true, nfseReady: ready && data.nfseEnabled === true && data.nfseReady === true }
     } catch (error) {
       if (attempt < retries) {
         await sleep(wait)
@@ -195,7 +197,7 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
       }
       // The app hides the section on a read error (ASAAS_INTEGRATION).
       console.warn('receive: payment settings not read', error)
-      return { ready: false, nfse: false }
+      return { ready: false, nfse: false, nfseReady: false }
     }
   }
 }
