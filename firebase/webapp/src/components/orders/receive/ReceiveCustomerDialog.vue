@@ -262,9 +262,11 @@ async function copyCharge() {
   }
 }
 
-function openOrder(id: string) {
+/** Closed first: the drawer takes its history entry out on unmount, and only then the order opens (or that would undo it). */
+async function openOrder(id: string) {
   emit('close')
-  void router.push({ path: '/', query: { order: id } })
+  await nextTick()
+  await router.push({ path: '/', query: { order: id } })
 }
 
 const METHODS = [

@@ -31,7 +31,32 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   INSTALLMENTS_IN_PROGRESS: 'web.error.orderDeleteBlocked',
   INVALID_ASSIGNEE: 'web.error.validation',
   PAYMENT_EXCEEDS_BALANCE: 'web.error.paymentExceeds',
+  // Asaas and notas fiscais: the same sentences as the app (asaas_error_text.dart, pay.errors.text).
+  ASAAS_INVALID_API_KEY: 'asaasErrorInvalidKey',
+  ASAAS_VALIDATION_ERROR: 'asaasErrorValidation',
+  ORDER_NOT_PAYABLE: 'asaasErrorOrderNotPayable',
+  ORDER_CANCELED: 'asaasErrorOrderCanceled',
+  INVALID_DUE_DATE: 'asaasErrorInvalidDueDate',
+  INVALID_INSTALLMENT_COUNT: 'asaasErrorInvalidInstallmentCount',
+  CHARGE_NOT_OPEN: 'asaasErrorChargeNotOpen',
+  NFSE_NOT_ENABLED: 'nfseErrorNotEnabled',
+  NFSE_NOT_READY: 'nfseErrorNotReady',
+  NFSE_SETUP_NEEDED: 'nfseErrorSetupNeeded',
+  NFSE_RECONNECT_NEEDED: 'nfseErrorReconnectNeeded',
+  NFSE_SETUP_REJECTED: 'nfseErrorSetupRejected',
+  INVOICE_OTHER_ACCOUNT: 'nfseErrorOtherAccount',
+  INVOICE_NOT_CANCELABLE: 'nfseErrorNotCancelable',
+  CANCEL_NOT_SUPPORTED: 'nfseErrorCancelNotSupported',
+  INVALID_FISCAL_INFO: 'nfseErrorInvalidFiscalInfo',
+  NFSE_ORDER_NOT_ALLOWED: 'nfseErrorOrderNotAllowed',
+  NO_SERVICES: 'nfseErrorNoServices',
+  ORDER_NOT_OF_CUSTOMER: 'nfseErrorOrderNotOfCustomer',
+  INVALID_EFFECTIVE_DATE: 'nfseErrorInvalidDate',
+  CUSTOMER_DATA_REQUIRED: 'nfseErrorCustomerData',
 }
+
+/** The sentence for a code the server sends, when there is one of its own (tests). */
+export const codeMessageKey = (code: string): MessageKey | undefined => CODE_MESSAGES[code]
 
 function statusMessage(status: number): MessageKey {
   if (status === 401) return 'web.error.sessionExpired'
