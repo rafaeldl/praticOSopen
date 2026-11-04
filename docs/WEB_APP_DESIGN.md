@@ -2,223 +2,215 @@
 
 ## Visão Geral
 
-Padrão visual e de interação do app web do PraticOS. Vale para toda tela autenticada no navegador. O app móvel segue `docs/APP_DESIGN_SYSTEM.md`, e o site institucional segue `firebase/hosting/design.md`.
+Padrão visual e de interação do app web do PraticOS (`firebase/webapp/`, servido em `/app`). Vale para toda tela autenticada no navegador. O app móvel segue `docs/APP_DESIGN_SYSTEM.md`, e o site institucional segue `firebase/hosting/design.md`. A arquitetura está em `docs/WEB_APP.md`.
 
-A ideia em uma frase: **a mesma ordem de serviço do site, em forma de ferramenta de mesa.** Papel claro, tinta grafite, réguas e números em mono, com a clareza de produto do app. Nada de Cupertino e nada de layout de marketing.
+A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** Papel quente, tinta e barra lateral azul-marinho, ação principal amarela e números alinhados em coluna, com as regras de produto do app. Nada de Cupertino e nada de layout de marketing.
 
-Status: proposta, junto com `docs/web-app/ADR-001-web-architecture.md`. Vale para qualquer das opções de arquitetura.
+**Status: construído.** Este documento descreve o que está no ar. A referência visual foi o protótipo da branch `claude/web-app-prototype-bb3bbf`; onde a proposta antiga deste documento e o protótipo divergiam, venceu o protótipo.
+
+### O que mudou desde a proposta
+
+| Proposta (out/2026) | Construído |
+|---|---|
+| Tema "Ordem de Serviço" (papel claro, tinta grafite) | Tema **Campo**, o mesmo do site (`tokens.css`) |
+| Botão principal azul | Botão principal **amarelo** (`--color-marker`) com texto marinho. Azul fica para link, foco e seleção |
+| Mestre-detalhe com o detalhe trocando de lugar | **Painel ao lado** da lista, que não é camada |
+| Quadro de OS como tela própria, prioridade baixa | **Quadro como aba** da lista (Lista \| Quadro) |
+| Archivo nos títulos, IBM Plex Sans no texto | **IBM Plex Sans em tudo**, títulos inclusive. Outfit só no logo |
+| Densidade compacta como padrão | **Confortável** como padrão, sem escolha por pessoa |
+| Receber como tela de mesa | **Receber como aba do Financeiro** (Resumo, Receber, Relatório) |
+| Mobile no navegador não é alvo | Funciona no celular, com abas embaixo e listas no lugar de tabelas |
 
 ## O que vem de cada lugar
 
 | Vem do app (regra de produto) | Vem do site (identidade) | Só existe na mesa |
 |---|---|---|
-| Uma pergunta por tela, um botão azul | Tokens de `tokens.css` | Mestre-detalhe |
-| Português do dia a dia, sem sigla | IBM Plex Sans, IBM Plex Mono e Archivo | Tabelas densas com seleção |
-| Mostrar só o que o registro tem | Réguas em vez de cartões e sombras | Atalhos e paleta de comandos |
-| Status: ponto + texto, nunca selo | Azul como sinal, sem gradiente | URLs compartilháveis e várias abas |
-| Atrasada em `danger`, com texto em negrito | Sucesso silencioso, sem confete | Arrastar, sempre com alternativa |
+| Uma pergunta por tela, um botão principal | Tokens de `tokens.css` (tema Campo) | Lista com painel ao lado |
+| Português do dia a dia, sem sigla | Papel, marinho e amarelo | Tabelas com seleção e ações em lote |
+| Mostrar só o que o registro tem | Réguas em vez de cartões e sombras | Atalhos e paleta (`⌘K`) |
+| Status: ponto + texto, nunca selo | Sem gradiente, sem vidro | URLs compartilháveis e várias abas |
+| Atrasada em vermelho, com texto em negrito | Sucesso silencioso, sem confete | Arrastar, sempre com alternativa |
 
 ## Regras
 
-1. **Uma pergunta por tela, respondida no topo.** A tela da OS diz "Falta receber R$ 166". A lista diz "12 em aberto · 2 atrasadas".
-2. **Um botão azul por área de trabalho.** A lista e o painel de detalhe aberto são áreas separadas, mas o painel só tem azul se houver próximo passo. Seleção em lote troca o azul da lista pela ação do lote.
-3. **Tudo se faz pelo teclado.** Nenhuma ação depende do mouse. Arrastar sempre tem alternativa com um clique ou tecla (WCAG 2.5.7).
-4. **Toda tela tem URL.** OS, cliente, filtro e aba aberta ficam na URL. Copiar o endereço e abrir em outra aba leva ao mesmo lugar, sujeito à permissão de quem abriu.
-5. **Permissão é igual à do app.** Quem não pode não vê a ação. O servidor confere de novo, e a URL direta também é barrada.
+1. **Uma pergunta por tela, respondida no topo.** A lista diz "12 em aberto · 2 atrasadas · R$ 480 para receber". A OS diz "Falta receber R$ 166".
+2. **Um botão amarelo por área de trabalho.** A lista e o painel aberto são áreas separadas; o painel só tem amarelo se houver próximo passo. Selecionar linhas troca a barra de filtros pelas ações do lote.
+3. **Tudo se faz pelo teclado.** Arrastar sempre tem alternativa com um clique ou tecla (WCAG 2.5.7): o quadro tem o botão "…" e `Shift` + seta, a agenda tem `Shift` + setas e `Enter`.
+4. **Toda tela tem URL.** OS, cliente, filtro, aba, mês e período ficam na URL (`?order=`, `?f=`, `?view=board`, `?month=`). Copiar o endereço leva ao mesmo lugar, sujeito à permissão de quem abriu. Voltar fecha o que estiver aberto.
+5. **Permissão é igual à do app.** Quem não pode não vê a ação nem o item do menu. O servidor confere de novo, e a URL direta também é barrada.
 6. **Mostrar só o que existe.** Coluna vazia em toda a página não aparece. Recurso ocasional fica no menu "…" ou na paleta.
-7. **Sem editar em modo.** Cada campo abre seu editor no lugar. Não há botão "Editar".
-8. **Salvar é claro.** Edição no lugar salva ao sair do campo e mostra "Salvo" discreto. Alteração em dinheiro ou situação nunca salva por engano: pede Enter e pode ser desfeita.
+7. **Sem modo de edição.** Cada linha abre o seu editor. Não há botão "Editar".
+8. **Dinheiro e situação nunca mudam por engano.** Pedem confirmação ou Enter e oferecem "Desfazer". Lote sempre mostra antes quantas mudam e de quê para quê.
 9. **A IA não mexe em dinheiro.** Nunca recebe, cancela ou apaga sozinha.
-   - **Em um registro:** segue o app. Faz, marca com ✦ e oferece "Desfazer".
-   - **Em vários registros:** pergunta antes. Mostra a lista do que vai mudar e só aplica com confirmação.
+   - **Em uma OS:** segue o app. Faz, marca com ✦ e oferece "Desfazer".
+   - **Em várias OS:** pergunta antes. Mostra o que cada OS ganharia e só aplica com "Aplicar em N OS".
 10. **Cor nunca sozinha.** Status, erro e seleção sempre têm texto ou ícone.
-11. **Texto sem reticências em nome e valor.** Em tabela, a linha quebra. Só descrição longa pode ser cortada, com o texto completo disponível no detalhe.
-
-A regra 9 consolida duas formulações: o app aplica na hora, com desfazer, e o brief do web diz que a IA pergunta antes. Em lote, desfazer não basta.
+11. **Sem reticências em nome e valor.** A linha quebra. O texto a 200% não corta nada nem cria rolagem lateral.
 
 ## Tokens
 
-Fonte única: `firebase/hosting/src/css/tokens.css`. O azul já é o mesmo: `--color-accent` (`oklch(52% 0.14 250)`) dá `#116BB5`, igual a `AppColors.accent`. Todo cliente web importa esse arquivo, sem cópia à mão.
+Fonte única: `firebase/hosting/src/css/tokens.css`, importado por `src/main.ts` (sem cópia à mão). O web acrescenta só o que a ferramenta precisa, em `src/styles/app.css`:
 
-| Papel no app | Token web | Claro | Escuro |
-|---|---|---|---|
-| `background` | `--color-paper` | `#F9F6F2` | `#0C1015` |
-| `surface` | `--color-card` | `#FDFCFA` | `#151A1F` |
-| `secondaryFill` | `--color-paper-2` | `#F1EEE9` | `#13181D` |
-| `text` | `--color-ink` | `#131920` | `#EFECE8` |
-| `textSecondary` | `--color-muted` | `#43484F` | `#B3B8BE` |
-| `separator` | `--color-rule` | `#D4D1CA` | `#2E333A` |
-| `accent` / `accentText` | `--color-accent` | `#116BB5` | `#6CB2EC` |
-| `accentSoft` | `--color-accent-soft` | `#D5EBFE` | `#192F46` |
-| `success` | `--color-success` | `#1D7D3E` | `#69C27E` |
-| `danger` | `--color-danger` | `#C93029` | `#EF675A` |
-
-Contraste medido com as fórmulas de OKLCH e WCAG. Três ajustes são necessários, porque o site foi desenhado para títulos e não para tabelas:
-
-| Problema | Medido | Ajuste |
+| Papel | Token | Uso no web |
 |---|---|---|
-| `--color-warning` como texto no claro | 2,56:1 sobre papel | Token novo `--color-warning-text`, `#974D00` no claro e `#ECA851` no escuro (os do app). `--color-warning` fica só no ponto de status |
-| `--color-rule` como borda de campo | 1,42:1 (WCAG 1.4.11 pede 3:1) | Token novo `--color-control-border`, usando `--color-neutral`. Régua continua decorativa |
-| `--color-success` sobre `--color-paper-2` | 4,48:1 | Status fica sobre `--color-paper` ou `--color-card` |
-| `--color-danger` sobre `accent-soft` | 4,35:1 no claro, 4,4:1 no escuro | Linha selecionada usa `accent-soft` e todo texto em `ink`. Atrasada mantém ponto e negrito |
+| Fundo | `--color-paper` | Fundo da página e da lista |
+| Superfície | `--color-card` | Painel da OS, gavetas, diálogos, campos |
+| Preenchimento secundário | `--color-paper-2` | Hover, botões secundários, faixa "sem conexão" |
+| Texto | `--color-ink` | Marinho no claro, quase branco no escuro |
+| Texto secundário | `--color-muted` | Subtítulos, rótulos, situação |
+| Régua | `--color-rule` | Separadores (decorativa). A régua forte (`--color-ink`, 2 px) separa o cabeçalho da lista |
+| Barra lateral | `--color-navy`, `--color-on-navy` | Navegação; continua marinho no escuro (um pouco mais escuro) |
+| Ação principal | `--action-bg` = `--color-marker` | Botão amarelo, texto `--color-marker-ink` |
+| Link e seleção | `--color-accent`, `--color-selected` | Links, foco (`--color-focus`), linha aberta |
+| Sucesso | `--color-success` | Ponto de concluída |
+| Aviso (texto) | `--color-warning-text` (só web) | Em andamento, "Parada". `--color-warning` só no ponto |
+| Erro (texto) | `--color-danger-text` (só web) | Atrasada, erro de campo |
+| Borda de campo | `--color-control` (só web) | Campos e botões: 3:1 contra o fundo (WCAG 1.4.11) |
 
-`--color-marker` não entra nas telas autenticadas. A marcação da IA é ✦ azul, como no app.
+Os tokens só do web existem porque o site foi desenhado para títulos: `--color-warning` e `--color-danger` como texto pequeno não passam de 4,5:1, e `--color-rule` como borda de campo fica abaixo de 3:1. Cada um tem valor próprio para o escuro (`:root[data-theme="dark"]`).
 
-### Divergência do `firebase/web`
-
-Hoje `firebase/web` usa Inter e DM Sans, `#2563EB`, selos coloridos e outro significado de cor: orçamento azul e aprovada verde, enquanto o app usa orçamento cinza e aprovada azul.
-
-- Trocar as fontes e `brand.primary` por tokens compartilhados, com a Tailwind lendo as variáveis CSS.
-- Trocar selos por ponto + texto, com o mapa de cor do app.
-- Fazer em PR próprio, antes das telas novas. `/q` e `/pro` são vistas por clientes finais, então entram com comparação visual.
-- Manter `/admin` por último, por ser uso interno.
+Tema: claro por padrão; escuro pelo sistema ou pela escolha em Configurações › Neste navegador (`data-theme`). Com `prefers-contrast: more`, texto secundário e réguas viram `--color-ink` e as bordas engrossam. Com `forced-colors`, pontos, aba atual e seleção ganham contorno do sistema.
 
 ## Tipografia
 
-| Uso | Fonte | Tamanho | Observação |
-|---|---|---|---|
-| Título da página | Archivo 700 | 22 | Só um por página. Sem escala de display |
-| Título do painel | IBM Plex Sans 600 | 18 | Cliente da OS |
-| Corpo e linha de tabela | IBM Plex Sans 400 | 15 | Padrão |
-| Rótulo e cabeçalho de coluna | IBM Plex Sans 600 | 13 | Sentence case, `--color-muted`. O mono em caixa alta do site não entra na ferramenta |
-| Número, valor, placa e nº da OS | IBM Plex Mono 400/500 | 14 | Tabular, sempre via formatação de locale |
+| Uso | Fonte | Tamanho |
+|---|---|---|
+| Logo | Outfit 800 | 1,45 rem |
+| Título da página | IBM Plex Sans 700 | 1,75 rem (1,4 rem abaixo de 48 rem) |
+| Título do painel (cliente da OS) | IBM Plex Sans 700 | 1,4 rem |
+| Corpo e linha de tabela | IBM Plex Sans 400 | 0,9375 rem (15 px) |
+| Rótulo e texto pequeno | IBM Plex Sans 600 | 0,8125 rem (13 px), sentence case |
+| Número, valor, placa e nº da OS | IBM Plex Sans 500, `tabular-nums` | 0,9375 rem |
+| Tecla (`kbd`) | IBM Plex Mono | 0,72 rem |
 
-O corpo é 15, e não 19 como no app, porque na mesa a pessoa fica mais longe do limite de toque e precisa ver mais linhas. Quem tem a vista cansada usa o zoom do navegador: a tela funciona até 200% (WCAG 1.4.4) e até 400% em coluna única (1.4.10). Tudo em `rem`, nunca em `px` fixo para texto.
+IBM Plex Sans em tudo foi escolha do dono: alinha os dígitos em coluna (DM Sans, a do site, não alinha) e lê melhor em tabela. No escuro o corpo fica com peso 350, para não "inchar". Fontes auto-hospedadas (`src/styles/fonts.css`), subset latino, `font-display: swap`.
 
-Fontes auto-hospedadas, com `font-display: swap` e subset latino. Só IBM Plex Sans é pré-carregada, para proteger o LCP.
+O corpo é 15, e não 19 como no app, porque na mesa a pessoa precisa ver mais linhas. Quem precisa de letra maior usa o zoom do navegador: tudo em `rem`, e as telas são testadas a 200%.
 
 ## Densidade e medidas
 
-| Item | Compacto (padrão com mouse) | Confortável |
+Densidade confortável, uma só:
+
+| Item | Mouse | Toque (`pointer: coarse`) e celular |
 |---|---|---|
-| Linha de tabela (altura mínima) | 36 px | 44 px |
-| Campo | 36 px | 44 px |
-| Botão principal | 40 px | 44 px |
+| Campo e botão | 2,75 rem (44 px) | 2,75 rem |
+| Botão principal | 2,75 rem | 3,25 rem (52 px) |
+| Linha de tabela | `--row-y` 0,8 rem de respiro | idem |
 | Alvo mínimo | 24 px (WCAG 2.5.8) | 44 px |
 
-Em tela de toque (`pointer: coarse`), começa em Confortável. A escolha fica por pessoa. Margens usam a escala de `tokens.css`. Cantos: 6 px, sem pílula. Sombra só em camada flutuante (paleta, menu).
+Cantos de 6 px, sem pílula (exceto as iniciais da empresa). Sombra só em camada flutuante (paleta, menu, aviso). Movimento de 160 a 240 ms, só em hover, foco e camada; `prefers-reduced-motion` desliga tudo.
 
 ## Estrutura da tela
 
 ```
-┌────────┬──────────────────────┬──────────────────────────┐
-│ Início │ 12 em aberto · 2 atr.│ OS 186 · Paulo Nunes     │
-│ Agenda │ [Filtros]   [Nova OS]│ Fiat Uno · ABC-1D23      │
-│ Financ.│──────────────────────│ ● Em andamento · Fica    │
-│ Client.│ OS  Cliente  Total   │   pronto hoje, 17:00     │
-│ Catál. │ 186 Paulo    R$ 166 ◄│ [Marcar como pronta]     │
-│        │ 185 Ana      R$  80  │ Serviços e peças         │
-│ Perfil │ 184 Bruno    R$ 310  │ ...                      │
-└────────┴──────────────────────┴──────────────────────────┘
- Navegação     Lista (mestre)        Detalhe (no mesmo lugar)
+┌──────────────┬───────────────────────────────┬──────────────────────────┐
+│ PraticOS     │ Início                [Nova OS]│ ×                    …  │
+│ (AB) Oficina │ 12 em aberto · 2 atrasadas     │ Paulo Nunes              │
+│ [Buscar ⌘K]  │ (Lista)(Quadro)                │ Fiat Uno · ABC1D23       │
+│              │ Em aberto  Atrasadas  Hoje …   │ ● Na oficina · fica      │
+│ Início    12 │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│   pronta hoje, 17:00     │
+│ Agenda       │ 186 Paulo   Fiat Uno  R$ 166 ◄ │ [ Concluir serviço ]     │
+│ Financeiro   │ 185 Ana     iPhone 12 R$  80   │ Serviços e peças         │
+│ Clientes     │ 184 Bruno   Gol       R$ 310   │ …                        │
+│ Notas fiscais│                                │                          │
+│ Catálogo     │                                │                          │
+│ Equipe       │                                │                          │
+│ Configurações│                                │                          │
+└──────────────┴───────────────────────────────┴──────────────────────────┘
+  barra lateral       lista (régua forte no topo)      painel ao lado
 ```
 
-- **Navegação lateral:** mesma ordem das abas do app, Início, Agenda, Financeiro. Clientes e Catálogo ficam logo abaixo, porque na mesa há lugar. Equipe e ajustes ficam em Perfil. Colapsa em ícones com texto acessível.
-- **Mestre-detalhe a partir de 1100 px.** Abaixo, a lista ocupa a tela e o detalhe abre como página própria, com a mesma URL.
-- **O painel não é camada:** o foco fica na lista, e `J`/`K` trocam o que o painel mostra. `Enter` leva o foco para o painel. Abaixo de 1100 px, o foco vai para o título da página aberta.
-- **Largura máxima da leitura:** 72ch no detalhe. Tabela usa toda a largura.
-- **Mobile no navegador:** não é alvo. Funciona em coluna única, com aviso para usar o app.
+- **Barra lateral marinho, 14 rem.** Logo, iniciais e nome da empresa (troca de empresa ali), campo "Buscar" com `⌘K`, e o menu na ordem das abas do app: Início, Agenda, Financeiro; depois Clientes, Notas fiscais, Catálogo e Equipe, cada um só para quem pode abrir. Configurações no pé. Abaixo de 48 rem vira trilho de ícones (3,5 rem) com nome acessível.
+- **Painel ao lado, não camada.** A OS (ou cliente, nota) abre à direita, com largura entre 27 e 42 rem (40% da área). O foco fica na lista: `↓`/`↑` (ou `J`/`K`) trocam o que o painel mostra e `Enter` leva o foco para dentro. Quando a área de trabalho fica abaixo de 60 rem, o painel ocupa a área toda, com a mesma URL.
+- **Gaveta à direita para criar.** Nova OS, cadastro de cliente, item do catálogo, checklist e recebimento abrem por cima, como camada (`Layer`). `Esc` fecha e pergunta antes de descartar; `⌘ Enter` salva de qualquer campo.
+- **Celular (abaixo de 40 rem).** Barra no topo com o logo e "Nova OS", abas embaixo (Início, Agenda, Financeiro, Mais) e listas no lugar de tabelas. O quadro rola de lado, uma coluna por tela. O lote não aparece no celular.
 
-### Zonas do detalhe da OS
+## Telas descritas
 
-Mesma ordem do app: cabeçalho (cliente, veículo, situação e uma frase), próximo passo, "O que o cliente pediu", "Serviços e peças" com total como recibo, fotos, comentários, checklists e detalhes.
+Sem imagens: o que se vê em cada tela, na tela grande.
+
+- **Entrada (`/login`).** Faixa marinho à esquerda com o logo e "Sua oficina inteira, em uma tela grande."; à direita, "Entrar no PraticOS", "Use a mesma conta do celular", e três botões: Continuar com Google, Continuar com Apple (preto) e "Já tenho conta com e-mail", que abre e-mail, senha e "Esqueceu a senha?". Quem não está na lista de acesso vê "O PraticOS no computador ainda não foi liberado para você".
+- **Início, lista.** Título "Início" com o resumo em uma frase e o botão amarelo "Nova OS". Abas Lista | Quadro, filtros (Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas, Todas; o técnico tem Minhas) com contagem, busca. Régua marinho de 2 px e a tabela: nº, cliente, aparelho e placa, situação (ponto + texto), Quando (visita ou entrega, vermelho se atrasada) e valor com "falta receber". Acima da lista, quando há, "Manutenções chegando". Linha aberta em `--color-selected`.
+- **Início, quadro.** Uma coluna por situação, cartões com nº, cliente, aparelho e valor. Dica no topo: arrastar, botão "…" ou `Shift` + seta. Só aparecem destinos que o papel aceita.
+- **Lote.** Marcar linhas troca os filtros por "N selecionadas" e as ações: Mudar situação, Responsável, Mandar cobrança, Pedir ao assistente, Receber de {cliente} (mesmo cliente), PDF e Imprimir. Cada mudança abre uma confirmação com a lista de → para; o aviso depois tem "Desfazer".
+- **OS no painel.** Título pequeno "OS 186", cliente grande, aparelho, situação com uma frase ("fica pronta hoje, 17:00", "atrasada 2 dias", "Falta receber R$ 166") e o botão amarelo do próximo passo (Aprovar, Começar, Concluir serviço, Retomar, Receber). Depois: serviços e peças por aparelho com o total como recibo, fotos (colar ou arrastar), checklists, contrato, comentários e Detalhes. Menu "…" com o raro, destrutivas no fim. Barra "Peça ao assistente" no pé.
+- **Nova OS (gaveta).** Cursor em Cliente, com Recentes; depois veículo ou aparelho, itens com o preço do catálogo e "Mais usados", entrega e "O que o cliente pediu". "+ Cadastrar «nome»" no fim de cada busca. "Salvar" amarelo; `⌘ Enter` salva.
+- **Agenda.** Semana ou Dia, grade de horas com faixa "Dia todo" no topo, mês pequeno ao lado com ponto nos dias com OS, filtro "De quem". Blocos arrastáveis de meia em meia hora; mover uma visita que o cliente esperava pergunta antes.
+- **Financeiro.** Abas Resumo, Receber e Relatório. Resumo: Recebido e Vendido do mês, A receber e Em andamento, e a lista do cartão escolhido. Receber: quem deve, por cliente, das dívidas mais antigas. Relatório: período, totais, composição, rankings, "Exportar CSV", "Exportar planilha" e "Imprimir ou salvar PDF".
+- **Paleta (`⌘K`).** Camada no topo com um campo: OS pelo número, clientes, aparelhos, catálogo e ações ("Ir para…", importar planilhas). Cada grupo só para quem abre a tela.
 
 ## Componentes
 
 | App | Web | Muda o quê |
 |---|---|---|
-| `AppListRow`, lista plana | `DataTable` | Linhas semânticas (`table`), paginação de 100 linhas, cabeçalho fixo, ordenação. Virtualizar esconde linhas do Ctrl+F e da impressão, então só vale com busca própria |
-| `PickerScaffold` (tela de escolher) | `Combobox` | Escolher continua sendo pesquisa, mas no lugar, digitando. Campo vazio já mostra Recentes e Mais usados, como no app. Busca pelo início de cada palavra. "+ Cadastrar “texto”" no fim, ✓ no atual, "Nenhum …" no topo |
-| `FormSheet` | `Drawer` à direita | Cadastro novo abre por cima da lista. `Esc` fecha e pergunta antes de descartar; `Ctrl+Enter` salva de qualquer campo. Rodapé não fica fixo em tela baixa, para não cobrir o foco |
-| `showPullDownMenu` | `Menu` | Mesmos grupos, destrutivas no fim, com setas e letras |
+| `AppListRow`, lista plana | Tabela nativa (`.grid`) | Linhas semânticas, cabeçalho fixo, carrega mais ao rolar. Sem virtualizar, para Ctrl+F e impressão funcionarem |
+| `PickerScaffold` | `Combobox` | Escolher continua sendo pesquisa, no lugar. Vazio mostra Recentes e Mais usados. "+ Cadastrar «texto»" no fim, ✓ no atual, "Nenhum …" para tirar. ARIA com `aria-activedescendant` |
+| `FormSheet` | Gaveta (`Layer`) à direita | `Esc` fecha e pergunta antes de descartar; `⌘ Enter` salva |
+| `showPullDownMenu` | `Menu` | Mesmos grupos, destrutivas no fim, setas e letras. Preso ao botão; no celular, folha embaixo |
 | `CupertinoAlertDialog` | `Dialog` | Foco preso, `Esc` cancela, botão padrão nunca é o destrutivo |
 | `AppGlass` | Não existe | Sem vidro na web |
-| `AssistantBar` (Foto/Falar) | Barra do assistente | Colar imagem, arrastar arquivo, digitar. Microfone onde o navegador deixar |
-| `EmptyState`, `ErrorState`, `LoadingState` | Iguais | Mesmas frases, vindas das mesmas chaves de tradução |
+| `AssistantBar` | Barra "Peça ao assistente" | Digitar, colar imagem, arrastar arquivo |
+| `EmptyState`, `ErrorState`, `LoadingState` | Iguais | Mesmas frases, das mesmas chaves de tradução |
+| Status | `StatusLabel` | Ponto + texto, nome da situação do segmento |
+| Valor | `MoneyInput` | Lê como digitado: 150 é 150, nunca 1,50 |
 
-`Combobox` segue o padrão ARIA com `aria-activedescendant`. `DataTable` usa `grid` só quando houver edição por célula. Nos dois casos, a tabela nativa continua sendo a base, para Ctrl+F, seleção de texto e impressão funcionarem.
+Os componentes base aparecem em `/app/dev/components`, só nos builds de emulador.
 
 ## Teclado
 
 | Tecla | Ação | Onde |
 |---|---|---|
-| `Ctrl/⌘ K` | Paleta de comandos e busca global | Sempre |
-| `N` | Nova OS | Fora de campo |
-| `/` | Filtrar a lista atual | Fora de campo |
-| `J` / `K` ou `↓` / `↑` | Próxima ou anterior | Lista |
-| `Enter` | Abrir no painel | Lista |
-| `Ctrl/⌘ Enter` | Abrir em nova aba (com mouse: `Ctrl`-clique) ou salvar formulário | Lista, formulário |
-| `Espaço` | Selecionar a linha | Lista |
-| `A` | Adicionar serviço ou peça | OS aberta |
-| `C` / `V` | Trocar cliente / veículo | OS aberta |
-| `D` | Agendar, aceitando texto curto como `sex 14` | OS aberta |
-| `M` | Mandar ao cliente | OS aberta |
-| `F` | Anexar foto | OS aberta |
-| `S` | Trocar situação | OS aberta |
-| `R` | Receber. Já traz as outras OS em aberto do cliente | OS aberta ou linha da lista |
-| `Esc` | Fechar a camada de cima | Sempre |
+| `⌘/Ctrl K` | Paleta: buscar e comandos | Sempre |
 | `?` | Lista de atalhos | Fora de campo |
+| `N` | Nova OS | Fora de campo |
+| `/` | Buscar na lista | Listas |
+| `↓` / `↑` ou `J` / `K` | Próxima ou anterior, abrindo no painel | Lista de OS |
+| `Enter` | Levar o foco para o painel | Lista de OS |
+| `Espaço` | Marcar a linha para o lote | Lista de OS |
+| `A` | Adicionar serviço ou peça | OS aberta |
+| `S` | Mudar a situação | OS aberta |
+| `C` | Trocar o cliente | OS aberta |
+| `D` | Agendar a visita | OS aberta |
+| `M` | Mandar para o cliente | OS aberta |
+| `R` | Receber | OS aberta |
+| `⌘/Ctrl Enter` | Salvar | Gaveta e formulário |
+| `←` / `→` | Período anterior e seguinte | Agenda, Financeiro, Relatório, Notas |
+| `T` | Hoje | Agenda |
+| `Shift` + setas | Mover cartão ou visita | Quadro, Agenda |
+| `Esc` | Fechar a camada de cima | Sempre |
 
 Regras:
 
-- Tecla simples só age fora de campo de texto. Ajustes tem "Desligar atalhos de uma tecla" (WCAG 2.1.4).
-- Nada captura `Ctrl+F`, `Ctrl+P`, `Ctrl+L`, `Ctrl+T`, `Ctrl+W` e nem as setas do leitor de tela. `Ctrl+P` imprime a OS aberta com folha própria.
-- Foco visível usa `--color-focus`, com contorno de 2 px, sem animação. Barra fixa nunca cobre o foco (2.4.11).
-- Abrir camada leva o foco para dentro; fechar devolve o foco para quem abriu.
-- Mudança de lista avisa o leitor de tela por região `aria-live`, com a contagem.
+- Tecla de uma letra só age fora de campo de texto, e pode ser desligada em Configurações › Neste navegador › "Usar atalhos de uma tecla" (WCAG 2.1.4).
+- Nada captura `Ctrl+F`, `Ctrl+P`, `Ctrl+L`, `Ctrl+T`, `Ctrl+W` nem as setas do leitor de tela.
+- Foco visível em `--color-focus`, 2 px, sem animação; na barra lateral, amarelo. Barra fixa nunca cobre o foco (2.4.11).
+- Abrir camada leva o foco para dentro; fechar devolve para quem abriu.
+- Mudança de lista avisa o leitor de tela por `aria-live`, com a contagem.
 
 ## Nova OS em menos de 45 segundos
 
-Roteiro de referência: cliente já cadastrado, um serviço do catálogo e valor do catálogo. A OS abre em `Drawer`, com o cursor em "Cliente" e os recentes já listados.
+Roteiro de referência: cliente já cadastrado, um serviço do catálogo, valor do catálogo. `N` abre a gaveta com o cursor em Cliente e os recentes listados; `↓` e `Enter` escolhem; o veículo único entra sozinho; digitar o serviço e `Enter` põe o item com o preço; `⌘ Enter` salva. O teste E2E cronometra esse roteiro e falha acima de 45 s.
 
-| Passo | Teclas |
-|---|---|
-| Abrir | `N` |
-| Cliente | `↓` nos recentes, ou digitar, e `Enter` |
-| Veículo ou aparelho | `Enter` no sugerido, ou `Tab` para pular |
-| Serviço | digitar, `Enter`. Já entra com o valor do catálogo |
-| Outro item | repetir |
-| Salvar | `Ctrl+Enter` de qualquer campo |
-
-Valor diferente: `Tab` a partir do item e digitar.
-
-Modelo KLM, não teste com pessoas: 8,7 s nesse roteiro e 21,7 s com tudo novo, ambos abaixo de 45 s. Com 1.500 clientes, o nome exige 10 teclas em média. Com 50 clientes ou menos, 3. Detalhes em `docs/web-app/keyboard-flows.md`.
-
-**A meta de 50% não vem do teclado.** O app já é curto, e as decisões são as mesmas. No modelo, nenhum dos 18 cenários reduz 50% do tempo, 7 ganham, 2 empatam e 9 perdem. O web ganha em sequência e em lote. Para ganhar mais é preciso tirar decisões: recentes, repetir OS, lançar várias linhas.
-
-**Busca na maior empresa:** a maioria dos clientes citados nas OS dela não tem cadastro em `customers`. A combobox precisa buscar também o que está gravado na OS, para evitar duplicar.
-
-## Telas de mesa
-
-Por ordem de evidência de uso:
-
-1. **Lista de OS com seleção e ações em lote.** Filtros na URL. Mudar situação, responsável e imprimir em lote.
-2. **Receber vários.** `R` já traz as OS em aberto do cliente, e selecionar linha por linha fica para clientes diferentes. O uso real tem recebimento em lote, e o app já marca todas do cliente de uma vez.
-3. **Busca global e paleta.** OS, cliente, placa, telefone e comando no mesmo campo.
-4. **Importação de clientes e catálogo.** Mostra o que vai entrar antes de gravar.
-5. **Agenda da equipe.** Coluna por pessoa, arrastar para reagendar, com "Mudar data" no menu da OS.
-6. **Quadro de OS.** Prioridade baixa: a maior empresa quase não usa o fluxo de situação.
-7. **Relatórios cruzados, impressão em lote e IA em seleção.** Depois de haver demanda.
+O modelo KLM da descoberta (`docs/web-app/keyboard-flows.md`) deu 8,7 s nesse roteiro e 21,7 s com tudo novo. A meta de reduzir 50% do tempo não vem do teclado: o web ganha em sequência e em lote (Recentes, Mais usados, ações em várias OS).
 
 ## Comportamentos
 
-- **Tempo real:** a lista e a OS aberta atualizam sozinhas. Se outra pessoa mudou o que está em edição, aparece aviso e nada é sobrescrito.
-- **Sem conexão:** faixa fixa "Sem conexão. O que você digitar não será salvo". Gravação fica bloqueada. Offline completo fica no celular.
-- **Sair:** computador da oficina é compartilhado. Cache persistente desligado por padrão, "Sair de todos os aparelhos" no perfil, bloqueio por inatividade configurável.
-- **Foto:** colar, arrastar ou escolher arquivo. Para câmera, QR "Continuar no celular" abre a mesma OS no app.
-- **Impressão:** folha própria, a partir do tema claro, sem navegação.
-- **Movimento:** 160 a 240 ms, só em hover, foco e camada. `prefers-reduced-motion` desliga.
+- **Tempo real:** a lista e a OS aberta se atualizam sozinhas para quem vê valores. Se outra pessoa mudou o que está em edição, aparece aviso e nada é sobrescrito (`409` com a versão nova).
+- **Sem conexão:** faixa "Sem conexão. O que você digitar não será salvo." no topo; gravação falha com frase, nunca fica numa fila que parece feita. Offline completo fica no celular.
+- **Sair:** computador da oficina é compartilhado. Sair pede confirmação e apaga o cache do navegador.
+- **Foto:** escolher, colar ou arrastar. Câmera fica no celular.
+- **Impressão:** folha própria, no tema claro, sem navegação (`@media print`). O PDF da OS é o mesmo do app, montado no navegador.
 
-## Idiomas e temas
+## Idiomas
 
-pt, en e es, com as mesmas chaves do app quando o sentido for igual. Moeda segue o país da empresa, como proposto em `docs/web-app/business-rules-map.md`. Tema claro é o padrão, escuro segue o sistema ou a escolha salva (`data-theme`). Labels de segmento usam `/segments`, com a mesma ordem de prioridade do app.
+pt, en e es, com as mesmas chaves do app quando o sentido é igual (`lib/l10n/app_*.arb`) e as do web em `src/i18n/web_*.json`. Moeda, datas e fuso seguem o país da empresa, não o idioma. Rótulos do ramo ("Veículo", "Aparelho") vêm do segmento, com a mesma prioridade do app.
 
 ## Checklist de tela nova
 
-- [ ] Responde uma pergunta no topo, com no máximo um botão azul por área
+- [ ] Responde uma pergunta no topo, com no máximo um botão amarelo por área
 - [ ] Funciona só com teclado, com foco visível e ordem lógica
-- [ ] URL reabre o mesmo estado e respeita a permissão
+- [ ] URL reabre o mesmo estado e respeita a permissão (`meta.access`)
 - [ ] Estados vazio, erro e carregando cobertos
-- [ ] axe sem violação em claro e escuro
-- [ ] Testada em 200% de zoom, em pt, en e es
+- [ ] axe sem violação em claro e escuro (`e2e/a11y.spec.ts`)
+- [ ] Testada a 200% de zoom, em pt, en e es, e abaixo de 40 rem
 - [ ] Linha na `docs/web-app/parity-matrix.yaml` atualizada
