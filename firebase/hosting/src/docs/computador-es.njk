@@ -1,0 +1,55 @@
+---
+layout: layouts/docs-article.njk
+permalink: /docs/computador-es.html
+lang: es
+langCode: es
+title: Usar en la computadora — PraticOS
+description: "Abre PraticOS en el navegador de la computadora con la misma cuenta del celular: lista y orden lado a lado, tablero, varias órdenes a la vez, agenda de arrastrar, impresión, PDF y planillas."
+keywords: praticos, computadora, navegador, web, atajos, tablero, agenda, imprimir, pdf, importar planilla
+indexPage: ../index-es.html
+faqLink: ../faq-es.html
+supportLink: ../support-es.html
+docsIndexLink: index-es.html
+breadcrumbRoot: Centro de ayuda
+breadcrumbCurrent: Usar en la computadora
+heroTitle: Usar en la computadora
+heroSubtitle: La misma cuenta del celular, con pantalla grande y teclado. Para quien pasa el día en el mostrador o en la oficina.
+sidebarTitle: En esta página
+sidebarNav:
+  - id: vision-general
+    label: Qué puedes hacer
+  - id: entrar
+    label: Cómo entrar
+  - id: atajos
+    label: Atajos de teclado
+  - id: escritorio
+    label: Tablero, lote, agenda e impresión
+  - id: planillas
+    label: Importar planillas
+  - id: roles
+    label: Qué ve cada rol
+  - id: faq
+    label: Preguntas frecuentes
+prevLink:
+  href: index-es.html
+  label: Volver
+  title: Centro de ayuda
+nextLink:
+  href: perfis-es.html
+  label: Siguiente
+  title: Equipo y roles
+langSwitch:
+  - code: PT
+    href: computador.html
+  - code: EN
+    href: computador-en.html
+  - code: ES
+    href: computador-es.html
+    active: true
+relPath: ../
+docsData: docs/computador
+# The web app is open only to an access list while site.flags.webApp is false:
+# keep the URL live but out of the hub, the sitemap and the index.
+eleventyComputed:
+  noindex: "{% if not site.flags.webApp %}true{% endif %}"
+---
