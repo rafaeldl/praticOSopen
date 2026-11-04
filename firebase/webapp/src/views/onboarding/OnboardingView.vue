@@ -15,6 +15,7 @@ import {
   localeTag,
   nameMissing,
   orderedPick,
+  resumesCompany,
   segmentName,
   subspecialtyName,
   type OnboardingSegment,
@@ -49,6 +50,8 @@ const masks = ref<string[]>([])
 let savedId: string | null = null
 /** The seed was asked for: its checklists may be in, so the segment cannot change any more. */
 const seedTried = ref(false)
+/** Completing a company that exists without a segment: no invite code, the same company is updated. */
+const resuming = ref(false)
 
 const step = computed<Step>(() => {
   const wanted = route.query.step
@@ -178,7 +181,14 @@ onMounted(() => {
     void resume()
     return
   }
-  if (session.companyId) {
+  // A company without a segment: the same steps with its name and phone, completing it (auth.gate.resume-company).
+  if (resumesCompany(session)) {
+    const company = session.company as { name?: string; phone?: string }
+    savedId = session.companyId
+    resuming.value = true
+    name.value = company.name ?? ''
+    phone.value = company.phone ?? ''
+  } else if (session.companyId) {
     void router.replace('/')
     return
   }
@@ -224,7 +234,7 @@ onMounted(() => {
             </button>
           </li>
         </ul>
-        <button type="button" class="link entry-link" data-testid="onboarding-invite-code" @click="codeOpen = true">{{ t('onboardingInviteCode') }}</button>
+        <button v-if="!resuming" type="button" class="link entry-link" data-testid="onboarding-invite-code" @click="codeOpen = true">{{ t('onboardingInviteCode') }}</button>
       </div>
 
       <div v-else-if="step === 'specialties' && segment" class="entry-box">

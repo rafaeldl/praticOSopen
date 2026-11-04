@@ -20,6 +20,8 @@ export const ui = reactive({
     items?: { id: string; name: string; value: number | null }[]
     /** "Novo contrato" (contract.list.new): Nova OS with Repetir on. */
     repeat?: boolean
+    /** "Experimentar agora" of the assistant's presentation: the cursor starts in the assistant (order.ai.intro-try). */
+    assist?: boolean
   },
 })
 

@@ -12,6 +12,7 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import FinanceTabs from '@/components/finance/FinanceTabs.vue'
+import NextCharge from '@/components/finance/NextCharge.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { financeSummary, type FinanceRow, type FinanceSummary } from '@/lib/finance/data'
@@ -240,6 +241,8 @@ const reportLink = computed(() => {
           </div>
         </section>
       </div>
+
+      <NextCharge :summary="summary" @changed="load" />
 
       <div class="fin-links">
         <RouterLink class="btn" :to="reportLink" data-testid="fin-report">{{ t('web.fin.seeReport') }}</RouterLink>

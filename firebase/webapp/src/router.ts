@@ -4,6 +4,7 @@ import { stripStaleLayers } from '@/lib/route-layer'
 import { effectiveUseFinancial, session, startSession } from '@/lib/session'
 import { NAV } from '@/navigation'
 import { readPending } from '@/lib/onboarding/pending'
+import { resumesCompany } from '@/lib/onboarding/model'
 import { loadOrderTexts, loadTexts } from '@/i18n'
 import type { MessageKey } from '@/generated/message-keys'
 
@@ -251,5 +252,7 @@ router.beforeEach(async (to) => {
   if (to.name === 'login' && session.uid) return { path: '/', replace: true }
   // A first access stopped after creating the company (reload): finish it before anything else.
   if (session.uid && to.name !== 'onboarding' && readPending(session.uid)) return { name: 'onboarding', replace: true }
+  // A company without a segment finishes its first access before any company screen (auth.gate.resume-company).
+  if (to.meta.access?.kind === 'member' && resumesCompany(session)) return { name: 'onboarding', replace: true }
   return true
 })
