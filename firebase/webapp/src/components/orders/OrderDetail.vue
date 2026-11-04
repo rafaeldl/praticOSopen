@@ -59,6 +59,7 @@ import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
 import * as maintenance from '@/lib/orders/maintenance-offer'
 import { askNotificationsOnce } from '@/lib/push'
+import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
 import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
 import TextDialog from './TextDialog.vue'
 import OrderCustomFields from './OrderCustomFields.vue'
@@ -332,6 +333,7 @@ async function setStatus(status: OrderStatus) {
   const ok = await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
   // Only a refusal by the server takes it back; a request cut by leaving the page (NETWORK, status 0) keeps the choice.
   if (!ok && lastError instanceof ApiError && lastError.status > 0) forget()
+  if (ok) offerNotify(status)
   // Done now (the server took it): when is the next maintenance? (device.maintenance.offer)
   if (ok && status === 'done' && was !== 'done' && order.value) await offerMaintenance()
 }
@@ -383,6 +385,47 @@ async function answerMaintenance(id: string | null) {
   const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id), order.value?.id)
   if (failed) showToast(t('nextMaintenanceSaveError'))
   else if (id !== 'none') showToast(t('web.order.maintenanceSaved'))
+}
+
+/**
+ * "Pronta. Avisar Ana?" (order.status.notify): a note under the actions for 8 s,
+ * never an alert, once per order while this screen is open. "Avisar" opens
+ * WhatsApp with the link and the words of the new situation (ShareDialog send).
+ * Pointer or focus on it holds the time, so no one loses it while reading.
+ */
+const notify = ref<OrderStatus | null>(null)
+const notifyAsked = new Set<string>()
+let notifyTimer: ReturnType<typeof setTimeout> | undefined
+function offerNotify(status: OrderStatus) {
+  if (!order.value || !shouldOfferStatusShare(order.value, status, notifyAsked)) return
+  notifyAsked.add(order.value.id)
+  notify.value = status
+  holdNotify(false)
+}
+function holdNotify(hold: boolean) {
+  clearTimeout(notifyTimer)
+  if (!hold && notify.value) notifyTimer = setTimeout(() => (notify.value = null), NOTIFY_NOTE_MS)
+}
+const notifyText = computed(() => {
+  if (!notify.value) return ''
+  const name = order.value?.customer?.name?.trim() || t('orderNotifyFallbackName')
+  return t('orderNotifyNote', { status: statusText(notify.value), name })
+})
+function notifyNow() {
+  holdNotify(true)
+  notify.value = null
+  dialog.value = { kind: 'share', send: true }
+}
+watch(() => order.value?.id, () => {
+  holdNotify(true)
+  notify.value = null
+})
+onBeforeUnmount(() => clearTimeout(notifyTimer))
+
+/** order.pdf.share by WhatsApp: the PDF was downloaded; the customer gets the order's link. */
+function sharePdfLink() {
+  pdfOpen.value = false
+  dialog.value = { kind: 'share', send: true }
 }
 
 async function runStep() {
@@ -938,6 +981,10 @@ watch(
           <button type="button" class="link" data-testid="share-open" @click="dialog = { kind: 'share' }">{{ t('shareTitle') }}</button>
           <button v-if="access.canChangeHold && !isHeld(order) && isActive(order)" type="button" class="link" @click="dialog = { kind: 'hold' }">{{ t('orderHoldMark') }}</button>
         </div>
+        <p v-if="notify" class="od-notify" role="status" data-testid="notify-note" @mouseenter="holdNotify(true)" @mouseleave="holdNotify(false)" @focusin="holdNotify(true)" @focusout="holdNotify(false)">
+          <span>{{ notifyText }}</span>
+          <button type="button" class="btn btn--small btn--primary" data-testid="notify-now" @click="notifyNow">{{ t('orderNotifyAction') }}</button>
+        </p>
         <section v-if="offer" class="od-offer" aria-labelledby="od-offer-title" data-testid="maintenance-offer">
           <h3 id="od-offer-title" class="od-offer-title">{{ t('nextMaintenanceQuestion') }}</h3>
           <p class="sub">{{ offer.devices.map((device) => device.name).join(', ') }}</p>
@@ -1153,7 +1200,14 @@ watch(
       @close="dialog = null"
     />
   </template>
-  <PdfDialog v-if="pdfOpen && order" :ids="[order.id]" :numbers="[order.number]" @close="pdfOpen = false" />
+  <PdfDialog
+    v-if="pdfOpen && order"
+    :ids="[order.id]"
+    :numbers="[order.number]"
+    :whatsapp="!!(order.customer?.id || order.customer?.name)"
+    @whatsapp="sharePdfLink"
+    @close="pdfOpen = false"
+  />
   <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
   <OrderPrint v-if="printing && order" :order="order" />
   <ReceiptsDialog v-if="receiptOpen && order?.customer?.id" :customer-id="order.customer.id" :customer-name="order.customer.name ?? ''" :focus-id="receiptOpen" @changed="watcher?.refresh()" @close="receiptOpen = null" />
