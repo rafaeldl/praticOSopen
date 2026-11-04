@@ -659,3 +659,144 @@ test('R6: gaveta do cliente com link aberto: Mandar de novo e Receber sem azul',
   expect(decodeURIComponent(href!)).toContain('wa.me/5511990002222?text=')
   await expect(page.getByTestId('receive-customer-save')).not.toHaveClass(/btn--primary/)
 })
+
+// ---------------------------------------------------------------------------
+// Fechamento da matriz (pay.*, receipt.*, charge.*)
+// ---------------------------------------------------------------------------
+
+test('parcelamento cancelado pelo servidor: aviso e link novo; comprovante do Asaas abre a página dele (pay.order.replace-charge, pay.order.asaas-receipt)', async ({ page }) => {
+  const order = await done({ id: 'customer-5', name: 'Cliente 05' }, 200, {
+    paidAmount: 50,
+    transactions: [{ id: 'asaas_pay_9_0', type: 'payment', amount: 50, billingType: 'PIX', receiptUrl: 'https://sandbox.asaas.com/comprovantes/abc', createdAt: new Date().toISOString() }],
+  })
+  await writeDoc(`orders/${order.id}/charges/plan1`, { status: 'canceled', autoCanceled: true, value: 200, dueDate: '2099-01-01', mode: 'cardInstallments', installmentCount: 4, paidAsaasPaymentIds: ['p1'], createdAt: new Date().toISOString() })
+  await openOrder(page, 'admin', order.id)
+  const card = panel(page).getByTestId('order-charge')
+  await expect(card).toContainText('Parcelamento cancelado')
+  await card.getByRole('button', { name: 'Gerar link novo de R$ 150,00' }).click()
+  await expect(dialog(page, 'Mandar cobrança').getByLabel('Valor')).toHaveValue('150,00')
+  await dialog(page, 'Mandar cobrança').getByRole('button', { name: 'Cancelar' }).click()
+  const history = panel(page).getByTestId('payment-history')
+  await expect(history).toContainText('Registrado automaticamente no Asaas')
+  await expect(history.getByRole('link', { name: 'Ver comprovante' })).toHaveAttribute('href', 'https://sandbox.asaas.com/comprovantes/abc')
+  // A payment of the Asaas has its own receipt: no "Imprimir recibo" for it.
+  await expect(history.getByRole('button', { name: /Imprimir recibo/ })).toHaveCount(0)
+})
+
+test('recibo de um pagamento da OS, impresso pelo navegador (pay.order.send-receipt, pay.order.payment-sheet)', async ({ page }) => {
+  const order = await done({ id: 'customer-6', name: 'Cliente 06' }, 100, {
+    paidAmount: 40,
+    transactions: [{ id: 'm-r1', type: 'payment', amount: 40, paymentMethod: 'pix', paidAt: new Date().toISOString(), createdAt: new Date().toISOString(), createdBy: { id: 'e2e-admin', name: 'Alberto Admin' } }],
+  })
+  await openOrder(page, 'admin', order.id)
+  await page.evaluate(() => (window.print = () => window.dispatchEvent(new Event('printed'))))
+  const history = panel(page).getByTestId('payment-history')
+  await expect(history).toContainText('por Alberto Admin')
+  await history.getByRole('button', { name: 'Imprimir recibo de R$ 40,00' }).click()
+  const sheet = page.getByTestId('receipt-print')
+  await expect(sheet).toContainText('Recibo')
+  await expect(sheet).toContainText('Cliente 06')
+  await expect(sheet).toContainText(`OS ${order.number}`)
+  await expect(sheet).toContainText('R$ 40,00')
+  await expect(sheet).toContainText('Registrado por Alberto Admin')
+})
+
+test('recebimento de várias OS: a parte na OS abre o recebimento, com o comprovante e as OS que abrem (pay.order.open-receipt-group, receipt.detail.proof, receipt.detail.open-order)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const a = await done(customer, 100, { createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString() })
+  const b = await done(customer, 50)
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  await drawer.getByLabel('Quanto recebeu').fill('150')
+  await drawer.getByLabel('Quanto recebeu').blur()
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 150,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText('Recebido R$ 150,00')
+  const [receipt] = await queryDocs('receipts', 'customer.id', customer.id)
+  await writeDoc(`receipts/${receipt!.id}`, { receiptFile: { url: 'https://firebasestorage.googleapis.com/v0/b/x/o/comprovante.pdf', storagePath: `tenants/company-alpha/receipts/${receipt!.id}/f.pdf` } }, true)
+
+  await page.goto(`orders?order=${b.id}`)
+  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+  await panel(page).getByTestId('payment-history').getByRole('button', { name: /Abrir recebimento/ }).click()
+  const list = page.getByTestId('receipts')
+  const row = list.getByTestId('receipt-row').first()
+  await expect(row).toHaveAttribute('aria-current', 'true')
+  await expect(row.getByRole('link', { name: 'Ver comprovante' })).toHaveAttribute('href', /comprovante\.pdf/)
+  await row.getByRole('button', { name: new RegExp(`OS ${a.number}`) }).click()
+  await expect(page).toHaveURL(new RegExp(`order=${a.id}`))
+  await expect(panel(page)).toContainText(customer.name)
+})
+
+test('gaveta do cliente: Abrir a OS; consultor inclui OS de outra pessoa, desmarcada e sem abrir (pay.customer.open-order, pay.customer.others)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const mine = await makeOrder('consultant', { customer, status: 'done', total: 80, paidAmount: 0, payment: 'unpaid', services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: 80 }] })
+  const mine2 = await makeOrder('consultant', { customer, status: 'done', total: 10, paidAmount: 0, payment: 'unpaid', services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: 10 }] })
+  const theirs = await done(customer, 30)
+  // Two of the consultant's own: "Receber" opens the drawer (one alone opens the order).
+  await openCustomer(page, 'consultant', customer.id)
+  await page.getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  const others = drawer.getByRole('group', { name: `Outras OS de ${customer.name}` })
+  await expect(others).toContainText('Feitas por outra pessoa')
+  await expect(others.getByLabel(`OS ${theirs.number}`)).not.toBeChecked()
+  await expect(others.getByRole('button', { name: /Abrir/ })).toHaveCount(0)
+  await others.getByLabel(`OS ${theirs.number}`).check()
+  await drawer.getByLabel('Quanto recebeu').fill('120')
+  await drawer.getByLabel('Quanto recebeu').blur()
+  await drawer.getByTestId('receive-customer-save').click()
+  await dialog(page, /Receber R\$ 120,00/).getByRole('button', { name: 'Confirmar recebimento' }).click()
+  await expect(page.locator('.toast')).toContainText('Recebido R$ 120,00')
+  await expect.poll(async () => (await readOrder(theirs.id))?.paidAmount).toBe(30)
+  await expect.poll(async () => (await readOrder(mine.id))?.paidAmount).toBe(80)
+  await expect.poll(async () => (await readOrder(mine2.id))?.paidAmount).toBe(10)
+
+  const next = await makeOrder('consultant', { customer, status: 'done', total: 20, paidAmount: 0, payment: 'unpaid', services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: 20 }] })
+  await makeOrder('consultant', { customer, status: 'done', total: 5, paidAmount: 0, payment: 'unpaid', services: [{ service: { id: 'service-1', name: 'Serviço 1' }, value: 5 }] })
+  await page.reload()
+  await page.getByTestId('customer-receive').click()
+  await page.getByTestId('receive-customer').getByRole('button', { name: `Abrir OS ${next.number}` }).click()
+  await expect(page).toHaveURL(new RegExp(`order=${next.id}`))
+  await expect(panel(page)).toBeVisible()
+})
+
+test('cobrança de várias OS sem CPF no cadastro: pede, confere e manda junto (charge.customer.tax-id)', async ({ page }) => {
+  const customer = await makeCustomer({ phone: '+5511990007777' })
+  await done(customer, 40)
+  await done(customer, 60)
+  const calls: Record<string, unknown>[] = []
+  await page.route(`**/v1/app/customers/${customer.id}/charges**`, async (route: Route) => {
+    const body = route.request().postDataJSON() as Record<string, unknown>
+    calls.push(body)
+    const charge = { customer: { id: customer.id, name: customer.name }, status: 'pending', value: body.value, dueDate: body.dueDate, orderIds: body.orderIds, invoiceUrl: 'https://sandbox.asaas.com/i/cc-t', paidAsaasPaymentIds: [], createdAt: new Date().toISOString() }
+    await writeDoc(`customerCharges/cc-t-${customer.id}`, charge)
+    return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ success: true, data: { id: `cc-t-${customer.id}`, ...charge } }) })
+  })
+  await openCustomer(page, 'admin', customer.id)
+  await page.getByTestId('customer-receive').click()
+  await page.getByTestId('customer-charge-new').click()
+  const sheet = dialog(page, 'Mandar cobrança')
+  await sheet.getByLabel('CPF ou CNPJ do cliente').fill('111.111.111-11')
+  await expect(sheet.getByTestId('charge-problem')).toHaveText('Esse CPF ou CNPJ não confere.')
+  await expect(sheet.getByTestId('charge-create')).toBeDisabled()
+  await sheet.getByLabel('CPF ou CNPJ do cliente').fill('529.982.247-25')
+  await sheet.getByTestId('charge-create').click()
+  await expect(sheet.getByRole('heading', { name: 'Link de pagamento pronto' })).toBeVisible()
+  expect(calls[0]).toMatchObject({ value: 100, customerTaxId: '52998224725' })
+})
+
+test('recusa do Asaas vira a mesma frase do app, num aviso (pay.errors.text)', async ({ page }) => {
+  const order = await done({ id: 'customer-8', name: 'Cliente 08' }, 70)
+  await page.route(`**/v1/app/orders/${order.id}/charges**`, (route: Route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ success: false, error: { code: 'ORDER_NOT_PAYABLE', message: 'Order not payable' } }) })
+      : route.continue(),
+  )
+  await openOrder(page, 'admin', order.id)
+  await panel(page).getByTestId('charge-new').click()
+  const sheet = dialog(page, 'Mandar cobrança')
+  await sheet.getByLabel('CPF ou CNPJ do cliente').fill('529.982.247-25')
+  await sheet.getByTestId('charge-create').click()
+  await expect(page.locator('.toast')).toContainText('Orçamento e OS cancelada não podem ser cobrados.')
+  await expect(sheet).toBeVisible()
+})

@@ -3,7 +3,7 @@
 // (status and one phrase), the next step in blue, then what is done, money,
 // photos, comments and details. Each row opens its own editor; there is no
 // "Editar" mode. Money, status and items go through the API (writes.ts).
-import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { MoreHorizontal, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -12,8 +12,8 @@ import type { ComboboxGroup, ComboboxItem } from '@/components/Combobox.vue'
 import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
-import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
-import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { canRegisterItem, loadCatalog, loadCustomers, registerItem, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
 import {
   accessOf,
@@ -45,6 +45,8 @@ import {
 import * as writes from '@/lib/orders/writes'
 import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
+import { useRouter } from 'vue-router'
+import { canOpen } from '@/router'
 import { featureOn } from '@/lib/company-features'
 import { segmentFieldService } from '@/lib/segments'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -71,6 +73,7 @@ import PaymentHistory from './receive/PaymentHistory.vue'
 import { dropUpload, paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
 import { receivesMoney, type Payment } from '@/lib/receive/model'
 // Opened on demand: the order shows without them.
+const ReceiptsDialog = defineAsyncComponent(() => import('./receive/ReceiptsDialog.vue'))
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
 const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
 // Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
@@ -85,6 +88,7 @@ const props = defineProps<{ orderId: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const ctx = listContext()
+const router = useRouter()
 const state = shallowRef<DetailState>({ kind: 'loading' })
 const busy = ref(false)
 const now = ref(new Date())
@@ -161,6 +165,8 @@ const chargesOn = ref(false)
 const nfseOn = ref(false)
 const issuing = ref(false)
 const pdfOpen = ref(false)
+/** The receipt over several orders that a payment belongs to (pay.order.open-receipt-group). */
+const receiptOpen = ref<string | null>(null)
 /** settings/payments still being read: whether there can be a link is not known yet. */
 const chargesPending = ref(false)
 onMounted(() => {
@@ -482,11 +488,17 @@ async function applyCustomer(customer: Customer, dropDevices: boolean) {
   const summary = { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email, taxId: customer.taxId }
   const fields: Record<string, unknown> = { customer: Object.fromEntries(Object.entries(summary).filter(([, v]) => v !== undefined && v !== null && v !== '')) }
   // The customer's address comes when the order has no place yet (order.customer.address-from-customer).
-  if (!o.address && customer.address) fields.address = customer.address
+  // With its coordinates, as the app's OrderStore.setCustomer; never over a place already there.
+  if (!o.address && customer.address) Object.assign(fields, { address: customer.address, latitude: customer.latitude ?? null, longitude: customer.longitude ?? null })
   if (dropDevices) Object.assign(fields, { device: null, devices: [], deviceIds: [] })
   await run(() => writes.updateOrderFields(o.id, fields), t('web.saved'))
 }
 
+/** Responsável with the name, or the e-mail when the member has no name (order.details.section). */
+const assigneeName = computed(() => {
+  const who = order.value?.assignedTo as { name?: string; email?: string } | null | undefined
+  return who?.name || who?.email || ''
+})
 // Absent on the company: the segment's default, as the app (auth.gate.feature-defaults).
 const fieldService = computed(() => featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService()))
 
@@ -555,6 +567,7 @@ async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') 
     if (kind === 'addItem' && !mostUsed.value.length) void mostUsedKeys().then((keys) => (mostUsed.value = keys), () => {})
     if (kind === 'customer' && !customers.value.length) customers.value = await loadCustomers()
     if ((kind === 'device' || kind === 'customer') && !devices.value.length) devices.value = await loadDevices()
+    if (kind === 'device' && order.value?.customer?.id) ownDevices.value = await devicesOfCustomer(order.value.customer.id, ctx.showsMoney)
     if (kind === 'customer') void recentCustomers().then((list) => (recents.value = list), () => {})
     if (kind === 'assignee' && !team.value.length) team.value = await loadTeam()
   } catch (error) {
@@ -589,12 +602,30 @@ const itemGroups = (query: string): ComboboxGroup[] => {
       })),
     },
     // Outside the catalog, named by what was typed (POST /items without catalogId, #516).
-    { items: writes.API_516 && query.trim() ? [{ id: FREE_ITEM, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
+    {
+      items: [
+        ...(writes.API_516 && query.trim() ? [{ id: FREE_ITEM, label: t('web.newOrder.useFree', { name: query.trim() }) }] : []),
+        // order.item-search.create: into the catalog and onto the order.
+        ...(query.trim() && canRegisterItem(catalog.value, query) ? [{ id: REGISTER_ITEM, label: t('web.newOrder.registerItem', { name: query.trim() }) }] : []),
+      ],
+    },
   ]
 }
 const FREE_ITEM = '__free'
+const REGISTER_ITEM = '__register'
+async function registerAndAdd(name: string) {
+  dialog.value = null
+  try {
+    const created = await registerItem(name)
+    catalog.value = [...catalog.value, created]
+    await addCatalogItem(created)
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  }
+}
 const pickItem = (picked: ComboboxItem, query = '') => {
   if (picked.id === FREE_ITEM && query.trim()) return void addFreeItem(query.trim())
+  if (picked.id === REGISTER_ITEM && query.trim()) return void registerAndAdd(query.trim())
   const item = catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (item) void addCatalogItem(item)
 }
@@ -610,13 +641,43 @@ const customerGroups = (query: string): ComboboxGroup[] => [
     items: search(query.trim() ? customers.value : customers.value.filter((c) => !recents.value.some((r) => r.id === c.id)), query, (c) => c.phone ?? '').map(customerRow),
   },
 ]
+/** Devices the order's customer brought before: the section "do cliente" (device.list.pick). */
+const ownDevices = shallowRef<Device[]>([])
 const deviceGroups = (query: string): ComboboxGroup[] => {
   const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
+  const row = (d: Device) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })
+  if (current) {
+    // Changing one device: the whole list, the current one always there with its ✓ (order.device.change).
+    const list = search(devices.value, query, (d) => d.serial ?? '')
+    const mine = devices.value.find((d) => d.id === current.id)
+    const shown = mine && !query.trim() && !list.some((d) => d.id === mine.id) ? [mine, ...list] : list
+    return [{ items: !query.trim() ? [{ id: NONE, label: t('pickerNoDevice', { device: deviceLabel().toLocaleLowerCase() }) }] : [] }, { items: shown.map(row) }]
+  }
+  const own = search(ownDevices.value, query, (d) => d.serial ?? '', 6)
+  // Another customer's device never shows under this customer's name: it goes to "Outros".
+  const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '')
   return [
     // "Nenhum …" only when changing a device and nothing is typed (device.list.pick-none).
     { items: current && !query.trim() ? [{ id: NONE, label: t('pickerNoDevice', { device: deviceLabel().toLocaleLowerCase() }) }] : [] },
-    { items: search(devices.value, query, (d) => d.serial ?? '').map((d) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })) },
+    { title: own.length && order.value?.customer?.name ? t('web.order.devicesOf', { name: order.value.customer.name }) : undefined, items: own.map(row) },
+    { title: own.length && others.length ? t('web.newOrder.otherDevices', { device: deviceLabel().toLocaleLowerCase() }) : undefined, items: others.map(row) },
+    // device.list.pick-create: a plate becomes the serial, anything else the model; it comes back chosen.
+    { items: query.trim() && can('manageDevices') && !current ? [{ id: NEW_DEVICE, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
   ]
+}
+const NEW_DEVICE = '__newDevice'
+async function pickDeviceItem(item: ComboboxItem, query: string) {
+  const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
+  if (current) return changeDevice(current, item)
+  if (item.id !== NEW_DEVICE) return addDevice(devices.value.find((d) => d.id === item.id) ?? (ownDevices.value.find((d) => d.id === item.id) as Device))
+  dialog.value = null
+  try {
+    const created = await createDeviceFrom(query)
+    devices.value = [...devices.value, created]
+    await addDevice(created)
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  }
 }
 
 const statusChoices = computed<Choice[]>(() => {
@@ -645,6 +706,9 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
   list.push({ id: 'share', label: t('shareTitle') })
+  // order.customer.open / order.device.open: the record's own screen, for who opens it.
+  if (o.customer?.id && canOpen('/customers')) list.push({ id: 'openCustomer', label: t('web.order.openCustomer') })
+  if (canOpen('/devices')) for (const device of o.devices) if (device.id) list.push({ id: `openDevice:${device.id}`, label: t('web.order.openDevice', { name: device.name ?? deviceLabel() }) })
   // order.pdf.view: the same rule as the app (canShareOrderPdf), values only for who sees them.
   if (canPrint.value) list.push({ id: 'pdf', label: t('web.order.pdf') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
@@ -669,8 +733,16 @@ function onMenu(id: string) {
   else if (id === 'pdf') pdfOpen.value = true
   else if (id === 'invoice') issuing.value = true
   else if (id === 'share') dialog.value = { kind: 'share' }
+  else if (id === 'openCustomer' && order.value?.customer?.id) void goTo('/customers', { customer: order.value.customer.id })
+  else if (id.startsWith('openDevice:')) void goTo('/devices', { device: id.slice('openDevice:'.length) })
   else if (id === 'cancel') dialog.value = { kind: 'cancel' }
   else if (id === 'delete') dialog.value = { kind: 'delete' }
+}
+
+/** After the menu left the page (its history entry is taken out on unmount), then another screen. */
+async function goTo(path: string, query: Record<string, string>) {
+  await nextTick()
+  await router.push({ path, query })
 }
 
 function openPendingForm(id: string) {
@@ -848,12 +920,21 @@ watch(
             @undo-all="undoAllPayments"
             @attach="attachProof"
             @detach="detachProof"
+            @open-receipt="(id: string) => (receiptOpen = id)"
           />
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
         <OrderPhotos :order="order" />
         <OrderComments :order-id="order.id" />
+        <section v-if="order.rating" class="od-sec" aria-labelledby="od-rating-title" data-testid="order-rating">
+          <h3 id="od-rating-title">{{ t('rating') }}</h3>
+          <p class="od-rating">
+            <span class="od-stars" aria-hidden="true"><span v-for="i in 5" :key="i" :class="{ on: i <= order.rating.score }">★</span></span>
+            <span class="sub num">{{ t('ratingScoreOf', { score: String(order.rating.score) }) }}</span>
+          </p>
+          <p v-if="order.rating.comment">{{ order.rating.comment }}</p>
+        </section>
         <OrderForms ref="formsRef" :order="order" @forms="(list: { id: string; status: string }[]) => (orderForms = list)" />
         <OrderContract :key="order.id" :order="order" :can-edit="!!access?.canEditMainFields" />
 
@@ -879,8 +960,8 @@ watch(
             <template v-if="order.assignedTo || access.canAssign">
               <dt>{{ t('orderAddResponsible') }}</dt>
               <dd>
-                <button v-if="access.canAssign" type="button" class="link" @click="openPicker('assignee')">{{ order.assignedTo?.name || t('web.order.nobody') }}</button>
-                <span v-else>{{ order.assignedTo?.name }}</span>
+                <button v-if="access.canAssign" type="button" class="link" @click="openPicker('assignee')">{{ assigneeName || t('web.order.nobody') }}</button>
+                <span v-else>{{ assigneeName }}</span>
               </dd>
             </template>
             <template v-if="order.address || (access.canEditMainFields && fieldService)">
@@ -967,11 +1048,13 @@ watch(
       :label="deviceLabel()"
       :groups="deviceGroups"
       :selected-id="dialog.current?.id"
-      @pick="(item) => (dialog?.kind === 'device' && dialog.current ? changeDevice(dialog.current, item) : addDevice(devices.find((d) => d.id === item.id) as Device))"
+      :selected-ids="dialog.current ? undefined : order.devices.map((d) => d.id).filter((id): id is string => !!id)"
+      @pick="pickDeviceItem"
       @close="dialog = null"
     />
   </template>
   <PdfDialog v-if="pdfOpen && order" :ids="[order.id]" :numbers="[order.number]" @close="pdfOpen = false" />
   <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
   <OrderPrint v-if="printing && order" :order="order" />
+  <ReceiptsDialog v-if="receiptOpen && order?.customer?.id" :customer-id="order.customer.id" :customer-name="order.customer.name ?? ''" :focus-id="receiptOpen" @changed="watcher?.refresh()" @close="receiptOpen = null" />
 </template>

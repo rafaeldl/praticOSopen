@@ -12,10 +12,9 @@ import RepeatFields, { type RepeatForm } from '@/components/contracts/RepeatFiel
 import MoneyInput from '@/components/MoneyInput.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { firestoreLite } from '@/lib/firebase'
 import { orderCreated } from '@/lib/orders/bus'
 import { markOffer } from '@/lib/forms/offer'
-import { forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { canRegisterItem, sameName, forgetLists, loadCatalog, registerItem, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
 import { startContract } from '@/lib/contracts/data'
 import { newContract } from '@/lib/contracts/model'
@@ -23,10 +22,12 @@ import { toIsoDay } from '@/lib/format'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { askWhenOpened } from '@/lib/orders/maintenance-offer'
-import { mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
+import { featureOn } from '@/lib/company-features'
+import { segmentFieldService } from '@/lib/segments'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 
@@ -59,6 +60,10 @@ const request = ref('')
 const status = ref<OrderStatus>('quote')
 const visit = ref('')
 const assignee = ref('')
+/** The place of the order (order.new.more-options): only for companies that go to the customer, like the order's own Local. */
+const address = ref('')
+// Absent on the company: the segment's default, like the order's own Local (auth.gate.feature-defaults).
+const fieldService = featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService())
 const more = ref(false)
 const saving = ref(false)
 const failed = ref('')
@@ -75,7 +80,7 @@ const repeat = !!ui.newOrderSeed?.repeat
 const today = toIsoDay(new Date())
 const repeatForm = ref<RepeatForm>({ repeat: { frequency: 'monthly', interval: 1 }, startDay: today, endDay: null, autoGenerate: true })
 const title = computed(() => (repeat ? t('contractNew') : t('orderNewTitle', { order: orderShort() })))
-const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value))
+const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value || address.value.trim()))
 const total = computed(() => lines.value.reduce((sum, line) => sum + (line.value ?? 0) * line.quantity, 0))
 const unpriced = computed(() => lines.value.filter((line) => line.value === null).length)
 const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
@@ -85,6 +90,8 @@ const moreSummary = computed(() => {
   if (visit.value) parts.push(t('orderScheduleLabel'))
   const person = team.value.find((member) => member.id === assignee.value)
   if (person) parts.push(person.name)
+  if (address.value.trim()) parts.push(address.value.trim())
+  if (repeat) parts.push(t('orderRepeatRow'))
   return parts.length ? parts.join(' · ') : t('orderMoreOptionsHint')
 })
 
@@ -120,26 +127,7 @@ onMounted(async () => {
 })
 
 /** Devices this customer brought before: suggested first, the only one is picked. */
-async function devicesOf(customerId: string): Promise<Device[]> {
-  try {
-    let rows: { devices?: Device[]; device?: Device }[] = []
-    if (showsMoney) {
-      const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-      const filters = [where('customer.id', '==', customerId), ...(can('viewAllOrders') ? [] : [where('createdBy.id', '==', session.uid)])]
-      rows = (await getDocs(query(collection(db, 'companies', session.companyId as string, 'orders'), ...filters, limit(10)))).docs.map((doc) => doc.data())
-    } else {
-      const body = await api<{ data?: typeof rows }>(`/v1/app/orders?limit=10&customerId=${encodeURIComponent(customerId)}`, { raw: true })
-      rows = body.data ?? []
-    }
-    const found = new Map<string, Device>()
-    for (const row of rows) for (const item of row.devices?.length ? row.devices : row.device ? [row.device] : []) if (item?.id) found.set(item.id, item)
-    return [...found.values()]
-  } catch (error) {
-    // Only the suggestion is lost: the device can still be searched.
-    console.warn('new order: devices of the customer not read', error)
-    return []
-  }
-}
+const devicesOf = (customerId: string) => devicesOfCustomer(customerId, showsMoney)
 
 const NEW = '__new'
 /** Item outside the catalog: the API accepts a line without catalogId with #516 (writes.API_516). */
@@ -163,7 +151,8 @@ const customerGroups = (query: string): ComboboxGroup[] => [
   },
   // A new customer right here (POST /v1/app/customers): the name, or the phone when only digits were typed.
   // Only once the list is in: an Enter typed before it loads must find the existing customer, never create a copy.
-  { items: query.trim() && !loading.value && can('manageCustomers') ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
+  // Hidden when a customer already has that name (accents and case ignored): pick that one (customer.picker.create).
+  { items: query.trim() && !loading.value && can('manageCustomers') && !sameName(customers.value, query) ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
 ]
 
 async function createCustomer(text: string): Promise<Customer | null> {
@@ -235,10 +224,9 @@ const deviceGroups = (query: string): ComboboxGroup[] => {
 async function pickDevice(item: ComboboxItem, query = '') {
   if (item.id === NEW) {
     try {
-      const created = await api<{ id: string; name: string }>('/v1/app/devices', { method: 'POST', body: { name: query.trim() } })
-      const fresh: Device = { id: created.id, name: created.name ?? query.trim() }
+      // A Brazilian plate becomes the serial in capitals; anything else the model (device.list.pick-create).
+      const fresh = await createDeviceFrom(query)
       devices.value = [...devices.value, fresh]
-      forgetLists()
       device.value = fresh
     } catch (error) {
       failed.value = t(errorMessageKey(error))
@@ -270,9 +258,26 @@ const itemGroups = (query: string): ComboboxGroup[] => [
       right: showsMoney ? (item.value === null ? t('catalogNoPrice') : money(item.value)) : undefined,
     })),
   },
-  { items: FREE_ITEMS && query.trim() && !loading.value ? [{ id: NEW, label: t('web.newOrder.useFree', { name: query.trim() }) }] : [] },
+  {
+    items: [
+      ...(FREE_ITEMS && query.trim() && !loading.value ? [{ id: NEW, label: t('web.newOrder.useFree', { name: query.trim() }) }] : []),
+      ...(query.trim() && !loading.value && canRegisterItem(catalog.value, query) ? [{ id: REGISTER_ITEM, label: t('web.newOrder.registerItem', { name: query.trim() }) }] : []),
+    ],
+  },
 ]
-function pickItem(picked: ComboboxItem, query = '') {
+const REGISTER_ITEM = '__register'
+async function pickItem(picked: ComboboxItem, query = '') {
+  if (picked.id === REGISTER_ITEM && query.trim()) {
+    try {
+      const created = await registerItem(query)
+      catalog.value = [...catalog.value, created]
+      lines.value = [...lines.value, { key: crypto.randomUUID(), item: created, value: created.value, quantity: 1 }]
+      announce(t('web.newOrder.itemRegistered', { name: created.name }))
+    } catch (error) {
+      failed.value = t(errorMessageKey(error))
+    }
+    return
+  }
   const free = picked.id === NEW && query.trim() ? { id: '', kind: 'service' as const, name: query.trim(), value: null } : null
   const item = free ?? catalog.value.find((entry) => `${entry.kind}:${entry.id}` === picked.id)
   if (!item) return
@@ -325,6 +330,10 @@ async function save() {
       after.push(free.reduce<Promise<unknown>>((chain, line) => chain.then(() => writes.addItem(created.id, { kind: 'service', description: line.item.name, ...own(line) })), Promise.resolve()))
     }
     if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
+    // The place: typed in "Mais opções", else the customer's address with its coordinates (order.customer.address-from-customer).
+    const place = address.value.trim()
+    if (place) after.push(writes.updateOrderFields(created.id, { address: place }))
+    else if (customer.value.address) after.push(writes.updateOrderFields(created.id, { address: customer.value.address, latitude: customer.value.latitude ?? null, longitude: customer.value.longitude ?? null }))
     if (request.value.trim()) after.push(writes.addComment(created.id, request.value.trim(), true))
     if (repeat) after.push(startContract(created.id, newContract(repeatForm.value, today)))
     const results = await Promise.allSettled(after)
@@ -436,6 +445,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
             <div v-if="useScheduling">
               <label class="field-label" for="no-visit">{{ t('orderScheduleLabel') }}</label>
               <input id="no-visit" v-model="visit" class="field" type="datetime-local" />
+            </div>
+            <div v-if="fieldService">
+              <label class="field-label" for="no-address">{{ t('orderAddressLabel') }}</label>
+              <input id="no-address" v-model="address" class="field" type="text" maxlength="500" :placeholder="customer?.address ?? ''" />
             </div>
             <div v-if="team.length">
               <label class="field-label" for="no-assignee">{{ t('orderAddResponsible') }}</label>

@@ -83,6 +83,8 @@ export interface Order {
   documents?: unknown[]
   address?: string | null
   customData?: Record<string, unknown>
+  /** What the customer rated on the share link (1 to 5), when there is a valid score. */
+  rating?: { score: number; comment?: string } | null
 }
 
 type Raw = Record<string, unknown>
@@ -200,7 +202,17 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     documents: showsMoney && Array.isArray(raw.documents) ? (raw.documents as unknown[]) : undefined,
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
+    rating: ratingOf(raw.rating),
   }
+}
+
+/** The app's OrderRating.hasRating: a whole score from 1 to 5, else nothing. */
+export function ratingOf(value: unknown): Order['rating'] {
+  const raw = (value ?? null) as { score?: unknown; comment?: unknown } | null
+  const score = raw?.score
+  if (typeof score !== 'number' || !Number.isInteger(score) || score < 1 || score > 5) return null
+  const comment = typeof raw?.comment === 'string' ? raw.comment.trim() : ''
+  return comment ? { score, comment } : { score }
 }
 
 // ---------------------------------------------------------------------------

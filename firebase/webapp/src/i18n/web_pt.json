@@ -781,6 +781,17 @@
   "web.when.quickLabel": "Digite o dia e a hora",
   "web.when.quickHint": "Ex.: amanhã 14h, +3, seg 8:30, 9/5 14h. ↑ ↓ muda o dia; Shift ↑ ↓, meia hora.",
   "web.when.quickError": "Não entendi. Tente: amanhã 14h, +3, seg 8:30 ou 9/5 14h.",
+  "web.order.previousPhoto": "Foto anterior",
+  "web.order.nextPhoto": "Próxima foto",
+  "web.order.photoOf": "{number} de {count}",
+  "web.order.photoCoverFailed": "Não deu para trocar a capa. Confira a internet e tente de novo.",
+  "web.order.openCustomer": "Abrir cliente",
+  "web.order.openDevice": "Abrir {name}",
+  "web.receive.printReceiptOf": "Imprimir recibo de {amount}",
+  "web.receive.byAsaas": "Registrado automaticamente no Asaas",
+  "web.newOrder.registerItem": "+ Cadastrar “{name}” no catálogo",
+  "web.newOrder.itemRegistered": "{name} cadastrado no catálogo e posto na OS",
+  "web.order.devicesOf": "De {name}",
   "web.login.signupBlocked": "O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.",
   "web.invites.joining": "Entrando…"
 }

@@ -2,12 +2,14 @@
 // Photos: see them (viewPhotos), add by choosing, dragging or pasting
 // (attachPhotos). "Enviando…" while they go up; a failure says so (the app
 // swallows it: defect 18). Photos saved elsewhere arrive through the listener.
+// The viewer passes between photos (buttons and ← →) and makes one the cover
+// (the first photo, as the app's coverPhotoUrl: order.photo.viewer, order.photo.cover).
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { ImagePlus } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
 import type { Order, OrderPhoto } from '@/lib/orders/model'
-import { deletePhoto, uploadPhoto } from '@/lib/orders/writes'
+import { deletePhoto, setCoverPhoto, uploadPhoto } from '@/lib/orders/writes'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { can } from '@/lib/session'
 import { showToast } from '@/lib/toast'
@@ -16,7 +18,41 @@ import { ui } from '@/lib/ui'
 const props = defineProps<{ order: Order }>()
 const uploading = ref(0)
 const over = ref(false)
-const viewing = ref<OrderPhoto | null>(null)
+/** Index of the photo open in the viewer. */
+const viewingIndex = ref<number | null>(null)
+const viewing = computed<OrderPhoto | null>(() => (viewingIndex.value === null ? null : (props.order.photos[viewingIndex.value] ?? null)))
+const covering = ref(false)
+
+function step(by: number) {
+  const count = props.order.photos.length
+  if (viewingIndex.value === null || count < 2) return
+  viewingIndex.value = (viewingIndex.value + by + count) % count
+}
+
+function onViewerKey(event: KeyboardEvent) {
+  if (viewingIndex.value === null || asking.value || event.defaultPrevented) return
+  if (event.key === 'ArrowRight') step(1)
+  else if (event.key === 'ArrowLeft') step(-1)
+  else return
+  event.preventDefault()
+}
+
+/** order.photo.cover: the photo goes first (the cover of the order, its PDF and the list). */
+async function makeCover() {
+  const photo = viewing.value
+  if (!photo || covering.value) return
+  covering.value = true
+  try {
+    await setCoverPhoto(props.order.id, photo)
+    viewingIndex.value = 0
+    showToast(t('orderPhotoCoverSet'))
+  } catch (error) {
+    console.warn('photos: cover failed', error)
+    showToast(t('web.order.photoCoverFailed'))
+  } finally {
+    covering.value = false
+  }
+}
 const asking = ref(false)
 const deleting = ref(false)
 
@@ -28,7 +64,7 @@ async function remove() {
   deleting.value = true
   try {
     await deletePhoto(props.order.id, photo)
-    viewing.value = null
+    viewingIndex.value = null
     showToast(t('web.order.photoDeleted'))
   } catch (error) {
     console.warn('photos: delete failed', error)
@@ -63,8 +99,14 @@ function onPaste(event: ClipboardEvent) {
   if (ui.layers > 0) return
   if (event.clipboardData?.files?.length && !(event.target as HTMLElement)?.matches?.('input, textarea')) void add(event.clipboardData.files)
 }
-onMounted(() => window.addEventListener('paste', onPaste))
-onBeforeUnmount(() => window.removeEventListener('paste', onPaste))
+onMounted(() => {
+  window.addEventListener('paste', onPaste)
+  window.addEventListener('keydown', onViewerKey)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('paste', onPaste)
+  window.removeEventListener('keydown', onViewerKey)
+})
 </script>
 
 <template>
@@ -78,7 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('paste', onPaste))
   >
     <h3 id="od-photos-title">{{ t('orderPhotosSection') }}</h3>
     <div class="photos" data-testid="photos">
-      <button v-for="(photo, index) in order.photos" :key="photo.id ?? photo.url" type="button" class="photo" :aria-label="t('web.order.viewPhoto', { number: index + 1 })" @click="viewing = photo">
+      <button v-for="(photo, index) in order.photos" :key="photo.id ?? photo.url" type="button" class="photo" :aria-label="t('web.order.viewPhoto', { number: index + 1 })" @click="viewingIndex = index">
         <img :src="photo.url" alt="" loading="lazy" />
       </button>
       <label v-if="canAttach" class="photo photo-add" :class="{ 'is-over': over }">
@@ -89,11 +131,19 @@ onBeforeUnmount(() => window.removeEventListener('paste', onPaste))
     </div>
     <p v-if="uploading" class="sub" role="status">{{ t('orderUploading') }}</p>
   </section>
-  <Layer v-if="viewing" kind="dialog" :label="t('orderPhotosSection')" @close="viewing = null">
+  <Layer v-if="viewing" kind="dialog" :label="t('orderPhotosSection')" @close="viewingIndex = null">
     <template #default="{ close }">
-      <div class="layer-body"><img class="photo-full" :src="viewing.url" :alt="viewing.description || t('orderPhotosSection')" /></div>
+      <div class="layer-body photo-viewer" data-testid="photo-viewer">
+        <img class="photo-full" :src="viewing.url" :alt="viewing.description || t('orderPhotosSection')" />
+        <div v-if="order.photos.length > 1" class="photo-nav">
+          <button type="button" class="icon-btn" :aria-label="t('web.order.previousPhoto')" @click="step(-1)"><ChevronLeft :size="18" aria-hidden="true" /></button>
+          <span class="sub num" aria-live="polite">{{ t('web.order.photoOf', { number: (viewingIndex ?? 0) + 1, count: order.photos.length }) }}</span>
+          <button type="button" class="icon-btn" :aria-label="t('web.order.nextPhoto')" @click="step(1)"><ChevronRight :size="18" aria-hidden="true" /></button>
+        </div>
+      </div>
       <div class="layer-foot">
         <button v-if="canAttach" type="button" class="btn btn--ghost btn--danger" :disabled="deleting" @click="asking = true">{{ t('web.order.deletePhoto') }}</button>
+        <button v-if="canAttach && viewingIndex" type="button" class="btn btn--ghost" :disabled="covering" @click="makeCover">{{ t('setAsCover') }}</button>
         <span class="spacer"></span>
         <button type="button" class="btn" @click="close()">{{ t('close') }}</button>
       </div>

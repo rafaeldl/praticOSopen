@@ -23,6 +23,8 @@ const props = defineProps<{
   groups: (query: string) => ComboboxGroup[]
   /** Current choice, marked with ✓. */
   selectedId?: string | null
+  /** Every item already chosen (✓), e.g. the devices already on the order. */
+  selectedIds?: string[]
   autofocus?: boolean
   /** The first suggestion is ready for Enter even before typing (the device of the customer). */
   preselect?: boolean
@@ -186,7 +188,7 @@ defineExpose({ focus: () => input.value?.focus(), pending: () => query.value.tri
           class="combo-opt"
           :class="{ 'is-active': flat.indexOf(item) === active }"
           role="option"
-          :aria-selected="item.id === selectedId"
+          :aria-selected="item.id === selectedId || !!selectedIds?.includes(item.id)"
           @mousedown.prevent="pick(item)"
           @mousemove="active = flat.indexOf(item)"
         >
@@ -194,7 +196,7 @@ defineExpose({ focus: () => input.value?.focus(), pending: () => query.value.tri
             <strong>{{ item.label }}</strong>
             <small v-if="item.sub">{{ item.sub }}</small>
           </span>
-          <span v-if="item.id === selectedId" aria-hidden="true">✓</span>
+          <span v-if="item.id === selectedId || selectedIds?.includes(item.id)" aria-hidden="true">✓</span>
           <span v-else-if="item.right" class="num">{{ item.right }}</span>
         </div>
       </div>

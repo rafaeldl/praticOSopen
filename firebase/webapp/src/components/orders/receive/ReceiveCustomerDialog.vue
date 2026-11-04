@@ -4,7 +4,7 @@
 // the split and the total are on screen before anything is saved; then a
 // confirmation repeats them. Before saving, the balances are read again: if one
 // changed (a link was paid, someone received), nothing is saved and the screen says so.
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Layer from '@/components/Layer.vue'
 import MoneyInput from '@/components/MoneyInput.vue'
@@ -213,9 +213,11 @@ async function copyCharge() {
   }
 }
 
-function openOrder(id: string) {
+/** Closed first: the drawer takes its history entry out on unmount, and only then the order opens (or that would undo it). */
+async function openOrder(id: string) {
   emit('close')
-  void router.push({ path: '/', query: { order: id } })
+  await nextTick()
+  await router.push({ path: '/', query: { order: id } })
 }
 
 const METHODS = [
