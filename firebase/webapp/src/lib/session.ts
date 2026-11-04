@@ -10,7 +10,7 @@ import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
 import { isSignupBlocked } from './auth-errors'
 import { readStorage, writeStorage } from './storage'
-import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, type WebAccess } from './web-access'
+import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, warmUpApi, type WebAccess } from './web-access'
 
 export interface CompanyEntry {
   id: string
@@ -192,8 +192,19 @@ function clear(): void {
  * A remembered "yes" lets the start go on and is confirmed in the background;
  * otherwise the start waits for the answer.
  */
+const accessAsks = new Map<string, Promise<void>>()
+
 async function checkWebAccess(uid: string): Promise<void> {
-  const ask = async () => {
+  // The login screen and onAuthStateChanged both hydrate the same sign-in: one question for both.
+  const ask = () => {
+    let asking = accessAsks.get(uid)
+    if (!asking) {
+      asking = askAccess().finally(() => accessAsks.delete(uid))
+      accessAsks.set(uid, asking)
+    }
+    return asking
+  }
+  const askAccess = async () => {
     try {
       const allowed = await fetchWebAccess((path) => api(path, { noCompany: true }))
       rememberAccess(uid, allowed)
@@ -220,7 +231,20 @@ function loggedIn(user: User): void {
   if (session.uid === user.uid) logLogin(methodOf(user), session.companies.length > 0)
 }
 
-async function hydrate(user: User, forceRefresh = false): Promise<void> {
+const hydrating = new Map<string, Promise<void>>()
+
+/** The login screen and onAuthStateChanged load the same sign-in at once: one load for both. */
+function hydrate(user: User, forceRefresh = false): Promise<void> {
+  if (forceRefresh) return load(user, true)
+  let loading = hydrating.get(user.uid)
+  if (!loading) {
+    loading = load(user).finally(() => hydrating.delete(user.uid))
+    hydrating.set(user.uid, loading)
+  }
+  return loading
+}
+
+async function load(user: User, forceRefresh = false): Promise<void> {
   session.failed = false
   // Another account: nothing of the previous one (access answer, cached data) carries over.
   if (session.uid !== user.uid) {
@@ -406,6 +430,7 @@ let redirectedIn = false
 async function finishRedirect(): Promise<void> {
   const kind = readStorage(REDIRECT_FLAG)
   if (!kind) return
+  mark('login:back')
   writeStorage(REDIRECT_FLAG, '')
   try {
     const [auth, { getRedirectResult, browserPopupRedirectResolver }] = await Promise.all([
@@ -413,6 +438,7 @@ async function finishRedirect(): Promise<void> {
       import('firebase/auth'),
     ])
     redirectedIn = !!(await getRedirectResult(auth, browserPopupRedirectResolver))
+    mark('login:auth')
   } catch (error) {
     console.warn('session: redirect sign-in failed', error)
     session.signInError = redirectErrorOf(kind, error)
@@ -429,11 +455,18 @@ export async function sendPasswordReset(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email)
 }
 
+/** Wakes the API before the sign-in needs it (lib/web-access.ts). */
+export function warmUpSignIn(): void {
+  warmUpApi(import.meta.env.VITE_API_BASE_URL ?? '')
+}
+
 export async function signInWithEmail(email: string, password: string): Promise<void> {
   const [auth, { signInWithEmailAndPassword }] = await Promise.all([authClient(), import('firebase/auth')])
   const { user } = await signInWithEmailAndPassword(auth, email, password)
+  mark('login:auth')
   // onAuthStateChanged also fires; awaiting here lets the login screen navigate on loaded data.
   await hydrate(user)
+  mark('login:hydrated')
   loggedIn(user)
 }
 

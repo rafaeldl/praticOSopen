@@ -232,3 +232,18 @@ describe('closing the panel', () => {
     expect(closeGoesBack(null, '/orders')).toBe(false)
   })
 })
+
+describe('warm-up of the API on the login screen', () => {
+  test('one plain GET without credentials, once per page, errors ignored', async () => {
+    const { warmUpApi } = await import('../src/lib/web-access')
+    const calls: [string, RequestInit | undefined][] = []
+    const request = (async (url: string, init?: RequestInit) => {
+      calls.push([url, init])
+      throw new Error('offline')
+    }) as unknown as typeof fetch
+    warmUpApi('https://api.test', request)
+    warmUpApi('https://api.test', request)
+    await Promise.resolve()
+    expect(calls).toEqual([['https://api.test/v1/app/web-access', { credentials: 'omit' }]])
+  })
+})

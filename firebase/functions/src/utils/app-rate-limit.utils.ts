@@ -62,6 +62,10 @@ export const API_CORS_OPTIONS: CorsOptions = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-API-Secret', 'X-WhatsApp-Number', 'X-Company-Id'],
   credentials: true,
+  // The browser keeps the preflight answer (Chrome caps it at 2 h): each call
+  // of the web app no longer pays one more round trip, which on a cold start
+  // took 3 s by itself (Cloud Run logs, 2026-11-04).
+  maxAge: 7200,
 };
 
 /**

@@ -9,7 +9,8 @@ import Layer from '@/components/Layer.vue'
 import { t, type MessageKey } from '@/i18n'
 import { logEmailLoginOpened } from '@/lib/analytics'
 import { emailErrorKey, isSignupBlocked, resetEmailErrorKey } from '@/lib/auth-errors'
-import { SIGNUP_BLOCKED, sendPasswordReset, session, signInWithEmail, signInWithProvider, type ProviderKind } from '@/lib/session'
+import { SIGNUP_BLOCKED, sendPasswordReset, session, signInWithEmail, signInWithProvider, warmUpSignIn, type ProviderKind } from '@/lib/session'
+import { mark } from '@/lib/marks'
 import { showToast } from '@/lib/toast'
 
 const route = useRoute()
@@ -41,6 +42,7 @@ function nextPath(): string {
 }
 
 async function enter() {
+  mark('login:enter')
   await router.replace(nextPath())
 }
 
@@ -69,6 +71,7 @@ async function submitEmail() {
   }
   busy.value = true
   error.value = null
+  mark('login:start')
   try {
     await signInWithEmail(email.value.trim(), password.value)
     await enter()
@@ -103,6 +106,7 @@ function onPageShow(event: PageTransitionEvent) {
 }
 
 onMounted(() => {
+  warmUpSignIn()
   const failed = session.signInError
   if (failed === SIGNUP_BLOCKED) error.value = 'web.login.signupBlocked'
   else if (failed && PROVIDER_ERRORS[failed as ProviderKind]) error.value = PROVIDER_ERRORS[failed as ProviderKind]

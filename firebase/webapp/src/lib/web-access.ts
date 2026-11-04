@@ -38,3 +38,18 @@ export async function fetchWebAccess(request: (path: string) => Promise<{ allowe
   const data = await request('/v1/app/web-access')
   return data?.allowed === true
 }
+
+let warmed = false
+
+/**
+ * The API runs with no instance kept on: the first call after a quiet while
+ * waited 4 to 8 s for it to start (Cloud Run logs, 2026-11-04). The login
+ * screen wakes it with a plain GET (no token, no CORS preflight; the answer is
+ * a 401 nobody reads) while the person is still on Google, Apple or typing the
+ * password, so the access check after sign-in finds it running.
+ */
+export function warmUpApi(baseUrl: string, request: typeof fetch = fetch): void {
+  if (warmed || !baseUrl) return
+  warmed = true
+  void request(`${baseUrl}/v1/app/web-access`, { credentials: 'omit' }).catch(() => {})
+}
