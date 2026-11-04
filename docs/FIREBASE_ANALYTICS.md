@@ -122,6 +122,10 @@ much was used; these events say whether it worked.
 
 Adoption per company = `ai_order_saved` over `ai_assist_requested`, by `company_id`.
 
+## Web app
+
+The web app (`firebase/webapp`, `docs/WEB_APP.md` "Estatísticas de uso") sends the same events with the same parameters through `src/lib/analytics.ts`, to the GA4 stream of the Firebase web app of the `praticos` project. Only after the person accepts the usage-statistics notice; the client downloads after the first screen. Screen views use `firebase_screen` with the app's names (`/home`, `/agenda`, `/financial`, `/customer_list`...).
+
 ## Files Modified
 
 - **NEW**: `lib/services/analytics_service.dart`

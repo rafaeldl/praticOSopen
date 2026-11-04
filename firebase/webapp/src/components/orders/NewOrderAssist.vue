@@ -10,6 +10,7 @@
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import { t } from '@/i18n'
+import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import type { DraftActions, NfseMoment } from '@/lib/orders/ai-actions'
 import { assistValue, changeTarget, customerStep, deviceStep, dueFromDraft, noteKey, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
@@ -122,6 +123,7 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
   if (reading.value || (!value && !images.length && !audio)) return
   reading.value = audio ? 'speech' : images.length ? 'photos' : 'text'
   note.value = ''
+  logAiEvent('ai_assist_requested', { input: aiInput(value, images.length) })
   const f = props.form
   try {
     // The photo goes into the Nova OS first (order.new.photos), then it is read.
@@ -204,6 +206,7 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     const filled =
       f.customer !== undo.customer || f.device !== undo.device || undo.added.length + undo.changed.length + undo.removed.length > 0 || !!undo.request || !!undo.due || !!draft.actions || customerAsk.value !== undo.asks.customer || deviceAsk.value !== undo.asks.device
     const onlyChanges = !undo.added.length && (undo.changed.length > 0 || undo.removed.length > 0) && f.customer === undo.customer
+    logAiEvent('ai_assist_result', { result: aiResult({ filled }) })
     const key = noteKey({ filled, hasActions: !!draft.actions, isNew: true, onlyChanges })
     note.value = key ? t(key) : ''
     // Desfazer sits in the note: the drawer is modal, a toast behind it could not be reached.
@@ -212,6 +215,9 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
   } catch (error) {
     console.warn('new order assistant: failed', error)
     note.value = errorNote(error)
+    const result = aiResult({ errorCode: error instanceof ApiError ? error.code : null, failed: true })
+    logAiEvent('ai_assist_result', { result })
+    if (result === 'quota') logAiEvent('upgrade_modal_shown', { trigger: 'ai_limit_100' })
   } finally {
     reading.value = ''
   }
@@ -230,6 +236,7 @@ function setNewDevice(device: NewDevice) {
 
 /** Takes back only what this answer did; what the person changed afterwards stays. */
 function undoDraft(undo: Undo) {
+  logAiEvent('ai_assist_undone')
   const f = props.form
   f.actions = null
   if (f.customer !== undo.customer && f.marked.has('customer')) {

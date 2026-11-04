@@ -15,11 +15,14 @@ import { ui } from '@/lib/ui'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
+import { needsConsent, startAnalytics } from '@/lib/analytics'
 
 // Opened by a key or a tap, never on the first paint: out of the first download.
 const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
 const ShortcutsDialog = defineAsyncComponent(() => import('@/components/ShortcutsDialog.vue'))
 const Layer = defineAsyncComponent(() => import('@/components/Layer.vue'))
+// Statistics: the notice and the client come after the first screen, never on the way to it.
+const AnalyticsConsent = defineAsyncComponent(() => import('@/components/AnalyticsConsent.vue'))
 const NewOrderDrawer = defineAsyncComponent(() =>
   Promise.all([import('@/components/orders/NewOrderDrawer.vue'), loadOrderTexts()]).then(([m]) => m),
 )
@@ -77,11 +80,18 @@ const companyInitials = computed(() => initials(rawCompanyName.value))
 
 const setOnline = () => (online.value = true)
 const setOffline = () => (online.value = false)
+const afterFirstScreen = ref(false)
+let analyticsTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
+  analyticsTimer = setTimeout(() => {
+    afterFirstScreen.value = true
+    void startAnalytics()
+  }, 2500)
   window.addEventListener('online', setOnline)
   window.addEventListener('offline', setOffline)
 })
 onBeforeUnmount(() => {
+  clearTimeout(analyticsTimer)
   window.removeEventListener('online', setOnline)
   window.removeEventListener('offline', setOffline)
 })
@@ -182,4 +192,5 @@ onBeforeUnmount(() => {
   <NewOrderDrawer v-if="ui.newOrder && canCreate" />
   <CommandPalette v-if="ui.palette" />
   <ShortcutsDialog v-if="ui.shortcuts" />
+  <AnalyticsConsent v-if="afterFirstScreen && needsConsent()" />
 </template>

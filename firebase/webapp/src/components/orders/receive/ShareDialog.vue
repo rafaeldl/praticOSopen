@@ -9,6 +9,7 @@ import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
+import { logShare } from '@/lib/analytics'
 import { errorMessageKey } from '@/lib/api'
 import { loadCustomer } from '@/lib/customers/data'
 import { formatDate } from '@/lib/format'
@@ -158,6 +159,7 @@ async function revoke() {
 async function copy(value: string, done: string) {
   try {
     await navigator.clipboard.writeText(value)
+    logShare('clipboard', 'order')
     copied.value = true
     setTimeout(() => (copied.value = false), 2000)
     showToast(done)
@@ -170,9 +172,15 @@ async function copy(value: string, done: string) {
 async function shareOther() {
   try {
     await navigator.share({ title: orderTitle(props.order), text: text.value })
+    logShare('sheet', 'order')
   } catch {
     // Closed by the person: nothing to say.
   }
+}
+
+function sentByWhatsApp() {
+  logShare('whatsapp', 'order')
+  announce(t('web.share.whatsappOpened'))
 }
 
 const sendButton = ref<HTMLElement | null>(null)
@@ -189,6 +197,7 @@ function ready() {
   const opened = window.open(whatsappLink(wa.value, text.value), '_blank')
   if (!opened) return
   opened.opener = null
+  logShare('whatsapp', 'order')
   announce(t('web.share.whatsappOpened'))
   emit('close')
 }
@@ -255,7 +264,7 @@ onBeforeUnmount(() => (copied.value = false))
           rel="noopener noreferrer"
           ref="sendButton"
           data-testid="share-whatsapp"
-          @click="announce(t('web.share.whatsappOpened'))"
+          @click="sentByWhatsApp"
         >{{ t('shareSendWhatsApp') }}</a>
         <button v-else ref="sendButton" type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
       </div>
