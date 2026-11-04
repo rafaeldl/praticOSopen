@@ -305,7 +305,11 @@ test.describe('Nova OS (usuários)', () => {
     const device = page.getByRole('combobox', { name: /Veículo, se tiver/ })
     await expect(device).toBeFocused()
     // The company's vehicles are listed even when the consultant's own orders have none of this customer.
-    await expect(page.getByRole('option', { name: /Veículo/ }).first()).toBeVisible()
+    // The company's, in the app's name order: devices made by other tests may come before the seeded "Veículo N".
+    const listed = page.getByRole('listbox', { name: /Veículo, se tiver/ }).getByRole('option')
+    await expect(listed.first()).toBeVisible()
+    const names = (await listed.allTextContents()).map((text) => text.trim())
+    expect(names.some((name) => name.startsWith('Cadastrar'))).toBe(false)
     // Enter with nothing typed goes on to the item.
     await page.keyboard.press('Enter')
     const item = page.getByRole('combobox', { name: 'O que vai ser feito?' })

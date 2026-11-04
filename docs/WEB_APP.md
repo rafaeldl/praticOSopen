@@ -171,10 +171,14 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Início (`/`).** A lista de OS, como no app. Filtros Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas e Todas (o técnico abre em Minhas, que pede `assignedTo=<uid>` à API). "Atrasada" compara por dia no fuso da empresa (`isOverdue`, contrato `overdue.json`). Resumo no topo com "R$ X para receber". Busca nas OS carregadas (número, cliente, aparelho, placa, sem acento) e "Procurar em todas". As linhas se atualizam no lugar (`lib/orders/bus.ts`), sem perder página nem rolagem. Paginação por data e id no cursor.
 - **Quadro** (`?view=board`): aba da lista; mover arrastando, pelo "…" ou com `Shift` + seta, só para onde o papel deixa.
 - **Lote** (tela grande): situação, responsável, cobrança (um link Asaas por cliente), assistente (até 10 OS, pergunta antes de aplicar), receber de um cliente, PDF e imprimir. Toda mudança mostra antes de → para e quantas já estão assim; o recusado pelo servidor é contado com o motivo; "Desfazer" volta o que o papel permite.
-- **Nova OS** (`N`, gaveta): cliente com Recentes e busca pela placa, veículo (do cliente primeiro; placa digitada vira veículo novo com a placa), itens com preço do catálogo e "Mais usados", "+ Cadastrar «nome»", "+ Usar «texto» nesta OS" (item fora do catálogo) e "+ Cadastrar «texto» no catálogo", entrega, pedido do cliente (vira o primeiro comentário interno, como no app) e "Mais opções" (situação, visita, responsável e, com Atendimento no local, o Local). Sem Local, a OS leva o endereço do cliente com a coordenada. Cronometrada no E2E: falha acima de 45 s.
-- **OS no painel**: cabeçalho com uma frase e o botão do próximo passo, itens por aparelho, totais só para quem vê valores, fotos (colar, arrastar, apagar), comentários internos ou para o cliente, Detalhes (entrega, visita, responsável, local), "Mais dados" do segmento, checklists, contrato, avaliação do cliente, Documentos (nota, contrato, garantia: "Que documento é este?" antes de subir, abrir em aba nova, excluir com confirmação; pasta `documents/` do app, nunca o comprovante de pagamento). Fotos em tela cheia com setas e "Definir como capa" (a primeira foto). O menu … abre a ficha do cliente e de cada aparelho. Teclas `A`, `S`, `C`, `D`, `M`, `R`. OS apagada ou sem acesso mostra "não está mais aqui".
+- **Nova OS** (`N`, gaveta): cliente com Recentes e busca pela placa, veículo (do cliente primeiro; placa digitada vira veículo novo com a placa), itens com preço do catálogo e "Mais usados", "+ Cadastrar «nome»", "+ Usar «texto» nesta OS" (item fora do catálogo) e "+ Cadastrar «texto» no catálogo", entrega, pedido do cliente (vira o primeiro comentário interno, como no app), fotos (ficam no navegador e sobem depois do id; clique na miniatura tira), campos do ramo (`service_order.*` sem o do pedido, conferidos antes do ✓ e gravados em `customData`) e "Mais opções" (situação, visita, responsável e, com Atendimento no local, o Local). Sem Local, a OS leva o endereço do cliente com a coordenada. Cronometrada no E2E: falha acima de 45 s.
+- **OS no painel**: cabeçalho com uma frase e o botão do próximo passo, itens por aparelho (item novo em OS com 2 ou mais aparelhos pergunta "Em quais veículos?": Geral, um, vários ou todos, uma linha por aparelho), totais só para quem vê valores, fotos (colar, arrastar, apagar), comentários internos ou para o cliente, Detalhes (entrega, visita, responsável, local), "Mais dados" do segmento, checklists, contrato, avaliação do cliente, Documentos (nota, contrato, garantia: "Que documento é este?" antes de subir, abrir em aba nova, excluir com confirmação; pasta `documents/` do app, nunca o comprovante de pagamento). Fotos em tela cheia com setas e "Definir como capa" (a primeira foto). O menu … abre a ficha do cliente e de cada aparelho. Teclas `A`, `S`, `C`, `D`, `M`, `R`. OS apagada ou sem acesso mostra "não está mais aqui".
 - **Ao concluir**: pergunta a próxima manutenção (`lib/orders/maintenance-offer.ts`, regras de `docs/DEVICE_NEXT_MAINTENANCE.md`) e trava se houver checklist por terminar.
-- **Assistente**: barra "Peça ao assistente" para quem edita itens, com `GET /v1/app/ai/status` ligado. Põe itens do catálogo (`POST /v1/app/ai/order-assist`), marca com ✦ e oferece Desfazer. Nunca recebe, cancela nem apaga.
+- **Assistente** (`POST /v1/app/ai/order-assist`, com `GET /v1/app/ai/status` ligado; `lib/orders/assist-draft.ts`, `ai-actions.ts`): aplica na hora, marca com ✦ e oferece Desfazer. Nunca recebe, cancela nem apaga sozinho.
+  - **Nova OS** (`NewOrderAssist.vue`): texto ou foto (arquivo, só com `attachPhotos`). Preenche cliente, veículo, itens, pedido e entrega sem trocar o que já está escolhido. Cliente ou veículo fora do cadastro entra como "novo" e é cadastrado pela API só no ✓; parecidos abrem "Qual X?" com "Cadastrar" (com a permissão) e "Outro". Desfazer fica no aviso, dentro da gaveta.
+  - **OS salva** (`OrderAssistant.vue`): põe itens (do catálogo ou só pelo nome), muda valor, quantidade ou descrição e tira a linha só quando pedido, tudo pela API de itens; linha ambígua pergunta "Qual X?". A foto entra na OS e depois é lida.
+  - **Dinheiro** ("Confere?", `AiActionsDialog.vue`): só com a chave `financeActions` (o servidor manda `actions`). Nada grava antes de Confirmar; depois desconto, aprovar, receber e status pela API, nessa ordem, parando no primeiro erro. Na Nova OS o cartão abre na OS depois do ✓.
+  - **Apresentação**: uma vez por navegador, em Início, para quem cria OS; "Experimentar agora" abre a Nova OS com o cursor no assistente.
 - **Início, extras**: "Manutenções chegando" (atrasadas ou em até 7 dias, sem as de contrato ativo), o sino com os avisos (`/notifications`) e "Agora" para o técnico (a visita de hoje).
 
 ### Clientes e aparelhos
@@ -204,6 +208,8 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Receber de um cliente em várias OS**: divide da mais antiga para a mais nova, relê os saldos antes de gravar, `receiptId` contra gravação em dobro. Recibo impresso pela ficha do cliente.
 - **Cobrança (Asaas)**: criar, cancelar e gerar link novo para quem tem `chargeOrder`, com a conta conectada; um link por OS ou por cliente. Detalhes em `docs/ASAAS_INTEGRATION.md`.
 - **Financeiro › Receber (`/finance/receive`)**: quem deve, por cliente, lido do servidor (`/finance/receivable`).
+- **Próxima cobrança** (Financeiro, `lib/finance/next-charge.ts`, regra de `lib/utils/next_charge.dart`): dívidas dos últimos 90 dias, a mais antiga primeiro; pula quem tem link aberto (do cliente ou de qualquer OS em aberto) e some se os links não puderem ser lidos em 8 s. "Mandar cobrança" abre a cobrança do cliente já na folha (várias OS com Asaas), a cobrança da OS (uma OS) ou o link da OS (sem Asaas). "Agora não" vale 30 dias **neste navegador, por empresa** (no app, no aparelho).
+- **Cobrança de várias OS sobre link de uma OS**: a linha da OS diz "Esperando o pagamento" ou "Venceu em dd/mm" e mandar a nova pede confirmação.
 
 ### Agenda
 
@@ -243,6 +249,8 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 ### Primeiro acesso
 
 `src/views/onboarding/`, `src/lib/onboarding/`. Mesmo fluxo de `docs/ONBOARDING.md`: ramo, especialidades e "Para o cliente", cada passo na URL. Grava empresa, membership e usuário no mesmo lote do app, espera a claim (até 20 s), pede a cópia dos dados (`POST /v1/app/onboarding/seed`) e entra. Recarregar no meio termina a mesma empresa (`sessionStorage`), nunca cria outra.
+
+**Empresa sem ramo** (`resumesCompany`): dono ou admin de uma empresa que existe sem `segment` volta ao primeiro acesso antes de qualquer tela da empresa, com o nome e o telefone dela, e completa a mesma empresa. O servidor só semeia empresa criada há pouco: numa empresa antiga o ramo é gravado sem checklists e exemplos (`ONBOARDING_NOT_NEW`).
 
 ### Equipe, empresa e configurações
 
@@ -367,7 +375,8 @@ Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/app/dev
 - **Quem não vê valores não tem tempo real:** a OS é relida depois de cada gravação e ao voltar à janela.
 - **Fuso:** a empresa não tem campo de fuso; ele vem do país. Uma empresa em Manaus aberta num computador em São Paulo usa São Paulo.
 - **Pedido do cliente:** fica no primeiro comentário interno, como no app; `service_order.observation` do segmento não é gravado pelo web.
-- **Primeiro acesso:** sem retomar empresa que já existe sem ramo (`auth.gate.resume-company`).
+- **Primeiro acesso de empresa antiga sem ramo:** completa o ramo sem checklists e exemplos (o servidor recusa semear empresa que não é nova).
+- **Próxima cobrança:** "Agora não" fica no navegador, como no app fica no aparelho.
 - **Opções da empresa que faltam no documento** (`lib/company-features.ts`): resolvidas como o app (empresa, padrão do ramo, padrão do app), mas o web nunca grava o que falta.
 
 ## Decisões pendentes
@@ -384,4 +393,4 @@ Técnicas, esperando outra peça:
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
 - **Lembretes:** no app são notificações locais; no web, só com Web Push.
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
-- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), Próxima cobrança, faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
+- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.

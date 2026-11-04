@@ -11,19 +11,22 @@ import MoneyInput from '@/components/MoneyInput.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
-import { formatDate, formatMoney } from '@/lib/format'
+import { formatDate, formatDayMonth, formatMoney } from '@/lib/format'
+import { firestoreLite } from '@/lib/firebase'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { loadCustomer } from '@/lib/customers/data'
 import { whatsappNumber } from '@/lib/phone'
 import { cancelCustomerCharge, customerCharges, listReceipts, openOrders, paymentSettings, registerReceipt } from '@/lib/receive/data'
-import { allocate, allocationSummary, localDay, openChargeOf, owedOf, paidAtFor, toCents, whatsappLink, type Charge, type OpenOrder } from '@/lib/receive/model'
+import { allocate, allocationSummary, chargeOf, localDay, openChargeOf, owedOf, paidAtFor, toCents, whatsappLink, type Charge, type OpenOrder } from '@/lib/receive/model'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChargeDialog from './ChargeDialog.vue'
 import '@/styles/receive.css'
 
-const props = defineProps<{ customerId: string; customerName: string; checked?: string[] }>()
+// startCharge: opened by the Financeiro's "Próxima cobrança" (pay.customer.start-charge): the charge
+// sheet opens by itself, only once it is known that the customer has no open link.
+const props = defineProps<{ customerId: string; customerName: string; checked?: string[]; startCharge?: boolean }>()
 const emit = defineEmits<{ close: []; done: [] }>()
 const router = useRouter()
 
@@ -35,9 +38,14 @@ const method = ref('')
 const today = localDay(new Date())
 const day = ref(today)
 const saving = ref(false)
-const dialog = ref<null | 'confirm' | 'charge' | 'cancelCharge'>(null)
+const dialog = ref<null | 'confirm' | 'charge' | 'cancelCharge' | 'replace'>(null)
+/** Open links of one order each (pay.customer.replace-single): the row says so and a new charge asks first. */
+const singleLinks = shallowRef(new Map<string, Charge>())
+let startedCharge = false
 const charge = shallowRef<Charge | null>(null)
 const chargesReady = ref(false)
+/** The payment links could not be read: no charge is offered until they are (Tentar de novo). */
+const chargesFailed = ref(false)
 // One id per receipt the person asks for: repeating the same request after a lost
 // answer sends it again (the server books it once). A new one when the balances
 // changed or the person changed what goes in (R2 of the #518 review).
@@ -105,18 +113,60 @@ async function loadCharges() {
     const [list, detail] = await Promise.all([customerCharges(props.customerId), loadCustomer(props.customerId).catch(() => null)])
     charge.value = openChargeOf(list)
     phone.value = detail?.customer.phone ?? ''
+    if (charger) singleLinks.value = await orderLinks(orders.value.length ? orders.value.map((o) => o.id) : (await openOrders(props.customerId)).map((o) => o.id))
   } catch (error) {
-    // Without knowing, never offer a link that could cancel one about to be paid (send_charge_flow).
+    // Without knowing, never offer a link that could cancel one about to be paid (send_charge_flow):
+    // the drawer says so, with Tentar de novo (B2 of #543).
     console.warn('receive: customer charges not read', error)
+    chargesFailed.value = true
     return
   }
+  chargesFailed.value = false
   chargesReady.value = true
+}
+
+/** The open link of each order (the newest open one), read once. A failed read throws: loadCharges says so. */
+async function orderLinks(ids: readonly string[]): Promise<Map<string, Charge>> {
+  const found = new Map<string, Charge>()
+  const [db, { collection, getDocs }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  await Promise.all(
+    ids.map(async (id) => {
+      const snap = await getDocs(collection(db, 'companies', session.companyId as string, 'orders', id, 'charges'))
+      const open = openChargeOf(snap.docs.map((d) => chargeOf(d.id, d.data())))
+      if (open) found.set(id, open)
+    }),
+  )
+  return found
 }
 
 onMounted(() => {
   void load()
   void loadCharges()
 })
+
+// Próxima cobrança: once the orders and the customer's links are known and nothing is open, the sheet opens (once).
+watch([chargesReady, state], () => {
+  if (!props.startCharge || startedCharge || !chargesReady.value || state.value !== 'ready') return
+  startedCharge = true
+  if (!charge.value && canCharge.value) newCharge()
+})
+
+/** Mandar cobrança over orders that have their own link asks first: the new one cancels those in Asaas. */
+function newCharge() {
+  dialog.value = chosen.value.some((o) => singleLinks.value.has(o.id)) ? 'replace' : 'charge'
+}
+/** Closed first: the confirmation takes its history entry out, then the charge opens. */
+async function replaceConfirmed() {
+  dialog.value = null
+  await nextTick()
+  dialog.value = 'charge'
+}
+/** "Esperando o pagamento" or "Venceu em dd/mm" of the order's own link. */
+function linkText(id: string): string {
+  const link = singleLinks.value.get(id)
+  if (!link) return ''
+  return link.status === 'overdue' ? t('chargeExpiredOn', { date: formatDayMonth(`${link.dueDate}T12:00:00`, country()) }) : t('chargeWaitingPayment')
+}
 
 // Marking or unmarking starts the amount again from what the marked orders owe (pay.customer.pick-orders).
 watch(picked, () => (amount.value = owed.value), { deep: true })
@@ -256,6 +306,10 @@ const preview = computed(() => {
             <p>{{ t('web.receive.nothingOwed', { name: customerName }) }}</p>
           </div>
           <template v-else>
+            <div v-if="chargesFailed" class="charge-warn" role="alert" data-testid="customer-links-failed">
+              <p>{{ t('web.receive.linksFailed') }}</p>
+              <button type="button" class="btn btn--small" @click="loadCharges">{{ t('web.tryAgain') }}</button>
+            </div>
             <div v-if="charge" class="charge-warn" role="status" data-testid="customer-charge">
               <strong>{{ t('receiveCustomerOpenCharge', { amount: formatMoney(charge.value, 'BR') }) }}</strong>
               <p class="sub">{{ t('chargeDetailUntil', { value: formatMoney(charge.value, 'BR'), date: formatDate(`${charge.dueDate}T12:00:00`, 'BR') }) }}</p>
@@ -274,6 +328,7 @@ const preview = computed(() => {
                   <span>{{ orderShort() }} {{ order.number }}</span>
                   <span class="sub"> · {{ order.createdAt ? formatDate(order.createdAt, country()) : '' }}</span>
                   <span v-if="rowText(order)" class="sub pick-split"> · {{ rowText(order) }}</span>
+                  <span v-if="linkText(order.id)" class="sub" data-testid="order-link"> · {{ linkText(order.id) }}</span>
                 </label>
                 <span class="num">{{ money(order.open) }}</span>
                 <button type="button" class="link" :aria-label="t('receiveCustomerOpenOrder', { number: order.number ?? '' })" @click="openOrder(order.id)">{{ t('web.receive.open') }}</button>
@@ -308,7 +363,7 @@ const preview = computed(() => {
           </template>
         </div>
         <div class="layer-foot">
-          <button v-if="canCharge" type="button" class="btn" data-testid="customer-charge-new" @click="dialog = 'charge'">{{ t('chargeSend') }}</button>
+          <button v-if="canCharge" type="button" class="btn" data-testid="customer-charge-new" @click="newCharge">{{ t('chargeSend') }}</button>
           <span class="spacer"></span>
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
           <button v-if="orders.length" type="submit" class="btn" :class="{ 'btn--primary': !charge }" :disabled="!!problem || saving" data-testid="receive-customer-save">{{ t('receiveMarkReceived') }}</button>
@@ -333,6 +388,15 @@ const preview = computed(() => {
     :keep="t('chargeKeepLink', { value: formatMoney(charge.value, 'BR') })"
     danger
     @confirm="cancelCharge"
+    @close="dialog = null"
+  />
+  <ConfirmDialog
+    v-else-if="dialog === 'replace'"
+    :title="t('chargeReplaceTitle')"
+    :body="t('chargeReplaceConfirm')"
+    :confirm="t('chargeReplace')"
+    :keep="t('cancel')"
+    @confirm="replaceConfirmed"
     @close="dialog = null"
   />
   <ChargeDialog

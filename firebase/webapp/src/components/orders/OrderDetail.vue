@@ -53,7 +53,7 @@ import { registerShortcut } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { preferredStep, rememberMethod, rememberTransition, suggestedMethod } from '@/lib/orders/suggest'
 import { currentToast, showToast } from '@/lib/toast'
-import { announce } from '@/lib/ui'
+import { announce, ui } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
 import * as maintenance from '@/lib/orders/maintenance-offer'
@@ -64,6 +64,9 @@ import ConfirmDialog from './ConfirmDialog.vue'
 import DateDialog from './DateDialog.vue'
 import HoldDialog from './HoldDialog.vue'
 import ItemDialog from './ItemDialog.vue'
+import DevicePickerDialog from './DevicePickerDialog.vue'
+import { deviceIdsOf, type PickResult } from '@/lib/orders/device-pick'
+import { currentCustomerId } from '@/lib/orders/assist-draft'
 import MoneyDialog from './MoneyDialog.vue'
 import OrderComments from './OrderComments.vue'
 import OrderPhotos from './OrderPhotos.vue'
@@ -117,6 +120,7 @@ type Dialog =
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share'; send?: boolean }
   | { kind: 'pendingForms'; count: number; first: string }
+  | { kind: 'devicesFor'; name: string; add: (deviceId: string | null) => Promise<unknown> }
 const dialog = shallowRef<Dialog | null>(null)
 const menuButton = ref<HTMLElement | null>(null)
 const catalog = shallowRef<CatalogItem[]>([])
@@ -126,6 +130,10 @@ const team = shallowRef<Member[]>([])
 
 const order = computed(() => (state.value.kind === 'ready' ? state.value.order : null))
 const access = computed(() => (order.value ? accessOf(order.value, session.role, session.uid, effectiveUseFinancial()) : null))
+// Money said on a Nova OS waits for this order's assistant; without it (no editing here), it is dropped.
+watch(access, (value) => {
+  if (value && !value.canEditMainFields && ui.aiActionsFor?.orderId === order.value?.id) ui.aiActionsFor = null
+})
 const money$ = computed(() => (order.value ? totals(order.value) : null))
 /**
  * The blue step. From a status, where this person went from it last time wins
@@ -415,13 +423,31 @@ async function discount(value: { amount: number; clientTransactionId: string }) 
 }
 
 async function addCatalogItem(item: CatalogItem) {
-  dialog.value = null
-  await run(() => writes.addItem(order.value!.id, { kind: item.kind, catalogId: item.id }, expected()), t('web.order.itemAdded', { name: item.name }))
+  await onDevices(item.name, (deviceId) => run(() => writes.addItem(order.value!.id, { kind: item.kind, catalogId: item.id, ...(deviceId ? { deviceId } : {}) }, expected()), t('web.order.itemAdded', { name: item.name })))
 }
 
 async function addFreeItem(name: string) {
+  await onDevices(name, (deviceId) => run(() => writes.addItem(order.value!.id, { kind: 'service', description: name, ...(deviceId ? { deviceId } : {}) }, expected()), t('web.order.itemAdded', { name })))
+}
+
+/** Two or more devices: "Em quais veículos?" first, then the item once per chosen device (order.device-picker.*). */
+async function onDevices(name: string, add: (deviceId: string | null) => Promise<unknown>) {
+  const withIds = (order.value?.devices ?? []).filter((d) => d.id)
+  if (withIds.length < 2) {
+    dialog.value = null
+    await add(withIds[0]?.id ?? null)
+    return
+  }
   dialog.value = null
-  await run(() => writes.addItem(order.value!.id, { kind: 'service', description: name }, expected()), t('web.order.itemAdded', { name }))
+  await nextTick()
+  dialog.value = { kind: 'devicesFor', name, add }
+}
+async function addOnPicked(result: PickResult) {
+  const current = dialog.value
+  dialog.value = null
+  if (current?.kind !== 'devicesFor') return
+  const ids = (order.value?.devices ?? []).map((d) => d.id).filter((id): id is string => !!id)
+  for (const deviceId of deviceIdsOf(result, ids)) await current.add(deviceId)
 }
 
 async function saveLine(line: OrderLine, patch: { description?: string; value?: number | null; quantity?: number; deviceId?: string | null }) {
@@ -998,7 +1024,9 @@ watch(
         </section>
       </div>
     </div>
-    <OrderAssistant v-if="order && access?.canEditMainFields" :order="order" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))" />
+    <OrderAssistant v-if="order && access?.canEditMainFields" :order="order" :pending-checklists="orderForms.filter((form) => form.status !== 'completed').length"
+      @hide="(ids: string[]) => (hiddenLines = [...hiddenLines, ...ids])"
+      @unhide="(ids: string[]) => (hiddenLines = hiddenLines.filter((id) => !ids.includes(id)))" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))" />
   </section>
 
   <template v-if="order && access && dialog">
@@ -1059,7 +1087,8 @@ watch(
       @close="dialog = null"
     />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
-    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="pickCustomerItem" @close="dialog = null" />
+    <DevicePickerDialog v-else-if="dialog.kind === 'devicesFor'" :devices="order.devices" :sub="dialog.name" @pick="addOnPicked" @close="dialog = null" />
+    <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="currentCustomerId(order.customer, customers, session.company?.country) ?? undefined" @pick="pickCustomerItem" @close="dialog = null" />
     <ComboDialog
       v-else-if="dialog.kind === 'device'"
       id="od-device"

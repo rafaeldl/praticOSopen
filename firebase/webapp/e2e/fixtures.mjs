@@ -13,6 +13,8 @@ export const COMPANY_T = 'company-team'
 /** "Manutenções chegando", sino and Agora (e2e/maintenance.spec.ts, notifications.spec.ts): its own devices, so counts do not move. */
 export const COMPANY_M = 'company-maint'
 export const COMPANY_D = 'company-delta'
+/** A company without a segment (a first access stopped in the app): auth.gate.resume-company. */
+export const COMPANY_R = 'company-resume'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -79,6 +81,8 @@ export const USERS = {
   polyglot: { ...user('polyglot', 'Paco Idiomas'), roles: {}, preferredLanguage: 'es-ES' },
   /** Signs in for the first time on the web: no users/{uid} yet. */
   fresh: { ...user('fresh', 'Fabi Primeira Vez'), roles: {}, noUserDoc: true },
+  /** Owner of a company without a segment: the first access completes it (auth.gate.resume-company). */
+  resumer: { ...user('resumer', 'Rita Retoma'), roles: { [COMPANY_R]: 'owner' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -100,6 +104,7 @@ export const COMPANIES = {
   [COMPANY_G]: { name: 'Oficina Gama', country: 'BR', segment: 'automotive', owner: USERS.gOwner },
   [COMPANY_T]: { name: 'Equipe Teta', country: 'BR', segment: 'automotive', owner: USERS.tOwner },
   [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },
+  [COMPANY_R]: { name: 'Retoma Sem Ramo', country: 'BR', segment: null, phone: '(48) 3333-4444', owner: USERS.resumer },
 }
 
 /** Invites of the team company: one waiting, one expired (the app hides it; the web offers "Convidar de novo"). */

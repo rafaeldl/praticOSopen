@@ -124,6 +124,18 @@ export function businessFields(input: BusinessInput, ownerName: string | null | 
   }
 }
 
+/**
+ * auth.gate.resume-company: a company that exists without a segment (a first
+ * access stopped in the app, or an old one) opens the first access with its
+ * name and phone and completes the same company. Only who may change the
+ * company (owner, admin): the app sends any member there and the save is
+ * refused by the rules (not copied).
+ */
+export function resumesCompany(state: { companyId: string | null; company: { segment?: unknown } | null; role: string | null }): boolean {
+  const segment = state.company?.segment
+  return !!state.companyId && !!state.company && !(typeof segment === 'string' && segment.trim()) && (state.role === 'owner' || state.role === 'admin')
+}
+
 /** Specialties picked, kept in the segment's order. */
 export function orderedPick(segment: OnboardingSegment, picked: ReadonlySet<string>): string[] {
   return segment.subspecialties.filter((sub) => picked.has(sub.id)).map((sub) => sub.id)

@@ -49,6 +49,9 @@ const OrderBoard = defineAsyncComponent(() => Promise.all([import('@/components/
 const FirstRun = defineAsyncComponent(() => Promise.all([import('@/components/orders/FirstRun.vue'), loadOrderTexts()]).then(([m]) => m))
 // "Manutenções chegando": read after the list paints, only on the open lists (home.maintenance.list).
 const Maintenances = defineAsyncComponent(() => Promise.all([import('@/components/orders/Maintenances.vue'), loadOrderTexts()]).then(([m]) => m))
+// The assistant's presentation, once per browser (order.ai.intro).
+const AiIntro = defineAsyncComponent(() => Promise.all([import('@/components/orders/AiIntro.vue'), loadOrderTexts()]).then(([m]) => m))
+const aiIntro = ref(false)
 const BatchActions = defineAsyncComponent(() => Promise.all([import('@/components/orders/BatchActions.vue'), loadOrderTexts()]).then(([m]) => m))
 
 const route = useRoute()
@@ -185,6 +188,18 @@ async function load() {
     // "Primeira vez" only when the company never created an order (home.empty.first-run).
     if (!rows.value.length && (filter.value === 'all' || filter.value === 'open' || filter.value === 'mine')) {
       firstRun.value = !(await companyHasOrders(ctx))
+    }
+    // After the paint: the assistant's presentation, only for who opens Nova OS (order.ai.intro).
+    if (canCreate.value && !aiIntro.value) {
+      void Promise.all([import('@/lib/orders/ai-intro'), import('@/lib/orders/assistant')])
+        .then(([intro, assistant]) =>
+          intro.shouldShowAiIntro(
+            () => token === loadToken && route.path === '/' && ui.layers === 0 && !ui.newOrder,
+            async () => (await assistant.assistStatus()).enabled,
+          ),
+        )
+        .then((show) => show && (aiIntro.value = true))
+        .catch(() => {})
     }
     // After the paint: the bell's count (lib/notifications, its own chunk).
     void import('@/lib/notifications')
@@ -487,6 +502,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
           <p>{{ agoraText }}</p>
           <button type="button" class="btn btn--primary" @click="open(agora)">{{ t('openOrderNumber', { number: agora.number ?? '' }) }}</button>
         </section>
+        <AiIntro v-if="aiIntro" @close="aiIntro = false" />
         <LoadingState v-if="state === 'loading'" />
         <ErrorState v-else-if="state === 'failed'" :body="t('loadOrdersError')" :retry="load" />
         <FirstRun v-else-if="firstRun" :can-create="canCreate" />

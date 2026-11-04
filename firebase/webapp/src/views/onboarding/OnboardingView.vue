@@ -9,12 +9,15 @@ import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { locale, t } from '@/i18n'
+import { ApiError } from '@/lib/api'
+import { showToast } from '@/lib/toast'
 import { companyPhoneMasks, enterCompany, listSegments, saveCompany, seedCompany, waitForClaim } from '@/lib/onboarding/data'
 import {
   countryFor,
   localeTag,
   nameMissing,
   orderedPick,
+  resumesCompany,
   segmentName,
   subspecialtyName,
   type OnboardingSegment,
@@ -49,6 +52,8 @@ const masks = ref<string[]>([])
 let savedId: string | null = null
 /** The seed was asked for: its checklists may be in, so the segment cannot change any more. */
 const seedTried = ref(false)
+/** Completing a company that exists without a segment: no invite code, the same company is updated. */
+const resuming = ref(false)
 
 const step = computed<Step>(() => {
   const wanted = route.query.step
@@ -116,7 +121,7 @@ async function create(withSamples: boolean) {
     })
     savedId = id
     // A reload from here on continues the same company (the router sends it back here).
-    writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value })
+    writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag: tag.value, seedTried: seedTried.value, existing: resuming.value })
     await finish(id, withSamples, tag.value)
   } catch (error) {
     console.error('onboarding: company setup failed', error)
@@ -128,11 +133,22 @@ async function create(withSamples: boolean) {
 async function finish(id: string, withSamples: boolean, localeTag: string) {
   await waitForClaim(id)
   seedTried.value = true
-  writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true })
-  await seedCompany(id, withSamples, localeTag)
+  writePending({ uid: session.uid as string, companyId: id, withSamples, localeTag, seedTried: true, existing: resuming.value })
+  let unseeded = false
+  try {
+    await seedCompany(id, withSamples, localeTag)
+  } catch (error) {
+    // An old company completed here: the server seeds only companies just created
+    // (ONBOARDING_NOT_NEW). The segment is saved; checklists and samples do not come.
+    if (!(resuming.value && error instanceof ApiError && error.code === 'ONBOARDING_NOT_NEW')) throw error
+    console.warn('onboarding: old company completed without the seed')
+    unseeded = true
+  }
   await enterCompany(id)
   writePending(null)
   await router.replace('/')
+  // Said on Início: the segment is saved, but samples and ready checklists only come to a new company (B5 of #543).
+  if (unseeded) showToast(t('web.onboarding.resumedNoSeed'))
 }
 
 /** After a reload: the company exists, the rest goes on with what was chosen then. */
@@ -141,6 +157,7 @@ async function resume() {
   if (!pending) return
   savedId = pending.companyId
   seedTried.value = pending.seedTried
+  resuming.value = !!pending.existing
   lastWithSamples.value = pending.withSamples
   status.value = 'saving'
   try {
@@ -178,7 +195,14 @@ onMounted(() => {
     void resume()
     return
   }
-  if (session.companyId) {
+  // A company without a segment: the same steps with its name and phone, completing it (auth.gate.resume-company).
+  if (resumesCompany(session)) {
+    const company = session.company as { name?: string; phone?: string }
+    savedId = session.companyId
+    resuming.value = true
+    name.value = company.name ?? ''
+    phone.value = company.phone ?? ''
+  } else if (session.companyId) {
     void router.replace('/')
     return
   }
@@ -224,7 +248,7 @@ onMounted(() => {
             </button>
           </li>
         </ul>
-        <button type="button" class="link entry-link" data-testid="onboarding-invite-code" @click="codeOpen = true">{{ t('onboardingInviteCode') }}</button>
+        <button v-if="!resuming" type="button" class="link entry-link" data-testid="onboarding-invite-code" @click="codeOpen = true">{{ t('onboardingInviteCode') }}</button>
       </div>
 
       <div v-else-if="step === 'specialties' && segment" class="entry-box">

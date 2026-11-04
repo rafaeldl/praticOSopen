@@ -127,6 +127,9 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
   .report, .report * { color: #000 !important; background: #fff !important; box-shadow: none !important; }
   .report .fin-row { break-inside: avoid; }
 }
+/* Próxima cobrança (fin.tab.next-charge): after "Hoje", before the notas row. */
+.fin-next { margin: 1rem 0 0; }
+.fin-next h2 { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; }
 .nfse-setup .nfse-next { margin: 0 0 1rem; min-height: 2.75rem; }
 .nfse-steps { list-style: none; margin: 0 0 1.25rem; padding: 0; border-top: 1px solid var(--color-rule); }
 .nfse-step { display: grid; gap: 0.15rem; width: 100%; min-height: 3rem; padding: 0.6rem 0; border: 0; border-bottom: 1px solid var(--color-rule); background: none; text-align: left; color: var(--color-ink); }

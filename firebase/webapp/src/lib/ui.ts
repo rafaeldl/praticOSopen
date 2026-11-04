@@ -1,5 +1,6 @@
 // Small shared screen state: open layers, announcements and the shell's overlays.
 import { reactive } from 'vue'
+import type { DraftActions, NfseMoment } from '@/lib/orders/ai-actions'
 
 export const ui = reactive({
   /** Open modal layers. Single-key shortcuts stop while any is open. */
@@ -20,7 +21,11 @@ export const ui = reactive({
     items?: { id: string; name: string; value: number | null }[]
     /** "Novo contrato" (contract.list.new): Nova OS with Repetir on. */
     repeat?: boolean
+    /** "Experimentar agora" of the assistant's presentation: the cursor starts in the assistant (order.ai.intro-try). */
+    assist?: boolean
   },
+  /** Money said to the assistant on a Nova OS: the "Confere?" card opens on that order once it exists (order.ai.money-card). */
+  aiActionsFor: null as null | { orderId: string; actions: DraftActions; nfse: NfseMoment | null },
 })
 
 export function announce(text: string): void {

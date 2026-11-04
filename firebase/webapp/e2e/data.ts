@@ -381,3 +381,7 @@ export async function makeReadyTemplate(title: string): Promise<string> {
 export async function setTemplateInB(id: string, fields: Record<string, unknown>): Promise<void> {
   await db().doc(`companies/${COMPANY_B}/forms/${id}`).set({ ...fields, updatedAt: new Date().toISOString() }, { merge: true })
 }
+
+export async function readUser(uid: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`users/${uid}`).get()).data()
+}

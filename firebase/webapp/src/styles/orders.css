@@ -238,6 +238,19 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-rating { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
 .od-stars span { color: var(--color-rule); font-size: 1.1rem; }
 .od-stars span.on { color: var(--color-warning-text); }
+/* The assistant on the Nova OS (order.ai.* on a new order): the bar on top, the rows that ask under it. */
+.assist-new { display: grid; gap: 0.35rem; padding-bottom: 0.75rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-rule); }
+.assist-new-bar { display: flex; gap: 0.4rem; align-items: center; }
+.assist-new-bar .field { flex: 1 1 auto; min-width: 0; }
+.assist-photo { cursor: pointer; }
+.assist-photo:focus-within { outline: 2px solid var(--color-focus, var(--color-accent)); outline-offset: 2px; }
+.assist-ask { text-align: left; min-height: 2.75rem; padding: 0.4rem 0.6rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-paper-2); color: var(--color-ink); }
+.assist-ask:hover { border-color: var(--color-accent); }
+/* "Confere?" (order.ai.money-card). */
+.ai-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.ai-steps > li { display: grid; gap: 0.35rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
+.ai-steps small { display: block; }
+.ai-intro-mark { font-size: 1.5rem; color: var(--color-accent); }
 .doc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .doc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: center; min-height: 2.75rem; }
 .doc-main { display: grid; min-width: 0; overflow-wrap: anywhere; }

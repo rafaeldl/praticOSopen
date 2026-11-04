@@ -389,9 +389,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Empresa sem segment abre o primeiro acesso com nome e telefone dela e atualiza a mesma empresa, sem criar outra."
+  note: "Empresa sem segment abre o primeiro acesso com nome e telefone dela e atualiza a mesma empresa, sem criar outra. Web: só dono e admin (o app manda qualquer membro e a gravação falha). Empresa criada há pouco recebe checklists e exemplos; empresa antiga completa o ramo sem eles, porque o servidor só semeia empresa nova (ONBOARDING_NOT_NEW). Igualar ao app pede liberar o seed no servidor para empresa sem ramo (decisão)."
 - id: auth.analytics.events
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -3508,10 +3509,11 @@ rows:
   feature_flags: ["aiEnabled", "planLimits:photo"]
   hardware: [camera, gallery]
   data: ["api:POST /v1/app/ai/order-assist", "storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: attachPhotos
-  note: "A foto entra na OS e depois é lida: não há foto só para a IA. Não copiar: Foto aparece sem attachPhotos quando a IA está ligada e não checa edição."
+  note: "A foto entra na OS e depois é lida: não há foto só para a IA. Web: foto por arquivo (botão ao lado do campo do assistente, só com attachPhotos). Na OS salva a foto entra na OS e depois é lida; na Nova OS fica nas fotos da Nova OS e sobe no ✓. JPEG até 1600 px, até 4 por pedido. Não copiar: Foto aparece sem attachPhotos quando a IA está ligada e não checa edição."
 - id: order.ai.undo
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3557,8 +3559,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
+  note: "Web: linha \"Ouvi “X”\" na Nova OS abre \"Qual X?\" com os parecidos, \"Cadastrar X como cliente novo\" (manageCustomers) e \"Outro cliente\"."
 - id: order.ai.register-customer
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3572,9 +3576,11 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: manageCustomers
+  note: "Web: na Nova OS entra como \"novo\" e é cadastrado pela API só no ✓; numa OS salva nunca entra sozinho."
 - id: order.ai.ask-device
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3588,8 +3594,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
+  note: "Web: linha \"“X” não está no cadastro\" na Nova OS abre \"Qual X?\". Na OS salva não aparece (o app também não mostra)."
 - id: order.ai.register-device
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3603,9 +3611,11 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: manageDevices
+  note: "Web: placa em maiúsculas, nome = modelo ou a placa; cadastrado pela API só no ✓."
 - id: order.ai.ask-line
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3619,8 +3629,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
+  note: "Web: \"Qual X?\" com o valor de cada linha, na Nova OS e na OS salva; fechar sem escolher ignora a mudança."
 - id: order.ai.intro
   screen: lib/screens/order/assistant/ai_intro.dart
   route: null
@@ -3634,9 +3646,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["api:GET /v1/app/ai/status", "local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Em Início, depois da carga e só com a tela assentada. Uma vez por aparelho, com qualquer resposta."
+  note: "Em Início, depois da carga e só com a tela assentada. Uma vez por aparelho, com qualquer resposta. Web: uma vez por navegador (localStorage praticos.aiIntroSeen.v1), em Início depois da lista, sem camada aberta, só com o assistente ligado e para quem cria OS."
 - id: order.ai.intro-try
   screen: lib/screens/order/assistant/ai_intro.dart
   route: "/order"
@@ -3650,9 +3663,11 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: createOrder
+  note: "Web: no computador não há \"já ouvindo\": abre a Nova OS com o cursor no campo do assistente (digitar ou mandar foto)."
 - id: order.ai.intro-later
   screen: lib/screens/order/assistant/ai_intro.dart
   route: null
@@ -3666,7 +3681,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
 - id: order.ai.uses-left
   screen: lib/screens/order/order_screen_v2.dart
@@ -3727,10 +3743,11 @@ rows:
   feature_flags: ["planLimits:photo"]
   hardware: [camera, gallery]
   data: ["storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: attachPhotos
-  note: "Ficam no aparelho até a OS ganhar id; tocar na miniatura oferece Remover foto. Sobem depois do id e só então roda o onCreated (arquivos de outro app). Não copiar: falha no envio é engolida e a pessoa acha que anexou."
+  note: "Ficam no aparelho até a OS ganhar id; tocar na miniatura oferece Remover foto. Sobem depois do id e só então roda o onCreated (arquivos de outro app). Web: ficam no navegador até o id, clique na miniatura oferece Remover Foto, sobem uma a uma depois de salvar; falha conta no aviso \"salva em parte\". Não copiar: falha no envio é engolida e a pessoa acha que anexou."
 - id: order.details.section
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3795,9 +3812,10 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Só o que a pessoa pediu (a pintura é 300); nunca troca cliente, pedido ou prazo já preenchidos; Desfazer recoloca. Linha ambígua abre order.ai.ask-line. Resultado em nota: preenchi, coloquei, mudei, não achei."
+  note: "Só o que a pessoa pediu (a pintura é 300); nunca troca cliente, pedido ou prazo já preenchidos; Desfazer recoloca. Linha ambígua abre order.ai.ask-line. Resultado em nota: preenchi, coloquei, mudei, não achei. Web: na OS salva pela API de itens (valor só com editPrices), Desfazer recoloca; na Nova OS muda valor e quantidade (a descrição não, a Nova OS do web não tem descrição por linha)."
 - id: order.attachments.merge
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3828,10 +3846,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Um cartão por seção, sem o campo do pedido, entre a entrega e Mais opções. Não copiar: o ✓ não espera campo obrigatório e required, minLength e pattern nunca rodam; no web, validar antes do ✓."
+  note: "Um cartão por seção, sem o campo do pedido, entre a entrega e Mais opções. Web: campos service_order do ramo (sem o do pedido) entre o pedido e Mais opções, conferidos antes do ✓ (obrigatório, mínimo, máximo, padrão) e gravados em customData depois do id. Não copiar: o ✓ não espera campo obrigatório e required, minLength e pattern nunca rodam; no web, validar antes do ✓."
 - id: order.customer.address-from-customer
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3897,9 +3916,10 @@ rows:
   feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
   hardware: null
   data: ["api:POST /v1/app/ai/order-assist", "companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Cartão Confere?: nada grava antes de Confirmar; Receber abre a folha de recebimento preenchida. Avisa quando vai emitir nota automática. Só aparece para quem pode receber."
+  note: "Cartão Confere?: nada grava antes de Confirmar; Receber abre a folha de recebimento preenchida. Avisa quando vai emitir nota automática. Só aparece para quem pode receber. Web: só quando o servidor manda actions (chave financeActions ligada). Na Nova OS o cartão abre na OS depois do ✓. Valor, forma e data editáveis no cartão; comprovante e aviso de cobrança aberta ficam na tela de receber da OS, não no cartão."
 - id: order.ai.money-plan
   screen: lib/screens/order/assistant/ai_actions_plan.dart
   route: null
@@ -3913,9 +3933,10 @@ rows:
   feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "O modelo só devolve o que foi dito; saldo, aprovar antes de receber em orçamento, valor acima do saldo e aviso de nota saem daqui."
+  note: "O modelo só devolve o que foi dito; saldo, aprovar antes de receber em orçamento, valor acima do saldo e aviso de nota saem daqui. Web: lib/orders/ai-actions.ts (planAiActions), mesmas regras e permissões de accessOf."
 - id: order.ai.money-run
   screen: lib/screens/order/assistant/ai_actions_runner.dart
   route: null
@@ -3929,9 +3950,10 @@ rows:
   feature_flags: ["aiEnabled", "financeActions", "useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
-  note: "Desconto, aprovar, receber e status, nesta ordem; para no primeiro erro. Status recusado volta a tela. Desfazer começa pelo último passo."
+  note: "Desconto, aprovar, receber e status, nesta ordem; para no primeiro erro. Status recusado volta a tela. Desfazer começa pelo último passo. Web: pela API (descontos, PATCH status, pagamentos com clientTransactionId e expectedUpdatedAt); para no primeiro erro; Desfazer tira pagamento, volta status (se o papel deixa) e tira desconto; nota emitida continua."
 - id: pay.order.register-payment
   screen: lib/screens/payments/order_payment_actions.dart
   route: null
@@ -4741,8 +4763,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
+  note: "Web: DevicePickerDialog ao pôr item em OS com 2 ou mais aparelhos: Geral (sem aparelho), um, ou todos."
 - id: order.device-picker.multi
   screen: lib/screens/widgets/device_picker_sheet.dart
   route: null
@@ -4756,8 +4780,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
+  note: "Web: vários marcados viram uma linha por aparelho (deviceId), como o app."
 - id: contract.config.frequency
   screen: lib/screens/widgets/contract_config_sheet.dart
   route: null
@@ -5473,10 +5499,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/customerCharges", "companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só abre a folha depois de confirmar que não há cobrança aberta do cliente."
+  note: "Só abre a folha depois de confirmar que não há cobrança aberta do cliente. Web: prop startCharge do ReceiveCustomerDialog; a folha abre uma vez, depois de ler as OS e os links do cliente, só se não há cobrança aberta."
 - id: pay.customer.replace-single
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -5490,10 +5517,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "As linhas mostram Esperando pagamento ou Venceu em dd/mm do link de OS única; mandar a de várias pede confirmação."
+  note: "As linhas mostram Esperando pagamento ou Venceu em dd/mm do link de OS única; mandar a de várias pede confirmação. Web: cada OS mostra \"Esperando o pagamento\" ou \"Venceu em dd/mm\" do link dela; Mandar cobrança sobre elas pede \"Já existe uma cobrança em aberto\" / \"Gerar nova\"."
 - id: charge.order.form
   screen: lib/screens/payments/create_charge_screen.dart
   route: null
@@ -6664,10 +6692,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/customerCharges", "companies/{id}/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Regra em lib/utils/next_charge.dart: dívidas dos últimos 90 dias, mais antiga primeiro; depois as mais velhas, mais nova primeiro; sem data no fim; adiados ficam fora. Pula quem já tem link de cobrança aberto (do cliente ou de qualquer OS em aberto) e some se os links não puderem ser lidos em 8 s, para não duplicar cobrança. A sheet mostra nome, valor e desde quando."
+  note: "Regra em lib/utils/next_charge.dart: dívidas dos últimos 90 dias, mais antiga primeiro; depois as mais velhas, mais nova primeiro; sem data no fim; adiados ficam fora. Pula quem já tem link de cobrança aberto (do cliente ou de qualquer OS em aberto) e some se os links não puderem ser lidos em 8 s, para não duplicar cobrança. A sheet mostra nome, valor e desde quando. Web: lib/finance/next-charge.ts com os devedores do servidor (/finance/summary); links lidos no Firestore (customerCharges e charges das OS em aberto), 8 s ou erro esconde."
 - id: fin.tab.next-charge-send
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6681,10 +6710,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [share_sheet]
   data: ["companies/{id}/orders", "api:POST /v1/app/orders/{id}/charges", "api:POST /v1/app/customers/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Com Asaas e várias OS do cliente: uma cobrança só na tela Receber do cliente (startCharge). Sem Asaas que cobre ou sem cliente: escolhe a OS e roda o envio de cobrança (gera cobrança Asaas e compartilha o link, ou compartilha o link da OS). Segundo toque ignorado enquanto roda."
+  note: "Com Asaas e várias OS do cliente: uma cobrança só na tela Receber do cliente (startCharge). Sem Asaas que cobre ou sem cliente: escolhe a OS e roda o envio de cobrança (gera cobrança Asaas e compartilha o link, ou compartilha o link da OS). Segundo toque ignorado enquanto roda. Web: várias OS com Asaas abre Receber do cliente já na cobrança; uma OS com Asaas abre a cobrança da OS; sem Asaas abre Mandar com o link da OS. Segundo clique ignorado enquanto roda."
 - id: fin.tab.next-charge-snooze
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6698,10 +6728,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["local"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Guardado em SharedPreferences: não segue o usuário entre aparelhos."
+  note: "Guardado em SharedPreferences: não segue o usuário entre aparelhos. Diferença registrada: no app fica no aparelho (SharedPreferences); no web fica neste navegador, por empresa (localStorage praticos.nextChargeSnooze.{empresa}), 30 dias, sem servidor novo. Não segue a pessoa entre computadores."
 - id: fin.tab.receivable
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -7440,11 +7471,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/devices"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: Recentes, placa e ✓ no atual por id (pickers.spec.ts). Falta o ✓ por nome+telefone de registro antigo sem id."
+  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: Recentes, placa e ✓ no atual por id (pickers.spec.ts). Falta o ✓ por nome+telefone de registro antigo sem id. Fechamento: ✓ por id, e registro antigo sem id por nome + telefone ou nome único (currentCustomerId em lib/orders/assist-draft.ts)."
 - id: customer.picker.create
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_form"
