@@ -243,7 +243,7 @@ async function sendNotification(
         },
         data: payload.data,
         webpush: {
-          notification: { icon: `${WEB_APP_ORIGIN}/logo.png` },
+          notification: { icon: `${WEB_APP_URL}notification-icon.png` },
           fcmOptions: { link: webPushLink(payload.data) },
         },
       });

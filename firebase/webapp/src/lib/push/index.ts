@@ -8,6 +8,36 @@ import { readStorage, writeStorage } from '@/lib/storage'
 const ASKED = 'praticos.push.asked'
 /** This browser's id in users/{uid}.fcmTokens (the app uses the phone's). */
 export const DEVICE_KEY = 'praticos.push.device'
+/** The account this browser's token was saved for. */
+export const OWNER_KEY = 'praticos.push.owner'
+
+/**
+ * Shared computer: the token goes to `uid` only if it was never someone
+ * else's. Another person signed in here (or the last one's session ended
+ * without "Sair", so their token was never removed): the old token is dropped
+ * first and this browser gets a new id, so B never gets A's notices.
+ * Resolves with the device id to save the new token under.
+ */
+export async function claimBrowser(uid: string, dropToken: () => Promise<void>): Promise<string> {
+  const owner = readStorage(OWNER_KEY)
+  let device = readStorage(DEVICE_KEY)
+  if (device && owner !== uid) {
+    await dropToken()
+    device = null
+  }
+  if (!device) {
+    device = `web-${crypto.randomUUID()}`
+    writeStorage(DEVICE_KEY, device)
+  }
+  writeStorage(OWNER_KEY, uid)
+  return device
+}
+
+/** Signed out with the token removed: nobody owns this browser's (deleted) token any more. */
+export function releaseBrowser(): void {
+  writeStorage(OWNER_KEY, '')
+  writeStorage(DEVICE_KEY, '')
+}
 
 type PushEnv = Pick<ImportMetaEnv, 'VITE_FIREBASE_VAPID_KEY' | 'VITE_FIREBASE_MESSAGING_SENDER_ID' | 'VITE_FIREBASE_APP_ID'>
 

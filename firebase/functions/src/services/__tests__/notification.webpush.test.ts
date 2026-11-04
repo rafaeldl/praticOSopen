@@ -57,7 +57,7 @@ describe('notification.service - Web Push', () => {
       notification: NATIVE_MESSAGE.notification,
       data: NATIVE_MESSAGE.data,
       webpush: {
-        notification: { icon: 'https://praticos.app/logo.png' },
+        notification: { icon: 'https://praticos.app/app/notification-icon.png' },
         fcmOptions: { link: 'https://praticos.app/app/?order=o1&company=c1' },
       },
     });

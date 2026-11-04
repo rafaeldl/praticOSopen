@@ -165,3 +165,27 @@ test('aviso com a página na tela aparece dentro dela e o sino conta de novo', a
   await expect(bell).toHaveAccessibleName(new RegExp(`Avisos, ${before + 1} novos?`))
   await writeDoc(`notifications/${id}`, { read: true }, true)
 })
+
+test('computador compartilhado: quem entra depois nunca herda o token de quem não saiu', async ({ page }) => {
+  // The last person (another account) left this browser without "Sair"; notifications already allowed.
+  await page.context().grantPermissions(['notifications'])
+  await page.addInitScript(() => {
+    Object.defineProperty(Notification, 'permission', { get: () => 'granted', configurable: true })
+    if (!sessionStorage.getItem('seeded')) {
+      sessionStorage.setItem('seeded', '1')
+      localStorage.setItem('praticos.push.device', 'web-left-behind')
+      localStorage.setItem('praticos.push.owner', 'e2e-someone-else')
+    }
+  })
+  await login(page, 'admin')
+  await expect(page.getByTestId('orders-table')).toBeVisible()
+
+  // Signed in with permission: this browser joins the account, under a new id and token.
+  await expect.poll(async () => (await entriesOf(page)).length).toBe(1)
+  const [entry] = await entriesOf(page)
+  expect(entry?.deviceId).not.toBe('web-left-behind')
+  expect(entry?.token).not.toContain('web-left-behind')
+  expect(await page.evaluate(() => localStorage.getItem('praticos.push.owner'))).toBe(ADMIN)
+  const all = ((await readUser(ADMIN))?.fcmTokens as Entry[] | undefined) ?? []
+  expect(all.filter((t) => t.deviceId === 'web-left-behind')).toEqual([])
+})

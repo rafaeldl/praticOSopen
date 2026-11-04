@@ -9,15 +9,21 @@
 ;(function (scope) {
   var BASE = new URL('./', scope.location).pathname
 
-  /** The route of a push: the server's link (same site only), else the order of the data, else the start. */
+  /**
+   * The route of a push: the server's link (fcmOptions.link, or
+   * notification.click_action, where FCM may put it), only inside /app; else
+   * the order of the data; else the start.
+   */
   function linkOf(payload) {
     var options = payload.fcmOptions || payload.fcm_options || {}
-    if (options.link) {
+    var candidates = [options.link, (payload.notification || {}).click_action]
+    for (var i = 0; i < candidates.length; i++) {
+      if (!candidates[i]) continue
       try {
-        var url = new URL(options.link, scope.location.origin)
+        var url = new URL(candidates[i], scope.location.origin)
         if (url.pathname.indexOf(BASE) === 0) return url.pathname + url.search
       } catch (error) {
-        // An odd link falls back to the data.
+        // An odd link falls back to the next one, then to the data.
       }
     }
     var data = payload.data || {}
@@ -65,7 +71,7 @@
         }
         return scope.registration.showNotification(title, {
           body: body,
-          icon: notification.icon || '/logo.png',
+          icon: notification.icon || BASE + 'notification-icon.png',
           // One notification per order: a new one replaces the previous.
           tag: data.orderId ? 'order-' + data.orderId : undefined,
           data: { link: linkOf(payload) },
