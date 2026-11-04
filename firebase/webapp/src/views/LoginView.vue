@@ -7,7 +7,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
 import { t, type MessageKey } from '@/i18n'
-import { emailErrorKey } from '@/lib/auth-errors'
+import { emailErrorKey, isSignupBlocked, resetEmailErrorKey } from '@/lib/auth-errors'
 import { sendPasswordReset, session, signInWithEmail, signInWithProvider, type ProviderKind } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 
@@ -16,6 +16,7 @@ const router = useRouter()
 const showEmail = ref(false)
 const email = ref('')
 const password = ref('')
+const passwordShown = ref(false)
 const busy = ref(false)
 const error = ref<MessageKey | null>(null)
 const resetOpen = ref(false)
@@ -45,15 +46,16 @@ async function withProvider(kind: ProviderKind) {
     if (result === 'done') await enter()
   } catch (cause) {
     console.warn('login: provider failed', cause)
-    error.value = PROVIDER_ERRORS[kind]
+    error.value = isSignupBlocked(cause) ? 'web.login.signupBlocked' : PROVIDER_ERRORS[kind]
   } finally {
     busy.value = false
   }
 }
 
 async function submitEmail() {
-  if (!email.value.trim()) {
-    error.value = 'emailLoginEmailRequired'
+  const emailProblem = resetEmailErrorKey(email.value)
+  if (emailProblem) {
+    error.value = emailProblem
     return
   }
   if (!password.value) {
@@ -79,6 +81,8 @@ function openReset() {
 }
 
 async function sendReset(close: () => void) {
+  resetError.value = resetEmailErrorKey(resetEmail.value)
+  if (resetError.value) return
   try {
     await sendPasswordReset(resetEmail.value.trim())
     close()
@@ -132,11 +136,23 @@ onMounted(() => {
           </div>
           <div>
             <label class="field-label" for="login-password">{{ t('password') }}</label>
-            <input id="login-password" v-model="password" class="field" type="password" autocomplete="current-password" />
+            <div class="entry-password">
+              <input id="login-password" v-model="password" class="field" :type="passwordShown ? 'text' : 'password'" autocomplete="current-password" />
+              <button
+                type="button"
+                class="link entry-reveal"
+                :aria-pressed="passwordShown"
+                aria-controls="login-password"
+                data-testid="toggle-password"
+                @click="passwordShown = !passwordShown"
+              >
+                {{ passwordShown ? t('hidePassword') : t('showPassword') }}
+              </button>
+            </div>
           </div>
           <button class="btn btn--wide" type="submit" :disabled="busy">{{ busy ? t('emailLoginSigningIn') : t('signIn') }}</button>
           <button type="button" class="link entry-link" @click="openReset">{{ t('forgotPasswordQuestion') }}</button>
-          <p class="sub">{{ t('emailLoginNewAccountHint') }}</p>
+          <p class="sub" data-testid="new-account-hint">{{ t('emailLoginNewAccountHint') }}</p>
         </form>
         <p class="sub entry-terms">
           {{ t('byContinuingYouAgree') }}
@@ -147,14 +163,14 @@ onMounted(() => {
   </div>
 
   <Layer v-if="resetOpen" v-slot="{ close }" :label="t('resetPasswordTitle')" @close="resetOpen = false">
-    <form class="layer-body" @submit.prevent="sendReset(close)">
+    <form class="layer-body" novalidate @submit.prevent="sendReset(close)">
       <h2 class="layer-title">{{ t('resetPasswordTitle') }}</h2>
       <p class="muted">{{ t('resetPasswordMessage') }}</p>
       <div>
         <label class="field-label" for="reset-email">{{ t('email') }}</label>
-        <input id="reset-email" v-model="resetEmail" class="field" type="email" autocomplete="email" data-autofocus />
+        <input id="reset-email" v-model="resetEmail" class="field" type="email" autocomplete="email" :aria-invalid="!!resetError" aria-describedby="reset-error" data-autofocus />
       </div>
-      <p v-if="resetError" class="field-error" role="alert">{{ t(resetError) }}</p>
+      <p v-if="resetError" id="reset-error" class="field-error" role="alert">{{ t(resetError) }}</p>
       <div class="layer-foot layer-foot--inline">
         <button type="button" class="btn" @click="close">{{ t('cancel') }}</button>
         <button type="submit" class="btn btn--primary">{{ t('send') }}</button>

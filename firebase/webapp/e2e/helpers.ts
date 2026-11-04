@@ -9,7 +9,15 @@ const EMAIL_LOGIN = /^(Já tenho conta com e-mail|I already have an account with
 const EMAIL = /^(E-mail|Email|Correo)$/
 const SIGN_IN = /^(Entrar|Sign In|Iniciar Sesión)$/
 
-export async function login(page: Page, user: UserKey, path = './') {
+/**
+ * The seeded people are shared by tests running at the same time, and changing
+ * the language in Configurações writes it to the account (users.preferredLanguage),
+ * which a fresh browser then follows. Each test starts as a browser where the
+ * language was already picked, so one test's choice never reaches another's
+ * screen. `followAccountLanguage` leaves that out (e2e/entry.spec.ts).
+ */
+export async function login(page: Page, user: UserKey, path = './', options: { followAccountLanguage?: boolean } = {}) {
+  if (!options.followAccountLanguage) await page.addInitScript(() => localStorage.setItem('praticos.languageChosen', '1'))
   await page.goto(path)
   await page.getByRole('button', { name: EMAIL_LOGIN }).click()
   await page.getByLabel(EMAIL).fill(USERS[user].email)

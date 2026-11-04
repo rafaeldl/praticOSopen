@@ -15,6 +15,8 @@ export interface CustomField {
 
 export interface SegmentDoc {
   customFields?: CustomField[]
+  /** The segment's default for "Atendimento no local" (company.fieldService absent). */
+  fieldService?: boolean
 }
 
 /** Label keys of the app (_getFromArb) that have a message here. */
@@ -126,4 +128,10 @@ export function segmentLabels(): Record<string, string> {
 
 export function segmentDocs(): readonly (SegmentDoc | null)[] {
   return state.docs
+}
+
+/** The company's segment default for fieldService, null until it loads (segment_config_service.dart). */
+export function segmentFieldService(): boolean | null {
+  const value = state.docs[1]?.fieldService
+  return typeof value === 'boolean' ? value : null
 }

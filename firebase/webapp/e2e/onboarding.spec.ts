@@ -50,7 +50,8 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
     segment: 'automotive',
     subspecialties: ['cars'],
     useScheduling: true,
-    fieldService: true,
+    // The segment default (segments/automotive in the seed: a workshop).
+    fieldService: false,
     useFinancial: true,
     country: 'BR',
     termsOfService: 'Garantia de 90 dias para o serviço.',

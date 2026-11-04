@@ -24,6 +24,8 @@ const ai = shallowRef<AiStatus | null>(null)
 const aiFailed = ref(false)
 
 const country = computed(() => session.company?.country)
+// Who cannot change the plan is told who can (plan.non-admin-note), as the app with paid plans.
+const isAdmin = computed(() => session.role === 'owner' || session.role === 'admin')
 const count = (value: number) => formatNumber(value, country.value)
 
 const header = computed(() => {
@@ -146,6 +148,7 @@ onMounted(() => {
           </p>
         </section>
         <p class="role-note">{{ t('web.plan.readOnly') }}</p>
+        <p v-if="!isAdmin" class="role-note" data-testid="plan-ask-admin">{{ t('askAdminToChangePlan') }}</p>
       </template>
     </div>
   </div>

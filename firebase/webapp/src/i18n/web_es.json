@@ -780,5 +780,7 @@
   "web.palette.create": "Registrar",
   "web.when.quickLabel": "Escribe el día y la hora",
   "web.when.quickHint": "Ej.: mañana 14h, +3, lun 8:30, 9/5 14h. ↑ ↓ cambia el día; Shift ↑ ↓, media hora.",
-  "web.when.quickError": "No lo entendí. Prueba: mañana 14h, +3, lun 8:30 o 9/5 14h."
+  "web.when.quickError": "No lo entendí. Prueba: mañana 14h, +3, lun 8:30 o 9/5 14h.",
+  "web.login.signupBlocked": "El registro no fue aceptado. Si ya tienes cuenta, entra con ella; si no, habla con el soporte de PraticOS.",
+  "web.invites.joining": "Entrando…"
 }
