@@ -25,6 +25,7 @@ function options(): FirebaseOptions {
     projectId,
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
     appId: env.VITE_FIREBASE_APP_ID,
+    messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   }
 }
 

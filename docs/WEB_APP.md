@@ -264,6 +264,19 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Sua conta**: perfil, trocar de empresa, código de convite, sair e apagar a conta (pela função `accountApi`, `docs/ACCOUNT_DELETION.md`).
 - **Integrações**: Asaas (piloto) e conexões do ChatGPT e do Claude.
 
+### Avisos do navegador
+
+`src/lib/push/`, `public/firebase-messaging-sw.js`.
+
+- **O que chega:** os mesmos avisos que o celular recebe do servidor (orçamento aprovado ou recusado, comentário, avaliação, pagamento, manutenção chegando, fim da cortesia), por Web Push pelo FCM.
+- **Quando pede:** depois de salvar a Nova OS ou de marcar visita numa OS salva, uma vez por navegador, enquanto ele não respondeu. Primeiro um aviso ("Avisos do PraticOS", "Continuar" ou "Agora não"), depois a pergunta do próprio navegador. Nunca na entrada. Na Nova OS com veículo fica para a próxima, porque a OS vai perguntar do checklist ou da manutenção.
+- **Token:** em `users/{uid}.fcmTokens`, no mesmo formato do app, com `platform: 'web'` e um `deviceId` deste navegador (`localStorage`). A cada entrada com permissão dada, o web confere o token. Sair da conta tira o token (até 3 segundos, sem segurar a saída).
+- **Clique:** o service worker (escopo `/app/`, sem código do Firebase) foca uma aba aberta e manda abrir a OS, ou abre `/app/?order={id}&company={id}`. O roteador abre a OS só se for da empresa em uso; de outra empresa, fica no Início, como o app.
+- **Com a página na tela:** o sistema não mostra nada; aparece um aviso dentro da página e o sino conta de novo.
+- **Configuração:** só funciona com `VITE_FIREBASE_VAPID_KEY` (chave pública do par de chaves Web Push, no console do Firebase › Cloud Messaging), `VITE_FIREBASE_MESSAGING_SENDER_ID` (número do projeto) e `VITE_FIREBASE_APP_ID` (app web registrado no projeto). Sem as três, o recurso fica escondido, sem erro.
+- **Lembretes não vêm:** os do app (antes da visita, resumo do dia, dias sem abrir, OS paradas) são agendados no próprio celular. Mandar pelo servidor duplicaria no celular; para ter no web, os lembretes do app precisariam ir para o servidor.
+- **Teste:** o emulador não entrega push. O build E2E usa um token fixo, o E2E (`e2e/push.spec.ts`) testa o pedido, o token, o clique e o aviso com a página na tela; o service worker é testado em `tests/push.test.ts`.
+
 ### PDF, impressão e paleta
 
 - **PDF da OS** (`src/lib/pdf/`): "Ver PDF" na OS e "PDF" no lote. Montado no navegador com `pdf-lib` e `qrcode-generator`, baixados só nesse momento. Mesmo desenho do app (`docs/PDF_GENERATION.md`), com os textos `pdf*` dos `.arb`. Sem `viewPrices`, sai sem valores. Caracteres fora do WinAnsi usam a Roboto do app, embutida só quando precisa.
@@ -310,7 +323,7 @@ O que trouxe o tempo de 2,6 s para 1,1 s: servir com brotli, ler usuário e empr
 
 | Guarda | Onde |
 |---|---|
-| JS da entrada até 200 KB, até a lista até 240 KB, Firestore completo fora do caminho até a lista | `scripts/check-budget.mjs` |
+| JS da entrada até 200 KB, até a lista até 240 KB, Firestore completo e Firebase Messaging fora do caminho até a lista | `scripts/check-budget.mjs` |
 | Scripts inline com hash na CSP | `scripts/check-csp.mjs` |
 | Acessibilidade 100, performance 90, LCP 2,5 s, CLS 0,1, TBT 300 ms | `lighthouserc.json` |
 | axe sem violação em claro e escuro | `e2e/a11y.spec.ts` |
@@ -340,7 +353,7 @@ Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/app/dev
 
 ## Deploy
 
-`firebase-hosting-deploy.yml` compila o site e depois a SPA (`npm run build:hosting`, que vai para `firebase/hosting/public/app`). Dispara também com mudanças em `firebase/webapp/**`. A configuração de produção (`.env.production`) só tem valores públicos.
+`firebase-hosting-deploy.yml` compila o site e depois a SPA (`npm run build:hosting`, que vai para `firebase/hosting/public/app`). Dispara também com mudanças em `firebase/webapp/**`. A configuração de produção (`.env.production`) só tem valores públicos. Os avisos do navegador precisam de mais três, também públicos (ver "Avisos do navegador").
 
 **Ordem:** a Function `api`, com a rota `/v1/app/web-access` e as rotas que uma tela nova usa, precisa estar no ar **antes** do Hosting. As Functions saem por outro workflow (`firebase-functions-deploy.yml`): num PR que mude os dois, confirme que o das Functions terminou.
 
@@ -391,6 +404,7 @@ Do dono:
 Técnicas, esperando outra peça:
 
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
-- **Lembretes:** no app são notificações locais; no web, só com Web Push.
+- **Avisos do navegador:** gerar o par de chaves Web Push no console do Firebase (Cloud Messaging), registrar o app web e pôr `VITE_FIREBASE_VAPID_KEY`, `VITE_FIREBASE_MESSAGING_SENDER_ID` e `VITE_FIREBASE_APP_ID` em `.env.production`.
+- **Lembretes no web:** no app são notificações locais do celular; para chegarem ao navegador, os lembretes do app teriam de ir para o servidor (senão o celular recebe dois).
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
 - **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.

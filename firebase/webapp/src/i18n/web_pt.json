@@ -813,5 +813,6 @@
   "web.nfse.percentInvalid": "Use um número de 0 a 100, como 2 ou 2,5.",
   "web.nfse.autoConfirmTitle": "Emitir as notas sozinho?",
   "web.nfse.autoConfirm": "Emitir sozinho",
-  "web.nfse.rowError": "não deu para ver as notas desta OS"
+  "web.nfse.rowError": "não deu para ver as notas desta OS",
+  "web.push.promptMessage": "O PraticOS avisa neste navegador quando o cliente aprova um orçamento, comenta numa OS ou paga. O navegador vai perguntar se pode mandar esses avisos."
 }

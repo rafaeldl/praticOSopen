@@ -430,6 +430,12 @@ let signingOut = false
 export async function signOutEverywhere(): Promise<void> {
   const [auth, { signOut }] = await Promise.all([authClient(), import('firebase/auth')])
   signingOut = true
+  // This browser stops getting the account's notifications (still signed in, so it may write). Never holds the exit.
+  const uid = session.uid
+  if (uid) {
+    const forget = import('@/lib/push').then((push) => push.forgetThisBrowser(uid))
+    await Promise.race([forget, new Promise((done) => setTimeout(done, 3000))]).catch((error) => console.warn('push: not forgotten', error))
+  }
   await signOut(auth)
   clear()
   await clearCachedData()

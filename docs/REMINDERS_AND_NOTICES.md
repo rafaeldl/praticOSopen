@@ -34,6 +34,15 @@ OS nova → sem id até o "✓" → createItem(onCreated) → scheduleReminder
 5. **Checklist de entrada.** Oferecido só no ramo `automotive`, em OS com veículo, com id, sem contrato e para quem pode mexer em checklists. Depois de 3 "Agora não" seguidos a oferta para (`checklist_offer_declined` em `SharedPreferences`). Offline a OS não recebe id em 3 segundos, e a oferta não aparece.
 6. **Próxima manutenção.** Ao concluir a OS, a pergunta segue o mesmo padrão de 3 recusas seguidas. Na Nova OS salva já concluída, ela toma o lugar do checklist. Ver `docs/DEVICE_NEXT_MAINTENANCE.md`.
 
+## Avisos no navegador (app web)
+
+O servidor (`firebase/functions/src/services/notification.service.ts`, `sendNotification`) separa os tokens de `users/{id}.fcmTokens` pela `platform`:
+
+- `ios`, `android` ou sem `platform` (tokens antigos): a mesma mensagem de sempre, com `android` e `apns`.
+- `web`: outra mensagem, com o mesmo título, texto e `data`, e `webpush.fcmOptions.link` para a tela do web (`https://praticos.app/app/?order={id}&company={id}`, ou `/app/` sem OS).
+
+Uma falha em qualquer das duas conta como falha do push (o aviso de cortesia tenta de novo). O teste `notification.webpush.test.ts` confere que a mensagem dos celulares não mudou. Os lembretes deste documento continuam só no celular. Ver `docs/WEB_APP.md`, "Avisos do navegador".
+
 ## Exemplos de Uso
 
 ```dart

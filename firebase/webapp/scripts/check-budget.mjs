@@ -93,6 +93,9 @@ if (!dist.endsWith('dist-e2e')) {
     .filter((file) => file.endsWith('.js') && readFileSync(resolve(dist, file), 'utf8').includes('127.0.0.1'))
   if (leaked.length) failures.push(`código do emulador no bundle de produção: ${leaked.join(', ')}`)
 }
+// Browser notifications (lib/push/token.ts) load Messaging only once allowed.
+const messaging = entries.find(([key]) => key.includes('node_modules/firebase/messaging/'))?.[0]
+if (messaging && closure(listKeys).has(messaging)) failures.push('Firebase Messaging entrou no caminho até a lista')
 if (initial.total > INITIAL_LIMIT_KB * 1024) failures.push(`JS inicial passou de ${INITIAL_LIMIT_KB} KB`)
 if (list.total > LIST_LIMIT_KB * 1024) failures.push(`JS até a lista passou de ${LIST_LIMIT_KB} KB`)
 if (failures.length) {

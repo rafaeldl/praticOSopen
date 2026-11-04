@@ -26,6 +26,8 @@ export const ui = reactive({
   },
   /** Money said to the assistant on a Nova OS: the "Confere?" card opens on that order once it exists (order.ai.money-card). */
   aiActionsFor: null as null | { orderId: string; actions: DraftActions; nfse: NfseMoment | null },
+  /** Goes up when a notification arrives with the page on screen: the bell counts again. */
+  noticesChanged: 0,
 })
 
 export function announce(text: string): void {

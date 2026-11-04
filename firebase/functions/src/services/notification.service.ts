@@ -13,6 +13,25 @@ import { db } from './firestore.service';
 import { Order, OrderComment, Company, UserAggr, RoleType } from '../models/types';
 import { maskTokenForLog } from '../utils/log-redaction.utils';
 
+/**
+ * Where the web app lives. A token saved by the browser (platform 'web',
+ * firebase/webapp/src/lib/push) gets a webpush message whose click opens this.
+ */
+const WEB_APP_ORIGIN = 'https://praticos.app';
+const WEB_APP_URL = `${WEB_APP_ORIGIN}/app/`;
+
+/**
+ * The screen a browser notification opens: the order in its company (the web
+ * ignores an order of another company, like the app's tap handler), or the
+ * start of the web app.
+ */
+export function webPushLink(data: Record<string, string> | undefined): string {
+  if (!data?.orderId) return WEB_APP_URL;
+  const query = new URLSearchParams({ order: data.orderId });
+  if (data.companyId) query.set('company', data.companyId);
+  return `${WEB_APP_URL}?${query.toString().replace(/\+/g, '%20')}`;
+}
+
 // Types for notification recipients
 interface NotificationRecipient {
   userId: string;
@@ -118,7 +137,10 @@ async function sendNotification(
   console.log(`[NOTIFICATION] Recipients: ${recipients.map(r => r.name).join(', ')}`);
   console.log(`[NOTIFICATION] Data:`, payload.data);
 
+  // Phones (ios, android, or saved before the platform existed) and browsers
+  // get different messages: the phones' one must not change.
   const allTokens: string[] = [];
+  const webTokens: string[] = [];
 
   // Save notification to Firestore and collect FCM tokens
   for (const recipient of recipients) {
@@ -149,10 +171,11 @@ async function sendNotification(
       if (userDoc.exists) {
         const userData = userDoc.data();
         if (userData?.fcmTokens && Array.isArray(userData.fcmTokens)) {
-          const tokens = userData.fcmTokens
-            .filter((t: { token?: string }) => t.token)
-            .map((t: { token: string }) => t.token);
-          allTokens.push(...tokens);
+          for (const entry of userData.fcmTokens as { token?: string; platform?: string }[]) {
+            if (!entry?.token) continue;
+            if (entry.platform === 'web') webTokens.push(entry.token);
+            else allTokens.push(entry.token);
+          }
         }
       }
     } catch (error) {
@@ -205,8 +228,30 @@ async function sendNotification(
       delivery.pushFailed = true;
       console.error('[NOTIFICATION] Error sending FCM:', error);
     }
-  } else {
+  } else if (webTokens.length === 0) {
     console.log('[NOTIFICATION] No FCM tokens available for recipients');
+  }
+
+  // Browsers: the same title, body and data, and the screen the click opens.
+  if (webTokens.length > 0) {
+    try {
+      const response = await getMessaging().sendEachForMulticast({
+        tokens: webTokens,
+        notification: {
+          title: payload.title,
+          body: payload.body,
+        },
+        data: payload.data,
+        webpush: {
+          notification: { icon: `${WEB_APP_ORIGIN}/logo.png` },
+          fcmOptions: { link: webPushLink(payload.data) },
+        },
+      });
+      console.log(`[NOTIFICATION] Web push sent: ${response.successCount} success, ${response.failureCount} failed`);
+    } catch (error) {
+      delivery.pushFailed = true;
+      console.error('[NOTIFICATION] Error sending web push:', error);
+    }
   }
   return delivery;
 }
