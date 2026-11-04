@@ -163,6 +163,7 @@ Os componentes base aparecem em `/app/dev/components`, só nos builds de emulado
 | `⌘/Ctrl K` | Paleta: buscar e comandos | Sempre |
 | `?` | Lista de atalhos | Fora de campo |
 | `N` | Nova OS | Fora de campo |
+| `0`–`9` | Abre a paleta com o número (achar a OS) | Fora de campo |
 | `/` | Buscar na lista | Listas |
 | `↓` / `↑` ou `J` / `K` | Próxima ou anterior, abrindo no painel | Lista de OS |
 | `Enter` | Levar o foco para o painel | Lista de OS |
@@ -172,7 +173,12 @@ Os componentes base aparecem em `/app/dev/components`, só nos builds de emulado
 | `C` | Trocar o cliente | OS aberta |
 | `D` | Agendar a visita | OS aberta |
 | `M` | Mandar para o cliente | OS aberta |
-| `R` | Receber | OS aberta |
+| `R` | Receber (valor que falta e a forma do último pagamento já vêm; `Enter` confirma) | OS aberta |
+| `P` | Próximo passo (o botão azul) | OS aberta |
+| `W` | Mandar pelo WhatsApp direto (sem telefone, abre "Mandar") | OS aberta |
+| `-` | Dar desconto | OS aberta |
+| `↑` / `↓`, `Home` / `End`, primeira letra | Andar nas opções de uma pergunta ("Qual a situação?", menu "…") | Lista de opções |
+| `↑` / `↓` (`Shift`: meia hora) | Mudar o dia da data digitada | Agendar e prazo |
 | `⌘/Ctrl Enter` | Salvar | Gaveta e formulário |
 | `←` / `→` | Período anterior e seguinte | Agenda, Financeiro, Relatório, Notas |
 | `T` | Hoje | Agenda |
@@ -185,6 +191,10 @@ Regras:
 - Nada captura `Ctrl+F`, `Ctrl+P`, `Ctrl+L`, `Ctrl+T`, `Ctrl+W` nem as setas do leitor de tela.
 - Foco visível em `--color-focus`, 2 px, sem animação; na barra lateral, amarelo. Barra fixa nunca cobre o foco (2.4.11).
 - Abrir camada leva o foco para dentro; fechar devolve para quem abriu.
+- Escolha sugerida vem pronta para `Enter`: no campo de busca vazio a primeira sugestão (ou a atual, ✓) já está ativa; em campo opcional sem sugestão, `Enter` segue para o próximo campo. Em "Mandar" o foco abre no WhatsApp. O botão azul segue o que a pessoa fez da última vez a partir daquela situação (ex.: Aprovado → Concluído), só para frente e só se permitido.
+- Na paleta, ações que batem com o texto ("desc" → Dar desconto, "cli" → Novo cliente) vêm antes dos registros; "Cadastrar cliente «texto»" fica por último.
+- Data digitada: "amanhã 14h", "+3", "seg 8:30", "9/5 14h" (em inglês, mês/dia e "2pm"); o seletor nativo continua embaixo e mostra o que foi entendido.
+- Pergunta que não bloqueia (próxima manutenção) fica dentro da OS, não por cima.
 - Mudança de lista avisa o leitor de tela por `aria-live`, com a contagem.
 
 ## Nova OS em menos de 45 segundos

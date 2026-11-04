@@ -7,6 +7,8 @@ export const ui = reactive({
   /** Text for the polite aria-live region. */
   live: '',
   palette: false,
+  /** Text the palette opens with (a digit typed on a screen). */
+  paletteQuery: '',
   shortcuts: false,
   /** Nova OS drawer, over any screen (key N, the + of the shell). */
   newOrder: false,

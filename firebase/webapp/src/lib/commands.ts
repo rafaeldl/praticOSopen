@@ -12,6 +12,8 @@ export interface Command {
   icon?: Component
   keys?: string
   run: () => void
+  /** Offered only while this holds (an order is open and allows it). */
+  when?: () => boolean
 }
 
 export const commands = shallowReactive(new Map<string, Command>())
@@ -24,7 +26,7 @@ export function registerCommand(command: Command): () => void {
 }
 
 export function searchCommands(query: string, label: (key: MessageKey) => string): Command[] {
-  const all = [...commands.values()]
+  const all = [...commands.values()].filter((command) => !command.when || command.when())
   const text = query.trim()
   return text ? all.filter((command) => matchesWords(label(command.label), text)) : all
 }

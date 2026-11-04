@@ -11,6 +11,8 @@ export interface Shortcut {
   run: () => void
   /** Still works while a layer is open. */
   global?: boolean
+  /** Shown in the help instead of the key, once for every key with the same text ("0–9"). */
+  display?: string
 }
 
 export const shortcuts = shallowReactive(new Map<string, Shortcut>())
@@ -48,5 +50,15 @@ export function handleShortcut(event: KeyboardEvent): void {
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
 export function shortcutLabel(keys: string): string {
-  return keys.replace('mod+', isMac ? '⌘ ' : 'Ctrl ').replace('arrowleft', '←').replace('arrowright', '→').toUpperCase()
+  return keys.replace('mod+', isMac ? '⌘ ' : 'Ctrl ').replace('arrowleft', '←').replace('arrowright', '→').replace('arrowup', '↑').replace('arrowdown', '↓').toUpperCase()
+}
+
+/** Rows of the help dialog ("?"): one per label and key text. */
+export function shortcutRows(): { label: MessageKey; keys: string }[] {
+  const rows = new Map<string, { label: MessageKey; keys: string }>()
+  for (const item of shortcuts.values()) {
+    const keys = item.display ?? shortcutLabel(item.keys)
+    rows.set(`${item.label} ${keys}`, { label: item.label, keys })
+  }
+  return [...rows.values()]
 }

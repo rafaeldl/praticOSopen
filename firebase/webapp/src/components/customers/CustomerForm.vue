@@ -47,6 +47,8 @@ const initial = {
   custom: Object.fromEntries(fields.map((field) => [field.key.split('.').pop() as string, readCustom(props.customer?.customData, field) ?? null])) as Record<string, unknown>,
 }
 const form = reactive({ ...initial, custom: { ...initial.custom } })
+// Name already typed (in the search or ⌘K): the cursor starts on the phone.
+const startOnPhone = !editing && !!initial.name.trim() && !initial.phone
 // Fields of a segment that arrived after the form opened: they come with what the record already has.
 watch(fieldList, (list) => {
   for (const field of list) {
@@ -171,11 +173,11 @@ function guard(): boolean {
         <p v-if="failed" class="field-error" role="alert">{{ failed }}</p>
         <div>
           <label class="field-label" for="cf-name">{{ label('customer.name') }}</label>
-          <input id="cf-name" v-model="form.name" class="field" autocomplete="off" :placeholder="t('customerNamePlaceholder')" :aria-invalid="tried && !form.name.trim()" data-autofocus />
+          <input id="cf-name" v-model="form.name" class="field" autocomplete="off" :placeholder="t('customerNamePlaceholder')" :aria-invalid="tried && !form.name.trim()" :data-autofocus="startOnPhone ? undefined : ''" />
         </div>
         <div>
           <label class="field-label" for="cf-phone">{{ t('customerPhoneLabel') }}</label>
-          <input id="cf-phone" :value="form.phone" class="field" type="tel" inputmode="tel" autocomplete="off" aria-describedby="cf-phone-hint" @input="onPhone" />
+          <input id="cf-phone" :value="form.phone" class="field" type="tel" inputmode="tel" autocomplete="off" aria-describedby="cf-phone-hint" :data-autofocus="startOnPhone ? '' : undefined" @input="onPhone" />
           <p id="cf-phone-hint" class="sub field-hint">{{ t('customerPhoneHint') }}</p>
         </div>
         <details class="more-options" :open="more" @toggle="more = ($event.target as HTMLDetailsElement).open">

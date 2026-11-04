@@ -6,13 +6,16 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { t } from '@/i18n'
 import { searchAll, type Command } from '@/lib/commands'
-import { directoryResults, groupLabel, groupOf, GROUPS, loadDirectory, ordersByNumber, screenCommands, type Directory } from '@/lib/global-search'
+import { createResults, directoryResults, groupLabel, loadDirectory, ordersByNumber, screenCommands, type Directory } from '@/lib/global-search'
+import { paletteGroups } from '@/lib/palette-order'
 import { shortcutLabel } from '@/lib/shortcuts'
 import { matchesWords } from '@/lib/text'
 import { ui } from '@/lib/ui'
 import Layer from './Layer.vue'
 
-const query = ref('')
+// A digit typed on a screen opens the palette with it (orders by number).
+const query = ref(ui.paletteQuery)
+ui.paletteQuery = ''
 const active = ref(0)
 const directory = shallowRef<Directory>({ customers: [], devices: [], catalog: [] })
 const byNumber = shallowRef<Command[]>([])
@@ -29,15 +32,20 @@ const results = computed(() => {
   const text = query.value.trim()
   const fromScreen = searchAll(query.value, (key) => t(key))
   const actions = text ? screens.filter((command) => matchesWords(command.text ?? '', text)) : []
-  const all = [...fromScreen, ...byNumber.value, ...directoryResults(directory.value, text), ...actions]
+  const all = [...fromScreen, ...byNumber.value, ...directoryResults(directory.value, text), ...actions, ...createResults(directory.value, text)]
   // The screen's own result wins over the same record found again.
   const seen = new Set<string>()
   const unique = all.filter((command) => !seen.has(command.id) && !!seen.add(command.id))
-  return GROUPS.map((group) => ({ group, label: groupLabel(group), items: unique.filter((command) => groupOf(command) === group).slice(0, 6) })).filter(
-    (entry) => entry.items.length,
-  )
+  // A customer with this exact name was found (also by the screen, newer than the directory): no offer to register it again.
+  const same = (name: string | undefined) => !!name && name.localeCompare(text, undefined, { sensitivity: 'base' }) === 0
+  if (unique.some((command) => command.id.startsWith('customer:') && same(command.text))) {
+    return paletteGroups(text, unique.filter((command) => !command.id.startsWith('create:'))).map((entry) => ({ ...entry, label: groupLabel(entry.group) }))
+  }
+  // Actions first when the text names one; the offer to register comes last.
+  return paletteGroups(text, unique).map((entry) => ({ ...entry, label: groupLabel(entry.group) }))
 })
 const flat = computed(() => results.value.flatMap((entry) => entry.items))
+const nothingFound = computed(() => !!query.value.trim() && flat.value.every((command) => command.id.startsWith('create:')))
 const optionId = (index: number) => `palette-opt-${index}`
 const activeId = computed(() => (flat.value[active.value] ? optionId(active.value) : undefined))
 const indexOf = (command: Command) => flat.value.indexOf(command)
@@ -54,7 +62,13 @@ watch(query, (text) => {
       .then((found) => ask === asked && (byNumber.value = found))
       .catch((error) => console.warn('palette: order not found', error))
   }, 200)
-})
+}, { immediate: true })
+
+/** Opened with a digit: the caret goes after it, so the next digits follow. */
+function toEnd(event: FocusEvent) {
+  const input = event.target as HTMLInputElement
+  input.setSelectionRange(input.value.length, input.value.length)
+}
 
 function run(command: Command | undefined) {
   if (!command) return
@@ -96,6 +110,7 @@ function onKeydown(event: KeyboardEvent) {
       :aria-activedescendant="activeId"
       :placeholder="t('web.palette.placeholder')"
       @keydown="onKeydown"
+      @focus="toEnd"
     />
     <div id="palette-list" class="pal-list" role="listbox" :aria-label="t('web.palette.title')">
       <div v-for="entry in results" :key="entry.group" role="group" :aria-label="entry.label">
@@ -117,6 +132,7 @@ function onKeydown(event: KeyboardEvent) {
         </div>
       </div>
     </div>
-    <p v-if="!flat.length" class="pal-none muted">{{ query.trim() ? t('web.palette.empty') : t('web.palette.hint') }}</p>
+    <!-- Only the offer to register what was typed: still say nothing was found. -->
+    <p v-if="!flat.length || nothingFound" class="pal-none muted">{{ query.trim() ? t('web.palette.empty') : t('web.palette.hint') }}</p>
   </Layer>
 </template>

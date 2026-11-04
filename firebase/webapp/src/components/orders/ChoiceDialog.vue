@@ -4,17 +4,11 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { t } from '@/i18n'
 import Layer from '@/components/Layer.vue'
+import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
 
-export interface Choice {
-  id: string
-  label: string
-  sub?: string
-  dot?: string
-  current?: boolean
-  danger?: boolean
-}
+export type { Choice }
 
-const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anchor?: HTMLElement | null }>()
+const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anchor?: HTMLElement | null; suggested?: string | null }>()
 // With an anchor it is a menu held under its button, not a box in the middle of the screen.
 // Placed again after the layer opens and on resize: opening can still move the
 // button (the panel settling), and the menu must stay held under it.
@@ -45,25 +39,7 @@ const emit = defineEmits<{ pick: [id: string]; close: [] }>()
       </div>
       <div class="layer-body">
         <slot />
-        <div class="opts" role="group" :aria-label="title">
-          <button
-            v-for="choice in choices"
-            :key="choice.id"
-            type="button"
-            class="opt"
-            :class="{ 'opt--danger': choice.danger }"
-            :aria-current="choice.current ? 'true' : undefined"
-            :data-autofocus="choice === choices[0] ? '' : undefined"
-            @click="emit('pick', choice.id)"
-          >
-            <span v-if="choice.dot" class="dot" :class="`dot--${choice.dot}`" aria-hidden="true"></span>
-            <span class="opt-main">
-              <span>{{ choice.label }}</span>
-              <small v-if="choice.sub" class="sub">{{ choice.sub }}</small>
-            </span>
-            <span v-if="choice.current" class="check-mark" aria-hidden="true">✓</span>
-          </button>
-        </div>
+        <ChoiceList :label="title" :choices="choices" :suggested="suggested" @pick="(id) => emit('pick', id)" />
       </div>
       <div class="layer-foot">
         <button type="button" class="btn btn--ghost" @click="close()">{{ t('cancel') }}</button>

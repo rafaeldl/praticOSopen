@@ -4,7 +4,7 @@
 // API (the server's SHARE_BASE_URL, never built here: defect 5). Changing what
 // the customer can do or the validity makes a new link and turns the old one off
 // (defect 4). Nothing is sent by itself: WhatsApp opens with the text, the person sends.
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
@@ -22,7 +22,8 @@ import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import '@/styles/receive.css'
 
-const props = defineProps<{ order: Order }>()
+/** send (key W): opens WhatsApp as soon as the link is ready; the sheet stays only when it cannot. */
+const props = defineProps<{ order: Order; send?: boolean }>()
 const emit = defineEmits<{ close: []; pickCustomer: [] }>()
 
 type State = 'loading' | 'ready' | 'failed' | 'noCustomer'
@@ -83,6 +84,8 @@ async function load() {
     const [tokens] = await Promise.all([listShareTokens(props.order.id), refreshPhone()])
     token.value = pickToken(tokens, new Date()) ?? (await createAndReread())
     state.value = 'ready'
+    await nextTick()
+    ready()
   } catch (error) {
     console.warn('share: link not made', error)
     state.value = 'failed'
@@ -172,6 +175,24 @@ async function shareOther() {
   }
 }
 
+const sendButton = ref<HTMLElement | null>(null)
+/**
+ * Ready: the focus goes to "Mandar pelo WhatsApp" (or "Copiar texto" without a
+ * phone), so Enter sends (timed-comparison T5). Asked by W, WhatsApp opens at
+ * once; if the browser blocks the new tab, the sheet stays with the button focused.
+ */
+function ready() {
+  const focused = document.activeElement
+  const inField = focused instanceof HTMLElement && focused.matches('input, textarea, select')
+  if (!inField) sendButton.value?.focus()
+  if (!props.send || !wa.value || !token.value) return
+  const opened = window.open(whatsappLink(wa.value, text.value), '_blank')
+  if (!opened) return
+  opened.opener = null
+  announce(t('web.share.whatsappOpened'))
+  emit('close')
+}
+
 onMounted(load)
 onBeforeUnmount(() => (copied.value = false))
 </script>
@@ -232,10 +253,11 @@ onBeforeUnmount(() => (copied.value = false))
           :href="whatsappLink(wa, text)"
           target="_blank"
           rel="noopener noreferrer"
+          ref="sendButton"
           data-testid="share-whatsapp"
           @click="announce(t('web.share.whatsappOpened'))"
         >{{ t('shareSendWhatsApp') }}</a>
-        <button v-else type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
+        <button v-else ref="sendButton" type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
       </div>
       <div v-else class="layer-foot">
         <button type="button" class="btn" @click="close()">{{ t('close') }}</button>

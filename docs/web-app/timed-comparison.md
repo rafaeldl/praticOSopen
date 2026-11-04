@@ -1,12 +1,12 @@
 # Comparação cronometrada: app no celular contra app web
 
-Base: master `9b29b518`, 2026-11-03. Mesmo roteiro nos dois lados, perfil admin, empresa de teste com 10 clientes (1 veículo cada), 5 serviços e 5 peças. Esse tamanho é o da empresa típica: fora a maior, o p95 é 21 clientes (`usage-findings.md`).
+Rodada 1: master `9b29b518`, 2026-11-03. Rodada 2 (atalhos e escolhas sugeridas): `feat/webapp-keyboard-speed`, 2026-11-04. Mesmo roteiro nos dois lados, perfil admin, empresa de teste com 10 clientes (1 veículo cada), 5 serviços e 5 peças. Esse tamanho é o da empresa típica: fora a maior, o p95 é 21 clientes (`usage-findings.md`).
 
 **O que foi medido e o que foi estimado**
 
 - **Web, medido:** o build de produção (`build:e2e`, mesmo bundle com as portas do emulador) contra o Emulator Suite no projeto `demo-praticos`. Playwright conta cada tecla e clique e cronometra da primeira tecla até o estado final, 5 rodadas por tarefa. Script: `firebase/webapp/e2e/perf/timed-comparison.spec.ts` (`CMP=1`).
 - **App, estimado:** passos contados no código de `lib/screens`, sem rodar o app. O build do app aponta para portas fixas do emulador (8080, 9099, 9199) e para o projeto real, e um agente no simulador não mede tempo humano. Nenhum tempo do app foi medido.
-- **Tempo humano, estimado nos dois lados:** KLM, o mesmo modelo de `keyboard-flows.md`: 0,24 s por passo, 1,2 s por decisão (começar a tarefa e cada campo ou opção). As decisões são as mesmas nos dois lados. "Máquina" é o tempo do script no emulador e não entra na conta humana.
+- **Tempo humano, estimado nos dois lados:** KLM, o mesmo modelo de `keyboard-flows.md`: 0,24 s por passo, 1,2 s por decisão (começar a tarefa e cada campo ou opção). Na rodada 1 as decisões eram as mesmas nos dois lados; na rodada 2 o web tira as que viraram sugestão (ver abaixo). "Máquina" é o tempo do script no emulador e não entra na conta humana.
 - **Sensibilidade:** só o app muda, com 0,333 s por letra no celular e 0,5 s por tela que abre.
 
 Passo: uma tecla, um toque ou um clique. `Ctrl+Enter` conta 2. Cada letra conta 1. Na busca, o web digita até o alvo ficar entre as 4 primeiras opções e usa `↓`.
@@ -26,7 +26,60 @@ Passo: uma tecla, um toque ou um clique. `Ctrl+Enter` conta 2. Cada letra conta 
 | T9 | Adicionar uma peça do catálogo, com o preço do catálogo | OS aberta |
 | T10 | Lançar desconto de R$ 20 | OS concluída |
 
-## Resultado
+## Resultado (rodada 2: atalhos e escolhas sugeridas)
+
+Remedido em 2026-11-04, branch `feat/webapp-keyboard-speed`, mesmo roteiro e mesmo KLM; 5 rodadas por tarefa, passos iguais em todas as rodadas (T1: 11 numa, 12 nas outras). O script agora escreve as decisões de cada caminho e imprime o KLM (`klm` na linha `CMP`). Decisão: começar a tarefa e cada campo ou opção que a pessoa precisa escolher. Sugestão confirmada com `Enter` ou tecla direta não é escolha; no app, escolher a opção num menu é.
+
+| # | Passos app | Passos web | Tempo app (KLM) | Tempo web (KLM) | Menos passos | Menos tempo | Meta | Caminho no web |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| T1 | 14 | 12 | 8,2 s | 7,7 s | 14% | 6% | Não | `N`, `Enter` (1º cliente já ativo, ou letras + `↓`), item, `Tab`, 180, `Ctrl+Enter` |
+| T2 | 6 | 2 | 3,8 s | 2,9 s | 67% | 24% | Só passos | `5` abre a busca com o número, `Enter` |
+| T3 | 3 | 1 | 4,3 s | 1,4 s | 67% | 67% | **Sim** (da 2ª vez) | `P`: o botão azul lembra Aprovado → Concluído; a pergunta da manutenção fica na OS |
+| T3 1ª vez | 3 | 3 | 4,3 s | 3,1 s | 0% | 27% | Não | `S`, `C`, `Enter` |
+| T4 | 5 | 2 | 3,6 s | 1,7 s | 60% | 53% | **Sim** (sinal pago em Pix) | `R`, `Enter`: valor e forma do último pagamento já vêm |
+| T4 sem pagamento antes | 5 | 5 | 3,6 s | 3,6 s | 0% | 0% | Não | `R`, `Tab`, `p`, `Tab`, `Enter` |
+| T5 | 2 | 1 | 2,9 s | 1,4 s | 50% | 50% | **Sim** | `W` abre o WhatsApp; `M`, `Enter` também (2 passos, foco já no WhatsApp) |
+| T6 | 27 | 26 | 10,1 s | 9,8 s | 4% | 3% | Não | `⌘K`, nome, `Enter` em "Cadastrar cliente «nome»", telefone (foco já nele), `Enter` |
+| T7 | 6 | 9 | 5,0 s | 5,8 s | -50% | -15% | Não | `D`, `+7 8:30`, `Enter` (antes: 15 passos) |
+| T8 | 1 | 0 | 1,4 s | 1,2 s | 100% | 14% | Só passos | Valor no topo da Início |
+| T9 | 3 | 3 | 3,1 s | 3,1 s | 0% | 0% | Não | `A`, `↓` ou uma letra, `Enter` (o 1º dos Mais usados já ativo) |
+| T10 | 5 | 4 | 4,8 s | 3,4 s | 20% | 30% | Não | `-`, 20, `Enter` |
+
+Tempo app de T5: 2,88 s (2 passos, 2 decisões); o web dá 1,44 s, exatamente a metade.
+
+**Meta (50% menos tempo e passos): 3 de 10** (T3 a partir da 2ª vez, T4 quando a OS já tem pagamento em Pix ou o último recebimento neste navegador foi Pix, T5). Antes: 0 de 10. Máquina web: 0,2 a 0,9 s por tarefa no emulador (as tarefas que gravam esperam a resposta da API; não entra no KLM).
+
+### O que mudou no web
+
+- Campo de busca vazio já com a primeira sugestão ativa (Recentes, Mais usados, ou a atual ✓); campo opcional sem sugestão (aparelho do cliente que não tem) continua com `Enter` = próximo campo.
+- "Qual a situação?" e o menu "…": `↑`/`↓`, `Home`/`End` e primeira letra; o foco abre na situação do botão azul.
+- `P` faz o próximo passo. O passo lembra, por empresa e neste navegador, para onde a pessoa foi a partir daquela situação (só para frente, só se permitido).
+- Próxima manutenção: a pergunta fica dentro da OS, com "Agora não"; seguir trabalhando não pede dispensar (no app é uma folha por cima).
+- Mandar: foco abre em "Mandar pelo WhatsApp" (`Enter` manda); `W` abre o WhatsApp direto e, se o navegador bloquear a aba, a folha fica com o botão em foco.
+- Receber: forma do último pagamento da OS, senão a última usada neste navegador; `Enter` no valor confirma. Sem histórico, vem vazia como antes.
+- `-` abre "Dar desconto". Na paleta, ações por nome ("Dar desconto", "Remarcar a visita", "Receber", "Mandar pelo WhatsApp", "Próximo passo", "Novo cliente") e elas vêm antes dos registros quando o texto bate.
+- "Cadastrar cliente «texto»" na paleta abre o formulário com o nome e o cursor no telefone.
+- Um número em qualquer tela abre a paleta com ele.
+- Agendar e prazo: campo curto que entende "amanhã 14h", "+3", "seg 8:30", "9/5 14h" (pt, en, es); `↑`/`↓` muda o dia, com `Shift` meia hora. O seletor nativo continua e o arrastar na agenda não mudou.
+- Atalhos novos aparecem no "?", com texto nos 3 idiomas; todos são de uma tecla, sem modificador (nada conflita com o navegador) e desligam junto com "Usar atalhos de uma tecla".
+
+### Por que 7 tarefas ainda não batem
+
+Com 1,2 s por decisão e 0,24 s por passo, uma tarefa só chega a 50% se o web tiver no máximo metade das decisões do app. Onde a decisão é o conteúdo (quem, o quê, quanto, quando), ela não some com sugestão.
+
+| # | Decisões app | Decisões web | Piso do web (decisões x 1,2 s) | Meta de tempo | Por quê |
+|---|---:|---:|---:|---:|---|
+| T1 | 4 | 4 | 4,8 s | 4,1 s | Cliente, item e valor 180 são escolha da pessoa |
+| T2 | 2 | 2 | 2,4 s | 1,9 s | O número é dado da pessoa; nos passos o web já ganha 67% |
+| T6 | 3 | 3 | 3,6 s | 5,05 s | Cabe no tempo, mas 22 dos 26 passos são o nome e o telefone digitados (meta de passos: 13) |
+| T7 | 3 | 3 | 3,6 s | 2,5 s | Dia e hora são escolha; o KLM conta o arraste do app como um toque, o que favorece o app |
+| T8 | 1 | 1 | 1,2 s | 0,7 s | Olhar é a única decisão; o web já tem 0 passos |
+| T9 | 2 | 2 | 2,4 s | 1,55 s | Qual peça é escolha |
+| T10 | 3 | 2 | 2,4 s | 2,4 s | O valor é escolha; com o atalho, sobra 3,36 s |
+
+Para essas, o ganho de 50% está no trabalho em série, que o roteiro de tarefas isoladas não mede: OS em sequência, receber várias de uma vez, lançar várias linhas.
+
+## Resultado da rodada 1 (base `9b29b518`)
 
 | # | Passos app | Passos web | Tempo app (KLM) | Tempo web (KLM) | Máquina web | Menos passos | Menos tempo | Sensibilidade | Meta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -41,36 +94,13 @@ Passo: uma tecla, um toque ou um clique. `Ctrl+Enter` conta 2. Cada letra conta 
 | T9 | 3 | 4 | 3,1 s | 3,4 s | 0,12 s | -33% | -8% | 10% | Não |
 | T10 | 5 | 5 (10 só teclado) | 4,8 s | 4,8 s | 0,18 s | 0% | 0% | 20% | Não |
 
-"Sensibilidade" é a redução de tempo com o app mais lento por digitar no celular e trocar de tela. Em T6 e T10 a coluna web usa o melhor caminho, com mouse no menu; só teclado está entre parênteses.
-
-**Metas**
-
-- **50% menos tempo e passos: não atingida em nenhuma tarefa.** O web empata em 4, ganha pouco em 2 e perde em 4. Só T8 tem 50% menos passos, e ainda assim só 17% menos tempo.
-- **OS completa em menos de 45 s só com teclado: atingida.** 8,2 s no KLM, 0,26 s de máquina, 14 passos.
-
-## Onde o web não bate a meta e por quê
-
-A causa comum é a mesma da descoberta: as decisões são iguais nos dois lados e pesam mais que as teclas. Com 1,2 s por decisão, tirar teclas nunca chega a 50%. Só tirar decisões chega lá.
-
-| # | Causa no web | O que tiraria passos |
-|---|---|---|
-| T1 | Busca vazia começa sem opção ativa, então custa um `↓` a mais no cliente e no item | Já vir com a primeira opção ativa: 12 passos |
-| T2 | Empata: `⌘K` vale 2 passos | Nada a fazer. O ganho real é achar OS antiga, que o app não acha porque filtra só as OS carregadas |
-| T3 | A lista de situações anda de `Tab` em `Tab` (3 até Concluído) | Setas e primeira letra na lista: `S`, `C`, `Enter`, `Esc` = 4 |
-| T4 | Empata: forma de pagamento vem vazia nos dois lados, por decisão de produto | Lembrar a última forma tiraria 2 passos dos dois lados |
-| T5 | O foco abre no topo e leva 2 `Tab` até "Mandar pelo WhatsApp" | Foco no botão do WhatsApp quando o cliente tem telefone: `M`, `Enter` = 2 |
-| T6 | Sem atalho nem comando para cliente novo. Pela paleta: "clientes" inteiro (os clientes aparecem antes da ação), `/`, nome, `Tab` até "Cadastrar" | Comando "Novo cliente" na paleta ou "Cadastrar «nome»" na própria paleta: cerca de 27 só teclado |
-| T7 | Data e hora digitadas: 8 dígitos, `→` (o ano aceita 6 dígitos e não pula sozinho) e 4 dígitos, contra 3 arrastes na roda | Data curta, como `sex 14 8:30`, ou "mesmo horário" pronto. Obs.: o KLM conta o arraste como um toque; na prática um arraste custa mais, então o app está favorecido aqui |
-| T8 | Ganha nos passos: o valor já está no topo da Início | Nada. O app mostra só no Financeiro |
-| T9 | O item vem dos "Mais usados" sem digitar, mas custa `↓` a mais pelo mesmo motivo de T1 | Primeira opção ativa: 3 |
-| T10 | Sem atalho para desconto: só teclado são 5 `Shift+Tab` até "Mais ações" | Atalho ou comando "Desconto" na paleta: 4 só teclado |
-
-Com essas mudanças o web empata ou ganha por pouco em todas as tarefas, mas continua longe de 50% no tempo. O caminho para 50% é o que o web faz e o app não: OS em sequência, receber várias de uma vez, lançar várias linhas, repetir a última OS. Isso não está no top 10 de tarefas isoladas.
+Na rodada 1 a meta não foi atingida em nenhuma tarefa, e a OS completa só com teclado ficou em 8,2 s (meta: menos de 45 s). As causas apontadas lá (busca sem opção ativa, situação de `Tab` em `Tab`, foco no topo do "Mandar", sem comando de cliente novo, data em 12 dígitos, sem atalho de desconto) são as que a rodada 2 corrigiu.
 
 ## Limites
 
 - App não medido: passos lidos no código. Com mais de 10 clientes a busca de cliente aparece no app e a conta de T1 muda.
 - KLM não inclui erro, leitura da tela, conversa com o cliente nem curva de aprendizado dos atalhos.
 - Dados de teste pequenos e nomes sintéticos. Com 1.500 clientes (a maior empresa) os dois lados digitam mais.
-- Data e hora do web seguem a ordem do Chromium em pt-BR (dia, mês, ano).
+- Data e hora do web: na rodada 1, a ordem do Chromium em pt-BR (dia, mês, ano); na rodada 2, o campo curto (T7 remarca de amanhã 14h para daqui a 7 dias 8:30).
+- T3 e T4 dependem de histórico (a pessoa já foi de Aprovado a Concluído uma vez; a OS já tem pagamento em Pix). As linhas "1ª vez" e "sem pagamento antes" mostram o caso sem histórico.
 - O tempo de máquina vem do emulador local, sem rede real.

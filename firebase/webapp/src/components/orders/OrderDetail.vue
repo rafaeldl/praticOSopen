@@ -46,6 +46,8 @@ import * as writes from '@/lib/orders/writes'
 import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
+import { registerCommand } from '@/lib/commands'
+import { preferredStep, rememberMethod, rememberTransition, suggestedMethod } from '@/lib/orders/suggest'
 import { currentToast, showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
@@ -102,10 +104,9 @@ type Dialog =
   | { kind: 'addItem' }
   | { kind: 'customer' }
   | { kind: 'address' }
-  | { kind: 'maintenance'; devices: { id: string; name: string }[] }
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
-  | { kind: 'share' }
+  | { kind: 'share'; send?: boolean }
   | { kind: 'pendingForms'; count: number; first: string }
 const dialog = shallowRef<Dialog | null>(null)
 const menuButton = ref<HTMLElement | null>(null)
@@ -117,7 +118,18 @@ const team = shallowRef<Member[]>([])
 const order = computed(() => (state.value.kind === 'ready' ? state.value.order : null))
 const access = computed(() => (order.value ? accessOf(order.value, session.role, session.uid, effectiveUseFinancial()) : null))
 const money$ = computed(() => (order.value ? totals(order.value) : null))
-const step = computed(() => (order.value && access.value ? nextStep(order.value, access.value) : null))
+/**
+ * The blue step. From a status, where this person went from it last time wins
+ * when still allowed (approved → done for who skips "Em andamento"): the choice
+ * comes ready and P confirms it (timed-comparison T3).
+ */
+const step = computed(() => {
+  if (!order.value || !access.value) return null
+  const base = nextStep(order.value, access.value)
+  if (base?.kind !== 'status') return base
+  const preferred = preferredStep(session.companyId, order.value.status, access.value.transitions)
+  return preferred ? { kind: 'status' as const, to: preferred } : base
+})
 const phrase = computed(() => (order.value ? headerPhrase(order.value, now.value, money$.value?.remaining ?? null) : null))
 const showsMoney = computed(() => !!order.value?.showsMoney)
 const canAddItems = computed(() => !!access.value?.canEditMainFields && (can('viewServices') || can('viewProducts')))
@@ -191,6 +203,8 @@ onBeforeUnmount(() => clearInterval(clock))
  * (never dropped). The response refreshes the screen and the list row.
  */
 let queue: Promise<unknown> = Promise.resolve()
+/** Why the last write failed: a refusal by the server (ApiError) or the request never answered (left the page, offline). */
+let lastError: unknown = null
 function run(action: () => Promise<{ order?: Record<string, unknown> } | void>, done?: string): Promise<boolean> {
   const next = queue.then(() => write(action, done))
   queue = next.catch(() => {})
@@ -216,6 +230,7 @@ async function write(action: () => Promise<{ order?: Record<string, unknown> } |
     }
     return true
   } catch (error) {
+    lastError = error
     console.warn('order: write failed', error)
     showToast(error instanceof ProofUploadError ? t('receiveCustomerUploadFailed') : t(errorMessageKey(error)))
     if (error instanceof ApiError && ['ORDER_CHANGED', 'ITEM_NOT_FOUND', 'PAYMENT_EXCEEDS_BALANCE'].includes(error.code)) await watcher?.refresh()
@@ -250,12 +265,13 @@ async function setStatus(status: OrderStatus) {
     return
   }
   const was = order.value.status
+  // Remembered when chosen, not after the answer: leaving the order right away must not lose it.
+  const forget = rememberTransition(session.companyId, was, status)
   const ok = await run(() => writes.patchOrder(order.value!.id, { status }, expected()), t('web.order.statusChanged', { status: statusText(status) }))
+  // Only a refusal by the server takes it back; a request cut by leaving the page (NETWORK, status 0) keeps the choice.
+  if (!ok && lastError instanceof ApiError && lastError.status > 0) forget()
   // Done now (the server took it): when is the next maintenance? (device.maintenance.offer)
-  if (ok && status === 'done' && was !== 'done' && order.value) {
-    const devices = await maintenance.devicesToAsk(order.value)
-    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
-  }
+  if (ok && status === 'done' && was !== 'done' && order.value) await offerMaintenance()
 }
 
 // Saved already done in the Nova OS: ask once the order is here (device.maintenance.offer).
@@ -263,8 +279,7 @@ watch(
   () => order.value?.id,
   async (id) => {
     if (!id || !maintenance.takeAskOnOpen(id) || !order.value || order.value.status !== 'done') return
-    const devices = await maintenance.devicesToAsk(order.value)
-    if (devices.length && !dialog.value) dialog.value = { kind: 'maintenance', devices }
+    await offerMaintenance()
   },
   { immediate: true },
 )
@@ -280,11 +295,28 @@ const maintenanceChoices = computed<Choice[]>(() => {
   ]
 })
 
-/** device.maintenance.answer / no-repeat; closing without an answer counts as a refusal and changes nothing. */
+/**
+ * The question sits in the order, not over it: nothing to dismiss before going on
+ * (timed-comparison T3). "Agora não", or leaving the order without answering,
+ * counts as a refusal and changes nothing.
+ */
+const offer = shallowRef<{ devices: { id: string; name: string }[] } | null>(null)
+async function offerMaintenance() {
+  if (!order.value) return
+  const devices = await maintenance.devicesToAsk(order.value)
+  if (!devices.length) return
+  offer.value = { devices }
+  announce(`${t('nextMaintenanceQuestion')} ${devices.map((device) => device.name).join(', ')}`)
+}
+onBeforeUnmount(() => {
+  if (offer.value) maintenance.decline()
+})
+
+/** device.maintenance.answer / no-repeat. */
 async function answerMaintenance(id: string | null) {
-  const current = dialog.value
-  dialog.value = null
-  if (current?.kind !== 'maintenance') return
+  const current = offer.value
+  offer.value = null
+  if (!current) return
   if (id === null) return maintenance.decline()
   const failed = await maintenance.answer(current.devices.map((device) => device.id), id === 'none' ? null : Number(id), order.value?.id)
   if (failed) showToast(t('nextMaintenanceSaveError'))
@@ -316,6 +348,7 @@ async function assign(id: string) {
 
 async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string; proof?: File }) {
   const { proof, ...body } = value
+  if (value.paymentMethod) rememberMethod(session.companyId, value.paymentMethod)
   const id = order.value!.id
   const ok = await run(async () => {
     // The file goes first (to the payment's folder), then the payment carries it.
@@ -427,6 +460,11 @@ async function deleteIt() {
 async function chooseCustomer(customer: Customer) {
   const o = order.value
   if (!o) return
+  // Enter on the current one (✓, the first highlighted): nothing changes.
+  if (customer.id === o.customer?.id) {
+    dialog.value = null
+    return
+  }
   if (o.devices.length && o.customer?.id && o.customer.id !== customer.id) {
     // Changing the customer keeps the previous one's device unless the person says (defect 26).
     dialog.value = { kind: 'keepDevices', customer }
@@ -598,7 +636,7 @@ const menuChoices = computed<Choice[]>(() => {
   const list: Choice[] = []
   if (a.transitions.some((status) => status !== 'canceled')) list.push({ id: 'status', label: t('orderMenuChangeStatus') })
   if (a.canChangeHold) list.push({ id: isHeld(o) ? 'resume' : 'hold', label: isHeld(o) ? t('orderHoldResume') : t('orderHoldMark') })
-  if (a.canDiscount && o.status !== 'quote' && o.status !== 'canceled' && (money$.value?.remaining ?? 0) > 0) list.push({ id: 'discount', label: t('orderAddDiscount') })
+  if (canDiscountNow.value) list.push({ id: 'discount', label: t('orderAddDiscount') })
   if (a.canEditMainFields && !o.dueDate) list.push({ id: 'due', label: t('orderAddDueDate') })
   if (a.canEditMainFields && !o.scheduledDate && useScheduling.value) list.push({ id: 'schedule', label: t('orderAddSchedule') })
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
@@ -655,6 +693,12 @@ const phraseActs = computed(() => {
   return (o.status === 'done' && access.value.canReceive) || (!!o.dueDate && access.value.canEditMainFields && o.status !== 'done')
 })
 
+const canReceiveNow = computed(() => !!access.value?.canReceive && (money$.value?.remaining ?? 0) > 0)
+/** The menu's rule for "Adicionar desconto" (order.menu.view). */
+const canDiscountNow = computed(() => {
+  const o = order.value
+  return !!o && !!access.value?.canDiscount && o.status !== 'quote' && o.status !== 'canceled' && (money$.value?.remaining ?? 0) > 0
+})
 // Keys of the open order (WEB_APP_DESIGN, Teclado). Only outside fields.
 const removers = [
   registerShortcut({ keys: 'a', label: 'web.shortcuts.addItem', run: () => canAddItems.value && void openPicker('addItem') }),
@@ -662,7 +706,19 @@ const removers = [
   registerShortcut({ keys: 'c', label: 'web.shortcuts.customer', run: () => access.value?.canEditMainFields && void openPicker('customer') }),
   registerShortcut({ keys: 'd', label: 'web.shortcuts.schedule', run: () => access.value?.canEditMainFields && (dialog.value = { kind: 'schedule' }) }),
   registerShortcut({ keys: 'm', label: 'web.shortcuts.share', run: () => order.value && (dialog.value = { kind: 'share' }) }),
-  registerShortcut({ keys: 'r', label: 'web.shortcuts.receive', run: () => access.value?.canReceive && (money$.value?.remaining ?? 0) > 0 && (dialog.value = { kind: 'receive' }) }),
+  registerShortcut({ keys: 'r', label: 'web.shortcuts.receive', run: () => canReceiveNow.value && (dialog.value = { kind: 'receive' }) }),
+  registerShortcut({ keys: 'p', label: 'web.shortcuts.nextStep', run: () => step.value && !busy.value && void runStep() }),
+  registerShortcut({ keys: 'w', label: 'web.shortcuts.whatsapp', run: () => order.value && (dialog.value = { kind: 'share', send: true }) }),
+  registerShortcut({ keys: '-', label: 'web.shortcuts.discount', run: () => canDiscountNow.value && (dialog.value = { kind: 'discount' }) }),
+  // The same actions in ⌘K, by name ("desconto", "remarcar"…), only while they apply.
+  registerCommand({ id: 'order-next', label: 'web.shortcuts.nextStep', keys: 'p', when: () => !!step.value, run: () => void runStep() }),
+  registerCommand({ id: 'order-status', label: 'web.shortcuts.status', keys: 's', when: () => statusChoices.value.length > 1, run: () => (dialog.value = { kind: 'status' }) }),
+  registerCommand({ id: 'order-receive', label: 'web.shortcuts.receive', keys: 'r', when: () => canReceiveNow.value, run: () => (dialog.value = { kind: 'receive' }) }),
+  registerCommand({ id: 'order-discount', label: 'web.palette.discount', keys: '-', when: () => canDiscountNow.value, run: () => (dialog.value = { kind: 'discount' }) }),
+  registerCommand({ id: 'order-schedule', label: 'web.palette.reschedule', keys: 'd', when: () => !!access.value?.canEditMainFields, run: () => (dialog.value = { kind: 'schedule' }) }),
+  registerCommand({ id: 'order-share', label: 'web.shortcuts.share', keys: 'm', when: () => !!order.value, run: () => (dialog.value = { kind: 'share' }) }),
+  registerCommand({ id: 'order-whatsapp', label: 'web.shortcuts.whatsapp', keys: 'w', when: () => !!order.value, run: () => (dialog.value = { kind: 'share', send: true }) }),
+  registerCommand({ id: 'order-add-item', label: 'web.shortcuts.addItem', keys: 'a', when: () => canAddItems.value, run: () => void openPicker('addItem') }),
 ]
 onBeforeUnmount(() => removers.forEach((remove) => remove()))
 watch(
@@ -729,6 +785,16 @@ watch(
           <button type="button" class="link" data-testid="share-open" @click="dialog = { kind: 'share' }">{{ t('shareTitle') }}</button>
           <button v-if="access.canChangeHold && !isHeld(order) && isActive(order)" type="button" class="link" @click="dialog = { kind: 'hold' }">{{ t('orderHoldMark') }}</button>
         </div>
+        <section v-if="offer" class="od-offer" aria-labelledby="od-offer-title" data-testid="maintenance-offer">
+          <h3 id="od-offer-title" class="od-offer-title">{{ t('nextMaintenanceQuestion') }}</h3>
+          <p class="sub">{{ offer.devices.map((device) => device.name).join(', ') }}</p>
+          <div class="od-offer-opts" role="group" :aria-label="t('nextMaintenanceQuestion')">
+            <button v-for="choice in maintenanceChoices" :key="choice.id" type="button" class="btn" @click="answerMaintenance(choice.id)">
+              {{ choice.label }}<small v-if="choice.sub" class="sub"> · {{ choice.sub }}</small>
+            </button>
+            <button type="button" class="btn btn--ghost" @click="answerMaintenance(null)">{{ t('notNow') }}</button>
+          </div>
+        </section>
       </header>
 
       <div class="od-body">
@@ -834,15 +900,7 @@ watch(
 
   <template v-if="order && access && dialog">
     <ChoiceDialog v-if="dialog.kind === 'menu'" :anchor="menuButton" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
-    <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
-    <ChoiceDialog
-      v-else-if="dialog.kind === 'maintenance'"
-      :title="t('nextMaintenanceQuestion')"
-      :sub="dialog.devices.map((device) => device.name).join(', ')"
-      :choices="maintenanceChoices"
-      @pick="answerMaintenance"
-      @close="answerMaintenance(null)"
-    />
+    <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" :suggested="step?.kind === 'status' ? step.to : null" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'assignee'" :title="t('pickerAssigneeTitle')" :choices="teamChoices" @pick="assign" @close="dialog = null" />
     <ConfirmDialog
       v-else-if="dialog.kind === 'cancel'"
@@ -885,8 +943,8 @@ watch(
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
-    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
-    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
+    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :method="suggestedMethod(order, session.companyId)" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
+    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" :send="!!dialog.send" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :devices="order.devices" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
     <TextDialog

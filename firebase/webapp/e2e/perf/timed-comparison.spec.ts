@@ -1,11 +1,14 @@
 // Timed comparison (docs/web-app/timed-comparison.md): the 10 most frequent tasks,
 // keyboard only, on the production build against the emulators. Counts every key
 // (a shortcut with a modifier counts 2, each letter 1) and every click, and times
-// from the first key to the end state. Prints one "CMP {json}" line per run.
+// from the first key to the end state. Prints one "CMP {json}" line per run, with
+// the KLM time: 0.24 s per step and 1.2 s per decision (start the task, and each
+// field or option the person has to choose; a suggestion confirmed with Enter or a
+// direct key is not a choice). The decisions of each path are written by the test.
 // Needs the default seed (scenario orders), so it only runs when asked:
 // CMP=1 E2E_PERF=1 PW_ARGS=e2e/perf/timed-comparison npm run e2e  (or with the suite up: CMP=1 E2E_PERF=1 npx playwright test e2e/perf/timed-comparison --workers=1)
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { makeOrder, readOrder } from '../data'
+import { makeDevice, makeOrder, readOrder } from '../data'
 import { login } from '../helpers'
 
 const RUNS = Number(process.env.CMP_RUNS ?? 5)
@@ -83,10 +86,18 @@ class Steps {
     }
     throw new Error(`não achou ${target}`)
   }
-  done(task: string, extra: Record<string, unknown> = {}) {
+  done(task: string, decisions: number, extra: Record<string, unknown> = {}) {
     const ms = Math.round(performance.now() - this.started)
-    console.log(`CMP ${JSON.stringify({ task, steps: this.total, keys: this.keys, letters: this.letters, clicks: this.clicks, ms, idleMs: this.idle, ...extra })}`)
+    const klm = Math.round((0.24 * this.total + 1.2 * decisions) * 100) / 100
+    console.log(`CMP ${JSON.stringify({ task, steps: this.total, keys: this.keys, letters: this.letters, clicks: this.clicks, decisions, klm, ms, idleMs: this.idle, ...extra })}`)
   }
+}
+
+/** Own vehicle: Veículo 2 can be under a contract made by other tests, and then the maintenance question never comes. */
+async function orderWithOwnDevice(status: string) {
+  const device = await makeDevice()
+  const aggr = { id: device.id, name: device.name, serial: device.serial }
+  return makeOrder('admin', { status, device: aggr, devices: [aggr], deviceIds: [device.id] })
 }
 
 async function startOnHome(page: Page) {
@@ -96,10 +107,20 @@ async function startOnHome(page: Page) {
   await page.locator('h1').click()
 }
 
-async function openOrder(page: Page, id: string) {
-  await login(page, 'admin', `orders?order=${id}`)
-  await expect(panel(page)).toBeVisible()
-  await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
+const pad = (n: number) => String(n).padStart(2, '0')
+/** Today + days on the company's clock (São Paulo), as yyyy-mm-dd. */
+function dayFromToday(days: number): string {
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  const [y, m, d] = today.split('-').map(Number) as [number, number, number]
+  const at = new Date(Date.UTC(y, m - 1, d + days))
+  return `${at.getUTCFullYear()}-${pad(at.getUTCMonth() + 1)}-${pad(at.getUTCDate())}`
+}
+
+async function openOrder(page: Page, id: string, signIn = true) {
+  if (signIn) await login(page, 'admin', `orders?order=${id}`)
+  else await page.goto(`orders?order=${id}`)
+  // The status shows only once the order is read ("Carregando…" gone passes at once right after a navigation).
+  await expect(panel(page).getByTestId('order-status')).toBeVisible()
   // Opened by URL the focus goes to the page title. In use the order is picked in the list,
   // and Enter takes the focus to the panel: start from there (not counted).
   await page.waitForTimeout(800)
@@ -130,38 +151,88 @@ for (let run = 1; run <= RUNS; run++) {
       await s.press('ControlOrMeta+Enter')
       await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 03')
       await expect(panel(page).getByTestId('order-totals')).toContainText('R$ 180,00')
-      s.done('T1')
+      // Start, customer, item, value.
+      s.done('T1', 4)
     })
 
     test('T2 Achar a OS 501', async ({ page }) => {
       await startOnHome(page)
       const s = new Steps(page)
       s.start()
-      await s.press('ControlOrMeta+k')
+      // A digit on the screen opens the search with it (no ⌘K).
+      await s.press('5')
       await expect(page.getByRole('combobox', { name: /Buscar/ })).toBeFocused()
-      await s.pick(page.getByRole('listbox').getByRole('option'), /OS 501/, '501')
+      await s.pick(page.getByRole('listbox').getByRole('option'), /OS 501/, '01')
       await expect(page).toHaveURL(/order=scn-late/)
       await expect(panel(page)).toContainText('OS 501')
-      s.done('T2')
+      // Start, the number.
+      s.done('T2', 2)
     })
 
-    test('T3 Mudar a situação para Concluído', async ({ page }) => {
-      const order = await makeOrder('admin', { status: 'approved' })
+    test('T3 Mudar a situação para Concluído (primeira vez: S, C, Enter)', async ({ page }) => {
+      const order = await orderWithOwnDevice('approved')
       await openOrder(page, order.id)
       const s = new Steps(page)
       s.start()
       await s.press('s')
       const picker = dialog(page, 'Qual a situação?')
-      await s.tabTo(picker.getByRole('button', { name: /^Concluído/ }))
+      await expect(picker).toBeVisible()
+      // First letter in the list (arrows also move).
+      await s.press('c')
+      await expect(picker.getByRole('button', { name: /^Concluído/ })).toBeFocused()
       await s.press('Enter')
-      await expect(dialog(page, 'Quando é a próxima manutenção?')).toBeVisible()
-      await s.press('Escape')
       await expect(panel(page).getByTestId('order-status')).toHaveText('Concluído')
+      // The next-maintenance question sits in the order: nothing to dismiss.
+      await expect(panel(page).getByTestId('maintenance-offer')).toBeVisible()
       await expect.poll(async () => (await readOrder(order.id))?.status).toBe('done')
-      s.done('T3')
+      // Start, Concluído.
+      s.done('T3n', 2)
     })
 
-    test('T4 Receber o que falta em Pix', async ({ page }) => {
+    test('T3 Mudar a situação para Concluído (da 2ª vez: P)', async ({ page }) => {
+      // Once from Aprovado straight to Concluído (not timed): the blue step remembers it.
+      const before = await makeOrder('admin', { status: 'approved' })
+      await openOrder(page, before.id)
+      await page.keyboard.press('s')
+      await expect(dialog(page, 'Qual a situação?')).toBeVisible()
+      await page.keyboard.press('c')
+      await expect(dialog(page, 'Qual a situação?').getByRole('button', { name: /^Concluído/ })).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect.poll(async () => (await readOrder(before.id))?.status).toBe('done')
+      const order = await orderWithOwnDevice('approved')
+      await openOrder(page, order.id, false)
+      await expect(panel(page).getByTestId('next-step')).toHaveText('Concluir serviço')
+      const s = new Steps(page)
+      s.start()
+      await s.press('p')
+      await expect(panel(page).getByTestId('order-status')).toHaveText('Concluído')
+      await expect(panel(page).getByTestId('maintenance-offer')).toBeVisible()
+      await expect.poll(async () => (await readOrder(order.id))?.status).toBe('done')
+      // Start (Concluir comes suggested).
+      s.done('T3', 1)
+    })
+
+    test('T4 Receber o que falta em Pix (sinal pago em Pix: R, Enter)', async ({ page }) => {
+      const order = await makeOrder('admin', {
+        status: 'done', total: 300, paidAmount: 100,
+        services: [{ service: { id: 'service-4', name: 'Serviço 4' }, value: 300 }],
+        transactions: [{ id: 'tx-sinal', type: 'payment', amount: 100, paymentMethod: 'pix', createdAt: new Date().toISOString() }],
+      })
+      await openOrder(page, order.id)
+      const s = new Steps(page)
+      s.start()
+      await s.press('r')
+      const box = dialog(page, 'Receber')
+      await expect(box.getByLabel('Quanto recebeu')).toHaveValue('200,00')
+      // The method of the order's last payment comes chosen; Enter in the amount sends.
+      await expect(box.getByLabel(/Como foi pago/)).toHaveValue('pix')
+      await s.press('Enter')
+      await expect(panel(page).getByTestId('order-totals')).toContainText('Tudo pago')
+      // Start (amount and method suggested).
+      s.done('T4', 1)
+    })
+
+    test('T4 Receber o que falta em Pix (sem pagamento anterior)', async ({ page }) => {
       const order = await makeOrder('admin', {
         status: 'done', total: 300, paidAmount: 100,
         services: [{ service: { id: 'service-4', name: 'Serviço 4' }, value: 300 }],
@@ -181,10 +252,24 @@ for (let run = 1; run <= RUNS; run++) {
       await s.press('Tab')
       await s.press('Enter')
       await expect(panel(page).getByTestId('order-totals')).toContainText('Tudo pago')
-      s.done('T4')
+      // Start, method.
+      s.done('T4n', 2)
     })
 
-    test('T5 Mandar pelo WhatsApp', async ({ page, context }) => {
+    test('T5 Mandar pelo WhatsApp (W)', async ({ page, context }) => {
+      await context.route('https://wa.me/**', (route) => route.fulfill({ body: 'wa' }))
+      const order = await makeOrder('admin', { status: 'done' })
+      await openOrder(page, order.id)
+      const s = new Steps(page)
+      s.start()
+      const popup = context.waitForEvent('page')
+      await s.press('w')
+      expect((await popup).url()).toMatch(/^https:\/\/wa\.me\//)
+      // Start.
+      s.done('T5', 1)
+    })
+
+    test('T5 Mandar pelo WhatsApp (M, Enter)', async ({ page, context }) => {
       await context.route('https://wa.me/**', (route) => route.fulfill({ body: 'wa' }))
       const order = await makeOrder('admin', { status: 'done' })
       await openOrder(page, order.id)
@@ -192,12 +277,13 @@ for (let run = 1; run <= RUNS; run++) {
       s.start()
       await s.press('m')
       const sheet = dialog(page, 'Mandar para o cliente')
-      await expect(sheet.getByTestId('share-url')).toHaveText(/\/q\//)
+      // The focus is already on "Mandar pelo WhatsApp".
+      await expect(sheet.getByTestId('share-whatsapp')).toBeFocused()
       const popup = context.waitForEvent('page')
-      await s.tabTo(sheet.getByTestId('share-whatsapp'))
       await s.press('Enter')
       await popup
-      s.done('T5')
+      // Start (WhatsApp comes suggested).
+      s.done('T5m', 1)
     })
 
     test('T6 Cadastrar cliente', async ({ page }) => {
@@ -206,24 +292,22 @@ for (let run = 1; run <= RUNS; run++) {
       const name = newName()
       const s = new Steps(page)
       s.start()
+      // ⌘K, the name, Enter on "Cadastrar cliente «…»": the form opens with the cursor on the phone.
       await s.press('ControlOrMeta+k')
-      await s.pick(page.getByRole('listbox').getByRole('option'), /^Ir para Clientes/, 'clientes')
-      await expect(page).toHaveURL(/\/customers/)
-      const search = page.getByLabel(/Buscar por nome/)
-      await expect(search).toBeVisible()
-      await s.press('/')
-      await expect(search).toBeFocused()
+      await expect(page.getByRole('combobox', { name: /Buscar/ })).toBeFocused()
       await s.type(name)
-      const create = page.getByTestId('create-from-search')
-      await s.tabTo(create)
+      const create = page.getByRole('option', { name: `Cadastrar cliente «${name}»` })
+      await expect(create).toBeVisible()
+      await expect(page.getByRole('combobox', { name: /Buscar/ })).toHaveAttribute('aria-activedescendant', (await create.getAttribute('id')) as string)
       await s.press('Enter')
       const form = page.getByTestId('customer-form')
       await expect(form.getByLabel('Nome', { exact: true })).toHaveValue(name)
-      await s.tabTo(form.getByLabel('Telefone ou WhatsApp'))
+      await expect(form.getByLabel('Telefone ou WhatsApp')).toBeFocused()
       await s.type(phone)
-      await s.press('ControlOrMeta+Enter')
+      await s.press('Enter')
       await expect(page.getByRole('complementary').getByRole('heading', { name })).toBeVisible()
-      s.done('T6')
+      // Start, name, phone.
+      s.done('T6', 3)
     })
 
     test('T6 Cadastrar cliente (mouse no menu e no +)', async ({ page }) => {
@@ -239,27 +323,26 @@ for (let run = 1; run <= RUNS; run++) {
       await s.type(name)
       await s.tabTo(form.getByLabel('Telefone ou WhatsApp'))
       await s.type(phone)
-      await s.press('ControlOrMeta+Enter')
+      await s.press('Enter')
       await expect(page.getByRole('complementary').getByRole('heading', { name })).toBeVisible()
-      s.done('T6m')
+      s.done('T6m', 3)
     })
 
     test('T7 Remarcar a visita', async ({ page }) => {
-      const order = await makeOrder('admin', { status: 'approved', scheduledDate: '2030-05-02T14:00:00.000' })
+      // Visit tomorrow 14:00, moved to a week from today at 8:30.
+      const order = await makeOrder('admin', { status: 'approved', scheduledDate: `${dayFromToday(1)}T14:00:00.000` })
       await openOrder(page, order.id)
       const s = new Steps(page)
       s.start()
       await s.press('d')
-      const field = dialog(page, 'Agendar dia e hora').getByLabel('Visita')
-      await expect(field).toBeFocused()
-      // Chromium's datetime-local (pt-BR with --lang): dd mm yyyy, then → to the time (the year takes 6 digits), hh mm.
-      await s.type('09052030')
-      await s.press('ArrowRight')
-      await s.type('0830')
-      await expect(field).toHaveValue('2030-05-09T08:30')
+      const box = dialog(page, 'Agendar dia e hora')
+      await expect(box.getByLabel('Digite o dia e a hora')).toBeFocused()
+      await s.type('+7 8:30')
+      await expect(box.getByLabel('Visita')).toHaveValue(`${dayFromToday(7)}T08:30`)
       await s.press('Enter')
-      await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe('2030-05-09T08:30:00.000')
-      s.done('T7')
+      await expect.poll(async () => (await readOrder(order.id))?.scheduledDate).toBe(`${dayFromToday(7)}T08:30:00.000`)
+      // Start, day, time.
+      s.done('T7', 3)
     })
 
     test('T8 Quanto falta receber', async ({ page }) => {
@@ -267,7 +350,8 @@ for (let run = 1; run <= RUNS; run++) {
       await login(page, 'admin')
       await expect(page.getByTestId('summary')).toContainText('para receber')
       const answer = await page.getByTestId('summary').textContent()
-      console.log(`CMP ${JSON.stringify({ task: 'T8', steps: 0, keys: 0, letters: 0, clicks: 0, ms: 0, loginToAnswerMs: Math.round(performance.now() - started), answer })}`)
+      // Looking is the only decision.
+      console.log(`CMP ${JSON.stringify({ task: 'T8', steps: 0, keys: 0, letters: 0, clicks: 0, decisions: 1, klm: 1.2, ms: 0, loginToAnswerMs: Math.round(performance.now() - started), answer })}`)
     })
 
     test('T9 Adicionar peça do catálogo', async ({ page }) => {
@@ -281,7 +365,8 @@ for (let run = 1; run <= RUNS; run++) {
       await s.pick(picker.getByRole('option'), /^Peça 1(?!\d)/, 'Peça 1')
       await expect(panel(page).getByTestId('order-line')).toHaveCount(2)
       await expect(panel(page).getByTestId('order-totals')).toContainText('R$ 75,00')
-      s.done('T9')
+      // Start, the part.
+      s.done('T9', 2)
     })
 
     test('T10 Desconto de R$ 20', async ({ page }) => {
@@ -289,18 +374,15 @@ for (let run = 1; run <= RUNS; run++) {
       await openOrder(page, order.id)
       const s = new Steps(page)
       s.start()
-      // "Mais ações" sits above the title: back with Shift+Tab.
-      await s.tabTo(panel(page).getByRole('button', { name: 'Mais ações' }), 30, 'Shift+Tab')
-      await s.press('Enter')
-      const item = page.getByRole('dialog').getByRole('button', { name: 'Desconto' })
-      await s.tabTo(item)
-      await s.press('Enter')
+      // "-" opens Dar desconto.
+      await s.press('-')
       const box = dialog(page, 'Dar desconto')
       await expect(box.getByLabel('Desconto')).toBeFocused()
       await s.type('20')
       await s.press('Enter')
       await expect(panel(page).getByTestId('order-totals')).toContainText('R$ 80,00')
-      s.done('T10')
+      // Start, value.
+      s.done('T10', 2)
     })
 
     test('T10 Desconto de R$ 20 (mouse no menu)', async ({ page }) => {
@@ -315,7 +397,8 @@ for (let run = 1; run <= RUNS; run++) {
       await s.type('20')
       await s.press('Enter')
       await expect(panel(page).getByTestId('order-totals')).toContainText('R$ 80,00')
-      s.done('T10m')
+      // Start, Desconto in the menu, value.
+      s.done('T10m', 3)
     })
   })
 }

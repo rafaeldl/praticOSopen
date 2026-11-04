@@ -74,6 +74,11 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-hold .muted { color: var(--color-muted); }
 .od-actions { display: flex; gap: 0.75rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center; width: 100%; }
 .od-actions .btn--primary { flex: 1 1 12rem; min-height: 2.75rem; }
+/* "Quando é a próxima manutenção?" inside the order, not over it. */
+.od-offer { width: 100%; margin-top: 0.75rem; padding: 0.75rem; border: 1px solid var(--color-rule); border-radius: var(--radius); background: var(--color-card); }
+.od-offer-title { font-size: 1rem; margin: 0; }
+.od-offer-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.od-offer-opts .btn { min-height: 2.75rem; }
 .od-body { display: flex; flex-direction: column; }
 .od-sec { padding: 0.75rem 1rem; border-top: 1px solid var(--color-rule); min-width: 0; }
 .od-sec h3 { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; }

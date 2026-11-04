@@ -8267,7 +8267,7 @@ rows:
   e2e: firebase/webapp/e2e/maintenance-offer.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo."
+  note: "OS com aparelho, id e sem contrato. Espera 800 ms para o toque duplo não responder. Fora aparelhos com contrato ativo. Vale para o botão azul, a lista de situação e a Nova OS salva concluída. Web: depois de o servidor aceitar concluída (botão azul, P ou situação), só com manageDevices, OS sem contrato e aparelhos sem contrato ativo. No web a pergunta fica dentro da OS (não por cima): seguir não pede dispensar; 'Agora não' ou sair da OS sem responder conta como recusa."
 - id: device.maintenance.answer
   screen: lib/screens/devices/next_maintenance_offer.dart
   route: null
