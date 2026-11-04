@@ -59,6 +59,12 @@
               "title": "Cobrança com Asaas",
               "description": "Cobre o cliente da OS por Pix, boleto ou cartão parcelado pela sua conta Asaas. O cliente paga pelo link da OS e o pagamento entra sozinho.",
               "href": "cobranca-asaas.html"
+            },
+            {
+              "title": "Usar no computador",
+              "description": "Abra o PraticOS no navegador: lista e OS lado a lado, quadro, várias OS de uma vez, agenda de arrastar, impressão e planilhas.",
+              "href": "computador.html",
+              "flag": "webApp"
             }
           ]
         },
@@ -177,6 +183,12 @@
               "title": "Asaas charges",
               "description": "Charge the customer of an order by Pix, boleto or card installments through your Asaas account. The customer pays on the order link and the payment is recorded on its own.",
               "href": "cobranca-asaas-en.html"
+            },
+            {
+              "title": "Use it on your computer",
+              "description": "Open PraticOS in your browser: list and order side by side, board, many orders at once, drag-and-drop schedule, printing and spreadsheets.",
+              "href": "computador-en.html",
+              "flag": "webApp"
             }
           ]
         },
@@ -295,6 +307,12 @@
               "title": "Cobro con Asaas",
               "description": "Cobra al cliente de la OS por Pix, boleto o tarjeta en cuotas con tu cuenta Asaas. El cliente paga en el enlace de la OS y el pago se registra solo.",
               "href": "cobranca-asaas-es.html"
+            },
+            {
+              "title": "Usar en la computadora",
+              "description": "Abre PraticOS en el navegador: lista y orden lado a lado, tablero, varias órdenes a la vez, agenda de arrastrar, impresión y planillas.",
+              "href": "computador-es.html",
+              "flag": "webApp"
             }
           ]
         },

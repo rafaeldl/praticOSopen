@@ -1,0 +1,1127 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "O PraticOS no computador",
+        "intro": "No balcão ou no escritório, abra o PraticOS no navegador e trabalhe com tela grande e teclado. É a mesma conta do celular: as OS, os clientes, a agenda e o dinheiro são os mesmos, e o que você muda num aparece no outro.",
+        "features": [
+          {
+            "title": "Lista e OS lado a lado",
+            "description": "Clique numa OS e ela abre ao lado da lista. Passe para a próxima sem perder o lugar."
+          },
+          {
+            "title": "Quadro",
+            "description": "Veja as OS em colunas por situação e mova o cartão quando o serviço anda."
+          },
+          {
+            "title": "Várias OS de uma vez",
+            "description": "Marque as OS e mude a situação, o responsável, cobre ou imprima todas juntas."
+          },
+          {
+            "title": "Agenda da semana",
+            "description": "Arraste a visita para outro dia ou horário."
+          },
+          {
+            "title": "Financeiro",
+            "description": "Resumo do mês, quem falta pagar na aba <strong>Receber</strong> e o relatório para imprimir ou levar para a planilha."
+          },
+          {
+            "title": "Planilhas",
+            "description": "Traga seus clientes e seu catálogo de uma planilha do Excel ou do Google Planilhas."
+          },
+          {
+            "title": "Impressão e PDF",
+            "description": "A OS com a sua logo, pronta para imprimir ou mandar em PDF."
+          }
+        ],
+        "infoCard": {
+          "title": "Estamos liberando aos poucos",
+          "content": "Se aparecer <strong>O PraticOS no computador ainda não foi liberado para você</strong>, continue pelo app no celular, que tem tudo, e <a href=\"../support.html\">fale com o suporte</a> se quiser entrar."
+        }
+      },
+      {
+        "id": "entrar",
+        "title": "Como entrar",
+        "intro": "Use a mesma conta do celular. Não precisa instalar nada.",
+        "steps": [
+          "No computador, abra <strong>praticos.app/app</strong> no navegador (Chrome, Edge, Safari ou Firefox).",
+          "Escolha <strong>Continuar com Google</strong> ou <strong>Continuar com Apple</strong>, se é assim que você entra no celular.",
+          "Se você entra com e-mail e senha, escolha <strong>Já tenho conta com e-mail</strong>. Esqueceu a senha? Toque em <strong>Esqueceu a senha?</strong> e siga o e-mail.",
+          "Se você trabalha em mais de uma empresa, escolha onde entrar. Para trocar depois, vá em <strong>Configurações › Sua conta › Trocar de conta</strong>."
+        ],
+        "infoCard": {
+          "title": "Ainda não tem conta?",
+          "content": "Comece com Google ou Apple. No primeiro acesso, o PraticOS pergunta o seu ramo e já deixa tudo pronto para a primeira OS."
+        },
+        "warningCard": {
+          "title": "Computador que outras pessoas usam",
+          "content": "Ao terminar, saia da conta em <strong>Configurações › Sair</strong>. Assim ninguém abre as suas OS depois de você."
+        }
+      },
+      {
+        "id": "atalhos",
+        "title": "Atalhos de teclado",
+        "intro": "Dá para fazer tudo sem tirar a mão do teclado. Aperte <kbd>?</kbd> a qualquer momento para ver a lista. No Windows, use <kbd>Ctrl</kbd> onde aparece <kbd>⌘</kbd>.",
+        "tables": [
+          {
+            "title": "Em qualquer tela",
+            "headers": [
+              "Tecla",
+              "O que faz"
+            ],
+            "rows": [
+              {
+                "label": "⌘ K",
+                "cells": [
+                  {
+                    "text": "Busca tudo: OS pelo número, cliente, placa, item do catálogo ou a tela que você quer abrir."
+                  }
+                ]
+              },
+              {
+                "label": "N",
+                "cells": [
+                  {
+                    "text": "Nova OS."
+                  }
+                ]
+              },
+              {
+                "label": "/",
+                "cells": [
+                  {
+                    "text": "Buscar na lista que está aberta."
+                  }
+                ]
+              },
+              {
+                "label": "?",
+                "cells": [
+                  {
+                    "text": "Ver todos os atalhos."
+                  }
+                ]
+              },
+              {
+                "label": "Esc",
+                "cells": [
+                  {
+                    "text": "Fechar o que está aberto por cima."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Na lista de OS",
+            "headers": [
+              "Tecla",
+              "O que faz"
+            ],
+            "rows": [
+              {
+                "label": "↓ e ↑",
+                "cells": [
+                  {
+                    "text": "Próxima OS e anterior. Ela abre ao lado na hora."
+                  }
+                ]
+              },
+              {
+                "label": "Enter",
+                "cells": [
+                  {
+                    "text": "Ir para a OS aberta ao lado."
+                  }
+                ]
+              },
+              {
+                "label": "Espaço",
+                "cells": [
+                  {
+                    "text": "Marcar a OS para fazer algo com várias de uma vez."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Com uma OS aberta",
+            "headers": [
+              "Tecla",
+              "O que faz"
+            ],
+            "rows": [
+              {
+                "label": "A",
+                "cells": [
+                  {
+                    "text": "Adicionar serviço ou peça."
+                  }
+                ]
+              },
+              {
+                "label": "S",
+                "cells": [
+                  {
+                    "text": "Mudar a situação."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "cells": [
+                  {
+                    "text": "Trocar o cliente."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "cells": [
+                  {
+                    "text": "Agendar a visita."
+                  }
+                ]
+              },
+              {
+                "label": "M",
+                "cells": [
+                  {
+                    "text": "Mandar para o cliente."
+                  }
+                ]
+              },
+              {
+                "label": "R",
+                "cells": [
+                  {
+                    "text": "Receber."
+                  }
+                ]
+              },
+              {
+                "label": "⌘ Enter",
+                "cells": [
+                  {
+                    "text": "Salvar, de qualquer lugar do formulário. Vale também na Nova OS."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Na Agenda e no Financeiro",
+            "headers": [
+              "Tecla",
+              "O que faz"
+            ],
+            "rows": [
+              {
+                "label": "← e →",
+                "cells": [
+                  {
+                    "text": "Semana, dia ou mês anterior e o seguinte."
+                  }
+                ]
+              },
+              {
+                "label": "T",
+                "cells": [
+                  {
+                    "text": "Voltar para hoje, na Agenda."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Atalho atrapalhando?",
+          "content": "As teclas de uma letra só funcionam fora de onde você escreve. Se preferir sem elas, desligue em <strong>Configurações › Neste navegador › Usar atalhos de uma tecla</strong>."
+        }
+      },
+      {
+        "id": "mesa",
+        "title": "Quadro, várias OS, agenda e impressão",
+        "subsections": [
+          {
+            "title": "Quadro",
+            "content": "No Início, troque de <strong>Lista</strong> para <strong>Quadro</strong>. Cada situação vira uma coluna. Arraste o cartão para a próxima coluna, ou use o botão <strong>…</strong> do cartão. Pelo teclado: com o cartão selecionado, <kbd>Shift</kbd> e a seta. Só aparecem as mudanças que o seu papel permite."
+          },
+          {
+            "title": "Várias OS de uma vez",
+            "intro": "Marque as OS na lista. No lugar dos filtros aparecem as ações:",
+            "steps": [
+              "<strong>Mudar a situação</strong> ou <strong>pôr o responsável</strong> em todas.",
+              "<strong>Mandar cobrança</strong>: um link de pagamento por cliente, se você cobra pelo Asaas.",
+              "<strong>Receber</strong> de um cliente várias OS de uma vez.",
+              "<strong>PDF</strong> ou <strong>Imprimir</strong>: todas num arquivo só, cada OS nas suas páginas."
+            ],
+            "infoCard": {
+              "title": "Nada muda sem você ver antes",
+              "content": "Antes de mudar, o PraticOS mostra quantas OS vão mudar e de quê para quê. Depois, o aviso tem <strong>Desfazer</strong>."
+            }
+          },
+          {
+            "title": "Agenda de arrastar",
+            "content": "Na <strong>Agenda</strong>, veja a semana ou o dia com as horas. Arraste a visita para outro horário ou dia, ou para <strong>Dia todo</strong>. Se o cliente já esperava aquela data, o PraticOS pergunta antes e lembra de avisar o cliente. Errou? Toque em <strong>Desfazer</strong>. Pelo teclado: selecione a visita, mova com <kbd>Shift</kbd> e as setas e confirme com <kbd>Enter</kbd>."
+          },
+          {
+            "title": "Imprimir e PDF",
+            "content": "Na OS, <strong>Imprimir ou salvar PDF</strong> monta uma folha limpa, sem os botões da tela. No menu <strong>…</strong>, <strong>Ver PDF</strong> gera o mesmo PDF do app, com a sua logo, as fotos e os checklists, para abrir ou baixar. No Financeiro, o relatório também imprime e vai para o Excel. O recibo de um pagamento sai pela tela do cliente."
+          }
+        ]
+      },
+      {
+        "id": "planilhas",
+        "title": "Trazer clientes e catálogo de uma planilha",
+        "intro": "Já tem tudo numa planilha? Traga de uma vez, sem digitar de novo. Vale para clientes (em <strong>Clientes › Importar planilha</strong>) e para serviços e peças (em <strong>Catálogo › Importar planilha</strong>). Também dá para achar pelo <kbd>⌘ K</kbd>.",
+        "steps": [
+          "Arraste o arquivo para a tela ou clique para escolher. Serve Excel (.xlsx) e CSV, inclusive o que o Google Planilhas baixa. Também dá para copiar as linhas da planilha e colar.",
+          "Confira o que tem em cada coluna. O PraticOS já marca o que reconheceu: nome, telefone, e-mail, preço.",
+          "Veja o que vai entrar e o que fica de fora, com o motivo: linha sem nome, telefone repetido, item que você já tem.",
+          "Toque em <strong>Importar</strong>. Só nessa hora alguma coisa entra."
+        ],
+        "infoCard": {
+          "title": "Caiu a internet no meio?",
+          "content": "Importe de novo. O que já tinha entrado não se repete."
+        }
+      },
+      {
+        "id": "perfis",
+        "title": "O que cada papel vê",
+        "intro": "No computador vale o mesmo que no celular: cada pessoa da equipe vê só o que o papel dela permite. Quem trabalha sozinho é o Administrador e vê tudo. Os papéis estão explicados em <a href=\"perfis.html\">Equipe e papéis</a>.",
+        "table": {
+          "headers": [
+            "Papel",
+            "O que aparece no computador"
+          ],
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "text": "Tudo: todas as OS com valores, Agenda, Financeiro, Clientes, Catálogo, notas fiscais, Equipe e os dados da empresa."
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "text": "Todas as OS com valores, Agenda, Financeiro, Clientes, Catálogo e notas fiscais. Não abre OS nova."
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "Todas as OS sem valores, Agenda, Clientes, Catálogo sem preços e os modelos de checklist. Sem Financeiro."
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "text": "As OS que ele abriu, com valores, a Agenda delas, Clientes e Catálogo. Sem Financeiro."
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "text": "As OS dele, que ele abriu ou de que é o responsável, sem valores, a Agenda delas e Clientes. Sem Catálogo nem Financeiro, e não abre OS nova."
+                }
+              ]
+            }
+          ]
+        },
+        "infoCard": {
+          "title": "Sem valores na conta",
+          "content": "Se a sua empresa desligou <strong>Valores e cobrança</strong>, ninguém vê preços nem Financeiro, no computador e no celular."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas frequentes",
+        "faq": [
+          {
+            "question": "Preciso instalar alguma coisa?",
+            "answer": "Não. Abra <strong>praticos.app/app</strong> no navegador e entre com a sua conta."
+          },
+          {
+            "question": "O que eu faço no computador aparece no celular?",
+            "answer": "Sim. É a mesma conta. A OS que você abre no computador aparece no app, e o que a equipe faz no celular aparece no computador."
+          },
+          {
+            "question": "E se a internet cair?",
+            "answer": "O PraticOS avisa e não deixa você perder o que digitou achando que salvou. Para trabalhar sem internet, use o app no celular."
+          },
+          {
+            "question": "Funciona no navegador do celular?",
+            "answer": "Funciona, mas no celular o app é melhor: tem câmera, voz e lembretes."
+          },
+          {
+            "question": "Apareceu que ainda não foi liberado para mim. E agora?",
+            "answer": "Estamos abrindo aos poucos. Continue pelo app no celular, que tem tudo, e <a href=\"../support.html\">fale com o suporte</a> se quiser entrar."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "PraticOS on your computer",
+        "intro": "At the front desk or in the office, open PraticOS in your browser and work with a big screen and a keyboard. It is the same account as your phone: the work orders, customers, schedule and money are the same, and what you change on one shows up on the other.",
+        "features": [
+          {
+            "title": "List and order side by side",
+            "description": "Click an order and it opens next to the list. Move on to the next one without losing your place."
+          },
+          {
+            "title": "Board",
+            "description": "See your orders in columns by status and move the card as the job moves."
+          },
+          {
+            "title": "Many orders at once",
+            "description": "Select orders and change the status or the person in charge, send charges or print them all together."
+          },
+          {
+            "title": "Weekly schedule",
+            "description": "Drag a visit to another day or time."
+          },
+          {
+            "title": "Financial",
+            "description": "The month at a glance, who still owes you in the <strong>Receive</strong> tab, and the report to print or take to a spreadsheet."
+          },
+          {
+            "title": "Spreadsheets",
+            "description": "Bring your customers and your catalog from an Excel or Google Sheets spreadsheet."
+          },
+          {
+            "title": "Printing and PDF",
+            "description": "The order with your logo, ready to print or send as a PDF."
+          }
+        ],
+        "infoCard": {
+          "title": "We are opening it gradually",
+          "content": "If you see <strong>PraticOS on the computer is not open to you yet</strong>, keep using the phone app, which has everything, and <a href=\"../support-en.html\">contact support</a> if you want to get in."
+        }
+      },
+      {
+        "id": "sign-in",
+        "title": "How to sign in",
+        "intro": "Use the same account as your phone. There is nothing to install.",
+        "steps": [
+          "On your computer, open <strong>praticos.app/app</strong> in your browser (Chrome, Edge, Safari or Firefox).",
+          "Choose <strong>Continue with Google</strong> or <strong>Continue with Apple</strong>, if that is how you sign in on your phone.",
+          "If you sign in with email and password, choose <strong>I already have an account with email</strong>. Forgot it? Click <strong>Forgot your password?</strong> and follow the email.",
+          "If you work for more than one company, choose where to go. To switch later, go to <strong>Settings › Your account › Switch account</strong>."
+        ],
+        "infoCard": {
+          "title": "No account yet?",
+          "content": "Start with Google or Apple. On your first visit, PraticOS asks about your line of work and gets everything ready for your first order."
+        },
+        "warningCard": {
+          "title": "Shared computer",
+          "content": "When you finish, sign out in <strong>Settings › Sign Out</strong>. That way nobody opens your orders after you."
+        }
+      },
+      {
+        "id": "shortcuts",
+        "title": "Keyboard shortcuts",
+        "intro": "You can do everything without leaving the keyboard. Press <kbd>?</kbd> at any time to see the list. On Windows, use <kbd>Ctrl</kbd> where you see <kbd>⌘</kbd>.",
+        "tables": [
+          {
+            "title": "Anywhere",
+            "headers": [
+              "Key",
+              "What it does"
+            ],
+            "rows": [
+              {
+                "label": "⌘ K",
+                "cells": [
+                  {
+                    "text": "Search everything: an order by number, a customer, a plate, a catalog item or the screen you want."
+                  }
+                ]
+              },
+              {
+                "label": "N",
+                "cells": [
+                  {
+                    "text": "New order."
+                  }
+                ]
+              },
+              {
+                "label": "/",
+                "cells": [
+                  {
+                    "text": "Search the list on screen."
+                  }
+                ]
+              },
+              {
+                "label": "?",
+                "cells": [
+                  {
+                    "text": "See all shortcuts."
+                  }
+                ]
+              },
+              {
+                "label": "Esc",
+                "cells": [
+                  {
+                    "text": "Close whatever is open on top."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "In the order list",
+            "headers": [
+              "Key",
+              "What it does"
+            ],
+            "rows": [
+              {
+                "label": "↓ and ↑",
+                "cells": [
+                  {
+                    "text": "Next and previous order. It opens alongside right away."
+                  }
+                ]
+              },
+              {
+                "label": "Enter",
+                "cells": [
+                  {
+                    "text": "Go into the order open alongside."
+                  }
+                ]
+              },
+              {
+                "label": "Space",
+                "cells": [
+                  {
+                    "text": "Select the order to act on several at once."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "With an order open",
+            "headers": [
+              "Key",
+              "What it does"
+            ],
+            "rows": [
+              {
+                "label": "A",
+                "cells": [
+                  {
+                    "text": "Add a service or part."
+                  }
+                ]
+              },
+              {
+                "label": "S",
+                "cells": [
+                  {
+                    "text": "Change the status."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "cells": [
+                  {
+                    "text": "Change the customer."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "cells": [
+                  {
+                    "text": "Schedule the visit."
+                  }
+                ]
+              },
+              {
+                "label": "M",
+                "cells": [
+                  {
+                    "text": "Send to the customer."
+                  }
+                ]
+              },
+              {
+                "label": "R",
+                "cells": [
+                  {
+                    "text": "Receive a payment."
+                  }
+                ]
+              },
+              {
+                "label": "⌘ Enter",
+                "cells": [
+                  {
+                    "text": "Save from anywhere in the form. Works in New order too."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "In Schedule and Financial",
+            "headers": [
+              "Key",
+              "What it does"
+            ],
+            "rows": [
+              {
+                "label": "← and →",
+                "cells": [
+                  {
+                    "text": "Previous and next week, day or month."
+                  }
+                ]
+              },
+              {
+                "label": "T",
+                "cells": [
+                  {
+                    "text": "Back to today, in Schedule."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Shortcuts getting in the way?",
+          "content": "Single-letter keys only work outside the places where you type. If you would rather not have them, turn them off in <strong>Settings › In this browser › Use single-key shortcuts</strong>."
+        }
+      },
+      {
+        "id": "desk",
+        "title": "Board, many orders, schedule and printing",
+        "subsections": [
+          {
+            "title": "Board",
+            "content": "On Home, switch from <strong>List</strong> to <strong>Board</strong>. Each status becomes a column. Drag the card to the next column, or use the card's <strong>…</strong> button. With the keyboard: with the card selected, <kbd>Shift</kbd> and an arrow. You only see the moves your role allows."
+          },
+          {
+            "title": "Many orders at once",
+            "intro": "Select orders in the list. The filters give way to the actions:",
+            "steps": [
+              "<strong>Change the status</strong> or <strong>set the person in charge</strong> on all of them.",
+              "<strong>Send a charge</strong>: one payment link per customer, if you charge through Asaas.",
+              "<strong>Receive</strong> several orders from one customer at once.",
+              "<strong>PDF</strong> or <strong>Print</strong>: all in one file, each order on its own pages."
+            ],
+            "infoCard": {
+              "title": "Nothing changes before you see it",
+              "content": "Before changing anything, PraticOS shows how many orders will change and from what to what. Afterwards, the notice has <strong>Undo</strong>."
+            }
+          },
+          {
+            "title": "Drag-and-drop schedule",
+            "content": "In <strong>Schedule</strong>, see the week or the day with the hours. Drag a visit to another time or day, or to <strong>All day</strong>. If the customer was already expecting that date, PraticOS asks first and reminds you to let them know. Made a mistake? Click <strong>Undo</strong>. With the keyboard: select the visit, move it with <kbd>Shift</kbd> and the arrows and confirm with <kbd>Enter</kbd>."
+          },
+          {
+            "title": "Printing and PDF",
+            "content": "In an order, <strong>Print or save as PDF</strong> makes a clean sheet without the screen's buttons. In the <strong>…</strong> menu, <strong>View PDF</strong> creates the same PDF as the app, with your logo, photos and checklists, to open or download. In Financial, the report prints too and goes to Excel. The receipt for a payment comes from the customer's page."
+          }
+        ]
+      },
+      {
+        "id": "spreadsheets",
+        "title": "Bring customers and catalog from a spreadsheet",
+        "intro": "Already have everything in a spreadsheet? Bring it in at once, without typing it again. It works for customers (in <strong>Customers › Import spreadsheet</strong>) and for services and parts (in <strong>Catalog › Import spreadsheet</strong>). You can also find it with <kbd>⌘ K</kbd>.",
+        "steps": [
+          "Drag the file onto the screen or click to choose it. Excel (.xlsx) and CSV work, including what Google Sheets downloads. You can also copy the rows from the spreadsheet and paste them.",
+          "Check what each column holds. PraticOS has already marked what it recognized: name, phone, email, price.",
+          "See what will come in and what is left out, with the reason: a row without a name, a repeated phone, an item you already have.",
+          "Click <strong>Import</strong>. Nothing comes in before that."
+        ],
+        "infoCard": {
+          "title": "Internet dropped halfway?",
+          "content": "Import again. What already came in is not repeated."
+        }
+      },
+      {
+        "id": "roles",
+        "title": "What each role sees",
+        "intro": "On the computer, the same rules as on the phone apply: each person on the team sees only what their role allows. If you work on your own, you are the Administrator and see everything. The roles are explained in <a href=\"perfis-en.html\">Team and roles</a>.",
+        "table": {
+          "headers": [
+            "Role",
+            "What shows up on the computer"
+          ],
+          "rows": [
+            {
+              "label": "Administrator",
+              "cells": [
+                {
+                  "text": "Everything: all orders with prices, Schedule, Financial, Customers, Catalog, invoices, Team and the company details."
+                }
+              ]
+            },
+            {
+              "label": "Manager",
+              "cells": [
+                {
+                  "text": "All orders with prices, Schedule, Financial, Customers, Catalog and invoices. Does not open new orders."
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "All orders without prices, Schedule, Customers, Catalog without prices and the checklist templates. No Financial."
+                }
+              ]
+            },
+            {
+              "label": "Consultant",
+              "cells": [
+                {
+                  "text": "The orders they opened, with prices, their Schedule, Customers and Catalog. No Financial."
+                }
+              ]
+            },
+            {
+              "label": "Technician",
+              "cells": [
+                {
+                  "text": "Their own orders, opened by them or assigned to them, without prices, their Schedule and Customers. No Catalog or Financial, and does not open new orders."
+                }
+              ]
+            }
+          ]
+        },
+        "infoCard": {
+          "title": "Account without prices",
+          "content": "If your company turned off <strong>Prices and billing</strong>, nobody sees prices or Financial, on the computer or on the phone."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "FAQ",
+        "faq": [
+          {
+            "question": "Do I need to install anything?",
+            "answer": "No. Open <strong>praticos.app/app</strong> in your browser and sign in with your account."
+          },
+          {
+            "question": "Does what I do on the computer show up on my phone?",
+            "answer": "Yes. It is the same account. An order you open on the computer shows up in the app, and what the team does on the phone shows up on the computer."
+          },
+          {
+            "question": "What if the internet drops?",
+            "answer": "PraticOS lets you know, so you never lose what you typed thinking it was saved. To work offline, use the phone app."
+          },
+          {
+            "question": "Does it work in a phone browser?",
+            "answer": "It does, but on the phone the app is better: it has the camera, voice and reminders."
+          },
+          {
+            "question": "It says it is not open to me yet. What now?",
+            "answer": "We are opening it gradually. Keep using the phone app, which has everything, and <a href=\"../support-en.html\">contact support</a> if you want to get in."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "vision-general",
+        "title": "PraticOS en la computadora",
+        "intro": "En el mostrador o en la oficina, abre PraticOS en el navegador y trabaja con pantalla grande y teclado. Es la misma cuenta del celular: las órdenes, los clientes, la agenda y el dinero son los mismos, y lo que cambias en uno aparece en el otro.",
+        "features": [
+          {
+            "title": "Lista y orden lado a lado",
+            "description": "Haz clic en una orden y se abre al lado de la lista. Pasa a la siguiente sin perder el lugar."
+          },
+          {
+            "title": "Tablero",
+            "description": "Mira las órdenes en columnas por estado y mueve la tarjeta cuando el trabajo avanza."
+          },
+          {
+            "title": "Varias órdenes a la vez",
+            "description": "Marca las órdenes y cambia el estado o el responsable, cobra o imprime todas juntas."
+          },
+          {
+            "title": "Agenda de la semana",
+            "description": "Arrastra la visita a otro día u horario."
+          },
+          {
+            "title": "Financiero",
+            "description": "El resumen del mes, quién te debe en la pestaña <strong>Cobrar</strong> y el informe para imprimir o llevar a la planilla."
+          },
+          {
+            "title": "Planillas",
+            "description": "Trae tus clientes y tu catálogo de una planilla de Excel o de Google Sheets."
+          },
+          {
+            "title": "Impresión y PDF",
+            "description": "La orden con tu logo, lista para imprimir o enviar en PDF."
+          }
+        ],
+        "infoCard": {
+          "title": "Lo estamos abriendo de a poco",
+          "content": "Si aparece <strong>PraticOS en la computadora aún no está habilitado para ti</strong>, sigue con la app del celular, que tiene todo, y <a href=\"../support-es.html\">habla con soporte</a> si quieres entrar."
+        }
+      },
+      {
+        "id": "entrar",
+        "title": "Cómo entrar",
+        "intro": "Usa la misma cuenta del celular. No hay que instalar nada.",
+        "steps": [
+          "En la computadora, abre <strong>praticos.app/app</strong> en el navegador (Chrome, Edge, Safari o Firefox).",
+          "Elige <strong>Continuar con Google</strong> o <strong>Continuar con Apple</strong>, si así entras en el celular.",
+          "Si entras con correo y contraseña, elige <strong>Ya tengo cuenta con correo</strong>. ¿La olvidaste? Haz clic en <strong>¿Olvidaste tu contraseña?</strong> y sigue el correo.",
+          "Si trabajas en más de una empresa, elige dónde entrar. Para cambiar después, ve a <strong>Configuración › Tu cuenta › Cambiar de cuenta</strong>."
+        ],
+        "infoCard": {
+          "title": "¿Todavía no tienes cuenta?",
+          "content": "Empieza con Google o Apple. En el primer acceso, PraticOS pregunta tu rubro y deja todo listo para la primera orden."
+        },
+        "warningCard": {
+          "title": "Computadora que usan otras personas",
+          "content": "Al terminar, cierra la sesión en <strong>Configuración › Cerrar Sesión</strong>. Así nadie abre tus órdenes después de ti."
+        }
+      },
+      {
+        "id": "atajos",
+        "title": "Atajos de teclado",
+        "intro": "Puedes hacer todo sin soltar el teclado. Presiona <kbd>?</kbd> en cualquier momento para ver la lista. En Windows, usa <kbd>Ctrl</kbd> donde aparece <kbd>⌘</kbd>.",
+        "tables": [
+          {
+            "title": "En cualquier pantalla",
+            "headers": [
+              "Tecla",
+              "Qué hace"
+            ],
+            "rows": [
+              {
+                "label": "⌘ K",
+                "cells": [
+                  {
+                    "text": "Busca todo: una orden por número, un cliente, una placa, un ítem del catálogo o la pantalla que quieres abrir."
+                  }
+                ]
+              },
+              {
+                "label": "N",
+                "cells": [
+                  {
+                    "text": "Nueva orden."
+                  }
+                ]
+              },
+              {
+                "label": "/",
+                "cells": [
+                  {
+                    "text": "Buscar en la lista que está abierta."
+                  }
+                ]
+              },
+              {
+                "label": "?",
+                "cells": [
+                  {
+                    "text": "Ver todos los atajos."
+                  }
+                ]
+              },
+              {
+                "label": "Esc",
+                "cells": [
+                  {
+                    "text": "Cerrar lo que está abierto encima."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "En la lista de órdenes",
+            "headers": [
+              "Tecla",
+              "Qué hace"
+            ],
+            "rows": [
+              {
+                "label": "↓ y ↑",
+                "cells": [
+                  {
+                    "text": "Orden siguiente y anterior. Se abre al lado en el momento."
+                  }
+                ]
+              },
+              {
+                "label": "Enter",
+                "cells": [
+                  {
+                    "text": "Ir a la orden abierta al lado."
+                  }
+                ]
+              },
+              {
+                "label": "Espacio",
+                "cells": [
+                  {
+                    "text": "Marcar la orden para hacer algo con varias a la vez."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Con una orden abierta",
+            "headers": [
+              "Tecla",
+              "Qué hace"
+            ],
+            "rows": [
+              {
+                "label": "A",
+                "cells": [
+                  {
+                    "text": "Agregar servicio o repuesto."
+                  }
+                ]
+              },
+              {
+                "label": "S",
+                "cells": [
+                  {
+                    "text": "Cambiar el estado."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "cells": [
+                  {
+                    "text": "Cambiar el cliente."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "cells": [
+                  {
+                    "text": "Agendar la visita."
+                  }
+                ]
+              },
+              {
+                "label": "M",
+                "cells": [
+                  {
+                    "text": "Enviar al cliente."
+                  }
+                ]
+              },
+              {
+                "label": "R",
+                "cells": [
+                  {
+                    "text": "Cobrar."
+                  }
+                ]
+              },
+              {
+                "label": "⌘ Enter",
+                "cells": [
+                  {
+                    "text": "Guardar, desde cualquier lugar del formulario. También en Nueva orden."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "En Agenda y Financiero",
+            "headers": [
+              "Tecla",
+              "Qué hace"
+            ],
+            "rows": [
+              {
+                "label": "← y →",
+                "cells": [
+                  {
+                    "text": "Semana, día o mes anterior y siguiente."
+                  }
+                ]
+              },
+              {
+                "label": "T",
+                "cells": [
+                  {
+                    "text": "Volver a hoy, en la Agenda."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "¿Algún atajo molesta?",
+          "content": "Las teclas de una letra solo funcionan fuera de donde escribes. Si prefieres sin ellas, apágalas en <strong>Configuración › En este navegador › Usar atajos de una tecla</strong>."
+        }
+      },
+      {
+        "id": "escritorio",
+        "title": "Tablero, varias órdenes, agenda e impresión",
+        "subsections": [
+          {
+            "title": "Tablero",
+            "content": "En Inicio, cambia de <strong>Lista</strong> a <strong>Tablero</strong>. Cada estado es una columna. Arrastra la tarjeta a la columna siguiente o usa el botón <strong>…</strong> de la tarjeta. Con el teclado: con la tarjeta seleccionada, <kbd>Shift</kbd> y la flecha. Solo aparecen los cambios que tu rol permite."
+          },
+          {
+            "title": "Varias órdenes a la vez",
+            "intro": "Marca las órdenes en la lista. En lugar de los filtros aparecen las acciones:",
+            "steps": [
+              "<strong>Cambiar el estado</strong> o <strong>poner el responsable</strong> en todas.",
+              "<strong>Enviar cobro</strong>: un enlace de pago por cliente, si cobras con Asaas.",
+              "<strong>Cobrar</strong> a un cliente varias órdenes de una vez.",
+              "<strong>PDF</strong> o <strong>Imprimir</strong>: todas en un solo archivo, cada orden en sus páginas."
+            ],
+            "infoCard": {
+              "title": "Nada cambia sin que lo veas antes",
+              "content": "Antes de cambiar, PraticOS muestra cuántas órdenes van a cambiar y de qué a qué. Después, el aviso tiene <strong>Deshacer</strong>."
+            }
+          },
+          {
+            "title": "Agenda de arrastrar",
+            "content": "En la <strong>Agenda</strong>, mira la semana o el día con las horas. Arrastra la visita a otro horario o día, o a <strong>Todo el día</strong>. Si el cliente ya esperaba esa fecha, PraticOS pregunta antes y te recuerda avisarle. ¿Te equivocaste? Haz clic en <strong>Deshacer</strong>. Con el teclado: selecciona la visita, muévela con <kbd>Shift</kbd> y las flechas y confirma con <kbd>Enter</kbd>."
+          },
+          {
+            "title": "Imprimir y PDF",
+            "content": "En la orden, <strong>Imprimir o guardar PDF</strong> arma una hoja limpia, sin los botones de la pantalla. En el menú <strong>…</strong>, <strong>Ver PDF</strong> genera el mismo PDF de la app, con tu logo, las fotos y los checklists, para abrir o descargar. En Financiero, el informe también se imprime y va a Excel. El recibo de un pago sale desde la pantalla del cliente."
+          }
+        ]
+      },
+      {
+        "id": "planillas",
+        "title": "Traer clientes y catálogo de una planilla",
+        "intro": "¿Ya tienes todo en una planilla? Tráelo de una vez, sin volver a escribirlo. Sirve para clientes (en <strong>Clientes › Importar planilla</strong>) y para servicios y repuestos (en <strong>Catálogo › Importar planilla</strong>). También lo encuentras con <kbd>⌘ K</kbd>.",
+        "steps": [
+          "Arrastra el archivo a la pantalla o haz clic para elegirlo. Sirven Excel (.xlsx) y CSV, incluido el que descarga Google Sheets. También puedes copiar las filas de la planilla y pegarlas.",
+          "Revisa qué hay en cada columna. PraticOS ya marcó lo que reconoció: nombre, teléfono, correo, precio.",
+          "Mira lo que va a entrar y lo que queda fuera, con el motivo: fila sin nombre, teléfono repetido, ítem que ya tienes.",
+          "Haz clic en <strong>Importar</strong>. Recién ahí entra algo."
+        ],
+        "infoCard": {
+          "title": "¿Se cortó internet a la mitad?",
+          "content": "Importa de nuevo. Lo que ya había entrado no se repite."
+        }
+      },
+      {
+        "id": "roles",
+        "title": "Qué ve cada rol",
+        "intro": "En la computadora vale lo mismo que en el celular: cada persona del equipo ve solo lo que su rol permite. Si trabajas solo, eres el Administrador y ves todo. Los roles están explicados en <a href=\"perfis-es.html\">Equipo y roles</a>.",
+        "table": {
+          "headers": [
+            "Rol",
+            "Qué aparece en la computadora"
+          ],
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "text": "Todo: todas las órdenes con valores, Agenda, Financiero, Clientes, Catálogo, facturas, Equipo y los datos de la empresa."
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "text": "Todas las órdenes con valores, Agenda, Financiero, Clientes, Catálogo y facturas. No abre órdenes nuevas."
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "Todas las órdenes sin valores, Agenda, Clientes, Catálogo sin precios y los modelos de checklist. Sin Financiero."
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "text": "Las órdenes que abrió, con valores, su Agenda, Clientes y Catálogo. Sin Financiero."
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "text": "Sus órdenes, las que abrió o de las que es responsable, sin valores, su Agenda y Clientes. Sin Catálogo ni Financiero, y no abre órdenes nuevas."
+                }
+              ]
+            }
+          ]
+        },
+        "infoCard": {
+          "title": "Cuenta sin valores",
+          "content": "Si tu empresa apagó <strong>Valores y cobros</strong>, nadie ve precios ni Financiero, en la computadora ni en el celular."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas frecuentes",
+        "faq": [
+          {
+            "question": "¿Tengo que instalar algo?",
+            "answer": "No. Abre <strong>praticos.app/app</strong> en el navegador y entra con tu cuenta."
+          },
+          {
+            "question": "¿Lo que hago en la computadora aparece en el celular?",
+            "answer": "Sí. Es la misma cuenta. La orden que abres en la computadora aparece en la app, y lo que el equipo hace en el celular aparece en la computadora."
+          },
+          {
+            "question": "¿Y si se cae internet?",
+            "answer": "PraticOS te avisa, para que no pierdas lo que escribiste creyendo que se guardó. Para trabajar sin internet, usa la app del celular."
+          },
+          {
+            "question": "¿Funciona en el navegador del celular?",
+            "answer": "Funciona, pero en el celular la app es mejor: tiene cámara, voz y recordatorios."
+          },
+          {
+            "question": "Me dice que aún no está habilitado para mí. ¿Y ahora?",
+            "answer": "Lo estamos abriendo de a poco. Sigue con la app del celular, que tiene todo, y <a href=\"../support-es.html\">habla con soporte</a> si quieres entrar."
+          }
+        ]
+      }
+    ]
+  }
+}

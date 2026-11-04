@@ -160,6 +160,7 @@
 .doc-section li + li { margin-top: var(--space-3xs); }
 .doc-section li::marker { color: var(--color-neutral); }
 .doc-section code { font-family: var(--font-mono); font-size: 0.9em; background: var(--color-paper-3); padding: 0.05em 0.3em; border-radius: 3px; overflow-wrap: anywhere; }
+.doc-section kbd { font-family: var(--font-mono); font-size: 0.85em; padding: 0.05em 0.35em; border: 1px solid var(--color-rule); border-bottom-width: 2px; border-radius: 3px; white-space: nowrap; }
 .doc-section a:not([class]) { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 .doc-section a:not([class]):hover { text-decoration-thickness: 2px; }
 
