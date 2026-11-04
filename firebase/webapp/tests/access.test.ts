@@ -153,12 +153,11 @@ describe('session companies', () => {
 })
 
 describe('sign-in helpers', () => {
-  test('popup that cannot open falls back to redirect', async () => {
-    const { shouldRedirect } = await import('../src/lib/session')
-    expect(shouldRedirect('auth/popup-blocked')).toBe(true)
-    expect(shouldRedirect('auth/operation-not-supported-in-this-environment')).toBe(true)
-    expect(shouldRedirect('auth/popup-closed-by-user')).toBe(false)
-    expect(shouldRedirect('auth/internal-error')).toBe(false)
+  test('a redirect that comes back refused by the server says so, other errors name the provider', async () => {
+    const { redirectErrorOf, SIGNUP_BLOCKED } = await import('../src/lib/session')
+    expect(redirectErrorOf('google', { code: 'auth/admin-restricted-operation' })).toBe(SIGNUP_BLOCKED)
+    expect(redirectErrorOf('apple', { code: 'auth/internal-error', message: 'BLOCKING_FUNCTION_ERROR_RESPONSE' })).toBe(SIGNUP_BLOCKED)
+    expect(redirectErrorOf('apple', { code: 'auth/network-request-failed' })).toBe('apple')
   })
 
   test('company guess from the claim follows the saved choice', async () => {

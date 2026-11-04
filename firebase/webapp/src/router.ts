@@ -249,6 +249,11 @@ export async function recheckCurrentRoute(): Promise<void> {
   if (currentDecision(route.meta.access) !== 'allow') await router.replace('/')
 }
 
+/** Only an internal path: `next` comes from the URL and could point elsewhere. */
+export function safeNext(next: unknown): string {
+  return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+}
+
 // Every navigation passes here, direct URLs included. The server checks again.
 router.beforeEach(async (to) => {
   await startSession()
@@ -258,7 +263,8 @@ router.beforeEach(async (to) => {
   if (decision === 'chooseCompany') return { name: 'chooseCompany', query: { next: to.fullPath }, replace: true }
   if (decision === 'noCompany') return { name: 'noCompany', replace: true }
   if (decision === 'forbidden') return { name: 'forbidden', query: { from: to.path }, replace: true }
-  if (to.name === 'login' && session.uid) return { path: '/', replace: true }
+  // Signed in on the login (back from Google or Apple): go where the person was headed.
+  if (to.name === 'login' && session.uid) return { path: safeNext(to.query.next), replace: true }
   // A first access stopped after creating the company (reload): finish it before anything else.
   if (session.uid && to.name !== 'onboarding' && readPending(session.uid)) return { name: 'onboarding', replace: true }
   // A company without a segment finishes its first access before any company screen (auth.gate.resume-company).

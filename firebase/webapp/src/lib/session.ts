@@ -8,6 +8,7 @@ import { createApi, type ApiOptions } from './api'
 import { authClient, cacheState, clearFirestoreCache, firestoreClient, firestoreLite } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
+import { isSignupBlocked } from './auth-errors'
 import { readStorage, writeStorage } from './storage'
 import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, type WebAccess } from './web-access'
 
@@ -370,19 +371,21 @@ export function startSession(): Promise<void> {
 export type ProviderKind = 'google' | 'apple'
 const REDIRECT_FLAG = 'praticos.signInRedirect'
 
-/** Popups that cannot open fall back to a full-page redirect. */
-export function shouldRedirect(code: string | undefined): boolean {
-  return (
-    code === 'auth/popup-blocked' ||
-    code === 'auth/operation-not-supported-in-this-environment' ||
-    code === 'auth/web-storage-unsupported'
-  )
+/** What the login screen says after a redirect that came back with an error. */
+export function redirectErrorOf(kind: string, error: unknown): string {
+  return isSignupBlocked(error) ? SIGNUP_BLOCKED : kind
 }
+export const SIGNUP_BLOCKED = 'signupBlocked'
 
-/** Google or Apple. Resolves 'cancelled' when the person closed the window. */
-export async function signInWithProvider(kind: ProviderKind): Promise<'done' | 'cancelled' | 'redirecting'> {
+/**
+ * Google or Apple, on the same page: the browser goes to /__/auth/handler on
+ * praticos.app (the authDomain is the app's own domain, so Safari keeps the
+ * storage first-party) and comes back to the login, where startSession
+ * finishes it. No popup to block or lose behind the window.
+ */
+export async function signInWithProvider(kind: ProviderKind): Promise<'redirecting'> {
   const [auth, firebaseAuth] = await Promise.all([authClient(), import('firebase/auth')])
-  const { GoogleAuthProvider, OAuthProvider, browserPopupRedirectResolver, signInWithPopup, signInWithRedirect } = firebaseAuth
+  const { GoogleAuthProvider, OAuthProvider, browserPopupRedirectResolver, signInWithRedirect } = firebaseAuth
   let provider: InstanceType<typeof GoogleAuthProvider> | InstanceType<typeof OAuthProvider>
   if (kind === 'google') {
     provider = new GoogleAuthProvider()
@@ -392,19 +395,9 @@ export async function signInWithProvider(kind: ProviderKind): Promise<'done' | '
     provider.addScope('email')
     provider.addScope('name')
   }
-  try {
-    const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver)
-    await hydrate(user)
-    loggedIn(user)
-    return 'done'
-  } catch (error) {
-    const code = (error as { code?: string }).code
-    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'cancelled'
-    if (!shouldRedirect(code)) throw error
-    writeStorage(REDIRECT_FLAG, kind)
-    await signInWithRedirect(auth, provider, browserPopupRedirectResolver)
-    return 'redirecting'
-  }
+  writeStorage(REDIRECT_FLAG, kind)
+  await signInWithRedirect(auth, provider, browserPopupRedirectResolver)
+  return 'redirecting'
 }
 
 let redirectedIn = false
@@ -422,7 +415,7 @@ async function finishRedirect(): Promise<void> {
     redirectedIn = !!(await getRedirectResult(auth, browserPopupRedirectResolver))
   } catch (error) {
     console.warn('session: redirect sign-in failed', error)
-    session.signInError = kind
+    session.signInError = redirectErrorOf(kind, error)
   }
 }
 
