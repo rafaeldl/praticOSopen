@@ -14,7 +14,7 @@ import {
 } from '../models/types';
 import * as companyService from './company.service';
 import * as channelLinkService from './channel-link.service';
-import { memberRole, ownerId, privateMembershipRef, verifyMembership } from './membership.service';
+import { memberRole, ownerId, privateMembershipRef, refreshRolesClaim, verifyMembership } from './membership.service';
 import { maskTokenForLog } from '../utils/log-redaction.utils';
 import { normalizePhone as toE164 } from '../utils/format.utils';
 
@@ -185,6 +185,7 @@ export async function acceptInvite(
   if (!result.success) return result;
 
   const { invite } = result;
+  await refreshClaimAfterAccept(userId, result.companies);
 
   // Log (masked identifiers only) when the caller email differs from the invite email
   const inviteEmail = normalizeEmail(invite.email);
@@ -238,7 +239,7 @@ export function inviteStateError(invite: Invite): string | null {
 async function acceptInviteTransaction(
   token: string,
   user: UserAggr
-): Promise<{ success: true; invite: Invite } | AcceptInviteError> {
+): Promise<{ success: true; invite: Invite; companies: unknown[] | null } | AcceptInviteError> {
   const inviteRef = getInvitesCollection().doc(token);
   const userRef = db.collection('users').doc(user.id);
 
@@ -270,6 +271,8 @@ async function acceptInviteTransaction(
 
     companyService.writeMemberAdd(tx, invite.company.id, company, user, invite.role);
 
+    // The user's new companies list (null when there is no users/{uid} doc).
+    let userCompanies: unknown[] | null = null;
     if (userSnap.exists) {
       const companies: Array<{ company?: { id?: string }; role?: string }> = Array.isArray(
         userSnap.get('companies')
@@ -281,6 +284,7 @@ async function acceptInviteTransaction(
       if (index === -1) companies.push(entry);
       else companies[index] = entry;
       tx.update(userRef, { companies });
+      userCompanies = companies;
     }
 
     tx.update(inviteRef, {
@@ -290,8 +294,24 @@ async function acceptInviteTransaction(
       acceptedAt: new Date().toISOString(),
     });
 
-    return { success: true as const, invite };
+    return { success: true as const, invite, companies: userCompanies };
   });
+}
+
+/**
+ * After an accepted invite, writes the `roles` claim with the new company
+ * right away instead of waiting for the updateUserClaims trigger, which can
+ * take 20+ s under load (the client gives up and stays on the old company).
+ * The invite is already accepted, so a failure is only logged: the users/{uid}
+ * write also fires the trigger, which rebuilds the same claim.
+ */
+async function refreshClaimAfterAccept(userId: string, companies: unknown[] | null): Promise<void> {
+  if (!companies) return;
+  try {
+    await refreshRolesClaim(userId, companies);
+  } catch (error) {
+    console.error(`[Invite] Claim not written after accept (trigger will retry): uid=${userId.slice(0, 6)}`, error);
+  }
 }
 
 /**
@@ -749,6 +769,7 @@ export async function acceptInviteViaWhatsApp(
   // Register membership and mark the invite accepted atomically
   const result = await acceptInviteTransaction(normalizedCode, { id: userId, name: userName });
   if (!result.success) return result;
+  await refreshClaimAfterAccept(userId, result.companies);
 
   // Link WhatsApp
   await channelLinkService.linkWhatsApp(

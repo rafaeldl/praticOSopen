@@ -113,12 +113,13 @@ Todo fluxo do servidor que altera membros mantém os quatro primeiros em sincron
 ### 5.2. Onde é usado
 
 - **Custom claims** (`updateUserClaims`, trigger em `users/{uid}`): `roles = { [companyId]: role }` contém apenas vínculos verificados. As regras do Firestore em `companies/{cid}/**` usam `request.auth.token.roles[cid]`.
+  - Quem muda vínculo no servidor (mudar papel e remover membro da equipe, aceite de convite pelo app e pelo WhatsApp) também grava o claim na hora, depois da transação, com `refreshRolesClaim` (`membership.service.ts`), que usa a mesma `buildRolesClaim` do gatilho. Assim o cliente não espera o gatilho, que sob carga já levou mais de 20 s. Os dois calculam a partir de dados já gravados e chegam ao mesmo resultado, então a ordem entre eles não importa. Se a gravação imediata falhar, a operação responde sucesso, registra o erro no log e o gatilho grava o claim.
 - **API do app** (`bearerAuth`, `resolveUserContext`, MCP) e **bot** (`botAuth`): empresa e papel vêm da verificação; sem vínculo verificado → 403.
 - **Convites**: ver 5.3.
 
 ### 5.3. Convites
 
-- Aceite (`POST /v1/app/invites/:token/accept` e WhatsApp) é atômico: em uma transação, exige convite `pending` e não expirado, registra o membro (5.1) e marca o convite como aceito.
+- Aceite (`POST /v1/app/invites/:token/accept` e WhatsApp) é atômico: em uma transação, exige convite `pending` e não expirado, registra o membro (5.1) e marca o convite como aceito. Depois da transação, e antes de responder, grava o claim `roles` já com a nova empresa (ver 5.2).
 - Quem já é dono ou membro da empresa recebe `ALREADY_MEMBER` (409); o papel existente nunca é alterado por um convite.
 - Quando o e-mail do login difere do e-mail do convite, o aceite segue e é registrado um aviso (identificadores mascarados).
 - O código (token) é o segredo: quem está logado e tem o código busca o convite (`GET /v1/app/invites/:token`) e aceita (`POST /v1/app/invites/:token/accept`), tenha empresa ou não. Essas duas rotas e `GET /v1/app/invites/pending` passam sem empresa (`bearerAuthAllowingNoCompany`, montado em `routes/v1/app-invites.mount.ts`). As demais rotas de convite (criar, listar da empresa, cancelar) continuam exigindo empresa.

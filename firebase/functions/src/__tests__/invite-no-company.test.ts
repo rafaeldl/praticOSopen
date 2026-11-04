@@ -19,9 +19,12 @@ const DECODED: Record<string, Record<string, unknown>> = {
   member2: { uid: 'member2', email: 'member2@example.com', email_verified: true },
 };
 
+const mockSetClaims = jest.fn(async (_uid: string, _claims: unknown) => undefined);
+
 jest.mock('../services/firestore.service', () => ({
   ...jest.requireActual('./helpers/fake-firestore').firestoreServiceMock,
   auth: {
+    setCustomUserClaims: (uid: string, claims: unknown) => mockSetClaims(uid, claims),
     verifyIdToken: async (token: string) => {
       if (!DECODED[token]) throw new Error('bad token');
       return DECODED[token];
@@ -89,6 +92,7 @@ describe('invites for an account without a company', () => {
   beforeEach(() => {
     seedAll();
     app = buildApp();
+    mockSetClaims.mockClear();
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -132,6 +136,38 @@ describe('invites for an account without a company', () => {
       { company: { id: 'c1', name: 'Oficina' }, role: 'technician' },
     ]);
     expect(read('links/invites/tokens/INV_EMAIL')?.status).toBe('accepted');
+  });
+
+  it('writes the roles claim with the new company before answering', async () => {
+    // The users/{uid} trigger also rebuilds it, but can take 20+ s under load.
+    const res = await request(app).post('/v1/app/invites/INV_EMAIL/accept').set(as('newbie'));
+
+    expect(res.status).toBe(200);
+    expect(mockSetClaims).toHaveBeenCalledWith('newbie', { roles: { c1: 'technician' } });
+  });
+
+  it('keeps the other companies in the claim, as the trigger does', async () => {
+    const res = await request(app).post('/v1/app/invites/INV_OTHER/accept').set(as('member2'));
+
+    expect(res.status).toBe(200);
+    expect(mockSetClaims).toHaveBeenCalledWith('member2', { roles: { c2: 'owner', c1: 'technician' } });
+  });
+
+  it('still accepts when writing the claim fails (the trigger covers it)', async () => {
+    mockSetClaims.mockRejectedValueOnce(new Error('auth down'));
+
+    const res = await request(app).post('/v1/app/invites/INV_EMAIL/accept').set(as('newbie'));
+
+    expect(res.status).toBe(200);
+    expect(read('companies/c1/private/membership')?.members).toMatchObject({ newbie: 'technician' });
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it('does not write the claim when the invite is refused', async () => {
+    const res = await request(app).post('/v1/app/invites/INV_ADMIN/accept').set(as('stranger'));
+
+    expect(res.status).not.toBe(200);
+    expect(mockSetClaims).not.toHaveBeenCalled();
   });
 
   it('accepts an invite addressed to the phone', async () => {

@@ -8,7 +8,7 @@
  * and the `memberships` subcollection are display data, not verification sources.
  */
 
-import { db } from './firestore.service';
+import { auth, db } from './firestore.service';
 
 export interface VerifiedMembership {
   companyId: string;
@@ -139,4 +139,21 @@ export async function buildRolesClaim(
     roles[companyId] = role;
   }
   return roles;
+}
+
+/**
+ * Writes the user's `roles` claim right away from their (already updated)
+ * `companies` list, with the same rule as the updateUserClaims trigger on
+ * users/{uid}. Used after a server change to the membership so the client
+ * does not wait for the trigger (which can take 20+ s under load). Both
+ * compute the claim from committed data, so the order between them does not
+ * matter. A user without an Auth account is skipped; other errors are thrown.
+ */
+export async function refreshRolesClaim(uid: string, entries: unknown[]): Promise<void> {
+  try {
+    await auth.setCustomUserClaims(uid, { roles: await buildRolesClaim(uid, entries) });
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'auth/user-not-found') return;
+    throw error;
+  }
 }
