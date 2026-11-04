@@ -122,8 +122,10 @@ try {
     await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
     check(page.url() === 'https://praticos.app/app/orders?order=1#x', `${old}/app vai para praticos.app (${page.url()})`)
     check(outside.length === 0, `sem carregar o Firebase antes de sair${outside.length ? `: ${outside.join(' | ')}` : ''}`)
-    await page.goto(`http://${old}:${PORT}/`)
-    check(page.url() === `http://${old}:${PORT}/`, `site em ${old} fica onde está`)
+    // The site moved too (docs/DOMAIN.md): an old-domain page goes to the same path on praticos.app.
+    await page.goto(`http://${old}:${PORT}/?a=1`)
+    await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
+    check(page.url() === 'https://praticos.app/?a=1', `site em ${old} vai para praticos.app (${page.url()})`)
   } finally {
     await legacy.close()
   }
