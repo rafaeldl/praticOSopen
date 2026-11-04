@@ -47,6 +47,8 @@ import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { useRouter } from 'vue-router'
 import { canOpen } from '@/router'
+import { featureOn } from '@/lib/company-features'
+import { segmentFieldService } from '@/lib/segments'
 import { registerShortcut } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { preferredStep, rememberMethod, rememberTransition, suggestedMethod } from '@/lib/orders/suggest'
@@ -512,7 +514,8 @@ const assigneeName = computed(() => {
   const who = order.value?.assignedTo as { name?: string; email?: string } | null | undefined
   return who?.name || who?.email || ''
 })
-const fieldService = computed(() => !!(session.company as { fieldService?: boolean } | null)?.fieldService)
+// Absent on the company: the segment's default, as the app (auth.gate.feature-defaults).
+const fieldService = computed(() => featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService()))
 
 /**
  * The place of the order (order.address.edit / remove): a new text drops the
@@ -658,6 +661,13 @@ const ownDevices = shallowRef<Device[]>([])
 const deviceGroups = (query: string): ComboboxGroup[] => {
   const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
   const row = (d: Device) => ({ id: d.id, label: d.name, sub: d.serial ?? undefined })
+  if (current) {
+    // Changing one device: the whole list, the current one always there with its ✓ (order.device.change).
+    const list = search(devices.value, query, (d) => d.serial ?? '')
+    const mine = devices.value.find((d) => d.id === current.id)
+    const shown = mine && !query.trim() && !list.some((d) => d.id === mine.id) ? [mine, ...list] : list
+    return [{ items: !query.trim() ? [{ id: NONE, label: t('pickerNoDevice', { device: deviceLabel().toLocaleLowerCase() }) }] : [] }, { items: shown.map(row) }]
+  }
   const own = search(ownDevices.value, query, (d) => d.serial ?? '', 6)
   // Another customer's device never shows under this customer's name: it goes to "Outros".
   const others = search(devices.value.filter((d) => !own.some((o) => o.id === d.id)), query, (d) => d.serial ?? '')

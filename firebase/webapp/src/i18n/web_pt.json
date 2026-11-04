@@ -799,5 +799,7 @@
   "web.order.noDocuments": "Nenhum documento. Nota, contrato ou garantia entram aqui.",
   "web.nfse.issuedCount": "{count, plural, =0{nenhuma emitida} =1{1 emitida} other{{count} emitidas}}",
   "web.nfse.searchOrder": "Número da OS",
-  "web.nfse.pickContinue": "{count, plural, =0{Escolha as OS} =1{Continuar com 1 OS} other{Continuar com {count} OS}}"
+  "web.nfse.pickContinue": "{count, plural, =0{Escolha as OS} =1{Continuar com 1 OS} other{Continuar com {count} OS}}",
+  "web.login.signupBlocked": "O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.",
+  "web.invites.joining": "Entrando…"
 }

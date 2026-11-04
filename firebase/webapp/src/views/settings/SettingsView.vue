@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import PageHead from '@/components/PageHead.vue'
 import { t } from '@/i18n'
 import { prefs } from '@/lib/prefs'
+import { chooseLanguage } from '@/lib/user-profile'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { can, session, signOutEverywhere } from '@/lib/session'
 import { displayRole, ROLE_LABEL } from '@/lib/settings/model'
@@ -36,6 +37,8 @@ const companyRows = computed<Row[]>(() => {
   if (can('manageCompany')) rows.push({ to: '/settings/company', title: t('web.company.title'), sub: t('web.settings.companySub'), testid: 'settings-company' })
   if (can('manageUsers')) rows.push({ to: '/team', title: t('teamTitle'), sub: t('web.settings.teamSub'), testid: 'settings-team' })
   rows.push({ to: '/settings/plan', title: t('planTitle'), sub: t('web.settings.planSub'), testid: 'settings-plan' })
+  // Avaliações (settings.open-ratings): who manages the company, as the app.
+  if (can('manageCompany')) rows.push({ to: '/settings/ratings', title: t('ratings'), sub: t('ratingsSubtitle'), testid: 'settings-ratings' })
   if (can('manageUsers')) rows.push({ to: '/settings/integrations', title: t('integrations'), sub: t('web.settings.integrationsSub'), testid: 'settings-integrations' })
   return rows
 })
@@ -127,7 +130,7 @@ const WEB_VERSION = __WEB_VERSION__
         <div class="settings-form">
           <div>
             <label class="field-label" for="pref-language">{{ t('language') }}</label>
-            <select id="pref-language" v-model="prefs.language" class="field">
+            <select id="pref-language" v-model="prefs.language" class="field" @change="chooseLanguage(session.uid, prefs.language)">
               <option value="system">{{ t('web.settings.languageSystem') }}</option>
               <option value="pt">Português</option>
               <option value="en">English</option>

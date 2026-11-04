@@ -2,7 +2,7 @@
 // First access of someone without a company and without an invite (docs/ONBOARDING.md):
 // Ramo → [Especialidades] → Para o cliente → Início, as lib/screens/onboarding/.
 // Each step is in the URL (?step=), so the browser's Back goes one step back.
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -24,6 +24,10 @@ import { applyMask } from '@/lib/segment-fields'
 import { session, signOutEverywhere } from '@/lib/session'
 
 type Step = 'segment' | 'specialties' | 'business'
+
+// "Recebi um código de convite" (onboarding.segment.have-invite): the same code screen as Sua conta.
+const InviteCodeFlow = defineAsyncComponent(() => import('@/components/InviteCodeFlow.vue'))
+const codeOpen = ref(false)
 
 const route = useRoute()
 const router = useRouter()
@@ -220,6 +224,7 @@ onMounted(() => {
             </button>
           </li>
         </ul>
+        <button type="button" class="link entry-link" data-testid="onboarding-invite-code" @click="codeOpen = true">{{ t('onboardingInviteCode') }}</button>
       </div>
 
       <div v-else-if="step === 'specialties' && segment" class="entry-box">
@@ -276,6 +281,7 @@ onMounted(() => {
       </form>
     </main>
   </div>
+  <InviteCodeFlow v-if="codeOpen" @close="codeOpen = false" />
 </template>
 
 <style scoped>

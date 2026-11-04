@@ -13,7 +13,8 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import CompanyDataForm from '@/components/settings/CompanyDataForm.vue'
 import TermsForm from '@/components/settings/TermsForm.vue'
 import { locale, t, type MessageKey } from '@/i18n'
-import { segmentLabels } from '@/lib/segments'
+import { segmentFieldService, segmentLabels } from '@/lib/segments'
+import { featureOn } from '@/lib/company-features'
 import { loadCompany, loadSegments, saveCompany, type CompanyDoc } from '@/lib/settings/data'
 import { defaultTerms, localName, type SegmentOption } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
@@ -42,8 +43,8 @@ const specialtyNames = computed(() => {
 const sortedSegments = computed(() => [...(segments.value ?? [])].sort((a, b) => localName(a, locale.value).localeCompare(localName(b, locale.value), locale.value)))
 const devicesPlural = computed(() => segmentLabels()['device._entity_plural'])
 
-/** As the app reads them: useFinancial absent is on; the rest absent is off. */
-const value = (feature: Feature): boolean => (feature === 'useFinancial' ? company.value?.useFinancial !== false : company.value?.[feature] === true)
+/** As the app resolves them (auth.gate.feature-defaults): absent values fall back to the segment, then the app's default. */
+const value = (feature: Feature): boolean => featureOn(company.value as Record<string, unknown> | null, feature, segmentFieldService())
 
 const switches = computed(() => {
   const list: { feature: Feature; title: string; sub: MessageKey }[] = [

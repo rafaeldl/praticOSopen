@@ -107,6 +107,16 @@ Google e Apple abrem em popup; se o navegador bloquear, segue por redirect (`sho
 
 Quem trabalha em mais de uma empresa escolhe em `/app/choose-company`; a escolha fica lembrada no navegador.
 
+Detalhes da entrada (`src/views/LoginView.vue`, `lib/auth-errors.ts`):
+
+- E-mail sem @ ou ponto e senha vazia são avisados antes de chamar o Auth; "Mostrar senha" troca o campo. "Esqueceu a senha?" com e-mail vazio ou errado diz no campo e não manda nada.
+- Cadastro recusado pelo servidor (função `blockSuspiciousSignups`, ou cadastro desligado) tem frase própria, nunca a do Google ou da Apple (`isSignupBlocked`).
+- Primeira entrada no web: sem `users/{uid}`, a sessão cria o documento do app numa transação (sem empresa, idioma do navegador), sem esperar (`lib/user-profile.ts`).
+- Idioma: o `preferredLanguage` da conta vale num navegador onde ninguém escolheu idioma; escolher em Configurações grava na conta (`pt-BR`, `en-US`, `es-ES`), como o app.
+- Conta que não carregou mostra "Tentar de novo"; nunca manda para o primeiro acesso.
+
+Convites sem empresa (`/app/no-company`, `components/InvitesList.vue`, `components/InviteCodeFlow.vue`): aceitar o convite da lista entra direto na empresa; "Recusar convite" pergunta com o nome da empresa; "Tenho outro código" e, no primeiro acesso, "Recebi um código de convite" abrem o código (maiúsculas e `INV_` na frente, como o app), com "Buscar outro código". Os erros vêm do código da API (`inviteErrorKey`).
+
 ### Domínios
 
 O web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` e `praticos.firebaseapp.com`: quem abre `/app` num deles vai para `praticos.app` com o mesmo caminho, query e hash (script inline no `index.html`, antes do Firebase, `scripts/legacy-host-plugin.ts`; só no build de produção). `/q`, `/__/auth` e o site não mudam.
@@ -241,7 +251,8 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Configurações (`/settings`)**: a conta e só as linhas que o papel abre. "Neste navegador": idioma, tema e "Usar atalhos de uma tecla". O rodapé mostra a versão ("PraticOS web {dia} ({commit})", `__WEB_VERSION__`).
 - **Equipe (`/team`)**: dono e admin. Convidar (código e WhatsApp), reenviar, convidar de novo, mudar papel e tirar. Tabela "O que cada papel pode fazer" lida da matriz gerada.
 - **Sua empresa**: dados, logo, termos, ramo e os interruptores (Valores e cobrança, Agenda, Atendimento no local, Contratos, Controle de aparelhos), gravados por transação com o `updatedAt` lido.
-- **Plano**: só leitura. Nada de compra ou preço no web.
+- **Plano**: só leitura. Nada de compra ou preço no web. Quem não é dono nem admin lê "Peça ao administrador da conta para mudar de plano."
+- **Avaliações (`/settings/ratings`)**: dono e admin (`manageCompany`). Média ("4,5 de 5") e as últimas, a linha abre a OS. Lê só as OS com `rating.score >= 1` (`lib/settings/ratings.ts`).
 - **Sua conta**: perfil, trocar de empresa, código de convite, sair e apagar a conta (pela função `accountApi`, `docs/ACCOUNT_DELETION.md`).
 - **Integrações**: Asaas (piloto) e conexões do ChatGPT e do Claude.
 
@@ -351,13 +362,13 @@ Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/app/dev
 
 ## Limitações conhecidas
 
-- **Primeiro convite de conta nova:** `/v1/app/invites` fica atrás de `bearerAuth`, que responde 403 para quem ainda não tem empresa. O app chama a mesma rota. Teste em `e2e/invites.spec.ts` como `fixme`.
 - **`expectedUpdatedAt` só protege entre telas do web:** o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - **Checklists e contratos com versões antigas do app:** o app pode apagar uma foto posta no web e regravar o mapa `contract` inteiro.
 - **Quem não vê valores não tem tempo real:** a OS é relida depois de cada gravação e ao voltar à janela.
 - **Fuso:** a empresa não tem campo de fuso; ele vem do país. Uma empresa em Manaus aberta num computador em São Paulo usa São Paulo.
 - **Pedido do cliente:** fica no primeiro comentário interno, como no app; `service_order.observation` do segmento não é gravado pelo web.
-- **Primeiro acesso:** sem a tela de código de convite e sem retomar empresa que já existe sem ramo.
+- **Primeiro acesso:** sem retomar empresa que já existe sem ramo (`auth.gate.resume-company`).
+- **Opções da empresa que faltam no documento** (`lib/company-features.ts`): resolvidas como o app (empresa, padrão do ramo, padrão do app), mas o web nunca grava o que falta.
 
 ## Decisões pendentes
 
@@ -371,7 +382,6 @@ Do dono:
 Técnicas, esperando outra peça:
 
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
-- **Aceitar o primeiro convite:** mudar a rota de convites para aceitar quem ainda não tem empresa.
 - **Lembretes:** no app são notificações locais; no web, só com Web Push.
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
 - **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), Próxima cobrança, faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.

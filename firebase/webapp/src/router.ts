@@ -173,6 +173,13 @@ export const routes: RouteRecordRaw[] = [
     component: withSettingsTexts(() => import('@/views/settings/CompanyView.vue')),
     meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'web.company.title' },
   },
+  // Avaliações: owner and admin, as the app's row (manageCompany).
+  {
+    path: '/settings/ratings',
+    name: 'ratings',
+    component: withSettingsTexts(() => import('@/views/settings/RatingsView.vue')),
+    meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'ratings' },
+  },
   // Every role reads the plan; nothing is bought here.
   {
     path: '/settings/plan',
