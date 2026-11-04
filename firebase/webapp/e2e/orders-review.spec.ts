@@ -68,9 +68,11 @@ test('A4: quem não vê valores também acha pelo número a OS que a lista não 
   })
   await login(page, 'supervisor', './?f=all')
   await expect(table(page).locator('tbody tr[data-order]').first()).toBeVisible()
-  await expect(table(page).locator('td.c-num', { hasText: new RegExp(`^${old.number}$`) })).toHaveCount(0)
+  // By id: the test numbers are random, so another test's recent order may share this one's number.
+  const row = table(page).locator(`tbody tr[data-order="${old.id}"]`)
+  await expect(row).toHaveCount(0)
   await page.getByRole('searchbox', { name: /Buscar OS/ }).fill(String(old.number))
-  await expect(table(page).locator('tbody tr[data-order] td.c-num').first()).toHaveText(String(old.number))
+  await expect(row.locator('td.c-num')).toHaveText(String(old.number))
   expect(asked.length).toBeGreaterThan(0)
   await expect(table(page).getByRole('columnheader', { name: 'Total' })).toHaveCount(0)
 })
