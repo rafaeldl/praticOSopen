@@ -13,6 +13,7 @@ import MoneyInput from '@/components/MoneyInput.vue'
 import NewOrderAssist, { type AssistForm } from './NewOrderAssist.vue'
 import NewOrderCustomFields from './NewOrderCustomFields.vue'
 import { newOrderFields } from '@/lib/orders/new-order-fields'
+import { requestField, withRequest } from '@/lib/orders/request'
 import NewOrderPhotos from './NewOrderPhotos.vue'
 import type { NewDevice } from '@/lib/orders/assist-draft'
 import { fieldName, validateField, writeCustom } from '@/lib/segment-fields'
@@ -374,13 +375,18 @@ async function save() {
     if (assignee.value) after.push(writes.patchOrder(created.id, { assignedTo: assignee.value }))
     // Photos go up once the order has its id, one after the other; a failure is counted, never swallowed.
     if (photos.value.length) after.push(photos.value.reduce<Promise<unknown>>((chain, file) => chain.then(() => writes.uploadPhoto(created.id, file)), Promise.resolve()))
-    const customData = customFields.length ? writeCustom(null, customFields, customValues) : null
+    // What the customer asked goes into the segment's field, as the app (order.new.request);
+    // a segment without it keeps it as the first internal comment, also as the app.
+    const asked = request.value.trim()
+    const askedField = asked ? requestField() : undefined
+    const fieldsData = customFields.length ? writeCustom(null, customFields, customValues) : null
+    const customData = askedField ? withRequest(fieldsData, askedField, asked) : fieldsData
     if (customData) after.push(writes.updateOrderFields(created.id, { customData }))
     // The place: typed in "Mais opções", else the customer's address with its coordinates (order.customer.address-from-customer).
     const place = address.value.trim()
     if (place) after.push(writes.updateOrderFields(created.id, { address: place }))
     else if (customer.value.address) after.push(writes.updateOrderFields(created.id, { address: customer.value.address, latitude: customer.value.latitude ?? null, longitude: customer.value.longitude ?? null }))
-    if (request.value.trim()) after.push(writes.addComment(created.id, request.value.trim(), true))
+    if (asked && !askedField) after.push(writes.addComment(created.id, asked, true))
     if (repeat) after.push(startContract(created.id, newContract(repeatForm.value, today)))
     const results = await Promise.allSettled(after)
     allowClose = true

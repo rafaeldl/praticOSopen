@@ -130,6 +130,8 @@
   "web.order.askAssistant": "Ask the assistant",
   "web.order.askAssistantHint": "Ask the assistant: oil and filter change",
   "web.order.change": "Change",
+  "web.order.requestAdd": "Write what the customer asked for",
+  "web.order.requestChange": "Change what the customer asked for",
   "web.order.changeCustomer": "Change the customer {name}",
   "web.order.clearDue": "Remove the date",
   "web.order.commentVisibility": "Who sees the comment",
