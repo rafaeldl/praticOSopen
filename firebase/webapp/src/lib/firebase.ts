@@ -25,6 +25,8 @@ function options(): FirebaseOptions {
     projectId,
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
     appId: env.VITE_FIREBASE_APP_ID,
+    // Only read by lib/analytics-client.ts, after consent.
+    ...(env.VITE_FIREBASE_MEASUREMENT_ID ? { measurementId: env.VITE_FIREBASE_MEASUREMENT_ID } : {}),
   }
 }
 

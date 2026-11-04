@@ -7,6 +7,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
 import { t, type MessageKey } from '@/i18n'
+import { logEmailLoginOpened } from '@/lib/analytics'
 import { emailErrorKey, isSignupBlocked, resetEmailErrorKey } from '@/lib/auth-errors'
 import { sendPasswordReset, session, signInWithEmail, signInWithProvider, type ProviderKind } from '@/lib/session'
 import { showToast } from '@/lib/toast'
@@ -14,6 +15,11 @@ import { showToast } from '@/lib/toast'
 const route = useRoute()
 const router = useRouter()
 const showEmail = ref(false)
+/** The app's email_login_opened: who looked for the e-mail way in. */
+function openEmail() {
+  showEmail.value = true
+  logEmailLoginOpened()
+}
 const email = ref('')
 const password = ref('')
 const passwordShown = ref(false)
@@ -117,7 +123,7 @@ onMounted(() => {
           <button type="button" class="btn btn--wide btn--apple" :disabled="busy" @click="withProvider('apple')">
             {{ t('continueWithApple') }}
           </button>
-          <button v-if="!showEmail" type="button" class="link entry-link" @click="showEmail = true">
+          <button v-if="!showEmail" type="button" class="link entry-link" @click="openEmail">
             {{ t('loginWithEmailLink') }}
           </button>
         </div>
