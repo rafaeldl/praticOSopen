@@ -59,7 +59,8 @@ test('do orçamento ao recebido, pelo botão azul (approve, start, finish, recei
   await receive.getByLabel(/Como foi pago/).selectOption('pix')
   await receive.getByRole('button', { name: 'Marcar como recebido' }).click()
   await expect(panel(page).getByTestId('order-totals')).toContainText('Tudo pago')
-  await expect(nextStep(page)).toHaveCount(0)
+  // Paid and done: with the nota set up (seed), the next step is the nota, as in the app (order.nfse.next-step).
+  await expect(nextStep(page)).toHaveText('Emitir nota fiscal')
   const saved = await readOrder(order.id)
   expect(saved?.status).toBe('done')
   expect(saved?.paidAmount).toBe(50)

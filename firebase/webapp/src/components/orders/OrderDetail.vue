@@ -76,11 +76,13 @@ import OrderAssistant from './OrderAssistant.vue'
 import PaymentHistory from './receive/PaymentHistory.vue'
 import { dropUpload, paymentSettings, removeProof, removeTransaction, resetPayments, setProof, uploadProof } from '@/lib/receive/data'
 import { receivesMoney, type Payment } from '@/lib/receive/model'
+import { canHaveNfse, isActive as nfseIsActive, nfseNextStep, type NfseInvoice } from '@/lib/nfse/model'
 // Opened on demand: the order shows without them.
 const ReceiptsDialog = defineAsyncComponent(() => import('./receive/ReceiptsDialog.vue'))
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
 const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
 // Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
+const OrderNfse = defineAsyncComponent(() => Promise.all([import('@/components/finance/OrderNfse.vue'), loadTexts('finance')]).then(([m]) => m))
 const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
 // Checklists, after the order shows (their texts are in the orders chunk).
 const PdfDialog = defineAsyncComponent(() => import('./PdfDialog.vue'))
@@ -141,6 +143,11 @@ const money$ = computed(() => (order.value ? totals(order.value) : null))
 const step = computed(() => {
   if (!order.value || !access.value) return null
   const base = nextStep(order.value, access.value)
+  // Finished and paid: the nota is the next step, for who issues (order.nfse.next-step).
+  if (!base && nfseOn.value && nfseLoaded.value && can('chargeOrder')) {
+    const nota = nfseNextStep(order.value, nfseCurrent.value, nfseReady.value, money$.value?.remaining ?? 0)
+    if (nota) return { kind: 'nfse' as const, fix: nota === 'fix' }
+  }
   if (base?.kind !== 'status') return base
   const preferred = preferredStep(session.companyId, order.value.status, access.value.transitions)
   return preferred ? { kind: 'status' as const, to: preferred } : base
@@ -163,6 +170,7 @@ const stepLabel = computed(() => {
   if (!value) return ''
   if (value.kind === 'resume') return t('orderHoldResume')
   if (value.kind === 'receive') return t('orderNextStepReceive', { amount: money(value.amount) })
+  if (value.kind === 'nfse') return value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
   return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('web.order.markDone')
 })
 const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
@@ -172,6 +180,12 @@ let watcher: ReturnType<typeof watchOrder> | undefined
 const chargesOn = ref(false)
 /** Notas fiscais on for the company (settings/payments): "Emitir nota fiscal" in the menu, for chargeOrder. */
 const nfseOn = ref(false)
+/** The nota setup is done (nfseReady): the nota can be the blue step (order.nfse.next-step). */
+const nfseReady = ref(false)
+/** The order's current nota, as OrderNfse reads it (live). */
+const nfseCurrent = shallowRef<NfseInvoice | null>(null)
+/** The order's notas were read (B8): before that, or after a failed read, no "Emitir". */
+const nfseLoaded = ref(false)
 const issuing = ref(false)
 const pdfOpen = ref(false)
 /** The receipt over several orders that a payment belongs to (pay.order.open-receipt-group). */
@@ -187,6 +201,7 @@ onMounted(() => {
       .then((settings) => {
         chargesOn.value = settings.ready
         nfseOn.value = settings.nfse
+        nfseReady.value = settings.nfseReady
       })
       .finally(() => (chargesPending.value = false))
   }
@@ -345,6 +360,7 @@ async function runStep() {
   if (!value || !order.value) return
   if (value.kind === 'status') await setStatus(value.to)
   else if (value.kind === 'resume') await run(() => writes.resumeOrder(order.value!.id), t('web.order.resumed'))
+  else if (value.kind === 'nfse') issuing.value = true
   else dialog.value = { kind: 'receive' }
 }
 
@@ -740,7 +756,7 @@ const menuChoices = computed<Choice[]>(() => {
   if (canPrint.value) list.push({ id: 'pdf', label: t('web.order.pdf') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
   // The server decides the rest (already has a nota, no service with value, not set up) and the dialog says why.
-  if (nfseOn.value && can('chargeOrder') && o.status !== 'quote' && o.status !== 'canceled') list.push({ id: 'invoice', label: t('nfseIssueAction') })
+  if (nfseOn.value && nfseLoaded.value && can('chargeOrder') && canHaveNfse(o) && !(nfseCurrent.value && nfseIsActive(nfseCurrent.value))) list.push({ id: 'invoice', label: t('nfseIssueAction') })
   if (a.transitions.includes('canceled')) list.push({ id: 'cancel', label: t('orderMenuCancel', { order: orderShort() }), danger: true })
   if (a.canDelete) list.push({ id: 'delete', label: t('orderMenuDelete', { order: orderShort() }), danger: true })
   return list
@@ -952,6 +968,7 @@ watch(
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
+        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
         <OrderPhotos :order="order" />
         <OrderDocuments :order="order" :can-edit="true" />
         <OrderComments :order-id="order.id" />

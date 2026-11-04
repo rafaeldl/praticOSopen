@@ -17,8 +17,10 @@ import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays, monthOf, shiftMonth } from '@/lib/finance/period'
 import { monthName, monthYear, today } from '@/lib/finance/text'
 import { formatDate } from '@/lib/format'
-import { cancelInvoice, monthInvoices, nfseSettings, type NfseSettings } from '@/lib/nfse/data'
-import { SEARCH_FROM, canCancel, canFix, matches, monthList, orderNumbers, type NfseInvoice, type NfseStatus } from '@/lib/nfse/model'
+import { cancelInvoice, customerInvoices, monthInvoices, nfseSettings, type NfseSettings } from '@/lib/nfse/data'
+import { can } from '@/lib/session'
+import { DOT, invoiceStatusText } from '@/lib/nfse/text'
+import { SEARCH_FROM, canCancel, canFix, matches, monthList, orderNumbers, type NfseInvoice } from '@/lib/nfse/model'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { registerShortcut } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
@@ -39,6 +41,8 @@ const month = computed(() => {
 })
 const query = computed(() => (typeof route.query.q === 'string' ? route.query.q : ''))
 const openId = computed(() => (typeof route.query.invoice === 'string' ? route.query.invoice : null))
+/** "Notas de X" (nfse.list.customer): only this customer's notas, from the customer's screen. */
+const customerId = computed(() => (typeof route.query.customer === 'string' && route.query.customer ? route.query.customer : null))
 
 const settings = ref<NfseSettings | null>(null)
 const state = ref<'loading' | 'ready' | 'failed' | 'off'>('loading')
@@ -55,7 +59,17 @@ async function load() {
       state.value = 'off'
       return
     }
-    const list = await monthInvoices(month.value, todayDay)
+    let list: NfseInvoice[]
+    if (customerId.value) {
+      list = await customerInvoices(customerId.value)
+      // Opens on the month of the customer's newest nota.
+      const newest = [...list].filter((i) => i.effectiveDate).sort((a, b) => (b.effectiveDate as string).localeCompare(a.effectiveDate as string))[0]
+      if (run === asked && typeof route.query.month !== 'string' && newest?.effectiveDate && monthOf(newest.effectiveDate) !== month.value) {
+        invoices.value = list
+        go({ month: monthOf(newest.effectiveDate) === current ? undefined : monthOf(newest.effectiveDate) })
+        return
+      }
+    } else list = await monthInvoices(month.value, todayDay)
     if (run !== asked) return
     invoices.value = list
     state.value = 'ready'
@@ -66,6 +80,7 @@ async function load() {
   }
 }
 watch(month, () => void load())
+watch(customerId, () => void load())
 const onFocus = () => state.value === 'ready' && void load()
 onMounted(() => {
   void load()
@@ -97,8 +112,11 @@ const rows = computed(() => (searchable.value && query.value ? result.value.rows
 const attention = computed(() => (searchable.value && query.value ? result.value.attention.filter((i) => matches(i, query.value)) : result.value.attention))
 const opened = computed(() => (openId.value ? (invoices.value.find((i) => i.id === openId.value) ?? null) : null))
 
+const customerName = computed(() => invoices.value.find((i) => i.customerName)?.customerName ?? '')
 const title = computed(() =>
-  state.value === 'ready'
+  customerId.value
+    ? t('nfseListCustomerTitle', { name: customerName.value })
+    : state.value === 'ready'
     ? t('nfseListSummary', { count: result.value.issuedCount, month: monthName(month.value), value: money(result.value.issuedTotal) })
     : t('nfseListTitle'),
 )
@@ -107,37 +125,7 @@ const title = computed(() =>
 // Status words (nfse_access.dart statusText)
 // ---------------------------------------------------------------------------
 
-const DOT: Record<NfseStatus, string> = {
-  creating: 'warning',
-  scheduled: 'warning',
-  synchronized: 'warning',
-  authorized: 'success',
-  processingCancellation: 'warning',
-  cancellationDenied: 'danger',
-  canceled: 'hollow',
-  error: 'danger',
-}
-function statusOf(invoice: NfseInvoice): string {
-  if (invoice.conflict) return t('nfseConflictNotice')
-  switch (invoice.status) {
-    case 'scheduled':
-      return invoice.effectiveDate && invoice.effectiveDate > todayDay
-        ? t('nfseStatusScheduledFor', { date: formatDate(`${invoice.effectiveDate}T12:00:00`, country()) })
-        : t('nfseStatusWaiting')
-    case 'authorized':
-      return invoice.number ? t('nfseStatusIssuedNumber', { number: invoice.number }) : t('nfseStatusIssued')
-    case 'processingCancellation':
-      return t('nfseStatusCanceling')
-    case 'cancellationDenied':
-      return t('nfseStatusCancelDenied')
-    case 'canceled':
-      return t('nfseStatusCanceled')
-    case 'error':
-      return t('nfseStatusError')
-    default:
-      return t('nfseStatusWaiting')
-  }
-}
+const statusOf = (invoice: NfseInvoice) => invoiceStatusText(invoice, todayDay)
 function headOf(invoice: NfseInvoice): string {
   if (invoice.status === 'error') return invoice.auto ? t('nfseHeadAutoError') : invoice.errorCode ? t('nfseHeadNotIssued') : t('nfseHeadError')
   if (invoice.status === 'authorized') return t('nfseHeadIssued')
@@ -220,6 +208,7 @@ async function fixed() {
 <template>
   <div class="finance invoices" data-testid="invoices">
     <PageHead :title="title" :sub="state === 'ready' ? t('nfseListOnlyServices') : undefined">
+      <RouterLink v-if="can('manageCompany') && !customerId && state !== 'off'" class="link" to="/invoices/setup" data-testid="nfse-setup-link">{{ t('nfseListSetup') }}</RouterLink>
       <div v-if="state === 'ready'" class="fin-month" role="group" :aria-label="t('web.fin.month')">
         <button type="button" class="icon-btn" :aria-label="t('financialPreviousMonth')" data-testid="nfse-prev" @click="step(-1)">
           <ChevronLeft :size="18" aria-hidden="true" />

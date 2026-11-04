@@ -227,7 +227,8 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Números do servidor** (`/v1/app/finance/*`): quem não tem `viewFinancialReports` não chega às telas e o servidor responde 403. O navegador manda o fuso; o servidor só aceita o do país da empresa.
 - **Resumo (`/finance`)**: Recebido e Vendido do mês, A receber e Em andamento, `?month=`.
 - **Relatório (`/finance/report`)**: dia, semana (domingo a sábado, contrato `finance-period.json`), mês, ano ou datas próprias; filtros por pagamento e cliente. "Exportar CSV" (BOM, `;` onde o país usa vírgula, proteção contra fórmula), "Exportar planilha" (XLSX montado no navegador) e "Imprimir ou salvar PDF".
-- **Notas fiscais (`/invoices`)**: para quem tem `chargeOrder`, com a nota ligada (`docs/NFSE_ASAAS.md`). Lista do mês com "Precisa de atenção", nota ao lado, emitir pela OS com prévia do servidor, corrigir e cancelar.
+- **Notas fiscais (`/invoices`)**: para quem tem `chargeOrder`, com a nota ligada (`docs/NFSE_ASAAS.md`). Lista do mês com "Precisa de atenção", nota ao lado, emitir pela OS com prévia do servidor, corrigir e cancelar. "Notas de X" em `/invoices?customer=`. Na OS, a linha "Nota fiscal" com a situação ao vivo e, concluída e paga, "Emitir nota fiscal" como botão azul. No cliente, "Notas fiscais · N emitidas" e "Emitir uma nota com várias OS".
+- **Configurar a nota (`/invoices/setup`)**: dono e admin (`manageCompany`), pelas rotas `/v1/app/nfse/setup*`. Dados fiscais, acesso à prefeitura (painel do Asaas, confere de novo ao voltar à aba), serviço buscado na lista da prefeitura ou digitado, impostos e quando emitir. Sem configuração pronta, a folha de emitir diz o que falta antes da prévia.
 
 ### Checklists
 
@@ -392,4 +393,4 @@ Técnicas, esperando outra peça:
 - **Pausar contratos:** quando o app que relê o modelo na transação estiver nas lojas e as versões antigas saírem de uso.
 - **Lembretes:** no app são notificações locais; no web, só com Web Push.
 - **Câmera:** no computador é arquivo; a proposta é um QR "Continuar no celular".
-- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), configuração da nota fiscal, uma nota com várias OS, faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
+- **Fica para depois, por área:** foto do aparelho (a rota ainda não aceita), faixa "Sem data" na agenda, mudar e tirar itens pelo assistente em lote, lote no celular, analytics do primeiro acesso.
