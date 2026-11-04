@@ -47,3 +47,11 @@
 .imp-table td { overflow-wrap: anywhere; }
 /* The badge ("12 atrasadas") wraps instead of pushing the table past a narrow screen with large text. */
 .dir-customers .status { white-space: normal; }
+
+/* Device photo (device.form.photo): only replaced, as the app. */
+.dev-photo { display: grid; gap: 0.35rem; }
+.dev-photo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.dev-photo-row label.btn { cursor: pointer; }
+.dev-photo-row label.btn:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.dev-thumb { display: inline-grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 6px; background: var(--color-paper-2); color: var(--color-muted); object-fit: cover; flex: none; }
+.od-head .dev-thumb { width: 4.5rem; height: 4.5rem; margin-bottom: 0.4rem; }
