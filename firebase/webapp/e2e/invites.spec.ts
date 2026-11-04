@@ -13,18 +13,8 @@ test('quem já trabalha numa empresa aceita convite de outra e entra nela', asyn
   await expect(invites).toHaveCount(0)
 })
 
-// The API mounts invites behind bearerAuth, which answers 403 to someone with no
-// company yet, so a first invite cannot be accepted through it (the app calls the
-// same route). Kept as fixme until the server accepts it; see docs/WEB_APP.md.
-test.fixme('quem não tem empresa vê o convite e aceita', async ({ page }) => {
-  test.setTimeout(60_000)
-  await login(page, 'newcomer')
-  const invites = page.getByRole('region', { name: 'Convites Pendentes' })
-  await expect(invites.getByText('Oficina Alfa')).toBeVisible()
-  await invites.getByRole('button', { name: 'Aceitar' }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible({ timeout: 30_000 })
-})
-
+// Accepting a first invite without a company: e2e/entry.spec.ts (the API takes it since
+// bearerAuthAllowingNoCompany, app-invites.mount.ts).
 test('quem não tem empresa vê o convite pendente', async ({ page }) => {
   await login(page, 'newcomer')
   const invites = page.getByRole('region', { name: 'Convites Pendentes' })

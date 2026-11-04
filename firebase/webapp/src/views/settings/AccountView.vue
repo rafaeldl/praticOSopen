@@ -3,7 +3,7 @@
 // papel"; edit the profile; switch company (with more than one, from the
 // companies the token confirms, not the old names of the user document);
 // join with an invite code; sign out (asks) and delete the account.
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { Check } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -13,22 +13,18 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import DeleteAccount from '@/components/settings/DeleteAccount.vue'
 import ProfileForm from '@/components/settings/ProfileForm.vue'
 import { t } from '@/i18n'
-import { ApiError } from '@/lib/api'
-import { acceptInvite } from '@/lib/invites'
 import { selectCompany, session, signOutEverywhere } from '@/lib/session'
-import { loadProfile, lookupInvite, type InvitePreview, type Profile } from '@/lib/settings/data'
-import { displayRole, normalizeInviteCode, ROLE_LABEL } from '@/lib/settings/model'
+import { loadProfile, type Profile } from '@/lib/settings/data'
+import { displayRole, ROLE_LABEL } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
 import '@/styles/settings.css'
+
+const InviteCodeFlow = defineAsyncComponent(() => import('@/components/InviteCodeFlow.vue'))
 
 const router = useRouter()
 const profile = shallowRef<Profile | null>(null)
 const failed = ref(false)
-const dialog = ref<'profile' | 'switch' | 'code' | 'join' | 'leave' | 'delete' | null>(null)
-const code = ref('')
-const codeError = ref('')
-const found = shallowRef<InvitePreview | null>(null)
-const busy = ref(false)
+const dialog = ref<'profile' | 'switch' | 'code' | 'leave' | 'delete' | null>(null)
 const switchTo = ref(session.companyId ?? '')
 
 const companyName = computed(() => session.company?.name || session.companies.find((item) => item.id === session.companyId)?.name || '')
@@ -57,58 +53,6 @@ async function doSwitch() {
     console.error('account: switch failed', error)
     showToast(t('web.error.generic'))
   }
-}
-
-function inviteError(error: unknown): string {
-  const status = error instanceof ApiError ? error.status : 0
-  const apiCode = error instanceof ApiError ? error.code : ''
-  if (apiCode === 'EXPIRED') return t('inviteExpired')
-  if (apiCode === 'ALREADY_MEMBER') return t('web.account.alreadyMember')
-  if (apiCode === 'RATE_LIMIT_EXCEEDED' || status === 429) return t('emailLoginTooManyAttempts')
-  if (apiCode === 'FORBIDDEN') return t('web.account.inviteNotForYou')
-  if (apiCode === 'NETWORK') return t('networkError')
-  if (status === 404 || status === 400) return t('web.account.inviteInvalid')
-  return t('web.error.generic')
-}
-
-async function lookup() {
-  codeError.value = ''
-  if (!normalizeInviteCode(code.value)) {
-    codeError.value = t('enterInviteCode')
-    return
-  }
-  busy.value = true
-  try {
-    found.value = await lookupInvite(code.value)
-    dialog.value = 'join'
-  } catch (error) {
-    codeError.value = inviteError(error)
-  } finally {
-    busy.value = false
-  }
-}
-
-async function join() {
-  const invite = found.value
-  if (!invite || busy.value) return
-  busy.value = true
-  try {
-    await acceptInvite({ token: invite.token, companyId: invite.company.id, companyName: invite.company.name, role: invite.role })
-    dialog.value = null
-    showToast(t('web.account.joined', { company: invite.company.name }))
-    await router.push('/')
-  } catch (error) {
-    codeError.value = inviteError(error)
-    dialog.value = 'code'
-  } finally {
-    busy.value = false
-  }
-}
-
-function openCode() {
-  code.value = ''
-  codeError.value = ''
-  dialog.value = 'code'
 }
 
 onMounted(load)
@@ -147,7 +91,7 @@ onMounted(load)
             </button>
           </li>
           <li>
-            <button type="button" class="set-row" data-testid="account-code" @click="openCode">
+            <button type="button" class="set-row" data-testid="account-code" @click="dialog = 'code'">
               <span class="set-text"><span class="who">{{ t('joinWithInviteCode') }}</span></span>
             </button>
           </li>
@@ -186,33 +130,7 @@ onMounted(load)
       </div>
     </template>
   </Layer>
-  <Layer v-if="dialog === 'code'" kind="dialog" :label="t('inviteCodeTitle')" @close="dialog = null">
-    <template #default="{ close }">
-      <form novalidate @submit.prevent="lookup">
-        <div class="layer-head">
-          <h2 class="layer-title">{{ t('inviteCodeTitle') }}</h2>
-        </div>
-        <div class="layer-body">
-          <label class="field-label" for="acc-code">{{ t('enterInviteCode') }}</label>
-          <input id="acc-code" v-model="code" class="field" autocomplete="off" autocapitalize="characters" spellcheck="false" :placeholder="t('inviteCodePlaceholder')" :aria-invalid="!!codeError" data-autofocus />
-          <p v-if="codeError" class="field-error" role="alert" data-testid="code-error">{{ codeError }}</p>
-        </div>
-        <div class="layer-foot">
-          <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
-          <button type="submit" class="btn btn--primary" :disabled="busy" data-testid="code-submit">{{ t('continue_') }}</button>
-        </div>
-      </form>
-    </template>
-  </Layer>
-  <ConfirmDialog
-    v-if="dialog === 'join' && found"
-    :title="t('web.account.joinTitle', { company: found.company.name })"
-    :body="t('web.account.joinBody', { role: roleText(found.role) })"
-    :confirm="t('acceptInvite')"
-    :keep="t('cancel')"
-    @confirm="join"
-    @close="dialog = null"
-  />
+  <InviteCodeFlow v-if="dialog === 'code'" @close="dialog = null" />
   <ConfirmDialog v-if="dialog === 'leave'" :title="t('logoutConfirm')" :confirm="t('logout')" :keep="t('cancel')" @confirm="signOutEverywhere" @close="dialog = null" />
   <DeleteAccount v-if="dialog === 'delete'" @close="dialog = null" />
 </template>

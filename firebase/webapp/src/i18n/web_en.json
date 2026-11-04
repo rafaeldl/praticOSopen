@@ -791,5 +791,7 @@
   "web.receive.byAsaas": "Recorded automatically by Asaas",
   "web.newOrder.registerItem": "+ Add “{name}” to the catalog",
   "web.newOrder.itemRegistered": "{name} added to the catalog and to the order",
-  "web.order.devicesOf": "{name}'s"
+  "web.order.devicesOf": "{name}'s",
+  "web.login.signupBlocked": "The sign-up was not accepted. If you already have an account, sign in with it; if not, contact PraticOS support.",
+  "web.invites.joining": "Joining…"
 }

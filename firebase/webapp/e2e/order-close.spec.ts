@@ -144,9 +144,14 @@ test('técnico começa direto o próprio orçamento; cancelar zera a cobrança e
   await expect.poll(async () => (await readOrder(paid.id))?.status).toBe('canceled')
   expect((await readOrder(paid.id))?.payment ?? null).toBeNull()
   expect((await readOrder(paid.id))?.paid).toBe(false)
+  // The screen has the canceled version before the next change (a change over the old one is refused: 409).
+  await expect(status(admin)).toHaveText(/Cancelad/)
+  await expect(admin.locator('.toast')).toHaveCount(0)
   await menu(admin, 'Mudar a situação')
   await dialog(admin, 'Qual a situação?').getByRole('button', { name: /Concluíd/ }).click()
-  await expect.poll(async () => (await readOrder(paid.id))?.payment).toBe('paid')
+  await expect(status(admin)).toHaveText('Concluído')
+  await expect.poll(async () => (await readOrder(paid.id))?.status).toBe('done')
+  expect((await readOrder(paid.id))?.payment).toBe('paid')
   await context.close()
 })
 

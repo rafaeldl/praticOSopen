@@ -1,16 +1,22 @@
 <script setup lang="ts">
 // Pending invites with Aceitar / Recusar, as in the app's PendingInvitesScreen.
-import { onMounted, ref } from 'vue'
+// Each row already shows what the app's detail shows (company, role, who
+// invited). Recusar asks first, with the company's name, and the row leaves
+// only after the write (onboarding.invites.reject).
+import { defineAsyncComponent, onMounted, ref, shallowRef } from 'vue'
 import { t, type MessageKey } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { acceptInvite, listPendingInvites, rejectInvite, type Invite } from '@/lib/invites'
+import { acceptInvite, inviteErrorKey, listPendingInvites, rejectInvite, type Invite } from '@/lib/invites'
 import { showToast } from '@/lib/toast'
+
+const ConfirmDialog = defineAsyncComponent(() => import('@/components/orders/ConfirmDialog.vue'))
 
 const emit = defineEmits<{ accepted: [companyId: string]; loaded: [count: number]; failed: [] }>()
 const invites = ref<Invite[]>([])
 const loaded = ref(false)
 const busy = ref<string | null>(null)
 const error = ref<MessageKey | null>(null)
+const rejecting = shallowRef<Invite | null>(null)
 
 const ROLE_LABELS: Record<string, MessageKey> = {
   admin: 'roleAdmin',
@@ -40,13 +46,14 @@ async function accept(invite: Invite) {
     await acceptInvite(invite)
     emit('accepted', invite.companyId)
   } catch (cause) {
-    error.value = errorMessageKey(cause)
+    error.value = inviteErrorKey(cause)
   } finally {
     busy.value = null
   }
 }
 
 async function reject(invite: Invite) {
+  rejecting.value = null
   busy.value = invite.token
   try {
     await rejectInvite(invite)
@@ -75,9 +82,20 @@ onMounted(load)
         </p>
       </div>
       <div class="invite-actions">
-        <button type="button" class="btn btn--primary" :disabled="busy !== null" @click="accept(invite)">{{ t('acceptInvite') }}</button>
-        <button type="button" class="btn" :disabled="busy !== null" @click="reject(invite)">{{ t('rejectInvite') }}</button>
+        <button type="button" class="btn btn--primary" :disabled="busy !== null" @click="accept(invite)">
+          {{ busy === invite.token ? t('web.invites.joining') : t('acceptInvite') }}
+        </button>
+        <button type="button" class="btn" :disabled="busy !== null" @click="rejecting = invite">{{ t('rejectInvite') }}</button>
       </div>
     </div>
   </section>
+  <ConfirmDialog
+    v-if="rejecting"
+    :title="t('areYouSureReject', { company: rejecting.companyName })"
+    :confirm="t('reject')"
+    :keep="t('back')"
+    danger
+    @confirm="reject(rejecting)"
+    @close="rejecting = null"
+  />
 </template>

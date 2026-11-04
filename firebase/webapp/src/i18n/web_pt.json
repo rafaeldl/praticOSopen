@@ -791,5 +791,7 @@
   "web.receive.byAsaas": "Registrado automaticamente no Asaas",
   "web.newOrder.registerItem": "+ Cadastrar “{name}” no catálogo",
   "web.newOrder.itemRegistered": "{name} cadastrado no catálogo e posto na OS",
-  "web.order.devicesOf": "De {name}"
+  "web.order.devicesOf": "De {name}",
+  "web.login.signupBlocked": "O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.",
+  "web.invites.joining": "Entrando…"
 }

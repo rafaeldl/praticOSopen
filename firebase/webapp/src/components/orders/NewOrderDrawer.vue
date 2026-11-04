@@ -26,6 +26,8 @@ import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, 
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
+import { featureOn } from '@/lib/company-features'
+import { segmentFieldService } from '@/lib/segments'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 
@@ -60,7 +62,8 @@ const visit = ref('')
 const assignee = ref('')
 /** The place of the order (order.new.more-options): only for companies that go to the customer, like the order's own Local. */
 const address = ref('')
-const fieldService = !!(session.company as { fieldService?: boolean } | null)?.fieldService
+// Absent on the company: the segment's default, like the order's own Local (auth.gate.feature-defaults).
+const fieldService = featureOn(session.company as Record<string, unknown> | null, 'fieldService', segmentFieldService())
 const more = ref(false)
 const saving = ref(false)
 const failed = ref('')
