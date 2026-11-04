@@ -3,7 +3,7 @@
 // newest day first, with who registered, how it came in and the proof. Remover
 // and Desfazer pagamentos ask first and say the consequence; the Asaas ones and
 // the shares of a receipt over several orders cannot leave from here.
-import { computed, ref, shallowRef } from 'vue'
+import { computed, nextTick, ref, shallowRef } from 'vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
 import { formatDate } from '@/lib/format'
@@ -11,10 +11,37 @@ import type { Order } from '@/lib/orders/model'
 import { country, money } from '@/lib/orders/text'
 import { canRemove, paymentsOf, undoAllState, type Payment } from '@/lib/receive/model'
 import { proofProblem } from '@/lib/receive/proof'
+import type { Receipt } from '@/lib/receive/data'
+import { can, session } from '@/lib/session'
+import ReceiptPrint from './ReceiptPrint.vue'
 import '@/styles/receive.css'
 
 const props = defineProps<{ order: Order; canReceive: boolean; canDiscount: boolean; canAttach?: boolean; busy?: boolean }>()
-const emit = defineEmits<{ remove: [payment: Payment]; undoAll: []; attach: [payment: Payment, file: File]; detach: [payment: Payment] }>()
+const emit = defineEmits<{ remove: [payment: Payment]; undoAll: []; attach: [payment: Payment, file: File]; detach: [payment: Payment]; openReceipt: [receiptId: string] }>()
+
+/**
+ * pay.order.send-receipt: the receipt of one manual payment, printed by the
+ * browser (it saves PDF). Not for Asaas (it has its own) nor for a share of a
+ * receipt over several orders (that one is printed from the receipt).
+ */
+const printable = (payment: Payment) => props.canReceive && payment.type === 'payment' && !payment.isAsaas && !payment.receiptGroupId && !!props.order.customer?.name
+const printing = shallowRef<Receipt | null>(null)
+async function printReceipt(payment: Payment) {
+  printing.value = {
+    id: payment.id ?? props.order.id,
+    amount: payment.amount,
+    paidAt: payment.paidOn ?? undefined,
+    allocations: [{ orderId: props.order.id, orderNumber: props.order.number ?? null, amount: payment.amount }],
+    status: 'active',
+    createdBy: payment.createdBy ?? undefined,
+  }
+  await nextTick()
+  window.addEventListener('afterprint', () => (printing.value = null), { once: true })
+  requestAnimationFrame(() => window.print())
+}
+/** pay.order.open-receipt-group: the financial roles open any receipt, a consultant the ones they registered. */
+const opensReceipt = (payment: Payment) =>
+  !!payment.receiptGroupId && !!props.order.customer?.id && (can('viewFinancialReports') || (!!payment.createdBy?.id && payment.createdBy.id === session.uid))
 
 const payments = computed(() => paymentsOf(props.order.transactions, props.order.documents ?? []))
 const undo = computed(() => undoAllState(payments.value))
@@ -88,9 +115,12 @@ function confirm() {
           <span class="sub">
             {{ payment.paidOn ? formatDate(payment.paidOn, country()) : '' }}<template v-if="payment.createdBy?.name"> · {{ t('web.receive.by', { name: payment.createdBy.name }) }}</template>
           </span>
-          <span v-if="payment.receiptGroupId" class="sub">{{ t('web.receive.partOfReceipt') }}</span>
+          <button v-if="opensReceipt(payment)" type="button" class="link" @click="emit('openReceipt', payment.receiptGroupId as string)">{{ t('web.receive.partOfReceipt') }} · {{ t('receiptOpen') }}</button>
+          <span v-else-if="payment.receiptGroupId" class="sub">{{ t('web.receive.partOfReceipt') }}</span>
+          <span v-else-if="payment.isAsaas && !payment.createdBy?.name" class="sub">{{ t('web.receive.byAsaas') }}</span>
         </span>
         <span class="pay-acts">
+          <button v-if="printable(payment)" type="button" class="link" :aria-label="t('web.receive.printReceiptOf', { amount: money(payment.amount) })" @click="printReceipt(payment)">{{ t('web.receive.printReceipt') }}</button>
           <a v-if="payment.proofUrl" class="link" :href="payment.proofUrl" target="_blank" rel="noopener noreferrer">{{ t('receiveViewReceipt') }}</a>
           <template v-if="proofFor(payment)">
             <button type="button" class="link" :disabled="busy" :aria-label="payment.proofUrl ? t('web.receive.replaceProofOf', { amount: money(payment.amount) }) : t('web.receive.attachProofOf', { amount: money(payment.amount) })" @click="choose(payment)">
@@ -146,4 +176,5 @@ function confirm() {
       @close="asking = null"
     />
   </section>
+  <ReceiptPrint v-if="printing && order.customer?.name" :receipt="printing" :customer-name="order.customer.name" />
 </template>

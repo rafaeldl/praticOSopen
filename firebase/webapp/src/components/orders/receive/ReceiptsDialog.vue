@@ -13,13 +13,15 @@ import { errorMessageKey } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { cancelReceipt, listReceipts, openOrders, type Receipt } from '@/lib/receive/data'
+import { safeUrl } from '@/lib/receive/model'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ReceiptPrint from './ReceiptPrint.vue'
 import '@/styles/receive.css'
 
-const props = defineProps<{ customerId: string; customerName: string }>()
+/** focusId: the receipt asked for from an order (pay.order.open-receipt-group), shown first and marked. */
+const props = defineProps<{ customerId: string; customerName: string; focusId?: string | null }>()
 const emit = defineEmits<{ close: []; changed: [] }>()
 const router = useRouter()
 
@@ -37,7 +39,11 @@ const undoing = shallowRef<Receipt | null>(null)
 const printing = shallowRef<Receipt | null>(null)
 const busy = ref(false)
 const financial = can('viewFinancialReports')
-const sorted = computed(() => [...receipts.value].sort((a, b) => (b.paidAt ?? '').localeCompare(a.paidAt ?? '')))
+const sorted = computed(() =>
+  [...receipts.value].sort((a, b) => Number(b.id === props.focusId) - Number(a.id === props.focusId) || (b.paidAt ?? '').localeCompare(a.paidAt ?? '')),
+)
+/** receipt.detail.proof: the receipt's file, only as an http(s) link. */
+const proofOf = (receipt: Receipt) => safeUrl(receipt.receiptFile?.url)
 const canUndo = (receipt: Receipt) => receipt.status === 'active' && !receipt.id.startsWith('asaas_') && (financial || receipt.createdBy?.id === session.uid)
 
 async function load() {
@@ -80,9 +86,11 @@ async function print(receipt: Receipt) {
   requestAnimationFrame(() => window.print())
 }
 
-function openOrder(id: string) {
+/** Closed first: the drawer takes its history entry out on unmount, and only then the order opens (or that would undo it). */
+async function openOrder(id: string) {
   emit('close')
-  void router.push({ path: '/', query: { order: id } })
+  await nextTick()
+  await router.push({ path: '/', query: { order: id } })
 }
 </script>
 
@@ -101,7 +109,7 @@ function openOrder(id: string) {
         </div>
         <p v-else-if="!sorted.length" class="muted">{{ t('web.receive.noReceipts') }}</p>
         <ul v-else class="pay-list">
-          <li v-for="receipt in sorted" :key="receipt.id" class="receipt-item" data-testid="receipt-row">
+          <li v-for="receipt in sorted" :key="receipt.id" class="receipt-item" :class="{ 'is-focus': receipt.id === focusId }" :aria-current="receipt.id === focusId ? 'true' : undefined" data-testid="receipt-row">
             <p>
               <strong class="num">{{ money(receipt.amount) }}</strong>
               <span class="sub"> · {{ t('receiptListSubtitle', { date: receipt.paidAt ? formatDate(receipt.paidAt, country()) : '', count: receipt.allocations.length }) }}</span>
@@ -115,6 +123,7 @@ function openOrder(id: string) {
             <p v-if="receipt.createdBy?.name" class="sub">{{ t('pdfReceiptRecordedBy', { name: receipt.createdBy.name }) }}</p>
             <div v-if="receipt.status === 'active'" class="row-actions">
               <button type="button" class="link" @click="print(receipt)">{{ t('web.receive.printReceipt') }}</button>
+              <a v-if="proofOf(receipt)" class="link" :href="proofOf(receipt)" target="_blank" rel="noopener noreferrer">{{ t('receiveViewReceipt') }}</a>
               <button v-if="canUndo(receipt)" type="button" class="link link--danger" :disabled="busy" @click="undoing = receipt">{{ t('receiptUndo') }}</button>
             </div>
           </li>

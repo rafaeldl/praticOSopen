@@ -780,5 +780,16 @@
   "web.palette.create": "Add",
   "web.when.quickLabel": "Type the day and time",
   "web.when.quickHint": "E.g. tomorrow 2pm, +3, mon 8:30, 5/9 2pm. ↑ ↓ change the day; Shift ↑ ↓, half an hour.",
-  "web.when.quickError": "Not understood. Try: tomorrow 2pm, +3, mon 8:30 or 5/9 2pm."
+  "web.when.quickError": "Not understood. Try: tomorrow 2pm, +3, mon 8:30 or 5/9 2pm.",
+  "web.order.previousPhoto": "Previous photo",
+  "web.order.nextPhoto": "Next photo",
+  "web.order.photoOf": "{number} of {count}",
+  "web.order.photoCoverFailed": "Couldn't change the cover. Check your internet and try again.",
+  "web.order.openCustomer": "Open customer",
+  "web.order.openDevice": "Open {name}",
+  "web.receive.printReceiptOf": "Print receipt for {amount}",
+  "web.receive.byAsaas": "Recorded automatically by Asaas",
+  "web.newOrder.registerItem": "+ Add “{name}” to the catalog",
+  "web.newOrder.itemRegistered": "{name} added to the catalog and to the order",
+  "web.order.devicesOf": "{name}'s"
 }

@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 676 linhas, 569 capacidades de usuário e 107 de lógica ou componente; 60 exceções propostas, nenhuma aprovada.
+# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 67 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -1809,10 +1809,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/orders-new.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: createOrder
+  note: "Web: \"Fica pronto, se já souber\" na Nova OS, gravado como a hora da empresa sem fuso."
 - id: order.new.more-options
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1826,11 +1827,11 @@ rows:
   feature_flags: ["useScheduling"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/memberships"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/orders-new.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Situação sempre; Visita com useScheduling; Responsável e Local sem checar permissão nem fieldService (no … da OS salva o Local exige fieldService). Fechado, mostra o resumo do que já foi definido (situação se não é orçamento, visita, responsável, local, repetição) ou uma dica. Situação inicial segue getAvailableStatuses como criador; concluída no ✓ puxa a oferta de próxima manutenção. Não copiar: consultor consegue criar OS já cancelada."
+  note: "Situação sempre; Visita com useScheduling; Responsável e Local sem checar permissão nem fieldService (no … da OS salva o Local exige fieldService). Fechado, mostra o resumo do que já foi definido (situação se não é orçamento, visita, responsável, local, repetição) ou uma dica. Situação inicial segue getAvailableStatuses como criador; concluída no ✓ puxa a oferta de próxima manutenção. Não copiar: consultor consegue criar OS já cancelada. Web: situação (orders-new.spec.ts), visita e responsável, com o resumo no título fechado; Local só para empresa com Atendimento no local (fieldService), a mesma regra do Local da OS salva, e a cópia do endereço do cliente quando fica vazio. Consultor nunca cria já cancelada."
 - id: order.new.status-pick
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -1916,10 +1917,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: createOrder
-  note: "Uma interrupção por vez: quem aceita o checklist deixa as notificações para a próxima OS. Sem id em 3 s (offline), só o que não precisa dele."
+  note: "Uma interrupção por vez: quem aceita o checklist deixa as notificações para a próxima OS. Sem id em 3 s (offline), só o que não precisa dele. Web: checklist de entrada (forms.spec.ts) e próxima manutenção ao salvar já concluída (maintenance-offer.spec.ts). O pedido de notificações é do push nativo (exceção proposta em auth.gate.notification-open)."
 - id: order.offer.checklist
   screen: lib/screens/order/new_order_offers.dart
   route: "/order"
@@ -2154,9 +2156,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
-  note: "approved para progress mantém. Por API, bot ou app antigo quem limpa é o trigger. Servidor recusar a situação traz a marca de volta. Financeiro e métricas não leem a marca."
+  note: "approved para progress mantém. Por API, bot ou app antigo quem limpa é o trigger. Servidor recusar a situação traz a marca de volta. Financeiro e métricas não leem a marca. Web: a tela ignora a marca fora de aprovada e em andamento, e o servidor a apaga ao concluir."
 - id: order.detail.next-receive
   screen: lib/screens/order/order_screen_v2.dart
   route: "/payment_management"
@@ -2257,7 +2260,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   note: "Supervisor/técnico só se criador."
 - id: order.status.start
@@ -2390,11 +2394,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
+  web_status: done
   e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484). Não copiar: a tela não checa canEditOrderMainFields ao tocar no item; qualquer papel abre a folha e o servidor recusa em silêncio."
+  note: "Técnico e supervisor só com status quote; consultor e técnico só em OS que criaram. Regras e /v1/app/orders checam o mesmo: supervisor e técnico só mudam total em quote (#484). Não copiar: a tela não checa canEditOrderMainFields ao tocar no item; qualquer papel abre a folha e o servidor recusa em silêncio. Web: Mudar só aparece para quem edita a OS (canEditMainFields), sem a folha que o servidor recusa."
 - id: order.item.edit-product
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2479,7 +2483,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: viewPrices
 - id: order.total.view
@@ -2549,8 +2554,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
+  note: "Web: \"Abrir cliente\" no menu … da OS, só para quem abre Clientes. No app redesenhado o nome troca o cliente; o web mantém as duas coisas."
 - id: order.device.add
   screen: lib/screens/order/order_screen_v2.dart
   route: "/device_list"
@@ -2600,8 +2607,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
+  note: "Web: \"Abrir {aparelho}\" no menu … da OS, um por aparelho, só para quem abre Aparelhos."
 - id: order.request.edit
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2771,8 +2780,10 @@ rows:
   feature_flags: ["fieldService"]
   hardware: [maps]
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
+  note: "Web: link \"Abrir no Mapa\" pelo texto do endereço, em aba nova."
 - id: order.discount.give
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -2820,8 +2831,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
+  note: "Web: os comentários ficam na própria OS, sem tela à parte."
 - id: order.checklist.add
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3059,8 +3072,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
+  note: "Web: só nota inteira de 1 a 5 (hasRating), também para quem não vê valores (projeção da API)."
 - id: order.custom-fields.view
   screen: lib/screens/widgets/order_custom_fields.dart
   route: null
@@ -3365,7 +3380,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["api:GET /v1/app/ai/status"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   note: "Devolve também o uso do mês. Resposta guardada por 5 min por empresa e limpa depois de cada pedido."
 - id: order.ai.talk
@@ -3398,7 +3414,7 @@ rows:
   hardware: [mic]
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Fala pelo microfone do celular; o assistente do web é digitado (order.ai.type)."}
 - id: order.ai.stop-fill
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3413,7 +3429,7 @@ rows:
   hardware: [mic]
   data: ["api:POST /v1/app/ai/order-assist"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Parar de ouvir e preencher só existe na fala pelo microfone; no web o pedido é digitado e enviado com Enter (order.ai.type)."}
 - id: order.ai.type
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3617,7 +3633,8 @@ rows:
   feature_flags: ["aiEnabled"]
   hardware: null
   data: ["api:POST /v1/app/ai/order-assist"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
 - id: order.ai.quota-plans
   screen: lib/screens/order/order_screen_v2.dart
@@ -3648,7 +3665,7 @@ rows:
   hardware: null
   data: ["analytics"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "Eventos do Firebase Analytics do app. O web não tem analytics (sem GA4, CSP fechada, sem banner de consentimento); o uso do assistente já é contado no servidor (cota mensal)."}
 - id: order.new.photos
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3713,10 +3730,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/order-detail.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
-  note: "quote e canceled zeram payment e paid; voltar a ativa recalcula por total e pago (OrderPaymentMath), em gravação própria que funciona offline. Pela API, conferir se o servidor já faz."
+  note: "quote e canceled zeram payment e paid; voltar a ativa recalcula por total e pago (OrderPaymentMath), em gravação própria que funciona offline. Pela API, conferir se o servidor já faz. Web: quem recalcula é o servidor (paymentStatusFields no PATCH da situação)."
 - id: order.ai.change-lines
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3746,9 +3763,10 @@ rows:
   feature_flags: []
   hardware: [share_intent]
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
-  note: "OrderSavedElsewhere: anexos de outro caminho aparecem e não são apagados na próxima gravação. No web, ouvir o documento da OS para não apagar fotos de outro aparelho."
+  note: "OrderSavedElsewhere: anexos de outro caminho aparecem e não são apagados na próxima gravação. No web, ouvir o documento da OS para não apagar fotos de outro aparelho. Web: a OS escuta o documento ao vivo; foto entra com arrayUnion e sai por transação que só tira a escolhida."
 - id: order.new.custom-fields
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3779,9 +3797,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
-  note: "OrderStore.setCustomer: traz endereço com latitude e longitude do cliente; não depende de fieldService; não sobrescreve local já preenchido."
+  note: "OrderStore.setCustomer: traz endereço com latitude e longitude do cliente; não depende de fieldService; não sobrescreve local já preenchido. Web: na Nova OS e ao trocar o cliente da OS, com latitude e longitude."
 - id: order.save.field-merge
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3877,9 +3896,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Mesmo caminho para Marcar como recebido e para o cartão da IA."
+  note: "Mesmo caminho para Marcar como recebido e para o cartão da IA. Web: MoneyDialog e a gaveta de várias OS, comprovante em proof.spec.ts. O cartão da IA não existe no web (o assistente nunca recebe)."
 - id: order.services.bridge
   screen: lib/screens/order/order_screen_services.dart
   route: null
@@ -3893,9 +3913,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/orders/{id}/comments", "companies/{id}/orders/{id}/forms"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
-  note: "Fonte canônica do que cada papel faz na OS."
+  note: "Fonte canônica do que cada papel faz na OS. Web: lib/rules/order-rules.ts e accessOf (lib/orders/model.ts), com os testes por papel."
 - id: checklist.pick.device-first
   screen: lib/screens/order/order_screen_services.dart
   route: null
@@ -3946,7 +3967,7 @@ rows:
   hardware: [mic, camera]
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "A barra Foto/Falar depende do microfone e da câmera do celular. No web o assistente é a barra de texto \"Peça ao assistente\" na OS, com o mesmo aviso e Desfazer (order.ai.type, order-detail.spec.ts)."}
   note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha."
 - id: order.sheet.date
   screen: lib/screens/order/order_extras.dart
@@ -3961,9 +3982,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
-  note: "Fecha uma vez só e aceita rodapé. Também usada em device.detail.maintenance-edit, só com data."
+  note: "Fecha uma vez só e aceita rodapé. Também usada em device.detail.maintenance-edit, só com data. Web: DateDialog."
 - id: order.sheet.address
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -3994,8 +4016,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-extras.spec.ts
   web_exception: null
+  note: "Web: TextDialog."
 - id: order.item-sheet.edit
   screen: lib/screens/order/order_item_sheet.dart
   route: null
@@ -4061,10 +4085,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Cadastrar X pelo texto digitado não pergunta o tipo: cria serviço se puder, senão produto, e salva só o nome. Quem pergunta serviço ou produto é o + do topo. Precisa de manageServices ou manageProducts."
+  note: "Cadastrar X pelo texto digitado não pergunta o tipo: cria serviço se puder, senão produto, e salva só o nome. Quem pergunta serviço ou produto é o + do topo. Precisa de manageServices ou manageProducts. Web: \"+ Cadastrar «X» no catálogo\" na busca da Nova OS e da OS, só quando nenhum item tem o mesmo nome (sem acento e caixa); serviço se pode, senão produto; entra na OS na hora."
 - id: order.item-search.price
   screen: lib/screens/order/order_item_search_screen.dart
   route: null
@@ -4078,10 +4103,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/services", "companies/{id}/products"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: viewPrices
-  note: "No app depende só de viewPrices, sem useFinancial; a flag é requisito do web."
+  note: "No app depende só de viewPrices, sem useFinancial; a flag é requisito do web. O lado de quem não vê: orders-review.spec.ts (M1)."
 - id: order.item-search.most-used
   screen: lib/screens/order/order_item_search_screen.dart
   route: null
@@ -4146,8 +4172,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
+  note: "Web: tirar com Desfazer no aviso, no lugar da confirmação."
 - id: order.service-screen.edit
   screen: lib/screens/order_service_screen.dart
   route: "/order_service"
@@ -4261,8 +4289,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/comments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
+  note: "Web: seção Comentários na própria OS."
 - id: order.comments.list
   screen: lib/screens/widgets/order_comments_widget.dart
   route: null
@@ -4406,9 +4436,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["storage:tenants/{id}/orders/{id}/photos"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: viewPhotos
+  note: "Web: botões e setas do teclado, \"N de M\"."
 - id: order.photo.share
   screen: lib/screens/widgets/photo_viewer_screen.dart
   route: null
@@ -4438,9 +4470,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: attachPhotos
+  note: "Web: leva a foto para o começo da lista numa transação (a capa é a primeira, como coverPhotoUrl)."
 - id: order.photo.delete
   screen: lib/screens/widgets/photo_viewer_screen.dart
   route: null
@@ -4637,7 +4671,7 @@ rows:
   hardware: null
   data: ["analytics"]
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "O web não tem analytics: nenhum GA4 no código, a CSP não libera googletagmanager nem google-analytics e ligar exigiria banner de consentimento (LGPD). Os links e pagamentos ficam registrados nos próprios documentos (links/share, transações)."}
   note: "logShare com método sheet, whatsapp ou clipboard e logPaymentAdded no app; a web manda os mesmos eventos ao GA4."
 - id: order.device-picker.one
   screen: lib/screens/widgets/device_picker_sheet.dart
@@ -4783,8 +4817,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
+  note: "Web: linha de OS em CustomerDetail e DeviceDetail (devices.spec.ts)."
 - id: order.ui.list-row
   screen: lib/screens/widgets/order_list_row.dart
   route: null
@@ -4864,8 +4900,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
+  note: "Web: o recebimento abre dentro da OS, que se abre pelo id (?order=) de qualquer lugar."
 - id: pay.order.mark-received
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4950,7 +4988,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges", "api:POST /v1/app/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
   note: "Bloco âmbar O parcelamento foi cancelado quando a última cobrança tem autoCanceled, a conta está conectada e ainda há saldo. A troca por mudança de valor é pay.widget.charge-changed, sem confirmação: o servidor cancela o link aberto. Não copiar: o alerta Trocar o link? é código morto (nunca alcançado)."
@@ -5002,9 +5041,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Só quando a parte do Asaas não se aplica (sem chargeOrder ou piloto desligado) e a OS já foi salva. Não copiar: com Asaas ligado e conta desconectada a OS fica sem nenhuma forma de mandar algo ao cliente."
+  note: "Só quando a parte do Asaas não se aplica (sem chargeOrder ou piloto desligado) e a OS já foi salva. Não copiar: com Asaas ligado e conta desconectada a OS fica sem nenhuma forma de mandar algo ao cliente. Web: \"Mandar para o cliente\" fica sempre na OS, também com Asaas ligado e conta desconectada."
 - id: pay.order.undo-all
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -5052,9 +5092,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Financeiro: qualquer um; consultor: os que registrou."
+  note: "Financeiro: qualquer um; consultor: os que registrou. Web: a linha \"Parte de um recebimento de várias OS · Abrir recebimento\" abre os recebimentos do cliente com esse em primeiro e marcado."
 - id: pay.order.send-receipt
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -5068,9 +5109,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [share_sheet, pdf_generation]
   data: ["companies/{id}/orders", "companies/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Só pagamento manual (o Asaas tem o recibo dele), fora de recebimento de várias OS de outra pessoa. Ainda falta usa o saldo de agora."
+  note: "Só pagamento manual (o Asaas tem o recibo dele), fora de recebimento de várias OS de outra pessoa. Ainda falta usa o saldo de agora. Web: \"Imprimir recibo\" por pagamento manual (o navegador salva PDF), sem \"Ainda falta\" (defeito 15 do recibo)."
 - id: pay.order.view-proof
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -5138,7 +5180,7 @@ rows:
   hardware: null
   data: []
   web_status: todo
-  web_exception: null
+  web_exception: {status: proposed, reason: "No web o recebimento é um diálogo dentro da OS aberta ao lado da lista; não há pilha de telas para voltar (fechar o diálogo, Esc ou o Voltar do navegador)."}
   note: "Vindo da OS (fromOrder), volta; vindo do Financeiro ou do cliente, troca a tela pela OS para a pilha não crescer."
 - id: pay.order.charge-keep
   screen: lib/screens/payment_management_screen.dart
@@ -5171,9 +5213,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Título R$ X · forma, ou - R$ X em desconto; mensagem Registrado por {nome} em {data} ou Registrado automaticamente no Asaas. Ações conforme o pagamento: Mandar recibo, Ver comprovante, comprovante do Asaas, Anexar comprovante, Remover. Parte de recebimento de várias OS abre o Recebimento quando a pessoa pode."
+  note: "Título R$ X · forma, ou - R$ X em desconto; mensagem Registrado por {nome} em {data} ou Registrado automaticamente no Asaas. Ações conforme o pagamento: Mandar recibo, Ver comprovante, comprovante do Asaas, Anexar comprovante, Remover. Parte de recebimento de várias OS abre o Recebimento quando a pessoa pode. Web: as ações ficam na própria linha (comprovante, recibo, recebimento de várias OS, remover), com \"por {nome}\" ou \"Registrado automaticamente no Asaas\"."
 - id: pay.order.asaas-receipt
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -5187,7 +5230,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [external_browser]
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Abre no navegador. Não checa viewPhotos: é registro de pagamento, não foto."
 - id: pay.order.payment-fields
@@ -5253,9 +5297,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["api:GET /v1/app/customers/{id}/open-orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Lista vem da API porque a regra não deixa o consultor ler OS alheias. Só o consultor sem financeiro. Mostram número e valor em aberto, começam desmarcadas e não abrem. Gravar com elas exige conexão. Não copiar: se a leitura falha, a seção some sem aviso."
+  note: "Lista vem da API porque a regra não deixa o consultor ler OS alheias. Só o consultor sem financeiro. Mostram número e valor em aberto, começam desmarcadas e não abrem. Gravar com elas exige conexão. Não copiar: se a leitura falha, a seção some sem aviso. Web: se a leitura falha, a gaveta mostra erro com Tentar de novo (não some calada)."
 - id: pay.customer.mark-received
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -5304,10 +5349,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [share_sheet]
   data: ["companies/{id}/customerCharges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Manda o invoiceUrl do Asaas. Não copiar: na tela de uma OS o mesmo botão manda o link da OS; a web escolhe um link e usa nos dois lugares."
+  note: "Manda o invoiceUrl do Asaas. Não copiar: na tela de uma OS o mesmo botão manda o link da OS; a web escolhe um link e usa nos dois lugares. Web: o mesmo link do Asaas na OS e na gaveta do cliente."
 - id: pay.customer.copy-link
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -5356,7 +5402,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: pay.customer.start-charge
   screen: lib/screens/payments/receive_customer_screen.dart
@@ -5476,7 +5523,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: charge.flow.send
@@ -5492,10 +5540,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges", "companies/{id}/settings/payments", "api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Limite de 8 s por leitura (ajustes e cobrança aberta). Falhou a leitura da cobrança: manda só o link da OS, para não criar um link que cancele outro prestes a ser pago. Com link aberto não cria outro; sem saldo, orçamento ou cancelada manda o link da OS. Manda o link da OS (ShareLinkSheet), não o invoiceUrl."
+  note: "Limite de 8 s por leitura (ajustes e cobrança aberta). Falhou a leitura da cobrança: manda só o link da OS, para não criar um link que cancele outro prestes a ser pago. Com link aberto não cria outro; sem saldo, orçamento ou cancelada manda o link da OS. Manda o link da OS (ShareLinkSheet), não o invoiceUrl. Web: as decisões viram botões no cartão da cobrança (link aberto: Mandar de novo e Copiar; sem link e com saldo: Mandar cobrança; sem saldo, orçamento ou cancelada: só o link da OS). Leitura falhou: erro com Tentar de novo, nunca cria link."
 - id: receipt.detail.view
   screen: lib/screens/payments/receipt_detail_screen.dart
   route: "/receipt_detail"
@@ -5526,7 +5575,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [external_browser]
   data: ["storage:tenants/{id}/receipts/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: receipt.detail.send
   screen: lib/screens/payments/receipt_detail_screen.dart
@@ -5541,8 +5591,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [share_sheet, pdf_generation]
   data: ["companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
+  note: "Web: Imprimir recibo (o navegador salva PDF)."
 - id: receipt.detail.undo
   screen: lib/screens/payments/receipt_detail_screen.dart
   route: null
@@ -5572,7 +5624,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: receipt.share.pdf
   screen: lib/screens/payments/receipt_share.dart
@@ -5621,9 +5674,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Cerca de 40 códigos; a web deve mapear os mesmos. Receber da OS tem três textos: precisa de conexão, recebido pelo Asaas não pode ser removido e falha genérica. Não copiar: erros em formatos diferentes (alerta Atenção na OS, alerta sem título na cobrança, toast na tela de vários); a web usa um padrão só (aviso ou erro no campo)."
+  note: "Cerca de 40 códigos; a web deve mapear os mesmos. Receber da OS tem três textos: precisa de conexão, recebido pelo Asaas não pode ser removido e falha genérica. Não copiar: erros em formatos diferentes (alerta Atenção na OS, alerta sem título na cobrança, toast na tela de vários); a web usa um padrão só (aviso ou erro no campo). Web: os mesmos códigos em lib/api.ts e chargeErrorKey, conferidos contra asaas_error_text.dart em tests/payment-errors.test.ts; sempre num aviso."
 - id: pay.widget.charge-section
   screen: lib/screens/payments/widgets/order_charge_section.dart
   route: null
@@ -5723,9 +5777,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["storage:tenants/{id}/receipts/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/proof.spec.ts
   web_exception: null
-  note: "Zoom de 0,5x a 3x, spinner enquanto carrega, ícone de erro se falha. Não copiar: preto e branco fixos, título cortado com reticências, sem baixar nem compartilhar."
+  note: "Zoom de 0,5x a 3x, spinner enquanto carrega, ícone de erro se falha. Não copiar: preto e branco fixos, título cortado com reticências, sem baixar nem compartilhar. Web: o comprovante abre em aba nova, onde o navegador dá zoom, baixar e imprimir."
 - id: pay.widget.amount
   screen: lib/screens/payments/widgets/receive_amount_field.dart
   route: null
@@ -5755,7 +5810,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
 - id: pay.widget.date
   screen: lib/screens/payments/widgets/receive_date_row.dart
@@ -5855,7 +5911,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: nfse.list.view
   screen: lib/screens/nfse/nfse_list_screen.dart
@@ -7319,7 +7376,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: o seletor de cliente da Nova OS (#515) ainda não tem ✓ por nome+telefone nem “Recentes”; fica para a próxima fatia de OS. Fechamento: na OS, ✓ no cliente atual por id e placa no seletor; falta o ✓ por nome+telefone de registro antigo sem id."
+  note: "✓ por id; registro antigo sem id casa por nome mais telefone ou nome único, e na dúvida fica sem ✓ (currentCustomerId). Busca abre focada e só aparece com mais de 10 clientes. Toque duplo travado. Na OS, a busca acha também pela placa ou série e traz cliente e aparelho juntos; cliente com 1 aparelho entra com ele se a OS ainda não tem aparelho (falha só não traz). Cadastrar com o texto digitado vira telefone se for só dígito, senão nome. Web: Recentes, placa e ✓ no atual por id (pickers.spec.ts). Falta o ✓ por nome+telefone de registro antigo sem id."
 - id: customer.picker.create
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_form"
@@ -7333,11 +7390,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na lista de clientes, “Cadastrar «texto»” já vira telefone ou nome e some com nome existente (customers.spec.ts); no seletor da Nova OS ainda não."
+  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na Nova OS \"+ Cadastrar «texto»\" some com nome existente e volta escolhido (orders-review.spec.ts P0); telefone vira telefone com 6 ou mais dígitos. O aviso de telefone repetido fica no cadastro completo (customers.spec.ts)."
 - id: customer.picker.plate
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -7387,10 +7444,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: in_progress
-  e2e: firebase/webapp/e2e/customers.spec.ts
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
-  note: "Só quando a OS ainda não tem aparelho. Espera até 3 s sem indicador; se demorar ou falhar, escolhe só o cliente. Aparelhos = os das OS do cliente. Web: a Nova OS já sugere o único aparelho ao escolher o cliente; vindo da tela do cliente não escolhe (regra do app). Falta E2E próprio."
+  note: "Só quando a OS ainda não tem aparelho. Espera até 3 s sem indicador; se demorar ou falhar, escolhe só o cliente. Aparelhos = os das OS do cliente. Web: a Nova OS escolhe o único aparelho se o campo está vazio e focado; vindo da tela do cliente não escolhe (regra do app)."
 - id: customer.detail.view
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"
@@ -7984,10 +8041,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices", "companies/{id}/orders"]
-  web_status: in_progress
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: o seletor de aparelho da Nova OS (#515) ainda não marca ✓ nem separa “do cliente” de “outros” pelas regras daqui. Fechamento: Nova OS separa do cliente e outros; na troca de veículo da OS, ✓ no atual. Falta ✓ em todos os da OS ao adicionar."
+  note: "Aparelho de outro cliente nunca aparece sob o nome deste: fica em seção própria. Seção 'do cliente' vem das OS dele (parcial para consultor e técnico) e 'Outros' é o resto; subtítulo com o nome só se o cliente tem aparelho. ✓ nos aparelhos que já estão na OS (por id). Escolher devolve o aparelho. Web: Nova OS e \"Outro …\" da OS separam \"De {cliente}\" e outros; ✓ em todos os da OS ao adicionar e no atual ao trocar (pickers.spec.ts)."
 - id: device.list.create
   screen: lib/screens/device_list_screen.dart
   route: "/device_form"
@@ -8089,10 +8147,11 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/devices"]
-  web_status: in_progress
+  web_status: done
+  e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web. Web: na lista de aparelhos, placa BR vira série e o resto modelo; no seletor da OS ainda não."
+  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web. Web: Nova OS e \"Outro …\" da OS cadastram direto (POST /devices) com a mesma regra da placa e põem na OS; só com manageDevices."
 - id: device.detail.view
   screen: lib/screens/devices/device_detail_screen.dart
   route: "/device_detail"

@@ -780,5 +780,16 @@
   "web.palette.create": "Registrar",
   "web.when.quickLabel": "Escribe el día y la hora",
   "web.when.quickHint": "Ej.: mañana 14h, +3, lun 8:30, 9/5 14h. ↑ ↓ cambia el día; Shift ↑ ↓, media hora.",
-  "web.when.quickError": "No lo entendí. Prueba: mañana 14h, +3, lun 8:30 o 9/5 14h."
+  "web.when.quickError": "No lo entendí. Prueba: mañana 14h, +3, lun 8:30 o 9/5 14h.",
+  "web.order.previousPhoto": "Foto anterior",
+  "web.order.nextPhoto": "Foto siguiente",
+  "web.order.photoOf": "{number} de {count}",
+  "web.order.photoCoverFailed": "No se pudo cambiar la portada. Revise su internet e intente de nuevo.",
+  "web.order.openCustomer": "Abrir cliente",
+  "web.order.openDevice": "Abrir {name}",
+  "web.receive.printReceiptOf": "Imprimir recibo de {amount}",
+  "web.receive.byAsaas": "Registrado automáticamente en Asaas",
+  "web.newOrder.registerItem": "+ Registrar “{name}” en el catálogo",
+  "web.newOrder.itemRegistered": "{name} registrado en el catálogo y puesto en la OS",
+  "web.order.devicesOf": "De {name}"
 }

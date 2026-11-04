@@ -6,10 +6,11 @@
 // section because a query was refused (the app's defect).
 import { loadCatalogList } from '@/lib/catalog/data'
 import { loadDevice } from '@/lib/customers/data'
-import { normalizePlate } from '@/lib/customers/model'
-import { api, can } from '@/lib/session'
+import { isBrazilianPlate, normalizePlate } from '@/lib/customers/model'
+import { firestoreLite } from '@/lib/firebase'
+import { api, can, session } from '@/lib/session'
 import { shallowRef } from 'vue'
-import type { Device } from './catalog'
+import { forgetLists, type Device } from './catalog'
 
 export interface Named {
   id: string
@@ -79,4 +80,39 @@ export async function mostUsedKeys(max = 6): Promise<string[]> {
     for (const list of lists) if (list[index] && keys.length < max) keys.push(list[index] as string)
   }
   return keys
+}
+
+/**
+ * Devices this customer brought before (the devices of their last orders): the
+ * section "do cliente" of device.list.pick. Who sees values reads Firestore;
+ * who does not, the API projection. A failure only loses the suggestion.
+ */
+export async function devicesOfCustomer(customerId: string, showsMoney: boolean): Promise<Device[]> {
+  try {
+    let rows: { devices?: Device[]; device?: Device }[] = []
+    if (showsMoney) {
+      const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+      const filters = [where('customer.id', '==', customerId), ...(can('viewAllOrders') ? [] : [where('createdBy.id', '==', session.uid)])]
+      rows = (await getDocs(query(collection(db, 'companies', session.companyId as string, 'orders'), ...filters, limit(10)))).docs.map((doc) => doc.data())
+    } else {
+      const body = await api<{ data?: typeof rows }>(`/v1/app/orders?limit=10&customerId=${encodeURIComponent(customerId)}`, { raw: true })
+      rows = body.data ?? []
+    }
+    const found = new Map<string, Device>()
+    for (const row of rows) for (const item of row.devices?.length ? row.devices : row.device ? [row.device] : []) if (item?.id) found.set(item.id, item)
+    return [...found.values()]
+  } catch (error) {
+    console.warn('pickers: devices of the customer not read', error)
+    return []
+  }
+}
+
+/** device.list.pick-create: a Brazilian plate becomes the serial in capitals, anything else the model. */
+export async function createDeviceFrom(text: string): Promise<Device> {
+  const typed = text.trim()
+  const plate = isBrazilianPlate(typed)
+  const created = await api<{ id: string; name: string | null; serial?: string | null }>('/v1/app/devices', { method: 'POST', body: plate ? { serial: typed.toUpperCase() } : { name: typed } })
+  const serial = created.serial ?? (plate ? typed.toUpperCase() : null)
+  forgetLists()
+  return { id: created.id, name: created.name || serial || typed, ...(serial ? { serial } : {}) }
 }

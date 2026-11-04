@@ -166,6 +166,23 @@ export async function deletePhoto(orderId: string, photo: { id?: string; url?: s
   })
 }
 
+/**
+ * The cover is the first photo (the app's coverPhotoUrl). A transaction rereads
+ * the list and moves only this one to the front: photos added elsewhere stay.
+ */
+export async function setCoverPhoto(orderId: string, photo: { id?: string; url?: string }): Promise<void> {
+  const { ref: docRef, firestore } = await orderDoc(orderId)
+  const db = await firestoreClient()
+  await firestore.runTransaction(db, async (tx) => {
+    const snap = await tx.get(docRef)
+    const photos = (snap.data()?.photos ?? []) as { id?: string; url?: string }[]
+    const index = photos.findIndex((item) => (photo.id ? item.id === photo.id : item.url === photo.url))
+    if (index <= 0) return
+    const next = [photos[index], ...photos.slice(0, index), ...photos.slice(index + 1)]
+    tx.update(docRef, { photos: next, updatedAt: new Date().toISOString(), updatedBy: author() })
+  })
+}
+
 /** Photo in the order's folder, then appended to `photos` (arrayUnion keeps others' photos). */
 export async function uploadPhoto(orderId: string, file: File): Promise<void> {
   const companyId = session.companyId as string

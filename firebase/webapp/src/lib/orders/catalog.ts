@@ -2,7 +2,7 @@
 // Read once per company and kept in memory (no money in them except catalog
 // prices, which only show for who has viewPrices).
 import { authClient, firestoreLite } from '@/lib/firebase'
-import { can, session } from '@/lib/session'
+import { api, can, session } from '@/lib/session'
 import { matchesWords } from '@/lib/text'
 
 export interface Customer {
@@ -12,6 +12,8 @@ export interface Customer {
   email?: string
   taxId?: string
   address?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 export interface Device {
   id: string
@@ -58,6 +60,8 @@ export const loadCustomers = () =>
     email: data.email as string | undefined,
     taxId: data.taxId as string | undefined,
     address: (data.address as string | null) ?? null,
+    latitude: typeof data.latitude === 'number' ? data.latitude : null,
+    longitude: typeof data.longitude === 'number' ? data.longitude : null,
   })).then((list) => [...list].sort(byName))
 
 export const loadDevices = () =>
@@ -129,4 +133,27 @@ export function search<T extends { name: string }>(items: T[], query: string, ex
   const text = query.trim()
   if (!text) return items.slice(0, max)
   return items.filter((item) => matchesWords(`${item.name} ${extra(item)}`, text)).slice(0, max)
+}
+
+/** Same name ignoring accents and case: "Troca de óleo" is "troca de oleo". */
+const folded = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').trim().toLocaleLowerCase()
+
+/**
+ * order.item-search.create: "+ Cadastrar «X»" in the item search, for who keeps
+ * the catalog, only when no item has that name yet. Like the app, it does not
+ * ask the kind: a service when the person may, else a product; only the name.
+ */
+/** Some item is already called this (accents and case ignored). */
+export const sameName = (items: { name: string }[], text: string) => !!folded(text) && items.some((item) => folded(item.name) === folded(text))
+
+export function canRegisterItem(items: CatalogItem[], text: string): boolean {
+  const name = folded(text)
+  return !!name && (can('manageServices') || can('manageProducts')) && !items.some((item) => folded(item.name) === name)
+}
+
+export async function registerItem(name: string): Promise<CatalogItem> {
+  const kind = can('manageServices') ? 'service' : 'product'
+  const created = await api<{ id: string }>(kind === 'service' ? '/v1/app/services' : '/v1/app/products', { method: 'POST', body: { name: name.trim() } })
+  forgetLists()
+  return { id: created.id, kind, name: name.trim(), value: null }
 }
