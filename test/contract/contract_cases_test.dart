@@ -20,6 +20,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/custom_field.dart';
+import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/permission.dart';
@@ -48,6 +49,7 @@ const _statuses = ['quote', 'approved', 'progress', 'done', 'canceled'];
 const _covered = {
   'currency.json',
   'contract-generation.json', // contract_generation_cases_test.dart
+  'customer-summary.json',
   'order-delete.json',
   'order-items.json',
   'order-permissions.json',
@@ -506,6 +508,43 @@ void main() {
           HomeRules.isOverdue(order, DateTime.parse(g['now'] as String)),
           _want(c)['overdue'],
         );
+      });
+    }
+  });
+
+  group('customer-summary', () {
+    for (final c in _cases('customer-summary.json')) {
+      test(c['id'], () {
+        final g = c['given'] as Map;
+        final orders = [
+          for (final o in (g['orders'] as List).cast<Map>())
+            Order()
+              ..id = o['id'] as String
+              ..customer = o['customer'] == null
+                  ? null
+                  : (CustomerAggr()..id = o['customer'] as String)
+              ..status = o['status'] as String?
+              ..dueDate = o['dueDate'] == null
+                  ? null
+                  : DateTime.parse(o['dueDate'] as String)
+              ..total = (o['total'] as num?)?.toDouble()
+              ..paidAmount = (o['paidAmount'] as num?)?.toDouble()
+              ..payment = o['payment'] as String?,
+        ];
+        final open = summarizeOpenOrders(
+          orders,
+          DateTime.parse(g['now'] as String),
+        );
+        final owed = owedByCustomerOf(orders);
+        final got = {
+          for (final id in {...open.keys, ...owed.keys})
+            id: {
+              'open': open[id]?.open ?? 0,
+              'late': open[id]?.late ?? 0,
+              'owed': owed[id] ?? 0,
+            },
+        };
+        expect(got, _want(c)['customers']);
       });
     }
   });

@@ -7059,6 +7059,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseDirectAcceptTerms => 'Li e aceito o termo do certificado';
 
   @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
   String get orderItemCatalogPriceTitle => 'Mudar o preço no Catálogo?';
 
   @override
@@ -7085,4 +7090,33 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get orderItemCatalogPriceFailed =>
       'Não deu para mudar o preço no Catálogo. Mude por lá.';
+
+  @override
+  String get sharePreview => 'Ver como o cliente vê';
+
+  @override
+  String get sharePreviewFailed =>
+      'Não deu para abrir a prévia. Tente de novo.';
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Concluído · $count sem resposta',
+      one: 'Concluído · 1 sem resposta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist concluído';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'Para mudar uma resposta, reabra o checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.';
 }

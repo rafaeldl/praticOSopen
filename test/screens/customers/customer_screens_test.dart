@@ -48,6 +48,7 @@ class FakeDirectory implements CustomerDirectory {
     this.owners = const {},
     this.orders = const {},
     this.open = const {},
+    this.owed = const {},
   });
 
   final List<Customer> customers;
@@ -59,6 +60,7 @@ class FakeDirectory implements CustomerDirectory {
   /// customer id -> orders
   final Map<String, List<Order>> orders;
   final Map<String, OpenOrdersSummary> open;
+  final Map<String, double> owed;
   final List<Customer> deleted = [];
 
   @override
@@ -86,6 +88,9 @@ class FakeDirectory implements CustomerDirectory {
 
   @override
   Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async => open;
+
+  @override
+  Future<Map<String, double>> owedByCustomer() async => owed;
 
   @override
   Future<List<String>> recentCustomerIds() async => const [];
@@ -1189,7 +1194,8 @@ void main() {
       expect(find.text('R\$ 1.250,00'), findsOneWidget);
     });
 
-    testWidgets('"Falta receber" sums the open amount of unpaid orders', (
+    testWidgets('"Falta receber" is the A receber of the Financeiro: '
+        'completed with a balance and running with a down payment', (
       tester,
     ) async {
       await pumpDetail(
@@ -1198,7 +1204,8 @@ void main() {
           orders: {
             'c1': [
               order(1, 'done', 100)..paidAmount = 40,
-              order(2, 'progress', 50),
+              order(2, 'progress', 50)..paidAmount = 20,
+              order(6, 'approved', 40),
               order(3, 'done', 80)..payment = 'paid',
               order(4, 'canceled', 500),
               order(5, 'quote', 70),
@@ -1206,8 +1213,12 @@ void main() {
           },
         ),
       );
-      // 60 (100 - 40) + 50
-      expect(find.text('Falta receber R\$ 110,00'), findsOneWidget);
+      // 60 (100 - 40) + 30 (50 - 20); the approved one with nothing paid is
+      // still in Em andamento, not owed (issue #588).
+      expect(
+        find.text('Falta receber ${FormatService().formatCurrency(90)}'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('"Receber" next to "Falta receber" opens with the open '
@@ -1540,6 +1551,7 @@ void main() {
         tester,
         HomeCustomerList(
           canAdd: true,
+          showOwed: false,
           directory: FakeDirectory(
             customers: [alice, ana, bruno],
             open: {'c1': const OpenOrdersSummary(open: 2, late: 1)},
@@ -1561,11 +1573,49 @@ void main() {
       );
     });
 
+    testWidgets('says how much each customer owes to who reads the '
+        'Financeiro', (tester) async {
+      final directory = FakeDirectory(
+        customers: [ana, bruno],
+        open: {'c1': const OpenOrdersSummary(open: 2)},
+        owed: {'c1': 166},
+      );
+      await Harness().pump(
+        tester,
+        HomeCustomerList(canAdd: true, showOwed: true, directory: directory),
+        direct: true,
+      );
+      expect(
+        find.text(
+          '2 OS em aberto · Falta receber '
+          '${FormatService().formatCurrency(166)} · (11) 90000-0001',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Falta receber'), findsOneWidget);
+    });
+
+    testWidgets('hides what is owed from who does not read the Financeiro', (
+      tester,
+    ) async {
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          directory: FakeDirectory(customers: [ana], owed: {'c1': 166}),
+        ),
+        direct: true,
+      );
+      expect(find.textContaining('Falta receber'), findsNothing);
+    });
+
     testWidgets('shows the phone formatted for the country', (tester) async {
       await Harness().pump(
         tester,
         HomeCustomerList(
           canAdd: true,
+          showOwed: false,
           directory: FakeDirectory(
             customers: [customer('c9', 'Carla', phone: '+5548981234567')],
           ),
@@ -1581,6 +1631,7 @@ void main() {
         tester,
         HomeCustomerList(
           canAdd: true,
+          showOwed: false,
           directory: FakeDirectory(
             customers: [ana, bruno],
             devices: [device('d1', 'Fiat Uno', 'ABC1D23')],
@@ -1601,7 +1652,11 @@ void main() {
     ) async {
       await Harness().pump(
         tester,
-        HomeCustomerList(canAdd: false, directory: FakeDirectory()),
+        HomeCustomerList(
+          canAdd: false,
+          showOwed: false,
+          directory: FakeDirectory(),
+        ),
         direct: true,
       );
       expect(find.text('Você ainda não tem clientes'), findsOneWidget);
@@ -1614,7 +1669,11 @@ void main() {
     ) async {
       await Harness().pump(
         tester,
-        HomeCustomerList(canAdd: true, directory: FakeDirectory()),
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          directory: FakeDirectory(),
+        ),
         direct: true,
       );
       expect(find.text('Você ainda não tem clientes'), findsOneWidget);

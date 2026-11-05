@@ -306,7 +306,7 @@ function openExisting(id: string) {
   fullForm.value = null
   void chooseCustomer(customers.value.find((c) => c.id === id) ?? null)
 }
-const directory = computed(() => customers.value.map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? null, email: null, taxId: null, address: null, open: 0, late: 0 }) as CustomerRow))
+const directory = computed(() => customers.value.map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? null, email: null, taxId: null, address: null, open: 0, late: 0, owed: null }) as CustomerRow))
 const deviceRows = computed(() => devices.value.map((d) => ({ id: d.id, name: d.name, serial: d.serial ?? null, manufacturer: null, category: null, status: null, photo: null, nextMaintenanceDate: null }) as DeviceRow))
 
 const itemRow = (item: CatalogItem) => ({

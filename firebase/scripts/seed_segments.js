@@ -443,6 +443,9 @@ const SEGMENTS = [
         type: 'number',
         labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage', 'es-ES': 'Kilometraje' },
         suffix: 'km',
+        // The device's reading: asked in each order, history in the vehicle
+        // screen (docs/DEVICE_READING.md).
+        reading: true,
         section: 'Estado',
         sectionI18n: { 'pt-BR': 'Estado', 'en-US': 'Condition', 'es-ES': 'Estado' },
         order: 2,
@@ -1755,6 +1758,8 @@ const SEGMENTS = [
         key: 'device.operatingHours',
         type: 'number',
         labels: { 'pt-BR': 'Horas de Operação', 'en-US': 'Operating Hours', 'es-ES': 'Horas de Operación' },
+        suffix: 'h',
+        reading: true, // docs/DEVICE_READING.md
         min: 0,
         max: 999999,
         section: 'Manutenção',

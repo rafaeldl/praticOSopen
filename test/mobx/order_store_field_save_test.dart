@@ -147,6 +147,21 @@ void main() {
     });
   });
 
+  test('a device reading goes by its own key: another device\'s reading '
+      'saved elsewhere stays', () async {
+    // Another phone saves the reading of d2 while this one has the order open.
+    serverDoc['deviceReadings'] = {'d2': 1250};
+
+    store.setDeviceReading('d1', 98000);
+    await Future<void>.delayed(Duration.zero);
+    expect(writes.single, {'deviceReadings.d1': 98000});
+
+    writes.clear();
+    store.setDeviceReading('d1', null);
+    await Future<void>.delayed(Duration.zero);
+    expect(writes.single, {'deviceReadings.d1': const DeleteFieldOp()});
+  });
+
   test('mergeMoney recomputes the total from the merged items', () {
     final merged = OrderFieldDiff.mergeMoney(
       {

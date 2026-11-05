@@ -107,14 +107,29 @@ describe('GET /customers (lista)', () => {
     expect(res.body.data.find((c: any) => c.id === 'bia')).toMatchObject({ name: 'Bia', phone: '+5511900000001', taxId: '52998224725' });
   });
 
-  test('selos: atrasada vence aberta e aberta é approved ou progress', async () => {
+  test('selos: em aberto é o da Início (orçamento conta) e atrasada é por dia', async () => {
     seedOrder('o1', { status: 'approved', dueDate: '2020-01-01T00:00:00.000Z' });
     seedOrder('o2', { status: 'progress' });
     seedOrder('o3', { status: 'quote' });
     seedOrder('o4', { status: 'done' });
+    seedOrder('o5', { status: 'approved', dueDate: new Date().toISOString() });
     const res = await call('admin', 'get', CU);
-    expect(res.body.data.find((c: any) => c.id === 'ana')).toMatchObject({ open: 2, late: 1 });
+    expect(res.body.data.find((c: any) => c.id === 'ana')).toMatchObject({ open: 4, late: 1 });
     expect(res.body.data.find((c: any) => c.id === 'bia')).toMatchObject({ open: 0, late: 0 });
+  });
+
+  test('falta receber na lista: a regra de A receber, só para quem lê o Financeiro', async () => {
+    seedOrder('o1', { status: 'done', total: 300, paidAmount: 100, payment: 'partial' });
+    seedOrder('o2', { status: 'progress', total: 50, paidAmount: 20, payment: 'partial' });
+    seedOrder('o3', { status: 'approved', total: 80 });
+    seedOrder('o4', { status: 'done', total: 70, paidAmount: 70, payment: 'paid' });
+    const admin = await call('admin', 'get', CU);
+    expect(admin.body.data.find((c: any) => c.id === 'ana').owed).toBe(230);
+    expect(admin.body.data.find((c: any) => c.id === 'bia').owed).toBe(0);
+    for (const role of ['technician', 'consultant', 'supervisor'] as const) {
+      const res = await call(role, 'get', CU);
+      expect([role, res.body.data.find((c: any) => c.id === 'ana').owed]).toEqual([role, null]);
+    }
   });
 
   test('consultor e técnico contam só as OS que podem ver', async () => {
@@ -141,12 +156,13 @@ describe('GET /customers/:id (tela do cliente)', () => {
     seedOrder('o5', { status: 'canceled', total: 999, createdAt: '2026-10-06T10:00:00.000Z' });
   });
 
-  test('gastou = concluídas; falta receber = fora de orçamento, cancelada e paga', async () => {
+  test('gastou = concluídas; falta receber = A receber do Financeiro (concluída com saldo ou com sinal)', async () => {
     const res = await call('admin', 'get', `${CU}/ana`);
     expect(res.status).toBe(200);
     expect(res.body.data.customer).toMatchObject({ id: 'ana', name: 'Ana Souza', phone: '(48) 98408-7801' });
     expect(res.body.data.spent).toBe(350);
-    expect(res.body.data.owed).toBe(280);
+    // o1 (300 - 100); o3 aprovada sem nada pago fica em Em andamento, mas dá para receber nela.
+    expect(res.body.data.owed).toBe(200);
     expect(res.body.data.orders.map((o: any) => o.id)).toEqual(['o5', 'o4', 'o3', 'o2', 'o1']);
     expect(res.body.data.receivable.sort()).toEqual(['o1', 'o3']);
     expect(res.body.data.devices).toEqual([

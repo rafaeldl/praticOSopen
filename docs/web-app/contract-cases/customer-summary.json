@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "generatedFrom": "b72bc9b4",
+  "rule": "Clientes e ficha do cliente usam as palavras da Início e do Financeiro, com a mesma conta. 'Em aberto': orçamento, aprovada e em andamento (o filtro Em aberto da Início). 'Atrasada': a regra de overdue.json (dia, não hora; orçamento conta). 'Falta receber': a regra de A receber do Financeiro (concluída com saldo, ou aprovada/em andamento com sinal); aprovada sem nada pago fica em Em andamento e não conta. Cliente que não aparece tem tudo zero.",
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": ["lib/utils/open_orders.dart kOpenOrderStatuses", "lib/utils/customer_utils.dart summarizeOpenOrders e owedByCustomerOf", "lib/utils/financial_summary.dart FinancialSummary.owesNow"],
+  "otherImplementations": ["firebase/functions/src/services/app-directory.service.ts summarizeCustomers (GET /v1/app/customers e /:id, usados pelo web)", "firebase/webapp/src/lib/orders/model.ts isOpen e rules/order-rules.ts isOverdue (Início do web; o web não calcula o que falta receber, só o servidor)"],
+  "cases": [
+    {"id":"quote-counts-as-open","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"quote","total":200},
+      {"id":"b","customer":"c1","status":"approved","total":300}
+    ]},"expect":{"customers":{"c1":{"open":2,"late":0,"owed":0}}},"note":"Teste de usuário da #588: a Início dizia 2 em aberto e Clientes dizia 1, porque Clientes não contava orçamento."},
+    {"id":"no-due-date-counts","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"progress","total":100},
+      {"id":"b","customer":"c1","status":"approved","dueDate":"2026-11-20T12:00:00.000Z","total":100}
+    ]},"expect":{"customers":{"c1":{"open":2,"late":0,"owed":0}}},"note":"No app, Clientes ordenava por dueDate e o Firestore deixava de fora a OS sem prazo."},
+    {"id":"late-by-day","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"approved","dueDate":"2026-11-04T12:00:00.000Z","total":100},
+      {"id":"b","customer":"c1","status":"progress","dueDate":"2026-11-05T12:00:00.000Z","total":100},
+      {"id":"c","customer":"c1","status":"quote","dueDate":"2026-11-01T12:00:00.000Z","total":100}
+    ]},"expect":{"customers":{"c1":{"open":3,"late":2,"owed":0}}},"note":"Vence hoje não é atrasada; orçamento vencido é, como na Início."},
+    {"id":"done-and-canceled-are-not-open","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"done","total":100,"paidAmount":100,"payment":"paid"},
+      {"id":"b","customer":"c1","status":"canceled","total":100}
+    ]},"expect":{"customers":{}}},
+    {"id":"owed-is-a-receber","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"done","total":100,"paidAmount":40,"payment":"partial"},
+      {"id":"b","customer":"c1","status":"progress","total":50,"paidAmount":20,"payment":"partial"},
+      {"id":"c","customer":"c1","status":"approved","total":40,"payment":"unpaid"},
+      {"id":"d","customer":"c1","status":"done","total":80,"paidAmount":80,"payment":"paid"},
+      {"id":"e","customer":"c1","status":"quote","total":70},
+      {"id":"f","customer":"c1","status":"canceled","total":500,"payment":"unpaid"}
+    ]},"expect":{"customers":{"c1":{"open":3,"late":0,"owed":90}}},"note":"60 da concluída e 30 da que teve sinal. A aprovada sem nada pago fica em Em andamento, como no Financeiro (#497); antes a ficha somava ela também."},
+    {"id":"done-without-payment-field","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c2","status":"done","total":75}
+    ]},"expect":{"customers":{"c2":{"open":0,"late":0,"owed":75}}},"note":"OS concluída fora do app fica sem payment: deve o total."},
+    {"id":"per-customer","given":{"now":"2026-11-05T15:00:00.000Z","orders":[
+      {"id":"a","customer":"c1","status":"approved","total":100},
+      {"id":"b","customer":"c2","status":"done","total":100,"paidAmount":10,"payment":"partial"},
+      {"id":"c","status":"done","total":100,"payment":"unpaid"}
+    ]},"expect":{"customers":{"c1":{"open":1,"late":0,"owed":0},"c2":{"open":0,"late":0,"owed":90}}},"note":"OS sem cliente não entra em nenhum."}
+  ]
+}

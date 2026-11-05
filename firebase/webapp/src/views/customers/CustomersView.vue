@@ -17,6 +17,7 @@ import { t } from '@/i18n'
 import { registerSearcher } from '@/lib/commands'
 import { loadCustomerDirectory, loadDevice, loadDeviceDirectory } from '@/lib/customers/data'
 import { badgeOf, canOfferCreate, customerMatches, draftFromSearch, groupByInitial, plateMatches, type CustomerRow, type DeviceRow } from '@/lib/customers/model'
+import { money } from '@/lib/orders/text'
 import { formatPhone } from '@/lib/phone'
 import { useRoutePanel } from '@/lib/route-layer'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -39,6 +40,8 @@ const searchEl = ref<HTMLInputElement | null>(null)
 const form = ref<{ draft: { name: string; phone: string } } | null>(null)
 
 const canManage = computed(() => can('manageCustomers'))
+/** The server sends what each one owes only to who reads the Financeiro. */
+const showOwed = computed(() => rows.value.some((row) => typeof row.owed === 'number'))
 const label = (key: string) => resolveLabel(key, segmentLabels(), (k) => t(k))
 const serialLabel = computed(() => label('device.serial'))
 const country = computed(() => session.company?.country)
@@ -263,11 +266,12 @@ onBeforeUnmount(() => {
               <th scope="col">{{ t('customer') }}</th>
               <th scope="col">{{ t('phone') }}</th>
               <th scope="col">{{ t('web.customers.ordersColumn') }}</th>
+              <th v-if="showOwed" scope="col" class="num">{{ t('web.customers.owedColumn') }}</th>
             </tr>
           </thead>
           <tbody v-for="group in groups" :key="group.initial || 'all'">
             <tr v-if="group.initial" class="group-row no-click">
-              <th colspan="3" scope="rowgroup">{{ group.initial }}</th>
+              <th :colspan="showOwed ? 4 : 3" scope="rowgroup">{{ group.initial }}</th>
             </tr>
             <tr v-for="row in group.rows" :id="`customer-${row.id}`" :key="row.id" :class="{ 'is-open': row.id === panel.value.value }" @click="open(row.id)">
               <td>
@@ -280,6 +284,7 @@ onBeforeUnmount(() => {
                   <span>{{ badgeOf(row)!.kind === 'late' ? t('web.customers.lateBadge', { count: badgeOf(row)!.count }) : t('web.customers.openBadge', { count: badgeOf(row)!.count }) }}</span>
                 </span>
               </td>
+              <td v-if="showOwed" class="num dir-money" data-testid="customer-owed">{{ row.owed ? money(row.owed) : '' }}</td>
             </tr>
           </tbody>
         </table>
