@@ -75,7 +75,8 @@ const rows = shallowRef<Order[]>([])
 const hasMore = ref(false)
 const loadingMore = ref(false)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
-const stale = ref(false)
+/** The next page did not come: 'offline' (no connection, the loaded rows stay) or 'failed' (the query itself). */
+const moreError = ref<'offline' | 'failed' | null>(null)
 const firstRun = ref(false)
 const unpaid = ref<{ count: number; amount: number } | null>(null)
 /** The server's count of the filter (home.summary.count): never what happens to be loaded. */
@@ -210,7 +211,7 @@ function setQuery(patch: Record<string, string | undefined>) {
 async function load() {
   const token = ++loadToken
   state.value = 'loading'
-  stale.value = false
+  moreError.value = null
   firstRun.value = false
   stopWatch?.()
   stopWatch = undefined
@@ -279,6 +280,14 @@ async function load() {
   }
 }
 
+const isOffline = (error: unknown) => !navigator.onLine || (error as { code?: string } | null)?.code === 'unavailable'
+
+/** "Tentar de novo" of the next page: the same query asked again (not the cache). */
+function retryMore() {
+  moreError.value = null
+  void loadMore()
+}
+
 /** True when a page came (the infinite scroll then looks at the end of the list again). */
 async function loadMore(): Promise<boolean> {
   if (!loader || loadingMore.value || !hasMore.value) return false
@@ -289,10 +298,12 @@ async function loadMore(): Promise<boolean> {
     if (token !== loadToken) return false
     rows.value = mergeById(rows.value, page.rows, compare)
     hasMore.value = page.hasMore
+    moreError.value = null
     return true
   } catch (error) {
     console.warn('orders: next page failed', error)
-    stale.value = true
+    // "Sem conexão" only when there is none; a refused query is an error that says so.
+    if (token === loadToken) moreError.value = isOffline(error) ? 'offline' : 'failed'
     return false
   } finally {
     // A filter that shows few rows (Paradas) keeps the end in view: watchListEnd looks again after each page.
@@ -577,9 +588,9 @@ const columns = 5 + (showsMoney ? 1 : 0)
   <template v-else>
     <div class="workspace" :class="{ 'has-panel': panelOpen }">
       <div class="list-pane">
-        <p v-if="stale && state === 'ready'" class="offline" role="alert">
-          {{ t('web.orders.stale') }}
-          <button type="button" class="link" @click="load">{{ t('web.tryAgain') }}</button>
+        <p v-if="moreError && state === 'ready'" class="offline" role="alert" :data-testid="`more-${moreError}`">
+          {{ moreError === 'offline' ? t('web.orders.stale') : t('web.orders.moreFailed') }}
+          <button type="button" class="link" @click="retryMore">{{ t('web.tryAgain') }}</button>
         </p>
         <Maintenances v-if="showsMaintenances" />
         <section v-if="agora" class="next-visit" aria-labelledby="next-visit-label" data-testid="next-visit">

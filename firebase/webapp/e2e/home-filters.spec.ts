@@ -119,3 +119,36 @@ test('supervisor (sem valores, pela API): Atrasadas por página e Paradas acha a
   await chip(page, /^Orçamentos$/).click()
   await expect(page.getByTestId('summary')).toHaveText('2 orçamentos sem resposta')
 })
+
+test('Em aberto com busca: as próximas páginas vêm do servidor, sem o aviso de cópia salva', async ({ page }) => {
+  await openHome(page, 'pOwner')
+  await expect(rows(page)).toHaveCount(30)
+  // Customer "Cliente Página 3": 5 on the first page, 5 far below it. The next
+  // pages start after the document id (the seed stores `id: null` in each order).
+  await page.locator('#orders-search').fill('Página 3')
+  await expect(row(page, 101)).toHaveCount(1)
+  await loadAll(page)
+  for (const number of [101, 129, 402, 409, 416, 423, 430]) await expect(row(page, number)).toHaveCount(1)
+  await expect(page.getByTestId('more-offline')).toHaveCount(0)
+  await expect(page.getByTestId('more-failed')).toHaveCount(0)
+})
+
+test('Próxima página recusada pelo servidor: erro claro, e "Tentar de novo" pergunta de novo', async ({ page }) => {
+  await openHome(page, 'pOwner')
+  await expect(rows(page)).toHaveCount(30)
+  // The query refused (an index missing in production): not "sem conexão".
+  let refuse = true
+  await page.route('**/*:runQuery*', (route) =>
+    refuse
+      ? route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify([{ error: { code: 400, status: 'FAILED_PRECONDITION', message: 'The query requires an index.' } }]) })
+      : route.continue(),
+  )
+  await more(page).click()
+  await expect(page.getByTestId('more-failed')).toHaveText(/Não deu para carregar as próximas OS\./)
+  await expect(page.getByTestId('more-offline')).toHaveCount(0)
+  await expect(rows(page)).toHaveCount(30)
+  refuse = false
+  await page.getByTestId('more-failed').getByRole('button', { name: 'Tentar de novo' }).click()
+  await expect(page.getByTestId('more-failed')).toHaveCount(0)
+  await expect(rows(page)).toHaveCount(70)
+})

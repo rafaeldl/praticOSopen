@@ -260,6 +260,9 @@ async function seedPaging() {
   const put = (number, author, extra) => {
     age += 10
     void writer.set(db.doc(`companies/${COMPANY_P}/orders/pg-${number}`), {
+      // Like old orders in production: an `id` field of their own, null. The list
+      // pages by the document id, never by this field (e2e/home-filters.spec.ts).
+      id: null,
       number,
       company,
       customer: { id: `pg-customer-${number % 7}`, name: `Cliente Página ${number % 7}` },
