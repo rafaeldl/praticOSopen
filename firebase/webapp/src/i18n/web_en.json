@@ -200,6 +200,7 @@
   "web.yes": "Yes",
   "web.no": "No",
   "web.customers.directory": "Records",
+  "web.customers.change": "Change",
   "web.customers.new": "New customer",
   "web.customers.import": "Import spreadsheet",
   "web.customers.first": "Add your first customer",

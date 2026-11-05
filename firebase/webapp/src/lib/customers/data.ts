@@ -2,6 +2,7 @@
 // reads that depend on orders come filtered by the role on the server, and
 // every write goes there too. No Firestore here, so these screens add nothing
 // to the Firestore chunk of the first download.
+import type { FiscalAddress } from './invoice-data'
 import { ApiError } from '@/lib/api'
 import { storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
@@ -39,6 +40,12 @@ export interface CustomerDetail {
     latitude: number | null
     longitude: number | null
     customData: Record<string, unknown> | null
+    // "Dados para nota" (docs/NFSE_DIRECT.md, etapa #568).
+    legalName?: string | null
+    fiscalAddress?: FiscalAddress | null
+    invoiceEmail?: string | null
+    invoiceRecipient?: { id: string; name: string } | null
+    autoIssueInvoice?: boolean | null
   }
   orders: OrderSummary[]
   devices: { id: string; name: string; serial: string | null; count: number }[]
@@ -123,6 +130,12 @@ export interface CustomerInput {
   address?: string | null
   taxId?: string | null
   customData?: Record<string, unknown> | null
+  legalName?: string | null
+  fiscalAddress?: FiscalAddress | null
+  invoiceEmail?: string | null
+  /** "Nota fiscal para": another customer's id; null takes it off. */
+  invoiceRecipientId?: string | null
+  autoIssueInvoice?: boolean | null
 }
 
 export async function saveCustomer(id: string | null, input: CustomerInput & { version?: string }): Promise<string> {

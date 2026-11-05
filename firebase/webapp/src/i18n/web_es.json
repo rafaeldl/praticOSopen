@@ -200,6 +200,7 @@
   "web.yes": "Sí",
   "web.no": "No",
   "web.customers.directory": "Registros",
+  "web.customers.change": "Cambiar",
   "web.customers.new": "Nuevo cliente",
   "web.customers.import": "Importar planilla",
   "web.customers.first": "Registrar el primer cliente",

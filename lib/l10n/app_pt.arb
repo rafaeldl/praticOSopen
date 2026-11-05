@@ -3196,5 +3196,13 @@
       "label": {"type": "String"},
       "value": {"type": "String"}
     }
-  }
+  },
+  "orderItemCatalogPriceTitle": "Mudar o preço no Catálogo?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” custa {from} no Catálogo. Usar {to} sempre ou só nesta OS?",
+  "@orderItemCatalogPriceMessage": {"placeholders": {"entity": {"type": "String"}, "name": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}}},
+  "orderItemCatalogPriceAlways": "Usar sempre",
+  "orderItemCatalogPriceOnlyHere": "Só nesta OS",
+  "orderItemCatalogPriceSaved": "Preço do Catálogo mudou para {to}",
+  "@orderItemCatalogPriceSaved": {"placeholders": {"to": {"type": "String"}}},
+  "orderItemCatalogPriceFailed": "Não deu para mudar o preço no Catálogo. Mude por lá."
 }

@@ -7052,4 +7052,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }
+
+  @override
+  String get orderItemCatalogPriceTitle => 'Change the price in the Catalog?';
+
+  @override
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  ) {
+    return '$entity “$name” costs $from in the Catalog. Use $to always or only on this order?';
+  }
+
+  @override
+  String get orderItemCatalogPriceAlways => 'Use always';
+
+  @override
+  String get orderItemCatalogPriceOnlyHere => 'Only this order';
+
+  @override
+  String orderItemCatalogPriceSaved(String to) {
+    return 'Catalog price changed to $to';
+  }
+
+  @override
+  String get orderItemCatalogPriceFailed =>
+      'Couldn\'t change the price in the Catalog. Change it there.';
 }

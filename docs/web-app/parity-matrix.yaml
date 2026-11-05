@@ -8149,8 +8149,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Grupo Dados para nota (só com settings/payments.nfseDirectEnabled): CPF/CNPJ, razão social, endereço com CEP (fiscalAddress) e e-mail da nota. Cartão no cadastro novo, link na edição."
@@ -8167,8 +8167,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["api:GET brasilapi.com.br/api/cnpj/v1", "api:GET viacep.com.br/ws"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "CNPJ numérico válido busca razão social, endereço com código IBGE e e-mail; CEP com 8 dígitos busca rua, bairro, cidade e UF. Nunca escreve por cima do que foi digitado."
@@ -8185,8 +8185,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Só quando o número mudou. Mandar as notas desta loja para ela salva sem o número e com invoiceRecipient."
@@ -8203,8 +8203,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/settings/nfse"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Só quando settings/nfse.autoIssue é selectedCustomers ou allOrders; autoIssueInvoice."
@@ -8221,8 +8221,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Pelo menu do cliente; tela de escolher com Nenhum primeiro. A linha Nota fiscal para só aparece quando preenchida."

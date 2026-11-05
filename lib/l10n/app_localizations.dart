@@ -11489,6 +11489,47 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{label}: {value}'**
   String deviceReadingLine(String label, String value);
+
+  /// No description provided for @orderItemCatalogPriceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar o preço no Catálogo?'**
+  String get orderItemCatalogPriceTitle;
+
+  /// No description provided for @orderItemCatalogPriceMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{entity} “{name}” custa {from} no Catálogo. Usar {to} sempre ou só nesta OS?'**
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  );
+
+  /// No description provided for @orderItemCatalogPriceAlways.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar sempre'**
+  String get orderItemCatalogPriceAlways;
+
+  /// No description provided for @orderItemCatalogPriceOnlyHere.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só nesta OS'**
+  String get orderItemCatalogPriceOnlyHere;
+
+  /// No description provided for @orderItemCatalogPriceSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço do Catálogo mudou para {to}'**
+  String orderItemCatalogPriceSaved(String to);
+
+  /// No description provided for @orderItemCatalogPriceFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mudar o preço no Catálogo. Mude por lá.'**
+  String get orderItemCatalogPriceFailed;
 }
 
 class _AppLocalizationsDelegate
