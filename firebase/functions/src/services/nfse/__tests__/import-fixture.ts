@@ -68,20 +68,43 @@ export function cancelEventXml(n: number, issuerTaxId = EMITTER_TAX_ID): string 
 
 export interface MailboxItem {
   nsu: number;
-  type: 'NFSE' | 'EVENTO';
+  kind: 'nfse' | 'event';
   xml: string;
 }
+
+/**
+ * Field names and values of the government's API (ADN), which are in
+ * Portuguese and cannot be renamed. Kept here only.
+ */
+const ADN = {
+  status: 'StatusProcessamento',
+  batch: 'LoteDFe',
+  nsu: 'NSU',
+  documentType: 'TipoDocumento',
+  xmlFile: 'ArquivoXml',
+  generatedAt: 'DataHoraGeracao',
+  environment: 'TipoAmbiente',
+  found: 'DOCUMENTOS_LOCALIZADOS',
+  notFound: 'NENHUM_DOCUMENTO_LOCALIZADO',
+  production: 'PRODUCAO',
+  documentTypes: { nfse: 'NFSE', event: 'EVENTO' },
+} as const;
 
 /** The answer of GET /contribuintes/DFe/{nsu}: up to 50 documents with NSU >= nsu (inclusive, the worst case). */
 export function dfeAnswer(items: MailboxItem[], nsu: number): { status: number; body: string } {
   const page = items.filter((i) => i.nsu >= nsu).slice(0, 50);
-  if (page.length === 0) return { status: 404, body: JSON.stringify({ StatusProcessamento: 'NENHUM_DOCUMENTO_LOCALIZADO', LoteDFe: [] }) };
+  if (page.length === 0) return { status: 404, body: JSON.stringify({ [ADN.status]: ADN.notFound, [ADN.batch]: [] }) };
   return {
     status: 200,
     body: JSON.stringify({
-      StatusProcessamento: 'DOCUMENTOS_LOCALIZADOS',
-      LoteDFe: page.map((i) => ({ NSU: i.nsu, TipoDocumento: i.type, ArquivoXml: gzipBase64(i.xml), DataHoraGeracao: '2026-11-05T10:00:00' })),
-      TipoAmbiente: 'PRODUCAO',
+      [ADN.status]: ADN.found,
+      [ADN.batch]: page.map((i) => ({
+        [ADN.nsu]: i.nsu,
+        [ADN.documentType]: ADN.documentTypes[i.kind],
+        [ADN.xmlFile]: gzipBase64(i.xml),
+        [ADN.generatedAt]: '2026-11-05T10:00:00',
+      })),
+      [ADN.environment]: ADN.production,
     }),
   };
 }

@@ -72,7 +72,7 @@ describe('adn-reader', () => {
   });
 
   it('reads a page: sorted by NSU, done under 50, empty mailbox (404 → null) done', () => {
-    const items: MailboxItem[] = [2, 1].map((nsu) => ({ nsu, type: 'NFSE', xml: nfseXml({ n: nsu, value: 1, date: '2026-10-01' }) }));
+    const items: MailboxItem[] = [2, 1].map((nsu) => ({ nsu, kind: 'nfse', xml: nfseXml({ n: nsu, value: 1, date: '2026-10-01' }) }));
     const page = parseDfePage(JSON.parse(dfeAnswer(items, 0).body));
     expect(page.documents.map((d) => [d.nsu, d.kind])).toEqual([[1, 'nfse'], [2, 'nfse']]);
     expect(page.done).toBe(true);
@@ -274,18 +274,18 @@ function seedCompany() {
 
   mailbox = [];
   let nsu = 0;
-  const push = (type: MailboxItem['type'], xml: string) => mailbox.push({ nsu: ++nsu, type, xml });
+  const push = (kind: MailboxItem['kind'], xml: string) => mailbox.push({ nsu: ++nsu, kind, xml });
   for (let i = 1; i <= 6; i++) {
-    push('NFSE', nfseXml({ n: i, value: 100 + i, date: `2026-10-0${i}`, recipient: { taxId: REVENDA, name: 'REVENDA EXEMPLO LTDA', email: 'fiscal@example.com' } }));
+    push('nfse', nfseXml({ n: i, value: 100 + i, date: `2026-10-0${i}`, recipient: { taxId: REVENDA, name: 'REVENDA EXEMPLO LTDA', email: 'fiscal@example.com' } }));
   }
-  push('NFSE', nfseXml({ n: 9, value: 80, date: '2026-10-09', recipient: { taxId: MODELO, name: 'AUTO PECAS MODELO LTDA' } }));
-  push('NFSE', nfseXml({ n: 10, value: 55, date: '2026-10-10', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }));
-  push('NFSE', nfseXml({ n: 11, value: 70, date: '2026-10-11', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }));
-  push('EVENTO', cancelEventXml(11));
+  push('nfse', nfseXml({ n: 9, value: 80, date: '2026-10-09', recipient: { taxId: MODELO, name: 'AUTO PECAS MODELO LTDA' } }));
+  push('nfse', nfseXml({ n: 10, value: 55, date: '2026-10-10', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }));
+  push('nfse', nfseXml({ n: 11, value: 70, date: '2026-10-11', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }));
+  push('event', cancelEventXml(11));
   // A nota received from a supplier (the emitter is the tomador).
-  push('NFSE', nfseXml({ n: 1, issuerTaxId: '00000000000515', issuerName: 'GUINCHO EXEMPLO', value: 300, date: '2026-10-12', recipient: { taxId: EMITTER_TAX_ID, name: 'OFICINA EXEMPLO LTDA' } }));
+  push('nfse', nfseXml({ n: 1, issuerTaxId: '00000000000515', issuerName: 'GUINCHO EXEMPLO', value: 300, date: '2026-10-12', recipient: { taxId: EMITTER_TAX_ID, name: 'OFICINA EXEMPLO LTDA' } }));
   // Old notas of other issuers fill the first pages (more than 50 documents in all).
-  for (let i = 0; i < 45; i++) push('NFSE', nfseXml({ n: 500 + i, issuerTaxId: '00000000000607', value: 1, date: '2026-10-13', recipient: { taxId: '00000000000698', name: 'TERCEIRO' } }));
+  for (let i = 0; i < 45; i++) push('nfse', nfseXml({ n: 500 + i, issuerTaxId: '00000000000607', value: 1, date: '2026-10-13', recipient: { taxId: '00000000000698', name: 'TERCEIRO' } }));
 }
 
 beforeEach(() => {
@@ -554,8 +554,8 @@ describe('daily reading', () => {
     await applyImport('c1', batch.id, {}, USER, deps);
     calls = [];
     const last = mailbox.length;
-    mailbox.push({ nsu: last + 1, type: 'NFSE', xml: nfseXml({ n: 30, value: 90, date: '2026-11-04', recipient: { taxId: MODELO, name: 'AUTO PECAS MODELO LTDA' } }) });
-    mailbox.push({ nsu: last + 2, type: 'EVENTO', xml: cancelEventXml(1) });
+    mailbox.push({ nsu: last + 1, kind: 'nfse', xml: nfseXml({ n: 30, value: 90, date: '2026-11-04', recipient: { taxId: MODELO, name: 'AUTO PECAS MODELO LTDA' } }) });
+    mailbox.push({ nsu: last + 2, kind: 'event', xml: cancelEventXml(1) });
 
     expect(await syncCompanyMailboxes('c1', deps)).toBe(2);
     expect(calls[0].url).toContain(`/DFe/${last}?`);
