@@ -43,6 +43,16 @@ export function loadCatalogList(kind: CatalogKind, fresh = false): Promise<Catal
   return promise
 }
 
+/** One item read now (value and version as the server has them). Null: gone. */
+export async function loadItem(kind: CatalogKind, id: string): Promise<CatalogItem | null> {
+  try {
+    return await api<CatalogItem>(`${BASE[kind]}/${encodeURIComponent(id)}`)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null
+    throw error
+  }
+}
+
 /** Someone saved the item (or one of the prices) since it was read. */
 export const changedSince = (error: unknown) => error instanceof ApiError && error.status === 409 && error.code === 'CATALOG_ITEM_CHANGED'
 
