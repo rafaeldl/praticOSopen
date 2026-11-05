@@ -28,7 +28,7 @@ test('sem entrar, URL direta pede login e volta para onde ia', async ({ page }) 
   await page.getByLabel('E-mail').fill(USERS.admin.email)
   await page.getByLabel('Senha').fill(PASSWORD)
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
-  await expect(page).toHaveURL(/\/app\/customers$/)
+  await expect(page).toHaveURL(/\/web\/customers$/)
 })
 
 test('next externo não sai do app', async ({ page }) => {
@@ -37,7 +37,7 @@ test('next externo não sai do app', async ({ page }) => {
   await page.getByLabel('E-mail').fill(USERS.admin.email)
   await page.getByLabel('Senha').fill(PASSWORD)
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
-  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/app\/$/)
+  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/web\/$/)
 })
 
 test('conta sem empresa e sem convite vai ao primeiro acesso e pode sair', async ({ page }) => {
@@ -110,7 +110,7 @@ test('Apple na mesma página pelo emulador', async ({ page }) => {
 test('voltar do Google sem entrar não é erro', async ({ page }) => {
   await page.goto('login')
   await page.getByRole('button', { name: 'Continuar com Google' }).click()
-  await expect(page).not.toHaveURL(/\/app\/login/, { timeout: 20_000 })
+  await expect(page).not.toHaveURL(/\/web\/login/, { timeout: 20_000 })
   await page.goBack()
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeEnabled({ timeout: 20_000 })
   await expect(page.getByRole('alert')).toHaveCount(0)

@@ -20,7 +20,7 @@ watchForStaleBuild((handler) => router.onError(handler))
 // Opening on the list: its query leaves with the session documents, not after them.
 // The screen applies the company's own rules again when it renders.
 onSessionHint(({ uid, companyId, role }) => {
-  if (!/^\/app\/(orders\/?)?$/.test(location.pathname) || !roleHasPermission(role, 'viewPrices')) return
+  if (!/^\/web\/(orders\/?)?$/.test(location.pathname) || !roleHasPermission(role, 'viewPrices')) return
   const params = new URLSearchParams(location.search)
   if (params.get('view') === 'board') return
   // Same statuses as queryStatuses (lib/orders/model.ts); who sees values never starts on "Minhas".

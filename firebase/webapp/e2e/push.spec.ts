@@ -124,19 +124,19 @@ test('tocar no aviso abre a OS da empresa em uso; de outra empresa, fica no Iní
   await expect(page.getByTestId('orders-table')).toBeVisible()
 
   // A tab already open: the worker focuses it and tells it what to open.
-  await fromWorker(page, { type: 'praticos:notice-open', link: `/app/?order=${order.id}&company=${COMPANY_A}` })
+  await fromWorker(page, { type: 'praticos:notice-open', link: `/web/?order=${order.id}&company=${COMPANY_A}` })
   await expect(panel(page)).toBeVisible()
-  await expect(page).toHaveURL(new RegExp(`/app/\\?order=${order.id}$`))
+  await expect(page).toHaveURL(new RegExp(`/web/\\?order=${order.id}$`))
 
   // An order of another company is ignored, as in the app.
-  await fromWorker(page, { type: 'praticos:notice-open', link: `/app/?order=other-order&company=${COMPANY_B}` })
-  await expect(page).toHaveURL(/\/app\/$/)
+  await fromWorker(page, { type: 'praticos:notice-open', link: `/web/?order=other-order&company=${COMPANY_B}` })
+  await expect(page).toHaveURL(/\/web\/$/)
   await expect(panel(page)).toHaveCount(0)
 
   // No tab open: the worker opens the server's link.
   await page.goto(`./?order=${order.id}&company=${COMPANY_A}`)
   await expect(panel(page)).toBeVisible()
-  await expect(page).toHaveURL(new RegExp(`/app/\\?order=${order.id}$`))
+  await expect(page).toHaveURL(new RegExp(`/web/\\?order=${order.id}$`))
 })
 
 test('aviso com a página na tela aparece dentro dela e o sino conta de novo', async ({ page }) => {

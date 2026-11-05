@@ -6,7 +6,7 @@
 
 ## Decisão
 
-Quando o web for construído, usar **Vue 3 + Vite, como SPA estática em `/app` no Firebase Hosting**, em pasta própria (`firebase/webapp/`). Nuxt continua servindo `/q`, `/pro` e `/admin`.
+Quando o web for construído, usar **Vue 3 + Vite, como SPA estática em `/web` no Firebase Hosting**, em pasta própria (`firebase/webapp/`). Nuxt continua servindo `/q`, `/pro` e `/admin`.
 
 - **Leitura:** Firestore direto, para perfis que podem ver valores.
 - **Leitura de quem não vê valores:** projeção da API.
@@ -92,7 +92,7 @@ Sem 1 a 4, a fatia de escrita não sai. A fatia só de leitura precisa do item 4
 
 ## O que não foi medido
 
-Leitor de tela real (NVDA, VoiceOver), Firefox e Safari, GPU integrada de notebook comum (o M5 favorece o Flutter), economia real de cache, cold start real de `/app`, app Flutter completo em execução. Na opção Vite, a lista na 1ª visita em Fast 4G ainda erra a meta por 190 ms, por latência. O LCP do navegador passa (1.046 ms) porque credita o título, então a marca "lista visível" é a métrica a acompanhar.
+Leitor de tela real (NVDA, VoiceOver), Firefox e Safari, GPU integrada de notebook comum (o M5 favorece o Flutter), economia real de cache, cold start real de `/web`, app Flutter completo em execução. Na opção Vite, a lista na 1ª visita em Fast 4G ainda erra a meta por 190 ms, por latência. O LCP do navegador passa (1.046 ms) porque credita o título, então a marca "lista visível" é a métrica a acompanhar.
 
 ## Rever esta decisão se
 

@@ -191,7 +191,7 @@ Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`
 
 ### Web
 
-O app web (`/app/invoices`) tem a lista do mês, a nota aberta (PDF, XML, cancelar, "Corrigir e emitir") e a folha de emissão, aberta também pelo "…" da OS. Usa as mesmas rotas (`/v1/app/nfse/invoices*`) e lê `invoices` do Firestore, com limite de cima no mês. A configuração continua só no app. Detalhes em `docs/WEB_APP.md`, "Financeiro e notas fiscais".
+O app web (`/web/invoices`) tem a lista do mês, a nota aberta (PDF, XML, cancelar, "Corrigir e emitir") e a folha de emissão, aberta também pelo "…" da OS. Usa as mesmas rotas (`/v1/app/nfse/invoices*`) e lê `invoices` do Firestore, com limite de cima no mês. A configuração continua só no app. Detalhes em `docs/WEB_APP.md`, "Financeiro e notas fiscais".
 
 ### Lista de notas
 

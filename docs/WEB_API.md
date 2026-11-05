@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O app web (SPA em `/app`) grava dinheiro, situação e itens da OS pela API `/v1/app`, para existir uma única versão das regras: a do servidor, igual à do app Flutter (`lib/mobx/order_store.dart`, `lib/utils/order_payment_math.dart`, `lib/services/authorization_service.dart`). Os casos em `docs/web-app/contract-cases/` provam que servidor, app e web decidem igual.
+O app web (SPA em `/web`) grava dinheiro, situação e itens da OS pela API `/v1/app`, para existir uma única versão das regras: a do servidor, igual à do app Flutter (`lib/mobx/order_store.dart`, `lib/utils/order_payment_math.dart`, `lib/services/authorization_service.dart`). Os casos em `docs/web-app/contract-cases/` provam que servidor, app e web decidem igual.
 
 O app Flutter não chama estas rotas de OS (só `share` e `charges`, montadas no mesmo caminho). Por isso elas podem mudar sem quebrar versões instaladas. Bot e MCP continuam usando `POST /:id/services` e `/:id/products`, que passam pela mesma lógica.
 

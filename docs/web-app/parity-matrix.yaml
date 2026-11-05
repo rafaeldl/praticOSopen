@@ -292,7 +292,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/push.spec.ts
   web_exception: null
-  note: "Web: aviso do navegador (Web Push pelo FCM, só com a chave VAPID configurada). Clicar foca a aba aberta e abre a OS, ou abre /app/?order={id}&company={id}; OS de outra empresa é ignorada, como o app (fica no Início). Sem OS (manutenção, cortesia), abre o Início. Com a página na tela, o aviso aparece dentro dela e o sino conta de novo."
+  note: "Web: aviso do navegador (Web Push pelo FCM, só com a chave VAPID configurada). Clicar foca a aba aberta e abre a OS, ou abre /web/?order={id}&company={id}; OS de outra empresa é ignorada, como o app (fica no Início). Sem OS (manutenção, cortesia), abre o Início. Com a página na tela, o aviso aparece dentro dela e o sino conta de novo."
 - id: auth.gate.after-invite
   screen: lib/screens/auth_wrapper.dart
   route: null
@@ -343,7 +343,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/auth.spec.ts
   web_exception: null
-  note: "Última empresa salva se ainda é membro, depois a ordem de users.companies; pula empresa apagada ou deixada; por fim busca por dono. Erro de rede vai para tentar de novo, nunca para o primeiro acesso. Empresa que sumiu é esquecida. Liga assinatura e identifyUser com empresa, segmento e papel. Web: /app/choose-company com mais de uma empresa; a escolha fica lembrada neste navegador."
+  note: "Última empresa salva se ainda é membro, depois a ordem de users.companies; pula empresa apagada ou deixada; por fim busca por dono. Erro de rede vai para tentar de novo, nunca para o primeiro acesso. Empresa que sumiu é esquecida. Liga assinatura e identifyUser com empresa, segmento e papel. Web: /web/choose-company com mais de uma empresa; a escolha fica lembrada neste navegador."
 - id: auth.session.role
   screen: lib/screens/auth_wrapper.dart
   route: null

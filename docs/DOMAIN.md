@@ -14,7 +14,8 @@ Como os três domínios servem o mesmo site, um `redirects` no `firebase/firebas
 |---|---|---|---|
 | Nuxt (Cloud Run `praticos-web`) | `/q/**`, `/pro/**`, `/admin/**` (GET/HEAD) | 301 no servidor, pelo `X-Forwarded-Host` que o Hosting manda; `Cache-Control: no-store` | `firebase/web/server/middleware/legacy-host.ts` |
 | Site estático (Eleventy) | todas as páginas | script no começo do `<head>` (`location.replace`) | `firebase/hosting/src/_includes/partials/legacy-host.njk` |
-| App web (`/app`) | `/app/**` | script no `index.html` de produção | `firebase/webapp/scripts/legacy-host-plugin.ts` |
+| App web (`/web`) | `/web/**` | script no `index.html` de produção | `firebase/webapp/scripts/legacy-host-plugin.ts` |
+| App web, endereço antigo (`/app`) | `/app`, `/app/**` | 301 no `redirects` do Hosting para `/web` (em qualquer domínio; não entra em loop porque o destino é outro caminho) | `firebase/firebase.json` |
 
 O que **não** redireciona, de propósito:
 

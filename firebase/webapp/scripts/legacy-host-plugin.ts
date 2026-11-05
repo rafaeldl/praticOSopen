@@ -1,4 +1,4 @@
-// praticos.app is the main domain. /app opened on the old Hosting domains goes
+// praticos.app is the main domain. /web opened on the old Hosting domains goes
 // there with the same path, query and hash, before Firebase loads: sign-in by
 // redirect only works on the authDomain's own site (Safari), and the session
 // lives per origin. Only in the production build; dev, the emulator and the E2E
@@ -6,7 +6,7 @@
 import type { Plugin } from 'vite'
 
 export const LEGACY_HOST_SCRIPT =
-  "var h=location.hostname;if((h==='praticos.web.app'||h==='praticos.firebaseapp.com')&&/^\\/app(\\/|$)/.test(location.pathname))" +
+  "var h=location.hostname;if((h==='praticos.web.app'||h==='praticos.firebaseapp.com')&&/^\\/web(\\/|$)/.test(location.pathname))" +
   "location.replace('https://praticos.app'+location.pathname+location.search+location.hash)"
 
 export function legacyHostRedirect(): Plugin {

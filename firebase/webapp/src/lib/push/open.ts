@@ -1,8 +1,8 @@
 // Where a browser notification goes (auth.gate.notification-open). The server
-// links to /app/?order={id}&company={id} (notification.service.ts webPushLink).
+// links to /web/?order={id}&company={id} (notification.service.ts webPushLink).
 import type { LocationQuery } from 'vue-router'
 
-const BASE = '/app'
+const BASE = '/web'
 
 /**
  * The query of a notification's link once the session is known: the order of
@@ -18,7 +18,7 @@ export function noticeRedirect(query: LocationQuery, companyId: string | null): 
   return withoutOrder
 }
 
-/** The route inside /app of a notification's link (absolute or not); anything outside /app is the start. */
+/** The route inside /web of a notification's link (absolute or not); anything outside /web is the start. */
 export function linkToPath(link: string): string {
   let url: URL
   try {

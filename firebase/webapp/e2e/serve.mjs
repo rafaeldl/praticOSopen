@@ -1,5 +1,5 @@
 // Serves dist-e2e like Firebase Hosting will: brotli, long cache for hashed
-// assets, /app/** rewritten to index.html. vite preview sends plain files, which
+// assets, /web/** rewritten to index.html. vite preview sends plain files, which
 // made the network numbers of the tests look 3 times worse than production.
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
@@ -31,11 +31,11 @@ async function load(path) {
 
 createServer(async (request, response) => {
   const { pathname } = new URL(request.url, 'http://localhost')
-  if (!pathname.startsWith('/app')) {
+  if (!pathname.startsWith('/web')) {
     response.writeHead(404).end()
     return
   }
-  const relative = normalize(pathname.replace(/^\/app\/?/, '') || 'index.html')
+  const relative = normalize(pathname.replace(/^\/web\/?/, '') || 'index.html')
   let path = resolve(root, relative)
   if (!path.startsWith(root) || !extname(path)) path = resolve(root, 'index.html')
   try {
@@ -49,4 +49,4 @@ createServer(async (request, response) => {
   } catch {
     response.writeHead(404).end()
   }
-}).listen(port, '127.0.0.1', () => console.log(`Local: http://127.0.0.1:${port}/app/`))
+}).listen(port, '127.0.0.1', () => console.log(`Local: http://127.0.0.1:${port}/web/`))

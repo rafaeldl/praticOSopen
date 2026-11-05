@@ -107,7 +107,7 @@ OS, permissões), mas para o usuário é a conta dele. Spec:
 
 ## Web
 
-O app web segue o mesmo fluxo em `/app/start` (`docs/WEB_APP.md`, "Primeiro acesso"): cria a empresa com o mesmo lote e as mesmas regras, e os checklists e exemplos vêm de `POST /v1/app/onboarding/seed`, a versão do servidor do `BootstrapService` (`docs/WEB_API.md`).
+O app web segue o mesmo fluxo em `/web/start` (`docs/WEB_APP.md`, "Primeiro acesso"): cria a empresa com o mesmo lote e as mesmas regras, e os checklists e exemplos vêm de `POST /v1/app/onboarding/seed`, a versão do servidor do `BootstrapService` (`docs/WEB_API.md`).
 
 - **Uma vez por empresa.** A rota grava `onboardingSeededAt` na empresa numa transação antes de copiar. Com o marcador, ou com empresa criada há mais de um dia (ou sem `createdAt`), responde 409 e não grava nada. O web trata `ONBOARDING_ALREADY_SEEDED` como pronto (a resposta anterior se perdeu). Uma cópia que falhe no meio não é repetida.
 - **Checklists** entram com `create`, só os que a empresa não tem; um modelo que já existe nunca é regravado.
