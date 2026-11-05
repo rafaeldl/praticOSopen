@@ -19,7 +19,8 @@
 .first-run .how { margin: 0.25rem 0 0.5rem; padding-left: 0; list-style: none; display: grid; gap: 0.25rem; }
 .batchbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .batchbar strong { font-weight: 700; }
-@media (min-width: 40.0625rem) { .toolbar .search-mini { width: 14rem; max-width: 100%; } }
+/* Início gives --search-w (its whole hint); other lists keep 14rem. */
+@media (min-width: 40.0625rem) { .toolbar .search-mini { width: var(--search-w, 14rem); max-width: 100%; } }
 /* List and open order side by side only while both fit the text size (200% text: the order alone). */
 .workspace, .board-wrap { container: workspace / inline-size; }
 @container workspace (max-width: 60rem) {

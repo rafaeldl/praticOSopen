@@ -15,6 +15,8 @@ export const COMPANY_M = 'company-maint'
 export const COMPANY_D = 'company-delta'
 /** A company without a segment (a first access stopped in the app): auth.gate.resume-company. */
 export const COMPANY_R = 'company-resume'
+/** Início filters as server queries (e2e/home-filters.spec.ts): more orders per filter than one page. */
+export const COMPANY_P = 'company-paging'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -83,6 +85,11 @@ export const USERS = {
   fresh: { ...user('fresh', 'Fabi Primeira Vez'), roles: {}, noUserDoc: true },
   /** Owner of a company without a segment: the first access completes it (auth.gate.resume-company). */
   resumer: { ...user('resumer', 'Rita Retoma'), roles: { [COMPANY_R]: 'owner' } },
+  // Company paging: one page is never the whole filter (home.filter.server).
+  pOwner: { ...user('p-owner', 'Paulo Dono Paginas'), roles: { [COMPANY_P]: 'owner' } },
+  pConsultant: { ...user('p-consultant', 'Patricia Consultora Paginas'), roles: { [COMPANY_P]: 'consultant' } },
+  pTech: { ...user('p-tech', 'Pedro Tecnico Paginas'), roles: { [COMPANY_P]: 'technician' } },
+  pSuper: { ...user('p-super', 'Priscila Supervisora Paginas'), roles: { [COMPANY_P]: 'supervisor' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -105,6 +112,7 @@ export const COMPANIES = {
   [COMPANY_T]: { name: 'Equipe Teta', country: 'BR', segment: 'automotive', owner: USERS.tOwner },
   [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },
   [COMPANY_R]: { name: 'Retoma Sem Ramo', country: 'BR', segment: null, phone: '(48) 3333-4444', owner: USERS.resumer },
+  [COMPANY_P]: { name: 'Oficina Paginas', country: 'BR', segment: 'automotive', owner: USERS.pOwner },
 }
 
 /** Invites of the team company: one waiting, one expired (the app hides it; the web offers "Convidar de novo"). */

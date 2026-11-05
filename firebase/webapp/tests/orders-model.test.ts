@@ -11,12 +11,14 @@ import {
   initialsOf,
   lateness,
   linesByDevice,
+  matchesFilter,
   matchesSearch,
   monthGroups,
   nextStep,
   normalizeOrder,
   remainingOnRow,
   rowsFor,
+  summaryFromCounts,
   summaryOf,
   totals,
   type Order,
@@ -67,41 +69,65 @@ describe('lateness and groups', () => {
   })
 
   test('open: late first (oldest promise), then today, then the server order', () => {
-    const rows = [
-      order('new'),
-      order('today', { dueDate: day(0, 18) }),
-      order('late1', { dueDate: day(-1) }),
-      order('late5', { dueDate: day(-5) }),
-      order('done', { status: 'done' }),
-    ]
+    // The server sends only open orders (lib/orders/data.ts): the screen orders them, it never drops one.
+    const rows = [order('new'), order('today', { dueDate: day(0, 18) }), order('late1', { dueDate: day(-1) }), order('late5', { dueDate: day(-5) })]
     expect(rowsFor('open', rows, NOW, 'u1').map((row) => row.id)).toEqual(['late5', 'late1', 'today', 'new'])
   })
 
   test('quotes oldest first; on hold longest first; mine: visits of today by hour', () => {
-    const rows = [
-      order('q2', { status: 'quote', createdAt: day(-1) }),
-      order('q1', { status: 'quote', createdAt: day(-9) }),
+    const quotes = [order('q2', { status: 'quote', createdAt: day(-1) }), order('q1', { status: 'quote', createdAt: day(-9) })]
+    const held = [
       order('h1', { status: 'progress', onHold: { reason: 'part', since: day(-1) } }),
       order('h2', { status: 'progress', onHold: { reason: 'other', since: day(-4) } }),
+    ]
+    const mine = [
       order('m2', { assignedTo: { id: 'tech' }, scheduledDate: day(0, 15) }),
       order('m1', { assignedTo: { id: 'tech' }, scheduledDate: day(0, 9) }),
       order('m3', { assignedTo: { id: 'tech' } }),
     ]
-    expect(rowsFor('quotes', rows, NOW, 'tech').map((r) => r.id)).toEqual(['q1', 'q2'])
-    expect(rowsFor('onHold', rows, NOW, 'tech').map((r) => r.id)).toEqual(['h2', 'h1'])
-    expect(rowsFor('mine', rows, NOW, 'tech').map((r) => r.id)).toEqual(['m1', 'm2', 'm3'])
+    expect(rowsFor('quotes', quotes, NOW, 'tech').map((r) => r.id)).toEqual(['q1', 'q2'])
+    expect(rowsFor('onHold', held, NOW, 'tech').map((r) => r.id)).toEqual(['h2', 'h1'])
+    expect(rowsFor('mine', mine, NOW, 'tech').map((r) => r.id)).toEqual(['m1', 'm2', 'm3'])
   })
 
-  test('Atrasadas, Para hoje, Sem receber; número exato primeiro', () => {
-    const rows = [
-      order('late', { dueDate: day(-2) }),
-      order('today', { scheduledDate: day(0, 15) }),
-      order('owed', { status: 'done', total: 100, paidAmount: 40 }),
-      order('paid', { status: 'done', total: 100, paidAmount: 100 }),
-    ]
-    expect(rowsFor('late', rows, NOW, null).map((r) => r.id)).toEqual(['late'])
-    expect(rowsFor('today', rows, NOW, null).map((r) => r.id)).toEqual(['today'])
-    expect(rowsFor('unpaid', rows, NOW, null).map((r) => r.id)).toEqual(['owed'])
+  test('rowsFor never leaves out a row the server sent (the query is the filter)', () => {
+    const rows = [order('a', { status: 'done' }), order('b', { dueDate: day(3) })]
+    for (const filter of ['open', 'late', 'today', 'quotes', 'onHold', 'unpaid', 'mine', 'done', 'all'] as const) {
+      expect(rowsFor(filter, rows, NOW, 'u1')).toHaveLength(2)
+    }
+  })
+
+  test('matchesFilter: an order changed on screen leaves the filter', () => {
+    const late = order('late', { dueDate: day(-2) })
+    const today = order('today', { scheduledDate: day(0, 15) })
+    const owed = order('owed', { status: 'done', total: 100, paidAmount: 40 })
+    const paid = order('paid', { status: 'done', total: 100, paidAmount: 100 })
+    expect(matchesFilter('late', late, NOW, null)).toBe(true)
+    expect(matchesFilter('late', today, NOW, null)).toBe(false)
+    expect(matchesFilter('today', today, NOW, null)).toBe(true)
+    expect(matchesFilter('unpaid', owed, NOW, null)).toBe(true)
+    expect(matchesFilter('unpaid', paid, NOW, null)).toBe(false)
+    expect(matchesFilter('quotes', order('q', { status: 'approved' }), NOW, null)).toBe(false)
+    expect(matchesFilter('onHold', order('h', { status: 'progress', onHold: { reason: 'part', since: day(-1) } }), NOW, null)).toBe(true)
+    expect(matchesFilter('mine', order('m', { assignedTo: { id: 'tech' } }), NOW, 'tech')).toBe(true)
+    expect(matchesFilter('mine', order('m', { assignedTo: { id: 'other' } }), NOW, 'tech')).toBe(false)
+  })
+
+  test('summary from the server counts, before every page is loaded', () => {
+    const some = [order('a')]
+    expect(summaryFromCounts('open', { count: 40, late: 35 }, some, false, NOW)).toEqual({ kind: 'open', open: 40, late: 35 })
+    expect(summaryFromCounts('unpaid', { count: 33, amount: 1650.004 }, some, false, NOW)).toEqual({ kind: 'unpaid', count: 33, amount: 1650 })
+    expect(summaryFromCounts('quotes', { count: 0 }, [], true, NOW)).toBeNull()
+    expect(summaryFromCounts('onHold', { count: 2 }, some, false, NOW)).toEqual({ kind: 'onHold', count: 2 })
+    // No count (Paradas on the API): only with the whole list, as before.
+    expect(summaryFromCounts('onHold', null, some, false, NOW)).toBeNull()
+    const held = [order('h', { status: 'progress', onHold: { reason: 'part', since: day(-1) } })]
+    expect(summaryFromCounts('onHold', null, held, true, NOW)).toEqual({ kind: 'onHold', count: 1 })
+    expect(summaryFromCounts('mine', { count: 35 }, some, false, NOW)).toEqual({ kind: 'mine', count: 35, today: false })
+  })
+
+  test('Sem receber; número exato primeiro', () => {
+    const rows = [order('owed', { status: 'done', total: 100, paidAmount: 40 })]
     expect(summaryOf('unpaid', rowsFor('unpaid', rows, NOW, null), true, NOW)).toEqual({ kind: 'unpaid', count: 1, amount: 60 })
     const numbered = [order('a', { number: 31 }), order('b', { number: 3 }), order('c', { number: 13 })]
     expect(exactFirst(numbered, '3').map((r) => r.id)).toEqual(['b', 'a', 'c'])

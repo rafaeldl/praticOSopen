@@ -30,6 +30,7 @@ function onInput(event: Event) {
       class="field"
       type="date"
       :value="modelValue ?? ''"
+      :data-empty="!modelValue || undefined"
       :min="min"
       :max="max"
       :required="required"
