@@ -6700,7 +6700,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Elige el archivo y escribe la contraseña para enviar.';
+      'Elige el archivo, escribe la contraseña y acepta los términos para enviar.';
 
   @override
   String get nfseDirectTerms =>
@@ -7065,6 +7065,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'Las facturas de $customer van al propio cliente';
   }
+
+  @override
+  String get nfseDirectAcceptTerms =>
+      'Leí y acepto los términos del certificado';
 
   @override
   String get nfseDirectErrorTooManyAttempts =>

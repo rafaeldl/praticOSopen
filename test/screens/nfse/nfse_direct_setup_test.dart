@@ -329,7 +329,7 @@ void main() {
       return results;
     }
 
-    testWidgets('the ✓ waits for file and password, then sends both', (
+    testWidgets('the ✓ waits for file, password and the terms, then sends', (
       tester,
     ) async {
       final server = _Server((_, _, _) => {'emitterId': 'e9'});
@@ -358,6 +358,24 @@ void main() {
         ),
       );
       expect(field.obscureText, isTrue);
+      // Still missing the explicit acceptance of the terms.
+      expect(find.byKey(const ValueKey('form_sheet_missing')), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('certificateUploadSheet')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('certificateAcceptTermsSwitch')));
+      await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
 
       await tester.tap(find.byKey(const ValueKey('new_order_save')));
@@ -388,6 +406,22 @@ void main() {
         'errada',
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('certificateUploadSheet')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('certificateAcceptTermsSwitch')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('new_order_save')));
       await tester.pumpAndSettle();
 
@@ -400,6 +434,21 @@ void main() {
       expect(find.byKey(const Key('certificateUploadSheet')), findsOneWidget);
       expect(results, isEmpty);
     });
+  });
+
+  test('the terms link opens the page in the app language', () {
+    expect(
+      nfseCertificateTermsUrlFor('pt'),
+      'https://praticos.app/termo-certificado.html',
+    );
+    expect(
+      nfseCertificateTermsUrlFor('en'),
+      'https://praticos.app/termo-certificado-en.html',
+    );
+    expect(
+      nfseCertificateTermsUrlFor('es'),
+      'https://praticos.app/termo-certificado-es.html',
+    );
   });
 
   group('FiscalEmitterScreen', () {

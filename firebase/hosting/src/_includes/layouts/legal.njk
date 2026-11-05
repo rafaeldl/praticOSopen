@@ -39,6 +39,9 @@ layout: layouts/base.njk
                     {% endfor %}
                 </ul>
                 {% endif %}
+                {% for para in section.paragraphsAfter %}
+                <p>{{ para | safe }}</p>
+                {% endfor %}
             </section>
             {% endfor %}
         </article>
