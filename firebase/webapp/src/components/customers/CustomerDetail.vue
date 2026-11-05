@@ -27,6 +27,8 @@ import { formatTaxId, usesTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import CustomerForm from './CustomerForm.vue'
+import InvoiceRecipientDialog from './InvoiceRecipientDialog.vue'
+import { INVOICE_OFF, invoiceConfig, type InvoiceConfig } from '@/lib/customers/invoice-data'
 import DeviceForm from './DeviceForm.vue'
 // Several orders in one receipt, and the customer's receipts (pay.customer.view, customer.detail.receipts).
 const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
@@ -40,7 +42,9 @@ const router = useRouter()
 
 const state = ref<'loading' | 'ready' | 'failed' | 'notFound'>('loading')
 const detail = shallowRef<CustomerDetail | null>(null)
-const dialog = ref<null | 'menu' | 'delete' | 'edit' | 'device' | 'receive' | 'receipts'>(null)
+const dialog = ref<null | 'menu' | 'delete' | 'edit' | 'device' | 'receive' | 'receipts' | 'recipient'>(null)
+// "Nota fiscal para" (customer.detail.invoice-recipient): only with the direct nota on.
+const invoice = ref<InvoiceConfig>(INVOICE_OFF)
 // Who receives also sees receipts: the server lists all for financial roles, a consultant's own.
 const canReceipts = computed(() => effectiveUseFinancial() && (can('viewFinancialReports') || session.role === 'consultant'))
 const menuButton = ref<HTMLElement | null>(null)
@@ -58,7 +62,13 @@ const owed = computed(() => detail.value?.owed ?? 0)
 const spent = computed(() => detail.value?.spent ?? 0)
 const receivable = computed(() => detail.value?.receivable ?? [])
 const menuChoices = computed<Choice[]>(() =>
-  canManage ? [{ id: 'edit', label: t('editCustomer') }, { id: 'delete', label: t('deleteAction'), danger: true }] : [],
+  canManage
+    ? [
+        ...(invoice.value.enabled ? [{ id: 'recipient', label: t('invoiceRecipientAction') }] : []),
+        { id: 'edit', label: t('editCustomer') },
+        { id: 'delete', label: t('deleteAction'), danger: true },
+      ]
+    : [],
 )
 /** What the customer has, counted on the server over everything, not only what the person reads (revisão M2). */
 const deleteLinks = computed(() => {
@@ -124,7 +134,7 @@ function openDevice(id: string) {
 }
 
 function onMenu(id: string) {
-  dialog.value = id === 'edit' ? 'edit' : id === 'delete' ? 'delete' : null
+  dialog.value = id === 'edit' ? 'edit' : id === 'delete' ? 'delete' : id === 'recipient' ? 'recipient' : null
 }
 
 async function remove() {
@@ -168,7 +178,18 @@ async function onDeviceSaved(id: string, notice?: string) {
   if (notice) showToast(notice)
 }
 
-onMounted(load)
+async function onRecipient(recipient: { id: string; name: string } | null) {
+  dialog.value = null
+  const name = customer.value?.name ?? ''
+  showToast(recipient ? t('invoiceRecipientSet', { customer: name, recipient: recipient.name }) : t('invoiceRecipientCleared', { customer: name }))
+  await load()
+  emit('changed')
+}
+
+onMounted(() => {
+  void load()
+  void invoiceConfig().then((config) => (invoice.value = config))
+})
 </script>
 
 <template>
@@ -227,6 +248,13 @@ onMounted(load)
             </dd>
           </template>
         </dl>
+        <dl v-if="invoice.enabled && customer.invoiceRecipient" class="kv" data-testid="customer-invoice-recipient">
+          <dt>{{ t('invoiceRecipientLabel') }}</dt>
+          <dd>
+            <span>{{ customer.invoiceRecipient.name }}</span>
+            <button v-if="canManage" type="button" class="link" @click="dialog = 'recipient'">{{ t('web.customers.change') }}</button>
+          </dd>
+        </dl>
         <p v-if="!phone && !customer.email && !customer.address && !customer.taxId" class="muted">{{ t('web.customers.noContact') }}</p>
         <template v-for="group in customFields" :key="group.title">
           <h4 class="od-group">{{ group.title }}</h4>
@@ -277,6 +305,15 @@ onMounted(load)
       @close="dialog = null"
     />
     <CustomerForm v-else-if="dialog === 'edit' && customer" :customer="customer" :version="detail?.version" :directory="directory" @saved="onEdited" @changed="onChangedElsewhere" @close="dialog = null" />
+    <InvoiceRecipientDialog
+      v-else-if="dialog === 'recipient' && customer"
+      :customer="customer"
+      :version="detail?.version"
+      :directory="directory"
+      @saved="onRecipient"
+      @changed="onChangedElsewhere"
+      @close="dialog = null"
+    />
     <DeviceForm v-else-if="dialog === 'device'" :devices="[]" @saved="onDeviceSaved" @close="dialog = null" />
     <ReceiveCustomerDialog v-else-if="dialog === 'receive' && customer" :customer-id="customer.id" :customer-name="customer.name" :checked="receivable" @done="onReceived" @close="dialog = null" />
     <ReceiptsDialog v-else-if="dialog === 'receipts' && customer" :customer-id="customer.id" :customer-name="customer.name" @changed="load" @close="dialog = null" />

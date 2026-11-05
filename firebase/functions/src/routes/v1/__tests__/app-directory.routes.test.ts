@@ -207,6 +207,70 @@ describe('POST e PATCH /customers', () => {
     expect(saved.updatedBy.id).toBe('sup1');
   });
 
+  test('dados para nota: grava razão social, endereço, e-mail da nota, interruptor e "Nota fiscal para"', async () => {
+    seed('companies/c1/customers/rev', { name: 'Revenda', phone: '41', taxId: '11222333000181', legalName: 'REVENDA LTDA' });
+    seed('companies/c1/customers/loja', { name: 'Loja Centro', createdAt: T0 });
+    const res = await call('admin', 'patch', `${CU}/loja`, {
+      legalName: 'LOJA CENTRO LTDA',
+      fiscalAddress: { postalCode: '80010000', street: 'Rua Das Flores', number: '100', complement: null, district: 'Centro', cityCode: '4106902', cityName: 'Curitiba', state: 'pr' },
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipientId: 'rev',
+    });
+    expect(res.status).toBe(200);
+    const saved = read('companies/c1/customers/loja') as any;
+    expect(saved).toMatchObject({
+      legalName: 'LOJA CENTRO LTDA',
+      fiscalAddress: { postalCode: '80010000', cityCode: '4106902', state: 'PR' },
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipient: { id: 'rev', name: 'Revenda', taxId: '11222333000181' },
+    });
+    expect(saved.fiscalAddress).not.toHaveProperty('complement');
+
+    const screen = await call('admin', 'get', `${CU}/loja`);
+    expect(screen.body.data.customer).toMatchObject({
+      legalName: 'LOJA CENTRO LTDA',
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipient: { id: 'rev', name: 'Revenda' },
+      fiscalAddress: { cityName: 'Curitiba', complement: null },
+    });
+    const listed = await call('admin', 'get', CU);
+    expect(listed.body.data.find((c: any) => c.id === 'rev').legalName).toBe('REVENDA LTDA');
+
+    expect((await call('admin', 'patch', `${CU}/loja`, { invoiceRecipientId: null, fiscalAddress: null })).status).toBe(200);
+    expect(read('companies/c1/customers/loja')).toMatchObject({ invoiceRecipient: null, fiscalAddress: null });
+  });
+
+  test('"Nota fiscal para" para si mesmo, inexistente ou de outra empresa: 400 e nada gravado', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    for (const id of ['loja', 'nope', 'zed']) {
+      const res = await call('admin', 'patch', `${CU}/loja`, { legalName: 'X', invoiceRecipientId: id });
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INVOICE_RECIPIENT_INVALID');
+    }
+    expect((read('companies/c1/customers/loja') as any).legalName).toBeUndefined();
+  });
+
+  test('dados para nota inválidos: 400', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    for (const body of [
+      { fiscalAddress: { postalCode: '8001' } },
+      { fiscalAddress: { state: 'Paraná' } },
+      { fiscalAddress: { other: 'x' } },
+      { invoiceRecipientId: 'loja/devices/x' },
+      { autoIssueInvoice: 'sim' },
+    ]) {
+      expect((await call('admin', 'patch', `${CU}/loja`, body)).status).toBe(400);
+    }
+  });
+
+  test('e-mail da nota como o app grava (sem checagem estrita) passa', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    expect((await call('admin', 'patch', `${CU}/loja`, { invoiceEmail: 'fiscal@loja.com;outro@x.com' })).status).toBe(200);
+  });
+
   test('gerente e técnico não cadastram nem editam', async () => {
     expect((await call('manager', 'post', CU, { name: 'X' })).status).toBe(403);
     expect((await call('technician', 'patch', `${CU}/ana`, { name: 'X' })).status).toBe(403);

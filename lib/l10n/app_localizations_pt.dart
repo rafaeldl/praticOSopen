@@ -7214,4 +7214,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseDirectFilterQuestion => 'Notas de qual CNPJ?';
+
+  @override
+  String get orderItemCatalogPriceTitle => 'Mudar o preço no Catálogo?';
+
+  @override
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  ) {
+    return '$entity “$name” custa $from no Catálogo. Usar $to sempre ou só nesta OS?';
+  }
+
+  @override
+  String get orderItemCatalogPriceAlways => 'Usar sempre';
+
+  @override
+  String get orderItemCatalogPriceOnlyHere => 'Só nesta OS';
+
+  @override
+  String orderItemCatalogPriceSaved(String to) {
+    return 'Preço do Catálogo mudou para $to';
+  }
+
+  @override
+  String get orderItemCatalogPriceFailed =>
+      'Não deu para mudar o preço no Catálogo. Mude por lá.';
 }

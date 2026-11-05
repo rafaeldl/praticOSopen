@@ -67,6 +67,8 @@ export interface DirectoryCustomer {
   phone: string | null;
   email: string | null;
   taxId: string | null;
+  /** Razão social for the nota ("Nota fiscal para" shows it). */
+  legalName: string | null;
   address: string | null;
   /** Open orders (approved, progress) the person reads. */
   open: number;
@@ -100,6 +102,7 @@ export async function customerDirectory(companyId: string, scope: OrderScope, no
       phone: text(data.phone),
       email: text(data.email),
       taxId: text(data.taxId),
+      legalName: text(data.legalName),
       address: text(data.address),
       ...(badges.get(doc.id) ?? { open: 0, late: 0 }),
     };
@@ -190,6 +193,7 @@ export async function customerScreen(
       latitude: typeof data.latitude === 'number' ? data.latitude : null,
       longitude: typeof data.longitude === 'number' ? data.longitude : null,
       customData: data.customData && typeof data.customData === 'object' ? data.customData : null,
+      ...invoiceDataOf(data),
     },
     version: orderVersion(data.updatedAt),
     orders: orders.map((o) => projectOrderSummary(o, options.showPrices)),
@@ -203,6 +207,33 @@ export async function customerScreen(
   };
 }
 
+/** Structured address of the nota (customers/{id}.fiscalAddress, lib/models/fiscal_address.dart). */
+export interface FiscalAddress {
+  postalCode?: string | null;
+  street?: string | null;
+  number?: string | null;
+  complement?: string | null;
+  district?: string | null;
+  cityCode?: string | null;
+  cityName?: string | null;
+  state?: string | null;
+}
+
+const FISCAL_ADDRESS_KEYS = ['postalCode', 'street', 'number', 'complement', 'district', 'cityCode', 'cityName', 'state'] as const;
+
+/** "Dados para nota" of a customer as the screens read them (docs/NFSE_DIRECT.md, etapa #568). */
+export function invoiceDataOf(data: Json): Json {
+  const address = data.fiscalAddress && typeof data.fiscalAddress === 'object' ? (data.fiscalAddress as Json) : null;
+  const recipient = data.invoiceRecipient && typeof data.invoiceRecipient === 'object' ? (data.invoiceRecipient as Json) : null;
+  return {
+    legalName: text(data.legalName),
+    fiscalAddress: address ? Object.fromEntries(FISCAL_ADDRESS_KEYS.map((key) => [key, text(address[key])])) : null,
+    invoiceEmail: text(data.invoiceEmail),
+    invoiceRecipient: recipient && text(recipient.id) ? { id: String(recipient.id), name: String(recipient.name ?? '') } : null,
+    autoIssueInvoice: typeof data.autoIssueInvoice === 'boolean' ? data.autoIssueInvoice : null,
+  };
+}
+
 export interface CustomerInput {
   name?: string;
   phone?: string | null;
@@ -210,13 +241,41 @@ export interface CustomerInput {
   address?: string | null;
   taxId?: string | null;
   customData?: Record<string, unknown> | null;
+  legalName?: string | null;
+  fiscalAddress?: FiscalAddress | null;
+  invoiceEmail?: string | null;
+  /** "Nota fiscal para": another customer's id; the server copies its summary. */
+  invoiceRecipientId?: string | null;
+  autoIssueInvoice?: boolean | null;
+}
+
+/** The customer that gets the notas, as the app embeds it (CustomerAggr). */
+async function recipientAggr(companyId: string, recipientId: string, selfId: string | null): Promise<Json> {
+  if (recipientId === selfId) throw new OrderRuleError('INVOICE_RECIPIENT_INVALID', 400, 'A customer cannot be its own invoice recipient');
+  const snapshot = await getTenantCollection(companyId, 'customers').doc(recipientId).get();
+  if (!snapshot.exists) throw new OrderRuleError('INVOICE_RECIPIENT_INVALID', 400, 'Invoice recipient not found');
+  const data = snapshot.data() ?? {};
+  return { id: snapshot.id, name: text(data.name), phone: text(data.phone), email: text(data.email), taxId: text(data.taxId) };
+}
+
+/** Writes "Nota fiscal para" from the id the web sends (null takes it off). */
+async function withRecipient(companyId: string, selfId: string | null, input: CustomerInput, fields: Json): Promise<Json> {
+  if (input.invoiceRecipientId === undefined) return fields;
+  return { ...fields, invoiceRecipient: input.invoiceRecipientId === null ? null : await recipientAggr(companyId, input.invoiceRecipientId, selfId) };
 }
 
 /** Fields of a write. `customData` is replaced whole: the web sends every field, without the legacy keys. */
 function customerFields(input: CustomerInput, current: Json = {}): Json {
   const out: Json = {};
-  for (const key of ['phone', 'email', 'address', 'taxId'] as const) {
+  for (const key of ['phone', 'email', 'address', 'taxId', 'legalName', 'invoiceEmail'] as const) {
     if (input[key] !== undefined) out[key] = input[key] === '' ? null : input[key];
+  }
+  if (input.autoIssueInvoice !== undefined) out.autoIssueInvoice = input.autoIssueInvoice;
+  if (input.fiscalAddress !== undefined) {
+    const address = input.fiscalAddress
+      ? Object.fromEntries(FISCAL_ADDRESS_KEYS.map((key) => [key, input.fiscalAddress?.[key] || null]).filter(([, value]) => value !== null))
+      : {};
+    out.fiscalAddress = Object.keys(address).length ? address : null;
   }
   if (input.customData !== undefined) out.customData = input.customData && Object.keys(input.customData).length ? input.customData : null;
   if (input.name !== undefined) {
@@ -235,7 +294,8 @@ export async function createCustomer(companyId: string, input: CustomerInput & {
   const collection = getTenantCollection(companyId, 'customers');
   const ref = id ? collection.doc(id) : collection.doc();
   const now = new Date().toISOString();
-  const data = { phone: null, email: null, address: null, taxId: null, ...customerFields(input), company, createdBy, createdAt: now, updatedBy: createdBy, updatedAt: now };
+  const fields = await withRecipient(companyId, ref.id, input, customerFields(input));
+  const data = { phone: null, email: null, address: null, taxId: null, ...fields, company, createdBy, createdAt: now, updatedBy: createdBy, updatedAt: now };
   try {
     await ref.create(data);
     return { id: ref.id, created: true };
@@ -259,7 +319,8 @@ export async function updateCustomer(companyId: string, customerId: string, inpu
       throw new OrderRuleError('CUSTOMER_CHANGED', 409, 'The customer changed since it was read');
     }
     const updatedAt = new Date().toISOString();
-    tx.update(ref, { ...customerFields(input, snapshot.data() ?? {}), updatedBy, updatedAt });
+    const fields = await withRecipient(companyId, customerId, input, customerFields(input, snapshot.data() ?? {}));
+    tx.update(ref, { ...fields, updatedBy, updatedAt });
     return updatedAt;
   });
 }

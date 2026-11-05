@@ -18,7 +18,7 @@ business/
 ├── README.md              # Este arquivo
 ├── LAUNCH_PLAN.md         # Plano de lançamento
 ├── MARKET_RESEARCH.md     # Pesquisa de mercado
-├── PRICING.md             # Definição de planos e preços (a criar)
+├── PRICING.md             # Planos, preços e concorrentes (nov/2026)
 ├── PERSONAS.md            # Personas e segmentos (a criar)
 └── COMPETITORS/           # Análises detalhadas por concorrente (a criar)
 ```

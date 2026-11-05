@@ -2843,5 +2843,11 @@
   "nfseDirectCheckNow": "Verificar ahora",
   "nfseDirectFilterRow": "CNPJ",
   "nfseDirectFilterAll": "Todos",
-  "nfseDirectFilterQuestion": "¿Notas de cuál CNPJ?"
+  "nfseDirectFilterQuestion": "¿Notas de cuál CNPJ?",
+  "orderItemCatalogPriceTitle": "¿Cambiar el precio en el Catálogo?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” cuesta {from} en el Catálogo. ¿Usar {to} siempre o solo en esta OS?",
+  "orderItemCatalogPriceAlways": "Usar siempre",
+  "orderItemCatalogPriceOnlyHere": "Solo en esta OS",
+  "orderItemCatalogPriceSaved": "El precio del Catálogo cambió a {to}",
+  "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí."
 }

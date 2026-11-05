@@ -2855,5 +2855,11 @@
   "nfseDirectCheckNow": "Check now",
   "nfseDirectFilterRow": "CNPJ",
   "nfseDirectFilterAll": "All",
-  "nfseDirectFilterQuestion": "Invoices of which CNPJ?"
+  "nfseDirectFilterQuestion": "Invoices of which CNPJ?",
+  "orderItemCatalogPriceTitle": "Change the price in the Catalog?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” costs {from} in the Catalog. Use {to} always or only on this order?",
+  "orderItemCatalogPriceAlways": "Use always",
+  "orderItemCatalogPriceOnlyHere": "Only this order",
+  "orderItemCatalogPriceSaved": "Catalog price changed to {to}",
+  "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there."
 }
