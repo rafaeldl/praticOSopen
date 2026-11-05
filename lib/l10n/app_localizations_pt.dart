@@ -7054,4 +7054,156 @@ class AppLocalizationsPt extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'As notas de $customer vão para ele mesmo';
   }
+
+  @override
+  String nfseDirectCpfLine(String value) {
+    return 'CPF $value';
+  }
+
+  @override
+  String nfseDirectCnpjLine(String value) {
+    return 'CNPJ $value';
+  }
+
+  @override
+  String get nfseDirectProblemCertificate => 'Sem certificado digital';
+
+  @override
+  String get nfseDirectProblemNotEnabled => 'Não habilitado a emitir na cidade';
+
+  @override
+  String get nfseDirectProblemService => 'Falta o serviço da nota';
+
+  @override
+  String get nfseDirectProblemSetup =>
+      'Falta terminar a configuração deste CNPJ';
+
+  @override
+  String nfseDirectIssueCannot(String reason) {
+    return 'Este CNPJ não emite agora: $reason';
+  }
+
+  @override
+  String get nfseDirectIssueCityByPostalCode =>
+      'Digite o CEP para achar a cidade.';
+
+  @override
+  String get nfseDirectIssueAddressMissing =>
+      'Falta o endereço com CEP de quem recebe a nota.';
+
+  @override
+  String get nfseDirectIssueEmailMissing =>
+      'Falta o e-mail de quem recebe a nota.';
+
+  @override
+  String get nfseDirectIssueEmitterQuestion => 'Por qual CNPJ emitir?';
+
+  @override
+  String get nfseDirectIssueRecipientQuestion => 'Para quem vai esta nota?';
+
+  @override
+  String get nfseDirectIssueRecipientOnlyThis => 'Vale só para esta nota';
+
+  @override
+  String get nfseDirectRefusedGeneric => 'O governo recusou a nota.';
+
+  @override
+  String get nfseDirectRefusedFixRecipient =>
+      'Confira os dados de quem recebe a nota e toque em ✓ de novo.';
+
+  @override
+  String get nfseDirectIssueBy => 'Emitir por';
+
+  @override
+  String get nfseDirectIssueTo => 'Para';
+
+  @override
+  String nfseDirectIssueViaRecipient(String name) {
+    return 'Pelo “Nota fiscal para” de $name';
+  }
+
+  @override
+  String get nfseDirectMeiNear =>
+      'Com esta nota, o MEI passa de 80% do teto do ano.';
+
+  @override
+  String get nfseDirectMeiOver =>
+      'Com esta nota, o MEI passa do teto do ano. Fale com o seu contador.';
+
+  @override
+  String nfseDirectIssueRecipientDataIntro(String name) {
+    return 'Faltam dados de $name para a nota. Ficam salvos no cadastro.';
+  }
+
+  @override
+  String nfseDirectIssueComplementary(String info) {
+    return 'Vai junto na nota: $info';
+  }
+
+  @override
+  String get nfseDirectIssuedToast => 'Nota emitida';
+
+  @override
+  String get nfseDirectWaitingToast =>
+      'O governo ainda não respondeu. A nota aparece assim que ele confirmar.';
+
+  @override
+  String get nfseDirectErrorRecipientTaxId =>
+      'Falta o CPF ou CNPJ de quem recebe a nota.';
+
+  @override
+  String get nfseDirectErrorEmitterNotReady =>
+      'Este CNPJ ainda não pode emitir. Confira a configuração da nota.';
+
+  @override
+  String get nfseDirectErrorOrderHasInvoice => 'Esta OS já tem nota.';
+
+  @override
+  String get nfseDirectErrorGovUnavailable =>
+      'O governo não respondeu. Tente de novo em alguns minutos.';
+
+  @override
+  String get nfseDirectErrorNotCancelable =>
+      'Esta nota não pode ser cancelada.';
+
+  @override
+  String get nfseDirectErrorPdf => 'O PDF desta nota ainda não está pronto.';
+
+  @override
+  String get nfseDirectCancelPortal =>
+      'A cidade não aceitou o cancelamento por aqui. Cancele no portal do governo (nfse.gov.br).';
+
+  @override
+  String get nfseDirectCancelMessage =>
+      'Diga o motivo. O governo registra na hora e a nota deixa de valer.';
+
+  @override
+  String get nfseDirectCancelReasonIssueError => 'Erro na nota';
+
+  @override
+  String get nfseDirectCancelReasonNotProvided => 'Serviço não prestado';
+
+  @override
+  String get nfseDirectCancelReasonRow => 'Motivo';
+
+  @override
+  String get nfseDirectEmitterLabel => 'Emitida por';
+
+  @override
+  String get nfseDirectAccessKeyLabel => 'Chave de acesso';
+
+  @override
+  String get nfseDirectExternalTag => 'Emitida fora do PraticOS';
+
+  @override
+  String get nfseDirectCheckNow => 'Conferir agora';
+
+  @override
+  String get nfseDirectFilterRow => 'CNPJ';
+
+  @override
+  String get nfseDirectFilterAll => 'Todos';
+
+  @override
+  String get nfseDirectFilterQuestion => 'Notas de qual CNPJ?';
 }

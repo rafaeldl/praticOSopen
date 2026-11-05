@@ -11,9 +11,10 @@ import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
+import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import ShareButtons from '@/components/ShareButtons.vue'
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays, monthOf, shiftMonth } from '@/lib/finance/period'
 import { monthName, monthYear, today } from '@/lib/finance/text'
@@ -21,7 +22,9 @@ import { formatDate } from '@/lib/format'
 import { cancelInvoice, customerInvoices, monthInvoices, nfseSettings, type NfseSettings } from '@/lib/nfse/data'
 import { can } from '@/lib/session'
 import { DOT, invoiceStatusText } from '@/lib/nfse/text'
-import { SEARCH_FROM, canCancel, canFix, matches, monthList, orderNumbers, type NfseInvoice } from '@/lib/nfse/model'
+import { SEARCH_FROM, byEmitter, canCancel, canFix, canReconcile, emittersOf, matches, monthList, orderNumbers, refusalMessage, type NfseInvoice } from '@/lib/nfse/model'
+import { CANCEL_REASONS, cancelDirect, cancelFailureText, directPdfPath, reconcileDirect, storageUrl, type CancelReason } from '@/lib/nfse/direct-issue'
+import { formatTaxId } from '@/lib/tax-id'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { registerShortcut } from '@/lib/shortcuts'
 import { fileFromUrl } from '@/lib/share'
@@ -45,6 +48,8 @@ const query = computed(() => (typeof route.query.q === 'string' ? route.query.q 
 const openId = computed(() => (typeof route.query.invoice === 'string' ? route.query.invoice : null))
 /** "Notas de X" (nfse.list.customer): only this customer's notas, from the customer's screen. */
 const customerId = computed(() => (typeof route.query.customer === 'string' && route.query.customer ? route.query.customer : null))
+/** Only the notas of one CNPJ (NFS-e direct with several emitters, spec §4.7). */
+const emitterId = computed(() => (typeof route.query.emitter === 'string' && route.query.emitter ? route.query.emitter : null))
 
 const settings = ref<NfseSettings | null>(null)
 const state = ref<'loading' | 'ready' | 'failed' | 'off'>('loading')
@@ -108,7 +113,10 @@ onMounted(() =>
 )
 onBeforeUnmount(() => removers.forEach((remove) => remove()))
 
-const result = computed(() => monthList(invoices.value, month.value, todayDay))
+/** The CNPJs of the notas read, when there is more than one: the filter shows. */
+const emitters = computed(() => emittersOf(invoices.value))
+const activeEmitter = computed(() => (emitters.value.some((e) => e.id === emitterId.value) ? emitterId.value : null))
+const result = computed(() => monthList(invoices.value.filter((i) => byEmitter(i, activeEmitter.value)), month.value, todayDay))
 const searchable = computed(() => result.value.rows.length + result.value.attention.length > SEARCH_FROM)
 const rows = computed(() => (searchable.value && query.value ? result.value.rows.filter((i) => matches(i, query.value)) : result.value.rows))
 const attention = computed(() => (searchable.value && query.value ? result.value.attention.filter((i) => matches(i, query.value)) : result.value.attention))
@@ -162,9 +170,14 @@ const REASON: Record<string, Parameters<typeof t>[0]> = {
 /** Short reason on the row: the city's text, or ours for a code we know. */
 function reasonOf(invoice: NfseInvoice): string | null {
   if (invoice.status !== 'error' && invoice.status !== 'cancellationDenied') return null
+  // NFS-e direct: the government's refusal in plain words, in the language on screen.
+  if (invoice.refusal) return refusalMessage(invoice.refusal, locale.value)
   const known = invoice.errorCode ? REASON[invoice.errorCode] : undefined
   return known ? t(known) : invoice.statusDescription
 }
+const external = (invoice: NfseInvoice) => invoice.source === 'external'
+const partyLine = (party: { legalName: string | null; taxId: string | null } | null) =>
+  party ? [party.legalName, party.taxId ? formatTaxId(party.taxId) : null].filter(Boolean).join(' · ') : ''
 const label = (invoice: NfseInvoice) => (invoice.number ? t('nfseListNumber', { number: invoice.number }) : t('nfseNotIssued'))
 const ordersText = (invoice: NfseInvoice) => (orderNumbers(invoice) ? `${orderShort()} ${orderNumbers(invoice)}` : '')
 
@@ -179,7 +192,7 @@ function close() {
 // Cancel and fix
 // ---------------------------------------------------------------------------
 
-const asking = ref<'cancel' | 'atCity' | null>(null)
+const asking = ref<'cancel' | 'atCity' | 'reason' | null>(null)
 const working = ref(false)
 const fixing = ref<NfseInvoice | null>(null)
 
@@ -213,6 +226,71 @@ async function cancel(onlyOnAsaas = false) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// NFS-e direct: cancel with the reason, check a nota still waiting, PDF and XML
+// ---------------------------------------------------------------------------
+
+/** What the government said about the last cancel or check of the open nota. */
+const panelNote = ref<{ id: string; text: string } | null>(null)
+const reasonChoices = computed(() =>
+  CANCEL_REASONS.map((reason) => ({ id: reason, label: t(reason === 'issueError' ? 'web.nfseDirect.reasonIssueError' : 'web.nfseDirect.reasonNotProvided') })),
+)
+
+async function cancelWithReason(reason: string) {
+  const invoice = opened.value
+  if (!invoice || working.value) return
+  working.value = true
+  asking.value = null
+  try {
+    await cancelDirect(invoice.id, reason as CancelReason)
+    panelNote.value = null
+    showToast(t('nfseCanceledToast'))
+    await load()
+  } catch (error) {
+    panelNote.value = { id: invoice.id, text: cancelFailureText(error, locale.value) }
+    await load()
+  } finally {
+    working.value = false
+  }
+}
+
+async function reconcile() {
+  const invoice = opened.value
+  if (!invoice || working.value) return
+  working.value = true
+  try {
+    const answer = await reconcileDirect(invoice.id)
+    panelNote.value = answer.status === 'creating' ? { id: invoice.id, text: t('web.nfseDirect.stillWaiting') } : null
+    await load()
+  } catch (error) {
+    panelNote.value = { id: invoice.id, text: cancelFailureText(error, locale.value) }
+  } finally {
+    working.value = false
+  }
+}
+
+/**
+ * Opens a file of the nota in a new tab. The tab opens at the click (a tab
+ * opened after waiting is blocked by the browser) and goes to the file when
+ * its link comes.
+ */
+async function openFile(kind: 'pdf' | 'xml') {
+  const invoice = opened.value
+  if (!invoice) return
+  const tab = window.open('', '_blank')
+  if (tab) tab.opener = null
+  try {
+    const storagePath = kind === 'pdf' ? await directPdfPath(invoice.id) : invoice.xmlPath
+    if (!storagePath) throw new Error('no file')
+    const url = await storageUrl(storagePath)
+    if (tab) tab.location.href = url
+    else window.location.assign(url)
+  } catch (error) {
+    tab?.close()
+    showToast(error instanceof Error && error.message === 'no file' ? t('web.nfseDirect.fileMissing') : t(errorMessageKey(error)))
+  }
+}
+
 async function fixed() {
   fixing.value = null
   await load()
@@ -241,7 +319,21 @@ async function fixed() {
     <EmptyState v-else-if="state === 'off'" :title="t('nfseErrorNotEnabled')" :body="t('web.nfse.offBody')" data-testid="nfse-off" />
     <div v-else class="workspace" :class="{ 'has-panel': opened }">
       <div class="list-pane">
-        <div v-if="searchable" class="toolbar">
+        <div v-if="searchable || emitters.length" class="toolbar">
+          <template v-if="emitters.length">
+            <label class="sr" for="nfse-emitter">{{ t('web.nfseDirect.emitterFilter') }}</label>
+            <select
+              id="nfse-emitter"
+              class="field search-mini"
+              :value="activeEmitter ?? ''"
+              data-testid="nfse-emitter-filter"
+              @change="go({ emitter: ($event.target as HTMLSelectElement).value || undefined })"
+            >
+              <option value="">{{ t('web.nfseDirect.allEmitters') }}</option>
+              <option v-for="e in emitters" :key="e.id" :value="e.id">{{ e.legalName }}</option>
+            </select>
+          </template>
+          <template v-if="searchable">
           <label class="sr" for="nfse-search">{{ t('nfseListSearch') }}</label>
           <input
             id="nfse-search"
@@ -252,6 +344,7 @@ async function fixed() {
             data-testid="nfse-search"
             @input="go({ q: ($event.target as HTMLInputElement).value || undefined })"
           />
+          </template>
         </div>
         <section v-if="attention.length" class="nfse-attention" aria-labelledby="nfse-att" data-testid="nfse-attention">
           <h2 id="nfse-att">{{ t('nfseListAttention') }}</h2>
@@ -289,6 +382,7 @@ async function fixed() {
               <td>
                 <button type="button" class="row-btn num" @click.stop="open(invoice)">{{ label(invoice) }}</button>
                 <span class="sub block">{{ invoice.effectiveDate ? formatDate(`${invoice.effectiveDate}T12:00:00`, country()) : '' }}</span>
+                <span v-if="external(invoice)" class="sub block nfse-tag" data-testid="nfse-external">{{ t('web.nfseDirect.external') }}</span>
               </td>
               <td><span class="who">{{ invoice.customerName || t('web.fin.noCustomer') }}</span><span class="sub block">{{ ordersText(invoice) }}</span></td>
               <td>
@@ -312,8 +406,14 @@ async function fixed() {
             <span class="dot" :class="`dot--${DOT[opened.status]}`" aria-hidden="true"></span><span data-testid="nfse-status">{{ statusOf(opened) }}</span>
           </span>
           <p>{{ headOf(opened) }}</p>
+          <p v-if="external(opened)" class="sub nfse-tag">{{ t('web.nfseDirect.external') }}</p>
           <div class="nfse-actions">
             <button v-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
+            <template v-if="opened.provider === 'direct'">
+              <button v-if="canReconcile(opened)" type="button" class="btn btn--primary" :disabled="working" data-testid="nfse-reconcile" @click="reconcile">{{ t('web.nfseDirect.checkNow') }}</button>
+              <button v-if="opened.accessKey && (opened.status === 'authorized' || opened.status === 'cancellationDenied' || opened.status === 'canceled')" type="button" class="btn btn--primary" data-testid="nfse-pdf" @click="openFile('pdf')">{{ t('nfseOpenPdf') }}</button>
+              <button v-if="opened.xmlPath" type="button" class="btn" data-testid="nfse-xml" @click="openFile('xml')">{{ t('nfseOpenXml') }}</button>
+            </template>
             <a v-if="opened.status === 'authorized' && opened.pdfUrl" class="btn btn--primary" :href="opened.pdfUrl" target="_blank" rel="noopener noreferrer" data-testid="nfse-pdf">{{ t('nfseOpenPdf') }}</a>
             <a v-if="opened.status === 'authorized' && opened.xmlUrl" class="btn" :href="opened.xmlUrl" target="_blank" rel="noopener noreferrer" data-testid="nfse-xml">{{ t('nfseOpenXml') }}</a>
             <ShareButtons
@@ -333,6 +433,9 @@ async function fixed() {
         <dl class="nfse-facts">
           <div><dt>{{ t('nfseValueLabel') }}</dt><dd class="num">{{ money(opened.value) }}</dd></div>
           <div v-if="opened.number"><dt>{{ t('nfseNumberLabel') }}</dt><dd class="num">{{ opened.number }}</dd></div>
+          <div v-if="opened.emitter"><dt>{{ t('web.nfseDirect.emitter') }}</dt><dd data-testid="nfse-emitter-line">{{ partyLine(opened.emitter) }}</dd></div>
+          <div v-if="opened.recipient"><dt>{{ t('web.nfseDirect.recipient') }}</dt><dd data-testid="nfse-recipient-line">{{ partyLine(opened.recipient) }}</dd></div>
+          <div v-if="opened.accessKey"><dt>{{ t('web.nfseDirect.accessKey') }}</dt><dd class="num nfse-key" data-testid="nfse-key">{{ opened.accessKey }}</dd></div>
           <div v-if="opened.effectiveDate"><dt>{{ t('nfseDateLabel') }}</dt><dd>{{ formatDate(`${opened.effectiveDate}T12:00:00`, country()) }}</dd></div>
           <div v-if="opened.orders.length">
             <dt>{{ t('nfseOrdersLabel') }}</dt>
@@ -346,8 +449,9 @@ async function fixed() {
           </div>
         </dl>
         <p v-if="opened.conflict" class="field-error" role="note">{{ t('nfseConflictNotice') }}</p>
+        <p v-if="panelNote && panelNote.id === opened.id" class="field-error" role="alert" data-testid="nfse-panel-note">{{ panelNote.text }}</p>
         <div v-if="canCancel(opened)" class="nfse-danger">
-          <button type="button" class="link link--danger" data-testid="nfse-cancel" @click="asking = 'cancel'">{{ t('nfseCancelAction') }}</button>
+          <button type="button" class="link link--danger" :disabled="working" data-testid="nfse-cancel" @click="asking = opened.provider === 'direct' ? 'reason' : 'cancel'">{{ t('nfseCancelAction') }}</button>
         </div>
       </aside>
     </div>
@@ -371,6 +475,14 @@ async function fixed() {
       @confirm="cancel(true)"
       @close="asking = null"
     />
-    <IssueInvoiceDialog v-if="fixing" :order-ids="fixing.orderIds" :customer-id="fixing.customerId" @done="fixed" @close="fixing = null" />
+    <ChoiceDialog
+      v-if="asking === 'reason' && opened"
+      :title="t('nfseCancelQuestion', { value: money(opened.value) })"
+      :sub="t('web.nfseDirect.cancelWhy')"
+      :choices="reasonChoices"
+      @pick="cancelWithReason"
+      @close="asking = null"
+    />
+    <IssueInvoiceDialog v-if="fixing" :order-ids="fixing.orderIds" :customer-id="fixing.customerId" :direct="fixing.provider === 'direct' || !!settings?.direct" @done="fixed" @close="fixing = null" />
   </div>
 </template>

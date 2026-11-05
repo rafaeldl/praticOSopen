@@ -49,6 +49,22 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
       return l10n.nfseDirectErrorValidation;
+    case 'RECIPIENT_TAX_ID_REQUIRED':
+      return l10n.nfseDirectErrorRecipientTaxId;
+    case 'EMITTER_NOT_READY':
+      return l10n.nfseDirectErrorEmitterNotReady;
+    case 'ORDER_HAS_INVOICE':
+      return l10n.nfseDirectErrorOrderHasInvoice;
+    case 'SEFIN_UNAVAILABLE':
+      return l10n.nfseDirectErrorGovUnavailable;
+    case 'INVOICE_NOT_CANCELABLE':
+      return l10n.nfseDirectErrorNotCancelable;
+    case 'CANCEL_REFUSED':
+      return l10n.nfseDirectCancelPortal;
+    case 'PDF_NOT_AVAILABLE':
+      return l10n.nfseDirectErrorPdf;
+    case 'NFSE_REFUSED':
+      return l10n.nfseDirectRefusedGeneric;
     case 'KEY_VAULT_UNAVAILABLE':
     case 'NETWORK_ERROR':
     case 'RATE_LIMIT_EXCEEDED':

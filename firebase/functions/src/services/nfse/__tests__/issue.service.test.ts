@@ -288,6 +288,24 @@ describe('previewDirectInvoice', () => {
     });
     expect(preview.emitters).toHaveLength(1);
   });
+
+  it('"Para" changed in the sheet: the preview reads the chosen customer; the default emitter is marked', async () => {
+    seedCompany();
+    seed('companies/c1/settings/nfse', { provider: 'direct', defaultEmitterId: 'e1' });
+    seed('companies/c1/customers/cu9', { name: 'Outra Loja', taxId: '12345678909', email: 'loja@example.com' });
+    const preview = await previewDirectInvoice('c1', { orderIds: ['o1'], recipientCustomerId: 'cu9' }, deps);
+    expect(preview.customer).toEqual({ id: 'cu1', name: 'Revenda Exemplo' });
+    expect(preview.recipient).toMatchObject({
+      customerId: 'cu9',
+      name: 'Outra Loja',
+      taxId: '12345678909',
+      email: 'loja@example.com',
+      address: null,
+      viaInvoiceRecipient: true,
+    });
+    expect(preview.missing).toEqual(['address']);
+    expect(preview.emitter).toMatchObject({ id: 'e1', isDefault: true, serviceName: 'Lubrificação, limpeza e revisão', problem: null });
+  });
 });
 
 describe('cancelDirectInvoice', () => {

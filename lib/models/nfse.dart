@@ -81,6 +81,62 @@ enum NfseCancelReason {
   }
 }
 
+/// What a refusal of the government asks the user to fix (spec §5.4).
+enum NfseRefusalGroup {
+  /// Recipient's document, address or e-mail: the sheet opens the fields.
+  customerData,
+
+  /// Municipal registration, service, regime: the emitter's setup.
+  emitterSetup,
+
+  /// Certificate of another CNPJ, expired or refused: replace it.
+  certificate,
+  other;
+
+  static NfseRefusalGroup parse(Object? value) => NfseRefusalGroup.values
+      .firstWhere((g) => g.name == value, orElse: () => NfseRefusalGroup.other);
+}
+
+/// A refusal of the government in plain words (`refusal` on a direct nota,
+/// or `details.refusal` of a NFSE_REFUSED / CANCEL_REFUSED answer).
+class NfseRefusal {
+  const NfseRefusal({
+    this.code,
+    this.group = NfseRefusalGroup.other,
+    this.messages = const {},
+    this.govText,
+  });
+
+  /// The government's code (E0312...).
+  final String? code;
+  final NfseRefusalGroup group;
+
+  /// Sentence per language code (`pt`, `en`, `es`).
+  final Map<String, String> messages;
+
+  /// The government's own text (diagnostic detail).
+  final String? govText;
+
+  /// The sentence in [languageCode], else Portuguese, else the government's.
+  String? text(String languageCode) =>
+      messages[languageCode] ?? messages['pt'] ?? govText;
+
+  static NfseRefusal? fromJson(Object? value) {
+    final json = _map(value);
+    if (json == null) return null;
+    final messages = _map(json['message']) ?? const <String, dynamic>{};
+    return NfseRefusal(
+      code: _str(json['code']),
+      group: NfseRefusalGroup.parse(json['group']),
+      messages: {
+        for (final e in messages.entries)
+          if (_str(e.value) != null) e.key: e.value as String,
+      },
+      govText: _str(json['govText']),
+    );
+  }
+}
+
 /// Who received a direct nota (tomador), as sent.
 class NfseRecipient {
   const NfseRecipient({
@@ -177,6 +233,7 @@ class NfseInvoice {
     this.pdfPath,
     this.cancelReason,
     this.importBatchId,
+    this.refusal,
   });
 
   final String id;
@@ -226,6 +283,11 @@ class NfseInvoice {
 
   /// The import that brought it (or linked it to an order).
   final String? importBatchId;
+
+  /// Why the government refused a direct nota (or its cancellation).
+  final NfseRefusal? refusal;
+
+  bool get isDirect => provider == NfseProvider.direct;
 
   /// Made outside PraticOS (portal or another system), read from the
   /// government: "Emitida fora do PraticOS".
@@ -278,6 +340,7 @@ class NfseInvoice {
       pdfPath: _str(json['pdfPath']),
       cancelReason: NfseCancelReason.parse(json['cancelReason']),
       importBatchId: _str(json['importBatchId']),
+      refusal: NfseRefusal.fromJson(json['refusal']),
     );
   }
 
@@ -570,6 +633,173 @@ class NfsePreview {
         for (final field in (customer['missingData'] as List? ?? const []))
           if (field is String) field,
       ],
+    );
+  }
+}
+
+/// "Com esta nota, o MEI passa de 80% / do teto do ano" (spec §4.6).
+enum NfseMeiWarning {
+  none,
+  near,
+  over;
+
+  static NfseMeiWarning parse(Object? value) => NfseMeiWarning.values
+      .firstWhere((w) => w.name == value, orElse: () => NfseMeiWarning.none);
+}
+
+/// One emitter as the direct sheet offers it.
+class NfseDirectEmitterOption {
+  const NfseDirectEmitterOption({
+    required this.id,
+    required this.legalName,
+    required this.taxId,
+    this.regime,
+    this.problem,
+    this.isDefault = false,
+    this.serviceName,
+  });
+
+  final String id;
+  final String legalName;
+  final String taxId;
+
+  /// `mei` | `simples`.
+  final String? regime;
+
+  /// Why it cannot issue now (`certificate`, `certificateExpired`,
+  /// `notEnabledInCity`, `city`, `service`, `series`, `regime`); null when
+  /// it can.
+  final String? problem;
+  final bool isDefault;
+  final String? serviceName;
+
+  bool get isMei => regime == 'mei';
+
+  factory NfseDirectEmitterOption.fromJson(Map<String, dynamic> json) =>
+      NfseDirectEmitterOption(
+        id: json['id'] as String? ?? '',
+        legalName: json['legalName'] as String? ?? '',
+        taxId: json['taxId'] as String? ?? '',
+        regime: _str(json['regime']),
+        problem: _str(json['problem']),
+        isDefault: json['isDefault'] == true,
+        serviceName: _str(json['serviceName']),
+      );
+}
+
+/// Who the direct nota goes to, as the preview found it.
+class NfseDirectPreviewRecipient {
+  const NfseDirectPreviewRecipient({
+    required this.customerId,
+    this.name,
+    this.legalName,
+    this.taxId,
+    this.address,
+    this.email,
+    this.viaInvoiceRecipient = false,
+  });
+
+  final String customerId;
+  final String? name;
+  final String? legalName;
+  final String? taxId;
+  final FiscalAddress? address;
+  final String? email;
+
+  /// The "Nota fiscal para" of the order's customer.
+  final bool viaInvoiceRecipient;
+
+  factory NfseDirectPreviewRecipient.fromJson(Map<String, dynamic> json) {
+    final address = _map(json['address']);
+    return NfseDirectPreviewRecipient(
+      customerId: json['customerId'] as String? ?? '',
+      name: _str(json['name']),
+      legalName: _str(json['legalName']),
+      taxId: _str(json['taxId']),
+      address: address == null ? null : FiscalAddress.fromJson(address),
+      email: _str(json['email']),
+      viaInvoiceRecipient: json['viaInvoiceRecipient'] == true,
+    );
+  }
+}
+
+/// `POST /v1/app/nfse/direct/invoices/preview`: what the direct nota will
+/// have (docs/NFSE_DIRECT.md).
+class NfseDirectPreview {
+  const NfseDirectPreview({
+    required this.value,
+    required this.orders,
+    required this.hasProducts,
+    required this.description,
+    required this.complementaryInfo,
+    required this.emitter,
+    required this.emitters,
+    required this.customerId,
+    this.customerName,
+    required this.recipient,
+    this.missing = const [],
+    this.meiWarning = NfseMeiWarning.none,
+    this.invoicedOrders = const {},
+  });
+
+  final double value;
+  final List<NfsePreviewOrder> orders;
+  final bool hasProducts;
+
+  /// The text by the fixed rule (§4.4); editable in the sheet.
+  final String description;
+
+  /// "OS 182 · Emitida pelo PraticOS (praticos.app)", always sent.
+  final String complementaryInfo;
+  final NfseDirectEmitterOption emitter;
+  final List<NfseDirectEmitterOption> emitters;
+
+  /// The order's customer (the recipient may be another one).
+  final String customerId;
+  final String? customerName;
+  final NfseDirectPreviewRecipient recipient;
+
+  /// What the recipient lacks: `taxId`, `address`, `email`.
+  final List<String> missing;
+  final NfseMeiWarning meiWarning;
+
+  /// Orders that already have an active nota (orderId → invoiceId).
+  final Map<String, String> invoicedOrders;
+
+  factory NfseDirectPreview.fromJson(Map<String, dynamic> json) {
+    final customer = _map(json['customer']) ?? const <String, dynamic>{};
+    final invoiced = _map(json['invoicedOrders']) ?? const <String, dynamic>{};
+    return NfseDirectPreview(
+      value: _num(json['value']),
+      orders: [
+        for (final o in (json['orders'] as List? ?? const []))
+          if (o is Map) NfsePreviewOrder.fromJson(Map<String, dynamic>.from(o)),
+      ],
+      hasProducts: json['hasProducts'] == true,
+      description: json['description'] as String? ?? '',
+      complementaryInfo: json['complementaryInfo'] as String? ?? '',
+      emitter: NfseDirectEmitterOption.fromJson(
+        _map(json['emitter']) ?? const {},
+      ),
+      emitters: [
+        for (final e in (json['emitters'] as List? ?? const []))
+          if (e is Map)
+            NfseDirectEmitterOption.fromJson(Map<String, dynamic>.from(e)),
+      ],
+      customerId: customer['id'] as String? ?? '',
+      customerName: _str(customer['name']),
+      recipient: NfseDirectPreviewRecipient.fromJson(
+        _map(json['recipient']) ?? const {},
+      ),
+      missing: [
+        for (final m in (json['missing'] as List? ?? const []))
+          if (m is String) m,
+      ],
+      meiWarning: NfseMeiWarning.parse(json['meiWarning']),
+      invoicedOrders: {
+        for (final e in invoiced.entries)
+          if (e.value is String) e.key: e.value as String,
+      },
     );
   }
 }

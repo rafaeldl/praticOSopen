@@ -225,6 +225,8 @@ const chargesOn = ref(false)
 const nfseOn = ref(false)
 /** The nota setup is done (nfseReady): the nota can be the blue step (order.nfse.next-step). */
 const nfseReady = ref(false)
+/** The nota goes by the NFS-e direct (nfseDirectEnabled): the issue sheet is the direct one. */
+const nfseDirect = ref(false)
 /** The order's current nota, as OrderNfse reads it (live). */
 const nfseCurrent = shallowRef<NfseInvoice | null>(null)
 /** The order's notas were read (B8): before that, or after a failed read, no "Emitir". */
@@ -245,6 +247,7 @@ onMounted(() => {
         chargesOn.value = settings.ready
         nfseOn.value = settings.nfse
         nfseReady.value = settings.nfseReady
+        nfseDirect.value = settings.nfseDirect === true
       })
       .finally(() => (chargesPending.value = false))
   }
@@ -1310,7 +1313,7 @@ watch(
     @whatsapp="sharePdfLink"
     @close="pdfOpen = false"
   />
-  <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
+  <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" :direct="nfseDirect" @done="issuing = false" @close="issuing = false" />
   <OrderPrint v-if="printing && order" :order="order" />
   <ReceiptsDialog v-if="receiptOpen && order?.customer?.id" :customer-id="order.customer.id" :customer-name="order.customer.name ?? ''" :focus-id="receiptOpen" @changed="watcher?.refresh()" @close="receiptOpen = null" />
 </template>

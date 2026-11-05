@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:io' show SocketException;
 
 import 'package:http/http.dart' as http;
+import 'package:praticos/models/fiscal_address.dart';
 import 'package:praticos/models/fiscal_emitter.dart';
+import 'package:praticos/models/nfse.dart' hide NfseDirectAutoIssue;
 import 'package:praticos/repositories/tenant/fiscal_emitter_repository.dart';
 import 'package:praticos/services/api_headers.dart';
 
@@ -24,10 +26,17 @@ String resolveNfseApiBaseUrl(String apiBaseUrl) {
 /// Error from the NFS-e direct endpoints. [message] is diagnostic text and
 /// never reaches the UI: map [code] with `nfseDirectErrorText`.
 class NfseDirectApiException implements Exception {
-  NfseDirectApiException(this.code, this.message);
+  NfseDirectApiException(this.code, this.message, {this.details});
 
   final String? code;
   final String message;
+
+  /// Extra data of the answer (`error.details`): the government's refusal,
+  /// the emitter's problem, `usePortal`...
+  final Map<String, dynamic>? details;
+
+  /// The government's refusal in plain words (NFSE_REFUSED, CANCEL_REFUSED).
+  NfseRefusal? get refusal => NfseRefusal.fromJson(details?['refusal']);
 
   @override
   String toString() => message;
@@ -106,9 +115,11 @@ class NfseDirectApiService {
       429 => 'RATE_LIMIT_EXCEEDED',
       _ => null,
     };
+    final details = error is Map ? error['details'] : null;
     throw NfseDirectApiException(
       code,
       'Request failed (${response.statusCode})',
+      details: details is Map ? Map<String, dynamic>.from(details) : null,
     );
   }
 
@@ -178,4 +189,89 @@ class NfseDirectApiService {
 
   Future<void> setAutoIssue(NfseDirectAutoIssue value) =>
       _request('PUT', '/v1/app/nfse/setup/settings', {'autoIssue': value.name});
+
+  // ─── Issue, cancel, PDF (/v1/app/nfse/direct) ─────────────────────────
+
+  /// What the nota of [orderIds] will have: the emitter marked
+  /// ([emitterId] when the sheet changed it) and the recipient
+  /// ([recipientCustomerId] when the sheet sent it elsewhere).
+  Future<NfseDirectPreview> previewInvoice(
+    List<String> orderIds, {
+    String? emitterId,
+    String? recipientCustomerId,
+  }) async {
+    final data =
+        await _request('POST', '/v1/app/nfse/direct/invoices/preview', {
+          'orderIds': orderIds,
+          if (emitterId != null) 'emitterId': emitterId,
+          if (recipientCustomerId != null)
+            'recipientCustomerId': recipientCustomerId,
+        });
+    return NfseDirectPreview.fromJson(data ?? const {});
+  }
+
+  /// Issues the nota. Resolves with it `authorized` (the usual) or still
+  /// `creating` when the government gave no clear answer; a refusal throws
+  /// NFSE_REFUSED with [NfseDirectApiException.refusal].
+  Future<NfseInvoice> issueInvoice(
+    List<String> orderIds, {
+    String? emitterId,
+    String? description,
+    String? recipientCustomerId,
+    String? taxId,
+    String? legalName,
+    FiscalAddress? address,
+    String? email,
+  }) async {
+    final recipient = <String, dynamic>{
+      if (recipientCustomerId != null) 'customerId': recipientCustomerId,
+      if (taxId != null) 'taxId': taxId,
+      if (legalName != null) 'legalName': legalName,
+      if (address != null)
+        'address': {
+          for (final e in address.toJson().entries)
+            if (e.value != null) e.key: e.value,
+        },
+      if (email != null) 'email': email,
+    };
+    final data = await _request('POST', '/v1/app/nfse/direct/invoices', {
+      'orderIds': orderIds,
+      if (emitterId != null) 'emitterId': emitterId,
+      if (description != null) 'description': description,
+      if (recipient.isNotEmpty) 'recipient': recipient,
+    });
+    return NfseInvoice.fromJson(data ?? const {});
+  }
+
+  /// Cancels an issued direct nota; CANCEL_REFUSED (with `usePortal`) when
+  /// the city does not take it.
+  Future<NfseInvoice> cancelInvoice(
+    String invoiceId,
+    NfseCancelReason reason,
+  ) async {
+    final data = await _request(
+      'POST',
+      '/v1/app/nfse/direct/invoices/$invoiceId/cancel',
+      {'reason': reason.name},
+    );
+    return NfseInvoice.fromJson(data ?? const {});
+  }
+
+  /// Asks the government now about a nota that got no clear answer.
+  Future<NfseInvoice> reconcileInvoice(String invoiceId) async {
+    final data = await _request(
+      'POST',
+      '/v1/app/nfse/direct/invoices/$invoiceId/reconcile',
+    );
+    return NfseInvoice.fromJson(data ?? const {});
+  }
+
+  /// Makes the PDF (DANFSe) when needed; returns its Storage path.
+  Future<String?> invoicePdfPath(String invoiceId) async {
+    final data = await _request(
+      'POST',
+      '/v1/app/nfse/direct/invoices/$invoiceId/pdf',
+    );
+    return data?['pdfPath'] as String?;
+  }
 }

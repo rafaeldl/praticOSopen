@@ -33,9 +33,53 @@ export interface NfseInvoice {
   auto: boolean
   createdAt: number | null
   conflict: boolean
+  /** 'direct': issued by our own engine in the national system (docs/NFSE_DIRECT.md); else Asaas. */
+  provider: 'asaas' | 'direct'
+  /** 'external': imported or issued at the government's portal, not by the PraticOS. */
+  source: 'praticos' | 'external'
+  emitter: { id: string; taxId: string; legalName: string; regime: string | null } | null
+  recipient: { customerId: string | null; taxId: string | null; legalName: string | null } | null
+  accessKey: string | null
+  /** Storage paths (tenants/{cid}/invoices/{id}/...), read by members. */
+  xmlPath: string | null
+  pdfPath: string | null
+  cancelReason: string | null
+  /** The government's refusal in plain words (direct only). */
+  refusal: DirectRefusal | null
 }
 
-const str = (value: unknown): string | null => (typeof value === 'string' && value ? value : null)
+export type RefusalGroup = 'customerData' | 'emitterSetup' | 'certificate' | 'other'
+export interface DirectRefusal {
+  code: string | null
+  group: RefusalGroup
+  message: { pt?: string; en?: string; es?: string }
+  govText: string | null
+}
+
+const GROUPS: RefusalGroup[] = ['customerData', 'emitterSetup', 'certificate', 'other']
+
+/** The refusal the server sends (error details or the nota's `refusal`), or null. */
+export function refusalOf(value: unknown): DirectRefusal | null {
+  if (!value || typeof value !== 'object') return null
+  const r = value as Record<string, unknown>
+  const message = (r.message && typeof r.message === 'object' ? r.message : {}) as Record<string, unknown>
+  return {
+    code: str(r.code),
+    group: GROUPS.includes(r.group as RefusalGroup) ? (r.group as RefusalGroup) : 'other',
+    message: { pt: str(message.pt) ?? undefined, en: str(message.en) ?? undefined, es: str(message.es) ?? undefined },
+    govText: str(r.govText),
+  }
+}
+
+/** The refusal's sentence in the language on screen, else Portuguese, else the government's text. */
+export function refusalMessage(refusal: DirectRefusal, locale: string): string | null {
+  const key = locale === 'en' || locale === 'es' ? locale : 'pt'
+  return refusal.message[key] ?? refusal.message.pt ?? refusal.govText
+}
+
+function str(value: unknown): string | null {
+  return typeof value === 'string' && value ? value : null
+}
 const num = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0)
 
 function millis(value: unknown): number | null {
@@ -89,16 +133,41 @@ export function invoiceOf(id: string, data: Record<string, unknown>): NfseInvoic
     auto: data.auto === true,
     createdAt: millis(data.createdAt),
     conflict: data.conflict === true,
+    provider: data.provider === 'direct' ? 'direct' : 'asaas',
+    source: data.source === 'external' ? 'external' : 'praticos',
+    emitter: emitterAggrOf(data.emitter),
+    recipient: recipientAggrOf(data.recipient),
+    accessKey: str(data.accessKey),
+    xmlPath: str(data.xmlPath),
+    pdfPath: str(data.pdfPath),
+    cancelReason: str(data.cancelReason),
+    refusal: refusalOf(data.refusal),
   }
+}
+
+function emitterAggrOf(value: unknown): NfseInvoice['emitter'] {
+  if (!value || typeof value !== 'object') return null
+  const e = value as Record<string, unknown>
+  const id = str(e.id)
+  return id ? { id, taxId: str(e.taxId) ?? '', legalName: str(e.legalName) ?? '', regime: str(e.regime) } : null
+}
+
+function recipientAggrOf(value: unknown): NfseInvoice['recipient'] {
+  if (!value || typeof value !== 'object') return null
+  const r = value as Record<string, unknown>
+  return { customerId: str(r.customerId), taxId: str(r.taxId), legalName: str(r.legalName) }
 }
 
 /** A `creating` nota older than this never reached Asaas. */
 export const STALE_CREATING_MS = 15 * 60 * 1000
 
-/** Blocks a second nota for its orders. */
+/**
+ * Blocks a second nota for its orders. A direct `creating` never goes stale
+ * here: the server keeps its orders until the government answers (reconcile).
+ */
 export function isActive(invoice: NfseInvoice, now = Date.now()): boolean {
   if (invoice.conflict || invoice.status === 'canceled' || invoice.status === 'error') return false
-  if (invoice.status === 'creating' && invoice.createdAt !== null && now - invoice.createdAt > STALE_CREATING_MS) return false
+  if (invoice.status === 'creating' && invoice.provider !== 'direct' && invoice.createdAt !== null && now - invoice.createdAt > STALE_CREATING_MS) return false
   return true
 }
 
@@ -107,7 +176,28 @@ export const isIssued = (invoice: NfseInvoice): boolean =>
   !invoice.conflict && (invoice.status === 'authorized' || invoice.status === 'cancellationDenied')
 
 export const canCancel = (invoice: NfseInvoice): boolean =>
-  invoice.status === 'scheduled' || invoice.status === 'authorized' || invoice.status === 'cancellationDenied'
+  invoice.provider === 'direct'
+    ? !!invoice.accessKey && (invoice.status === 'authorized' || invoice.status === 'cancellationDenied')
+    : invoice.status === 'scheduled' || invoice.status === 'authorized' || invoice.status === 'cancellationDenied'
+
+/** A direct nota still waiting for the government after this long can be checked by hand ("Conferir agora"). */
+export const RECONCILE_AFTER_MS = 3 * 60 * 1000
+
+export const canReconcile = (invoice: NfseInvoice, now = Date.now()): boolean =>
+  invoice.provider === 'direct' && invoice.status === 'creating' && invoice.createdAt !== null && now - invoice.createdAt > RECONCILE_AFTER_MS
+
+/** The emitters (CNPJs) the notas came from, by name, when there is more than one (the list's filter). */
+export function emittersOf(invoices: NfseInvoice[]): { id: string; legalName: string; taxId: string }[] {
+  const seen = new Map<string, { id: string; legalName: string; taxId: string }>()
+  for (const invoice of invoices) {
+    const e = invoice.emitter
+    if (e && !seen.has(e.id)) seen.set(e.id, { id: e.id, legalName: e.legalName, taxId: e.taxId })
+  }
+  const list = [...seen.values()].sort((a, b) => a.legalName.localeCompare(b.legalName, 'pt-BR'))
+  return list.length > 1 ? list : []
+}
+
+export const byEmitter = (invoice: NfseInvoice, emitterId: string | null): boolean => !emitterId || invoice.emitter?.id === emitterId
 
 /** "Corrigir e emitir": a refused nota of ours, with its orders. */
 export const canFix = (invoice: NfseInvoice): boolean => invoice.status === 'error' && !invoice.conflict && invoice.orderIds.length > 0

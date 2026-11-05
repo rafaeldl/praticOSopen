@@ -9,8 +9,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
-import 'package:praticos/screens/widgets/picker_screen.dart'
-    show AppSearchField;
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -81,6 +80,9 @@ class _NfseListScreenState extends State<NfseListScreen> {
       : DateTime(widget.month!.year, widget.month!.month);
   late bool _pickMonth = widget.customerId != null && widget.month == null;
   String _query = '';
+
+  /// "CNPJ" filter of the NFS-e direct (null: all).
+  String? _emitterId;
 
   bool get _ofCustomer => widget.customerId != null;
 
@@ -173,6 +175,61 @@ class _NfseListScreenState extends State<NfseListScreen> {
     );
   }
 
+  /// The CNPJs the filter offers (id → legal name): the company's and the
+  /// ones on the notas read. Empty unless there is more than one.
+  Map<String, String> get _emitterOptions {
+    if (!_nfse.direct) return const {};
+    final options = <String, String>{
+      for (final e in _nfse.emitters)
+        if (e.id != null) e.id!: e.legalName ?? e.taxId ?? '',
+    };
+    for (final invoice in _nfse.invoices) {
+      final e = invoice.emitter;
+      if (e?.id != null) {
+        options.putIfAbsent(e!.id!, () => e.legalName ?? e.taxId ?? '');
+      }
+    }
+    return options.length > 1 ? options : const {};
+  }
+
+  Future<void> _pickEmitter(Map<String, String> options) async {
+    final l10n = context.l10n;
+    const all = '';
+    final picked = await pickOne<String>(
+      context,
+      title: l10n.nfseDirectFilterQuestion,
+      selected: _emitterId ?? all,
+      options: [
+        PickerItem<String>(
+          key: const Key('nfseListEmitterAll'),
+          value: all,
+          title: l10n.nfseDirectFilterAll,
+        ),
+        for (final e in options.entries)
+          PickerItem<String>(
+            key: Key('nfseListEmitter_${e.key}'),
+            value: e.key,
+            title: e.value,
+          ),
+      ],
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _emitterId = picked == all ? null : picked);
+  }
+
+  Widget _emitterFilter(Map<String, String> options) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: AppListRow(
+        key: const Key('nfseListEmitterFilter'),
+        title: l10n.nfseDirectFilterRow,
+        trailing: options[_emitterId] ?? l10n.nfseDirectFilterAll,
+        onTap: () => _pickEmitter(options),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -233,9 +290,21 @@ class _NfseListScreenState extends State<NfseListScreen> {
       ];
     }
     final monthName = _format.formatMonthYear(_month);
-    final list = nfseMonthList(_nfse.invoices, _month, now: _today);
+    final options = _emitterOptions;
+    final emitterId = options.containsKey(_emitterId) ? _emitterId : null;
+    final invoices = emitterId == null
+        ? _nfse.invoices
+        : [
+            for (final invoice in _nfse.invoices)
+              if (invoice.emitter?.id == emitterId) invoice,
+          ];
+    final list = nfseMonthList(invoices, _month, now: _today);
+    final filter = options.isEmpty
+        ? null
+        : SliverToBoxAdapter(child: _emitterFilter(options));
     if (list.isEmpty) {
       return [
+        ?filter,
         SliverFillRemaining(
           hasScrollBody: false,
           child: EmptyState(
@@ -257,6 +326,7 @@ class _NfseListScreenState extends State<NfseListScreen> {
     final searching = _query.trim().isNotEmpty;
 
     return [
+      ?filter,
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -342,6 +412,9 @@ class _NfseListScreenState extends State<NfseListScreen> {
       if (invoice.orderNumbers.isNotEmpty)
         l10n.nfseListOrders(invoice.orderNumbers),
       if (day != null) _format.formatDayMonth(day),
+      if (invoice.isExternal) l10n.nfseDirectExternalTag,
+      if (_emitterOptions.isNotEmpty && invoice.emitter?.legalName != null)
+        invoice.emitter!.legalName!,
     ].join(' · ');
     final name = _ofCustomer
         ? numberText ?? l10n.nfseRowTitle
@@ -477,9 +550,9 @@ class _NfseMonthRowState extends State<NfseMonthRow> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (!_nfse.enabled) {
-      // NFS-e direct pilot before its notas list: the owner reaches the setup.
-      if (!_nfse.direct) return const SizedBox.shrink();
+    if (!_nfse.enabled) return const SizedBox.shrink();
+    if (_nfse.direct && !_nfse.ready && _nfse.invoices.isEmpty) {
+      // NFS-e direct before the first CNPJ: the owner reaches the setup.
       final canSetUp =
           widget.canSetUp ?? AuthorizationService.instance.canManageCompany;
       if (!canSetUp) return const SizedBox.shrink();

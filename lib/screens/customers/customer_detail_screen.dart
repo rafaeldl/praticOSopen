@@ -14,7 +14,6 @@ import 'package:praticos/models/receipt.dart';
 import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_list_screen.dart';
-import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/nfse/nfse_orders_picker.dart';
 import 'package:praticos/screens/payments/receipt_detail_screen.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
@@ -390,19 +389,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       previousTitle: _customer?.name,
     );
     if (ids == null || ids.isEmpty || !mounted) return;
-    final invoice = await NfseIssueSheet.show(
-      context,
-      orderIds: ids,
-      customerId: _customer?.id,
-      sandbox: _nfse.sandbox,
-    );
-    if (invoice != null && mounted) {
-      showAppToast(
-        context,
-        l10n.nfseSent,
-        icon: CupertinoIcons.checkmark_circle,
-      );
-    }
+    await issueNfse(context, _nfse, orderIds: ids, customerId: _customer?.id);
   }
 
   void _showMenu() {

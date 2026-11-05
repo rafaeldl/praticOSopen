@@ -91,6 +91,8 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
 .nfse-facts dt { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
 .nfse-facts dd { margin: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .nfse-order { min-height: 1.5rem; }
+.nfse-key { word-break: break-all; font-size: 0.8125rem; }
+.nfse-tag { color: var(--color-muted); font-weight: 600; }
 .nfse-danger { padding: 0.75rem 1rem; border-top: 1px solid var(--color-rule); }
 .nfse-danger .link { min-height: 2.25rem; }
 .invoices > .field-error { padding: 0 1rem; }

@@ -3,7 +3,7 @@
  * Mounted at /v1/app/nfse/direct by the nfseApi function. Issuing and
  * canceling: owner, admin and manager (spec decision 12).
  *
- *   POST /invoices/preview          { orderIds, emitterId? }        what the sheet shows
+ *   POST /invoices/preview          { orderIds, emitterId?, recipientCustomerId? }  what the sheet shows
  *   POST /invoices                  { orderIds, emitterId?, description?, recipient? }
  *   POST /invoices/:id/cancel       { reason: 'issueError' | 'serviceNotProvided' }
  *   POST /invoices/:id/reconcile    check a nota that got no clear answer
@@ -43,7 +43,7 @@ const address = z
   })
   .strict();
 
-const previewSchema = z.object({ orderIds, emitterId: id.nullish() });
+const previewSchema = z.object({ orderIds, emitterId: id.nullish(), recipientCustomerId: id.nullish() });
 const issueSchema = z.object({
   orderIds,
   emitterId: id.nullish(),
