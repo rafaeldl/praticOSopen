@@ -42,6 +42,18 @@ service firebase.storage {
       return hasAnyRole(companyId, ['owner', 'admin', 'manager', 'consultant']);
     }
 
+    // Financeiro e notas fiscais: dono, admin e gerente (canViewCharges do
+    // firestore.rules, pelas claims)
+    function canViewCharges(companyId) {
+      return hasAnyRole(companyId, ['owner', 'admin', 'manager']);
+    }
+
+    // XML e PDF da nota fiscal (tenants/{cid}/invoices/**): guarda de 5 anos.
+    // Só a nfseApi grava; ninguém apaga pelo app.
+    function isInvoiceFile() {
+      return resource != null && resource.name.matches('tenants/[^/]+/invoices/.*');
+    }
+
     // Imagem ou PDF até 10MB (comprovante)
     function isValidReceipt() {
       return request.resource.contentType != null
@@ -53,9 +65,17 @@ service firebase.storage {
     // Tudo da empresa: abrir um arquivo só para membros. Listar e apagar a
     // pasta inteira (exclusão de conta feita pelo app até a versão de out/2026)
     // só para dono/admin. Os caminhos abaixo liberam o resto.
+    // Os arquivos da nota fiscal ficam de fora (regra própria abaixo).
     match /tenants/{companyId}/{allPaths=**} {
-      allow get: if belongsToCompany(companyId);
-      allow list, delete: if isCompanyAdmin(companyId);
+      allow get: if belongsToCompany(companyId) && !isInvoiceFile();
+      allow list: if isCompanyAdmin(companyId);
+      allow delete: if isCompanyAdmin(companyId) && !isInvoiceFile();
+    }
+
+    // ─── Nota fiscal: XML e PDF (DANFSe) ───
+    // Ler: quem vê o financeiro. Gravar e apagar: só o servidor (Admin SDK).
+    match /tenants/{companyId}/invoices/{invoiceId}/{fileName} {
+      allow get: if canViewCharges(companyId);
     }
 
     // Logo pelo caminho antigo do cadastro (app até out/2026)

@@ -32,6 +32,8 @@ export interface EmitterUpdate {
 export interface NfseSettingsUpdate {
   defaultEmitterId?: string;
   autoIssue?: NfseDirectAutoIssue;
+  /** May the manager issue and cancel notas (default yes). Owner only, checked by the route. */
+  managerCanIssue?: boolean;
 }
 
 /** Saves the fields given; the others stay. Returns the emitter as saved. */
@@ -76,8 +78,9 @@ export async function updateNfseSettings(companyId: string, update: NfseSettings
     changes.defaultEmitterId = update.defaultEmitterId;
   }
   if (update.autoIssue !== undefined) changes.autoIssue = update.autoIssue;
+  if (update.managerCanIssue !== undefined) changes.managerCanIssue = update.managerCanIssue;
   const ref = companyRef(companyId).collection('settings').doc('nfse');
   await ref.set(changes, { merge: true });
   const saved = (await ref.get()).data() ?? {};
-  return { defaultEmitterId: saved.defaultEmitterId, autoIssue: saved.autoIssue };
+  return { defaultEmitterId: saved.defaultEmitterId, autoIssue: saved.autoIssue, managerCanIssue: saved.managerCanIssue !== false };
 }

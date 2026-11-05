@@ -9,12 +9,16 @@ jest.mock('../../../services/nfse/issue.service', () => ({
 }));
 
 jest.mock('../../../services/nfse/danfse.service', () => ({ ensureDanfse: jest.fn() }));
+jest.mock('../../../services/firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
+jest.mock('../../../services/notification.service', () => ({ notifyOwnerOfInvoiceAction: jest.fn(async () => undefined) }));
 
 import * as issue from '../../../services/nfse/issue.service';
 import * as danfse from '../../../services/nfse/danfse.service';
 import { AsaasServiceError } from '../../../services/asaas/errors';
 import { NfseServiceError } from '../../../services/nfse/errors';
 import router from '../nfse-direct.routes';
+import { resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
+import { notifyOwnerOfInvoiceAction } from '../../../services/notification.service';
 
 const mock = issue as jest.Mocked<typeof issue>;
 
@@ -32,7 +36,29 @@ function buildApp(role: string) {
 describe('nfse-direct.routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetFakeDb();
+    seed('companies/c1', { owner: { id: 'owner1', name: 'Dona' }, country: 'BR' });
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  it('the owner turned managers off: manager gets 403, admin still issues (issue #560)', async () => {
+    seed('companies/c1/settings/nfse', { managerCanIssue: false });
+    mock.issueDirectInvoice.mockResolvedValue({ id: 'nf1', status: 'authorized' } as never);
+    const res = await request(buildApp('manager')).post('/invoices').send({ orderIds: ['o1'] });
+    expect(res.status).toBe(403);
+    expect((await request(buildApp('manager')).post('/invoices/nf1/cancel').send({ reason: 'issueError' })).status).toBe(403);
+    expect(mock.issueDirectInvoice).not.toHaveBeenCalled();
+    expect((await request(buildApp('admin')).post('/invoices').send({ orderIds: ['o1'] })).status).toBe(201);
+  });
+
+  it('someone other than the owner issues or cancels: the owner is told (issue #560)', async () => {
+    mock.issueDirectInvoice.mockResolvedValue({ id: 'nf1', status: 'authorized', value: 270, recipient: { legalName: 'REVENDA' } } as never);
+    mock.cancelDirectInvoice.mockResolvedValue({ id: 'nf1', status: 'canceled', value: 270 } as never);
+    await request(buildApp('manager')).post('/invoices').send({ orderIds: ['o1'] });
+    await request(buildApp('manager')).post('/invoices/nf1/cancel').send({ reason: 'issueError' });
+    const notify = notifyOwnerOfInvoiceAction as jest.Mock;
+    expect(notify.mock.calls.map(([, m]) => m.action)).toEqual(['issued', 'canceled']);
+    expect(notify.mock.calls[0][1].body).toContain('Ana emitiu uma nota fiscal para REVENDA');
   });
 
   it.each(['owner', 'admin', 'manager'])('%s issues: 201 when issued', async (role) => {

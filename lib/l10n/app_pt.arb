@@ -3189,6 +3189,12 @@
   "@invoiceRecipientSet": {"placeholders": {"customer": {"type": "String"}, "recipient": {"type": "String"}}},
   "invoiceRecipientCleared": "As notas de {customer} vão para ele mesmo",
   "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}},
+  "nfseDirectErrorTooManyAttempts": "Muitas tentativas de enviar o certificado. Espere uma hora e tente de novo.",
+  "nfseDirectErrorBusy": "Outra pessoa está mexendo neste certificado agora. Tente de novo em alguns minutos.",
+  "nfseDirectErrorDailyLimit": "Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.",
+  "nfseDirectErrorOwnerOnly": "Só o dono da conta muda isso.",
+  "nfseDirectManagerCanIssue": "Gerente pode emitir notas",
+  "nfseDirectManagerCanIssueHint": "Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.",
   "deviceReadingLine": "{label}: {value}",
   "@deviceReadingLine": {
     "description": "Reading of a device at this visit (odometer, hour meter), label from the segment",

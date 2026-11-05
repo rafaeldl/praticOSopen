@@ -7049,6 +7049,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Too many tries to send the certificate. Wait an hour and try again.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Someone else is changing this certificate right now. Try again in a few minutes.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'This company reached today\'s invoice limit. It can issue again tomorrow; if you need more, contact support.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly =>
+      'Only the account owner can change this.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'Managers can issue invoices';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'You get a notice whenever someone else issues or cancels an invoice.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }

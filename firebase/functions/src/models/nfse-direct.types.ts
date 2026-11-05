@@ -194,6 +194,12 @@ export interface FiscalEmitterPrivate {
   nextDpsNumber: number;
   /** Last NSU read from the ADN (import and daily sync). */
   lastNsu: number;
+  /** Day (YYYY-MM-DD, São Paulo) of `issuedToday`. */
+  issuedOn?: string;
+  /** Notas reserved on `issuedOn` (the daily ceiling, issue #560). */
+  issuedToday?: number;
+  /** Ceiling of this emitter when it differs from the default (set by hand, server only). */
+  dailyIssueLimit?: number;
 }
 
 /** companies/{cid}/nfseImports/{batchId}: the import proposal and what was applied, for "Desfazer". */

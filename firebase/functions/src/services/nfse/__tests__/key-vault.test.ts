@@ -94,4 +94,22 @@ describe('KmsKeyVault', () => {
     expect(emitterKeyId('abcDEF_1-2')).toBe('emitter-abcDEF_1-2');
     expect(() => emitterKeyId('../x')).toThrow();
   });
+
+  it('destroys every live version but the current one; a missing key is nothing to do (issue #560)', async () => {
+    const v = (n: number) => `${KEY}/cryptoKeyVersions/${n}`;
+    const list = jest.fn(async (_req: unknown) => [[{ name: v(1) }, { name: v(2) }, { name: v(3) }]]);
+    const destroy = jest.fn(async (_req: { name: string }) => [{}]);
+    const { vault } = fakeClient({ listCryptoKeyVersions: list, destroyCryptoKeyVersion: destroy });
+    await vault.destroyOtherVersions('e1', v(3));
+    expect(list).toHaveBeenCalledWith({ parent: KEY, filter: 'state=ENABLED OR state=DISABLED' });
+    expect(destroy.mock.calls.map(([arg]) => arg.name)).toEqual([v(1), v(2)]);
+
+    const missing = fakeClient({
+      listCryptoKeyVersions: jest.fn(async () => {
+        throw Object.assign(new Error('nf'), { code: 5 });
+      }),
+    });
+    await expect(missing.vault.destroyOtherVersions('e1', null)).resolves.toBeUndefined();
+    expect(missing.client.destroyCryptoKeyVersion).not.toHaveBeenCalled();
+  });
 });
