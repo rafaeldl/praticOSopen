@@ -2693,7 +2693,7 @@
   "nfseDirectPickFile": "Choose",
   "nfseDirectCertificatePassword": "Certificate password",
   "nfseDirectCertificatePasswordHint": "Used only to send. PraticOS does not keep the password.",
-  "nfseDirectUploadMissing": "Choose the file and type the password to send.",
+  "nfseDirectUploadMissing": "Choose the file, type the password and accept the terms to send.",
   "nfseDirectTerms": "PraticOS uses the certificate only to issue and read your invoices. You can delete it at any time.",
   "nfseDirectTermsLink": "Read the terms",
   "nfseDirectCnpjAdded": "CNPJ added",
@@ -2805,5 +2805,6 @@
   "invoiceTaxIdTakenMessage": "Each CPF or CNPJ belongs to one customer only.",
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
-  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself"
+  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
+  "nfseDirectAcceptTerms": "I have read and accept the certificate terms"
 }

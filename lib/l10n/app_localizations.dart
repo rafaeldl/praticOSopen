@@ -10875,7 +10875,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseDirectUploadMissing.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha o arquivo e digite a senha para enviar.'**
+  /// **'Escolha o arquivo, digite a senha e aceite o termo para enviar.'**
   String get nfseDirectUploadMissing;
 
   /// No description provided for @nfseDirectTerms.
@@ -11483,6 +11483,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
+
+  /// No description provided for @nfseDirectAcceptTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Li e aceito o termo do certificado'**
+  String get nfseDirectAcceptTerms;
 }
 
 class _AppLocalizationsDelegate

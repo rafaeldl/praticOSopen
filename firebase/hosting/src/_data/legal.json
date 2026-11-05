@@ -4,7 +4,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidade",
       "subtitle": "Saiba como coletamos, usamos e protegemos seus dados",
-      "lastUpdated": "Última atualização: Outubro de 2026",
+      "lastUpdated": "Última atualização: Novembro de 2026",
       "sections": [
         {
           "title": "Introdução",
@@ -46,6 +46,7 @@
           "list": [
             "Com provedores de serviço (Firebase/Google) para processamento e armazenamento",
             "Com provedores de inteligência artificial (Google Vertex AI e Anthropic) quando você usa o assistente de IA",
+            "Com o Sistema Nacional da NFS-e (Receita Federal e prefeituras), para emitir, cancelar e consultar as notas fiscais que você pedir",
             "Quando exigido por lei ou ordem judicial",
             "Para proteger nossos direitos legais"
           ]
@@ -56,6 +57,15 @@
             "Quando você toca em Falar ou Foto na ordem de serviço, o texto do que você disse, as fotos que escolheu e os nomes do seu catálogo e dos seus clientes são enviados a um provedor de inteligência artificial para montar a ordem de serviço. O áudio vira texto pelo reconhecimento de voz do próprio celular (da Apple ou do Google, conforme o aparelho); o PraticOS não grava nem envia o áudio.",
             "Os provedores são o Google (Vertex AI, com processamento no Brasil) e a Anthropic (Claude, com processamento nos Estados Unidos). Eles usam esses dados só para responder ao pedido e não os usam para treinar modelos. A transferência internacional segue o art. 33 da LGPD.",
             "O assistente só age quando você toca em Falar ou Foto, e tudo o que ele preenche fica marcado para você conferir antes de salvar."
+          ]
+        },
+        {
+          "title": "Certificado digital e notas fiscais",
+          "paragraphs": [
+            "Quando você liga a emissão de notas fiscais de serviço, pode enviar o certificado digital A1 de um ou mais CNPJs. O PraticOS usa o certificado só para emitir e cancelar as notas que você pedir, ler no Emissor Nacional as notas emitidas e recebidas por esse CNPJ e consultar os dados dele na prefeitura. A senha do certificado não é guardada. O certificado fica protegido com criptografia e com uma chave própria para cada CNPJ, no serviço de chaves do Google Cloud, no Brasil. Ninguém da sua equipe, nem você, consegue baixá-lo de volta.",
+            "As notas lidas do Emissor Nacional trazem dados dos seus clientes e fornecedores, como nome ou razão social, CPF ou CNPJ e endereço. O PraticOS usa esses dados só para mostrar o histórico de notas e preencher os seus cadastros, e você confere antes de aplicar.",
+            "Você pode apagar o certificado quando quiser. Em até 24 horas ele não pode mais ser aberto, nem a partir de cópias de segurança. Ele também é apagado quando a conta é excluída e 90 dias depois de vencer. A base legal é a execução do serviço que você contratou (art. 7º, V, da LGPD), e o aceite do termo do certificado fica registrado com a data e a versão.",
+            "Detalhes no <a href=\"termo-certificado.html\">Termo de uso do certificado digital</a>."
           ]
         },
         {
@@ -88,7 +98,8 @@
           "title": "Retenção de Dados",
           "paragraphs": [
             "Mantemos seus dados enquanto sua conta estiver ativa. Você pode solicitar a exclusão da sua conta e dados a qualquer momento.",
-            "Após a exclusão, seus dados serão removidos em até 30 dias, exceto quando houver obrigação legal de retenção."
+            "Após a exclusão, seus dados serão removidos em até 30 dias, exceto quando houver obrigação legal de retenção.",
+            "O certificado digital é apagado quando você pede, quando a conta é excluída ou 90 dias depois de vencer."
           ]
         },
         {
@@ -112,7 +123,7 @@
       "title": "Privacy",
       "titleHighlight": "Policy",
       "subtitle": "Learn how we collect, use, and protect your data",
-      "lastUpdated": "Last updated: October 2026",
+      "lastUpdated": "Last updated: November 2026",
       "sections": [
         {
           "title": "Introduction",
@@ -154,6 +165,7 @@
           "list": [
             "With service providers (Firebase/Google) for processing and storage",
             "With artificial intelligence providers (Google Vertex AI and Anthropic) when you use the AI assistant",
+            "With Brazil’s national NFS-e system (Federal Revenue and city halls), to issue, cancel and look up the invoices you ask for",
             "When required by law or court order",
             "To protect our legal rights"
           ]
@@ -164,6 +176,15 @@
             "When you tap Speak or Photo on a work order, the text of what you said, the photos you picked, and the names in your catalog and customer list are sent to an artificial intelligence provider to build the work order. The audio is turned into text by your phone's own speech recognition (Apple's or Google's, depending on the device); PraticOS does not record or send the audio.",
             "The providers are Google (Vertex AI, processed in Brazil) and Anthropic (Claude, processed in the United States). They use this data only to answer the request and do not use it to train models.",
             "The assistant only acts when you tap Speak or Photo, and everything it fills in is marked so you can check it before saving."
+          ]
+        },
+        {
+          "title": "Digital certificate and invoices",
+          "paragraphs": [
+            "When you turn on service invoices (NFS-e), you can send the A1 digital certificate of one or more companies. PraticOS uses the certificate only to issue and cancel the invoices you ask for, read on Brazil’s national NFS-e system the invoices issued and received by that company, and look up its city registration. The certificate password is not stored. The certificate is encrypted with its own key for each company, in Google Cloud’s key service, in Brazil. No one on your team, not even you, can download it back.",
+            "Invoices read from the national system contain data about your customers and suppliers, such as name or company name, tax ID and address. PraticOS uses this data only to show the invoice history and fill in your records, and you review it before it is applied.",
+            "You can delete the certificate at any time. Within 24 hours it can no longer be opened, not even from backups. It is also deleted when the account is deleted and 90 days after it expires. The legal basis is the performance of the service you signed up for (LGPD art. 7, V), and your acceptance of the certificate terms is recorded with its date and version.",
+            "Details in the <a href=\"termo-certificado-en.html\">Digital certificate terms of use</a>."
           ]
         },
         {
@@ -192,7 +213,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidad",
       "subtitle": "Conozca cómo recopilamos, usamos y protegemos sus datos",
-      "lastUpdated": "Última actualización: Octubre de 2026",
+      "lastUpdated": "Última actualización: Noviembre de 2026",
       "sections": [
         {
           "title": "Introducción",
@@ -234,6 +255,7 @@
           "list": [
             "Con proveedores de servicios (Firebase/Google) para procesamiento y almacenamiento",
             "Con proveedores de inteligencia artificial (Google Vertex AI y Anthropic) cuando usas el asistente de IA",
+            "Con el sistema nacional de NFS-e de Brasil (Receita Federal y municipalidades), para emitir, cancelar y consultar las facturas que pidas",
             "Cuando lo exija la ley u orden judicial",
             "Para proteger nuestros derechos legales"
           ]
@@ -244,6 +266,15 @@
             "Cuando tocas Hablar o Foto en una orden de servicio, el texto de lo que dijiste, las fotos que elegiste y los nombres de tu catálogo y de tus clientes se envían a un proveedor de inteligencia artificial para armar la orden. El audio se convierte en texto con el reconocimiento de voz del propio teléfono (de Apple o de Google, según el dispositivo); PraticOS no graba ni envía el audio.",
             "Los proveedores son Google (Vertex AI, con procesamiento en Brasil) y Anthropic (Claude, con procesamiento en Estados Unidos). Usan estos datos solo para responder la solicitud y no los usan para entrenar modelos.",
             "El asistente solo actúa cuando tocas Hablar o Foto, y todo lo que completa queda marcado para que lo revises antes de guardar."
+          ]
+        },
+        {
+          "title": "Certificado digital y facturas",
+          "paragraphs": [
+            "Cuando activas las facturas de servicio (NFS-e), puedes enviar el certificado digital A1 de una o más empresas. PraticOS usa el certificado solo para emitir y cancelar las facturas que pidas, leer en el sistema nacional de NFS-e de Brasil las facturas emitidas y recibidas por esa empresa y consultar sus datos en la municipalidad. La contraseña del certificado no se guarda. El certificado queda cifrado con una clave propia para cada empresa, en el servicio de claves de Google Cloud, en Brasil. Nadie de tu equipo, ni siquiera tú, puede descargarlo de vuelta.",
+            "Las facturas leídas del sistema nacional traen datos de tus clientes y proveedores, como nombre o razón social, identificación fiscal y dirección. PraticOS usa esos datos solo para mostrar el historial de facturas y completar tus registros, y tú los revisas antes de aplicarlos.",
+            "Puedes borrar el certificado cuando quieras. En hasta 24 horas ya no se puede abrir, ni desde copias de respaldo. También se borra cuando se elimina la cuenta y 90 días después de vencer. La base legal es la ejecución del servicio que contrataste (art. 7, V, de la LGPD), y tu aceptación de los términos del certificado queda registrada con la fecha y la versión.",
+            "Detalles en los <a href=\"termo-certificado-es.html\">Términos de uso del certificado digital</a>."
           ]
         },
         {
@@ -610,6 +641,233 @@
           "title": "Contacto",
           "paragraphs": [
             "Dudas sobre eliminación o privacidad: <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a>. Ver también la <a href=\"privacy-es.html\">Política de Privacidad</a>."
+          ]
+        }
+      ]
+    }
+  },
+  "certificateTerms": {
+    "pt": {
+      "title": "Termo de uso do",
+      "titleHighlight": "certificado digital",
+      "subtitle": "Como o PraticOS usa, guarda e apaga o certificado A1 do seu CNPJ para emitir notas fiscais de serviço",
+      "lastUpdated": "Versão 2026-11-05",
+      "version": "2026-11-05",
+      "sections": [
+        {
+          "title": "Para que serve",
+          "paragraphs": [
+            "Você envia ao PraticOS o certificado digital A1 (arquivo .pfx ou .p12) de um CNPJ para que o PraticOS emita as notas fiscais de serviço desse CNPJ no Emissor Nacional da NFS-e. O governo só aceita a nota se ela for assinada e enviada com o certificado do próprio CNPJ."
+          ]
+        },
+        {
+          "title": "O que o PraticOS faz com o certificado",
+          "paragraphs": [
+            "O PraticOS usa o certificado <strong>só</strong> para:"
+          ],
+          "list": [
+            "emitir e cancelar as notas fiscais de serviço que você ou a sua equipe pedirem no app;",
+            "ler no Emissor Nacional as notas emitidas e recebidas por esse CNPJ, para mostrar o histórico e preencher os seus cadastros;",
+            "consultar no Emissor Nacional os dados do CNPJ na prefeitura (inscrição municipal, serviços e alíquotas)."
+          ]
+        },
+        {
+          "title": "O que o PraticOS nunca faz",
+          "paragraphs": [
+            "O PraticOS nunca usa o certificado para outra coisa: não entra no e-CAC, não assina contratos ou documentos, não acessa bancos nem outros sistemas do governo."
+          ]
+        },
+        {
+          "title": "Como o certificado é guardado",
+          "list": [
+            "A <strong>senha não é guardada</strong>. Ela é usada uma única vez, no envio, para abrir o arquivo, e é descartada em seguida. Ela não fica no seu celular, no banco de dados nem nos registros do sistema.",
+            "O <strong>arquivo original também não é guardado</strong>. Fica guardada só a parte necessária para assinar as notas, protegida com criptografia.",
+            "Cada CNPJ tem a <strong>própria chave de criptografia</strong>, guardada no serviço de chaves do Google Cloud (Cloud KMS), no Brasil. A chave nunca sai desse serviço.",
+            "Só o serviço de notas fiscais do PraticOS consegue abrir o certificado, e só na hora de emitir ou ler notas. O app, o site e as pessoas da sua equipe não conseguem ver nem baixar o certificado. Nem você consegue baixá-lo de volta."
+          ]
+        },
+        {
+          "title": "Quem pode enviar, trocar e apagar",
+          "paragraphs": [
+            "Só o dono ou um administrador da empresa no PraticOS. Fica registrado quem enviou, trocou ou apagou, e quando."
+          ]
+        },
+        {
+          "title": "Como apagar",
+          "paragraphs": [
+            "Você pode apagar o certificado quando quiser, na tela do CNPJ no app. Ao apagar:"
+          ],
+          "list": [
+            "o certificado sai do banco na hora, e o PraticOS não consegue mais emitir por esse CNPJ;",
+            "a chave de criptografia daquele CNPJ é destruída em 24 horas. Nesse prazo, se você apagou por engano, fale com o suporte para desfazer;",
+            "depois disso, nenhuma cópia que tenha ficado em backup pode ser aberta, por ninguém."
+          ],
+          "paragraphsAfter": [
+            "O certificado também é apagado do mesmo jeito quando você exclui a conta, e 90 dias depois de vencer, se não for trocado."
+          ]
+        },
+        {
+          "title": "Suas responsabilidades",
+          "list": [
+            "Enviar só certificados de CNPJs pelos quais você responde ou com autorização do titular.",
+            "Conferir os dados da nota antes de emitir. O PraticOS envia ao governo o que está na nota. A escolha do serviço, dos valores e dos impostos é de responsabilidade da empresa e do contador dela.",
+            "Avisar o suporte se suspeitar de uso indevido. Nesse caso, apague o certificado no app e, se achar necessário, revogue-o com a autoridade certificadora que o emitiu."
+          ]
+        },
+        {
+          "title": "Aceite",
+          "paragraphs": [
+            "Ao enviar o certificado, você declara que leu e aceita este termo. O PraticOS guarda a data do aceite e a versão do termo aceita (versão 2026-11-05)."
+          ]
+        }
+      ]
+    },
+    "en": {
+      "title": "Digital certificate",
+      "titleHighlight": "terms of use",
+      "subtitle": "How PraticOS uses, stores and deletes your company’s A1 certificate to issue service invoices (NFS-e)",
+      "lastUpdated": "Version 2026-11-05",
+      "version": "2026-11-05",
+      "sections": [
+        {
+          "title": "What it is for",
+          "paragraphs": [
+            "You send PraticOS the A1 digital certificate (.pfx or .p12 file) of a company (CNPJ) so that PraticOS can issue that company’s service invoices on Brazil’s national NFS-e system. The government only accepts an invoice signed and sent with the company’s own certificate."
+          ]
+        },
+        {
+          "title": "What PraticOS does with the certificate",
+          "paragraphs": [
+            "PraticOS uses the certificate <strong>only</strong> to:"
+          ],
+          "list": [
+            "issue and cancel the service invoices that you or your team ask for in the app;",
+            "read on the national system the invoices issued and received by that company, to show the history and fill in your records;",
+            "look up the company’s city registration on the national system (municipal registration, services and rates)."
+          ]
+        },
+        {
+          "title": "What PraticOS never does",
+          "paragraphs": [
+            "PraticOS never uses the certificate for anything else: it does not log in to e-CAC, does not sign contracts or documents, and does not access banks or other government systems."
+          ]
+        },
+        {
+          "title": "How the certificate is stored",
+          "list": [
+            "The <strong>password is not stored</strong>. It is used once, when you send the file, to open it, and then discarded. It is not kept on your phone, in the database or in the system logs.",
+            "The <strong>original file is not stored either</strong>. Only the part needed to sign invoices is kept, encrypted.",
+            "Each company has <strong>its own encryption key</strong>, kept in Google Cloud’s key service (Cloud KMS), in Brazil. The key never leaves that service.",
+            "Only the PraticOS invoice service can open the certificate, and only when issuing or reading invoices. The app, the website and your team cannot see or download the certificate. Not even you can download it back."
+          ]
+        },
+        {
+          "title": "Who can send, replace and delete it",
+          "paragraphs": [
+            "Only the owner or an administrator of the company in PraticOS. Who sent, replaced or deleted it, and when, is recorded."
+          ]
+        },
+        {
+          "title": "How to delete it",
+          "paragraphs": [
+            "You can delete the certificate at any time, on the company’s screen in the app. When you delete it:"
+          ],
+          "list": [
+            "the certificate leaves the database right away, and PraticOS can no longer issue invoices for that company;",
+            "that company’s encryption key is destroyed within 24 hours. Within that window, if you deleted it by mistake, contact support to undo it;",
+            "after that, no copy left in a backup can be opened, by anyone."
+          ],
+          "paragraphsAfter": [
+            "The certificate is also deleted the same way when you delete your account, and 90 days after it expires if it is not replaced."
+          ]
+        },
+        {
+          "title": "Your responsibilities",
+          "list": [
+            "Only send certificates of companies you answer for, or with the holder’s permission.",
+            "Check the invoice before issuing it. PraticOS sends the government what is on the invoice. The choice of service, amounts and taxes is the responsibility of the company and its accountant.",
+            "Tell support if you suspect misuse. In that case, delete the certificate in the app and, if needed, revoke it with the certificate authority that issued it."
+          ]
+        },
+        {
+          "title": "Acceptance",
+          "paragraphs": [
+            "By sending the certificate, you declare that you have read and accept these terms. PraticOS records the date of acceptance and the version accepted (version 2026-11-05)."
+          ]
+        }
+      ]
+    },
+    "es": {
+      "title": "Términos de uso del",
+      "titleHighlight": "certificado digital",
+      "subtitle": "Cómo PraticOS usa, guarda y borra el certificado A1 de tu empresa para emitir facturas de servicio (NFS-e)",
+      "lastUpdated": "Versión 2026-11-05",
+      "version": "2026-11-05",
+      "sections": [
+        {
+          "title": "Para qué sirve",
+          "paragraphs": [
+            "Envías a PraticOS el certificado digital A1 (archivo .pfx o .p12) de una empresa (CNPJ) para que PraticOS emita las facturas de servicio de esa empresa en el sistema nacional de NFS-e de Brasil. El gobierno solo acepta la factura si está firmada y enviada con el certificado de la propia empresa."
+          ]
+        },
+        {
+          "title": "Qué hace PraticOS con el certificado",
+          "paragraphs": [
+            "PraticOS usa el certificado <strong>solo</strong> para:"
+          ],
+          "list": [
+            "emitir y cancelar las facturas de servicio que tú o tu equipo pidan en la app;",
+            "leer en el sistema nacional las facturas emitidas y recibidas por esa empresa, para mostrar el historial y completar tus registros;",
+            "consultar en el sistema nacional los datos de la empresa en la municipalidad (inscripción municipal, servicios y alícuotas)."
+          ]
+        },
+        {
+          "title": "Qué PraticOS nunca hace",
+          "paragraphs": [
+            "PraticOS nunca usa el certificado para otra cosa: no entra en el e-CAC, no firma contratos ni documentos, no accede a bancos ni a otros sistemas del gobierno."
+          ]
+        },
+        {
+          "title": "Cómo se guarda el certificado",
+          "list": [
+            "La <strong>contraseña no se guarda</strong>. Se usa una sola vez, al enviar el archivo, para abrirlo, y se descarta enseguida. No queda en tu teléfono, en la base de datos ni en los registros del sistema.",
+            "El <strong>archivo original tampoco se guarda</strong>. Solo se guarda la parte necesaria para firmar las facturas, cifrada.",
+            "Cada empresa tiene <strong>su propia clave de cifrado</strong>, guardada en el servicio de claves de Google Cloud (Cloud KMS), en Brasil. La clave nunca sale de ese servicio.",
+            "Solo el servicio de facturas de PraticOS puede abrir el certificado, y solo al emitir o leer facturas. La app, el sitio y tu equipo no pueden ver ni descargar el certificado. Ni siquiera tú puedes descargarlo de vuelta."
+          ]
+        },
+        {
+          "title": "Quién puede enviar, cambiar y borrar",
+          "paragraphs": [
+            "Solo el dueño o un administrador de la empresa en PraticOS. Queda registrado quién lo envió, cambió o borró, y cuándo."
+          ]
+        },
+        {
+          "title": "Cómo borrarlo",
+          "paragraphs": [
+            "Puedes borrar el certificado cuando quieras, en la pantalla de la empresa en la app. Al borrarlo:"
+          ],
+          "list": [
+            "el certificado sale de la base de datos al momento, y PraticOS ya no puede emitir por esa empresa;",
+            "la clave de cifrado de esa empresa se destruye en 24 horas. En ese plazo, si lo borraste por error, habla con soporte para deshacerlo;",
+            "después, ninguna copia que haya quedado en un respaldo se puede abrir, por nadie."
+          ],
+          "paragraphsAfter": [
+            "El certificado también se borra de la misma forma cuando eliminas la cuenta, y 90 días después de vencer si no se reemplaza."
+          ]
+        },
+        {
+          "title": "Tus responsabilidades",
+          "list": [
+            "Enviar solo certificados de empresas por las que respondes o con autorización del titular.",
+            "Revisar la factura antes de emitirla. PraticOS envía al gobierno lo que está en la factura. La elección del servicio, los valores y los impuestos es responsabilidad de la empresa y de su contador.",
+            "Avisar a soporte si sospechas de un uso indebido. En ese caso, borra el certificado en la app y, si hace falta, revócalo con la autoridad certificadora que lo emitió."
+          ]
+        },
+        {
+          "title": "Aceptación",
+          "paragraphs": [
+            "Al enviar el certificado, declaras que leíste y aceptas estos términos. PraticOS guarda la fecha de aceptación y la versión aceptada (versión 2026-11-05)."
           ]
         }
       ]

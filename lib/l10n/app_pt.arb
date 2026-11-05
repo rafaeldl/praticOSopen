@@ -3072,7 +3072,7 @@
   "nfseDirectPickFile": "Escolher",
   "nfseDirectCertificatePassword": "Senha do certificado",
   "nfseDirectCertificatePasswordHint": "Fica só no envio. O PraticOS não guarda a senha.",
-  "nfseDirectUploadMissing": "Escolha o arquivo e digite a senha para enviar.",
+  "nfseDirectUploadMissing": "Escolha o arquivo, digite a senha e aceite o termo para enviar.",
   "nfseDirectTerms": "O PraticOS usa o certificado só para emitir e ler as suas notas. Você pode apagar quando quiser.",
   "nfseDirectTermsLink": "Ler o termo",
   "nfseDirectCnpjAdded": "CNPJ adicionado",
@@ -3188,5 +3188,6 @@
   "invoiceRecipientSet": "As notas de {customer} vão para {recipient}",
   "@invoiceRecipientSet": {"placeholders": {"customer": {"type": "String"}, "recipient": {"type": "String"}}},
   "invoiceRecipientCleared": "As notas de {customer} vão para ele mesmo",
-  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}}
+  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}},
+  "nfseDirectAcceptTerms": "Li e aceito o termo do certificado"
 }

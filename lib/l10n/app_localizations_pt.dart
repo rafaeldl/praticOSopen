@@ -6689,7 +6689,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Escolha o arquivo e digite a senha para enviar.';
+      'Escolha o arquivo, digite a senha e aceite o termo para enviar.';
 
   @override
   String get nfseDirectTerms =>
@@ -7054,4 +7054,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'As notas de $customer vão para ele mesmo';
   }
+
+  @override
+  String get nfseDirectAcceptTerms => 'Li e aceito o termo do certificado';
 }
