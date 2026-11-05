@@ -184,6 +184,15 @@ export async function readDoc(path: string): Promise<Record<string, unknown> | u
   return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
 }
 
+/** A customer of the company with the direct nota on (e2e/customer-invoice.spec.ts). */
+export async function makeCustomerInN(data: Record<string, unknown> = {}): Promise<{ id: string; name: string }> {
+  return makeCustomer(data, 'company-nfse')
+}
+
+export async function readCustomerInN(id: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/company-nfse/customers/${id}`).get()).data()
+}
+
 /** Writes any document of company A (charges the tests simulate, since Asaas is not in the emulator). */
 export async function writeDoc(path: string, data: Record<string, unknown>, merge = false): Promise<void> {
   await db().doc(`companies/${COMPANY_A}/${path}`).set(data, { merge })

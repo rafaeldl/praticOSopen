@@ -68,12 +68,35 @@ const taxIdSchema = z
   .transform((value) => (value === undefined ? undefined : value === null ? null : normalizeTaxId(value) || null))
   .refine((value) => value === undefined || value === null || isValidTaxId(value), 'Invalid taxId');
 
+const digits = (length: number) => z.string().trim().regex(new RegExp(`^\\d{${length}}$`)).nullable().optional();
+/** "Dados para nota" (docs/NFSE_DIRECT.md, etapa #568): the address the nota sends. */
+const fiscalAddressSchema = z
+  .object({
+    postalCode: digits(8),
+    street: optionalText(200),
+    number: optionalText(60),
+    complement: optionalText(200),
+    district: optionalText(120),
+    cityCode: digits(7),
+    cityName: optionalText(120),
+    state: z.string().trim().regex(/^[A-Za-z]{2}$/).transform((value) => value.toUpperCase()).nullable().optional(),
+  })
+  .strict()
+  .nullable()
+  .optional();
+
 const customerBody = {
   phone: optionalText(40),
   email: optionalText(200),
   address: optionalText(500),
   taxId: taxIdSchema,
   customData: customDataSchema,
+  legalName: optionalText(200),
+  fiscalAddress: fiscalAddressSchema,
+  // No strict e-mail check: the app saves it as typed, and a stricter server would block every web edit of that customer.
+  invoiceEmail: z.string().trim().max(200).nullable().optional(),
+  invoiceRecipientId: z.string().min(1).max(128).regex(/^[^/]+$/).nullable().optional(),
+  autoIssueInvoice: z.boolean().nullable().optional(),
 };
 const createSchema = z.object({ name: z.string().trim().min(1, 'Name is required').max(200), ...customerBody });
 const updateSchema = z.object({ name: z.string().trim().min(1).max(200).optional(), ...customerBody, version: z.string().min(1).max(64).optional() });
