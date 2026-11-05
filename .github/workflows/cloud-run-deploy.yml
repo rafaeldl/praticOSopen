@@ -10,6 +10,13 @@ env:
   SERVICE_NAME: praticos-web
   REGION: southamerica-east1
 
+# Only the newest master matters: a new push cancels the running and pending
+# deploys of older commits, and the newest one publishes everything (merges in
+# sequence used to queue one deploy per merge).
+concurrency:
+  group: cloud-run-deploy-praticos-web
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
