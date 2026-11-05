@@ -6636,4 +6636,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteFailedTryAgain => 'Couldn\'t delete. Try again.';
+
+  @override
+  String get invoiceDataTitle => 'Invoice details';
+
+  @override
+  String get invoiceDataHint =>
+      'Tax ID, legal name and address for the invoice';
+
+  @override
+  String get invoiceLegalName => 'Legal name';
+
+  @override
+  String get invoiceLegalNamePlaceholder => 'E.g. SAMPLE DEALER LTDA';
+
+  @override
+  String get invoicePostalCode => 'ZIP code';
+
+  @override
+  String get invoicePostalCodePlaceholder => '00000-000';
+
+  @override
+  String get invoiceStreet => 'Street';
+
+  @override
+  String get invoiceNumber => 'Number';
+
+  @override
+  String get invoiceComplement => 'Address line 2';
+
+  @override
+  String get invoiceDistrict => 'District';
+
+  @override
+  String get invoiceCity => 'City';
+
+  @override
+  String get invoiceState => 'State';
+
+  @override
+  String get invoiceStatePlaceholder => 'SP';
+
+  @override
+  String get invoiceEmailLabel => 'Invoice e-mail';
+
+  @override
+  String get invoiceEmailFallback =>
+      'If empty, the invoice goes to the customer\'s e-mail';
+
+  @override
+  String get invoiceTaxIdLooking => 'Looking up the CNPJ…';
+
+  @override
+  String get invoiceTaxIdFound =>
+      'Filled with the Receita\'s data. Check before saving.';
+
+  @override
+  String get invoiceTaxIdNotFound =>
+      'We couldn\'t find this CNPJ. Fill it in by hand.';
+
+  @override
+  String get invoicePostalCodeLooking => 'Looking up the ZIP code…';
+
+  @override
+  String get invoicePostalCodeNotFound =>
+      'We couldn\'t find this ZIP code. Fill it in by hand.';
+
+  @override
+  String get invoiceRecipientLabel => 'Invoice to';
+
+  @override
+  String get invoiceRecipientAction => 'Send the invoice to another customer';
+
+  @override
+  String get invoiceRecipientPickerTitle => 'Who gets the invoice?';
+
+  @override
+  String get invoiceRecipientNone =>
+      'None: the invoice goes to the customer itself';
+
+  @override
+  String get invoiceAutoIssue => 'Issue invoice by itself';
+
+  @override
+  String get invoiceAutoIssueHint => 'When the order is done';
+
+  @override
+  String invoiceTaxIdTakenCnpj(String name) {
+    return '$name already has this CNPJ';
+  }
+
+  @override
+  String invoiceTaxIdTakenCpf(String name) {
+    return '$name already has this CPF';
+  }
+
+  @override
+  String get invoiceTaxIdTakenMessage =>
+      'Each CPF or CNPJ belongs to one customer only.';
+
+  @override
+  String get invoiceTaxIdTakenUse => 'Send this store\'s invoices to it';
+
+  @override
+  String invoiceRecipientSet(String customer, String recipient) {
+    return '$customer\'s invoices go to $recipient';
+  }
+
+  @override
+  String invoiceRecipientCleared(String customer) {
+    return '$customer\'s invoices go to the customer itself';
+  }
 }

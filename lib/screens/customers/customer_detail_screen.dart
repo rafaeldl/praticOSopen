@@ -3,9 +3,11 @@ import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/customers/customer_invoice_fields.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/receipt.dart';
@@ -47,7 +49,9 @@ import 'package:praticos/screens/widgets/failure_alert.dart';
 /// customer's vehicles (with "Cadastrar outro veículo"), the latest orders
 /// and, with financial access, the customer's "Recebimentos" (payments that
 /// covered several orders; each opens [ReceiptDetailScreen]).
-/// Edit and delete live in the "…" menu.
+/// Edit and delete live in the "…" menu. With the direct nota on, the menu
+/// also has "Mandar a nota para outro cliente" and, once set, a "Nota fiscal
+/// para" row shows who gets this customer's notas.
 class CustomerDetailScreen extends StatefulWidget {
   const CustomerDetailScreen({
     super.key,
@@ -61,6 +65,8 @@ class CustomerDetailScreen extends StatefulWidget {
     this.onOpenReceipt,
     this.nfse,
     this.can,
+    this.invoiceConfig,
+    this.saveCustomer,
   });
 
   /// Falls back to the `customer` route argument.
@@ -105,6 +111,13 @@ class CustomerDetailScreen extends StatefulWidget {
   /// [AuthorizationService.hasPermission]. Test seam.
   final bool Function(PermissionType permission)? can;
 
+  /// "Dados para nota". Defaults to [loadCustomerInvoiceConfig]. Test seam.
+  final CustomerInvoiceConfig? invoiceConfig;
+
+  /// Saves the customer ("Nota fiscal para"). Defaults to
+  /// [CustomerStore.saveCustomer]. Test seam.
+  final Future<void> Function(Customer customer)? saveCustomer;
+
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
 }
@@ -122,6 +135,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   /// Last orders shown (the "…" menu picks from them).
   List<Order> _lastOrders = const [];
 
+  late CustomerInvoiceConfig _invoice =
+      widget.invoiceConfig ?? CustomerInvoiceConfig.off;
+
   void _onNfse() {
     if (mounted) setState(() {});
   }
@@ -130,7 +146,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   void initState() {
     super.initState();
     _nfse.addListener(_onNfse);
+    if (widget.invoiceConfig == null) {
+      loadCustomerInvoiceConfig().then((config) {
+        if (mounted && config.enabled) setState(() => _invoice = config);
+      });
+    }
   }
+
+  bool get _canSetRecipient =>
+      _invoice.enabled && _can(PermissionType.manageCustomers);
 
   @override
   void dispose() {
@@ -300,6 +324,49 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     if (mounted) Navigator.pop(context);
   }
 
+  /// "Para quem vai a nota?": sets or clears "Nota fiscal para" and saves.
+  Future<void> _changeInvoiceRecipient() async {
+    final customer = _customer!;
+    final l10n = context.l10n;
+    List<Customer> customers;
+    try {
+      customers = await _directory.watchCustomers().first.timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (_) {
+      if (mounted) await showFailureAlert(context, l10n.customerLookupError);
+      return;
+    }
+    if (!mounted) return;
+    final picked = await pickInvoiceRecipient(
+      context,
+      customer: customer,
+      customers: customers,
+    );
+    if (picked == null || !mounted) return;
+    final previous = customer.invoiceRecipient;
+    final next = picked is Customer ? picked.toAggr() : null;
+    if (previous?.id == next?.id) return;
+    customer.invoiceRecipient = next;
+    try {
+      final save = widget.saveCustomer ?? CustomerStore().saveCustomer;
+      await save(customer);
+    } catch (_) {
+      customer.invoiceRecipient = previous;
+      if (mounted) await showFailureAlert(context, l10n.customerSaveError);
+      return;
+    }
+    if (!mounted) return;
+    setState(() {});
+    showAppToast(
+      context,
+      next == null
+          ? l10n.invoiceRecipientCleared(customer.name ?? '')
+          : l10n.invoiceRecipientSet(customer.name ?? '', next.name ?? ''),
+      icon: CupertinoIcons.checkmark_circle,
+    );
+  }
+
   /// "Emitir uma nota com várias OS": picks orders of this customer that
   /// can have a nota and have none, then the issue sheet.
   Future<void> _issueSeveralNfse() async {
@@ -352,6 +419,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                 _issueSeveralNfse();
               },
               child: Text(l10n.nfseIssueSeveralAction),
+            ),
+          if (_canSetRecipient)
+            CupertinoActionSheetAction(
+              key: const Key('customerInvoiceRecipient'),
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                _changeInvoiceRecipient();
+              },
+              child: Text(l10n.invoiceRecipientAction),
             ),
           if (_can(PermissionType.manageCustomers)) ...[
             CupertinoActionSheetAction(
@@ -584,6 +660,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           label: l10n.addAnotherDevice(config.device.toLowerCase()),
           onTap: _addDevice,
         ),
+      ?_invoiceRecipientRow(),
       ?_nfseRow(),
       if (orders.isNotEmpty) ...[
         SectionLabel(l10n.latestOrders),
@@ -591,6 +668,22 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ],
       if (_receipts != null && _canSeeReceipts) _receiptsSection(),
     ];
+  }
+
+  /// "Nota fiscal para · REVENDA EXEMPLO": only when set (and the direct
+  /// nota is on); opens "Para quem vai a nota?".
+  Widget? _invoiceRecipientRow() {
+    final recipient = _customer?.invoiceRecipient;
+    if (!_invoice.enabled || recipient == null) return null;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: AppListRow(
+        key: const Key('customerInvoiceRecipientRow'),
+        title: context.l10n.invoiceRecipientLabel,
+        subtitle: recipient.name,
+        onTap: _canSetRecipient ? _changeInvoiceRecipient : null,
+      ),
+    );
   }
 
   /// "Notas fiscais · 5": opens the notas of this customer. Only with notas.

@@ -130,3 +130,17 @@ Falha ao gerar nunca derruba a emissão nem o cancelamento: só registra no log,
 **Rota:** `POST /v1/app/nfse/direct/invoices/:id/pdf` (dono, admin e gerente) gera se precisar e devolve `{ pdfPath }`; o app baixa pelo Storage. Erro `PDF_NOT_AVAILABLE` (409) para nota que não foi emitida ou que é do Asaas.
 
 Testes (`__tests__/danfse.test.ts`): XML sintético validado contra o XSD oficial da NFS-e, cada campo lido, regras da v1.02, uma página só (inclusive com descrição enorme), marca d'água, "sem validade" e geração/guarda com Firestore e Storage falsos.
+
+## Cliente: dados para nota (etapa #568)
+
+Só aparece com `settings/payments.nfseDirectEnabled` ligada (`loadCustomerInvoiceConfig`, em `lib/screens/customers/customer_invoice_fields.dart`). Com ela desligada, o CPF/CNPJ continua em "Mais dados", como antes.
+
+- **Grupo "Dados para nota"** no cadastro do cliente (cartão no cadastro novo, link "+ Dados para nota" na edição): CPF/CNPJ, razão social, CEP, rua, número, complemento, bairro, cidade, UF e e-mail da nota (vazio, a nota vai para o e-mail do cliente). Grava `taxId`, `legalName`, `fiscalAddress` e `invoiceEmail`.
+- **Busca do CNPJ**: com um CNPJ numérico válido, o app consulta a BrasilAPI (dados públicos da Receita) e preenche razão social, endereço com o código IBGE da cidade e e-mail. Mostra "Confira antes de salvar"; nada é salvo sem o "Salvar". CNPJ alfanumérico ainda não tem consulta pública.
+- **Busca do CEP**: com 8 dígitos, o ViaCEP preenche rua, bairro, cidade, UF e o código IBGE. Quem digita outra cidade perde o código (a nota pede o código; a folha de emissão abre os campos).
+- As buscas só escrevem em campo vazio ou no que outra busca escreveu, nunca por cima do que a pessoa digitou. Sem internet ou sem resultado: "Preencha à mão". Serviço: `lib/services/fiscal_lookup_service.dart`.
+- **CPF/CNPJ único na empresa**: ao salvar um número que outro cliente já tem (só quando o número mudou), o app bloqueia com "REVENDA EXEMPLO LTDA já tem este CNPJ" e oferece "Mandar as notas desta loja para ela": salva o cliente sem o número e com `invoiceRecipient` apontando para o outro. A conferência usa a lista de clientes da empresa (`findCustomerWithTaxId`); corrida entre dois aparelhos é aceita, como na spec.
+- **Nota fiscal para**: "…" do cliente → "Mandar a nota para outro cliente" abre "Para quem vai a nota?" (tela de escolher, com "Nenhum" primeiro e ✓ no atual). A linha "Nota fiscal para" só aparece quando preenchida, na tela do cliente e no grupo; tocar troca ou tira. Precisa de `manageCustomers`.
+- **Emitir nota sozinha**: interruptor do cliente (`autoIssueInvoice`) que só aparece quando `settings/nfse.autoIssue` é `selectedCustomers` (vem desligado) ou `allOrders` (vem ligado e serve para tirar o cliente da regra). Quem não lê `settings/nfse` (sem acesso a cobranças) não vê o interruptor.
+
+Fora desta etapa: app web (o cliente no web não tem esses campos ainda), oferta na 3ª nota e a emissão automática no servidor (etapa 11 da spec).
