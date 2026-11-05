@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "fc80b7b37f5869411d9e2570fdc8b6e63c8d561d1691cec820d25c428dca4f9d",
+      "sha": "dcb8498e8513189d1583511e2a1f5222b228addbdcaff9c495165f1105217198",
       "scope": "**/*"
     },
     {
@@ -49,13 +49,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 13,
-        "median": 0.41,
-        "min": 0.04,
-        "max": 0.86,
-        "fired": 2,
-        "verdict": "decisive"
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 4,
+        "median": 0.02,
+        "min": 0,
+        "max": 0.07,
+        "fired": 0,
+        "verdict": "skipped"
       }
     },
     {
@@ -83,7 +83,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -112,11 +112,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 1,
+        "median": 0.14,
+        "min": 0.14,
+        "max": 0.14,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -145,11 +145,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.04,
+        "min": 0.03,
+        "max": 0.06,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -178,11 +178,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.07,
+        "min": 0.06,
+        "max": 0.22,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -207,7 +207,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -252,7 +252,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -285,7 +285,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -331,7 +331,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -381,11 +381,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 1,
+        "median": 0.06,
+        "min": 0.06,
+        "max": 0.06,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -427,7 +427,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -460,7 +460,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -489,7 +489,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -518,11 +518,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 1,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.02,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -547,11 +547,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 1,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.02,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -577,10 +577,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.01,
+        "min": 0.02,
         "max": 0.03,
         "fired": 0,
         "verdict": "decisive"
@@ -607,11 +607,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 1,
-        "median": 0.89,
-        "min": 0.89,
-        "max": 0.89,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 2,
+        "median": 0.465,
+        "min": 0.13,
+        "max": 0.8,
         "fired": 1,
         "verdict": "skipped"
       }
@@ -649,11 +649,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.02,
+        "min": 0.01,
+        "max": 0.02,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -678,11 +678,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.02,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -841,11 +841,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.04,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -874,11 +874,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.01,
+        "min": 0.01,
+        "max": 0.01,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -916,11 +916,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.05,
+        "min": 0.04,
+        "max": 0.06,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -945,11 +945,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.02,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -974,11 +974,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1003,11 +1003,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.04,
+        "min": 0.02,
+        "max": 0.04,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1049,11 +1049,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1082,7 +1082,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
+        "at": "2026-11-05T19:34:02.060Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1111,11 +1111,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T17:08:28.367Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-11-05T19:34:02.060Z",
+        "hunks": 3,
+        "median": 0.05,
+        "min": 0.04,
+        "max": 0.06,
         "fired": 0,
         "verdict": "skipped"
       }

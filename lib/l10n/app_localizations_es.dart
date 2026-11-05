@@ -7067,6 +7067,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
   String get orderItemCatalogPriceTitle => '¿Cambiar el precio en el Catálogo?';
 
   @override

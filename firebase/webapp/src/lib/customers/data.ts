@@ -20,6 +20,8 @@ export interface OrderSummary {
   total?: number
   paidAmount?: number
   payment?: string | null
+  /** Each device's reading at that visit, by device id (lib/device-reading.ts). */
+  deviceReadings?: Record<string, number>
 }
 
 export interface CustomerDetail {

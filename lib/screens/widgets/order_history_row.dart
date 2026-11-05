@@ -20,7 +20,12 @@ class OrderHistoryRow extends StatelessWidget {
     this.showPrices = true,
     this.showDate = false,
     this.statusLabel,
+    this.detail,
   });
+
+  /// Appended to the status line, e.g. the device's reading at this visit
+  /// ("98.000 km") in the vehicle screen.
+  final String? detail;
 
   /// Segment-customized status names; defaults to [OrderStatusStyle.label].
   final String Function(String? status)? statusLabel;
@@ -105,6 +110,7 @@ class OrderHistoryRow extends StatelessWidget {
                                 statusText,
                                 if (showDate && order.createdAt != null)
                                   format.formatDate(order.createdAt),
+                                ?detail,
                               ].join(' · '),
                               style: AppTypography.callout.copyWith(
                                 color: late ? danger : secondary,
