@@ -12,6 +12,7 @@ import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
+import 'package:praticos/screens/nfse/direct/nfse_direct_setup_screen.dart';
 import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -89,6 +90,10 @@ class NfseController extends ChangeNotifier {
 
   /// Notas are on for this company and user.
   bool get enabled => _settings?.nfseAvailable == true;
+
+  /// The NFS-e direct pilot is on (`nfseDirectEnabled`): the setup is the
+  /// direct one (docs/NFSE_DIRECT.md).
+  bool get direct => _settings?.nfseDirectEnabled == true;
 
   /// The Asaas connection is sandbox.
   bool get sandbox => _settings?.isSandbox == true;
@@ -284,6 +289,7 @@ class NfseStatusLine extends StatelessWidget {
 Future<void> showNfseNotReady(
   BuildContext context, {
   required bool sandbox,
+  bool direct = false,
   bool? canSetUp,
 }) async {
   final l10n = context.l10n;
@@ -309,6 +315,10 @@ Future<void> showNfseNotReady(
   );
   if (setUp != true || !context.mounted) return;
   await Navigator.of(context, rootNavigator: true).push<void>(
-    CupertinoPageRoute<void>(builder: (_) => NfseSetupScreen(sandbox: sandbox)),
+    CupertinoPageRoute<void>(
+      builder: (_) => direct
+          ? const NfseDirectSetupScreen()
+          : NfseSetupScreen(sandbox: sandbox),
+    ),
   );
 }

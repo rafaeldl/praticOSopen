@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/nfse.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_setup_screen.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_invoice_screen.dart';
 import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
@@ -165,7 +166,9 @@ class _NfseListScreenState extends State<NfseListScreen> {
     if (picked != 'setup' || !mounted) return;
     await Navigator.of(context).push<void>(
       CupertinoPageRoute<void>(
-        builder: (_) => NfseSetupScreen(sandbox: _nfse.sandbox),
+        builder: (_) => _nfse.direct
+            ? const NfseDirectSetupScreen()
+            : NfseSetupScreen(sandbox: _nfse.sandbox),
       ),
     );
   }
@@ -428,10 +431,14 @@ class NfseMonthRow extends StatefulWidget {
     required this.month,
     required this.wrap,
     this.nfse,
+    this.canSetUp,
   });
 
   final DateTime month;
   final Widget Function(Widget row) wrap;
+
+  /// Who sees the NFS-e direct setup row; defaults to "manages the company".
+  final bool? canSetUp;
 
   /// Test seam; defaults to a new [NfseController].
   final NfseController? nfse;
@@ -469,8 +476,23 @@ class _NfseMonthRowState extends State<NfseMonthRow> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_nfse.enabled) return const SizedBox.shrink();
     final l10n = context.l10n;
+    if (!_nfse.enabled) {
+      // NFS-e direct pilot before its notas list: the owner reaches the setup.
+      if (!_nfse.direct) return const SizedBox.shrink();
+      final canSetUp =
+          widget.canSetUp ?? AuthorizationService.instance.canManageCompany;
+      if (!canSetUp) return const SizedBox.shrink();
+      return widget.wrap(
+        AppListRow(
+          key: const Key('financialNfseDirectSetup'),
+          title: l10n.nfseRowTitle,
+          subtitle: l10n.nfseListSetup,
+          horizontalPadding: AppSpacing.lg,
+          onTap: () => NfseDirectSetupScreen.open(context),
+        ),
+      );
+    }
     final list = nfseMonthList(_nfse.invoices, widget.month);
     final problems = list.attention.length;
     final danger = AppColors.danger.resolveFrom(context);

@@ -313,6 +313,31 @@ export async function notifyCourtesyEnding(
 }
 
 /**
+ * Tell the owner and admins that a fiscal emitter's certificate is about to
+ * expire (NFS-e direct, 30 and 7 days before). The bell counts as delivered;
+ * throws only when it failed for everyone, so the daily job tries again.
+ */
+export async function notifyCertificateExpiring(
+  companyId: string,
+  message: { title: string; body: string; days: number; emitterId: string },
+): Promise<void> {
+  const recipients = await getPaymentNotificationRecipients(companyId, ['owner', 'admin']);
+  if (recipients.length === 0) return;
+  const delivery = await sendNotification(
+    recipients,
+    {
+      title: message.title,
+      body: message.body,
+      data: { type: 'nfse_certificate_expiring', days: String(message.days), emitterId: message.emitterId, companyId },
+    },
+    companyId,
+  );
+  if (delivery.saved === 0) {
+    throw new Error('certificate notice not delivered');
+  }
+}
+
+/**
  * Tell the company about the maintenances coming up: who manages devices, and
  * the [technicians] of their last orders while they are still on the team.
  * The bell counts as delivered: a failure of the push alone is not repeated,

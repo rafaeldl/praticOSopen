@@ -12004,3 +12004,147 @@ rows:
   e2e: firebase/webapp/e2e/onboarding.spec.ts
   web_exception: null
   note: "No web, o erro vai no aviso da própria tela ou no toast, sem perder o que foi digitado."
+- id: nfse.direct.setup
+  screen: lib/screens/nfse/direct/nfse_direct_setup_screen.dart
+  route: null
+  action: "Ver CNPJs e configurar a nota direta"
+  kind: screen
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [empty, error, loading]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/fiscalEmitters", "settings/payments"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Lista de CNPJs com validade do certificado (ponto verde/âmbar/vermelho), ✓ no padrão. Web: /web/invoices/direct, lista e emitente lado a lado. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.auto-issue
+  screen: lib/screens/nfse/direct/nfse_direct_setup_screen.dart
+  route: null
+  action: "Escolher emissão automática ao concluir a OS"
+  kind: picker
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["api:PUT /v1/app/nfse/setup/settings"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Tela de escolher (pickOne). Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.add-certificate
+  screen: lib/screens/nfse/direct/certificate_upload_sheet.dart
+  route: null
+  action: "Adicionar CNPJ enviando o certificado A1"
+  kind: sheet
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: [file]
+  data: ["api:POST /v1/app/nfse/emitters/certificate"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Senha digitada vai só ao servidor, nunca fica no aparelho. Web: arrastar o arquivo. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.replace-certificate
+  screen: lib/screens/nfse/direct/certificate_upload_sheet.dart
+  route: null
+  action: "Trocar o certificado do CNPJ"
+  kind: sheet
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: [file]
+  data: ["api:PUT /v1/app/nfse/emitters/{id}/certificate"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Mesma sheet do adicionar, a partir do menu … do emitente. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.emitter
+  screen: lib/screens/nfse/direct/fiscal_emitter_screen.dart
+  route: null
+  action: "Ver o CNPJ: notas do ano/mês, teto do MEI e certificado"
+  kind: screen
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, error]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/fiscalEmitters"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Menu …: usar como padrão, trocar e apagar certificado (vermelho). Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.emitter.delete-certificate
+  screen: lib/screens/nfse/direct/fiscal_emitter_screen.dart
+  route: null
+  action: "Apagar o certificado do CNPJ"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["api:DELETE /v1/app/nfse/emitters/{id}/certificate"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Confirmação antes. Só o certificado sai; CNPJ e notas ficam. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.emitter.edit
+  screen: lib/screens/nfse/direct/fiscal_emitter_editors.dart
+  route: null
+  action: "Editar serviço, inscrição municipal e estilo da descrição"
+  kind: sheet
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, unsaved]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["api:PATCH /v1/app/nfse/setup/emitters/{id}"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Cada linha abre o seu editor. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.texts
+  screen: lib/screens/nfse/direct/nfse_direct_texts.dart
+  route: null
+  action: "Textos de regime, validade e erros da nota direta"
+  kind: logic
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: []
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Só textos e formatação; sem tela própria. Atrás de settings/payments.nfseDirectEnabled (desligada)."

@@ -6657,6 +6657,305 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteFailedTryAgain => 'No se pudo eliminar. Inténtalo de nuevo.';
 
   @override
+  String get nfseDirectHeadEmpty =>
+      'Envía el certificado digital para emitir facturas';
+
+  @override
+  String get nfseDirectHeadWithEmitters =>
+      'Las facturas salen por el CNPJ que elijas en el momento';
+
+  @override
+  String get nfseDirectEmittersSection => 'Tus CNPJ';
+
+  @override
+  String get nfseDirectAddCnpjTitle => 'Agregar CNPJ';
+
+  @override
+  String get nfseDirectAddCnpjIntro =>
+      'Elige el certificado digital A1 del CNPJ y escribe su contraseña. PraticOS busca el resto.';
+
+  @override
+  String get nfseDirectReplaceTitle => 'Cambiar certificado';
+
+  @override
+  String nfseDirectReplaceIntro(String name) {
+    return 'Elige el certificado nuevo de $name y escribe su contraseña.';
+  }
+
+  @override
+  String get nfseDirectSendCertificate => 'Enviar certificado';
+
+  @override
+  String get nfseDirectCertificateFile => 'Archivo del certificado';
+
+  @override
+  String get nfseDirectPickFile => 'Elegir';
+
+  @override
+  String get nfseDirectCertificatePassword => 'Contraseña del certificado';
+
+  @override
+  String get nfseDirectCertificatePasswordHint =>
+      'Solo se usa para enviar. PraticOS no guarda la contraseña.';
+
+  @override
+  String get nfseDirectUploadMissing =>
+      'Elige el archivo y escribe la contraseña para enviar.';
+
+  @override
+  String get nfseDirectTerms =>
+      'PraticOS usa el certificado solo para emitir y leer tus facturas. Puedes borrarlo cuando quieras.';
+
+  @override
+  String get nfseDirectTermsLink => 'Leer los términos';
+
+  @override
+  String get nfseDirectCnpjAdded => 'CNPJ agregado';
+
+  @override
+  String get nfseDirectCertificateReplaced => 'Certificado cambiado';
+
+  @override
+  String get nfseDirectCertificateDeleted => 'Certificado borrado';
+
+  @override
+  String get nfseDirectRegimeMei => 'MEI';
+
+  @override
+  String get nfseDirectRegimeSimples => 'Simples';
+
+  @override
+  String get nfseDirectDefault => 'Predeterminado';
+
+  @override
+  String get nfseDirectDefaultSaved =>
+      'Las facturas usan este CNPJ cuando el cliente no tiene otro';
+
+  @override
+  String get nfseDirectUseAsDefault => 'Usar como predeterminado';
+
+  @override
+  String nfseDirectCertValidUntil(String date) {
+    return 'Certificado vale hasta $date';
+  }
+
+  @override
+  String nfseDirectCertExpiresIn(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'El certificado vence en $days días',
+      one: 'El certificado vence mañana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseDirectCertExpired => 'Certificado vencido';
+
+  @override
+  String get nfseDirectCertPending => 'Certificado esperando tu confirmación';
+
+  @override
+  String get nfseDirectCertMissing => 'Sin certificado';
+
+  @override
+  String nfseDirectCertExpiresOn(String date) {
+    return 'Vence el $date';
+  }
+
+  @override
+  String nfseDirectCertExpiredOn(String date) {
+    return 'Venció el $date';
+  }
+
+  @override
+  String nfseDirectCertSentBy(String expires, String name, String date) {
+    return '$expires · enviado por $name el $date';
+  }
+
+  @override
+  String get nfseDirectAutoIssueRow => 'Emitir sola al terminar la OS';
+
+  @override
+  String get nfseDirectAutoIssueQuestion => '¿Cuándo sale sola la factura?';
+
+  @override
+  String get nfseDirectAutoIssueNever => 'Nunca';
+
+  @override
+  String get nfseDirectAutoIssueNeverHint =>
+      'Tú la emites desde la OS, con un toque';
+
+  @override
+  String get nfseDirectAutoIssueSelected => 'Para los clientes elegidos';
+
+  @override
+  String get nfseDirectAutoIssueSelectedHint => 'Actívala en cada cliente';
+
+  @override
+  String get nfseDirectAutoIssueAll => 'Para todas las OS';
+
+  @override
+  String get nfseDirectAutoIssueAllHint => 'Sale cuando la OS se termina';
+
+  @override
+  String get nfseDirectEmitterTitle => 'CNPJ';
+
+  @override
+  String nfseDirectTotals(String year, String month) {
+    return 'Facturas este año: $year · este mes: $month';
+  }
+
+  @override
+  String nfseDirectMeiLimit(String value, String limit) {
+    return 'Facturó $value de $limit este año (por las facturas)';
+  }
+
+  @override
+  String nfseDirectNotEnabledInCity(String city) {
+    return 'Aún no habilitado para emitir en $city';
+  }
+
+  @override
+  String get nfseDirectServiceRow => 'Servicio de la factura';
+
+  @override
+  String get nfseDirectServiceName => 'Nombre del servicio';
+
+  @override
+  String get nfseDirectServiceNamePlaceholder =>
+      'Ej.: Mantenimiento de vehículos';
+
+  @override
+  String get nfseDirectServiceCode => 'Código del servicio';
+
+  @override
+  String get nfseDirectServiceCodeHint =>
+      '6 números de la lista nacional. Tu contador lo sabe.';
+
+  @override
+  String get nfseDirectServiceMissing =>
+      'Escribe el nombre y los 6 números del código para guardar.';
+
+  @override
+  String get nfseDirectRegistrationRow => 'Inscripción municipal';
+
+  @override
+  String get nfseDirectRegistrationHint =>
+      'Déjalo vacío si el municipio no lo usa.';
+
+  @override
+  String get nfseDirectStyleRow => 'Estilo de la descripción';
+
+  @override
+  String get nfseDirectStyleHead => 'Cómo aparecen los servicios en la factura';
+
+  @override
+  String get nfseDirectStyleUppercase => 'Todo en mayúsculas';
+
+  @override
+  String get nfseDirectStyleSeparator => 'Separar servicios con';
+
+  @override
+  String get nfseDirectSeparatorQuestion => '¿Cómo separar los servicios?';
+
+  @override
+  String nfseDirectStyleSample(String sample) {
+    return 'Queda así: $sample';
+  }
+
+  @override
+  String get nfseDirectSampleService1 => 'Cambio de aceite';
+
+  @override
+  String get nfseDirectSampleService2 => 'Alineación';
+
+  @override
+  String get nfseDirectCertificateRow => 'Certificado';
+
+  @override
+  String get nfseDirectMissing => 'Falta';
+
+  @override
+  String get nfseDirectNone => 'Ninguna';
+
+  @override
+  String get nfseDirectSaved => 'Guardado';
+
+  @override
+  String get nfseDirectDeleteAction => 'Borrar certificado';
+
+  @override
+  String get nfseDirectDeleteTitle => '¿Borrar el certificado?';
+
+  @override
+  String nfseDirectDeleteMessage(String name) {
+    return 'El certificado de $name se borra para siempre y ya no emite facturas. Las facturas se quedan.';
+  }
+
+  @override
+  String get nfseDirectErrorInvalidFile =>
+      'Este archivo no es un certificado A1. Elige el archivo .pfx o .p12.';
+
+  @override
+  String get nfseDirectErrorWrongPassword =>
+      'Contraseña incorrecta. Confírmala con quien envió el certificado.';
+
+  @override
+  String get nfseDirectErrorExpired =>
+      'Este certificado ya venció. Pide uno nuevo a tu contador.';
+
+  @override
+  String get nfseDirectErrorNotYetValid => 'Este certificado aún no es válido.';
+
+  @override
+  String get nfseDirectErrorNotIcpBrasil =>
+      'Este certificado no es de ICP-Brasil. Usa el certificado A1 de la empresa.';
+
+  @override
+  String get nfseDirectErrorNoTaxId =>
+      'Este certificado no es de un CNPJ. Usa el certificado A1 de la empresa.';
+
+  @override
+  String get nfseDirectErrorOtherTaxId =>
+      'Este certificado es de otro CNPJ. Para cambiarlo, usa uno del mismo CNPJ.';
+
+  @override
+  String get nfseDirectErrorAlreadyExists =>
+      'Este CNPJ ya está agregado. Para renovar, ábrelo y cambia el certificado.';
+
+  @override
+  String get nfseDirectErrorNotFound => 'Este CNPJ ya no está agregado.';
+
+  @override
+  String get nfseDirectErrorNotEnabled =>
+      'La factura aún no está activada para tu empresa.';
+
+  @override
+  String get nfseDirectErrorForbidden =>
+      'Solo el dueño y el administrador pueden cambiar esto.';
+
+  @override
+  String get nfseDirectErrorValidation =>
+      'Revisa lo que escribiste e intenta de nuevo.';
+
+  @override
+  String get nfseDirectErrorUnavailable =>
+      'No se pudo enviar ahora. Intenta de nuevo en unos minutos.';
+
+  @override
+  String get nfseDirectErrorGeneric => 'No funcionó. Intenta de nuevo.';
+
+  @override
+  String get nfseDirectServiceCodePlaceholder => 'Ej.: 140101';
+
+  @override
+  String nfseDirectSeparatorValue(String separator) {
+    return '“$separator”';
+  }
+
+  @override
   String get invoiceDataTitle => 'Datos para la factura';
 
   @override

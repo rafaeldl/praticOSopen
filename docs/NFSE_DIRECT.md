@@ -208,6 +208,33 @@ Falha ao gerar nunca derruba a emissão nem o cancelamento: só registra no log,
 
 Testes (`__tests__/danfse.test.ts`): XML sintético validado contra o XSD oficial da NFS-e, cada campo lido, regras da v1.02, uma página só (inclusive com descrição enorme), marca d'água, "sem validade" e geração/guarda com Firestore e Storage falsos.
 
+## Telas de configuração (etapa #565)
+
+Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
+
+| Onde | O quê |
+|---|---|
+| App: `lib/screens/nfse/direct/nfse_direct_setup_screen.dart` | "Nota fiscal": frase no topo, "Seus CNPJs" (regime, certificado com ponto colorido, ✓ no padrão), "+" no topo e, sem CNPJ, o botão azul "Adicionar CNPJ"; "Emitir sozinha quando concluir a OS" abre a tela de escolher (Nunca / Para os clientes escolhidos / Para todas as OS) |
+| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho) e termo. ✓ azul só com arquivo e senha; recusa do servidor em frase simples dentro do sheet |
+| App: `fiscal_emitter_screen.dart` e `fiscal_emitter_editors.dart` | Emitente: CNPJ, regime, "Notas este ano · este mês", teto do MEI (R$ 81 mil), linhas que abrem o editor (serviço, inscrição municipal, estilo da descrição, certificado). "…": Usar como padrão, Trocar certificado, Apagar certificado (vermelho, confirma; o emitente e as notas ficam) |
+| App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
+| Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |
+
+Certificado: verde vale, âmbar a menos de 30 dias, vermelho e negrito vencido, cinza sem certificado.
+
+### Rotas novas (`routes/v1/nfse-settings.routes.ts`, em `/v1/app/nfse/setup` na `nfseApi`)
+
+- `PATCH /emitters/:emitterId` `{ municipalRegistration?, service?, descriptionStyle? }`: o servidor grava (o app não escreve no emitente). Serviço com código nacional de 6 números e ISS de 0 a 10%; separador entre `', '`, `' - '`, `' / '`, `'; '`.
+- `PUT /settings` `{ defaultEmitterId?, autoIssue? }`: o padrão tem de ser um emitente da empresa.
+
+O app e o web chamam a `nfseApi` pela URL da `api` trocando `/api` por `/nfseApi`.
+
+### Aviso de vencimento
+
+`services/nfse/certificate-expiry-notice.service.ts`, na rotina `nfseDaily`: 30 e 7 dias antes de `certificate.notAfter`, sino e push (`notifyCertificateExpiring`, tipo `nfse_certificate_expiring`) para dono e admin: "O certificado da OFICINA EXEMPLO vence em 7 dias. Peça um novo ao contador." Cada passo vai uma vez por certificado (`private/nfse/emitters/{id}.expiryNotice`); certificado novo recomeça.
+
+Fora desta etapa: "Pedir ao contador", importação e "Desfazer importação", limite de CNPJs por plano, "Ligar para todos os clientes com CNPJ".
+
 ## Cliente: dados para nota (etapa #568)
 
 Só aparece com `settings/payments.nfseDirectEnabled` ligada (`loadCustomerInvoiceConfig`, em `lib/screens/customers/customer_invoice_fields.dart`). Com ela desligada, o CPF/CNPJ continua em "Mais dados", como antes.
