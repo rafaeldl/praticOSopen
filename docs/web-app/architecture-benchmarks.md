@@ -112,7 +112,7 @@ Saídas para manter a B: shell estático no Hosting (na prática, vira a entrega
 | Ctrl+F em linha fora da janela virtualizada | Não acha | **Também não acha**: a busca do app precisa cobrir isso |
 | Selecionar e copiar | Sem semântica, copiou vazio. Com semântica, copiou sem separar colunas | Copia com tabulação, cola certo em planilha |
 | Impressão | 1 página de imagem, 1 caractere de texto | 2 páginas com texto, **só as linhas renderizadas**: relatório impresso exige tela própria |
-| Link direto `/app/orders/{id}` | Funciona | Funciona |
+| Link direto `/web/orders/{id}` | Funciona | Funciona |
 | Voltar / avançar | Voltar funciona. **Avançar não**, com Navigator 1.0 (Router API pode resolver, não testado) | Funcionam |
 | Duas abas | Abre, mas a 2ª cai para cache em memória (`failed-precondition`). `synchronizeTabs` não testado | Sem erro, cache compartilhado |
 | Cmd/Ctrl+clique | Abre na mesma aba | Nova aba, com a URL certa |
@@ -254,7 +254,7 @@ Testes de regras, não auditoria. A cobertura completa está em `security-summar
 - **Tamanho real com gzip em Firestore e REST.** Emulador não comprime. Só sei que o JSON de 10 mil OS vai de 18,1 MB para 1,55 MB em gzip.
 - **Leitor de tela de verdade.** NVDA e VoiceOver não foram testados, só a árvore de acessibilidade.
 - **Firefox e Safari.**
-- **Cold start real do `/app`.** Usei 2 s, observado em `/admin/login`.
+- **Cold start real do `/web`.** Usei 2 s, observado em `/admin/login`.
 - **App Flutter completo rodando na web.** Compilou, mas só o caminho do protótipo foi executado.
 - **Latência de busca em serviço externo.** Só custo, a partir de fontes públicas e divergentes.
 - **Preço do Firestore em São Paulo.**

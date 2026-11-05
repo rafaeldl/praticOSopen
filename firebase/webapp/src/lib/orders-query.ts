@@ -18,45 +18,134 @@ export interface OrderRow {
 export const FIRST_PAGE = 30
 export const PAGE_SIZE = 100
 
+export type FilterOp = '==' | '<' | '>' | '>='
+
 export interface OrdersQuery {
   companyId: string
   /** null: every order. Otherwise only the ones this user created (firestore.rules). */
   createdBy: string | null
   /** null: every status. Indexed with createdAt (firestore.indexes.json). */
   statuses?: string[] | null
+  /** More filters of the Início filter (dates, payment, hold, assignee). */
+  where?: [field: string, op: FilterOp, value: string][]
+  /** Sort field and direction; the id breaks ties the same way. createdAt desc by default. */
+  order?: { field: string; dir: 'asc' | 'desc' }
 }
 
 const pending = new Map<string, Promise<OrderRow[]>>()
 const keyOf = (query: OrdersQuery, size: number, after?: string) =>
-  `${query.companyId}|${query.createdBy ?? '*'}|${(query.statuses ?? []).join(',')}|${size}|${after ?? ''}`
+  `${query.companyId}|${query.createdBy ?? '*'}|${(query.statuses ?? []).join(',')}|${JSON.stringify(query.where ?? [])}|${query.order?.field ?? ''} ${query.order?.dir ?? ''}|${size}|${after ?? ''}`
+
+/** The company's day as the app stores dates: local wall text without a zone. */
+export interface DayBounds {
+  /** "2026-11-05T00:00:00.000": start of today. */
+  today: string
+  /** Start of tomorrow, same form. */
+  tomorrow: string
+}
+
+const OPEN = ['quote', 'approved', 'progress']
+
+/**
+ * The Firestore queries of an Início filter: one, or two for Para hoje (the
+ * delivery today and the visit today). Each query is the filter itself, so a
+ * page never needs filtering on screen and a count of it is the filter's count.
+ * Dates are stored as text (the app writes local time without a zone), so the
+ * bounds are the company's day in that form. Each query has its composite
+ * index in firestore.indexes.json, with and without `createdBy.id`.
+ */
+export function filterQueries(
+  filter: string,
+  base: { companyId: string; createdBy: string | null; uid: string | null },
+  day: DayBounds | null,
+): OrdersQuery[] | null {
+  const q = (extra: Partial<OrdersQuery>): OrdersQuery => ({ companyId: base.companyId, createdBy: base.createdBy, ...extra })
+  switch (filter) {
+    case 'open':
+      return [q({ statuses: OPEN })]
+    case 'late':
+      // The lower bound leaves out an empty text (no date).
+      return day ? [q({ statuses: OPEN, where: [['dueDate', '>', ''], ['dueDate', '<', day.today]], order: { field: 'dueDate', dir: 'asc' } })] : null
+    case 'today':
+      return day
+        ? (['dueDate', 'scheduledDate'] as const).map((field) =>
+            q({ statuses: OPEN, where: [[field, '>=', day.today], [field, '<', day.tomorrow]], order: { field, dir: 'asc' } }),
+          )
+        : null
+    case 'quotes':
+      // Waiting longest first.
+      return [q({ statuses: ['quote'], order: { field: 'createdAt', dir: 'asc' } })]
+    case 'onHold':
+      // Stopped longest first. The app and the API always write `since` with the mark.
+      return [q({ statuses: ['approved', 'progress'], where: [['onHold.since', '>', '']], order: { field: 'onHold.since', dir: 'asc' } })]
+    case 'unpaid':
+      return [q({ statuses: ['done'], where: [['payment', '==', 'unpaid']] })]
+    case 'mine':
+      // Given to this person, created by anyone (firestore.rules isOrderAssignee).
+      return [{ companyId: base.companyId, createdBy: null, statuses: OPEN, where: [['assignedTo.id', '==', base.uid ?? '']] }]
+    case 'done':
+      return [q({ statuses: ['done'] })]
+    case 'all':
+      return [q({ statuses: null })]
+    default:
+      return null
+  }
+}
 
 type Snapshot = { docs: { id: string; data: () => unknown }[] }
 const toRows = (snapshot: Snapshot) => snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as object) }) as OrderRow)
 
-/** createdAt as stored: the app writes a Timestamp, the API an ISO string. */
-function cursorValue(row: OrderRow): unknown {
-  return row.createdAt ?? ''
+/** A field of a row by its path ("onHold.since"). */
+export function valueAt(row: Record<string, unknown>, path: string): unknown {
+  return path.split('.').reduce<unknown>((value, key) => (value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined), row)
+}
+
+/** The sort field as stored (createdAt: the app writes a Timestamp, the API an ISO string). */
+function cursorValue(query: OrdersQuery, row: OrderRow): unknown {
+  return valueAt(row, query.order?.field ?? 'createdAt') ?? ''
 }
 
 type Module = typeof import('firebase/firestore') | typeof import('firebase/firestore/lite')
 
 /** Same query on either build: the REST one for pages, the full one for live rows. */
 function buildQuery<M extends Module>(firestore: M, db: unknown, query: OrdersQuery, size: number, after?: OrderRow) {
-  const { collection, documentId, limit, orderBy, query: build, startAfter, where } = firestore as typeof import('firebase/firestore/lite')
-  const filters = [
-    ...(query.createdBy ? [where('createdBy.id', '==', query.createdBy)] : []),
-    ...(query.statuses?.length ? [where('status', 'in', query.statuses)] : []),
-  ]
-  // Id as tie-break: two orders with the same createdAt are neither repeated nor skipped between pages.
-  const cursor = after ? [startAfter(cursorValue(after), after.id)] : []
+  const { collection, documentId, limit, orderBy, query: build, startAfter } = firestore as typeof import('firebase/firestore/lite')
+  const order = query.order ?? { field: 'createdAt', dir: 'desc' }
+  // Id as tie-break: two orders with the same date are neither repeated nor skipped between pages.
+  const cursor = after ? [startAfter(cursorValue(query, after), after.id)] : []
   return build(
     collection(db as import('firebase/firestore/lite').Firestore, 'companies', query.companyId, 'orders'),
-    ...filters,
-    orderBy('createdAt', 'desc'),
-    orderBy(documentId(), 'desc'),
+    ...filtersOf(firestore, query),
+    orderBy(order.field, order.dir),
+    orderBy(documentId(), order.dir),
     ...cursor,
     limit(size),
   )
+}
+
+/** The filters alone: a page and its count ask the same. */
+function filtersOf<M extends Module>(firestore: M, query: OrdersQuery) {
+  const { where } = firestore as typeof import('firebase/firestore/lite')
+  const statuses = query.statuses ?? []
+  return [
+    ...(query.createdBy ? [where('createdBy.id', '==', query.createdBy)] : []),
+    ...(statuses.length === 1 ? [where('status', '==', statuses[0])] : statuses.length ? [where('status', 'in', statuses)] : []),
+    ...(query.where ?? []).map(([field, op, value]) => where(field, op, value)),
+  ]
+}
+
+/**
+ * How many orders the query has, and the sum of number fields, counted by the
+ * server (Firestore aggregation: the same filters and indexes as the pages).
+ */
+export async function countOrders(query: OrdersQuery, sums: string[] = []): Promise<{ count: number; sums: Record<string, number> }> {
+  const [db, firestore] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  const { collection, count, getAggregate, query: build, sum } = firestore
+  const spec: Record<string, ReturnType<typeof count> | ReturnType<typeof sum>> = { count: count() }
+  sums.forEach((field, index) => (spec[`s${index}`] = sum(field)))
+  const snapshot = await getAggregate(build(collection(db, 'companies', query.companyId, 'orders'), ...filtersOf(firestore, query)), spec)
+  const data = snapshot.data() as Record<string, number | null | undefined>
+  return { count: Number(data.count ?? 0), sums: Object.fromEntries(sums.map((field, index) => [field, Number(data[`s${index}`] ?? 0)])) }
 }
 
 /**

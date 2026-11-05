@@ -6,7 +6,7 @@ O app web do PraticOS é a ferramenta de mesa para as mesmas contas e os mesmos 
 
 | | |
 |---|---|
-| Endereço | **https://praticos.app/app** (ver [Domínios](#domínios)) |
+| Endereço | **https://praticos.app/web** (ver [Domínios](#domínios)) |
 | Código | `firebase/webapp/` (Vue 3 + Vite, SPA estática, TypeScript) |
 | Acesso | Fechado por lista de acesso (`config/webApp`, ver [Lista de acesso](#lista-de-acesso)) |
 | Deploy | Junto com o site, pelo `firebase-hosting-deploy.yml` |
@@ -17,7 +17,7 @@ Documentos relacionados:
 
 - `docs/WEB_APP_DESIGN.md`: padrão visual e de interação (tema Campo, painel ao lado, teclado).
 - `docs/WEB_API.md`: rotas `/v1/app/*` que o web usa.
-- `docs/web-app/ADR-001-web-architecture.md`: por que Vue + Vite estático em `/app`.
+- `docs/web-app/ADR-001-web-architecture.md`: por que Vue + Vite estático em `/web`.
 - `docs/web-app/parity-matrix.yaml`: cada capacidade do app e onde ela está no web.
 - `docs/web-app/discovery-report.md`: uso real e roteiro que levaram ao web.
 
@@ -32,8 +32,8 @@ firebase/webapp/
 │   ├── gen.mjs             # contrato: permissões e textos → src/generated/ (fora do git)
 │   ├── check-budget.mjs    # orçamento de tamanho, roda no build
 │   ├── check-csp.mjs       # hashes dos scripts inline batem com firebase.json
-│   ├── check-hosting.mjs   # /app no emulador de Hosting com o firebase.json real
-│   └── copy-to-hosting.mjs # dist → firebase/hosting/public/app
+│   ├── check-hosting.mjs   # /web no emulador de Hosting com o firebase.json real
+│   └── copy-to-hosting.mjs # dist → firebase/hosting/public/web
 ├── src/
 │   ├── main.ts, App.vue, router.ts, navigation.ts
 │   ├── i18n/               # t(), web_{pt,en,es}.json
@@ -109,7 +109,7 @@ Tempo da entrada: a tela de login acorda o `api` (`warmUpApi`, `lib/web-access.t
 
 Nos testes de tela, o emulador do Auth fica em outra origem (`127.0.0.1:9099`), então o redirect só roda no Chromium; no WebKit ele cai no bloqueio que o domínio próprio evita em produção.
 
-Quem trabalha em mais de uma empresa escolhe em `/app/choose-company`; a escolha fica lembrada no navegador.
+Quem trabalha em mais de uma empresa escolhe em `/web/choose-company`; a escolha fica lembrada no navegador.
 
 Detalhes da entrada (`src/views/LoginView.vue`, `lib/auth-errors.ts`):
 
@@ -119,11 +119,13 @@ Detalhes da entrada (`src/views/LoginView.vue`, `lib/auth-errors.ts`):
 - Idioma: o `preferredLanguage` da conta vale num navegador onde ninguém escolheu idioma; escolher em Configurações grava na conta (`pt-BR`, `en-US`, `es-ES`), como o app.
 - Conta que não carregou mostra "Tentar de novo"; nunca manda para o primeiro acesso.
 
-Convites sem empresa (`/app/no-company`, `components/InvitesList.vue`, `components/InviteCodeFlow.vue`): aceitar o convite da lista entra direto na empresa; "Recusar convite" pergunta com o nome da empresa; "Tenho outro código" e, no primeiro acesso, "Recebi um código de convite" abrem o código (maiúsculas e `INV_` na frente, como o app), com "Buscar outro código". Os erros vêm do código da API (`inviteErrorKey`).
+Convites sem empresa (`/web/no-company`, `components/InvitesList.vue`, `components/InviteCodeFlow.vue`): aceitar o convite da lista entra direto na empresa; "Recusar convite" pergunta com o nome da empresa; "Tenho outro código" e, no primeiro acesso, "Recebi um código de convite" abrem o código (maiúsculas e `INV_` na frente, como o app), com "Buscar outro código". Os erros vêm do código da API (`inviteErrorKey`).
 
 ### Domínios
 
-O web fica em **https://praticos.app/app**. O mesmo Hosting também responde em `praticos.web.app` e `praticos.firebaseapp.com`: quem abre `/app` num deles vai para `praticos.app` com o mesmo caminho, query e hash (script inline no `index.html`, antes do Firebase, `scripts/legacy-host-plugin.ts`; só no build de produção). `/q`, `/__/auth` e o site não mudam.
+O web fica em **https://praticos.app/web**. O mesmo Hosting também responde em `praticos.web.app` e `praticos.firebaseapp.com`: quem abre `/web` num deles vai para `praticos.app` com o mesmo caminho, query e hash (script inline no `index.html`, antes do Firebase, `scripts/legacy-host-plugin.ts`; só no build de produção). `/q`, `/__/auth` e o site não mudam.
+
+**Endereço antigo `/app`.** Até 2026-11-05 o web ficava em `/app`. O Hosting responde `/app` e `/app/**` com 301 para `/web` com o mesmo caminho e query (`redirects` no `firebase/firebase.json`, testado em `scripts/check-hosting.mjs`); no domínio antigo são dois passos, `/app` → `/web` no mesmo host e depois o script leva a `praticos.app`. O service worker de avisos que ficou instalado em `/app/` é desregistrado na próxima entrada (`dropLegacyWorker` em `lib/push/token.ts`), para não mostrar cada aviso duas vezes.
 
 Por que um domínio só: o redirect de reserva da entrada depende do `authDomain` (Safari), e login, empresa escolhida e caches ficam guardados por origem.
 
@@ -172,16 +174,16 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 
 `src/lib/orders/`, `src/components/orders/`, `src/views/OrdersView.vue`.
 
-- **Início (`/`).** A lista de OS, como no app. Filtros Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas e Todas (o técnico abre em Minhas, que pede `assignedTo=<uid>` à API). "Atrasada" compara por dia no fuso da empresa (`isOverdue`, contrato `overdue.json`). Resumo no topo com "R$ X para receber". Busca nas OS carregadas (número, cliente, aparelho, placa, sem acento) e "Procurar em todas". As linhas se atualizam no lugar (`lib/orders/bus.ts`), sem perder página nem rolagem. Paginação por data e id no cursor.
+- **Início (`/`).** A lista de OS, como no app. Filtros Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas e Todas (o técnico abre em Minhas, que pede `assignedTo=<uid>` à API). "Atrasada" compara por dia no fuso da empresa (`isOverdue`, contrato `overdue.json`). Cada filtro é a sua própria consulta (`filterQueries` em `lib/orders-query.ts`, `filterSources` em `lib/orders/data.ts`): Atrasadas por `dueDate` antes de hoje, Para hoje por `dueDate` ou `scheduledDate` de hoje (duas consultas juntas, sem repetir), Orçamentos por `createdAt` crescente, Paradas por `onHold.since`, Sem receber por `status done` e `payment unpaid`, sempre com `createdBy.id` para quem só vê as próprias. Datas comparadas como o texto gravado pelo app (hora local sem fuso). Os números do topo e o "Sem receber N" vêm do servidor (agregação `count`/`sum` do Firestore, ou o `total` da API), nunca do que está carregado. Pela API (quem não vê valores) Paradas não tem filtro: as páginas seguem até encher. Resumo no topo com "R$ X para receber". Busca nas OS carregadas (número, cliente, aparelho, placa, sem acento), que também pergunta ao servidor (`lib/orders/search.ts`: número, clientes e veículos que batem) e vale no Quadro, onde os cartões são só o que o servidor achou; "Procurar em todas". Sino, Lista | Quadro e Nova OS ficam numa linha só, no mesmo lugar nas duas vistas; a busca fica na barra de baixo. As linhas se atualizam no lugar (`lib/orders/bus.ts`), sem perder página nem rolagem. Paginação por data e id no cursor.
 - **Quadro** (`?view=board`): aba da lista; mover arrastando, pelo "…" ou com `Shift` + seta, só para onde o papel deixa.
 - **Lote** (tela grande): situação, responsável, cobrança (um link Asaas por cliente), assistente (até 10 OS, pergunta antes de aplicar), receber de um cliente, PDF e imprimir. Toda mudança mostra antes de → para e quantas já estão assim; o recusado pelo servidor é contado com o motivo; "Desfazer" volta o que o papel permite.
-- **Nova OS** (`N`, gaveta): cliente com Recentes e busca pela placa, veículo (do cliente primeiro; placa digitada vira veículo novo com a placa), itens com preço do catálogo e "Mais usados", "+ Cadastrar «nome»", "+ Usar «texto» nesta OS" (item fora do catálogo) e "+ Cadastrar «texto» no catálogo", entrega, pedido do cliente (no ramo com o campo `service_order.observation` grava em `customData.observation`; sem o campo vira o primeiro comentário interno, como no app), fotos (ficam no navegador e sobem depois do id; clique na miniatura tira), campos do ramo (`service_order.*` sem o do pedido, conferidos antes do ✓ e gravados em `customData`) e "Mais opções" (situação, visita, responsável e, com Atendimento no local, o Local). Sem Local, a OS leva o endereço do cliente com a coordenada. Cronometrada no E2E: falha acima de 45 s.
+- **Nova OS** (`N`, gaveta): cliente com Recentes e busca pela placa, veículo (do cliente primeiro; placa digitada vira veículo novo com a placa), itens com preço do catálogo e "Mais usados", "+ Cadastrar «nome»", "+ Usar «texto» nesta OS" (item fora do catálogo) e "+ Cadastrar «texto» no catálogo" (os cadastros abrem um bloco com 1 ou 2 campos: WhatsApp; modelo e placa/série; tipo e preço; ver `docs/QUICK_REGISTER.md`), entrega, pedido do cliente (no ramo com o campo `service_order.observation` grava em `customData.observation`; sem o campo vira o primeiro comentário interno, como no app), fotos (ficam no navegador e sobem depois do id; clique na miniatura tira), campos do ramo (`service_order.*` sem o do pedido, conferidos antes do ✓ e gravados em `customData`) e "Mais opções" (situação, visita, responsável e, com Atendimento no local, o Local). Sem Local, a OS leva o endereço do cliente com a coordenada. Cronometrada no E2E: falha acima de 45 s.
 - **OS no painel**: cabeçalho com uma frase e o botão do próximo passo, "O que o cliente pediu" logo abaixo (`lib/orders/request.ts`: o campo do ramo, mudar com a mesma regra dos campos principais; vazio, escrever pelo menu …; pedido antigo que o web gravava como comentário aparece enquanto o campo está vazio, sem apagar o comentário), itens por aparelho (item novo em OS com 2 ou mais aparelhos pergunta "Em quais veículos?": Geral, um, vários ou todos, uma linha por aparelho), totais só para quem vê valores, fotos (colar, arrastar, apagar), comentários internos ou para o cliente, Detalhes (entrega, visita, responsável, local), "Mais dados" do segmento, checklists, contrato, avaliação do cliente, Documentos (nota, contrato, garantia: "Que documento é este?" antes de subir, abrir em aba nova, excluir com confirmação; pasta `documents/` do app, nunca o comprovante de pagamento). Fotos em tela cheia com setas e "Definir como capa" (a primeira foto). O menu … abre a ficha do cliente e de cada aparelho. Teclas `A`, `S`, `C`, `D`, `M`, `R`. OS apagada ou sem acesso mostra "não está mais aqui".
 - **Ao concluir**: pergunta a próxima manutenção (`lib/orders/maintenance-offer.ts`, regras de `docs/DEVICE_NEXT_MAINTENANCE.md`) e trava se houver checklist por terminar.
 - **Assistente** (`POST /v1/app/ai/order-assist`, com `GET /v1/app/ai/status` ligado; `lib/orders/assist-draft.ts`, `ai-actions.ts`): aplica na hora, marca com ✦ e oferece Desfazer. Nunca recebe, cancela nem apaga sozinho.
   - **Nova OS** (`NewOrderAssist.vue`): texto ou foto (arquivo, só com `attachPhotos`). Preenche cliente, veículo, itens, pedido e entrega sem trocar o que já está escolhido. Cliente ou veículo fora do cadastro entra como "novo" e é cadastrado pela API só no ✓; parecidos abrem "Qual X?" com "Cadastrar" (com a permissão) e "Outro". Desfazer fica no aviso, dentro da gaveta.
   - **OS salva** (`OrderAssistant.vue`): põe itens (do catálogo ou só pelo nome), muda valor, quantidade ou descrição e tira a linha só quando pedido, tudo pela API de itens; linha ambígua pergunta "Qual X?". A foto entra na OS e depois é lida.
-  - **Falar** (`AssistTalk.vue`, nas duas barras): grava pelo microfone do navegador (`MediaRecorder`, webm, ogg ou mp4, 32 kbps) e manda o áudio na mesma chamada do texto; o servidor transcreve. O gravador (`lib/orders/talk.ts`) só carrega ao tocar em Falar, e o microfone só é pedido aí. Enquanto ouve: "Cancelar" (ou Esc) joga fora, "Parar e preencher a OS" manda. Para sozinho depois de 20 s sem som ou 5 min; parar sem ter ouvido nada só avisa. Microfone bloqueado: aviso para liberar no cadeado da barra de endereço. Navegador que não grava: sem Falar, fica a caixa de texto. O `firebase.json` libera `microphone=(self)` no `Permissions-Policy` de `/app`. Com áudio o cartão de dinheiro não vem (o servidor só manda `actions` com texto).
+  - **Falar** (`AssistTalk.vue`, nas duas barras): grava pelo microfone do navegador (`MediaRecorder`, webm, ogg ou mp4, 32 kbps) e manda o áudio na mesma chamada do texto; o servidor transcreve. O gravador (`lib/orders/talk.ts`) só carrega ao tocar em Falar, e o microfone só é pedido aí. Enquanto ouve: "Cancelar" (ou Esc) joga fora, "Parar e preencher a OS" manda. Para sozinho depois de 20 s sem som ou 5 min; parar sem ter ouvido nada só avisa. Microfone bloqueado: aviso para liberar no cadeado da barra de endereço. Navegador que não grava: sem Falar, fica a caixa de texto. O `firebase.json` libera `microphone=(self)` no `Permissions-Policy` de `/web`. Com áudio o cartão de dinheiro não vem (o servidor só manda `actions` com texto).
   - **Dinheiro** ("Confere?", `AiActionsDialog.vue`): só com a chave `financeActions` (o servidor manda `actions`). Nada grava antes de Confirmar; depois desconto, aprovar, receber e status pela API, nessa ordem, parando no primeiro erro. Na Nova OS o cartão abre na OS depois do ✓.
   - **Apresentação**: uma vez por navegador, em Início, para quem cria OS; "Experimentar agora" abre a Nova OS com o cursor no assistente.
 - **Início, extras**: "Manutenções chegando" (atrasadas ou em até 7 dias, sem as de contrato ativo), o sino com os avisos (`/notifications`) e "Agora" para o técnico (a visita de hoje).
@@ -279,7 +281,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **O que chega:** os mesmos avisos que o celular recebe do servidor (orçamento aprovado ou recusado, comentário, avaliação, pagamento, manutenção chegando, fim da cortesia), por Web Push pelo FCM.
 - **Quando pede:** depois de salvar a Nova OS ou de marcar visita numa OS salva, uma vez por navegador, enquanto ele não respondeu. Primeiro um aviso ("Avisos do PraticOS", "Continuar" ou "Agora não"), depois a pergunta do próprio navegador. Nunca na entrada. Na Nova OS com veículo fica para a próxima, porque a OS vai perguntar do checklist ou da manutenção.
 - **Token:** em `users/{uid}.fcmTokens`, no mesmo formato do app, com `platform: 'web'` e um `deviceId` deste navegador (`localStorage`). A cada entrada com permissão dada, o web confere o token. Sair da conta tira o token (até 3 segundos, sem segurar a saída) e apaga o token no FCM. **Computador compartilhado:** o `localStorage` guarda de quem é o token (`praticos.push.owner`); se outra pessoa entrar (ou a anterior não saiu), o token antigo é apagado no FCM e o navegador ganha id e token novos antes de gravar na conta nova. Se não der para apagar, a pessoa nova fica sem aviso nessa vez, nunca com o da anterior. O ícone do aviso é `public/notification-icon.png` (192 px).
-- **Clique:** o service worker (escopo `/app/`, sem código do Firebase) foca uma aba aberta e manda abrir a OS, ou abre `/app/?order={id}&company={id}`. O roteador abre a OS só se for da empresa em uso; de outra empresa, fica no Início, como o app.
+- **Clique:** o service worker (escopo `/web/`, sem código do Firebase) foca uma aba aberta e manda abrir a OS, ou abre `/web/?order={id}&company={id}`. O roteador abre a OS só se for da empresa em uso; de outra empresa, fica no Início, como o app.
 - **Com a página na tela:** o sistema não mostra nada; aparece um aviso dentro da página e o sino conta de novo.
 - **Configuração:** só funciona com `VITE_FIREBASE_VAPID_KEY` (chave pública do par de chaves Web Push, no console do Firebase › Cloud Messaging), `VITE_FIREBASE_MESSAGING_SENDER_ID` (número do projeto) e `VITE_FIREBASE_APP_ID` (app web registrado no projeto). Sem as três, o recurso fica escondido, sem erro.
 - **Lembretes não vêm:** os do app (antes da visita, resumo do dia, dias sem abrir, OS paradas) são agendados no próprio celular. Mandar pelo servidor duplicaria no celular; para ter no web, os lembretes do app precisariam ir para o servidor.
@@ -293,7 +295,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Consentimento:** depois da primeira tela aparece uma vez o aviso "Estatísticas de uso" com "Recusar" e "Aceitar". Nada sai antes do "Aceitar" e o `firebase/analytics` nem baixa. A resposta fica no navegador (`praticos.analyticsConsent`) e muda em Configurações › Neste navegador.
 - **Sem dado pessoal:** só as chaves da lista `ALLOWED_PARAMS` saem; nome, telefone e e-mail nunca. O usuário é o uid. O endereço enviado é o da rota, sem id de OS nem busca. Anúncios, sinais do Google e personalização ficam desligados.
 - **Configuração:** `VITE_FIREBASE_APP_ID` e `VITE_FIREBASE_MEASUREMENT_ID` em `.env.production` (app web "PraticOS Website" do projeto `praticos`, o mesmo fluxo GA4 do site). Sem eles, tudo desligado e sem aviso.
-- **Orçamento e CSP:** o client vem depois da primeira tela; `check-budget.mjs` falha se ele entrar no caminho da entrada ou da lista. A CSP do `/app` libera só `www.googletagmanager.com` (script) e `*.google-analytics.com`, `*.analytics.google.com` (envio).
+- **Orçamento e CSP:** o client vem depois da primeira tela; `check-budget.mjs` falha se ele entrar no caminho da entrada ou da lista. A CSP do `/web` libera só `www.googletagmanager.com` (script) e `*.google-analytics.com`, `*.analytics.google.com` (envio).
 - **Testes:** no build e2e os eventos vão para `window.__analytics`, e só quando o teste pede (`praticos.analyticsE2E`): `e2e/analytics.spec.ts` e `tests/analytics.test.ts`.
 
 ### PDF, impressão e paleta
@@ -365,14 +367,14 @@ npm test && npm run typecheck && npm run build
 
 (cd ../functions && npm ci && npm run build)   # uma vez
 npm run emulators    # terminal 1: suíte + seed
-npm run dev          # terminal 2: http://localhost:5180/app/
+npm run dev          # terminal 2: http://localhost:5180/web/
 ```
 
-Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/app/dev/components`, só nos builds de emulador.
+Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/web/dev/components`, só nos builds de emulador.
 
 ## Deploy
 
-`firebase-hosting-deploy.yml` compila o site e depois a SPA (`npm run build:hosting`, que vai para `firebase/hosting/public/app`). Dispara também com mudanças em `firebase/webapp/**`. A configuração de produção (`.env.production`) só tem valores públicos. Os avisos do navegador precisam de mais três, também públicos (ver "Avisos do navegador").
+`firebase-hosting-deploy.yml` compila o site e depois a SPA (`npm run build:hosting`, que vai para `firebase/hosting/public/web`). Dispara também com mudanças em `firebase/webapp/**`. A configuração de produção (`.env.production`) só tem valores públicos. Os avisos do navegador precisam de mais três, também públicos (ver "Avisos do navegador").
 
 **Ordem:** a Function `api`, com a rota `/v1/app/web-access` e as rotas que uma tela nova usa, precisa estar no ar **antes** do Hosting. As Functions saem por outro workflow (`firebase-functions-deploy.yml`): num PR que mude os dois, confirme que o das Functions terminou.
 
@@ -380,10 +382,10 @@ Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/app/dev
 
 | Caminho | O que faz |
 |---|---|
-| `^/app/[^.]*$` | rewrite para `/app/index.html`. Só caminhos sem extensão: um asset que não existe dá 404, não o `index.html` |
-| `/app/assets/**` | `Cache-Control: public, max-age=31536000, immutable` |
+| `^/web/[^.]*$` | rewrite para `/web/index.html`. Só caminhos sem extensão: um asset que não existe dá 404, não o `index.html` |
+| `/web/assets/**` | `Cache-Control: public, max-age=31536000, immutable` |
 | rotas do app e `index.html` | `Cache-Control: no-cache` |
-| `/app/**` | CSP, `nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` |
+| `/web/**` | CSP, `nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` |
 
 - Uma aba aberta antes de um deploy pede chunks que já não existem: o app recarrega uma vez (`lib/stale-build.ts`); se falhar de novo em menos de um minuto, mostra o erro.
 - A CSP libera os três scripts inline do `index.html` por hash. Se um mudar, `npm run build` falha e mostra o hash novo para colar em `firebase.json`.

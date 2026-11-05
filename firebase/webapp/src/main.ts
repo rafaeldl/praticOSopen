@@ -7,7 +7,7 @@ import './styles/orders.css'
 import App from './App.vue'
 import { startI18n } from './i18n'
 import { firestoreLite } from './lib/firebase'
-import { firstOrdersPage } from './lib/orders-query'
+import { filterQueries, firstOrdersPage } from './lib/orders-query'
 import { roleHasPermission } from './lib/permissions'
 import { startPrefs } from './lib/prefs'
 import { onSessionHint, startSession } from './lib/session'
@@ -20,16 +20,13 @@ watchForStaleBuild((handler) => router.onError(handler))
 // Opening on the list: its query leaves with the session documents, not after them.
 // The screen applies the company's own rules again when it renders.
 onSessionHint(({ uid, companyId, role }) => {
-  if (!/^\/app\/(orders\/?)?$/.test(location.pathname) || !roleHasPermission(role, 'viewPrices')) return
+  if (!/^\/web\/(orders\/?)?$/.test(location.pathname) || !roleHasPermission(role, 'viewPrices')) return
   const params = new URLSearchParams(location.search)
   if (params.get('view') === 'board') return
-  // Same statuses as queryStatuses (lib/orders/model.ts); who sees values never starts on "Minhas".
-  const filter = params.get('f')
-  void firstOrdersPage({
-    companyId,
-    createdBy: roleHasPermission(role, 'viewAllOrders') ? null : uid,
-    statuses: filter === 'done' || filter === 'unpaid' ? ['done'] : filter === 'all' ? null : ['quote', 'approved', 'progress'],
-  }).catch(() => {})
+  // The same query as the screen's (lib/orders/data.ts); who sees values never starts on "Minhas".
+  // Atrasadas and Para hoje need the company's day: they wait for the screen.
+  const queries = filterQueries(params.get('f') ?? 'open', { companyId, createdBy: roleHasPermission(role, 'viewAllOrders') ? null : uid, uid }, null)
+  if (queries?.length === 1) void firstOrdersPage(queries[0] as Parameters<typeof firstOrdersPage>[0]).catch(() => {})
 })
 // Network work starts now, side by side, so it does not wait for the screen.
 // Firestore only for who already has a session: the login screen does not need it.

@@ -18,7 +18,7 @@ import { maskTokenForLog } from '../utils/log-redaction.utils';
  * firebase/webapp/src/lib/push) gets a webpush message whose click opens this.
  */
 const WEB_APP_ORIGIN = 'https://praticos.app';
-const WEB_APP_URL = `${WEB_APP_ORIGIN}/app/`;
+const WEB_APP_URL = `${WEB_APP_ORIGIN}/web/`;
 
 /**
  * The screen a browser notification opens: the order in its company (the web

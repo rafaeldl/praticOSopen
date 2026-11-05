@@ -18,7 +18,7 @@ for (const [role, { allowed, denied }] of Object.entries(MATRIX)) {
     await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
     for (const path of allowed) {
       await page.goto(path)
-      await expect(page).toHaveURL(new RegExp(`/app/${path}$`))
+      await expect(page).toHaveURL(new RegExp(`/web/${path}$`))
       await expect(page.getByRole('heading', { name: 'Você não tem acesso a esta tela' })).toBeHidden()
     }
     for (const path of denied) {
@@ -64,6 +64,6 @@ test('trocar de empresa passa pela guarda: admin em A, técnico em B, sai da Equ
   await expect(page.getByRole('heading', { level: 1, name: 'Equipe' })).toBeVisible()
   await page.getByLabel('Empresa').selectOption({ label: 'Beta Repairs' })
   await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
-  await expect(page).toHaveURL(/\/app\/$/)
+  await expect(page).toHaveURL(/\/web\/$/)
   await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Equipe' })).toHaveCount(0)
 })

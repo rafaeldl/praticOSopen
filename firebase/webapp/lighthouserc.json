@@ -3,7 +3,7 @@
     "collect": {
       "startServerCommand": "node e2e/serve.mjs 4184",
       "startServerReadyPattern": "Local",
-      "url": ["http://127.0.0.1:4184/app/login"],
+      "url": ["http://127.0.0.1:4184/web/login"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",

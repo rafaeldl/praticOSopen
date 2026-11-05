@@ -2,7 +2,7 @@
 // Board of orders, a tab of the list: one column per status. Dragging moves a
 // card, and always has an alternative (WCAG 2.5.7): the "Mover" button or
 // Shift + arrow with the card in focus. Only moves this person may make.
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { MoreHorizontal } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -33,7 +33,41 @@ const over = ref<OrderStatus | null>(null)
 const moving = ref<Order | null>(null)
 const panel = useRoutePanel('order')
 
-const cards = computed(() => Object.fromEntries(COLUMNS.map((status) => [status, rows.value.filter((order) => order.status === status)])) as Record<OrderStatus, Order[]>)
+const props = defineProps<{ search?: string }>()
+/** Cards of the search, straight from the server (lib/orders/search.ts); null while not searching. */
+const found = shallowRef<Order[] | null>(null)
+const searching = ref(false)
+const searchFailed = ref(false)
+let searchToken = 0
+const shown = computed(() => found.value ?? rows.value)
+const cards = computed(
+  () => Object.fromEntries(COLUMNS.map((status) => [status, shown.value.filter((order) => order.status === status)])) as Record<OrderStatus, Order[]>,
+)
+
+/** The search of the toolbar: the same server query as the list (number, customer, vehicle). */
+async function runSearch(text: string) {
+  const token = ++searchToken
+  searchFailed.value = false
+  if (!text) {
+    found.value = null
+    searching.value = false
+    return
+  }
+  searching.value = true
+  try {
+    const { searchOrders } = await import('@/lib/orders/search')
+    const result = await searchOrders(ctx, text)
+    if (token !== searchToken) return
+    found.value = mergeById([], result)
+    announce(t('web.orders.count', { count: COLUMNS.reduce((sum, status) => sum + cards.value[status].length, 0) }))
+  } catch (error) {
+    console.warn('board: search failed', error)
+    if (token === searchToken) searchFailed.value = true
+  } finally {
+    if (token === searchToken) searching.value = false
+  }
+}
+watch(() => props.search ?? '', (text) => void runSearch(text), { immediate: true })
 const access = (order: Order) => accessOf(order, session.role, session.uid, effectiveUseFinancial())
 
 async function load() {
@@ -60,6 +94,7 @@ async function move(order: Order, to: OrderStatus) {
     const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: to }, order.version), ctx.showsMoney)
     if (fresh) {
       rows.value = mergeById(rows.value, [fresh])
+      if (found.value) found.value = mergeById(found.value, [fresh])
       orderChanged(fresh)
     }
     announce(t('web.order.statusChanged', { status: statusText(to) }))
@@ -87,15 +122,20 @@ function drop(status: OrderStatus) {
 const stop = onOrderEvent(({ order, removedId }) => {
   if (removedId) rows.value = rows.value.filter((row) => row.id !== removedId)
   if (order) rows.value = mergeById(rows.value.filter((row) => row.id !== order.id), order.status === 'canceled' ? [] : [order])
+  if (found.value && removedId) found.value = found.value.filter((row) => row.id !== removedId)
+  if (found.value && order && found.value.some((row) => row.id === order.id)) found.value = mergeById(found.value.filter((row) => row.id !== order.id), order.status === 'canceled' ? [] : [order])
 })
 onMounted(load)
 onBeforeUnmount(stop)
 </script>
 
 <template>
-  <p class="board-hint sub">{{ t('web.board.hint') }}</p>
-  <LoadingState v-if="state === 'loading'" />
+  <LoadingState v-if="state === 'loading' || searching" />
   <ErrorState v-else-if="state === 'failed'" :retry="load" />
+  <ErrorState v-else-if="searchFailed" :retry="() => runSearch(props.search ?? '')" />
+  <div v-else-if="found && !found.some((order) => COLUMNS.includes(order.status))" class="empty" data-testid="board-no-match">
+    <h2>{{ t('web.orders.noMatch', { query: props.search ?? '' }) }}</h2>
+  </div>
   <div v-else class="board-wrap" :class="{ 'has-panel': panel.value.value }">
     <div class="board" data-testid="board">
       <section

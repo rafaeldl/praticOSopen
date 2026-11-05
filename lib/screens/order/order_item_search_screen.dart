@@ -88,7 +88,6 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   final Map<CatalogKind, List<CatalogItem>?> _items = {};
   final List<StreamSubscription<List<CatalogItem>>> _subs = [];
   bool _hasError = false;
-  bool _creating = false;
   List<String> _mostUsed = const [];
 
   List<CatalogKind> get _kinds => [
@@ -170,7 +169,9 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   ];
 
   /// "+" on top: the new item sheet, then the item goes into the order.
-  Future<void> _add() async {
+  /// "Cadastrar «X»" ([name]) opens the same sheet with the name typed and the
+  /// cursor on the price (order.quick.item), never saving the name alone.
+  Future<void> _add([String? name]) async {
     final kinds = _manageableKinds;
     if (kinds.isEmpty) return;
     final l10n = context.l10n;
@@ -199,6 +200,8 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
         kind: kind,
         source: _source,
         permissions: _permissions,
+        item: name == null ? null : CatalogItem(name: name.trim()),
+        focusPrice: name != null,
         asSheet: true,
       ),
     );
@@ -206,34 +209,7 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
     Navigator.pop(context, OrderItemPick(kind, created));
   }
 
-  Future<void> _create(String name) async {
-    final kind = _createKind;
-    if (kind == null || _creating) return;
-    setState(() => _creating = true);
-    final item = CatalogItem(name: name);
-    try {
-      await _source.save(kind, item);
-      if (!mounted) return;
-      Navigator.pop(context, OrderItemPick(kind, item));
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _creating = false);
-      final l10n = context.l10n;
-      await showCupertinoDialog<void>(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: Text(l10n.orderCreateItemError),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.ok),
-            ),
-          ],
-        ),
-      );
-    }
-  }
+  Future<void> _create(String name) => _add(name);
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +226,6 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       loading: _loading && !_hasError,
       hasError: _hasError,
       onRetry: _listen,
-      enabled: !_creating,
       addLabel: _createKind == null ? null : l10n.pickerNewItem,
       onAdd: _createKind == null ? null : _add,
       onCreate: _createKind == null ? null : _create,

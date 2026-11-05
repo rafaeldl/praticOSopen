@@ -1,5 +1,5 @@
 // Browser notifications of the web app (docs/WEB_APP.md "Avisos do navegador").
-// Registered by src/lib/push/token.ts at /app/ and handed to Firebase Messaging,
+// Registered by src/lib/push/token.ts at /web/ and handed to Firebase Messaging,
 // which subscribes it with FCM. No Firebase code here: the push carries FCM's
 // JSON ({ notification, data, fcmOptions }) and this file shows it.
 // - A tab of the web app on screen: the page shows it (bell and a notice inside),
@@ -11,7 +11,7 @@
 
   /**
    * The route of a push: the server's link (fcmOptions.link, or
-   * notification.click_action, where FCM may put it), only inside /app; else
+   * notification.click_action, where FCM may put it), only inside /web; else
    * the order of the data; else the start.
    */
   function linkOf(payload) {

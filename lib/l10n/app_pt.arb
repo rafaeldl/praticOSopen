@@ -965,6 +965,8 @@
   "@searchCustomerPlaceholder": {"placeholders": {"serial": {"type": "String"}}},
   "customerNamePlaceholder": "Ex.: Ana Ribeiro",
   "customerNameRequired": "Digite o nome do cliente",
+  "orderMissingWhatsapp": "WhatsApp",
+  "@orderMissingWhatsapp": {"description": "Link on a saved order whose customer has no phone: opens the customer form (order.quick.complete)"},
   "customerPhoneLabel": "Telefone ou WhatsApp",
   "customerPhoneHint": "Usado para mandar o orçamento e o aviso de pronto.",
   "moreCustomerData": "Mais dados (e-mail, CPF ou CNPJ, endereço)",

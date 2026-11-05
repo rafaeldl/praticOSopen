@@ -563,6 +563,35 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
+  /// The order's customer was edited from the order (order.quick.complete):
+  /// its copy on the order follows (name, phone, e-mail, CPF/CNPJ), so
+  /// WhatsApp works at once. Another customer is ignored.
+  void refreshCustomer(Customer c) {
+    if (order == null || c.id == null || customer?.id != c.id) return;
+    runInAction(() {
+      order!.customer = c.toAggr();
+      customer = order!.customer;
+    });
+    createItem();
+  }
+
+  /// One of the order's devices was edited from the order: its copy follows
+  /// (name and plate/serial), in the same place.
+  void refreshDevice(Device d) {
+    final list = order?.devices;
+    if (list == null || d.id == null) return;
+    final index = list.indexWhere((e) => e.id == d.id);
+    if (index < 0) return;
+    runInAction(() {
+      list[index] = d.toAggr();
+      devices = list.asObservable();
+      order!.device = list.first;
+      device = order!.device;
+      order!.syncDeviceIds();
+    });
+    createItem();
+  }
+
   @action
   setDevice(Device? d) {
     if (d == null) return;
@@ -2072,8 +2101,8 @@ abstract class _OrderStore with Store {
 
   /// Finds an order by number. Replaceable in tests.
   @visibleForTesting
-  late Future<Order?> Function(String companyId, int number)
-  findOrderByNumber = repository.getOrderByNumber;
+  late Future<Order?> Function(String companyId, int number) findOrderByNumber =
+      repository.getOrderByNumber;
 
   /// Writes a new order. Replaceable in tests.
   @visibleForTesting

@@ -89,6 +89,7 @@ function onNumber(event: Event) {
       class="field"
       type="date"
       :value="day"
+      :data-empty="!day || undefined"
       :required="field.required"
       :aria-invalid="!!error"
       :aria-describedby="error ? `${id}-error` : undefined"

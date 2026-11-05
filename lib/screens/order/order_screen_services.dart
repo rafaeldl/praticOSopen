@@ -8,7 +8,11 @@ import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/models/device.dart';
+import 'package:praticos/repositories/v2/customer_repository_v2.dart';
+import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_comment.dart';
@@ -126,6 +130,42 @@ class OrderPermissions {
 /// PDF). Injectable so the screen can be tested without Firebase.
 class OrderScreenActions {
   const OrderScreenActions();
+
+  /// "+ WhatsApp" / "Dados do cliente" on the order (order.quick.complete):
+  /// the customer's own form, pushed (editing opens pushed), without leaving
+  /// the order. The saved customer, or null when nothing was saved.
+  Future<Customer?> editCustomer(
+    BuildContext context,
+    String customerId,
+  ) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    final customer = await CustomerRepositoryV2().getSingle(
+      companyId,
+      customerId,
+    );
+    if (customer == null || !context.mounted) return null;
+    final saved = await Navigator.pushNamed(
+      context,
+      '/customer_form',
+      arguments: {'customer': customer},
+    );
+    return saved is Customer ? saved : null;
+  }
+
+  /// "+ Placa" / "+ Modelo" on the order: the device's own form, pushed.
+  Future<Device?> editDevice(BuildContext context, String deviceId) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    final device = await DeviceRepositoryV2().getSingle(companyId, deviceId);
+    if (device == null || !context.mounted) return null;
+    final saved = await Navigator.pushNamed(
+      context,
+      '/device_form',
+      arguments: {'device': device},
+    );
+    return saved is Device ? saved : null;
+  }
 
   /// People of the company, to pick the "Responsável" of an order.
   Future<List<UserAggr>> teamMembers() async {

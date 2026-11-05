@@ -13,9 +13,9 @@ import StatusLabel from '@/components/StatusLabel.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { formatMonthYear, formatTime } from '@/lib/format'
 import { mark } from '@/lib/marks'
-import { applyFreshFirstPage, mergeById } from '@/lib/order-list'
+import { applyFreshFirstPage, compareBy, compareRows, mergeById, type RowCompare } from '@/lib/order-list'
 import { onOrderEvent } from '@/lib/orders/bus'
-import { ASSIGNED_READS, FIRST_PAGE, companyHasOrders, createListLoader, listContext, type ListLoader } from '@/lib/orders/data'
+import { FIRST_PAGE, companyHasOrders, createFilterLoader, createListLoader, listContext, type ListLoader } from '@/lib/orders/data'
 import {
   canCreateOrders,
   defaultFilter,
@@ -24,6 +24,7 @@ import {
   filtersFor,
   holdDays,
   isHeld,
+  matchesFilter,
   matchesSearch,
   monthGroups,
   nextVisit,
@@ -32,7 +33,9 @@ import {
   remainingOnRow,
   rowsFor,
   servicesSummary,
+  summaryFromCounts,
   summaryOf,
+  type FilterCounts,
   type ListFilter,
   type Order,
 } from '@/lib/orders/model'
@@ -66,6 +69,8 @@ const filter = computed<ListFilter>(() => {
 })
 const board = computed(() => route.query.view === 'board')
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
+/** The search as it is in the URL (after the pause in typing): what the board asks the server. */
+const searchQuery = computed(() => (typeof route.query.q === 'string' ? route.query.q.trim() : ''))
 const rows = shallowRef<Order[]>([])
 const hasMore = ref(false)
 const loadingMore = ref(false)
@@ -73,6 +78,10 @@ const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const stale = ref(false)
 const firstRun = ref(false)
 const unpaid = ref<{ count: number; amount: number } | null>(null)
+/** The server's count of the filter (home.summary.count): never what happens to be loaded. */
+const counts = ref<FilterCounts | null>(null)
+/** The order of the filter's query, so pages and live rows join without skipping one. */
+let compare: RowCompare<Order> = compareRows
 /** New notices of this person (home.notifications.badge); read after the list paints. */
 const unread = ref(0)
 let stopSearch: (() => void) | undefined
@@ -109,7 +118,7 @@ const groups = computed(() =>
     ? monthGroups(visible.value).map((group) => ({ ...group, title: group.month ? formatMonthYear(group.month, country()) : '' }))
     : [{ key: 'list', title: '', rows: visible.value }],
 )
-const summary = computed(() => (search.value.trim() ? null : summaryOf(filter.value, filterRows.value, !hasMore.value, now.value)))
+const summary = computed(() => (search.value.trim() ? null : summaryFromCounts(filter.value, counts.value, filterRows.value, !hasMore.value, now.value)))
 const title = computed(() => t(route.name === 'orders' ? 'orders' : 'home'))
 /** The answer of the screen, right under the title (home.summary.count). */
 const summaryText = computed(() => {
@@ -133,6 +142,21 @@ const summaryText = computed(() => {
   return value.today ? t('homeWithYouToday', { count: value.count }) : t('homeWithYou', { count: value.count })
 })
 const searchHint = computed(() => t('homeSearchHintDevice', { device: deviceLabel().toLocaleLowerCase() }))
+/** The hint does not fit the box (phone, text at 200%): the box says only "Buscar"; the label keeps the whole hint. */
+const searchShort = ref(false)
+let measure: CanvasRenderingContext2D | null = null
+function fitSearch() {
+  const el = searchEl.value
+  if (!el || !el.clientWidth) return
+  const style = getComputedStyle(el)
+  measure ??= document.createElement('canvas').getContext('2d')
+  if (!measure) return
+  measure.font = style.font
+  const room = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+  // A little room for the clear button of type="search".
+  searchShort.value = measure.measureText(searchHint.value).width > room - 4
+}
+let searchResize: ResizeObserver | undefined
 const panelOpen = computed(() => !!panel.value.value)
 const showsMaintenances = computed(() => state.value === 'ready' && !search.value.trim() && ['open', 'mine', 'quotes', 'onHold'].includes(filter.value))
 const selectedOrders = computed(() => selected.value.map((id) => rows.value.find((row) => row.id === id)).filter((row): row is Order => !!row))
@@ -160,6 +184,23 @@ const EMPTY_TITLE: Record<ListFilter, () => string> = {
   all: () => t('noOrdersInView'),
 }
 
+/** An order found or changed on this screen, outside the pages: only shown if it belongs to the filter. */
+const inFilter = (order: Order) => board.value || matchesFilter(filter.value, order, now.value, session.uid)
+
+let recountTimer: ReturnType<typeof setTimeout> | undefined
+/** After a change on screen: the server counts the filter again (and Sem receber). */
+function recount() {
+  clearTimeout(recountTimer)
+  const token = loadToken
+  recountTimer = setTimeout(() => {
+    void import('@/lib/orders/list-extras').then((extras) => {
+      if (token !== loadToken) return
+      if (showsMoney) void extras.unpaidTotals(ctx).then((totals) => token === loadToken && (unpaid.value = totals))
+      void extras.filterCounts(ctx, filter.value, now.value).then((found) => token === loadToken && (counts.value = found))
+    })
+  }, 400)
+}
+
 function setQuery(patch: Record<string, string | undefined>) {
   const query = { ...route.query, ...patch }
   for (const key of Object.keys(patch)) if (patch[key] === undefined) delete query[key]
@@ -173,13 +214,15 @@ async function load() {
   firstRun.value = false
   stopWatch?.()
   stopWatch = undefined
-  // Minhas by assignedTo once #514 is in (ASSIGNED_READS); until then the orders the technician created.
-  const assigned = ASSIGNED_READS && filter.value === 'mine' ? (session.uid as string) : undefined
-  loader = createListLoader(ctx, queryStatuses(board.value ? 'all' : filter.value), assigned)
+  counts.value = null
+  // Each filter is its own server query (home.filter.*): what shows is never filtered from what was loaded.
+  loader = board.value ? createListLoader(ctx, queryStatuses('all')) : createFilterLoader(ctx, filter.value, now.value)
+  const order = loader.query.order
+  compare = order ? compareBy<Order>(order.field, order.dir) : compareRows
   try {
     const page = await loader.first()
     if (token !== loadToken) return
-    rows.value = page.rows
+    rows.value = [...page.rows].sort(compare)
     hasMore.value = page.hasMore
     state.value = 'ready'
     await nextTick()
@@ -209,7 +252,8 @@ async function load() {
     // After the paint: Sem receber count, ⌘K search and the lists of Nova OS (list-extras.ts).
     void import('@/lib/orders/list-extras').then((extras) => {
       if (token !== loadToken) return
-      if (showsMoney) void extras.unpaidTotals(ctx).then((totals) => (unpaid.value = totals))
+      if (showsMoney) void extras.unpaidTotals(ctx).then((totals) => token === loadToken && (unpaid.value = totals))
+      void extras.filterCounts(ctx, filter.value, now.value).then((found) => token === loadToken && (counts.value = found))
       stopSearch?.()
       stopSearch = extras.paletteSearch(() => rows.value, (id) => void panel.open(id), (name) => {
         search.value = name
@@ -224,7 +268,7 @@ async function load() {
     stopWatch = await loader.watch(
       FIRST_PAGE,
       (fresh) => {
-        if (token === loadToken) rows.value = applyFreshFirstPage(rows.value, fresh, FIRST_PAGE)
+        if (token === loadToken) rows.value = applyFreshFirstPage(rows.value, fresh, FIRST_PAGE, compare)
       },
       (error) => console.warn('orders: live list stopped', error),
     )
@@ -243,7 +287,7 @@ async function loadMore(): Promise<boolean> {
   try {
     const page = await loader.more()
     if (token !== loadToken) return false
-    rows.value = mergeById(rows.value, page.rows)
+    rows.value = mergeById(rows.value, page.rows, compare)
     hasMore.value = page.hasMore
     return true
   } catch (error) {
@@ -260,9 +304,9 @@ async function loadMore(): Promise<boolean> {
 async function searchOlder() {
   const number = Number(search.value.trim())
   if (loader && Number.isInteger(number) && number > 0) {
-    const found = await loader.byNumber(number).catch(() => [])
+    const found = (await loader.byNumber(number).catch(() => [])).filter(inFilter)
     if (found.length) {
-      rows.value = mergeById(rows.value, found)
+      rows.value = mergeById(rows.value, found, compare)
       return
     }
   }
@@ -355,13 +399,17 @@ watch(search, (text) => {
   typing = setTimeout(() => {
     setQuery({ q: text.trim() || undefined })
     if (text.trim()) announce(t('web.orders.count', { count: visible.value.length }))
-    // A number typed and not among the loaded rows: ask for it, so the exact one still comes first.
-    const number = Number(text.trim())
-    if (loader && Number.isInteger(number) && number > 0 && !rows.value.some((row) => row.number === number)) {
+    // The same server search as the board (number, customer, vehicle): an order of the
+    // filter that is not among the loaded pages still shows (lib/orders/search.ts).
+    if (!board.value && text.trim()) {
       const token = loadToken
-      void loader.byNumber(number).then((found) => {
-        if (token === loadToken && found.length) rows.value = mergeById(rows.value, found)
-      }).catch(() => {})
+      void import('@/lib/orders/search')
+        .then((module) => module.searchOrders(ctx, text))
+        .then((found) => {
+          const kept = found.filter(inFilter)
+          if (token === loadToken && kept.length) rows.value = mergeById(rows.value, kept, compare)
+        })
+        .catch((error) => console.warn('orders: search not asked', error))
     }
   }, 250)
 })
@@ -390,8 +438,10 @@ const stopBus = onOrderEvent(({ order, removedId, createdId }) => {
     const current = rows.value.find((row) => row.id === order.id)
     // A list row of the API has no lines: keep what the row had when the update has none.
     const merged = current && !order.hasLines ? { ...order, lines: current.lines, hasLines: current.hasLines } : order
-    rows.value = mergeById(rows.value, [merged])
+    // Changed here and out of the filter now (approved in Orçamentos, received in Sem receber): it leaves the list.
+    rows.value = inFilter(merged) ? mergeById(rows.value, [merged], compare) : rows.value.filter((row) => row.id !== merged.id)
   }
+  if (order || removedId || createdId) recount()
 })
 
 /**
@@ -418,15 +468,33 @@ onMounted(() => {
   // Infinite scroll: more rows before the end shows (home.list.load-more).
   observer = watchListEnd(loadMore)
   watch(sentinel, (element) => observer?.watch(element), { immediate: true })
+  // The search box changes size with the window and the text size; the hint is fitted again each time.
+  if ('ResizeObserver' in window) searchResize = new ResizeObserver(() => fitSearch())
+  watch(
+    searchEl,
+    (element, previous) => {
+      if (previous) searchResize?.unobserve(previous)
+      if (element) searchResize?.observe(element)
+      fitSearch()
+    },
+    { immediate: true },
+  )
+  watch(searchHint, () => void nextTick(fitSearch))
+  // Measured in the page's font: again once the web font is in (a fallback font is wider).
+  document.fonts?.addEventListener?.('loadingdone', fitSearch)
+  void document.fonts?.ready.then(fitSearch)
 })
 onBeforeUnmount(() => {
   loadToken++
+  clearTimeout(recountTimer)
   stopWatch?.()
   stopBus()
   observer?.disconnect()
   clearInterval(clock)
   window.removeEventListener('keydown', onKeys)
   removers.forEach((remove) => remove())
+  searchResize?.disconnect()
+  document.fonts?.removeEventListener?.('loadingdone', fitSearch)
   stopSearch?.()
 })
 
@@ -441,12 +509,15 @@ const columns = 5 + (showsMoney ? 1 : 0)
 </script>
 
 <template>
-  <header class="page-head">
+  <header class="page-head home-head">
     <div>
       <h1 class="page-title" tabindex="-1" data-page-title>{{ title }}</h1>
-      <!-- Always there on the list: the sentence arrives after the rows (what is left to receive) and must not push the screen down. -->
-      <p v-if="!board" class="page-sub page-answer" data-testid="summary">{{ summaryText }}</p>
+      <!-- Always there: the sentence arrives after the rows (what is left to receive) and must not push the screen down;
+           on the board it stays empty, so the toolbar and its search sit where they sit on the list. -->
+      <p class="page-sub page-answer" data-testid="summary" :aria-hidden="board || undefined">{{ board ? '' : summaryText }}</p>
     </div>
+    <!-- One row, the same place in Lista and Quadro: the search lives below, in the toolbar, and never moves these. -->
+    <div class="head-actions">
     <RouterLink class="btn btn--ghost bell" to="/notifications" data-testid="bell">
       <Bell :size="18" aria-hidden="true" />
       <span class="sr">{{ unread ? t('notificationsA11y', { count: unread }) : t('noticesTitle') }}</span>
@@ -466,13 +537,14 @@ const columns = 5 + (showsMoney ? 1 : 0)
     >
       {{ t('newOrderButton') }} <kbd>N</kbd>
     </button>
+    </div>
   </header>
 
-  <OrderBoard v-if="board" />
-  <template v-else>
-    <div class="toolbar">
-      <BatchActions v-if="selected.length" :orders="selectedOrders" @done="selected = []" />
-      <template v-else>
+  <div class="toolbar home-bar" :class="{ 'board-bar': board }">
+    <p v-if="board" class="board-hint sub">{{ t('web.board.hint') }}</p>
+    <BatchActions v-else-if="selected.length" :orders="selectedOrders" @done="selected = []" />
+    <template v-if="board || !selected.length">
+      <template v-if="!board">
         <div class="chips" role="group" :aria-label="t('web.orders.filters')">
           <button
             v-for="item in filters"
@@ -485,6 +557,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
             {{ FILTER_LABEL[item]() }}<span v-if="item === 'unpaid' && unpaid?.count" class="num"> {{ unpaid.count }}</span>
           </button>
         </div>
+      </template>
         <span class="spacer"></span>
         <label class="sr" for="orders-search">{{ searchHint }}</label>
         <input
@@ -494,11 +567,14 @@ const columns = 5 + (showsMoney ? 1 : 0)
           class="field search-mini"
           type="search"
           autocomplete="off"
-          :placeholder="searchHint"
+          :style="{ '--search-w': `calc(${searchHint.length}ch + 2.4rem)` }"
+          :placeholder="searchShort ? t('search') : searchHint"
         />
-      </template>
-    </div>
+    </template>
+  </div>
 
+  <OrderBoard v-if="board" :search="searchQuery" />
+  <template v-else>
     <div class="workspace" :class="{ 'has-panel': panelOpen }">
       <div class="list-pane">
         <p v-if="stale && state === 'ready'" class="offline" role="alert">

@@ -128,6 +128,25 @@ class FakeActions extends OrderScreenActions {
   @override
   Future<void> openInMaps(OrderStore store) async => calls.add('maps');
 
+  /// What "+ WhatsApp" / "+ Placa" get back from the record's own form.
+  Customer? editedCustomer;
+  Device? editedDevice;
+
+  @override
+  Future<Customer?> editCustomer(
+    BuildContext context,
+    String customerId,
+  ) async {
+    calls.add('editCustomer:$customerId');
+    return editedCustomer;
+  }
+
+  @override
+  Future<Device?> editDevice(BuildContext context, String deviceId) async {
+    calls.add('editDevice:$deviceId');
+    return editedDevice;
+  }
+
   @override
   Future<double?> askDiscount(
     BuildContext context, {
@@ -1164,6 +1183,81 @@ void main() {
       expect(find.byKey(const ValueKey('order_nfse')), findsOneWidget);
       await _openMenu(tester);
       expect(_menuLabels(tester), contains('Emitir nota fiscal'));
+    });
+  });
+
+  group('completar pela OS (order.quick.complete)', () {
+    testWidgets('"+ WhatsApp" opens the customer and the order copy follows', (
+      tester,
+    ) async {
+      final actions = FakeActions()
+        ..editedCustomer = (Customer()
+          ..id = 'c1'
+          ..name = 'Ana Souza'
+          ..phone = '(47) 98888-7777');
+      final store = OrderStore();
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': _order()},
+      );
+      final link = find.byKey(const ValueKey('order_missing_phone_'));
+      expect(link, findsOneWidget);
+      expect(find.text('WhatsApp'), findsOneWidget);
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+      expect(actions.calls, contains('editCustomer:c1'));
+      expect(store.customer?.phone, '(47) 98888-7777');
+      expect(find.byKey(const ValueKey('order_missing_phone_')), findsNothing);
+    });
+
+    testWidgets(
+      'a device without plate shows "+ Placa"; with a phone, nothing',
+      (tester) async {
+        final actions = FakeActions()
+          ..editedDevice = (Device()
+            ..id = 'd1'
+            ..name = 'Onix'
+            ..serial = 'ONX2B34');
+        final store = OrderStore();
+        final order = _order(phone: '(47) 3333-0101')
+          ..devices = [
+            DeviceAggr()
+              ..id = 'd1'
+              ..name = 'Onix',
+          ]
+          ..device = (DeviceAggr()
+            ..id = 'd1'
+            ..name = 'Onix');
+        await _pump(
+          tester,
+          screen(store, actions: actions),
+          args: {'order': order},
+        );
+        expect(
+          find.byKey(const ValueKey('order_missing_phone_')),
+          findsNothing,
+        );
+        final link = find.byKey(const ValueKey('order_missing_serial_d1'));
+        expect(link, findsOneWidget);
+        await tester.tap(link);
+        await tester.pumpAndSettle();
+        expect(actions.calls, contains('editDevice:d1'));
+        expect(store.devices.single.serial, 'ONX2B34');
+        expect(
+          find.byKey(const ValueKey('order_missing_serial_d1')),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets('without edit permission, no link', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), edit: false),
+        args: {'order': _order()},
+      );
+      expect(find.byKey(const ValueKey('order_missing_phone_')), findsNothing);
     });
   });
 }

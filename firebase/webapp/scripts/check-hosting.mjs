@@ -1,6 +1,6 @@
 // npm run check:hosting: serves firebase/hosting/public with the real
 // firebase.json in the Hosting emulator (demo project, own port) and checks that
-// /app routes get the SPA with its headers while the site stays the same.
+// /web routes get the SPA with its headers while the site stays the same.
 // Only static paths are requested: /q, /pro, /admin and /mcp go to Cloud Run or
 // Functions, so they are checked in the config instead of over the network.
 import { spawn } from 'node:child_process'
@@ -19,17 +19,21 @@ const check = (ok, message) => {
   console.log(`${ok ? 'ok  ' : 'FAIL'} ${message}`)
 }
 
-// 1. Config: /app goes first and the old rewrites are untouched and in order.
+// 1. Config: /web goes first and the old rewrites are untouched and in order.
 const rewrites = config.hosting.rewrites.map((rule) => rule.source)
 check(
-  rewrites[0] === '/app' && config.hosting.rewrites[1].regex === '^/app/[^.]*$',
-  'rewrites de /app vêm primeiro, só para caminhos sem extensão',
+  config.hosting.redirects[0]?.source === '/app' && config.hosting.redirects[1]?.source === '/app/:path*',
+  'redirects de /app para /web vêm primeiro',
+)
+check(
+  rewrites[0] === '/web' && config.hosting.rewrites[1].regex === '^/web/[^.]*$',
+  'rewrites de /web vêm primeiro, só para caminhos sem extensão',
 )
 for (const source of ['/mcp/**', '/_nuxt/**', '/q/**', '/pro/**', '/admin', '/admin/**', '/api/admin/**', '/api/orders/**']) {
   check(rewrites.includes(source), `rewrite ${source} continua`)
 }
 
-for (const file of ['public/index.html', 'public/app/index.html']) {
+for (const file of ['public/index.html', 'public/web/index.html']) {
   if (!existsSync(resolve(firebaseDir, 'hosting', file))) {
     console.error(`Falta hosting/${file}: rode o build do site e npm run build:hosting`)
     process.exit(1)
@@ -62,17 +66,17 @@ async function waitUp() {
 try {
   await waitUp()
   const get = (path) => fetch(`http://127.0.0.1:${PORT}${path}`, { redirect: 'manual' })
-  const spa = readFileSync(resolve(firebaseDir, 'hosting/public/app/index.html'), 'utf8')
+  const spa = readFileSync(resolve(firebaseDir, 'hosting/public/web/index.html'), 'utf8')
   const site = readFileSync(resolve(firebaseDir, 'hosting/public/index.html'), 'utf8')
 
-  // /app is a folder in public/, so Hosting answers with a redirect to /app/.
-  const bare = await get('/app')
+  // /web is a folder in public/, so Hosting answers with a redirect to /web/.
+  const bare = await get('/web')
   check(
-    bare.status === 200 || (bare.status === 301 && bare.headers.get('location')?.endsWith('/app/')),
-    '/app leva à SPA',
+    bare.status === 200 || (bare.status === 301 && bare.headers.get('location')?.endsWith('/web/')),
+    '/web leva à SPA',
   )
 
-  for (const path of ['/app/', '/app/orders', '/app/orders/x', '/app/orders?order=1', '/app/login']) {
+  for (const path of ['/web/', '/web/orders', '/web/orders/x', '/web/orders?order=1', '/web/login']) {
     const response = await get(path)
     const body = await response.text()
     check(response.status === 200 && body === spa, `${path} serve a SPA`)
@@ -81,7 +85,14 @@ try {
     check(response.headers.get('x-content-type-options') === 'nosniff', `${path} com nosniff`)
   }
 
-  const asset = /\/app\/assets\/[^"]+\.js/.exec(spa)?.[0]
+  // The web app moved from /app to /web (2026-11): saved links and bookmarks keep working.
+  for (const [from, to] of [['/app', '/web'], ['/app/', '/web'], ['/app/orders/x?order=1&f=all', '/web/orders/x?order=1&f=all'], ['/app/login', '/web/login']]) {
+    const moved = await get(from)
+    const location = moved.headers.get('location') ?? ''
+    check(moved.status === 301 && new URL(location, 'http://x').pathname + new URL(location, 'http://x').search === to, `${from} redireciona (301) para ${to} (${moved.status} ${location})`)
+  }
+
+  const asset = /\/web\/assets\/[^"]+\.js/.exec(spa)?.[0]
   const assetResponse = await get(asset)
   check(assetResponse.status === 200 && (await assetResponse.text()).length > 0, `${asset} existe`)
   check(assetResponse.headers.get('cache-control') === 'public, max-age=31536000, immutable', 'asset com cache imutável')
@@ -97,7 +108,7 @@ try {
       if (/Content Security Policy|Refused to/i.test(message.text())) violations.push(message.text())
     })
     await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort())
-    await page.goto(`http://127.0.0.1:${PORT}/app/login`)
+    await page.goto(`http://127.0.0.1:${PORT}/web/login`)
     const heading = await page.getByRole('heading', { level: 1 }).textContent({ timeout: 15000 }).catch(() => null)
     check(!!heading, `login renderiza com a CSP (${heading ?? 'nada'})`)
     check(violations.length === 0, `sem bloqueio da CSP${violations.length ? `: ${violations.join(' | ')}` : ''}`)
@@ -105,7 +116,7 @@ try {
     await browser.close()
   }
 
-  // An old domain sends /app to praticos.app with path, query and hash, before
+  // An old domain sends /web to praticos.app with path, query and hash, before
   // Firebase loads. praticos.firebaseapp.com is pointed at this emulator (web.app is
   // HSTS-preloaded, so the browser would not ask it over http); praticos.app is stubbed.
   const old = 'praticos.firebaseapp.com'
@@ -118,10 +129,14 @@ try {
       outside.push(route.request().url())
       return route.abort()
     })
+    await page.goto(`http://${old}:${PORT}/web/orders?order=1#x`)
+    await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
+    check(page.url() === 'https://praticos.app/web/orders?order=1#x', `${old}/web vai para praticos.app (${page.url()})`)
+    check(outside.length === 0, `sem carregar o Firebase antes de sair${outside.length ? `: ${outside.join(' | ')}` : ''}`)
+    // An old /app link on an old domain: /web on the same host, then praticos.app.
     await page.goto(`http://${old}:${PORT}/app/orders?order=1#x`)
     await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
-    check(page.url() === 'https://praticos.app/app/orders?order=1#x', `${old}/app vai para praticos.app (${page.url()})`)
-    check(outside.length === 0, `sem carregar o Firebase antes de sair${outside.length ? `: ${outside.join(' | ')}` : ''}`)
+    check(page.url() === 'https://praticos.app/web/orders?order=1#x', `${old}/app vai para praticos.app/web (${page.url()})`)
     // The site moved too (docs/DOMAIN.md): an old-domain page goes to the same path on praticos.app.
     await page.goto(`http://${old}:${PORT}/?a=1`)
     await page.waitForURL('https://praticos.app/**', { timeout: 10000 }).catch(() => {})
@@ -131,7 +146,7 @@ try {
   }
 
   // A tab from before a deploy asks for an old chunk: 404, never the index cached for a year.
-  const gone = await get('/app/assets/index-ffffffff.js')
+  const gone = await get('/web/assets/index-ffffffff.js')
   const goneBody = await gone.text()
   check(gone.status === 404 && goneBody !== spa, 'asset que não existe dá 404')
 

@@ -94,16 +94,18 @@ test('filtros do app: orçamentos, paradas, concluídas e todas por mês (home.f
   await openHome(page, 'admin')
   await page.getByRole('button', { name: 'Orçamentos' }).click()
   await expect(page).toHaveURL(/f=quotes/)
+  // Waiting longest first, page by page from the server: 505 (created "ahead") comes
+  // last when the other tests have made more than a page of quotes.
+  await loadAll(page)
   await expect(row(page, 505)).toHaveCount(1)
   await expect(row(page, 501)).toHaveCount(0)
-  await loadAll(page)
   await expect(page.getByTestId('summary')).toHaveText(/orçamentos? sem resposta/)
 
   await page.getByRole('button', { name: 'Paradas' }).click()
-  await expect(row(page, 503)).toHaveCount(1)
   // Only stopped orders, and the sentence counts them. Other tests stop orders of
   // their own in company A (orders-review N1), so the count is read from the screen.
   await loadAll(page)
+  await expect(row(page, 503)).toHaveCount(1)
   const held = table(page).locator('tbody tr')
   const count = await held.count()
   for (let i = 0; i < count; i++) await expect(held.nth(i)).toContainText(/Parada (há|desde)/)

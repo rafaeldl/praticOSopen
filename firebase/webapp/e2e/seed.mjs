@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_P, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -243,6 +243,57 @@ function brDay(offset) {
   const date = new Date(`${today}T15:00:00.000Z`)
   date.setUTCDate(date.getUTCDate() + offset)
   return date.toISOString()
+}
+
+/**
+ * Company paging (e2e/home-filters.spec.ts): each filter has more orders than
+ * the first page (30), so a filter that only looked at what was loaded misses
+ * some. Newest first: 40 paid done orders, then 35 late, 33 owed, 2 quotes of the
+ * consultant, 32 given to the technician and, oldest of all, one stopped order.
+ * Em aberto: 35 + 2 + 32 + 1 = 70, of them 35 late. Sem receber: 33 × R$ 60.
+ */
+async function seedPaging() {
+  const company = { id: COMPANY_P, name: COMPANIES[COMPANY_P].name }
+  const writer = db.bulkWriter()
+  writer.onWriteError((error) => error.failedAttempts < 3)
+  let age = 0
+  const put = (number, author, extra) => {
+    age += 10
+    void writer.set(db.doc(`companies/${COMPANY_P}/orders/pg-${number}`), {
+      number,
+      company,
+      customer: { id: `pg-customer-${number % 7}`, name: `Cliente Página ${number % 7}` },
+      services: [{ service: { id: 'pg-service', name: 'Revisão' }, value: 100 }],
+      products: [],
+      total: 100,
+      discount: 0,
+      paidAmount: 0,
+      payment: 'unpaid',
+      paid: false,
+      ...audit(author, age),
+      ...extra,
+    })
+  }
+  for (let n = 1; n <= 40; n++) put(n, USERS.pOwner, { status: 'done', paidAmount: 100, payment: 'paid', paid: true })
+  for (let n = 101; n <= 135; n++) put(n, USERS.pOwner, { status: 'approved', dueDate: brDay(-5) })
+  for (let n = 201; n <= 233; n++) put(n, USERS.pOwner, { status: 'done', paidAmount: 40 })
+  for (const n of [301, 302]) put(n, USERS.pConsultant, { status: 'quote', payment: null })
+  for (let n = 401; n <= 432; n++) put(n, USERS.pOwner, { status: 'approved', assignedTo: aggr(USERS.pTech) })
+  // The oldest order, with a customer and a vehicle of its own: the search of the
+  // list and of the board (e2e/home-header.spec.ts) finds it far from the loaded pages.
+  const zeca = { id: 'pg-customer-zeca', name: 'Zeca Antiguidades' }
+  const fusca = { id: 'pg-device-fusca', name: 'Fusca 1970', serial: 'OLD1970' }
+  put(900, USERS.pOwner, {
+    status: 'progress',
+    onHold: { reason: 'part', note: 'Peça encomendada', since: brDay(-10) },
+    customer: zeca,
+    device: fusca,
+    devices: [fusca],
+    deviceIds: [fusca.id],
+  })
+  void writer.set(db.doc(`companies/${COMPANY_P}/customers/${zeca.id}`), { name: zeca.name, company, ...audit(USERS.pOwner, 99000) })
+  void writer.set(db.doc(`companies/${COMPANY_P}/devices/${fusca.id}`), { name: fusca.name, serial: fusca.serial, company, ...audit(USERS.pOwner, 99000) })
+  await writer.close()
 }
 
 async function seedScenario() {
@@ -553,5 +604,6 @@ await seedOrders(COMPANY_B, 5)
 if (orders <= DEFAULT_ORDERS) {
   await seedScenario()
   await seedFinance()
+  await seedPaging()
 }
 console.log(`seed: ${Object.keys(USERS).length} usuários, ${orders} OS em ${Date.now() - started} ms`)

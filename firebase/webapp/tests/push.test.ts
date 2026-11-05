@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { askNotificationsOnce, claimBrowser, declineOffer, DEVICE_KEY, OWNER_KEY, pushConfigured, pushOffer, releaseBrowser } from '@/lib/push'
 import { linkToPath, noticeRedirect } from '@/lib/push/open'
+import { dropLegacyWorker } from '@/lib/push/token'
 
 describe('pushConfigured', () => {
   const full = { VITE_FIREBASE_VAPID_KEY: 'v', VITE_FIREBASE_MESSAGING_SENDER_ID: 's', VITE_FIREBASE_APP_ID: 'a' }
@@ -115,11 +116,38 @@ describe('noticeRedirect', () => {
   })
 })
 
+describe('dropLegacyWorker (web app moved from /app to /web)', () => {
+  function withRegistration(scope: string | null) {
+    const unregister = vi.fn(async () => true)
+    const getRegistration = vi.fn(async () => (scope ? { scope, unregister } : undefined))
+    Object.defineProperty(navigator, 'serviceWorker', { value: { getRegistration }, configurable: true })
+    return { unregister, getRegistration }
+  }
+
+  it('unregisters the old worker at /app/', async () => {
+    const { unregister, getRegistration } = withRegistration('https://praticos.app/app/')
+    await dropLegacyWorker()
+    expect(getRegistration).toHaveBeenCalledWith('/app/')
+    expect(unregister).toHaveBeenCalled()
+  })
+
+  it('leaves any other worker alone (the browser answers with the closest scope)', async () => {
+    const { unregister } = withRegistration('https://praticos.app/')
+    await dropLegacyWorker()
+    expect(unregister).not.toHaveBeenCalled()
+  })
+
+  it('does nothing without one', async () => {
+    withRegistration(null)
+    await expect(dropLegacyWorker()).resolves.toBeUndefined()
+  })
+})
+
 describe('linkToPath', () => {
-  it('turns the link of the notification into a route of /app', () => {
-    expect(linkToPath('https://praticos.app/app/?order=o1&company=c1')).toBe('/?order=o1&company=c1')
-    expect(linkToPath('/app/')).toBe('/')
-    expect(linkToPath('https://praticos.app/app/notifications')).toBe('/notifications')
+  it('turns the link of the notification into a route of /web', () => {
+    expect(linkToPath('https://praticos.app/web/?order=o1&company=c1')).toBe('/?order=o1&company=c1')
+    expect(linkToPath('/web/')).toBe('/')
+    expect(linkToPath('https://praticos.app/web/notifications')).toBe('/notifications')
     expect(linkToPath('https://evil.example/elsewhere')).toBe('/')
   })
 })
@@ -130,7 +158,7 @@ function loadWorker(windows: { url: string; visibilityState: string; focus?: () 
   const shown: { title: string; options: { body?: string; data?: { link?: string } } }[] = []
   const opened: string[] = []
   const scope = {
-    location: new URL('https://praticos.app/app/firebase-messaging-sw.js'),
+    location: new URL('https://praticos.app/web/firebase-messaging-sw.js'),
     addEventListener: (type: string, listener: (event: unknown) => void) => (listeners[type] = listener),
     skipWaiting: () => Promise.resolve(),
     registration: { showNotification: (title: string, options: { body?: string; data?: { link?: string } }) => (shown.push({ title, options }), Promise.resolve()) },
@@ -153,21 +181,21 @@ function loadWorker(windows: { url: string; visibilityState: string; focus?: () 
 const PUSH = {
   notification: { title: 'Orçamento Aprovado! ✅', body: 'Ana aprovou o orçamento da OS #42' },
   data: { type: 'order_approved', orderId: 'o1', companyId: 'c1' },
-  fcmOptions: { link: 'https://praticos.app/app/?order=o1&company=c1' },
+  fcmOptions: { link: 'https://praticos.app/web/?order=o1&company=c1' },
 }
 
 describe('firebase-messaging-sw.js', () => {
   it('shows the notification when no tab of the web app is on screen', async () => {
-    const worker = loadWorker([{ url: 'https://praticos.app/app/', visibilityState: 'hidden' }])
+    const worker = loadWorker([{ url: 'https://praticos.app/web/', visibilityState: 'hidden' }])
     await worker.fire('push', { data: { json: () => PUSH } })
     expect(worker.shown).toEqual([
-      { title: PUSH.notification.title, options: expect.objectContaining({ body: PUSH.notification.body, data: { link: '/app/?order=o1&company=c1' } }) },
+      { title: PUSH.notification.title, options: expect.objectContaining({ body: PUSH.notification.body, data: { link: '/web/?order=o1&company=c1' } }) },
     ])
   })
 
   it('hands it to the tab on screen instead (the bell and a notice inside the page)', async () => {
     const postMessage = vi.fn()
-    const worker = loadWorker([{ url: 'https://praticos.app/app/orders', visibilityState: 'visible', postMessage }])
+    const worker = loadWorker([{ url: 'https://praticos.app/web/orders', visibilityState: 'visible', postMessage }])
     await worker.fire('push', { data: { json: () => PUSH } })
     expect(worker.shown).toEqual([])
     expect(postMessage).toHaveBeenCalledWith({ type: 'praticos:notice', title: PUSH.notification.title, body: PUSH.notification.body, data: PUSH.data })
@@ -176,33 +204,33 @@ describe('firebase-messaging-sw.js', () => {
   it('a click focuses the open tab and tells it what to open', async () => {
     const postMessage = vi.fn()
     const focus = vi.fn(() => Promise.resolve())
-    const worker = loadWorker([{ url: 'https://praticos.app/app/', visibilityState: 'hidden', focus, postMessage }])
+    const worker = loadWorker([{ url: 'https://praticos.app/web/', visibilityState: 'hidden', focus, postMessage }])
     const close = vi.fn()
-    await worker.fire('notificationclick', { notification: { close, data: { link: '/app/?order=o1&company=c1' } } })
+    await worker.fire('notificationclick', { notification: { close, data: { link: '/web/?order=o1&company=c1' } } })
     expect(close).toHaveBeenCalled()
     expect(focus).toHaveBeenCalled()
-    expect(postMessage).toHaveBeenCalledWith({ type: 'praticos:notice-open', link: '/app/?order=o1&company=c1' })
+    expect(postMessage).toHaveBeenCalledWith({ type: 'praticos:notice-open', link: '/web/?order=o1&company=c1' })
     expect(worker.opened).toEqual([])
   })
 
   it('a click without an open tab opens the link', async () => {
     const worker = loadWorker([])
-    await worker.fire('notificationclick', { notification: { close: vi.fn(), data: { link: '/app/?order=o1&company=c1' } } })
-    expect(worker.opened).toEqual(['/app/?order=o1&company=c1'])
+    await worker.fire('notificationclick', { notification: { close: vi.fn(), data: { link: '/web/?order=o1&company=c1' } } })
+    expect(worker.opened).toEqual(['/web/?order=o1&company=c1'])
   })
 
-  it('reads the link from notification.click_action too, only inside /app', async () => {
+  it('reads the link from notification.click_action too, only inside /web', async () => {
     const worker = loadWorker([])
-    const notification = { title: 'x', click_action: 'https://praticos.app/app/?order=o2&company=c1' }
+    const notification = { title: 'x', click_action: 'https://praticos.app/web/?order=o2&company=c1' }
     await worker.fire('push', { data: { json: () => ({ notification, data: {} }) } })
     await worker.fire('push', { data: { json: () => ({ notification: { ...notification, click_action: 'https://praticos.app/pricing' }, data: {} }) } })
-    expect(worker.shown.map((n) => n.options.data?.link)).toEqual(['/app/?order=o2&company=c1', '/app/'])
+    expect(worker.shown.map((n) => n.options.data?.link)).toEqual(['/web/?order=o2&company=c1', '/web/'])
   })
 
   it('without a link from the server, builds it from the data; without an order, the start', async () => {
     const worker = loadWorker([])
     await worker.fire('push', { data: { json: () => ({ ...PUSH, fcmOptions: undefined }) } })
     await worker.fire('push', { data: { json: () => ({ notification: { title: 'Manutenção' }, data: { type: 'maintenance_due' } }) } })
-    expect(worker.shown.map((n) => n.options.data?.link)).toEqual(['/app/?order=o1&company=c1', '/app/'])
+    expect(worker.shown.map((n) => n.options.data?.link)).toEqual(['/web/?order=o1&company=c1', '/web/'])
   })
 })

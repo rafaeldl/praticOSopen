@@ -21,6 +21,8 @@
       "**/node_modules/**"
     ],
     "redirects": [
+      { "source": "/app", "destination": "/web", "type": 301 },
+      { "source": "/app/:path*", "destination": "/web/:path*", "type": 301 },
       { "source": "/pricing.html", "destination": "/", "type": 301 },
       { "source": "/pricing", "destination": "/", "type": 301 },
       { "source": "/pricing-en.html", "destination": "/index-en.html", "type": 301 },
@@ -56,27 +58,27 @@
         ]
       },
       {
-        "source": "/app/assets/**",
+        "source": "/web/assets/**",
         "headers": [
           { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
         ]
       },
       {
-        "regex": "^/app(/[^.]*)?$",
+        "regex": "^/web(/[^.]*)?$",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]
       },
       {
-        "source": "/app/index.html",
+        "source": "/web/index.html",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]
       },
       {
-        "source": "/app/**",
+        "source": "/web/**",
         "headers": [
-          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'sha256-jFkTf7aYV4R6zmmcKQQMEtWfB7QTRDIPKTtjG9Xi17Q=' 'sha256-9KH+o0p3BZIKNYvYzj4XVYanQGWycZx0EE/vGGnXn50=' 'sha256-ad4hJN5Hm7TJbiTnq9hkJL8phcV91kn00HatoWXK7X0=' https://apis.google.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://*.googleapis.com https://southamerica-east1-praticos.cloudfunctions.net https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://praticos.app https://praticos.web.app https://praticos.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" },
+          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'sha256-FR43fhspVHlnuABQwzrSEqUhdV2m2ExIJG5ev71Swa0=' 'sha256-9KH+o0p3BZIKNYvYzj4XVYanQGWycZx0EE/vGGnXn50=' 'sha256-+XMDdtfqycOlOcHECp38vx8fYNSXYJrD8i2Q0+e3rwo=' https://apis.google.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://*.googleapis.com https://southamerica-east1-praticos.cloudfunctions.net https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://praticos.app https://praticos.web.app https://praticos.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" },
           { "key": "X-Content-Type-Options", "value": "nosniff" },
           { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
           { "key": "X-Frame-Options", "value": "DENY" },
@@ -85,8 +87,8 @@
       }
     ],
     "rewrites": [
-      { "source": "/app", "destination": "/app/index.html" },
-      { "regex": "^/app/[^.]*$", "destination": "/app/index.html" },
+      { "source": "/web", "destination": "/web/index.html" },
+      { "regex": "^/web/[^.]*$", "destination": "/web/index.html" },
       {
         "source": "/mcp/**",
         "function": { "functionId": "api", "region": "southamerica-east1" }

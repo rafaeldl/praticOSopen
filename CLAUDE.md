@@ -752,6 +752,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/ORDER_ON_HOLD.md` - Marca de OS parada (motivo, dias parados, filtro Paradas)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
+- `docs/QUICK_REGISTER.md` - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS
 - `docs/CUSTOMER_CONTACTS.md` - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/DOMAIN.md` - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
@@ -759,7 +760,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
 - `docs/NFSE_DIRECT_DISCOVERY.md` - Discovery da NFS-e direto no Emissor Nacional (sem Asaas): regras do certificado, spike em produção, APIs do governo, cliente piloto e direção do desenho (emitentes, importar notas ao subir o certificado)
-- `docs/WEB_APP.md` - App web em `firebase/webapp` (Vue + Vite em `/app`): arquitetura, como rodar com o emulador, como adicionar tela
+- `docs/WEB_APP.md` - App web em `firebase/webapp` (Vue + Vite em `/web`): arquitetura, como rodar com o emulador, como adicionar tela
 - `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_APP_DESIGN.md` - Padrão do app web: tokens, mestre-detalhe, teclado

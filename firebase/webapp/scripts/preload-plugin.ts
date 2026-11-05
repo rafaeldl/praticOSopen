@@ -23,11 +23,11 @@ function chunkFiles(bundle: Record<string, ChunkLike>, test: (id: string) => boo
   return [...found]
 }
 
-/** Someone with a saved session gets Firestore (and the list, on /app/orders) preloaded. */
+/** Someone with a saved session gets Firestore (and the list, on /web/orders) preloaded. */
 export const PRELOAD_SCRIPT =
   "try{if(Object.keys(localStorage).some(function(k){return k.indexOf('firebase:authUser:')===0})){" +
   "var m=function(n){var e=document.querySelector('meta[name=\"'+n+'\"]');return e&&e.content?e.content.split(' '):[]};" +
-  "var f=m('praticos-preload-session');if(/^\\/app\\/orders\\/?$/.test(location.pathname))f=f.concat(m('praticos-preload-orders'));" +
+  "var f=m('praticos-preload-session');if(/^\\/web\\/orders\\/?$/.test(location.pathname))f=f.concat(m('praticos-preload-orders'));" +
   "f.forEach(function(h){var l=document.createElement('link');l.rel='modulepreload';l.href=h;document.head.appendChild(l)})}}catch(e){}"
 
 export function preloadCritical(base: string): Plugin {

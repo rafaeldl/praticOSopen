@@ -76,8 +76,13 @@ test('avisar o cliente depois de mudar a situação: nota com "Avisar", WhatsApp
   expect(text).toContain(`Começamos o serviço: OS ${order.number}.`)
   expect(text).toMatch(/\/q\/[A-Za-z0-9_-]+/)
   await expect(dialog(page, 'Mandar para o cliente')).toHaveCount(0)
-  // Once per order on this screen: concluding does not ask again.
-  await panel(page).getByTestId('next-step').click()
+  // Once per order on this screen: concluding does not ask again. The button
+  // turns into "Concluir serviço" only after "em andamento" is saved; a click
+  // before that is lost (CI).
+  const step = panel(page).getByTestId('next-step')
+  await expect(step).toHaveText('Concluir serviço', { timeout: 15_000 })
+  await expect(step).toBeEnabled()
+  await step.click()
   // Saved as done (the maintenance question depends on the shared vehicle, so it is not waited for).
   await expect.poll(async () => (await readOrder(order.id))?.status).toBe('done')
   await expect(panel(page).getByTestId('notify-note')).toHaveCount(0)

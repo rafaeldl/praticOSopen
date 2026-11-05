@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
 import { legacyHostRedirect } from './scripts/legacy-host-plugin'
 import { preloadCritical } from './scripts/preload-plugin'
 
-const BASE = '/app/'
+const BASE = '/web/'
 
 /** Version of this web build (settings.more-view): build day and commit, e.g. "2026.11.03 (3bc8283)". */
 function buildVersion(): string {

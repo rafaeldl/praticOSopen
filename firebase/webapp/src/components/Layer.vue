@@ -110,7 +110,10 @@ onMounted(async () => {
   await router.push({ query: { ...route.query, [LAYER_PARAM]: [...queryValues(route.query, LAYER_PARAM), key] } })
   pushed = true
   await nextTick()
-  const target = box.value?.querySelector<HTMLElement>('[data-autofocus]') ?? focusables()[0] ?? box.value
+  // A marked wrapper (MoneyInput's) gives its own field.
+  const marked = box.value?.querySelector<HTMLElement>('[data-autofocus]')
+  const field = marked && !marked.matches('input, textarea, select, button') ? marked.querySelector<HTMLElement>('input, textarea, select, button') : null
+  const target = field ?? marked ?? focusables()[0] ?? box.value
   target?.focus()
 })
 

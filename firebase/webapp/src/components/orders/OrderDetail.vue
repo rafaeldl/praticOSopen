@@ -12,8 +12,8 @@ import type { ComboboxGroup, ComboboxItem } from '@/components/Combobox.vue'
 import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
-import { canRegisterItem, loadCatalog, loadCustomers, registerItem, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
-import { createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { canRegisterItem, forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { listContext, watchOrder, type DetailState } from '@/lib/orders/data'
 import { loadLegacyRequest, readRequest, requestField, withRequest } from '@/lib/orders/request'
 import {
@@ -57,6 +57,11 @@ import { currentToast, showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
+import QuickCreate from './QuickCreate.vue'
+import Layer from '@/components/Layer.vue'
+import { loadCustomer, loadDevice, type CustomerDetail, type DeviceDetail } from '@/lib/customers/data'
+import { customerSummary, missingOnOrder, type Missing } from '@/lib/orders/quick-create'
+import { resolveLabel, segmentLabels } from '@/lib/segments'
 import * as maintenance from '@/lib/orders/maintenance-offer'
 import { askNotificationsOnce } from '@/lib/push'
 import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
@@ -86,6 +91,9 @@ const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue
 const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
 // Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
 const OrderNfse = defineAsyncComponent(() => Promise.all([import('@/components/finance/OrderNfse.vue'), loadTexts('finance')]).then(([m]) => m))
+// The full forms behind "Mais dados" and the order's "+ WhatsApp" / "+ Placa" (order.quick.*), with the cadastros' texts.
+const CustomerForm = defineAsyncComponent(() => Promise.all([import('@/components/customers/CustomerForm.vue'), loadTexts('customers')]).then(([m]) => m))
+const DeviceForm = defineAsyncComponent(() => Promise.all([import('@/components/customers/DeviceForm.vue'), loadTexts('customers')]).then(([m]) => m))
 const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
 // Checklists, after the order shows (their texts are in the orders chunk).
 const PdfDialog = defineAsyncComponent(() => import('./PdfDialog.vue'))
@@ -125,6 +133,10 @@ type Dialog =
   | { kind: 'share'; send?: boolean }
   | { kind: 'pendingForms'; count: number; first: string }
   | { kind: 'devicesFor'; name: string; add: (deviceId: string | null) => Promise<unknown> }
+  | { kind: 'quick'; quick: 'device' | 'item'; text: string }
+  | { kind: 'newDevice'; draft: { name: string; serial: string } }
+  | { kind: 'editCustomer'; detail: CustomerDetail }
+  | { kind: 'editDevice'; detail: DeviceDetail }
 const dialog = shallowRef<Dialog | null>(null)
 const menuButton = ref<HTMLElement | null>(null)
 const catalog = shallowRef<CatalogItem[]>([])
@@ -731,12 +743,92 @@ const itemGroups = (query: string): ComboboxGroup[] => {
 }
 const FREE_ITEM = '__free'
 const REGISTER_ITEM = '__register'
-async function registerAndAdd(name: string) {
+/** order.quick.item: kind and price asked in a small sheet, then into the catalog and onto the order. */
+function registerAndAdd(name: string) {
+  dialog.value = { kind: 'quick', quick: 'item', text: name }
+}
+
+async function onQuickSaved(record: Customer | Device | CatalogItem) {
+  const kind = dialog.value?.kind === 'quick' ? dialog.value.quick : null
   dialog.value = null
+  if (kind === 'item') {
+    catalog.value = [...catalog.value, record as CatalogItem]
+    await addCatalogItem(record as CatalogItem)
+  } else if (kind === 'device') {
+    devices.value = [...devices.value, record as Device]
+    await addDevice(record as Device)
+  }
+}
+function onQuickMore(draft: { name: string; serial?: string }) {
+  dialog.value = { kind: 'newDevice', draft: { name: draft.name, serial: draft.serial ?? '' } }
+}
+async function onNewDeviceSaved(id: string) {
+  dialog.value = null
+  forgetLists()
+  devices.value = await loadDevices()
+  const created = devices.value.find((d) => d.id === id)
+  if (created) await addDevice(created)
+}
+
+/**
+ * order.quick.complete: what the customer and the devices still lack (WhatsApp,
+ * plate/serial, model), as links under them; each opens the record's form over the order.
+ */
+const label = (key: string) => resolveLabel(key, segmentLabels(), (k) => t(k))
+const missing = computed<Missing[]>(() => {
+  const o = order.value
+  if (!o || !access.value?.canEditMainFields) return []
+  return missingOnOrder(o, { customers: can('manageCustomers'), devices: can('manageDevices') })
+})
+const missingText = (item: Missing) => {
+  const device = item.kind === 'phone' ? null : order.value?.devices.find((d) => d.id === item.deviceId)
+  const many = (order.value?.devices.length ?? 0) > 1
+  const what = item.kind === 'phone' ? t('web.quick.whatsapp') : label(item.kind === 'serial' ? 'device.serial' : 'device.model')
+  return many && device ? `${what} · ${device.name || device.serial}` : what
+}
+async function openMissing(item: Missing) {
+  if (item.kind === 'phone') await editCustomer()
+  else await editDevice(item.deviceId)
+}
+async function editCustomer() {
+  const id = order.value?.customer?.id
+  if (!id) return
   try {
-    const created = await registerItem(name)
-    catalog.value = [...catalog.value, created]
-    await addCatalogItem(created)
+    dialog.value = { kind: 'editCustomer', detail: await loadCustomer(id) }
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  }
+}
+async function editDevice(id: string) {
+  try {
+    dialog.value = { kind: 'editDevice', detail: await loadDevice(id) }
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  }
+}
+/** Saved: the order's copy of the customer follows (name, phone, e-mail, CPF/CNPJ), so WhatsApp works at once. */
+async function onCustomerEdited(id: string) {
+  dialog.value = null
+  const o = order.value
+  if (!o) return
+  try {
+    const fresh = (await loadCustomer(id)).customer
+    customers.value = customers.value.map((c) => (c.id === id ? { ...c, name: fresh.name, phone: fresh.phone ?? undefined } : c))
+    await run(() => writes.updateOrderFields(o.id, { customer: customerSummary(fresh) }), t('web.saved'))
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  }
+}
+/** Saved: the order's copy of that device follows (name and plate/serial). */
+async function onDeviceEdited(id: string) {
+  dialog.value = null
+  const o = order.value
+  if (!o) return
+  try {
+    const fresh = (await loadDevice(id)).device
+    forgetLists()
+    devices.value = devices.value.map((d) => (d.id === id ? { ...d, name: fresh.name ?? d.name, serial: fresh.serial } : d))
+    await saveDevices(o.devices.map((item) => (item.id === id ? { ...item, name: fresh.name || fresh.serial || item.name, ...(fresh.serial ? { serial: fresh.serial } : {}) } : item)))
   } catch (error) {
     showToast(t(errorMessageKey(error)))
   }
@@ -788,14 +880,8 @@ async function pickDeviceItem(item: ComboboxItem, query: string) {
   const current = dialog.value?.kind === 'device' ? dialog.value.current : undefined
   if (current) return changeDevice(current, item)
   if (item.id !== NEW_DEVICE) return addDevice(devices.value.find((d) => d.id === item.id) ?? (ownDevices.value.find((d) => d.id === item.id) as Device))
-  dialog.value = null
-  try {
-    const created = await createDeviceFrom(query)
-    devices.value = [...devices.value, created]
-    await addDevice(created)
-  } catch (error) {
-    showToast(t(errorMessageKey(error)))
-  }
+  // order.quick.device: model and plate/serial asked in a small sheet.
+  dialog.value = { kind: 'quick', quick: 'device', text: query }
 }
 
 const statusChoices = computed<Choice[]>(() => {
@@ -826,8 +912,11 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
   list.push({ id: 'share', label: t('shareTitle') })
-  // order.customer.open / order.device.open: the record's own screen, for who opens it.
+  // order.quick.complete: the customer's and the devices' data in a form over the order, without leaving it;
+  // "Abrir …" still goes to the record's own screen (order.customer.open / order.device.open).
+  if (o.customer?.id && can('manageCustomers')) list.push({ id: 'editCustomer', label: t('web.quick.customerData') })
   if (o.customer?.id && canOpen('/customers')) list.push({ id: 'openCustomer', label: t('web.order.openCustomer') })
+  for (const device of o.devices) if (device.id && can('manageDevices')) list.push({ id: `editDevice:${device.id}`, label: t('web.quick.deviceData', { name: device.name || device.serial || deviceLabel() }) })
   if (canOpen('/devices')) for (const device of o.devices) if (device.id) list.push({ id: `openDevice:${device.id}`, label: t('web.order.openDevice', { name: device.name ?? deviceLabel() }) })
   // order.pdf.view: the same rule as the app (canShareOrderPdf), values only for who sees them.
   if (canPrint.value) list.push({ id: 'pdf', label: t('web.order.pdf') })
@@ -855,6 +944,8 @@ function onMenu(id: string) {
   else if (id === 'invoice') issuing.value = true
   else if (id === 'share') dialog.value = { kind: 'share' }
   else if (id === 'openCustomer' && order.value?.customer?.id) void goTo('/customers', { customer: order.value.customer.id })
+  else if (id === 'editCustomer') void editCustomer()
+  else if (id.startsWith('editDevice:')) void editDevice(id.slice('editDevice:'.length))
   else if (id.startsWith('openDevice:')) void goTo('/devices', { device: id.slice('openDevice:'.length) })
   else if (id === 'cancel') dialog.value = { kind: 'cancel' }
   else if (id === 'delete') dialog.value = { kind: 'delete' }
@@ -968,6 +1059,9 @@ watch(
         <button v-else-if="access.canEditMainFields" type="button" class="link od-device-add" @click="openPicker('device')">
           {{ t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() }) }}
         </button>
+        <p v-if="missing.length" class="od-missing" data-testid="order-missing">
+          <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
+        </p>
         <div class="od-state">
           <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="lateText(order, now) ? undefined : statusText(order.status)" data-testid="order-status" />
           <button v-if="phrase && phraseActs" type="button" class="od-sentence link-plain" :class="{ 'od-sentence--late': phrase.late }" @click="onPhrase">{{ phrase.text }}</button>
@@ -1164,7 +1258,7 @@ watch(
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :method="suggestedMethod(order, session.companyId)" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
-    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" :send="!!dialog.send" @pick-customer="openPicker('customer')" @close="dialog = null" />
+    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" :send="!!dialog.send" @pick-customer="openPicker('customer')" @linked="watcher?.reread()" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :devices="order.devices" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
     <TextDialog
@@ -1199,6 +1293,14 @@ watch(
       @pick="pickDeviceItem"
       @close="dialog = null"
     />
+    <Layer v-else-if="dialog.kind === 'quick'" kind="sheet" :label="dialog.quick === 'item' ? t('web.quick.newItem') : t('web.quick.newDevice', { device: deviceLabel() })" @close="dialog = null">
+      <div class="layer-body">
+        <QuickCreate :id="`od-quick-${dialog.quick}`" :kind="dialog.quick" :text="dialog.text" @saved="onQuickSaved" @more="onQuickMore" @cancel="dialog = null" />
+      </div>
+    </Layer>
+    <DeviceForm v-else-if="dialog.kind === 'newDevice'" :draft="dialog.draft" :devices="[]" @saved="onNewDeviceSaved" @close="dialog = null" />
+    <CustomerForm v-else-if="dialog.kind === 'editCustomer'" :customer="dialog.detail.customer" :version="dialog.detail.version" :directory="[]" @saved="onCustomerEdited" @changed="editCustomer" @close="dialog = null" />
+    <DeviceForm v-else-if="dialog.kind === 'editDevice'" :device="dialog.detail.device" :version="dialog.detail.version" :devices="[]" @saved="onDeviceEdited" @changed="editDevice(dialog.detail.device.id)" @close="dialog = null" />
   </template>
   <PdfDialog
     v-if="pdfOpen && order"

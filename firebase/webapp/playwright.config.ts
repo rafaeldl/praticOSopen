@@ -17,14 +17,14 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     ...devices['Desktop Chrome'],
-    baseURL: `http://127.0.0.1:${PORT}/app/`,
+    baseURL: `http://127.0.0.1:${PORT}/web/`,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
     trace: 'retain-on-failure',
   },
   webServer: {
     command: `node e2e/serve.mjs ${PORT}`,
-    url: `http://127.0.0.1:${PORT}/app/`,
+    url: `http://127.0.0.1:${PORT}/web/`,
     reuseExistingServer: false,
   },
 })

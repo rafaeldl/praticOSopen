@@ -25,7 +25,8 @@ import '@/styles/receive.css'
 
 /** send (key W): opens WhatsApp as soon as the link is ready; the sheet stays only when it cannot. */
 const props = defineProps<{ order: Order; send?: boolean }>()
-const emit = defineEmits<{ close: []; pickCustomer: [] }>()
+// linked: the server saved the link in the order, so its version moved (the next save must send the new one).
+const emit = defineEmits<{ close: []; pickCustomer: []; linked: [] }>()
 
 type State = 'loading' | 'ready' | 'failed' | 'noCustomer'
 const state = ref<State>(props.order.customer?.id || props.order.customer?.name ? 'loading' : 'noCustomer')
@@ -102,6 +103,7 @@ async function load() {
  */
 async function createAndReread(): Promise<ShareToken> {
   const made = await createShareToken(props.order.id, PERMISSIONS_OF.all, 7)
+  emit('linked')
   try {
     return pickToken(await listShareTokens(props.order.id), new Date()) ?? made
   } catch {
@@ -132,6 +134,7 @@ async function replace(permissions: PermissionKind, expiresIn: number) {
   busy.value = true
   try {
     token.value = await createShareToken(props.order.id, PERMISSIONS_OF[permissions], expiresIn)
+    emit('linked')
     edited.value = false
     showToast(t('web.share.newLink'))
     announce(t('web.share.newLink'))
@@ -149,6 +152,7 @@ async function revoke() {
   busy.value = true
   try {
     await revokeShareToken(props.order.id, current.token)
+    emit('linked')
     showToast(t('web.share.revoked'))
     emit('close')
   } catch (error) {
