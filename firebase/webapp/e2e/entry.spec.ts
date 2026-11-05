@@ -204,7 +204,7 @@ test('Início no celular: o botão do perfil abre Clientes, Catálogo, Equipe e 
   await expect(page.getByRole('heading', { level: 1, name: 'Configurações' })).toBeVisible()
   for (const id of ['settings-customers', 'settings-catalog', 'settings-team', 'settings-company']) await expect(page.getByTestId(id)).toBeVisible()
   await page.getByTestId('settings-customers').click()
-  await expect(page).toHaveURL(/\/app\/customers$/)
+  await expect(page).toHaveURL(/\/web\/customers$/)
 })
 
 test('busca nas mais antigas traz a OS que não estava carregada (home.search.older)', async ({ page }) => {
@@ -237,7 +237,7 @@ test.describe('Avaliações', () => {
     await expect(rows.nth(1)).toContainText('“Serviço rápido” · OS 9301')
     await expectNoAxeViolations(page, 'avaliações')
     await rows.nth(1).getByRole('button').click()
-    await expect(page).toHaveURL(/\/app\/\?order=rated-5/)
+    await expect(page).toHaveURL(/\/web\/\?order=rated-5/)
     await expect(page.getByRole('complementary', { name: 'OS aberta' })).toContainText('9301')
   })
 

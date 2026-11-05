@@ -55,7 +55,7 @@ test('Ajustes leva aos checklists: os seus e os prontos, sem o pronto já copiad
 test('prontos que não carregam mostram o erro com Tentar de novo, sem sumir calados (checklist.list.load)', async ({ page }) => {
   await openChecklists(page, 'admin')
   await expect(page.getByTestId('ready-list')).toBeVisible()
-  await page.locator('a[href="/app/settings"]').first().click()
+  await page.locator('a[href="/web/settings"]').first().click()
   await expect(page.getByTestId('settings-checklists')).toBeVisible()
   await page.context().setOffline(true)
   await page.getByTestId('settings-checklists').click()

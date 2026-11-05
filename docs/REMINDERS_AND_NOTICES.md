@@ -39,7 +39,7 @@ OS nova → sem id até o "✓" → createItem(onCreated) → scheduleReminder
 O servidor (`firebase/functions/src/services/notification.service.ts`, `sendNotification`) separa os tokens de `users/{id}.fcmTokens` pela `platform`:
 
 - `ios`, `android` ou sem `platform` (tokens antigos): a mesma mensagem de sempre, com `android` e `apns`.
-- `web`: outra mensagem, com o mesmo título, texto e `data`, e `webpush.fcmOptions.link` para a tela do web (`https://praticos.app/app/?order={id}&company={id}`, ou `/app/` sem OS).
+- `web`: outra mensagem, com o mesmo título, texto e `data`, e `webpush.fcmOptions.link` para a tela do web (`https://praticos.app/web/?order={id}&company={id}`, ou `/web/` sem OS).
 
 Uma falha em qualquer das duas conta como falha do push (o aviso de cortesia tenta de novo). O teste `notification.webpush.test.ts` confere que a mensagem dos celulares não mudou. Os lembretes deste documento continuam só no celular. Ver `docs/WEB_APP.md`, "Avisos do navegador".
 

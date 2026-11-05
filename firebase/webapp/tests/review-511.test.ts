@@ -73,7 +73,7 @@ describe('stale build', () => {
   })
 
   test('recognizes failed chunk loads', () => {
-    expect(isChunkLoadError(new TypeError('Failed to fetch dynamically imported module: /app/assets/x.js'))).toBe(true)
+    expect(isChunkLoadError(new TypeError('Failed to fetch dynamically imported module: /web/assets/x.js'))).toBe(true)
     expect(isChunkLoadError(new Error('boom'))).toBe(false)
   })
 })

@@ -8,7 +8,7 @@ on:
       - master  # Ou a branch que você usa como principal
     paths:
       - 'firebase/hosting/**' # Executa a action se houver mudanças na pasta do site
-      - 'firebase/webapp/**' # App web servido em /app (docs/WEB_APP.md)
+      - 'firebase/webapp/**' # App web servido em /web (docs/WEB_APP.md)
       - 'firebase/firebase.json' # Ou se mudar rewrites/headers/config do hosting
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
         working-directory: firebase/hosting
         run: npm run build
 
-      # After the site: Eleventy writes hosting/public, the SPA goes to public/app.
+      # After the site: Eleventy writes hosting/public, the SPA goes to public/web.
       - name: Build web app
         working-directory: firebase/webapp
         run: |

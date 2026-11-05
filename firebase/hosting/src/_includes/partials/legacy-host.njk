@@ -2,5 +2,5 @@
    with the same path, query and hash before anything else loads. A static
    site cannot answer 301 per host (firebase.json redirects apply to every
    domain), so this runs first in <head>; the canonical already points to
-   praticos.app for search engines. /app has its own copy (webapp). #}
+   praticos.app for search engines. /web has its own copy (webapp). #}
 <script>(function(l){var h=l.hostname;if(h==='praticos.web.app'||h==='praticos.firebaseapp.com')l.replace('https://praticos.app'+l.pathname+l.search+l.hash)})(location)</script>

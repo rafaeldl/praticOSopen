@@ -80,7 +80,7 @@ jobs:
       - name: Lighthouse
         run: npm run lhci
 
-      - name: Hosting emulator (/app rewrites, headers, CSP, site unchanged)
+      - name: Hosting emulator (/web rewrites, headers, CSP, site unchanged)
         run: |
           (cd ../hosting && npm ci && npm run build)
           npm run build:hosting

@@ -15,10 +15,26 @@ interface TokenEntry {
   lastUsedAt?: string
 }
 
-/** The worker lives at /app/, so it never touches the site or another app's notifications. */
-function worker(): Promise<ServiceWorkerRegistration> {
+/** The worker lives at /web/, so it never touches the site or another app's notifications. */
+async function worker(): Promise<ServiceWorkerRegistration> {
   const base = import.meta.env.BASE_URL
+  await dropLegacyWorker()
   return navigator.serviceWorker.register(`${base}firebase-messaging-sw.js`, { scope: base })
+}
+
+/**
+ * Until 2026-11 the web app lived at /app/. Its worker stays installed (its
+ * script now answers with a redirect, so it never updates) and would show each
+ * notice a second time: unregistering it also ends its FCM subscription, and
+ * the new token replaces the old one under the same device id (saveToken).
+ */
+export async function dropLegacyWorker(): Promise<void> {
+  try {
+    const legacy = await navigator.serviceWorker.getRegistration('/app/')
+    if (legacy && new URL(legacy.scope).pathname === '/app/') await legacy.unregister()
+  } catch {
+    // Nothing to drop, or the browser refused: the new worker still registers.
+  }
 }
 
 async function browserToken(device: string): Promise<string | null> {

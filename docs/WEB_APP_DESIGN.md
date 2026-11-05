@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Padrão visual e de interação do app web do PraticOS (`firebase/webapp/`, servido em `/app`). Vale para toda tela autenticada no navegador. O app móvel segue `docs/APP_DESIGN_SYSTEM.md`, e o site institucional segue `firebase/hosting/design.md`. A arquitetura está em `docs/WEB_APP.md`.
+Padrão visual e de interação do app web do PraticOS (`firebase/webapp/`, servido em `/web`). Vale para toda tela autenticada no navegador. O app móvel segue `docs/APP_DESIGN_SYSTEM.md`, e o site institucional segue `firebase/hosting/design.md`. A arquitetura está em `docs/WEB_APP.md`.
 
 A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** Papel quente, tinta e barra lateral azul-marinho, ação principal amarela e números alinhados em coluna, com as regras de produto do app. Nada de Cupertino e nada de layout de marketing.
 
@@ -154,7 +154,7 @@ Sem imagens: o que se vê em cada tela, na tela grande.
 | Status | `StatusLabel` | Ponto + texto, nome da situação do segmento |
 | Valor | `MoneyInput` | Lê como digitado: 150 é 150, nunca 1,50 |
 
-Os componentes base aparecem em `/app/dev/components`, só nos builds de emulador.
+Os componentes base aparecem em `/web/dev/components`, só nos builds de emulador.
 
 ## Teclado
 

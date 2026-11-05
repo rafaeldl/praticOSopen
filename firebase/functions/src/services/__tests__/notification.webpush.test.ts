@@ -1,5 +1,5 @@
 // Browser notifications (Web Push through FCM): tokens the web app saves with
-// platform 'web' get a webpush message that opens the right screen of /app; the
+// platform 'web' get a webpush message that opens the right screen of /web; the
 // message to the phones stays exactly what it was.
 const mockSendEachForMulticast = jest.fn();
 
@@ -57,8 +57,8 @@ describe('notification.service - Web Push', () => {
       notification: NATIVE_MESSAGE.notification,
       data: NATIVE_MESSAGE.data,
       webpush: {
-        notification: { icon: 'https://praticos.app/app/notification-icon.png' },
-        fcmOptions: { link: 'https://praticos.app/app/?order=o1&company=c1' },
+        notification: { icon: 'https://praticos.app/web/notification-icon.png' },
+        fcmOptions: { link: 'https://praticos.app/web/?order=o1&company=c1' },
       },
     });
   });
@@ -89,7 +89,7 @@ describe('notification.service - Web Push', () => {
 
     await notifyMaintenanceDue('c1', { title: 'Manutenção chegando', body: 'Split', count: 1 }, []);
 
-    expect(mockSendEachForMulticast.mock.calls[0][0].webpush.fcmOptions.link).toBe('https://praticos.app/app/');
+    expect(mockSendEachForMulticast.mock.calls[0][0].webpush.fcmOptions.link).toBe('https://praticos.app/web/');
   });
 
   it('counts a failure of the browser message as a failed push', async () => {
@@ -105,11 +105,11 @@ describe('notification.service - Web Push', () => {
 
 describe('webPushLink', () => {
   it('opens the order in its company', () => {
-    expect(webPushLink({ orderId: 'o 1', companyId: 'c1' })).toBe('https://praticos.app/app/?order=o%201&company=c1');
+    expect(webPushLink({ orderId: 'o 1', companyId: 'c1' })).toBe('https://praticos.app/web/?order=o%201&company=c1');
   });
 
   it('opens the start without an order', () => {
-    expect(webPushLink({ type: 'courtesy_ending', companyId: 'c1' })).toBe('https://praticos.app/app/');
-    expect(webPushLink(undefined)).toBe('https://praticos.app/app/');
+    expect(webPushLink({ type: 'courtesy_ending', companyId: 'c1' })).toBe('https://praticos.app/web/');
+    expect(webPushLink(undefined)).toBe('https://praticos.app/web/');
   });
 });

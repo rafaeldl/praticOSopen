@@ -9,11 +9,11 @@ const webapp = resolve(import.meta.dirname, '..')
 const html = readFileSync(resolve(webapp, process.argv[2] ?? 'dist', 'index.html'), 'utf8')
 const hosting = JSON.parse(readFileSync(resolve(webapp, '../firebase.json'), 'utf8')).hosting
 const csp = hosting.headers
-  .filter((rule) => rule.source === '/app/**')
+  .filter((rule) => rule.source === '/web/**')
   .flatMap((rule) => rule.headers)
   .find((header) => header.key === 'Content-Security-Policy')?.value ?? ''
 
-if (!csp) console.error('firebase.json sem Content-Security-Policy em /app/**')
+if (!csp) console.error('firebase.json sem Content-Security-Policy em /web/**')
 
 const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1])
 const hashes = inline.map((code) => `'sha256-${createHash('sha256').update(code, 'utf8').digest('base64')}'`)
