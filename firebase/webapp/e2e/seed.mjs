@@ -279,7 +279,20 @@ async function seedPaging() {
   for (let n = 201; n <= 233; n++) put(n, USERS.pOwner, { status: 'done', paidAmount: 40 })
   for (const n of [301, 302]) put(n, USERS.pConsultant, { status: 'quote', payment: null })
   for (let n = 401; n <= 432; n++) put(n, USERS.pOwner, { status: 'approved', assignedTo: aggr(USERS.pTech) })
-  put(900, USERS.pOwner, { status: 'progress', onHold: { reason: 'part', note: 'Peça encomendada', since: brDay(-10) } })
+  // The oldest order, with a customer and a vehicle of its own: the search of the
+  // list and of the board (e2e/home-header.spec.ts) finds it far from the loaded pages.
+  const zeca = { id: 'pg-customer-zeca', name: 'Zeca Antiguidades' }
+  const fusca = { id: 'pg-device-fusca', name: 'Fusca 1970', serial: 'OLD1970' }
+  put(900, USERS.pOwner, {
+    status: 'progress',
+    onHold: { reason: 'part', note: 'Peça encomendada', since: brDay(-10) },
+    customer: zeca,
+    device: fusca,
+    devices: [fusca],
+    deviceIds: [fusca.id],
+  })
+  void writer.set(db.doc(`companies/${COMPANY_P}/customers/${zeca.id}`), { name: zeca.name, company, ...audit(USERS.pOwner, 99000) })
+  void writer.set(db.doc(`companies/${COMPANY_P}/devices/${fusca.id}`), { name: fusca.name, serial: fusca.serial, company, ...audit(USERS.pOwner, 99000) })
   await writer.close()
 }
 

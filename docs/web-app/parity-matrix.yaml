@@ -1266,9 +1266,9 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  e2e: firebase/webapp/e2e/home-header.spec.ts
   web_exception: null
-  note: "Campo sempre visível. Ignora maiúscula e acento. Busca só nas OS já carregadas."
+  note: "Campo sempre visível. Ignora maiúscula e acento. Busca só nas OS já carregadas. Web: na Lista e no Quadro, no mesmo lugar abaixo do sino, Lista | Quadro e Nova OS; também pergunta ao servidor (lib/orders/search.ts): número, clientes e veículos que batem (customer.id in, deviceIds array-contains-any; pela API, número e cliente), então acha OS fora das páginas carregadas. No Quadro os cartões são só o que o servidor achou."
 - id: home.search.older
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
