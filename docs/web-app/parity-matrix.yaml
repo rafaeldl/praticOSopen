@@ -1147,8 +1147,9 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  e2e: firebase/webapp/e2e/home-filters.spec.ts
   web_exception: null
+  note: "Web: cada filtro é uma consulta própria no servidor, com página (Mostrar mais), e os números do topo vêm de agregação (Firestore) ou do total da API, nunca do que está carregado."
 - id: home.filter.quotes
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1163,9 +1164,9 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  e2e: firebase/webapp/e2e/home-filters.spec.ts
   web_exception: null
-  note: "Mais antigos primeiro. Filtra no cliente sobre as OS abertas."
+  note: "Mais antigos primeiro. Web: consulta própria no Firestore (status quote, createdAt crescente, com página) e contagem no servidor; o app filtra no cliente sobre as OS abertas."
 - id: home.filter.on-hold
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1180,9 +1181,9 @@ rows:
   hardware: null
   data: ["companies/{id}/orders"]
   web_status: done
-  e2e: firebase/webapp/e2e/orders-list.spec.ts
+  e2e: firebase/webapp/e2e/home-filters.spec.ts
   web_exception: null
-  note: "Paradas há mais tempo primeiro. Filtra no cliente sobre as OS abertas."
+  note: "Paradas há mais tempo primeiro. Web: consulta própria no Firestore (approved/progress com onHold.since, com página) e contagem no servidor; quem não vê valores lê pela API, que não tem filtro de parada, e as páginas seguem até encher (sem contagem antes do fim). O app filtra no cliente sobre as OS abertas."
 - id: home.filter.mine
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1199,7 +1200,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/orders-review.spec.ts
   web_exception: null
-  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Web: Minhas pede assignedTo=<uid> à API (ASSIGNED_READS); com o #514 o técnico lê a OS atribuída criada por qualquer um (regras, API e índices). E2E: OS 508 do admin atribuída ao técnico aparece em Minhas e abre (orders-review.spec.ts). Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela."
+  note: "Filtra por assignedTo só dentro das OS que o técnico criou. Web: Minhas pede assignedTo=<uid> à API, com página e o total da API no topo (home-filters.spec.ts); com o #514 o técnico lê a OS atribuída criada por qualquer um (regras, API e índices). E2E: OS 508 do admin atribuída ao técnico aparece em Minhas e abre (orders-review.spec.ts). Não copiar: técnico só lê OS que criou e não cria OS, então Minhas fica vazia quando o admin cria e atribui; o web precisa de regra por assignedTo antes de prometer esta tela."
 - id: home.filter.done
   screen: lib/screens/menu_navigation/home_content.dart
   route: null

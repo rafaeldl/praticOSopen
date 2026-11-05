@@ -1,8 +1,11 @@
 /* Shell and base rules of the "Campo" prototype. Tokens: firebase/hosting/src/css/tokens.css.
-   Closed decisions: yellow primary action, comfortable density, IBM Plex Sans for text. */
+   Closed decisions: yellow primary action, density "Confortável" and font "Mais sóbria" of the
+   prototype (its data-density="comfy" and data-font="sober"): IBM Plex Sans for titles, text and
+   numbers, rows with --row-y 0.8rem and every one-line control (button, input, select) --ctl tall. */
 :root { --sidebar: 14rem;
   --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-num: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --color-warning-text: oklch(47% 0.12 60);
   --color-danger-text: oklch(49% 0.19 28);
   --color-control: oklch(58% 0.02 255);

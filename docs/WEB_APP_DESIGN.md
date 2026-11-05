@@ -17,7 +17,7 @@ A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** 
 | Mestre-detalhe com o detalhe trocando de lugar | **Painel ao lado** da lista, que não é camada |
 | Quadro de OS como tela própria, prioridade baixa | **Quadro como aba** da lista (Lista \| Quadro) |
 | Archivo nos títulos, IBM Plex Sans no texto | **IBM Plex Sans em tudo**, títulos inclusive. Outfit só no logo |
-| Densidade compacta como padrão | **Confortável** como padrão, sem escolha por pessoa |
+| Densidade compacta como padrão | **Confortável** como padrão, sem escolha por pessoa (no protótipo: Densidade "Confortável" e Fonte "Mais sóbria"; em `app.css`: `--font-display`, `--font-body` e `--font-num` IBM Plex Sans, `--row-y` 0,8 rem, `--ctl` 2,75 rem, que vale para botão, input e select) |
 | Receber como tela de mesa | **Receber como aba do Financeiro** (Resumo, Receber, Relatório) |
 | Mobile no navegador não é alvo | Funciona no celular, com abas embaixo e listas no lugar de tabelas |
 
