@@ -705,6 +705,7 @@ describeEmulator('firestore.rules', () => {
       const serverOnly = [
         'nfseCertificates/e1',
         'nfseCertificateRequests/h1',
+        'nfseKeyDestructions/k1',
         'companies/c1/private/nfse/emitters/e1',
         'companies/c1/private/nfse/emitters/e1/received/1',
         'companies/c1/private/nfse/audit/a1',
@@ -720,6 +721,7 @@ describeEmulator('firestore.rules', () => {
           await fs.setDoc(fs.doc(db, importBatch), { emitterId: 'e1', status: 'proposed' });
           await fs.setDoc(fs.doc(db, 'nfseCertificates/e1'), { companyId: 'c1', ciphertext: 'x', wrappedDek: 'y' });
           await fs.setDoc(fs.doc(db, 'nfseCertificateRequests/h1'), { companyId: 'c1', status: 'open' });
+          await fs.setDoc(fs.doc(db, 'nfseKeyDestructions/k1'), { companyId: 'c1', keyVersion: 'v1' });
           await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/emitters/e1'), { nextDpsNumber: 1, lastNsu: 0 });
           await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/emitters/e1/received/1'), { value: 10 });
           await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/audit/a1'), { action: 'upload' });

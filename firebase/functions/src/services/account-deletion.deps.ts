@@ -7,6 +7,7 @@ import { auth, db, storage } from './firestore.service';
 import { memberRole, ownerId, privateMembershipRef } from './membership.service';
 import { removeMember } from './company.service';
 import type { AccountDeletionDeps, CompanyInfo } from './account-deletion.service';
+import { deleteCompanyCertificates } from './nfse/certificate-vault.service';
 
 /** Company ids from a users/{uid}.companies array; malformed entries are ignored. */
 export function companyIdsFromEntries(companies: unknown): string[] {
@@ -84,6 +85,10 @@ export function defaultAccountDeletionDeps(): AccountDeletionDeps {
 
     deleteStoragePrefix: async (prefix) => {
       await storage.bucket().deleteFiles({ prefix });
+    },
+
+    deleteNfseCertificates: async (companyId) => {
+      await deleteCompanyCertificates(companyId);
     },
 
     deleteCompanyTree: async (companyId) => {

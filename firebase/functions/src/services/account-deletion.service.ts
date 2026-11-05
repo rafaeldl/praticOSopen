@@ -69,6 +69,12 @@ export interface AccountDeletionDeps {
   getCompany(companyId: string, uid: string): Promise<CompanyInfo>;
   /** Deletes every Storage object under [prefix]. */
   deleteStoragePrefix(prefix: string): Promise<void>;
+  /**
+   * Shreds the company's NFS-e certificates (/nfseCertificates, outside the
+   * company tree): deletes the sealed material and destroys each KMS key
+   * version (docs/ACCOUNT_DELETION.md).
+   */
+  deleteNfseCertificates(companyId: string): Promise<void>;
   /** Recursively deletes companies/{companyId} and all its subcollections. */
   deleteCompanyTree(companyId: string): Promise<void>;
   /** Removes [uid] from a company it does not own (membership doc and member map). */
@@ -167,6 +173,7 @@ export async function deleteAccount(uid: string, deps: AccountDeletionDeps): Pro
     for (const prefix of companyStoragePrefixes(companyId)) {
       await deps.deleteStoragePrefix(prefix);
     }
+    await deps.deleteNfseCertificates(companyId);
     await deps.deleteCompanyTree(companyId);
     console.log(`[accountDeletion] uid=${uid} company=${companyId} deleted`);
   }

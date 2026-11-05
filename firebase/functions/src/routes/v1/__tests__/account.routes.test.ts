@@ -24,6 +24,7 @@ function fakeDeps(overrides: Partial<AccountDeletionDeps> = {}): AccountDeletion
     getOwnedCompanyIds: jest.fn().mockResolvedValue([]),
     getCompany: jest.fn().mockResolvedValue(companyInfo()),
     deleteStoragePrefix: jest.fn().mockResolvedValue(undefined),
+    deleteNfseCertificates: jest.fn().mockResolvedValue(undefined),
     deleteCompanyTree: jest.fn().mockResolvedValue(undefined),
     leaveCompany: jest.fn().mockResolvedValue(undefined),
     deleteUserChannelLinks: jest.fn().mockResolvedValue(undefined),

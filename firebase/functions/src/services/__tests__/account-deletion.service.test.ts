@@ -60,6 +60,9 @@ function fakeWorld(init: {
     deleteStoragePrefix: jest.fn(async (prefix) => {
       calls.push(`storage:${prefix}`);
     }),
+    deleteNfseCertificates: jest.fn(async (id) => {
+      calls.push(`nfse-certs:${id}`);
+    }),
     deleteCompanyTree: jest.fn(async (id) => {
       calls.push(`company:${id}`);
       companies.delete(id);
@@ -105,6 +108,7 @@ describe('deleteAccount', () => {
     expect(w.calls).toEqual([
       'storage:tenants/c1/',
       'storage:companies/c1/',
+      'nfse-certs:c1',
       'company:c1',
       'links:u1',
       'user:u1',
