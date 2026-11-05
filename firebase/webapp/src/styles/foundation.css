@@ -11,9 +11,15 @@ a.nav-item, a.more-row, .tabbar a, a.btn { text-decoration: none; }
 .panel-title { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; line-height: 1.15; }
 
 .layer-head { padding: 1rem 1.15rem 0.5rem; }
-.layer-body { padding: 0.5rem 1.15rem 1rem; overflow: auto; display: grid; gap: 0.5rem; }
+.layer-body { padding: 0.5rem 1.15rem 1rem; overflow: auto; display: grid; gap: 0.5rem; grid-template-columns: minmax(0, 1fr); }
+/* Nothing in a layer pushes it sideways: the body's single column never grows
+   past the box (minmax above), a long word or link breaks where it must, and a
+   child of a flex or grid row may shrink below its content. */
+.layer-box { overflow-wrap: anywhere; }
+.layer-body > *, .layer-head > *, .layer-foot > * { min-width: 0; }
+.layer-foot { flex-wrap: wrap; }
 .layer--sheet { align-items: center; justify-content: center; }
-.layer--sheet .layer-box { width: 28rem; border-radius: 8px; max-height: 80vh; }
+.layer--sheet .layer-box { width: 28rem; border-radius: 8px; max-height: calc(100dvh - 2rem); }
 .layer-box:focus { outline: none; }
 .pal-none { padding: 1rem; }
 

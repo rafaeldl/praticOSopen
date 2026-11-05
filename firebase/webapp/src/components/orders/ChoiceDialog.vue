@@ -12,9 +12,16 @@ const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anch
 // With an anchor it is a menu held under its button, not a box in the middle of the screen.
 // Placed again after the layer opens and on resize: opening can still move the
 // button (the panel settling), and the menu must stay held under it.
-const place = () => {
+const place = (): Record<string, string> | undefined => {
   const rect = props.anchor?.getBoundingClientRect()
-  return rect ? { top: `${Math.round(rect.bottom + 4)}px`, right: `${Math.max(8, Math.round(window.innerWidth - rect.right))}px` } : undefined
+  if (!rect) return undefined
+  const right = `${Math.max(8, Math.round(window.innerWidth - rect.right))}px`
+  // As tall as the room below the button allows (it scrolls only past that);
+  // with little room below and more above, it opens upwards.
+  const below = window.innerHeight - rect.bottom - 12
+  const above = rect.top - 12
+  if (below >= 240 || below >= above) return { top: `${Math.round(rect.bottom + 4)}px`, right, '--menu-max': `${Math.round(below)}px` }
+  return { bottom: `${Math.round(window.innerHeight - rect.top + 4)}px`, right, '--menu-max': `${Math.round(above)}px` }
 }
 const boxStyle = ref(place())
 const replace = () => (boxStyle.value = place())
