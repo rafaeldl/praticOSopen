@@ -52,9 +52,9 @@ O core atual cobre a criação e preenchimento de formulários na OS. As regras 
 ## UX (seguir `docs/APP_DESIGN_SYSTEM.md`)
 - Tela de OS: seção “Checklists” com uma linha por checklist, ponto + texto de status (“Faltam 3 perguntas”, “Completo”).
 - **Resumo do checklist** (`lib/screens/forms/form_fill_screen.dart`, `FormFillScreen`):
-  - Fundo cinza agrupado, título grande, voltar em vidro e, só no checklist concluído (e para quem pode reabrir), “…” (`showPullDownMenu`) com “Reabrir”.
-  - Cabeçalho: aparelho/veículo, status (ponto + texto: âmbar “Faltam N perguntas”, verde “Completo”) e o único botão azul: “Começar”, “Continuar” ou “Concluir checklist”. Faltando só perguntas opcionais, “Concluir assim mesmo” aparece como link.
-  - “Perguntas”: cartão branco com cada pergunta, a resposta em palavras (“Sim”, a opção, “Óleo, Filtro”, o texto, “2 fotos”) ou “Sem resposta · Obrigatória”, e as miniaturas das fotos (tocar abre a galeria em tela cheia, com lixeira enquanto não estiver concluído). Tocar na linha abre aquela pergunta.
+  - Fundo cinza agrupado, título grande e voltar em vidro.
+  - Cabeçalho: aparelho/veículo, status (ponto + texto: âmbar “Faltam N perguntas”, verde “Completo” ou, se foi concluído com perguntas sem resposta, verde “Concluído · N sem resposta”) e o único botão azul: “Começar”, “Continuar” ou “Concluir checklist”. Faltando só perguntas opcionais, “Concluir assim mesmo” aparece como link. No checklist concluído, “Reabrir” aparece como link logo abaixo do status (só para quem pode reabrir).
+  - “Perguntas”: cartão branco com cada pergunta, a resposta em palavras (“Sim”, a opção, “Óleo, Filtro”, o texto, “2 fotos”) ou “Sem resposta · Obrigatória”, e as miniaturas das fotos (tocar abre a galeria em tela cheia, com lixeira enquanto não estiver concluído). Tocar na linha abre aquela pergunta. Com o checklist concluído, o toque mostra um alerta “Checklist concluído” que oferece “Reabrir” (ou, para quem não pode, diz que quem gerencia a equipe reabre). O texto do status vem de `completedChecklistLabel` (`form_question_sheet.dart`) e, no web, de `completedStatus` (`lib/forms/model.ts`); a linha do checklist na OS usa o mesmo texto (#588).
   - Checklist sem nenhuma resposta abre direto na primeira pergunta.
 - **Uma pergunta por vez** (`lib/screens/forms/form_question_sheet.dart`, `FormQuestionSheet`, aberta em sheet grande):
   - Topo: “Fechar” (X em vidro), nome do checklist, barra de progresso em segmentos (um por pergunta, azul quando respondida) e “Faltam N” (nunca “2 de 5”), pergunta em letra de título.

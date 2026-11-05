@@ -2794,6 +2794,7 @@
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
   "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "deviceReadingLine": "{label}: {value}",
   "orderItemCatalogPriceTitle": "¿Cambiar el precio en el Catálogo?",
   "orderItemCatalogPriceMessage": "{entity} “{name}” cuesta {from} en el Catálogo. ¿Usar {to} siempre o solo en esta OS?",
   "orderItemCatalogPriceAlways": "Usar siempre",
@@ -2802,5 +2803,9 @@
   "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí.",
   "sharePreview": "Ver como lo ve el cliente",
   "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
-  "sharePreviewFailed": "No se pudo abrir la vista previa. Inténtalo de nuevo."
+  "sharePreviewFailed": "No se pudo abrir la vista previa. Inténtalo de nuevo.",
+  "checklistStatusDoneMissing": "{count, plural, =1{Concluido · 1 sin respuesta} other{Concluido · {count} sin respuesta}}",
+  "checklistDoneTitle": "Checklist concluido",
+  "checklistDoneReopenBody": "Para cambiar una respuesta, reabra el checklist.",
+  "checklistDoneAskReopenBody": "Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist."
 }

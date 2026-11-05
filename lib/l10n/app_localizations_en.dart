@@ -7049,6 +7049,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
   String get orderItemCatalogPriceTitle => 'Change the price in the Catalog?';
 
   @override
@@ -7081,4 +7086,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharePreviewFailed => 'Couldn\'t open the preview. Try again.';
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Done · $count unanswered',
+      one: 'Done · 1 unanswered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist done';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'To change an answer, reopen the checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'To change an answer, ask whoever manages the team to reopen the checklist.';
 }

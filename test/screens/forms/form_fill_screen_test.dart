@@ -379,7 +379,7 @@ void main() {
     expect(FormsService.canQueueOffline(StateError('x')), isFalse);
   });
 
-  testWidgets('completed: read only, "…" reopens', (tester) async {
+  testWidgets('completed: read only, "Reabrir" in sight', (tester) async {
     final forms = _FakeForms();
     await _open(
       tester,
@@ -404,11 +404,80 @@ void main() {
     expect(find.text('1 foto'), findsOneWidget);
     expect(find.text('Continuar'), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('form_fill_menu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reabrir'));
+    await tester.tap(find.byKey(const ValueKey('form_fill_reopen')));
     await tester.pumpAndSettle();
     expect(forms.statuses, [FormStatus.inProgress]);
     expect(find.text('Concluir checklist'), findsOneWidget);
+  });
+
+  testWidgets('completed with questions left: says so and a tap offers to '
+      'reopen', (tester) async {
+    final forms = _FakeForms();
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          status: FormStatus.completed,
+          responses: [FormResponse(itemId: 'b', value: 'Cheio')],
+        ),
+        formsService: forms,
+        photoService: _FakePhotos(),
+        canReopen: () => true,
+      ),
+    );
+
+    expect(find.text('Concluído · 2 sem resposta'), findsOneWidget);
+    expect(find.text('Completo'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('form_fill_item_a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Checklist concluído'), findsOneWidget);
+    expect(
+      find.text('Para mudar uma resposta, reabra o checklist.'),
+      findsOneWidget,
+    );
+    expect(find.byType(FormQuestionSheet), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('form_fill_done_reopen')));
+    await tester.pumpAndSettle();
+    expect(forms.statuses, [FormStatus.inProgress]);
+    expect(find.text('Continuar'), findsOneWidget);
+  });
+
+  testWidgets('completed, without permission to reopen: a tap says who can', (
+    tester,
+  ) async {
+    final forms = _FakeForms();
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          status: FormStatus.completed,
+          responses: [FormResponse(itemId: 'b', value: 'Cheio')],
+        ),
+        formsService: forms,
+        photoService: _FakePhotos(),
+        canReopen: () => false,
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('form_fill_reopen')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('form_fill_item_a')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir '
+        'o checklist.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Reabrir'), findsNothing);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(forms.statuses, isEmpty);
   });
 }

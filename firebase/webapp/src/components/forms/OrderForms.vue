@@ -15,7 +15,7 @@ import TemplatePicker from './TemplatePicker.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { addOrderForm, deleteOrderForm, loadReadyTemplates, loadSubscription, watchOrderForms, watchTemplates } from '@/lib/forms/data'
-import { activeCount, activeLimit, answeredCount, fitsOneMore, formsAccess, titleOf, WEB_PLAN_LIMITS_ENFORCED, type OrderForm, type Template } from '@/lib/forms/model'
+import { activeCount, activeLimit, answeredCount, completedStatus, fitsOneMore, formsAccess, titleOf, WEB_PLAN_LIMITS_ENFORCED, type OrderForm, type Template } from '@/lib/forms/model'
 import { declinedCount, offerDone, offerWaiting, rememberDecline, shouldOffer } from '@/lib/forms/offer'
 import { orderRoleOf, type Order } from '@/lib/orders/model'
 import { deviceLabel } from '@/lib/orders/text'
@@ -217,8 +217,11 @@ function open(formId: string) {
 }
 defineExpose({ open, startAdd })
 
-const statusText = (form: OrderForm) =>
-  form.status === 'completed' ? t('checklistStatusDone') : t('orderChecklistProgress', { answered: answeredCount(form), total: form.items.length })
+function statusText(form: OrderForm) {
+  if (form.status !== 'completed') return t('orderChecklistProgress', { answered: answeredCount(form), total: form.items.length })
+  const done = completedStatus(form)
+  return t(done.key, { count: done.count })
+}
 
 watch(
   () => props.order.id,

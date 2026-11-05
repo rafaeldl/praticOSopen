@@ -11484,6 +11484,12 @@ abstract class AppLocalizations {
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
 
+  /// Reading of a device at this visit (odometer, hour meter), label from the segment
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {value}'**
+  String deviceReadingLine(String label, String value);
+
   /// No description provided for @orderItemCatalogPriceTitle.
   ///
   /// In pt, this message translates to:
@@ -11536,6 +11542,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para abrir a prévia. Tente de novo.'**
   String get sharePreviewFailed;
+
+  /// No description provided for @checklistStatusDoneMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Concluído · 1 sem resposta} other{Concluído · {count} sem resposta}}'**
+  String checklistStatusDoneMissing(int count);
+
+  /// No description provided for @checklistDoneTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist concluído'**
+  String get checklistDoneTitle;
+
+  /// No description provided for @checklistDoneReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, reabra o checklist.'**
+  String get checklistDoneReopenBody;
+
+  /// No description provided for @checklistDoneAskReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.'**
+  String get checklistDoneAskReopenBody;
 }
 
 class _AppLocalizationsDelegate

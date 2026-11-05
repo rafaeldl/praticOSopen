@@ -432,7 +432,7 @@ test('concluído em outro lugar enquanto se digita: a resposta não entra (B1)',
   await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
   await fill(page).getByRole('textbox', { name: 'Observação' }).fill('digitado no web')
   await writeOrderFormRaw(order.id, formId, { status: 'completed', completedAt: new Date().toISOString() })
-  await expect(fill(page).getByTestId('fill-status')).toContainText('Completo')
+  await expect(fill(page).getByTestId('fill-status')).toContainText('Concluído · 1 sem resposta')
   await fill(page).getByRole('button', { name: 'Fechar' }).click()
   await expect(fill(page)).toBeHidden()
   const [saved] = await readOrderForms(order.id)
@@ -459,7 +459,11 @@ test('concluído: só leitura; admin reabre, técnico não; gerente lê sem resp
   await expect(fill(page).getByTestId('fill-status')).toContainText('Completo')
   await expect(fill(page)).toContainText('Sim')
   await expect(fill(page).getByRole('radio')).toHaveCount(0)
-  await expect(fill(page).getByTestId('fill-menu')).toHaveCount(0)
+  await expect(fill(page).getByTestId('fill-reopen')).toHaveCount(0)
+  // A click on an answer says it is completed and who reopens it (#588).
+  await fill(page).getByTestId('fill-done-q1').click()
+  await expect(page.getByTestId('fill-done-notice')).toContainText('peça a quem gerencia a equipe')
+  await page.getByRole('dialog', { name: 'Checklist concluído' }).getByRole('button', { name: 'OK' }).click()
   // Technician only adds or removes in a quote.
   await page.keyboard.press('Escape')
   await expect(forms(page).getByTestId('add-checklist')).toHaveCount(0)
@@ -467,8 +471,7 @@ test('concluído: só leitura; admin reabre, técnico não; gerente lê sem resp
   await signOut(page)
   await openOrder(page, 'admin', order.id)
   await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
-  await fill(page).getByTestId('fill-menu').click()
-  await page.getByRole('dialog').getByRole('button', { name: 'Reabrir' }).click()
+  await fill(page).getByTestId('fill-reopen').click()
   await expect(fill(page).getByTestId('fill-status')).toContainText('Tudo respondido')
   await expect(fill(page).getByRole('radio', { name: 'Sim' })).toHaveAttribute('aria-checked', 'true')
   expect((await readOrderForms(order.id))[0]?.status).toBe('in_progress')
@@ -480,6 +483,25 @@ test('concluído: só leitura; admin reabre, técnico não; gerente lê sem resp
   await expect(fill(page)).toContainText('Sim')
   await expect(fill(page).getByRole('radio')).toHaveCount(0)
   await expect(fill(page).getByTestId('fill-finish')).toHaveCount(0)
+})
+
+test('concluído assim mesmo: selo diz o que faltou e o clique numa pergunta oferece reabrir (#588)', async ({ page }) => {
+  const order = await makeOrder('admin', { status: 'progress' })
+  await makeOrderForm(order.id, {
+    items: [{ id: 'a', label: 'Freio ok?', type: 'boolean' }, { id: 'b', label: 'Luzes ok?', type: 'boolean' }, { id: 'c', label: 'Pneus ok?', type: 'boolean' }],
+    responses: [{ itemId: 'a', value: true, photoUrls: [] }],
+    status: 'completed',
+  })
+  await openOrder(page, 'admin', order.id)
+  await expect(forms(page).getByTestId('form-progress')).toHaveText('Concluído · 2 sem resposta')
+  await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
+  await expect(fill(page).getByTestId('fill-status')).toContainText('Concluído · 2 sem resposta')
+  await fill(page).getByTestId('fill-done-b').click()
+  const notice = page.getByRole('dialog', { name: 'Checklist concluído' })
+  await expect(notice).toContainText('Para mudar uma resposta, reabra o checklist.')
+  await notice.getByRole('button', { name: 'Reabrir' }).click()
+  await expect(fill(page).getByTestId('fill-status')).toContainText('Faltam 2 perguntas')
+  expect((await readOrderForms(order.id))[0]?.status).toBe('in_progress')
 })
 
 test('checklist pendente segura o "concluída" e abre o que falta; Remover tira da OS (order.status.pending-checklist, order.checklist.open, order.checklist.delete)', async ({ page }) => {

@@ -109,6 +109,10 @@ class FakeActions extends OrderScreenActions {
   final List<String> calls = [];
 
   @override
+  void recordDeviceReading(String deviceId, CustomField field, int value) =>
+      calls.add('reading $deviceId ${field.key} $value');
+
+  @override
   Future<void> openPayments(BuildContext context, OrderStore store) async =>
       calls.add('payments');
 
@@ -3179,6 +3183,131 @@ void main() {
         find.byKey(const ValueKey('new_order_more_responsible')),
         findsNothing,
       );
+    });
+  });
+
+  group('device reading (km, hours, none)', () {
+    const mileage = CustomField(
+      key: 'device.mileage',
+      type: 'number',
+      labels: {'pt-BR': 'Quilometragem'},
+      suffix: 'km',
+      reading: true,
+    );
+    // A machine shop whose segment was saved before the `reading` flag.
+    const hours = CustomField(
+      key: 'device.operatingHours',
+      type: 'number',
+      labels: {'pt-BR': 'Horímetro'},
+      suffix: 'h',
+    );
+    const battery = CustomField(
+      key: 'device.batteryHealth',
+      type: 'number',
+      labels: {'pt-BR': 'Saúde da bateria'},
+      suffix: '%',
+    );
+    tearDown(() => SegmentConfigService().debugSetCustomFields(const []));
+
+    Order visit({Map<String, num>? readings, String status = 'progress'}) =>
+        Order()
+          ..id = 'o1'
+          ..number = 7
+          ..status = status
+          ..customer = (CustomerAggr()
+            ..id = 'c1'
+            ..name = 'Ana Souza')
+          ..devices = [
+            DeviceAggr()
+              ..id = 'd1'
+              ..name = 'Gol 2018'
+              ..serial = 'ABC1D23',
+          ]
+          ..deviceReadings = readings
+          ..services = []
+          ..products = []
+          ..discount = 0
+          ..paidAmount = 0
+          ..transactions = [];
+
+    OrderScreenV2 screenWith(OrderStore store, FakeActions actions) =>
+        OrderScreenV2(
+          showAssistant: false,
+          store: store,
+          permissions: _permissions(),
+          actions: actions,
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+        );
+
+    testWidgets('vehicle: the km of this visit shows under the vehicle', (
+      tester,
+    ) async {
+      SegmentConfigService().debugSetCustomFields(const [mileage]);
+      await _pump(
+        tester,
+        screenWith(OrderStore(), FakeActions()),
+        args: {'order': visit(readings: {'d1': 98000})},
+      );
+      expect(find.text('Quilometragem: 98.000 km'), findsOneWidget);
+      expect(find.byKey(const ValueKey('order_reading_add_d1')), findsNothing);
+    });
+
+    testWidgets('machine: "+ Horímetro" asks the hours, saves them in the '
+        'order and on the machine', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const [hours]);
+      final store = OrderStore()
+        ..streamOrder = ((_, _) => const Stream.empty())
+        ..writeOrderFields = (_, _, _) async {};
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        screenWith(store, actions),
+        args: {'order': visit()},
+      );
+      final add = find.byKey(const ValueKey('order_reading_add_d1'));
+      expect(add, findsOneWidget);
+      expect(find.text('Horímetro'), findsOneWidget);
+
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('device_reading_input')),
+          matching: find.byType(EditableText),
+        ),
+        '1250',
+      );
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
+
+      expect(store.order!.deviceReadings, {'d1': 1250});
+      expect(actions.calls, contains('reading d1 device.operatingHours 1250'));
+      expect(find.text('Horímetro: 1.250 h'), findsOneWidget);
+    });
+
+    testWidgets('phone repair: no reading anywhere', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const [battery]);
+      await _pump(
+        tester,
+        screenWith(OrderStore(), FakeActions()),
+        args: {'order': visit()},
+      );
+      expect(find.byKey(const ValueKey('order_reading_add_d1')), findsNothing);
+      expect(find.byKey(const ValueKey('order_reading_d1')), findsNothing);
+      expect(find.textContaining('Saúde da bateria'), findsNothing);
+    });
+
+    testWidgets('a finished order without reading does not ask for it', (
+      tester,
+    ) async {
+      SegmentConfigService().debugSetCustomFields(const [mileage]);
+      await _pump(
+        tester,
+        screenWith(OrderStore(), FakeActions()),
+        args: {'order': visit(status: 'done')},
+      );
+      expect(find.byKey(const ValueKey('order_reading_add_d1')), findsNothing);
     });
   });
 }

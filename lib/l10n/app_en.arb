@@ -2806,6 +2806,7 @@
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
   "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
+  "deviceReadingLine": "{label}: {value}",
   "orderItemCatalogPriceTitle": "Change the price in the Catalog?",
   "orderItemCatalogPriceMessage": "{entity} “{name}” costs {from} in the Catalog. Use {to} always or only on this order?",
   "orderItemCatalogPriceAlways": "Use always",
@@ -2814,5 +2815,9 @@
   "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there.",
   "sharePreview": "See what the customer sees",
   "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
-  "sharePreviewFailed": "Couldn't open the preview. Try again."
+  "sharePreviewFailed": "Couldn't open the preview. Try again.",
+  "checklistStatusDoneMissing": "{count, plural, =1{Done · 1 unanswered} other{Done · {count} unanswered}}",
+  "checklistDoneTitle": "Checklist done",
+  "checklistDoneReopenBody": "To change an answer, reopen the checklist.",
+  "checklistDoneAskReopenBody": "To change an answer, ask whoever manages the team to reopen the checklist."
 }
