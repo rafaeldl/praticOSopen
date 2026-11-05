@@ -22,6 +22,13 @@ class LabelKeys {
   /// Exemplos: "Veículos", "Equipamentos", "Aparelhos"
   static const deviceEntityPlural = 'device._entity_plural';
 
+  /// Label of a catalog service (singular). Example: "Serviço".
+  static const serviceEntity = 'service._entity';
+
+  /// Label of a catalog product (singular).
+  /// Examples: "Produto", "Peça", "Componente"
+  static const productEntity = 'product._entity';
+
   /// Label da entidade "customer" (singular)
   /// Exemplos: "Cliente", "Proprietário"
   static const customerEntity = 'customer._entity';

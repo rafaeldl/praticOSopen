@@ -2811,5 +2811,11 @@
   "nfseDirectErrorDailyLimit": "This company reached today's invoice limit. It can issue again tomorrow; if you need more, contact support.",
   "nfseDirectErrorOwnerOnly": "Only the account owner can change this.",
   "nfseDirectManagerCanIssue": "Managers can issue invoices",
-  "nfseDirectManagerCanIssueHint": "You get a notice whenever someone else issues or cancels an invoice."
+  "nfseDirectManagerCanIssueHint": "You get a notice whenever someone else issues or cancels an invoice.",
+  "orderItemCatalogPriceTitle": "Change the price in the Catalog?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” costs {from} in the Catalog. Use {to} always or only on this order?",
+  "orderItemCatalogPriceAlways": "Use always",
+  "orderItemCatalogPriceOnlyHere": "Only this order",
+  "orderItemCatalogPriceSaved": "Catalog price changed to {to}",
+  "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there."
 }

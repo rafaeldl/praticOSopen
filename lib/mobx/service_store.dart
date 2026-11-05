@@ -84,6 +84,23 @@ abstract class _ServiceStore with Store {
     _draftIds.remove(service.id);
   }
 
+  /// Writes only the price of the service [id] (with updatedAt, so the web
+  /// sees the change): "Usar sempre" after a new price in an order.
+  Future<void> updatePrice(String id, double? value) async {
+    await _companyLoaded;
+    if (companyId == null) return;
+    final user = await userStore.getSingleUserById();
+    final stamp = Service()
+      ..updatedAt = DateTime.now()
+      ..updatedBy = user?.toAggr();
+    final json = stamp.toJson();
+    await repository.writeFields(companyId!, id, {
+      'value': value,
+      'updatedAt': json['updatedAt'],
+      if (json['updatedBy'] != null) 'updatedBy': json['updatedBy'],
+    });
+  }
+
   /// Ids given to services not saved yet (a photo taken before the ✓).
   final Set<String> _draftIds = {};
 

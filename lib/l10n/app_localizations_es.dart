@@ -7088,4 +7088,32 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get nfseDirectManagerCanIssueHint =>
       'Recibes un aviso cada vez que otra persona emite o cancela una factura.';
+
+  @override
+  String get orderItemCatalogPriceTitle => '¿Cambiar el precio en el Catálogo?';
+
+  @override
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  ) {
+    return '$entity “$name” cuesta $from en el Catálogo. ¿Usar $to siempre o solo en esta OS?';
+  }
+
+  @override
+  String get orderItemCatalogPriceAlways => 'Usar siempre';
+
+  @override
+  String get orderItemCatalogPriceOnlyHere => 'Solo en esta OS';
+
+  @override
+  String orderItemCatalogPriceSaved(String to) {
+    return 'El precio del Catálogo cambió a $to';
+  }
+
+  @override
+  String get orderItemCatalogPriceFailed =>
+      'No se pudo cambiar el precio en el Catálogo. Cámbialo allí.';
 }

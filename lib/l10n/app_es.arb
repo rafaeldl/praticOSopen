@@ -2799,5 +2799,11 @@
   "nfseDirectErrorDailyLimit": "Esta empresa llegó al límite de facturas de hoy. Mañana puede volver a emitir; si necesitas más, habla con soporte.",
   "nfseDirectErrorOwnerOnly": "Solo el dueño de la cuenta puede cambiar esto.",
   "nfseDirectManagerCanIssue": "El gerente puede emitir facturas",
-  "nfseDirectManagerCanIssueHint": "Recibes un aviso cada vez que otra persona emite o cancela una factura."
+  "nfseDirectManagerCanIssueHint": "Recibes un aviso cada vez que otra persona emite o cancela una factura.",
+  "orderItemCatalogPriceTitle": "¿Cambiar el precio en el Catálogo?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” cuesta {from} en el Catálogo. ¿Usar {to} siempre o solo en esta OS?",
+  "orderItemCatalogPriceAlways": "Usar siempre",
+  "orderItemCatalogPriceOnlyHere": "Solo en esta OS",
+  "orderItemCatalogPriceSaved": "El precio del Catálogo cambió a {to}",
+  "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí."
 }

@@ -3194,5 +3194,13 @@
   "nfseDirectErrorDailyLimit": "Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.",
   "nfseDirectErrorOwnerOnly": "Só o dono da conta muda isso.",
   "nfseDirectManagerCanIssue": "Gerente pode emitir notas",
-  "nfseDirectManagerCanIssueHint": "Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota."
+  "nfseDirectManagerCanIssueHint": "Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.",
+  "orderItemCatalogPriceTitle": "Mudar o preço no Catálogo?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” custa {from} no Catálogo. Usar {to} sempre ou só nesta OS?",
+  "@orderItemCatalogPriceMessage": {"placeholders": {"entity": {"type": "String"}, "name": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}}},
+  "orderItemCatalogPriceAlways": "Usar sempre",
+  "orderItemCatalogPriceOnlyHere": "Só nesta OS",
+  "orderItemCatalogPriceSaved": "Preço do Catálogo mudou para {to}",
+  "@orderItemCatalogPriceSaved": {"placeholders": {"to": {"type": "String"}}},
+  "orderItemCatalogPriceFailed": "Não deu para mudar o preço no Catálogo. Mude por lá."
 }
