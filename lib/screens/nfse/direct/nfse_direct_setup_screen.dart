@@ -173,6 +173,25 @@ class _NfseDirectSetupScreenState extends State<NfseDirectSetupScreen> {
     if (mounted) setState(() => _saving = false);
   }
 
+  Future<void> _setManagerCanIssue(bool value) async {
+    setState(() => _saving = true);
+    try {
+      await _api.setManagerCanIssue(value);
+    } catch (e) {
+      if (mounted) {
+        final forbidden = e is NfseDirectApiException && e.code == 'FORBIDDEN';
+        showAppToast(
+          context,
+          forbidden
+              ? context.l10n.nfseDirectErrorOwnerOnly
+              : nfseDirectErrorText(context.l10n, e),
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
+    }
+    if (mounted) setState(() => _saving = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -240,6 +259,13 @@ class _NfseDirectSetupScreenState extends State<NfseDirectSetupScreen> {
                 title: l10n.nfseDirectAutoIssueRow,
                 subtitle: nfseDirectAutoIssueLabel(l10n, _settings.autoIssue),
                 onTap: _saving ? null : _pickAutoIssue,
+              ),
+              MoreSwitchRow(
+                key: const Key('nfseDirectManagerCanIssue'),
+                title: l10n.nfseDirectManagerCanIssue,
+                subtitle: l10n.nfseDirectManagerCanIssueHint,
+                value: _settings.managerCanIssue,
+                onChanged: _saving ? null : _setManagerCanIssue,
               ),
             ],
           ),

@@ -48,6 +48,8 @@ const uniqueName = () => `new_${Date.now()}_${uploads++}`;
 
 const ADMINS: Actor[] = ['owner', 'admin'];
 const RECEIVERS: Actor[] = ['owner', 'admin', 'manager', 'consultant'];
+const FINANCE: Actor[] = ['owner', 'admin', 'manager'];
+const XML = { contentType: 'application/xml' };
 
 export const STORAGE_CASES: StorageCase[] = [
   { id: 'orderPhoto.read', title: 'ver foto de OS', run: read(`${T}/orders/o1/photos/p1.png`), allow: MEMBERS, shouldAllow: MEMBERS },
@@ -77,6 +79,12 @@ export const STORAGE_CASES: StorageCase[] = [
   { id: 'receipt.upload', title: 'enviar comprovante de recebimento', run: (s) => upload(`${T}/receipts/r1/${uniqueName()}.pdf`, PDF)(s), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'receipt.overwrite', title: 'sobrescrever comprovante de recebimento', run: upload(`${T}/receipts/r1/f1.pdf`, PDF), allow: [], shouldAllow: [] },
   { id: 'unknown.path', title: 'gravar fora dos caminhos conhecidos', run: upload('anything/else.png'), allow: [], shouldAllow: [] },
+  // Nota fiscal (issue #560): quem vê o financeiro lê; só o servidor grava; ninguém apaga (guarda de 5 anos).
+  { id: 'invoiceXml.read', title: 'baixar o XML da nota fiscal', run: read(`${T}/invoices/nf1/nfse.xml`), allow: FINANCE, shouldAllow: FINANCE },
+  { id: 'invoicePdf.read', title: 'baixar o PDF da nota fiscal', run: read(`${T}/invoices/nf1/danfse.pdf`), allow: FINANCE, shouldAllow: FINANCE },
+  { id: 'invoiceXml.delete', title: 'apagar o XML da nota fiscal', run: remove(`${T}/invoices/nf1/nfse.xml`), allow: [], shouldAllow: [] },
+  { id: 'invoicePdf.delete', title: 'apagar o PDF da nota fiscal', run: remove(`${T}/invoices/nf1/danfse.pdf`), allow: [], shouldAllow: [] },
+  { id: 'invoiceXml.write', title: 'trocar o XML da nota fiscal', run: upload(`${T}/invoices/nf1/nfse.xml`, XML), allow: [], shouldAllow: [] },
   { id: 'tenant.unknownWrite', title: 'gravar caminho desconhecido dentro da empresa', run: upload(`${T}/legacy/new.png`), allow: [], shouldAllow: [] },
 ];
 
@@ -87,6 +95,8 @@ const SEED_FILES: [string, { contentType: string }][] = [
   [`${T}/receipts/r1/f1.pdf`, PDF],
   [`${T}/legacy/x.png`, PNG],
   ['companies/c1/logo/l1.png', PNG],
+  [`${T}/invoices/nf1/nfse.xml`, XML],
+  [`${T}/invoices/nf1/danfse.pdf`, PDF],
 ];
 
 describeEmulator('storage.rules matrix', () => {

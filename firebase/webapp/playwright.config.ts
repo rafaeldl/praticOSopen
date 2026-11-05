@@ -6,6 +6,9 @@ const PORT = Number(process.env.PW_PORT ?? 4183)
 export default defineConfig({
   testDir: 'e2e',
   testIgnore: process.env.E2E_PERF ? undefined : ['perf/**'],
+  // PRs that don't touch styles skip the dark-theme axe pass (E2E_SKIP_DARK_AXE
+  // from webapp_check.yml); the light pass and dark-mode behavior tests still run.
+  grepInvert: process.env.E2E_SKIP_DARK_AXE ? /axe.*(tema escuro|\(dark\))/ : undefined,
   timeout: process.env.E2E_PERF ? 180_000 : 30_000,
   // CI runs 3 workers next to the emulators on a shared runner: Firestore
   // listeners there can take over 8 s, which failed random tests (#552).

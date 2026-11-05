@@ -6681,7 +6681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Choose the file and type the password to send.';
+      'Choose the file, type the password and accept the terms to send.';
 
   @override
   String get nfseDirectTerms =>
@@ -7047,6 +7047,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return '$customer\'s invoices go to the customer itself';
   }
+
+  @override
+  String get nfseDirectAcceptTerms =>
+      'I have read and accept the certificate terms';
+
+  @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Too many tries to send the certificate. Wait an hour and try again.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Someone else is changing this certificate right now. Try again in a few minutes.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'This company reached today\'s invoice limit. It can issue again tomorrow; if you need more, contact support.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly =>
+      'Only the account owner can change this.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'Managers can issue invoices';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'You get a notice whenever someone else issues or cancels an invoice.';
 
   @override
   String deviceReadingLine(String label, String value) {

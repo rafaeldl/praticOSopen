@@ -178,4 +178,11 @@ class NfseDirectApiService {
 
   Future<void> setAutoIssue(NfseDirectAutoIssue value) =>
       _request('PUT', '/v1/app/nfse/setup/settings', {'autoIssue': value.name});
+
+  /// Owner only (the server refuses others with FORBIDDEN).
+  Future<void> setManagerCanIssue(bool value) => _request(
+    'PUT',
+    '/v1/app/nfse/setup/settings',
+    {'managerCanIssue': value},
+  );
 }

@@ -241,6 +241,59 @@ void main() {
       expect(server.calls.single.$2, '/v1/app/nfse/setup/settings');
       expect(server.calls.single.$3, {'autoIssue': 'selectedCustomers'});
     });
+
+    testWidgets('"Gerente pode emitir" saves the owner\'s choice', (
+      tester,
+    ) async {
+      final server = _Server();
+      await _pump(
+        tester,
+        NfseDirectSetupScreen(
+          emitters: Stream.value([_emitter()]),
+          settings: Stream.value(const NfseDirectSettings()),
+          service: server.api,
+          now: _now,
+        ),
+      );
+      expect(find.text('Gerente pode emitir notas'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('nfseDirectManagerCanIssue')),
+          matching: find.byType(CupertinoSwitch),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(server.calls.single.$3, {'managerCanIssue': false});
+    });
+
+    testWidgets(
+      'an admin who is not the owner is told only the owner changes it',
+      (tester) async {
+        final server = _Server((_, _, _) => _error('FORBIDDEN', status: 403));
+        await _pump(
+          tester,
+          NfseDirectSetupScreen(
+            emitters: Stream.value([_emitter()]),
+            settings: Stream.value(
+              NfseDirectSettings.fromJson({'managerCanIssue': false}),
+            ),
+            service: server.api,
+            now: _now,
+          ),
+        );
+        await tester.tap(
+          find.descendant(
+            of: find.byKey(const Key('nfseDirectManagerCanIssue')),
+            matching: find.byType(CupertinoSwitch),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(server.calls.single.$3, {'managerCanIssue': true});
+        expect(find.text('Só o dono da conta muda isso.'), findsOneWidget);
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+      },
+    );
   });
 
   group('CertificateUploadSheet', () {
@@ -276,7 +329,7 @@ void main() {
       return results;
     }
 
-    testWidgets('the ✓ waits for file and password, then sends both', (
+    testWidgets('the ✓ waits for file, password and the terms, then sends', (
       tester,
     ) async {
       final server = _Server((_, _, _) => {'emitterId': 'e9'});
@@ -305,6 +358,24 @@ void main() {
         ),
       );
       expect(field.obscureText, isTrue);
+      // Still missing the explicit acceptance of the terms.
+      expect(find.byKey(const ValueKey('form_sheet_missing')), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('certificateUploadSheet')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('certificateAcceptTermsSwitch')));
+      await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
 
       await tester.tap(find.byKey(const ValueKey('new_order_save')));
@@ -335,6 +406,22 @@ void main() {
         'errada',
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('certificateUploadSheet')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('certificateAcceptTermsSwitch')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('certificateAcceptTermsSwitch')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('new_order_save')));
       await tester.pumpAndSettle();
 
@@ -347,6 +434,21 @@ void main() {
       expect(find.byKey(const Key('certificateUploadSheet')), findsOneWidget);
       expect(results, isEmpty);
     });
+  });
+
+  test('the terms link opens the page in the app language', () {
+    expect(
+      nfseCertificateTermsUrlFor('pt'),
+      'https://praticos.app/termo-certificado.html',
+    );
+    expect(
+      nfseCertificateTermsUrlFor('en'),
+      'https://praticos.app/termo-certificado-en.html',
+    );
+    expect(
+      nfseCertificateTermsUrlFor('es'),
+      'https://praticos.app/termo-certificado-es.html',
+    );
   });
 
   group('FiscalEmitterScreen', () {

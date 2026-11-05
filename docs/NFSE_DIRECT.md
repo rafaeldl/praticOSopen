@@ -39,6 +39,14 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 - `PUT /:emitterId/certificate`: troca (o CNPJ tem de ser o do emitente).
 - `DELETE /:emitterId/certificate`: apaga de verdade.
 
+### Termo do certificado (issue #572)
+
+- Página própria no site: `praticos.app/termo-certificado.html` (pt), `-en.html` e `-es.html`. Texto em `firebase/hosting/src/_data/legal.json` (`certificateTerms`), aprovado pelo Rafael em 2026-11-05 sem revisão de advogado (fica para depois).
+- Versão `2026-11-05`, igual a `NFSE_CERTIFICATE_TERMS_VERSION` (servidor), `nfseCertificateTermsVersion` (app) e `TERMS_VERSION` (web). Mudou o texto: subir a versão nos quatro lugares; o servidor recusa versão velha (`TERMS_NOT_ACCEPTED`).
+- Aceite explícito no envio: interruptor no app, caixa de marcar no web (`CertificateDrawer.vue`). Sem aceite o envio não sai.
+- Promessas do termo que dependem de gente: desfazer um apagamento em até 24 h é feito pelo suporte (restaurar a versão da chave no Cloud KMS); não há botão.
+- Política de privacidade: seção "Certificado digital e notas fiscais", Sistema Nacional da NFS-e em Compartilhamento e o prazo do certificado em Retenção.
+
 ### Regras
 
 1. Senha e .pfx nunca são gravados nem logados; os logs levam só o código do erro.
@@ -47,7 +55,19 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 4. Trocar: a chave do emitente ganha versão nova (primária) e a antiga é destruída.
 5. Apagar: apaga o material e a DEK cifrada e agenda a destruição da versão (24 h, dá para desfazer no console do KMS nesse prazo). Depois disso, qualquer cópia do documento em backup fica ilegível. O emitente e as notas ficam; `certificate.status` vira `deleted` (ou `expired` na limpeza dos 90 dias).
 6. Se o KMS não destruir na hora, a versão vai para `nfseKeyDestructions` e `processPendingKeyDestructions` tenta de novo (rotina diária da `nfseApi`).
-7. Auditoria em `companies/{cid}/private/nfse/audit`: ação (`upload`, `replace`, `delete`, `purge-expired`, `destroy-failed`), emitente, quem, quando, aparelho (`x-app-version` ou user agent) e IP. O upload grava a versão do termo aceito (`NFSE_CERTIFICATE_TERMS_VERSION`).
+7. Auditoria em `companies/{cid}/private/nfse/audit`: ação (`upload`, `replace`, `delete`, `purge-expired`, `destroy-failed`, `open`), emitente, quem, quando, aparelho (`x-app-version` ou user agent) e IP. O upload grava a versão do termo aceito (`NFSE_CERTIFICATE_TERMS_VERSION`).
+
+### Endurecimento (issue #560)
+
+8. Arquivo: o .pfx com contagem de iterações acima de 100 mil numa derivação, ou 400 mil somando todas, é recusado (`CERT_INVALID_FILE`) antes de qualquer conta. A checagem fica nas funções de derivação do `node-forge` (MAC, PBE do PKCS#12 e PBES2), então vale também para o que vem dentro de partes cifradas.
+9. Envios: no máximo 5 tentativas de enviar certificado por hora por pessoa e por empresa, contando senha errada e arquivo ruim (`TOO_MANY_ATTEMPTS`, 429). Contagem em `/nfseUploadLimits/{user-…|company-…}` (fechado nas regras).
+10. Uma troca por vez em cada emitente: enviar, trocar, apagar e a nova tentativa de destruição pegam uma trava com prazo de 3 min em `/nfseCertificateLocks/{emitter-…|taxid-…}` (fechado). Ocupado: `CERT_BUSY` (409). Depois de cada troca ou apagamento, toda versão viva da chave que não seja a do certificado atual é destruída (precisa de `cloudkms.cryptoKeyVersions.list` no `nfseKeyManager`).
+11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
+12. Exclusão de conta: o `accountApi` (outra conta de serviço) só apaga o material e põe o emitente na fila; quem destrói as versões é a `nfseDaily`. A fila guarda o emitente e, na hora de tentar, mantém só a versão do certificado que existir então. Depois de 2 tentativas sem sucesso a rotina loga `[nfse-alert] key destruction still pending`, que tem alerta no Cloud Monitoring.
+13. Emitir e cancelar: dono, admin e gerente; o dono pode tirar o gerente (`settings/nfse.managerCanIssue = false`, interruptor "Gerente pode emitir notas", só o dono muda). Quando outra pessoa emite ou cancela, o dono recebe aviso (sino + push, `type: nfse_invoice_by_team`).
+14. Teto diário por emitente: 60 notas por dia (São Paulo), contadas na reserva do número da DPS (`private/nfse/emitters/{id}.issuedOn/issuedToday`). Passou: `DAILY_LIMIT_REACHED` (429). Para um emitente que precise de mais, gravar `dailyIssueLimit` à mão no mesmo documento (máximo 1000).
+15. Arquivos da nota no Storage (`tenants/{cid}/invoices/**`): leitura só para dono, admin e gerente; ninguém apaga pelo app (guarda de 5 anos). Só o servidor grava.
+16. Revisão: `.github/CODEOWNERS` pede o Rafael em `services/nfse/**`, `nfse-api.ts`, rotas `nfse-*`, `package.json`/lock das Functions, regras e workflows.
 
 ### Cloud KMS (configurado em 2026-11-05)
 
@@ -66,7 +86,7 @@ Permissões da `nfse-api` (nada de KMS no projeto):
 | Onde | Papel | Para quê |
 |---|---|---|
 | key ring `nfse-certs` | `roles/cloudkms.cryptoKeyEncrypterDecrypter` | cifrar e decifrar a DEK |
-| key ring `nfse-certs` | `projects/praticos/roles/nfseKeyManager` (papel próprio: `cloudkms.cryptoKeys.create`, `.get`, `.update`, `cloudkms.cryptoKeyVersions.create`, `.destroy`) | criar a chave do emitente, versão nova na troca, trocar a primária, destruir a versão |
+| key ring `nfse-certs` | `projects/praticos/roles/nfseKeyManager` (papel próprio: `cloudkms.cryptoKeys.create`, `.get`, `.update`, `cloudkms.cryptoKeyVersions.create`, `.destroy`, `.list`) | criar a chave do emitente, versão nova na troca, trocar a primária, destruir as versões que sobraram |
 | projeto | `roles/datastore.user` | Firestore |
 | bucket `praticos.appspot.com` | `roles/storage.objectUser` | XML da nota em `tenants/{cid}/invoices/` |
 
@@ -77,7 +97,7 @@ gcloud services enable cloudkms.googleapis.com --project praticos
 gcloud kms keyrings create nfse-certs --location southamerica-east1 --project praticos
 gcloud iam service-accounts create nfse-api --display-name "NFS-e direta (nfseApi)" --description "Unica conta que decifra os certificados A1" --project praticos
 gcloud iam roles create nfseKeyManager --project praticos --title "NFS-e: chaves do emitente" --stage GA \
-  --permissions cloudkms.cryptoKeys.create,cloudkms.cryptoKeys.get,cloudkms.cryptoKeys.update,cloudkms.cryptoKeyVersions.create,cloudkms.cryptoKeyVersions.destroy
+  --permissions cloudkms.cryptoKeys.create,cloudkms.cryptoKeys.get,cloudkms.cryptoKeys.update,cloudkms.cryptoKeyVersions.create,cloudkms.cryptoKeyVersions.destroy,cloudkms.cryptoKeyVersions.list
 SA=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com
 gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role roles/cloudkms.cryptoKeyEncrypterDecrypter
 gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role projects/praticos/roles/nfseKeyManager
@@ -85,7 +105,7 @@ gcloud projects add-iam-policy-binding praticos --member $SA --role roles/datast
 gcloud storage buckets add-iam-policy-binding gs://praticos.appspot.com --member $SA --role roles/storage.objectUser
 ```
 
-O deploy pelo CI (`github-actions-deployer`) já pode usar a conta: tem `roles/iam.serviceAccountUser` no projeto.
+O deploy pelo CI (`github-actions-deployer`) usa a conta com `roles/iam.serviceAccountUser` dado na própria `nfse-api`, e só a ele (issue #560). Os logs de acesso do KMS (Data Access: leitura e escrita) ficam ligados no projeto, com alerta para Decrypt feito por outra conta e para pico de uso.
 
 #### Quem mais alcança as chaves
 
@@ -215,7 +235,7 @@ Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
 | Onde | O quê |
 |---|---|
 | App: `lib/screens/nfse/direct/nfse_direct_setup_screen.dart` | "Nota fiscal": frase no topo, "Seus CNPJs" (regime, certificado com ponto colorido, ✓ no padrão), "+" no topo e, sem CNPJ, o botão azul "Adicionar CNPJ"; "Emitir sozinha quando concluir a OS" abre a tela de escolher (Nunca / Para os clientes escolhidos / Para todas as OS) |
-| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho) e termo. ✓ azul só com arquivo e senha; recusa do servidor em frase simples dentro do sheet |
+| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho), link "Ler o termo" e interruptor "Li e aceito o termo do certificado". ✓ azul só com arquivo, senha e aceite; recusa do servidor em frase simples dentro do sheet |
 | App: `fiscal_emitter_screen.dart` e `fiscal_emitter_editors.dart` | Emitente: CNPJ, regime, "Notas este ano · este mês", teto do MEI (R$ 81 mil), linhas que abrem o editor (serviço, inscrição municipal, estilo da descrição, certificado). "…": Usar como padrão, Trocar certificado, Apagar certificado (vermelho, confirma; o emitente e as notas ficam) |
 | App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
 | Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |
