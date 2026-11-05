@@ -11484,6 +11484,264 @@ abstract class AppLocalizations {
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
 
+  /// No description provided for @nfseDirectCpfLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'CPF {value}'**
+  String nfseDirectCpfLine(String value);
+
+  /// No description provided for @nfseDirectCnpjLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJ {value}'**
+  String nfseDirectCnpjLine(String value);
+
+  /// No description provided for @nfseDirectProblemCertificate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem certificado digital'**
+  String get nfseDirectProblemCertificate;
+
+  /// No description provided for @nfseDirectProblemNotEnabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não habilitado a emitir na cidade'**
+  String get nfseDirectProblemNotEnabled;
+
+  /// No description provided for @nfseDirectProblemService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o serviço da nota'**
+  String get nfseDirectProblemService;
+
+  /// No description provided for @nfseDirectProblemSetup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta terminar a configuração deste CNPJ'**
+  String get nfseDirectProblemSetup;
+
+  /// No description provided for @nfseDirectIssueCannot.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este CNPJ não emite agora: {reason}'**
+  String nfseDirectIssueCannot(String reason);
+
+  /// No description provided for @nfseDirectIssueCityByPostalCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o CEP para achar a cidade.'**
+  String get nfseDirectIssueCityByPostalCode;
+
+  /// No description provided for @nfseDirectIssueAddressMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o endereço com CEP de quem recebe a nota.'**
+  String get nfseDirectIssueAddressMissing;
+
+  /// No description provided for @nfseDirectIssueEmailMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o e-mail de quem recebe a nota.'**
+  String get nfseDirectIssueEmailMissing;
+
+  /// No description provided for @nfseDirectIssueEmitterQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por qual CNPJ emitir?'**
+  String get nfseDirectIssueEmitterQuestion;
+
+  /// No description provided for @nfseDirectIssueRecipientQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para quem vai esta nota?'**
+  String get nfseDirectIssueRecipientQuestion;
+
+  /// No description provided for @nfseDirectIssueRecipientOnlyThis.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vale só para esta nota'**
+  String get nfseDirectIssueRecipientOnlyThis;
+
+  /// No description provided for @nfseDirectRefusedGeneric.
+  ///
+  /// In pt, this message translates to:
+  /// **'O governo recusou a nota.'**
+  String get nfseDirectRefusedGeneric;
+
+  /// No description provided for @nfseDirectRefusedFixRecipient.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira os dados de quem recebe a nota e toque em ✓ de novo.'**
+  String get nfseDirectRefusedFixRecipient;
+
+  /// No description provided for @nfseDirectIssueBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir por'**
+  String get nfseDirectIssueBy;
+
+  /// No description provided for @nfseDirectIssueTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para'**
+  String get nfseDirectIssueTo;
+
+  /// No description provided for @nfseDirectIssueViaRecipient.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pelo “Nota fiscal para” de {name}'**
+  String nfseDirectIssueViaRecipient(String name);
+
+  /// No description provided for @nfseDirectMeiNear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com esta nota, o MEI passa de 80% do teto do ano.'**
+  String get nfseDirectMeiNear;
+
+  /// No description provided for @nfseDirectMeiOver.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com esta nota, o MEI passa do teto do ano. Fale com o seu contador.'**
+  String get nfseDirectMeiOver;
+
+  /// No description provided for @nfseDirectIssueRecipientDataIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faltam dados de {name} para a nota. Ficam salvos no cadastro.'**
+  String nfseDirectIssueRecipientDataIntro(String name);
+
+  /// No description provided for @nfseDirectIssueComplementary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai junto na nota: {info}'**
+  String nfseDirectIssueComplementary(String info);
+
+  /// No description provided for @nfseDirectIssuedToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota emitida'**
+  String get nfseDirectIssuedToast;
+
+  /// No description provided for @nfseDirectWaitingToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'O governo ainda não respondeu. A nota aparece assim que ele confirmar.'**
+  String get nfseDirectWaitingToast;
+
+  /// No description provided for @nfseDirectErrorRecipientTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o CPF ou CNPJ de quem recebe a nota.'**
+  String get nfseDirectErrorRecipientTaxId;
+
+  /// No description provided for @nfseDirectErrorEmitterNotReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este CNPJ ainda não pode emitir. Confira a configuração da nota.'**
+  String get nfseDirectErrorEmitterNotReady;
+
+  /// No description provided for @nfseDirectErrorManagerNotAllowed.
+  ///
+  /// In pt, this message translates to:
+  /// **'O dono não liberou a emissão de notas para gerentes. Peça para ele emitir ou liberar.'**
+  String get nfseDirectErrorManagerNotAllowed;
+
+  /// No description provided for @nfseDirectErrorOrderHasInvoice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS já tem nota.'**
+  String get nfseDirectErrorOrderHasInvoice;
+
+  /// No description provided for @nfseDirectErrorGovUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'O governo não respondeu. Tente de novo em alguns minutos.'**
+  String get nfseDirectErrorGovUnavailable;
+
+  /// No description provided for @nfseDirectErrorNotCancelable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta nota não pode ser cancelada.'**
+  String get nfseDirectErrorNotCancelable;
+
+  /// No description provided for @nfseDirectErrorPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'O PDF desta nota ainda não está pronto.'**
+  String get nfseDirectErrorPdf;
+
+  /// No description provided for @nfseDirectCancelPortal.
+  ///
+  /// In pt, this message translates to:
+  /// **'A cidade não aceitou o cancelamento por aqui. Cancele no portal do governo (nfse.gov.br).'**
+  String get nfseDirectCancelPortal;
+
+  /// No description provided for @nfseDirectCancelMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diga o motivo. O governo registra na hora e a nota deixa de valer.'**
+  String get nfseDirectCancelMessage;
+
+  /// No description provided for @nfseDirectCancelReasonIssueError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro na nota'**
+  String get nfseDirectCancelReasonIssueError;
+
+  /// No description provided for @nfseDirectCancelReasonNotProvided.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço não prestado'**
+  String get nfseDirectCancelReasonNotProvided;
+
+  /// No description provided for @nfseDirectCancelReasonRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Motivo'**
+  String get nfseDirectCancelReasonRow;
+
+  /// No description provided for @nfseDirectEmitterLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida por'**
+  String get nfseDirectEmitterLabel;
+
+  /// No description provided for @nfseDirectAccessKeyLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chave de acesso'**
+  String get nfseDirectAccessKeyLabel;
+
+  /// No description provided for @nfseDirectExternalTag.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida fora do PraticOS'**
+  String get nfseDirectExternalTag;
+
+  /// No description provided for @nfseDirectCheckNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferir agora'**
+  String get nfseDirectCheckNow;
+
+  /// No description provided for @nfseDirectFilterRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJ'**
+  String get nfseDirectFilterRow;
+
+  /// No description provided for @nfseDirectFilterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get nfseDirectFilterAll;
+
+  /// No description provided for @nfseDirectFilterQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas de qual CNPJ?'**
+  String get nfseDirectFilterQuestion;
+
   /// No description provided for @nfseImportTitle.
   ///
   /// In pt, this message translates to:

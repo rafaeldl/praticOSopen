@@ -221,6 +221,8 @@ export async function resolveRecipient(
 export interface DirectPreviewInput {
   orderIds: string[];
   emitterId?: string | null;
+  /** The sheet sent this nota to another customer ("Para"). */
+  recipientCustomerId?: string | null;
 }
 
 export interface DirectPreview {
@@ -229,12 +231,34 @@ export interface DirectPreview {
   hasProducts: boolean;
   description: string;
   complementaryInfo: string;
-  emitter: { id: string; legalName: string; taxId: string; regime: string | undefined; problem: string | null };
-  emitters: Array<{ id: string; legalName: string; taxId: string; regime: string | undefined; problem: string | null }>;
-  recipient: { customerId: string; legalName: string | null; taxId: string | null; viaInvoiceRecipient: boolean };
+  emitter: EmitterSummary;
+  emitters: EmitterSummary[];
+  /** The order's customer (the "Para" may point elsewhere). */
+  customer: { id: string; name: string | null };
+  recipient: {
+    customerId: string;
+    name: string | null;
+    legalName: string | null;
+    taxId: string | null;
+    /** What the customer already has: fills the fields the sheet asks for. */
+    address: FiscalAddress | null;
+    email: string | null;
+    viaInvoiceRecipient: boolean;
+  };
   missing: Array<'taxId' | 'address' | 'email'>;
   meiWarning: MeiWarning;
   invoicedOrders: Record<string, string>;
+}
+
+export interface EmitterSummary {
+  id: string;
+  legalName: string;
+  taxId: string;
+  regime: string | undefined;
+  /** Why it cannot issue now (see emitterProblem), or null. */
+  problem: string | null;
+  isDefault: boolean;
+  serviceName: string | null;
 }
 
 export async function previewDirectInvoice(companyId: string, input: DirectPreviewInput, override?: Partial<IssueDeps>): Promise<DirectPreview> {
@@ -247,7 +271,10 @@ export async function previewDirectInvoice(companyId: string, input: DirectPrevi
   const today = todayInSaoPaulo(deps.now());
   const config = await deps.config();
 
-  const target = customer.invoiceRecipient?.id ? (await readCustomer(companyId, customer.invoiceRecipient.id)) ?? customer : customer;
+  const chosen = input.recipientCustomerId ? await readCustomer(companyId, input.recipientCustomerId) : null;
+  const target =
+    chosen ??
+    (customer.invoiceRecipient?.id ? (await readCustomer(companyId, customer.invoiceRecipient.id)) ?? customer : customer);
   const missing: DirectPreview['missing'] = [];
   const taxId = onlyDigits(target.taxId);
   if (taxId.length !== 11 && taxId.length !== 14) missing.push('taxId');
@@ -255,12 +282,15 @@ export async function previewDirectInvoice(companyId: string, input: DirectPrevi
   if (!clean(target.invoiceEmail) && !clean(target.email)) missing.push('email');
 
   const all = await emittersRef(companyId).get();
-  const summary = (e: FiscalEmitter) => ({
+  const defaultId = (await companyRef(companyId).collection('settings').doc('nfse').get()).data()?.defaultEmitterId as string | undefined;
+  const summary = (e: FiscalEmitter): EmitterSummary => ({
     id: e.id,
     legalName: e.legalName,
     taxId: e.taxId,
     regime: e.regime,
     problem: emitterProblem(e, today),
+    isDefault: e.id === defaultId,
+    serviceName: e.service?.name ?? null,
   });
   const invoicedOrders: Record<string, string> = {};
   for (const orderId of loaded.orders.map((o) => o.id)) {
@@ -278,10 +308,14 @@ export async function previewDirectInvoice(companyId: string, input: DirectPrevi
     complementaryInfo: complementaryInfo(loaded.orders.map((o) => o.number)),
     emitter: summary(emitter),
     emitters: all.docs.map((d) => summary({ ...(d.data() as FiscalEmitter), id: d.id })),
+    customer: { id: customer.id, name: clean(customer.name) },
     recipient: {
       customerId: target.id,
+      name: clean(target.name),
       legalName: clean(target.legalName) ?? clean(target.name),
       taxId: taxId || null,
+      address: target.fiscalAddress ?? null,
+      email: clean(target.invoiceEmail) ?? clean(target.email),
       viaInvoiceRecipient: target.id !== customer.id,
     },
     missing,

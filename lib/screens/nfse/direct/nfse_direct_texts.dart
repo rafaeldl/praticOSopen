@@ -45,10 +45,29 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
     case 'NFSE_DIRECT_NOT_ENABLED':
       return l10n.nfseDirectErrorNotEnabled;
     case 'FORBIDDEN':
+      if (error is NfseDirectApiException &&
+          error.details?['reason'] == 'managerNotAllowed') {
+        return l10n.nfseDirectErrorManagerNotAllowed;
+      }
+      return l10n.nfseDirectErrorForbidden;
     case 'UNAUTHENTICATED':
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
       return l10n.nfseDirectErrorValidation;
+    case 'RECIPIENT_TAX_ID_REQUIRED':
+      return l10n.nfseDirectErrorRecipientTaxId;
+    case 'EMITTER_NOT_READY':
+      return l10n.nfseDirectErrorEmitterNotReady;
+    case 'SEFIN_UNAVAILABLE':
+      return l10n.nfseDirectErrorGovUnavailable;
+    case 'INVOICE_NOT_CANCELABLE':
+      return l10n.nfseDirectErrorNotCancelable;
+    case 'CANCEL_REFUSED':
+      return l10n.nfseDirectCancelPortal;
+    case 'PDF_NOT_AVAILABLE':
+      return l10n.nfseDirectErrorPdf;
+    case 'NFSE_REFUSED':
+      return l10n.nfseDirectRefusedGeneric;
     case 'ORDER_HAS_INVOICE':
       return l10n.nfseLinkErrorOrderHasNota;
     case 'INVOICE_HAS_ORDER':
@@ -62,7 +81,6 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
     case 'DAILY_LIMIT_REACHED':
       return l10n.nfseDirectErrorDailyLimit;
     case 'KEY_VAULT_UNAVAILABLE':
-    case 'SEFIN_UNAVAILABLE':
     case 'NETWORK_ERROR':
     case 'RATE_LIMIT_EXCEEDED':
       return l10n.nfseDirectErrorUnavailable;

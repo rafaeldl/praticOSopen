@@ -19,12 +19,15 @@ const invoices = shallowRef<NfseInvoice[]>([])
 const ready = ref(true)
 /** Notas on for the company (nfseEnabled, Asaas connected): nothing shows otherwise. */
 const available = ref(false)
+/** The nota goes by the NFS-e direct: the sheet is the direct one (the Asaas nota stays hidden, spec decision 1). */
+const direct = ref(false)
 let stop: (() => void) | undefined
 onMounted(async () => {
   const settings = await nfseSettings().catch(() => null)
   if (!settings?.available) return
   available.value = true
   ready.value = settings.ready
+  direct.value = settings.direct === true
   stop = await watchInvoicesOf({ customerId: props.customerId }, (list) => (invoices.value = list), () => {})
   full.value = await customerOrdersForNfse(props.customerId).catch(() => [])
 })
@@ -109,7 +112,7 @@ function done() {
       </div>
     </template>
   </Layer>
-  <IssueInvoiceDialog v-if="issuing" :order-ids="issuing" :customer-id="customerId" @done="done" @close="issuing = null" />
+  <IssueInvoiceDialog v-if="issuing" :order-ids="issuing" :customer-id="customerId" :direct="direct" @done="done" @close="issuing = null" />
 </template>
 
 <style scoped>

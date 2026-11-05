@@ -40,7 +40,6 @@ import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_invoice_screen.dart';
-import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/assistant/speech_listener.dart';
@@ -1257,22 +1256,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Future<void> _issueNfse(Order order) async {
-    if (!_nfse.ready) {
-      await showNfseNotReady(context, sandbox: _nfse.sandbox);
-      return;
-    }
-    final invoice = await NfseIssueSheet.show(
-      context,
-      orderIds: [order.id!],
-      sandbox: _nfse.sandbox,
-    );
-    if (invoice != null && mounted) {
-      showAppToast(
-        context,
-        context.l10n.nfseSent,
-        icon: CupertinoIcons.checkmark_circle,
-      );
-    }
+    await issueNfse(context, _nfse, orderIds: [order.id!]);
   }
 
   /// A finished order without a nota: "Não emitida" when the blue button

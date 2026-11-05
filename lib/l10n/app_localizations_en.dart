@@ -7049,6 +7049,161 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String nfseDirectCpfLine(String value) {
+    return 'CPF $value';
+  }
+
+  @override
+  String nfseDirectCnpjLine(String value) {
+    return 'CNPJ $value';
+  }
+
+  @override
+  String get nfseDirectProblemCertificate => 'No digital certificate';
+
+  @override
+  String get nfseDirectProblemNotEnabled => 'Not enabled to issue in the city';
+
+  @override
+  String get nfseDirectProblemService => 'The invoice service is missing';
+
+  @override
+  String get nfseDirectProblemSetup => 'This CNPJ\'s setup is not finished';
+
+  @override
+  String nfseDirectIssueCannot(String reason) {
+    return 'This CNPJ can\'t issue now: $reason';
+  }
+
+  @override
+  String get nfseDirectIssueCityByPostalCode =>
+      'Type the CEP to find the city.';
+
+  @override
+  String get nfseDirectIssueAddressMissing =>
+      'The recipient\'s address with CEP is missing.';
+
+  @override
+  String get nfseDirectIssueEmailMissing =>
+      'The recipient\'s e-mail is missing.';
+
+  @override
+  String get nfseDirectIssueEmitterQuestion => 'Issue under which CNPJ?';
+
+  @override
+  String get nfseDirectIssueRecipientQuestion => 'Who gets this invoice?';
+
+  @override
+  String get nfseDirectIssueRecipientOnlyThis => 'Only for this invoice';
+
+  @override
+  String get nfseDirectRefusedGeneric => 'The government refused the invoice.';
+
+  @override
+  String get nfseDirectRefusedFixRecipient =>
+      'Check the recipient\'s data and tap ✓ again.';
+
+  @override
+  String get nfseDirectIssueBy => 'Issue under';
+
+  @override
+  String get nfseDirectIssueTo => 'To';
+
+  @override
+  String nfseDirectIssueViaRecipient(String name) {
+    return 'Through the “Invoice to” of $name';
+  }
+
+  @override
+  String get nfseDirectMeiNear =>
+      'With this invoice, the MEI goes over 80% of the yearly limit.';
+
+  @override
+  String get nfseDirectMeiOver =>
+      'With this invoice, the MEI goes over the yearly limit. Talk to your accountant.';
+
+  @override
+  String nfseDirectIssueRecipientDataIntro(String name) {
+    return '$name is missing data for the invoice. It\'s saved on the customer.';
+  }
+
+  @override
+  String nfseDirectIssueComplementary(String info) {
+    return 'Also on the invoice: $info';
+  }
+
+  @override
+  String get nfseDirectIssuedToast => 'Invoice issued';
+
+  @override
+  String get nfseDirectWaitingToast =>
+      'The government hasn\'t answered yet. The invoice shows up as soon as it confirms.';
+
+  @override
+  String get nfseDirectErrorRecipientTaxId =>
+      'The recipient\'s CPF or CNPJ is missing.';
+
+  @override
+  String get nfseDirectErrorEmitterNotReady =>
+      'This CNPJ can\'t issue yet. Check the invoice setup.';
+
+  @override
+  String get nfseDirectErrorManagerNotAllowed =>
+      'The owner hasn\'t allowed managers to issue invoices. Ask the owner to issue it or allow it.';
+
+  @override
+  String get nfseDirectErrorOrderHasInvoice =>
+      'This order already has an invoice.';
+
+  @override
+  String get nfseDirectErrorGovUnavailable =>
+      'The government didn\'t answer. Try again in a few minutes.';
+
+  @override
+  String get nfseDirectErrorNotCancelable => 'This invoice can\'t be canceled.';
+
+  @override
+  String get nfseDirectErrorPdf => 'This invoice\'s PDF isn\'t ready yet.';
+
+  @override
+  String get nfseDirectCancelPortal =>
+      'The city didn\'t accept the cancellation here. Cancel it on the government portal (nfse.gov.br).';
+
+  @override
+  String get nfseDirectCancelMessage =>
+      'Pick the reason. The government records it right away and the invoice stops being valid.';
+
+  @override
+  String get nfseDirectCancelReasonIssueError => 'Mistake in the invoice';
+
+  @override
+  String get nfseDirectCancelReasonNotProvided => 'Service not provided';
+
+  @override
+  String get nfseDirectCancelReasonRow => 'Reason';
+
+  @override
+  String get nfseDirectEmitterLabel => 'Issued by';
+
+  @override
+  String get nfseDirectAccessKeyLabel => 'Access key';
+
+  @override
+  String get nfseDirectExternalTag => 'Issued outside PraticOS';
+
+  @override
+  String get nfseDirectCheckNow => 'Check now';
+
+  @override
+  String get nfseDirectFilterRow => 'CNPJ';
+
+  @override
+  String get nfseDirectFilterAll => 'All';
+
+  @override
+  String get nfseDirectFilterQuestion => 'Invoices of which CNPJ?';
+
+  @override
   String get nfseImportTitle => 'Import notas';
 
   @override

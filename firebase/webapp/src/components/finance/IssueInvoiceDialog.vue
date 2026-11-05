@@ -3,7 +3,7 @@
 // order, what is left out, the text and what is missing), then one request.
 // "Emitir" stays grey with the first reason (nfse.issue.blockers). Refusals open
 // what fixes them (nfse.issue.refusal). Nothing is sent before "Emitir".
-import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
@@ -18,7 +18,10 @@ import { isValidTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
 import '@/styles/finance.css'
 
-const props = defineProps<{ orderIds: string[]; customerId?: string | null }>()
+// The direct sheet (NFS-e direct, docs/NFSE_DIRECT.md) comes only when the company uses it.
+const DirectIssueDialog = defineAsyncComponent(() => import('./DirectIssueDialog.vue'))
+/** `direct`: the company issues by the NFS-e direct (nfseDirectEnabled): its own sheet, the Asaas one stays out. */
+const props = defineProps<{ orderIds: string[]; customerId?: string | null; direct?: boolean }>()
 const emit = defineEmits<{ done: []; close: [] }>()
 const router = useRouter()
 /** Closed first (the drawer takes its history entry out on unmount), then the setup opens. */
@@ -62,6 +65,7 @@ async function load(keepText = false) {
  * the preview, which refuses with the same sentence.
  */
 onMounted(async () => {
+  if (props.direct) return
   const settings = await nfseSettings().catch(() => null)
   if (settings && settings.available && !settings.ready) {
     refusal.value = { text: t('nfseNotReadyTitle'), setup: true }
@@ -157,7 +161,8 @@ const mark = () => (touched.value = true)
 </script>
 
 <template>
-  <Layer kind="drawer" :label="t('nfseIssueAction')" :guard="guard" @close="emit('close')">
+  <DirectIssueDialog v-if="direct" :order-ids="orderIds" :customer-id="customerId" @done="emit('done')" @close="emit('close')" />
+  <Layer v-else kind="drawer" :label="t('nfseIssueAction')" :guard="guard" @close="emit('close')">
     <template #default="{ close }">
       <form class="issue" data-testid="nfse-issue" @submit.prevent="send" @input="mark">
         <div class="layer-head">

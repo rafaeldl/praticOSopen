@@ -13,6 +13,12 @@ export interface NfseSettings {
   ready: boolean
   /** The Asaas account is the sandbox (its panel is another address). */
   sandbox?: boolean
+  /**
+   * settings/payments.nfseDirectEnabled: the nota goes by our own engine
+   * (docs/NFSE_DIRECT.md) and the Asaas nota stays hidden (spec decision 1).
+   * `ready` then means the company has a CNPJ to issue by.
+   */
+  direct?: boolean
 }
 
 /** settings/payments (members read it). A failed read is an error, never "off" (D23 shows nothing forever). */
@@ -20,8 +26,16 @@ export async function nfseSettings(): Promise<NfseSettings> {
   const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
   const data = (snap.data() ?? {}) as Record<string, unknown>
+  if (data.nfseDirectEnabled === true) return { available: true, ready: await hasEmitter(), direct: true }
   const available = data.nfseEnabled === true && data.asaasEnabled === true && data.asaasConnected === true
   return { available, ready: available && data.nfseReady === true, sandbox: data.asaasEnvironment === 'sandbox' }
+}
+
+/** The company has at least one CNPJ (fiscalEmitters: owner, admin and manager read it). */
+export async function hasEmitter(): Promise<boolean> {
+  const [db, { collection, getDocs, limit, query }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  const snap = await getDocs(query(collection(db, 'companies', session.companyId as string, 'fiscalEmitters'), limit(1)))
+  return !snap.empty
 }
 
 /**

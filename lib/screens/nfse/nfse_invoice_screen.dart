@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,8 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_issue_sheet.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
 import 'package:praticos/screens/nfse/direct/nfse_order_link.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
@@ -60,6 +63,14 @@ String nfseHeadline(AppLocalizations l10n, NfseInvoice invoice) {
 /// Why a nota did not go out: our reason for an automatic one that failed,
 /// or the city's text. Null when there is nothing to say.
 String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
+  if (invoice.isDirect) {
+    final refusal = invoice.refusal;
+    if (refusal != null) {
+      return refusal.text(l10n.localeName.split('_').first) ??
+          l10n.nfseDirectRefusedGeneric;
+    }
+    return invoice.statusDescription;
+  }
   switch (invoice.errorCode) {
     case null:
       return invoice.statusDescription;
@@ -88,6 +99,22 @@ Future<void> shareNfsePdf(
 }) async {
   final url = invoice.pdfUrl;
   if (url == null) return;
+  await shareNfsePdfUrl(
+    context,
+    url,
+    'nota-${invoice.number ?? invoice.id}.pdf',
+    client: client,
+  );
+}
+
+/// Shares the PDF at [url] as a file named [name], or the link when it
+/// cannot be downloaded.
+Future<void> shareNfsePdfUrl(
+  BuildContext context,
+  String url,
+  String name, {
+  http.Client? client,
+}) async {
   final box = context.findRenderObject() as RenderBox?;
   final origin = box == null ? null : box.localToGlobal(Offset.zero) & box.size;
   XFile? file;
@@ -97,7 +124,6 @@ Future<void> shareNfsePdf(
     final isPdf = (response.headers['content-type'] ?? '').contains('pdf');
     if (response.statusCode == 200 && isPdf) {
       final directory = await getTemporaryDirectory();
-      final name = 'nota-${invoice.number ?? invoice.id}.pdf';
       final saved = File('${directory.path}/$name');
       await saved.writeAsBytes(response.bodyBytes);
       file = XFile(saved.path, mimeType: 'application/pdf');
@@ -111,6 +137,10 @@ Future<void> shareNfsePdf(
         : ShareParams(files: [file], sharePositionOrigin: origin),
   );
 }
+
+/// Download URL of a file in Storage (the direct nota's PDF and XML).
+Future<String> nfseStorageUrl(String path) =>
+    FirebaseStorage.instance.ref(path).getDownloadURL();
 
 /// A nota: status, value, orders, text, the PDF/XML once the city issued
 /// it, the city's reason when it refused, and "Cancelar nota" in the "…".
@@ -127,6 +157,8 @@ class NfseInvoiceScreen extends StatefulWidget {
     this.sharePdf,
     this.previousPageTitle,
     this.directService,
+    this.storageUrl,
+    this.now,
   });
 
   final NfseInvoice invoice;
@@ -146,9 +178,14 @@ class NfseInvoiceScreen extends StatefulWidget {
 
   final String? previousPageTitle;
 
-  /// Test seam of the NFS-e direct ("Ligar a uma OS"); defaults to
-  /// [NfseDirectApiService.instance].
+  /// Test seam; defaults to [NfseDirectApiService.instance] (direct notas).
   final NfseDirectApiService? directService;
+
+  /// Test seam; defaults to [nfseStorageUrl].
+  final Future<String> Function(String path)? storageUrl;
+
+  /// Test seam; defaults to now.
+  final DateTime? now;
 
   static Future<void> open(
     BuildContext context,
@@ -176,6 +213,21 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
 
   AsaasApiService get _service => widget.service ?? AsaasApiService.instance;
 
+  NfseDirectApiService get _direct =>
+      widget.directService ?? NfseDirectApiService.instance;
+
+  /// A direct nota with no clear answer for a while: "Conferir agora".
+  bool get _stale {
+    final created = _invoice.createdAt;
+    if (!_invoice.isDirect ||
+        _invoice.status != NfseStatus.creating ||
+        created == null) {
+      return false;
+    }
+    return (widget.now ?? DateTime.now()).difference(created) >
+        const Duration(minutes: 3);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -202,12 +254,38 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
+  /// Download URL of the direct nota's PDF (made by the server if needed).
+  Future<String?> _directPdfUrl() async {
+    final path = await _direct.invoicePdfPath(_invoice.id);
+    if (path == null) return null;
+    return (widget.storageUrl ?? nfseStorageUrl)(path);
+  }
+
   Future<void> _sharePdf() async {
     if (_busy) return;
     setState(() => _busy = true);
     final share = widget.sharePdf ?? shareNfsePdf;
     try {
-      await share(context, _invoice);
+      if (_invoice.isDirect && widget.sharePdf == null) {
+        final url = await _directPdfUrl();
+        if (url != null && mounted) {
+          await shareNfsePdfUrl(
+            context,
+            url,
+            'nota-${_invoice.number ?? _invoice.id}.pdf',
+          );
+        }
+      } else {
+        await share(context, _invoice);
+      }
+    } on NfseDirectApiException catch (e) {
+      if (mounted) {
+        showAppToast(
+          context,
+          nfseDirectErrorText(context.l10n, e),
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
     } catch (_) {
       if (mounted) {
         showAppToast(
@@ -220,28 +298,92 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     if (mounted) setState(() => _busy = false);
   }
 
+  /// Opens the PDF or the XML of a direct nota.
+  Future<void> _openDirect({required bool pdf}) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final url = pdf
+          ? await _directPdfUrl()
+          : await (widget.storageUrl ?? nfseStorageUrl)(_invoice.xmlPath!);
+      if (url != null) await _open(url);
+    } catch (e) {
+      if (mounted) {
+        showAppToast(
+          context,
+          nfseDirectErrorText(context.l10n, e),
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
   /// Emits again: the sheet asks for what is missing.
   Future<void> _reissue() async {
-    final invoice = await NfseIssueSheet.show(
-      context,
-      orderIds: _invoice.orderIds,
-      customerId: _invoice.customerId,
-      service: widget.service,
-    );
+    final direct = _invoice.isDirect;
+    final invoice = direct
+        ? await NfseDirectIssueSheet.show(
+            context,
+            orderIds: _invoice.orderIds,
+            service: widget.directService,
+          )
+        : await NfseIssueSheet.show(
+            context,
+            orderIds: _invoice.orderIds,
+            customerId: _invoice.customerId,
+            service: widget.service,
+          );
     if (invoice != null && mounted) {
+      final l10n = context.l10n;
       showAppToast(
         context,
-        context.l10n.nfseSent,
+        !direct
+            ? l10n.nfseSent
+            : invoice.status == NfseStatus.creating
+            ? l10n.nfseDirectWaitingToast
+            : l10n.nfseDirectIssuedToast,
         icon: CupertinoIcons.checkmark_circle,
       );
       Navigator.of(context).pop();
     }
   }
 
+  /// Asks the government now about a direct nota with no clear answer.
+  Future<void> _reconcile() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await _direct.reconcileInvoice(_invoice.id);
+      if (mounted && updated.id.isNotEmpty) {
+        setState(() => _invoice = updated);
+      }
+    } catch (e) {
+      if (mounted) {
+        showAppToast(
+          context,
+          nfseDirectErrorText(context.l10n, e),
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
   Widget? _floatingButton() {
     final l10n = context.l10n;
     final invoice = _invoice;
-    if (invoice.status == NfseStatus.authorized && invoice.pdfUrl != null) {
+    if (_stale) {
+      return PrimaryButton(
+        key: const Key('nfseReconcile'),
+        label: l10n.nfseDirectCheckNow,
+        floating: true,
+        onPressed: _busy ? null : _reconcile,
+      );
+    }
+    if (invoice.status == NfseStatus.authorized &&
+        (invoice.pdfUrl != null ||
+            (invoice.isDirect && invoice.xmlPath != null))) {
       return PrimaryButton(
         key: const Key('nfseSharePdf'),
         label: l10n.nfseSharePdf,
@@ -287,12 +429,79 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       ],
     );
     if (!mounted) return;
-    if (choice == 'cancel') await _confirmCancel();
+    if (choice == 'cancel') {
+      if (_invoice.isDirect) {
+        await _confirmDirectCancel();
+      } else {
+        await _confirmCancel();
+      }
+    }
     if (choice == 'unlink') {
       await unlinkNfseFromOrder(
         context,
         _invoice,
         service: widget.directService,
+      );
+    }
+  }
+
+  /// "Cancelar nota" of a direct nota: the reason is the confirmation.
+  Future<void> _confirmDirectCancel() async {
+    final l10n = context.l10n;
+    final reason = await showCupertinoModalPopup<NfseCancelReason>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(l10n.nfseCancelQuestion(_format.formatBrl(_invoice.value))),
+        message: Text(l10n.nfseDirectCancelMessage),
+        actions: [
+          for (final reason in NfseCancelReason.values)
+            CupertinoActionSheetAction(
+              key: Key('nfseCancelReason_${reason.name}'),
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(sheetContext, reason),
+              child: Text(nfseCancelReasonText(l10n, reason)),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(sheetContext),
+          child: Text(l10n.nfseKeep),
+        ),
+      ),
+    );
+    if (reason == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await _direct.cancelInvoice(_invoice.id, reason);
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        if (updated.id.isNotEmpty) _invoice = updated;
+      });
+      showAppToast(
+        context,
+        l10n.nfseCanceledToast,
+        icon: CupertinoIcons.checkmark_circle,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      final portal = e is NfseDirectApiException && e.code == 'CANCEL_REFUSED';
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          content: Text(
+            portal ? l10n.nfseDirectCancelPortal : nfseDirectErrorText(l10n, e),
+            key: const Key('nfseDirectCancelError'),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.ok),
+            ),
+          ],
+        ),
       );
     }
   }
@@ -444,6 +653,38 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
                 title: l10n.nfseOrdersLabel,
                 trailing: invoice.orderNumbers,
               ),
+            if (invoice.emitter != null)
+              AppListRow(
+                key: const Key('nfseInvoiceEmitter'),
+                title: l10n.nfseDirectEmitterLabel,
+                subtitle: [
+                  invoice.emitter!.legalName ?? '',
+                  if (invoice.emitter!.taxId != null)
+                    nfseTaxIdLine(l10n, invoice.emitter!.taxId!),
+                ].where((t) => t.isNotEmpty).join('\n'),
+              ),
+            if (invoice.recipient != null)
+              AppListRow(
+                key: const Key('nfseInvoiceRecipient'),
+                title: l10n.nfseDirectIssueTo,
+                subtitle: [
+                  invoice.recipient!.legalName ?? invoice.customerName ?? '',
+                  if (invoice.recipient!.taxId != null)
+                    nfseTaxIdLine(l10n, invoice.recipient!.taxId!),
+                ].where((t) => t.isNotEmpty).join('\n'),
+              ),
+            if (invoice.cancelReason != null &&
+                invoice.status == NfseStatus.canceled)
+              AppListRow(
+                title: l10n.nfseDirectCancelReasonRow,
+                trailing: nfseCancelReasonText(l10n, invoice.cancelReason!),
+              ),
+            if (invoice.accessKey != null)
+              AppListRow(
+                key: const Key('nfseInvoiceAccessKey'),
+                title: l10n.nfseDirectAccessKeyLabel,
+                subtitle: invoice.accessKey,
+              ),
             if (canLinkNfseToOrder(invoice))
               AppListRow(
                 key: const Key('nfseLinkOrder'),
@@ -460,6 +701,20 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               ),
           ],
         ),
+        if (invoice.isExternal)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.md,
+              AppSpacing.pageMargin,
+              0,
+            ),
+            child: Text(
+              l10n.nfseDirectExternalTag,
+              key: const Key('nfseInvoiceExternal'),
+              style: AppTypography.callout.copyWith(color: secondary),
+            ),
+          ),
         if (invoice.conflict)
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -491,7 +746,33 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
             ),
           ),
         ],
-        if (authorized && (invoice.pdfUrl != null || invoice.xmlUrl != null))
+        if (authorized && invoice.isDirect && invoice.xmlPath != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.md,
+              AppSpacing.pageMargin,
+              0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextLink(
+                  key: const Key('nfseOpenPdf'),
+                  label: l10n.nfseOpenPdf,
+                  onPressed: () => _openDirect(pdf: true),
+                ),
+                TextLink(
+                  key: const Key('nfseOpenXml'),
+                  label: l10n.nfseOpenXml,
+                  onPressed: () => _openDirect(pdf: false),
+                ),
+              ],
+            ),
+          ),
+        if (authorized &&
+            !invoice.isDirect &&
+            (invoice.pdfUrl != null || invoice.xmlUrl != null))
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.pageMargin,
@@ -533,3 +814,10 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     );
   }
 }
+
+String nfseCancelReasonText(AppLocalizations l10n, NfseCancelReason reason) =>
+    switch (reason) {
+      NfseCancelReason.issueError => l10n.nfseDirectCancelReasonIssueError,
+      NfseCancelReason.serviceNotProvided =>
+        l10n.nfseDirectCancelReasonNotProvided,
+    };

@@ -167,6 +167,12 @@ export interface PaymentSettings {
   nfse: boolean
   /** The nota setup is done (nfseReady): it can be issued. */
   nfseReady: boolean
+  /**
+   * The nota goes by our own engine (settings/payments.nfseDirectEnabled,
+   * docs/NFSE_DIRECT.md): `nfse` is on without Asaas and `nfseReady` means the
+   * company has a CNPJ to issue by. Absent when off.
+   */
+  nfseDirect?: boolean
 }
 
 /** Tries before giving up on a Firestore read of this screen, and the wait between them. */
@@ -189,6 +195,11 @@ export async function paymentSettings({ retries = 2, wait = 800 }: ReadRetry = {
       const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
       const data = (snap.data() ?? {}) as Record<string, unknown>
       const ready = data.asaasEnabled === true && data.asaasConnected === true
+      if (data.nfseDirectEnabled === true) {
+        const { collection, getDocs, limit, query } = await import('firebase/firestore/lite')
+        const emitters = await getDocs(query(collection(db, 'companies', session.companyId as string, 'fiscalEmitters'), limit(1))).catch(() => null)
+        return { ready, nfse: true, nfseReady: !!emitters && !emitters.empty, nfseDirect: true }
+      }
       return { ready, nfse: ready && data.nfseEnabled === true, nfseReady: ready && data.nfseEnabled === true && data.nfseReady === true }
     } catch (error) {
       if (attempt < retries) {

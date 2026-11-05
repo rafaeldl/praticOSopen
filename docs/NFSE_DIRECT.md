@@ -197,7 +197,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571.
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571. A folha de emitir está em "Emitir a nota pela OS".
 
 Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 
@@ -269,7 +269,46 @@ Só aparece com `settings/payments.nfseDirectEnabled` ligada (`loadCustomerInvoi
 
 **App web** (`firebase/webapp`): o mesmo grupo no formulário do cliente (`CustomerForm.vue`, regras em `src/lib/customers/invoice-data.ts`), a linha "Nota fiscal para" com "Trocar" e o item no "…" (`InvoiceRecipientDialog.vue`). Grava pela `PATCH /v1/app/customers/:id` (campos em `docs/WEB_API.md`). Na hora de salvar, o formulário espera a lista de clientes para conferir o CPF/CNPJ repetido, mesmo quando a tela abriu direto no cliente. A política de segurança do `/web` libera `brasilapi.com.br` e `viacep.com.br` para as buscas. E2E: `e2e/customer-invoice.spec.ts`, na empresa `company-nfse` da semente.
 
+
 Fora desta etapa: oferta na 3ª nota e a emissão automática no servidor (etapa 11 da spec).
+
+## Emitir a nota pela OS (etapa #566)
+
+Com `settings/payments.nfseDirectEnabled` ligada, a nota direta substitui a do Asaas no app e no web (decisão 1 da spec): os mesmos pontos de entrada (botão azul "Emitir nota fiscal" na OS concluída e paga, link "Emitir" na linha "Nota fiscal", "…" da OS, "Emitir nota" de várias OS no cliente) abrem a folha direta. Sem nenhum CNPJ cadastrado, o dono e o admin vão para a configuração; os outros veem quem pode configurar.
+
+| Onde | O quê |
+|---|---|
+| App: `lib/screens/nfse/direct/nfse_direct_issue_sheet.dart` | Folha `NfseDirectIssueSheet` |
+| App: `lib/screens/nfse/nfse_access.dart` | `NfseController` liga com a flag direta (`ready` = tem CNPJ, `emitters`); `issueNfse` escolhe a folha e mostra o aviso |
+| App: `nfse_invoice_screen.dart`, `nfse_list_screen.dart` | Detalhe e lista com a nota direta |
+| App: `lib/services/nfse_direct_api_service.dart` | `previewInvoice`, `issueInvoice`, `cancelInvoice`, `reconcileInvoice`, `invoicePdfPath` |
+| Web: `components/finance/DirectIssueDialog.vue`, `lib/nfse/direct-issue.ts`, `views/finance/InvoicesView.vue` | Mesmo comportamento no app web |
+
+### Folha, de cima para baixo
+
+1. **Emitir por**: o emitente que o servidor marcou (o último usado para o cliente, senão o padrão). Com mais de um CNPJ, o toque abre "Por qual CNPJ emitir?" e a prévia é refeita com `emitterId`. Emitente que não pode emitir (`problem`: certificado vencido, sem serviço, não habilitado na cidade...) deixa o ✓ cinza com o motivo.
+2. **Para**: o "Nota fiscal para" do cliente, senão ele mesmo ("Pelo “Nota fiscal para” de Loja Centro"). O toque abre "Para quem vai esta nota?" (vale só para esta nota): a prévia é refeita com `recipientCustomerId` e a emissão manda `recipient.customerId`. Digitar um CNPJ solto, sem cliente, ainda não existe.
+3. **Faltando dado** de quem recebe (`missing`: `taxId`, `address`, `email`), os campos aparecem ali. O CEP (ViaCEP) preenche rua, bairro, cidade, UF e o código IBGE; cidade digitada à mão perde o código e o ✓ pede o CEP. O servidor grava no cliente só o que está vazio.
+4. **Valor** pela regra de hoje (serviços menos a parte do desconto) e a nota "peças ficam de fora".
+5. **Descrição** pela regra fixa num campo aberto. Só vai na emissão (`description`) se a pessoa mudou; mudar vale só para esta nota. Abaixo, em letra pequena, o `xInfComp` ("Vai junto na nota: OS 182 · Emitida pelo PraticOS (praticos.app)").
+6. **Aviso do MEI**, sem bloquear: `near` "Com esta nota, o MEI passa de 80% do teto do ano." e `over` "... passa do teto do ano. Fale com o seu contador."
+
+✓ emite. 201: a folha fecha com "Nota emitida". 202 (`creating`): "O governo ainda não respondeu. A nota aparece assim que ele confirmar." Recusa (`NFSE_REFUSED`, `details.refusal`): a frase no idioma do aparelho e, pelo grupo, `customerData` abre todos os campos do "Para"; `emitterSetup` e `certificate` oferecem "Configurar" (abre o emitente) a dono e admin; `other` só mostra a frase.
+
+### Rota: prévia com o destinatário escolhido
+
+`POST /v1/app/nfse/direct/invoices/preview` aceita `recipientCustomerId` e devolve também `customer { id, name }` (o cliente da OS), `recipient { name, address, email }` (o que o destinatário já tem) e, em cada emitente, `isDefault` e `serviceName`.
+
+### Lista e detalhe
+
+- **Lista**: etiqueta "Emitida fora do PraticOS" (`source: 'external'`) e filtro "CNPJ" (tela de escolher) quando há mais de um CNPJ entre os da empresa e os das notas.
+- **Detalhe**: "Emitida por", "Para", chave de acesso, motivo do cancelamento. PDF: `POST /invoices/:id/pdf` e download pelo Storage (`tenants/{cid}/invoices/{id}/danfse.pdf`); XML pelo `xmlPath`. "Compartilhar PDF" é o botão azul.
+- **Cancelar** ("…" → "Cancelar nota"): folha de ações com o motivo ("Erro na nota" / "Serviço não prestado"); `CANCEL_REFUSED` diz para cancelar no portal do governo.
+- **Sem resposta certa** há mais de 3 minutos: botão "Conferir agora" (`/reconcile`).
+
+O app web chama o ViaCEP do navegador: `https://viacep.com.br` entrou no `connect-src` da CSP de `/web/**` (`firebase.json`).
+
+Fora desta etapa: limite de CNPJs por plano na folha ("Disponível no Pro"), compartilhar o PDF direto pelo web e a oferta da 3ª nota.
 
 ## Importação das notas (etapa #569)
 
@@ -329,4 +368,4 @@ A `nfseDaily` lê a caixa de cada emitente com certificado válido a partir do `
 
 `__tests__/import.test.ts` com XMLs e caixa do ADN sintéticos (`import-fixture.ts`, CNPJs e nomes inventados): leitura em páginas e com limite de tempo, cancelamento, recebidas, proposta, aplicar, "Sim"/"Não", desfazer, 30 dias, ligar/desligar e leitura diária. App: `test/screens/nfse/nfse_import_test.dart`.
 
-Fora desta etapa: importação no app web, etiqueta "Emitida fora do PraticOS" na lista (#566) e notas recebidas → despesas.
+Fora desta etapa: importação no app web e notas recebidas → despesas.

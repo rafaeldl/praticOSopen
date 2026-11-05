@@ -4,16 +4,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
-import 'package:praticos/models/nfse.dart';
+import 'package:praticos/models/fiscal_emitter.dart';
+import 'package:praticos/models/nfse.dart' hide NfseDirectAutoIssue;
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/repositories/tenant/fiscal_emitter_repository.dart';
 import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
+import 'package:praticos/screens/nfse/direct/nfse_direct_issue_sheet.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_setup_screen.dart';
+import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -63,7 +68,9 @@ class NfseController extends ChangeNotifier {
     bool? canIssue,
     Stream<PaymentSettings>? settingsStream,
     Stream<List<NfseInvoice>> Function(String id)? invoicesOf,
-  }) : _invoicesOf = invoicesOf {
+    Stream<List<FiscalEmitter>>? emittersStream,
+  }) : _invoicesOf = invoicesOf,
+       _emittersStream = emittersStream {
     // Company first: without one there is nothing to show, and the
     // permission lookup would build the auth stores for nothing.
     final companyId = Global.companyAggr?.id;
@@ -78,7 +85,10 @@ class NfseController extends ChangeNotifier {
   }
 
   final Stream<List<NfseInvoice>> Function(String id)? _invoicesOf;
+  final Stream<List<FiscalEmitter>>? _emittersStream;
   StreamSubscription<PaymentSettings>? _settingsSubscription;
+  StreamSubscription<List<FiscalEmitter>>? _emittersSubscription;
+  List<FiscalEmitter> _emitters = const [];
   StreamSubscription<List<NfseInvoice>>? _invoicesSubscription;
   PaymentSettings? _settings;
   List<NfseInvoice> _invoices = const [];
@@ -88,18 +98,25 @@ class NfseController extends ChangeNotifier {
   bool _failed = false;
   bool _disposed = false;
 
-  /// Notas are on for this company and user.
-  bool get enabled => _settings?.nfseAvailable == true;
+  /// Notas are on for this company and user: the NFS-e direct, or the one
+  /// through Asaas.
+  bool get enabled => direct || _settings?.nfseAvailable == true;
 
-  /// The NFS-e direct pilot is on (`nfseDirectEnabled`): the setup is the
-  /// direct one (docs/NFSE_DIRECT.md).
+  /// The NFS-e direct pilot is on (`nfseDirectEnabled`): it replaces the
+  /// nota through Asaas (spec decision 1). Setup, sheet, detail and cancel
+  /// are the direct ones (docs/NFSE_DIRECT.md).
   bool get direct => _settings?.nfseDirectEnabled == true;
 
   /// The Asaas connection is sandbox.
   bool get sandbox => _settings?.isSandbox == true;
 
-  /// The setup is complete: notas can be issued.
-  bool get ready => enabled && _settings!.nfseReady;
+  /// The setup is complete: notas can be issued. Direct: the company has a
+  /// CNPJ (the sheet tells when it cannot issue now).
+  bool get ready =>
+      direct ? _emitters.isNotEmpty : enabled && _settings!.nfseReady;
+
+  /// The company's CNPJs (direct only), by legal name.
+  List<FiscalEmitter> get emitters => direct ? _emitters : const [];
 
   /// Notas of the watched order or customer (empty while disabled).
   List<NfseInvoice> get invoices => enabled ? _invoices : const [];
@@ -144,10 +161,25 @@ class NfseController extends ChangeNotifier {
 
   void _onSettings(PaymentSettings settings) {
     _settings = settings;
-    if (settings.nfseAvailable && _invoicesSubscription == null) {
-      _subscribe();
+    if (settings.nfseDirectEnabled && _emittersSubscription == null) {
+      _watchEmitters();
     }
+    if (enabled && _invoicesSubscription == null) _subscribe();
     _notify();
+  }
+
+  void _watchEmitters() {
+    final companyId = Global.companyAggr?.id;
+    final source =
+        _emittersStream ??
+        (companyId == null
+            ? null
+            : FiscalEmitterRepository().watchAll(companyId));
+    if (source == null) return;
+    _emittersSubscription = source.listen((list) {
+      _emitters = list;
+      _notify();
+    }, onError: (Object _) {});
   }
 
   void _subscribe() {
@@ -196,6 +228,7 @@ class NfseController extends ChangeNotifier {
     _disposed = true;
     _settingsSubscription?.cancel();
     _invoicesSubscription?.cancel();
+    _emittersSubscription?.cancel();
     super.dispose();
   }
 }
@@ -321,4 +354,41 @@ Future<void> showNfseNotReady(
           : NfseSetupScreen(sandbox: sandbox),
     ),
   );
+}
+
+/// "Emitir nota fiscal" of [orderIds]: the direct sheet when the NFS-e
+/// direct is on, else the one through Asaas; "Falta configurar" first when
+/// there is nothing to issue by. Shows the toast and returns the nota.
+Future<NfseInvoice?> issueNfse(
+  BuildContext context,
+  NfseController nfse, {
+  required List<String> orderIds,
+  String? customerId,
+}) async {
+  if (!nfse.ready) {
+    await showNfseNotReady(context, sandbox: nfse.sandbox, direct: nfse.direct);
+    return null;
+  }
+  final invoice = nfse.direct
+      ? await NfseDirectIssueSheet.show(context, orderIds: orderIds)
+      : await NfseIssueSheet.show(
+          context,
+          orderIds: orderIds,
+          customerId: customerId,
+          sandbox: nfse.sandbox,
+        );
+  if (invoice != null && context.mounted) {
+    final l10n = context.l10n;
+    final waiting = invoice.status == NfseStatus.creating;
+    showAppToast(
+      context,
+      !invoice.isDirect
+          ? l10n.nfseSent
+          : waiting
+          ? l10n.nfseDirectWaitingToast
+          : l10n.nfseDirectIssuedToast,
+      icon: waiting ? CupertinoIcons.clock : CupertinoIcons.checkmark_circle,
+    );
+  }
+  return invoice;
 }
