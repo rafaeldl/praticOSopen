@@ -55,6 +55,9 @@ interface Cell {
 }
 
 class Page {
+  /** Divider lines, stroked last so the gray shading never covers them. */
+  private readonly lines: number[] = [];
+
   constructor(private readonly doc: PDFKit.PDFDocument) {}
 
   shade(x: number, y: number, w: number, h: number) {
@@ -62,8 +65,18 @@ class Page {
   }
 
   hline(y: number) {
-    this.doc.save().lineWidth(0.5).strokeColor(BLACK).moveTo(cm(LEFT), cm(y)).lineTo(cm(LEFT + WIDTH), cm(y)).stroke().restore();
+    this.lines.push(y);
   }
+
+  /** Block dividers (0.5 pt) and the page border (1 pt), over everything else (item 2.2.3). */
+  strokeLines() {
+    const doc = this.doc;
+    doc.save().lineWidth(0.5).strokeColor(BLACK);
+    for (const y of this.lines) doc.moveTo(cm(LEFT), cm(y)).lineTo(cm(LEFT + WIDTH), cm(y)).stroke();
+    doc.restore();
+    doc.save().lineWidth(1).strokeColor(BLACK).rect(cm(LEFT), cm(0.3), cm(WIDTH), cm(BOTTOM - 0.3)).stroke().restore();
+  }
+
 
   /** Fits text in a box; adds "..." when it does not fit (item 2.1). */
   text(value: string, x: number, y: number, w: number, h: number, size: number, bold = false, color = BLACK, align: 'left' | 'center' = 'left') {
@@ -159,8 +172,6 @@ export async function renderDanfse(
   });
   const page = new Page(doc);
 
-  // Page border, 1 pt (item 2.2.3).
-  doc.save().lineWidth(1).strokeColor(BLACK).rect(cm(LEFT), cm(0.3), cm(WIDTH), cm(BOTTOM - 0.3)).stroke().restore();
 
   // ---- Header (item 2.4.3) -------------------------------------------------
   page.shade(LEFT, 0.3, WIDTH, 1.16);
@@ -381,6 +392,8 @@ export async function renderDanfse(
   const room = infoH - page.textHeight(fixed, WIDTH, 7) - 0.15;
   if (parts.length) page.text(parts.join(' | '), LEFT, y + 0.05, WIDTH, Math.max(0.3, room), 7);
   page.text(fixed, LEFT, y + 0.05 + (parts.length ? Math.max(0.3, room) : 0), WIDTH, infoH, 7);
+
+  page.strokeLines();
 
   // ---- Watermark (items 2.5.1 and 2.5.2), see-through over the content ------
   if (situation !== 'normal') {
