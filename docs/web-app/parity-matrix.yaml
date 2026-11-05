@@ -12165,3 +12165,39 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Só textos e formatação; sem tela própria. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.import
+  screen: lib/screens/nfse/direct/nfse_import_screen.dart
+  route: null
+  action: "Importar as notas do governo e ver o resumo"
+  kind: flow
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, error, saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/nfseImports", "companies/{id}/customers", "companies/{id}/invoices", "api:POST /v1/app/nfse/imports"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "Abre depois de enviar o certificado de um CNPJ novo e pelo … do emitente (Importar e Desfazer importação, 30 dias). Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.order-link
+  screen: lib/screens/nfse/direct/nfse_order_link.dart
+  route: null
+  action: "Ligar a nota a uma OS ou desligar"
+  kind: picker
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, empty, error, saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["api:GET /v1/app/nfse/links/invoices/{id}/candidates", "api:POST /v1/app/nfse/links/invoices/{id}/link", "api:POST /v1/app/nfse/links/invoices/{id}/unlink"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: null
+  note: "Tela de escolher com as OS do cliente da nota primeiro. Desligar só em nota feita fora do PraticOS. Atrás de settings/payments.nfseDirectEnabled (desligada)."
