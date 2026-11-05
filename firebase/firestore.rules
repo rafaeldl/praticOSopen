@@ -471,6 +471,16 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Trava de uma troca de certificado por vez em cada emitente, e contagem
+    // de envios de certificado por pessoa e por empresa. Só o servidor.
+    match /nfseCertificateLocks/{lockId} {
+      allow read, write: if false;
+    }
+
+    match /nfseUploadLimits/{limitId} {
+      allow read, write: if false;
+    }
+
     match /segments/{segmentId} {
       allow read: if request.auth != null;
       allow write: if false; // Apenas via Admin SDK (script de seed)

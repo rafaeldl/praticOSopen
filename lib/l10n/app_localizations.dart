@@ -11490,6 +11490,42 @@ abstract class AppLocalizations {
   /// **'Li e aceito o termo do certificado'**
   String get nfseDirectAcceptTerms;
 
+  /// No description provided for @nfseDirectErrorTooManyAttempts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas de enviar o certificado. Espere uma hora e tente de novo.'**
+  String get nfseDirectErrorTooManyAttempts;
+
+  /// No description provided for @nfseDirectErrorBusy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outra pessoa está mexendo neste certificado agora. Tente de novo em alguns minutos.'**
+  String get nfseDirectErrorBusy;
+
+  /// No description provided for @nfseDirectErrorDailyLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.'**
+  String get nfseDirectErrorDailyLimit;
+
+  /// No description provided for @nfseDirectErrorOwnerOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o dono da conta muda isso.'**
+  String get nfseDirectErrorOwnerOnly;
+
+  /// No description provided for @nfseDirectManagerCanIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerente pode emitir notas'**
+  String get nfseDirectManagerCanIssue;
+
+  /// No description provided for @nfseDirectManagerCanIssueHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.'**
+  String get nfseDirectManagerCanIssueHint;
+
   /// Reading of a device at this visit (odometer, hour meter), label from the segment
   ///
   /// In pt, this message translates to:

@@ -3,7 +3,9 @@ jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests_
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { fakeDb, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import {
+  acquireCertificateLock,
   deleteCertificate,
+  MAX_UPLOADS_PER_WINDOW,
   deleteCompanyCertificates,
   loadCertificate,
   NFSE_CERTIFICATE_TERMS_VERSION,
@@ -51,6 +53,16 @@ class FakeKeyVault implements KeyVault {
     this.calls.push(`destroy:${name}`);
     if (this.failDestroy) throw new NfseServiceError('KEY_VAULT_UNAVAILABLE', 'down');
     for (const entry of this.keys.values()) for (const v of entry.versions) if (v.name === name) v.key = null;
+  }
+  async destroyOtherVersions(emitterId: string, keep: string | null) {
+    this.calls.push(`destroyOthers:${emitterId}:${keep ?? '-'}`);
+    for (const v of this.keys.get(emitterId)?.versions ?? []) {
+      if (v.key && v.name !== keep) await this.destroyVersion(v.name);
+    }
+  }
+  /** Versions still usable (not destroyed). */
+  live(emitterId: string) {
+    return (this.keys.get(emitterId)?.versions ?? []).filter((v) => v.key).map((v) => v.name);
   }
 }
 
@@ -166,7 +178,83 @@ describe('storeCertificate', () => {
     expect(vault.calls).toContain(`destroy:${firstVersion}`);
     expect((read(`companies/c1/fiscalEmitters/${emitterId}`)!.certificate as Record<string, unknown>).notAfter).toBe('2028-03-12T00:00:00.000Z');
     expect((await loadCertificate('c1', emitterId, deps)).notAfter).toBe('2028-03-12T00:00:00.000Z');
-    expect(docsUnder('companies/c1/private/nfse/audit/').map((a) => a.action)).toEqual(['upload', 'replace']);
+    expect(docsUnder('companies/c1/private/nfse/audit/').map((a) => a.action)).toEqual(['upload', 'replace', 'open']);
+  });
+
+  it('replacing also destroys versions left behind by an upload that failed half-way', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    // An upload that created a version and died before saving.
+    await vault.prepareKey(emitterId);
+    const orphan = vault.live(emitterId).at(-1)!;
+    await storeCertificate(input({ emitterId }), deps);
+    const current = read(`nfseCertificates/${emitterId}`)!.kmsKeyVersion;
+    expect(vault.live(emitterId)).toEqual([current]);
+    expect(vault.calls).toContain(`destroy:${orphan}`);
+  });
+});
+
+describe('upload limit (issue #560)', () => {
+  it(`allows ${MAX_UPLOADS_PER_WINDOW} attempts per hour per user and per company, wrong passwords included`, async () => {
+    for (let i = 0; i < MAX_UPLOADS_PER_WINDOW; i++) {
+      expect(await codeOf(storeCertificate(input({ password: 'errada' }), deps))).toBe('CERT_WRONG_PASSWORD');
+    }
+    expect(await codeOf(storeCertificate(input(), deps))).toBe('TOO_MANY_ATTEMPTS');
+    // Same user in another company: the user's count is full.
+    expect(await codeOf(storeCertificate(input({ companyId: 'c2' }), deps))).toBe('TOO_MANY_ATTEMPTS');
+    // Another person of the same company: the company's count is full.
+    const other = { ...actor, user: { id: 'u2', name: 'Admin' } };
+    expect(await codeOf(storeCertificate(input({ actor: other }), deps))).toBe('TOO_MANY_ATTEMPTS');
+    // Someone else, elsewhere, is not affected.
+    expect(await codeOf(storeCertificate(input({ companyId: 'c3', actor: { ...actor, user: { id: 'u3', name: 'X' } } }), deps))).toBeUndefined();
+    // An hour later it works again.
+    const later = { ...deps, now: () => new Date(NOW.getTime() + 61 * 60 * 1000) };
+    expect(await codeOf(storeCertificate(input(), later))).toBeUndefined();
+  });
+});
+
+describe('one change at a time per emitter (issue #560)', () => {
+  it('refuses a replace or delete while another change holds the emitter, and frees it after', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    expect(docsUnder('nfseCertificateLocks/')).toEqual([]);
+    const release = await acquireCertificateLock(`emitter-${emitterId}`, NOW);
+    expect(await codeOf(storeCertificate(input({ emitterId }), deps))).toBe('CERT_BUSY');
+    expect(await codeOf(deleteCertificate({ companyId: 'c1', emitterId, actor }, deps))).toBe('CERT_BUSY');
+    await release();
+    expect(await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps)).toBe(true);
+  });
+
+  it('a lease left by a crashed call expires by itself', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    await acquireCertificateLock(`emitter-${emitterId}`, new Date(NOW.getTime() - 10 * 60 * 1000));
+    expect(await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps)).toBe(true);
+  });
+
+  it('two first uploads of the same CNPJ at once: the second waits its turn', async () => {
+    const release = await acquireCertificateLock('taxid-c1-00000000000191', NOW);
+    expect(await codeOf(storeCertificate(input(), deps))).toBe('CERT_BUSY');
+    await release();
+    expect(await codeOf(storeCertificate(input(), deps))).toBeUndefined();
+  });
+});
+
+describe('loadCertificate audit (issue #560)', () => {
+  it('audits every opening with its purpose and nota, before opening', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    await loadCertificate('c1', emitterId, deps, { purpose: 'issue', invoiceId: 'nf1', by: actor.user });
+    await loadCertificate('c1', emitterId, deps, { purpose: 'reconcile', invoiceId: 'nf1' });
+    await loadCertificate('c1', emitterId, deps);
+    const opens = docsUnder('companies/c1/private/nfse/audit/').filter((a) => a.action === 'open');
+    expect(opens).toEqual([
+      expect.objectContaining({ purpose: 'issue', invoiceId: 'nf1', by: actor.user, emitterId }),
+      expect.objectContaining({ purpose: 'reconcile', invoiceId: 'nf1', by: null }),
+      expect.objectContaining({ purpose: 'unspecified', invoiceId: null }),
+    ]);
+  });
+
+  it('a refused opening (other company) leaves no key unwrapped and no audit there', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    expect(await codeOf(loadCertificate('c2', emitterId, deps, { purpose: 'issue' }))).toBe('CERT_NOT_FOUND');
+    expect(docsUnder('companies/c2/private/nfse/audit/')).toEqual([]);
   });
 });
 
@@ -203,7 +291,8 @@ describe('deleteCertificate (crypto-shredding)', () => {
     vault.failDestroy = true;
     await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps);
     expect(read(`nfseCertificates/${emitterId}`)).toBeUndefined();
-    expect(docsUnder('nfseKeyDestructions/')).toEqual([expect.objectContaining({ keyVersion: version, companyId: 'c1' })]);
+    expect(docsUnder('nfseKeyDestructions/')).toEqual([expect.objectContaining({ emitterId, companyId: 'c1', attempts: 0 })]);
+    expect(vault.live(emitterId)).toEqual([version]);
     expect(docsUnder('companies/c1/private/nfse/audit/').map((a) => a.action)).toContain('destroy-failed');
 
     expect(await processPendingKeyDestructions(deps)).toBe(0);
@@ -211,6 +300,46 @@ describe('deleteCertificate (crypto-shredding)', () => {
     vault.failDestroy = false;
     expect(await processPendingKeyDestructions(deps)).toBe(1);
     expect(docsUnder('nfseKeyDestructions/')).toEqual([]);
+    expect(vault.live(emitterId)).toEqual([]);
+  });
+
+  it('the retry never destroys a certificate sent after the failure', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    vault.failDestroy = true;
+    await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps);
+    vault.failDestroy = false;
+    await storeCertificate(input({ emitterId }), deps);
+    const current = read(`nfseCertificates/${emitterId}`)!.kmsKeyVersion;
+    // The new upload already cleaned the old version; the queued item finishes with nothing to destroy.
+    expect(await processPendingKeyDestructions(deps)).toBe(1);
+    expect(vault.live(emitterId)).toEqual([current]);
+    expect((await loadCertificate('c1', emitterId, deps)).taxId).toBe('00000000000191');
+  });
+
+  it('logs the alert line after 2 failed retries', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    vault.failDestroy = true;
+    await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps);
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      await processPendingKeyDestructions(deps);
+      expect(spy.mock.calls.some(([line]) => String(line).startsWith('[nfse-alert]'))).toBe(false);
+      await processPendingKeyDestructions(deps);
+      expect(spy.mock.calls.some(([line]) => String(line).startsWith('[nfse-alert]') && String(line).includes(emitterId))).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('a retry waits while the emitter is being changed', async () => {
+    const { emitterId } = await storeCertificate(input(), deps);
+    vault.failDestroy = true;
+    await deleteCertificate({ companyId: 'c1', emitterId, actor }, deps);
+    vault.failDestroy = false;
+    const release = await acquireCertificateLock(`emitter-${emitterId}`, NOW);
+    expect(await processPendingKeyDestructions(deps)).toBe(0);
+    await release();
+    expect(await processPendingKeyDestructions(deps)).toBe(1);
   });
 });
 
@@ -232,14 +361,22 @@ describe('purgeExpiredCertificates', () => {
 });
 
 describe('deleteCompanyCertificates (account deletion)', () => {
-  it('shreds every certificate of the company and nothing of others', async () => {
+  it('removes every certificate of the company now and leaves the keys to the nfseApi daily job', async () => {
     const a = await storeCertificate(input(), deps);
     const b = await storeCertificate(input({ pfx: pki.pfx({ cnpj: '11222333000181' }) }), deps);
-    const other = await storeCertificate(input({ companyId: 'c2' }), deps);
+    const other = await storeCertificate(input({ companyId: 'c2', actor: { ...actor, user: { id: 'u9', name: 'Y' } } }), deps);
+    vault.calls = [];
     expect(await deleteCompanyCertificates('c1', deps)).toBe(2);
     expect(read(`nfseCertificates/${a.emitterId}`)).toBeUndefined();
     expect(read(`nfseCertificates/${b.emitterId}`)).toBeUndefined();
     expect(read(`nfseCertificates/${other.emitterId}`)).toBeDefined();
-    expect(vault.calls.filter((c) => c.startsWith('destroy:'))).toHaveLength(2);
+    // The accountApi runs as another service account: no KMS call from it.
+    expect(vault.calls).toEqual([]);
+    expect(docsUnder('nfseKeyDestructions/').map((i) => i.emitterId).sort()).toEqual([a.emitterId, b.emitterId].sort());
+
+    expect(await processPendingKeyDestructions(deps)).toBe(2);
+    expect(vault.live(a.emitterId)).toEqual([]);
+    expect(vault.live(b.emitterId)).toEqual([]);
+    expect(vault.live(other.emitterId)).toHaveLength(1);
   });
 });

@@ -7059,6 +7059,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseDirectAcceptTerms => 'Li e aceito o termo do certificado';
 
   @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Muitas tentativas de enviar o certificado. Espere uma hora e tente de novo.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Outra pessoa está mexendo neste certificado agora. Tente de novo em alguns minutos.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly => 'Só o dono da conta muda isso.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'Gerente pode emitir notas';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }

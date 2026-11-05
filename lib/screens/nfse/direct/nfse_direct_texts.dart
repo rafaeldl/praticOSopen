@@ -49,6 +49,12 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
       return l10n.nfseDirectErrorValidation;
+    case 'TOO_MANY_ATTEMPTS':
+      return l10n.nfseDirectErrorTooManyAttempts;
+    case 'CERT_BUSY':
+      return l10n.nfseDirectErrorBusy;
+    case 'DAILY_LIMIT_REACHED':
+      return l10n.nfseDirectErrorDailyLimit;
     case 'KEY_VAULT_UNAVAILABLE':
     case 'NETWORK_ERROR':
     case 'RATE_LIMIT_EXCEEDED':

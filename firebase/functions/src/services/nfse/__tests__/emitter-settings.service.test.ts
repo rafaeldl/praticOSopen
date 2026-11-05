@@ -51,8 +51,13 @@ describe('updateEmitter', () => {
 describe('updateNfseSettings', () => {
   it('sets the default emitter and the auto issue', async () => {
     const saved = await updateNfseSettings('c1', { defaultEmitterId: 'e1', autoIssue: 'selectedCustomers' });
-    expect(saved).toEqual({ defaultEmitterId: 'e1', autoIssue: 'selectedCustomers' });
+    expect(saved).toEqual({ defaultEmitterId: 'e1', autoIssue: 'selectedCustomers', managerCanIssue: true });
     expect(read('companies/c1/settings/nfse')).toMatchObject({ defaultEmitterId: 'e1', autoIssue: 'selectedCustomers' });
+  });
+
+  it('saves whether managers issue notas (issue #560)', async () => {
+    expect((await updateNfseSettings('c1', { managerCanIssue: false })).managerCanIssue).toBe(false);
+    expect(read('companies/c1/settings/nfse')).toMatchObject({ managerCanIssue: false });
   });
 
   it('refuses a default that is not an emitter of the company', async () => {

@@ -42,6 +42,60 @@ export interface OpenCertificateOptions {
 
 const MAX_PFX_BYTES = 64 * 1024;
 
+/**
+ * Highest PBE/MAC iteration count accepted for one key derivation. Real A1s
+ * use 2 000 to 10 000 (OpenSSL, Windows, the ACs); node-forge has no ceiling
+ * and derives in pure JS, so a crafted file with millions of iterations would
+ * hold the instance for minutes. Spec §6, issue #560.
+ */
+export const MAX_PFX_ITERATIONS = 100_000;
+/** All the derivations of one file together (MAC + every encrypted bag). */
+export const MAX_PFX_TOTAL_ITERATIONS = 400_000;
+
+/**
+ * Budget of the file being opened now (openCertificate is synchronous, so one
+ * file at a time per process). Null outside openCertificate.
+ */
+let iterationBudget: { left: number } | null = null;
+
+function spendIterations(count: unknown): void {
+  const n = Number(count);
+  if (!Number.isFinite(n) || n > MAX_PFX_ITERATIONS) {
+    throw new NfseServiceError('CERT_INVALID_FILE', 'Certificate file uses too many iterations');
+  }
+  if (iterationBudget) {
+    iterationBudget.left -= Math.max(1, n);
+    if (iterationBudget.left < 0) throw new NfseServiceError('CERT_INVALID_FILE', 'Certificate file uses too many iterations');
+  }
+}
+
+type AnyFn = (...args: never[]) => unknown;
+const GUARDED = Symbol.for('praticos.nfse.iterationGuard');
+
+/** Wraps a forge key derivation so the iteration count (argument [index]) is checked before any work. */
+function guard(owner: Record<string, unknown>, name: string, index: number): void {
+  const original = owner?.[name] as (AnyFn & { [GUARDED]?: true }) | undefined;
+  if (typeof original !== 'function' || original[GUARDED]) return;
+  const wrapped = function (this: unknown, ...args: unknown[]) {
+    spendIterations(args[index]);
+    return (original as unknown as (...a: unknown[]) => unknown).apply(this, args);
+  } as AnyFn & { [GUARDED]?: true };
+  wrapped[GUARDED] = true;
+  owner[name] = wrapped;
+}
+
+/*
+ * node-forge looks these up on its module objects at call time (pkcs12.js MAC,
+ * pbe.js PKCS#12 PBE and PBES2), so wrapping them here covers the MAC and the
+ * bags nested inside encrypted safes, which a scan before decrypting cannot see.
+ * Only this module uses forge's password-based crypto.
+ */
+const forgeAny = forge as unknown as Record<string, Record<string, unknown>>;
+guard(forgeAny.pkcs12, 'generateKey', 3);
+guard((forgeAny.pki as unknown as Record<string, Record<string, unknown>>).pbe, 'generatePkcs12Key', 3);
+if (forgeAny.pbe && forgeAny.pbe !== (forgeAny.pki as unknown as Record<string, unknown>).pbe) guard(forgeAny.pbe, 'generatePkcs12Key', 3);
+guard(forgeAny.pkcs5, 'pbkdf2', 2);
+
 function bagsOf(p12: forge.pkcs12.Pkcs12Pfx, type: string): forge.pkcs12.Bag[] {
   return p12.getBags({ bagType: type })[type] ?? [];
 }
@@ -53,15 +107,19 @@ function decodePfx(pfx: Buffer, password: string): forge.pkcs12.Pkcs12Pfx {
   } catch {
     throw new NfseServiceError('CERT_INVALID_FILE', 'Not a PKCS#12 file');
   }
+  iterationBudget = { left: MAX_PFX_TOTAL_ITERATIONS };
   try {
     return forge.pkcs12.pkcs12FromAsn1(asn1, false, password);
   } catch (error) {
+    if (error instanceof NfseServiceError) throw error;
     // forge says "Invalid password?" (MAC check) or fails to decrypt the bags.
     const message = (error as Error)?.message ?? '';
     if (/password|mac|decrypt|padding/i.test(message)) {
       throw new NfseServiceError('CERT_WRONG_PASSWORD', 'Wrong certificate password');
     }
     throw new NfseServiceError('CERT_INVALID_FILE', 'Could not read the PKCS#12 file');
+  } finally {
+    iterationBudget = null;
   }
 }
 
