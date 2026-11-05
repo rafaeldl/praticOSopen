@@ -101,7 +101,7 @@ export function defaultImportDeps(): ImportDeps {
     now: () => new Date(),
     clock: () => Date.now(),
     budgetMs: READ_BUDGET_MS,
-    loadCertificate: (cid, emitterId) => loadCertificate(cid, emitterId),
+    loadCertificate: (cid, emitterId) => loadCertificate(cid, emitterId, undefined, { purpose: 'import' }),
     config: getNfseServerConfig,
     saveFile: async (path, contents, contentType) => {
       await storage.bucket().file(path).save(contents, { contentType, resumable: false });

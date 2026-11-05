@@ -83,6 +83,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..deviceIds = (json['deviceIds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList()
+  ..deviceReadings = (json['deviceReadings'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as num),
+  )
   ..contract = json['contract'] == null
       ? null
       : OrderContract.fromJson(json['contract'] as Map<String, dynamic>)
@@ -121,6 +124,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'customData': instance.customData,
   'documents': instance.documents?.map((e) => e.toJson()).toList(),
   'deviceIds': instance.deviceIds,
+  'deviceReadings': instance.deviceReadings,
   'contract': instance.contract?.toJson(),
   'isContract': instance.isContract,
 };

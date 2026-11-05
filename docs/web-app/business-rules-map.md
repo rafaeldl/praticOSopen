@@ -77,6 +77,7 @@ Achados novos ao escrever os casos (os do servidor, já corrigidos):
 - **Apagar OS.** `firestore.rules` recusa apagar OS com dinheiro, exceto admin; `canDeleteOrder` no app e `DELETE /v1/app/orders/:id` seguem a mesma regra (`order-delete.json`).
 - **Recibo.** Corrigido: `buildReceiptPlan` recusa orçamento, cancelada e valor acima do aberto, como o servidor (`receipts.json`).
 - **Atrasada.** Corrigido: `getOverdueOrders` inclui orçamento, como a tela (`overdue.json`).
+- **Clientes.** Corrigido (#588): a lista contava só aprovada e em andamento (a Início conta orçamento), no app ainda perdia OS sem prazo e marcava atrasada pelo minuto; a ficha somava em "Falta receber" OS aprovada sem nada pago. Agora "em aberto" e "atrasada" são os da Início e "Falta receber" é o A receber do Financeiro, na lista e na ficha (`customer-summary.json`).
 
 Sem divergência encontrada: CPF/CNPJ, repartição de pagamento, `isSafeInvoiceUrl`/`sanitizeReceiptUrl`/`asaas_billing.dart`, `showsValues`/`companyShowsValues`, tabela de permissões.
 

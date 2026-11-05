@@ -4,6 +4,7 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/v2/repository_v2.dart';
+import 'package:praticos/utils/open_orders.dart';
 
 /// Repository V2 para Orders usando subcollections por tenant.
 ///
@@ -202,10 +203,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       } else if (status == 'open') {
         // "Em aberto": everything not done/canceled. Uses the existing
         // (status, createdAt) index.
-        query = query.where(
-          'status',
-          whereIn: ['quote', 'approved', 'progress'],
-        );
+        query = query.where('status', whereIn: kOpenOrderStatuses);
       } else if (status == 'due_date') {
         query = query.where('status', whereIn: ['approved', 'progress']);
         query = query.orderBy('dueDate');

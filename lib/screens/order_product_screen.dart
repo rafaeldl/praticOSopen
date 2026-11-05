@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -6,6 +8,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/order/order_item_form.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
@@ -22,6 +25,8 @@ class OrderProductScreen extends StatefulWidget {
     super.key,
     this.canEditMainFields,
     this.canViewPrices,
+    this.canManageCatalog,
+    this.catalogPriceWriter,
   });
 
   /// Overrides [AuthorizationService.canEditOrderMainFields] (tests).
@@ -29,6 +34,12 @@ class OrderProductScreen extends StatefulWidget {
 
   /// Overrides the `viewPrices` permission (tests).
   final bool? canViewPrices;
+
+  /// Overrides the `manageProducts` permission (tests).
+  final bool? canManageCatalog;
+
+  /// Overrides [writeCatalogPrice] (tests).
+  final CatalogPriceWriter? catalogPriceWriter;
 
   @override
   State<OrderProductScreen> createState() => _OrderProductScreenState();
@@ -123,10 +134,17 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       widget.canViewPrices ??
       _authService.hasPermission(PermissionType.viewPrices);
 
+  bool get _canManageCatalog =>
+      widget.canManageCatalog ??
+      _authService.hasPermission(PermissionType.manageProducts);
+
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      final previousValue = _orderProduct.value;
       _formKey.currentState!.save();
+      await _offerCatalogPrice(previousValue);
+      if (!mounted) return;
+      setState(() => _isLoading = true);
 
       final value = _orderProduct.value;
       _orderProduct.total = value == null
@@ -141,6 +159,38 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
         Navigator.pop(context);
       }
     }
+  }
+
+  /// A new unit price for a product of the catalog: only here or always?
+  Future<void> _offerCatalogPrice(double? previousValue) async {
+    final catalog = _orderProduct.product;
+    final newValue = _orderProduct.value;
+    final offer = shouldOfferCatalogPrice(
+      catalogId: catalog?.id,
+      catalogValue: _isEditing ? catalog?.value : _product?.value,
+      previousValue: _isEditing ? previousValue : _product?.value,
+      newValue: newValue,
+      canManageCatalog: _canManageCatalog && _canViewPrices,
+    );
+    if (!offer) return;
+    final always = await askCatalogPrice(
+      context,
+      entity: context.read<SegmentConfigProvider>().label(
+        LabelKeys.productEntity,
+      ),
+      name: _productName,
+      from: _isEditing ? catalog!.value : _product?.value,
+      to: newValue!,
+    );
+    if (!always) return;
+    catalog!.value = newValue;
+    final write = widget.catalogPriceWriter ?? writeCatalogPrice;
+    // Not awaited: offline, Firestore only completes once it syncs.
+    unawaited(
+      write(CatalogKind.product, catalog.id!, newValue).catchError(
+        (Object e) => debugPrint('catalog price not saved: $e'),
+      ),
+    );
   }
 
   Future<void> _showMore() async {

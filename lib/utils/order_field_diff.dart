@@ -73,20 +73,34 @@ class OrderFieldDiff {
     return json;
   }
 
+  /// Maps written key by key (`deviceReadings.d1`), never whole: two people
+  /// filling different keys of the same order keep both.
+  static const Set<String> keyedFields = {'deviceReadings'};
+
   /// Top-level fields of [current] that differ from [base]. A field present
-  /// in [base] and gone from [current] comes as [DeleteFieldOp].
+  /// in [base] and gone from [current] comes as [DeleteFieldOp]. A
+  /// [keyedFields] map comes as one path per changed key.
   static Map<String, dynamic> changedFields(
     Map<String, dynamic> base,
     Map<String, dynamic> current,
   ) {
     final changed = <String, dynamic>{};
+    for (final key in keyedFields) {
+      final before = base[key] is Map ? base[key] as Map : const {};
+      final after = current[key] is Map ? current[key] as Map : const {};
+      for (final sub in {...before.keys, ...after.keys}) {
+        if (_equality.equals(before[sub], after[sub])) continue;
+        changed['$key.$sub'] =
+            after.containsKey(sub) ? after[sub] : const DeleteFieldOp();
+      }
+    }
     current.forEach((key, value) {
-      if (ignoredFields.contains(key)) return;
+      if (ignoredFields.contains(key) || keyedFields.contains(key)) return;
       if (!base.containsKey(key) && value == null) return;
       if (!_equality.equals(base[key], value)) changed[key] = value;
     });
     for (final key in base.keys) {
-      if (ignoredFields.contains(key)) continue;
+      if (ignoredFields.contains(key) || keyedFields.contains(key)) continue;
       if (!current.containsKey(key) && base[key] != null) {
         changed[key] = const DeleteFieldOp();
       }

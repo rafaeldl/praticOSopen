@@ -10,6 +10,8 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/screens/order/order_item_form.dart';
 import 'package:praticos/screens/order_product_screen.dart';
 import 'package:praticos/screens/order_service_screen.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +42,8 @@ OrderStore _store({List<DeviceAggr> devices = const []}) {
       OrderService()
         ..service = (ServiceAggr()
           ..id = 's1'
-          ..name = 'Troca de óleo do motor com filtro e revisão completa')
+          ..name = 'Troca de óleo do motor com filtro e revisão completa'
+          ..value = 120)
         ..value = 120
         ..description = 'Óleo 5W30',
     ]
@@ -48,7 +51,8 @@ OrderStore _store({List<DeviceAggr> devices = const []}) {
       OrderProduct()
         ..product = (ProductAggr()
           ..id = 'p1'
-          ..name = 'Filtro de óleo')
+          ..name = 'Filtro de óleo'
+          ..value = 35.5)
         ..value = 35.5
         ..quantity = 2
         ..total = 71
@@ -126,6 +130,7 @@ void main() {
     const screen = OrderServiceScreen(
       canEditMainFields: true,
       canViewPrices: true,
+      canManageCatalog: false,
     );
 
     testWidgets('opens prefilled: name, value, notes, "…" and Salvar', (
@@ -244,7 +249,11 @@ void main() {
       final store = _store();
       await _open(
         tester,
-        const OrderServiceScreen(canEditMainFields: false, canViewPrices: true),
+        const OrderServiceScreen(
+          canEditMainFields: false,
+          canViewPrices: true,
+          canManageCatalog: false,
+        ),
         {'orderStore': store, 'orderServiceIndex': 0},
       );
 
@@ -294,6 +303,7 @@ void main() {
     const screen = OrderProductScreen(
       canEditMainFields: true,
       canViewPrices: true,
+      canManageCatalog: false,
     );
 
     testWidgets('opens prefilled: quantity, unit value and total', (
@@ -392,6 +402,169 @@ void main() {
         'orderProductIndex': 0,
       }, textScale: 2.2);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('new price: only here or always (#588)', () {
+    late List<(CatalogKind, String, double?)> writes;
+    Future<void> writer(CatalogKind kind, String id, double? value) async =>
+        writes.add((kind, id, value));
+    setUp(() => writes = []);
+
+    OrderServiceScreen serviceScreen({bool canManage = true}) =>
+        OrderServiceScreen(
+          canEditMainFields: true,
+          canViewPrices: true,
+          canManageCatalog: canManage,
+          catalogPriceWriter: writer,
+        );
+
+    testWidgets('"Usar sempre" saves the line and the catalog price', (
+      tester,
+    ) async {
+      final store = _store();
+      await _open(tester, serviceScreen(), {
+        'orderStore': store,
+        'orderServiceIndex': 0,
+      });
+
+      await tester.enterText(_key('order_item_value'), '150');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mudar o preço no Catálogo?'), findsOneWidget);
+      expect(find.textContaining('Serviço “Troca de óleo'), findsOneWidget);
+      await tester.tap(_key('order_item_catalog_price_always'));
+      await tester.pumpAndSettle();
+
+      expect(writes, [(CatalogKind.service, 's1', 150.0)]);
+      expect(store.order!.services!.first.value, 150);
+      expect(store.order!.services!.first.service!.value, 150);
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('"Só nesta OS" keeps the catalog as it was', (tester) async {
+      final store = _store();
+      await _open(tester, serviceScreen(), {
+        'orderStore': store,
+        'orderServiceIndex': 0,
+      });
+
+      await tester.enterText(_key('order_item_value'), '150');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('order_item_catalog_price_only_here'));
+      await tester.pumpAndSettle();
+
+      expect(writes, isEmpty);
+      expect(store.order!.services!.first.value, 150);
+      expect(store.order!.services!.first.service!.value, 120);
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('same price: no question', (tester) async {
+      final store = _store();
+      await _open(tester, serviceScreen(), {
+        'orderStore': store,
+        'orderServiceIndex': 0,
+      });
+
+      await tester.enterText(_key('order_item_notes'), 'Outro óleo');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mudar o preço no Catálogo?'), findsNothing);
+      expect(writes, isEmpty);
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('loose item (not from the catalog): no question', (
+      tester,
+    ) async {
+      final store = _store();
+      store.order!.services!.first.service!.id = null;
+      await _open(tester, serviceScreen(), {
+        'orderStore': store,
+        'orderServiceIndex': 0,
+      });
+
+      await tester.enterText(_key('order_item_value'), '150');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mudar o preço no Catálogo?'), findsNothing);
+      expect(store.order!.services!.first.value, 150);
+    });
+
+    testWidgets('cannot edit the catalog: no question', (tester) async {
+      final store = _store();
+      await _open(tester, serviceScreen(canManage: false), {
+        'orderStore': store,
+        'orderServiceIndex': 0,
+      });
+
+      await tester.enterText(_key('order_item_value'), '150');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mudar o preço no Catálogo?'), findsNothing);
+      expect(writes, isEmpty);
+      expect(store.order!.services!.first.value, 150);
+    });
+
+    testWidgets('product: asks with the segment name and writes the product', (
+      tester,
+    ) async {
+      final store = _store();
+      await _open(
+        tester,
+        OrderProductScreen(
+          canEditMainFields: true,
+          canViewPrices: true,
+          canManageCatalog: true,
+          catalogPriceWriter: writer,
+        ),
+        {'orderStore': store, 'orderProductIndex': 0},
+      );
+
+      await tester.enterText(_key('order_item_value'), '40');
+      await tester.tap(_key('order_item_save'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Produto “Filtro de óleo”'), findsOneWidget);
+      await tester.tap(_key('order_item_catalog_price_always'));
+      await tester.pumpAndSettle();
+
+      expect(writes, [(CatalogKind.product, 'p1', 40.0)]);
+      expect(store.order!.products!.first.total, 80);
+    });
+
+    test('shouldOfferCatalogPrice', () {
+      bool offer({
+        String? id = 'x',
+        double? catalog = 100,
+        double? before = 100,
+        double? now = 120,
+        bool can = true,
+      }) => shouldOfferCatalogPrice(
+        catalogId: id,
+        catalogValue: catalog,
+        previousValue: before,
+        newValue: now,
+        canManageCatalog: can,
+      );
+
+      expect(offer(), isTrue);
+      expect(offer(id: null), isFalse);
+      expect(offer(can: false), isFalse);
+      expect(offer(now: 100), isFalse);
+      // Changed before ("só nesta OS"), not touched now.
+      expect(offer(before: 120, now: 120), isFalse);
+      // Back to the catalog price.
+      expect(offer(before: 120, now: 100), isFalse);
+      // Catalog without price.
+      expect(offer(catalog: null, before: null), isTrue);
+      expect(offer(now: 100.001), isFalse);
     });
   });
 }

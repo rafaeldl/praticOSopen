@@ -2,9 +2,11 @@
 // reads that depend on orders come filtered by the role on the server, and
 // every write goes there too. No Firestore here, so these screens add nothing
 // to the Firestore chunk of the first download.
+import type { FiscalAddress } from './invoice-data'
 import { ApiError } from '@/lib/api'
 import { storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
+import { currentZone } from '@/lib/zone'
 import type { CustomerRow, DeviceRow, DeviceStatus } from './model'
 
 export interface OrderSummary {
@@ -19,6 +21,8 @@ export interface OrderSummary {
   total?: number
   paidAmount?: number
   payment?: string | null
+  /** Each device's reading at that visit, by device id (lib/device-reading.ts). */
+  deviceReadings?: Record<string, number>
 }
 
 export interface CustomerDetail {
@@ -37,6 +41,12 @@ export interface CustomerDetail {
     latitude: number | null
     longitude: number | null
     customData: Record<string, unknown> | null
+    // "Dados para nota" (docs/NFSE_DIRECT.md, etapa #568).
+    legalName?: string | null
+    fiscalAddress?: FiscalAddress | null
+    invoiceEmail?: string | null
+    invoiceRecipient?: { id: string; name: string } | null
+    autoIssueInvoice?: boolean | null
   }
   orders: OrderSummary[]
   devices: { id: string; name: string; serial: string | null; count: number }[]
@@ -95,7 +105,7 @@ export interface Directory<T> {
 export const loadCustomerDirectory = (fresh = false): Promise<Directory<CustomerRow>> => {
   if (fresh) forgetDirectory()
   return cached('customers', async () => {
-    const body = await api<{ data: CustomerRow[]; meta?: { truncated?: boolean; partial?: boolean } }>('/v1/app/customers', { raw: true })
+    const body = await api<{ data: CustomerRow[]; meta?: { truncated?: boolean; partial?: boolean } }>(`/v1/app/customers?zone=${encodeURIComponent(currentZone())}`, { raw: true })
     return { rows: body.data ?? [], truncated: !!body.meta?.truncated, partial: !!body.meta?.partial }
   })
 }
@@ -121,6 +131,12 @@ export interface CustomerInput {
   address?: string | null
   taxId?: string | null
   customData?: Record<string, unknown> | null
+  legalName?: string | null
+  fiscalAddress?: FiscalAddress | null
+  invoiceEmail?: string | null
+  /** "Nota fiscal para": another customer's id; null takes it off. */
+  invoiceRecipientId?: string | null
+  autoIssueInvoice?: boolean | null
 }
 
 export async function saveCustomer(id: string | null, input: CustomerInput & { version?: string }): Promise<string> {

@@ -241,6 +241,59 @@ void main() {
       expect(server.calls.single.$2, '/v1/app/nfse/setup/settings');
       expect(server.calls.single.$3, {'autoIssue': 'selectedCustomers'});
     });
+
+    testWidgets('"Gerente pode emitir" saves the owner\'s choice', (
+      tester,
+    ) async {
+      final server = _Server();
+      await _pump(
+        tester,
+        NfseDirectSetupScreen(
+          emitters: Stream.value([_emitter()]),
+          settings: Stream.value(const NfseDirectSettings()),
+          service: server.api,
+          now: _now,
+        ),
+      );
+      expect(find.text('Gerente pode emitir notas'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('nfseDirectManagerCanIssue')),
+          matching: find.byType(CupertinoSwitch),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(server.calls.single.$3, {'managerCanIssue': false});
+    });
+
+    testWidgets(
+      'an admin who is not the owner is told only the owner changes it',
+      (tester) async {
+        final server = _Server((_, _, _) => _error('FORBIDDEN', status: 403));
+        await _pump(
+          tester,
+          NfseDirectSetupScreen(
+            emitters: Stream.value([_emitter()]),
+            settings: Stream.value(
+              NfseDirectSettings.fromJson({'managerCanIssue': false}),
+            ),
+            service: server.api,
+            now: _now,
+          ),
+        );
+        await tester.tap(
+          find.descendant(
+            of: find.byKey(const Key('nfseDirectManagerCanIssue')),
+            matching: find.byType(CupertinoSwitch),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(server.calls.single.$3, {'managerCanIssue': true});
+        expect(find.text('Só o dono da conta muda isso.'), findsOneWidget);
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+      },
+    );
   });
 
   group('CertificateUploadSheet', () {

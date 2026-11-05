@@ -269,6 +269,10 @@ fica como está.
   - **Serviços em aberto** (`depositOwed`, `depositOrders`): saldo das OS `approved` ou `progress`
     que já têm recebimento parcial (`FinancialSummary.hasPartialPayment`). Lista por OS; tocar abre
     a OS. Estas OS não entram em Próxima cobrança, que continua só com serviços concluídos.
+  - **Mesma regra fora do Financeiro** (`FinancialSummary.owesNow`): o "Falta receber" da ficha do
+    cliente e da lista de Clientes (app e web) soma exatamente estas duas partes. A lista usa a mesma
+    consulta do Financeiro (`getUnpaidOrders`, no web `ordersWithMoneyOpen`), só para quem tem
+    `viewFinancialReports`. Casos em `docs/web-app/contract-cases/customer-summary.json`.
 
   Subtítulo "{valor} de {n} clientes"; o cliente com as duas partes conta uma vez. Os títulos das
   partes só aparecem quando há as duas.

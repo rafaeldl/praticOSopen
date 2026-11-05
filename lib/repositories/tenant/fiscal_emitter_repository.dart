@@ -10,10 +10,14 @@ class NfseDirectSettings {
   const NfseDirectSettings({
     this.defaultEmitterId,
     this.autoIssue = NfseDirectAutoIssue.never,
+    this.managerCanIssue = true,
   });
 
   final String? defaultEmitterId;
   final NfseDirectAutoIssue autoIssue;
+
+  /// Whether managers issue and cancel notas (owner's choice; default yes).
+  final bool managerCanIssue;
 
   /// Unknown or Asaas values ('manual', 'paid', 'completed') read as never.
   factory NfseDirectSettings.fromJson(Map<String, dynamic>? json) {
@@ -24,6 +28,7 @@ class NfseDirectSettings {
         (value) => value.name == auto,
         orElse: () => NfseDirectAutoIssue.never,
       ),
+      managerCanIssue: json?['managerCanIssue'] != false,
     );
   }
 }

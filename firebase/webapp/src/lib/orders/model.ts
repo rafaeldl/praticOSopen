@@ -13,6 +13,7 @@ import {
   type OrderRole,
 } from '@/lib/rules/order-rules'
 import { instantOf, wallParts } from '@/lib/zone'
+import { readingsOf } from '@/lib/device-reading'
 
 export type OrderStatus = 'quote' | 'approved' | 'progress' | 'done' | 'canceled'
 export const STATUSES: OrderStatus[] = ['quote', 'approved', 'progress', 'done', 'canceled']
@@ -83,6 +84,8 @@ export interface Order {
   documents?: unknown[]
   address?: string | null
   customData?: Record<string, unknown>
+  /** Each device's reading at this visit, by device id (lib/device-reading.ts). */
+  deviceReadings?: Record<string, number>
   /** Files attached to the order (nota, contrato, garantia, outro): never a payment proof (order.document.open). */
   attachments: OrderAttachment[]
   /** What the customer rated on the share link (1 to 5), when there is a valid score. */
@@ -220,6 +223,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     attachments: attachmentsOf(raw.documents, showsMoney),
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
+    deviceReadings: readingsOf(raw.deviceReadings),
     rating: ratingOf(raw.rating),
     shareLink: shareLinkOf(raw.shareLink),
   }

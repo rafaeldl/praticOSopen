@@ -16,7 +16,7 @@ import type { Order } from '@/lib/orders/model'
 import { country, orderShort, orderTitle } from '@/lib/orders/text'
 import { whatsappNumber } from '@/lib/phone'
 import { createShareToken, listShareTokens, revokeShareToken } from '@/lib/receive/data'
-import { messageKind, permissionKind, PERMISSIONS_OF, pickToken, validityDays, whatsappLink, type PermissionKind, type ShareToken } from '@/lib/receive/model'
+import { messageKind, permissionKind, PERMISSIONS_OF, pickToken, previewUrl, validityDays, whatsappLink, type PermissionKind, type ShareToken } from '@/lib/receive/model'
 import { session } from '@/lib/session'
 import { canShareSheet, copyText, onShare, openWhatsapp, shareSheet } from '@/lib/share'
 import { showToast } from '@/lib/toast'
@@ -222,6 +222,8 @@ onBeforeUnmount(() => (copied.value = false))
           <label class="field-label" for="share-text">{{ t('web.share.message') }}</label>
           <textarea id="share-text" v-model="text" class="field" rows="6" data-testid="share-text" @input="edited = true"></textarea>
           <p class="share-url"><span class="sr">{{ t('web.share.linkLabel') }}</span><code class="num" data-testid="share-url">{{ token.url }}</code></p>
+          <!-- Opens the customer's page as a preview in a new tab: nothing is sent, counted, approved or rated. -->
+          <p><a class="link" :href="previewUrl(token.url)" target="_blank" rel="noopener noreferrer" data-testid="share-preview">{{ t('sharePreview') }}</a></p>
           <div class="share-opts">
             <div>
               <label class="field-label" for="share-perm">{{ t('shareWhatCanDo') }}</label>

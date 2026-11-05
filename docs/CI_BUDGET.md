@@ -39,6 +39,8 @@ Equivalente a ~98.000 minutos/mês, ou ~US$ 600/mês se fosse privado. 95% do cu
 
 Os deploys continuam automáticos no merge de propósito: o backend precisa sair antes do app (o RC usa o mesmo Firebase de produção), e correções de site/regras não devem esperar uma versão do app.
 
+Vários merges seguidos não enfileiram um deploy por merge: Functions, Hosting e Cloud Run usam `concurrency` com `cancel-in-progress: true`, então um push novo cancela o deploy em andamento e os pendentes, e só o último commit publica tudo. As regras ficam de fora de propósito (`cancel-in-progress: false`), para não cancelar uma publicação de regras pela metade.
+
 ## Hook de pre-push
 
 Arquivo versionado em `.githooks/pre-push`. Instalar uma vez por clone:

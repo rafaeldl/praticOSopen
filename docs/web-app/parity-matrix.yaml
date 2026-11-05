@@ -4093,6 +4093,23 @@ rows:
   e2e: firebase/webapp/e2e/ai-talk.spec.ts
   web_exception: null
   note: "Dica de fala usa o rótulo do aparelho. O aviso ganha um X quando a ação não o fecha. Web: na Nova OS a barra tem texto, Foto (arquivo) e Falar; o aviso fica no topo do formulário com Desfazer (o formulário é modal)."
+- id: order.device-reading.edit
+  screen: lib/screens/order/device_reading_sheet.dart
+  route: null
+  action: "Anotar a leitura do equipamento na OS (quilometragem, horímetro)"
+  kind: sheet
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: [automotive, asset_maintenance]
+  segment_variation: ["custom_fields:device"]
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{companyId}/orders", "companies/{companyId}/devices"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  note: "Campo do equipamento com reading: true (ou device.mileage/device.operatingHours). Grava Order.deviceReadings e a última leitura no equipamento se não for menor e houver canRegisterDevices. Ramo sem leitura não mostra. Web: ReadingDialog.vue no OrderDetail, sem e2e ainda. docs/DEVICE_READING.md."
 - id: order.sheet.date
   screen: lib/screens/order/order_extras.dart
   route: null
@@ -8132,8 +8149,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Grupo Dados para nota (só com settings/payments.nfseDirectEnabled): CPF/CNPJ, razão social, endereço com CEP (fiscalAddress) e e-mail da nota. Cartão no cadastro novo, link na edição."
@@ -8150,8 +8167,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["api:GET brasilapi.com.br/api/cnpj/v1", "api:GET viacep.com.br/ws"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "CNPJ numérico válido busca razão social, endereço com código IBGE e e-mail; CEP com 8 dígitos busca rua, bairro, cidade e UF. Nunca escreve por cima do que foi digitado."
@@ -8168,8 +8185,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Só quando o número mudou. Mandar as notas desta loja para ela salva sem o número e com invoiceRecipient."
@@ -8186,8 +8203,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers", "companies/{id}/settings/nfse"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Só quando settings/nfse.autoIssue é selectedCustomers ou allOrders; autoIssueInvoice."
@@ -8204,8 +8221,8 @@ rows:
   feature_flags: [nfseDirectEnabled]
   hardware: null
   data: ["companies/{id}/customers"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customer-invoice.spec.ts
   web_exception: null
   permission: manageCustomers
   note: "Pelo menu do cliente; tela de escolher com Nenhum primeiro. A linha Nota fiscal para só aparece quando preenchida."

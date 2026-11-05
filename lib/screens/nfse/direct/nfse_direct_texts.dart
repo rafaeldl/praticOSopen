@@ -55,6 +55,12 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseLinkErrorAlreadyLinked;
     case 'IMPORT_UNDO_EXPIRED':
       return l10n.nfseImportErrorUndoExpired;
+    case 'TOO_MANY_ATTEMPTS':
+      return l10n.nfseDirectErrorTooManyAttempts;
+    case 'CERT_BUSY':
+      return l10n.nfseDirectErrorBusy;
+    case 'DAILY_LIMIT_REACHED':
+      return l10n.nfseDirectErrorDailyLimit;
     case 'KEY_VAULT_UNAVAILABLE':
     case 'SEFIN_UNAVAILABLE':
     case 'NETWORK_ERROR':

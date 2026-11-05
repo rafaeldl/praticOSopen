@@ -7270,4 +7270,88 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseLinkErrorAlreadyLinked => 'Esta nota já está ligada a uma OS.';
+
+  @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Muitas tentativas de enviar o certificado. Espere uma hora e tente de novo.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Outra pessoa está mexendo neste certificado agora. Tente de novo em alguns minutos.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly => 'Só o dono da conta muda isso.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'Gerente pode emitir notas';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.';
+
+  @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String get orderItemCatalogPriceTitle => 'Mudar o preço no Catálogo?';
+
+  @override
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  ) {
+    return '$entity “$name” custa $from no Catálogo. Usar $to sempre ou só nesta OS?';
+  }
+
+  @override
+  String get orderItemCatalogPriceAlways => 'Usar sempre';
+
+  @override
+  String get orderItemCatalogPriceOnlyHere => 'Só nesta OS';
+
+  @override
+  String orderItemCatalogPriceSaved(String to) {
+    return 'Preço do Catálogo mudou para $to';
+  }
+
+  @override
+  String get orderItemCatalogPriceFailed =>
+      'Não deu para mudar o preço no Catálogo. Mude por lá.';
+
+  @override
+  String get sharePreview => 'Ver como o cliente vê';
+
+  @override
+  String get sharePreviewFailed =>
+      'Não deu para abrir a prévia. Tente de novo.';
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Concluído · $count sem resposta',
+      one: 'Concluído · 1 sem resposta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist concluído';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'Para mudar uma resposta, reabra o checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.';
 }

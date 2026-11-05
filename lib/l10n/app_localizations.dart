@@ -11777,6 +11777,125 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Esta nota já está ligada a uma OS.'**
   String get nfseLinkErrorAlreadyLinked;
+
+  /// No description provided for @nfseDirectErrorTooManyAttempts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas de enviar o certificado. Espere uma hora e tente de novo.'**
+  String get nfseDirectErrorTooManyAttempts;
+
+  /// No description provided for @nfseDirectErrorBusy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outra pessoa está mexendo neste certificado agora. Tente de novo em alguns minutos.'**
+  String get nfseDirectErrorBusy;
+
+  /// No description provided for @nfseDirectErrorDailyLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este CNPJ chegou ao limite de notas de hoje. Amanhã volta a emitir; se precisar de mais, fale com o suporte.'**
+  String get nfseDirectErrorDailyLimit;
+
+  /// No description provided for @nfseDirectErrorOwnerOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o dono da conta muda isso.'**
+  String get nfseDirectErrorOwnerOnly;
+
+  /// No description provided for @nfseDirectManagerCanIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerente pode emitir notas'**
+  String get nfseDirectManagerCanIssue;
+
+  /// No description provided for @nfseDirectManagerCanIssueHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.'**
+  String get nfseDirectManagerCanIssueHint;
+
+  /// Reading of a device at this visit (odometer, hour meter), label from the segment
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {value}'**
+  String deviceReadingLine(String label, String value);
+
+  /// No description provided for @orderItemCatalogPriceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar o preço no Catálogo?'**
+  String get orderItemCatalogPriceTitle;
+
+  /// No description provided for @orderItemCatalogPriceMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{entity} “{name}” custa {from} no Catálogo. Usar {to} sempre ou só nesta OS?'**
+  String orderItemCatalogPriceMessage(
+    String entity,
+    String name,
+    String from,
+    String to,
+  );
+
+  /// No description provided for @orderItemCatalogPriceAlways.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar sempre'**
+  String get orderItemCatalogPriceAlways;
+
+  /// No description provided for @orderItemCatalogPriceOnlyHere.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só nesta OS'**
+  String get orderItemCatalogPriceOnlyHere;
+
+  /// No description provided for @orderItemCatalogPriceSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço do Catálogo mudou para {to}'**
+  String orderItemCatalogPriceSaved(String to);
+
+  /// No description provided for @orderItemCatalogPriceFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mudar o preço no Catálogo. Mude por lá.'**
+  String get orderItemCatalogPriceFailed;
+
+  /// Opens the customer link as a preview: nothing counted or sent (#588)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver como o cliente vê'**
+  String get sharePreview;
+
+  /// No description provided for @sharePreviewFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a prévia. Tente de novo.'**
+  String get sharePreviewFailed;
+
+  /// No description provided for @checklistStatusDoneMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Concluído · 1 sem resposta} other{Concluído · {count} sem resposta}}'**
+  String checklistStatusDoneMissing(int count);
+
+  /// No description provided for @checklistDoneTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist concluído'**
+  String get checklistDoneTitle;
+
+  /// No description provided for @checklistDoneReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, reabra o checklist.'**
+  String get checklistDoneReopenBody;
+
+  /// No description provided for @checklistDoneAskReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.'**
+  String get checklistDoneAskReopenBody;
 }
 
 class _AppLocalizationsDelegate

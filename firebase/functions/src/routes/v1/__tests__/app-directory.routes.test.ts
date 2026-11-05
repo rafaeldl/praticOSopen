@@ -107,14 +107,29 @@ describe('GET /customers (lista)', () => {
     expect(res.body.data.find((c: any) => c.id === 'bia')).toMatchObject({ name: 'Bia', phone: '+5511900000001', taxId: '52998224725' });
   });
 
-  test('selos: atrasada vence aberta e aberta é approved ou progress', async () => {
+  test('selos: em aberto é o da Início (orçamento conta) e atrasada é por dia', async () => {
     seedOrder('o1', { status: 'approved', dueDate: '2020-01-01T00:00:00.000Z' });
     seedOrder('o2', { status: 'progress' });
     seedOrder('o3', { status: 'quote' });
     seedOrder('o4', { status: 'done' });
+    seedOrder('o5', { status: 'approved', dueDate: new Date().toISOString() });
     const res = await call('admin', 'get', CU);
-    expect(res.body.data.find((c: any) => c.id === 'ana')).toMatchObject({ open: 2, late: 1 });
+    expect(res.body.data.find((c: any) => c.id === 'ana')).toMatchObject({ open: 4, late: 1 });
     expect(res.body.data.find((c: any) => c.id === 'bia')).toMatchObject({ open: 0, late: 0 });
+  });
+
+  test('falta receber na lista: a regra de A receber, só para quem lê o Financeiro', async () => {
+    seedOrder('o1', { status: 'done', total: 300, paidAmount: 100, payment: 'partial' });
+    seedOrder('o2', { status: 'progress', total: 50, paidAmount: 20, payment: 'partial' });
+    seedOrder('o3', { status: 'approved', total: 80 });
+    seedOrder('o4', { status: 'done', total: 70, paidAmount: 70, payment: 'paid' });
+    const admin = await call('admin', 'get', CU);
+    expect(admin.body.data.find((c: any) => c.id === 'ana').owed).toBe(230);
+    expect(admin.body.data.find((c: any) => c.id === 'bia').owed).toBe(0);
+    for (const role of ['technician', 'consultant', 'supervisor'] as const) {
+      const res = await call(role, 'get', CU);
+      expect([role, res.body.data.find((c: any) => c.id === 'ana').owed]).toEqual([role, null]);
+    }
   });
 
   test('consultor e técnico contam só as OS que podem ver', async () => {
@@ -141,12 +156,13 @@ describe('GET /customers/:id (tela do cliente)', () => {
     seedOrder('o5', { status: 'canceled', total: 999, createdAt: '2026-10-06T10:00:00.000Z' });
   });
 
-  test('gastou = concluídas; falta receber = fora de orçamento, cancelada e paga', async () => {
+  test('gastou = concluídas; falta receber = A receber do Financeiro (concluída com saldo ou com sinal)', async () => {
     const res = await call('admin', 'get', `${CU}/ana`);
     expect(res.status).toBe(200);
     expect(res.body.data.customer).toMatchObject({ id: 'ana', name: 'Ana Souza', phone: '(48) 98408-7801' });
     expect(res.body.data.spent).toBe(350);
-    expect(res.body.data.owed).toBe(280);
+    // o1 (300 - 100); o3 aprovada sem nada pago fica em Em andamento, mas dá para receber nela.
+    expect(res.body.data.owed).toBe(200);
     expect(res.body.data.orders.map((o: any) => o.id)).toEqual(['o5', 'o4', 'o3', 'o2', 'o1']);
     expect(res.body.data.receivable.sort()).toEqual(['o1', 'o3']);
     expect(res.body.data.devices).toEqual([
@@ -205,6 +221,70 @@ describe('POST e PATCH /customers', () => {
     const saved = read('companies/c1/customers/ed') as any;
     expect(saved).toMatchObject({ name: 'Edu', email: null, taxId: '11222333000181', createdAt: T0, createdBy: { id: 'owner1' } });
     expect(saved.updatedBy.id).toBe('sup1');
+  });
+
+  test('dados para nota: grava razão social, endereço, e-mail da nota, interruptor e "Nota fiscal para"', async () => {
+    seed('companies/c1/customers/rev', { name: 'Revenda', phone: '41', taxId: '11222333000181', legalName: 'REVENDA LTDA' });
+    seed('companies/c1/customers/loja', { name: 'Loja Centro', createdAt: T0 });
+    const res = await call('admin', 'patch', `${CU}/loja`, {
+      legalName: 'LOJA CENTRO LTDA',
+      fiscalAddress: { postalCode: '80010000', street: 'Rua Das Flores', number: '100', complement: null, district: 'Centro', cityCode: '4106902', cityName: 'Curitiba', state: 'pr' },
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipientId: 'rev',
+    });
+    expect(res.status).toBe(200);
+    const saved = read('companies/c1/customers/loja') as any;
+    expect(saved).toMatchObject({
+      legalName: 'LOJA CENTRO LTDA',
+      fiscalAddress: { postalCode: '80010000', cityCode: '4106902', state: 'PR' },
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipient: { id: 'rev', name: 'Revenda', taxId: '11222333000181' },
+    });
+    expect(saved.fiscalAddress).not.toHaveProperty('complement');
+
+    const screen = await call('admin', 'get', `${CU}/loja`);
+    expect(screen.body.data.customer).toMatchObject({
+      legalName: 'LOJA CENTRO LTDA',
+      invoiceEmail: 'fiscal@loja.com',
+      autoIssueInvoice: true,
+      invoiceRecipient: { id: 'rev', name: 'Revenda' },
+      fiscalAddress: { cityName: 'Curitiba', complement: null },
+    });
+    const listed = await call('admin', 'get', CU);
+    expect(listed.body.data.find((c: any) => c.id === 'rev').legalName).toBe('REVENDA LTDA');
+
+    expect((await call('admin', 'patch', `${CU}/loja`, { invoiceRecipientId: null, fiscalAddress: null })).status).toBe(200);
+    expect(read('companies/c1/customers/loja')).toMatchObject({ invoiceRecipient: null, fiscalAddress: null });
+  });
+
+  test('"Nota fiscal para" para si mesmo, inexistente ou de outra empresa: 400 e nada gravado', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    for (const id of ['loja', 'nope', 'zed']) {
+      const res = await call('admin', 'patch', `${CU}/loja`, { legalName: 'X', invoiceRecipientId: id });
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INVOICE_RECIPIENT_INVALID');
+    }
+    expect((read('companies/c1/customers/loja') as any).legalName).toBeUndefined();
+  });
+
+  test('dados para nota inválidos: 400', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    for (const body of [
+      { fiscalAddress: { postalCode: '8001' } },
+      { fiscalAddress: { state: 'Paraná' } },
+      { fiscalAddress: { other: 'x' } },
+      { invoiceRecipientId: 'loja/devices/x' },
+      { autoIssueInvoice: 'sim' },
+    ]) {
+      expect((await call('admin', 'patch', `${CU}/loja`, body)).status).toBe(400);
+    }
+  });
+
+  test('e-mail da nota como o app grava (sem checagem estrita) passa', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    expect((await call('admin', 'patch', `${CU}/loja`, { invoiceEmail: 'fiscal@loja.com;outro@x.com' })).status).toBe(200);
   });
 
   test('gerente e técnico não cadastram nem editam', async () => {

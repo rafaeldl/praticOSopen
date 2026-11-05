@@ -188,6 +188,26 @@ class ShareLinkService {
     }
   }
 
+  /// The customer's link as a preview ("Ver como o cliente vê"): the page
+  /// shows a banner, turns approve/reject/rate/comment off and the server does
+  /// not count it as the customer's visit.
+  static String previewUrl(String url) {
+    final uri = Uri.parse(url);
+    return uri
+        .replace(queryParameters: {...uri.queryParameters, 'preview': '1'})
+        .toString();
+  }
+
+  /// Opens the preview inside the app (Safari view / Custom Tab), so nothing
+  /// is sent to anyone.
+  Future<void> openPreview(String url) async {
+    final opened = await launchUrl(
+      Uri.parse(previewUrl(url)),
+      mode: LaunchMode.inAppBrowserView,
+    );
+    if (!opened) throw ShareLinkException('Could not open preview');
+  }
+
   /// Copy link to clipboard
   Future<void> copyToClipboard(String url) async {
     await Clipboard.setData(ClipboardData(text: url));

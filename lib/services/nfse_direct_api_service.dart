@@ -240,4 +240,11 @@ class NfseDirectApiService {
 
   Future<void> unlinkInvoice(String invoiceId) =>
       _request('POST', '/v1/app/nfse/links/invoices/$invoiceId/unlink');
+
+  /// Owner only (the server refuses others with FORBIDDEN).
+  Future<void> setManagerCanIssue(bool value) => _request(
+    'PUT',
+    '/v1/app/nfse/setup/settings',
+    {'managerCanIssue': value},
+  );
 }

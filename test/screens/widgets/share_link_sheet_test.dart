@@ -54,6 +54,11 @@ class _FakeService extends ShareLinkService {
 
   @override
   Future<void> copyToClipboard(String url) async => copied.add(url);
+
+  final previews = <String>[];
+
+  @override
+  Future<void> openPreview(String url) async => previews.add(url);
 }
 
 Order _order({String? phone = '11999990000'}) => Order()
@@ -183,5 +188,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.generatedDays.last, 30);
+  });
+
+  testWidgets('"Ver como o cliente vê" opens the same link, sends nothing', (
+    tester,
+  ) async {
+    final service = _FakeService();
+    await _pump(tester, _order(), service);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ver como o cliente vê'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('shareLinkPreview')));
+    await tester.tap(find.byKey(const Key('shareLinkPreview')));
+    await tester.pump();
+
+    expect(service.previews, ['https://praticos.app/q/tok1']);
+    expect(service.whatsapp, isEmpty);
+    expect(service.sheets, isEmpty);
+    expect(service.copied, isEmpty);
+    // Reuses the link the sheet already made: no extra token.
+    expect(service.generated, hasLength(1));
+  });
+
+  test('preview url marks the link as a preview', () {
+    expect(
+      ShareLinkService.previewUrl('https://praticos.app/q/ST_1'),
+      'https://praticos.app/q/ST_1?preview=1',
+    );
+    expect(
+      ShareLinkService.previewUrl('https://praticos.app/q/ST_1?lang=en'),
+      'https://praticos.app/q/ST_1?lang=en&preview=1',
+    );
   });
 }

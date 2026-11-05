@@ -18,6 +18,8 @@ import { getCompanyAggr, getUserAggr } from '../../middleware/company.middleware
 import * as directory from '../../services/app-directory.service';
 import { isValidTaxId, normalizeTaxId } from '../../utils/tax-id.utils';
 import { validateInput } from '../../utils/validation.utils';
+import { companyZone } from '../../utils/company-zone';
+import { db } from '../../services/firestore.service';
 import { sendOrderError } from './orders.routes';
 
 const router: Router = Router();
@@ -68,12 +70,35 @@ const taxIdSchema = z
   .transform((value) => (value === undefined ? undefined : value === null ? null : normalizeTaxId(value) || null))
   .refine((value) => value === undefined || value === null || isValidTaxId(value), 'Invalid taxId');
 
+const digits = (length: number) => z.string().trim().regex(new RegExp(`^\\d{${length}}$`)).nullable().optional();
+/** "Dados para nota" (docs/NFSE_DIRECT.md, etapa #568): the address the nota sends. */
+const fiscalAddressSchema = z
+  .object({
+    postalCode: digits(8),
+    street: optionalText(200),
+    number: optionalText(60),
+    complement: optionalText(200),
+    district: optionalText(120),
+    cityCode: digits(7),
+    cityName: optionalText(120),
+    state: z.string().trim().regex(/^[A-Za-z]{2}$/).transform((value) => value.toUpperCase()).nullable().optional(),
+  })
+  .strict()
+  .nullable()
+  .optional();
+
 const customerBody = {
   phone: optionalText(40),
   email: optionalText(200),
   address: optionalText(500),
   taxId: taxIdSchema,
   customData: customDataSchema,
+  legalName: optionalText(200),
+  fiscalAddress: fiscalAddressSchema,
+  // No strict e-mail check: the app saves it as typed, and a stricter server would block every web edit of that customer.
+  invoiceEmail: z.string().trim().max(200).nullable().optional(),
+  invoiceRecipientId: z.string().min(1).max(128).regex(/^[^/]+$/).nullable().optional(),
+  autoIssueInvoice: z.boolean().nullable().optional(),
 };
 const createSchema = z.object({ name: z.string().trim().min(1, 'Name is required').max(200), ...customerBody });
 const updateSchema = z.object({ name: z.string().trim().min(1).max(200).optional(), ...customerBody, version: z.string().min(1).max(64).optional() });
@@ -88,7 +113,12 @@ const importSchema = z.object({
 router.get('/', route('Failed to list customers', async (req, res, companyId) => {
   if (!(await can(req, res, 'viewCustomers'))) return forbidden(res, "Permission 'viewCustomers' is required");
   const scope = await orderScopeOf(req, res);
-  const result = await directory.customerDirectory(companyId, scope);
+  // "Falta receber" per customer only for who reads the Financeiro: its query reads every order of the company with money open.
+  const withOwed = scope.all && (await can(req, res, 'viewFinancialReports'));
+  const company = (await db.collection('companies').doc(companyId).get()).data();
+  const requested = typeof req.query.zone === 'string' ? req.query.zone.slice(0, 64) : null;
+  const zone = companyZone(company?.country as string | undefined, requested);
+  const result = await directory.customerDirectory(companyId, scope, { zone, withOwed });
   res.json({ success: true, data: result.customers, meta: { total: result.customers.length, truncated: result.truncated, partial: !scope.all } });
 }));
 
