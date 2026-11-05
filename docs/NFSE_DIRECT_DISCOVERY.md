@@ -100,6 +100,23 @@ Diferenças por regime que o motor trata:
 | Tributos federais | `tribFed` (PIS/COFINS) | sem `tribFed` (E0676) |
 | Valor aproximado dos tributos | `pTotTribSN` | `indTotTrib=0` |
 
+## Guarda do certificado e da senha (proposta para o desenho)
+
+Hoje as chaves do Asaas usam AES-256-GCM com uma chave mestra no Secret Manager (`ASAAS_CREDENTIALS_KEY`, `services/asaas/crypto.ts`). Um e-CNPJ vale muito mais que uma chave de API, então a proposta sobe o nível:
+
+1. **Não guardar a senha.** No envio, o servidor abre o `.pfx` só na memória, confere se o CNPJ do certificado é o do emitente e lê a validade. Depois guarda só a chave privada e o certificado já abertos (PEM), cifrados, e descarta a senha e o `.pfx`. A senha nunca é gravada e nunca aparece em log. A troca de certificado repete o envio.
+2. **Cifra em envelope com Cloud KMS.** Cada certificado é cifrado com uma chave própria (DEK, AES-256-GCM), e essa chave é cifrada por uma chave do Cloud KMS (KEK), que nunca sai do KMS. Um vazamento do banco ou de backup não abre nada sem chamar o KMS.
+3. **Um só serviço decifra.** Só a função que emite e importa notas, com uma conta de serviço própria, tem `cloudkms.cryptoKeyDecrypter` nessa chave. O app, o app web e as outras Functions não têm. O KMS registra cada decifração em log de auditoria.
+4. **Fora do alcance do app.** O material cifrado fica numa coleção fechada nas regras do Firestore (`allow read, write: if false`), fora de `companies/{id}`. O documento do emitente mostra só o que é público: CNPJ, titular, validade e "certificado enviado em".
+5. **Na memória pelo menor tempo possível.** Decifra na hora de emitir, usa no `https.Agent` e na assinatura e descarta. Sem cache em disco nem em variável global entre chamadas.
+6. **Quem pode mexer.** Só o dono (ou admin) envia, troca ou apaga. Ninguém, nem o dono, baixa o certificado de volta. Cada ação fica registrada (quem, quando, de qual aparelho).
+7. **Apagar de verdade.** Quando o emitente é removido ou a conta é excluída, a DEK e o material cifrado são apagados, e o certificado vencido é apagado depois de um prazo. Destruir a versão da chave no KMS inutiliza todas as cópias de backup.
+8. **Avisos e consentimento.** O dono aceita um termo dizendo para que o certificado é usado (emitir e ler notas) e que pode apagar quando quiser. O app avisa 30 e 7 dias antes de vencer. A política de privacidade e o tratamento de LGPD são atualizados.
+
+Descartado: guardar a chave num HSM sem exportação (Cloud KMS com importação de chave RSA). A assinatura da nota funcionaria, mas a conexão mTLS do governo exige a chave no próprio handshake TLS do Node. Fica para depois, se o governo aceitar outro modo de autenticação (por exemplo o PAA).
+
+Tudo isso é `risk:high`: regras do Firestore, IAM, KMS e Functions com escrita. Pede revisão de segurança antes de ligar para o primeiro cliente.
+
 ## Riscos
 
 - **Guarda do certificado (o maior)**: um e-CNPJ dá acesso a muito mais que nota (e-CAC, assinaturas). Pede criptografia com KMS/Secret Manager, acesso só pelo servidor, revisão de segurança, LGPD e termos. Tudo `risk:high`.
