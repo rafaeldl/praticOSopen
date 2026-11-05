@@ -33,7 +33,17 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer()
   ..keywords = (json['keywords'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList()
-  ..customData = json['customData'] as Map<String, dynamic>?;
+  ..customData = json['customData'] as Map<String, dynamic>?
+  ..legalName = json['legalName'] as String?
+  ..fiscalAddress = json['fiscalAddress'] == null
+      ? null
+      : FiscalAddress.fromJson(json['fiscalAddress'] as Map<String, dynamic>)
+  ..invoiceEmail = json['invoiceEmail'] as String?
+  ..invoiceRecipient = json['invoiceRecipient'] == null
+      ? null
+      : CustomerAggr.fromJson(json['invoiceRecipient'] as Map<String, dynamic>)
+  ..autoIssueInvoice = json['autoIssueInvoice'] as bool?
+  ..lastEmitterId = json['lastEmitterId'] as String?;
 
 Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
   'id': instance.id,
@@ -51,6 +61,12 @@ Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
   'longitude': instance.longitude,
   'keywords': instance.keywords,
   'customData': instance.customData,
+  'legalName': instance.legalName,
+  'fiscalAddress': instance.fiscalAddress?.toJson(),
+  'invoiceEmail': instance.invoiceEmail,
+  'invoiceRecipient': instance.invoiceRecipient?.toJson(),
+  'autoIssueInvoice': instance.autoIssueInvoice,
+  'lastEmitterId': ?instance.lastEmitterId,
 };
 
 CustomerAggr _$CustomerAggrFromJson(Map<String, dynamic> json) => CustomerAggr()

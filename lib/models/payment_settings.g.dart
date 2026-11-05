@@ -14,6 +14,7 @@ PaymentSettings _$PaymentSettingsFromJson(Map<String, dynamic> json) =>
       asaasEnvironment: json['asaasEnvironment'] as String?,
       nfseEnabled: json['nfseEnabled'] as bool? ?? false,
       nfseReady: json['nfseReady'] as bool? ?? false,
+      nfseDirectEnabled: json['nfseDirectEnabled'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$PaymentSettingsToJson(PaymentSettings instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$PaymentSettingsToJson(PaymentSettings instance) =>
       'asaasEnvironment': instance.asaasEnvironment,
       'nfseEnabled': instance.nfseEnabled,
       'nfseReady': instance.nfseReady,
+      'nfseDirectEnabled': instance.nfseDirectEnabled,
     };

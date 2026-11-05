@@ -759,6 +759,8 @@ Antes de finalizar uma feature, verificar:
 - `docs/ACCOUNT_DELETION.md` - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
+- `docs/NFSE_DIRECT.md` - NFS-e direta (Emissor Nacional): dados e regras, cofre do certificado com KMS por emitente (crypto-shredding), rotas e passo manual do KMS
+- `docs/NFSE_DIRECT_DISCOVERY.md` - Discovery da NFS-e direto no Emissor Nacional (sem Asaas): regras do certificado, spike em produção, APIs do governo, cliente piloto e direção do desenho (emitentes, importar notas ao subir o certificado)
 - `docs/WEB_APP.md` - App web em `firebase/webapp` (Vue + Vite em `/web`): arquitetura, como rodar com o emulador, como adicionar tela
 - `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino

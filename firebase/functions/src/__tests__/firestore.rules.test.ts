@@ -699,6 +699,108 @@ describeEmulator('firestore.rules', () => {
       });
     });
 
+    describe('NFS-e direta: emitentes, importação, certificado e link do contador', () => {
+      const emitter = 'companies/c1/fiscalEmitters/e1';
+      const importBatch = 'companies/c1/nfseImports/b1';
+      const serverOnly = [
+        'nfseCertificates/e1',
+        'nfseCertificateRequests/h1',
+        'nfseKeyDestructions/k1',
+        'companies/c1/private/nfse/emitters/e1',
+        'companies/c1/private/nfse/emitters/e1/received/1',
+        'companies/c1/private/nfse/audit/a1',
+      ];
+
+      beforeEach(async () => {
+        await env.withSecurityRulesDisabled(async (ctx) => {
+          const db = ctx.firestore();
+          await fs.setDoc(fs.doc(db, emitter), {
+            taxId: '00000000000191', legalName: 'OFICINA EXEMPLO LTDA', regime: 'simples',
+            certificate: { holderName: 'OFICINA EXEMPLO LTDA', status: 'active' },
+          });
+          await fs.setDoc(fs.doc(db, importBatch), { emitterId: 'e1', status: 'proposed' });
+          await fs.setDoc(fs.doc(db, 'nfseCertificates/e1'), { companyId: 'c1', ciphertext: 'x', wrappedDek: 'y' });
+          await fs.setDoc(fs.doc(db, 'nfseCertificateRequests/h1'), { companyId: 'c1', status: 'open' });
+          await fs.setDoc(fs.doc(db, 'nfseKeyDestructions/k1'), { companyId: 'c1', keyVersion: 'v1' });
+          await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/emitters/e1'), { nextDpsNumber: 1, lastNsu: 0 });
+          await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/emitters/e1/received/1'), { value: 10 });
+          await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/audit/a1'), { action: 'upload' });
+        });
+      });
+
+      it('dono, admin e gerente leem os emitentes (também em lista)', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('adm2', { c1: 'admin' }), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertSucceeds(fs.getDoc(fs.doc(db, emitter)));
+          await rut.assertSucceeds(fs.getDocs(fs.collection(db, 'companies/c1/fiscalEmitters')));
+        }
+      });
+
+      it.each(['supervisor', 'consultant', 'technician'])('%s não lê emitentes nem importações', async (role) => {
+        const db = asUser(`u_${role}`, { c1: role });
+        await rut.assertFails(fs.getDoc(fs.doc(db, emitter)));
+        await rut.assertFails(fs.getDoc(fs.doc(db, importBatch)));
+      });
+
+      it('outra empresa e anônimo não leem emitentes', async () => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), emitter)));
+        await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), emitter)));
+      });
+
+      it('só dono e admin leem a importação; gerente não', async () => {
+        await rut.assertSucceeds(fs.getDoc(fs.doc(owner(), importBatch)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(ownerClaim(), importBatch)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('adm2', { c1: 'admin' }), importBatch)));
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('mgr1', { c1: 'manager' }), importBatch)));
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), importBatch)));
+      });
+
+      it('ninguém escreve emitente nem importação, nem o dono', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.updateDoc(fs.doc(db, emitter), { regime: 'mei' }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/fiscalEmitters/e2'), { taxId: '1' }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, emitter)));
+          await rut.assertFails(fs.updateDoc(fs.doc(db, importBatch), { status: 'applied' }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/nfseImports/b2'), { status: 'proposed' }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, importBatch)));
+        }
+      });
+
+      it.each(serverOnly)('%s: ninguém lê nem grava, nem o dono', async (path) => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.getDoc(fs.doc(db, path)));
+          await rut.assertFails(fs.setDoc(fs.doc(db, path), { x: 1 }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+        await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), path)));
+      });
+
+      it('certificados e pedidos do contador não são listáveis', async () => {
+        await rut.assertFails(fs.getDocs(fs.collection(owner(), 'nfseCertificates')));
+        await rut.assertFails(fs.getDocs(fs.collection(owner(), 'nfseCertificateRequests')));
+      });
+
+      it('settings/nfse com os campos da nota direta segue só leitura para dono, admin e gerente', async () => {
+        const settings = 'companies/c1/settings/nfse';
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('mgr1', { c1: 'manager' }), settings)));
+        await rut.assertFails(
+          fs.setDoc(fs.doc(owner(), settings), { provider: 'direct', defaultEmitterId: 'e1', autoIssue: 'allOrders' }),
+        );
+        await rut.assertFails(
+          fs.setDoc(fs.doc(owner(), 'companies/c1/settings/payments'), { nfseDirectEnabled: true }),
+        );
+      });
+
+      it('quem edita clientes grava os dados para nota no cliente', async () => {
+        const data = {
+          name: 'Revenda', taxId: '00000000000191', legalName: 'REVENDA EXEMPLO LTDA',
+          fiscalAddress: { postalCode: '00000000', street: 'Rua A', number: '1', cityCode: '0000000', state: 'SC' },
+          invoiceEmail: 'nota@example.com', invoiceRecipient: { id: 'cu2', name: 'Matriz' }, autoIssueInvoice: true,
+        };
+        await rut.assertSucceeds(fs.setDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/customers/cu1'), data));
+        await rut.assertFails(fs.setDoc(fs.doc(asUser('tech2', { c1: 'technician' }), 'companies/c1/customers/cu3'), data));
+      });
+    });
+
     describe('private/asaas', () => {
       const paths = [
         'companies/c1/private/asaas',

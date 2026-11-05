@@ -450,6 +450,27 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    // NFS-E DIRETA (Emissor Nacional) — spec 2026-11-05-nfse-direta-design §6
+    // Certificado A1 cifrado (envelope com Cloud KMS, uma chave por emitente)
+    // e pedidos do link do contador (só o hash do token). Fora de
+    // companies/{id} de propósito: só a nfseApi (Admin SDK) lê e grava;
+    // ninguém baixa o certificado de volta, nem o dono.
+    // ════════════════════════════════════════════════════════════════════════
+    match /nfseCertificates/{emitterId} {
+      allow read, write: if false;
+    }
+
+    match /nfseCertificateRequests/{tokenHash} {
+      allow read, write: if false;
+    }
+
+    // Versões de chave do KMS que falta destruir (o KMS recusou na hora);
+    // a rotina diária da nfseApi tenta de novo. Só o servidor.
+    match /nfseKeyDestructions/{itemId} {
+      allow read, write: if false;
+    }
+
     match /segments/{segmentId} {
       allow read: if request.auth != null;
       allow write: if false; // Apenas via Admin SDK (script de seed)
@@ -674,6 +695,27 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // NFS-E DIRETA: EMITENTES FISCAIS (CNPJs que emitem a nota)
+      // Uma empresa pode ter vários (um Simples e vários MEIs). O servidor
+      // grava ao receber o certificado; o app só lê o que mostra (CNPJ,
+      // regime, validade do certificado, faturamento). O material do
+      // certificado fica em /nfseCertificates (fechado); número da DPS, NSU e
+      // auditoria em private/nfse/** (negado abaixo).
+      // ──────────────────────────────────────────────────────────────────────
+      match /fiscalEmitters/{emitterId} {
+        allow read: if canViewCharges(companyId);
+        allow write: if false;
+      }
+
+      // Importação das notas ao enviar o certificado: proposta, respostas e o
+      // que foi aplicado (para o "Desfazer"). Mexe em clientes em lote, então
+      // só dono e admin veem; quem aplica é o servidor.
+      match /nfseImports/{batchId} {
+        allow read: if isCompanyAdmin(companyId) || isCompanyOwner(companyId);
+        allow write: if false;
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // RECEBIMENTOS DE CLIENTE ("Receber de João")
       // Um pagamento do cliente repartido entre várias OS. Gravado no mesmo
       // batch que os pagamentos de cada OS. Nunca é apagado: desfazer é
@@ -762,7 +804,8 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
-      // DADOS PRIVADOS DO SERVIDOR (ex.: mapa de membros verificado)
+      // DADOS PRIVADOS DO SERVIDOR (ex.: mapa de membros verificado; na nota
+      // direta: private/nfse/emitters, private/nfse/orders e private/nfse/audit)
       // Somente Admin SDK; nenhum acesso pelo cliente
       // ──────────────────────────────────────────────────────────────────────
       match /private/{doc=**} {
@@ -856,7 +899,8 @@ service cloud.firestore {
         allow write: if false;
       }
 
-      // settings/nfse: serviço padrão das notas (código municipal, ISS).
+      // settings/nfse: serviço padrão das notas (código municipal, ISS) e, na
+      // nota direta, provider, defaultEmitterId e autoIssue. Só o servidor grava.
       match /settings/nfse {
         allow read: if canViewCharges(companyId);
         allow write: if false;

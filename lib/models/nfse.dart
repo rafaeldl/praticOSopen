@@ -1,4 +1,6 @@
-/// NFS-e (nota fiscal de serviço) through Asaas. See docs/NFSE_ASAAS.md.
+/// NFS-e (nota fiscal de serviço) through Asaas (docs/NFSE_ASAAS.md) or
+/// direct to the national system (`provider: 'direct'`, spec
+/// docs/superpowers/specs/2026-11-05-nfse-direta-design.md).
 ///
 /// Everything here is written only by the server: the app reads the
 /// invoices from Firestore (`companies/{cid}/invoices`) and talks to
@@ -7,6 +9,8 @@
 library;
 
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+import 'package:praticos/models/fiscal_address.dart';
+import 'package:praticos/models/fiscal_emitter.dart';
 
 DateTime? _date(Object? value) {
   if (value is String) return DateTime.tryParse(value);
@@ -40,6 +44,86 @@ enum NfseStatus {
   /// Still on the way to the city.
   bool get waiting =>
       this == creating || this == scheduled || this == synchronized;
+}
+
+Map<String, dynamic>? _map(Object? value) =>
+    value is Map ? Map<String, dynamic>.from(value) : null;
+
+/// Who issues a nota. Missing on everything before the direct engine.
+enum NfseProvider {
+  asaas,
+  direct;
+
+  static NfseProvider parse(Object? value) =>
+      value == 'direct' ? NfseProvider.direct : NfseProvider.asaas;
+}
+
+/// Where a nota came from: issued by PraticOS, or read from the government
+/// (import or daily sync: made in the portal or another system).
+enum NfseSource {
+  praticos,
+  external;
+
+  static NfseSource parse(Object? value) =>
+      value == 'external' ? NfseSource.external : NfseSource.praticos;
+}
+
+/// Why the user canceled a direct nota.
+enum NfseCancelReason {
+  issueError,
+  serviceNotProvided;
+
+  static NfseCancelReason? parse(Object? value) {
+    for (final reason in values) {
+      if (reason.name == value) return reason;
+    }
+    return null;
+  }
+}
+
+/// Who received a direct nota (tomador), as sent.
+class NfseRecipient {
+  const NfseRecipient({
+    this.customerId,
+    this.taxId,
+    this.legalName,
+    this.address,
+    this.email,
+  });
+
+  /// The customer the nota went to; null when typed by hand in the sheet.
+  final String? customerId;
+  final String? taxId;
+  final String? legalName;
+  final FiscalAddress? address;
+  final String? email;
+
+  factory NfseRecipient.fromJson(Map<String, dynamic> json) {
+    final address = _map(json['address']);
+    return NfseRecipient(
+      customerId: _str(json['customerId']),
+      taxId: _str(json['taxId']),
+      legalName: _str(json['legalName']),
+      address: address == null ? null : FiscalAddress.fromJson(address),
+      email: _str(json['email']),
+    );
+  }
+}
+
+/// Our request behind a direct nota (series and number of the DPS). The
+/// nota's own number ([NfseInvoice.number]) is the government's.
+class NfseDps {
+  const NfseDps({required this.id, this.series, this.number});
+
+  final String id;
+  final String? series;
+  final int? number;
+
+  factory NfseDps.fromJson(Map<String, dynamic> json) => NfseDps(
+    id: json['id'] as String? ?? '',
+    series: _str(json['series']),
+    number: (json['number'] as num?)?.toInt(),
+  );
 }
 
 /// One order covered by a nota and the services value it put in.
@@ -83,6 +167,16 @@ class NfseInvoice {
     this.auto = false,
     this.createdAt,
     this.conflict = false,
+    this.provider = NfseProvider.asaas,
+    this.source = NfseSource.praticos,
+    this.emitter,
+    this.recipient,
+    this.dps,
+    this.accessKey,
+    this.xmlPath,
+    this.pdfPath,
+    this.cancelReason,
+    this.importBatchId,
   });
 
   final String id;
@@ -115,6 +209,28 @@ class NfseInvoice {
   /// another one: kept for the record, never counts as the order's nota.
   final bool conflict;
 
+  // Direct engine (`provider: 'direct'`); empty on Asaas notas.
+  final NfseProvider provider;
+  final NfseSource source;
+  final FiscalEmitterAggr? emitter;
+  final NfseRecipient? recipient;
+  final NfseDps? dps;
+
+  /// Chave de acesso of the nota (50 characters).
+  final String? accessKey;
+
+  /// Storage paths of the XML and of the PDF we generate.
+  final String? xmlPath;
+  final String? pdfPath;
+  final NfseCancelReason? cancelReason;
+
+  /// The import that brought it (or linked it to an order).
+  final String? importBatchId;
+
+  /// Made outside PraticOS (portal or another system), read from the
+  /// government: "Emitida fora do PraticOS".
+  bool get isExternal => source == NfseSource.external;
+
   /// A `creating` nota older than this never reached Asaas.
   static const staleCreating = Duration(minutes: 15);
 
@@ -146,6 +262,22 @@ class NfseInvoice {
       auto: json['auto'] == true,
       createdAt: _date(json['createdAt']),
       conflict: json['conflict'] == true,
+      provider: NfseProvider.parse(json['provider']),
+      source: NfseSource.parse(json['source']),
+      emitter: _map(json['emitter']) == null
+          ? null
+          : FiscalEmitterAggr.fromJson(_map(json['emitter'])!),
+      recipient: _map(json['recipient']) == null
+          ? null
+          : NfseRecipient.fromJson(_map(json['recipient'])!),
+      dps: _map(json['dps']) == null
+          ? null
+          : NfseDps.fromJson(_map(json['dps'])!),
+      accessKey: _str(json['accessKey']),
+      xmlPath: _str(json['xmlPath']),
+      pdfPath: _str(json['pdfPath']),
+      cancelReason: NfseCancelReason.parse(json['cancelReason']),
+      importBatchId: _str(json['importBatchId']),
     );
   }
 
@@ -554,6 +686,9 @@ class NfseServiceSettings {
     this.taxes = const NfseTaxes(),
     this.descriptionTemplate = defaultTemplate,
     this.autoIssue,
+    this.provider = NfseProvider.asaas,
+    this.defaultEmitterId,
+    this.directAutoIssue = NfseDirectAutoIssue.never,
   });
 
   /// `{servicos}` becomes the services of the order(s), `{os}` the numbers.
@@ -569,6 +704,14 @@ class NfseServiceSettings {
   /// on save (and reads as [NfseAutoIssue.manual]).
   final NfseAutoIssue? autoIssue;
 
+  // Direct engine. Read only here: the server writes them (never sent back
+  // by [toJson], which is the Asaas setup's payload).
+  final NfseProvider provider;
+  final String? defaultEmitterId;
+
+  /// `autoIssue` as the direct engine reads it (same key, other values).
+  final NfseDirectAutoIssue directAutoIssue;
+
   NfseServiceSettings copyWith({NfseAutoIssue? autoIssue}) =>
       NfseServiceSettings(
         municipalServiceId: municipalServiceId,
@@ -577,6 +720,9 @@ class NfseServiceSettings {
         taxes: taxes,
         descriptionTemplate: descriptionTemplate,
         autoIssue: autoIssue ?? this.autoIssue,
+        provider: provider,
+        defaultEmitterId: defaultEmitterId,
+        directAutoIssue: directAutoIssue,
       );
 
   factory NfseServiceSettings.fromJson(
@@ -590,6 +736,9 @@ class NfseServiceSettings {
         : const NfseTaxes(),
     descriptionTemplate: _str(json['descriptionTemplate']) ?? defaultTemplate,
     autoIssue: NfseAutoIssue.parse(json['autoIssue']),
+    provider: NfseProvider.parse(json['provider']),
+    defaultEmitterId: _str(json['defaultEmitterId']),
+    directAutoIssue: NfseDirectAutoIssue.parse(json['autoIssue']),
   );
 
   Map<String, dynamic> toJson() => {
@@ -617,6 +766,26 @@ enum NfseAutoIssue {
     (v) => v.name == value,
     orElse: () => NfseAutoIssue.manual,
   );
+}
+
+/// When the direct engine issues the nota by itself, only when the order is
+/// done (`settings/nfse.autoIssue`, same key as [NfseAutoIssue], other values).
+enum NfseDirectAutoIssue {
+  /// Only when someone asks (default).
+  never,
+
+  /// For customers whose "Emitir nota sozinha" is on.
+  selectedCustomers,
+
+  /// For every order, except customers that turned it off.
+  allOrders;
+
+  /// Anything else, including the Asaas values, reads as [never].
+  static NfseDirectAutoIssue parse(Object? value) =>
+      NfseDirectAutoIssue.values.firstWhere(
+        (v) => v.name == value,
+        orElse: () => NfseDirectAutoIssue.never,
+      );
 }
 
 /// A service of the city's list (`GET /v3/fiscalInfo/services`).

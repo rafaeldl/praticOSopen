@@ -31,6 +31,12 @@ class PaymentSettings {
   @JsonKey(defaultValue: false)
   bool nfseReady;
 
+  /// NFS-e direct to the national system (no Asaas), turned on per company
+  /// by script during the pilot. See
+  /// docs/superpowers/specs/2026-11-05-nfse-direta-design.md.
+  @JsonKey(defaultValue: false)
+  bool nfseDirectEnabled;
+
   PaymentSettings({
     this.asaasEnabled = false,
     this.asaasConnected = false,
@@ -38,6 +44,7 @@ class PaymentSettings {
     this.asaasEnvironment,
     this.nfseEnabled = false,
     this.nfseReady = false,
+    this.nfseDirectEnabled = false,
   });
 
   factory PaymentSettings.fromJson(Map<String, dynamic> json) =>
