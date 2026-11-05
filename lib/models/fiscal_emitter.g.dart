@@ -94,52 +94,69 @@ Map<String, dynamic> _$FiscalEmitterTotalsToJson(
   'monthValue': instance.monthValue,
 };
 
-FiscalEmitter _$FiscalEmitterFromJson(
-  Map<String, dynamic> json,
-) => FiscalEmitter(
-  id: json['id'] as String?,
-  taxId: json['taxId'] as String?,
-  legalName: json['legalName'] as String?,
-  tradeName: json['tradeName'] as String?,
-  regime: $enumDecodeNullable(
-    _$FiscalRegimeEnumMap,
-    json['regime'],
-    unknownValue: FiscalRegime.simples,
-  ),
-  simplesOption: (json['simplesOption'] as num?)?.toInt(),
-  cityCode: json['cityCode'] as String?,
-  cityName: json['cityName'] as String?,
-  municipalRegistration: json['municipalRegistration'] as String?,
-  enabledInCity: json['enabledInCity'] as bool? ?? false,
-  service: json['service'] == null
-      ? null
-      : FiscalEmitterService.fromJson(json['service'] as Map<String, dynamic>),
-  descriptionStyle: json['descriptionStyle'] == null
-      ? null
-      : FiscalDescriptionStyle.fromJson(
-          json['descriptionStyle'] as Map<String, dynamic>,
+FiscalEmitter _$FiscalEmitterFromJson(Map<String, dynamic> json) =>
+    FiscalEmitter(
+        taxId: json['taxId'] as String?,
+        legalName: json['legalName'] as String?,
+        tradeName: json['tradeName'] as String?,
+        regime: $enumDecodeNullable(
+          _$FiscalRegimeEnumMap,
+          json['regime'],
+          unknownValue: FiscalRegime.simples,
         ),
-  dpsSeries: json['dpsSeries'] as String?,
-  certificate: json['certificate'] == null
-      ? null
-      : FiscalEmitterCertificate.fromJson(
-          json['certificate'] as Map<String, dynamic>,
-        ),
-  totals: json['totals'] == null
-      ? null
-      : FiscalEmitterTotals.fromJson(json['totals'] as Map<String, dynamic>),
-  importBatchId: json['importBatchId'] as String?,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
-);
+        simplesOption: (json['simplesOption'] as num?)?.toInt(),
+        cityCode: json['cityCode'] as String?,
+        cityName: json['cityName'] as String?,
+        municipalRegistration: json['municipalRegistration'] as String?,
+        enabledInCity: json['enabledInCity'] as bool? ?? false,
+        service: json['service'] == null
+            ? null
+            : FiscalEmitterService.fromJson(
+                json['service'] as Map<String, dynamic>,
+              ),
+        descriptionStyle: json['descriptionStyle'] == null
+            ? null
+            : FiscalDescriptionStyle.fromJson(
+                json['descriptionStyle'] as Map<String, dynamic>,
+              ),
+        dpsSeries: json['dpsSeries'] as String?,
+        certificate: json['certificate'] == null
+            ? null
+            : FiscalEmitterCertificate.fromJson(
+                json['certificate'] as Map<String, dynamic>,
+              ),
+        totals: json['totals'] == null
+            ? null
+            : FiscalEmitterTotals.fromJson(
+                json['totals'] as Map<String, dynamic>,
+              ),
+        importBatchId: json['importBatchId'] as String?,
+      )
+      ..id = json['id'] as String?
+      ..createdAt = json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String)
+      ..createdBy = json['createdBy'] == null
+          ? null
+          : UserAggr.fromJson(json['createdBy'] as Map<String, dynamic>)
+      ..updatedAt = json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String)
+      ..updatedBy = json['updatedBy'] == null
+          ? null
+          : UserAggr.fromJson(json['updatedBy'] as Map<String, dynamic>)
+      ..company = json['company'] == null
+          ? null
+          : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$FiscalEmitterToJson(FiscalEmitter instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'createdBy': instance.createdBy?.toJson(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'updatedBy': instance.updatedBy?.toJson(),
+      'company': instance.company?.toJson(),
       'taxId': instance.taxId,
       'legalName': instance.legalName,
       'tradeName': instance.tradeName,
@@ -155,8 +172,6 @@ Map<String, dynamic> _$FiscalEmitterToJson(FiscalEmitter instance) =>
       'certificate': instance.certificate?.toJson(),
       'totals': instance.totals?.toJson(),
       'importBatchId': instance.importBatchId,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
     };
 
 const _$FiscalRegimeEnumMap = {

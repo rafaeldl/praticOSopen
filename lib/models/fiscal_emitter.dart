@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:praticos/models/base_audit_company.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 
 part 'fiscal_emitter.g.dart';
@@ -116,9 +118,7 @@ class FiscalEmitterTotals {
 /// owner, admin and manager. See
 /// docs/superpowers/specs/2026-11-05-nfse-direta-design.md §7.
 @JsonSerializable(explicitToJson: true)
-class FiscalEmitter {
-  String? id;
-
+class FiscalEmitter extends BaseAuditCompany {
   /// CNPJ, normalized (see lib/utils/tax_id.dart). Unique per company.
   String? taxId;
   String? legalName;
@@ -146,11 +146,8 @@ class FiscalEmitter {
   FiscalEmitterCertificate? certificate;
   FiscalEmitterTotals? totals;
   String? importBatchId;
-  DateTime? createdAt;
-  DateTime? updatedAt;
 
   FiscalEmitter({
-    this.id,
     this.taxId,
     this.legalName,
     this.tradeName,
@@ -166,13 +163,12 @@ class FiscalEmitter {
     this.certificate,
     this.totals,
     this.importBatchId,
-    this.createdAt,
-    this.updatedAt,
   });
 
   factory FiscalEmitter.fromJson(Map<String, dynamic> json) =>
       _$FiscalEmitterFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$FiscalEmitterToJson(this);
 
   FiscalEmitterAggr toAggr() => FiscalEmitterAggr(
@@ -201,18 +197,20 @@ class FiscalEmitter {
 
 /// The emitter embedded in an invoice.
 @JsonSerializable()
-class FiscalEmitterAggr {
-  String? id;
+class FiscalEmitterAggr extends BaseAuditCompanyAggr {
   String? taxId;
   String? legalName;
 
   @JsonKey(unknownEnumValue: FiscalRegime.simples)
   FiscalRegime? regime;
 
-  FiscalEmitterAggr({this.id, this.taxId, this.legalName, this.regime});
+  FiscalEmitterAggr({String? id, this.taxId, this.legalName, this.regime}) {
+    this.id = id;
+  }
 
   factory FiscalEmitterAggr.fromJson(Map<String, dynamic> json) =>
       _$FiscalEmitterAggrFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$FiscalEmitterAggrToJson(this);
 }
