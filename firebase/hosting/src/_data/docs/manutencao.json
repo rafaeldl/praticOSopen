@@ -72,6 +72,11 @@
         "intro": "Ao concluir a nova OS, a pergunta volta e a próxima data substitui a anterior. Se você tocar em Não repetir, a data que acabou de ser cumprida sai. Uma data ainda distante continua lá."
       },
       {
+        "id": "leitura",
+        "title": "Quilometragem e horímetro",
+        "intro": "Na oficina, cada OS guarda a quilometragem do veículo naquela visita. Em máquinas, o horímetro. Toque em <strong>+ Quilometragem</strong> logo abaixo do veículo na OS e digite o número. O veículo passa a mostrar a última quilometragem ao lado da placa, e o histórico mostra a de cada OS. Em ramos que não medem nada, como celular e eletrônica, o campo não aparece."
+      },
+      {
         "id": "contrato",
         "title": "Aparelho com contrato",
         "intro": "Com contrato ativo, a ficha mostra a data do contrato, com a indicação <strong>Pelo contrato</strong>. O app não pede outra data, e o aparelho não entra em Manutenções chegando."
@@ -182,6 +187,11 @@
         "intro": "When you finish the new order, the question comes back and the next date replaces the previous one. If you tap Don't repeat, the date just fulfilled goes away. A date still far off stays."
       },
       {
+        "id": "reading",
+        "title": "Mileage and hour meter",
+        "intro": "In a repair shop, each order keeps the vehicle's mileage at that visit. For machines, the hour meter. Tap <strong>+ Mileage</strong> right below the vehicle in the order and type the number. The vehicle then shows its last mileage next to the plate, and its history shows the one of each order. In trades that measure nothing, such as phones and electronics, the field does not show."
+      },
+      {
         "id": "contract",
         "title": "Device under contract",
         "intro": "With an active contract, the device page shows the contract date, marked <strong>From the contract</strong>. The app does not ask for another date, and the device stays out of Maintenance coming up."
@@ -290,6 +300,11 @@
         "id": "ciclo",
         "title": "El ciclo continúa",
         "intro": "Al concluir la nueva OS, la pregunta vuelve y la próxima fecha reemplaza a la anterior. Si tocas No repetir, la fecha recién cumplida se quita. Una fecha aún lejana se queda."
+      },
+      {
+        "id": "lectura",
+        "title": "Kilometraje y horómetro",
+        "intro": "En el taller, cada orden guarda el kilometraje del vehículo en esa visita. En máquinas, el horómetro. Toca <strong>+ Kilometraje</strong> justo debajo del vehículo en la orden y escribe el número. El vehículo pasa a mostrar el último kilometraje junto a la placa, y su historial muestra el de cada orden. En rubros que no miden nada, como celulares y electrónica, el campo no aparece."
       },
       {
         "id": "contrato",

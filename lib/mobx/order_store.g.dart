@@ -385,6 +385,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$deviceReadingsAtom = Atom(
+    name: '_OrderStore.deviceReadings',
+    context: context,
+  );
+
+  @override
+  Map<String, num>? get deviceReadings {
+    _$deviceReadingsAtom.reportRead();
+    return super.deviceReadings;
+  }
+
+  @override
+  set deviceReadings(Map<String, num>? value) {
+    _$deviceReadingsAtom.reportWrite(value, super.deviceReadings, () {
+      super.deviceReadings = value;
+    });
+  }
+
   late final _$customerFilterAtom = Atom(
     name: '_OrderStore.customerFilter',
     context: context,
@@ -1766,6 +1784,7 @@ payment: ${payment},
 customer: ${customer},
 device: ${device},
 devices: ${devices},
+deviceReadings: ${deviceReadings},
 customerFilter: ${customerFilter},
 services: ${services},
 products: ${products},

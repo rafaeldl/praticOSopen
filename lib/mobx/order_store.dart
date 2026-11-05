@@ -191,6 +191,10 @@ abstract class _OrderStore with Store {
   @observable
   ObservableList<DeviceAggr> devices = ObservableList<DeviceAggr>();
 
+  /// [Order.deviceReadings]: each device's reading at this visit.
+  @observable
+  Map<String, num>? deviceReadings;
+
   /// Transient state for multi-device picker flow
   String? pendingDeviceId;
   bool pendingDuplicateAll = false;
@@ -505,6 +509,7 @@ abstract class _OrderStore with Store {
     customer = order.customer;
     devices = order.effectiveDevices.asObservable();
     device = devices.isNotEmpty ? devices.first : null;
+    deviceReadings = order.deviceReadings;
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
@@ -650,6 +655,24 @@ abstract class _OrderStore with Store {
     products = order!.products?.asObservable() ?? ObservableList();
 
     updateTotal();
+    createItem();
+  }
+
+  /// Reading of device [deviceId] at this visit (odometer, hour meter…);
+  /// null removes it. Saves the order.
+  void setDeviceReading(String deviceId, int? value) {
+    final current = order;
+    if (current == null) return;
+    final readings = Map<String, num>.of(current.deviceReadings ?? const {});
+    if (value == null) {
+      readings.remove(deviceId);
+    } else {
+      readings[deviceId] = value;
+    }
+    runInAction(() {
+      current.deviceReadings = readings.isEmpty ? null : readings;
+      deviceReadings = current.deviceReadings;
+    });
     createItem();
   }
 
@@ -2139,6 +2162,11 @@ abstract class _OrderStore with Store {
     final previous = {
       for (final key in changed.keys)
         if (base.containsKey(key)) key: base[key],
+      // A keyed map (`deviceReadings.d1`) goes back whole.
+      for (final key in OrderFieldDiff.keyedFields)
+        if (base.containsKey(key) &&
+            changed.keys.any((path) => path.startsWith('$key.')))
+          key: base[key],
     };
     _savedSnapshot = current;
 
@@ -2170,7 +2198,12 @@ abstract class _OrderStore with Store {
       // fields back as unsaved when the store still holds this order.
       final snapshot = _savedSnapshot;
       if (snapshot != null && _savedSnapshotId == orderId) {
-        for (final key in changed.keys) {
+        final keyed = {
+          for (final key in OrderFieldDiff.keyedFields)
+            if (changed.keys.any((path) => path.startsWith('$key.'))) key,
+        };
+        for (final key in {...changed.keys, ...keyed}) {
+          if (key.contains('.')) continue;
           if (previous.containsKey(key)) {
             snapshot[key] = previous[key];
           } else {

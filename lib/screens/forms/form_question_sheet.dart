@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -31,6 +32,16 @@ bool isFormItemAnswered(FormItemDefinition item, FormResponse? response) {
 int formItemsMissing(OrderForm form) => form.items
     .where((item) => !isFormItemAnswered(item, form.getResponse(item.id)))
     .length;
+
+/// Status of a completed checklist: "Completo", or "Concluído · 2 sem
+/// resposta" when it was finished with questions left ("Concluir assim
+/// mesmo"), so it does not look like a fully answered one.
+String completedChecklistLabel(AppLocalizations l10n, OrderForm form) {
+  final missing = formItemsMissing(form);
+  return missing == 0
+      ? l10n.checklistStatusDone
+      : l10n.checklistStatusDoneMissing(missing);
+}
 
 /// Index of the first question without an answer, or null when all have one.
 int? firstUnansweredIndex(OrderForm form) {

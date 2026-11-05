@@ -12,6 +12,7 @@ import {
   answerText,
   applyChange,
   canFinishAnyway,
+  completedStatus,
   editedItem,
   firstUnanswered,
   fitsOneMore,
@@ -97,6 +98,14 @@ describe('respostas', () => {
     expect(canFinishAnyway(f)).toBe(true)
     expect(canFinishAnyway(form(items))).toBe(false)
     expect(requiredMissing(form(items)).map((i) => i.id)).toEqual(['a'])
+  })
+
+  test('concluído assim mesmo diz quantas ficaram sem resposta (#588)', () => {
+    const items = [item('a', 'boolean'), item('b', 'text'), item('c', 'text')]
+    const answered = { itemId: 'a', value: true, photoUrls: [] }
+    expect(completedStatus({ ...form(items, [answered]), status: 'completed' })).toEqual({ key: 'checklistStatusDoneMissing', count: 2 })
+    const all = items.map((entry) => ({ itemId: entry.id, value: 'x', photoUrls: [] }))
+    expect(completedStatus({ ...form(items, all), status: 'completed' })).toEqual({ key: 'checklistStatusDone', count: 0 })
   })
 
   test('mesclar por itemId: a resposta do web não apaga a que o app gravou em outra pergunta', () => {

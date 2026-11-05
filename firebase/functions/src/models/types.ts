@@ -292,6 +292,8 @@ export interface Order {
   devices?: DeviceAggr[];
   /** Ids of `devices`, for the app's array-contains queries. */
   deviceIds?: string[];
+  /** Each device's reading at this visit (odometer, hour meter), by device id (docs/DEVICE_READING.md). */
+  deviceReadings?: Record<string, number> | null;
   services?: OrderService[];
   products?: OrderProduct[];
   photos?: OrderPhoto[];

@@ -19,6 +19,16 @@
 
     <!-- Order content -->
     <template v-else>
+      <!-- "Ver como o cliente vê": the team's look, nothing is counted or sent -->
+      <div
+        v-if="preview"
+        class="sticky top-0 z-40 border-b border-[#F59E0B] bg-[#FFFBEB] px-4 py-3 text-center text-[13px] leading-snug text-[#78350F]"
+        role="status"
+        data-testid="preview-banner"
+      >
+        <strong class="font-semibold">{{ t.previewTitle }}</strong>
+        {{ t.previewBody }}
+      </div>
       <OrderHeader :order="order" :company="company" />
 
       <!-- Mobile layout (single column) -->
@@ -151,6 +161,8 @@
 import { shouldRefreshCharge } from '~/utils/charge'
 import { quietRefresh } from '~/utils/quiet-refresh'
 import { showsValues } from '~/utils/values'
+import { isPreview, orderDataPath } from '~/utils/preview'
+import { PreviewBlockedError } from '~/composables/useOrderApi'
 
 const route = useRoute()
 const token = route.params.token as string
@@ -158,8 +170,13 @@ const token = route.params.token as string
 const { t, setSegmentLabels } = useOrderI18n()
 const { approveQuote, rejectQuote } = useOrderApi()
 
+// "Ver como o cliente vê" (?preview=1): not counted as a visit, customer actions off
+const { preview, blockedAt } = useOrderPreview()
+preview.value = isPreview(route.query)
+const dataPath = orderDataPath(token, preview.value)
+
 // SSR data fetch via server proxy
-const { data: orderData, error, pending, refresh: refreshOrder } = await useFetch(`/api/orders/${token}`)
+const { data: orderData, error, pending, refresh: refreshOrder } = await useFetch(dataPath)
 
 // Computed data from response
 const order = computed(() => (orderData.value as any)?.data?.order)
@@ -173,7 +190,7 @@ const showValues = computed(() => showsValues((orderData.value as any)?.data))
 // Customer pays the Asaas invoice in another tab; reflect it when they come back
 // Quiet fetch: a failed background refresh must not flip the page to the invalid-link screen.
 useRefreshOnVisible(
-  () => quietRefresh(() => $fetch(`/api/orders/${token}`), (fresh) => { orderData.value = fresh as typeof orderData.value }),
+  () => quietRefresh(() => $fetch(dataPath), (fresh) => { orderData.value = fresh as typeof orderData.value }),
   {
     when: () => shouldRefreshCharge(charge.value),
     minIntervalMs: 10_000,
@@ -221,6 +238,9 @@ function showToast(message: string, type: 'success' | 'error' = 'success') {
   setTimeout(() => { toastVisible.value = false }, 3000)
 }
 
+// A blocked action in preview (approve, reject, rate, comment) says why nothing happened
+watch(blockedAt, () => showToast(t.value.previewBlocked, 'error'))
+
 async function handleApprove() {
   showApproveModal.value = false
   try {
@@ -230,6 +250,7 @@ async function handleApprove() {
       setTimeout(() => refreshOrder(), 1500)
     }
   } catch (err: any) {
+    if (err instanceof PreviewBlockedError) return
     showToast(err?.data?.error?.message || t.value.error, 'error')
   }
 }
@@ -243,6 +264,7 @@ async function handleReject(reason: string) {
       setTimeout(() => refreshOrder(), 1500)
     }
   } catch (err: any) {
+    if (err instanceof PreviewBlockedError) return
     showToast(err?.data?.error?.message || t.value.error, 'error')
   }
 }

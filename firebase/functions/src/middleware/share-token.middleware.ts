@@ -8,6 +8,16 @@ import { AuthenticatedRequest, ShareTokenPermission } from '../models/types';
 import { validateShareToken, incrementViewCount } from '../services/share-token.service';
 
 /**
+ * Whether this load counts as the customer viewing the link (viewCount and
+ * lastViewedAt). "Ver como o cliente vê" in the app and the web opens the same
+ * link with `?preview=1`: the team looking at it is not the customer. The flag
+ * only skips the count; what can be read still depends on the token alone.
+ */
+export function countsAsVisit(req: Pick<AuthenticatedRequest, 'query'>): boolean {
+  return req.query?.preview !== '1';
+}
+
+/**
  * Middleware to authenticate requests using share token
  * Token can be passed as:
  * - URL parameter: /public/orders/:token
@@ -62,10 +72,12 @@ export async function shareTokenAuth(
       customer: shareToken.customer,
     };
 
-    // Increment view count asynchronously
-    incrementViewCount(token).catch((err) => {
-      console.error('Error incrementing view count:', err);
-    });
+    // Increment view count asynchronously (not for the team's own preview)
+    if (countsAsVisit(req)) {
+      incrementViewCount(token).catch((err) => {
+        console.error('Error incrementing view count:', err);
+      });
+    }
 
     next();
   } catch (error) {

@@ -7090,6 +7090,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Recibes un aviso cada vez que otra persona emite o cancela una factura.';
 
   @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
   String get orderItemCatalogPriceTitle => '¿Cambiar el precio en el Catálogo?';
 
   @override
@@ -7116,4 +7121,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get orderItemCatalogPriceFailed =>
       'No se pudo cambiar el precio en el Catálogo. Cámbialo allí.';
+
+  @override
+  String get sharePreview => 'Ver como lo ve el cliente';
+
+  @override
+  String get sharePreviewFailed =>
+      'No se pudo abrir la vista previa. Inténtalo de nuevo.';
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Concluido · $count sin respuesta',
+      one: 'Concluido · 1 sin respuesta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist concluido';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'Para cambiar una respuesta, reabra el checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist.';
 }
