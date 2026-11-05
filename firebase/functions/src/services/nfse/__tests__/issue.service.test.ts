@@ -25,6 +25,7 @@ let now: Date;
 let calls: HttpRequest[];
 let answer: (req: HttpRequest) => HttpResponse | Promise<HttpResponse>;
 let saved: Record<string, string>;
+let pdfRefreshed: string[];
 let deps: Partial<IssueDeps>;
 
 const json = (status: number, body: unknown): HttpResponse => ({ status, body: JSON.stringify(body) });
@@ -77,6 +78,7 @@ beforeEach(() => {
   now = new Date('2026-11-05T13:00:00Z');
   calls = [];
   saved = {};
+  pdfRefreshed = [];
   answer = () => issuedAnswer(1);
   deps = {
     now: () => now,
@@ -88,6 +90,9 @@ beforeEach(() => {
     },
     saveFile: async (path, contents) => {
       saved[path] = contents;
+    },
+    refreshPdf: async (_companyId, invoiceId) => {
+      pdfRefreshed.push(invoiceId);
     },
   };
   jest.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -123,6 +128,7 @@ describe('issueDirectInvoice', () => {
       effectiveDate: '2026-11-05',
     });
     expect(saved[`tenants/c1/invoices/${invoice.id}/nfse.xml`]).toBe(nfseXml(1));
+    expect(pdfRefreshed).toEqual([invoice.id]);
     expect(read('companies/c1/private/nfse/emitters/e1')!.nextDpsNumber).toBe(2);
     expect(read('companies/c1/private/nfse/orders/o1')!.invoiceId).toBe(invoice.id);
     expect(read('companies/c1/customers/cu1')!.lastEmitterId).toBe('e1');
@@ -290,6 +296,8 @@ describe('cancelDirectInvoice', () => {
     answer = () => json(201, { eventoXmlGZipB64: gzipBase64('<evento/>') });
     const canceled = await cancelDirectInvoice('c1', invoice.id, 'issueError', USER, deps);
     expect(canceled.status).toBe('canceled');
+    // PDF made again, now with the "CANCELADA" watermark.
+    expect(pdfRefreshed).toEqual([invoice.id, invoice.id]);
     expect(read(`companies/c1/invoices/${invoice.id}`)).toMatchObject({ status: 'canceled', cancelReason: 'issueError' });
     expect(read('companies/c1/private/nfse/orders/o1')).toBeUndefined();
     expect((read('companies/c1/fiscalEmitters/e1')!.totals as { yearValue: number }).yearValue).toBe(0);
