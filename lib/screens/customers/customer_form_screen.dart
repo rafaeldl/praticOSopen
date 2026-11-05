@@ -5,6 +5,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/customers/customer_invoice_fields.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/more_fields_link.dart';
@@ -12,6 +13,7 @@ import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/contact_picker_service.dart';
 import 'package:praticos/services/customer_directory.dart';
+import 'package:praticos/services/fiscal_lookup_service.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -35,6 +37,12 @@ import 'package:praticos/widgets/tax_id_form_field.dart';
 /// with a phone that is already registered asks first (a number can be
 /// shared, so it never blocks). Nothing is saved without the "✓".
 ///
+/// With the direct nota on ([CustomerInvoiceConfig]), CPF/CNPJ moves to a
+/// "Dados para nota" group ([CustomerInvoiceFields]) and a CPF/CNPJ that
+/// another customer already has blocks the save, offering "Mandar as notas
+/// desta loja para ela" (fills "Nota fiscal para" and keeps the number in
+/// the other customer).
+///
 /// Pops with the saved [Customer], or the existing one from "Abrir cliente".
 class CustomerFormScreen extends StatefulWidget {
   const CustomerFormScreen({
@@ -44,6 +52,8 @@ class CustomerFormScreen extends StatefulWidget {
     this.onSave,
     this.pickContact,
     this.loadCustomers,
+    this.invoiceConfig,
+    this.lookup,
   });
 
   /// Customer to edit. Falls back to the `customer` route argument; a new one
@@ -64,6 +74,12 @@ class CustomerFormScreen extends StatefulWidget {
   /// [FirestoreCustomerDirectory].
   final Future<List<Customer>> Function()? loadCustomers;
 
+  /// "Dados para nota". Defaults to [loadCustomerInvoiceConfig]. Test seam.
+  final CustomerInvoiceConfig? invoiceConfig;
+
+  /// CNPJ and CEP lookups. Defaults to [FiscalLookupService]. Test seam.
+  final FiscalLookupService? lookup;
+
   @override
   State<CustomerFormScreen> createState() => _CustomerFormScreenState();
 }
@@ -79,7 +95,13 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _address = TextEditingController();
   String _taxId = '';
+  String _initialTaxId = '';
   bool _customTouched = false;
+  CustomerInvoiceConfig _invoice = CustomerInvoiceConfig.off;
+
+  /// Set by "Mandar as notas desta loja para ela": saving gives the notas to
+  /// this customer and leaves the CPF/CNPJ with it.
+  Customer? _sendNotasTo;
   late String _initialSnapshot;
 
   @override
@@ -97,7 +119,9 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       _email.text = c.email ?? '';
       _address.text = c.address ?? '';
       _taxId = c.taxId ?? '';
+      _initialTaxId = _taxId;
       _initialSnapshot = _snapshot;
+      _loadInvoiceConfig();
       for (final controller in [_name, _phone, _email, _address]) {
         controller.addListener(_onEdit);
       }
@@ -116,6 +140,29 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   void _onEdit() {
     if (mounted) setState(() {});
+  }
+
+  void _onInvoiceEdit() {
+    if (mounted) setState(() => _customTouched = true);
+  }
+
+  Future<void> _loadInvoiceConfig() async {
+    final given = widget.invoiceConfig;
+    if (given != null) {
+      _invoice = given;
+      return;
+    }
+    final config = await loadCustomerInvoiceConfig();
+    if (mounted && config.enabled) setState(() => _invoice = config);
+  }
+
+  Future<List<Customer>> _loadCustomers() {
+    final load =
+        widget.loadCustomers ??
+        () => FirestoreCustomerDirectory().watchCustomers().first.timeout(
+          const Duration(seconds: 5),
+        );
+    return load();
   }
 
   String get _snapshot => [
@@ -179,15 +226,62 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     final phone = _phone.text.trim();
     if (_isEditing || phone.isEmpty) return null;
     try {
-      final load =
-          widget.loadCustomers ??
-          () => FirestoreCustomerDirectory().watchCustomers().first.timeout(
-            const Duration(seconds: 5),
-          );
-      return findCustomerByPhone(await load(), phone);
+      return findCustomerByPhone(await _loadCustomers(), phone);
     } catch (_) {
       return null;
     }
+  }
+
+  /// The other customer with the CPF/CNPJ being saved (direct nota on and
+  /// the number changed). Failing to load the list must not stop the save.
+  Future<Customer?> _findTaxIdOwner() async {
+    if (!_invoice.enabled || _taxId.isEmpty || _taxId == _initialTaxId) {
+      return null;
+    }
+    try {
+      return findCustomerWithTaxId(
+        await _loadCustomers(),
+        _taxId,
+        exceptId: _customer?.id,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// True after "Mandar as notas desta loja para ela" (saves with the notas
+  /// going to [owner]); false after "Voltar".
+  Future<bool> _confirmTaxIdOwner(Customer owner) async {
+    final l10n = context.l10n;
+    final name = owner.legalName?.trim().isNotEmpty == true
+        ? owner.legalName!
+        : (owner.name ?? '');
+    final send = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(
+          _taxId.length == 11
+              ? l10n.invoiceTaxIdTakenCpf(name)
+              : l10n.invoiceTaxIdTakenCnpj(name),
+        ),
+        content: Text(l10n.invoiceTaxIdTakenMessage),
+        actions: [
+          CupertinoDialogAction(
+            key: const Key('invoiceTaxIdTakenUse'),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.invoiceTaxIdTakenUse),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.back),
+          ),
+        ],
+      ),
+    );
+    if (send != true) return false;
+    _sendNotasTo = owner;
+    return true;
   }
 
   /// True to save anyway; false after "Abrir cliente", which closes the form
@@ -227,7 +321,20 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       if (!await _confirmDuplicate(duplicate) || !mounted) return;
       setState(() => _isLoading = true);
     }
+    _sendNotasTo = null;
+    final owner = await _findTaxIdOwner();
+    if (!mounted) return;
+    if (owner != null) {
+      setState(() => _isLoading = false);
+      if (!await _confirmTaxIdOwner(owner) || !mounted) return;
+      setState(() => _isLoading = true);
+    }
     _formKey.currentState!.save();
+    final sendTo = _sendNotasTo;
+    if (sendTo != null) {
+      _customer!.taxId = null;
+      _customer!.invoiceRecipient = sendTo.toAggr();
+    }
     // Avoid storing an empty map in Firestore.
     if (_customer!.customData != null && _customer!.customData!.isEmpty) {
       _customer!.customData = null;
@@ -331,8 +438,25 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         initiallyExpanded: _hasMoreData,
         children: _moreFields(config, inCard: false),
       ),
+      if (_invoice.enabled)
+        MoreFieldsLink(
+          key: const Key('customerInvoiceData'),
+          label: context.l10n.invoiceDataTitle,
+          initiallyExpanded: CustomerInvoiceFields.hasData(_customer!),
+          children: [_invoiceFields()],
+        ),
     ];
   }
+
+  Widget _invoiceFields() => CustomerInvoiceFields(
+    customer: _customer!,
+    config: _invoice,
+    lookup: widget.lookup,
+    initialTaxId: _taxId,
+    loadCustomers: _loadCustomers,
+    onChanged: _onInvoiceEdit,
+    onTaxIdChanged: (v) => _taxId = v,
+  );
 
   /// Cards of the new-customer sheet.
   List<Widget> _buildSheetCards(SegmentConfigProvider config) {
@@ -351,6 +475,14 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         initiallyOpen: _hasMoreData || _email.text.isNotEmpty,
         children: _moreFields(config, inCard: true),
       ),
+      if (_invoice.enabled)
+        FormMoreCard(
+          key: const Key('customerInvoiceData'),
+          title: l10n.invoiceDataTitle,
+          hint: l10n.invoiceDataHint,
+          initiallyOpen: CustomerInvoiceFields.hasData(_customer!),
+          children: [_invoiceFields()],
+        ),
     ];
   }
 
@@ -431,8 +563,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         keyboardType: TextInputType.emailAddress,
         onSaved: (v) => customer.email = v.isEmpty ? null : v,
       ),
-      // CPF/CNPJ (Brazil only): required by Asaas to charge
-      if (config.countryCode == null || config.countryCode == 'BR')
+      // CPF/CNPJ (Brazil only): required by Asaas to charge. With the direct
+      // nota on it lives in "Dados para nota".
+      if (!_invoice.enabled &&
+          (config.countryCode == null || config.countryCode == 'BR'))
         inCard
             ? Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
