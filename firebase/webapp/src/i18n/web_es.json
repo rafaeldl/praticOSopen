@@ -868,6 +868,8 @@
   "web.nfseDirect.refusedOther": "El gobierno rechazó la factura: {text}",
   "web.nfseDirect.noEmitter": "Todavía no hay CNPJ para emitir la factura.",
   "web.nfseDirect.recipientTaxId": "Falta el CPF o CNPJ de quien recibe la factura.",
+  "web.nfseDirect.dailyLimit": "Esta empresa llegó al límite de facturas de hoy. Intente mañana o hable con soporte.",
+  "web.nfseDirect.managerNotAllowed": "El dueño no permitió que los gerentes emitan facturas. Pídale que la emita o lo permita.",
   "web.nfseDirect.orderHasInvoice": "Esta OS ya tiene una factura. Ábrala para verla.",
   "web.nfseDirect.govUnavailable": "El sistema de facturas del gobierno no respondió. Intente de nuevo en unos minutos.",
   "web.nfseDirect.cancelPortal": "La ciudad no aceptó la cancelación desde aquí. Cancele en el portal del gobierno (nfse.gov.br).",

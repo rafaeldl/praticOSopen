@@ -868,6 +868,8 @@
   "web.nfseDirect.refusedOther": "The government refused the invoice: {text}",
   "web.nfseDirect.noEmitter": "There is no CNPJ to issue the invoice yet.",
   "web.nfseDirect.recipientTaxId": "The CPF or CNPJ of who gets the invoice is missing.",
+  "web.nfseDirect.dailyLimit": "This company reached today's invoice limit. Try tomorrow or contact support.",
+  "web.nfseDirect.managerNotAllowed": "The owner hasn't allowed managers to issue invoices. Ask the owner to issue it or allow it.",
   "web.nfseDirect.orderHasInvoice": "This order already has an invoice. Open it to see.",
   "web.nfseDirect.govUnavailable": "The government's invoice system did not answer. Try again in a few minutes.",
   "web.nfseDirect.cancelPortal": "The city did not accept the cancellation from here. Cancel it on the government's site (nfse.gov.br).",

@@ -7148,6 +7148,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This CNPJ can\'t issue yet. Check the invoice setup.';
 
   @override
+  String get nfseDirectErrorDailyLimit =>
+      'This company reached today\'s invoice limit. Try tomorrow or contact support.';
+
+  @override
+  String get nfseDirectErrorManagerNotAllowed =>
+      'The owner hasn\'t allowed managers to issue invoices. Ask the owner to issue it or allow it.';
+
+  @override
   String get nfseDirectErrorOrderHasInvoice =>
       'This order already has an invoice.';
 

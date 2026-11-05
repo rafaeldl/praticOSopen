@@ -11,6 +11,7 @@ import 'package:praticos/models/fiscal_emitter.dart';
 import 'package:praticos/models/nfse.dart' hide NfseDirectAutoIssue;
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_issue_sheet.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_invoice_screen.dart';
 import 'package:praticos/screens/nfse/nfse_list_screen.dart';
@@ -219,6 +220,32 @@ Customer _customer(String id, String name, {String? taxId}) => Customer()
 
 void main() {
   setUp(() => FormatService().setLocale('pt_BR'));
+
+  test('daily limit and manager not allowed in plain words', () {
+    final l10n = lookupAppLocalizations(const Locale('pt'));
+    expect(
+      nfseDirectErrorText(
+        l10n,
+        NfseDirectApiException('DAILY_LIMIT_REACHED', 'x'),
+      ),
+      l10n.nfseDirectErrorDailyLimit,
+    );
+    expect(
+      nfseDirectErrorText(
+        l10n,
+        NfseDirectApiException(
+          'FORBIDDEN',
+          'x',
+          details: {'reason': 'managerNotAllowed'},
+        ),
+      ),
+      l10n.nfseDirectErrorManagerNotAllowed,
+    );
+    expect(
+      nfseDirectErrorText(l10n, NfseDirectApiException('FORBIDDEN', 'x')),
+      l10n.nfseDirectErrorForbidden,
+    );
+  });
 
   group('NfseDirectIssueSheet', () {
     testWidgets('shows who issues, who gets it, value and text; ✓ issues', (

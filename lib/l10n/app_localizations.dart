@@ -11640,6 +11640,18 @@ abstract class AppLocalizations {
   /// **'Este CNPJ ainda não pode emitir. Confira a configuração da nota.'**
   String get nfseDirectErrorEmitterNotReady;
 
+  /// No description provided for @nfseDirectErrorDailyLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta empresa chegou ao limite de notas de hoje. Tente amanhã ou fale com o suporte.'**
+  String get nfseDirectErrorDailyLimit;
+
+  /// No description provided for @nfseDirectErrorManagerNotAllowed.
+  ///
+  /// In pt, this message translates to:
+  /// **'O dono não liberou a emissão de notas para gerentes. Peça para ele emitir ou liberar.'**
+  String get nfseDirectErrorManagerNotAllowed;
+
   /// No description provided for @nfseDirectErrorOrderHasInvoice.
   ///
   /// In pt, this message translates to:

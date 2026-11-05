@@ -2826,6 +2826,8 @@
   "nfseDirectWaitingToast": "El gobierno aún no respondió. La nota aparece en cuanto confirme.",
   "nfseDirectErrorRecipientTaxId": "Falta el CPF o CNPJ de quien recibe la nota.",
   "nfseDirectErrorEmitterNotReady": "Este CNPJ aún no puede emitir. Revisa la configuración de la nota.",
+  "nfseDirectErrorDailyLimit": "Esta empresa llegó al límite de facturas de hoy. Intente mañana o hable con soporte.",
+  "nfseDirectErrorManagerNotAllowed": "El dueño no permitió que los gerentes emitan facturas. Pídale que la emita o lo permita.",
   "nfseDirectErrorOrderHasInvoice": "Esta OS ya tiene nota.",
   "nfseDirectErrorGovUnavailable": "El gobierno no respondió. Intenta de nuevo en unos minutos.",
   "nfseDirectErrorNotCancelable": "Esta nota no se puede cancelar.",

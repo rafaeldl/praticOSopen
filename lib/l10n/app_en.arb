@@ -2838,6 +2838,8 @@
   "nfseDirectWaitingToast": "The government hasn't answered yet. The invoice shows up as soon as it confirms.",
   "nfseDirectErrorRecipientTaxId": "The recipient's CPF or CNPJ is missing.",
   "nfseDirectErrorEmitterNotReady": "This CNPJ can't issue yet. Check the invoice setup.",
+  "nfseDirectErrorDailyLimit": "This company reached today's invoice limit. Try tomorrow or contact support.",
+  "nfseDirectErrorManagerNotAllowed": "The owner hasn't allowed managers to issue invoices. Ask the owner to issue it or allow it.",
   "nfseDirectErrorOrderHasInvoice": "This order already has an invoice.",
   "nfseDirectErrorGovUnavailable": "The government didn't answer. Try again in a few minutes.",
   "nfseDirectErrorNotCancelable": "This invoice can't be canceled.",

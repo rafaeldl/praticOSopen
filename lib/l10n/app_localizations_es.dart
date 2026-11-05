@@ -7168,6 +7168,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este CNPJ aún no puede emitir. Revisa la configuración de la nota.';
 
   @override
+  String get nfseDirectErrorDailyLimit =>
+      'Esta empresa llegó al límite de facturas de hoy. Intente mañana o hable con soporte.';
+
+  @override
+  String get nfseDirectErrorManagerNotAllowed =>
+      'El dueño no permitió que los gerentes emitan facturas. Pídale que la emita o lo permita.';
+
+  @override
   String get nfseDirectErrorOrderHasInvoice => 'Esta OS ya tiene nota.';
 
   @override

@@ -299,6 +299,11 @@ export function directFailure(error: unknown, locale: string): DirectFailure {
       return { text: t('web.nfseDirect.recipientTaxId'), fields: true }
     case 'ORDER_HAS_INVOICE':
       return { text: t('web.nfseDirect.orderHasInvoice') }
+    case 'DAILY_LIMIT_REACHED':
+      return { text: t('web.nfseDirect.dailyLimit') }
+    case 'FORBIDDEN':
+      if (details.reason === 'managerNotAllowed') return { text: t('web.nfseDirect.managerNotAllowed') }
+      return { text: t(errorMessageKey(error)) }
     case 'SEFIN_UNAVAILABLE':
       return { text: t('web.nfseDirect.govUnavailable') }
     case 'NFSE_DIRECT_NOT_ENABLED':

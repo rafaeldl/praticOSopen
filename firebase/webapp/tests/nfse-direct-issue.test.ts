@@ -155,6 +155,8 @@ describe('folha da nota direta: regras', () => {
     expect(directFailure(err('RECIPIENT_TAX_ID_REQUIRED', 400), 'pt')).toMatchObject({ fields: true })
     expect(directFailure(err('ORDER_HAS_INVOICE', 409), 'pt').text).toBe(t('web.nfseDirect.orderHasInvoice'))
     expect(directFailure(err('SEFIN_UNAVAILABLE', 503), 'pt').text).toBe(t('web.nfseDirect.govUnavailable'))
+    expect(directFailure(err('DAILY_LIMIT_REACHED', 429), 'pt').text).toBe(t('web.nfseDirect.dailyLimit'))
+    expect(directFailure(err('FORBIDDEN', 403, { reason: 'managerNotAllowed' }), 'pt').text).toBe(t('web.nfseDirect.managerNotAllowed'))
   })
 
   test('cancelamento recusado pela cidade manda ao portal', () => {

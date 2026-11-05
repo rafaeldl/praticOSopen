@@ -45,6 +45,13 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
     case 'NFSE_DIRECT_NOT_ENABLED':
       return l10n.nfseDirectErrorNotEnabled;
     case 'FORBIDDEN':
+      if (error is NfseDirectApiException &&
+          error.details?['reason'] == 'managerNotAllowed') {
+        return l10n.nfseDirectErrorManagerNotAllowed;
+      }
+      return l10n.nfseDirectErrorForbidden;
+    case 'DAILY_LIMIT_REACHED':
+      return l10n.nfseDirectErrorDailyLimit;
     case 'UNAUTHENTICATED':
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
