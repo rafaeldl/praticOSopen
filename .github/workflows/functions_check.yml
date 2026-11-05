@@ -41,6 +41,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Jest only transpiles, so sources and tests are type checked here
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Test
         run: npm test
 

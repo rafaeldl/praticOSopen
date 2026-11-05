@@ -23,6 +23,7 @@
     "memberships:seed": "ts-node scripts/seed-private-membership.ts",
     "subscriptions:grace": "ts-node scripts/grant-grace-period.ts",
     "test": "jest",
+    "typecheck": "tsc -p tsconfig.test.json",
     "test:watch": "jest --watch",
     "test:rules": "firebase emulators:exec --only firestore --project demo-praticos --config ../firebase.json \"jest src/__tests__/firestore.rules.test.ts src/__tests__/web-isolation.rules.test.ts src/__tests__/contract-concurrency.emulator.test.ts\"",
     "test:contracts": "firebase emulators:exec --only firestore --project demo-praticos --config ../firebase.json \"jest src/__tests__/contract-concurrency.emulator.test.ts\"",

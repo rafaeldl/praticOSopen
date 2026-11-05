@@ -56,7 +56,7 @@ O hook olha os arquivos alterados pelos commits do push e roda só o que foi toc
 | Se mudou | Roda |
 |---|---|
 | `lib/`, `test/`, `pubspec.*`, `.fvmrc`, `docs/web-app/contract-cases/` | `fvm flutter analyze` + `fvm flutter test` |
-| `firebase/functions/`, `docs/web-app/contract-cases/` | `npm run lint` + `jest` (sem credenciais do gcloud, igual ao CI) |
+| `firebase/functions/`, `docs/web-app/contract-cases/` | `npm run lint` + `npm run typecheck` + `jest` (sem credenciais do gcloud, igual ao CI) |
 | `firebase/webapp/`, `docs/web-app/contract-cases/`, `lib/l10n/*.arb` | `npm run typecheck` + `npm test` |
 
 Regras:
@@ -73,6 +73,10 @@ Em nov/2026 levava 20 min por execução, 15 deles nos 700 testes E2E (3 navegad
 - Três jobs em paralelo: um rápido (gen, typecheck, testes, build, Lighthouse, Hosting) e o E2E dividido em dois (`--shard=1/2` e `2/2`). A espera cai pela metade; os minutos ficam parecidos.
 - Axe no tema escuro (34 testes) só quando o PR mexe em estilos (`src/styles/`, `src/lib/prefs.ts`, tokens do site).
 - Atenção ao tornar privado: lá a máquina padrão tem 2 núcleos, e o E2E fica mais lento.
+
+## Functions Check
+
+Em nov/2026 o "Lint + Test" levava 8 a 13 min: o `ts-jest` checava os tipos de cada arquivo de teste. Agora o Jest só transpila (`isolatedModules`) e os tipos de fontes e testes são checados num passo próprio (`npm run typecheck`, com `tsconfig.test.json`, ~5 s). Na máquina local o Jest caiu de 196 s para 34 s.
 - Para pular numa emergência: `git push --no-verify` ou `SKIP_PREPUSH=1 git push`.
 
 ## Etapa 2 (pendente)

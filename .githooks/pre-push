@@ -3,7 +3,7 @@
 # pre-push: runs locally the checks that used to run on every push in CI.
 # Only the parts touched by the pushed commits run:
 #   - Flutter (lib/, test/, pubspec, contract cases) -> analyze + test
-#   - Functions (firebase/functions/, contract cases) -> lint + jest
+#   - Functions (firebase/functions/, contract cases) -> lint + typecheck + jest
 #   - Web app (firebase/webapp/, contract cases, .arb) -> typecheck + vitest
 #
 # Install once per clone: scripts/install-git-hooks.sh
@@ -60,6 +60,7 @@ if touches '^(firebase/functions/|docs/web-app/contract-cases/)'; then
   fn="$ROOT/firebase/functions"
   step "functions npm ci" need_npm_ci "$fn"
   step "functions lint" bash -c "cd '$fn' && npm run lint"
+  step "functions typecheck" bash -c "cd '$fn' && npm run typecheck"
   # Same as CI: no gcloud credentials, so tests can't reach the real Firestore
   tmp_home=$(mktemp -d)
   step "functions test" env HOME="$tmp_home" CLOUDSDK_CONFIG="$tmp_home/gcloud" \
