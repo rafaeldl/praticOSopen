@@ -2,7 +2,7 @@
 // "Adicionar CNPJ" / "Trocar certificado" (NFS-e direct, spec §4.2): the A1
 // file (dragged in or chosen), its password and the terms. "Enviar" turns
 // blue with a file, a password and the terms accepted (checkbox); the server checks the certificate and a
-// refusal comes back as a plain sentence. The password lives only in this
+// refusal comes back as a plain sentence. A new CNPJ goes on to "Importar notas". The password lives only in this
 // form and in the request: it is cleared after sending and never stored.
 import { computed, ref, shallowRef } from 'vue'
 import { Check, FileUp, X } from '@lucide/vue'
@@ -12,7 +12,8 @@ import { errorMessageKey } from '@/lib/api'
 import { certificateFileProblem, uploadCertificate } from '@/lib/nfse/direct'
 
 const props = defineProps<{ emitterId?: string | null; legalName?: string }>()
-const emit = defineEmits<{ close: []; saved: [] }>()
+/** `saved` carries the emitter the server answered with (a new CNPJ: `created`), so "Importar notas" can follow. */
+const emit = defineEmits<{ close: []; saved: [result: { emitterId: string | null; created: boolean }] }>()
 
 // The certificate terms (version TERMS_VERSION in lib/nfse/direct.ts), in the user's language.
 const TERMS_URLS = {
@@ -56,10 +57,10 @@ async function send() {
   saving.value = true
   failed.value = ''
   try {
-    await uploadCertificate(file.value, password.value, props.emitterId)
+    const data = await uploadCertificate(file.value, password.value, props.emitterId)
     password.value = ''
     allowClose = true
-    emit('saved')
+    emit('saved', { emitterId: typeof data?.emitterId === 'string' ? data.emitterId : (props.emitterId ?? null), created: data?.created === true })
   } catch (error) {
     failed.value = t(errorMessageKey(error))
   } finally {

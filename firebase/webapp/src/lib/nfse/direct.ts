@@ -37,6 +37,8 @@ export interface Emitter {
   descriptionStyle: { uppercase: boolean; separator: string }
   certificate: { notAfter: string | null; uploadedAt: string | null; uploadedBy: string | null; status: CertificateStatus } | null
   totals: { year: number; yearValue: number; month: number; monthValue: number } | null
+  /** The last "Importar notas" applied (null: never imported, or undone). */
+  importBatchId: string | null
 }
 
 export interface DirectSettings {
@@ -80,6 +82,7 @@ export function emitterOf(id: string, data: Record<string, unknown>): Emitter {
         }
       : null,
     totals: totals ? { year: num(totals.year), yearValue: num(totals.yearValue), month: num(totals.month), monthValue: num(totals.monthValue) } : null,
+    importBatchId: text(data.importBatchId),
   }
 }
 
@@ -115,6 +118,15 @@ export function defaultEmitterId(emitters: Emitter[], settings: DirectSettings):
 export function stylePreview(style: { uppercase: boolean; separator: string }, services: string[]): string {
   const joined = services.join(style.separator)
   return style.uppercase ? joined.toUpperCase() : joined
+}
+
+/**
+ * The two services the "Estilo da descrição" sample shows: the company's own
+ * (most used first), or the neutral pair when it has fewer than two.
+ */
+export function sampleServices(names: string[], neutral: [string, string]): string[] {
+  const own = [...new Set(names.map((name) => name.trim()).filter(Boolean))].slice(0, 2)
+  return own.length === 2 ? own : neutral
 }
 
 /** Why a picked file cannot be a certificate, or null. */

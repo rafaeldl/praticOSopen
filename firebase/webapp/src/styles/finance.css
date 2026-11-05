@@ -136,7 +136,7 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
 .nfse-steps { list-style: none; margin: 0 0 1.25rem; padding: 0; border-top: 1px solid var(--color-rule); }
 .nfse-step { display: grid; gap: 0.15rem; width: 100%; min-height: 3rem; padding: 0.6rem 0; border: 0; border-bottom: 1px solid var(--color-rule); background: none; text-align: left; color: var(--color-ink); }
 button.nfse-step:hover { background: var(--color-paper-2); }
-.nfse-step .dot { margin-right: 0.35rem; }
+.nfse-step .dot { display: inline-block; margin-right: 0.35rem; }
 .nfse-auto { border: 0; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 0.25rem; }
 .nfse-auto-row { min-height: 2.75rem; }
 .nfse-city p { margin: 0 0 0.5rem; }
@@ -148,6 +148,27 @@ button.nfse-step:hover { background: var(--color-paper-2); }
 .nfse-setup > :not(.page-head) { margin-left: 1.25rem; margin-right: 1.25rem; }
 
 /* NFS-e direct setup: the CNPJs beside the chosen one (master-detail). */
+.nfse-direct > :not(.page-head) { margin-inline: 1.25rem; }
+/* Section labels like the rest of the web (Financeiro); the chosen CNPJ's name is the panel title. */
+.nfse-direct .form-section, .nfse-import .form-section { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; }
+.nfse-direct .nfse-emitter > .nfse-name { font-size: 1.4rem; margin: 0 0 0.25rem; }
+.nfse-import .drawer-body > section + section { margin-top: 0.5rem; }
+.nfse-direct > .nfse-direct-grid { padding-bottom: 2rem; }
+@media (max-width: 48rem) { .nfse-direct > :not(.page-head) { margin-inline: 1rem; } }
+.nfse-import-offer { display: grid; gap: 0.6rem; justify-items: start; padding: 0.85rem 1rem; margin: 0.75rem 0 1rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); }
+.nfse-import-offer p { margin: 0; }
+/* Importar notas (drawer). */
+.nfse-import section { display: grid; gap: 0.4rem; }
+.nfse-import-facts { margin: 0; display: grid; border-top: 1px solid var(--color-rule); }
+.nfse-import-facts > div { display: grid; gap: 0.1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
+.nfse-import-facts dt { font-weight: 600; }
+.nfse-import-facts dd { margin: 0; overflow-wrap: anywhere; }
+.nfse-import-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.nfse-import-list li { display: grid; gap: 0.1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-rule); }
+.nfse-import-name { font-weight: 600; overflow-wrap: anywhere; }
+.nfse-import-ask, .nfse-import-auto { border: 0; border-bottom: 1px solid var(--color-rule); margin: 0; padding: 0.5rem 0; display: grid; gap: 0.1rem; }
+.nfse-import-ask legend, .nfse-import-auto legend { display: grid; gap: 0.1rem; padding: 0; margin-bottom: 0.25rem; }
+.nfse-import-ask .check-row, .nfse-import-auto .check-row { min-height: 2.75rem; }
 .nfse-direct-grid { display: grid; gap: 2rem; }
 @media (min-width: 60rem) { .nfse-direct-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); } }
 .nfse-direct .nfse-step[aria-current] { background: var(--color-paper-2); }

@@ -89,6 +89,26 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
   }
 }
 
+/// The two services the "Estilo da descrição" sample joins: the company's
+/// own when it has two, else a neutral pair (never an example of another
+/// segment).
+List<String> descriptionSamples(AppLocalizations l10n, List<String> own) {
+  final names = <String>{
+    for (final name in own)
+      if (name.trim().isNotEmpty) name.trim(),
+  }.take(2).toList();
+  return names.length == 2
+      ? names
+      : [l10n.nfseDirectSampleService1, l10n.nfseDirectSampleService2];
+}
+
+/// "Ainda não habilitado…": with the city when known, else a sentence that
+/// stands without it (nothing was checked yet).
+String notEnabledInCityText(AppLocalizations l10n, String? cityName) =>
+    cityName == null || cityName.trim().isEmpty
+    ? l10n.nfseDirectNotEnabledNoCity
+    : l10n.nfseDirectNotEnabledInCity(cityName);
+
 String fiscalRegimeLabel(AppLocalizations l10n, FiscalRegime? regime) =>
     regime == FiscalRegime.mei
     ? l10n.nfseDirectRegimeMei
