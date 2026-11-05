@@ -74,7 +74,8 @@ Código: `firebase/functions/src/services/nfse/` e `firebase/functions/src/nfse-
 |---|---|
 | `layouts/v20260209.ts`, `layouts/v20261020.ts` | Montam a DPS de cada pacote (produção usa 20260209, testes 20261020). Diferenças: `finNFSe` só no 20261020; ordem de `cNBS` × `xDescServ` |
 | `layouts/common.ts` | Regras por regime e texto: prestador só com CNPJ, IM e regime (E0121, E0128); MEI sem `regApTribSN` nem `tribFed`, `indTotTrib=0`; Simples com `regApTribSN`, PIS/COFINS CST 08 e `pTotTribSN`; sem retenção nem `pAliq`; textos só Latin-1, sem quebra de linha (fora a descrição) |
-| `dps.ts` | Id da DPS (cidade + 1/2 + documento + série + número), `dhEmi` em Brasília com recuo de 5 s sem voltar ao dia anterior, escolha do leiaute por `config/nfse.layoutByEnvironment`, evento de cancelamento e101101 |
+| `layouts/v2027.ts`, `layouts/ibscbs.ts`, `layouts/ibscbs-table.ts` | Leiaute 2027: o mesmo pacote de cada ambiente com o grupo `IBSCBS` (ver "Leiaute 2027 (IBS/CBS)" abaixo) |
+| `dps.ts` | Id da DPS (cidade + 1/2 + documento + série + número), `dhEmi` em Brasília com recuo de 5 s sem voltar ao dia anterior, escolha do leiaute por ambiente e data de competência (`config/nfse.layoutByEnvironment`), evento de cancelamento e101101 |
 | `signature.ts` | XMLDSig enveloped RSA-SHA1 C14N (`xml-crypto`) |
 | `sefin-client.ts` | mTLS com a chave e a cadeia do cofre num `https.Agent` por chamada; `POST /nfse`, `GET /dps/{id}`, `GET /nfse/{chave}`, `POST /nfse/{chave}/eventos`, `GET` no ADN. Recusa com código é resposta; tempo esgotado, rede, 5xx ou resposta sem nota viram `SefinUnavailableError` ("sem resposta certa") |
 | `refusals.ts` | Tabela de recusas por código em pt/en/es, com o grupo que a folha abre (`customerData`, `emitterSetup`, `certificate`, `other`) |
@@ -98,8 +99,39 @@ Rotas (`routes/v1/nfse-direct.routes.ts`, em `/v1/app/nfse/direct` na `nfseApi`)
 3. Recusada: `error` com `errorCode` e `refusal`; as OS ficam livres; o número fica com a DPS recusada (a próxima usa o seguinte).
 4. Sem resposta certa: continua `creating` e travada. Depois de 3 minutos, `reconcileDirectInvoice` pergunta `GET /dps/{id}`: existe → busca a nota e grava; não existe → reenvia a mesma DPS (mesmo número, `dhEmi` novo). A rotina diária `nfseDaily` confere todas as `creating`.
 
+### Leiaute 2027 (IBS/CBS) (etapa #575)
+
+A partir da competência 01/01/2027 a DPS do Simples e do MEI leva o grupo `infDPS/IBSCBS` (Anexo VI v1.04.01, linha 373: "Para optantes do Simples Nacional, os grupos IBSCBS só serão obrigatórios a partir de 2027"). Os dois XSD publicados (produção 20260209 e Produção Restrita 20261020) já têm o grupo, como opcional, então o leiaute 2027 é o pacote de cada ambiente mais o grupo:
+
+| Leiaute | Base | Diferença no `IBSCBS` |
+|---|---|---|
+| `v2027_20260209` | produção | `finNFSe` dentro do grupo, `cIndOp` obrigatório, `CST`/`cClassTrib` em `trib/gIBSCBS` |
+| `v2027_20261020` | Produção Restrita | `finNFSe` já no `infDPS`, `CST`/`cClassTrib` direto em `trib` |
+
+O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador), `CST` e `cClassTrib`. Valores não: a calculadora do governo calcula IBS e CBS e recusa código errado (E0858-E0860, E0901, E0958), o que volta como recusa normal.
+
+**De onde vêm os códigos.** `ibscbs-table.ts` é gerado do Anexo VIII (tabela de correlação item LC 116 × NBS × cIndOp × cClassTrib, versão 20261026) por `firebase/functions/scripts/nfse/build-ibscbs-table.py`. Regra:
+
+1. NBS do serviço do emitente → o primeiro `cIndOp` da linha e `cClassTrib` 000001 (tributação integral) quando a linha tem, senão o primeiro. Para oficina (14.01) dá 050101: serviço feito no estabelecimento; 050102 é "em outro lugar".
+2. Sem NBS: o par que a maioria das NBS do item dá (14.01 → 050101/000001 em 23 de 25).
+3. Serviço fora da tabela: 100301 (demais serviços) e 000001; o governo julga.
+4. `service.operationIndicator`/`service.taxClassification` na `DpsInput` ganham dos três (ainda não ligados ao cadastro do emitente).
+
+`CST` = 3 primeiros dígitos do `cClassTrib`.
+
+**Quando liga.** `layoutFor(ambiente, config, dataDeCompetência)`. Sem configuração: até 31/12/2026 o pacote do ambiente; de 01/01/2027 o `v2027_*` do mesmo pacote. `config/nfse.layoutByEnvironment` aceita, por ambiente, um id (vale sempre) ou uma agenda `[{ layout }, { from: 'AAAA-MM-DD', layout }]`; passo com id desconhecido ou data malformada é ignorado, e sem passo válido volta ao padrão.
+
+- Testar antes de janeiro: `config/nfse` com `environment: 'test'` e `layoutByEnvironment.test: 'v2027_20261020'` (o governo aceita IBSCBS desde a competência 01/01/2026, E0850).
+- Segurar em janeiro se der problema: `layoutByEnvironment.production: 'v20260209'`.
+
+**Pendências conhecidas (acompanhar no portal):**
+
+- `regApIBSCBSSN` (regime do IBS/CBS no Simples) e `cAtvSN` (atividade do Simples) estão na NT 009 §2.4 e no Anexo VI, mas em nenhum XSD publicado; mandar hoje quebra o schema. Quando sair o XSD, é um módulo novo (a tabela já traz `cAtvSN` por NBS).
+- No Anexo VI 1.04.01 o `indDest` sai do `IBSCBS` e vai para o `infDPS`, e aparecem `indZFMALC`, `indDoacao`, `condominios`, `gPgtoVinc`. Ainda não estão em XSD.
+- Falta a emissão de verdade no ambiente de testes (critério da issue #575): ver se `cIndOp` 100301/050101 passa sem endereço do tomador.
+
 ### Ainda não ligado
 
 `nfseApi` e `nfseDaily` estão em `src/nfse-api.ts` e **não** são exportadas pelo `index.ts`: o deploy precisa antes do keyring e da conta de serviço (passo manual acima). Depois do passo, acrescentar `export { nfseApi, nfseDaily } from './nfse-api';` ao `index.ts`. O PDF (DANFSe) é a etapa #564, a importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
 
-Testes: DPS dos dois regimes nos dois leiautes validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
+Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.

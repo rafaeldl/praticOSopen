@@ -4,7 +4,7 @@ import { plainText } from '../layouts/common';
 import type { DpsInput, DpsLayoutId } from '../layouts/types';
 import { leafOf, signXml, verifyXmlSignature } from '../signature';
 import { testPki } from './test-certificates';
-import { validateAgainstXsd } from './xsd';
+import { packageOf, validateAgainstXsd } from './xsd';
 
 // Synthetic data only.
 const base = (overrides: Partial<DpsInput> = {}): DpsInput => ({
@@ -63,17 +63,45 @@ describe('brasiliaTimestamps', () => {
 });
 
 describe('layoutFor', () => {
-  it('production uses 20260209 and tests 20261020, unless configured', () => {
-    expect(layoutFor('production').id).toBe('v20260209');
-    expect(layoutFor('test').id).toBe('v20261020');
-    expect(layoutFor('production', { production: 'v20261020' }).id).toBe('v20261020');
-    expect(layoutFor('production', { production: 'v9999' }).id).toBe('v20260209');
+  const dec = '2026-12-31';
+  const jan = '2027-01-01';
+
+  it('2026: production uses 20260209 and tests 20261020, unless configured', () => {
+    expect(layoutFor('production', null, dec).id).toBe('v20260209');
+    expect(layoutFor('test', null, dec).id).toBe('v20261020');
+    expect(layoutFor('production', { production: 'v20261020' }, dec).id).toBe('v20261020');
+    expect(layoutFor('production', { production: 'v9999' }, dec).id).toBe('v20260209');
+  });
+
+  it('from 01/01/2027 the same packages carry IBS/CBS', () => {
+    expect(layoutFor('production', null, jan).id).toBe('v2027_20260209');
+    expect(layoutFor('test', null, jan).id).toBe('v2027_20261020');
+    expect(layoutFor('test', null, '2027-06-15').id).toBe('v2027_20261020');
+  });
+
+  it('config turns IBS/CBS on earlier (to try it in Produção Restrita) or holds it back', () => {
+    expect(layoutFor('test', { test: 'v2027_20261020' }, dec).id).toBe('v2027_20261020');
+    expect(layoutFor('production', { production: 'v20260209' }, jan).id).toBe('v20260209');
+  });
+
+  it('a schedule picks the last step already in force, ignoring unknown or malformed steps', () => {
+    const schedule = [
+      { layout: 'v20260209' },
+      { from: '2026-12-15', layout: 'v2027_20260209' },
+      { from: '2026-12-20', layout: 'v9999' },
+      { from: '15/12/2026', layout: 'v20261020' },
+    ];
+    expect(layoutFor('production', { production: schedule }, '2026-12-14').id).toBe('v20260209');
+    expect(layoutFor('production', { production: schedule }, '2026-12-15').id).toBe('v2027_20260209');
+    expect(layoutFor('production', { production: schedule }, '2026-12-25').id).toBe('v2027_20260209');
+    // Nothing usable: back to the defaults.
+    expect(layoutFor('production', { production: [{ from: '2030-01-01', layout: 'v2027_20260209' }] }, dec).id).toBe('v20260209');
   });
 });
 
 describe.each(Object.keys(LAYOUTS) as DpsLayoutId[])('DPS %s', (layoutId) => {
   const layout = LAYOUTS[layoutId];
-  const environment = layoutId === 'v20260209' ? 'production' : 'test';
+  const environment = packageOf(layoutId) === 'v20260209' ? 'production' : 'test';
 
   async function signedAndValid(input: DpsInput) {
     const { id, xml } = buildDps(input, layout);

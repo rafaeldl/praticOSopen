@@ -3,17 +3,21 @@
  * client rule). Read on each call, so a change applies without a deploy.
  *
  *   environment          'production' (default) | 'test' (Produção Restrita)
- *   layoutByEnvironment  { production: 'v20260209', test: 'v20261020' }
+ *   layoutByEnvironment  per environment, a layout id or a schedule by competence
+ *                        date, e.g. { test: 'v2027_20261020' } or
+ *                        { production: [{ layout: 'v20260209' }, { from: '2027-01-01', layout: 'v2027_20260209' }] }.
+ *                        Without it: the package of the environment, with IBS/CBS from 2027-01-01.
  *   meiAnnualLimit       81000
  */
 
 import { db } from '../firestore.service';
-import type { DpsLayoutId, NfseEnvironment } from './layouts/types';
+import type { LayoutSetting } from './dps';
+import type { NfseEnvironment } from './layouts/types';
 import { DEFAULT_MEI_ANNUAL_LIMIT } from './totals';
 
 export interface NfseServerConfig {
   environment: NfseEnvironment;
-  layoutByEnvironment: Partial<Record<NfseEnvironment, DpsLayoutId>>;
+  layoutByEnvironment: Partial<Record<NfseEnvironment, LayoutSetting>>;
   meiAnnualLimit: number;
   /** verAplic, at most 20 characters. */
   appVersion: string;

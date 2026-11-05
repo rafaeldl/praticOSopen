@@ -1,29 +1,69 @@
 /**
  * DPS (Declaração de Prestação de Serviço): id, dates and the layout module
- * chosen per environment by `config/nfse.layoutByEnvironment` (spec §5.2), so
- * a new package is switched on without releasing the app.
+ * chosen per environment and competence date (spec §5.2, §5.9). The defaults
+ * switch to the IBS/CBS layout on 01/01/2027; `config/nfse.layoutByEnvironment`
+ * overrides them, so a new package is switched on without releasing the app.
  */
 
 import { escapeXml, el, plainText } from './layouts/common';
 import { NFSE_NAMESPACE, type DpsInput, type DpsLayout, type DpsLayoutId, type NfseEnvironment } from './layouts/types';
 import { layoutV20260209 } from './layouts/v20260209';
 import { layoutV20261020 } from './layouts/v20261020';
+import { layoutV2027Production, layoutV2027Test } from './layouts/v2027';
 
 export const LAYOUTS: Record<DpsLayoutId, DpsLayout> = {
   v20260209: layoutV20260209,
   v20261020: layoutV20261020,
+  v2027_20260209: layoutV2027Production,
+  v2027_20261020: layoutV2027Test,
 };
 
-/** What each environment applies today; config/nfse.layoutByEnvironment overrides it. */
-export const DEFAULT_LAYOUT_BY_ENVIRONMENT: Record<NfseEnvironment, DpsLayoutId> = {
-  production: 'v20260209',
-  test: 'v20261020',
+/** One step of a schedule: the layout applies from `from` (competence date, YYYY-MM-DD) on. */
+export interface LayoutStep {
+  from?: string | null;
+  layout: string;
+}
+
+/** A layout id (always) or a schedule by competence date. */
+export type LayoutSetting = string | LayoutStep[];
+
+/** IBS/CBS is required for Simples and MEI from this competence date (Anexo VI, row 373). */
+export const IBS_CBS_REQUIRED_FROM = '2027-01-01';
+
+export const DEFAULT_LAYOUT_BY_ENVIRONMENT: Record<NfseEnvironment, LayoutStep[]> = {
+  production: [{ layout: 'v20260209' }, { from: IBS_CBS_REQUIRED_FROM, layout: 'v2027_20260209' }],
+  test: [{ layout: 'v20261020' }, { from: IBS_CBS_REQUIRED_FROM, layout: 'v2027_20261020' }],
 };
 
-export function layoutFor(environment: NfseEnvironment, configured?: Partial<Record<NfseEnvironment, string>> | null): DpsLayout {
-  const id = configured?.[environment];
-  if (id && id in LAYOUTS) return LAYOUTS[id as DpsLayoutId];
-  return LAYOUTS[DEFAULT_LAYOUT_BY_ENVIRONMENT[environment]];
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** The known layout of the last step whose `from` is on or before the date; null when none fits. */
+function pick(steps: LayoutStep[], competenceDate: string): DpsLayout | null {
+  let chosen: DpsLayout | null = null;
+  let chosenFrom = '';
+  for (const step of steps) {
+    const from = step?.from ?? '';
+    if (!step || !(step.layout in LAYOUTS) || (from && !DATE.test(from))) continue;
+    if (from <= competenceDate && from >= chosenFrom) {
+      chosen = LAYOUTS[step.layout as DpsLayoutId];
+      chosenFrom = from;
+    }
+  }
+  return chosen;
+}
+
+export function layoutFor(
+  environment: NfseEnvironment,
+  configured?: Partial<Record<NfseEnvironment, LayoutSetting>> | null,
+  competenceDate: string = new Date().toISOString().slice(0, 10),
+): DpsLayout {
+  const setting = configured?.[environment];
+  if (typeof setting === 'string' && setting in LAYOUTS) return LAYOUTS[setting as DpsLayoutId];
+  if (Array.isArray(setting)) {
+    const chosen = pick(setting, competenceDate);
+    if (chosen) return chosen;
+  }
+  return pick(DEFAULT_LAYOUT_BY_ENVIRONMENT[environment], competenceDate)!;
 }
 
 /**

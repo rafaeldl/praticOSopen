@@ -2,13 +2,13 @@
  * What a DPS needs, independent of the layout package. Built by the issue
  * service from the emitter, the recipient and the orders; turned into XML by
  * one module per package (v20260209 in production, v20261020 in the test
- * environment, v2027 later). Spec §5.2.
+ * environment, and from 2027 the same packages with IBS/CBS). Spec §5.2, §5.9.
  */
 
 import type { FiscalAddress, FiscalRegime } from '../../../models/nfse-direct.types';
 
 export type NfseEnvironment = 'production' | 'test';
-export type DpsLayoutId = 'v20260209' | 'v20261020';
+export type DpsLayoutId = 'v20260209' | 'v20261020' | 'v2027_20260209' | 'v2027_20261020';
 
 export const NFSE_NAMESPACE = 'http://www.sped.fazenda.gov.br/nfse';
 
@@ -44,6 +44,9 @@ export interface DpsInput {
     description: string;
     /** Where the service was provided; defaults to the emitter's city. */
     cityCode?: string | null;
+    /** 2027 layout: cIndOp and cClassTrib, when not the ones the correlation table gives. */
+    operationIndicator?: string | null;
+    taxClassification?: string | null;
   };
   value: number;
   /** pTotTribSN of the Simples (approximate % of taxes). Ignored for MEI. */
