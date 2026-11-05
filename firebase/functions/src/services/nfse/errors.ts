@@ -18,7 +18,15 @@ export type NfseErrorCode =
   | 'EMITTER_NOT_FOUND'
   | 'EMITTER_ALREADY_EXISTS'
   | 'TERMS_NOT_ACCEPTED'
-  | 'KEY_VAULT_UNAVAILABLE';
+  | 'KEY_VAULT_UNAVAILABLE'
+  | 'EMITTER_NOT_READY'
+  | 'RECIPIENT_TAX_ID_REQUIRED'
+  | 'NFSE_REFUSED'
+  | 'INVOICE_NOT_FOUND'
+  | 'INVOICE_NOT_CANCELABLE'
+  | 'CANCEL_REFUSED'
+  | 'SEFIN_UNAVAILABLE'
+  | 'ORDER_HAS_INVOICE';
 
 const HTTP_STATUS: Record<NfseErrorCode, number> = {
   NFSE_DIRECT_NOT_ENABLED: 403,
@@ -36,29 +44,43 @@ const HTTP_STATUS: Record<NfseErrorCode, number> = {
   EMITTER_ALREADY_EXISTS: 409,
   TERMS_NOT_ACCEPTED: 400,
   KEY_VAULT_UNAVAILABLE: 503,
+  EMITTER_NOT_READY: 409,
+  RECIPIENT_TAX_ID_REQUIRED: 400,
+  NFSE_REFUSED: 422,
+  INVOICE_NOT_FOUND: 404,
+  INVOICE_NOT_CANCELABLE: 409,
+  CANCEL_REFUSED: 422,
+  SEFIN_UNAVAILABLE: 503,
+  ORDER_HAS_INVOICE: 409,
 };
 
 export class NfseServiceError extends Error {
   readonly code: NfseErrorCode;
   readonly httpStatus: number;
+  /** Extra data for the app (e.g. the refusal: group and message in pt/en/es). */
+  readonly details?: Record<string, unknown>;
 
-  constructor(code: NfseErrorCode, message: string) {
+  constructor(code: NfseErrorCode, message: string, details?: Record<string, unknown>) {
     super(message);
     this.name = 'NfseServiceError';
     this.code = code;
     this.httpStatus = HTTP_STATUS[code];
+    if (details) this.details = details;
   }
 }
 
 export interface NfseHttpError {
   status: number;
-  body: { success: false; error: { code: string; message: string } };
+  body: { success: false; error: { code: string; message: string; details?: Record<string, unknown> } };
 }
 
 /** Business errors keep their code; anything else is a 500 without details (never echoes the input). */
 export function toNfseHttpError(error: unknown, fallbackMessage: string): NfseHttpError {
   if (error instanceof NfseServiceError) {
-    return { status: error.httpStatus, body: { success: false, error: { code: error.code, message: error.message } } };
+    return {
+      status: error.httpStatus,
+      body: { success: false, error: { code: error.code, message: error.message, ...(error.details ? { details: error.details } : {}) } },
+    };
   }
   return { status: 500, body: { success: false, error: { code: 'INTERNAL_ERROR', message: fallbackMessage } } };
 }

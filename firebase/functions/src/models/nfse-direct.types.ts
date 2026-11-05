@@ -52,6 +52,8 @@ export interface FiscalEmitterService {
   name: string;
   /** ISS rate in percent, from the city's history for the service. */
   issRate: number;
+  /** Simples only: approximate % of taxes on the nota (pTotTribSN), from the accountant. */
+  simplesTaxRate?: number | null;
 }
 
 /** How the description of the notas is written, learned from the emitter's old notas. */
@@ -157,6 +159,10 @@ export interface NfseDirectInvoiceFields {
   pdfPath?: string | null;
   cancelReason?: NfseCancelReason | null;
   importBatchId?: string | null;
+  /** Why the government refused it, in plain words (group + pt/en/es), when status is 'error'. */
+  refusal?: { code: string | null; group: 'customerData' | 'emitterSetup' | 'certificate' | 'other'; message: Record<'pt' | 'en' | 'es', string>; govText: string | null } | null;
+  /** Last send without a clear answer (the reconcile waits 3 minutes from it). */
+  lastAttemptAt?: string | null;
 }
 
 /** Fields of companies/{cid}/settings/nfse added by the direct engine. */

@@ -796,6 +796,15 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "settings",
+      "fieldPath": "nfseDirectEnabled",
+      "ttl": false,
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
       "collectionGroup": "devices",
       "fieldPath": "nextMaintenanceDate",
       "ttl": false,
