@@ -93,8 +93,9 @@ const customerBody = {
   customData: customDataSchema,
   legalName: optionalText(200),
   fiscalAddress: fiscalAddressSchema,
-  invoiceEmail: z.string().trim().email().max(200).nullable().optional(),
-  invoiceRecipientId: z.string().min(1).max(128).nullable().optional(),
+  // No strict e-mail check: the app saves it as typed, and a stricter server would block every web edit of that customer.
+  invoiceEmail: z.string().trim().max(200).nullable().optional(),
+  invoiceRecipientId: z.string().min(1).max(128).regex(/^[^/]+$/).nullable().optional(),
   autoIssueInvoice: z.boolean().nullable().optional(),
 };
 const createSchema = z.object({ name: z.string().trim().min(1, 'Name is required').max(200), ...customerBody });

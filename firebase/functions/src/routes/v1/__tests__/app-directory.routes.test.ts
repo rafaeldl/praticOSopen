@@ -259,11 +259,16 @@ describe('POST e PATCH /customers', () => {
       { fiscalAddress: { postalCode: '8001' } },
       { fiscalAddress: { state: 'Paraná' } },
       { fiscalAddress: { other: 'x' } },
-      { invoiceEmail: 'sem-arroba' },
+      { invoiceRecipientId: 'loja/devices/x' },
       { autoIssueInvoice: 'sim' },
     ]) {
       expect((await call('admin', 'patch', `${CU}/loja`, body)).status).toBe(400);
     }
+  });
+
+  test('e-mail da nota como o app grava (sem checagem estrita) passa', async () => {
+    seed('companies/c1/customers/loja', { name: 'Loja', createdAt: T0 });
+    expect((await call('admin', 'patch', `${CU}/loja`, { invoiceEmail: 'fiscal@loja.com;outro@x.com' })).status).toBe(200);
   });
 
   test('gerente e técnico não cadastram nem editam', async () => {
