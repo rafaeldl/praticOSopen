@@ -154,7 +154,7 @@ run_tests() {
     mkdir -p "$SCREENSHOT_DIR"
 
     # Set environment variables
-    export DEMO_EMAIL="demo-pt@praticos.com.br"
+    export DEMO_EMAIL="demo-pt@praticos.app"
     export DEMO_PASSWORD="Demo@2024!"
 
     if [ -n "$FLOW" ]; then

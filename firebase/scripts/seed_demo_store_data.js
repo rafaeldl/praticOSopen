@@ -25,7 +25,7 @@ const PHOTOS_DIR = path.join(__dirname, 'demo_store_photos');
 
 const DEMO = {
   'pt-BR': {
-    email: 'demo-pt@praticos.com.br',
+    email: 'demo-pt@praticos.app',
     companyId: '9q6xWooL73LdmgeJJo7L',
     userName: 'Paulo Andrade',
     customers: [
@@ -52,7 +52,7 @@ const DEMO = {
     },
   },
   'en-US': {
-    email: 'demo-en@praticos.com.br',
+    email: 'demo-en@praticos.app',
     companyId: '2KYAWVNBILJOeT92FRU9',
     userName: 'Michael Johnson',
     customers: [
@@ -79,7 +79,7 @@ const DEMO = {
     },
   },
   'es-ES': {
-    email: 'demo-es@praticos.com.br',
+    email: 'demo-es@praticos.app',
     companyId: 'xL2GRPiVF8LAnz8524iu',
     userName: 'Carlos Rodríguez',
     customers: [

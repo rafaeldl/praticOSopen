@@ -4,7 +4,7 @@ import XCTest
 class RunnerUITests: XCTestCase {
     var app: XCUIApplication!
 
-    private let demoEmail = "demo@praticos.com.br"
+    private let demoEmail = "demo@praticos.app"
     private let demoPassword = "Demo@2024!"
 
     override func setUp() {

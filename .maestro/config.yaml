@@ -12,7 +12,7 @@ tags:
 
 # Environment variables
 env:
-  DEMO_EMAIL: demo-pt@praticos.com.br
+  DEMO_EMAIL: demo-pt@praticos.app
   DEMO_PASSWORD: Demo@2024!
 
 # Screenshot output directory
