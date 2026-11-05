@@ -5,6 +5,7 @@
 /// (`firebase/functions/src/services/nfse/import-proposal.ts`).
 library;
 
+import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/fiscal_emitter.dart';
 
 enum NfseImportStatus {
@@ -214,17 +215,21 @@ class NfseImportProposal {
   }
 }
 
-class NfseImportBatch {
-  const NfseImportBatch({
-    required this.id,
+class NfseImportBatch extends BaseAuditCompany {
+  NfseImportBatch({
+    required String id,
     required this.emitterId,
     required this.status,
     this.documentsRead = 0,
     this.proposal,
     this.expiresAt,
-  });
+  }) {
+    this.id = id;
+  }
 
-  final String id;
+  /// The batch id for the API calls (always set: it comes from the document).
+  String get batchId => id ?? '';
+
   final String emitterId;
   final NfseImportStatus status;
 
@@ -251,6 +256,14 @@ class NfseImportBatch {
       expiresAt: DateTime.tryParse(_str(json['expiresAt']) ?? ''),
     );
   }
+
+  /// Written only by the server; kept for [BaseAuditCompany].
+  @override
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'emitterId': emitterId,
+    'status': status.name,
+  };
 }
 
 /// An order offered in "Ligar a uma OS".

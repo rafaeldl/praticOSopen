@@ -1,24 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/nfse_import.dart';
+import 'package:praticos/repositories/tenant_repository.dart';
 
 /// Read-only access to `/companies/{companyId}/nfseImports` (issue #569).
 /// Written only by the `nfseApi`; the rules let the owner and admins read.
-class NfseImportRepository {
-  NfseImportRepository({FirebaseFirestore? firestore}) : _firestore = firestore;
+/// The writes of [TenantRepository] are never used here.
+class NfseImportRepository extends TenantRepository<NfseImportBatch?> {
+  static const String collectionName = 'nfseImports';
 
-  final FirebaseFirestore? _firestore;
+  NfseImportRepository() : super(collectionName);
 
-  FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
+  @override
+  NfseImportBatch fromJson(Map<String, dynamic> data) =>
+      NfseImportBatch.fromJson(data);
 
-  Stream<NfseImportBatch?> watch(String companyId, String batchId) => _db
-      .collection('companies')
-      .doc(companyId)
-      .collection('nfseImports')
-      .doc(batchId)
-      .snapshots()
-      .map(
-        (snap) => snap.exists
-            ? NfseImportBatch.fromJson(snap.data()!, id: snap.id)
-            : null,
-      );
+  @override
+  Map<String, dynamic> toJson(NfseImportBatch? batch) =>
+      throw UnsupportedError('nfseImports is written only by the server');
 }

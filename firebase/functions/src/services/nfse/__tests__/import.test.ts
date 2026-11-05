@@ -283,9 +283,9 @@ function seedCompany() {
   push('NFSE', nfseXml({ n: 11, value: 70, date: '2026-10-11', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }));
   push('EVENTO', cancelEventXml(11));
   // A nota received from a supplier (the emitter is the tomador).
-  push('NFSE', nfseXml({ n: 1, emitTaxId: '00000000000515', emitName: 'GUINCHO EXEMPLO', value: 300, date: '2026-10-12', recipient: { taxId: EMITTER_TAX_ID, name: 'OFICINA EXEMPLO LTDA' } }));
+  push('NFSE', nfseXml({ n: 1, issuerTaxId: '00000000000515', issuerName: 'GUINCHO EXEMPLO', value: 300, date: '2026-10-12', recipient: { taxId: EMITTER_TAX_ID, name: 'OFICINA EXEMPLO LTDA' } }));
   // Old notas of other issuers fill the first pages (more than 50 documents in all).
-  for (let i = 0; i < 45; i++) push('NFSE', nfseXml({ n: 500 + i, emitTaxId: '00000000000607', value: 1, date: '2026-10-13', recipient: { taxId: '00000000000698', name: 'TERCEIRO' } }));
+  for (let i = 0; i < 45; i++) push('NFSE', nfseXml({ n: 500 + i, issuerTaxId: '00000000000607', value: 1, date: '2026-10-13', recipient: { taxId: '00000000000698', name: 'TERCEIRO' } }));
 }
 
 beforeEach(() => {

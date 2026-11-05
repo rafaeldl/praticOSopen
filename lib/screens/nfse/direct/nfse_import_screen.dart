@@ -72,7 +72,7 @@ class _NfseImportScreenState extends State<NfseImportScreen> {
       var batch = await _api.startImport(widget.emitterId);
       if (mounted) setState(() => _batch = batch);
       while (mounted && batch.status == NfseImportStatus.reading) {
-        batch = await _api.continueImport(batch.id);
+        batch = await _api.continueImport(batch.batchId);
         if (mounted) setState(() => _batch = batch);
       }
     } catch (e) {
@@ -86,7 +86,7 @@ class _NfseImportScreenState extends State<NfseImportScreen> {
     setState(() => _applying = true);
     try {
       await _api.applyImport(
-        batch.id,
+        batch.batchId,
         sameCustomer: Map.of(_same),
         autoIssueCustomerIds: _autoIssue.toList(),
       );

@@ -118,7 +118,10 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
     if (batchId == null) return;
     final stream =
         widget.importBatchOf?.call(batchId) ??
-        NfseImportRepository().watch(Global.companyAggr?.id ?? '', batchId);
+        NfseImportRepository().streamSingle(
+          Global.companyAggr?.id ?? '',
+          batchId,
+        );
     _importSub = stream.listen(
       (batch) => setState(() => _import = batch),
       onError: (Object _) {},
@@ -226,7 +229,7 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
     );
     if (confirmed != true || !mounted) return;
     try {
-      await _api.undoImport(batch.id);
+      await _api.undoImport(batch.batchId);
       if (mounted) _toast(l10n.nfseImportUndone);
     } catch (e) {
       if (mounted) _toast(nfseDirectErrorText(l10n, e), error: true);
