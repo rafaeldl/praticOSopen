@@ -12022,6 +12022,24 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Lista de CNPJs com validade do certificado (ponto verde/âmbar/vermelho), ✓ no padrão. Web: /web/invoices/direct, lista e emitente lado a lado. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.issue
+  screen: lib/screens/nfse/direct/nfse_direct_issue_sheet.dart
+  route: null
+  action: "Emitir a nota direta pela OS"
+  kind: sheet
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error, loading, saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/fiscalEmitters", "companies/{id}/customers", "api:POST /v1/app/nfse/direct/invoices/preview", "api:POST /v1/app/nfse/direct/invoices"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: chargeOrder
+  note: "Emitir por (emitente marcado), Para (Nota fiscal para do cliente), dados que faltam com CEP, descrição editável e aviso do MEI. Web: DirectIssueDialog.vue. Atrás de settings/payments.nfseDirectEnabled (desligada)."
 - id: nfse.direct.auto-issue
   screen: lib/screens/nfse/direct/nfse_direct_setup_screen.dart
   route: null
