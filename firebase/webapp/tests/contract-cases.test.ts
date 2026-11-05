@@ -14,6 +14,7 @@ import {
   isOverdue,
 } from '../src/lib/rules/order-rules'
 import { periodOf } from '../src/lib/finance/period'
+import { isOpen } from '../src/lib/orders/model'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,5 +85,27 @@ describe('order-permissions', () => {
 describe('finance-period', () => {
   test.each(cases('finance-period.json'))('$id', (c) => {
     expect(periodOf(c.given.kind, c.given.offset, c.given.today)).toEqual(c.correct ?? c.expect)
+  })
+})
+
+// Clientes comes from the server (functions runs the whole case); here the Início of the web must
+// count "em aberto" and "atrasada" the same way, so the two screens say the same number.
+describe('customer-summary (Início do web)', () => {
+  test.each(cases('customer-summary.json'))('$id', (c) => {
+    const now = new Date(c.given.now)
+    const got: Record<string, { open: number; late: number }> = {}
+    for (const o of c.given.orders) {
+      if (!o.customer || !isOpen(o)) continue
+      const row = (got[o.customer] ??= { open: 0, late: 0 })
+      row.open++
+      if (isOverdue(o.status, o.dueDate, now)) row.late++
+    }
+    const want = c.correct ?? c.expect
+    const expected = Object.fromEntries(
+      Object.entries<{ open: number; late: number }>(want.customers)
+        .filter(([, v]) => v.open > 0)
+        .map(([id, v]) => [id, { open: v.open, late: v.late }]),
+    )
+    expect(got).toEqual(expected)
   })
 })

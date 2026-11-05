@@ -3,6 +3,9 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/menu_navigation/home_groups.dart';
+import 'package:praticos/utils/financial_summary.dart';
+import 'package:praticos/utils/open_orders.dart';
 
 /// Pure helpers of the customer screens (list, picker and detail).
 
@@ -83,15 +86,25 @@ double totalSpent(List<Order> orders) => orders
     .where((o) => o.status == 'done')
     .fold<double>(0, (sum, o) => sum + (o.total ?? 0));
 
-/// What the customer still owes ("Falta receber"): the open amount of every
-/// order that is not a quote, not canceled and not paid, in any month.
-double customerOwed(List<Order> orders) => orders
-    .where((o) =>
-        o.status != 'quote' && o.status != 'canceled' && o.payment != 'paid')
-    .fold<double>(0, (sum, o) {
-  final open = (o.total ?? 0) - (o.paidAmount ?? 0);
-  return open > 0 ? sum + open : sum;
-});
+/// What the customer still owes ("Falta receber"): the A receber rule of
+/// the Financeiro ([FinancialSummary.owesNow]), so the customer screen, the
+/// Clientes list and the Financeiro never disagree.
+double customerOwed(Iterable<Order?> orders) => orders
+    .whereType<Order>()
+    .where(FinancialSummary.owesNow)
+    .fold<double>(0, (sum, o) => sum + FinancialSummary.openAmount(o));
+
+/// [customerOwed] per customer id, for the Clientes list. Customers that owe
+/// nothing are absent.
+Map<String, double> owedByCustomerOf(Iterable<Order?> orders) {
+  final result = <String, double>{};
+  for (final o in orders.whereType<Order>().where(FinancialSummary.owesNow)) {
+    final id = o.customer?.id;
+    if (id == null) continue;
+    result[id] = (result[id] ?? 0) + FinancialSummary.openAmount(o);
+  }
+  return result;
+}
 
 /// Customer ids of the most recent [orders], distinct, newest first.
 List<String> recentCustomerIdsOf(List<Order> orders, {int max = 5}) {
@@ -119,22 +132,22 @@ class OpenOrdersSummary {
   final int late;
 }
 
-/// Groups the open orders by customer id. An order is late when its due date
-/// is before [now].
+/// Groups the open orders by customer id, with the rules of the Início:
+/// "em aberto" is [isOpenOrderStatus] (quotes count) and late is
+/// [HomeRules.isOverdue] (by day). Same numbers in Início, Clientes and web
+/// (docs/web-app/contract-cases/customer-summary.json).
 Map<String, OpenOrdersSummary> summarizeOpenOrders(
-  List<Order> orders,
+  Iterable<Order?> orders,
   DateTime now,
 ) {
   final open = <String, int>{};
   final late = <String, int>{};
-  for (final o in orders) {
+  for (final o in orders.whereType<Order>()) {
     final id = o.customer?.id;
     if (id == null) continue;
-    if (o.status != 'approved' && o.status != 'progress') continue;
+    if (!isOpenOrderStatus(o.status)) continue;
     open[id] = (open[id] ?? 0) + 1;
-    if (o.dueDate != null && o.dueDate!.isBefore(now)) {
-      late[id] = (late[id] ?? 0) + 1;
-    }
+    if (HomeRules.isOverdue(o, now)) late[id] = (late[id] ?? 0) + 1;
   }
   return {
     for (final id in open.keys)

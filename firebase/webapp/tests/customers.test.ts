@@ -140,10 +140,10 @@ describe('segment fields', () => {
 
 describe('customer list rules', () => {
   const people = [
-    { id: '1', name: 'João Silva', phone: '(48) 98408-7801', email: null, taxId: null, address: null, open: 2, late: 1 },
-    { id: '2', name: 'Ana', phone: '+5511900000001', email: 'ana@x.com', taxId: null, address: null, open: 1, late: 0 },
-    { id: '3', name: '3M Peças', phone: null, email: null, taxId: null, address: null, open: 0, late: 0 },
-    { id: '4', name: 'Álvaro', phone: null, email: null, taxId: null, address: null, open: 0, late: 0 },
+    { id: '1', name: 'João Silva', phone: '(48) 98408-7801', email: null, taxId: null, address: null, open: 2, late: 1, owed: null },
+    { id: '2', name: 'Ana', phone: '+5511900000001', email: 'ana@x.com', taxId: null, address: null, open: 1, late: 0, owed: null },
+    { id: '3', name: '3M Peças', phone: null, email: null, taxId: null, address: null, open: 0, late: 0, owed: null },
+    { id: '4', name: 'Álvaro', phone: null, email: null, taxId: null, address: null, open: 0, late: 0, owed: null },
   ]
   test('search ignores accents and compares phones by digits', () => {
     expect(customerMatches(people[0]!, 'joao')).toBe(true)

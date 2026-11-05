@@ -108,17 +108,23 @@ void main() {
   });
 
   test('summarizeOpenOrders counts open and late per customer', () {
-    final now = DateTime(2026, 10, 10);
+    final now = DateTime(2026, 10, 10, 15);
     final summary = summarizeOpenOrders([
       order('1', status: 'approved', dueDate: DateTime(2026, 10, 1)),
       order('1', status: 'progress', dueDate: DateTime(2026, 10, 20)),
       order('2', status: 'progress'),
       order('2', status: 'done'),
+      // Quotes are "em aberto" too, as in the Início (issue #588).
+      order('2', status: 'quote'),
+      // Due earlier today is not late yet: by day, as in the Início.
+      order('3', status: 'approved', dueDate: DateTime(2026, 10, 10, 9)),
     ], now);
     expect(summary['1']!.open, 2);
     expect(summary['1']!.late, 1);
-    expect(summary['2']!.open, 1);
+    expect(summary['2']!.open, 2);
     expect(summary['2']!.late, 0);
+    expect(summary['3']!.open, 1);
+    expect(summary['3']!.late, 0);
   });
 
   test('orderCountForDevice counts orders with the device, legacy included',
