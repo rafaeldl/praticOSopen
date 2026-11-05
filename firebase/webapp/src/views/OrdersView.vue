@@ -69,6 +69,8 @@ const filter = computed<ListFilter>(() => {
 })
 const board = computed(() => route.query.view === 'board')
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
+/** The search as it is in the URL (after the pause in typing): what the board asks the server. */
+const searchQuery = computed(() => (typeof route.query.q === 'string' ? route.query.q.trim() : ''))
 const rows = shallowRef<Order[]>([])
 const hasMore = ref(false)
 const loadingMore = ref(false)
@@ -397,14 +399,17 @@ watch(search, (text) => {
   typing = setTimeout(() => {
     setQuery({ q: text.trim() || undefined })
     if (text.trim()) announce(t('web.orders.count', { count: visible.value.length }))
-    // A number typed and not among the loaded rows: ask for it, so the exact one still comes first.
-    const number = Number(text.trim())
-    if (loader && Number.isInteger(number) && number > 0 && !rows.value.some((row) => row.number === number)) {
+    // The same server search as the board (number, customer, vehicle): an order of the
+    // filter that is not among the loaded pages still shows (lib/orders/search.ts).
+    if (!board.value && text.trim()) {
       const token = loadToken
-      void loader.byNumber(number).then((found) => {
-        const kept = found.filter(inFilter)
-        if (token === loadToken && kept.length) rows.value = mergeById(rows.value, kept, compare)
-      }).catch(() => {})
+      void import('@/lib/orders/search')
+        .then((module) => module.searchOrders(ctx, text))
+        .then((found) => {
+          const kept = found.filter(inFilter)
+          if (token === loadToken && kept.length) rows.value = mergeById(rows.value, kept, compare)
+        })
+        .catch((error) => console.warn('orders: search not asked', error))
     }
   }, 250)
 })
@@ -504,12 +509,15 @@ const columns = 5 + (showsMoney ? 1 : 0)
 </script>
 
 <template>
-  <header class="page-head">
+  <header class="page-head home-head">
     <div>
       <h1 class="page-title" tabindex="-1" data-page-title>{{ title }}</h1>
-      <!-- Always there on the list: the sentence arrives after the rows (what is left to receive) and must not push the screen down. -->
-      <p v-if="!board" class="page-sub page-answer" data-testid="summary">{{ summaryText }}</p>
+      <!-- Always there: the sentence arrives after the rows (what is left to receive) and must not push the screen down;
+           on the board it stays empty, so the toolbar and its search sit where they sit on the list. -->
+      <p class="page-sub page-answer" data-testid="summary" :aria-hidden="board || undefined">{{ board ? '' : summaryText }}</p>
     </div>
+    <!-- One row, the same place in Lista and Quadro: the search lives below, in the toolbar, and never moves these. -->
+    <div class="head-actions">
     <RouterLink class="btn btn--ghost bell" to="/notifications" data-testid="bell">
       <Bell :size="18" aria-hidden="true" />
       <span class="sr">{{ unread ? t('notificationsA11y', { count: unread }) : t('noticesTitle') }}</span>
@@ -529,13 +537,14 @@ const columns = 5 + (showsMoney ? 1 : 0)
     >
       {{ t('newOrderButton') }} <kbd>N</kbd>
     </button>
+    </div>
   </header>
 
-  <OrderBoard v-if="board" />
-  <template v-else>
-    <div class="toolbar">
-      <BatchActions v-if="selected.length" :orders="selectedOrders" @done="selected = []" />
-      <template v-else>
+  <div class="toolbar home-bar" :class="{ 'board-bar': board }">
+    <p v-if="board" class="board-hint sub">{{ t('web.board.hint') }}</p>
+    <BatchActions v-else-if="selected.length" :orders="selectedOrders" @done="selected = []" />
+    <template v-if="board || !selected.length">
+      <template v-if="!board">
         <div class="chips" role="group" :aria-label="t('web.orders.filters')">
           <button
             v-for="item in filters"
@@ -548,6 +557,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
             {{ FILTER_LABEL[item]() }}<span v-if="item === 'unpaid' && unpaid?.count" class="num"> {{ unpaid.count }}</span>
           </button>
         </div>
+      </template>
         <span class="spacer"></span>
         <label class="sr" for="orders-search">{{ searchHint }}</label>
         <input
@@ -560,9 +570,11 @@ const columns = 5 + (showsMoney ? 1 : 0)
           :style="{ '--search-w': `calc(${searchHint.length}ch + 2.4rem)` }"
           :placeholder="searchShort ? t('search') : searchHint"
         />
-      </template>
-    </div>
+    </template>
+  </div>
 
+  <OrderBoard v-if="board" :search="searchQuery" />
+  <template v-else>
     <div class="workspace" :class="{ 'has-panel': panelOpen }">
       <div class="list-pane">
         <p v-if="stale && state === 'ready'" class="offline" role="alert">
