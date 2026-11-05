@@ -91,7 +91,7 @@ nfseImportRoutes.post('/:batchId/apply', async (req: AuthenticatedRequest, res: 
   try {
     ensureRole(req, IMPORT_ROLES);
     const { answers } = parse(applySchema, req.body ?? {});
-    res.json({ success: true, data: await applyImport(req.userContext!.companyId, parse(id, req.params.batchId), answers, userOf(req)) });
+    res.json({ success: true, data: await applyImport(req.userContext!.companyId, parse(id, req.params.batchId), answers ?? {}, userOf(req)) });
   } catch (error) {
     fail(res, error, 'apply');
   }
