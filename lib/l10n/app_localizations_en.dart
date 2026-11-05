@@ -7047,4 +7047,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return '$customer\'s invoices go to the customer itself';
   }
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Done · $count unanswered',
+      one: 'Done · 1 unanswered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist done';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'To change an answer, reopen the checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'To change an answer, ask whoever manages the team to reopen the checklist.';
 }

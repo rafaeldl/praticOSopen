@@ -5,6 +5,8 @@ import 'dart:math' show max;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/screens/forms/form_question_sheet.dart'
+    show completedChecklistLabel;
 import 'package:praticos/screens/device_list_screen.dart'
     show kRemoveDeviceResult;
 import 'package:praticos/screens/order/assistant/ai_actions_plan.dart';
@@ -4528,7 +4530,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     ];
   }
 
-  /// "Checklist de entrada · 7 de 10 respondidas ›".
+  /// "Checklist de entrada · 7 de 10 respondidas ›"; a completed one says
+  /// "Completo" or "Concluído · 2 sem resposta".
   Widget _checklistRow(of_model.OrderForm form, bool canManage) {
     final l10n = context.l10n;
     final total = form.items.length;
@@ -4539,7 +4542,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       onDelete: () => _confirmDeleteChecklist(form),
       child: AppListRow(
         title: form.getLocalizedTitle(l10n.localeName),
-        subtitle: l10n.orderChecklistProgress(answered, total),
+        subtitle: form.status == of_model.FormStatus.completed
+            ? completedChecklistLabel(l10n, form)
+            : l10n.orderChecklistProgress(answered, total),
         onTap: () => _actions.openChecklist(context, _store, form),
       ),
     );

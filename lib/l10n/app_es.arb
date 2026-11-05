@@ -2793,5 +2793,9 @@
   "invoiceTaxIdTakenMessage": "Cada CPF o CNPJ queda en un solo cliente.",
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
-  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente"
+  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "checklistStatusDoneMissing": "{count, plural, =1{Concluido · 1 sin respuesta} other{Concluido · {count} sin respuesta}}",
+  "checklistDoneTitle": "Checklist concluido",
+  "checklistDoneReopenBody": "Para cambiar una respuesta, reabra el checklist.",
+  "checklistDoneAskReopenBody": "Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist."
 }

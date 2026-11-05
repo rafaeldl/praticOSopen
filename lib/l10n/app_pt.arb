@@ -3188,5 +3188,10 @@
   "invoiceRecipientSet": "As notas de {customer} vão para {recipient}",
   "@invoiceRecipientSet": {"placeholders": {"customer": {"type": "String"}, "recipient": {"type": "String"}}},
   "invoiceRecipientCleared": "As notas de {customer} vão para ele mesmo",
-  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}}
+  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}},
+  "checklistStatusDoneMissing": "{count, plural, =1{Concluído · 1 sem resposta} other{Concluído · {count} sem resposta}}",
+  "@checklistStatusDoneMissing": {"placeholders": {"count": {"type": "int"}}},
+  "checklistDoneTitle": "Checklist concluído",
+  "checklistDoneReopenBody": "Para mudar uma resposta, reabra o checklist.",
+  "checklistDoneAskReopenBody": "Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist."
 }

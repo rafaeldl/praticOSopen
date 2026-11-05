@@ -11483,6 +11483,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
+
+  /// No description provided for @checklistStatusDoneMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Concluído · 1 sem resposta} other{Concluído · {count} sem resposta}}'**
+  String checklistStatusDoneMissing(int count);
+
+  /// No description provided for @checklistDoneTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist concluído'**
+  String get checklistDoneTitle;
+
+  /// No description provided for @checklistDoneReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, reabra o checklist.'**
+  String get checklistDoneReopenBody;
+
+  /// No description provided for @checklistDoneAskReopenBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.'**
+  String get checklistDoneAskReopenBody;
 }
 
 class _AppLocalizationsDelegate

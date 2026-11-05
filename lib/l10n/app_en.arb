@@ -2805,5 +2805,9 @@
   "invoiceTaxIdTakenMessage": "Each CPF or CNPJ belongs to one customer only.",
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
-  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself"
+  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
+  "checklistStatusDoneMissing": "{count, plural, =1{Done · 1 unanswered} other{Done · {count} unanswered}}",
+  "checklistDoneTitle": "Checklist done",
+  "checklistDoneReopenBody": "To change an answer, reopen the checklist.",
+  "checklistDoneAskReopenBody": "To change an answer, ask whoever manages the team to reopen the checklist."
 }
