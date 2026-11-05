@@ -22,6 +22,10 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
   await expect(page.getByRole('checkbox', { name: 'Carros' })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Motos' })).toBeChecked()
   await page.getByRole('checkbox', { name: 'Motos' }).uncheck()
+  // Names stored as a map by locale or as that map in JSON show as text, never raw.
+  for (const name of ['Lava Car', 'Funilaria e Pintura']) await page.getByRole('checkbox', { name }).uncheck()
+  await expect(page.locator('main')).not.toContainText('[object Object]')
+  await expect(page.locator('main')).not.toContainText('"pt-BR"')
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   await expect(heading(page, 'Para o cliente')).toBeVisible()
