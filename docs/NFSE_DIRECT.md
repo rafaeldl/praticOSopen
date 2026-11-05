@@ -167,7 +167,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 **Quando liga.** `layoutFor(ambiente, config, dataDeCompetência)`. Sem configuração: até 31/12/2026 o pacote do ambiente; de 01/01/2027 o `v2027_*` do mesmo pacote. `config/nfse.layoutByEnvironment` aceita, por ambiente, um id (vale sempre) ou uma agenda `[{ layout }, { from: 'AAAA-MM-DD', layout }]`; passo com id desconhecido ou data malformada é ignorado, e sem passo válido volta ao padrão.
 
 - Testar antes de janeiro: `config/nfse` com `environment: 'test'` e `layoutByEnvironment.test: 'v2027_20261020'` (o governo aceita IBSCBS desde a competência 01/01/2026, E0850).
-- Segurar em janeiro se der problema: `layoutByEnvironment.production: 'v20260209'`.
+- Segurar em janeiro se der problema: `layoutByEnvironment.production: 'v20260209'`. Um id fixo vale para sempre e passa por cima da troca de 2027: tirar assim que resolver, senão o Simples e o MEI ficam sem IBSCBS e o governo recusa.
 
 **Pendências conhecidas (acompanhar no portal):**
 
