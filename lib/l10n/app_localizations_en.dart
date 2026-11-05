@@ -6681,7 +6681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Choose the file and type the password to send.';
+      'Choose the file, type the password and accept the terms to send.';
 
   @override
   String get nfseDirectTerms =>
@@ -7265,6 +7265,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nfseLinkErrorAlreadyLinked =>
       'This nota is already linked to an order.';
+
+  @override
+  String get nfseDirectAcceptTerms =>
+      'I have read and accept the certificate terms';
 
   @override
   String get nfseDirectErrorTooManyAttempts =>

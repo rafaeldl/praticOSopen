@@ -39,6 +39,14 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 - `PUT /:emitterId/certificate`: troca (o CNPJ tem de ser o do emitente).
 - `DELETE /:emitterId/certificate`: apaga de verdade.
 
+### Termo do certificado (issue #572)
+
+- Página própria no site: `praticos.app/termo-certificado.html` (pt), `-en.html` e `-es.html`. Texto em `firebase/hosting/src/_data/legal.json` (`certificateTerms`), aprovado pelo Rafael em 2026-11-05 sem revisão de advogado (fica para depois).
+- Versão `2026-11-05`, igual a `NFSE_CERTIFICATE_TERMS_VERSION` (servidor), `nfseCertificateTermsVersion` (app) e `TERMS_VERSION` (web). Mudou o texto: subir a versão nos quatro lugares; o servidor recusa versão velha (`TERMS_NOT_ACCEPTED`).
+- Aceite explícito no envio: interruptor no app, caixa de marcar no web (`CertificateDrawer.vue`). Sem aceite o envio não sai.
+- Promessas do termo que dependem de gente: desfazer um apagamento em até 24 h é feito pelo suporte (restaurar a versão da chave no Cloud KMS); não há botão.
+- Política de privacidade: seção "Certificado digital e notas fiscais", Sistema Nacional da NFS-e em Compartilhamento e o prazo do certificado em Retenção.
+
 ### Regras
 
 1. Senha e .pfx nunca são gravados nem logados; os logs levam só o código do erro.
@@ -227,7 +235,7 @@ Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
 | Onde | O quê |
 |---|---|
 | App: `lib/screens/nfse/direct/nfse_direct_setup_screen.dart` | "Nota fiscal": frase no topo, "Seus CNPJs" (regime, certificado com ponto colorido, ✓ no padrão), "+" no topo e, sem CNPJ, o botão azul "Adicionar CNPJ"; "Emitir sozinha quando concluir a OS" abre a tela de escolher (Nunca / Para os clientes escolhidos / Para todas as OS) |
-| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho) e termo. ✓ azul só com arquivo e senha; recusa do servidor em frase simples dentro do sheet |
+| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho), link "Ler o termo" e interruptor "Li e aceito o termo do certificado". ✓ azul só com arquivo, senha e aceite; recusa do servidor em frase simples dentro do sheet |
 | App: `fiscal_emitter_screen.dart` e `fiscal_emitter_editors.dart` | Emitente: CNPJ, regime, "Notas este ano · este mês", teto do MEI (R$ 81 mil), linhas que abrem o editor (serviço, inscrição municipal, estilo da descrição, certificado). "…": Usar como padrão, Trocar certificado, Apagar certificado (vermelho, confirma; o emitente e as notas ficam) |
 | App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
 | Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |

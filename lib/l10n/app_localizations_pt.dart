@@ -6689,7 +6689,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Escolha o arquivo e digite a senha para enviar.';
+      'Escolha o arquivo, digite a senha e aceite o termo para enviar.';
 
   @override
   String get nfseDirectTerms =>
@@ -7270,6 +7270,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseLinkErrorAlreadyLinked => 'Esta nota já está ligada a uma OS.';
+
+  @override
+  String get nfseDirectAcceptTerms => 'Li e aceito o termo do certificado';
 
   @override
   String get nfseDirectErrorTooManyAttempts =>

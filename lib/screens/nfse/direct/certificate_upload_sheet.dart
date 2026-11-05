@@ -36,11 +36,20 @@ Future<PickedCertificate?> pickCertificateFile() async {
   return PickedCertificate(file.name, bytes);
 }
 
-/// Where the certificate terms live.
-const nfseCertificateTermsUrl = 'https://praticos.app/privacy.html';
+/// Where the certificate terms live (version [nfseCertificateTermsVersion]).
+const nfseCertificateTermsUrl = 'https://praticos.app/termo-certificado.html';
+
+/// The terms page in the app's language (pt, en or es).
+String nfseCertificateTermsUrlFor(String languageCode) =>
+    switch (languageCode) {
+      'en' => 'https://praticos.app/termo-certificado-en.html',
+      'es' => 'https://praticos.app/termo-certificado-es.html',
+      _ => nfseCertificateTermsUrl,
+    };
 
 /// "Adicionar CNPJ" / "Trocar certificado" (spec §4.2): the A1 file, its
-/// password and the terms. The "✓" turns blue with a file and a password;
+/// password and the terms. The "✓" turns blue with a file, a password and
+/// the terms accepted (switch "Li e aceito o termo");
 /// the server checks the certificate and answers with a plain sentence when
 /// something is wrong. The password goes only in the request: it is never
 /// saved on the device. Pops with true when the server took it.
@@ -92,10 +101,11 @@ class _CertificateUploadSheetState extends State<CertificateUploadSheet> {
   PickedCertificate? _file;
   String? _error;
   bool _busy = false;
+  bool _accepted = false;
 
   bool get _replace => widget.emitterId != null;
 
-  bool get _ready => _file != null && _password.text.isNotEmpty;
+  bool get _ready => _file != null && _password.text.isNotEmpty && _accepted;
 
   @override
   void dispose() {
@@ -123,7 +133,7 @@ class _CertificateUploadSheetState extends State<CertificateUploadSheet> {
 
   Future<void> _send() async {
     final file = _file;
-    if (_busy || file == null || _password.text.isEmpty) return;
+    if (_busy || file == null || _password.text.isEmpty || !_accepted) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -206,6 +216,52 @@ class _CertificateUploadSheetState extends State<CertificateUploadSheet> {
             ),
           ],
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.nfseDirectTerms,
+                style: AppTypography.callout.copyWith(color: secondary),
+              ),
+              TextLink(
+                key: const Key('certificateTermsLink'),
+                label: l10n.nfseDirectTermsLink,
+                onPressed: () => launchUrl(
+                  Uri.parse(
+                    nfseCertificateTermsUrlFor(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  ),
+                  mode: LaunchMode.externalApplication,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        FormCard(
+          children: [
+            FormRow(
+              key: const Key('certificateAcceptTerms'),
+              title: l10n.nfseDirectAcceptTerms,
+              showChevron: false,
+              onTap: _busy
+                  ? null
+                  : () => setState(() => _accepted = !_accepted),
+              trailing: CupertinoSwitch(
+                key: const Key('certificateAcceptTermsSwitch'),
+                value: _accepted,
+                onChanged: _busy
+                    ? null
+                    : (value) => setState(() => _accepted = value),
+              ),
+            ),
+          ],
+        ),
         if (_error != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -223,28 +279,6 @@ class _CertificateUploadSheetState extends State<CertificateUploadSheet> {
               ),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.pageMargin,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.nfseDirectTerms,
-                style: AppTypography.callout.copyWith(color: secondary),
-              ),
-              TextLink(
-                key: const Key('certificateTermsLink'),
-                label: l10n.nfseDirectTermsLink,
-                onPressed: () => launchUrl(
-                  Uri.parse(nfseCertificateTermsUrl),
-                  mode: LaunchMode.externalApplication,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }

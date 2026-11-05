@@ -1,5 +1,7 @@
 module.exports = {
-  preset: 'ts-jest',
+  // Transpile only: type checking the tests took ~6x longer (CI went past 8 min).
+  // Types are checked by `npm run typecheck` (tsconfig.test.json) instead.
+  transform: { '^.+\\.ts$': ['ts-jest', { isolatedModules: true }] },
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
