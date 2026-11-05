@@ -2805,5 +2805,8 @@
   "invoiceTaxIdTakenMessage": "Each CPF or CNPJ belongs to one customer only.",
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
-  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself"
+  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
+  "sharePreview": "See what the customer sees",
+  "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
+  "sharePreviewFailed": "Couldn't open the preview. Try again."
 }

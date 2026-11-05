@@ -7054,4 +7054,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'As notas de $customer vão para ele mesmo';
   }
+
+  @override
+  String get sharePreview => 'Ver como o cliente vê';
+
+  @override
+  String get sharePreviewFailed =>
+      'Não deu para abrir a prévia. Tente de novo.';
 }

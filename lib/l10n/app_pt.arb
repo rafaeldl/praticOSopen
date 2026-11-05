@@ -3188,5 +3188,8 @@
   "invoiceRecipientSet": "As notas de {customer} vão para {recipient}",
   "@invoiceRecipientSet": {"placeholders": {"customer": {"type": "String"}, "recipient": {"type": "String"}}},
   "invoiceRecipientCleared": "As notas de {customer} vão para ele mesmo",
-  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}}
+  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}},
+  "sharePreview": "Ver como o cliente vê",
+  "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
+  "sharePreviewFailed": "Não deu para abrir a prévia. Tente de novo."
 }

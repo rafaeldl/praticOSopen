@@ -7047,4 +7047,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return '$customer\'s invoices go to the customer itself';
   }
+
+  @override
+  String get sharePreview => 'See what the customer sees';
+
+  @override
+  String get sharePreviewFailed => 'Couldn\'t open the preview. Try again.';
 }

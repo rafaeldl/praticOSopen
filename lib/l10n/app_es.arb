@@ -2793,5 +2793,8 @@
   "invoiceTaxIdTakenMessage": "Cada CPF o CNPJ queda en un solo cliente.",
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
-  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente"
+  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "sharePreview": "Ver como lo ve el cliente",
+  "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
+  "sharePreviewFailed": "No se pudo abrir la vista previa. Inténtalo de nuevo."
 }

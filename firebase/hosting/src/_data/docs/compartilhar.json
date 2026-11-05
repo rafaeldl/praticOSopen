@@ -214,6 +214,10 @@
             "answer": "Não. Ele abre o link no navegador do celular ou do computador e já vê a OS."
           },
           {
+            "question": "Dá para ver a página antes de mandar?",
+            "answer": "Sim. Em <strong>Mandar para o cliente</strong>, toque em <strong>Ver como o cliente vê</strong>. A página abre como prévia: nada é enviado, a abertura não conta como visita do cliente e aprovar, recusar, avaliar e comentar ficam desligados."
+          },
+          {
             "question": "Dá para saber se o cliente abriu o link?",
             "answer": "Ainda não aparece no app. Você fica sabendo quando ele aprova, recusa, comenta ou avalia."
           },
@@ -452,6 +456,10 @@
             "answer": "No. They open the link in the browser on their phone or computer and see the order right away."
           },
           {
+            "question": "Can I see the page before sending it?",
+            "answer": "Yes. In <strong>Send to the customer</strong>, tap <strong>See what the customer sees</strong>. The page opens as a preview: nothing is sent, it does not count as the customer's visit, and approve, decline, rate and comment are off."
+          },
+          {
             "question": "Can I tell whether the customer opened the link?",
             "answer": "Not in the app yet. You find out when they approve, decline, comment or rate."
           },
@@ -688,6 +696,10 @@
           {
             "question": "¿El cliente necesita crear cuenta?",
             "answer": "No. Abre el enlace en el navegador del celular o de la computadora y ya ve la OS."
+          },
+          {
+            "question": "¿Puedo ver la página antes de enviarla?",
+            "answer": "Sí. En <strong>Enviar al cliente</strong>, toca <strong>Ver como lo ve el cliente</strong>. La página abre como vista previa: no se envía nada, no cuenta como visita del cliente y aprobar, rechazar, calificar y comentar quedan desactivados."
           },
           {
             "question": "¿Puedo saber si el cliente abrió el enlace?",

@@ -7065,4 +7065,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'Las facturas de $customer van al propio cliente';
   }
+
+  @override
+  String get sharePreview => 'Ver como lo ve el cliente';
+
+  @override
+  String get sharePreviewFailed =>
+      'No se pudo abrir la vista previa. Inténtalo de nuevo.';
 }

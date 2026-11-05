@@ -11483,6 +11483,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
+
+  /// Opens the customer link as a preview: nothing counted or sent (#588)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver como o cliente vê'**
+  String get sharePreview;
+
+  /// No description provided for @sharePreviewFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a prévia. Tente de novo.'**
+  String get sharePreviewFailed;
 }
 
 class _AppLocalizationsDelegate
