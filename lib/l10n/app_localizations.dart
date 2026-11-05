@@ -11483,6 +11483,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
+
+  /// Reading of a device at this visit (odometer, hour meter), label from the segment
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {value}'**
+  String deviceReadingLine(String label, String value);
 }
 
 class _AppLocalizationsDelegate

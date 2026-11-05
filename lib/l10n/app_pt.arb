@@ -3188,5 +3188,13 @@
   "invoiceRecipientSet": "As notas de {customer} vão para {recipient}",
   "@invoiceRecipientSet": {"placeholders": {"customer": {"type": "String"}, "recipient": {"type": "String"}}},
   "invoiceRecipientCleared": "As notas de {customer} vão para ele mesmo",
-  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}}
+  "@invoiceRecipientCleared": {"placeholders": {"customer": {"type": "String"}}},
+  "deviceReadingLine": "{label}: {value}",
+  "@deviceReadingLine": {
+    "description": "Reading of a device at this visit (odometer, hour meter), label from the segment",
+    "placeholders": {
+      "label": {"type": "String"},
+      "value": {"type": "String"}
+    }
+  }
 }

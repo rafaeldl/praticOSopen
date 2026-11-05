@@ -2793,5 +2793,6 @@
   "invoiceTaxIdTakenMessage": "Cada CPF o CNPJ queda en un solo cliente.",
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
-  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente"
+  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "deviceReadingLine": "{label}: {value}"
 }

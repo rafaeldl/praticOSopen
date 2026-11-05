@@ -1,3 +1,4 @@
+import 'package:praticos/utils/device_reading.dart';
 import 'package:flutter/cupertino.dart';
 import '../models/custom_field.dart';
 import '../services/segment_config_service.dart';
@@ -246,6 +247,10 @@ class SegmentConfigProvider extends ChangeNotifier {
 
   /// Obtém configuração de um campo específico
   CustomField? getField(String key) => _service.getField(key);
+
+  /// The device field each visit records (odometer, hour meter…), or null
+  /// when the segment has no reading. See `lib/utils/device_reading.dart`.
+  CustomField? get readingField => readingFieldOf(fieldsFor('device'));
 
   /// Obtém máscaras para um campo
   List<String> getMasks(String fieldKey) => _service.getMasks(fieldKey);

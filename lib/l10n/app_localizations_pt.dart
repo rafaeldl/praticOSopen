@@ -7054,4 +7054,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'As notas de $customer vão para ele mesmo';
   }
+
+  @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
 }

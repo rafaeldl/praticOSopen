@@ -23,6 +23,7 @@ import { money, orderShort } from '@/lib/orders/text'
 import { fieldTitle, groupBySection, namespaceFields, readCustom, type FormField } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { can, session } from '@/lib/session'
+import { deviceReading, formatReading, readingFieldOf } from '@/lib/device-reading'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import DeviceForm from './DeviceForm.vue'
@@ -62,9 +63,15 @@ const statusText = computed(() => {
   if (!management || !status) return ''
   return { active: t('deviceStatusActive'), maintenance: t('deviceStatusMaintenance'), inactive: t('deviceStatusInactive'), decommissioned: t('deviceStatusDecommissioned') }[status] ?? ''
 })
+const deviceFields = computed(() => namespaceFields('device', ['device.category', 'device.brand', 'device.model', 'device.serial']))
+// The last reading (98.000 km) next to the serial, and the one of each order in the history (docs/DEVICE_READING.md).
+const reading = computed(() => readingFieldOf(deviceFields.value))
+const readingText = computed(() => (reading.value ? formatReading(reading.value, deviceReading(device.value?.customData, reading.value), country.value) : ''))
+const orderReading = (order: { deviceReadings?: Record<string, number> }) =>
+  reading.value && device.value ? formatReading(reading.value, order.deviceReadings?.[device.value.id], country.value) : ''
 const customFields = computed(() => {
   const data = device.value?.customData
-  const fields = namespaceFields('device', ['device.category', 'device.brand', 'device.model', 'device.serial'])
+  const fields = deviceFields.value.filter((field) => field.key !== reading.value?.key)
   return groupBySection(fields, locale.value, t('web.customers.general'))
     .map((group) => ({ title: group.title, fields: group.fields.map((field) => ({ field, text: customText(field, readCustom(data, field)) })).filter((item) => item.text) }))
     .filter((group) => group.fields.length)
@@ -211,8 +218,9 @@ onMounted(load)
         <h2 class="od-h"><span class="od-name">{{ title }}</span></h2>
         <p class="od-device-line" data-testid="device-owner">
           <template v-if="device.serial"><span class="num">{{ device.serial }}</span></template>
+          <template v-if="readingText">{{ device.serial ? ' · ' : '' }}<span class="num" data-testid="device-reading">{{ readingText }}</span></template>
           <template v-if="owner">
-            {{ device.serial ? ' · ' : '' }}{{ t('web.devices.of') }}
+            {{ device.serial || readingText ? ' · ' : '' }}{{ t('web.devices.of') }}
             <RouterLink class="link" :to="{ path: '/customers', query: { customer: owner.id } }">{{ owner.name }}</RouterLink>
           </template>
         </p>
@@ -279,7 +287,7 @@ onMounted(load)
             <RouterLink class="row-btn" :to="{ path: '/', query: { order: order.id } }"><span class="num">{{ orderShort() }} {{ order.number }}</span></RouterLink>
             <OrderStatus :status="order.status" />
             <span v-if="order.total !== undefined" class="num dir-money">{{ money(order.total) }}</span>
-            <span class="sub">{{ order.customer?.name }}<template v-if="order.createdAt"> · {{ formatDate(order.createdAt, country) }}</template></span>
+            <span class="sub">{{ order.customer?.name }}<template v-if="order.createdAt"> · {{ formatDate(order.createdAt, country) }}</template><template v-if="orderReading(order)"> · <span class="num" data-testid="order-reading">{{ orderReading(order) }}</span></template></span>
           </li>
         </ul>
         <p v-else class="muted">{{ t('web.customers.noOrders') }}</p>

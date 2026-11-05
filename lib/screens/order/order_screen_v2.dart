@@ -48,6 +48,8 @@ import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/devices/next_maintenance_offer.dart';
+import 'package:praticos/screens/order/device_reading_sheet.dart';
+import 'package:praticos/utils/device_reading.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_hold_sheet.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
@@ -3646,7 +3648,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     key: const ValueKey('order_header_customer'),
                   ),
                 ),
-                for (final device in _store.devices)
+                for (final device in _store.devices) ...[
                   _tappable(
                     key: ValueKey('order_header_device_${device.id}'),
                     onTap: canEdit ? () => _changeDevice(device) : null,
@@ -3661,6 +3663,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                       ),
                     ),
                   ),
+                  ?_buildReading(device, config, canEdit: canEdit),
+                ],
               ],
             ),
           if (canEdit && (customer == null || _store.devices.isEmpty))
@@ -3756,6 +3760,82 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         ],
       ),
     );
+  }
+
+  /// The device's reading at this visit ("Quilometragem: 98.000 km"),
+  /// right under the device; "+ Quilometragem" while an open order has
+  /// none. Null when the segment has no reading (electronics, phones…).
+  Widget? _buildReading(
+    DeviceAggr device,
+    SegmentConfigProvider config, {
+    required bool canEdit,
+  }) {
+    final field = config.readingField;
+    final id = device.id;
+    if (field == null || id == null) return null;
+    final value = parseReading(_store.deviceReadings?[id]);
+    final label = field.getLabel(config.locale);
+    if (value == null) {
+      const open = ['quote', 'approved', 'progress'];
+      if (!canEdit || !open.contains(_store.status ?? 'quote')) return null;
+      return Transform.translate(
+        offset: const Offset(-AppSpacing.pageMargin, 0),
+        child: SizedBox(
+          width: double.infinity,
+          child: _link(
+            _store.devices.length < 2 ? label : '$label · ${_deviceName(device)}',
+            key: ValueKey('order_reading_add_$id'),
+            icon: CupertinoIcons.add,
+            onTap: () => _editReading(device, field, config),
+          ),
+        ),
+      );
+    }
+    return _tappable(
+      key: ValueKey('order_reading_$id'),
+      onTap: canEdit ? () => _editReading(device, field, config) : null,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            context.l10n.deviceReadingLine(
+              label,
+              formatReading(field, value, _format) ?? '$value',
+            ),
+            style: AppTypography.callout.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _deviceName(DeviceAggr device) {
+    final name = device.name?.trim() ?? '';
+    return name.isNotEmpty ? name : (device.serial ?? '');
+  }
+
+  Future<void> _editReading(
+    DeviceAggr device,
+    CustomField field,
+    SegmentConfigProvider config,
+  ) async {
+    final id = device.id!;
+    final edit = await DeviceReadingSheet.show(
+      context,
+      field: field,
+      locale: config.locale,
+      deviceName: _store.devices.length < 2 ? null : _deviceName(device),
+      initial: parseReading(_store.deviceReadings?[id]),
+    );
+    if (edit == null || !mounted) return;
+    setState(() => _store.setDeviceReading(id, edit.value));
+    final value = edit.value;
+    if (value != null && _permissions.canRegisterDevices()) {
+      _actions.recordDeviceReading(id, field, value);
+    }
   }
 
   /// Why the order is stopped, since when, and the note.

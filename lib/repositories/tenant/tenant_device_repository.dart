@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/utils/device_reading.dart';
 
 /// Runs every write and waits for all. [isMissing] failures (a device deleted
 /// meanwhile) are skipped; any other one is thrown after all have finished.
@@ -134,5 +136,34 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
       ),
       isMissing: (e) => e is FirebaseException && e.code == 'not-found',
     );
+  }
+
+  /// Records [value] as the device's last reading in `customData.[fieldName]`
+  /// (the segment's reading field), unless the device already has a bigger
+  /// one ([readingAdvances]). Touches only that field. A device deleted
+  /// meanwhile is skipped. Offline it resolves only when the connection is
+  /// back: do not wait for it on screen.
+  Future<void> setReading(
+    String companyId,
+    String deviceId, {
+    required CustomField field,
+    required int value,
+    UserAggr? actor,
+  }) async {
+    final ref = collectionFor(companyId).doc(deviceId);
+    final snap = await ref.get();
+    if (!snap.exists) return;
+    final data = snap.data();
+    final customData = data?['customData'];
+    final current = deviceReading(
+      customData is Map ? Map<String, dynamic>.from(customData) : null,
+      field,
+    );
+    if (!readingAdvances(current, value) || current == value) return;
+    await ref.update({
+      'customData.${field.fieldName}': value,
+      'updatedAt': DateTime.now().toIso8601String(),
+      if (actor != null) 'updatedBy': actor.toJson(),
+    });
   }
 }

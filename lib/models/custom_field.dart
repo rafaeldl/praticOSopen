@@ -32,6 +32,11 @@ class CustomField {
   final String? section;
   final int? order;
 
+  /// The device's reading (odometer, hour meter, page counter…): the segment
+  /// marks which device field each visit records. See
+  /// `docs/DEVICE_READING.md` and `lib/utils/device_reading.dart`.
+  final bool reading;
+
   const CustomField({
     required this.key,
     required this.type,
@@ -54,6 +59,7 @@ class CustomField {
     this.textCapitalization,
     this.section,
     this.order,
+    this.reading = false,
   });
 
   /// Cria a partir de JSON do Firestore
@@ -92,6 +98,7 @@ class CustomField {
       textCapitalization: json['textCapitalization'],
       section: json['section'],
       order: json['order'],
+      reading: json['reading'] == true,
     );
   }
 
@@ -119,6 +126,7 @@ class CustomField {
       if (textCapitalization != null) 'textCapitalization': textCapitalization,
       if (section != null) 'section': section,
       if (order != null) 'order': order,
+      if (reading) 'reading': true,
     };
   }
 

@@ -191,6 +191,10 @@ abstract class _OrderStore with Store {
   @observable
   ObservableList<DeviceAggr> devices = ObservableList<DeviceAggr>();
 
+  /// [Order.deviceReadings]: each device's reading at this visit.
+  @observable
+  Map<String, num>? deviceReadings;
+
   /// Transient state for multi-device picker flow
   String? pendingDeviceId;
   bool pendingDuplicateAll = false;
@@ -505,6 +509,7 @@ abstract class _OrderStore with Store {
     customer = order.customer;
     devices = order.effectiveDevices.asObservable();
     device = devices.isNotEmpty ? devices.first : null;
+    deviceReadings = order.deviceReadings;
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
@@ -650,6 +655,24 @@ abstract class _OrderStore with Store {
     products = order!.products?.asObservable() ?? ObservableList();
 
     updateTotal();
+    createItem();
+  }
+
+  /// Reading of device [deviceId] at this visit (odometer, hour meter…);
+  /// null removes it. Saves the order.
+  void setDeviceReading(String deviceId, int? value) {
+    final current = order;
+    if (current == null) return;
+    final readings = Map<String, num>.of(current.deviceReadings ?? const {});
+    if (value == null) {
+      readings.remove(deviceId);
+    } else {
+      readings[deviceId] = value;
+    }
+    runInAction(() {
+      current.deviceReadings = readings.isEmpty ? null : readings;
+      deviceReadings = current.deviceReadings;
+    });
     createItem();
   }
 

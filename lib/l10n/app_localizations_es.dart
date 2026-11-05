@@ -7065,4 +7065,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'Las facturas de $customer van al propio cliente';
   }
+
+  @override
+  String deviceReadingLine(String label, String value) {
+    return '$label: $value';
+  }
 }

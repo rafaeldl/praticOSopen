@@ -9,7 +9,10 @@ import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
+import 'package:praticos/utils/device_reading.dart' show readingAdvances;
 import 'package:praticos/models/device.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
@@ -151,6 +154,25 @@ class OrderScreenActions {
       arguments: {'customer': customer},
     );
     return saved is Customer ? saved : null;
+  }
+
+  /// A reading typed in the order becomes the device's last reading (unless
+  /// the device has a bigger one, see [readingAdvances]). Fire and forget: a
+  /// failure keeps the order's reading, and the device form edits it by hand.
+  void recordDeviceReading(String deviceId, CustomField field, int value) {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return;
+    TenantDeviceRepository()
+        .setReading(
+          companyId,
+          deviceId,
+          field: field,
+          value: value,
+          actor: Global.userAggr,
+        )
+        .catchError((Object e) {
+          debugPrint('Could not record the device reading: $e');
+        });
   }
 
   /// "+ Placa" / "+ Modelo" on the order: the device's own form, pushed.
