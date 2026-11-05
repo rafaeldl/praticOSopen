@@ -28,7 +28,7 @@ vi.mock('firebase/firestore/lite', () => {
     sum: (field: string) => ({ kind: 'sum', field }),
     getDocs: vi.fn(async () => {
       const docs = pages.shift() ?? []
-      return { docs: docs.map((raw) => ({ id: String(raw.id), data: () => raw })) }
+      return { docs: docs.map((raw) => ({ id: String(raw.docId ?? raw.id), data: () => raw })) }
     }),
     getAggregate: vi.fn(async (_q: unknown, spec: Record<string, unknown>) => {
       calls.push(['getAggregate', spec])
@@ -160,6 +160,13 @@ describe('Firestore pages (who sees values)', () => {
     aggregate = { count: 42 }
     expect(await filterCounts(admin, 'open', NOW)).toEqual({ count: 42, late: 42 })
     expect(calls.filter((call) => call[0] === 'getAggregate')).toHaveLength(2)
+    // A plain count carries the page's sort, so the page's index serves it (production asks for one).
+    expect(orders()).toEqual([
+      ['createdAt', 'desc'],
+      ['__name__', 'desc'],
+      ['dueDate', 'asc'],
+      ['__name__', 'asc'],
+    ])
     calls.length = 0
     aggregate = { count: 33, s0: 9900, s1: 3300.5 }
     expect(await filterCounts(consultant, 'unpaid', NOW)).toEqual({ count: 33, amount: 6599.5 })
@@ -169,9 +176,22 @@ describe('Firestore pages (who sees values)', () => {
       ['payment', '==', 'unpaid'],
     ])
     expect(calls.find((call) => call[0] === 'getAggregate')?.[1]).toMatchObject({ s0: { field: 'total' }, s1: { field: 'paidAmount' } })
-    // No orderBy, no limit: the whole filter is counted.
+    // A sum cannot carry a sort (no index has fields after __name__): it has its own
+    // index with the summed fields (firestore.indexes.json). No limit either.
     expect(calls.some((call) => call[0] === 'orderBy' || call[0] === 'limit')).toBe(false)
     expect(await filterCounts(admin, 'done', NOW)).toBeNull()
+  })
+
+  test('the next page starts after the document id, even when the order stores an id field of its own', async () => {
+    // Old orders carry `id: null` (or another id) inside the document: the cursor must still be the doc id.
+    const rest = Array.from({ length: FIRST_PAGE - 1 }, (_, i) => ({ id: `r${i}`, status: 'approved', createdAt: '2026-01-03' }))
+    pages = [[...rest, { docId: 'doc-1', id: null, status: 'approved', createdAt: '2026-01-02' }], []]
+    const loader = createFilterLoader(admin, 'open', NOW)
+    const first = await loader.first()
+    expect(first.rows.map((row) => row.id)).toContain('doc-1')
+    await loader.more()
+    const after = calls.find((call) => call[0] === 'startAfter')
+    expect(after?.slice(1)).toEqual(['2026-01-02', 'doc-1'])
   })
 
   test('countOrders with no sums', async () => {

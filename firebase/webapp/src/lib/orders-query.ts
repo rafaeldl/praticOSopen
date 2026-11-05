@@ -93,7 +93,9 @@ export function filterQueries(
 }
 
 type Snapshot = { docs: { id: string; data: () => unknown }[] }
-const toRows = (snapshot: Snapshot) => snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as object) }) as OrderRow)
+// The document id last: old orders store an `id` field of their own (often null), which
+// must not replace it (the next page's cursor is this id).
+const toRows = (snapshot: Snapshot) => snapshot.docs.map((doc) => ({ ...(doc.data() as object), id: doc.id }) as OrderRow)
 
 /** A field of a row by its path ("onHold.since"). */
 export function valueAt(row: Record<string, unknown>, path: string): unknown {
@@ -107,8 +109,8 @@ function cursorValue(query: OrdersQuery, row: OrderRow): unknown {
 
 type Module = typeof import('firebase/firestore') | typeof import('firebase/firestore/lite')
 
-/** Same query on either build: the REST one for pages, the full one for live rows. */
-function buildQuery<M extends Module>(firestore: M, db: unknown, query: OrdersQuery, size: number, after?: OrderRow) {
+/** Same query on either build: the REST one for pages, the full one for live rows. No size: the whole filter (a count). */
+function buildQuery<M extends Module>(firestore: M, db: unknown, query: OrdersQuery, size?: number, after?: OrderRow) {
   const { collection, documentId, limit, orderBy, query: build, startAfter } = firestore as typeof import('firebase/firestore/lite')
   const order = query.order ?? { field: 'createdAt', dir: 'desc' }
   // Id as tie-break: two orders with the same date are neither repeated nor skipped between pages.
@@ -119,7 +121,7 @@ function buildQuery<M extends Module>(firestore: M, db: unknown, query: OrdersQu
     orderBy(order.field, order.dir),
     orderBy(documentId(), order.dir),
     ...cursor,
-    limit(size),
+    ...(size ? [limit(size)] : []),
   )
 }
 
@@ -136,14 +138,21 @@ function filtersOf<M extends Module>(firestore: M, query: OrdersQuery) {
 
 /**
  * How many orders the query has, and the sum of number fields, counted by the
- * server (Firestore aggregation: the same filters and indexes as the pages).
+ * server (Firestore aggregation). A plain count is the page's query without the
+ * limit, sort included, so the page's composite index serves it. A sum cannot
+ * carry the sort (Firestore has no index with fields after __name__): it has an
+ * index of its own with the summed fields (Sem receber: payment, status,
+ * paidAmount, total in firestore.indexes.json), which the emulator never asks for.
  */
 export async function countOrders(query: OrdersQuery, sums: string[] = []): Promise<{ count: number; sums: Record<string, number> }> {
   const [db, firestore] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-  const { collection, count, getAggregate, query: build, sum } = firestore
+  const { count, getAggregate, sum } = firestore
   const spec: Record<string, ReturnType<typeof count> | ReturnType<typeof sum>> = { count: count() }
   sums.forEach((field, index) => (spec[`s${index}`] = sum(field)))
-  const snapshot = await getAggregate(build(collection(db, 'companies', query.companyId, 'orders'), ...filtersOf(firestore, query)), spec)
+  const counted = sums.length
+    ? firestore.query(firestore.collection(db, 'companies', query.companyId, 'orders'), ...filtersOf(firestore, query))
+    : buildQuery(firestore, db, query)
+  const snapshot = await getAggregate(counted, spec)
   const data = snapshot.data() as Record<string, number | null | undefined>
   return { count: Number(data.count ?? 0), sums: Object.fromEntries(sums.map((field, index) => [field, Number(data[`s${index}`] ?? 0)])) }
 }
