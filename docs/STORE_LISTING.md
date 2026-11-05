@@ -77,7 +77,7 @@ Nunca usar dados de clientes reais nem a conta pessoal de ninguém.
 
 ## Revisão da Apple
 
-- Conta: `demo-pt@praticos.com.br` (a mesma dos prints), no plano **Free**,
+- Conta: `demo-pt@praticos.app` (a mesma dos prints), no plano **Free**,
   para o revisor bater no limite e chegar ao IAP.
 - `notes.txt` explica a regra 3.1.1, onde fica o paywall e o que a conta tem.
 

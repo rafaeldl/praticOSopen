@@ -100,7 +100,7 @@ open .maestro/screenshots/
 Realiza login com a conta demo configurada.
 
 **Conta Demo:**
-- Email: `demo-pt@praticos.com.br`
+- Email: `demo-pt@praticos.app`
 - Senha: `Demo@2024!`
 
 ### 02_plans_screen.yaml

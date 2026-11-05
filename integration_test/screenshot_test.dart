@@ -396,9 +396,9 @@ Future<void> _performLogout(WidgetTester tester) async {
 }
 
 String _emailFor(String locale) => switch (locale) {
-  'en-US' => 'demo-en@praticos.com.br',
-  'es-ES' => 'demo-es@praticos.com.br',
-  _ => 'demo-pt@praticos.com.br',
+  'en-US' => 'demo-en@praticos.app',
+  'es-ES' => 'demo-es@praticos.app',
+  _ => 'demo-pt@praticos.app',
 };
 
 Future<void> _performLogin(WidgetTester tester, String locale) async {

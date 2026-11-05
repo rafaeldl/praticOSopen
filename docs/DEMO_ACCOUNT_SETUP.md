@@ -5,7 +5,7 @@ Este documento descreve como configurar a conta demo para geração de screensho
 ## Credenciais da Conta Demo
 
 ```
-Email: demo@praticos.com.br
+Email: demo@praticos.app
 Senha: Demo@2024!
 ```
 
@@ -26,7 +26,7 @@ No Firebase Console:
 1. Vá em **Authentication** > **Users**
 2. Clique em **Add user**
 3. Preencha:
-   - Email: `demo@praticos.com.br`
+   - Email: `demo@praticos.app`
    - Password: `Demo@2024!`
 4. Clique em **Add user**
 
@@ -36,7 +36,7 @@ No Firebase Console:
 
 O app possui um `DemoDataSeeder` (`lib/utils/demo_data_seeder.dart`) que:
 
-1. Detecta quando o email `demo@praticos.com.br` faz login
+1. Detecta quando o email `demo@praticos.app` faz login
 2. Verifica se já existem dados para a conta demo
 3. Se não existirem, cria automaticamente:
    - Empresa: "Assistência TechFix (Demo)"
@@ -68,7 +68,7 @@ Ao submeter o app, forneça as credenciais de demo na seção **App Review Infor
 | Campo | Valor |
 |-------|-------|
 | Sign-in required | Yes |
-| Demo Account Email | demo@praticos.com.br |
+| Demo Account Email | demo@praticos.app |
 | Demo Account Password | Demo@2024! |
 | Notes | Clique em "Entrar com email" na tela de login para acessar com as credenciais demo |
 
@@ -78,7 +78,7 @@ Adicione ao arquivo `ios/fastlane/Appfile`:
 
 ```ruby
 # Credenciais para App Review
-ENV["FASTLANE_APPLE_DEMO_ACCOUNT_EMAIL"] = "demo@praticos.com.br"
+ENV["FASTLANE_APPLE_DEMO_ACCOUNT_EMAIL"] = "demo@praticos.app"
 ENV["FASTLANE_APPLE_DEMO_ACCOUNT_PASSWORD"] = "Demo@2024!"
 ```
 
@@ -86,7 +86,7 @@ ENV["FASTLANE_APPLE_DEMO_ACCOUNT_PASSWORD"] = "Demo@2024!"
 
 Crie o arquivo `ios/fastlane/metadata/review_information/demo_user.txt`:
 ```
-demo@praticos.com.br
+demo@praticos.app
 ```
 
 Crie o arquivo `ios/fastlane/metadata/review_information/demo_password.txt`:

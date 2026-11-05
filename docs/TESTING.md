@@ -241,7 +241,7 @@ String _findTextByLocale(String locale, String key) {
 ## Conta de Teste (Demo)
 
 **Credenciais:**
-- Email: `demo@praticos.com.br`
+- Email: `demo@praticos.app`
 - Senha: `Demo@2024!`
 - Segmento: **Mecânica** (mesmo para todos idiomas)
 

@@ -4,18 +4,20 @@ Este documento contém as informações necessárias para criar as contas demo e
 
 ## Contas Criadas no Firebase Auth
 
+As contas usavam `@praticos.com.br`, domínio que não é nosso. Em 2026-11-05 passaram para `@praticos.app` (mesmo uid, dados e senha) com `firebase/scripts/rename_demo_accounts_email.js`.
+
 | Email | Password | Locale | Status |
 |-------|----------|--------|--------|
-| demo-pt@praticos.com.br | Demo@2024! | pt-BR | ✅ Criado |
-| demo-en@praticos.com.br | Demo@2024! | en-US | ✅ Criado |
-| demo-es@praticos.com.br | Demo@2024! | es-ES | ✅ Criado |
+| demo-pt@praticos.app | Demo@2024! | pt-BR | ✅ Criado |
+| demo-en@praticos.app | Demo@2024! | en-US | ✅ Criado |
+| demo-es@praticos.app | Demo@2024! | es-ES | ✅ Criado |
 
 ---
 
 ## 🇧🇷 Português (pt-BR)
 
 ### Conta
-- **Email**: demo-pt@praticos.com.br
+- **Email**: demo-pt@praticos.app
 - **Senha**: Demo@2024!
 - **Nome do Usuário**: Rafael Oliveira
 
@@ -45,7 +47,7 @@ Ao finalizar o onboarding, escolher **"Sim, criar dados de exemplo"** para gerar
 ## 🇺🇸 English (en-US)
 
 ### Account
-- **Email**: demo-en@praticos.com.br
+- **Email**: demo-en@praticos.app
 - **Password**: Demo@2024!
 - **User Name**: Michael Johnson
 
@@ -75,7 +77,7 @@ When finishing onboarding, choose **"Yes, create sample data"** to generate:
 ## 🇪🇸 Español (es-ES)
 
 ### Cuenta
-- **Email**: demo-es@praticos.com.br
+- **Email**: demo-es@praticos.app
 - **Contraseña**: Demo@2024!
 - **Nombre del Usuario**: Carlos Rodríguez
 
@@ -171,13 +173,13 @@ O arquivo `integration_test/screenshot_test.dart` usa automaticamente a conta co
 String _getEmailByLocale(String locale) {
   switch (locale) {
     case 'pt-BR':
-      return 'demo-pt@praticos.com.br';
+      return 'demo-pt@praticos.app';
     case 'en-US':
-      return 'demo-en@praticos.com.br';
+      return 'demo-en@praticos.app';
     case 'es-ES':
-      return 'demo-es@praticos.com.br';
+      return 'demo-es@praticos.app';
     default:
-      return 'demo@praticos.com.br';
+      return 'demo@praticos.app';
   }
 }
 ```

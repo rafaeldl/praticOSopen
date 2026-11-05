@@ -86,7 +86,7 @@ flutter run -d emulator-5554
 ### 3.2 Cenarios de Teste Manual
 
 #### Cenario 1: Visualizar Tela de Planos
-1. Fazer login com conta demo: `demo-pt@praticos.com.br` / `Demo@2024!`
+1. Fazer login com conta demo: `demo-pt@praticos.app` / `Demo@2024!`
 2. Ir em Menu > Configuracoes
 3. Tocar em "Planos e Assinatura"
 4. **Verificar:**
