@@ -40,7 +40,7 @@ const summary = (runs: Record<string, number>[]) =>
   Object.fromEntries(STEPS.map((step) => [step, Math.round(p75(runs.map((run) => run[step] as number)))]))
 
 test('lista visível em Fast 4G + CPU 4x', async ({ browser }) => {
-  test.skip(!!process.env.PERF_COLD, 'medida fria roda à parte')
+  test.skip(!!process.env.PERF_COLD || !!process.env.PERF_LOGIN, 'medida fria roda à parte')
   const setup = await browser.newContext()
   // Perf runs without the Functions emulator (10 thousand triggers would skew the
   // numbers), so the access list answer is the remembered "yes" every allowed

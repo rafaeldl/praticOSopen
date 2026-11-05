@@ -77,44 +77,41 @@ test('esqueceu a senha manda o e-mail pelo Auth', async ({ page }) => {
   await expect(page.getByText('E-mail enviado. Verifique sua caixa de entrada para redefinir sua senha.')).toBeVisible()
 })
 
-/** The Auth emulator's sign-in page. Its form appears after its own script runs, so retry the click. */
-async function signInOnEmulatorPopup(popup: Page, email: string) {
-  await popup.waitForLoadState('domcontentloaded')
-  const add = popup.getByText('Add new account')
-  const field = popup.getByLabel('Email')
+/** The Auth emulator's sign-in page, in the same tab. Its form appears after its own script runs, so retry the click. */
+async function signInOnEmulatorPage(tab: Page, email: string) {
+  await tab.waitForLoadState('domcontentloaded')
+  const add = tab.getByText('Add new account')
+  const field = tab.getByLabel('Email')
   await expect(async () => {
     if (await add.isVisible()) await add.click()
     await expect(field).toBeVisible({ timeout: 1000 })
   }).toPass({ timeout: 20_000 })
   await field.fill(email)
-  await popup.getByRole('button', { name: /Sign in with/ }).click()
+  await tab.getByRole('button', { name: /Sign in with/ }).click()
 }
 
-test('Google pelo popup do emulador cria a conta e cai na lista de acesso', async ({ page }) => {
+test('Google na mesma página pelo emulador cria a conta e cai na lista de acesso', async ({ page }) => {
   test.setTimeout(60_000)
   await page.goto('login')
-  const popupPromise = page.waitForEvent('popup')
   await page.getByRole('button', { name: 'Continuar com Google' }).click()
-  await signInOnEmulatorPopup(await popupPromise, 'novo-google@praticos.test')
+  await signInOnEmulatorPage(page, 'novo-google@praticos.test')
   await expect(page.getByRole('heading', { level: 1, name: /ainda não foi liberado/ })).toBeVisible()
   await expect(page.locator('.shell')).toHaveCount(0)
 })
 
-test('Apple pelo popup do emulador', async ({ page }) => {
+test('Apple na mesma página pelo emulador', async ({ page }) => {
   test.setTimeout(60_000)
   await page.goto('login')
-  const popupPromise = page.waitForEvent('popup')
   await page.getByRole('button', { name: 'Continuar com Apple' }).click()
-  await signInOnEmulatorPopup(await popupPromise, 'novo-apple@praticos.test')
+  await signInOnEmulatorPage(page, 'novo-apple@praticos.test')
   await expect(page.getByRole('heading', { level: 1, name: /ainda não foi liberado/ })).toBeVisible()
 })
 
-test('fechar o popup não é erro', async ({ page }) => {
+test('voltar do Google sem entrar não é erro', async ({ page }) => {
   await page.goto('login')
-  const popupPromise = page.waitForEvent('popup')
   await page.getByRole('button', { name: 'Continuar com Google' }).click()
-  await (await popupPromise).close()
-  // Firebase notices the closed window by polling, a few seconds later.
+  await expect(page).not.toHaveURL(/\/app\/login/, { timeout: 20_000 })
+  await page.goBack()
   await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeEnabled({ timeout: 20_000 })
   await expect(page.getByRole('alert')).toHaveCount(0)
 })

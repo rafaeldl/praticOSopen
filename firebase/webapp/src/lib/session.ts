@@ -8,8 +8,9 @@ import { createApi, type ApiOptions } from './api'
 import { authClient, cacheState, clearFirestoreCache, firestoreClient, firestoreLite } from './firebase'
 import { mark } from './marks'
 import { hasAnyPermission, roleHasPermission, type Permission } from './permissions'
+import { isSignupBlocked } from './auth-errors'
 import { readStorage, writeStorage } from './storage'
-import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, type WebAccess } from './web-access'
+import { fetchWebAccess, rememberAccess, rememberedAccess, shouldRecheck, warmUpApi, type WebAccess } from './web-access'
 
 export interface CompanyEntry {
   id: string
@@ -191,8 +192,19 @@ function clear(): void {
  * A remembered "yes" lets the start go on and is confirmed in the background;
  * otherwise the start waits for the answer.
  */
+const accessAsks = new Map<string, Promise<void>>()
+
 async function checkWebAccess(uid: string): Promise<void> {
-  const ask = async () => {
+  // The login screen and onAuthStateChanged both hydrate the same sign-in: one question for both.
+  const ask = () => {
+    let asking = accessAsks.get(uid)
+    if (!asking) {
+      asking = askAccess().finally(() => accessAsks.delete(uid))
+      accessAsks.set(uid, asking)
+    }
+    return asking
+  }
+  const askAccess = async () => {
     try {
       const allowed = await fetchWebAccess((path) => api(path, { noCompany: true }))
       rememberAccess(uid, allowed)
@@ -219,7 +231,20 @@ function loggedIn(user: User): void {
   if (session.uid === user.uid) logLogin(methodOf(user), session.companies.length > 0)
 }
 
-async function hydrate(user: User, forceRefresh = false): Promise<void> {
+const hydrating = new Map<string, Promise<void>>()
+
+/** The login screen and onAuthStateChanged load the same sign-in at once: one load for both. */
+function hydrate(user: User, forceRefresh = false): Promise<void> {
+  if (forceRefresh) return load(user, true)
+  let loading = hydrating.get(user.uid)
+  if (!loading) {
+    loading = load(user).finally(() => hydrating.delete(user.uid))
+    hydrating.set(user.uid, loading)
+  }
+  return loading
+}
+
+async function load(user: User, forceRefresh = false): Promise<void> {
   session.failed = false
   // Another account: nothing of the previous one (access answer, cached data) carries over.
   if (session.uid !== user.uid) {
@@ -370,19 +395,21 @@ export function startSession(): Promise<void> {
 export type ProviderKind = 'google' | 'apple'
 const REDIRECT_FLAG = 'praticos.signInRedirect'
 
-/** Popups that cannot open fall back to a full-page redirect. */
-export function shouldRedirect(code: string | undefined): boolean {
-  return (
-    code === 'auth/popup-blocked' ||
-    code === 'auth/operation-not-supported-in-this-environment' ||
-    code === 'auth/web-storage-unsupported'
-  )
+/** What the login screen says after a redirect that came back with an error. */
+export function redirectErrorOf(kind: string, error: unknown): string {
+  return isSignupBlocked(error) ? SIGNUP_BLOCKED : kind
 }
+export const SIGNUP_BLOCKED = 'signupBlocked'
 
-/** Google or Apple. Resolves 'cancelled' when the person closed the window. */
-export async function signInWithProvider(kind: ProviderKind): Promise<'done' | 'cancelled' | 'redirecting'> {
+/**
+ * Google or Apple, on the same page: the browser goes to /__/auth/handler on
+ * praticos.app (the authDomain is the app's own domain, so Safari keeps the
+ * storage first-party) and comes back to the login, where startSession
+ * finishes it. No popup to block or lose behind the window.
+ */
+export async function signInWithProvider(kind: ProviderKind): Promise<'redirecting'> {
   const [auth, firebaseAuth] = await Promise.all([authClient(), import('firebase/auth')])
-  const { GoogleAuthProvider, OAuthProvider, browserPopupRedirectResolver, signInWithPopup, signInWithRedirect } = firebaseAuth
+  const { GoogleAuthProvider, OAuthProvider, browserPopupRedirectResolver, signInWithRedirect } = firebaseAuth
   let provider: InstanceType<typeof GoogleAuthProvider> | InstanceType<typeof OAuthProvider>
   if (kind === 'google') {
     provider = new GoogleAuthProvider()
@@ -392,19 +419,9 @@ export async function signInWithProvider(kind: ProviderKind): Promise<'done' | '
     provider.addScope('email')
     provider.addScope('name')
   }
-  try {
-    const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver)
-    await hydrate(user)
-    loggedIn(user)
-    return 'done'
-  } catch (error) {
-    const code = (error as { code?: string }).code
-    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'cancelled'
-    if (!shouldRedirect(code)) throw error
-    writeStorage(REDIRECT_FLAG, kind)
-    await signInWithRedirect(auth, provider, browserPopupRedirectResolver)
-    return 'redirecting'
-  }
+  writeStorage(REDIRECT_FLAG, kind)
+  await signInWithRedirect(auth, provider, browserPopupRedirectResolver)
+  return 'redirecting'
 }
 
 let redirectedIn = false
@@ -413,6 +430,7 @@ let redirectedIn = false
 async function finishRedirect(): Promise<void> {
   const kind = readStorage(REDIRECT_FLAG)
   if (!kind) return
+  mark('login:back')
   writeStorage(REDIRECT_FLAG, '')
   try {
     const [auth, { getRedirectResult, browserPopupRedirectResolver }] = await Promise.all([
@@ -420,9 +438,10 @@ async function finishRedirect(): Promise<void> {
       import('firebase/auth'),
     ])
     redirectedIn = !!(await getRedirectResult(auth, browserPopupRedirectResolver))
+    mark('login:auth')
   } catch (error) {
     console.warn('session: redirect sign-in failed', error)
-    session.signInError = kind
+    session.signInError = redirectErrorOf(kind, error)
   }
 }
 
@@ -436,11 +455,18 @@ export async function sendPasswordReset(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email)
 }
 
+/** Wakes the API before the sign-in needs it (lib/web-access.ts). */
+export function warmUpSignIn(): void {
+  warmUpApi(import.meta.env.VITE_API_BASE_URL ?? '')
+}
+
 export async function signInWithEmail(email: string, password: string): Promise<void> {
   const [auth, { signInWithEmailAndPassword }] = await Promise.all([authClient(), import('firebase/auth')])
   const { user } = await signInWithEmailAndPassword(auth, email, password)
+  mark('login:auth')
   // onAuthStateChanged also fires; awaiting here lets the login screen navigate on loaded data.
   await hydrate(user)
+  mark('login:hydrated')
   loggedIn(user)
 }
 

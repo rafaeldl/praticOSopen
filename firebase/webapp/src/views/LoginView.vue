@@ -2,14 +2,15 @@
 // Same doors as the app (lib/screens/login.dart): Google, Apple and "Já tenho
 // conta com e-mail" (password, with "Esqueceu a senha?"). New accounts come
 // from Google or Apple, as in the app.
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
 import { t, type MessageKey } from '@/i18n'
 import { logEmailLoginOpened } from '@/lib/analytics'
 import { emailErrorKey, isSignupBlocked, resetEmailErrorKey } from '@/lib/auth-errors'
-import { sendPasswordReset, session, signInWithEmail, signInWithProvider, type ProviderKind } from '@/lib/session'
+import { SIGNUP_BLOCKED, sendPasswordReset, session, signInWithEmail, signInWithProvider, warmUpSignIn, type ProviderKind } from '@/lib/session'
+import { mark } from '@/lib/marks'
 import { showToast } from '@/lib/toast'
 
 const route = useRoute()
@@ -41,6 +42,7 @@ function nextPath(): string {
 }
 
 async function enter() {
+  mark('login:enter')
   await router.replace(nextPath())
 }
 
@@ -48,12 +50,11 @@ async function withProvider(kind: ProviderKind) {
   busy.value = true
   error.value = null
   try {
-    const result = await signInWithProvider(kind)
-    if (result === 'done') await enter()
+    // The page leaves for Google or Apple; the button stays busy until it does.
+    await signInWithProvider(kind)
   } catch (cause) {
     console.warn('login: provider failed', cause)
     error.value = isSignupBlocked(cause) ? 'web.login.signupBlocked' : PROVIDER_ERRORS[kind]
-  } finally {
     busy.value = false
   }
 }
@@ -70,6 +71,7 @@ async function submitEmail() {
   }
   busy.value = true
   error.value = null
+  mark('login:start')
   try {
     await signInWithEmail(email.value.trim(), password.value)
     await enter()
@@ -98,11 +100,20 @@ async function sendReset(close: () => void) {
   }
 }
 
+/** Back button from Google or Apple: the browser may show the page as it was left, busy. */
+function onPageShow(event: PageTransitionEvent) {
+  if (event.persisted) busy.value = false
+}
+
 onMounted(() => {
-  const failed = session.signInError as ProviderKind | null
-  if (failed && PROVIDER_ERRORS[failed]) error.value = PROVIDER_ERRORS[failed]
+  warmUpSignIn()
+  const failed = session.signInError
+  if (failed === SIGNUP_BLOCKED) error.value = 'web.login.signupBlocked'
+  else if (failed && PROVIDER_ERRORS[failed as ProviderKind]) error.value = PROVIDER_ERRORS[failed as ProviderKind]
   session.signInError = null
+  window.addEventListener('pageshow', onPageShow)
 })
+onBeforeUnmount(() => window.removeEventListener('pageshow', onPageShow))
 </script>
 
 <template>

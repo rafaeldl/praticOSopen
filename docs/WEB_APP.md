@@ -103,7 +103,11 @@ Onde o web difere do app de propósito (para não deixar uma empresa sem saída)
 
 Mesmas portas do app (`lib/screens/login.dart`): Google, Apple e "Já tenho conta com e-mail" (senha e "Esqueceu a senha?"). Conta nova só por Google ou Apple. Não há entrada por link de e-mail.
 
-Google e Apple abrem em popup; se o navegador bloquear, segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa ser do mesmo site do app: o `.env.production` usa `praticos.app`, e o Hosting serve o handler em `/__/auth/handler`.
+Google e Apple entram na mesma página, sem popup (`signInWithRedirect` em `signInWithProvider`, `lib/session.ts`): a página vai para `/__/auth/handler`, depois para o Google ou a Apple, e volta para `/login`, onde `startSession` termina a entrada e o roteador segue para o `next`. Isso só funciona no Safari porque o `authDomain` é o próprio domínio do app (`praticos.app` no `.env.production`): o armazenamento do login fica no mesmo site. Não mudar o `authDomain` para outro domínio. Voltar do Google sem entrar devolve a tela pronta (evento `pageshow`). A confirmação de identidade antes de apagar a conta (`reauthenticate`, `lib/settings/data.ts`) continua em popup, para não perder a tela aberta.
+
+Tempo da entrada: a tela de login acorda o `api` (`warmUpApi`, `lib/web-access.ts`) com um GET simples, porque o Cloud Run sem instância mínima levava de 4 a 8 s para responder à primeira checagem de acesso. O login e o `onAuthStateChanged` dividem a mesma carga da conta (`hydrate`) e a mesma pergunta de acesso. A medida fica em `npm run e2e:perf:login` (`PERF_COLD_API_MS=4000 PERF_AWAY_MS=5000` simula o `api` frio); meta de 3 s do clique até a lista.
+
+Nos testes de tela, o emulador do Auth fica em outra origem (`127.0.0.1:9099`), então o redirect só roda no Chromium; no WebKit ele cai no bloqueio que o domínio próprio evita em produção.
 
 Quem trabalha em mais de uma empresa escolhe em `/app/choose-company`; a escolha fica lembrada no navegador.
 

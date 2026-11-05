@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -52,7 +53,25 @@ class AuthRepository {
     return firebaseUser;
   }
 
+  /// Android has no native Apple sign-in. The sign_in_with_apple web flow
+  /// needs a server that sends Apple's form_post back to the app, and the
+  /// Firebase handler does not, so the browser tab never came back. Firebase
+  /// runs the whole Apple flow itself on Android instead.
+  static bool get usesFirebaseAppleFlow =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  static AppleAuthProvider appleProvider() => AppleAuthProvider()
+    ..addScope('email')
+    ..addScope('name');
+
   Future<User> signInWithApple() async {
+    if (usesFirebaseAppleFlow) {
+      final UserCredential result =
+          await _auth.signInWithProvider(appleProvider());
+      currentUser = result.user!;
+      return result.user!;
+    }
+
     // Generate a nonce for the request
     final rawNonce = _generateNonce();
     final nonce = _sha256ofString(rawNonce);
@@ -64,12 +83,6 @@ class AuthRepository {
         AppleIDAuthorizationScopes.fullName,
       ],
       nonce: nonce,
-      webAuthenticationOptions: WebAuthenticationOptions(
-        clientId: 'br.com.rafsoft.praticos.app',
-        redirectUri: Uri.parse(
-          'https://praticos.app/__/auth/handler',
-        ),
-      ),
     );
 
     // Create an OAuth Credential for Firebase
@@ -207,6 +220,8 @@ class AuthRepository {
 
         await user.reauthenticateWithCredential(credential);
         print('✅ Re-authentication with Google successful');
+      } else if (providerId == 'apple.com' && usesFirebaseAppleFlow) {
+        await user.reauthenticateWithProvider(appleProvider());
       } else if (providerId == 'apple.com') {
         // Re-authenticate with Apple
         final rawNonce = _generateNonce();
@@ -218,12 +233,6 @@ class AuthRepository {
             AppleIDAuthorizationScopes.fullName,
           ],
           nonce: nonce,
-          webAuthenticationOptions: WebAuthenticationOptions(
-            clientId: 'br.com.rafsoft.praticos.app',
-            redirectUri: Uri.parse(
-              'https://praticos.app/__/auth/handler',
-            ),
-          ),
         );
 
         final OAuthCredential credential = OAuthProvider("apple.com").credential(

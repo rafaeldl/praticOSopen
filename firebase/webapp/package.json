@@ -23,6 +23,7 @@
     "e2e": "node e2e/run.mjs",
     "e2e:perf": "E2E_ORDERS=10000 E2E_ONLY=auth,firestore,storage node e2e/run.mjs perf",
     "e2e:perf:cold": "PERF_COLD=1 E2E_ORDERS=10000 node e2e/run.mjs perf",
+    "e2e:perf:login": "PERF_LOGIN=1 node e2e/run.mjs perf",
     "lhci": "node scripts/lhci.mjs"
   },
   "dependencies": {

@@ -33,6 +33,19 @@ function listen(userMax: number, ipMax: number): Promise<void> {
   });
 }
 
+describe('app CORS', () => {
+  it('o navegador guarda o pré-voo por 2 h: o app web não paga uma ida a mais por chamada', async () => {
+    await listen(10, 10);
+    const res = await request(server)
+      .options('/v1/app/web-access')
+      .set('Origin', 'https://praticos.app')
+      .set('Access-Control-Request-Method', 'GET')
+      .set('Access-Control-Request-Headers', 'authorization');
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-max-age']).toBe('7200');
+  });
+});
+
 describe('app rate limit', () => {
   it('conta por usuário: duas pessoas do mesmo escritório (mesmo IP) não se travam', async () => {
     await listen(3, 100);

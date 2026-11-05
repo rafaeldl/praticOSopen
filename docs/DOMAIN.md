@@ -32,3 +32,9 @@ O que **não** redireciona, de propósito:
 ## Alternativa avaliada
 
 Um segundo site no Hosting só com `redirects` (301 de verdade para tudo, inclusive páginas estáticas) exigiria mover `praticos.app` para um site novo, com novo certificado e tempo fora do ar, e ajustar o deploy. Como o canonical já aponta para `praticos.app` e o Google segue redirecionamento por script, ficou o desenho acima.
+
+## Entrar com Apple no Android
+
+O Android não tem Apple nativo. Antes, o app usava o fluxo web do pacote `sign_in_with_apple`, que manda a resposta da Apple (form_post) para o `redirectUri` e espera um servidor que devolva para o app (`intent://...`). O handler do Firebase (`/__/auth/handler`) não faz isso, então a aba nunca voltava, em qualquer domínio. Desde 2026-11-04 o Android usa `FirebaseAuth.signInWithProvider(AppleAuthProvider())` (`AuthRepository.usesFirebaseAppleFlow`), e o Firebase conduz a entrada pelo handler de `praticos.firebaseapp.com`, que nunca redireciona. O iPhone continua com a folha nativa da Apple.
+
+A Apple aceita como retorno os três handlers (`praticos.app`, `praticos.web.app` e `praticos.firebaseapp.com`): conferido em 2026-11-04 abrindo a autorização com cada `redirect_uri` (um endereço fora da lista dá 403).

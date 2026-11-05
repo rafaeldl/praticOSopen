@@ -153,12 +153,11 @@ describe('session companies', () => {
 })
 
 describe('sign-in helpers', () => {
-  test('popup that cannot open falls back to redirect', async () => {
-    const { shouldRedirect } = await import('../src/lib/session')
-    expect(shouldRedirect('auth/popup-blocked')).toBe(true)
-    expect(shouldRedirect('auth/operation-not-supported-in-this-environment')).toBe(true)
-    expect(shouldRedirect('auth/popup-closed-by-user')).toBe(false)
-    expect(shouldRedirect('auth/internal-error')).toBe(false)
+  test('a redirect that comes back refused by the server says so, other errors name the provider', async () => {
+    const { redirectErrorOf, SIGNUP_BLOCKED } = await import('../src/lib/session')
+    expect(redirectErrorOf('google', { code: 'auth/admin-restricted-operation' })).toBe(SIGNUP_BLOCKED)
+    expect(redirectErrorOf('apple', { code: 'auth/internal-error', message: 'BLOCKING_FUNCTION_ERROR_RESPONSE' })).toBe(SIGNUP_BLOCKED)
+    expect(redirectErrorOf('apple', { code: 'auth/network-request-failed' })).toBe('apple')
   })
 
   test('company guess from the claim follows the saved choice', async () => {
@@ -231,5 +230,20 @@ describe('closing the panel', () => {
     expect(closeGoesBack('/orders?status=done', '/orders?status=done')).toBe(true)
     expect(closeGoesBack('/dev/components', '/orders')).toBe(false)
     expect(closeGoesBack(null, '/orders')).toBe(false)
+  })
+})
+
+describe('warm-up of the API on the login screen', () => {
+  test('one plain GET without credentials, once per page, errors ignored', async () => {
+    const { warmUpApi } = await import('../src/lib/web-access')
+    const calls: [string, RequestInit | undefined][] = []
+    const request = (async (url: string, init?: RequestInit) => {
+      calls.push([url, init])
+      throw new Error('offline')
+    }) as unknown as typeof fetch
+    warmUpApi('https://api.test', request)
+    warmUpApi('https://api.test', request)
+    await Promise.resolve()
+    expect(calls).toEqual([['https://api.test/v1/app/web-access', { credentials: 'omit' }]])
   })
 })
