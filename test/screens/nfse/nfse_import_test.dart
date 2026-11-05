@@ -176,11 +176,13 @@ void main() {
       'reads until the proposal, shows the summary and imports with the answers',
       (tester) async {
         final server = _Server((method, path, body) {
-          if (path == '/v1/app/nfse/imports')
+          if (path == '/v1/app/nfse/imports') {
             return _batch('reading', read: 50);
+          }
           if (path.endsWith('/continue')) return _batch('proposed', read: 120);
-          if (path.endsWith('/apply'))
+          if (path.endsWith('/apply')) {
             return {..._batch('proposed'), 'status': 'applied'};
+          }
           return null;
         });
         await _pump(
