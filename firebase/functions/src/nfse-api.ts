@@ -3,11 +3,9 @@
  * Runs with its own service account, the only one with
  * `cloudkms.cryptoKeyDecrypter` on the `nfse-certs` keys.
  *
- * NOT exported from index.ts yet: exporting deploys it, and the deploy needs
- * the key ring and the service account first (manual step in issue #561,
- * docs/NFSE_DIRECT.md). After that step, add to index.ts:
- *
- *   export { nfseApi, nfseDaily } from './nfse-api';
+ * Exported from index.ts. The key ring, the service account and its roles
+ * are set by hand (docs/NFSE_DIRECT.md, "Cloud KMS"); the routes stay closed
+ * while `nfseDirectEnabled` is off.
  *
  * Never logs request bodies: they carry the certificate password and customer data.
  */
@@ -27,7 +25,7 @@ import { reconcileStaleDirectInvoices } from './services/nfse/issue.service';
 import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 
-/** Service account of the nfseApi (created by hand, see issue #561). */
+/** Service account of the nfseApi and nfseDaily (created by hand, docs/NFSE_DIRECT.md). */
 export const NFSE_SERVICE_ACCOUNT = `nfse-api@${process.env.GCLOUD_PROJECT || 'praticos'}.iam.gserviceaccount.com`;
 
 export function buildNfseApp(): express.Express {
