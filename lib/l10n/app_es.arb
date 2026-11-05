@@ -2760,5 +2760,6 @@
   "nfseDirectErrorValidation": "Revisa lo que escribiste e intenta de nuevo.",
   "nfseDirectErrorUnavailable": "No se pudo enviar ahora. Intenta de nuevo en unos minutos.",
   "nfseDirectErrorGeneric": "No funcionó. Intenta de nuevo.",
-  "nfseDirectServiceCodePlaceholder": "Ej.: 140101"
+  "nfseDirectServiceCodePlaceholder": "Ej.: 140101",
+  "nfseDirectSeparatorValue": "“{separator}”"
 }

@@ -3150,5 +3150,7 @@
   "nfseDirectErrorValidation": "Confira o que foi digitado e tente de novo.",
   "nfseDirectErrorUnavailable": "Não deu para enviar agora. Tente de novo em alguns minutos.",
   "nfseDirectErrorGeneric": "Não deu certo. Tente de novo.",
-  "nfseDirectServiceCodePlaceholder": "Ex.: 140101"
+  "nfseDirectServiceCodePlaceholder": "Ex.: 140101",
+  "nfseDirectSeparatorValue": "“{separator}”",
+  "@nfseDirectSeparatorValue": {"placeholders": {"separator": {"type": "String"}}}
 }

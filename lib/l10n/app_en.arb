@@ -2771,5 +2771,7 @@
   "nfseDirectErrorValidation": "Check what was typed and try again.",
   "nfseDirectErrorUnavailable": "Could not send now. Try again in a few minutes.",
   "nfseDirectErrorGeneric": "That did not work. Try again.",
-  "nfseDirectServiceCodePlaceholder": "E.g. 140101"
+  "nfseDirectServiceCodePlaceholder": "E.g. 140101",
+  "nfseDirectSeparatorValue": "“{separator}”",
+  "@nfseDirectSeparatorValue": {"placeholders": {"separator": {"type": "String"}}}
 }

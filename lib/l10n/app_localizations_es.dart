@@ -6949,4 +6949,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseDirectServiceCodePlaceholder => 'Ej.: 140101';
+
+  @override
+  String nfseDirectSeparatorValue(String separator) {
+    return '“$separator”';
+  }
 }

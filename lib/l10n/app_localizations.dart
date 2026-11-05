@@ -11285,6 +11285,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ex.: 140101'**
   String get nfseDirectServiceCodePlaceholder;
+
+  /// No description provided for @nfseDirectSeparatorValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{separator}”'**
+  String nfseDirectSeparatorValue(String separator);
 }
 
 class _AppLocalizationsDelegate

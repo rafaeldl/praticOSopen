@@ -319,7 +319,7 @@ class _EmitterDescriptionStyleScreenState
             FormRow(
               key: const Key('styleSeparator'),
               title: l10n.nfseDirectStyleSeparator,
-              value: '"${_style.separator.trim()}"',
+              value: l10n.nfseDirectSeparatorValue(_style.separator.trim()),
               onTap: _busy ? null : _pickSeparator,
             ),
           ],
