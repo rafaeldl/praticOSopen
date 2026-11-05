@@ -18,6 +18,7 @@
  */
 
 import { db, storage } from '../firestore.service';
+import { refreshDanfse } from './danfse.service';
 import type { Customer, UserAggr } from '../../models/types';
 import type { NfseInvoice } from '../../models/asaas.types';
 import type {
@@ -76,6 +77,8 @@ export interface IssueDeps {
   /** Transport of the government client; tests answer with recorded fixtures. */
   transport?: Transport;
   saveFile: (path: string, contents: string, contentType: string) => Promise<void>;
+  /** Makes the PDF after issuing or canceling (best effort; tests replace it). */
+  refreshPdf: (companyId: string, invoiceId: string) => Promise<void>;
 }
 
 export function defaultIssueDeps(): IssueDeps {
@@ -86,6 +89,7 @@ export function defaultIssueDeps(): IssueDeps {
     saveFile: async (path, contents, contentType) => {
       await storage.bucket().file(path).save(contents, { contentType, resumable: false });
     },
+    refreshPdf: (companyId, invoiceId) => refreshDanfse(companyId, invoiceId),
   };
 }
 
@@ -495,6 +499,7 @@ async function applyIssueResult(
   await recalcEmitterTotals(companyId, emitterId, deps).catch((error) => {
     console.error(`[nfse] totals of emitter ${emitterId} not updated`, (error as Error)?.name);
   });
+  await deps.refreshPdf(companyId, invoiceId);
   return { ...invoice, ...update } as DirectInvoice;
 }
 
@@ -632,6 +637,8 @@ export async function cancelDirectInvoice(
   await invoicesRef(companyId).doc(invoiceId).update(update);
   await releaseLocks(companyId, invoiceId, invoice.orderIds ?? []);
   await recalcEmitterTotals(companyId, invoice.emitter.id, deps).catch(() => undefined);
+  // The PDF now needs the "CANCELADA" watermark (NT 008, item 2.5.1).
+  await deps.refreshPdf(companyId, invoiceId);
   console.log(`[nfse] invoice ${invoiceId} of company ${companyId} canceled`);
   return { ...invoice, ...update };
 }

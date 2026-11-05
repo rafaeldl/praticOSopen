@@ -100,6 +100,33 @@ Rotas (`routes/v1/nfse-direct.routes.ts`, em `/v1/app/nfse/direct` na `nfseApi`)
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts` e **não** são exportadas pelo `index.ts`: o deploy precisa antes do keyring e da conta de serviço (passo manual acima). Depois do passo, acrescentar `export { nfseApi, nfseDaily } from './nfse-api';` ao `index.ts`. O PDF (DANFSe) é a etapa #564, a importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts` e **não** são exportadas pelo `index.ts`: o deploy precisa antes do keyring e da conta de serviço (passo manual acima). Depois do passo, acrescentar `export { nfseApi, nfseDaily } from './nfse-api';` ao `index.ts`. A importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
 
 Testes: DPS dos dois regimes nos dois leiautes validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
+
+## PDF da nota (DANFSe, etapa #564)
+
+A API do governo que gerava o PDF foi desligada em 03/08/2026 (NT 008/2026). O servidor gera o **DANFSe v2.0** a partir do XML da nota, no leiaute da Nota Técnica 008 v1.02.
+
+Código: `firebase/functions/src/services/nfse/danfse/` e `danfse.service.ts`.
+
+| Arquivo | Faz |
+|---|---|
+| `danfse/parse.ts` | Lê o XML da NFS-e e monta o texto de cada campo (item 2.4.5): chave sem o prefixo "NFS", datas `DD/MM/AAAA hh:mm:ss`, CNPJ/CPF/CEP com máscara, valores `R$ 1.234,56`, campo vazio vira "-" (nota 12). Nome e endereço do prestador vêm de `emit` quando ele é o emitente. Regras da v1.02: PIS/COFINS retidos (`tpRetPisCofins = 1`) somam em "Contribuições Sociais - Retidas" e o débito próprio fica 0,00; a linha de PIS/COFINS só sai até a competência de 2026 (nota 6). Informações complementares na ordem fixa, separadas por " \| ", sempre com a linha de "Totais Aproximados dos Tributos" (nota 10) |
+| `danfse/labels.ts` | Descrição de cada código (situação, finalidade, Simples, regime especial, tributação do ISSQN, retenções), tirada do Anexo I do leiaute 1.01, e a UF pelo código IBGE |
+| `danfse/render.ts` | Uma página A4 com `pdfkit`: posições e tamanhos do item 2.4.5 (em cm), borda de 1 pt, linhas de 0,5 pt, cinza 5% no cabeçalho, nos títulos e nos campos "Emitente" e "Valor líquido + IBS/CBS", QR code de 1,52 cm em X 17,48 / Y 1,67 com `https://www.nfse.gov.br/ConsultaPublica/?tpc=1&chave={chave}`, "NFS-e SEM VALIDADE JURÍDICA" em vermelho quando `tpAmb = 2`, marca d'água "CANCELADA" ou "SUBSTITUÍDA" na diagonal em cinza K35. Blocos sem dado viram uma linha ("TOMADOR/ADQUIRENTE DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e", "O DESTINATÁRIO É O PRÓPRIO TOMADOR/ADQUIRENTE DA OPERAÇÃO"...) e o espaço vai para a descrição e as informações complementares. Texto que não cabe termina em "..." (item 2.1). O canhoto (opcional) não é impresso |
+| `danfse/logo.ts` | Logomarca oficial da NFS-e (horizontal), a mesma da NT 008 |
+| `danfse.service.ts` | `ensureDanfse`: lê o XML do Storage, monta e guarda `tenants/{cid}/invoices/{id}/danfse.pdf`, grava `pdfPath` e `pdfSituation` na nota. Nome das cidades: do emitente e do destinatário da nota; o que faltar, pela API pública do IBGE (com cache) |
+
+**Fontes:** a NT pede Arial (títulos) e Microsoft Sans Serif (conteúdo), que não podem ser embutidas aqui. O PDF usa a Helvetica padrão, com as mesmas medidas da Arial; tamanhos, negrito e caixa seguem o item 2.4.
+
+**Quando é gerado:**
+- Logo depois de a nota ser emitida (`applyIssueResult`).
+- De novo, com "CANCELADA", quando a nota é cancelada.
+- Na primeira abertura, quando falta ou está com a marca errada (notas importadas, #569, ou falha anterior).
+
+Falha ao gerar nunca derruba a emissão nem o cancelamento: só registra no log, e a próxima abertura gera.
+
+**Rota:** `POST /v1/app/nfse/direct/invoices/:id/pdf` (dono, admin e gerente) gera se precisar e devolve `{ pdfPath }`; o app baixa pelo Storage. Erro `PDF_NOT_AVAILABLE` (409) para nota que não foi emitida ou que é do Asaas.
+
+Testes (`__tests__/danfse.test.ts`): XML sintético validado contra o XSD oficial da NFS-e, cada campo lido, regras da v1.02, uma página só (inclusive com descrição enorme), marca d'água, "sem validade" e geração/guarda com Firestore e Storage falsos.

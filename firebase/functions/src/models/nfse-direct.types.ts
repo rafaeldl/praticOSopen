@@ -157,6 +157,8 @@ export interface NfseDirectInvoiceFields {
   /** Storage paths (tenants/{cid}/invoices/{id}/nfse.xml and .pdf). */
   xmlPath?: string | null;
   pdfPath?: string | null;
+  /** Watermark of the PDF at pdfPath: a canceled nota gets a new one with "CANCELADA" (#564). */
+  pdfSituation?: 'normal' | 'canceled' | 'replaced' | null;
   cancelReason?: NfseCancelReason | null;
   importBatchId?: string | null;
   /** Why the government refused it, in plain words (group + pt/en/es), when status is 'error'. */

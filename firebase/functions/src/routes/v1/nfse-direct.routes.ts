@@ -7,6 +7,7 @@
  *   POST /invoices                  { orderIds, emitterId?, description?, recipient? }
  *   POST /invoices/:id/cancel       { reason: 'issueError' | 'serviceNotProvided' }
  *   POST /invoices/:id/reconcile    check a nota that got no clear answer
+ *   POST /invoices/:id/pdf          makes the PDF (DANFSe) if needed; returns its Storage path
  */
 
 import { Router, Response } from 'express';
@@ -21,6 +22,7 @@ import {
   previewDirectInvoice,
   reconcileDirectInvoice,
 } from '../../services/nfse/issue.service';
+import { ensureDanfse } from '../../services/nfse/danfse.service';
 
 const router: Router = Router();
 
@@ -127,6 +129,17 @@ router.post('/invoices/:invoiceId/reconcile', async (req: AuthenticatedRequest, 
     res.json({ success: true, data: invoice });
   } catch (error) {
     fail(res, error, 'reconcile');
+  }
+});
+
+router.post('/invoices/:invoiceId/pdf', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    ensureRole(req);
+    const invoiceId = parse(id, req.params.invoiceId);
+    // The app downloads it from Storage (tenants/{cid}/invoices/{id}/danfse.pdf).
+    res.json({ success: true, data: { pdfPath: await ensureDanfse(req.userContext!.companyId, invoiceId) } });
+  } catch (error) {
+    fail(res, error, 'pdf');
   }
 });
 

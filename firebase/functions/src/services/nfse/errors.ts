@@ -26,7 +26,8 @@ export type NfseErrorCode =
   | 'INVOICE_NOT_CANCELABLE'
   | 'CANCEL_REFUSED'
   | 'SEFIN_UNAVAILABLE'
-  | 'ORDER_HAS_INVOICE';
+  | 'ORDER_HAS_INVOICE'
+  | 'PDF_NOT_AVAILABLE';
 
 const HTTP_STATUS: Record<NfseErrorCode, number> = {
   NFSE_DIRECT_NOT_ENABLED: 403,
@@ -52,6 +53,7 @@ const HTTP_STATUS: Record<NfseErrorCode, number> = {
   CANCEL_REFUSED: 422,
   SEFIN_UNAVAILABLE: 503,
   ORDER_HAS_INVOICE: 409,
+  PDF_NOT_AVAILABLE: 409,
 };
 
 export class NfseServiceError extends Error {

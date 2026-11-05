@@ -8,7 +8,10 @@ jest.mock('../../../services/nfse/issue.service', () => ({
   reconcileDirectInvoice: jest.fn(),
 }));
 
+jest.mock('../../../services/nfse/danfse.service', () => ({ ensureDanfse: jest.fn() }));
+
 import * as issue from '../../../services/nfse/issue.service';
+import * as danfse from '../../../services/nfse/danfse.service';
 import { AsaasServiceError } from '../../../services/asaas/errors';
 import { NfseServiceError } from '../../../services/nfse/errors';
 import router from '../nfse-direct.routes';
@@ -84,5 +87,17 @@ describe('nfse-direct.routes', () => {
     expect((await request(app).post('/invoices/nf1/reconcile')).body.data.status).toBe('authorized');
     expect(mock.reconcileDirectInvoice).toHaveBeenCalledWith('c1', 'nf1', undefined, true);
     expect((await request(app).post('/invoices/nf1/reconcile')).status).toBe(404);
+  });
+
+  it('pdf: makes it when needed and returns the Storage path', async () => {
+    const ensure = danfse.ensureDanfse as jest.Mock;
+    ensure.mockResolvedValue('tenants/c1/invoices/nf1/danfse.pdf');
+    const res = await request(buildApp('manager')).post('/invoices/nf1/pdf');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ pdfPath: 'tenants/c1/invoices/nf1/danfse.pdf' });
+    expect(ensure).toHaveBeenCalledWith('c1', 'nf1');
+    ensure.mockRejectedValue(new NfseServiceError('PDF_NOT_AVAILABLE', 'no'));
+    expect((await request(buildApp('owner')).post('/invoices/nf1/pdf')).status).toBe(409);
+    expect((await request(buildApp('technician')).post('/invoices/nf1/pdf')).status).toBe(403);
   });
 });
