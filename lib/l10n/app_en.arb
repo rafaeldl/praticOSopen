@@ -2770,5 +2770,6 @@
   "nfseDirectErrorForbidden": "Only the owner and admins can change this.",
   "nfseDirectErrorValidation": "Check what was typed and try again.",
   "nfseDirectErrorUnavailable": "Could not send now. Try again in a few minutes.",
-  "nfseDirectErrorGeneric": "That did not work. Try again."
+  "nfseDirectErrorGeneric": "That did not work. Try again.",
+  "nfseDirectServiceCodePlaceholder": "E.g. 140101"
 }

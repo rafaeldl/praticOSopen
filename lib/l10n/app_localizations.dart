@@ -11279,6 +11279,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu certo. Tente de novo.'**
   String get nfseDirectErrorGeneric;
+
+  /// No description provided for @nfseDirectServiceCodePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 140101'**
+  String get nfseDirectServiceCodePlaceholder;
 }
 
 class _AppLocalizationsDelegate

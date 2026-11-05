@@ -3149,5 +3149,6 @@
   "nfseDirectErrorForbidden": "Só o dono e o administrador mexem nessa configuração.",
   "nfseDirectErrorValidation": "Confira o que foi digitado e tente de novo.",
   "nfseDirectErrorUnavailable": "Não deu para enviar agora. Tente de novo em alguns minutos.",
-  "nfseDirectErrorGeneric": "Não deu certo. Tente de novo."
+  "nfseDirectErrorGeneric": "Não deu certo. Tente de novo.",
+  "nfseDirectServiceCodePlaceholder": "Ex.: 140101"
 }

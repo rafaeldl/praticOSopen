@@ -6928,4 +6928,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseDirectErrorGeneric => 'That did not work. Try again.';
+
+  @override
+  String get nfseDirectServiceCodePlaceholder => 'E.g. 140101';
 }

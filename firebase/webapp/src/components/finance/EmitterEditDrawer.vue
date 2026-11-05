@@ -90,7 +90,7 @@ async function save() {
           </div>
           <div>
             <label class="field-label" for="em-code">{{ t('nfseDirectServiceCode') }}</label>
-            <input id="em-code" v-model="code" class="field" inputmode="numeric" maxlength="6" placeholder="140101" data-testid="emitter-service-code" />
+            <input id="em-code" v-model="code" class="field" inputmode="numeric" maxlength="6" :placeholder="t('nfseDirectServiceCodePlaceholder')" data-testid="emitter-service-code" />
             <p class="field-hint">{{ t('nfseDirectServiceCodeHint') }}</p>
           </div>
           <div>

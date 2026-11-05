@@ -117,7 +117,7 @@ class _EmitterServiceSheetState extends State<EmitterServiceSheet>
               key: const Key('emitterServiceCode'),
               label: l10n.nfseDirectServiceCode,
               controller: _code,
-              placeholder: '140101',
+              placeholder: l10n.nfseDirectServiceCodePlaceholder,
               hint: l10n.nfseDirectServiceCodeHint,
               keyboardType: TextInputType.number,
               inputFormatters: [
