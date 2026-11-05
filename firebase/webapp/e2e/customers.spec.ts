@@ -282,7 +282,7 @@ test('apagar pede confirmação, avisa e tira da lista (customer.detail.delete, 
 
 test('lista vazia oferece o primeiro cliente só para quem cadastra; erro tem "Tentar de novo" (customer.list.empty-add)', async ({ page }) => {
   let fail = true
-  await page.route(/\/v1\/app\/customers$/, async (route) => {
+  await page.route(/\/v1\/app\/customers(\?[^/]*)?$/, async (route) => {
     if (route.request().method() !== 'GET') return route.fallback()
     if (fail) return route.fulfill({ status: 503, body: '{}' })
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: [], meta: { partial: false } }) })

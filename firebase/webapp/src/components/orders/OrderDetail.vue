@@ -9,7 +9,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import type { ComboboxGroup, ComboboxItem } from '@/components/Combobox.vue'
-import { loadTexts, t } from '@/i18n'
+import { loadTexts, locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { canRegisterItem, forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
@@ -59,7 +59,7 @@ import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
 import QuickCreate from './QuickCreate.vue'
 import Layer from '@/components/Layer.vue'
-import { loadCustomer, loadDevice, type CustomerDetail, type DeviceDetail } from '@/lib/customers/data'
+import { loadCustomer, loadDevice, saveDevice, type CustomerDetail, type DeviceDetail } from '@/lib/customers/data'
 import { customerSummary, missingOnOrder, type Missing } from '@/lib/orders/quick-create'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import * as maintenance from '@/lib/orders/maintenance-offer'
@@ -67,6 +67,9 @@ import { askNotificationsOnce } from '@/lib/push'
 import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
 import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
 import TextDialog from './TextDialog.vue'
+import ReadingDialog from './ReadingDialog.vue'
+import { deviceReading, formatReading, readingAdvances, readingFieldOf } from '@/lib/device-reading'
+import { fieldTitle, segmentFieldList } from '@/lib/segment-fields'
 import OrderCustomFields from './OrderCustomFields.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import DateDialog from './DateDialog.vue'
@@ -131,6 +134,7 @@ type Dialog =
   | { kind: 'customer' }
   | { kind: 'address' }
   | { kind: 'request' }
+  | { kind: 'reading'; deviceId: string; name: string }
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share'; send?: boolean }
@@ -196,6 +200,46 @@ watch(
   },
   { immediate: true },
 )
+
+/**
+ * The device's reading at this visit (docs/DEVICE_READING.md): "Quilometragem:
+ * 98.000 km" under the devices, "+ Quilometragem" while an open order has none.
+ * Nothing when the segment has no reading.
+ */
+const reading = computed(() => readingFieldOf(segmentFieldList()))
+const readingTitle = computed(() => (reading.value ? fieldTitle(reading.value, locale.value) : ''))
+const readingRows = computed(() => {
+  const o = order.value
+  const field = reading.value
+  if (!o || !field) return []
+  const open = ['quote', 'approved', 'progress'].includes(o.status)
+  return o.devices
+    .filter((device): device is typeof device & { id: string } => !!device.id)
+    .map((device) => {
+      const value = o.deviceReadings?.[device.id] ?? null
+      return { id: device.id, name: device.name || device.serial || deviceLabel(), value, text: formatReading(field, value, session.company?.country) }
+    })
+    .filter((row) => row.text || (open && !!access.value?.canEditMainFields))
+})
+
+async function saveReading(deviceId: string, value: number | null) {
+  dialog.value = null
+  const o = order.value
+  const field = reading.value
+  if (!o || !field || (o.deviceReadings?.[deviceId] ?? null) === value) return
+  const saved = await run(() => writes.setDeviceReading(o.id, deviceId, value), t('web.saved'))
+  if (!saved || value === null || !can('manageDevices')) return
+  // The device keeps its last reading, never going back (the app's recordDeviceReading).
+  try {
+    const { device, version } = await loadDevice(deviceId)
+    const current = deviceReading(device.customData, field)
+    if (!readingAdvances(current, value) || current === value) return
+    const name = field.key.split('.').pop() as string
+    await saveDevice(deviceId, { customData: { ...(device.customData ?? {}), [name]: value }, ...(version ? { version } : {}) })
+  } catch {
+    // The order keeps the reading; the device form edits it by hand.
+  }
+}
 
 async function saveRequest(text: string) {
   dialog.value = null
@@ -1089,6 +1133,19 @@ watch(
         <button v-else-if="access.canEditMainFields" type="button" class="link od-device-add" @click="openPicker('device')">
           {{ t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() }) }}
         </button>
+        <p v-if="readingRows.length" class="od-missing" data-testid="order-readings">
+          <template v-for="row in readingRows" :key="row.id">
+            <button
+              v-if="access.canEditMainFields"
+              type="button"
+              class="link"
+              :class="{ 'od-reading': row.text }"
+              :data-testid="row.text ? `reading-${row.id}` : `reading-add-${row.id}`"
+              @click="dialog = { kind: 'reading', deviceId: row.id, name: row.name }"
+            >{{ row.text ? t('deviceReadingLine', { label: readingTitle, value: row.text }) : `+ ${readingTitle}` }}<template v-if="order.devices.length > 1"> · {{ row.name }}</template></button>
+            <span v-else class="od-reading" :data-testid="`reading-${row.id}`">{{ t('deviceReadingLine', { label: readingTitle, value: row.text }) }}<template v-if="order.devices.length > 1"> · {{ row.name }}</template></span>
+          </template>
+        </p>
         <p v-if="missing.length" class="od-missing" data-testid="order-missing">
           <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
         </p>
@@ -1306,6 +1363,15 @@ watch(
       :label="t('orderAddressLabel')"
       :value="order.address ?? ''"
       @save="saveAddress"
+      @close="dialog = null"
+    />
+    <ReadingDialog
+      v-else-if="dialog.kind === 'reading' && reading"
+      :title="readingTitle"
+      :unit="reading.suffix"
+      :sub="order.devices.length > 1 ? dialog.name : undefined"
+      :value="order.deviceReadings?.[dialog.deviceId] ?? null"
+      @save="(value) => saveReading((dialog as { deviceId: string }).deviceId, value)"
       @close="dialog = null"
     />
     <TextDialog

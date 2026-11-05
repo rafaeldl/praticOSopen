@@ -12,7 +12,9 @@ export default defineEventHandler(async (event) => {
     const headers: Record<string, string> = config.ssrApiSecret
       ? { 'X-Praticos-SSR-Secret': config.ssrApiSecret }
       : {}
-    const data = await $fetch(`${config.apiBaseUrl}/public/orders/${token}`, { headers })
+    // "Ver como o cliente vê": the api must not count the team's look as a visit.
+    const query = getQuery(event).preview === '1' ? '?preview=1' : ''
+    const data = await $fetch(`${config.apiBaseUrl}/public/orders/${encodeURIComponent(token)}${query}`, { headers })
     return data
   } catch (error: any) {
     const statusCode = error?.response?.status || error?.statusCode || 500

@@ -272,6 +272,12 @@ class FinancialSummary {
       isOpen(order) &&
       (order.status == 'approved' || order.status == 'progress');
 
+  /// Counts in A receber: completed with a balance, or running with a
+  /// partial payment. The one rule for "what the customer owes now"
+  /// (Financeiro, Clientes and the customer screen).
+  static bool owesNow(Order order) =>
+      isReceivable(order) || (isInProgress(order) && hasPartialPayment(order));
+
   /// Part of [order] was already received.
   static bool hasPartialPayment(Order order) => (order.paidAmount ?? 0) > 0;
 

@@ -1,8 +1,10 @@
 /* Mandar ao cliente, receber e cobrar. Loaded with the screens that use it. */
 .share .field { width: 100%; }
 .share-url { margin: 0.25rem 0 0.5rem; }
-.share-url code { overflow-wrap: anywhere; font-size: 0.875rem; }
-.share-opts { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.share-url code { white-space: normal; overflow-wrap: anywhere; font-size: 0.875rem; }
+.share-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+/* Each field as wide as its longest choice, sharing what is left; stacked when both do not fit. */
+.share-opts > div { flex: 1 1 auto; min-width: min(100%, 8rem); }
 .share-foot { flex-wrap: wrap; }
 .share-foot a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 

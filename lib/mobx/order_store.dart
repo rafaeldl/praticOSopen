@@ -25,6 +25,9 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/utils/contract_generation.dart';
+import 'package:praticos/utils/open_orders.dart';
+
+export 'package:praticos/utils/open_orders.dart' show kOpenOrdersLimit;
 import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:flutter/foundation.dart'
@@ -38,10 +41,6 @@ import 'package:praticos/services/order_reminder_text.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/utils/financial_summary.dart';
 part 'order_store.g.dart';
-
-/// "Em aberto" loads every open order at once: the next-step block, the
-/// sections and the "12 em aberto" count must see all of them, not a page.
-const int kOpenOrdersLimit = 500;
 
 class OrderStore = _OrderStore with _$OrderStore;
 
@@ -190,6 +189,10 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableList<DeviceAggr> devices = ObservableList<DeviceAggr>();
+
+  /// [Order.deviceReadings]: each device's reading at this visit.
+  @observable
+  Map<String, num>? deviceReadings;
 
   /// Transient state for multi-device picker flow
   String? pendingDeviceId;
@@ -505,6 +508,7 @@ abstract class _OrderStore with Store {
     customer = order.customer;
     devices = order.effectiveDevices.asObservable();
     device = devices.isNotEmpty ? devices.first : null;
+    deviceReadings = order.deviceReadings;
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
@@ -650,6 +654,24 @@ abstract class _OrderStore with Store {
     products = order!.products?.asObservable() ?? ObservableList();
 
     updateTotal();
+    createItem();
+  }
+
+  /// Reading of device [deviceId] at this visit (odometer, hour meter…);
+  /// null removes it. Saves the order.
+  void setDeviceReading(String deviceId, int? value) {
+    final current = order;
+    if (current == null) return;
+    final readings = Map<String, num>.of(current.deviceReadings ?? const {});
+    if (value == null) {
+      readings.remove(deviceId);
+    } else {
+      readings[deviceId] = value;
+    }
+    runInAction(() {
+      current.deviceReadings = readings.isEmpty ? null : readings;
+      deviceReadings = current.deviceReadings;
+    });
     createItem();
   }
 
@@ -2139,6 +2161,11 @@ abstract class _OrderStore with Store {
     final previous = {
       for (final key in changed.keys)
         if (base.containsKey(key)) key: base[key],
+      // A keyed map (`deviceReadings.d1`) goes back whole.
+      for (final key in OrderFieldDiff.keyedFields)
+        if (base.containsKey(key) &&
+            changed.keys.any((path) => path.startsWith('$key.')))
+          key: base[key],
     };
     _savedSnapshot = current;
 
@@ -2170,7 +2197,12 @@ abstract class _OrderStore with Store {
       // fields back as unsaved when the store still holds this order.
       final snapshot = _savedSnapshot;
       if (snapshot != null && _savedSnapshotId == orderId) {
-        for (final key in changed.keys) {
+        final keyed = {
+          for (final key in OrderFieldDiff.keyedFields)
+            if (changed.keys.any((path) => path.startsWith('$key.'))) key,
+        };
+        for (final key in {...changed.keys, ...keyed}) {
+          if (key.contains('.')) continue;
           if (previous.containsKey(key)) {
             snapshot[key] = previous[key];
           } else {

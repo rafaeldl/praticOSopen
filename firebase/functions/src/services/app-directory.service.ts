@@ -16,6 +16,8 @@ import type { Order, UserAggr, CompanyAggr } from '../models/types';
 import { projectOrderSummary } from './order-projection';
 import { generatePhoneKeywords, generateSearchKeywords } from '../utils/search.utils';
 import { timestampToDate } from '../utils/date.utils';
+import { ordersWithMoneyOpen } from './app-finance.service';
+import { countsByCustomer, customerOwed, owedByCustomer, OPEN_STATUSES } from './customer-summary';
 import { orderVersion, versionMatches } from './order-version';
 import { OrderRuleError } from './order-errors';
 import { deletePhotoFileIn, recordPhotoFolder, storagePathOfUrl, type PhotoInput } from './record-photo';
@@ -70,30 +72,34 @@ export interface DirectoryCustomer {
   /** Razão social for the nota ("Nota fiscal para" shows it). */
   legalName: string | null;
   address: string | null;
-  /** Open orders (approved, progress) the person reads. */
+  /** "Em aberto" of the Início (quote, approved, progress) the person reads. */
   open: number;
-  /** Of those, the ones past the promised date. */
+  /** Of those, the ones past the promised day (by day). */
   late: number;
+  /** "Falta receber" (A receber rule); null for who does not read the Financeiro. */
+  owed: number | null;
 }
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value : null);
 
-/** Every customer of the company with the order badges of the list. */
-export async function customerDirectory(companyId: string, scope: OrderScope, now = new Date()): Promise<{ customers: DirectoryCustomer[]; truncated: boolean }> {
-  const [snapshot, open] = await Promise.all([
+/**
+ * Every customer of the company with the order badges of the list
+ * (customer-summary.ts). `withOwed`: also what each one owes, from the query of
+ * the Financeiro (every order with money open, not every order of the company).
+ */
+export async function customerDirectory(
+  companyId: string,
+  scope: OrderScope,
+  options: { zone: string; withOwed: boolean; now?: Date },
+): Promise<{ customers: DirectoryCustomer[]; truncated: boolean }> {
+  const now = options.now ?? new Date();
+  const [snapshot, open, money] = await Promise.all([
     getTenantCollection(companyId, 'customers').limit(DIRECTORY_LIMIT + 1).get(),
-    scopedOrders(companyId, scope, (base) => [base.where('status', 'in', ['approved', 'progress'])]),
+    scopedOrders(companyId, scope, (base) => [base.where('status', 'in', [...OPEN_STATUSES])]),
+    options.withOwed ? ordersWithMoneyOpen(companyId) : null,
   ]);
-  const badges = new Map<string, { open: number; late: number }>();
-  for (const order of open) {
-    const id = order.customer?.id;
-    if (!id) continue;
-    const badge = badges.get(id) ?? { open: 0, late: 0 };
-    badge.open++;
-    const due = timestampToDate(order.dueDate as string | undefined);
-    if (due && due.getTime() < now.getTime()) badge.late++;
-    badges.set(id, badge);
-  }
+  const counts = countsByCustomer(open, now, options.zone);
+  const owed = money ? owedByCustomer(money.orders) : null;
   const customers = snapshot.docs.slice(0, DIRECTORY_LIMIT).map((doc) => {
     const data = doc.data();
     return {
@@ -104,10 +110,11 @@ export async function customerDirectory(companyId: string, scope: OrderScope, no
       taxId: text(data.taxId),
       legalName: text(data.legalName),
       address: text(data.address),
-      ...(badges.get(doc.id) ?? { open: 0, late: 0 }),
+      ...(counts.get(doc.id) ?? { open: 0, late: 0 }),
+      owed: owed ? owed.get(doc.id) ?? 0 : null,
     };
   });
-  return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT };
+  return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT || !!money?.truncated };
 }
 
 /** Devices of a list of orders, with how many orders each one is in (distinctVehicles). */
@@ -130,15 +137,6 @@ function devicesOf(orders: Order[]): { id: string; name: string; serial: string 
 /** "gastou" (customer_utils totalSpent): total of the done orders. */
 export function totalSpent(orders: Pick<Order, 'status' | 'total'>[]): number {
   return round(orders.filter((o) => o.status === 'done').reduce((sum, o) => sum + (o.total ?? 0), 0));
-}
-
-/** "falta receber" (customerOwed): what is left on orders that are not quotes, canceled or paid, of any month. */
-export function customerOwed(orders: Pick<Order, 'status' | 'total' | 'paidAmount' | 'payment'>[]): number {
-  return round(
-    orders
-      .filter((o) => o.status !== 'quote' && o.status !== 'canceled' && o.payment !== 'paid')
-      .reduce((sum, o) => sum + Math.max((o.total ?? 0) - (o.paidAmount ?? 0), 0), 0),
-  );
 }
 
 const round = (value: number) => Math.round(value * 100) / 100;
@@ -181,6 +179,7 @@ export async function customerScreen(
   const ordersTruncated = scoped.length > ORDERS_LIMIT;
   const orders = scoped.slice(0, ORDERS_LIMIT);
   const data = snapshot.data() ?? {};
+  // Receber takes any open order (Debtor.openOrders), not only what counts as owed.
   const owedOrders = orders.filter((o) => o.status !== 'quote' && o.status !== 'canceled' && o.payment !== 'paid' && (o.total ?? 0) - (o.paidAmount ?? 0) > 0);
   return {
     customer: {

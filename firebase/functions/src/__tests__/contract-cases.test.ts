@@ -35,6 +35,7 @@ import {
 import ordersRouter from '../routes/v1/orders.routes';
 import { syncPaymentStatusWithTotal } from '../services/asaas/order-payment.service';
 import { reportOf, summarizeOrders } from '../services/app-finance.service';
+import { countsByCustomer, owedByCustomer } from '../services/customer-summary';
 import * as catalogService from '../services/catalog.service';
 import { canReceiveForCustomer, registerCustomerReceipt } from '../services/customer-receipt.service';
 import * as orderService from '../services/order.service';
@@ -54,6 +55,7 @@ const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
 const COVERED = [
   'contract-generation.json', // contract-generation.cases.test.ts
   'currency.json',
+  'customer-summary.json',
   'finance-summary.json',
   'order-delete.json',
   'order-items.json',
@@ -497,6 +499,22 @@ describe('receipts', () => {
           }),
         }).toEqual(expected);
       }
+    });
+  }
+});
+
+describe('customer-summary', () => {
+  for (const c of cases('customer-summary.json')) {
+    it(c.id, () => {
+      const { now, orders } = c.given;
+      const list = orders.map((o: any) => ({ ...o, customer: o.customer ? { id: o.customer } : null }));
+      const counts = countsByCustomer(list, new Date(now), 'America/Sao_Paulo');
+      const owed = owedByCustomer(list);
+      const got: Record<string, unknown> = {};
+      for (const id of new Set([...counts.keys(), ...owed.keys()])) {
+        got[id] = { ...(counts.get(id) ?? { open: 0, late: 0 }), owed: owed.get(id) ?? 0 };
+      }
+      expect(got).toEqual(want(c).customers);
     });
   }
 });

@@ -90,6 +90,8 @@ export function projectOrderSummary(order: Order, showPrices: boolean): Json {
     customer: order.customer,
     device: order.device ?? undefined,
     devices: order.devices,
+    // The reading of each device at this visit: no money (device.detail history).
+    deviceReadings: order.deviceReadings ?? undefined,
     status: order.status,
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? undefined,
@@ -125,6 +127,7 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     latitude: order.latitude,
     longitude: order.longitude,
     customData: order.customData,
+    deviceReadings: order.deviceReadings ?? undefined,
     status: order.status,
     onHold: order.onHold,
     assignedTo: order.assignedTo ?? null,

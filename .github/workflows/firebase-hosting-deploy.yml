@@ -11,6 +11,13 @@ on:
       - 'firebase/webapp/**' # App web servido em /web (docs/WEB_APP.md)
       - 'firebase/firebase.json' # Ou se mudar rewrites/headers/config do hosting
 
+# Only the newest master matters: a new push cancels the running and pending
+# deploys of older commits, and the newest one publishes everything (merges in
+# sequence used to queue one deploy per merge).
+concurrency:
+  group: firebase-hosting-deploy-praticos
+  cancel-in-progress: true
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest

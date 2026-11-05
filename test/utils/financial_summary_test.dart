@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/utils/financial_summary.dart';
 
 Order order(
@@ -365,5 +366,29 @@ void main() {
 
       expect(FinancialSummary.openOrdersOldestFirst(orders).map((o) => o.id), ['2', '1', '3']);
     });
+  });
+
+  test('owesNow is A receber: Clientes and the customer screen sum what the '
+      'Financeiro shows', () {
+    final orders = [
+      order('1', customerId: 'c1', status: 'done', total: 100, paid: 40, payment: 'partial'),
+      order('2', customerId: 'c1', status: 'progress', total: 50, paid: 20, payment: 'partial'),
+      order('3', customerId: 'c1', status: 'approved', total: 40),
+      order('4', customerId: 'c2', status: 'done', total: 70),
+      order('5', customerId: 'c2', status: 'done', total: 30, paid: 30, payment: 'paid'),
+    ];
+    final summary = FinancialSummary.compute(
+      month: DateTime(2026, 11),
+      monthOrders: const [],
+      openOrders: orders,
+    );
+    final owed = orders.where(FinancialSummary.owesNow).fold<double>(
+          0,
+          (sum, o) => sum + FinancialSummary.openAmount(o),
+        );
+    expect(summary.receivable, 160);
+    expect(owed, summary.receivable);
+    expect(customerOwed(orders), summary.receivable);
+    expect(owedByCustomerOf(orders), {'c1': 90, 'c2': 70});
   });
 }

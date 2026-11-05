@@ -15,6 +15,7 @@ import {
   paymentsOf,
   permissionKind,
   pickToken,
+  previewUrl,
   receivesMoney,
   safeUrl,
   undoAllState,
@@ -168,5 +169,15 @@ describe('revisão #518', () => {
       { token: 'new', url: 'u/new', permissions: ['view' as const], expiresAt: '2026-11-20T00:00:00Z', createdAt: '2026-11-03T11:00:00Z' },
     ]
     expect(pickToken(tokens, now)?.token).toBe('new')
+  })
+})
+
+describe('previewUrl ("Ver como o cliente vê")', () => {
+  it('opens the same link marked as a preview', () => {
+    expect(previewUrl('https://praticos.app/q/ST_1')).toBe('https://praticos.app/q/ST_1?preview=1')
+  })
+  it('keeps other query params and does not repeat the flag', () => {
+    expect(previewUrl('https://praticos.app/q/ST_1?lang=en')).toBe('https://praticos.app/q/ST_1?lang=en&preview=1')
+    expect(previewUrl('https://praticos.app/q/ST_1?preview=1')).toBe('https://praticos.app/q/ST_1?preview=1')
   })
 })

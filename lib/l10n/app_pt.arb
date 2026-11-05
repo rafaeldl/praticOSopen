@@ -3239,6 +3239,14 @@
   "nfseDirectFilterRow": "CNPJ",
   "nfseDirectFilterAll": "Todos",
   "nfseDirectFilterQuestion": "Notas de qual CNPJ?",
+  "deviceReadingLine": "{label}: {value}",
+  "@deviceReadingLine": {
+    "description": "Reading of a device at this visit (odometer, hour meter), label from the segment",
+    "placeholders": {
+      "label": {"type": "String"},
+      "value": {"type": "String"}
+    }
+  },
   "orderItemCatalogPriceTitle": "Mudar o preço no Catálogo?",
   "orderItemCatalogPriceMessage": "{entity} “{name}” custa {from} no Catálogo. Usar {to} sempre ou só nesta OS?",
   "@orderItemCatalogPriceMessage": {"placeholders": {"entity": {"type": "String"}, "name": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}}},
@@ -3246,5 +3254,13 @@
   "orderItemCatalogPriceOnlyHere": "Só nesta OS",
   "orderItemCatalogPriceSaved": "Preço do Catálogo mudou para {to}",
   "@orderItemCatalogPriceSaved": {"placeholders": {"to": {"type": "String"}}},
-  "orderItemCatalogPriceFailed": "Não deu para mudar o preço no Catálogo. Mude por lá."
+  "orderItemCatalogPriceFailed": "Não deu para mudar o preço no Catálogo. Mude por lá.",
+  "sharePreview": "Ver como o cliente vê",
+  "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
+  "sharePreviewFailed": "Não deu para abrir a prévia. Tente de novo.",
+  "checklistStatusDoneMissing": "{count, plural, =1{Concluído · 1 sem resposta} other{Concluído · {count} sem resposta}}",
+  "@checklistStatusDoneMissing": {"placeholders": {"count": {"type": "int"}}},
+  "checklistDoneTitle": "Checklist concluído",
+  "checklistDoneReopenBody": "Para mudar uma resposta, reabra o checklist.",
+  "checklistDoneAskReopenBody": "Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist."
 }

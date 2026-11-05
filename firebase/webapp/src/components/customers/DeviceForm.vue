@@ -16,6 +16,7 @@ import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { changedSince, saveDevice, uploadDevicePhoto, type DeviceDetail } from '@/lib/customers/data'
 import { DEVICE_STATUSES, modelSuggestions, serialError, type DeviceRow, type DeviceStatus } from '@/lib/customers/model'
+import { readingFieldOf } from '@/lib/device-reading'
 import { useMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { session } from '@/lib/session'
@@ -66,7 +67,8 @@ const MAX_PHOTO = 10 * 1024 * 1024
 const photo = ref<{ file: File; url: string } | null>(null)
 const photoError = ref('')
 const uploading = ref(false)
-const more = ref(!!(props.device?.photo || initial.manufacturer || initial.category || initial.description || Object.values(initial.custom).some((v) => v !== null && v !== '')))
+const readingName = readingFieldOf(fields)?.key.split('.').pop()
+const more = ref(!!(props.device?.photo || initial.manufacturer || initial.category || initial.description || Object.entries(initial.custom).some(([name, v]) => name !== readingName && v !== null && v !== '')))
 const saving = ref(false)
 const failed = ref('')
 const tried = ref(false)
@@ -80,7 +82,9 @@ const shownPhoto = computed(() => photo.value?.url ?? props.device?.photo ?? nul
 const serialProblem = computed(() => serialError(form.serial, form.name, serialFieldRef.value?.pattern))
 const suggestions = computed(() => (suggestOpen.value ? modelSuggestions(props.devices, form.name) : []))
 const fieldErrors = computed(() => Object.fromEntries(fieldList.value.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
-const sections = computed(() => groupBySection(fieldList.value, locale.value, t('web.customers.general')))
+// The reading (odometer, hour meter) sits next to the serial, not in "Mais dados" (docs/DEVICE_READING.md).
+const reading = computed(() => readingFieldOf(fieldList.value))
+const sections = computed(() => groupBySection(fieldList.value.filter((field) => field.key !== reading.value?.key), locale.value, t('web.customers.general')))
 const needsAny = computed(() => t('deviceSaveNeedsAny', { first: label('device.model').toLocaleLowerCase(), second: label('device.serial').toLocaleLowerCase() }))
 const statusLabel: Record<DeviceStatus, string> = {
   active: t('deviceStatusActive'),
@@ -254,6 +258,13 @@ onBeforeUnmount(() => {
           />
           <p v-if="tried && serialProblem === 'pattern'" id="df-serial-error" class="field-error">{{ t('invalidFormat') }}</p>
         </div>
+        <CustomFieldInput
+          v-if="reading"
+          v-model="form.custom[reading.key.split('.').pop() as string]"
+          :field="reading"
+          :error="tried || form.custom[reading.key.split('.').pop() as string] ? errorText(fieldErrors[reading.key] ?? null, reading.min, reading.max, reading.minLength) : ''"
+          data-testid="device-reading"
+        />
         <fieldset v-if="editing && management" class="choice-set" data-testid="device-status">
           <legend class="field-label">{{ t('web.devices.status') }}</legend>
           <label v-for="status in DEVICE_STATUSES" :key="status" class="check-row">

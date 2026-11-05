@@ -9,7 +9,6 @@ import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
-import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -26,12 +25,13 @@ import 'package:provider/provider.dart';
 /// A checklist of the OS: the summary of the answers, and the questions one
 /// at a time ([FormQuestionSheet]).
 ///
-/// - Top: back and, for a completed checklist, "…" with "Reabrir".
-/// - Header: device, status (dot + text: "Faltam 3 perguntas", "Completo")
+/// - Top: back.
+/// - Header: device, status (dot + text: "Faltam 3 perguntas", "Completo",
+///   "Concluído · 2 sem resposta"), "Reabrir" as a link when completed,
 ///   and the one blue button: "Começar"/"Continuar" (opens the questions at
 ///   the first one without an answer) or "Concluir checklist".
 /// - "Perguntas": a white card with each question and its answer; a tap opens
-///   that question.
+///   that question or, when completed, says so and offers "Reabrir".
 ///
 /// A checklist with no answer yet opens straight on the first question.
 /// Answering the last one with nothing left completes the checklist and goes
@@ -453,27 +453,42 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  Future<void> _showMenu() async {
+  /// A tap on a question of a completed checklist: says it is completed and
+  /// offers "Reabrir" (or who can reopen it).
+  Future<void> _explainCompleted() async {
+    if (_isSaving) return;
     final l10n = context.l10n;
-    final picked = await showPullDownMenu(
-      context,
-      groups: [
-        PullDownGroup([
-          PullDownItem(
-            value: 'reopen',
-            label: l10n.reopen,
-            icon: CupertinoIcons.arrow_counterclockwise,
+    final canReopen = _canReopenForm();
+    final reopen = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(l10n.checklistDoneTitle),
+        content: Text(
+          canReopen
+              ? l10n.checklistDoneReopenBody
+              : l10n.checklistDoneAskReopenBody,
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(canReopen ? l10n.cancel : l10n.ok),
           ),
-        ]),
-      ],
+          if (canReopen)
+            CupertinoDialogAction(
+              key: const ValueKey('form_fill_done_reopen'),
+              isDefaultAction: true,
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.reopen),
+            ),
+        ],
+      ),
     );
-    if (picked == 'reopen') _reopenForm();
+    if (reopen == true) _reopenForm();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final showMenu = _isCompleted && !_isSaving && _canReopenForm();
     // A record screen: short title in the bar, the checklist name in the
     // header, where it wraps instead of being cut (design system rule 8).
     return CupertinoPageScaffold(
@@ -486,16 +501,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
             .resolveFrom(context)
             .withValues(alpha: 0.8),
         border: null,
-        trailing: _isSaving
-            ? const CupertinoActivityIndicator()
-            : showMenu
-            ? GlassBarButton(
-                key: const ValueKey('form_fill_menu'),
-                label: l10n.orderMoreActions,
-                icon: CupertinoIcons.ellipsis,
-                onPressed: _showMenu,
-              )
-            : null,
+        trailing: _isSaving ? const CupertinoActivityIndicator() : null,
       ),
       child: CustomScrollView(
         slivers: [
@@ -544,7 +550,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
     final String status;
     if (_isCompleted) {
       dot = AppColors.success;
-      status = l10n.checklistStatusDone;
+      status = completedChecklistLabel(l10n, _currentForm);
     } else if (missing > 0) {
       dot = AppColors.warning;
       status = l10n.orderChecklistMissing(missing);
@@ -608,6 +614,24 @@ class _FormFillScreenState extends State<FormFillScreen> {
               ],
             ),
           ),
+          // Reopening in sight, not hidden in a menu.
+          if (_isCompleted && _canReopenForm())
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pageMargin,
+                  AppSpacing.xs,
+                  AppSpacing.pageMargin,
+                  0,
+                ),
+                child: TextLink(
+                  key: const ValueKey('form_fill_reopen'),
+                  label: l10n.reopen,
+                  onPressed: _isSaving ? null : _reopenForm,
+                ),
+              ),
+            ),
           if (!_isCompleted && _currentForm.items.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.lg),
             Padding(
@@ -703,11 +727,11 @@ class _FormFillScreenState extends State<FormFillScreen> {
         : l10n.checklistNoAnswer;
 
     return Semantics(
-      button: canOpen,
+      button: true,
       child: GestureDetector(
         key: ValueKey('form_fill_item_${item.id}'),
         behavior: HitTestBehavior.opaque,
-        onTap: canOpen ? () => _openQuestions(index) : null,
+        onTap: canOpen ? () => _openQuestions(index) : _explainCompleted,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
           child: Padding(

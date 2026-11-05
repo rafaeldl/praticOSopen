@@ -9,6 +9,7 @@ import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/utils/device_reading.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
@@ -364,9 +365,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     final serialLabel = config.label(LabelKeys.deviceSerialNumber);
     final secondary = AppColors.textSecondary.resolveFrom(context);
 
-    final plate = (device.serial?.isNotEmpty ?? false)
-        ? '$serialLabel ${device.serial}'
-        : '';
+    // Plate/serial and the last reading ("98.000 km"), what identifies it.
+    final readingField = config.readingField;
+    final format = FormatService()..setLocale(l10n.localeName);
+    final plate = [
+      if (device.serial?.isNotEmpty ?? false) '$serialLabel ${device.serial}',
+      if (readingField != null)
+        ?formatReading(
+          readingField,
+          deviceReading(device.customData, readingField),
+          format,
+        ),
+    ].join(' · ');
     final ownerName = owner?.name ?? '';
     final subtitle = [plate, if (ownerName.isNotEmpty) ownerName].join(' · ');
     final subtitleStyle = AppTypography.callout.copyWith(color: secondary);
@@ -644,8 +654,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       labelMap[f.fieldName] = label;
     }
 
+    // The reading shows next to the plate/serial at the top.
+    final reading = config.readingField;
     return data.entries
         .where((e) => e.value != null && e.value.toString().isNotEmpty)
+        .where(
+          (e) =>
+              reading == null ||
+              (e.key != reading.fieldName && e.key != reading.key),
+        )
         .map((entry) {
       final label = labelMap[entry.key] ?? entry.key;
       final value = entry.value.toString();
@@ -669,8 +686,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _orderRow(Order order, SegmentConfigProvider config) {
+    final field = config.readingField;
+    final id = _device?.id;
+    final reading = field == null || id == null
+        ? null
+        : formatReading(
+            field,
+            order.deviceReadings?[id],
+            FormatService()..setLocale(context.l10n.localeName),
+          );
     return OrderHistoryRow(
       order: order,
+      detail: reading,
       showPrices: _showPrices,
       showDate: true,
       statusLabel: config.getStatus,

@@ -357,3 +357,8 @@ CupertinoNavigationBar(
 - `lib/providers/segment_config_provider.dart` - Provider de segmento
 - `firebase/scripts/seed_segments.js` - Script de seeding
 - `docs/MULTI_TENANCY.md` - Arquitetura multi-tenant relacionada
+
+## Leitura do equipamento (`reading`)
+
+Um campo numérico do equipamento pode ser marcado com `reading: true` (ex.: `device.mileage` com `suffix: 'km'`). Ele vira a "leitura" pedida em cada OS e mostrada no histórico do equipamento, com nome e unidade do próprio campo. Ramo sem campo marcado não mostra nada. Ver `docs/DEVICE_READING.md`.
+

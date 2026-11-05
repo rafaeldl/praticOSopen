@@ -4,6 +4,7 @@ import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/device_store.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/repository.dart';
@@ -162,13 +163,19 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       (widget.device?.name?.trim().isNotEmpty ?? false) &&
       (widget.device?.serial?.trim().isEmpty ?? true);
 
-  bool get _hasMoreData {
+  /// Whether "Mais dados" starts open: something in it is filled (the
+  /// reading is above it, so it does not count).
+  bool _hasMoreData(SegmentConfigProvider config) {
     final d = _device!;
     bool filled(String? v) => v != null && v.isNotEmpty;
+    final reading = config.readingField;
+    final others = (d.customData ?? const {}).keys.where(
+      (k) => reading == null || (k != reading.fieldName && k != reading.key),
+    );
     return filled(d.photo) ||
         filled(d.manufacturer) ||
         filled(d.category) ||
-        (d.customData?.isNotEmpty ?? false);
+        others.isNotEmpty;
   }
 
   Future<void> _saveDevice() async {
@@ -340,9 +347,10 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     return [
       _modelField(config),
       _serialField(config),
+      ?_readingField(config),
       MoreFieldsLink(
         label: context.l10n.photoAndMoreData,
-        initiallyExpanded: _hasMoreData,
+        initiallyExpanded: _hasMoreData(config),
         children: _moreFields(config, inCard: false),
       ),
     ];
@@ -352,14 +360,20 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   List<Widget> _buildSheetCards(SegmentConfigProvider config) {
     final l10n = context.l10n;
     return [
-      FormFieldsCard(children: [_modelField(config), _serialField(config)]),
+      FormFieldsCard(
+        children: [
+          _modelField(config),
+          _serialField(config),
+          ?_readingField(config),
+        ],
+      ),
       FormMoreCard(
         title: l10n.formMoreData,
         hint: l10n.deviceMoreDataHint(
           config.label(LabelKeys.deviceBrand).toLowerCase(),
           config.label(LabelKeys.deviceCategory).toLowerCase(),
         ),
-        initiallyOpen: _hasMoreData,
+        initiallyOpen: _hasMoreData(config),
         children: _moreFields(config, inCard: true),
       ),
     ];
@@ -414,6 +428,38 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           return l10n.invalidFormat;
         }
         return null;
+      },
+    );
+  }
+
+  /// The segment's reading (odometer, hour meter…) next to the
+  /// identification, so it is not lost in "Mais dados"; null when the segment
+  /// has none. Same `customData` key as before, so old values show.
+  Widget? _readingField(SegmentConfigProvider config) {
+    final field = config.readingField;
+    if (field == null) return null;
+    return _customFieldInput(field, config.locale);
+  }
+
+  Widget _customFieldInput(CustomField field, String locale) {
+    return DynamicFieldBuilder(
+      key: ValueKey('device_field_${field.key}'),
+      field: field,
+      value:
+          _device?.customData?[field.fieldName] ??
+          _device?.customData?[field.key],
+      locale: locale,
+      onChanged: (newValue) {
+        setState(() {
+          _customTouched = true;
+          _device?.customData ??= {};
+          if (newValue == null) {
+            _device!.customData!.remove(field.fieldName);
+          } else {
+            _device!.customData![field.fieldName] = newValue;
+          }
+          _device!.customData!.remove(field.key); // migrate old key
+        });
       },
     );
   }
@@ -520,7 +566,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   }) {
     final grouped = config.fieldsGroupedBySectionLocalized(
       'device',
-      exclude: _builtInFieldKeys,
+      exclude: {..._builtInFieldKeys, ?config.readingField?.key},
     );
     if (grouped.isEmpty) return [];
 
@@ -529,27 +575,9 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
 
     for (final entry in grouped.entries) {
       sections.add(SectionLabel(entry.key));
-      final fields = entry.value.map((field) {
-        return DynamicFieldBuilder(
-          field: field,
-          value:
-              _device?.customData?[field.fieldName] ??
-              _device?.customData?[field.key],
-          locale: locale,
-          onChanged: (newValue) {
-            setState(() {
-              _customTouched = true;
-              _device?.customData ??= {};
-              if (newValue == null) {
-                _device!.customData!.remove(field.fieldName);
-              } else {
-                _device!.customData![field.fieldName] = newValue;
-              }
-              _device!.customData!.remove(field.key); // migrate old key
-            });
-          },
-        );
-      }).toList();
+      final fields = [
+        for (final field in entry.value) _customFieldInput(field, locale),
+      ];
       sections.add(
         inCard
             ? Column(

@@ -166,9 +166,9 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
 .layer { position: fixed; inset: 0; z-index: 40; background: oklch(20% 0.05 255 / 0.42); display: flex; }
 .layer-box { background: var(--color-card); color: var(--color-ink); box-shadow: 0 16px 40px oklch(18% 0.05 255 / 0.35); display: flex; flex-direction: column; min-height: 0; max-width: 100%; }
 .layer--dialog { align-items: flex-start; justify-content: center; padding-top: 12vh; }
-.layer--dialog .layer-box { width: 30rem; border-radius: 8px; max-height: 76vh; }
+.layer--dialog .layer-box { width: 30rem; border-radius: 8px; max-height: calc(100dvh - 12vh - 1rem); }
 .layer--palette { align-items: flex-start; justify-content: center; padding-top: 11vh; }
-.layer--palette .layer-box { width: 40rem; border-radius: 8px; max-height: 70vh; }
+.layer--palette .layer-box { width: 40rem; border-radius: 8px; max-height: calc(100dvh - 11vh - 1rem); }
 .layer--drawer { justify-content: flex-end; }
 .layer--drawer .layer-box { width: 36rem; height: 100%; }
 .layer-title { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; line-height: 1.2; }

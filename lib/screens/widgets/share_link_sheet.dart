@@ -225,6 +225,29 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     });
   }
 
+  /// "Ver como o cliente vê": the same link, opened here as a preview.
+  Future<void> _openPreview() async {
+    final url = _result?.url;
+    if (url == null) return;
+    try {
+      await _service.openPreview(url);
+    } catch (_) {
+      if (!mounted) return;
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          content: Text(context.l10n.sharePreviewFailed),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(context.l10n.ok),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   _Access get _access {
     if (_canApprove && _canComment) return _Access.all;
     if (_canApprove) return _Access.approve;
@@ -508,6 +531,13 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
             key: const Key('shareLinkCopy'),
             label: _copied ? l10n.shareLinkCopied : l10n.shareCopyLink,
             onPressed: _copyLink,
+          ),
+        ),
+        Center(
+          child: TextLink(
+            key: const Key('shareLinkPreview'),
+            label: l10n.sharePreview,
+            onPressed: _openPreview,
           ),
         ),
       ],

@@ -6,6 +6,8 @@ import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_customer_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/utils/open_orders.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/customer_utils.dart';
 
@@ -29,8 +31,14 @@ abstract class CustomerDirectory {
   /// Orders of [customerId], newest first.
   Stream<List<Order>> watchOrdersOf(String customerId);
 
-  /// Open/overdue order counts per customer id.
+  /// Open/overdue order counts per customer id, from the same query as the
+  /// Início "Em aberto" (same statuses, same reader scope, same limit).
   Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer();
+
+  /// What each customer owes now (A receber rule), from the query the
+  /// Financeiro already runs (every order with money open). Only for who
+  /// reads the Financeiro.
+  Future<Map<String, double>> owedByCustomer();
 
   /// Customer ids of the last ~50 orders, newest first, distinct.
   Future<List<String>> recentCustomerIds();
@@ -94,14 +102,20 @@ class FirestoreCustomerDirectory implements CustomerDirectory {
 
   @override
   Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async {
-    final list = await _orders
-        .streamOrders(_companyId, status: 'due_date')
-        .first;
-    return summarizeOpenOrders(
-      list.whereType<Order>().toList(),
-      DateTime.now(),
+    final page = await OrderRepositoryV2().getOrdersWithPagination(
+      _companyId,
+      status: 'open',
+      limit: kOpenOrdersLimit,
     );
+    final orders = page.docs.map(
+      (doc) => Order.fromJson(doc.data()..['id'] = doc.id),
+    );
+    return summarizeOpenOrders(orders, DateTime.now());
   }
+
+  @override
+  Future<Map<String, double>> owedByCustomer() async =>
+      owedByCustomerOf(await OrderRepositoryV2().getUnpaidOrders(_companyId));
 
   @override
   Future<List<String>> recentCustomerIds() async {

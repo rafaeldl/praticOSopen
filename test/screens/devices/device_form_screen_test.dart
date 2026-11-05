@@ -3,10 +3,12 @@ import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:provider/provider.dart';
 
 Device known(String name, String brand, String category) => Device()
@@ -252,5 +254,55 @@ void main() {
     await tester.tap(find.textContaining(RegExp(r'^Salvar')));
     await tester.pumpAndSettle();
     expect(h.saved.single, same(device));
+  });
+
+  group('reading next to the plate', () {
+    tearDown(() => SegmentConfigService().debugSetCustomFields(const []));
+
+    testWidgets('vehicle: km in the first card, "Mais dados" stays closed '
+        'and keeps the old value', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const [
+        CustomField(
+          key: 'device.mileage',
+          type: 'number',
+          labels: {'pt-BR': 'Quilometragem'},
+          suffix: 'km',
+          reading: true,
+          section: 'Estado',
+          sectionI18n: {'pt-BR': 'Estado'},
+        ),
+      ]);
+      final h = _Harness();
+      await h.open(tester);
+      final field = find.byKey(const ValueKey('device_field_device.mileage'));
+      expect(field, findsOneWidget);
+      expect(find.text('Estado'), findsNothing);
+
+      await tester.enterText(
+        find.descendant(of: field, matching: find.byType(EditableText)),
+        '45000',
+      );
+      await tester.enterText(find.byType(EditableText).first, 'Gol');
+      await tester.pump();
+      await tester.tap(_save);
+      await tester.pumpAndSettle();
+      expect(h.saved.single.customData?['mileage'], 45000);
+    });
+
+    testWidgets('phone repair: no reading field', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const [
+        CustomField(
+          key: 'device.batteryHealth',
+          type: 'number',
+          labels: {'pt-BR': 'Saúde da bateria'},
+          suffix: '%',
+        ),
+      ]);
+      await _Harness().open(tester);
+      expect(
+        find.byKey(const ValueKey('device_field_device.batteryHealth')),
+        findsNothing,
+      );
+    });
   });
 }

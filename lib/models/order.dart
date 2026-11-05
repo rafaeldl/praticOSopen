@@ -73,6 +73,11 @@ class Order extends BaseAuditCompany {
   /// Denormalized device IDs for Firestore arrayContains queries
   List<String>? deviceIds;
 
+  /// The reading of each device at this visit (odometer, hour meter…), by
+  /// device id. Which reading it is (name, unit) comes from the segment:
+  /// `lib/utils/device_reading.dart`. Null when the order has none.
+  Map<String, num>? deviceReadings;
+
   /// Contract sub-document (null = normal order, filled = recurring contract)
   OrderContract? contract;
 
