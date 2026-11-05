@@ -9,6 +9,8 @@ export interface CustomerRow {
   phone: string | null
   email: string | null
   taxId: string | null
+  /** Razão social, for "Nota fiscal para" (older servers do not send it). */
+  legalName?: string | null
   address: string | null
   /** Open orders (approved, progress) the person reads. */
   open: number

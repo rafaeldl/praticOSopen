@@ -255,4 +255,6 @@ Só aparece com `settings/payments.nfseDirectEnabled` ligada (`loadCustomerInvoi
 - **Nota fiscal para**: "…" do cliente → "Mandar a nota para outro cliente" abre "Para quem vai a nota?" (tela de escolher, com "Nenhum" primeiro e ✓ no atual). A linha "Nota fiscal para" só aparece quando preenchida, na tela do cliente e no grupo; tocar troca ou tira. Precisa de `manageCustomers`.
 - **Emitir nota sozinha**: interruptor do cliente (`autoIssueInvoice`) que só aparece quando `settings/nfse.autoIssue` é `selectedCustomers` (vem desligado) ou `allOrders` (vem ligado e serve para tirar o cliente da regra). Quem não lê `settings/nfse` (sem acesso a cobranças) não vê o interruptor.
 
-Fora desta etapa: app web (o cliente no web não tem esses campos ainda), oferta na 3ª nota e a emissão automática no servidor (etapa 11 da spec).
+**App web** (`firebase/webapp`): o mesmo grupo no formulário do cliente (`CustomerForm.vue`, regras em `src/lib/customers/invoice-data.ts`), a linha "Nota fiscal para" com "Trocar" e o item no "…" (`InvoiceRecipientDialog.vue`). Grava pela `PATCH /v1/app/customers/:id` (campos em `docs/WEB_API.md`). Na hora de salvar, o formulário espera a lista de clientes para conferir o CPF/CNPJ repetido, mesmo quando a tela abriu direto no cliente. A política de segurança do `/web` libera `brasilapi.com.br` e `viacep.com.br` para as buscas. E2E: `e2e/customer-invoice.spec.ts`, na empresa `company-nfse` da semente.
+
+Fora desta etapa: oferta na 3ª nota e a emissão automática no servidor (etapa 11 da spec).

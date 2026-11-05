@@ -2806,5 +2806,11 @@
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
   "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
-  "nfseDirectAcceptTerms": "I have read and accept the certificate terms"
+  "nfseDirectAcceptTerms": "I have read and accept the certificate terms",
+  "orderItemCatalogPriceTitle": "Change the price in the Catalog?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” costs {from} in the Catalog. Use {to} always or only on this order?",
+  "orderItemCatalogPriceAlways": "Use always",
+  "orderItemCatalogPriceOnlyHere": "Only this order",
+  "orderItemCatalogPriceSaved": "Catalog price changed to {to}",
+  "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there."
 }

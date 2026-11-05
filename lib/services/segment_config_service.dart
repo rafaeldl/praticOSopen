@@ -198,6 +198,10 @@ class SegmentConfigService {
         return _l10n!.customers;
       case 'device._entity':
         return _l10n!.device;
+      case 'service._entity':
+        return _l10n!.service;
+      case 'product._entity':
+        return _l10n!.product;
       case 'device._entity_plural':
         return _l10n!.devices;
       case 'service_order._entity':

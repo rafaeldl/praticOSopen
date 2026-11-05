@@ -17,6 +17,8 @@ export const COMPANY_D = 'company-delta'
 export const COMPANY_R = 'company-resume'
 /** Início filters as server queries (e2e/home-filters.spec.ts): more orders per filter than one page. */
 export const COMPANY_P = 'company-paging'
+/** NFS-e direta on (settings/payments.nfseDirectEnabled): "Dados para nota" of the customer (e2e/customer-invoice.spec.ts). */
+export const COMPANY_N = 'company-nfse'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -90,6 +92,8 @@ export const USERS = {
   pConsultant: { ...user('p-consultant', 'Patricia Consultora Paginas'), roles: { [COMPANY_P]: 'consultant' } },
   pTech: { ...user('p-tech', 'Pedro Tecnico Paginas'), roles: { [COMPANY_P]: 'technician' } },
   pSuper: { ...user('p-super', 'Priscila Supervisora Paginas'), roles: { [COMPANY_P]: 'supervisor' } },
+  // Company nfse: the direct nota on, so the customer form has "Dados para nota".
+  nOwner: { ...user('n-owner', 'Nadia Dona Nota'), roles: { [COMPANY_N]: 'owner' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -113,6 +117,7 @@ export const COMPANIES = {
   [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },
   [COMPANY_R]: { name: 'Retoma Sem Ramo', country: 'BR', segment: null, phone: '(48) 3333-4444', owner: USERS.resumer },
   [COMPANY_P]: { name: 'Oficina Paginas', country: 'BR', segment: 'automotive', owner: USERS.pOwner },
+  [COMPANY_N]: { name: 'Oficina Nota Direta', country: 'BR', segment: 'automotive', owner: USERS.nOwner },
 }
 
 /** Invites of the team company: one waiting, one expired (the app hides it; the web offers "Convidar de novo"). */

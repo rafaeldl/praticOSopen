@@ -91,7 +91,7 @@ Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/
 | `GET /customers` | `viewCustomers` | Todos os clientes (até 5.000; `meta.truncated` acima) com `open` e `late`: OS aprovadas e na oficina que o papel lê, atrasada pela promessa (`dueDate` antes de agora). `meta.partial` quando o papel não lê todas as OS |
 | `GET /customers/:id` | `viewCustomers` | Cliente com e-mail, CPF/CNPJ, endereço e `customData`; `orders` (até 500, as que o papel lê, sem valores sem `viewPrices`); `devices` das OS com quantas OS; `spent` (soma das concluídas) e `owed` (aberto das que não são orçamento, cancelada nem paga), `null` sem `viewPrices`; `receivable`: as OS em que a pessoa pode receber, da mais antiga; `version` (opaca, como nas OS); `ordersTruncated` quando há mais de 500 (são as mais recentes por `createdAt`); `links`: total de OS, recibos e cobranças do cliente, também o que o papel não vê, sem detalhe (dito antes de apagar) |
 | `POST /customers` | `manageCustomers` | `{name, phone?, email?, address?, taxId?, customData?}`. `taxId` normalizado e validado (CPF ou CNPJ, também alfanumérico): inválido → 400 |
-| `PATCH /customers/:id` | `manageCustomers` | Mesmos campos; `null` limpa; `customData` troca o mapa inteiro. Nunca regrava `createdAt`/`createdBy`. `version` (a lida no GET): se alguém salvou depois, `409 CUSTOMER_CHANGED` e nada é gravado; a resposta traz a versão nova |
+| `PATCH /customers/:id` | `manageCustomers` | Mesmos campos, mais os dados para nota (abaixo); `null` limpa; `customData` troca o mapa inteiro. Nunca regrava `createdAt`/`createdBy`. `version` (a lida no GET): se alguém salvou depois, `409 CUSTOMER_CHANGED` e nada é gravado; a resposta traz a versão nova |
 | `DELETE /customers/:id` | `manageCustomers` | As OS ficam com a cópia do cliente. Aparelhos com `nextMaintenanceCustomer.id` dele ficam só com o nome |
 | `POST /customers/import` | `manageCustomers` | `{importId, customers: [...]}`, até 500 por chamada; cada linha vira o documento `{importId}-{n}`, então repetir devolve `existing` em vez de criar de novo. Uma linha inválida recusa a chamada (400) |
 | `GET /devices` | `viewDevices` | Todos os aparelhos com situação e `nextMaintenanceDate` |
@@ -99,6 +99,8 @@ Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/
 | `POST /devices`, `PATCH /devices/:id` | `manageDevices` | Modelo ou série obrigatório; série com `trim` e maiúsculas; `status` em `active`, `maintenance`, `inactive`, `decommissioned`. Editar nunca mexe na próxima manutenção. `version` no PATCH: `409 DEVICE_CHANGED` quando mudou. `photo: {url, storagePath}` só no PATCH (o aparelho precisa existir para ter a pasta): arquivo da pasta `tenants/{empresa}/devices/{id}/` e a URL de download desse mesmo arquivo no bucket do projeto, senão `400`; só troca, sem tirar (como o app). Trocar apaga o arquivo antigo se for outro arquivo da mesma pasta |
 | `DELETE /devices/:id` | `manageDevices` | |
 | `PUT /devices/:id/next-maintenance` | `manageDevices` | `{date: 'AAAA-MM-DD' \| null}`; só de hoje (Brasília) em diante. Grava dono e último serviço, ou mantém o cliente antigo sem dono conhecido, e apaga `nextMaintenanceNoticeFor`. `null` tira data, cliente e serviço |
+
+Dados para nota (NFS-e direta, `docs/NFSE_DIRECT.md`) no `POST` e no `PATCH`: `legalName`, `fiscalAddress {postalCode (8 dígitos), street, number, complement, district, cityCode (IBGE, 7 dígitos), cityName, state (UF)}`, `invoiceEmail`, `autoIssueInvoice` e `invoiceRecipientId` (outro cliente da empresa; o servidor grava o resumo dele em `invoiceRecipient`, e o próprio cliente, um inexistente ou de outra empresa dá `400 INVOICE_RECIPIENT_INVALID`). O `GET /customers/:id` devolve esses campos, com `invoiceRecipient {id, name}`; o `GET /customers` traz `legalName`. CPF/CNPJ repetido é conferido pela tela, como no app.
 
 Testes: `routes/v1/__tests__/app-directory.routes.test.ts` e os casos `customers.*`/`devices.*` de `__tests__/rbac/api-matrix.ts`.
 
@@ -192,6 +194,7 @@ Testes: `routes/v1/__tests__/onboarding.routes.test.ts` e o caso `onboarding.see
 | `INVALID_ASSIGNEE` | 400 | Responsável não é da empresa |
 | `INVALID_CURSOR`, `UNSUPPORTED_QUERY` | 400 | Lista |
 | `CUSTOMER_NOT_FOUND`, `DEVICE_NOT_FOUND` | 404 | Clientes e aparelhos |
+| `INVOICE_RECIPIENT_INVALID` | 400 | "Nota fiscal para" o próprio cliente, um que não existe ou de outra empresa |
 | `INVALID_FILE`, `INVALID_PAID_AT` | 400 | Comprovante fora da pasta, de outro bucket ou tipo errado; data inválida, no futuro ou antes da OS |
 | `INSUFFICIENT_PERMISSIONS`, `FORBIDDEN` | 403 | Papel |
 | `NOT_FOUND`, `ITEM_NOT_FOUND`, `TRANSACTION_NOT_FOUND`, `RECEIPT_NOT_FOUND` | 404 | |
