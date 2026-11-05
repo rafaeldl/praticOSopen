@@ -430,7 +430,7 @@ async function sendDps(
   const client = new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
   const stamp = brasiliaTimestamps(deps.now());
   const input: DpsInput = { ...snapshot.dps, ...stamp, environment: config.environment, appVersion: config.appVersion };
-  const { id, xml } = buildDps(input, layoutFor(config.environment, config.layoutByEnvironment));
+  const { id, xml } = buildDps(input, layoutFor(config.environment, config.layoutByEnvironment, input.competenceDate));
   if (id !== invoice.dps?.id) throw new Error('DPS id changed between reservation and send');
   const signed = signXml(xml, cert.keyPem, leafOf(cert.chainPem), 'infDPS', 'DPS');
 

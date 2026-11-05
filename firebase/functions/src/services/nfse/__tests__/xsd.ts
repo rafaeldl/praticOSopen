@@ -6,12 +6,17 @@ import { validateXML } from 'xmllint-wasm';
 
 const ROOT = join(__dirname, 'fixtures', 'xsd');
 
+/** The package (XSD folder) of a layout: v2027_20261020 → v20261020. */
+export function packageOf(layoutId: string): 'v20260209' | 'v20261020' {
+  return layoutId.includes('20260209') ? 'v20260209' : 'v20261020';
+}
+
 export async function validateAgainstXsd(
   xml: string,
-  pkg: 'v20260209' | 'v20261020',
+  layoutId: string,
   schema: 'DPS_v1.01.xsd' | 'pedRegEvento_v1.01.xsd',
 ): Promise<{ valid: boolean; errors: string[] }> {
-  const dir = join(ROOT, pkg);
+  const dir = join(ROOT, packageOf(layoutId));
   const files = readdirSync(dir).filter((f) => f.endsWith('.xsd'));
   const result = await validateXML({
     xml: [{ fileName: 'doc.xml', contents: xml }],
