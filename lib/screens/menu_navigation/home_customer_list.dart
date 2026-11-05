@@ -12,6 +12,7 @@ import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/customer_directory.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/plate_lookup.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -26,7 +27,12 @@ import 'package:praticos/models/permission.dart';
 /// Clientes tab: searchable list (name, phone or vehicle plate) grouped by
 /// initial. A row opens the customer screen; "+" opens the new-customer sheet.
 class HomeCustomerList extends StatefulWidget {
-  const HomeCustomerList({super.key, this.directory, this.canAdd});
+  const HomeCustomerList({
+    super.key,
+    this.directory,
+    this.canAdd,
+    this.showOwed,
+  });
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
@@ -34,6 +40,10 @@ class HomeCustomerList extends StatefulWidget {
   /// Whether "+" (new customer) shows. Defaults to the `manageCustomers`
   /// permission (the Firestore rules deny the write otherwise). Test seam.
   final bool? canAdd;
+
+  /// Whether each row says how much the customer owes. Defaults to who reads
+  /// the Financeiro (its query is the one used). Test seam.
+  final bool? showOwed;
 
   @override
   State<HomeCustomerList> createState() => _HomeCustomerListState();
@@ -57,6 +67,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
   StreamSubscription<List<Customer>>? _subscription;
   List<Customer>? _customers;
   Map<String, OpenOrdersSummary> _openOrders = const {};
+  Map<String, double> _owed = const {};
+  bool get _showOwed =>
+      widget.showOwed ??
+      AuthorizationService.instance.hasPermission(
+        PermissionType.viewFinancialReports,
+      );
   bool _hasError = false;
   String _query = '';
 
@@ -71,6 +87,14 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           if (mounted) setState(() => _openOrders = summary);
         })
         .catchError((_) {});
+    if (_showOwed) {
+      _directory
+          .owedByCustomer()
+          .then((owed) {
+            if (mounted) setState(() => _owed = owed);
+          })
+          .catchError((_) {});
+    }
   }
 
   void _listen() {
@@ -253,10 +277,16 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       status = l10n.openOrdersCount(summary.open);
       dot = AppColors.warning;
     }
+    final owed = _owed[customer.id] ?? 0;
+    final owes = owed > 0
+        ? l10n.customerOwesValue(
+            (FormatService()..setLocale(l10n.localeName)).formatCurrency(owed),
+          )
+        : null;
     final phone = (customer.phone?.isNotEmpty ?? false)
         ? formatPhone(customer.phone)
         : null;
-    final subtitle = [?plate, ?status, ?phone].join(' · ');
+    final subtitle = [?plate, ?status, ?owes, ?phone].join(' · ');
     return AppListRow(
       leading: dot == null ? null : StatusDot(color: dot),
       title: customer.name ?? '',

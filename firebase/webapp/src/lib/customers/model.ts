@@ -12,9 +12,11 @@ export interface CustomerRow {
   /** Razão social, for "Nota fiscal para" (older servers do not send it). */
   legalName?: string | null
   address: string | null
-  /** Open orders (approved, progress) the person reads. */
+  /** "Em aberto" of the Início (quote, approved, progress) the person reads; late by day. */
   open: number
   late: number
+  /** "Falta receber" (A receber rule of the Financeiro); null for who does not read the Financeiro. */
+  owed: number | null
 }
 
 export type DeviceStatus = 'active' | 'maintenance' | 'inactive' | 'decommissioned'

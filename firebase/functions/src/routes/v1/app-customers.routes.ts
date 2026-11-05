@@ -18,6 +18,8 @@ import { getCompanyAggr, getUserAggr } from '../../middleware/company.middleware
 import * as directory from '../../services/app-directory.service';
 import { isValidTaxId, normalizeTaxId } from '../../utils/tax-id.utils';
 import { validateInput } from '../../utils/validation.utils';
+import { companyZone } from '../../utils/company-zone';
+import { db } from '../../services/firestore.service';
 import { sendOrderError } from './orders.routes';
 
 const router: Router = Router();
@@ -111,7 +113,12 @@ const importSchema = z.object({
 router.get('/', route('Failed to list customers', async (req, res, companyId) => {
   if (!(await can(req, res, 'viewCustomers'))) return forbidden(res, "Permission 'viewCustomers' is required");
   const scope = await orderScopeOf(req, res);
-  const result = await directory.customerDirectory(companyId, scope);
+  // "Falta receber" per customer only for who reads the Financeiro: its query reads every order of the company with money open.
+  const withOwed = scope.all && (await can(req, res, 'viewFinancialReports'));
+  const company = (await db.collection('companies').doc(companyId).get()).data();
+  const requested = typeof req.query.zone === 'string' ? req.query.zone.slice(0, 64) : null;
+  const zone = companyZone(company?.country as string | undefined, requested);
+  const result = await directory.customerDirectory(companyId, scope, { zone, withOwed });
   res.json({ success: true, data: result.customers, meta: { total: result.customers.length, truncated: result.truncated, partial: !scope.all } });
 }));
 

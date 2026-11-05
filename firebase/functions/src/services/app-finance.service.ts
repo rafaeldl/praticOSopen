@@ -115,6 +115,9 @@ function openCents(order: FinanceOrder): number {
   return cents(order.total) - cents(order.paidAmount);
 }
 
+/** What is still open on the order, in money. */
+export const openAmount = (order: FinanceOrder): number => money(openCents(order));
+
 /** Has money to receive: not a quote, not canceled, not paid, something open. */
 export function isOpen(order: FinanceOrder): boolean {
   return isSold(order) && order.payment !== 'paid' && openCents(order) > 0;
@@ -434,6 +437,13 @@ async function openOrders(companyId: string, budget: Budget): Promise<FinanceOrd
     budget,
   );
   return [...unpaid, ...missing];
+}
+
+/** Every order with money open (the A receber query of financeSummary), for the Clientes list. */
+export async function ordersWithMoneyOpen(companyId: string, max = MAX_ORDERS): Promise<{ orders: FinanceOrder[] } & ReadMeta> {
+  const budget = budgetOf(max);
+  const open = await openOrders(companyId, budget);
+  return { orders: [...new Map(open.map((order) => [order.id, order])).values()], ...metaOf(budget, max) };
 }
 
 export async function financeSummary(companyId: string, period: Period, max = MAX_ORDERS): Promise<FinanceSummary & ReadMeta> {

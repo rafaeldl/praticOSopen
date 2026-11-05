@@ -25,6 +25,9 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/utils/contract_generation.dart';
+import 'package:praticos/utils/open_orders.dart';
+
+export 'package:praticos/utils/open_orders.dart' show kOpenOrdersLimit;
 import 'package:praticos/utils/order_field_diff.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:flutter/foundation.dart'
@@ -38,10 +41,6 @@ import 'package:praticos/services/order_reminder_text.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/utils/financial_summary.dart';
 part 'order_store.g.dart';
-
-/// "Em aberto" loads every open order at once: the next-step block, the
-/// sections and the "12 em aberto" count must see all of them, not a page.
-const int kOpenOrdersLimit = 500;
 
 class OrderStore = _OrderStore with _$OrderStore;
 
