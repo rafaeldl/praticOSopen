@@ -3,6 +3,7 @@
  * See docs/superpowers/specs/2026-10-04-asaas-cobranca-os-design.md
  */
 
+import type { NfseDirectInvoiceFields } from './nfse-direct.types';
 import { PaymentTransaction, UserAggr } from './types';
 
 export type AsaasEnvironment = 'sandbox' | 'production';
@@ -382,8 +383,10 @@ export interface InvoiceOrderPart {
 /**
  * companies/{cid}/invoices/{invoiceId}: one NFS-e, for one order (default)
  * or several orders of the same customer. Written only by the server.
+ * Invoices of the direct engine (`provider: 'direct'`) add the fields of
+ * NfseDirectInvoiceFields; the Asaas ones stay empty there.
  */
-export interface NfseInvoice {
+export interface NfseInvoice extends NfseDirectInvoiceFields {
   id: string;
   asaasInvoiceId?: string;
   status: InvoiceStatus;
