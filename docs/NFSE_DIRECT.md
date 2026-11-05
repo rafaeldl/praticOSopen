@@ -49,22 +49,67 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 6. Se o KMS não destruir na hora, a versão vai para `nfseKeyDestructions` e `processPendingKeyDestructions` tenta de novo (rotina diária da `nfseApi`).
 7. Auditoria em `companies/{cid}/private/nfse/audit`: ação (`upload`, `replace`, `delete`, `purge-expired`, `destroy-failed`), emitente, quem, quando, aparelho (`x-app-version` ou user agent) e IP. O upload grava a versão do termo aceito (`NFSE_CERTIFICATE_TERMS_VERSION`).
 
-### Passo manual antes de ligar (needs-human)
+### Cloud KMS (configurado em 2026-11-05)
 
-Feito uma vez por um humano com acesso de dono ao projeto. Os nomes abaixo são os que o código espera.
+Feito à mão por um dono do projeto. Estado em produção:
+
+| Item | Valor |
+|---|---|
+| API | `cloudkms.googleapis.com` ligada no projeto `praticos` |
+| Key ring | `projects/praticos/locations/southamerica-east1/keyRings/nfse-certs` |
+| Chaves | uma por emitente, `emitter-{emitterId}`, criadas pelo código no primeiro certificado (`ENCRYPT_DECRYPT`, `SOFTWARE`, `destroyScheduledDuration` 86400 s, labels `app=praticos`, `use=nfse-certificate`). O prazo de 24 h vem do código na criação de cada chave; o key ring não tem esse campo |
+| Conta | `nfse-api@praticos.iam.gserviceaccount.com`, usada só pela `nfseApi` e pela `nfseDaily` (`NFSE_SERVICE_ACCOUNT` em `src/nfse-api.ts`) |
+| Variáveis | nenhuma obrigatória. `NFSE_KMS_LOCATION` (padrão `southamerica-east1`) e `NFSE_KMS_KEY_RING` (padrão `nfse-certs`); o projeto vem de `GCLOUD_PROJECT`. Sem segredos |
+
+Permissões da `nfse-api` (nada de KMS no projeto):
+
+| Onde | Papel | Para quê |
+|---|---|---|
+| key ring `nfse-certs` | `roles/cloudkms.cryptoKeyEncrypterDecrypter` | cifrar e decifrar a DEK |
+| key ring `nfse-certs` | `projects/praticos/roles/nfseKeyManager` (papel próprio: `cloudkms.cryptoKeys.create`, `.get`, `.update`, `cloudkms.cryptoKeyVersions.create`, `.destroy`) | criar a chave do emitente, versão nova na troca, trocar a primária, destruir a versão |
+| projeto | `roles/datastore.user` | Firestore |
+| bucket `praticos.appspot.com` | `roles/storage.objectUser` | XML da nota em `tenants/{cid}/invoices/` |
+
+Comandos usados (para recriar em outro projeto, troque `praticos`):
 
 ```bash
 gcloud services enable cloudkms.googleapis.com --project praticos
 gcloud kms keyrings create nfse-certs --location southamerica-east1 --project praticos
-gcloud iam service-accounts create nfse-api --display-name "NFS-e direta (nfseApi)" --project praticos
+gcloud iam service-accounts create nfse-api --display-name "NFS-e direta (nfseApi)" --description "Unica conta que decifra os certificados A1" --project praticos
+gcloud iam roles create nfseKeyManager --project praticos --title "NFS-e: chaves do emitente" --stage GA \
+  --permissions cloudkms.cryptoKeys.create,cloudkms.cryptoKeys.get,cloudkms.cryptoKeys.update,cloudkms.cryptoKeyVersions.create,cloudkms.cryptoKeyVersions.destroy
+SA=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com
+gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role roles/cloudkms.cryptoKeyEncrypterDecrypter
+gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role projects/praticos/roles/nfseKeyManager
+gcloud projects add-iam-policy-binding praticos --member $SA --role roles/datastore.user --condition=None
+gcloud storage buckets add-iam-policy-binding gs://praticos.appspot.com --member $SA --role roles/storage.objectUser
 ```
 
-Permissões só no keyring `nfse-certs` (nunca no projeto), para `nfse-api@praticos.iam.gserviceaccount.com`:
+O deploy pelo CI (`github-actions-deployer`) já pode usar a conta: tem `roles/iam.serviceAccountUser` no projeto.
 
-- `roles/cloudkms.cryptoKeyEncrypterDecrypter` (cifrar e decifrar a DEK). Nenhuma outra conta recebe este papel.
-- Papel próprio `nfseKeyManager` com `cloudkms.cryptoKeys.create`, `cloudkms.cryptoKeys.get`, `cloudkms.cryptoKeys.update`, `cloudkms.cryptoKeyVersions.create`, `cloudkms.cryptoKeyVersions.destroy` (criar a chave do emitente, versão nova, trocar a primária e destruir).
+#### Quem mais alcança as chaves
 
-No projeto, para a mesma conta: `roles/datastore.user` (Firestore) e o que a `nfseApi` precisar de Storage na etapa #563. A `nfseApi` é declarada com `serviceAccount: 'nfse-api@…'` na etapa #563; até lá a rota não está montada e nada usa o KMS.
+- As outras Functions rodam com a conta padrão de computação (v2) ou `praticos@appspot` (as duas v1). Ambas têm Editor, que não tem `useToEncrypt`, `useToDecrypt` nem `cryptoKeyVersions.destroy`, e nenhuma está na política do key ring ou das chaves. Por isso o `accountApi`, ao apagar uma conta, não destrói a versão: ela vai para `nfseKeyDestructions` e a `nfseDaily` destrói no dia seguinte.
+- Os donos do projeto (papel Owner) conseguem decifrar e destruir. É do papel e não muda.
+- Quem pode se passar pela `nfse-api` (papel `serviceAccountTokenCreator` ou `actAs`) também alcança as chaves. Revisar essa lista ao mexer em IAM no projeto.
+
+#### Teste em produção (2026-11-05)
+
+Script local rodando como `nfse-api` (ADC com impersonação, permissão `serviceAccountTokenCreator` dada ao dono só durante o teste e tirada depois), com certificado falso gerado na hora (`__tests__/test-certificates.ts`) e empresa descartável `kms-smoke-…`:
+
+1. `storeCertificate`: criou a chave `emitter-{id}`, versão 1, e gravou `nfseCertificates/{id}`.
+2. `loadCertificate`: abriu chave e cadeia.
+3. `deleteCertificate`: apagou o material e agendou a destruição na hora (fila vazia).
+4. `loadCertificate` de novo: `CERT_NOT_FOUND`.
+5. `gcloud kms keys versions list`: versão 1 em `DESTROY_SCHEDULED`, destruição 24 h depois.
+6. Limpeza: empresa, certificado e fila apagados. A chave de teste fica no key ring sem versão utilizável (o KMS não apaga chaves).
+
+Para conferir o estado de uma chave:
+
+```bash
+gcloud kms keys versions list --key projects/praticos/locations/southamerica-east1/keyRings/nfse-certs/cryptoKeys/emitter-{emitterId}
+gcloud kms keyrings get-iam-policy nfse-certs --location southamerica-east1 --project praticos
+```
 
 ## Motor de emissão (etapa #563)
 
@@ -100,7 +145,7 @@ Rotas (`routes/v1/nfse-direct.routes.ts`, em `/v1/app/nfse/direct` na `nfseApi`)
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts` e **não** são exportadas pelo `index.ts`: o deploy precisa antes do keyring e da conta de serviço (passo manual acima). Depois do passo, acrescentar `export { nfseApi, nfseDaily } from './nfse-api';` ao `index.ts`. A importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
 
 Testes: DPS dos dois regimes nos dois leiautes validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 

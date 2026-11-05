@@ -1,0 +1,26 @@
+/**
+ * nfseApi and nfseDaily are deployed and run as nfse-api@, the only account
+ * with decrypt on the nfse-certs key ring. Any other runtime account (the
+ * default compute one of the other functions) cannot open a certificate.
+ */
+import { readFileSync } from 'fs';
+import path from 'path';
+
+const src = (file: string) => readFileSync(path.join(__dirname, '..', file), 'utf8');
+
+describe('nfseApi deploy', () => {
+  it('index.ts exports nfseApi and nfseDaily', () => {
+    expect(src('index.ts')).toMatch(/export \{ nfseApi, nfseDaily \} from '\.\/nfse-api';/);
+  });
+
+  it('both functions run as the nfse-api service account', () => {
+    const api = src('nfse-api.ts');
+    expect(api).toMatch(/NFSE_SERVICE_ACCOUNT = `nfse-api@\$\{process\.env\.GCLOUD_PROJECT \|\| 'praticos'\}\.iam\.gserviceaccount\.com`/);
+    expect(api.match(/serviceAccount: NFSE_SERVICE_ACCOUNT/g)).toHaveLength(2);
+  });
+
+  it('no other function opens the vault directly', () => {
+    const index = src('index.ts');
+    expect(index).not.toMatch(/certificate-vault|key-vault|nfse-certificate\.routes|nfse-direct\.routes/);
+  });
+});
