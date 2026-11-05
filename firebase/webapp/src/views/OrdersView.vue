@@ -284,8 +284,10 @@ const isOffline = (error: unknown) => !navigator.onLine || (error as { code?: st
 
 /** "Tentar de novo" of the next page: the same query asked again (not the cache). */
 function retryMore() {
+  if (loadingMore.value) return
   moreError.value = null
-  void loadMore()
+  // A page came: the infinite scroll looks at the end again (the observer only fires on a change).
+  void loadMore().then((loaded) => loaded && observer?.watch(sentinel.value ?? null))
 }
 
 /** True when a page came (the infinite scroll then looks at the end of the list again). */
