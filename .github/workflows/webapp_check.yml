@@ -65,8 +65,16 @@ jobs:
       - name: Build and bundle budget
         run: npm run build
 
+      # The runner image already has Chromium's system libraries; --with-deps
+      # only added CJK fonts from a slow apt mirror (up to 7 min)
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('firebase/webapp/package-lock.json') }}
+
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       # Lighthouse measures dist-e2e, so it needs that build
       - name: Lighthouse
@@ -141,8 +149,16 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ hashFiles('firebase/webapp/package-lock.json') }}
 
+      # The runner image already has Chromium's system libraries; --with-deps
+      # only added CJK fonts from a slow apt mirror (up to 7 min)
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('firebase/webapp/package-lock.json') }}
+
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: E2E on the Emulator Suite
         env:
