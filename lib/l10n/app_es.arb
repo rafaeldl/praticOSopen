@@ -2799,5 +2799,9 @@
   "orderItemCatalogPriceAlways": "Usar siempre",
   "orderItemCatalogPriceOnlyHere": "Solo en esta OS",
   "orderItemCatalogPriceSaved": "El precio del Catálogo cambió a {to}",
-  "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí."
+  "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí.",
+  "checklistStatusDoneMissing": "{count, plural, =1{Concluido · 1 sin respuesta} other{Concluido · {count} sin respuesta}}",
+  "checklistDoneTitle": "Checklist concluido",
+  "checklistDoneReopenBody": "Para cambiar una respuesta, reabra el checklist.",
+  "checklistDoneAskReopenBody": "Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist."
 }

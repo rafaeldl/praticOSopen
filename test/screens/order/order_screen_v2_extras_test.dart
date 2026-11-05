@@ -264,27 +264,33 @@ Order _order({String status = 'quote', String? phone}) => Order()
   ..paidAmount = 0
   ..transactions = [];
 
-of_model.OrderForm _form(String id, {int items = 3, int answered = 1}) =>
-    of_model.OrderForm(
-      id: id,
-      formDefinitionId: 'def-$id',
-      title: 'Entrada do veículo',
-      status: answered >= items
+of_model.OrderForm _form(
+  String id, {
+  int items = 3,
+  int answered = 1,
+  of_model.FormStatus? status,
+}) => of_model.OrderForm(
+  id: id,
+  formDefinitionId: 'def-$id',
+  title: 'Entrada do veículo',
+  status:
+      status ??
+      (answered >= items
           ? of_model.FormStatus.completed
-          : of_model.FormStatus.inProgress,
-      items: [
-        for (var i = 0; i < items; i++)
-          FormItemDefinition(
-            id: 'q$i',
-            label: 'Pergunta $i',
-            type: FormItemType.text,
-          ),
-      ],
-      responses: [
-        for (var i = 0; i < answered; i++)
-          of_model.FormResponse(itemId: 'q$i', value: 'ok'),
-      ],
-    );
+          : of_model.FormStatus.inProgress),
+  items: [
+    for (var i = 0; i < items; i++)
+      FormItemDefinition(
+        id: 'q$i',
+        label: 'Pergunta $i',
+        type: FormItemType.text,
+      ),
+  ],
+  responses: [
+    for (var i = 0; i < answered; i++)
+      of_model.FormResponse(itemId: 'q$i', value: 'ok'),
+  ],
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -417,7 +423,12 @@ void main() {
       final actions = FakeActions();
       final store = OrderStore()
         ..formsStream = ObservableStream(
-          Stream.value([_form('f1'), _form('f2', items: 2, answered: 2)]),
+          Stream.value([
+            _form('f1'),
+            _form('f2', items: 2, answered: 2),
+            // "Concluir assim mesmo" left one without an answer (#588).
+            _form('f3', status: of_model.FormStatus.completed, answered: 2),
+          ]),
         );
       await _pump(
         tester,
@@ -427,13 +438,14 @@ void main() {
 
       expect(find.text('Checklists'), findsOneWidget);
       expect(find.text('1 de 3 respondidas'), findsOneWidget);
-      expect(find.text('2 de 2 respondidas'), findsOneWidget);
+      expect(find.text('Completo'), findsOneWidget);
+      expect(find.text('Concluído · 1 sem resposta'), findsOneWidget);
       expect(
         find.ancestor(
           of: find.text('Entrada do veículo'),
           matching: find.byType(Dismissible),
         ),
-        findsNWidgets(2),
+        findsNWidgets(3),
       );
 
       await tester.tap(find.text('1 de 3 respondidas'));

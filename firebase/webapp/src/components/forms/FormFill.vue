@@ -12,10 +12,8 @@
 // the web can answer at the same time. An answer that did not reach the
 // server stays on screen marked "não foi salvo", with "Tentar de novo".
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ChevronLeft, ChevronRight, ImagePlus, MoreHorizontal, X } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, ImagePlus, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
-import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { locale, t } from '@/i18n'
 import { addPhotos, FormCompleted, removePhoto, saveAnswer, setFormStatus } from '@/lib/forms/data'
@@ -23,6 +21,7 @@ import {
   answerText,
   applyChange,
   canFinishAnyway,
+  completedStatus,
   firstUnanswered,
   isAnswered,
   labelOf,
@@ -48,7 +47,6 @@ import { announce } from '@/lib/ui'
 
 const props = defineProps<{ orderId: string; form: OrderForm; access: FormsAccess; devices: DeviceAggr[]; start?: boolean }>()
 const emit = defineEmits<{ close: [] }>()
-const router = useRouter()
 
 interface Pending {
   change: AnswerChange
@@ -75,8 +73,8 @@ const busy = ref(false)
 const viewer = ref<{ itemId: string; index: number } | null>(null)
 const removing = ref<{ itemId: string; url: string } | null>(null)
 const missingList = ref<FormItem[] | null>(null)
-const menuOpen = ref(false)
-const menuButton = ref<HTMLElement | null>(null)
+/** A question of a completed checklist was clicked: says so and offers "Reabrir". */
+const doneNotice = ref(false)
 const layer = ref<InstanceType<typeof Layer> | null>(null)
 /** Closed on its own after completing: nothing more to announce. */
 let finished = false
@@ -103,7 +101,10 @@ const device = computed(() => {
   return found ? [found.name, found.serial].filter(Boolean).join(' · ') : null
 })
 const status = computed(() => {
-  if (completed.value) return { dot: 'success', text: t('checklistStatusDone') }
+  if (completed.value) {
+    const done = completedStatus(view.value)
+    return { dot: 'success', text: t(done.key, { count: done.count }) }
+  }
   if (missing.value > 0) return { dot: 'warning', text: t('orderChecklistMissing', { count: missing.value }) }
   return { dot: 'accent', text: t('checklistRemaining', { count: 0 }) }
 })
@@ -342,22 +343,12 @@ async function finish() {
   }
 }
 
-/** As in the editor: the menu leaves through the history, then "Reabrir" runs. */
-let reopenPicked = false
-function pickReopen() {
-  reopenPicked = true
-  router.back()
-}
-function onMenuClosed() {
-  menuOpen.value = false
-  if (reopenPicked) {
-    reopenPicked = false
-    void reopen()
-  }
+function reopenFromNotice() {
+  doneNotice.value = false
+  void reopen()
 }
 
 async function reopen() {
-  menuOpen.value = false
   if (busy.value) return
   busy.value = true
   try {
@@ -402,14 +393,14 @@ onMounted(() => {
       <div class="drawer-head">
         <button type="button" class="icon-btn" :aria-label="t('close')" @click="layer?.close()"><X :size="18" aria-hidden="true" /></button>
         <h2 class="layer-title">{{ title }}</h2>
-        <button v-if="completed && access.reopen" ref="menuButton" type="button" class="icon-btn" :aria-label="t('orderMoreActions')" data-testid="fill-menu" @click="menuOpen = true">
-          <MoreHorizontal :size="18" aria-hidden="true" />
-        </button>
       </div>
       <div class="drawer-body">
         <header class="fill-head">
           <p v-if="device" class="sub" data-testid="fill-device">{{ device }}</p>
           <p class="fill-status" data-testid="fill-status"><span class="dot" :class="`dot--${status.dot}`" aria-hidden="true"></span> {{ status.text }}</p>
+          <div v-if="completed && access.reopen" class="row-actions">
+            <button type="button" class="link" :disabled="busy" data-testid="fill-reopen" @click="reopen">{{ t('reopen') }}</button>
+          </div>
           <div v-if="editable && view.items.length" class="row-actions">
             <button v-if="missing === 0" type="button" class="btn btn--primary" :disabled="busy" data-testid="fill-finish" :data-autofocus="autoStart ? undefined : ''" @click="finish">{{ t('checklistFinish') }}</button>
             <button v-else type="button" class="btn btn--primary" data-testid="fill-start" :data-autofocus="autoStart ? undefined : ''" @click="startOrContinue">{{ answeredAny ? t('continue_') : t('checklistStart') }}</button>
@@ -437,7 +428,18 @@ onMounted(() => {
               </legend>
 
               <template v-if="!editable">
-                <p class="fill-answer" :class="{ muted: !isAnswered(item, responseOf(view, item.id)) }">
+                <!-- Completed: a click says so and offers "Reabrir", instead of doing nothing. -->
+                <button
+                  v-if="completed && access.fill"
+                  type="button"
+                  class="link-plain fill-answer"
+                  :class="{ muted: !isAnswered(item, responseOf(view, item.id)) }"
+                  :data-testid="`fill-done-${item.id}`"
+                  @click="doneNotice = true"
+                >
+                  {{ answerText(item, responseOf(view, item.id), locale, words) ?? t('checklistNoAnswer') }}
+                </button>
+                <p v-else class="fill-answer" :class="{ muted: !isAnswered(item, responseOf(view, item.id)) }">
                   {{ answerText(item, responseOf(view, item.id), locale, words) ?? t('checklistNoAnswer') }}
                 </p>
               </template>
@@ -520,7 +522,22 @@ onMounted(() => {
     </div>
   </Layer>
 
-  <ChoiceDialog v-if="menuOpen" :anchor="menuButton" :title="title" :choices="[{ id: 'reopen', label: t('reopen') }]" @pick="pickReopen" @close="onMenuClosed" />
+  <ConfirmDialog
+    v-if="doneNotice && access.reopen"
+    :title="t('checklistDoneTitle')"
+    :body="t('checklistDoneReopenBody')"
+    :confirm="t('reopen')"
+    :keep="t('cancel')"
+    @confirm="reopenFromNotice"
+    @close="doneNotice = false"
+  />
+  <Layer v-else-if="doneNotice" kind="dialog" :label="t('checklistDoneTitle')" @close="doneNotice = false">
+    <template #default="{ close }">
+      <div class="layer-head"><h2 class="layer-title">{{ t('checklistDoneTitle') }}</h2></div>
+      <div class="layer-body" data-testid="fill-done-notice"><p>{{ t('checklistDoneAskReopenBody') }}</p></div>
+      <div class="layer-foot"><button type="button" class="btn btn--primary" data-autofocus @click="close()">{{ t('ok') }}</button></div>
+    </template>
+  </Layer>
   <Layer v-if="viewed && !removing" kind="dialog" :label="t('photo')" @close="viewer = null">
     <template #default="{ close }">
       <div class="layer-body fill-viewer" data-testid="fill-viewer" @keydown.left.prevent="step(-1)" @keydown.right.prevent="step(1)">

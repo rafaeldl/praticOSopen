@@ -7093,4 +7093,26 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get orderItemCatalogPriceFailed =>
       'No se pudo cambiar el precio en el Catálogo. Cámbialo allí.';
+
+  @override
+  String checklistStatusDoneMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Concluido · $count sin respuesta',
+      one: 'Concluido · 1 sin respuesta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistDoneTitle => 'Checklist concluido';
+
+  @override
+  String get checklistDoneReopenBody =>
+      'Para cambiar una respuesta, reabra el checklist.';
+
+  @override
+  String get checklistDoneAskReopenBody =>
+      'Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist.';
 }

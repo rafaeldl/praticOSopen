@@ -2811,5 +2811,9 @@
   "orderItemCatalogPriceAlways": "Use always",
   "orderItemCatalogPriceOnlyHere": "Only this order",
   "orderItemCatalogPriceSaved": "Catalog price changed to {to}",
-  "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there."
+  "orderItemCatalogPriceFailed": "Couldn't change the price in the Catalog. Change it there.",
+  "checklistStatusDoneMissing": "{count, plural, =1{Done · 1 unanswered} other{Done · {count} unanswered}}",
+  "checklistDoneTitle": "Checklist done",
+  "checklistDoneReopenBody": "To change an answer, reopen the checklist.",
+  "checklistDoneAskReopenBody": "To change an answer, ask whoever manages the team to reopen the checklist."
 }

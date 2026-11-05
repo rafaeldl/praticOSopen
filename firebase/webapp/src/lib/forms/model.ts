@@ -162,6 +162,16 @@ export function isAnswered(item: FormItem, response: FormResponse | undefined): 
 
 export const missingCount = (form: OrderForm) => form.items.filter((item) => !isAnswered(item, responseOf(form, item.id))).length
 export const answeredCount = (form: OrderForm) => form.items.length - missingCount(form)
+
+/**
+ * Status of a completed checklist: "Completo", or "Concluído · 2 sem resposta"
+ * when it was finished with questions left ("Concluir assim mesmo"), so it
+ * does not look like a fully answered one (the app's completedChecklistLabel).
+ */
+export function completedStatus(form: OrderForm): { key: 'checklistStatusDone' | 'checklistStatusDoneMissing'; count: number } {
+  const count = missingCount(form)
+  return { key: count ? 'checklistStatusDoneMissing' : 'checklistStatusDone', count }
+}
 export function firstUnanswered(form: OrderForm, after = -1): number | null {
   for (let i = after + 1; i < form.items.length; i++) if (!isAnswered(form.items[i] as FormItem, responseOf(form, (form.items[i] as FormItem).id))) return i
   return null
