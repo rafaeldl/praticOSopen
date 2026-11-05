@@ -835,5 +835,20 @@
   "web.nfse.autoConfirmTitle": "Issue notas automatically?",
   "web.nfse.autoConfirm": "Issue automatically",
   "web.nfse.rowError": "couldn't load this order's notas",
-  "web.push.promptMessage": "PraticOS tells you in this browser when a customer approves a quote, comments on an order or pays. Your browser will ask if it can send these notifications."
+  "web.push.promptMessage": "PraticOS tells you in this browser when a customer approves a quote, comments on an order or pays. Your browser will ask if it can send these notifications.",
+  "web.quick.newCustomer": "New customer",
+  "web.quick.newDevice": "New {device}",
+  "web.quick.newItem": "New service or part",
+  "web.quick.needsName": "Type the name to add it",
+  "web.quick.itemName": "Name",
+  "web.quick.itemKind": "It is a",
+  "web.quick.phoneOf": "This number belongs to {name}.",
+  "web.quick.useCustomer": "Use {name}",
+  "web.quick.phoneOptional": "The phone can stay blank",
+  "web.quick.register": "Add",
+  "web.quick.registerAndAdd": "Add to the order",
+  "web.quick.finishFirst": "Finish or cancel the open record before saving",
+  "web.quick.whatsapp": "WhatsApp",
+  "web.quick.customerData": "Customer details",
+  "web.quick.deviceData": "Details of {name}"
 }

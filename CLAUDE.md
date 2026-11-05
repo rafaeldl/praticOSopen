@@ -752,6 +752,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/ORDER_ON_HOLD.md` - Marca de OS parada (motivo, dias parados, filtro Paradas)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
+- `docs/QUICK_REGISTER.md` - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS
 - `docs/CUSTOMER_CONTACTS.md` - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/DOMAIN.md` - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar

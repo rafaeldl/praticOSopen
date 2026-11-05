@@ -2187,6 +2187,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customerNameRequired => 'Escribe el nombre del cliente';
 
   @override
+  String get orderMissingWhatsapp => 'WhatsApp';
+
+  @override
   String get customerPhoneLabel => 'Teléfono o WhatsApp';
 
   @override

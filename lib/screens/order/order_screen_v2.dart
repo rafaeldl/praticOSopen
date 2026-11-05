@@ -25,6 +25,8 @@ import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/screens/order/order_missing_data.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/models/user.dart';
@@ -3539,6 +3541,37 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return null;
   }
 
+  /// "WhatsApp", "Placa" or "Modelo", with the device's name when the order
+  /// has more than one.
+  String _missingLabel(MissingData missing, SegmentConfigProvider config) {
+    final what = switch (missing.kind) {
+      MissingKind.phone => context.l10n.orderMissingWhatsapp,
+      MissingKind.serial => config.label(LabelKeys.deviceSerialNumber),
+      MissingKind.model => config.label(LabelKeys.deviceModel),
+    };
+    if (missing.deviceId == null || _store.devices.length < 2) return what;
+    final device = _store.devices.firstWhere(
+      (d) => d.id == missing.deviceId,
+      orElse: () => DeviceAggr(),
+    );
+    final name = device.name?.trim().isNotEmpty ?? false
+        ? device.name!
+        : device.serial ?? '';
+    return name.isEmpty ? what : '$what · $name';
+  }
+
+  Future<void> _completeMissing(MissingData missing) async {
+    if (missing.kind == MissingKind.phone) {
+      final id = _store.customer?.id;
+      if (id == null) return;
+      final saved = await _actions.editCustomer(context, id);
+      if (saved != null && mounted) _store.refreshCustomer(saved);
+    } else {
+      final saved = await _actions.editDevice(context, missing.deviceId!);
+      if (saved != null && mounted) _store.refreshDevice(saved);
+    }
+  }
+
   /// Customer (large), vehicle, status (dot + text), what matters now and
   /// the next step. Opaque, no card.
   Widget _buildHeader(SegmentConfigProvider config) {
@@ -3648,6 +3681,29 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                       ),
               ),
             ),
+          // order.quick.complete: what the customer and the devices still
+          // lack (WhatsApp, plate/serial, model), each opening its form.
+          if (canEdit)
+            for (final missing in missingOnOrder(
+              customer: customer,
+              devices: _store.devices,
+              canEditCustomers: _permissions.canRegisterCustomers(),
+              canEditDevices: _permissions.canRegisterDevices(),
+            ))
+              Transform.translate(
+                offset: const Offset(-AppSpacing.pageMargin, 0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _link(
+                    _missingLabel(missing, config),
+                    key: ValueKey(
+                      'order_missing_${missing.kind.name}_${missing.deviceId ?? ''}',
+                    ),
+                    icon: CupertinoIcons.add,
+                    onTap: () => _completeMissing(missing),
+                  ),
+                ),
+              ),
           const SizedBox(height: AppSpacing.sm),
           _tappable(
             key: const ValueKey('order_header_status'),

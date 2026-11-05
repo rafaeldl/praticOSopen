@@ -105,8 +105,15 @@ test('buscar item: preço para quem vê valores e "+ Cadastrar no catálogo" põ
   const name = `Alinhamento ${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`
   await search.fill(name)
   await page.getByRole('option', { name: `+ Cadastrar “${name}” no catálogo` }).click()
+  // order.quick.item: kind and price asked right there; the price goes to the catalog and the line.
+  const quick = page.getByTestId('quick-item')
+  await expect(quick.getByRole('radio', { name: 'Serviço' })).toHaveAttribute('aria-checked', 'true')
+  await expect(quick.getByLabel('Preço')).toBeFocused()
+  await quick.getByLabel('Preço').fill('80')
+  await page.keyboard.press('Enter')
   await expect(panel(page).getByTestId('order-line').filter({ hasText: name })).toBeVisible()
   await expect.poll(async () => (await catalogNamed('service', name)).length).toBe(1)
+  expect(((await catalogNamed('service', name))[0] as { value?: number }).value).toBe(80)
   await expect.poll(async () => ((await readOrder(order.id))?.services as { service?: { name?: string } }[]).some((line) => line.service?.name === name)).toBe(true)
 })
 
@@ -224,11 +231,19 @@ test.describe('Nova OS', () => {
     const input = page.getByRole('combobox', { name: /Veículo, se tiver/ })
     await input.fill(plate.toLowerCase())
     await page.getByRole('option', { name: `+ Cadastrar “${plate.toLowerCase()}”` }).click()
+    // order.quick.device: the plate goes to its field in capitals and the cursor to the model.
+    const quick = page.getByTestId('quick-device')
+    await expect(quick.getByLabel('Placa')).toHaveValue(plate)
+    await expect(quick.getByLabel('Modelo')).toBeFocused()
+    await quick.getByLabel('Modelo').fill('Argo Prata')
+    await page.keyboard.press('Enter')
     await expect(drawer(page)).toContainText(plate)
+    await expect(drawer(page)).toContainText('Argo Prata')
     await page.getByTestId('save-order').click()
     await expect(page.locator('.toast')).toContainText(/OS \d+ criada/)
     const saved = await readOrder(new URL(page.url()).searchParams.get('order') as string)
     expect((saved?.device as { serial?: string }).serial).toBe(plate)
+    expect((saved?.device as { name?: string }).name).toBe('Argo Prata')
   })
 })
 
@@ -248,6 +263,8 @@ test('outro veículo na OS: do cliente primeiro, ✓ nos que já estão, placa n
   const plate = `PK${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1 + Math.random() * 8)}B${Math.floor(10 + Math.random() * 89)}`
   await picker.getByRole('combobox').fill(plate)
   await picker.getByRole('option', { name: `+ Cadastrar “${plate}”` }).click()
+  await expect(page.getByTestId('quick-device').getByLabel('Placa')).toHaveValue(plate)
+  await page.keyboard.press('Enter')
   await expect.poll(async () => ((await readOrder(order.id))?.devices as { serial?: string }[]).map((d) => d.serial)).toEqual([a.serial, plate])
 })
 

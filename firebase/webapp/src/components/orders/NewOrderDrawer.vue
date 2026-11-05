@@ -3,7 +3,7 @@
 // cursor on Cliente; Enter picks; the device is suggested; each item enters with
 // the catalog price; Ctrl+Enter saves from any field. Nothing is saved before
 // that. Closing with something filled in asks first (also the browser's Voltar).
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { Check, Trash2, X } from '@lucide/vue'
 import Combobox, { type ComboboxGroup, type ComboboxItem } from '@/components/Combobox.vue'
@@ -15,14 +15,16 @@ import NewOrderCustomFields from './NewOrderCustomFields.vue'
 import { newOrderFields } from '@/lib/orders/new-order-fields'
 import { requestField, withRequest } from '@/lib/orders/request'
 import NewOrderPhotos from './NewOrderPhotos.vue'
+import QuickCreate from './QuickCreate.vue'
+import type { CustomerRow, DeviceRow } from '@/lib/customers/model'
 import type { NewDevice } from '@/lib/orders/assist-draft'
 import { fieldName, validateField, writeCustom } from '@/lib/segment-fields'
-import { t } from '@/i18n'
+import { loadTexts, t } from '@/i18n'
 import { logAiEvent } from '@/lib/analytics'
 import { errorMessageKey } from '@/lib/api'
 import { orderCreated } from '@/lib/orders/bus'
 import { markOffer } from '@/lib/forms/offer'
-import { canRegisterItem, sameName, forgetLists, loadCatalog, registerItem, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
+import { canRegisterItem, sameName, forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
 import { startContract } from '@/lib/contracts/data'
 import { newContract } from '@/lib/contracts/model'
@@ -31,7 +33,7 @@ import { deviceLabel, lineKindText, money, orderShort, statusText, country } fro
 import * as writes from '@/lib/orders/writes'
 import { askWhenOpened } from '@/lib/orders/maintenance-offer'
 import { askNotificationsOnce } from '@/lib/push'
-import { byName, createDeviceFrom, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
+import { byName, devicesOfCustomer, mostUsedKeys, ownerOf, plateHits, plateOwnerName, recentCustomers, type Named } from '@/lib/orders/pickers'
 import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
@@ -49,6 +51,9 @@ interface Line {
   free?: boolean
 }
 
+// The full forms behind "Mais dados" and the order's "+ WhatsApp" / "+ Placa" (order.quick.*), with the cadastros' texts.
+const CustomerForm = defineAsyncComponent(() => Promise.all([import('@/components/customers/CustomerForm.vue'), loadTexts('customers')]).then(([m]) => m))
+const DeviceForm = defineAsyncComponent(() => Promise.all([import('@/components/customers/DeviceForm.vue'), loadTexts('customers')]).then(([m]) => m))
 const router = useRouter()
 const layer = ref<InstanceType<typeof Layer> | null>(null)
 const customerRef = ref<InstanceType<typeof Combobox> | null>(null)
@@ -92,6 +97,9 @@ const failed = ref('')
 const loading = ref(true)
 const devicesLoading = ref(false)
 let allowClose = false
+/** "+ Cadastrar «X»" open as a block in place of its search (order.quick.*), and the full form behind "Mais dados". */
+const quick = ref<{ kind: 'customer' | 'device' | 'item'; text: string } | null>(null)
+const fullForm = ref<{ kind: 'customer'; draft: { name: string; phone: string } } | { kind: 'device'; draft: { name: string; serial: string } } | null>(null)
 
 const showsMoney = can('viewPrices')
 const editPrices = showsMoney && can('editPrices')
@@ -177,22 +185,6 @@ const customerGroups = (query: string): ComboboxGroup[] => [
   { items: query.trim() && !loading.value && can('manageCustomers') && !sameName(customers.value, query) ? [{ id: NEW, label: t('web.newOrder.register', { name: query.trim() }) }] : [] },
 ]
 
-async function createCustomer(text: string): Promise<Customer | null> {
-  const digits = /^[\d\s()+-]+$/.test(text) && /\d{6}/.test(text.replace(/\D/g, ''))
-  const body = digits ? { name: text, phone: text } : { name: text }
-  try {
-    const created = await api<{ id: string; name: string }>('/v1/app/customers', { method: 'POST', body })
-    const fresh: Customer = { id: created.id, name: created.name, ...(digits ? { phone: text } : {}) }
-    customers.value = [...customers.value, fresh]
-    forgetLists()
-    announce(t('web.newOrder.registered', { name: fresh.name }))
-    return fresh
-  } catch (error) {
-    failed.value = t(errorMessageKey(error))
-    return null
-  }
-}
-
 /** The plate's device and its owner (the customer of its latest order); without an owner, only the device. */
 async function pickPlate(deviceId: string) {
   const found = devices.value.find((d) => d.id === deviceId) ?? null
@@ -206,8 +198,15 @@ async function pickPlate(deviceId: string) {
 
 async function pickCustomer(item: ComboboxItem, query = '') {
   if (item.id.startsWith(PLATE)) return pickPlate(item.id.slice(PLATE.length))
-  const chosen =
-    item.id === NEW ? await createCustomer(query.trim()) : (customers.value.find((c) => c.id === item.id) ?? recents.value.find((c) => c.id === item.id) ?? null)
+  if (item.id === NEW) {
+    quick.value = { kind: 'customer', text: query }
+    return
+  }
+  await chooseCustomer(customers.value.find((c) => c.id === item.id) ?? recents.value.find((c) => c.id === item.id) ?? null)
+}
+
+async function chooseCustomer(chosen: Customer | null) {
+  quick.value = null
   customer.value = chosen
   device.value = null
   customerDevices.value = []
@@ -244,20 +243,71 @@ const deviceGroups = (query: string): ComboboxGroup[] => {
   ]
 }
 async function pickDevice(item: ComboboxItem, query = '') {
+  // A new one asks model and plate/serial right here (order.quick.device).
   if (item.id === NEW) {
-    try {
-      // A Brazilian plate becomes the serial in capitals; anything else the model (device.list.pick-create).
-      const fresh = await createDeviceFrom(query)
-      devices.value = [...devices.value, fresh]
-      device.value = fresh
-    } catch (error) {
-      failed.value = t(errorMessageKey(error))
-      return
-    }
-  } else device.value = devices.value.find((d) => d.id === item.id) ?? customerDevices.value.find((d) => d.id === item.id) ?? null
+    quick.value = { kind: 'device', text: query }
+    return
+  }
+  await chooseDevice(devices.value.find((d) => d.id === item.id) ?? customerDevices.value.find((d) => d.id === item.id) ?? null)
+}
+async function chooseDevice(chosen: Device | null) {
+  quick.value = null
+  device.value = chosen
   await nextTick()
   itemRef.value?.focus()
 }
+
+/** The block registered it: the record is chosen and the order goes on. */
+async function onQuickSaved(record: Customer | Device | CatalogItem) {
+  const kind = quick.value?.kind
+  if (kind === 'customer') {
+    customers.value = [...customers.value, record as Customer]
+    announce(t('web.newOrder.registered', { name: record.name }))
+    await chooseCustomer(record as Customer)
+  } else if (kind === 'device') {
+    devices.value = [...devices.value, record as Device]
+    announce(t('web.newOrder.registered', { name: record.name }))
+    await chooseDevice(record as Device)
+  } else if (kind === 'item') {
+    const created = record as CatalogItem
+    quick.value = null
+    catalog.value = [...catalog.value, created]
+    lines.value = [...lines.value, { key: crypto.randomUUID(), item: created, value: created.value, quantity: 1 }]
+    announce(t('web.newOrder.itemRegistered', { name: created.name }))
+    await nextTick()
+    itemRef.value?.focus()
+  }
+}
+async function onQuickCancel() {
+  const kind = quick.value?.kind
+  quick.value = null
+  await nextTick()
+  ;(kind === 'customer' ? customerRef : kind === 'device' ? deviceRef : itemRef).value?.focus()
+}
+function onQuickMore(draft: { name: string; phone?: string; serial?: string }) {
+  if (quick.value?.kind === 'customer') fullForm.value = { kind: 'customer', draft: { name: draft.name, phone: draft.phone ?? '' } }
+  else if (quick.value?.kind === 'device') fullForm.value = { kind: 'device', draft: { name: draft.name, serial: draft.serial ?? '' } }
+}
+/** Saved in the full form: read the lists again and choose it. */
+async function onFullSaved(id: string) {
+  const kind = fullForm.value?.kind
+  fullForm.value = null
+  forgetLists()
+  if (kind === 'customer') {
+    customers.value = await loadCustomers()
+    await chooseCustomer(customers.value.find((c) => c.id === id) ?? null)
+  } else {
+    devices.value = await loadDevices()
+    await chooseDevice(devices.value.find((d) => d.id === id) ?? null)
+  }
+}
+/** The full form's "Já cadastrado › Abrir": that customer is chosen. */
+function openExisting(id: string) {
+  fullForm.value = null
+  void chooseCustomer(customers.value.find((c) => c.id === id) ?? null)
+}
+const directory = computed(() => customers.value.map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? null, email: null, taxId: null, address: null, open: 0, late: 0 }) as CustomerRow))
+const deviceRows = computed(() => devices.value.map((d) => ({ id: d.id, name: d.name, serial: d.serial ?? null, manufacturer: null, category: null, status: null, photo: null, nextMaintenanceDate: null }) as DeviceRow))
 
 const itemRow = (item: CatalogItem) => ({
   id: `${item.kind}:${item.id}`,
@@ -289,15 +339,9 @@ const itemGroups = (query: string): ComboboxGroup[] => [
 ]
 const REGISTER_ITEM = '__register'
 async function pickItem(picked: ComboboxItem, query = '') {
+  // Kind and price asked right here (order.quick.item).
   if (picked.id === REGISTER_ITEM && query.trim()) {
-    try {
-      const created = await registerItem(query)
-      catalog.value = [...catalog.value, created]
-      lines.value = [...lines.value, { key: crypto.randomUUID(), item: created, value: created.value, quantity: 1 }]
-      announce(t('web.newOrder.itemRegistered', { name: created.name }))
-    } catch (error) {
-      failed.value = t(errorMessageKey(error))
-    }
+    quick.value = { kind: 'item', text: query }
     return
   }
   const free = picked.id === NEW && query.trim() ? { id: '', kind: 'service' as const, name: query.trim(), value: null } : null
@@ -315,6 +359,11 @@ async function save() {
   // A price being typed is read on blur: let it commit before saving.
   ;(document.activeElement as HTMLElement | null)?.blur?.()
   await nextTick()
+  // A register half done is never thrown away in silence: finish or cancel it first.
+  if (quick.value) {
+    failed.value = t('web.quick.finishFirst')
+    return
+  }
   if (!customer.value) {
     failed.value = t('orderSaveNeedsCustomer')
     customerRef.value?.focus()
@@ -466,6 +515,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
               <small v-if="newCustomer" class="sub"> · {{ [formatPhone(customer.phone), t('orderAssistantNewCustomer')].filter(Boolean).join(' · ') }}</small></span>
             <button type="button" class="link" @click="customer = null; device = null; newCustomer = null; newDevice = null; marked.delete('customer'); $nextTick(() => customerRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
+          <QuickCreate v-else-if="quick?.kind === 'customer'" id="no-quick-customer" kind="customer" :text="quick.text" :customers="customers" @saved="onQuickSaved" @use="chooseCustomer" @more="onQuickMore" @cancel="onQuickCancel" />
           <Combobox v-else id="no-customer" ref="customerRef" :label="t('customer')" :placeholder="t('web.newOrder.customerHint')" :groups="customerGroups" :loading="loading" :autofocus="!startInAssistant" @pick="pickCustomer" />
         </div>
         <div v-if="customer" class="step">
@@ -474,10 +524,12 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
               <small v-if="newDevice" class="sub"> · {{ t('orderAssistantNewDevice') }}</small></span>
             <button type="button" class="link" @click="device = null; newDevice = null; marked.delete('device'); $nextTick(() => deviceRef?.focus())">{{ t('web.newOrder.change') }}</button>
           </div>
+          <QuickCreate v-else-if="quick?.kind === 'device'" id="no-quick-device" kind="device" :text="quick.text" @saved="onQuickSaved" @more="onQuickMore" @cancel="onQuickCancel" />
           <Combobox v-else id="no-device" ref="deviceRef" :label="t('web.newOrder.deviceOptional', { device: deviceLabel() })" :groups="deviceGroups" :loading="devicesLoading" :preselect="devicesLoading || customerDevices.length > 0" skippable @pick="pickDevice" @next="itemRef?.focus()" />
         </div>
         <div class="step">
-          <Combobox id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
+          <QuickCreate v-if="quick?.kind === 'item'" id="no-quick-item" kind="item" :text="quick.text" @saved="onQuickSaved" @cancel="onQuickCancel" />
+          <Combobox v-else id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
           <ul v-if="lines.length" class="drawer-items" :aria-label="t('orderItemsSection')">
             <li v-for="line in lines" :key="line.key">
               <span><span v-if="marked.has(line.key)" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>
@@ -540,4 +592,6 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
       </div>
     </div>
   </Layer>
+  <CustomerForm v-if="fullForm?.kind === 'customer'" :draft="fullForm.draft" :directory="directory" @saved="onFullSaved" @open="openExisting" @close="fullForm = null" />
+  <DeviceForm v-else-if="fullForm?.kind === 'device'" :draft="fullForm.draft" :devices="deviceRows" @saved="onFullSaved" @close="fullForm = null" />
 </template>

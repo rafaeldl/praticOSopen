@@ -667,6 +667,54 @@ void main() {
       expect(picked?.item.name, 'Pastilha');
     });
 
+    testWidgets('"Cadastrar «X»" opens the sheet with the name and the cursor '
+        'on the price, never saving the name alone (order.quick.item)', (
+      tester,
+    ) async {
+      final src = FakeSource();
+      await pump(
+        tester,
+        OrderItemSearchScreen(
+          source: src,
+          permissions: only({
+            PermissionType.viewServices,
+            PermissionType.manageServices,
+            PermissionType.viewPrices,
+          }),
+          mostUsed: () async => const [],
+        ),
+      );
+      await tester.enterText(
+        find.byType(CupertinoSearchTextField),
+        'Alinhamento',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cadastrar “Alinhamento”'));
+      await tester.pumpAndSettle();
+      expect(src.saved, isEmpty);
+      final sheet = find.byType(FormSheet);
+      expect(sheet, findsOneWidget);
+      final fields = find.descendant(
+        of: sheet,
+        matching: find.byType(CupertinoTextField),
+      );
+      expect(
+        tester.widget<CupertinoTextField>(fields.first).controller?.text,
+        'Alinhamento',
+      );
+      expect(
+        tester.widget<CupertinoTextField>(fields.at(1)).focusNode?.hasFocus ??
+            tester.widget<CupertinoTextField>(fields.at(1)).autofocus,
+        isTrue,
+      );
+      await tester.enterText(fields.at(1), '80');
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(src.saved.single.name, 'Alinhamento');
+      expect(src.saved.single.value, 80);
+    });
+
     testWidgets('with only one kind to create, opens the sheet directly', (
       tester,
     ) async {

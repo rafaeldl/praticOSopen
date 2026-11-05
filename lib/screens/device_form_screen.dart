@@ -110,12 +110,12 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   }
 
   String get _snapshot => [
-        _model.text.trim(),
-        _serial.text.trim(),
-        _brand.text.trim(),
-        _category.text.trim(),
-        _device?.photo ?? '',
-      ].join('\u0000');
+    _model.text.trim(),
+    _serial.text.trim(),
+    _brand.text.trim(),
+    _category.text.trim(),
+    _device?.photo ?? '',
+  ].join('\u0000');
 
   /// The sheet can be saved once the model or the plate/serial is filled.
   bool get _canSave =>
@@ -146,12 +146,21 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   Future<List<Device>> _defaultLoader() async {
     final id = Global.companyAggr?.id;
     if (id == null) return const [];
-    final list = await TenantDeviceRepository()
-        .getQueryList(id, orderBy: [OrderBy('name')]);
+    final list = await TenantDeviceRepository().getQueryList(
+      id,
+      orderBy: [OrderBy('name')],
+    );
     return list.whereType<Device>().toList();
   }
 
   bool get _isEditing => _device?.id != null;
+
+  /// A new device whose model came typed ("Cadastrar «X»" in the order):
+  /// the cursor starts on the plate/serial (order.quick.device).
+  late final bool _startOnSerial =
+      widget.device?.id == null &&
+      (widget.device?.name?.trim().isNotEmpty ?? false) &&
+      (widget.device?.serial?.trim().isEmpty ?? true);
 
   bool get _hasMoreData {
     final d = _device!;
@@ -212,7 +221,10 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  StatusDot(color: DeviceStatusStyle.dotColor(status), size: 10),
+                  StatusDot(
+                    color: DeviceStatusStyle.dotColor(status),
+                    size: 10,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(DeviceStatusStyle.label(l10n, status)),
                 ],
@@ -247,8 +259,8 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           CupertinoActionSheetAction(
             onPressed: () async {
               Navigator.pop(ctx);
-              final file =
-                  await _deviceStore.photoService.pickImageFromGallery();
+              final file = await _deviceStore.photoService
+                  .pickImageFromGallery();
               if (file != null) {
                 await _deviceStore.uploadDevicePhoto(file, _device!);
                 if (mounted) setState(() {});
@@ -359,7 +371,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       label: config.label(LabelKeys.deviceModel),
       controller: _model,
       placeholder: modelField?.placeholder,
-      autofocus: !_isEditing,
+      autofocus: !_isEditing && !_startOnSerial,
       textInputAction: TextInputAction.next,
       suggestions: (text) => [
         for (final s in deviceSuggestions(_known, text))
@@ -381,6 +393,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       label: serialLabel,
       controller: _serial,
       placeholder: serialField?.placeholder,
+      autofocus: _startOnSerial,
       keyboardType: config.getKeyboardType('device.serial'),
       textCapitalization: TextCapitalization.characters,
       inputFormatters: masks.isEmpty
@@ -519,7 +532,8 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       final fields = entry.value.map((field) {
         return DynamicFieldBuilder(
           field: field,
-          value: _device?.customData?[field.fieldName] ??
+          value:
+              _device?.customData?[field.fieldName] ??
               _device?.customData?[field.key],
           locale: locale,
           onChanged: (newValue) {
