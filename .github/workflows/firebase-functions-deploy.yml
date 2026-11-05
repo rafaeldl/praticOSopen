@@ -10,6 +10,13 @@ on:
       - 'firebase/functions/**' # Executa a action apenas se houver mudanças nas functions
   workflow_dispatch:
 
+# Only the newest master matters: a new push cancels the running and pending
+# deploys of older commits, and the newest one publishes everything (merges in
+# sequence used to queue one deploy per merge).
+concurrency:
+  group: firebase-functions-deploy-praticos
+  cancel-in-progress: true
+
 jobs:
   deploy_functions:
     runs-on: ubuntu-latest
