@@ -60,6 +60,9 @@ async function seedSegments() {
     subspecialties: [
       { id: 'cars', name: 'Carros', nameI18n: { 'pt-BR': 'Carros', 'en-US': 'Cars', 'es-ES': 'Autos' } },
       { id: 'motorcycles', name: 'Motos', nameI18n: { 'pt-BR': 'Motos', 'en-US': 'Motorcycles', 'es-ES': 'Motos' } },
+      // Production shapes (seed_segments.js): the name as a map by locale, and that map saved as JSON text.
+      { id: 'car_wash', name: { 'pt-BR': 'Lava Car', 'en-US': 'Car Wash', 'es-ES': 'Lavado de Autos' } },
+      { id: 'body_paint', name: JSON.stringify({ 'pt-BR': 'Funilaria e Pintura', 'en-US': 'Body and Paint', 'es-ES': 'Chapa y Pintura' }) },
     ],
     defaultTermsOfService: { 'pt-BR': 'Garantia de 90 dias para o serviço.', 'en-US': '90-day warranty on the service.', 'es-ES': 'Garantía de 90 días para el servicio.' },
     customFields: [

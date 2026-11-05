@@ -142,6 +142,31 @@ test('Termos para o cliente: texto padrão do ramo só com o campo vazio; vazio 
   await expect.poll(async () => (await company())?.termsOfService).toBeNull()
 })
 
+test('O que você atende? mostra o nome no idioma, nunca o mapa de idiomas nem [object Object] (company.settings.subspecialties)', async ({ page }) => {
+  await openCompany(page)
+  await page.getByTestId('company-specialties').click()
+  const list = page.getByTestId('specialty-list')
+  await expect(list.getByLabel('Lava Car')).toBeVisible()
+  await expect(list.getByLabel('Funilaria e Pintura')).toBeVisible()
+  for (const raw of ['{', '"pt-BR"', 'pt-BR', '[object Object]']) await expect(list).not.toContainText(raw)
+  await list.getByLabel('Lava Car').check()
+  await list.getByLabel('Funilaria e Pintura').check()
+  await page.getByTestId('specialties-save').click()
+  const row = page.getByTestId('company-specialties')
+  await expect(row).toContainText('Lava Car')
+  await expect(row).toContainText('Funilaria e Pintura')
+  await expect(row).not.toContainText('[object Object]')
+  await expect(row).not.toContainText('{')
+  await expect.poll(async () => (await company())?.subspecialties).toEqual(['car_wash', 'body_paint'])
+
+  // Leaves none picked for the next test (serial).
+  await row.click()
+  await list.getByLabel('Lava Car').uncheck()
+  await list.getByLabel('Funilaria e Pintura').uncheck()
+  await page.getByTestId('specialties-save').click()
+  await expect.poll(async () => (await company())?.subspecialties).toBeNull()
+})
+
 test('Especialidades e ramo: trocar o ramo pergunta antes e tira as especialidades (company.settings.subspecialties, company.settings.segment)', async ({ page }) => {
   await openCompany(page)
   await expect(page.getByTestId('company-segment')).toContainText('Mecânica')

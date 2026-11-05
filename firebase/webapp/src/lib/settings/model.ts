@@ -1,5 +1,6 @@
 // Pure rules of the team, plan and company screens (fatia 07: equipe, empresa,
 // plano). Tested in tests/settings-model.test.ts; nothing here reads Firebase.
+import { localizedMap, localizedNames, pickLocalized } from '@/lib/localized'
 import { FINANCIAL_PERMISSIONS, ROLE_PERMISSIONS } from '@/generated/permissions'
 import type { MessageKey } from '@/generated/message-keys'
 import { FORMAT_COUNTRIES } from '@/lib/format'
@@ -448,7 +449,25 @@ const FULL: Record<string, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' }
 
 /** Name in the language, then pt-BR, then the stored name (OnboardingSegment.nameFor). */
 export function localName(item: { name: string; nameI18n: Record<string, string> }, language: string): string {
-  return item.nameI18n[FULL[language] ?? language] ?? item.nameI18n[language] ?? item.nameI18n['pt-BR'] ?? item.name
+  return pickLocalized(item.nameI18n, FULL[language] ?? language) ?? item.name
+}
+
+/** segments/{id} as the settings read it. `name` may be a text, a map by locale or that map as JSON (the seed's shape). */
+export function toSegmentOption(id: string, data: Record<string, unknown>): SegmentOption {
+  const names = localizedNames(data.name, data.nameI18n)
+  const subs = Array.isArray(data.subspecialties) ? (data.subspecialties as Record<string, unknown>[]) : []
+  return {
+    id,
+    name: pickLocalized(names, 'pt-BR') ?? id,
+    nameI18n: names,
+    termsI18n: localizedMap(data.defaultTermsOfService),
+    subspecialties: subs
+      .filter((sub) => !!sub && typeof sub.id === 'string')
+      .map((sub) => {
+        const subNames = localizedNames(sub.name, sub.nameI18n)
+        return { id: sub.id as string, name: pickLocalized(subNames, 'pt-BR') ?? (sub.id as string), nameI18n: subNames }
+      }),
+  }
 }
 
 /** The segment's default terms in the language, then pt-BR (SegmentConfigService). */
