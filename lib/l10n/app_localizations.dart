@@ -11291,6 +11291,198 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'“{separator}”'**
   String nfseDirectSeparatorValue(String separator);
+
+  /// No description provided for @invoiceDataTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados para nota'**
+  String get invoiceDataTitle;
+
+  /// No description provided for @invoiceDataHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'CPF/CNPJ, razão social e endereço da nota fiscal'**
+  String get invoiceDataHint;
+
+  /// No description provided for @invoiceLegalName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Razão social'**
+  String get invoiceLegalName;
+
+  /// No description provided for @invoiceLegalNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: REVENDA EXEMPLO LTDA'**
+  String get invoiceLegalNamePlaceholder;
+
+  /// No description provided for @invoicePostalCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'CEP'**
+  String get invoicePostalCode;
+
+  /// No description provided for @invoicePostalCodePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'00000-000'**
+  String get invoicePostalCodePlaceholder;
+
+  /// No description provided for @invoiceStreet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rua'**
+  String get invoiceStreet;
+
+  /// No description provided for @invoiceNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número'**
+  String get invoiceNumber;
+
+  /// No description provided for @invoiceComplement.
+  ///
+  /// In pt, this message translates to:
+  /// **'Complemento'**
+  String get invoiceComplement;
+
+  /// No description provided for @invoiceDistrict.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bairro'**
+  String get invoiceDistrict;
+
+  /// No description provided for @invoiceCity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cidade'**
+  String get invoiceCity;
+
+  /// No description provided for @invoiceState.
+  ///
+  /// In pt, this message translates to:
+  /// **'UF'**
+  String get invoiceState;
+
+  /// No description provided for @invoiceStatePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'SP'**
+  String get invoiceStatePlaceholder;
+
+  /// No description provided for @invoiceEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail da nota'**
+  String get invoiceEmailLabel;
+
+  /// No description provided for @invoiceEmailFallback.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vazio, a nota vai para o e-mail do cliente'**
+  String get invoiceEmailFallback;
+
+  /// No description provided for @invoiceTaxIdLooking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscando o CNPJ na Receita…'**
+  String get invoiceTaxIdLooking;
+
+  /// No description provided for @invoiceTaxIdFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchido com os dados da Receita. Confira antes de salvar.'**
+  String get invoiceTaxIdFound;
+
+  /// No description provided for @invoiceTaxIdNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achamos este CNPJ na Receita. Preencha à mão.'**
+  String get invoiceTaxIdNotFound;
+
+  /// No description provided for @invoicePostalCodeLooking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscando o CEP…'**
+  String get invoicePostalCodeLooking;
+
+  /// No description provided for @invoicePostalCodeNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achamos este CEP. Preencha à mão.'**
+  String get invoicePostalCodeNotFound;
+
+  /// No description provided for @invoiceRecipientLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota fiscal para'**
+  String get invoiceRecipientLabel;
+
+  /// No description provided for @invoiceRecipientAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar a nota para outro cliente'**
+  String get invoiceRecipientAction;
+
+  /// No description provided for @invoiceRecipientPickerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para quem vai a nota?'**
+  String get invoiceRecipientPickerTitle;
+
+  /// No description provided for @invoiceRecipientNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum: a nota vai para o próprio cliente'**
+  String get invoiceRecipientNone;
+
+  /// No description provided for @invoiceAutoIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir nota sozinha'**
+  String get invoiceAutoIssue;
+
+  /// No description provided for @invoiceAutoIssueHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando concluir a OS'**
+  String get invoiceAutoIssueHint;
+
+  /// No description provided for @invoiceTaxIdTakenCnpj.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} já tem este CNPJ'**
+  String invoiceTaxIdTakenCnpj(String name);
+
+  /// No description provided for @invoiceTaxIdTakenCpf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} já tem este CPF'**
+  String invoiceTaxIdTakenCpf(String name);
+
+  /// No description provided for @invoiceTaxIdTakenMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cada CPF ou CNPJ fica em um cliente só.'**
+  String get invoiceTaxIdTakenMessage;
+
+  /// No description provided for @invoiceTaxIdTakenUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar as notas desta loja para ela'**
+  String get invoiceTaxIdTakenUse;
+
+  /// No description provided for @invoiceRecipientSet.
+  ///
+  /// In pt, this message translates to:
+  /// **'As notas de {customer} vão para {recipient}'**
+  String invoiceRecipientSet(String customer, String recipient);
+
+  /// No description provided for @invoiceRecipientCleared.
+  ///
+  /// In pt, this message translates to:
+  /// **'As notas de {customer} vão para ele mesmo'**
+  String invoiceRecipientCleared(String customer);
 }
 
 class _AppLocalizationsDelegate

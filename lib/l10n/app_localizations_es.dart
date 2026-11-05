@@ -6954,4 +6954,115 @@ class AppLocalizationsEs extends AppLocalizations {
   String nfseDirectSeparatorValue(String separator) {
     return '“$separator”';
   }
+
+  @override
+  String get invoiceDataTitle => 'Datos para la factura';
+
+  @override
+  String get invoiceDataHint =>
+      'CPF/CNPJ, razón social y dirección de la factura';
+
+  @override
+  String get invoiceLegalName => 'Razón social';
+
+  @override
+  String get invoiceLegalNamePlaceholder => 'Ej.: REVENDEDORA EJEMPLO LTDA';
+
+  @override
+  String get invoicePostalCode => 'Código postal';
+
+  @override
+  String get invoicePostalCodePlaceholder => '00000-000';
+
+  @override
+  String get invoiceStreet => 'Calle';
+
+  @override
+  String get invoiceNumber => 'Número';
+
+  @override
+  String get invoiceComplement => 'Complemento';
+
+  @override
+  String get invoiceDistrict => 'Barrio';
+
+  @override
+  String get invoiceCity => 'Ciudad';
+
+  @override
+  String get invoiceState => 'Estado';
+
+  @override
+  String get invoiceStatePlaceholder => 'SP';
+
+  @override
+  String get invoiceEmailLabel => 'Correo de la factura';
+
+  @override
+  String get invoiceEmailFallback =>
+      'Si queda vacío, la factura va al correo del cliente';
+
+  @override
+  String get invoiceTaxIdLooking => 'Buscando el CNPJ en la Receita…';
+
+  @override
+  String get invoiceTaxIdFound =>
+      'Completado con los datos de la Receita. Revise antes de guardar.';
+
+  @override
+  String get invoiceTaxIdNotFound =>
+      'No encontramos este CNPJ en la Receita. Complete a mano.';
+
+  @override
+  String get invoicePostalCodeLooking => 'Buscando el código postal…';
+
+  @override
+  String get invoicePostalCodeNotFound =>
+      'No encontramos este código postal. Complete a mano.';
+
+  @override
+  String get invoiceRecipientLabel => 'Factura para';
+
+  @override
+  String get invoiceRecipientAction => 'Enviar la factura a otro cliente';
+
+  @override
+  String get invoiceRecipientPickerTitle => '¿Para quién va la factura?';
+
+  @override
+  String get invoiceRecipientNone => 'Ninguno: la factura va al propio cliente';
+
+  @override
+  String get invoiceAutoIssue => 'Emitir factura sola';
+
+  @override
+  String get invoiceAutoIssueHint => 'Al concluir la OS';
+
+  @override
+  String invoiceTaxIdTakenCnpj(String name) {
+    return '$name ya tiene este CNPJ';
+  }
+
+  @override
+  String invoiceTaxIdTakenCpf(String name) {
+    return '$name ya tiene este CPF';
+  }
+
+  @override
+  String get invoiceTaxIdTakenMessage =>
+      'Cada CPF o CNPJ queda en un solo cliente.';
+
+  @override
+  String get invoiceTaxIdTakenUse =>
+      'Enviar las facturas de esta tienda a ella';
+
+  @override
+  String invoiceRecipientSet(String customer, String recipient) {
+    return 'Las facturas de $customer van a $recipient';
+  }
+
+  @override
+  String invoiceRecipientCleared(String customer) {
+    return 'Las facturas de $customer van al propio cliente';
+  }
 }
