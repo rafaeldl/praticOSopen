@@ -1,8 +1,11 @@
 /* Shell and base rules of the "Campo" prototype. Tokens: firebase/hosting/src/css/tokens.css.
-   Closed decisions: yellow primary action, comfortable density, IBM Plex Sans for text. */
+   Closed decisions: yellow primary action, density "Confortável" and font "Mais sóbria" of the
+   prototype (its data-density="comfy" and data-font="sober"): IBM Plex Sans for titles, text and
+   numbers, rows with --row-y 0.8rem and every one-line control (button, input, select) --ctl tall. */
 :root { --sidebar: 14rem;
   --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-num: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --color-warning-text: oklch(47% 0.12 60);
   --color-danger-text: oklch(49% 0.19 28);
   --color-control: oklch(58% 0.02 255);
@@ -82,6 +85,22 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; line-height: 1; padding
 .field { width: 100%; min-height: var(--ctl); padding: 0.4rem 0.6rem; border: 1px solid var(--color-control); border-radius: 6px;
   background: var(--color-card); color: var(--color-ink); }
 .field::placeholder { color: var(--color-muted); }
+/* One-line controls share one box: the browser's own select (Safari ignores its
+   height) and the inner padding of date fields made them differ from inputs. The
+   arrow is drawn with the text colour, so it follows the theme. */
+select.field { appearance: none; -webkit-appearance: none; padding-right: 2rem; line-height: inherit;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 52%, calc(100% - 0.75rem) 52%; background-size: 0.35rem 0.35rem; background-repeat: no-repeat; }
+select.field:disabled { opacity: 0.6; }
+@media (forced-colors: active) { select.field { appearance: auto; -webkit-appearance: auto; } }
+input.field[type="date"], input.field[type="time"], input.field[type="datetime-local"] { color: var(--color-ink); }
+.field::-webkit-datetime-edit, .field::-webkit-datetime-edit-fields-wrapper { padding: 0; color: inherit; }
+.field::-webkit-datetime-edit-text, .field::-webkit-datetime-edit-day-field, .field::-webkit-datetime-edit-month-field,
+.field::-webkit-datetime-edit-year-field, .field::-webkit-datetime-edit-hour-field, .field::-webkit-datetime-edit-minute-field,
+.field::-webkit-datetime-edit-ampm-field { color: inherit; padding-block: 0; }
+.field::-webkit-date-and-time-value { text-align: start; min-height: 1.45em; }
+/* An empty date shows its "dd/mm/aaaa" in the placeholder colour (data-empty on the field). */
+input.field[data-empty] { color: var(--color-muted); }
 textarea.field { resize: vertical; min-height: 4.25rem; line-height: 1.45; }
 .field-label { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin-bottom: 0.25rem; }
 .combo { position: relative; }
@@ -113,7 +132,8 @@ textarea.field { resize: vertical; min-height: 4.25rem; line-height: 1.45; }
 .chip[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); font-weight: 700; }
 .chip .num { font-size: 0.8125rem; }
 .chip--danger:not([aria-pressed="true"]) { color: var(--color-danger-text); font-weight: 700; }
-.toolbar .search-mini { width: 11rem; min-height: 2.1rem; }
+/* Never shrinks under its width: with no room it goes to the next line (the hint stays whole). */
+.toolbar .search-mini { width: 11rem; max-width: 100%; flex: 0 0 auto; min-width: min(11rem, 100%); min-height: 2.1rem; }
 .toolbar .select-mini { width: auto; min-height: 2.1rem; padding-block: 0; }
 .spacer { flex: 1; }
 @container list (min-width: 46rem) { .c-who { display: table-cell; } }

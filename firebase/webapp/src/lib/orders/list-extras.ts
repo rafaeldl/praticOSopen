@@ -5,27 +5,47 @@ import { shallowRef } from 'vue'
 import { t } from '@/i18n'
 import { registerSearcher, type Command } from '@/lib/commands'
 import { loadCatalog, loadCustomers, loadDevices, type Customer } from './catalog'
-import { firestoreLite } from '@/lib/firebase'
+import { countOrders, type OrdersQuery } from '@/lib/orders-query'
 import { roundMoney } from '@/lib/rules/order-rules'
-import type { ListContext } from './data'
-import { deviceSummary, exactFirst, matchesSearch, normalizeOrder, remainingOnRow, type Order } from './model'
+import { apiCount, filterSources, type ListContext } from './data'
+import { deviceSummary, exactFirst, matchesSearch, type FilterCounts, type ListFilter, type Order } from './model'
 import { orderShort, statusText } from './text'
 
 /**
- * "Sem receber": done orders with a balance. Read through `payment == 'unpaid'`
- * (indexed with createdAt), newest 200, then counted here. Null when unknown.
+ * What the server counts for a filter (home.summary.count), with the same
+ * queries as the pages: a Firestore aggregation for who sees values, the API's
+ * `total` for who does not. Null when the server cannot count it (Paradas on
+ * the API, a technician's own orders) or for a filter without a sentence.
  */
-async function unpaidOrders(ctx: ListContext): Promise<Order[] | null> {
-  if (!ctx.showsMoney) return null
+export async function filterCounts(ctx: ListContext, filter: ListFilter, now: Date): Promise<FilterCounts | null> {
+  if (!['open', 'quotes', 'onHold', 'unpaid', 'mine'].includes(filter)) return null
   try {
-    const [db, { collection, getDocs, limit, orderBy, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-    const filters = [where('payment', '==', 'unpaid'), ...(ctx.seesAll ? [] : [where('createdBy.id', '==', ctx.uid)])]
-    const snapshot = await getDocs(query(collection(db, 'companies', ctx.companyId, 'orders'), ...filters, orderBy('createdAt', 'desc'), limit(200)))
-    return snapshot.docs.map((doc) => normalizeOrder(doc.id, doc.data(), true)).filter((order) => remainingOnRow(order) !== null)
+    const [source] = filterSources(ctx, filter, now)
+    if (!source) return null
+    if (ctx.showsMoney) {
+      if (filter === 'unpaid') return await unpaidCounts(ctx, now)
+      const [all, late] = await Promise.all([
+        countOrders(source.firestore),
+        filter === 'open' ? countOrders((filterSources(ctx, 'late', now)[0] as { firestore: OrdersQuery }).firestore) : null,
+      ])
+      return { count: all.count, ...(late ? { late: late.count } : {}) }
+    }
+    if (source.keep) return null
+    const [all, late] = await Promise.all([apiCount(source.api), filter === 'open' ? apiCount(filterSources(ctx, 'late', now)[0]?.api ?? {}) : null])
+    if (all === null) return null
+    return { count: all, ...(late !== null ? { late } : {}) }
   } catch (error) {
-    console.warn('orders: unpaid not read', error)
+    console.warn('orders: not counted', error)
     return null
   }
+}
+
+/** Sem receber: how many and how much is left (sum of totals less sum of what was paid). */
+async function unpaidCounts(ctx: ListContext, now: Date): Promise<FilterCounts | null> {
+  const source = filterSources(ctx, 'unpaid', now)[0]
+  if (!source) return null
+  const { count, sums } = await countOrders(source.firestore, ['total', 'paidAmount'])
+  return { count, amount: roundMoney(Math.max(0, (sums.total ?? 0) - (sums.paidAmount ?? 0))) }
 }
 
 
@@ -40,10 +60,15 @@ export function warmLists(): void {
 }
 
 /** How many done orders still owe and how much in all (the day opens with it: "R$ 2.151 para receber"). */
-export function unpaidTotals(ctx: ListContext): Promise<{ count: number; amount: number } | null> {
-  return unpaidOrders(ctx).then((list) =>
-    list ? { count: list.length, amount: roundMoney(list.reduce((sum, order) => sum + (remainingOnRow(order) ?? 0), 0)) } : null,
-  )
+export async function unpaidTotals(ctx: ListContext): Promise<{ count: number; amount: number } | null> {
+  if (!ctx.showsMoney) return null
+  try {
+    const counts = await unpaidCounts(ctx, new Date())
+    return counts ? { count: counts.count, amount: counts.amount ?? 0 } : null
+  } catch (error) {
+    console.warn('orders: unpaid not counted', error)
+    return null
+  }
 }
 
 /** ⌘K finds an order by number (exact first), customer or device, and a customer (opens their orders). */

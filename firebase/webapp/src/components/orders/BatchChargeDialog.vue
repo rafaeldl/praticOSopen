@@ -191,7 +191,7 @@ async function undo() {
             </div>
             <template v-if="groups.length">
               <label class="field-label" for="batch-charge-due">{{ t('chargeDueDate') }}</label>
-              <input id="batch-charge-due" v-model="due" class="field" type="date" :min="today" />
+              <input id="batch-charge-due" v-model="due" class="field" type="date" :min="today" :data-empty="!due || undefined" />
               <p v-if="!due || due < today" class="sub">{{ t('web.charge.dueInvalid') }}</p>
             </template>
           </template>

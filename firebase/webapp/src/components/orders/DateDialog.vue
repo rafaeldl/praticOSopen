@@ -81,7 +81,7 @@ function save() {
           />
           <p id="order-date-hint" class="sub field-hint">{{ quickError ? t('web.when.quickError') : t('web.when.quickHint') }}</p>
           <label class="field-label" for="order-date">{{ label }}</label>
-          <input id="order-date" v-model="text" class="field" type="datetime-local" :aria-describedby="preview ? 'order-date-preview' : undefined" />
+          <input id="order-date" v-model="text" class="field" type="datetime-local" :data-empty="!text || undefined" :aria-describedby="preview ? 'order-date-preview' : undefined" />
           <p id="order-date-preview" class="sub" aria-live="polite">{{ preview }}</p>
         </div>
         <div class="layer-foot">

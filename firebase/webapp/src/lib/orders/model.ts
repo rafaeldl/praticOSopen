@@ -447,40 +447,64 @@ export function nextVisit(rows: Order[], now: Date, uid: string | null): Order |
 }
 
 /**
- * Rows of a filter in screen order (home.rules.groups):
+ * Rows of a filter in screen order (home.rules.groups). The rows come from the
+ * filter's own server query (lib/orders/data.ts), so none is left out here:
  * open: late (oldest promise first), then today, then server order.
- * quotes: oldest first. onHold: stopped longest first. mine: today's visits by hour first.
+ * late: oldest promise first. today: by hour. quotes: oldest first.
+ * onHold: stopped longest first. mine: today's visits by hour first.
  */
 export function rowsFor(filter: ListFilter, rows: Order[], now: Date, uid: string | null): Order[] {
   switch (filter) {
     case 'open': {
-      const open = rows.filter(isOpen)
-      const late = open.filter((o) => overdue(o, now)).sort(byDate('dueDate'))
-      const today = open.filter((o) => !overdue(o, now) && (sameDay(o.dueDate, now) || sameDay(o.scheduledDate, now)))
-      const rest = open.filter((o) => !late.includes(o) && !today.includes(o))
+      const late = rows.filter((o) => overdue(o, now)).sort(byDate('dueDate'))
+      const today = rows.filter((o) => !overdue(o, now) && (sameDay(o.dueDate, now) || sameDay(o.scheduledDate, now)))
+      const rest = rows.filter((o) => !late.includes(o) && !today.includes(o))
       return [...late, ...today, ...rest]
     }
     case 'late':
-      return rows.filter((o) => isOpen(o) && overdue(o, now)).sort(byDate('dueDate'))
-    case 'today':
-      return rows.filter((o) => isOpen(o) && !overdue(o, now) && (sameDay(o.dueDate, now) || sameDay(o.scheduledDate, now)))
-    case 'unpaid':
-      return rows.filter((o) => remainingOnRow(o) !== null)
-    case 'quotes':
-      return rows.filter((o) => o.status === 'quote').sort(byDate('createdAt'))
-    case 'onHold':
-      return rows
-        .filter(isHeld)
-        .sort((a, b) => (a.onHold?.since ?? '').localeCompare(b.onHold?.since ?? '') || a.id.localeCompare(b.id))
-    case 'mine': {
-      const mine = rows.filter((o) => isOpen(o) && o.assignedTo?.id === uid)
-      const visits = mine.filter((o) => sameDay(o.scheduledDate, now)).sort(byDate('scheduledDate'))
-      return [...visits, ...rowsFor('open', mine.filter((o) => !visits.includes(o)), now, uid)]
+      return [...rows].sort(byDate('dueDate'))
+    case 'today': {
+      const at = (o: Order) => [o.dueDate, o.scheduledDate].filter((iso) => sameDay(iso, now)).sort()[0] ?? ''
+      return [...rows].sort((a, b) => at(a).localeCompare(at(b)) || a.id.localeCompare(b.id))
     }
-    case 'done':
-      return rows.filter((o) => o.status === 'done')
-    case 'all':
+    case 'quotes':
+      return [...rows].sort(byDate('createdAt'))
+    case 'onHold':
+      return [...rows].sort((a, b) => (a.onHold?.since ?? '').localeCompare(b.onHold?.since ?? '') || a.id.localeCompare(b.id))
+    case 'mine': {
+      const visits = rows.filter((o) => sameDay(o.scheduledDate, now)).sort(byDate('scheduledDate'))
+      return [...visits, ...rowsFor('open', rows.filter((o) => !visits.includes(o)), now, uid)]
+    }
+    default:
       return rows
+  }
+}
+
+/**
+ * Does the order still belong to the filter? Only for an order changed on this
+ * screen (a status, a hold, a payment): it leaves the list at once instead of
+ * waiting for the next read. What the list shows comes from the server query.
+ */
+export function matchesFilter(filter: ListFilter, order: Order, now: Date, uid: string | null): boolean {
+  switch (filter) {
+    case 'open':
+      return isOpen(order)
+    case 'late':
+      return isOpen(order) && overdue(order, now)
+    case 'today':
+      return isOpen(order) && (sameDay(order.dueDate, now) || sameDay(order.scheduledDate, now))
+    case 'unpaid':
+      return remainingOnRow(order) !== null
+    case 'quotes':
+      return order.status === 'quote'
+    case 'onHold':
+      return isHeld(order)
+    case 'mine':
+      return isOpen(order) && order.assignedTo?.id === uid
+    case 'done':
+      return order.status === 'done'
+    case 'all':
+      return true
   }
 }
 
@@ -511,7 +535,34 @@ export type Summary =
   | { kind: 'unpaid'; count: number; amount: number }
   | null
 
-/** One sentence on top (home.summary.count): only with the whole list loaded and something in it. */
+/** What the server counted for a filter (Firestore aggregation or the API's total). */
+export interface FilterCounts {
+  count: number
+  /** Em aberto: how many of them are late. */
+  late?: number
+  /** Sem receber: what is left to receive. */
+  amount?: number
+}
+
+/**
+ * The sentence on top (home.summary.count) from the server's counts, so it
+ * holds before every page is loaded. Without counts (a filter the API cannot
+ * count), it waits for the whole list, as before.
+ */
+export function summaryFromCounts(filter: ListFilter, counts: FilterCounts | null, visible: Order[], loadedAll: boolean, now: Date): Summary {
+  // Minhas: "N com você hoje" needs every row; until then, how many are with the person.
+  if (filter === 'mine' && loadedAll) return summaryOf(filter, visible, true, now)
+  if (!counts) return summaryOf(filter, visible, loadedAll, now)
+  if (!counts.count) return null
+  if (filter === 'open') return { kind: 'open', open: counts.count, late: counts.late ?? 0 }
+  if (filter === 'quotes') return { kind: 'quotes', count: counts.count }
+  if (filter === 'onHold') return { kind: 'onHold', count: counts.count }
+  if (filter === 'unpaid') return { kind: 'unpaid', count: counts.count, amount: roundMoney(counts.amount ?? 0) }
+  if (filter === 'mine') return { kind: 'mine', count: counts.count, today: false }
+  return null
+}
+
+/** One sentence on top (home.summary.count) from the rows: only with the whole list loaded and something in it. */
 export function summaryOf(filter: ListFilter, visible: Order[], loadedAll: boolean, now: Date): Summary {
   if (!loadedAll || !visible.length) return null
   if (filter === 'open') return { kind: 'open', open: visible.length, late: visible.filter((o) => overdue(o, now)).length }

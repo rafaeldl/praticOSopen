@@ -490,7 +490,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
         </div>
         <div class="step">
           <label class="field-label" for="no-due"><span v-if="marked.has('due')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('web.newOrder.due') }}</label>
-          <input id="no-due" v-model="due" class="field" type="datetime-local" />
+          <input id="no-due" v-model="due" class="field" type="datetime-local" :data-empty="!due || undefined" />
         </div>
         <div class="step">
           <label class="field-label" for="no-request"><span v-if="marked.has('request')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('orderCustomerRequestTitle') }}</label>
@@ -513,7 +513,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
             </div>
             <div v-if="useScheduling">
               <label class="field-label" for="no-visit">{{ t('orderScheduleLabel') }}</label>
-              <input id="no-visit" v-model="visit" class="field" type="datetime-local" />
+              <input id="no-visit" v-model="visit" class="field" type="datetime-local" :data-empty="!visit || undefined" />
             </div>
             <div v-if="fieldService">
               <label class="field-label" for="no-address">{{ t('orderAddressLabel') }}</label>
