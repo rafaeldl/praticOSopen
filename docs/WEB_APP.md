@@ -367,7 +367,7 @@ npm test && npm run typecheck && npm run build
 
 (cd ../functions && npm ci && npm run build)   # uma vez
 npm run emulators    # terminal 1: suíte + seed
-npm run dev          # terminal 2: http://localhost:5180/app/
+npm run dev          # terminal 2: http://localhost:5180/web/
 ```
 
 Desenvolvimento sempre contra o emulador. Os componentes base ficam em `/web/dev/components`, só nos builds de emulador.

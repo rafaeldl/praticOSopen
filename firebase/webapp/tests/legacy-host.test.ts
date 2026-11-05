@@ -29,13 +29,13 @@ describe('old domain → praticos.app', () => {
 
   test.each([
     'https://praticos.app/web/orders',
-    'http://localhost:5180/app/',
-    'http://127.0.0.1:15050/app/login',
+    'http://localhost:5180/web/',
+    'http://127.0.0.1:15050/web/login',
     'https://praticos.web.app/q/ST_x',
     'https://praticos.web.app/__/auth/handler',
     'https://praticos.web.app/',
     'https://praticos.web.app/application',
-    'https://praticos--preview-1.web.app/app/',
+    'https://praticos--preview-1.web.app/web/',
   ])('%s stays', (href) => {
     expect(run(href)).toBeNull()
   })
