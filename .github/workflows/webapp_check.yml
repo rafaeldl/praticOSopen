@@ -13,14 +13,20 @@ on:
       - 'firebase/functions/src/__tests__/rbac/app-permissions.json'
       - '.github/workflows/webapp_check.yml'
 
+# A new push to the same PR cancels the run still going: only the last one counts
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
+  # Fast answer (~3 min): everything that does not need the E2E emulators
   check:
-    name: Gen, types, tests, E2E and Lighthouse
+    name: Gen, types, tests, Lighthouse and Hosting
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: firebase/webapp
@@ -35,9 +41,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             firebase/webapp/package-lock.json
-            firebase/functions/package-lock.json
             firebase/hosting/package-lock.json
 
+      # check:hosting runs the Hosting emulator from the Firebase CLI
       - name: Setup Java (Firebase emulators)
         uses: actions/setup-java@v5
         with:
@@ -59,6 +65,70 @@ jobs:
       - name: Build and bundle budget
         run: npm run build
 
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      # Lighthouse measures dist-e2e, so it needs that build
+      - name: Lighthouse
+        run: |
+          npm run build:e2e
+          npm run lhci
+
+      - name: Hosting emulator (/web rewrites, headers, CSP, site unchanged)
+        run: |
+          (cd ../hosting && npm ci && npm run build)
+          npm run build:hosting
+          npm run check:hosting
+
+  # E2E split across two machines at once: half the wait, about the same minutes
+  e2e:
+    name: E2E (${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pull-requests: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    defaults:
+      run:
+        working-directory: firebase/webapp
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The dark-theme axe pass only runs when colors or styles change
+      - name: Did styles change?
+        uses: dorny/paths-filter@v4
+        id: styles
+        with:
+          filters: |
+            styles:
+              - 'firebase/webapp/src/styles/**'
+              - 'firebase/webapp/src/lib/prefs.ts'
+              - 'firebase/hosting/src/css/tokens.css'
+              - 'firebase/webapp/playwright.config.ts'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            firebase/webapp/package-lock.json
+            firebase/functions/package-lock.json
+
+      - name: Setup Java (Firebase emulators)
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build Functions for the emulator
         working-directory: firebase/functions
         run: |
@@ -75,22 +145,16 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E on the Emulator Suite
+        env:
+          PW_ARGS: --shard=${{ matrix.shard }}/2
+          E2E_SKIP_DARK_AXE: ${{ steps.styles.outputs.styles != 'true' && '1' || '' }}
         run: npm run e2e
-
-      - name: Lighthouse
-        run: npm run lhci
-
-      - name: Hosting emulator (/web rewrites, headers, CSP, site unchanged)
-        run: |
-          (cd ../hosting && npm ci && npm run build)
-          npm run build:hosting
-          npm run check:hosting
 
       - name: Keep E2E traces
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: webapp-e2e-traces
+          name: webapp-e2e-traces-${{ matrix.shard }}
           path: firebase/webapp/test-results
           retention-days: 7
           if-no-files-found: ignore

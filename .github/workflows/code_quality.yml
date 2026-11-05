@@ -13,6 +13,11 @@ on:
       - '.github/workflows/code_quality.yml'
       - '.fvmrc'
 
+# A new push to the same PR cancels the run still going: only the last one counts
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Flutter Analyze

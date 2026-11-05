@@ -64,6 +64,15 @@ Regras:
 - Roda sobre a cópia de trabalho: mudanças não commitadas também contam.
 - Instala `node_modules` com `npm ci` se faltar (worktrees novas).
 - E2E do web app, regras do Firestore e paridade ficam só no CI (precisam de emuladores ou são baratos lá).
+
+## Web App Check
+
+Em nov/2026 levava 20 min por execução, 15 deles nos 700 testes E2E (3 navegadores numa máquina de 4 núcleos). Os testes de axe somavam ~1/4 do tempo e os de receber/cobrar ~1/5.
+
+- Um push novo no mesmo PR cancela a execução anterior (também no Code Quality e no Functions Check).
+- Três jobs em paralelo: um rápido (gen, typecheck, testes, build, Lighthouse, Hosting) e o E2E dividido em dois (`--shard=1/2` e `2/2`). A espera cai pela metade; os minutos ficam parecidos.
+- Axe no tema escuro (34 testes) só quando o PR mexe em estilos (`src/styles/`, `src/lib/prefs.ts`, tokens do site).
+- Atenção ao tornar privado: lá a máquina padrão tem 2 núcleos, e o E2E fica mais lento.
 - Para pular numa emergência: `git push --no-verify` ou `SKIP_PREPUSH=1 git push`.
 
 ## Etapa 2 (pendente)
