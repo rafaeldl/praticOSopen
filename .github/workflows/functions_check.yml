@@ -12,6 +12,11 @@ on:
       - 'firebase/functions/**'
       - '.github/workflows/functions_check.yml'
 
+# A new push to the same PR cancels the run still going: only the last one counts
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: Lint + Test
@@ -35,6 +40,10 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      # Jest only transpiles, so sources and tests are type checked here
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Test
         run: npm test

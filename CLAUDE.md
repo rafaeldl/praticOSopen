@@ -579,6 +579,7 @@ Prioridade vem do [`ROADMAP.md`](ROADMAP.md). Trabalho vem de issues.
 3. Implementar com **teste novo** para o que mudou. Rodar `fvm flutter analyze`, `fvm flutter test` e, se mexer em Functions, `npm test` em `firebase/functions`.
 4. Abrir PR com o template, `Closes #N` e o label de risco da issue.
 5. Se o CI falhar, corrigir no mesmo PR antes de pegar outra issue.
+6. **CI verde em PR `risk:low`: o próprio agente mescla** (`gh pr merge --merge`), sem esperar revisão. A `master` não tem checks obrigatórios, então o auto-merge do GitHub não espera o CI: não usar. Em PR que mexe em `firebase/functions`, esperar o deploy do merge anterior terminar antes de mesclar o próximo.
 
 ### Limites
 - **WIP: no máximo 2 PRs de agente abertos.** Acima disso, não abrir novos: revisar/consertar os existentes.
