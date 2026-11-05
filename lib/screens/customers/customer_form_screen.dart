@@ -88,9 +88,8 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     if (!_initialized) {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      _customer = widget.customer ??
-          (args?['customer'] as Customer?) ??
-          Customer();
+      _customer =
+          widget.customer ?? (args?['customer'] as Customer?) ?? Customer();
       _customer!.customData ??= {};
       final c = _customer!;
       _name.text = c.name ?? '';
@@ -120,12 +119,12 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   }
 
   String get _snapshot => [
-        _name.text.trim(),
-        _phone.text.trim(),
-        _email.text.trim(),
-        _address.text.trim(),
-        _taxId,
-      ].join('\u0000');
+    _name.text.trim(),
+    _phone.text.trim(),
+    _email.text.trim(),
+    _address.text.trim(),
+    _taxId,
+  ].join('\u0000');
 
   /// The sheet can be saved once the name is filled.
   bool get _canSave => _name.text.trim().isNotEmpty;
@@ -134,6 +133,14 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   bool get _dirty => _customTouched || _snapshot != _initialSnapshot;
 
   bool get _isEditing => _customer?.id != null;
+
+  /// A new customer whose name came typed ("Cadastrar «X»" in the order):
+  /// the cursor starts on the phone, the one field companies fill
+  /// (order.quick.customer).
+  late final bool _startOnPhone =
+      widget.customer?.id == null &&
+      (widget.customer?.name?.trim().isNotEmpty ?? false) &&
+      (widget.customer?.phone?.trim().isEmpty ?? true);
 
   bool get _hasMoreData {
     final c = _customer!;
@@ -172,11 +179,11 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     final phone = _phone.text.trim();
     if (_isEditing || phone.isEmpty) return null;
     try {
-      final load = widget.loadCustomers ??
-          () => FirestoreCustomerDirectory()
-              .watchCustomers()
-              .first
-              .timeout(const Duration(seconds: 5));
+      final load =
+          widget.loadCustomers ??
+          () => FirestoreCustomerDirectory().watchCustomers().first.timeout(
+            const Duration(seconds: 5),
+          );
       return findCustomerByPhone(await load(), phone);
     } catch (_) {
       return null;
@@ -355,7 +362,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       placeholder: l10n.customerNamePlaceholder,
       textCapitalization: TextCapitalization.words,
       textInputAction: TextInputAction.next,
-      autofocus: !_isEditing,
+      autofocus: !_isEditing && !_startOnPhone,
       onSaved: (v) => _customer!.name = v.trim(),
       validator: (v) => v.trim().isEmpty ? l10n.customerNameRequired : null,
     );
@@ -369,6 +376,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       controller: _phone,
       hint: l10n.customerPhoneHint,
       keyboardType: TextInputType.phone,
+      autofocus: _startOnPhone,
       inputFormatters: phoneMasks.isEmpty
           ? null
           : [
@@ -407,7 +415,8 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   }) {
     final l10n = context.l10n;
     final customer = _customer!;
-    final hasAddress = (customer.address?.isNotEmpty ?? false) ||
+    final hasAddress =
+        (customer.address?.isNotEmpty ?? false) ||
         (customer.latitude != null && customer.longitude != null);
     final taxId = TaxIdFormField(
       initialValue: customer.taxId,
@@ -426,9 +435,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       if (config.countryCode == null || config.countryCode == 'BR')
         inCard
             ? Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 child: taxId,
               )
             : CupertinoListSection.insetGrouped(children: [taxId]),
@@ -495,7 +502,8 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       final fields = entry.value.map((field) {
         return DynamicFieldBuilder(
           field: field,
-          value: _customer?.customData?[field.fieldName] ??
+          value:
+              _customer?.customData?[field.fieldName] ??
               _customer?.customData?[field.key],
           locale: locale,
           onChanged: (newValue) {

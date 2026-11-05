@@ -34,6 +34,7 @@ class CatalogItemForm extends StatefulWidget {
     required this.permissions,
     this.item,
     this.asSheet = false,
+    this.focusPrice = false,
   });
 
   final CatalogKind kind;
@@ -43,6 +44,10 @@ class CatalogItemForm extends StatefulWidget {
   /// Item to edit; a new one is created when null.
   final CatalogItem? item;
   final bool asSheet;
+
+  /// "Cadastrar «X»" inside the order (order.quick.item): the name came typed,
+  /// so the cursor starts on the price.
+  final bool focusPrice;
 
   @override
   State<CatalogItemForm> createState() => _CatalogItemFormState();
@@ -58,6 +63,8 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
 
   bool get _isService => widget.kind == CatalogKind.service;
   bool get _isEditing => widget.item?.id != null;
+  bool get _startOnPrice =>
+      widget.focusPrice && !_isEditing && widget.permissions.canViewPrices;
 
   @override
   void initState() {
@@ -151,9 +158,9 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
               Navigator.pop(sheetContext);
               _confirmDelete();
             },
-            child: Text(_isService
-                ? l10n.deleteServiceAction
-                : l10n.deleteProductAction),
+            child: Text(
+              _isService ? l10n.deleteServiceAction : l10n.deleteProductAction,
+            ),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
@@ -283,7 +290,9 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
               bottom: AppSpacing.lg,
               child: CupertinoButton(
                 padding: EdgeInsets.zero,
-                minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+                minimumSize: const Size.fromHeight(
+                  AppSizes.primaryButtonHeight,
+                ),
                 color: AppColors.accent.resolveFrom(context),
                 borderRadius: BorderRadius.circular(AppRadii.button),
                 onPressed: _saving ? null : _save,
@@ -318,7 +327,7 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
             : l10n.productNameHint(SegmentConfigService().exampleSegment),
         textCapitalization: TextCapitalization.sentences,
         textInputAction: TextInputAction.next,
-        autofocus: !_isEditing,
+        autofocus: !_isEditing && !_startOnPrice,
         onChanged: (v) => setState(() => _name = v),
         onSaved: (v) => _item.name = v.trim(),
         validator: (v) => v.trim().isEmpty
@@ -330,6 +339,7 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
           label: l10n.catalogPriceLabel,
           initialValue: _item.value,
           hint: l10n.catalogPriceHint,
+          autofocus: _startOnPrice,
           onChanged: (_) => _touch(),
           onSavedNullable: (v) => _item.value = v,
         ),
@@ -371,7 +381,10 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
           ],
           CupertinoButton(
             padding: EdgeInsets.zero,
-            minimumSize: const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+            minimumSize: const Size(
+              AppSizes.minTouchTarget,
+              AppSizes.minTouchTarget,
+            ),
             onPressed: _uploading ? null : _pickPhoto,
             child: _uploading
                 ? const CupertinoActivityIndicator()
@@ -390,9 +403,9 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
 
   /// Keys of the built-in fields already rendered above.
   Set<String> get _builtInFieldKeys => {
-        '${widget.kind.name}.name',
-        '${widget.kind.name}.value',
-      };
+    '${widget.kind.name}.name',
+    '${widget.kind.name}.value',
+  };
 
   /// [inCard]: inside the sheet's "Mais dados" card, so no inset sections.
   List<Widget> _buildCustomFieldSections(
@@ -409,25 +422,26 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
     for (final entry in grouped.entries) {
       sections.add(SectionLabel(entry.key));
       final fields = entry.value.map((field) {
-            return DynamicFieldBuilder(
-              field: field,
-              value: _item.customData?[field.fieldName] ??
-                  _item.customData?[field.key],
-              locale: locale,
-              onChanged: (newValue) {
-                setState(() {
-                  _touched = true;
-                  _item.customData ??= {};
-                  if (newValue == null) {
-                    _item.customData!.remove(field.fieldName);
-                  } else {
-                    _item.customData![field.fieldName] = newValue;
-                  }
-                  _item.customData!.remove(field.key); // migrate old key
-                });
-              },
-            );
-          }).toList();
+        return DynamicFieldBuilder(
+          field: field,
+          value:
+              _item.customData?[field.fieldName] ??
+              _item.customData?[field.key],
+          locale: locale,
+          onChanged: (newValue) {
+            setState(() {
+              _touched = true;
+              _item.customData ??= {};
+              if (newValue == null) {
+                _item.customData!.remove(field.fieldName);
+              } else {
+                _item.customData![field.fieldName] = newValue;
+              }
+              _item.customData!.remove(field.key); // migrate old key
+            });
+          },
+        );
+      }).toList();
       sections.add(
         inCard
             ? Column(

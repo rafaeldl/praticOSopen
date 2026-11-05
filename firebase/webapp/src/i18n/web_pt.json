@@ -835,5 +835,20 @@
   "web.nfse.autoConfirmTitle": "Emitir as notas sozinho?",
   "web.nfse.autoConfirm": "Emitir sozinho",
   "web.nfse.rowError": "não deu para ver as notas desta OS",
-  "web.push.promptMessage": "O PraticOS avisa neste navegador quando o cliente aprova um orçamento, comenta numa OS ou paga. O navegador vai perguntar se pode mandar esses avisos."
+  "web.push.promptMessage": "O PraticOS avisa neste navegador quando o cliente aprova um orçamento, comenta numa OS ou paga. O navegador vai perguntar se pode mandar esses avisos.",
+  "web.quick.newCustomer": "Cliente novo",
+  "web.quick.newDevice": "{device} novo",
+  "web.quick.newItem": "Serviço ou peça novo",
+  "web.quick.needsName": "Escreva o nome para cadastrar",
+  "web.quick.itemName": "Nome",
+  "web.quick.itemKind": "É um",
+  "web.quick.phoneOf": "Esse número é de {name}.",
+  "web.quick.useCustomer": "Usar {name}",
+  "web.quick.phoneOptional": "Pode deixar o telefone em branco",
+  "web.quick.register": "Cadastrar",
+  "web.quick.registerAndAdd": "Cadastrar e pôr na OS",
+  "web.quick.finishFirst": "Termine ou cancele o cadastro aberto antes de salvar",
+  "web.quick.whatsapp": "WhatsApp",
+  "web.quick.customerData": "Dados do cliente",
+  "web.quick.deviceData": "Dados de {name}"
 }

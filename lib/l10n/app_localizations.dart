@@ -4072,6 +4072,12 @@ abstract class AppLocalizations {
   /// **'Digite o nome do cliente'**
   String get customerNameRequired;
 
+  /// Link on a saved order whose customer has no phone: opens the customer form (order.quick.complete)
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp'**
+  String get orderMissingWhatsapp;
+
   /// No description provided for @customerPhoneLabel.
   ///
   /// In pt, this message translates to:

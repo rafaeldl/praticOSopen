@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "2ac9a14263740d7b9c4799d8170e6732b381af8c028d7b1a831dcad670451e85",
+      "sha": "731983b473068f9ae64982b725f2b3012951b230f7986cf7154c34ce76480894",
       "scope": "**/*"
     },
     {
@@ -45,13 +45,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
-        "hunks": 5,
-        "median": 0.14,
-        "min": 0.11,
-        "max": 0.16,
+        "at": "2026-11-05T12:28:51.409Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -79,7 +79,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -108,7 +108,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -141,7 +141,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -174,7 +174,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -203,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -281,7 +281,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -327,7 +327,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -377,7 +377,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -423,7 +423,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -456,7 +456,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -485,7 +485,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -514,7 +514,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -543,7 +543,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -573,11 +573,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.02,
-        "max": 0.07,
+        "min": 0.01,
+        "max": 0.04,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -603,7 +603,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -645,7 +645,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -674,7 +674,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -837,7 +837,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -870,7 +870,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -912,7 +912,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -941,7 +941,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -970,7 +970,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -999,7 +999,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1045,7 +1045,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1078,7 +1078,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1107,7 +1107,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-04T13:31:01.050Z",
+        "at": "2026-11-05T12:28:51.409Z",
         "hunks": 0,
         "median": 0,
         "min": 0,

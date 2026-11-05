@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 689 linhas, 578 capacidades de usuário e 111 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
+# Contagem: 691 linhas, 579 capacidades de usuário e 112 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -2606,6 +2606,41 @@ rows:
   e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   note: "Web: \"Abrir cliente\" no menu … da OS, só para quem abre Clientes. No app redesenhado o nome troca o cliente; o web mantém as duas coisas."
+- id: order.quick.complete
+  screen: lib/screens/order/order_screen_v2.dart
+  route: "/customer_form"
+  action: "Completar WhatsApp do cliente e placa ou modelo do aparelho sem sair da OS"
+  kind: action
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: ["labels:device", "masks:device.serial", "masks:customer.phone"]
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/customers", "companies/{id}/devices", "companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/e2e/quick-register.spec.ts
+  web_exception: null
+  permission: manageCustomers
+  note: "Abaixo do cliente e do aparelho, \"+ WhatsApp\", \"+ Placa\" (rótulo do ramo) ou \"+ Modelo\" quando faltam; nunca e-mail ou CPF. Abre o formulário do registro (app: empurrado; web: gaveta por cima da OS) e, salvo, a cópia do cliente ou do aparelho na OS acompanha. Só quem edita a OS e tem manageCustomers (telefone) ou manageDevices (aparelho). Web: o menu … também tem \"Dados do cliente\" e \"Dados de …\". Outras OS do mesmo cliente não são atualizadas."
+- id: order.quick.missing-rule
+  screen: lib/screens/order/order_missing_data.dart
+  route: null
+  action: "Regra do que falta no cliente e no aparelho da OS"
+  kind: logic
+  roles: [owner, admin, supervisor, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: done
+  e2e: firebase/webapp/e2e/quick-register.spec.ts
+  web_exception: null
+  note: "missingOnOrder: telefone vazio do cliente; série vazia, ou modelo vazio ou igual à série, de cada aparelho. Mesma regra no web em src/lib/orders/quick-create.ts (tests/quick-create.test.ts)."
 - id: order.device.add
   screen: lib/screens/order/order_screen_v2.dart
   route: "/device_list"
@@ -4178,7 +4213,7 @@ rows:
   e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: manageServices
-  note: "Cadastrar X pelo texto digitado não pergunta o tipo: cria serviço se puder, senão produto, e salva só o nome. Quem pergunta serviço ou produto é o + do topo. Precisa de manageServices ou manageProducts. Web: \"+ Cadastrar «X» no catálogo\" na busca da Nova OS e da OS, só quando nenhum item tem o mesmo nome (sem acento e caixa); serviço se pode, senão produto; entra na OS na hora."
+  note: "Cadastrar X pelo texto digitado nunca salva só o nome (docs/QUICK_REGISTER.md): no app pergunta serviço ou peça (quando pode os dois) e abre o mesmo formulário do + com o nome e o cursor no preço; no web, \"+ Cadastrar «X» no catálogo\" abre um bloco com Serviço | Peça e Preço (só com editPrices). Só quando nenhum item tem o mesmo nome (sem acento e caixa). Precisa de manageServices ou manageProducts; entra na OS com o preço."
 - id: order.item-search.price
   screen: lib/screens/order/order_item_search_screen.dart
   route: null
@@ -7517,10 +7552,10 @@ rows:
   hardware: null
   data: ["companies/{id}/customers"]
   web_status: done
-  e2e: firebase/webapp/e2e/order-close.spec.ts
+  e2e: firebase/webapp/e2e/quick-register.spec.ts
   web_exception: null
   permission: manageCustomers
-  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na Nova OS \"+ Cadastrar «texto»\" some com nome existente e volta escolhido (orders-review.spec.ts P0); telefone vira telefone com 6 ou mais dígitos. O aviso de telefone repetido fica no cadastro completo (customers.spec.ts)."
+  note: "Abrir cliente, no aviso de repetido, escolhe o que já existe. 'Cadastrar texto' pela busca: só dígitos, espaço e ()+- vira telefone; o resto vira nome. A opção some quando já existe cliente com o mesmo nome (sem acento e caixa). Salvo, volta escolhido. Web: na Nova OS \"+ Cadastrar «texto»\" some com nome existente e volta escolhido (orders-review.spec.ts P0); telefone vira telefone com 6 ou mais dígitos. Cadastro rápido (docs/QUICK_REGISTER.md): no web, um bloco abaixo do campo pede nome e WhatsApp (opcional, com máscara), avisa telefone de outro cliente com \"Usar …\" e \"Mais dados\" abre o cadastro completo; no app, o formulário completo já abre com o cursor no telefone quando o nome veio digitado."
 - id: customer.picker.plate
   screen: lib/screens/customers/customer_list_screen.dart
   route: "/customer_list"
@@ -8279,7 +8314,7 @@ rows:
   e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   permission: manageDevices
-  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web. Web: Nova OS e \"Outro …\" da OS cadastram direto (POST /devices) com a mesma regra da placa e põem na OS; só com manageDevices."
+  note: "Texto no formato de placa BR, com ou sem hífen (AAA-9A99 ou AAA9A99), vira série em maiúsculas; o resto vira modelo. O aparelho criado volta escolhido. Consultor cria cliente mas não aparelho: avaliar na web. Web: Nova OS e \"Outro …\" da OS abrem um bloco com modelo e placa/série (rótulo e máscara do ramo, mesma regra da placa), e \"Mais dados\" abre o cadastro completo; salvo, entra na OS; só com manageDevices. App: o formulário completo abre com o cursor na placa quando o modelo veio digitado (docs/QUICK_REGISTER.md)."
 - id: device.detail.view
   screen: lib/screens/devices/device_detail_screen.dart
   route: "/device_detail"

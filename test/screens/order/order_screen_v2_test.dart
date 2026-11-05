@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/global.dart';
@@ -1725,32 +1726,50 @@ void main() {
       expect(find.text(_money(35.5)), findsNWidgets(2)); // row + total
     });
 
-    testWidgets('"Cadastrar “X”" creates without price and adds', (
-      tester,
-    ) async {
-      final catalog = FakeSource(services: [_item('s1', 'Troca de óleo', 120)]);
-      final store = OrderStore();
-      await _pump(tester, screen(store, catalog: catalog));
+    testWidgets(
+      '"Cadastrar “X”" asks kind and price, then adds (order.quick.item)',
+      (tester) async {
+        final catalog = FakeSource(
+          services: [_item('s1', 'Troca de óleo', 120)],
+        );
+        final store = OrderStore();
+        await _pump(tester, screen(store, catalog: catalog));
 
-      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
-      await tester.pumpAndSettle();
-      await tester.enterText(
-        find.byType(CupertinoSearchTextField),
-        'Troca de embreagem',
-      );
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byType(CupertinoSearchTextField),
+          'Troca de embreagem',
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cadastrar “Troca de embreagem”'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Cadastrar “Troca de embreagem”'));
+        await tester.pumpAndSettle();
+        // Nothing saved with the name alone: the kind, then the sheet.
+        expect(catalog.saved, isEmpty);
+        expect(find.text('O que vai cadastrar?'), findsOneWidget);
+        await tester.tap(find.text('Serviço').last);
+        await tester.pumpAndSettle();
+        final fields = find.descendant(
+          of: find.byType(FormSheet),
+          matching: find.byType(CupertinoTextField),
+        );
+        expect(
+          tester.widget<CupertinoTextField>(fields.first).controller?.text,
+          'Troca de embreagem',
+        );
+        await tester.enterText(fields.at(1), '150');
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('new_order_save')).last);
+        await tester.pumpAndSettle();
 
-      expect(catalog.saved.single.$1, CatalogKind.service);
-      expect(catalog.saved.single.$2.name, 'Troca de embreagem');
-      expect(catalog.saved.single.$2.value, isNull);
-      expect(store.services!.single.value, isNull);
-      expect(find.text('Troca de embreagem'), findsOneWidget);
-      expect(find.text('sem valor'), findsOneWidget);
-      expect(find.text('1 item sem valor, fora do total'), findsOneWidget);
-    });
+        expect(catalog.saved.single.$1, CatalogKind.service);
+        expect(catalog.saved.single.$2.name, 'Troca de embreagem');
+        expect(catalog.saved.single.$2.value, 150);
+        expect(store.services!.single.value, 150);
+        expect(find.text('Troca de embreagem'), findsOneWidget);
+      },
+    );
 
     testWidgets('no create row without manageServices/manageProducts', (
       tester,
@@ -3105,24 +3124,26 @@ void main() {
       expect(_menuLabels(tester), contains('Responsável'));
     });
 
-    testWidgets('without it the Responsável row of a saved order is read only',
-        (tester) async {
-      await _pump(
-        tester,
-        screen(OrderStore(), assign: false),
-        args: {'order': saved(assignee: tech)},
-      );
-      final row = find.ancestor(
-        of: find.text('Carlos Técnico'),
-        matching: find.byType(AppListRow),
-      );
-      await tester.scrollUntilVisible(
-        row,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(tester.widget<AppListRow>(row).onTap, isNull);
-    });
+    testWidgets(
+      'without it the Responsável row of a saved order is read only',
+      (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), assign: false),
+          args: {'order': saved(assignee: tech)},
+        );
+        final row = find.ancestor(
+          of: find.text('Carlos Técnico'),
+          matching: find.byType(AppListRow),
+        );
+        await tester.scrollUntilVisible(
+          row,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(tester.widget<AppListRow>(row).onTap, isNull);
+      },
+    );
 
     testWidgets('with it the Responsável row opens the picker', (tester) async {
       await _pump(
@@ -3160,5 +3181,4 @@ void main() {
       );
     });
   });
-
 }
