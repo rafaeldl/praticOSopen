@@ -45,14 +45,6 @@ export function deviceReading(customData: Record<string, unknown> | null | undef
 /** A visit's reading becomes the device's when the device has none or it does not go back. */
 export const readingAdvances = (current: number | null, next: number): boolean => current === null || next >= current
 
-/** `deviceReadings` of the order with [deviceId] set to [value] (null removes it); null when empty. */
-export function withReading(readings: Record<string, number> | null | undefined, deviceId: string, value: number | null): Record<string, number> | null {
-  const out = { ...(readings ?? {}) }
-  if (value === null) delete out[deviceId]
-  else out[deviceId] = value
-  return Object.keys(out).length ? out : null
-}
-
 /** Readings of an order document, numbers only. */
 export function readingsOf(raw: unknown): Record<string, number> | undefined {
   if (!raw || typeof raw !== 'object') return undefined

@@ -74,6 +74,7 @@ Ficha do equipamento ← customData.mileage (última) + deviceReadings de cada O
 3. Atualizar o equipamento exige a permissão de cadastrar equipamentos (`manageDevices` / `canRegisterDevices`). Sem ela, só a OS guarda a leitura.
 4. "+ Quilometragem" aparece só em OS em aberto (orçamento, aprovada, em andamento) e para quem pode editar a OS. Leitura já salva aparece em qualquer situação.
 5. OS com mais de um equipamento: uma leitura por equipamento, com o nome dele ao lado.
+6. A leitura é gravada por chave (`deviceReadings.<deviceId>`), nunca o mapa inteiro: duas pessoas lançando leituras de equipamentos diferentes na mesma OS mantêm as duas (app: `OrderFieldDiff.keyedFields`; web: `writes.setDeviceReading`).
 
 ## Fora deste desenho (registrado na #588)
 

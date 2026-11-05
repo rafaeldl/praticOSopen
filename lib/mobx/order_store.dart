@@ -2162,6 +2162,11 @@ abstract class _OrderStore with Store {
     final previous = {
       for (final key in changed.keys)
         if (base.containsKey(key)) key: base[key],
+      // A keyed map (`deviceReadings.d1`) goes back whole.
+      for (final key in OrderFieldDiff.keyedFields)
+        if (base.containsKey(key) &&
+            changed.keys.any((path) => path.startsWith('$key.')))
+          key: base[key],
     };
     _savedSnapshot = current;
 
@@ -2193,7 +2198,12 @@ abstract class _OrderStore with Store {
       // fields back as unsaved when the store still holds this order.
       final snapshot = _savedSnapshot;
       if (snapshot != null && _savedSnapshotId == orderId) {
-        for (final key in changed.keys) {
+        final keyed = {
+          for (final key in OrderFieldDiff.keyedFields)
+            if (changed.keys.any((path) => path.startsWith('$key.'))) key,
+        };
+        for (final key in {...changed.keys, ...keyed}) {
+          if (key.contains('.')) continue;
           if (previous.containsKey(key)) {
             snapshot[key] = previous[key];
           } else {

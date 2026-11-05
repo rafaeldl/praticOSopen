@@ -138,6 +138,15 @@ export async function updateOrderFields(orderId: string, fields: Record<string, 
   await firestore.updateDoc(ref, { ...fields, updatedAt: new Date().toISOString(), updatedBy: author() })
 }
 
+/**
+ * One device's reading at this visit (docs/DEVICE_READING.md), by its own
+ * path: another device's reading saved meanwhile stays. Null removes it.
+ */
+export async function setDeviceReading(orderId: string, deviceId: string, value: number | null): Promise<void> {
+  const { ref, firestore } = await orderDoc(orderId)
+  await firestore.updateDoc(ref, new firestore.FieldPath('deviceReadings', deviceId), value === null ? firestore.deleteField() : value, 'updatedAt', new Date().toISOString(), 'updatedBy', author())
+}
+
 export async function addComment(orderId: string, text: string, isInternal: boolean): Promise<void> {
   const [db, { addDoc, collection }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   await addDoc(collection(db, 'companies', session.companyId as string, 'orders', orderId, 'comments'), {

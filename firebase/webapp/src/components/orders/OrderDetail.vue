@@ -68,7 +68,7 @@ import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
 import { formatMonthYear, fromIsoDay, toIsoDay } from '@/lib/format'
 import TextDialog from './TextDialog.vue'
 import ReadingDialog from './ReadingDialog.vue'
-import { deviceReading, formatReading, readingAdvances, readingFieldOf, withReading } from '@/lib/device-reading'
+import { deviceReading, formatReading, readingAdvances, readingFieldOf } from '@/lib/device-reading'
 import { fieldTitle, segmentFieldList } from '@/lib/segment-fields'
 import OrderCustomFields from './OrderCustomFields.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
@@ -227,7 +227,7 @@ async function saveReading(deviceId: string, value: number | null) {
   const o = order.value
   const field = reading.value
   if (!o || !field || (o.deviceReadings?.[deviceId] ?? null) === value) return
-  const saved = await run(() => writes.updateOrderFields(o.id, { deviceReadings: withReading(o.deviceReadings, deviceId, value) }), t('web.saved'))
+  const saved = await run(() => writes.setDeviceReading(o.id, deviceId, value), t('web.saved'))
   if (!saved || value === null || !can('manageDevices')) return
   // The device keeps its last reading, never going back (the app's recordDeviceReading).
   try {

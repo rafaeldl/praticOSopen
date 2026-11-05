@@ -2,7 +2,7 @@
 // test/utils/device_reading_test.dart, for a vehicle (km), a machine (hours)
 // and a phone repair (no reading).
 import { describe, expect, it } from 'vitest'
-import { deviceReading, formatReading, parseReading, readingAdvances, readingFieldOf, readingsOf, withReading, type ReadingField } from '@/lib/device-reading'
+import { deviceReading, formatReading, parseReading, readingAdvances, readingFieldOf, readingsOf, type ReadingField } from '@/lib/device-reading'
 import { normalizeOrder } from '@/lib/orders/model'
 
 const mileage: ReadingField = { key: 'device.mileage', type: 'number', suffix: 'km', reading: true }
@@ -35,10 +35,6 @@ describe('format and parse', () => {
 })
 
 describe('order readings', () => {
-  it('sets and removes one device, keeping the others', () => {
-    expect(withReading({ d1: 10 }, 'd2', 20)).toEqual({ d1: 10, d2: 20 })
-    expect(withReading({ d1: 10 }, 'd1', null)).toBeNull()
-  })
   it('the device keeps the bigger reading', () => {
     expect(readingAdvances(null, 1)).toBe(true)
     expect(readingAdvances(98000, 50000)).toBe(false)
