@@ -305,6 +305,20 @@ export function watchOrder(ctx: ListContext, id: string, onState: (state: Detail
     }
   }
 
+  /** The stored order now, read once beside the channel (after a write that is not this screen's, like the share link). */
+  async function readStored() {
+    try {
+      const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+      const snapshot = await getDoc(doc(db, 'companies', ctx.companyId, 'orders', id))
+      if (alive && snapshot.exists()) {
+        const order = await orderFromDoc(id, snapshot.data() as Record<string, unknown>)
+        if (alive) onState({ kind: 'ready', order })
+      }
+    } catch {
+      // The channel brings it later.
+    }
+  }
+
   /** One read without the channel (REST build). */
   async function readOnce() {
     try {
@@ -365,6 +379,8 @@ export function watchOrder(ctx: ListContext, id: string, onState: (state: Detail
   void start()
   return {
     refresh: () => (ctx.showsMoney ? Promise.resolve() : readApi()),
+    /** Read again now in both builds: a server write this screen did not make (the share link moves the version). */
+    reread: () => (ctx.showsMoney ? readStored() : readApi()),
     /** "Tentar de novo" after a failure: the API again, or listen again and read once meanwhile. */
     retry: async () => {
       if (!ctx.showsMoney) return readApi()
