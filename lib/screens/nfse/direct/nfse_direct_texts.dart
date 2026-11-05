@@ -49,7 +49,14 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
       return l10n.nfseDirectErrorValidation;
+    case 'ORDER_HAS_INVOICE':
+      return l10n.nfseLinkErrorOrderHasNota;
+    case 'INVOICE_HAS_ORDER':
+      return l10n.nfseLinkErrorAlreadyLinked;
+    case 'IMPORT_UNDO_EXPIRED':
+      return l10n.nfseImportErrorUndoExpired;
     case 'KEY_VAULT_UNAVAILABLE':
+    case 'SEFIN_UNAVAILABLE':
     case 'NETWORK_ERROR':
     case 'RATE_LIMIT_EXCEEDED':
       return l10n.nfseDirectErrorUnavailable;

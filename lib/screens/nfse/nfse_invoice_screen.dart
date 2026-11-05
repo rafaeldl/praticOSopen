@@ -10,6 +10,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
+import 'package:praticos/screens/nfse/direct/nfse_order_link.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
@@ -22,6 +23,7 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/nfse_direct_api_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -124,6 +126,7 @@ class NfseInvoiceScreen extends StatefulWidget {
     this.openUrl,
     this.sharePdf,
     this.previousPageTitle,
+    this.directService,
   });
 
   final NfseInvoice invoice;
@@ -142,6 +145,10 @@ class NfseInvoiceScreen extends StatefulWidget {
   sharePdf;
 
   final String? previousPageTitle;
+
+  /// Test seam of the NFS-e direct ("Ligar a uma OS"); defaults to
+  /// [NfseDirectApiService.instance].
+  final NfseDirectApiService? directService;
 
   static Future<void> open(
     BuildContext context,
@@ -260,17 +267,34 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     final choice = await showPullDownMenu(
       context,
       groups: [
-        PullDownGroup([
-          PullDownItem(
-            value: 'cancel',
-            label: l10n.nfseCancelAction,
-            icon: CupertinoIcons.xmark_circle,
-            destructive: true,
-          ),
-        ]),
+        if (canUnlinkNfseFromOrder(_invoice))
+          PullDownGroup([
+            PullDownItem(
+              value: 'unlink',
+              label: l10n.nfseUnlinkAction,
+              icon: CupertinoIcons.link,
+            ),
+          ]),
+        if (_invoice.canCancel)
+          PullDownGroup([
+            PullDownItem(
+              value: 'cancel',
+              label: l10n.nfseCancelAction,
+              icon: CupertinoIcons.xmark_circle,
+              destructive: true,
+            ),
+          ]),
       ],
     );
-    if (choice == 'cancel' && mounted) await _confirmCancel();
+    if (!mounted) return;
+    if (choice == 'cancel') await _confirmCancel();
+    if (choice == 'unlink') {
+      await unlinkNfseFromOrder(
+        context,
+        _invoice,
+        service: widget.directService,
+      );
+    }
   }
 
   Future<void> _confirmCancel() async {
@@ -387,7 +411,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       floatingButton: _floatingButton(),
       trailing: _busy
           ? const CupertinoActivityIndicator()
-          : invoice.canCancel
+          : invoice.canCancel || canUnlinkNfseFromOrder(invoice)
           ? GlassBarButton(
               key: const Key('nfseMenuButton'),
               label: l10n.nfseMenu,
@@ -419,6 +443,20 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               AppListRow(
                 title: l10n.nfseOrdersLabel,
                 trailing: invoice.orderNumbers,
+              ),
+            if (canLinkNfseToOrder(invoice))
+              AppListRow(
+                key: const Key('nfseLinkOrder'),
+                title: l10n.nfseLinkOrderRow,
+                trailing: l10n.nfseLinkOrderAction,
+                trailingStyle: AppTypography.body.copyWith(
+                  color: AppColors.accentText.resolveFrom(context),
+                ),
+                onTap: () => linkNfseToOrder(
+                  context,
+                  invoice,
+                  service: widget.directService,
+                ),
               ),
           ],
         ),

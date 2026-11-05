@@ -9,6 +9,7 @@ import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/nfse/direct/certificate_upload_sheet.dart';
 import 'package:praticos/screens/nfse/direct/fiscal_emitter_screen.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
+import 'package:praticos/screens/nfse/direct/nfse_import_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -111,18 +112,24 @@ class _NfseDirectSetupScreenState extends State<NfseDirectSetupScreen> {
     return list.length == 1 ? list.first.id : null;
   }
 
+  /// Adds a CNPJ, then reads its notas in the government (spec §4.2, §4.3).
   Future<void> _add() async {
+    String? added;
     final saved = await CertificateUploadSheet.show(
       context,
       service: widget.service,
       pickFile: widget.pickFile,
+      onAdded: (id) => added = id,
     );
-    if (saved == true && mounted) {
-      showAppToast(
-        context,
-        context.l10n.nfseDirectCnpjAdded,
-        icon: CupertinoIcons.checkmark_circle,
-      );
+    if (saved != true || !mounted) return;
+    showAppToast(
+      context,
+      context.l10n.nfseDirectCnpjAdded,
+      icon: CupertinoIcons.checkmark_circle,
+    );
+    final emitterId = added;
+    if (emitterId != null) {
+      await NfseImportScreen.open(context, emitterId, service: widget.service);
     }
   }
 

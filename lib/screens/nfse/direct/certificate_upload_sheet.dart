@@ -51,7 +51,11 @@ class CertificateUploadSheet extends StatefulWidget {
     this.legalName,
     this.service,
     this.pickFile,
+    this.onAdded,
   });
+
+  /// A new CNPJ was added: its emitter id (the import starts from it).
+  final ValueChanged<String>? onAdded;
 
   /// Replaces the certificate of this emitter; null adds a new CNPJ.
   final String? emitterId;
@@ -67,6 +71,7 @@ class CertificateUploadSheet extends StatefulWidget {
     String? legalName,
     NfseDirectApiService? service,
     Future<PickedCertificate?> Function()? pickFile,
+    ValueChanged<String>? onAdded,
   }) => FormSheet.show<bool>(
     context,
     (_) => CertificateUploadSheet(
@@ -74,6 +79,7 @@ class CertificateUploadSheet extends StatefulWidget {
       legalName: legalName,
       service: service,
       pickFile: pickFile,
+      onAdded: onAdded,
     ),
   );
 
@@ -131,7 +137,8 @@ class _CertificateUploadSheetState extends State<CertificateUploadSheet> {
           _password.text,
         );
       } else {
-        await service.addCertificate(file.bytes, _password.text);
+        final id = await service.addCertificate(file.bytes, _password.text);
+        if (id != null) widget.onAdded?.call(id);
       }
       _password.clear();
       if (mounted) Navigator.pop(context, true);

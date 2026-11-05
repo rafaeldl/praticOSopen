@@ -4,6 +4,7 @@ import 'dart:io' show SocketException;
 
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/fiscal_emitter.dart';
+import 'package:praticos/models/nfse_import.dart';
 import 'package:praticos/repositories/tenant/fiscal_emitter_repository.dart';
 import 'package:praticos/services/api_headers.dart';
 
@@ -178,4 +179,65 @@ class NfseDirectApiService {
 
   Future<void> setAutoIssue(NfseDirectAutoIssue value) =>
       _request('PUT', '/v1/app/nfse/setup/settings', {'autoIssue': value.name});
+
+  // --------------------------------------------------------------------------
+  // Import of the notas already issued (spec §4.3) and links to orders (§4.7)
+  // --------------------------------------------------------------------------
+
+  NfseImportBatch _batch(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw NfseDirectApiException(null, 'Import answered without data');
+    }
+    return NfseImportBatch.fromJson(data);
+  }
+
+  /// Starts reading the emitter's notas in the government (or continues an
+  /// import still open). The server reads for ~45 s per call.
+  Future<NfseImportBatch> startImport(String emitterId) async => _batch(
+    await _request('POST', '/v1/app/nfse/imports', {'emitterId': emitterId}),
+  );
+
+  /// Reads more; the proposal comes once everything was read.
+  Future<NfseImportBatch> continueImport(String batchId) async =>
+      _batch(await _request('POST', '/v1/app/nfse/imports/$batchId/continue'));
+
+  /// "Importar": [sameCustomer] answers "Este é o mesmo cliente?" by group
+  /// key; [autoIssueCustomerIds] turns "Emitir sozinha" on for them.
+  Future<NfseImportBatch> applyImport(
+    String batchId, {
+    Map<String, bool> sameCustomer = const {},
+    List<String> autoIssueCustomerIds = const [],
+  }) async => _batch(
+    await _request('POST', '/v1/app/nfse/imports/$batchId/apply', {
+      'answers': {
+        'sameCustomer': sameCustomer,
+        'autoIssueCustomerIds': autoIssueCustomerIds,
+      },
+    }),
+  );
+
+  /// "Desfazer importação" (30 days).
+  Future<NfseImportBatch> undoImport(String batchId) async =>
+      _batch(await _request('POST', '/v1/app/nfse/imports/$batchId/undo'));
+
+  /// Orders for "Ligar a uma OS", the likely ones first.
+  Future<List<NfseLinkCandidate>> linkCandidates(String invoiceId) async {
+    final data = await _request(
+      'GET',
+      '/v1/app/nfse/links/invoices/$invoiceId/candidates',
+    );
+    return [
+      for (final o in (data?['orders'] as List? ?? const []))
+        if (o is Map) NfseLinkCandidate.fromJson(Map<String, dynamic>.from(o)),
+    ];
+  }
+
+  Future<void> linkInvoiceToOrder(String invoiceId, String orderId) => _request(
+    'POST',
+    '/v1/app/nfse/links/invoices/$invoiceId/link',
+    {'orderId': orderId},
+  );
+
+  Future<void> unlinkInvoice(String invoiceId) =>
+      _request('POST', '/v1/app/nfse/links/invoices/$invoiceId/unlink');
 }

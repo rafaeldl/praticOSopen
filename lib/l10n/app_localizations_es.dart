@@ -7065,4 +7065,221 @@ class AppLocalizationsEs extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'Las facturas de $customer van al propio cliente';
   }
+
+  @override
+  String get nfseImportTitle => 'Importar notas';
+
+  @override
+  String get nfseImportReading => 'Leyendo sus notas en el gobierno…';
+
+  @override
+  String nfseImportReadingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documentos leídos',
+      one: '1 documento leído',
+      zero: 'Empezando',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportHeadline(int notas, int customers) {
+    return 'Encontramos $notas notas para $customers clientes. Vamos a completar sus clientes y el servicio de la nota.';
+  }
+
+  @override
+  String get nfseImportHeadlineEmpty =>
+      'No encontramos notas de este CNPJ en el gobierno. Vamos a completar el servicio y la serie de la nota.';
+
+  @override
+  String get nfseImportEmitterSection => 'Emisor';
+
+  @override
+  String get nfseImportServiceRow => 'Servicio más usado';
+
+  @override
+  String nfseImportServiceValue(String name, String rate) {
+    return '$name · ISS $rate';
+  }
+
+  @override
+  String get nfseImportSeriesRow => 'Serie de las notas de PraticOS';
+
+  @override
+  String get nfseImportCustomersSection => 'Clientes';
+
+  @override
+  String nfseImportCustomersNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clientes nuevos',
+      one: '1 cliente nuevo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportCustomersCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count completan clientes que ya tiene',
+      one: '1 completa un cliente que ya tiene',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportCustomersHint =>
+      'Solo completamos lo que está vacío. Nada de lo que escribió cambia.';
+
+  @override
+  String get nfseImportAskSection => '¿Es el mismo cliente?';
+
+  @override
+  String nfseImportAskSubtitle(String customer) {
+    return '¿Es su cliente $customer?';
+  }
+
+  @override
+  String get nfseImportAskUnanswered => 'Responder';
+
+  @override
+  String get nfseImportAskSame => 'Sí';
+
+  @override
+  String get nfseImportAskNew => 'No, crear otro';
+
+  @override
+  String get nfseImportAskHint => 'Sin respuesta, se crea un cliente nuevo.';
+
+  @override
+  String get nfseImportStoresSection => 'Tiendas que facturan en otro CNPJ';
+
+  @override
+  String nfseImportStoreRow(String recipient) {
+    return 'Nota fiscal para $recipient';
+  }
+
+  @override
+  String get nfseImportAutoSection => 'Emitir sola';
+
+  @override
+  String nfseImportAutoQuestion(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Estos $count clientes tuvieron nota en casi todas las OS. ¿Activar la nota automática para ellos?',
+      one:
+          'Este cliente tuvo nota en casi todas las OS. ¿Activar la nota automática para él?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportNotasSection => 'Notas';
+
+  @override
+  String nfseImportNotasLinked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vinculadas a sus OS',
+      one: '1 vinculada a sus OS',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportNotasHistory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count solo en el historial',
+      one: '1 solo en el historial',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportButton => 'Importar';
+
+  @override
+  String get nfseImportDone => 'Notas importadas';
+
+  @override
+  String get nfseImportAction => 'Importar notas del gobierno';
+
+  @override
+  String get nfseImportUndoAction => 'Deshacer importación';
+
+  @override
+  String get nfseImportUndoQuestion => '¿Deshacer la importación?';
+
+  @override
+  String get nfseImportUndoMessage =>
+      'Borramos los clientes creados que aún no tienen OS, vaciamos lo que se completó y desvinculamos las notas de las OS. Las notas siguen en el historial.';
+
+  @override
+  String get nfseImportUndone => 'Importación deshecha';
+
+  @override
+  String get nfseImportErrorUndoExpired =>
+      'La importación tiene más de 30 días y ya no se puede deshacer.';
+
+  @override
+  String get nfseLinkOrderRow => 'OS';
+
+  @override
+  String get nfseLinkOrderAction => 'Vincular a una OS';
+
+  @override
+  String get nfseLinkPickerTitle => '¿De qué OS es esta nota?';
+
+  @override
+  String get nfseLinkPickerSame => 'Del cliente';
+
+  @override
+  String get nfseLinkPickerOthers => 'Otras';
+
+  @override
+  String get nfseLinkPickerEmpty => 'Ninguna OS para vincular';
+
+  @override
+  String nfseLinkOrderTitle(String number) {
+    return 'OS $number';
+  }
+
+  @override
+  String get nfseLinkHasNota => 'Ya tiene nota';
+
+  @override
+  String get nfseLinked => 'Nota vinculada a la OS';
+
+  @override
+  String get nfseUnlinkAction => 'Desvincular de la OS';
+
+  @override
+  String nfseUnlinkQuestion(String numbers) {
+    return '¿Desvincular la nota de la OS $numbers?';
+  }
+
+  @override
+  String get nfseUnlinkMessage =>
+      'La OS queda libre para otra nota. La nota sigue en el historial.';
+
+  @override
+  String get nfseUnlinked => 'Nota desvinculada de la OS';
+
+  @override
+  String get nfseLinkErrorOrderHasNota =>
+      'Esta OS ya tiene nota. Cancele la otra antes.';
+
+  @override
+  String get nfseLinkErrorAlreadyLinked =>
+      'Esta nota ya está vinculada a una OS.';
 }

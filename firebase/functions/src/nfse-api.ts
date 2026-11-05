@@ -20,10 +20,12 @@ import { globalErrorHandler } from './middleware/error-handler.middleware';
 import nfseCertificateRoutes from './routes/v1/nfse-certificate.routes';
 import nfseDirectRoutes from './routes/v1/nfse-direct.routes';
 import nfseSettingsRoutes from './routes/v1/nfse-settings.routes';
+import { nfseImportRoutes, nfseLinkRoutes } from './routes/v1/nfse-import.routes';
 import { db } from './services/firestore.service';
 import { processPendingKeyDestructions, purgeExpiredCertificates } from './services/nfse/certificate-vault.service';
 import { sendCertificateNotices } from './services/nfse/certificate-expiry-notice.service';
 import { reconcileStaleDirectInvoices } from './services/nfse/issue.service';
+import { syncCompanyMailboxes } from './services/nfse/import.service';
 import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 
@@ -47,6 +49,8 @@ export function buildNfseApp(): express.Express {
   app.use('/v1/app/nfse/emitters', ...appBearer, nfseCertificateRoutes);
   app.use('/v1/app/nfse/direct', ...appBearer, nfseDirectRoutes);
   app.use('/v1/app/nfse/setup', ...appBearer, nfseSettingsRoutes);
+  app.use('/v1/app/nfse/imports', ...appBearer, nfseImportRoutes);
+  app.use('/v1/app/nfse/links', ...appBearer, nfseLinkRoutes);
   app.use((_req: Request, res: Response) => {
     res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not found' } });
   });
@@ -66,20 +70,26 @@ export const nfseApi = onRequest(
   buildNfseApp(),
 );
 
-/** Daily: notas without a clear answer, certificate expiry notices, expired certificates (90 days) and pending key destructions. */
-export async function runNfseDaily(): Promise<{ reconciled: number; noticed: number; purged: number; destroyed: number }> {
+/**
+ * Daily: notas without a clear answer, the government mailbox of each emitter
+ * (notas made elsewhere, cancellations, received notas), certificate expiry
+ * notices, expired certificates (90 days) and pending key destructions.
+ */
+export async function runNfseDaily(): Promise<{ reconciled: number; read: number; noticed: number; purged: number; destroyed: number }> {
   const companies = await db.collectionGroup('settings').where('nfseDirectEnabled', '==', true).get();
   let reconciled = 0;
   let noticed = 0;
+  let read = 0;
   for (const doc of companies.docs) {
     const companyId = doc.ref.parent.parent?.id;
     if (!companyId) continue;
     reconciled += await reconcileStaleDirectInvoices(companyId).catch(() => 0);
+    read += await syncCompanyMailboxes(companyId).catch(() => 0);
     noticed += (await sendCertificateNotices(companyId, new Date()).catch(() => ({ sent: 0 }))).sent;
   }
   const purged = await purgeExpiredCertificates();
   const destroyed = await processPendingKeyDestructions();
-  return { reconciled, noticed, purged, destroyed };
+  return { reconciled, read, noticed, purged, destroyed };
 }
 
 export const nfseDaily = onSchedule(
