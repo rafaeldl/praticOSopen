@@ -11531,6 +11531,18 @@ abstract class AppLocalizations {
   /// **'Não deu para mudar o preço no Catálogo. Mude por lá.'**
   String get orderItemCatalogPriceFailed;
 
+  /// Opens the customer link as a preview: nothing counted or sent (#588)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver como o cliente vê'**
+  String get sharePreview;
+
+  /// No description provided for @sharePreviewFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a prévia. Tente de novo.'**
+  String get sharePreviewFailed;
+
   /// No description provided for @checklistStatusDoneMissing.
   ///
   /// In pt, this message translates to:

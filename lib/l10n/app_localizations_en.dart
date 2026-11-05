@@ -7082,6 +7082,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t change the price in the Catalog. Change it there.';
 
   @override
+  String get sharePreview => 'See what the customer sees';
+
+  @override
+  String get sharePreviewFailed => 'Couldn\'t open the preview. Try again.';
+
+  @override
   String checklistStatusDoneMissing(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

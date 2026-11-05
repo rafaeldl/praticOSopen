@@ -7089,6 +7089,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não deu para mudar o preço no Catálogo. Mude por lá.';
 
   @override
+  String get sharePreview => 'Ver como o cliente vê';
+
+  @override
+  String get sharePreviewFailed =>
+      'Não deu para abrir a prévia. Tente de novo.';
+
+  @override
   String checklistStatusDoneMissing(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

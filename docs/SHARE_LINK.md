@@ -168,6 +168,25 @@ faz GET em `https://praticos.app/api/orders/{token}`. Por isso `firebase/firebas
 `/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
 404 e a página cai na tela de erro.
 
+### 2b. Prévia: "Ver como o cliente vê" (#588)
+
+A equipe abre o próprio link do cliente com `?preview=1`, sem mandar nada a ninguém:
+
+- **App:** link "Ver como o cliente vê" no `ShareLinkSheet`, abaixo de "Copiar o link". Abre dentro do app (`LaunchMode.inAppBrowserView`: Safari view no iPhone, Custom Tab no Android) via `ShareLinkService.openPreview`.
+- **Web (`/web`):** link "Ver como o cliente vê" no `ShareDialog` (Mandar para o cliente), em nova aba (`previewUrl` em `lib/receive/model.ts`).
+- **Token:** usa o mesmo link que a tela já reusa ou cria (`POST /v1/app/orders/{orderId}/share`). Não há rota nova nem token próprio de prévia.
+
+O que muda com `preview=1`:
+
+| Onde | Comportamento |
+|------|---------------|
+| Functions (`shareTokenAuth`, `countsAsVisit`) | Não incrementa `viewCount` nem `lastViewedAt`. O token continua sendo validado igual: a flag não libera nada. |
+| Nuxt `server/api/orders/[token].get.ts` | Repassa `?preview=1` para `/public/orders/{token}`, também nos refreshes ao voltar à aba. |
+| Página `/q/{token}` | Faixa no topo "Prévia. É assim que o cliente vê…". `useOrderApi` bloqueia aprovar, recusar, avaliar e comentar antes de qualquer chamada (`PreviewBlockedError`) e a página mostra "Só prévia: o cliente faz isso pelo link dele." |
+
+Como nenhuma escrita chega à API, a prévia não muda status, não grava comentário/avaliação e não dispara push. O GET do link não grava mais nada além do contador de visualização.
+Quem tirar o `preview=1` da URL vê a página normal do cliente (e conta como visita), igual a abrir o link mandado.
+
 ### 3. Aprovação/Rejeição
 
 ```
@@ -427,6 +446,7 @@ O `ShareLinkSheet` é um modal bottom sheet que centraliza todas as ações de c
 | **WhatsApp** | Abre WhatsApp com mensagem formatada (se cliente tem telefone) |
 | **Compartilhar** | Abre share sheet nativo do sistema |
 | **Copiar Link** | Copia URL para clipboard |
+| **Ver como o cliente vê** | Abre o link como prévia dentro do app (`?preview=1`), sem contar visita nem liberar ações |
 | **Revogar** | Remove link com confirmação |
 
 ### Opções Avançadas

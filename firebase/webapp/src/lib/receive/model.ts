@@ -246,6 +246,17 @@ export function messageKind(status: OrderStatus): 'approved' | 'progress' | 'don
   return 'other'
 }
 
+/**
+ * "Ver como o cliente vê": the same link with `?preview=1`. The customer page
+ * then shows a banner and turns approve/reject/rate/comment off, and the api
+ * does not count the visit (share-token.middleware countsAsVisit).
+ */
+export function previewUrl(url: string): string {
+  const parsed = new URL(url)
+  parsed.searchParams.set('preview', '1')
+  return parsed.toString()
+}
+
 /** wa.me with the text; without a number WhatsApp asks for the contact. */
 export function whatsappLink(number: string, text: string): string {
   return whatsappUrl(number, text)
