@@ -50,8 +50,6 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
         return l10n.nfseDirectErrorManagerNotAllowed;
       }
       return l10n.nfseDirectErrorForbidden;
-    case 'DAILY_LIMIT_REACHED':
-      return l10n.nfseDirectErrorDailyLimit;
     case 'UNAUTHENTICATED':
       return l10n.nfseDirectErrorForbidden;
     case 'VALIDATION_ERROR':
@@ -60,8 +58,6 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseDirectErrorRecipientTaxId;
     case 'EMITTER_NOT_READY':
       return l10n.nfseDirectErrorEmitterNotReady;
-    case 'ORDER_HAS_INVOICE':
-      return l10n.nfseDirectErrorOrderHasInvoice;
     case 'SEFIN_UNAVAILABLE':
       return l10n.nfseDirectErrorGovUnavailable;
     case 'INVOICE_NOT_CANCELABLE':
@@ -72,6 +68,18 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
       return l10n.nfseDirectErrorPdf;
     case 'NFSE_REFUSED':
       return l10n.nfseDirectRefusedGeneric;
+    case 'ORDER_HAS_INVOICE':
+      return l10n.nfseLinkErrorOrderHasNota;
+    case 'INVOICE_HAS_ORDER':
+      return l10n.nfseLinkErrorAlreadyLinked;
+    case 'IMPORT_UNDO_EXPIRED':
+      return l10n.nfseImportErrorUndoExpired;
+    case 'TOO_MANY_ATTEMPTS':
+      return l10n.nfseDirectErrorTooManyAttempts;
+    case 'CERT_BUSY':
+      return l10n.nfseDirectErrorBusy;
+    case 'DAILY_LIMIT_REACHED':
+      return l10n.nfseDirectErrorDailyLimit;
     case 'KEY_VAULT_UNAVAILABLE':
     case 'NETWORK_ERROR':
     case 'RATE_LIMIT_EXCEEDED':

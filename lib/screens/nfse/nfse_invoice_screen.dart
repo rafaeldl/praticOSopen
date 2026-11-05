@@ -13,6 +13,7 @@ import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_issue_sheet.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
+import 'package:praticos/screens/nfse/direct/nfse_order_link.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
@@ -408,21 +409,39 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     final choice = await showPullDownMenu(
       context,
       groups: [
-        PullDownGroup([
-          PullDownItem(
-            value: 'cancel',
-            label: l10n.nfseCancelAction,
-            icon: CupertinoIcons.xmark_circle,
-            destructive: true,
-          ),
-        ]),
+        if (canUnlinkNfseFromOrder(_invoice))
+          PullDownGroup([
+            PullDownItem(
+              value: 'unlink',
+              label: l10n.nfseUnlinkAction,
+              icon: CupertinoIcons.link,
+            ),
+          ]),
+        if (_invoice.canCancel)
+          PullDownGroup([
+            PullDownItem(
+              value: 'cancel',
+              label: l10n.nfseCancelAction,
+              icon: CupertinoIcons.xmark_circle,
+              destructive: true,
+            ),
+          ]),
       ],
     );
-    if (choice != 'cancel' || !mounted) return;
-    if (_invoice.isDirect) {
-      await _confirmDirectCancel();
-    } else {
-      await _confirmCancel();
+    if (!mounted) return;
+    if (choice == 'cancel') {
+      if (_invoice.isDirect) {
+        await _confirmDirectCancel();
+      } else {
+        await _confirmCancel();
+      }
+    }
+    if (choice == 'unlink') {
+      await unlinkNfseFromOrder(
+        context,
+        _invoice,
+        service: widget.directService,
+      );
     }
   }
 
@@ -601,7 +620,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       floatingButton: _floatingButton(),
       trailing: _busy
           ? const CupertinoActivityIndicator()
-          : invoice.canCancel
+          : invoice.canCancel || canUnlinkNfseFromOrder(invoice)
           ? GlassBarButton(
               key: const Key('nfseMenuButton'),
               label: l10n.nfseMenu,
@@ -665,6 +684,20 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
                 key: const Key('nfseInvoiceAccessKey'),
                 title: l10n.nfseDirectAccessKeyLabel,
                 subtitle: invoice.accessKey,
+              ),
+            if (canLinkNfseToOrder(invoice))
+              AppListRow(
+                key: const Key('nfseLinkOrder'),
+                title: l10n.nfseLinkOrderRow,
+                trailing: l10n.nfseLinkOrderAction,
+                trailingStyle: AppTypography.body.copyWith(
+                  color: AppColors.accentText.resolveFrom(context),
+                ),
+                onTap: () => linkNfseToOrder(
+                  context,
+                  invoice,
+                  service: widget.directService,
+                ),
               ),
           ],
         ),

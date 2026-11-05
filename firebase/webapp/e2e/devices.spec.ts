@@ -135,7 +135,9 @@ test('situação pela lista de escolher, campos do segmento e editar pelo botão
   await expect(row(page, device.serial)).toContainText('Inativo')
   await expect(await readDoc(`devices/${device.id}`)).toMatchObject({ status: 'inactive', customData: { mileage: 98000, fuel: 'Diesel' } })
   await row(page, device.serial).getByRole('button', { name: device.name, exact: true }).click()
-  await expect(panel(page).getByTestId('device-custom')).toContainText('98.000')
+  // The reading (odometer) sits next to the serial, not in the custom fields (docs/DEVICE_READING.md)
+  await expect(panel(page).getByTestId('device-reading')).toContainText('98.000')
+  await expect(panel(page).getByTestId('device-custom')).toContainText('Diesel')
 })
 
 test('apagar pelo botão da linha só sai quando o servidor confirma (device.list.delete, device.detail.delete)', async ({ page }) => {

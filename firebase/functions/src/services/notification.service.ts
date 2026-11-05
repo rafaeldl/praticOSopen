@@ -338,6 +338,29 @@ export async function notifyCertificateExpiring(
 }
 
 /**
+ * Tell the company owner that someone else issued or canceled a nota
+ * (NFS-e direct, issue #560). Only the owner: the point is that the owner
+ * sees what the team does with the company's certificate.
+ */
+export async function notifyOwnerOfInvoiceAction(
+  companyId: string,
+  message: { title: string; body: string; invoiceId: string; action: 'issued' | 'canceled' },
+): Promise<void> {
+  const companyDoc = await db.collection('companies').doc(companyId).get();
+  const owner = (companyDoc.data() as Company | undefined)?.owner;
+  if (!owner?.id) return;
+  await sendNotification(
+    [{ userId: owner.id, name: owner.name ?? '' }],
+    {
+      title: message.title,
+      body: message.body,
+      data: { type: 'nfse_invoice_by_team', action: message.action, invoiceId: message.invoiceId, companyId },
+    },
+    companyId,
+  );
+}
+
+/**
  * Tell the company about the maintenances coming up: who manages devices, and
  * the [technicians] of their last orders while they are still on the team.
  * The bell counts as delivered: a failure of the push alone is not repeated,

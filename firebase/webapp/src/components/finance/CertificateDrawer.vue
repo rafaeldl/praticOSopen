@@ -1,20 +1,27 @@
 <script setup lang="ts">
 // "Adicionar CNPJ" / "Trocar certificado" (NFS-e direct, spec §4.2): the A1
 // file (dragged in or chosen), its password and the terms. "Enviar" turns
-// blue with a file and a password; the server checks the certificate and a
+// blue with a file, a password and the terms accepted (checkbox); the server checks the certificate and a
 // refusal comes back as a plain sentence. The password lives only in this
 // form and in the request: it is cleared after sending and never stored.
 import { computed, ref, shallowRef } from 'vue'
 import { Check, FileUp, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { certificateFileProblem, uploadCertificate } from '@/lib/nfse/direct'
 
 const props = defineProps<{ emitterId?: string | null; legalName?: string }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
-const TERMS_URL = 'https://praticos.app/privacy.html'
+// The certificate terms (version TERMS_VERSION in lib/nfse/direct.ts), in the user's language.
+const TERMS_URLS = {
+  pt: 'https://praticos.app/termo-certificado.html',
+  en: 'https://praticos.app/termo-certificado-en.html',
+  es: 'https://praticos.app/termo-certificado-es.html',
+} as const
+const termsUrl = computed(() => TERMS_URLS[locale.value] ?? TERMS_URLS.pt)
+const accepted = ref(false)
 const file = shallowRef<File | null>(null)
 const password = ref('')
 const failed = ref('')
@@ -25,7 +32,7 @@ const layer = ref<InstanceType<typeof Layer> | null>(null)
 let allowClose = false
 
 const replace = computed(() => !!props.emitterId)
-const ready = computed(() => !!file.value && password.value.length > 0)
+const ready = computed(() => !!file.value && password.value.length > 0 && accepted.value)
 
 function take(picked: File | null | undefined) {
   if (!picked) return
@@ -92,8 +99,12 @@ async function send() {
         <p v-if="failed" class="field-error" role="alert" data-testid="certificate-error">{{ failed }}</p>
         <p class="sub">
           {{ t('nfseDirectTerms') }}
-          <a class="link" :href="TERMS_URL" target="_blank" rel="noopener noreferrer">{{ t('nfseDirectTermsLink') }}</a>
+          <a class="link" :href="termsUrl" target="_blank" rel="noopener noreferrer" data-testid="certificate-terms-link">{{ t('nfseDirectTermsLink') }}</a>
         </p>
+        <label class="check-row">
+          <input v-model="accepted" class="check" type="checkbox" data-testid="certificate-accept" />
+          <span>{{ t('nfseDirectAcceptTerms') }}</span>
+        </label>
       </div>
       <div class="drawer-foot">
         <span class="hint" aria-live="polite">{{ ready ? '' : t('nfseDirectUploadMissing') }}</span>

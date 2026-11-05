@@ -4,11 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/fiscal_emitter.dart';
+import 'package:praticos/models/nfse_import.dart';
 import 'package:praticos/repositories/tenant/fiscal_emitter_repository.dart';
+import 'package:praticos/repositories/tenant/nfse_import_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/nfse/direct/certificate_upload_sheet.dart';
 import 'package:praticos/screens/nfse/direct/fiscal_emitter_editors.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
+import 'package:praticos/screens/nfse/direct/nfse_import_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
@@ -25,7 +28,8 @@ import 'package:praticos/utils/tax_id.dart';
 /// One CNPJ that issues notas (spec §4.7), pushed from "Seus CNPJs": who it
 /// is, what it issued this year and month (and, for the MEI, how far from
 /// the limit), and one line per thing to set up, each opening its editor.
-/// "…": use as default, replace and delete the certificate.
+/// "…": use as default, import the notas from the government, replace and
+/// delete the certificate, and "Desfazer importação" for 30 days.
 class FiscalEmitterScreen extends StatefulWidget {
   const FiscalEmitterScreen({
     super.key,
@@ -35,9 +39,13 @@ class FiscalEmitterScreen extends StatefulWidget {
     this.service,
     this.pickFile,
     this.now,
+    this.importBatchOf,
   });
 
   final String emitterId;
+
+  /// Test seam: the import batch named by the emitter's `importBatchId`.
+  final Stream<NfseImportBatch?> Function(String batchId)? importBatchOf;
 
   /// Test seams; default to Firestore and the real API.
   final Stream<FiscalEmitter?>? emitter;
@@ -53,6 +61,9 @@ class FiscalEmitterScreen extends StatefulWidget {
 class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
   StreamSubscription<FiscalEmitter?>? _emitterSub;
   StreamSubscription<NfseDirectSettings>? _settingsSub;
+  StreamSubscription<NfseImportBatch?>? _importSub;
+  String? _importBatchId;
+  NfseImportBatch? _import;
   FiscalEmitter? _emitter;
   NfseDirectSettings _settings = const NfseDirectSettings();
   bool _loaded = false;
@@ -78,11 +89,14 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
         (widget.emitter ??
                 repository().streamSingle(companyId, widget.emitterId))
             .listen(
-              (emitter) => setState(() {
-                _emitter = emitter;
-                _loaded = true;
-                _failed = false;
-              }),
+              (emitter) {
+                setState(() {
+                  _emitter = emitter;
+                  _loaded = true;
+                  _failed = false;
+                });
+                _watchImport(emitter?.importBatchId);
+              },
               onError: (Object _) => setState(() {
                 _loaded = true;
                 _failed = true;
@@ -95,8 +109,28 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
         );
   }
 
+  /// The last import of this emitter, for "Desfazer importação".
+  void _watchImport(String? batchId) {
+    if (batchId == _importBatchId) return;
+    _importBatchId = batchId;
+    _importSub?.cancel();
+    _import = null;
+    if (batchId == null) return;
+    final stream =
+        widget.importBatchOf?.call(batchId) ??
+        NfseImportRepository().streamSingle(
+          Global.companyAggr?.id ?? '',
+          batchId,
+        );
+    _importSub = stream.listen(
+      (batch) => setState(() => _import = batch),
+      onError: (Object _) {},
+    );
+  }
+
   @override
   void dispose() {
+    _importSub?.cancel();
     _emitterSub?.cancel();
     _settingsSub?.cancel();
     super.dispose();
@@ -169,10 +203,47 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
     }
   }
 
+  Future<void> _openImport() =>
+      NfseImportScreen.open(context, widget.emitterId, service: widget.service);
+
+  Future<void> _confirmUndoImport(NfseImportBatch batch) async {
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.nfseImportUndoQuestion),
+        content: Text(l10n.nfseImportUndoMessage),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            key: const Key('emitterUndoImportConfirm'),
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.nfseImportUndoAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await _api.undoImport(batch.batchId);
+      if (mounted) _toast(l10n.nfseImportUndone);
+    } catch (e) {
+      if (mounted) _toast(nfseDirectErrorText(l10n, e), error: true);
+    }
+  }
+
   Future<void> _showMenu(FiscalEmitter emitter) async {
     final l10n = context.l10n;
     final hasCertificate =
         certificateState(emitter, now: widget.now) != CertificateState.missing;
+    final batch = _import;
+    final undoable = batch != null && batch.canUndo(now: widget.now)
+        ? batch
+        : null;
     final picked = await showPullDownMenu(
       context,
       groups: [
@@ -183,6 +254,15 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
               label: l10n.nfseDirectUseAsDefault,
               icon: CupertinoIcons.checkmark_circle,
             ),
+          if (certificateState(emitter, now: widget.now) ==
+                  CertificateState.valid ||
+              certificateState(emitter, now: widget.now) ==
+                  CertificateState.expiring)
+            PullDownItem(
+              value: 'import',
+              label: l10n.nfseImportAction,
+              icon: CupertinoIcons.arrow_down_doc,
+            ),
           PullDownItem(
             value: 'replace',
             label: hasCertificate
@@ -191,14 +271,22 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
             icon: CupertinoIcons.arrow_2_circlepath,
           ),
         ]),
-        if (hasCertificate)
+        if (hasCertificate || undoable != null)
           PullDownGroup([
-            PullDownItem(
-              value: 'delete',
-              label: l10n.nfseDirectDeleteAction,
-              icon: CupertinoIcons.trash,
-              destructive: true,
-            ),
+            if (undoable != null)
+              PullDownItem(
+                value: 'undo',
+                label: l10n.nfseImportUndoAction,
+                icon: CupertinoIcons.arrow_uturn_left,
+                destructive: true,
+              ),
+            if (hasCertificate)
+              PullDownItem(
+                value: 'delete',
+                label: l10n.nfseDirectDeleteAction,
+                icon: CupertinoIcons.trash,
+                destructive: true,
+              ),
           ]),
       ],
     );
@@ -210,6 +298,10 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
         await _replaceCertificate(emitter);
       case 'delete':
         await _confirmDelete(emitter);
+      case 'import':
+        await _openImport();
+      case 'undo':
+        if (undoable != null) await _confirmUndoImport(undoable);
     }
   }
 

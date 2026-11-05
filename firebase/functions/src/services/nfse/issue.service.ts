@@ -32,7 +32,7 @@ import type {
 import { fiscalEmitterAggr } from '../../models/nfse-direct.types';
 import { loadInvoiceOrders, type LoadedOrders } from '../asaas/invoice.service';
 import { todayInSaoPaulo } from '../asaas/charge.service';
-import { loadCertificate, type UsableCertificate } from './certificate-vault.service';
+import { loadCertificate, type CertificateUse, type UsableCertificate } from './certificate-vault.service';
 import { getNfseServerConfig, type NfseServerConfig } from './config';
 import { complementaryInfo, describeOrdersForNota } from './description';
 import { brasiliaTimestamps, buildCancelEvent, buildDps, dpsId, layoutFor } from './dps';
@@ -72,7 +72,8 @@ const cancelXmlPath = (companyId: string, invoiceId: string) => `tenants/${compa
 
 export interface IssueDeps {
   now: () => Date;
-  loadCertificate: (companyId: string, emitterId: string) => Promise<UsableCertificate>;
+  /** [use] is audited on every opening (issue #560). */
+  loadCertificate: (companyId: string, emitterId: string, use: CertificateUse) => Promise<UsableCertificate>;
   config: () => Promise<NfseServerConfig>;
   /** Transport of the government client; tests answer with recorded fixtures. */
   transport?: Transport;
@@ -84,7 +85,7 @@ export interface IssueDeps {
 export function defaultIssueDeps(): IssueDeps {
   return {
     now: () => new Date(),
-    loadCertificate: (companyId, emitterId) => loadCertificate(companyId, emitterId),
+    loadCertificate: (companyId, emitterId, use) => loadCertificate(companyId, emitterId, undefined, use),
     config: getNfseServerConfig,
     saveFile: async (path, contents, contentType) => {
       await storage.bucket().file(path).save(contents, { contentType, resumable: false });
@@ -335,6 +336,25 @@ export interface IssueDirectInput {
   recipient?: RecipientInput | null;
 }
 
+/**
+ * Notas one emitter may reserve per day (issue #560): far above a small
+ * shop's day, low enough to stop a misused account. Raised per emitter by
+ * hand in private/nfse/emitters/{id}.dailyIssueLimit.
+ */
+export const DEFAULT_DAILY_ISSUE_LIMIT = 60;
+export const MAX_DAILY_ISSUE_LIMIT = 1000;
+
+/** The emitter's count for [today] after this nota, or DAILY_LIMIT_REACHED. */
+export function reserveDailySlot(counter: Partial<FiscalEmitterPrivate> | undefined, today: string): number {
+  const custom = Math.floor(Number(counter?.dailyIssueLimit));
+  const limit = custom > 0 ? Math.min(custom, MAX_DAILY_ISSUE_LIMIT) : DEFAULT_DAILY_ISSUE_LIMIT;
+  const used = counter?.issuedOn === today ? Math.max(0, Math.floor(Number(counter?.issuedToday) || 0)) : 0;
+  if (used >= limit) {
+    throw new NfseServiceError('DAILY_LIMIT_REACHED', 'Daily nota limit of this emitter reached', { limit });
+  }
+  return used + 1;
+}
+
 export interface IssueOptions {
   auto?: boolean;
 }
@@ -419,10 +439,11 @@ export async function issueDirectInvoice(
         throw new NfseServiceError('ORDER_HAS_INVOICE', 'An order already has an active nota');
       }
     }
+    const issuedToday = reserveDailySlot(counter, today);
     const number = Math.max(1, Math.floor(Number(counter?.nextDpsNumber) || 1));
     const id = dpsId(emitter.cityCode, emitter.taxId, series, number);
     const invoice = { ...base, dps: { id, series, number } };
-    tx.set(counterRef, { nextDpsNumber: number + 1, updatedAt: createdAt }, { merge: true });
+    tx.set(counterRef, { nextDpsNumber: number + 1, issuedOn: today, issuedToday, updatedAt: createdAt }, { merge: true });
     tx.set(invoiceRef, invoice as unknown as Record<string, unknown>);
     for (const orderId of orderIds) tx.set(orderLockRef(companyId, orderId), { invoiceId: invoiceRef.id, updatedAt: createdAt });
     const snapshot: Omit<DpsInput, 'issuedAt' | 'competenceDate' | 'environment' | 'appVersion'> = {
@@ -464,7 +485,7 @@ async function sendDps(
   orderCustomerId?: string,
 ): Promise<DirectInvoice> {
   const snapshot = (await dpsSnapshotRef(companyId, invoiceId).get()).data() as { dps: Omit<DpsInput, 'issuedAt' | 'competenceDate' | 'environment' | 'appVersion'> };
-  const cert = await deps.loadCertificate(companyId, emitterId);
+  const cert = await deps.loadCertificate(companyId, emitterId, { purpose: 'issue', invoiceId, by: invoice.createdBy ?? null });
   const client = new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
   const stamp = brasiliaTimestamps(deps.now());
   const input: DpsInput = { ...snapshot.dps, ...stamp, environment: config.environment, appVersion: config.appVersion };
@@ -570,7 +591,7 @@ export async function reconcileDirectInvoice(
   if (!force && deps.now().getTime() - last < RECONCILE_AFTER_MS) return invoice;
 
   const config = await deps.config();
-  const cert = await deps.loadCertificate(companyId, invoice.emitter.id);
+  const cert = await deps.loadCertificate(companyId, invoice.emitter.id, { purpose: 'reconcile', invoiceId });
   const client = new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
   let accessKey: string | null;
   try {
@@ -629,7 +650,7 @@ export async function cancelDirectInvoice(
   }
 
   const config = await deps.config();
-  const cert = await deps.loadCertificate(companyId, invoice.emitter.id);
+  const cert = await deps.loadCertificate(companyId, invoice.emitter.id, { purpose: 'cancel', invoiceId, by: user });
   const client = new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
   const { issuedAt } = brasiliaTimestamps(deps.now());
   const event = buildCancelEvent({

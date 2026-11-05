@@ -6,7 +6,7 @@
 import { createApi, type ApiOptions } from '@/lib/api'
 import { authClient, firestoreClient, firestoreLite, storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
-import { accountApiBase, normalizeInviteCode, type AssignableRole, type Member, type SegmentOption, type TeamInvite } from './model'
+import { accountApiBase, normalizeInviteCode, toSegmentOption, type AssignableRole, type Member, type SegmentOption, type TeamInvite } from './model'
 
 const companyId = (): string => {
   if (!session.companyId) throw new Error('settings: no company')
@@ -170,34 +170,12 @@ export async function uploadLogo(file: File, expected?: unknown): Promise<{ url:
   return { url, updatedAt }
 }
 
-interface SegmentDoc {
-  name?: string
-  nameI18n?: Record<string, string>
-  active?: boolean
-  subspecialties?: { id?: string; name?: string; nameI18n?: Record<string, string> }[]
-  defaultTermsOfService?: Record<string, string>
-}
-
-const strings = (value: unknown): Record<string, string> =>
-  Object.fromEntries(Object.entries((value as Record<string, unknown>) ?? {}).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
-
 /** Active segments (firestoreOnboardingSegments), sorted by stored name like the app. */
 export async function loadSegments(): Promise<SegmentOption[]> {
   const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snapshot = await getDocs(query(collection(db, 'segments'), where('active', '==', true)))
   return snapshot.docs
-    .map((doc) => {
-      const data = doc.data() as SegmentDoc
-      return {
-        id: doc.id,
-        name: data.name ?? doc.id,
-        nameI18n: strings(data.nameI18n),
-        termsI18n: strings(data.defaultTermsOfService),
-        subspecialties: (data.subspecialties ?? [])
-          .filter((sub) => typeof sub?.id === 'string')
-          .map((sub) => ({ id: sub.id as string, name: sub.name ?? (sub.id as string), nameI18n: strings(sub.nameI18n) })),
-      }
-    })
+    .map((doc) => toSegmentOption(doc.id, doc.data()))
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 

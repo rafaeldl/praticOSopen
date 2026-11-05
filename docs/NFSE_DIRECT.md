@@ -39,6 +39,14 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 - `PUT /:emitterId/certificate`: troca (o CNPJ tem de ser o do emitente).
 - `DELETE /:emitterId/certificate`: apaga de verdade.
 
+### Termo do certificado (issue #572)
+
+- Página própria no site: `praticos.app/termo-certificado.html` (pt), `-en.html` e `-es.html`. Texto em `firebase/hosting/src/_data/legal.json` (`certificateTerms`), aprovado pelo Rafael em 2026-11-05 sem revisão de advogado (fica para depois).
+- Versão `2026-11-05`, igual a `NFSE_CERTIFICATE_TERMS_VERSION` (servidor), `nfseCertificateTermsVersion` (app) e `TERMS_VERSION` (web). Mudou o texto: subir a versão nos quatro lugares; o servidor recusa versão velha (`TERMS_NOT_ACCEPTED`).
+- Aceite explícito no envio: interruptor no app, caixa de marcar no web (`CertificateDrawer.vue`). Sem aceite o envio não sai.
+- Promessas do termo que dependem de gente: desfazer um apagamento em até 24 h é feito pelo suporte (restaurar a versão da chave no Cloud KMS); não há botão.
+- Política de privacidade: seção "Certificado digital e notas fiscais", Sistema Nacional da NFS-e em Compartilhamento e o prazo do certificado em Retenção.
+
 ### Regras
 
 1. Senha e .pfx nunca são gravados nem logados; os logs levam só o código do erro.
@@ -47,7 +55,19 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 4. Trocar: a chave do emitente ganha versão nova (primária) e a antiga é destruída.
 5. Apagar: apaga o material e a DEK cifrada e agenda a destruição da versão (24 h, dá para desfazer no console do KMS nesse prazo). Depois disso, qualquer cópia do documento em backup fica ilegível. O emitente e as notas ficam; `certificate.status` vira `deleted` (ou `expired` na limpeza dos 90 dias).
 6. Se o KMS não destruir na hora, a versão vai para `nfseKeyDestructions` e `processPendingKeyDestructions` tenta de novo (rotina diária da `nfseApi`).
-7. Auditoria em `companies/{cid}/private/nfse/audit`: ação (`upload`, `replace`, `delete`, `purge-expired`, `destroy-failed`), emitente, quem, quando, aparelho (`x-app-version` ou user agent) e IP. O upload grava a versão do termo aceito (`NFSE_CERTIFICATE_TERMS_VERSION`).
+7. Auditoria em `companies/{cid}/private/nfse/audit`: ação (`upload`, `replace`, `delete`, `purge-expired`, `destroy-failed`, `open`), emitente, quem, quando, aparelho (`x-app-version` ou user agent) e IP. O upload grava a versão do termo aceito (`NFSE_CERTIFICATE_TERMS_VERSION`).
+
+### Endurecimento (issue #560)
+
+8. Arquivo: o .pfx com contagem de iterações acima de 100 mil numa derivação, ou 400 mil somando todas, é recusado (`CERT_INVALID_FILE`) antes de qualquer conta. A checagem fica nas funções de derivação do `node-forge` (MAC, PBE do PKCS#12 e PBES2), então vale também para o que vem dentro de partes cifradas.
+9. Envios: no máximo 5 tentativas de enviar certificado por hora por pessoa e por empresa, contando senha errada e arquivo ruim (`TOO_MANY_ATTEMPTS`, 429). Contagem em `/nfseUploadLimits/{user-…|company-…}` (fechado nas regras).
+10. Uma troca por vez em cada emitente: enviar, trocar, apagar e a nova tentativa de destruição pegam uma trava com prazo de 3 min em `/nfseCertificateLocks/{emitter-…|taxid-…}` (fechado). Ocupado: `CERT_BUSY` (409). Depois de cada troca ou apagamento, toda versão viva da chave que não seja a do certificado atual é destruída (precisa de `cloudkms.cryptoKeyVersions.list` no `nfseKeyManager`).
+11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
+12. Exclusão de conta: o `accountApi` (outra conta de serviço) só apaga o material e põe o emitente na fila; quem destrói as versões é a `nfseDaily`. A fila guarda o emitente e, na hora de tentar, mantém só a versão do certificado que existir então. Depois de 2 tentativas sem sucesso a rotina loga `[nfse-alert] key destruction still pending`, que tem alerta no Cloud Monitoring.
+13. Emitir e cancelar: dono, admin e gerente; o dono pode tirar o gerente (`settings/nfse.managerCanIssue = false`, interruptor "Gerente pode emitir notas", só o dono muda). Quando outra pessoa emite ou cancela, o dono recebe aviso (sino + push, `type: nfse_invoice_by_team`).
+14. Teto diário por emitente: 60 notas por dia (São Paulo), contadas na reserva do número da DPS (`private/nfse/emitters/{id}.issuedOn/issuedToday`). Passou: `DAILY_LIMIT_REACHED` (429). Para um emitente que precise de mais, gravar `dailyIssueLimit` à mão no mesmo documento (máximo 1000).
+15. Arquivos da nota no Storage (`tenants/{cid}/invoices/**`): leitura só para dono, admin e gerente; ninguém apaga pelo app (guarda de 5 anos). Só o servidor grava.
+16. Revisão: `.github/CODEOWNERS` pede o Rafael em `services/nfse/**`, `nfse-api.ts`, rotas `nfse-*`, `package.json`/lock das Functions, regras e workflows.
 
 ### Cloud KMS (configurado em 2026-11-05)
 
@@ -66,7 +86,7 @@ Permissões da `nfse-api` (nada de KMS no projeto):
 | Onde | Papel | Para quê |
 |---|---|---|
 | key ring `nfse-certs` | `roles/cloudkms.cryptoKeyEncrypterDecrypter` | cifrar e decifrar a DEK |
-| key ring `nfse-certs` | `projects/praticos/roles/nfseKeyManager` (papel próprio: `cloudkms.cryptoKeys.create`, `.get`, `.update`, `cloudkms.cryptoKeyVersions.create`, `.destroy`) | criar a chave do emitente, versão nova na troca, trocar a primária, destruir a versão |
+| key ring `nfse-certs` | `projects/praticos/roles/nfseKeyManager` (papel próprio: `cloudkms.cryptoKeys.create`, `.get`, `.update`, `cloudkms.cryptoKeyVersions.create`, `.destroy`, `.list`) | criar a chave do emitente, versão nova na troca, trocar a primária, destruir as versões que sobraram |
 | projeto | `roles/datastore.user` | Firestore |
 | bucket `praticos.appspot.com` | `roles/storage.objectUser` | XML da nota em `tenants/{cid}/invoices/` |
 
@@ -77,7 +97,7 @@ gcloud services enable cloudkms.googleapis.com --project praticos
 gcloud kms keyrings create nfse-certs --location southamerica-east1 --project praticos
 gcloud iam service-accounts create nfse-api --display-name "NFS-e direta (nfseApi)" --description "Unica conta que decifra os certificados A1" --project praticos
 gcloud iam roles create nfseKeyManager --project praticos --title "NFS-e: chaves do emitente" --stage GA \
-  --permissions cloudkms.cryptoKeys.create,cloudkms.cryptoKeys.get,cloudkms.cryptoKeys.update,cloudkms.cryptoKeyVersions.create,cloudkms.cryptoKeyVersions.destroy
+  --permissions cloudkms.cryptoKeys.create,cloudkms.cryptoKeys.get,cloudkms.cryptoKeys.update,cloudkms.cryptoKeyVersions.create,cloudkms.cryptoKeyVersions.destroy,cloudkms.cryptoKeyVersions.list
 SA=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com
 gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role roles/cloudkms.cryptoKeyEncrypterDecrypter
 gcloud kms keyrings add-iam-policy-binding nfse-certs --location southamerica-east1 --project praticos --member $SA --role projects/praticos/roles/nfseKeyManager
@@ -85,7 +105,7 @@ gcloud projects add-iam-policy-binding praticos --member $SA --role roles/datast
 gcloud storage buckets add-iam-policy-binding gs://praticos.appspot.com --member $SA --role roles/storage.objectUser
 ```
 
-O deploy pelo CI (`github-actions-deployer`) já pode usar a conta: tem `roles/iam.serviceAccountUser` no projeto.
+O deploy pelo CI (`github-actions-deployer`) usa a conta com `roles/iam.serviceAccountUser` dado na própria `nfse-api`, e só a ele (issue #560). Os logs de acesso do KMS (Data Access: leitura e escrita) ficam ligados no projeto, com alerta para Decrypt feito por outra conta e para pico de uso.
 
 #### Quem mais alcança as chaves
 
@@ -177,7 +197,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN são a #569, a emissão automática é a #571. A folha de emitir está em "Emitir a nota pela OS".
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571. A folha de emitir está em "Emitir a nota pela OS".
 
 Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 
@@ -215,7 +235,7 @@ Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
 | Onde | O quê |
 |---|---|
 | App: `lib/screens/nfse/direct/nfse_direct_setup_screen.dart` | "Nota fiscal": frase no topo, "Seus CNPJs" (regime, certificado com ponto colorido, ✓ no padrão), "+" no topo e, sem CNPJ, o botão azul "Adicionar CNPJ"; "Emitir sozinha quando concluir a OS" abre a tela de escolher (Nunca / Para os clientes escolhidos / Para todas as OS) |
-| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho) e termo. ✓ azul só com arquivo e senha; recusa do servidor em frase simples dentro do sheet |
+| App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho), link "Ler o termo" e interruptor "Li e aceito o termo do certificado". ✓ azul só com arquivo, senha e aceite; recusa do servidor em frase simples dentro do sheet |
 | App: `fiscal_emitter_screen.dart` e `fiscal_emitter_editors.dart` | Emitente: CNPJ, regime, "Notas este ano · este mês", teto do MEI (R$ 81 mil), linhas que abrem o editor (serviço, inscrição municipal, estilo da descrição, certificado). "…": Usar como padrão, Trocar certificado, Apagar certificado (vermelho, confirma; o emitente e as notas ficam) |
 | App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
 | Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |
@@ -233,7 +253,7 @@ O app e o web chamam a `nfseApi` pela URL da `api` trocando `/api` por `/nfseApi
 
 `services/nfse/certificate-expiry-notice.service.ts`, na rotina `nfseDaily`: 30 e 7 dias antes de `certificate.notAfter`, sino e push (`notifyCertificateExpiring`, tipo `nfse_certificate_expiring`) para dono e admin: "O certificado da OFICINA EXEMPLO vence em 7 dias. Peça um novo ao contador." Cada passo vai uma vez por certificado (`private/nfse/emitters/{id}.expiryNotice`); certificado novo recomeça.
 
-Fora desta etapa: "Pedir ao contador", importação e "Desfazer importação", limite de CNPJs por plano, "Ligar para todos os clientes com CNPJ".
+Fora desta etapa: "Pedir ao contador", limite de CNPJs por plano, "Ligar para todos os clientes com CNPJ".
 
 ## Cliente: dados para nota (etapa #568)
 
@@ -288,4 +308,64 @@ Com `settings/payments.nfseDirectEnabled` ligada, a nota direta substitui a do A
 
 O app web chama o ViaCEP do navegador: `https://viacep.com.br` entrou no `connect-src` da CSP de `/web/**` (`firebase.json`).
 
-Fora desta etapa: ligar e desligar nota de OS à mão (vem com a importação, #569), limite de CNPJs por plano na folha ("Disponível no Pro"), compartilhar o PDF direto pelo web e a oferta da 3ª nota.
+Fora desta etapa: limite de CNPJs por plano na folha ("Disponível no Pro"), compartilhar o PDF direto pelo web e a oferta da 3ª nota.
+
+## Importação das notas (etapa #569)
+
+Ao enviar o certificado de um CNPJ novo, o app abre "Importar notas": o servidor lê no governo as notas que o CNPJ já emitiu e recebeu, monta uma proposta e só aplica no "Importar". Só dono e admin.
+
+Código: `firebase/functions/src/services/nfse/adn-reader.ts`, `import-proposal.ts` (regras, funções puras), `import.service.ts` e `routes/v1/nfse-import.routes.ts`. App: `lib/screens/nfse/direct/nfse_import_screen.dart`, `nfse_order_link.dart`, `lib/models/nfse_import.dart`.
+
+### Leitura do ADN
+
+- `GET {adn}/contribuintes/DFe/{NSU}?cnpjConsulta={cnpj}&lote=true`, até 50 documentos por página (XML em GZip + Base64). A resposta não diz se a página começa no NSU pedido ou depois dele: o servidor pede a partir do último NSU guardado e descarta o que já tem (`nsu <= lastNsu`). Caixa vazia responde 404.
+- Cada chamada lê por até ~45 s (`READ_BUDGET_MS`) e guarda o ponto em `private/nfse/emitters/{id}.lastNsu`; o app chama `continue` até a proposta ficar pronta.
+- **Emitidas** pelo CNPJ viram `invoices/ext-{chave}` com `source: 'external'`, `provider: 'direct'`, XML em `tenants/{cid}/invoices/{id}/nfse.xml`, `customer: null`, sem OS, e `external { regime, IM, cidade, código do serviço, alíquota... }` para a proposta. Nota que já existe (emitida pelo PraticOS, mesma chave) não é criada de novo.
+- **Eventos** e101101/e105102 cancelam a nota (status `canceled`, `canceledOutside: true`) e liberam a OS travada. Evento lido antes da nota fica em `private/nfse/emitters/{id}/canceledKeys/{chave}` até a nota chegar.
+- **Recebidas** (o CNPJ é o tomador): registro mínimo só no servidor, `private/nfse/emitters/{id}/received/{nsu}` (`accessKey`, `providerTaxId`, `providerName`, `value`, `date`, `status`), para a etapa posterior A (despesas).
+
+### Proposta (`nfseImports/{batchId}`, `status: proposed`)
+
+| Parte | Regra |
+|---|---|
+| Emitente | Regime (`opSimpNac` 2 MEI, 3 Simples), `regApTribSN`, cidade, IM do CNC (só a que o CNC tem), habilitado na cidade (CNC; sem CNC, nota nos últimos 90 dias), serviço mais usado com a alíquota da cidade e o `pTotTribSN`, estilo da descrição (maiúsculas em 70%+, separador mais usado) e série. Só o que está vazio |
+| Série | A primeira a partir de 10 que o CNPJ nunca usou (o portal usa 900, 70000...; o Asaas usa 1) |
+| Cliente certo | Mesmo CPF/CNPJ; ou nome igual (sem LTDA/ME e acentos) com OS casada; ou 3+ OS casadas com nome que divide uma palavra. Vai sem perguntar |
+| "Este é o mesmo cliente?" | Só nome igual, ou 1-2 OS casadas com outro nome. Sem resposta, vira cliente novo |
+| Lojas | Outros clientes com 2+ OS casadas no mesmo CNPJ ganham "Nota fiscal para" o cliente com mais notas |
+| Nota × OS | Liga só quando há exatamente uma OS com o mesmo valor (ao centavo, regra `invoiceValueOfOrder`) até 10 dias da data, sem nota ativa e que nenhuma outra nota quer |
+| Emitir sozinha | Sugere (nunca liga) os clientes certos com nota em 80%+ das OS concluídas (mínimo 3) desde a primeira nota |
+
+### Aplicar ("Importar")
+
+`POST /v1/app/nfse/imports/:id/apply { answers: { sameCustomer: { [cnpj]: bool }, autoIssueCustomerIds } }`:
+
+1. Completa os clientes só nos campos vazios (`taxId`, `legalName`, `fiscalAddress`, `invoiceEmail` quando não há e-mail); cria os novos (com `importBatchId`), sem duplicar CNPJ que alguém salvou no meio tempo.
+2. "Nota fiscal para" nas lojas sem CNPJ nem destinatário próprio.
+3. Notas do grupo recebem `customer` e `recipient.customerId`; as que casam ligam à OS numa transação que confere a trava (`private/nfse/orders/{orderId}`) e travam a OS.
+4. Emitente: só o vazio, mais `enabledInCity` e `importBatchId`. `settings/nfse`: `defaultEmitterId` e `provider: 'direct'` se vazios.
+5. Grava em `applied` tudo o que fez (clientes criados, valores preenchidos, lojas, notas, ligações, interruptores) e `expiresAt` = 30 dias.
+
+### Desfazer (30 dias)
+
+"…" do emitente → "Desfazer importação". Desliga as notas das OS (libera a trava), tira cliente das notas, apaga "Nota fiscal para", "Emitir sozinha" e os campos preenchidos **que continuam com o valor que a importação gravou**, e apaga os clientes criados que ainda não têm OS. O emitente fica configurado e as notas ficam no histórico.
+
+### Ligar e desligar à mão
+
+Rotas em `/v1/app/nfse/links` (dono, admin, gerente):
+
+- `GET /invoices/:id/candidates`: até 40 OS, primeiro as do cliente da nota e das lojas que apontam para ele, depois as de valor e data mais parecidos; as que já têm nota vão por último.
+- `POST /invoices/:id/link { orderId }`: nota direta emitida e sem OS; recusa OS com nota ativa (`ORDER_HAS_INVOICE`).
+- `POST /invoices/:id/unlink`: só nota feita fora do PraticOS (`source: 'external'`); a emitida pelo PraticOS fica com a sua OS.
+
+No app: linha "OS · Ligar a uma OS" no detalhe da nota direta sem OS, e "…" → "Desligar da OS" na nota externa ligada.
+
+### Leitura diária
+
+A `nfseDaily` lê a caixa de cada emitente com certificado válido a partir do `lastNsu`: notas feitas no portal ou em outro sistema entram no histórico (ligadas ao cliente quando só um cliente tem aquele CPF/CNPJ; nunca à OS), cancelamentos são aplicados, recebidas registradas e o faturamento do ano recalculado.
+
+### Testes
+
+`__tests__/import.test.ts` com XMLs e caixa do ADN sintéticos (`import-fixture.ts`, CNPJs e nomes inventados): leitura em páginas e com limite de tempo, cancelamento, recebidas, proposta, aplicar, "Sim"/"Não", desfazer, 30 dias, ligar/desligar e leitura diária. App: `test/screens/nfse/nfse_import_test.dart`.
+
+Fora desta etapa: importação no app web e notas recebidas → despesas.

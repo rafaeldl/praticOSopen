@@ -6681,7 +6681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseDirectUploadMissing =>
-      'Choose the file and type the password to send.';
+      'Choose the file, type the password and accept the terms to send.';
 
   @override
   String get nfseDirectTerms =>
@@ -7148,10 +7148,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This CNPJ can\'t issue yet. Check the invoice setup.';
 
   @override
-  String get nfseDirectErrorDailyLimit =>
-      'This company reached today\'s invoice limit. Try tomorrow or contact support.';
-
-  @override
   String get nfseDirectErrorManagerNotAllowed =>
       'The owner hasn\'t allowed managers to issue invoices. Ask the owner to issue it or allow it.';
 
@@ -7206,6 +7202,251 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseDirectFilterQuestion => 'Invoices of which CNPJ?';
+
+  @override
+  String get nfseImportTitle => 'Import notas';
+
+  @override
+  String get nfseImportReading => 'Reading your notas from the government…';
+
+  @override
+  String nfseImportReadingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents read',
+      one: '1 document read',
+      zero: 'Starting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportHeadline(int notas, int customers) {
+    return 'We found $notas notas for $customers customers. We will fill in your customers and the nota\'s service.';
+  }
+
+  @override
+  String get nfseImportHeadlineEmpty =>
+      'We found no notas of this CNPJ at the government. We will fill in the nota\'s service and series.';
+
+  @override
+  String get nfseImportEmitterSection => 'Issuer';
+
+  @override
+  String get nfseImportServiceRow => 'Most used service';
+
+  @override
+  String nfseImportServiceValue(String name, String rate) {
+    return '$name · ISS $rate';
+  }
+
+  @override
+  String get nfseImportSeriesRow => 'Series of the PraticOS notas';
+
+  @override
+  String get nfseImportCustomersSection => 'Customers';
+
+  @override
+  String nfseImportCustomersNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new customers',
+      one: '1 new customer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportCustomersCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count complete customers you already have',
+      one: '1 completes a customer you already have',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportCustomersHint =>
+      'We only fill what is empty. Nothing you typed changes.';
+
+  @override
+  String get nfseImportAskSection => 'Is this the same customer?';
+
+  @override
+  String nfseImportAskSubtitle(String customer) {
+    return 'Is it your customer $customer?';
+  }
+
+  @override
+  String get nfseImportAskUnanswered => 'Answer';
+
+  @override
+  String get nfseImportAskSame => 'Yes';
+
+  @override
+  String get nfseImportAskNew => 'No, create another';
+
+  @override
+  String get nfseImportAskHint =>
+      'Without an answer, it becomes a new customer.';
+
+  @override
+  String get nfseImportStoresSection => 'Stores billed on another CNPJ';
+
+  @override
+  String nfseImportStoreRow(String recipient) {
+    return 'Nota fiscal to $recipient';
+  }
+
+  @override
+  String get nfseImportAutoSection => 'Issue by itself';
+
+  @override
+  String nfseImportAutoQuestion(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'These $count customers had a nota on almost every order. Turn on the automatic nota for them?',
+      one:
+          'This customer had a nota on almost every order. Turn on the automatic nota for them?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportNotasSection => 'Notas';
+
+  @override
+  String nfseImportNotasLinked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count linked to your orders',
+      one: '1 linked to your orders',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseImportNotasHistory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count only in the history',
+      one: '1 only in the history',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseImportButton => 'Import';
+
+  @override
+  String get nfseImportDone => 'Notas imported';
+
+  @override
+  String get nfseImportAction => 'Import notas from the government';
+
+  @override
+  String get nfseImportUndoAction => 'Undo import';
+
+  @override
+  String get nfseImportUndoQuestion => 'Undo the import?';
+
+  @override
+  String get nfseImportUndoMessage =>
+      'We delete the customers created that have no orders yet, empty what was filled in and unlink the notas from the orders. The notas stay in the history.';
+
+  @override
+  String get nfseImportUndone => 'Import undone';
+
+  @override
+  String get nfseImportErrorUndoExpired =>
+      'The import is more than 30 days old and can no longer be undone.';
+
+  @override
+  String get nfseLinkOrderRow => 'Order';
+
+  @override
+  String get nfseLinkOrderAction => 'Link to an order';
+
+  @override
+  String get nfseLinkPickerTitle => 'Which order is this nota for?';
+
+  @override
+  String get nfseLinkPickerSame => 'Of the customer';
+
+  @override
+  String get nfseLinkPickerOthers => 'Others';
+
+  @override
+  String get nfseLinkPickerEmpty => 'No order to link';
+
+  @override
+  String nfseLinkOrderTitle(String number) {
+    return 'Order $number';
+  }
+
+  @override
+  String get nfseLinkHasNota => 'Already has a nota';
+
+  @override
+  String get nfseLinked => 'Nota linked to the order';
+
+  @override
+  String get nfseUnlinkAction => 'Unlink from the order';
+
+  @override
+  String nfseUnlinkQuestion(String numbers) {
+    return 'Unlink the nota from order $numbers?';
+  }
+
+  @override
+  String get nfseUnlinkMessage =>
+      'The order is free for another nota. The nota stays in the history.';
+
+  @override
+  String get nfseUnlinked => 'Nota unlinked from the order';
+
+  @override
+  String get nfseLinkErrorOrderHasNota =>
+      'This order already has a nota. Cancel the other one first.';
+
+  @override
+  String get nfseLinkErrorAlreadyLinked =>
+      'This nota is already linked to an order.';
+
+  @override
+  String get nfseDirectAcceptTerms =>
+      'I have read and accept the certificate terms';
+
+  @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Too many tries to send the certificate. Wait an hour and try again.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Someone else is changing this certificate right now. Try again in a few minutes.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'This company reached today\'s invoice limit. It can issue again tomorrow; if you need more, contact support.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly =>
+      'Only the account owner can change this.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'Managers can issue invoices';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'You get a notice whenever someone else issues or cancels an invoice.';
 
   @override
   String deviceReadingLine(String label, String value) {

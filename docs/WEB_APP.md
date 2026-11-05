@@ -350,7 +350,7 @@ O que trouxe o tempo de 2,6 s para 1,1 s: servir com brotli, ler usuário e empr
 | axe sem violação em claro e escuro | `e2e/a11y.spec.ts` |
 | Toda rota com `meta.access` | `tests/access.test.ts` |
 
-O CI (`.github/workflows/webapp_check.yml`) roda gen, typecheck, testes, build, E2E e Lighthouse em todo PR que toque o web, os tokens do site, os casos de contrato, os `.arb`, a matriz de permissões ou a rota `web-access`.
+O CI (`.github/workflows/webapp_check.yml`) roda em todo PR que toque o web, os tokens do site, os casos de contrato, os `.arb`, a matriz de permissões ou a rota `web-access`, em três máquinas ao mesmo tempo: uma com gen, typecheck, testes, build, Lighthouse e Hosting, e duas com metade do E2E cada (`--shard`). Um push novo no mesmo PR cancela a execução anterior. O axe no tema escuro só roda quando o PR mexe em `src/styles/`, `src/lib/prefs.ts` ou nos tokens do site; nos outros PRs o CI passa `E2E_SKIP_DARK_AXE=1` e o `playwright.config.ts` pula esses testes (o tema claro e os testes do modo escuro continuam).
 
 ## Como rodar
 

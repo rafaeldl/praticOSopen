@@ -2,6 +2,8 @@
 // rules as lib/services/onboarding_service.dart (OnboardingSegment,
 // OnboardingBusiness, applyBusiness). Pure, tested in tests/onboarding.test.ts.
 
+import { localizedNames, pickLocalized } from '@/lib/localized'
+
 export interface OnboardingSubspecialty {
   id: string
   names: Record<string, string>
@@ -30,15 +32,16 @@ export function toSegment(id: string, data: Record<string, unknown>): Onboarding
   const subs = Array.isArray(data.subspecialties) ? data.subspecialties : []
   return {
     id,
-    name: typeof data.name === 'string' ? data.name : id,
-    nameI18n: stringMap(data.nameI18n),
+    name: pickLocalized(localizedNames(data.name), 'pt-BR') ?? id,
+    nameI18n: localizedNames(data.name, data.nameI18n),
     icon: typeof data.icon === 'string' ? data.icon : null,
     subspecialties: subs
       .filter((sub): sub is Record<string, unknown> => !!sub && typeof sub === 'object' && typeof (sub as { id?: unknown }).id === 'string')
       .map((sub) => ({
         id: sub.id as string,
         // A map of names (seed_segments.js); a plain name is pt-BR, with nameI18n when there is one.
-        names: typeof sub.name === 'string' ? { 'pt-BR': sub.name, ...stringMap(sub.nameI18n) } : stringMap(sub.name),
+        // Text (pt-BR), map by locale or that map as JSON; nameI18n adds the other languages and wins.
+        names: localizedNames(sub.name, sub.nameI18n),
         icon: typeof sub.icon === 'string' ? sub.icon : null,
       })),
     fieldServiceDefault: typeof data.fieldService === 'boolean' ? data.fieldService : true,
