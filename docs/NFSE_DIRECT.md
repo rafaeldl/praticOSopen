@@ -65,3 +65,41 @@ Permissões só no keyring `nfse-certs` (nunca no projeto), para `nfse-api@prati
 - Papel próprio `nfseKeyManager` com `cloudkms.cryptoKeys.create`, `cloudkms.cryptoKeys.get`, `cloudkms.cryptoKeys.update`, `cloudkms.cryptoKeyVersions.create`, `cloudkms.cryptoKeyVersions.destroy` (criar a chave do emitente, versão nova, trocar a primária e destruir).
 
 No projeto, para a mesma conta: `roles/datastore.user` (Firestore) e o que a `nfseApi` precisar de Storage na etapa #563. A `nfseApi` é declarada com `serviceAccount: 'nfse-api@…'` na etapa #563; até lá a rota não está montada e nada usa o KMS.
+
+## Motor de emissão (etapa #563)
+
+Código: `firebase/functions/src/services/nfse/` e `firebase/functions/src/nfse-api.ts`.
+
+| Arquivo | Faz |
+|---|---|
+| `layouts/v20260209.ts`, `layouts/v20261020.ts` | Montam a DPS de cada pacote (produção usa 20260209, testes 20261020). Diferenças: `finNFSe` só no 20261020; ordem de `cNBS` × `xDescServ` |
+| `layouts/common.ts` | Regras por regime e texto: prestador só com CNPJ, IM e regime (E0121, E0128); MEI sem `regApTribSN` nem `tribFed`, `indTotTrib=0`; Simples com `regApTribSN`, PIS/COFINS CST 08 e `pTotTribSN`; sem retenção nem `pAliq`; textos só Latin-1, sem quebra de linha (fora a descrição) |
+| `dps.ts` | Id da DPS (cidade + 1/2 + documento + série + número), `dhEmi` em Brasília com recuo de 5 s sem voltar ao dia anterior, escolha do leiaute por `config/nfse.layoutByEnvironment`, evento de cancelamento e101101 |
+| `signature.ts` | XMLDSig enveloped RSA-SHA1 C14N (`xml-crypto`) |
+| `sefin-client.ts` | mTLS com a chave e a cadeia do cofre num `https.Agent` por chamada; `POST /nfse`, `GET /dps/{id}`, `GET /nfse/{chave}`, `POST /nfse/{chave}/eventos`, `GET` no ADN. Recusa com código é resposta; tempo esgotado, rede, 5xx ou resposta sem nota viram `SefinUnavailableError` ("sem resposta certa") |
+| `refusals.ts` | Tabela de recusas por código em pt/en/es, com o grupo que a folha abre (`customerData`, `emitterSetup`, `certificate`, `other`) |
+| `description.ts` | Descrição pela regra fixa (nome do catálogo + detalhe sem repetir palavra, estilo do emitente, uma linha por OS) e `xInfComp` "OS 182 · Emitida pelo PraticOS (praticos.app)" |
+| `totals.ts` | Notas do ano e do mês por emitente (menos canceladas) e aviso do MEI a 80% e acima do teto (`config/nfse.meiAnnualLimit`, R$ 81.000) |
+| `registry.service.ts` | CNC (inscrição municipal, `HABILITADO`), convênio da cidade, alíquota do serviço na data e CNPJ pela BrasilAPI |
+| `issue.service.ts` | Prévia, emitir, conferir, cancelar e recalcular o faturamento |
+| `config.ts` | `config/nfse`: `environment` (`production` padrão, `test`), `layoutByEnvironment`, `meiAnnualLimit` |
+
+Rotas (`routes/v1/nfse-direct.routes.ts`, em `/v1/app/nfse/direct` na `nfseApi`), dono, admin e gerente:
+
+- `POST /invoices/preview` `{ orderIds, emitterId? }`: valor, descrição, emitente marcado e lista, destinatário, o que falta (`taxId`, `address`, `email`), aviso do MEI, OS que já têm nota.
+- `POST /invoices` `{ orderIds, emitterId?, description?, recipient? }`: 201 emitida, 202 sem resposta certa ainda (`creating`), 422 `NFSE_REFUSED` com `details.refusal`.
+- `POST /invoices/:id/cancel` `{ reason: 'issueError' | 'serviceNotProvided' }`: 422 `CANCEL_REFUSED` com `details.usePortal` quando a cidade recusa.
+- `POST /invoices/:id/reconcile`: confere uma nota `creating` agora.
+
+### Numeração e idempotência
+
+1. Uma transação reserva o número (`private/nfse/emitters/{id}.nextDpsNumber`), cria a nota `creating` com `dps { id, series, number }` e trava as OS (`private/nfse/orders/{orderId}`). O que entra na DPS fica em `private/nfse/dps/{invoiceId}` para reenviar a mesma.
+2. Emitida: grava `accessKey`, `number` (o `nNFSe` do governo), `xmlPath` (`tenants/{cid}/invoices/{id}/nfse.xml`), `lastEmitterId` no cliente da OS e o faturamento do emitente.
+3. Recusada: `error` com `errorCode` e `refusal`; as OS ficam livres; o número fica com a DPS recusada (a próxima usa o seguinte).
+4. Sem resposta certa: continua `creating` e travada. Depois de 3 minutos, `reconcileDirectInvoice` pergunta `GET /dps/{id}`: existe → busca a nota e grava; não existe → reenvia a mesma DPS (mesmo número, `dhEmi` novo). A rotina diária `nfseDaily` confere todas as `creating`.
+
+### Ainda não ligado
+
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts` e **não** são exportadas pelo `index.ts`: o deploy precisa antes do keyring e da conta de serviço (passo manual acima). Depois do passo, acrescentar `export { nfseApi, nfseDaily } from './nfse-api';` ao `index.ts`. O PDF (DANFSe) é a etapa #564, a importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
+
+Testes: DPS dos dois regimes nos dois leiautes validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
