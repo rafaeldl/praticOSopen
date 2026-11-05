@@ -566,3 +566,19 @@ const client = createApi({
 export function api<T>(path: string, options?: ApiOptions): Promise<T> {
   return client.request<T>(path, options)
 }
+
+/** The nfseApi function (NFS-e direct): the api URL with `/api` swapped for `/nfseApi`. */
+export const nfseApiBaseUrl = (apiBaseUrl: string) => apiBaseUrl.replace(/\/api$/, '/nfseApi')
+
+const nfseClient = createApi({
+  baseUrl: () => nfseApiBaseUrl(import.meta.env.VITE_API_BASE_URL ?? ''),
+  getCompanyId: () => session.companyId,
+  getToken: async (forceRefresh) => {
+    const auth = await authClient()
+    return (await auth.currentUser?.getIdToken(forceRefresh)) ?? null
+  },
+})
+
+export function nfseApi<T>(path: string, options?: ApiOptions): Promise<T> {
+  return nfseClient.request<T>(path, options)
+}

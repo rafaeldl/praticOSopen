@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "ffc49bb70735b8a035493afd0d3ffbaaba55c5e124e32ebc9267ec3cabcbe0ed",
+      "sha": "fc80b7b37f5869411d9e2570fdc8b6e63c8d561d1691cec820d25c428dca4f9d",
       "scope": "**/*"
     },
     {
@@ -36,22 +36,22 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Is any name declared on an added line (after class, enum, final, var, const, static, a type, or in a parameter list) a Portuguese word like cliente, valor, pendente, servico, statusDaOS? Answer only about declared names; strings, Text(...), l10n keys and comments never count.",
+          "instructions": "Look only at identifiers declared on added lines: class/enum/variable/field/method/parameter names, enum members, JSON or Firestore map keys, and string constants saved to the database. Is at least one of them a Portuguese word (e.g. cliente, valor, pendente, servico, emitente, nota, situacao)?",
           "criteria": {
-            "true": "final valorTotal = 0; class StatusOS {} static const pendente = 'pendente';",
-            "false": "final total = 0; Text('Cliente'); // calcula o total; context.l10n.cliente"
+            "true": "final valorTotal = 0; enum Situacao { pendente } ; {'cliente': id}",
+            "false": "final total = 0; Text(context.l10n.cliente); // calcula o total; 'Cliente' shown in UI"
           }
         }
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "fired": 0,
-        "verdict": "skipped"
+        "at": "2026-11-05T17:08:55.898Z",
+        "hunks": 13,
+        "median": 0.6,
+        "min": 0.25,
+        "max": 0.9,
+        "fired": 2,
+        "verdict": "decisive"
       }
     },
     {
@@ -79,7 +79,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -108,7 +108,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -141,7 +141,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -174,7 +174,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -203,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -281,7 +281,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -327,7 +327,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -377,7 +377,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -423,7 +423,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -456,7 +456,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -485,7 +485,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -514,7 +514,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -543,7 +543,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -573,11 +573,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 20,
         "median": 0.02,
         "min": 0.01,
-        "max": 0.04,
+        "max": 0.03,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -603,12 +603,12 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "fired": 0,
+        "at": "2026-11-05T17:08:55.898Z",
+        "hunks": 1,
+        "median": 0.9,
+        "min": 0.9,
+        "max": 0.9,
+        "fired": 1,
         "verdict": "skipped"
       }
     },
@@ -645,7 +645,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -674,7 +674,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -837,7 +837,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -870,7 +870,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -912,7 +912,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -941,7 +941,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -970,7 +970,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -999,7 +999,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1045,7 +1045,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1078,7 +1078,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1107,7 +1107,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T12:28:51.409Z",
+        "at": "2026-11-05T17:08:55.898Z",
         "hunks": 0,
         "median": 0,
         "min": 0,

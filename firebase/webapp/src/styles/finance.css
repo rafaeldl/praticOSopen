@@ -144,3 +144,15 @@ button.nfse-step:hover { background: var(--color-paper-2); }
 .nfse-result[aria-pressed="true"] { background: var(--color-selected); box-shadow: inset 3px 0 0 var(--color-accent); }
 .nfse-picked { margin: 0; font-weight: 600; }
 .nfse-setup > :not(.page-head) { margin-left: 1.25rem; margin-right: 1.25rem; }
+
+/* NFS-e direct setup: the CNPJs beside the chosen one (master-detail). */
+.nfse-direct-grid { display: grid; gap: 2rem; }
+@media (min-width: 60rem) { .nfse-direct-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); } }
+.nfse-direct .nfse-step[aria-current] { background: var(--color-paper-2); }
+.nfse-direct .is-danger { color: var(--color-danger-text); font-weight: 700; }
+.nfse-direct .is-warning { color: var(--color-warning-text, var(--color-ink)); font-weight: 700; }
+.nfse-emitter .row-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.cert-drop { display: grid; justify-items: start; gap: 0.5rem; padding: 1rem; border: 1.5px dashed var(--color-rule); border-radius: 0.5rem; }
+.cert-drop.is-over { border-color: var(--color-accent); background: var(--color-paper-2); }
+.cert-drop.has-file { border-style: solid; }
+.cert-file { font-weight: 600; }

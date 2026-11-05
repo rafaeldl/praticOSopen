@@ -27,6 +27,7 @@ class AppFormField extends StatefulWidget {
     this.validator,
     this.onSaved,
     this.onChanged,
+    this.obscureText = false,
   });
 
   final String label;
@@ -48,6 +49,9 @@ class AppFormField extends StatefulWidget {
   final ValueChanged<String>? onSaved;
   final ValueChanged<String>? onChanged;
 
+  /// Hides what is typed (passwords). Forces a single line.
+  final bool obscureText;
+
   @override
   State<AppFormField> createState() => _AppFormFieldState();
 }
@@ -56,7 +60,8 @@ class _AppFormFieldState extends State<AppFormField> {
   TextEditingController? _own;
 
   TextEditingController get _controller =>
-      widget.controller ?? (_own ??= TextEditingController(text: widget.initialValue));
+      widget.controller ??
+      (_own ??= TextEditingController(text: widget.initialValue));
 
   @override
   void dispose() {
@@ -94,8 +99,7 @@ class _AppFormFieldState extends State<AppFormField> {
               CupertinoTextField(
                 controller: _controller,
                 placeholder: widget.placeholder,
-                placeholderStyle:
-                    AppTypography.body.copyWith(color: secondary),
+                placeholderStyle: AppTypography.body.copyWith(color: secondary),
                 style: AppTypography.body.copyWith(color: text),
                 keyboardType: widget.keyboardType,
                 textCapitalization: widget.textCapitalization,
@@ -103,7 +107,10 @@ class _AppFormFieldState extends State<AppFormField> {
                 inputFormatters: widget.inputFormatters,
                 autofocus: widget.autofocus,
                 minLines: 1,
-                maxLines: widget.maxLines,
+                maxLines: widget.obscureText ? 1 : widget.maxLines,
+                obscureText: widget.obscureText,
+                autocorrect: !widget.obscureText,
+                enableSuggestions: !widget.obscureText,
                 clearButtonMode: OverlayVisibilityMode.editing,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg,

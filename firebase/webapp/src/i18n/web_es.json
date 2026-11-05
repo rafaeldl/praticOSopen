@@ -850,5 +850,7 @@
   "web.quick.finishFirst": "Termine o cancele el registro abierto antes de guardar",
   "web.quick.whatsapp": "WhatsApp",
   "web.quick.customerData": "Datos del cliente",
-  "web.quick.deviceData": "Datos de {name}"
+  "web.quick.deviceData": "Datos de {name}",
+  "web.nfseDirect.dropHere": "Arrastra el archivo .pfx o .p12 aquí",
+  "web.nfseDirect.send": "Enviar"
 }

@@ -37,6 +37,7 @@ NfseInvoice _nota(
 NfseController _controller(
   Stream<List<NfseInvoice>> Function(String id) invoicesOf, {
   bool enabled = true,
+  bool direct = false,
 }) => NfseController(
   canIssue: true,
   settingsStream: Stream.value(
@@ -45,6 +46,7 @@ NfseController _controller(
       asaasConnected: true,
       nfseEnabled: enabled,
       nfseReady: true,
+      nfseDirectEnabled: direct,
     ),
   ),
   invoicesOf: invoicesOf,
@@ -238,11 +240,12 @@ void main() {
   });
 
   group('row of the Financeiro tab', () {
-    Widget row(NfseController nfse) => CupertinoPageScaffold(
+    Widget row(NfseController nfse, {bool? canSetUp}) => CupertinoPageScaffold(
       child: SafeArea(
         child: NfseMonthRow(
           month: DateTime.now(),
           nfse: nfse,
+          canSetUp: canSetUp,
           wrap: (row) => row,
         ),
       ),
@@ -254,6 +257,41 @@ void main() {
         row(_controller((_) => Stream.value(const []), enabled: false)),
       );
       expect(find.byKey(const Key('financialNfse')), findsNothing);
+    });
+
+    testWidgets('NFS-e direct pilot: the owner reaches the setup', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        row(
+          _controller(
+            (_) => Stream.value(const []),
+            enabled: false,
+            direct: true,
+          ),
+          canSetUp: true,
+        ),
+      );
+      expect(find.byKey(const Key('financialNfse')), findsNothing);
+      expect(find.byKey(const Key('financialNfseDirectSetup')), findsOneWidget);
+    });
+
+    testWidgets('NFS-e direct pilot: nothing for who cannot set it up', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        row(
+          _controller(
+            (_) => Stream.value(const []),
+            enabled: false,
+            direct: true,
+          ),
+          canSetUp: false,
+        ),
+      );
+      expect(find.byKey(const Key('financialNfseDirectSetup')), findsNothing);
     });
 
     testWidgets('shows the count, never money', (tester) async {

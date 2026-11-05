@@ -15,6 +15,7 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { nfseSettings, nfseSetup, saveService } from '@/lib/nfse/data'
+import { directEnabled } from '@/lib/nfse/direct'
 import { cityAccessKind, nextSetupStep, type AutoIssue, type NfseSetup } from '@/lib/nfse/model'
 import { showToast } from '@/lib/toast'
 import '@/styles/finance.css'
@@ -49,7 +50,12 @@ async function load(quiet = false) {
 const onFocus = () => {
   if (setup.value?.missing.includes('cityAccess') && !open.value) void load(true)
 }
-onMounted(() => {
+onMounted(async () => {
+  // NFS-e direct pilot: its own setup (emitters and certificates).
+  if (await directEnabled().catch(() => false)) {
+    void router.replace('/invoices/direct')
+    return
+  }
   void load()
   window.addEventListener('focus', onFocus)
 })

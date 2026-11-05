@@ -10799,6 +10799,486 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para apagar. Tente de novo.'**
   String get deleteFailedTryAgain;
+
+  /// No description provided for @nfseDirectHeadEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Envie o certificado digital para emitir notas'**
+  String get nfseDirectHeadEmpty;
+
+  /// No description provided for @nfseDirectHeadWithEmitters.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas saem pelo CNPJ que você escolher na hora'**
+  String get nfseDirectHeadWithEmitters;
+
+  /// No description provided for @nfseDirectEmittersSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus CNPJs'**
+  String get nfseDirectEmittersSection;
+
+  /// No description provided for @nfseDirectAddCnpjTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar CNPJ'**
+  String get nfseDirectAddCnpjTitle;
+
+  /// No description provided for @nfseDirectAddCnpjIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o certificado digital A1 do CNPJ e digite a senha dele. O resto o PraticOS busca sozinho.'**
+  String get nfseDirectAddCnpjIntro;
+
+  /// No description provided for @nfseDirectReplaceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar certificado'**
+  String get nfseDirectReplaceTitle;
+
+  /// No description provided for @nfseDirectReplaceIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o certificado novo da {name} e digite a senha dele.'**
+  String nfseDirectReplaceIntro(String name);
+
+  /// No description provided for @nfseDirectSendCertificate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar certificado'**
+  String get nfseDirectSendCertificate;
+
+  /// No description provided for @nfseDirectCertificateFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arquivo do certificado'**
+  String get nfseDirectCertificateFile;
+
+  /// No description provided for @nfseDirectPickFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher'**
+  String get nfseDirectPickFile;
+
+  /// No description provided for @nfseDirectCertificatePassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha do certificado'**
+  String get nfseDirectCertificatePassword;
+
+  /// No description provided for @nfseDirectCertificatePasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica só no envio. O PraticOS não guarda a senha.'**
+  String get nfseDirectCertificatePasswordHint;
+
+  /// No description provided for @nfseDirectUploadMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o arquivo e digite a senha para enviar.'**
+  String get nfseDirectUploadMissing;
+
+  /// No description provided for @nfseDirectTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'O PraticOS usa o certificado só para emitir e ler as suas notas. Você pode apagar quando quiser.'**
+  String get nfseDirectTerms;
+
+  /// No description provided for @nfseDirectTermsLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler o termo'**
+  String get nfseDirectTermsLink;
+
+  /// No description provided for @nfseDirectCnpjAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJ adicionado'**
+  String get nfseDirectCnpjAdded;
+
+  /// No description provided for @nfseDirectCertificateReplaced.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado trocado'**
+  String get nfseDirectCertificateReplaced;
+
+  /// No description provided for @nfseDirectCertificateDeleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado apagado'**
+  String get nfseDirectCertificateDeleted;
+
+  /// No description provided for @nfseDirectRegimeMei.
+  ///
+  /// In pt, this message translates to:
+  /// **'MEI'**
+  String get nfseDirectRegimeMei;
+
+  /// No description provided for @nfseDirectRegimeSimples.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simples'**
+  String get nfseDirectRegimeSimples;
+
+  /// No description provided for @nfseDirectDefault.
+  ///
+  /// In pt, this message translates to:
+  /// **'Padrão'**
+  String get nfseDirectDefault;
+
+  /// No description provided for @nfseDirectDefaultSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas saem por este CNPJ quando o cliente não tem outro'**
+  String get nfseDirectDefaultSaved;
+
+  /// No description provided for @nfseDirectUseAsDefault.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar como padrão'**
+  String get nfseDirectUseAsDefault;
+
+  /// No description provided for @nfseDirectCertValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado vale até {date}'**
+  String nfseDirectCertValidUntil(String date);
+
+  /// No description provided for @nfseDirectCertExpiresIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days, plural, =1{Certificado vence amanhã} other{Certificado vence em {days} dias}}'**
+  String nfseDirectCertExpiresIn(int days);
+
+  /// No description provided for @nfseDirectCertExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado vencido'**
+  String get nfseDirectCertExpired;
+
+  /// No description provided for @nfseDirectCertPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado esperando você confirmar'**
+  String get nfseDirectCertPending;
+
+  /// No description provided for @nfseDirectCertMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem certificado'**
+  String get nfseDirectCertMissing;
+
+  /// No description provided for @nfseDirectCertExpiresOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence em {date}'**
+  String nfseDirectCertExpiresOn(String date);
+
+  /// No description provided for @nfseDirectCertExpiredOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venceu em {date}'**
+  String nfseDirectCertExpiredOn(String date);
+
+  /// No description provided for @nfseDirectCertSentBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'{expires} · enviado por {name} em {date}'**
+  String nfseDirectCertSentBy(String expires, String name, String date);
+
+  /// No description provided for @nfseDirectAutoIssueRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir sozinha quando concluir a OS'**
+  String get nfseDirectAutoIssueRow;
+
+  /// No description provided for @nfseDirectAutoIssueQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando a nota sai sozinha?'**
+  String get nfseDirectAutoIssueQuestion;
+
+  /// No description provided for @nfseDirectAutoIssueNever.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nunca'**
+  String get nfseDirectAutoIssueNever;
+
+  /// No description provided for @nfseDirectAutoIssueNeverHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você emite pela OS, com um toque'**
+  String get nfseDirectAutoIssueNeverHint;
+
+  /// No description provided for @nfseDirectAutoIssueSelected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para os clientes escolhidos'**
+  String get nfseDirectAutoIssueSelected;
+
+  /// No description provided for @nfseDirectAutoIssueSelectedHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligue no cadastro de cada cliente'**
+  String get nfseDirectAutoIssueSelectedHint;
+
+  /// No description provided for @nfseDirectAutoIssueAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para todas as OS'**
+  String get nfseDirectAutoIssueAll;
+
+  /// No description provided for @nfseDirectAutoIssueAllHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sai quando a OS é concluída'**
+  String get nfseDirectAutoIssueAllHint;
+
+  /// No description provided for @nfseDirectEmitterTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJ'**
+  String get nfseDirectEmitterTitle;
+
+  /// No description provided for @nfseDirectTotals.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas este ano: {year} · este mês: {month}'**
+  String nfseDirectTotals(String year, String month);
+
+  /// No description provided for @nfseDirectMeiLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faturou {value} de {limit} este ano (pelas notas)'**
+  String nfseDirectMeiLimit(String value, String limit);
+
+  /// No description provided for @nfseDirectNotEnabledInCity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não habilitado para emitir em {city}'**
+  String nfseDirectNotEnabledInCity(String city);
+
+  /// No description provided for @nfseDirectServiceRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço da nota'**
+  String get nfseDirectServiceRow;
+
+  /// No description provided for @nfseDirectServiceName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do serviço'**
+  String get nfseDirectServiceName;
+
+  /// No description provided for @nfseDirectServiceNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Manutenção de veículos'**
+  String get nfseDirectServiceNamePlaceholder;
+
+  /// No description provided for @nfseDirectServiceCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código do serviço'**
+  String get nfseDirectServiceCode;
+
+  /// No description provided for @nfseDirectServiceCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'6 números da lista nacional. O contador sabe qual é.'**
+  String get nfseDirectServiceCodeHint;
+
+  /// No description provided for @nfseDirectServiceMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome e os 6 números do código para salvar.'**
+  String get nfseDirectServiceMissing;
+
+  /// No description provided for @nfseDirectRegistrationRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inscrição municipal'**
+  String get nfseDirectRegistrationRow;
+
+  /// No description provided for @nfseDirectRegistrationHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deixe em branco se a prefeitura não usa.'**
+  String get nfseDirectRegistrationHint;
+
+  /// No description provided for @nfseDirectStyleRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estilo da descrição'**
+  String get nfseDirectStyleRow;
+
+  /// No description provided for @nfseDirectStyleHead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como os serviços aparecem na nota'**
+  String get nfseDirectStyleHead;
+
+  /// No description provided for @nfseDirectStyleUppercase.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo em maiúsculas'**
+  String get nfseDirectStyleUppercase;
+
+  /// No description provided for @nfseDirectStyleSeparator.
+  ///
+  /// In pt, this message translates to:
+  /// **'Separar serviços com'**
+  String get nfseDirectStyleSeparator;
+
+  /// No description provided for @nfseDirectSeparatorQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como separar os serviços?'**
+  String get nfseDirectSeparatorQuestion;
+
+  /// No description provided for @nfseDirectStyleSample.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica assim: {sample}'**
+  String nfseDirectStyleSample(String sample);
+
+  /// No description provided for @nfseDirectSampleService1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Troca de óleo'**
+  String get nfseDirectSampleService1;
+
+  /// No description provided for @nfseDirectSampleService2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alinhamento'**
+  String get nfseDirectSampleService2;
+
+  /// No description provided for @nfseDirectCertificateRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado'**
+  String get nfseDirectCertificateRow;
+
+  /// No description provided for @nfseDirectMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta'**
+  String get nfseDirectMissing;
+
+  /// No description provided for @nfseDirectNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma'**
+  String get nfseDirectNone;
+
+  /// No description provided for @nfseDirectSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvo'**
+  String get nfseDirectSaved;
+
+  /// No description provided for @nfseDirectDeleteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar certificado'**
+  String get nfseDirectDeleteAction;
+
+  /// No description provided for @nfseDirectDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar o certificado?'**
+  String get nfseDirectDeleteTitle;
+
+  /// No description provided for @nfseDirectDeleteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O certificado da {name} é apagado de vez e não dá mais para emitir por ele. As notas ficam.'**
+  String nfseDirectDeleteMessage(String name);
+
+  /// No description provided for @nfseDirectErrorInvalidFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse arquivo não é um certificado A1. Escolha o arquivo .pfx ou .p12.'**
+  String get nfseDirectErrorInvalidFile;
+
+  /// No description provided for @nfseDirectErrorWrongPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha errada. Confira com quem mandou o certificado.'**
+  String get nfseDirectErrorWrongPassword;
+
+  /// No description provided for @nfseDirectErrorExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse certificado já venceu. Peça um novo ao contador.'**
+  String get nfseDirectErrorExpired;
+
+  /// No description provided for @nfseDirectErrorNotYetValid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse certificado ainda não começou a valer.'**
+  String get nfseDirectErrorNotYetValid;
+
+  /// No description provided for @nfseDirectErrorNotIcpBrasil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse certificado não é do ICP-Brasil. Use o certificado A1 da empresa.'**
+  String get nfseDirectErrorNotIcpBrasil;
+
+  /// No description provided for @nfseDirectErrorNoTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse certificado não é de um CNPJ. Use o certificado A1 da empresa.'**
+  String get nfseDirectErrorNoTaxId;
+
+  /// No description provided for @nfseDirectErrorOtherTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse certificado é de outro CNPJ. Para trocar, use um do mesmo CNPJ.'**
+  String get nfseDirectErrorOtherTaxId;
+
+  /// No description provided for @nfseDirectErrorAlreadyExists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse CNPJ já está cadastrado. Para renovar, abra o CNPJ e troque o certificado.'**
+  String get nfseDirectErrorAlreadyExists;
+
+  /// No description provided for @nfseDirectErrorNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse CNPJ não está mais cadastrado.'**
+  String get nfseDirectErrorNotFound;
+
+  /// No description provided for @nfseDirectErrorNotEnabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota fiscal ainda não está ligada para a sua empresa.'**
+  String get nfseDirectErrorNotEnabled;
+
+  /// No description provided for @nfseDirectErrorForbidden.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o dono e o administrador mexem nessa configuração.'**
+  String get nfseDirectErrorForbidden;
+
+  /// No description provided for @nfseDirectErrorValidation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira o que foi digitado e tente de novo.'**
+  String get nfseDirectErrorValidation;
+
+  /// No description provided for @nfseDirectErrorUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para enviar agora. Tente de novo em alguns minutos.'**
+  String get nfseDirectErrorUnavailable;
+
+  /// No description provided for @nfseDirectErrorGeneric.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu certo. Tente de novo.'**
+  String get nfseDirectErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

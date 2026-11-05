@@ -34,6 +34,7 @@ const FinanceReceiveView = withFinanceTexts(() => import('@/components/orders/re
 const ReportView = withFinanceTexts(() => import('@/views/finance/ReportView.vue'))
 const InvoicesView = withFinanceTexts(() => import('@/views/finance/InvoicesView.vue'))
 const NfseSetupView = withFinanceTexts(() => import('@/views/finance/NfseSetupView.vue'))
+const NfseDirectSetupView = withFinanceTexts(() => import('@/views/finance/NfseDirectSetupView.vue'))
 // Agenda opens orders beside it, so it brings their texts too.
 const AgendaView = () => Promise.all([import('@/views/agenda/AgendaView.vue'), loadTexts('agenda'), loadOrderTexts()]).then(([m]) => m)
 // The catalog's texts are in the same chunk as the customers' (scripts/gen.mjs FEATURES).
@@ -135,6 +136,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/invoices/setup',
     name: 'nfseSetup',
     component: NfseSetupView,
+    meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'nfseListSetup' },
+  },
+  // NFS-e direct setup (spec §4.8): owner and admin, like the server's routes.
+  {
+    path: '/invoices/direct',
+    name: 'nfseDirectSetup',
+    component: NfseDirectSetupView,
     meta: { access: { kind: 'member', anyOf: ['manageCompany'] }, title: 'nfseListSetup' },
   },
   {

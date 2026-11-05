@@ -850,5 +850,7 @@
   "web.quick.finishFirst": "Finish or cancel the open record before saving",
   "web.quick.whatsapp": "WhatsApp",
   "web.quick.customerData": "Customer details",
-  "web.quick.deviceData": "Details of {name}"
+  "web.quick.deviceData": "Details of {name}",
+  "web.nfseDirect.dropHere": "Drag the .pfx or .p12 file here",
+  "web.nfseDirect.send": "Send"
 }

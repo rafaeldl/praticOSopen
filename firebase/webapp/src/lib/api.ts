@@ -53,6 +53,19 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   ORDER_NOT_OF_CUSTOMER: 'nfseErrorOrderNotOfCustomer',
   INVALID_EFFECTIVE_DATE: 'nfseErrorInvalidDate',
   CUSTOMER_DATA_REQUIRED: 'nfseErrorCustomerData',
+  // NFS-e direct: certificate and emitters (the app's nfse_direct_texts.dart).
+  CERT_INVALID_FILE: 'nfseDirectErrorInvalidFile',
+  CERT_WRONG_PASSWORD: 'nfseDirectErrorWrongPassword',
+  CERT_EXPIRED: 'nfseDirectErrorExpired',
+  CERT_NOT_YET_VALID: 'nfseDirectErrorNotYetValid',
+  CERT_NOT_ICP_BRASIL: 'nfseDirectErrorNotIcpBrasil',
+  CERT_NO_TAX_ID: 'nfseDirectErrorNoTaxId',
+  CERT_TAX_ID_MISMATCH: 'nfseDirectErrorOtherTaxId',
+  EMITTER_ALREADY_EXISTS: 'nfseDirectErrorAlreadyExists',
+  EMITTER_NOT_FOUND: 'nfseDirectErrorNotFound',
+  CERT_NOT_FOUND: 'nfseDirectErrorNotFound',
+  NFSE_DIRECT_NOT_ENABLED: 'nfseDirectErrorNotEnabled',
+  KEY_VAULT_UNAVAILABLE: 'nfseDirectErrorUnavailable',
 }
 
 /** The sentence for a code the server sends, when there is one of its own (tests). */
