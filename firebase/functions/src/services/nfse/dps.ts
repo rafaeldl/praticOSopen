@@ -37,13 +37,16 @@ export const DEFAULT_LAYOUT_BY_ENVIRONMENT: Record<NfseEnvironment, LayoutStep[]
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** Own keys only: "constructor" or "toString" in the config are not layouts. */
+const isLayoutId = (id: unknown): id is DpsLayoutId => typeof id === 'string' && Object.prototype.hasOwnProperty.call(LAYOUTS, id);
+
 /** The known layout of the last step whose `from` is on or before the date; null when none fits. */
 function pick(steps: LayoutStep[], competenceDate: string): DpsLayout | null {
   let chosen: DpsLayout | null = null;
   let chosenFrom = '';
   for (const step of steps) {
     const from = step?.from ?? '';
-    if (!step || !(step.layout in LAYOUTS) || (from && !DATE.test(from))) continue;
+    if (!step || !isLayoutId(step.layout) || (from && !DATE.test(from))) continue;
     if (from <= competenceDate && from >= chosenFrom) {
       chosen = LAYOUTS[step.layout as DpsLayoutId];
       chosenFrom = from;
@@ -58,7 +61,7 @@ export function layoutFor(
   competenceDate: string = new Date().toISOString().slice(0, 10),
 ): DpsLayout {
   const setting = configured?.[environment];
-  if (typeof setting === 'string' && setting in LAYOUTS) return LAYOUTS[setting as DpsLayoutId];
+  if (isLayoutId(setting)) return LAYOUTS[setting];
   if (Array.isArray(setting)) {
     const chosen = pick(setting, competenceDate);
     if (chosen) return chosen;

@@ -71,6 +71,8 @@ describe('layoutFor', () => {
     expect(layoutFor('test', null, dec).id).toBe('v20261020');
     expect(layoutFor('production', { production: 'v20261020' }, dec).id).toBe('v20261020');
     expect(layoutFor('production', { production: 'v9999' }, dec).id).toBe('v20260209');
+    expect(layoutFor('production', { production: 'constructor' }, dec).id).toBe('v20260209');
+    expect(layoutFor('production', { production: [{ layout: 'toString' }] }, jan).id).toBe('v2027_20260209');
   });
 
   it('from 01/01/2027 the same packages carry IBS/CBS', () => {
