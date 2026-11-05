@@ -199,6 +199,7 @@
   "web.yes": "Sim",
   "web.no": "Não",
   "web.customers.directory": "Cadastros",
+  "web.customers.change": "Trocar",
   "web.customers.new": "Novo cliente",
   "web.customers.import": "Importar planilha",
   "web.customers.first": "Cadastrar primeiro cliente",

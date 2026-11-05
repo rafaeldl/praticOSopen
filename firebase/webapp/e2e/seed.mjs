@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_P, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
+import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_N, COMPANY_P, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
 
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
@@ -198,6 +198,11 @@ async function seedCatalog() {
     // Payment links (Asaas pilot) on in company A. The charges themselves are
     // simulated by the tests: no Asaas account exists in the emulator.
     // Notas fiscais (fatia 6) too: on and set up, so the list and "Emitir nota fiscal" show. Asaas itself is simulated.
+    // NFS-e direta (docs/NFSE_DIRECT.md): "Dados para nota" and "Emitir nota sozinha" for the chosen customers.
+    if (id === COMPANY_N) {
+      batch.set(db.doc(`companies/${id}/settings/payments`), { nfseDirectEnabled: true })
+      batch.set(db.doc(`companies/${id}/settings/nfse`), { provider: 'direct', autoIssue: 'selectedCustomers' })
+    }
     if (id === COMPANY_A) {
       batch.set(db.doc(`companies/${id}/settings/payments`), {
         asaasEnabled: true, asaasConnected: true, asaasEnvironment: 'sandbox', nfseEnabled: true, nfseReady: true,
