@@ -34,6 +34,7 @@ Lógica em `services/account-deletion.service.ts` (`decideCompany`, dependência
    - Divergência (ex.: admin que trocou o `owner` para si, ou mapa dizendo `owner` com o campo apontando para outro) → 409 `OWNERSHIP_MISMATCH`.
 4. Dono com outro membro em `memberships/*`, no mapa privado ou no array `company.users` (empresas antigas) → 409 `COMPANY_HAS_MEMBERS`.
 5. Dono único: apaga Storage com prefixo `tenants/{id}/` e `companies/{id}/` (`bucket.deleteFiles`) e depois `firestore.recursiveDelete(companies/{id})`.
+   Antes do `recursiveDelete`, apaga os certificados da NFS-e direta da empresa (`nfseCertificates`, fora da árvore da empresa) e agenda a destruição da versão da chave do KMS de cada um (crypto-shredding, ver `docs/NFSE_DIRECT.md`). Se o KMS recusar (a `accountApi` não tem permissão nas chaves), a versão vai para `nfseKeyDestructions` e a rotina diária da `nfseApi` destrói depois; o material cifrado já foi apagado.
 6. Empresa de outro dono: só se o uid estiver de fato em `memberships/{uid}` ou no mapa privado (o `users.companies[]` pode ser forjado). Apaga a foto em `tenants/{id}/users/{uid}/` e sai com `removeMember` (membership, mapa privado, `users` da empresa, links do WhatsApp daquela empresa).
 7. Apaga os links do WhatsApp do usuário, `users/{uid}` (recursivo) e por fim o usuário do Firebase Auth.
 

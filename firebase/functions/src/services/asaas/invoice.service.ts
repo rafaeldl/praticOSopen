@@ -330,7 +330,7 @@ async function requireReadyService(companyId: string, ctx: NfseContext): Promise
   return service;
 }
 
-interface LoadedOrders {
+export interface LoadedOrders {
   orders: Order[];
   parts: Array<InvoiceOrderPart & OrderInvoiceValue>;
   customerId: string;
