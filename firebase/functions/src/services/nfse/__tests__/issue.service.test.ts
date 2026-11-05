@@ -323,3 +323,35 @@ describe('cancelDirectInvoice', () => {
     expect((await codeOf(cancelDirectInvoice('c1', 'missing', 'issueError', USER, deps))).code).toBe('INVOICE_NOT_FOUND');
   });
 });
+
+describe('security review (issue #560)', () => {
+  it('opens the certificate with the purpose and the nota of each step', async () => {
+    const uses: unknown[] = [];
+    const load = deps.loadCertificate!;
+    deps.loadCertificate = async (companyId, emitterId, use) => {
+      uses.push(use);
+      return load(companyId, emitterId, use);
+    };
+    const invoice = await issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps);
+    answer = () => json(201, { eventoXmlGZipB64: gzipBase64('<evento/>') });
+    await cancelDirectInvoice('c1', invoice.id, 'issueError', USER, deps);
+    expect(uses).toEqual([
+      { purpose: 'issue', invoiceId: invoice.id, by: { id: USER.id, name: USER.name } },
+      { purpose: 'cancel', invoiceId: invoice.id, by: USER },
+    ]);
+  });
+
+  it('daily ceiling per emitter: refused before reserving a number or sending', async () => {
+    seed('companies/c1/private/nfse/emitters/e1', { nextDpsNumber: 7, issuedOn: '2026-11-05', issuedToday: 1, dailyIssueLimit: 1 });
+    const error = await codeOf(issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps));
+    expect(error.code).toBe('DAILY_LIMIT_REACHED');
+    expect(calls).toHaveLength(0);
+    expect(read('companies/c1/private/nfse/emitters/e1')!.nextDpsNumber).toBe(7);
+    expect(read('companies/c1/private/nfse/orders/o1')).toBeUndefined();
+    // Next day it goes.
+    now = new Date('2026-11-06T13:00:00Z');
+    const invoice = await issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps);
+    expect(invoice.status).toBe('authorized');
+    expect(read('companies/c1/private/nfse/emitters/e1')).toMatchObject({ issuedOn: '2026-11-06', issuedToday: 1 });
+  });
+});

@@ -13,6 +13,17 @@
  *
  * When KMS cannot destroy a version right away, the version goes to
  * /nfseKeyDestructions (closed) and `processPendingKeyDestructions` retries it.
+ * Account deletion only queues (it runs outside the nfseApi, whose service
+ * account is the only one meant to touch the keys); the daily job destroys.
+ *
+ * Issue #560 (security review):
+ * - uploads are limited per user and per company (attempts, before opening);
+ * - upload, replace, delete and the destruction retry hold a lease per
+ *   emitter (/nfseCertificateLocks), so two at once never leave a live key
+ *   version behind; after each change every version but the current one is
+ *   destroyed;
+ * - every opening of a certificate is audited with its purpose, before the
+ *   key is unwrapped (no audit, no opening).
  */
 
 import { db } from '../firestore.service';
@@ -35,6 +46,16 @@ export const EXPIRED_RETENTION_DAYS = 90;
 
 export const CERTIFICATES = 'nfseCertificates';
 export const KEY_DESTRUCTIONS = 'nfseKeyDestructions';
+export const CERTIFICATE_LOCKS = 'nfseCertificateLocks';
+export const UPLOAD_LIMITS = 'nfseUploadLimits';
+
+/** Certificate uploads (right or wrong) per user and per company in [UPLOAD_WINDOW_MS]. */
+export const MAX_UPLOADS_PER_WINDOW = 5;
+export const UPLOAD_WINDOW_MS = 60 * 60 * 1000;
+/** A lease longer than the nfseApi timeout (120 s): a crashed holder frees it by itself. */
+export const LOCK_LEASE_MS = 3 * 60 * 1000;
+/** Failed retries of a destruction after which the daily job logs the alert line. */
+export const DESTRUCTION_ALERT_ATTEMPTS = 2;
 
 /** /nfseCertificates/{emitterId}. Binary fields in base64. */
 export interface StoredCertificateDoc {
@@ -54,7 +75,25 @@ export interface StoredCertificateDoc {
   createdBy: UserAggr;
 }
 
-export type CertificateAuditAction = 'upload' | 'replace' | 'delete' | 'purge-expired' | 'delete-account' | 'destroy-failed';
+export type CertificateAuditAction =
+  | 'upload'
+  | 'replace'
+  | 'delete'
+  | 'purge-expired'
+  | 'delete-account'
+  | 'destroy-failed'
+  | 'open';
+
+/** Why the certificate is being opened (audited on every opening). */
+export type CertificatePurpose = 'issue' | 'cancel' | 'reconcile' | 'import' | 'unspecified';
+
+export interface CertificateUse {
+  purpose: CertificatePurpose;
+  /** The nota it is opened for, when there is one. */
+  invoiceId?: string | null;
+  /** Who asked (null for the daily routines and automatic notas). */
+  by?: UserAggr | null;
+}
 
 /** Who did it, from which device: written to the audit log (no secrets). */
 export interface CertificateActor {
@@ -92,6 +131,53 @@ function auditEntry(action: CertificateAuditAction, emitterId: string, actor: Ce
   };
 }
 
+/**
+ * Counts one upload attempt for the user and for the company; refuses past
+ * [MAX_UPLOADS_PER_WINDOW] in the last hour. Counted before the file is
+ * opened, so wrong passwords and broken files count too.
+ */
+export async function consumeUploadAttempt(companyId: string, userId: string, now: Date): Promise<void> {
+  const refs = [db.collection(UPLOAD_LIMITS).doc(`user-${userId}`), db.collection(UPLOAD_LIMITS).doc(`company-${companyId}`)];
+  const since = now.getTime() - UPLOAD_WINDOW_MS;
+  await db.runTransaction(async (tx) => {
+    const snaps = await Promise.all(refs.map((ref) => tx.get(ref)));
+    const recent = snaps.map((snap) =>
+      ((snap.data()?.attempts as string[] | undefined) ?? []).filter((at) => Date.parse(at) > since),
+    );
+    if (recent.some((list) => list.length >= MAX_UPLOADS_PER_WINDOW)) {
+      throw new NfseServiceError('TOO_MANY_ATTEMPTS', 'Too many certificate uploads; try again later');
+    }
+    refs.forEach((ref, i) => tx.set(ref, { attempts: [...recent[i], now.toISOString()], updatedAt: now.toISOString() }));
+  });
+}
+
+/**
+ * Takes the lease [key] (one certificate change at a time per emitter) or
+ * throws CERT_BUSY. Returns the release function (only frees its own lease).
+ */
+export async function acquireCertificateLock(key: string, now: Date): Promise<() => Promise<void>> {
+  const ref = db.collection(CERTIFICATE_LOCKS).doc(key);
+  const token = db.collection(CERTIFICATE_LOCKS).doc().id;
+  await db.runTransaction(async (tx) => {
+    const current = (await tx.get(ref)).data() as { expiresAt?: string } | undefined;
+    if (current?.expiresAt && Date.parse(current.expiresAt) > now.getTime()) {
+      throw new NfseServiceError('CERT_BUSY', 'Another change of this certificate is running');
+    }
+    tx.set(ref, { token, expiresAt: new Date(now.getTime() + LOCK_LEASE_MS).toISOString() });
+  });
+  return async () => {
+    await db
+      .runTransaction(async (tx) => {
+        const current = (await tx.get(ref)).data() as { token?: string } | undefined;
+        if (current?.token === token) tx.delete(ref);
+      })
+      .catch((error) => console.error('[nfse] certificate lock release failed', (error as Error)?.name));
+  };
+}
+
+const emitterLockKey = (emitterId: string) => `emitter-${emitterId}`;
+const taxIdLockKey = (companyId: string, taxId: string) => `taxid-${companyId}-${taxId}`;
+
 /** The certificate fields the emitter shows (never the material). */
 function publicCertificate(holderName: string, notAfter: Date, now: Date, by: UserAggr, status: FiscalCertificateStatus): FiscalEmitterCertificate {
   return { holderName, notAfter: notAfter.toISOString(), uploadedAt: now.toISOString(), uploadedBy: by, status };
@@ -126,8 +212,26 @@ export async function storeCertificate(input: StoreCertificateInput, override?: 
     throw new NfseServiceError('TERMS_NOT_ACCEPTED', 'Certificate terms must be accepted');
   }
   const now = d.now();
+  await consumeUploadAttempt(input.companyId, input.actor.user.id, now);
   const cert = openCertificate(input.pfx, input.password, { ...d.certificateOptions, now });
 
+  const release = await acquireCertificateLock(
+    input.emitterId ? emitterLockKey(input.emitterId) : taxIdLockKey(input.companyId, cert.taxId),
+    now,
+  );
+  try {
+    return await storeOpened(d, input, cert, now);
+  } finally {
+    await release();
+  }
+}
+
+async function storeOpened(
+  d: VaultDeps,
+  input: StoreCertificateInput,
+  cert: ReturnType<typeof openCertificate>,
+  now: Date,
+): Promise<StoreCertificateResult> {
   const emitters = emittersOf(input.companyId);
   let emitterId = input.emitterId ?? null;
   let created = false;
@@ -203,8 +307,9 @@ export async function storeCertificate(input: StoreCertificateInput, override?: 
   );
   await batch.commit();
 
-  if (previous && previous.kmsKeyVersion !== keyVersion) {
-    await destroyOrQueue(d, input.companyId, emitterId, previous.kmsKeyVersion, input.actor);
+  if (previous || !created) {
+    // The old version, and any left behind by an upload that failed half-way.
+    await destroyOthersOrQueue(d, input.companyId, emitterId, keyVersion, input.actor);
   }
 
   return { emitterId, created, taxId: cert.taxId, holderName: cert.holderName, notAfter: doc.notAfter };
@@ -218,8 +323,17 @@ export interface UsableCertificate {
   notAfter: string;
 }
 
-/** Opens the emitter's certificate for one operation (issue, cancel, read). */
-export async function loadCertificate(companyId: string, emitterId: string, override?: Partial<VaultDeps>): Promise<UsableCertificate> {
+/**
+ * Opens the emitter's certificate for one operation (issue, cancel, read).
+ * The opening is audited first, with [use]; when the audit cannot be written
+ * the certificate is not opened.
+ */
+export async function loadCertificate(
+  companyId: string,
+  emitterId: string,
+  override?: Partial<VaultDeps>,
+  use: CertificateUse = { purpose: 'unspecified' },
+): Promise<UsableCertificate> {
   const d = deps(override);
   const snap = await db.collection(CERTIFICATES).doc(emitterId).get();
   const doc = snap.data() as StoredCertificateDoc | undefined;
@@ -229,6 +343,13 @@ export async function loadCertificate(companyId: string, emitterId: string, over
   if (doc.status !== 'active') throw new NfseServiceError('CERT_NOT_FOUND', 'Certificate waiting for confirmation');
   if (d.now() > new Date(doc.notAfter)) throw new NfseServiceError('CERT_EXPIRED', 'Certificate expired');
 
+  await auditOf(companyId).doc().set(
+    auditEntry('open', emitterId, use.by ? { user: use.by } : null, d.now(), {
+      purpose: use.purpose,
+      invoiceId: use.invoiceId ?? null,
+      kmsKeyVersion: doc.kmsKeyVersion,
+    }),
+  );
   const aad = certificateAad(companyId, emitterId);
   const dek = await d.vault.unwrap(emitterId, Buffer.from(doc.wrappedDek, 'base64'), aad);
   try {
@@ -252,6 +373,9 @@ export interface DeleteCertificateInput {
   action?: Extract<CertificateAuditAction, 'delete' | 'purge-expired' | 'delete-account'>;
 }
 
+/** Account deletion runs outside the nfseApi: it never calls KMS, it only queues. */
+const queuesOnly = (action: DeleteCertificateInput['action']) => action === 'delete-account';
+
 /**
  * Deletes material and DEK and schedules the destruction of the key version
  * (crypto-shredding). The emitter stays, marked without a certificate; its
@@ -260,6 +384,16 @@ export interface DeleteCertificateInput {
 export async function deleteCertificate(input: DeleteCertificateInput, override?: Partial<VaultDeps>): Promise<boolean> {
   const d = deps(override);
   const now = d.now();
+  if (queuesOnly(input.action)) return deleteUnlocked(d, input, now);
+  const release = await acquireCertificateLock(emitterLockKey(input.emitterId), now);
+  try {
+    return await deleteUnlocked(d, input, now);
+  } finally {
+    await release();
+  }
+}
+
+async function deleteUnlocked(d: VaultDeps, input: DeleteCertificateInput, now: Date): Promise<boolean> {
   const certRef = db.collection(CERTIFICATES).doc(input.emitterId);
   const doc = (await certRef.get()).data() as StoredCertificateDoc | undefined;
   if (!doc) return false;
@@ -280,35 +414,86 @@ export async function deleteCertificate(input: DeleteCertificateInput, override?
     batch.set(auditOf(input.companyId).doc(), auditEntry(action, input.emitterId, input.actor, now));
   }
   await batch.commit();
-  await destroyOrQueue(d, input.companyId, input.emitterId, doc.kmsKeyVersion, input.actor);
+  if (queuesOnly(input.action)) {
+    await queueDestruction(d, input.companyId, input.emitterId, doc.kmsKeyVersion);
+  } else {
+    await destroyOthersOrQueue(d, input.companyId, input.emitterId, null, input.actor);
+  }
   return true;
 }
 
-/** Schedules the version's destruction; on failure keeps it for the daily retry (and audits it). */
-async function destroyOrQueue(d: VaultDeps, companyId: string, emitterId: string, keyVersion: string, actor: CertificateActor | null) {
+/** One emitter whose key versions (all but the current certificate's) still need destroying. */
+interface KeyDestructionItem {
+  companyId: string;
+  emitterId: string;
+  /** The version known when queued (log only; the retry destroys every stale one). */
+  keyVersion?: string | null;
+  queuedAt: string;
+  attempts: number;
+  lastAttemptAt?: string;
+}
+
+async function queueDestruction(d: VaultDeps, companyId: string, emitterId: string, keyVersion: string | null) {
+  const item: KeyDestructionItem = { companyId, emitterId, keyVersion, queuedAt: d.now().toISOString(), attempts: 0 };
+  await db.collection(KEY_DESTRUCTIONS).doc().set(item);
+}
+
+/**
+ * Destroys every version of the emitter's key except [keep]; on failure keeps
+ * the emitter for the daily retry (and audits it).
+ */
+async function destroyOthersOrQueue(
+  d: VaultDeps,
+  companyId: string,
+  emitterId: string,
+  keep: string | null,
+  actor: CertificateActor | null,
+) {
   try {
-    await d.vault.destroyVersion(keyVersion);
+    await d.vault.destroyOtherVersions(emitterId, keep);
   } catch (error) {
     console.error('[nfse] key destruction deferred', (error as NfseServiceError)?.code ?? (error as Error)?.name);
-    const now = d.now().toISOString();
-    await db.collection(KEY_DESTRUCTIONS).doc().set({ companyId, emitterId, keyVersion, queuedAt: now, attempts: 0 });
+    await queueDestruction(d, companyId, emitterId, keep);
     await auditOf(companyId).doc().set(auditEntry('destroy-failed', emitterId, actor, d.now()));
   }
 }
 
-/** Retries the destructions KMS refused before (daily routine of the nfseApi). */
+/**
+ * Retries the destructions KMS refused before, and those queued by account
+ * deletion (daily routine of the nfseApi). Keeps only the version of the
+ * certificate stored now, read under the emitter's lease, so a certificate
+ * sent in the meantime is never destroyed. After [DESTRUCTION_ALERT_ATTEMPTS]
+ * failed retries it logs the "[nfse-alert]" line the log alert watches.
+ */
 export async function processPendingKeyDestructions(override?: Partial<VaultDeps>): Promise<number> {
   const d = deps(override);
   const pending = await db.collection(KEY_DESTRUCTIONS).limit(100).get();
   let done = 0;
   for (const snap of pending.docs) {
-    const item = snap.data() as { keyVersion: string; attempts?: number };
+    const item = snap.data() as Partial<KeyDestructionItem>;
+    let release: (() => Promise<void>) | null = null;
     try {
-      await d.vault.destroyVersion(item.keyVersion);
+      if (!item.emitterId) {
+        // Older item: only the version name.
+        if (item.keyVersion) await d.vault.destroyVersion(item.keyVersion);
+      } else {
+        release = await acquireCertificateLock(emitterLockKey(item.emitterId), d.now());
+        const current = (await db.collection(CERTIFICATES).doc(item.emitterId).get()).data() as StoredCertificateDoc | undefined;
+        await d.vault.destroyOtherVersions(item.emitterId, current?.kmsKeyVersion ?? null);
+      }
       await snap.ref.delete();
       done++;
-    } catch {
-      await snap.ref.set({ attempts: (item.attempts ?? 0) + 1, lastAttemptAt: d.now().toISOString() }, { merge: true });
+    } catch (error) {
+      const attempts = (item.attempts ?? 0) + 1;
+      await snap.ref.set({ attempts, lastAttemptAt: d.now().toISOString() }, { merge: true });
+      if (attempts >= DESTRUCTION_ALERT_ATTEMPTS) {
+        console.error(
+          `[nfse-alert] key destruction still pending emitter=${item.emitterId ?? '-'} attempts=${attempts}`,
+          (error as NfseServiceError)?.code ?? (error as Error)?.name,
+        );
+      }
+    } finally {
+      if (release) await release();
     }
   }
   return done;
@@ -329,7 +514,11 @@ export async function purgeExpiredCertificates(override?: Partial<VaultDeps>): P
   return count;
 }
 
-/** Account deletion: every certificate of the company (before its tree is deleted). */
+/**
+ * Account deletion: every certificate of the company (before its tree is
+ * deleted). Runs in the accountApi: removes the material now and queues the
+ * key destruction for the nfseApi's daily job (no KMS call from here).
+ */
 export async function deleteCompanyCertificates(companyId: string, override?: Partial<VaultDeps>): Promise<number> {
   const d = deps(override);
   const snap = await db.collection(CERTIFICATES).where('companyId', '==', companyId).get();

@@ -1,5 +1,5 @@
 import forge from 'node-forge';
-import { openCertificate, taxIdOfCertificate } from '../certificate';
+import { MAX_PFX_ITERATIONS, openCertificate, taxIdOfCertificate } from '../certificate';
 import { NfseServiceError } from '../errors';
 import { ICP_BRASIL_ROOTS } from '../icp-brasil-roots';
 import { testPki } from './test-certificates';
@@ -94,5 +94,64 @@ describe('taxIdOfCertificate', () => {
     const cert = forge.pki.createCertificate();
     cert.setSubject([{ name: 'commonName', value: 'FULANO DE TAL:12345678909' }]);
     expect(taxIdOfCertificate(cert)).toBe('12345678909');
+  });
+});
+
+
+/**
+ * Rewrites every INTEGER equal to [from] (the iteration counts forge wrote) to
+ * [to], also inside OCTET STRINGs that hold DER (the PKCS#12 safes).
+ */
+function withIterations(pfx: Buffer, from: number, to: number): Buffer {
+  const { asn1 } = forge;
+  const fromBytes = asn1.integerToDer(from).getBytes();
+  const toBytes = asn1.integerToDer(to).getBytes();
+  const walk = (node: forge.asn1.Asn1): boolean => {
+    if (node.tagClass === asn1.Class.UNIVERSAL && node.type === asn1.Type.INTEGER && node.value === fromBytes) {
+      node.value = toBytes;
+      return true;
+    }
+    if (Array.isArray(node.value)) return node.value.map(walk).some(Boolean);
+    if (node.tagClass === asn1.Class.UNIVERSAL && node.type === asn1.Type.OCTETSTRING && typeof node.value === 'string' && node.value.length > 8) {
+      try {
+        const inner = asn1.fromDer(forge.util.createBuffer(node.value));
+        if (walk(inner)) {
+          node.value = asn1.toDer(inner).getBytes();
+          return true;
+        }
+      } catch {
+        // Not DER (salt, digest, ciphertext).
+      }
+    }
+    return false;
+  };
+  const root = asn1.fromDer(forge.util.createBuffer(pfx.toString('binary')));
+  walk(root);
+  return Buffer.from(asn1.toDer(root).getBytes(), 'binary');
+}
+
+describe('PFX with too many iterations (issue #560)', () => {
+  const pki = testPki();
+  const roots = [pki.rootPem];
+
+  it('refuses a MAC with millions of iterations before deriving anything', () => {
+    const evil = withIterations(pki.pfx(), 2048, 50_000_000);
+    const start = Date.now();
+    expect(codeOf(() => openCertificate(evil, 'senha-teste', { now, trustedRoots: roots }))).toBe('CERT_INVALID_FILE');
+    expect(Date.now() - start).toBeLessThan(3000);
+  });
+
+  it('refuses an encrypted bag with too many iterations (file without MAC)', () => {
+    const key = forge.pki.privateKeyFromPem(openCertificate(pki.pfx(), 'senha-teste', { now, trustedRoots: roots }).keyPem);
+    const cert = forge.pki.certificateFromPem(openCertificate(pki.pfx(), 'senha-teste', { now, trustedRoots: roots }).certPem);
+    const p12 = forge.pkcs12.toPkcs12Asn1(key, [cert], 'senha-teste', { algorithm: '3des', useMac: false });
+    const plain = Buffer.from(forge.asn1.toDer(p12).getBytes(), 'binary');
+    const evil = withIterations(plain, 2048, MAX_PFX_ITERATIONS + 1);
+    expect(evil.equals(plain)).toBe(false);
+    expect(codeOf(() => openCertificate(evil, 'senha-teste', { now, trustedRoots: roots }))).toBe('CERT_INVALID_FILE');
+  });
+
+  it('a normal file still opens after a refused one', () => {
+    expect(openCertificate(pki.pfx(), 'senha-teste', { now, trustedRoots: roots }).taxId).toBe('00000000000191');
   });
 });

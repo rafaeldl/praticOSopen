@@ -2805,5 +2805,11 @@
   "invoiceTaxIdTakenMessage": "Each CPF or CNPJ belongs to one customer only.",
   "invoiceTaxIdTakenUse": "Send this store's invoices to it",
   "invoiceRecipientSet": "{customer}'s invoices go to {recipient}",
-  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself"
+  "invoiceRecipientCleared": "{customer}'s invoices go to the customer itself",
+  "nfseDirectErrorTooManyAttempts": "Too many tries to send the certificate. Wait an hour and try again.",
+  "nfseDirectErrorBusy": "Someone else is changing this certificate right now. Try again in a few minutes.",
+  "nfseDirectErrorDailyLimit": "This company reached today's invoice limit. It can issue again tomorrow; if you need more, contact support.",
+  "nfseDirectErrorOwnerOnly": "Only the account owner can change this.",
+  "nfseDirectManagerCanIssue": "Managers can issue invoices",
+  "nfseDirectManagerCanIssueHint": "You get a notice whenever someone else issues or cancels an invoice."
 }

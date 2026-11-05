@@ -3,7 +3,10 @@
  * Mounted by the nfseApi at /v1/app/nfse/setup. Owner and admin only (spec decision 12).
  *
  *   PATCH /emitters/:emitterId   { municipalRegistration?, service?, descriptionStyle? }
- *   PUT   /settings              { defaultEmitterId?, autoIssue? }
+ *   PUT   /settings              { defaultEmitterId?, autoIssue?, managerCanIssue? }
+ *
+ * `managerCanIssue` (may the manager issue and cancel notas) is the owner's
+ * call only (issue #560).
  */
 
 import { Router, Response } from 'express';
@@ -50,6 +53,7 @@ const settingsSchema = z
   .object({
     defaultEmitterId: emitterIdSchema.optional(),
     autoIssue: z.enum(NFSE_DIRECT_AUTO_ISSUE as [string, ...string[]]).optional(),
+    managerCanIssue: z.boolean().optional(),
   })
   .strict();
 
@@ -88,6 +92,9 @@ router.put('/settings', async (req: AuthenticatedRequest, res: Response) => {
   try {
     ensureRole(req);
     const update = parse(settingsSchema, req.body);
+    if (update.managerCanIssue !== undefined && req.userContext?.role !== 'owner') {
+      throw new NfseServiceError('FORBIDDEN', 'Only the owner decides whether managers issue notas');
+    }
     res.json({ success: true, data: await updateNfseSettings(req.userContext!.companyId, update as never) });
   } catch (error) {
     fail(res, error, 'settings update');

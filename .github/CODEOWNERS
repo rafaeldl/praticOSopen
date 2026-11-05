@@ -1,0 +1,12 @@
+# Mudanças no cofre do certificado e na função que o abre pedem revisão do
+# Rafael (issue #560). Vale com "Require review from Code Owners" ligado na
+# proteção da master.
+/firebase/functions/src/services/nfse/ @rafaeldl
+/firebase/functions/src/nfse-api.ts @rafaeldl
+/firebase/functions/src/routes/v1/nfse-*.routes.ts @rafaeldl
+/firebase/functions/package.json @rafaeldl
+/firebase/functions/package-lock.json @rafaeldl
+/firebase/firestore.rules @rafaeldl
+/firebase/storage.rules @rafaeldl
+/.github/CODEOWNERS @rafaeldl
+/.github/workflows/ @rafaeldl

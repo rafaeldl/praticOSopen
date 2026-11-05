@@ -7065,4 +7065,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String invoiceRecipientCleared(String customer) {
     return 'Las facturas de $customer van al propio cliente';
   }
+
+  @override
+  String get nfseDirectErrorTooManyAttempts =>
+      'Demasiados intentos de enviar el certificado. Espera una hora e inténtalo de nuevo.';
+
+  @override
+  String get nfseDirectErrorBusy =>
+      'Otra persona está cambiando este certificado ahora. Inténtalo de nuevo en unos minutos.';
+
+  @override
+  String get nfseDirectErrorDailyLimit =>
+      'Esta empresa llegó al límite de facturas de hoy. Mañana puede volver a emitir; si necesitas más, habla con soporte.';
+
+  @override
+  String get nfseDirectErrorOwnerOnly =>
+      'Solo el dueño de la cuenta puede cambiar esto.';
+
+  @override
+  String get nfseDirectManagerCanIssue => 'El gerente puede emitir facturas';
+
+  @override
+  String get nfseDirectManagerCanIssueHint =>
+      'Recibes un aviso cada vez que otra persona emite o cancela una factura.';
 }

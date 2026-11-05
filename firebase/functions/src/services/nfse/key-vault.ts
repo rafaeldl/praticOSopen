@@ -27,6 +27,13 @@ export interface KeyVault {
   unwrap(emitterId: string, wrappedDek: Buffer, aad: Buffer): Promise<Buffer>;
   /** Schedules destruction of one version (24 h, then irreversible). */
   destroyVersion(keyVersion: string): Promise<void>;
+  /**
+   * Schedules destruction of every live version of the emitter's key except
+   * [keep] (null = all). Catches versions left behind by an upload that
+   * failed half-way or by two uploads at once. A key that does not exist is
+   * nothing to do.
+   */
+  destroyOtherVersions(emitterId: string, keep: string | null): Promise<void>;
 }
 
 export const NFSE_KEY_RING = 'nfse-certs';
@@ -147,6 +154,24 @@ export class KmsKeyVault implements KeyVault {
       // Already destroyed or scheduled: nothing left to do.
       if (grpcCode(error) === GRPC_FAILED_PRECONDITION || grpcCode(error) === GRPC_NOT_FOUND) return;
       throw unavailable(error);
+    }
+  }
+
+  async destroyOtherVersions(emitterId: string, keep: string | null): Promise<void> {
+    const client = await this.client();
+    let versions: Array<{ name?: string | null }>;
+    try {
+      [versions] = await client.listCryptoKeyVersions({
+        parent: this.keyName(client, emitterId),
+        filter: 'state=ENABLED OR state=DISABLED',
+      });
+    } catch (error) {
+      if (grpcCode(error) === GRPC_NOT_FOUND) return;
+      throw unavailable(error);
+    }
+    for (const version of versions) {
+      if (!version.name || version.name === keep) continue;
+      await this.destroyVersion(version.name);
     }
   }
 }

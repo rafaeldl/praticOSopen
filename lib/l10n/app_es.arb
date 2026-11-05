@@ -2793,5 +2793,11 @@
   "invoiceTaxIdTakenMessage": "Cada CPF o CNPJ queda en un solo cliente.",
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
-  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente"
+  "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "nfseDirectErrorTooManyAttempts": "Demasiados intentos de enviar el certificado. Espera una hora e inténtalo de nuevo.",
+  "nfseDirectErrorBusy": "Otra persona está cambiando este certificado ahora. Inténtalo de nuevo en unos minutos.",
+  "nfseDirectErrorDailyLimit": "Esta empresa llegó al límite de facturas de hoy. Mañana puede volver a emitir; si necesitas más, habla con soporte.",
+  "nfseDirectErrorOwnerOnly": "Solo el dueño de la cuenta puede cambiar esto.",
+  "nfseDirectManagerCanIssue": "El gerente puede emitir facturas",
+  "nfseDirectManagerCanIssueHint": "Recibes un aviso cada vez que otra persona emite o cancela una factura."
 }
