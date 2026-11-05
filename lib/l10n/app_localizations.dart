@@ -11484,6 +11484,300 @@ abstract class AppLocalizations {
   /// **'As notas de {customer} vão para ele mesmo'**
   String invoiceRecipientCleared(String customer);
 
+  /// No description provided for @nfseImportTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar notas'**
+  String get nfseImportTitle;
+
+  /// No description provided for @nfseImportReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo suas notas no governo…'**
+  String get nfseImportReading;
+
+  /// No description provided for @nfseImportReadingCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Começando} =1{1 documento lido} other{{count} documentos lidos}}'**
+  String nfseImportReadingCount(int count);
+
+  /// No description provided for @nfseImportHeadline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Achamos {notas} notas para {customers} clientes. Vamos preencher seus clientes e o serviço da nota.'**
+  String nfseImportHeadline(int notas, int customers);
+
+  /// No description provided for @nfseImportHeadlineEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achamos notas deste CNPJ no governo. Vamos preencher o serviço e a série da nota.'**
+  String get nfseImportHeadlineEmpty;
+
+  /// No description provided for @nfseImportEmitterSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitente'**
+  String get nfseImportEmitterSection;
+
+  /// No description provided for @nfseImportServiceRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço mais usado'**
+  String get nfseImportServiceRow;
+
+  /// No description provided for @nfseImportServiceValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} · ISS {rate}'**
+  String nfseImportServiceValue(String name, String rate);
+
+  /// No description provided for @nfseImportSeriesRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Série das notas do PraticOS'**
+  String get nfseImportSeriesRow;
+
+  /// No description provided for @nfseImportCustomersSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Clientes'**
+  String get nfseImportCustomersSection;
+
+  /// No description provided for @nfseImportCustomersNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 cliente novo} other{{count} clientes novos}}'**
+  String nfseImportCustomersNew(int count);
+
+  /// No description provided for @nfseImportCustomersCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 completa um cliente que você já tem} other{{count} completam clientes que você já tem}}'**
+  String nfseImportCustomersCompleted(int count);
+
+  /// No description provided for @nfseImportCustomersHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só preenchemos o que está vazio. Nada que você digitou muda.'**
+  String get nfseImportCustomersHint;
+
+  /// No description provided for @nfseImportAskSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este é o mesmo cliente?'**
+  String get nfseImportAskSection;
+
+  /// No description provided for @nfseImportAskSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'É o seu cliente {customer}?'**
+  String nfseImportAskSubtitle(String customer);
+
+  /// No description provided for @nfseImportAskUnanswered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responder'**
+  String get nfseImportAskUnanswered;
+
+  /// No description provided for @nfseImportAskSame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim'**
+  String get nfseImportAskSame;
+
+  /// No description provided for @nfseImportAskNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, criar outro'**
+  String get nfseImportAskNew;
+
+  /// No description provided for @nfseImportAskHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem resposta, vira cliente novo.'**
+  String get nfseImportAskHint;
+
+  /// No description provided for @nfseImportStoresSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lojas que faturam em outro CNPJ'**
+  String get nfseImportStoresSection;
+
+  /// No description provided for @nfseImportStoreRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota fiscal para {recipient}'**
+  String nfseImportStoreRow(String recipient);
+
+  /// No description provided for @nfseImportAutoSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir sozinha'**
+  String get nfseImportAutoSection;
+
+  /// No description provided for @nfseImportAutoQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Este cliente teve nota em quase todas as OS. Ligar a nota sozinha para ele?} other{Estes {count} clientes tiveram nota em quase todas as OS. Ligar a nota sozinha para eles?}}'**
+  String nfseImportAutoQuestion(int count);
+
+  /// No description provided for @nfseImportNotasSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas'**
+  String get nfseImportNotasSection;
+
+  /// No description provided for @nfseImportNotasLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 ligada às suas OS} other{{count} ligadas às suas OS}}'**
+  String nfseImportNotasLinked(int count);
+
+  /// No description provided for @nfseImportNotasHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 só no histórico} other{{count} só no histórico}}'**
+  String nfseImportNotasHistory(int count);
+
+  /// No description provided for @nfseImportButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar'**
+  String get nfseImportButton;
+
+  /// No description provided for @nfseImportDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas importadas'**
+  String get nfseImportDone;
+
+  /// No description provided for @nfseImportAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar notas do governo'**
+  String get nfseImportAction;
+
+  /// No description provided for @nfseImportUndoAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer importação'**
+  String get nfseImportUndoAction;
+
+  /// No description provided for @nfseImportUndoQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer a importação?'**
+  String get nfseImportUndoQuestion;
+
+  /// No description provided for @nfseImportUndoMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagamos os clientes criados que ainda não têm OS, esvaziamos o que foi preenchido e desligamos as notas das OS. As notas continuam no histórico.'**
+  String get nfseImportUndoMessage;
+
+  /// No description provided for @nfseImportUndone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importação desfeita'**
+  String get nfseImportUndone;
+
+  /// No description provided for @nfseImportErrorUndoExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'A importação tem mais de 30 dias e não pode mais ser desfeita.'**
+  String get nfseImportErrorUndoExpired;
+
+  /// No description provided for @nfseLinkOrderRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS'**
+  String get nfseLinkOrderRow;
+
+  /// No description provided for @nfseLinkOrderAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar a uma OS'**
+  String get nfseLinkOrderAction;
+
+  /// No description provided for @nfseLinkPickerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual OS é desta nota?'**
+  String get nfseLinkPickerTitle;
+
+  /// No description provided for @nfseLinkPickerSame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Do cliente'**
+  String get nfseLinkPickerSame;
+
+  /// No description provided for @nfseLinkPickerOthers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outras'**
+  String get nfseLinkPickerOthers;
+
+  /// No description provided for @nfseLinkPickerEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS para ligar'**
+  String get nfseLinkPickerEmpty;
+
+  /// No description provided for @nfseLinkOrderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String nfseLinkOrderTitle(String number);
+
+  /// No description provided for @nfseLinkHasNota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já tem nota'**
+  String get nfseLinkHasNota;
+
+  /// No description provided for @nfseLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota ligada à OS'**
+  String get nfseLinked;
+
+  /// No description provided for @nfseUnlinkAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar da OS'**
+  String get nfseUnlinkAction;
+
+  /// No description provided for @nfseUnlinkQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar a nota da OS {numbers}?'**
+  String nfseUnlinkQuestion(String numbers);
+
+  /// No description provided for @nfseUnlinkMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'A OS fica livre para outra nota. A nota continua no histórico.'**
+  String get nfseUnlinkMessage;
+
+  /// No description provided for @nfseUnlinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota desligada da OS'**
+  String get nfseUnlinked;
+
+  /// No description provided for @nfseLinkErrorOrderHasNota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS já tem nota. Cancele a outra antes.'**
+  String get nfseLinkErrorOrderHasNota;
+
+  /// No description provided for @nfseLinkErrorAlreadyLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta nota já está ligada a uma OS.'**
+  String get nfseLinkErrorAlreadyLinked;
+
   /// No description provided for @nfseDirectAcceptTerms.
   ///
   /// In pt, this message translates to:

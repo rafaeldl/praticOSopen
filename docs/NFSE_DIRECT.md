@@ -197,7 +197,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN são a #569, a emissão automática é a #571.
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571.
 
 Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 
@@ -253,7 +253,7 @@ O app e o web chamam a `nfseApi` pela URL da `api` trocando `/api` por `/nfseApi
 
 `services/nfse/certificate-expiry-notice.service.ts`, na rotina `nfseDaily`: 30 e 7 dias antes de `certificate.notAfter`, sino e push (`notifyCertificateExpiring`, tipo `nfse_certificate_expiring`) para dono e admin: "O certificado da OFICINA EXEMPLO vence em 7 dias. Peça um novo ao contador." Cada passo vai uma vez por certificado (`private/nfse/emitters/{id}.expiryNotice`); certificado novo recomeça.
 
-Fora desta etapa: "Pedir ao contador", importação e "Desfazer importação", limite de CNPJs por plano, "Ligar para todos os clientes com CNPJ".
+Fora desta etapa: "Pedir ao contador", limite de CNPJs por plano, "Ligar para todos os clientes com CNPJ".
 
 ## Cliente: dados para nota (etapa #568)
 
@@ -270,3 +270,63 @@ Só aparece com `settings/payments.nfseDirectEnabled` ligada (`loadCustomerInvoi
 **App web** (`firebase/webapp`): o mesmo grupo no formulário do cliente (`CustomerForm.vue`, regras em `src/lib/customers/invoice-data.ts`), a linha "Nota fiscal para" com "Trocar" e o item no "…" (`InvoiceRecipientDialog.vue`). Grava pela `PATCH /v1/app/customers/:id` (campos em `docs/WEB_API.md`). Na hora de salvar, o formulário espera a lista de clientes para conferir o CPF/CNPJ repetido, mesmo quando a tela abriu direto no cliente. A política de segurança do `/web` libera `brasilapi.com.br` e `viacep.com.br` para as buscas. E2E: `e2e/customer-invoice.spec.ts`, na empresa `company-nfse` da semente.
 
 Fora desta etapa: oferta na 3ª nota e a emissão automática no servidor (etapa 11 da spec).
+
+## Importação das notas (etapa #569)
+
+Ao enviar o certificado de um CNPJ novo, o app abre "Importar notas": o servidor lê no governo as notas que o CNPJ já emitiu e recebeu, monta uma proposta e só aplica no "Importar". Só dono e admin.
+
+Código: `firebase/functions/src/services/nfse/adn-reader.ts`, `import-proposal.ts` (regras, funções puras), `import.service.ts` e `routes/v1/nfse-import.routes.ts`. App: `lib/screens/nfse/direct/nfse_import_screen.dart`, `nfse_order_link.dart`, `lib/models/nfse_import.dart`.
+
+### Leitura do ADN
+
+- `GET {adn}/contribuintes/DFe/{NSU}?cnpjConsulta={cnpj}&lote=true`, até 50 documentos por página (XML em GZip + Base64). A resposta não diz se a página começa no NSU pedido ou depois dele: o servidor pede a partir do último NSU guardado e descarta o que já tem (`nsu <= lastNsu`). Caixa vazia responde 404.
+- Cada chamada lê por até ~45 s (`READ_BUDGET_MS`) e guarda o ponto em `private/nfse/emitters/{id}.lastNsu`; o app chama `continue` até a proposta ficar pronta.
+- **Emitidas** pelo CNPJ viram `invoices/ext-{chave}` com `source: 'external'`, `provider: 'direct'`, XML em `tenants/{cid}/invoices/{id}/nfse.xml`, `customer: null`, sem OS, e `external { regime, IM, cidade, código do serviço, alíquota... }` para a proposta. Nota que já existe (emitida pelo PraticOS, mesma chave) não é criada de novo.
+- **Eventos** e101101/e105102 cancelam a nota (status `canceled`, `canceledOutside: true`) e liberam a OS travada. Evento lido antes da nota fica em `private/nfse/emitters/{id}/canceledKeys/{chave}` até a nota chegar.
+- **Recebidas** (o CNPJ é o tomador): registro mínimo só no servidor, `private/nfse/emitters/{id}/received/{nsu}` (`accessKey`, `providerTaxId`, `providerName`, `value`, `date`, `status`), para a etapa posterior A (despesas).
+
+### Proposta (`nfseImports/{batchId}`, `status: proposed`)
+
+| Parte | Regra |
+|---|---|
+| Emitente | Regime (`opSimpNac` 2 MEI, 3 Simples), `regApTribSN`, cidade, IM do CNC (só a que o CNC tem), habilitado na cidade (CNC; sem CNC, nota nos últimos 90 dias), serviço mais usado com a alíquota da cidade e o `pTotTribSN`, estilo da descrição (maiúsculas em 70%+, separador mais usado) e série. Só o que está vazio |
+| Série | A primeira a partir de 10 que o CNPJ nunca usou (o portal usa 900, 70000...; o Asaas usa 1) |
+| Cliente certo | Mesmo CPF/CNPJ; ou nome igual (sem LTDA/ME e acentos) com OS casada; ou 3+ OS casadas com nome que divide uma palavra. Vai sem perguntar |
+| "Este é o mesmo cliente?" | Só nome igual, ou 1-2 OS casadas com outro nome. Sem resposta, vira cliente novo |
+| Lojas | Outros clientes com 2+ OS casadas no mesmo CNPJ ganham "Nota fiscal para" o cliente com mais notas |
+| Nota × OS | Liga só quando há exatamente uma OS com o mesmo valor (ao centavo, regra `invoiceValueOfOrder`) até 10 dias da data, sem nota ativa e que nenhuma outra nota quer |
+| Emitir sozinha | Sugere (nunca liga) os clientes certos com nota em 80%+ das OS concluídas (mínimo 3) desde a primeira nota |
+
+### Aplicar ("Importar")
+
+`POST /v1/app/nfse/imports/:id/apply { answers: { sameCustomer: { [cnpj]: bool }, autoIssueCustomerIds } }`:
+
+1. Completa os clientes só nos campos vazios (`taxId`, `legalName`, `fiscalAddress`, `invoiceEmail` quando não há e-mail); cria os novos (com `importBatchId`), sem duplicar CNPJ que alguém salvou no meio tempo.
+2. "Nota fiscal para" nas lojas sem CNPJ nem destinatário próprio.
+3. Notas do grupo recebem `customer` e `recipient.customerId`; as que casam ligam à OS numa transação que confere a trava (`private/nfse/orders/{orderId}`) e travam a OS.
+4. Emitente: só o vazio, mais `enabledInCity` e `importBatchId`. `settings/nfse`: `defaultEmitterId` e `provider: 'direct'` se vazios.
+5. Grava em `applied` tudo o que fez (clientes criados, valores preenchidos, lojas, notas, ligações, interruptores) e `expiresAt` = 30 dias.
+
+### Desfazer (30 dias)
+
+"…" do emitente → "Desfazer importação". Desliga as notas das OS (libera a trava), tira cliente das notas, apaga "Nota fiscal para", "Emitir sozinha" e os campos preenchidos **que continuam com o valor que a importação gravou**, e apaga os clientes criados que ainda não têm OS. O emitente fica configurado e as notas ficam no histórico.
+
+### Ligar e desligar à mão
+
+Rotas em `/v1/app/nfse/links` (dono, admin, gerente):
+
+- `GET /invoices/:id/candidates`: até 40 OS, primeiro as do cliente da nota e das lojas que apontam para ele, depois as de valor e data mais parecidos; as que já têm nota vão por último.
+- `POST /invoices/:id/link { orderId }`: nota direta emitida e sem OS; recusa OS com nota ativa (`ORDER_HAS_INVOICE`).
+- `POST /invoices/:id/unlink`: só nota feita fora do PraticOS (`source: 'external'`); a emitida pelo PraticOS fica com a sua OS.
+
+No app: linha "OS · Ligar a uma OS" no detalhe da nota direta sem OS, e "…" → "Desligar da OS" na nota externa ligada.
+
+### Leitura diária
+
+A `nfseDaily` lê a caixa de cada emitente com certificado válido a partir do `lastNsu`: notas feitas no portal ou em outro sistema entram no histórico (ligadas ao cliente quando só um cliente tem aquele CPF/CNPJ; nunca à OS), cancelamentos são aplicados, recebidas registradas e o faturamento do ano recalculado.
+
+### Testes
+
+`__tests__/import.test.ts` com XMLs e caixa do ADN sintéticos (`import-fixture.ts`, CNPJs e nomes inventados): leitura em páginas e com limite de tempo, cancelamento, recebidas, proposta, aplicar, "Sim"/"Não", desfazer, 30 dias, ligar/desligar e leitura diária. App: `test/screens/nfse/nfse_import_test.dart`.
+
+Fora desta etapa: importação no app web, etiqueta "Emitida fora do PraticOS" na lista (#566) e notas recebidas → despesas.
