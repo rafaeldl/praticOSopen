@@ -2794,6 +2794,12 @@
   "invoiceTaxIdTakenUse": "Enviar las facturas de esta tienda a ella",
   "invoiceRecipientSet": "Las facturas de {customer} van a {recipient}",
   "invoiceRecipientCleared": "Las facturas de {customer} van al propio cliente",
+  "orderItemCatalogPriceTitle": "¿Cambiar el precio en el Catálogo?",
+  "orderItemCatalogPriceMessage": "{entity} “{name}” cuesta {from} en el Catálogo. ¿Usar {to} siempre o solo en esta OS?",
+  "orderItemCatalogPriceAlways": "Usar siempre",
+  "orderItemCatalogPriceOnlyHere": "Solo en esta OS",
+  "orderItemCatalogPriceSaved": "El precio del Catálogo cambió a {to}",
+  "orderItemCatalogPriceFailed": "No se pudo cambiar el precio en el Catálogo. Cámbialo allí.",
   "sharePreview": "Ver como lo ve el cliente",
   "@sharePreview": {"description": "Opens the customer link as a preview: nothing counted or sent (#588)"},
   "sharePreviewFailed": "No se pudo abrir la vista previa. Inténtalo de nuevo."

@@ -72,6 +72,8 @@ import ConfirmDialog from './ConfirmDialog.vue'
 import DateDialog from './DateDialog.vue'
 import HoldDialog from './HoldDialog.vue'
 import ItemDialog from './ItemDialog.vue'
+import { canChangeCatalogPrice, catalogPriceOffer, mayOfferCatalogPrice, type CatalogPriceOffer } from '@/lib/orders/catalog-price'
+import { changedSince, loadItem as loadCatalogItem, saveItem as saveCatalogItem } from '@/lib/catalog/data'
 import DevicePickerDialog from './DevicePickerDialog.vue'
 import { deviceIdsOf, type PickResult } from '@/lib/orders/device-pick'
 import { currentCustomerId } from '@/lib/orders/assist-draft'
@@ -124,6 +126,7 @@ type Dialog =
   | { kind: 'receive' }
   | { kind: 'discount' }
   | { kind: 'item'; line: OrderLine }
+  | { kind: 'catalogPrice'; offer: CatalogPriceOffer }
   | { kind: 'addItem' }
   | { kind: 'customer' }
   | { kind: 'address' }
@@ -544,6 +547,30 @@ async function saveLine(line: OrderLine, patch: { description?: string; value?: 
   }
   const ok = await run(() => writes.updateItem(order.value!.id, line.id as string, patch, expected()), t('web.saved'))
   if (ok) dialog.value = null
+  if (ok) await offerCatalogPrice(line, patch.value)
+}
+
+/** A new price on a line from the catalog: only on this order or always (#588)? */
+async function offerCatalogPrice(line: OrderLine, to: number | null | undefined) {
+  const allowed = canChangeCatalogPrice(line.kind, can)
+  if (!mayOfferCatalogPrice(line, to, allowed)) return
+  // Read now: the price and version the catalog has, not the one the order kept.
+  const item = await loadCatalogItem(line.kind, line.catalogId as string).catch(() => null)
+  const offer = catalogPriceOffer(line, to, item, allowed)
+  if (offer && !dialog.value) dialog.value = { kind: 'catalogPrice', offer }
+}
+
+const catalogEntity = (kind: OrderLine['kind']) => (kind === 'service' ? t('service') : resolveLabel('product._entity', segmentLabels(), (key) => t(key), t('product')))
+
+async function useCatalogPriceAlways(offer: CatalogPriceOffer) {
+  dialog.value = null
+  try {
+    await saveCatalogItem(offer.kind, offer.id, { value: offer.to, ...(offer.version ? { version: offer.version } : {}) })
+    forgetLists()
+    showToast(t('orderItemCatalogPriceSaved', { to: money(offer.to) }))
+  } catch (error) {
+    showToast(changedSince(error) ? t('orderItemCatalogPriceFailed') : t(errorMessageKey(error)))
+  }
 }
 
 /**
@@ -1252,6 +1279,15 @@ watch(
       :confirm="t('orderOpenChecklist')"
       :keep="t('notNow')"
       @confirm="openPendingForm((dialog as { first: string }).first)"
+      @close="dialog = null"
+    />
+    <ConfirmDialog
+      v-else-if="dialog.kind === 'catalogPrice'"
+      :title="t('orderItemCatalogPriceTitle')"
+      :body="t('orderItemCatalogPriceMessage', { entity: catalogEntity(dialog.offer.kind), name: dialog.offer.name, from: dialog.offer.from === null ? t('catalogNoPrice') : money(dialog.offer.from), to: money(dialog.offer.to) })"
+      :confirm="t('orderItemCatalogPriceAlways')"
+      :keep="t('orderItemCatalogPriceOnlyHere')"
+      @confirm="useCatalogPriceAlways((dialog as { offer: CatalogPriceOffer }).offer)"
       @close="dialog = null"
     />
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
