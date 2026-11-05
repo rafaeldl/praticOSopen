@@ -138,7 +138,8 @@ Uma Function nova, `nfseApi` (HTTP, Node 22, região de São Paulo), com **conta
 
 ### 5.3 Numeração e idempotência
 
-- **Série nossa por emitente** (`dpsSeries`): escolhida na importação, diferente das séries que o CNPJ já usou (o portal e o Asaas usam a 1; o spike usou a 900). Padrão: 900.
+- **Dois números**: o **número da nota** (`nNFSe`, o que aparece no PDF) é do governo, sequencial por CNPJ, e continua sozinho de onde o cliente parou (portal, Asaas ou outro sistema). O **número da DPS** é o nosso pedido, com uma série; o governo recusa DPS repetida.
+- **Série nossa por emitente** (`dpsSeries`): escolhida na importação entre as que o CNPJ **nunca usou**, olhando as notas antigas. Não continuar a série de outro emissor: se o dono ainda emitir pelo portal, os dois disputariam o mesmo número. Visto na piloto: o portal do governo usou as séries 900 (nas primeiras notas) e 70000; o Asaas usa a 1. Candidata padrão: 10, trocando se já tiver sido usada.
 - **Número**: contador em `private/nfse/emitters/{emitterId}.nextDpsNumber`, reservado numa transação que também cria a nota `creating` com o `dpsId` (que é determinístico: cidade + CNPJ + série + número).
 - **Sem resposta certa** (tempo esgotado, 5xx, rede): `GET /dps/{dpsId}`. Existe → busca a NFS-e e grava como emitida. Não existe → reenvia **a mesma DPS** (mesmo número), nunca pula nem repete número. Conferência automática das `creating` com mais de 3 minutos, como a do Asaas.
 - **Recusa** (o governo respondeu com erro): a nota fica `error` com o código, e o número **não** é reaproveitado (é da DPS recusada; o número da NFS-e é do governo e não pula).
