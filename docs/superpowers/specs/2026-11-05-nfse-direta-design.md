@@ -188,7 +188,7 @@ Detalhe completo e o porquê de cada ponto em [`NFSE_DIRECT_DISCOVERY.md`, "Guar
 1. **Senha e .pfx nunca são gravados.** O servidor abre o arquivo na memória, confere CNPJ, validade e cadeia ICP-Brasil, e guarda só a chave e o certificado em PEM, cifrados. A senha não aparece em log.
 2. **Envelope com Cloud KMS, uma chave por emitente** (`nfse-certs/emitter-{emitterId}`): uma DEK AES-256-GCM por certificado, cifrada pela KEK do emitente, que nunca sai do KMS.
 3. **Só a `nfseApi`**, com conta de serviço própria, decifra. O KMS registra cada decifração.
-4. **Coleção fechada** `nfseCertificates/{emitterId}` (fora de `companies/{id}`, regras `allow read, write: if false`): `companyId`, `ciphertext`, `iv`, `tag`, `wrappedDek`, `kmsKeyVersion`, `createdAt`. O emitente mostra só CNPJ, titular, validade e quem enviou quando.
+4. **Área privada da empresa** `companies/{cid}/private/nfse/certificates/{emitterId}`, coberta pela regra que já fecha `private/{doc=**}` (`if false`, só o servidor grava e lê): `ciphertext`, `iv`, `tag`, `wrappedDek`, `kmsKeyVersion`, `createdAt`. Obrigatório: **teste das regras provando que nenhum perfil da empresa (dono, admin, gerente, consultor, técnico) lê nem grava esse caminho**. Vantagem sobre uma coleção na raiz: o certificado sai junto quando a empresa é excluída. Decisão de 2026-11-05 (antes era `nfseCertificates/{emitterId}` na raiz). O emitente mostra só CNPJ, titular, validade e quem enviou quando.
 5. **Na memória só durante a chamada**, sem cache.
 6. **Dono e admin** enviam, trocam e apagam; ninguém baixa de volta. Cada ação vai para `private/nfse/audit` (quem, quando, aparelho, ação).
 7. **Apagar de verdade**: apaga material e DEK, agenda a destruição da versão da chave com 24 h (`destroyScheduledDuration` = 1 dia, dá para desfazer nesse prazo); depois disso, as cópias em backup ficam ilegíveis. Vale para apagar o emitente, excluir a conta (`ACCOUNT_DELETION.md`) e certificado vencido há mais de 90 dias. Renovar cria versão nova e destrói a antiga.
@@ -216,7 +216,7 @@ Custo: ~US$ 0,06 por emitente por mês mais ~US$ 0,03 por 10 mil operações.
 | `companies/{cid}/private/nfse/emitters/{id}` | servidor | ninguém | `nextDpsNumber`, `lastNsu`, `received/{nsu}` |
 | `companies/{cid}/private/nfse/orders/{orderId}` | servidor | ninguém | trava de uma nota ativa por OS (já existe) |
 | `companies/{cid}/private/nfse/audit/{id}` | servidor | ninguém (suporte pelo console) | ações no certificado |
-| `nfseCertificates/{emitterId}` | servidor | ninguém | material cifrado (§6) |
+| `companies/{cid}/private/nfse/certificates/{emitterId}` | servidor | ninguém (teste de regras obrigatório) | material cifrado (§6) |
 | `nfseCertificateRequests/{hash}` | servidor | ninguém | link do contador |
 
 CNPJ único por empresa: o app confere com `customers where taxId ==` antes de salvar, e a importação usa a mesma consulta. Corrida entre dois aparelhos é rara e aceitável; a importação junta o duplicado se achar.
@@ -242,7 +242,7 @@ Ordem pensada para chegar ao piloto o quanto antes: primeiro emitir à mão pela
 | # | Etapa | Entrega | Risco |
 |---|---|---|---|
 | 0 | Revisão de segurança do desenho | Revisão da §6 e da §6.1 por alguém de fora do código (ameaças, IAM, LGPD, termo); ajustes nesta spec | `risk:high` · `needs-human` |
-| 1 | Cofre do certificado | KMS (keyring `nfse-certs`, chave por emitente), conta de serviço da `nfseApi`, `nfseCertificates` fechada nas regras, envio/validação/troca/apagar com crypto-shred, auditoria, testes | `risk:high` |
+| 1 | Cofre do certificado | KMS (keyring `nfse-certs`, chave por emitente), conta de serviço da `nfseApi`, certificado em `private/nfse/certificates` com teste de regras de que nenhum membro lê, envio/validação/troca/apagar com crypto-shred, auditoria, testes | `risk:high` |
 | 2 | Modelo e regras | `fiscalEmitters`, campos novos de `invoices`, `customers` e `settings/nfse`, `nfseImports`; regras do Firestore e índices; modelos no app (`FiscalEmitter`) | `risk:high` |
 | 3 | Motor de emissão | DPS por leiaute e regime, assinatura, mTLS, emitir, numeração, idempotência e conferência, cancelar, tabela de recusas, faturamento do ano, consultas de cadastro e CNPJ; testes com XSD e fixtures | `risk:high` |
 | 4 | PDF da nota | DANFSe a partir do XML, no Storage, com QR code | `risk:high` (Function com escrita) |
