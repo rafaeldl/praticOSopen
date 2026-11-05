@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/mobx/product_store.dart';
+import 'package:praticos/mobx/service_store.dart';
+import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -540,4 +543,80 @@ Future<bool> askRemoveOrderItem(BuildContext context, String name) async {
     ),
   );
   return confirmed ?? false;
+}
+
+/// Writes a new catalog price ("Usar sempre"). Replaceable in tests.
+typedef CatalogPriceWriter = Future<void> Function(
+  CatalogKind kind,
+  String id,
+  double? value,
+);
+
+/// Default [CatalogPriceWriter]: only the price, through the catalog stores.
+Future<void> writeCatalogPrice(CatalogKind kind, String id, double? value) =>
+    kind == CatalogKind.service
+        ? ServiceStore().updatePrice(id, value)
+        : ProductStore().updatePrice(id, value);
+
+/// The person changed the price of the line ([previousValue] to
+/// [newValue]) to one that differs from the catalog price of the item it
+/// came from, and may change the catalog: offer to use it always. A loose
+/// item (no [catalogId]) or an unchanged price never asks.
+bool shouldOfferCatalogPrice({
+  required String? catalogId,
+  required double? catalogValue,
+  required double? previousValue,
+  required double? newValue,
+  required bool canManageCatalog,
+}) {
+  if (!canManageCatalog || catalogId == null || newValue == null) {
+    return false;
+  }
+  if (_sameMoney(previousValue, newValue)) return false;
+  return !_sameMoney(catalogValue, newValue);
+}
+
+bool _sameMoney(double? a, double? b) =>
+    a == null || b == null ? a == b : (a * 100).round() == (b * 100).round();
+
+/// "Mudar o preço no Catálogo?": true for "Usar sempre", false for
+/// "Só nesta OS" (the default, as today). [entity] is the segment name of
+/// the item (Serviço, Produto, Peça...).
+Future<bool> askCatalogPrice(
+  BuildContext context, {
+  required String entity,
+  required String name,
+  required double? from,
+  required double to,
+}) async {
+  final l10n = context.l10n;
+  final format = FormatService()..setLocale(l10n.localeName);
+  final always = await showCupertinoDialog<bool>(
+    context: context,
+    builder: (ctx) => CupertinoAlertDialog(
+      title: Text(l10n.orderItemCatalogPriceTitle),
+      content: Text(
+        l10n.orderItemCatalogPriceMessage(
+          entity,
+          name,
+          from == null ? l10n.catalogNoPrice : format.formatCurrency(from),
+          format.formatCurrency(to),
+        ),
+      ),
+      actions: [
+        CupertinoDialogAction(
+          key: const ValueKey('order_item_catalog_price_always'),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l10n.orderItemCatalogPriceAlways),
+        ),
+        CupertinoDialogAction(
+          key: const ValueKey('order_item_catalog_price_only_here'),
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l10n.orderItemCatalogPriceOnlyHere),
+        ),
+      ],
+    ),
+  );
+  return always ?? false;
 }
