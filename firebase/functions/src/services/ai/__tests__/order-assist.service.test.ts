@@ -7,6 +7,8 @@ import {
   buildSystemPrompt,
   buildUserText,
   matchCatalog,
+  nextDays,
+  withMemorySchema,
   orderAssistInputSchema,
   parseLlmDraft,
   runOrderAssist,
@@ -518,7 +520,7 @@ describe('history and context (issue #631)', () => {
     const text = buildUserText({ text: 'capô 500' }, CATALOG);
     expect(text).not.toContain('Current order');
     expect(text).toContain('Text from the user:');
-    expect(buildSystemPrompt('pt')).not.toContain('ALREADY applied');
+    expect(buildSystemPrompt('pt')).not.toContain('Answer only the NEW message');
   });
 
   it('lists the order with who filled each field, never the customer name, and the earlier messages', () => {
@@ -529,11 +531,11 @@ describe('history and context (issue #631)', () => {
     expect(text).toContain('Request: "Barulho na suspensão" (from assistant)');
     expect(text).toContain('Deadline: 2026-11-06T18:00 (set by the user)');
     expect(text).toContain('Waiting for the user to pick: line');
-    expect(text).toContain('Earlier messages (ALREADY applied');
+    expect(text).toContain('Earlier messages (already applied');
     expect(text).toContain('1. Gol placa ABC1234, barulho');
     expect(text).toContain('New message from the user:\nnão, a placa é ABC1D23');
     const prompt = buildSystemPrompt('pt', undefined, undefined, { memory: true });
-    expect(prompt).toContain('Never apply them again');
+    expect(prompt).toContain('Never return again');
     expect(prompt).toContain('A field set by the user is NEVER changed');
     expect(prompt).toContain('"replaces"');
   });
@@ -541,9 +543,9 @@ describe('history and context (issue #631)', () => {
   it('sends the memory rules only with context or history', async () => {
     const d = deps({}, { operations: [] });
     await runOrderAssist('c1', { text: 'x', history: ['y'] }, d);
-    expect(d.llm.generateJson.mock.calls[0][0].systemPrompt).toContain('ALREADY applied');
+    expect(d.llm.generateJson.mock.calls[0][0].systemPrompt).toContain('Answer only the NEW message');
     await runOrderAssist('c1', { text: 'x' }, d);
-    expect(d.llm.generateJson.mock.calls[1][0].systemPrompt).not.toContain('ALREADY applied');
+    expect(d.llm.generateJson.mock.calls[1][0].systemPrompt).not.toContain('Answer only the NEW message');
   });
 
   it('a corrected vehicle from the assistant says which one it replaces; one set by the user never', async () => {
@@ -574,5 +576,35 @@ describe('history and context (issue #631)', () => {
     };
     const fixed = await runOrderAssist('c1', { text: 'x', context: fromAi }, deps({}, answer));
     expect(fixed).toMatchObject({ customer: { guess: { name: 'Outro' } }, notes: 'Troca', dueDate: '2026-11-09T10:00' });
+  });
+});
+
+describe('nextDays', () => {
+  it('lists the 7 days after today so a weekday needs no counting', () => {
+    expect(nextDays('2026-11-06 (Friday)')).toBe(
+      ' (Saturday 2026-11-07, Sunday 2026-11-08, Monday 2026-11-09, Tuesday 2026-11-10, Wednesday 2026-11-11, Thursday 2026-11-12, Friday 2026-11-13)',
+    );
+    expect(buildSystemPrompt('pt', undefined, '2026-11-06 (Friday)')).toContain('Monday 2026-11-09');
+    expect(nextDays('x')).toBe('');
+  });
+});
+
+describe('withMemorySchema', () => {
+  it('requires the device (nullable) only for requests with memory', async () => {
+    const schema = withMemorySchema(LLM_RESPONSE_SCHEMA) as any;
+    expect(schema.required).toEqual(['operations', 'device']);
+    expect(schema.properties.device.type).toEqual(['object', 'null']);
+    expect(schema.properties.device.required).toEqual(['name', 'serial', 'manufacturer', 'replaces']);
+    const d = deps({}, { device: null, operations: [] });
+    await runOrderAssist('c1', { text: 'x', context: {} }, d);
+    expect(d.llm.generateJson.mock.calls[0][0].responseSchema.required).toContain('device');
+    await runOrderAssist('c1', { text: 'x' }, d);
+    expect(d.llm.generateJson.mock.calls[1][0].responseSchema).toBe(LLM_RESPONSE_SCHEMA);
+  });
+
+  it('reads a device with null parts', () => {
+    const draft = parseLlmDraft('{"operations":[],"device":{"name":"Corsa","serial":null,"manufacturer":null,"replaces":"V1"}}');
+    expect(draft.device).toEqual({ name: 'Corsa', replaces: 'V1' });
+    expect(parseLlmDraft('{"operations":[],"device":null}').device).toBeNull();
   });
 });

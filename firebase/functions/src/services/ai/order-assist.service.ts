@@ -295,6 +295,30 @@ export const LLM_RESPONSE_SCHEMA_WITH_ACTIONS: Record<string, unknown> = {
   required: [...(LLM_RESPONSE_SCHEMA.required as string[]), 'actions'],
 };
 
+const NULLABLE_STRING = { type: ['string', 'null'] };
+
+/**
+ * [schema] for requests with `context`/`history`: `device` is required (null
+ * when no vehicle was said). With it optional, Claude left out the corrected
+ * vehicle on "não, é um Corsa" (scripts/ai-memory-eval.ts), as it skipped
+ * `payment` before `actions` parts were required.
+ */
+export function withMemorySchema(schema: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ...schema,
+    properties: {
+      ...(schema.properties as Record<string, unknown>),
+      device: {
+        type: ['object', 'null'],
+        additionalProperties: false,
+        properties: { name: NULLABLE_STRING, serial: NULLABLE_STRING, manufacturer: NULLABLE_STRING, replaces: NULLABLE_STRING },
+        required: ['name', 'serial', 'manufacturer', 'replaces'],
+      },
+    },
+    required: [...(schema.required as string[]), 'device'],
+  };
+}
+
 /**
  * Parses the model's JSON text. Tolerates ```json fences and drops invalid
  * items instead of failing the whole draft. Throws [LlmUnavailableError] when
@@ -349,6 +373,23 @@ export function todayLabel(now: Date = new Date(), timeZone = 'America/Sao_Paulo
   return `${date} (${weekday})`;
 }
 
+/**
+ * " (Saturday 2026-11-07, …)": the 7 days after today, so a weekday needs no
+ * counting (Gemini put "quarta" on a Thursday). Empty when [today] has no date.
+ */
+export function nextDays(today: string): string {
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(today);
+  if (!match) return '';
+  const date = new Date(`${match[1]}T12:00:00Z`);
+  const days: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    const weekday = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'long' }).format(date);
+    days.push(`${weekday} ${date.toISOString().slice(0, 10)}`);
+  }
+  return ` (${days.join(', ')})`;
+}
+
 /** Rules of `actions`. Only companies with `financeActions` on get them. */
 const ACTIONS_PROMPT = [
   '- actions: only what was said or typed, never read from a photo. A part that was not said is null.',
@@ -383,19 +424,22 @@ const ACTIONS_PROMPT = [
  * prompt they had.
  */
 const MEMORY_PROMPT = [
-  'The order as it is now is under "Current order". Each field says who filled it: "(from assistant)" or "(set by the user)".',
-  'A field from the assistant may be corrected by the new message. A field set by the user is NEVER changed: leave it out.',
-  'The messages under "Earlier messages" were ALREADY applied to the order. Never apply them again: no line, vehicle,',
-  'customer, note or deadline from them. Use them only to understand the new message ("o mesmo valor", "o dele também",',
-  '"não, era 350"). Everything you return comes from the new message.',
+  'Answer only the NEW message. "Current order" shows what the order has now, and who filled each field:',
+  '"(from assistant)" or "(set by the user)". A field from the assistant may be corrected by the new message.',
+  'A field set by the user is NEVER changed: leave it out.',
+  '"Earlier messages" were already applied: what they said is already in "Current order". Never return again',
+  'something only an earlier message said. Use them only to understand the new message ("o mesmo valor", "o dele',
+  'também", "não, era 350"). Whatever the new message says or corrects, return it as you would with no history.',
   '- A correction of a line ("não, era 350", "não, são 2") is an "update" on that line, never a new line.',
+  '- device: a vehicle in the new message is returned, also when it corrects one. A correction of a vehicle from the',
+  '  assistant returns the whole corrected vehicle (keep what was right) with "replaces" set to its id.',
+  '  "não, a placa é QRS1B45" with V1 "Palio 2015, plate QRS1234 (from assistant)" → device {name "Palio 2015",',
+  '  serial "QRS1B45", replaces "V1"}. "não, é um Fiesta" → device {name "Fiesta", replaces "V1"}.',
+  '  "Não", "errada", "errei" or "é…" about the plate or model is a correction: always set "replaces".',
+  '  Never replace a vehicle set by the user. Another vehicle ("e o outro carro…") has no "replaces".',
   '- customer: only when the new message says a customer, or corrects the customer from the assistant.',
-  '- device: when the new message corrects a vehicle from the assistant ("não, a placa é ABC1D23", "é um Corsa, não Gol"),',
-  '  return the whole corrected vehicle (keep what was right) and set "replaces" to its id (V1, V2…). Never replace a',
-  '  vehicle set by the user. Another vehicle ("e o outro carro…") has no "replaces". Leave device out when the new',
-  '  message says nothing about a vehicle.',
   '- notes: only when the new message says a defect or request, or corrects the note from the assistant; then return the',
-  '  whole new note. Leave it out otherwise.',
+  '  whole new note.',
   '- dueDate: only when the new message says a deadline ("o prazo é segunda" corrects the one from the assistant).',
   '- When the screen is waiting for the user to pick a customer, vehicle or line, a name, plate or price in the new',
   '  message answers that question.',
@@ -435,7 +479,7 @@ export function buildSystemPrompt(
     '  no price was said. "200 cada" means unit value 200 with quantity. "garantia" or "cortesia" means value 0.',
     '  Parts/materials are kind "product"; labor is kind "service".',
     `- dueDate: when the order must be ready ("pronto sexta", "entregar amanhã", "dia 20"), as YYYY-MM-DD.`,
-    `  Today is ${today}; a weekday means the next one after today. dueTime as HH:MM only when a time was said.`,
+    `  Today is ${today}; a weekday means the next one after today${nextDays(today)}. dueTime as HH:MM only when a time was said.`,
     '  Leave both out when no deadline was said, and do not repeat the deadline in notes.',
     '- notes: what the customer asked or the defect (seen in the photo or said), short. Not the deadline.',
     ...(options.financeActions ? ACTIONS_PROMPT : []),
@@ -486,17 +530,17 @@ export function buildUserText(input: OrderAssistInput, catalog: CompanyCatalog):
     });
   const current = [...lines('S', input.order?.services ?? []), ...lines('P', input.order?.products ?? [])];
   const parts = [
-    ...currentOrder(input),
     'Services catalog:',
     list(catalog.services),
     'Products catalog:',
     list(catalog.products),
     'Lines already in the order:',
     current.join('\n') || '(none: new order)',
+    ...currentOrder(input),
   ];
   if (input.history?.length) {
     parts.push(
-      'Earlier messages (ALREADY applied, oldest first; never apply them again):',
+      'Earlier messages (already applied, oldest first):',
       ...input.history.map((text, i) => `${i + 1}. ${text}`),
     );
   }
@@ -838,7 +882,9 @@ export async function runOrderAssist(
       }),
       userText: buildUserText(input, catalog),
       media,
-      responseSchema: useActions ? LLM_RESPONSE_SCHEMA_WITH_ACTIONS : LLM_RESPONSE_SCHEMA,
+      responseSchema: ((schema) => (hasMemory(input) ? withMemorySchema(schema) : schema))(
+        useActions ? LLM_RESPONSE_SCHEMA_WITH_ACTIONS : LLM_RESPONSE_SCHEMA,
+      ),
       provider: useActions ? 'claude' : settings.provider,
     });
     draft = guardUserFields(parseLlmDraft(raw), input.context);
