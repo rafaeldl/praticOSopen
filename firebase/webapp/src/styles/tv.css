@@ -6,7 +6,7 @@
 .tv-clock { margin: 0; font-size: 1.4em; font-weight: 700; }
 .tv-actions { display: flex; gap: 0.5rem; font-size: 1rem; }
 .tv-actions .btn { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 44px; }
-.tv-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tv-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(var(--tv-cols, 4), minmax(0, 1fr)); }
 .tv-col { min-height: 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--color-rule); }
 .tv-col:last-child { border-right: 0; }
 .tv-col-head { display: flex; align-items: center; gap: 0.45em; margin: 0; padding: 0.5em 0.6em; font-size: 1.15em; }

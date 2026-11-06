@@ -66,6 +66,8 @@ export interface Order {
   hasLines: boolean
   photos: OrderPhoto[]
   onHold?: { reason: HoldReason; note?: string; since: string } | null
+  /** Work stage while `progress` (lib/orders/stages.ts): the stage, the place in its column and since when. */
+  stage?: { id: string; rank: number; since: string } | null
   assignedTo?: Aggr | null
   dueDate?: string | null
   scheduledDate?: string | null
@@ -209,6 +211,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     photos: (Array.isArray(raw.photos) ? (raw.photos as OrderPhoto[]) : []).filter((photo) => photo?.url),
     // A mark outside approved and progress is ignored (order.hold.view).
     onHold: hold && hold.reason && (status === 'approved' || status === 'progress') ? { ...hold, since: isoOf(hold.since) ?? '' } : null,
+    stage: stageOfRaw(raw.stage, status),
     assignedTo: (raw.assignedTo as Aggr | null) ?? null,
     dueDate: isoOf(raw.dueDate),
     scheduledDate: isoOf(raw.scheduledDate),
@@ -230,6 +233,13 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     rating: ratingOf(raw.rating),
     shareLink: shareLinkOf(raw.shareLink),
   }
+}
+
+/** A stage outside `progress` is ignored (the trigger removes it). */
+function stageOfRaw(value: unknown, status: OrderStatus): Order['stage'] {
+  const raw = (value ?? null) as { id?: unknown; rank?: unknown; since?: unknown } | null
+  if (status !== 'progress' || !raw || typeof raw !== 'object' || typeof raw.id !== 'string' || !raw.id) return null
+  return { id: raw.id, rank: typeof raw.rank === 'number' && Number.isFinite(raw.rank) ? raw.rank : Number.POSITIVE_INFINITY, since: isoOf(raw.since) ?? '' }
 }
 
 function shareLinkOf(value: unknown): Order['shareLink'] {

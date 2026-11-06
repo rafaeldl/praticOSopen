@@ -94,6 +94,7 @@ export function projectOrderSummary(order: Order, showPrices: boolean): Json {
     deviceReadings: order.deviceReadings ?? undefined,
     status: order.status,
     onHold: order.onHold,
+    stage: order.stage,
     assignedTo: order.assignedTo ?? undefined,
     // Who created it decides what consultant and technician may change (agenda, board).
     createdBy: order.createdBy ?? undefined,
@@ -130,6 +131,7 @@ export function projectOrder(order: Order, showPrices: boolean): Json {
     deviceReadings: order.deviceReadings ?? undefined,
     status: order.status,
     onHold: order.onHold,
+    stage: order.stage,
     assignedTo: order.assignedTo ?? null,
     rating: order.rating,
     // Attached files (nota, contrato, garantia): to everyone who reads the order.

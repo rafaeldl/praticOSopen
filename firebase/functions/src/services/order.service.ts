@@ -17,6 +17,7 @@ import {
   updateDocument,
   getNextOrderNumber,
   runTransaction,
+  FieldValue,
 } from './firestore.service';
 import {
   Order,
@@ -827,11 +828,7 @@ export async function updateOrder(
     const updateData: Record<string, unknown> = audit(updatedBy, new Date().toISOString());
 
     if (input.status !== undefined) {
-      updateData.status = input.status;
-      const legacyPaid = existing.paidAmount === undefined || existing.paidAmount === null;
-      if (input.status === 'quote' || input.status === 'canceled' || !legacyPaid || existing.payment == null) {
-        Object.assign(updateData, paymentStatusFields(input.status, existing.total ?? 0, existing.paidAmount ?? 0));
-      }
+      Object.assign(updateData, statusUpdateFields(existing, input.status));
     }
     if (input.dueDate !== undefined) {
       updateData.dueDate = storedOrderDate(input.dueDate);
@@ -843,9 +840,30 @@ export async function updateOrder(
       updateData.assignedTo = input.assignedTo;
     }
 
-    tx.update(ref, updateData);
-    return { ...existing, ...updateData } as Order;
+    // The stage only lives in `progress` (order-stage.service); leaving it drops the stage here,
+    // and the trigger covers every other path.
+    const dropsStage = input.status !== undefined && input.status !== 'progress' && !!existing.stage;
+    tx.update(ref, dropsStage ? { ...updateData, stage: FieldValue.delete() } : updateData);
+    const updated = { ...existing, ...updateData } as Order;
+    if (dropsStage) delete updated.stage;
+    return updated;
   });
+}
+
+/**
+ * Fields written when the status changes. The payment status follows it like
+ * the app's applyOrderStatus, except on legacy orders paid before `paidAmount`.
+ */
+export function statusUpdateFields(
+  existing: Pick<Order, 'paidAmount' | 'payment' | 'total'>,
+  status: OrderStatus,
+): Record<string, unknown> {
+  const fields: Record<string, unknown> = { status };
+  const legacyPaid = existing.paidAmount === undefined || existing.paidAmount === null;
+  if (status === 'quote' || status === 'canceled' || !legacyPaid || existing.payment == null) {
+    Object.assign(fields, paymentStatusFields(status, existing.total ?? 0, existing.paidAmount ?? 0));
+  }
+  return fields;
 }
 
 // ============================================================================

@@ -24,6 +24,8 @@ export type OrderErrorCode =
   | 'INVALID_CURSOR'
   | 'UNSUPPORTED_QUERY'
   | 'HOLD_NOT_ALLOWED'
+  | 'STAGE_UNKNOWN'
+  | 'STAGE_NOT_ALLOWED'
   | 'ORDER_STATUS';
 
 export class OrderRuleError extends Error {

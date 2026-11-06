@@ -11,6 +11,7 @@ import { deviceSummary, isHeld, type Order, type OrderStatus } from '@/lib/order
 import { country, holdText, lateText, statusText } from '@/lib/orders/text'
 import { TV_COLUMNS, TV_LIMIT, dayStartIso, emptyColumns, sortForTv, watchTv, type TvColumns } from '@/lib/orders/tv'
 import { session } from '@/lib/session'
+import { sortInStage, stageIdOf, workStages } from '@/lib/orders/stages'
 import '@/styles/tv.css'
 
 const DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
@@ -22,14 +23,32 @@ const failed = ref(false)
 const canFullscreen = typeof document !== 'undefined' && !!document.fullscreenEnabled
 const full = ref(false)
 
-const shown = computed(() =>
-  TV_COLUMNS.map((status) => ({
-    status,
-    title: status === 'done' ? t('web.tv.doneToday') : statusText(status),
-    orders: status === 'done' ? columns.value.done : sortForTv(columns.value[status], now.value),
-    full: columns.value[status].length >= TV_LIMIT,
-  })),
-)
+/**
+ * With work stages (docs/WORK_STAGES.md), "Em andamento" shows one column per
+ * stage, in the order set on the board: that is the queue the team follows.
+ */
+const shown = computed(() => {
+  const stages = workStages()
+  return TV_COLUMNS.flatMap((status) => {
+    if (status === 'progress' && stages.length) {
+      const progress = columns.value.progress
+      return stages.map((stage) => ({
+        key: `stage-${stage.id}`,
+        status,
+        title: stage.name,
+        orders: sortInStage(progress.filter((order) => stageIdOf(order, stages) === stage.id), stage.id),
+        full: progress.length >= TV_LIMIT,
+      }))
+    }
+    return [{
+      key: status as string,
+      status,
+      title: status === 'done' ? t('web.tv.doneToday') : statusText(status),
+      orders: status === 'done' ? columns.value.done : sortForTv(columns.value[status], now.value),
+      full: columns.value[status].length >= TV_LIMIT,
+    }]
+  })
+})
 
 let live: ReturnType<typeof watchTv> | null = null
 let day = ''
@@ -122,9 +141,9 @@ const flag = (order: Order) => lateText(order, now.value) || (isHeld(order) ? ho
     </header>
 
     <ErrorState v-if="failed" :retry="start" />
-    <div v-else class="tv-board">
-      <section v-for="col in shown" :key="col.status" class="tv-col" :aria-labelledby="`tv-${col.status}`" :data-testid="`tv-col-${col.status}`">
-        <h2 :id="`tv-${col.status}`" class="tv-col-head">
+    <div v-else class="tv-board" :style="{ '--tv-cols': shown.length }">
+      <section v-for="col in shown" :key="col.key" class="tv-col" :aria-labelledby="`tv-${col.key}`" :data-testid="`tv-col-${col.key}`">
+        <h2 :id="`tv-${col.key}`" class="tv-col-head">
           <span class="dot" :class="`dot--${DOT[col.status]}`" aria-hidden="true"></span>{{ col.title }}<span class="num tv-count">{{ col.orders.length }}{{ col.full ? '+' : '' }}</span>
         </h2>
         <ul class="tv-list">

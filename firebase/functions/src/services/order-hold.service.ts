@@ -55,7 +55,8 @@ function resumedText(since: string | undefined, now: Date): string {
   return days === 1 ? 'Retomada depois de 1 dia parada' : `Retomada depois de ${days} dias parada`;
 }
 
-function internalComment(text: string, actor: UserAggr) {
+/** Internal comment (not shown to the customer), the app's addOrderComment from the API. */
+export function internalComment(text: string, actor: UserAggr) {
   return {
     text,
     authorType: 'internal',

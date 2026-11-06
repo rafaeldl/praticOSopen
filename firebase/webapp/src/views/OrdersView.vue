@@ -44,6 +44,7 @@ import { country, deviceLabel, holdText, lateText, orderShort, shownMoney as mon
 import { prefs } from '@/lib/prefs'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
+import { workStages } from '@/lib/orders/stages'
 import { registerShortcut } from '@/lib/shortcuts'
 import { announce, ui } from '@/lib/ui'
 
@@ -569,7 +570,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
   </header>
 
   <div class="toolbar home-bar" :class="{ 'board-bar': board }">
-    <p v-if="board" class="board-hint sub">{{ t('web.board.hint') }}</p>
+    <p v-if="board" class="board-hint sub">{{ t(workStages().length ? 'web.board.hintStages' : 'web.board.hint') }}</p>
     <!-- Modo TV (#627): the same board alone, big and live, for a screen in the shop. -->
     <RouterLink v-if="board && can('viewAllOrders')" class="btn btn--ghost tv-open hide-phone" to="/tv" data-testid="open-tv">
       <Tv :size="18" aria-hidden="true" /> {{ t('web.tv.open') }}

@@ -152,7 +152,7 @@ const UID: Record<ApiRole, string> = {
   owner: 'owner1', admin: 'admin1', supervisor: 'sup1', manager: 'mgr1', consultant: 'cons1', technician: 'tech1',
 };
 const COMPANIES: Record<CompanyKey, Record<string, unknown>> = {
-  c1: { name: 'Company c1', owner: { id: 'owner1', name: 'Owner' }, segment: 'automotive', createdAt: new Date().toISOString() },
+  c1: { name: 'Company c1', owner: { id: 'owner1', name: 'Owner' }, segment: 'automotive', createdAt: new Date().toISOString(), workStages: [{ id: 'paint', name: 'Painting' }] },
   nofin: { name: 'Sem valores', owner: { id: 'owner1', name: 'Owner' }, useFinancial: false },
 };
 
