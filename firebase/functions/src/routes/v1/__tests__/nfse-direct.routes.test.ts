@@ -9,11 +9,13 @@ jest.mock('../../../services/nfse/issue.service', () => ({
 }));
 
 jest.mock('../../../services/nfse/danfse.service', () => ({ ensureDanfse: jest.fn() }));
+jest.mock('../../../services/nfse/invoice-email.service', () => ({ resendInvoiceEmail: jest.fn() }));
 jest.mock('../../../services/firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 jest.mock('../../../services/notification.service', () => ({ notifyOwnerOfInvoiceAction: jest.fn(async () => undefined) }));
 
 import * as issue from '../../../services/nfse/issue.service';
 import * as danfse from '../../../services/nfse/danfse.service';
+import * as invoiceEmail from '../../../services/nfse/invoice-email.service';
 import { AsaasServiceError } from '../../../services/asaas/errors';
 import { NfseServiceError } from '../../../services/nfse/errors';
 import router from '../nfse-direct.routes';
@@ -125,5 +127,18 @@ describe('nfse-direct.routes', () => {
     ensure.mockRejectedValue(new NfseServiceError('PDF_NOT_AVAILABLE', 'no'));
     expect((await request(buildApp('owner')).post('/invoices/nf1/pdf')).status).toBe(409);
     expect((await request(buildApp('technician')).post('/invoices/nf1/pdf')).status).toBe(403);
+  });
+
+  it('email: "Enviar de novo" by the three roles, answers with the delivery (issue #611)', async () => {
+    const resend = invoiceEmail.resendInvoiceEmail as jest.Mock;
+    const delivery = { status: 'sent', kind: 'issued', to: 'nota@example.com', at: '2026-11-05T13:00:00.000Z', manual: true };
+    resend.mockResolvedValue(delivery);
+    const res = await request(buildApp('manager')).post('/invoices/nf1/email');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ emailDelivery: delivery });
+    expect(resend).toHaveBeenCalledWith('c1', 'nf1');
+    resend.mockRejectedValue(new NfseServiceError('EMAIL_NOT_AVAILABLE', 'no'));
+    expect((await request(buildApp('owner')).post('/invoices/nf1/email')).status).toBe(409);
+    expect((await request(buildApp('technician')).post('/invoices/nf1/email')).status).toBe(403);
   });
 });

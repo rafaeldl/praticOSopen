@@ -14,6 +14,7 @@ import PageHead from '@/components/PageHead.vue'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import ShareButtons from '@/components/ShareButtons.vue'
+import InvoiceEmailFact from '@/components/finance/InvoiceEmailFact.vue'
 import { locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays, monthOf, shiftMonth } from '@/lib/finance/period'
@@ -435,6 +436,7 @@ async function fixed() {
           <div v-if="opened.number"><dt>{{ t('nfseNumberLabel') }}</dt><dd class="num">{{ opened.number }}</dd></div>
           <div v-if="opened.emitter"><dt>{{ t('web.nfseDirect.emitter') }}</dt><dd data-testid="nfse-emitter-line">{{ partyLine(opened.emitter) }}</dd></div>
           <div v-if="opened.recipient"><dt>{{ t('web.nfseDirect.recipient') }}</dt><dd data-testid="nfse-recipient-line">{{ partyLine(opened.recipient) }}</dd></div>
+          <InvoiceEmailFact :invoice="opened" />
           <div v-if="opened.accessKey"><dt>{{ t('web.nfseDirect.accessKey') }}</dt><dd class="num nfse-key" data-testid="nfse-key">{{ opened.accessKey }}</dd></div>
           <div v-if="opened.effectiveDate"><dt>{{ t('nfseDateLabel') }}</dt><dd>{{ formatDate(`${opened.effectiveDate}T12:00:00`, country()) }}</dd></div>
           <div v-if="opened.orders.length">

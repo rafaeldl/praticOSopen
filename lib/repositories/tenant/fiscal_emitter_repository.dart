@@ -11,6 +11,7 @@ class NfseDirectSettings {
     this.defaultEmitterId,
     this.autoIssue = NfseDirectAutoIssue.never,
     this.managerCanIssue = true,
+    this.emailToCustomer = true,
   });
 
   final String? defaultEmitterId;
@@ -18,6 +19,9 @@ class NfseDirectSettings {
 
   /// Whether managers issue and cancel notas (owner's choice; default yes).
   final bool managerCanIssue;
+
+  /// Whether the nota goes to the customer's e-mail on its own (default yes).
+  final bool emailToCustomer;
 
   /// Unknown or Asaas values ('manual', 'paid', 'completed') read as never.
   factory NfseDirectSettings.fromJson(Map<String, dynamic>? json) {
@@ -29,6 +33,7 @@ class NfseDirectSettings {
         orElse: () => NfseDirectAutoIssue.never,
       ),
       managerCanIssue: json?['managerCanIssue'] != false,
+      emailToCustomer: json?['emailToCustomer'] != false,
     );
   }
 }

@@ -7481,6 +7481,71 @@ class AppLocalizationsEs extends AppLocalizations {
       'Recibes un aviso cada vez que otra persona emite o cancela una factura.';
 
   @override
+  String get nfseEmailRow => 'Correo al cliente';
+
+  @override
+  String nfseEmailSentTo(String email, String date) {
+    return 'Enviada a $email el $date';
+  }
+
+  @override
+  String nfseEmailCancelSentTo(String email, String date) {
+    return 'Aviso de cancelación enviado a $email el $date';
+  }
+
+  @override
+  String nfseEmailFailedTo(String email, String date) {
+    return 'No se pudo enviar a $email el $date';
+  }
+
+  @override
+  String get nfseEmailSkippedNoEmail =>
+      'No se envió: el cliente no tiene correo registrado';
+
+  @override
+  String get nfseEmailSkippedTurnedOff =>
+      'No se envió: el envío automático está apagado';
+
+  @override
+  String get nfseEmailNotSentYet => 'Aún no se envió por correo';
+
+  @override
+  String get nfseEmailSendAgain => 'Enviar de nuevo';
+
+  @override
+  String get nfseEmailSend => 'Enviar';
+
+  @override
+  String nfseEmailSentToast(String email) {
+    return 'Factura enviada a $email';
+  }
+
+  @override
+  String get nfseEmailFailedToast =>
+      'No se pudo enviar el correo. Inténtalo de nuevo en un momento.';
+
+  @override
+  String get nfseEmailNoAddressToast =>
+      'El cliente no tiene correo. Agrégalo a su registro y envía de nuevo.';
+
+  @override
+  String get nfseDirectEmailToCustomer =>
+      'Enviar la factura por correo al cliente';
+
+  @override
+  String get nfseDirectEmailToCustomerHint =>
+      'Sale sola al emitir y al cancelar, con el PDF y el XML. Apágalo si la mandas por WhatsApp.';
+
+  @override
+  String nfseDirectIssueEmailGoesTo(String email) {
+    return 'La factura se enviará por correo a $email.';
+  }
+
+  @override
+  String get nfseDirectIssueEmailOff =>
+      'La factura no se enviará por correo: el envío automático está apagado.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }

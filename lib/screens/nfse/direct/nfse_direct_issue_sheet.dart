@@ -630,7 +630,28 @@ class _NfseDirectIssueSheetState extends State<NfseDirectIssueSheet> {
             style: AppTypography.callout.copyWith(color: secondary),
           ),
         ),
+      if (_emailLine(preview) case final line?)
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+          ),
+          child: Text(
+            line,
+            key: const Key('nfseDirectIssueEmailLine'),
+            style: AppTypography.callout.copyWith(color: secondary),
+          ),
+        ),
     ];
+  }
+
+  /// Whether the nota goes to the customer's e-mail (issue #611). When the
+  /// sheet asks for the e-mail, the field already says where it goes.
+  String? _emailLine(NfseDirectPreview preview) {
+    final l10n = context.l10n;
+    if (!preview.emailToCustomer) return l10n.nfseDirectIssueEmailOff;
+    final email = preview.recipient.email;
+    if (_asked(preview, 'email') || email == null) return null;
+    return l10n.nfseDirectIssueEmailGoesTo(email);
   }
 
   Widget _meiWarning(NfseDirectPreview preview) {

@@ -199,6 +199,22 @@ class _NfseDirectSetupScreenState extends State<NfseDirectSetupScreen> {
     if (mounted) setState(() => _saving = false);
   }
 
+  Future<void> _setEmailToCustomer(bool value) async {
+    setState(() => _saving = true);
+    try {
+      await _api.setEmailToCustomer(value);
+    } catch (e) {
+      if (mounted) {
+        showAppToast(
+          context,
+          nfseDirectErrorText(context.l10n, e),
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
+    }
+    if (mounted) setState(() => _saving = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -273,6 +289,13 @@ class _NfseDirectSetupScreenState extends State<NfseDirectSetupScreen> {
                 subtitle: l10n.nfseDirectManagerCanIssueHint,
                 value: _settings.managerCanIssue,
                 onChanged: _saving ? null : _setManagerCanIssue,
+              ),
+              MoreSwitchRow(
+                key: const Key('nfseDirectEmailToCustomer'),
+                title: l10n.nfseDirectEmailToCustomer,
+                subtitle: l10n.nfseDirectEmailToCustomerHint,
+                value: _settings.emailToCustomer,
+                onChanged: _saving ? null : _setEmailToCustomer,
               ),
             ],
           ),

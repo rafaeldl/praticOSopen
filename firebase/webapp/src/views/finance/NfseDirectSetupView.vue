@@ -46,7 +46,7 @@ import '@/styles/finance.css'
 const route = useRoute()
 const router = useRouter()
 const emitters = shallowRef<Emitter[] | null>(null)
-const settings = shallowRef<DirectSettings>({ defaultEmitterId: null, autoIssue: 'never' })
+const settings = shallowRef<DirectSettings>({ defaultEmitterId: null, autoIssue: 'never', emailToCustomer: true })
 const state = ref<'loading' | 'ready' | 'failed' | 'off'>('loading')
 const busy = ref(false)
 const adding = ref(false)
@@ -195,6 +195,7 @@ async function run(call: () => Promise<unknown>, done: string) {
   }
 }
 const chooseAuto = (value: AutoIssue) => value !== settings.value.autoIssue && run(() => updateDirectSettings({ autoIssue: value }), t('web.saved'))
+const setEmailToCustomer = (value: boolean) => run(() => updateDirectSettings({ emailToCustomer: value }), t('web.saved'))
 const useAsDefault = (id: string) => run(() => updateDirectSettings({ defaultEmitterId: id }), t('nfseDirectDefaultSaved'))
 async function confirmDelete() {
   const id = selected.value?.id
@@ -238,6 +239,10 @@ function back() {
             <span>{{ AUTO_TEXT[value].label() }}<small class="sub"> · {{ AUTO_TEXT[value].hint() }}</small></span>
           </label>
         </fieldset>
+        <label class="check-row nfse-auto-row" data-testid="nfse-direct-email">
+          <input class="check" type="checkbox" :checked="settings.emailToCustomer" :disabled="busy" @change="setEmailToCustomer(($event.target as HTMLInputElement).checked)" />
+          <span>{{ t('nfseDirectEmailToCustomer') }}<small class="sub"> · {{ t('nfseDirectEmailToCustomerHint') }}</small></span>
+        </label>
       </section>
       <section v-if="selected" class="nfse-emitter" :aria-label="selected.legalName" data-testid="nfse-emitter-detail">
         <h2 class="nfse-name">{{ selected.legalName }}</h2>

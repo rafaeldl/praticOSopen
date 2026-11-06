@@ -242,6 +242,39 @@ void main() {
       expect(server.calls.single.$3, {'autoIssue': 'selectedCustomers'});
     });
 
+    testWidgets('"Mandar a nota por e-mail" turns the automatic e-mail off', (
+      tester,
+    ) async {
+      final server = _Server();
+      await _pump(
+        tester,
+        NfseDirectSetupScreen(
+          emitters: Stream.value([_emitter()]),
+          settings: Stream.value(const NfseDirectSettings()),
+          service: server.api,
+          now: _now,
+        ),
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('nfseDirectEmailToCustomer')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Mandar a nota por e-mail ao cliente'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('nfseDirectEmailToCustomer')),
+          matching: find.byType(CupertinoSwitch),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(server.calls.single.$2, '/v1/app/nfse/setup/settings');
+      expect(server.calls.single.$3, {'emailToCustomer': false});
+      expect(
+        NfseDirectSettings.fromJson({'emailToCustomer': false}).emailToCustomer,
+        isFalse,
+      );
+    });
+
     testWidgets('"Gerente pode emitir" saves the owner\'s choice', (
       tester,
     ) async {

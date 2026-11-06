@@ -228,6 +228,55 @@ Falha ao gerar nunca derruba a emissão nem o cancelamento: só registra no log,
 
 Testes (`__tests__/danfse.test.ts`): XML sintético validado contra o XSD oficial da NFS-e, cada campo lido, regras da v1.02, uma página só (inclusive com descrição enorme), marca d'água, "sem validade" e geração/guarda com Firestore e Storage falsos.
 
+## Nota por e-mail ao cliente (issue #611)
+
+O governo não manda e-mail para nota emitida pela API, e o Asaas (que mandava) saiu do caminho. Quem manda agora é o PraticOS, pela `nfseApi`.
+
+**Provedor:** [Resend](https://resend.com), por chamada direta à API (`POST https://api.resend.com/emails`). A extensão Trigger Email não serve: o PDF e o XML anexados não cabem num documento do Firestore (1 MB). O DNS de `praticos.app` está no Cloudflare, que só recebe e-mail (Email Routing); o envio do Cloudflare ainda é beta e só por Workers, por isso Resend.
+
+**Remetente:** `"Nome da empresa" <notas@praticos.app>`, com "responder para" o e-mail da empresa (`companies/{cid}.email`). Assim a resposta do cliente vai para a empresa, não para o PraticOS.
+
+**Destinatário:** `invoiceEmail` do cliente que recebe a nota (o "Nota fiscal para", quando há), senão o e-mail do cadastro, senão o e-mail com que a nota saiu. Sem nenhum, não envia (`skipped`, motivo `noEmail`). A folha de emitir diz para onde vai ("A nota vai por e-mail para …") ou que não vai (envio desligado).
+
+**Quando:**
+
+| Evento | Conteúdo | Anexos |
+|---|---|---|
+| Nota emitida (`applyIssueResult`, inclusive pelo reconcile do `nfseDaily`) | número, valor, link da consulta pública (`https://www.nfse.gov.br/ConsultaPublica/?tpc=1&chave=…`) | PDF (DANFSe) e XML |
+| Nota cancelada (`cancelDirectInvoice`) | aviso de cancelamento | PDF com "CANCELADA" |
+| "Enviar de novo" (`POST /v1/app/nfse/direct/invoices/:id/email`, dono, admin e gerente) | o que serve para a nota agora (cancelada → aviso) | os mesmos |
+
+O texto é em português (a NFS-e só existe no Brasil). Assunto: "Nota fiscal nº 29 de Oficina Exemplo" e "… foi cancelada".
+
+**Resultado na nota:** `emailDelivery` em `companies/{cid}/invoices/{id}`:
+
+```json
+{ "status": "sent", "kind": "issued", "to": "cliente@exemplo.com", "at": "2026-11-05T13:00:00.000Z", "manual": false, "providerId": "…" }
+```
+
+`status`: `sent`, `failed` (com `errorCode`: `EMAIL_UNREACHABLE`, `EMAIL_REJECTED_<http>_<nome>`, `EMAIL_NOT_CONFIGURED`, `INVALID_EMAIL`, `PDF_NOT_AVAILABLE`) ou `skipped` (com `reason`: `noEmail`, `turnedOff`). As telas (app e web) mostram "Enviada para fulano@… em dd/mm/aaaa", "Não deu para mandar…" ou por que não foi, com "Enviar de novo".
+
+**Regras:**
+- Falha no envio nunca derruba a emissão nem o cancelamento: fica em `emailDelivery` e aparece na tela.
+- `settings/nfse.emailToCustomer = false` desliga o envio automático (quem manda pelo WhatsApp). "Enviar de novo" continua mandando. Dono e admin mudam pela tela da nota direta (`PUT /v1/app/nfse/setup/settings { emailToCustomer }`).
+- O envio automático usa `Idempotency-Key` `nfse-{cid}-{invoiceId}-{kind}`: repetir o mesmo evento não manda duas vezes. "Enviar de novo" usa uma chave nova a cada toque.
+- Log só com códigos e ids, nunca o endereço nem o conteúdo.
+
+**Código:** `firebase/functions/src/services/nfse/invoice-email.service.ts` (`sendInvoiceEmail`, `resendInvoiceEmail`, `notifyInvoiceEmail`, `sendWithResend`). `IssueDeps.sendEmail` liga o envio ao emitir e ao cancelar.
+
+**Chave:** segredo `RESEND_API_KEY` no Secret Manager, ligado só à `nfseApi` e ao `nfseDaily` (`secrets: [RESEND_API_KEY]`), que rodam como `nfse-api@`. Sem a chave o envio falha com `EMAIL_NOT_CONFIGURED` e nada sai. **O segredo tem que existir antes do deploy**: o Firebase recusa publicar função que aponta para segredo que não existe.
+
+**Configuração do provedor (feita à mão, uma vez):**
+1. Conta no Resend e domínio `praticos.app` em *Domains* (região `sa-east-1`).
+2. No Cloudflare (DNS de `praticos.app`), os registros que o Resend mostrar: TXT `resend._domainkey` (DKIM), MX e TXT de `send.praticos.app` (SPF do subdomínio de retorno). O SPF da raiz (Email Routing) não muda.
+3. DMARC: TXT `_dmarc.praticos.app` com `v=DMARC1; p=none; rua=mailto:dmarc@praticos.app` no começo (endereço do domínio, encaminhado pelo Email Routing); depois de umas semanas sem problema, `p=quarantine`.
+4. Chave de API só de envio, restrita ao domínio, no Secret Manager: `firebase functions:secrets:set RESEND_API_KEY`, e acesso só para `nfse-api@` (`roles/secretmanager.secretAccessor` no segredo).
+5. Testar com uma nota do Piloto antes de ligar para outra empresa: chega no Gmail, fora do spam, com "SPF: PASS, DKIM: PASS" em "Mostrar original".
+
+**Privacidade:** o Resend vira operador (recebe nome, e-mail do cliente e a nota). Está na política de privacidade do site (pt, en, es).
+
+**Testes:** `__tests__/invoice-email.service.test.ts` (envio falso: endereço e fallback, desligado, falha gravada, PDF que falhou, idempotência, conteúdo e cabeçalho escapados; `sendWithResend` com `fetch` falso e recusa sem chave antes de chamar a rede), `issue.service.test.ts` (envio ao emitir e ao cancelar, falha que não derruba), rotas (`/email`, `emailToCustomer`). App: `nfse_direct_issue_test.dart` e `nfse_direct_setup_test.dart`. Web: `tests/nfse-email.test.ts`.
+
 ## Telas de configuração (etapa #565)
 
 Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.

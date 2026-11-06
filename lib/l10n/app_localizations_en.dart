@@ -7463,6 +7463,69 @@ class AppLocalizationsEn extends AppLocalizations {
       'You get a notice whenever someone else issues or cancels an invoice.';
 
   @override
+  String get nfseEmailRow => 'Email to the customer';
+
+  @override
+  String nfseEmailSentTo(String email, String date) {
+    return 'Sent to $email on $date';
+  }
+
+  @override
+  String nfseEmailCancelSentTo(String email, String date) {
+    return 'Cancellation notice sent to $email on $date';
+  }
+
+  @override
+  String nfseEmailFailedTo(String email, String date) {
+    return 'Could not send to $email on $date';
+  }
+
+  @override
+  String get nfseEmailSkippedNoEmail =>
+      'Not sent: the customer has no email on file';
+
+  @override
+  String get nfseEmailSkippedTurnedOff => 'Not sent: automatic sending is off';
+
+  @override
+  String get nfseEmailNotSentYet => 'Not sent by email yet';
+
+  @override
+  String get nfseEmailSendAgain => 'Send again';
+
+  @override
+  String get nfseEmailSend => 'Send';
+
+  @override
+  String nfseEmailSentToast(String email) {
+    return 'Invoice sent to $email';
+  }
+
+  @override
+  String get nfseEmailFailedToast =>
+      'Could not send the email. Try again in a moment.';
+
+  @override
+  String get nfseEmailNoAddressToast =>
+      'The customer has no email. Add it to their record and send again.';
+
+  @override
+  String get nfseDirectEmailToCustomer => 'Email the invoice to the customer';
+
+  @override
+  String get nfseDirectEmailToCustomerHint =>
+      'Goes out on its own when issued or canceled, with the PDF and XML. Turn it off if you send it by WhatsApp.';
+
+  @override
+  String nfseDirectIssueEmailGoesTo(String email) {
+    return 'The invoice will be emailed to $email.';
+  }
+
+  @override
+  String get nfseDirectIssueEmailOff =>
+      'The invoice will not be emailed: automatic sending is off.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }

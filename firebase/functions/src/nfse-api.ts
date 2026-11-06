@@ -25,6 +25,7 @@ import { db } from './services/firestore.service';
 import { processPendingKeyDestructions, purgeExpiredCertificates } from './services/nfse/certificate-vault.service';
 import { sendCertificateNotices } from './services/nfse/certificate-expiry-notice.service';
 import { reconcileStaleDirectInvoices } from './services/nfse/issue.service';
+import { RESEND_API_KEY } from './services/nfse/invoice-email.service';
 import { syncCompanyMailboxes } from './services/nfse/import.service';
 import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
@@ -62,6 +63,8 @@ export const nfseApi = onRequest(
   {
     region: 'southamerica-east1',
     serviceAccount: NFSE_SERVICE_ACCOUNT,
+    // The nota goes to the customer's e-mail (issue #611); the reconcile in nfseDaily may issue too.
+    secrets: [RESEND_API_KEY],
     memory: '512MiB',
     timeoutSeconds: 120,
     minInstances: 0,
@@ -98,6 +101,7 @@ export const nfseDaily = onSchedule(
     timeZone: 'America/Sao_Paulo',
     region: 'southamerica-east1',
     serviceAccount: NFSE_SERVICE_ACCOUNT,
+    secrets: [RESEND_API_KEY],
     timeoutSeconds: 540,
   },
   async () => {

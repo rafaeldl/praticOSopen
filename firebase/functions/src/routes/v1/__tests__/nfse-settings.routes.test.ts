@@ -38,4 +38,11 @@ describe('nfse-settings.routes: managerCanIssue (issue #560)', () => {
   it('admins keep changing the other settings', async () => {
     expect((await request(buildApp('admin')).put('/settings').send({ autoIssue: 'never' })).status).toBe(200);
   });
+
+  it('owner and admin turn the e-mail to the customer off (issue #611)', async () => {
+    expect((await request(buildApp('admin')).put('/settings').send({ emailToCustomer: false })).status).toBe(200);
+    expect(updateNfseSettings).toHaveBeenCalledWith('c1', { emailToCustomer: false });
+    expect((await request(buildApp('admin')).put('/settings').send({ emailToCustomer: 'no' })).status).toBe(400);
+    expect((await request(buildApp('manager')).put('/settings').send({ emailToCustomer: false })).status).toBe(403);
+  });
 });

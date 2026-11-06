@@ -8,6 +8,7 @@
  *   POST /invoices/:id/cancel       { reason: 'issueError' | 'serviceNotProvided' }
  *   POST /invoices/:id/reconcile    check a nota that got no clear answer
  *   POST /invoices/:id/pdf          makes the PDF (DANFSe) if needed; returns its Storage path
+ *   POST /invoices/:id/email        "Enviar de novo": e-mails the nota to the customer (issue #611)
  */
 
 import { Router, Response } from 'express';
@@ -23,6 +24,7 @@ import {
   reconcileDirectInvoice,
 } from '../../services/nfse/issue.service';
 import { ensureDanfse } from '../../services/nfse/danfse.service';
+import { resendInvoiceEmail } from '../../services/nfse/invoice-email.service';
 import { assertMayIssue, ISSUE_ROLES, noticeOwnerIfTeamMember } from '../../services/nfse/issue-permissions.service';
 
 const router: Router = Router();
@@ -152,6 +154,18 @@ router.post('/invoices/:invoiceId/pdf', async (req: AuthenticatedRequest, res: R
     res.json({ success: true, data: { pdfPath: await ensureDanfse(req.userContext!.companyId, invoiceId) } });
   } catch (error) {
     fail(res, error, 'pdf');
+  }
+});
+
+router.post('/invoices/:invoiceId/email', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    // Sends a nota already issued: open to the three roles, like reading it.
+    if (!ISSUE_ROLES.includes(req.userContext?.role ?? '')) throw new NfseServiceError('FORBIDDEN', 'Only owners, admins and managers send notas');
+    const invoiceId = parse(id, req.params.invoiceId);
+    const delivery = await resendInvoiceEmail(req.userContext!.companyId, invoiceId);
+    res.json({ success: true, data: { emailDelivery: delivery } });
+  } catch (error) {
+    fail(res, error, 'email');
   }
 });
 
