@@ -6,6 +6,9 @@
 // Header, as the app on a saved order: a customer only when there is none, a
 // registered device it does not have, the request only into a blank field; an
 // unknown name or plate becomes a row that asks ("Cadastrar … como novo").
+// What the assistant itself put (and nobody changed since) a new message may
+// correct ("não, a placa é…", "o prazo é segunda"): issue #631. The last 3
+// messages stay only in this screen's memory and go with the next one.
 // It never receives, cancels or deletes on its own: a line leaves only when the
 // person asked ("tira a lavação"), and money waits for the "Confere?" card.
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
@@ -15,7 +18,7 @@ import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import { contextOf, offerOf, planAiActions, type DraftActions, type NfseMoment } from '@/lib/orders/ai-actions'
 import { noticeText } from '@/lib/orders/ai-actions-text'
-import { changeTarget, dueFromDraft, noteKey, savedOrderFill, usesLeft as usesLeftOf, type AssistDraft, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
+import { assistContext, changeTarget, dueFromDraft, forget, localMinute, noteKey, remember, replacedDevice, savedOrderFill, usesLeft as usesLeftOf, type AssistDraft, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
 import { ASSIST_MAX_PHOTOS, assistPhoto } from '@/lib/orders/assist-photo'
 import { askAssistant, assistStatus } from '@/lib/orders/assistant'
 import { orderChanged } from '@/lib/orders/bus'
@@ -49,7 +52,8 @@ const canPhoto = computed(() => can('attachPhotos'))
 const asking = shallowRef<{ change: DraftChange; lines: OrderLine[]; resolve: (line: OrderLine | null) => void } | null>(null)
 /** "Ouvi “Juliene”": the rows that ask (order.ai.ask-customer / ask-device), until picked or the order has one. */
 const customerAsk = shallowRef<{ name: string; phone?: string; options: CustomerHit[] } | null>(null)
-const deviceAsk = shallowRef<{ label: string; device: NewDevice; options: DeviceHit[] } | null>(null)
+/** `replaces`: id of the assistant's vehicle the pick takes the place of. */
+const deviceAsk = shallowRef<{ label: string; device: NewDevice; options: DeviceHit[]; replaces?: string } | null>(null)
 const choosing = ref<null | 'customer' | 'device'>(null)
 /** The "Confere?" card: from this answer, or left by the Nova OS just saved (aiActionsAfterSave). */
 const card = shallowRef<{ actions: DraftActions; nfse: NfseMoment | null; undoDraft: (() => Promise<void>) | null } | null>(null)
@@ -128,21 +132,41 @@ function answered(id: string | null) {
 
 type OrderDevice = Order['devices'][number]
 
+/**
+ * What the assistant put in this order and is still as it put it: a field
+ * counts as its (✦) only while the value is the same, so a change by hand
+ * ends it. Only in memory, like the history.
+ */
+interface Put { customerId: string | null; deviceIds: string[]; request: string | null; due: string | null }
+let put: Put = { customerId: null, deviceIds: [], request: null, due: null }
+let history: string[] = []
+const aiCustomer = () => !!put.customerId && props.order.customer?.id === put.customerId
+const aiDevice = (id?: string | null) => !!id && put.deviceIds.includes(id)
+const aiRequest = () => {
+  const field = requestField()
+  return !!field && put.request !== null && readRequest(props.order.customData, field) === put.request
+}
+const aiDue = () => put.due !== null && localMinute(props.order.dueDate) === put.due
+
 interface Undo {
   added: string[]
   changed: { id: string; before: { value?: number | null; quantity?: number; description?: string | null } }[]
   removed: OrderLine[]
-  due: boolean
-  /** The order had no customer: Desfazer takes the one put in. */
-  customer: boolean
+  /** The deadline before ('' = none), when this answer set it. */
+  due: string | null
+  /** The customer before (null = none), when this answer put one. */
+  customer: Order['customer'] | null | undefined
   /** The devices before one was put in. */
   devices: OrderDevice[] | null
-  /** The request field was blank. */
-  request: boolean
+  /** The request before, when this answer wrote it. */
+  request: string | null
+  /** What the assistant had put before this answer, and what was said. */
+  put: Put
+  said: string
 }
 
-const emptyUndo = (): Undo => ({ added: [], changed: [], removed: [], due: false, customer: false, devices: null, request: false })
-const hasUndo = (undo: Undo) => undo.added.length + undo.changed.length + undo.removed.length > 0 || undo.due || undo.customer || !!undo.devices || undo.request
+const emptyUndo = (): Undo => ({ added: [], changed: [], removed: [], due: null, customer: undefined, devices: null, request: null, put: { ...put, deviceIds: [...put.deviceIds] }, said: '' })
+const hasUndo = (undo: Undo) => undo.added.length + undo.changed.length + undo.removed.length > 0 || undo.due !== null || undo.customer !== undefined || !!undo.devices || undo.request !== null
 
 function devicesFields(list: OrderDevice[]) {
   return { device: list[0] ?? null, devices: list, deviceIds: list.map((item) => item.id) }
@@ -152,32 +176,43 @@ const deviceOf = (hit: { id: string; name?: string | null; serial?: string | nul
 async function putCustomer(hit: { id: string; name: string; phone?: string }) {
   await writes.updateOrderFields(props.order.id, { customer: { id: hit.id, name: hit.name, ...(hit.phone ? { phone: hit.phone } : {}) } })
 }
-async function putDevice(device: OrderDevice) {
-  await writes.updateOrderFields(props.order.id, devicesFields([...props.order.devices, device]))
+/** Adds the device, or puts it in the place of [replaces] (the assistant's, being corrected). */
+async function putDevice(device: OrderDevice, replaces?: string) {
+  const list = replaces && props.order.devices.some((d) => d.id === replaces)
+    ? props.order.devices.map((d) => (d.id === replaces ? device : d))
+    : [...props.order.devices, device]
+  await writes.updateOrderFields(props.order.id, devicesFields(list))
 }
 
 /** Customer, device and request of a saved order (savedOrderFill); rows that ask stay for a tap. */
 async function applyHeader(draft: AssistDraft, undo: Undo) {
   const field = requestField()
+  const index = replacedDevice(draft, props.order.devices.map((d) => ({ fromAi: aiDevice(d.id) })))
+  const replaces = index === null ? undefined : (props.order.devices[index]?.id ?? undefined)
+  const request = field ? readRequest(props.order.customData, field) : ''
   const fill = savedOrderFill(draft, {
-    hasCustomer: !!props.order.customer?.id,
-    devices: props.order.devices,
+    hasCustomer: !!props.order.customer?.id && !aiCustomer(),
+    devices: props.order.devices.filter((d) => d.id !== replaces),
     canRegisterCustomers: can('manageCustomers'),
     canRegisterDevices: can('manageDevices'),
     hasRequestField: !!field,
-    request: field ? readRequest(props.order.customData, field) : '',
+    request,
+    requestFromAi: aiRequest(),
   })
-  if (fill.customer.kind === 'match') {
+  if (fill.customer.kind === 'match' && fill.customer.customer.id !== props.order.customer?.id) {
+    undo.customer = props.order.customer ?? null
     await putCustomer(fill.customer.customer)
-    undo.customer = true
+    put.customerId = fill.customer.customer.id
   } else if (fill.customer.kind === 'ask') customerAsk.value = { name: fill.customer.name, ...(fill.customer.phone ? { phone: fill.customer.phone } : {}), options: fill.customer.options }
   if (fill.device.kind === 'match') {
     undo.devices = [...props.order.devices]
-    await putDevice(deviceOf(fill.device.device))
-  } else if (fill.device.kind === 'ask') deviceAsk.value = { label: fill.device.label, device: fill.device.device, options: fill.device.options }
+    await putDevice(deviceOf(fill.device.device), replaces)
+    put.deviceIds = [...put.deviceIds.filter((id) => id !== replaces), fill.device.device.id]
+  } else if (fill.device.kind === 'ask') deviceAsk.value = { label: fill.device.label, device: fill.device.device, options: fill.device.options, ...(replaces ? { replaces } : {}) }
   if (fill.request && field) {
+    undo.request = request
     await writes.updateOrderFields(props.order.id, { customData: withRequest(props.order.customData, field, fill.request) })
-    undo.request = true
+    put.request = fill.request
   }
 }
 
@@ -229,16 +264,18 @@ async function apply(draft: AssistDraft, sent: Order, undo: Undo): Promise<{ fil
     if (response.itemId) undo.added.push(response.itemId)
     take(response)
   }
-  // "Fica pronto" only when the order has none.
+  // "Fica pronto" when the order has none, or the one there is the assistant's ("o prazo é segunda").
   const due = dueFromDraft(draft.dueDate)
-  if (due && !props.order.dueDate) {
+  const dueBefore = localMinute(props.order.dueDate)
+  if (due && due !== dueBefore && (!props.order.dueDate || aiDue())) {
     take(await writes.patchOrder(props.order.id, { dueDate: `${due}:00.000` }, version))
-    undo.due = true
+    undo.due = dueBefore
+    put.due = due
   }
   await applyHeader(draft, undo)
   const asks = !!customerAsk.value || !!deviceAsk.value
-  const header = undo.customer || !!undo.devices || undo.request
-  const onlyChanges = !draft.items.length && !undo.due && !header && (undo.changed.length > 0 || undo.removed.length > 0)
+  const header = undo.customer !== undefined || !!undo.devices || undo.request !== null
+  const onlyChanges = !draft.items.length && undo.due === null && !header && (undo.changed.length > 0 || undo.removed.length > 0)
   return { filled: hasUndo(undo), onlyChanges, asks }
 }
 
@@ -261,11 +298,13 @@ async function undoDraft(undo: Undo) {
   const ids = undo.removed.map((l) => l.id).filter((id): id is string => !!id)
   for (const batch of pending) batch.ids = batch.ids.filter((id) => !ids.includes(id))
   if (ids.length) emit('unhide', ids)
-  if (undo.due) await writes.patchOrder(props.order.id, { dueDate: null }).catch(() => {})
-  if (undo.customer) await writes.updateOrderFields(props.order.id, { customer: null }).catch(() => {})
+  if (undo.due !== null) await writes.patchOrder(props.order.id, { dueDate: undo.due ? `${undo.due}:00.000` : null }).catch(() => {})
+  if (undo.customer !== undefined) await writes.updateOrderFields(props.order.id, { customer: undo.customer }).catch(() => {})
   if (undo.devices) await writes.updateOrderFields(props.order.id, devicesFields(undo.devices)).catch(() => {})
   const field = requestField()
-  if (undo.request && field) await writes.updateOrderFields(props.order.id, { customData: withRequest(props.order.customData, field, '') }).catch(() => {})
+  if (undo.request !== null && field) await writes.updateOrderFields(props.order.id, { customData: withRequest(props.order.customData, field, undo.request) }).catch(() => {})
+  put = undo.put
+  history = forget(history, undo.said)
   customerAsk.value = null
   deviceAsk.value = null
   emit('undone', undo.added)
@@ -291,11 +330,21 @@ async function run(input: { text?: string; files?: File[]; audio?: { mimeType: s
       photos.push(await assistPhoto(file))
     }
     const sent = props.order
-    const draft = await askAssistant(value, sent, photos, input.audio)
+    const field = requestField()
+    const context = assistContext({
+      customer: { chosen: !!sent.customer?.id, fromAi: aiCustomer() },
+      devices: sent.devices.map((d) => ({ name: d.name, serial: d.serial ?? null, fromAi: aiDevice(d.id) })),
+      request: { text: field ? readRequest(sent.customData, field) : '', fromAi: aiRequest() },
+      due: { date: localMinute(sent.dueDate), fromAi: aiDue() },
+      pending: [],
+    })
+    const draft = await askAssistant(value, sent, photos, input.audio, { history, context })
+    undo.said = value || draft.transcript?.trim() || ''
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const { filled, onlyChanges, asks } = await apply(draft, sent, undo)
     holdRemovals(undo)
+    history = remember(history, undo.said)
     if (!input.audio) text.value = ''
     emit('added', undo.added)
     const actions = draft.actions ?? null
@@ -368,10 +417,10 @@ async function pickDevice(id: string) {
       const nd = ask.device
       const created = await api<{ id: string }>('/v1/app/devices', { method: 'POST', body: { name: nd.name, ...(nd.serial ? { serial: nd.serial } : {}), ...(nd.manufacturer ? { manufacturer: nd.manufacturer } : {}) } })
       forgetLists()
-      await putDevice(deviceOf({ id: created.id, name: nd.name, serial: nd.serial }))
+      await putDevice(deviceOf({ id: created.id, name: nd.name, serial: nd.serial }), ask.replaces)
     } else {
       const hit = ask.options.find((d) => d.id === id)
-      if (hit && !props.order.devices.some((d) => d.id === hit.id)) await putDevice(deviceOf(hit))
+      if (hit && !props.order.devices.some((d) => d.id === hit.id)) await putDevice(deviceOf(hit), ask.replaces)
     }
     deviceAsk.value = null
   } catch (error) {
@@ -398,7 +447,7 @@ function cardDone(text: string, undoActions: (() => Promise<void>) | null) {
   <div v-if="enabled" class="assist-bar" data-testid="assistant">
     <p v-if="note" class="assist-note small" role="status">{{ note }}</p>
     <p v-if="usesLeft !== null" class="assist-note small">{{ t('orderAssistantUsesLeft', { count: usesLeft }) }}</p>
-    <button v-if="customerAsk && !order.customer?.id" type="button" class="assist-ask" data-testid="assist-ask-customer" @click="choosing = 'customer'">
+    <button v-if="customerAsk && (!order.customer?.id || aiCustomer())" type="button" class="assist-ask" data-testid="assist-ask-customer" @click="choosing = 'customer'">
       <span class="ai" aria-hidden="true">✦</span> {{ t('orderAssistantCustomerGuess', { name: customerAsk.name }) }}
     </button>
     <button v-if="deviceAsk" type="button" class="assist-ask" data-testid="assist-ask-device" @click="choosing = 'device'">
