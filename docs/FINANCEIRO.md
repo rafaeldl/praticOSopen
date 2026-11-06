@@ -138,6 +138,18 @@ Com a conta Asaas conectada (piloto) e permissão `chargeOrder`, "Mandar cobran�
   que falta. Roda no servidor quando a OS muda, então vale também para recebimento offline. Ver
   `docs/ASAAS_INTEGRATION.md`.
 
+### Mandar extrato ao cliente (OS não pagas)
+
+No "…" de "Receber de {cliente}" (app e web), **Mandar extrato** manda ao cliente o que ele ainda deve, para conferir. Funciona sem Asaas e não cobra nada.
+
+- **Quais OS:** as marcadas na tela. A tela lista todas as OS não pagas do cliente, de qualquer mês, inclusive as em andamento; vindo de A receber, as concluídas começam marcadas e as em andamento podem ser marcadas. "Outras OS" do consultor vão só com número e quanto falta.
+- **Pergunta:** "Mandar com PDF" ou "Só o texto".
+- **Texto** (`buildStatementText`, `lib/services/pdf/customer_statement_pdf.dart`): "Olá, João! Estas são as OS em aberto com {empresa}:", uma linha por OS (número, dia, aparelho com placa/série ou 1º serviço, "em andamento" quando não concluída), "Falta R$ …" e o total em aberto.
+- **PDF** (`CustomerStatementPdfService`, mesmo cabeçalho do recibo, `pdfCompanyHeader`): "OS em aberto de João em 06/11/2026.", um bloco por OS com situação, aparelho, serviços e peças (quantidade e valor), desconto, "Total · Pago · Falta", e o total em aberto. Não leva fotos nem checklist. Sem marca d'água (como o recibo).
+- **App:** abre o compartilhar do sistema com o texto e, se pediu, o PDF (`statement_share.dart`). No WhatsApp, a mensagem vai junto do arquivo quando a versão aceita; se só o arquivo for, o resumo está no PDF.
+- **Web** (`StatementDialog.vue`, `lib/receive/statement.ts`, `lib/pdf/statement-pdf.ts`): baixa o PDF para anexar e abre o WhatsApp do cliente com a mensagem; sem WhatsApp no cadastro, copia a mensagem. As OS são lidas do Firestore (serviços e peças); a que não puder ser lida vai só com número e saldo.
+- Não usa o PDF do Relatório financeiro (por período, junta clientes).
+
 ### Receber em OS de outra pessoa (consultor)
 
 O consultor só grava nas OS que ele criou (regras do Firestore). Em "Receber de João" ele vê as

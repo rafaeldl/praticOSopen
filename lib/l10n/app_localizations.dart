@@ -12352,6 +12352,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.'**
   String get checklistDoneAskReopenBody;
+
+  /// No description provided for @statementSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar extrato'**
+  String get statementSend;
+
+  /// No description provided for @statementSendTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar a {name} o que falta pagar'**
+  String statementSendTitle(String name);
+
+  /// No description provided for @statementSendMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai uma mensagem com as OS marcadas e quanto falta em cada uma. Quer mandar o PDF junto?'**
+  String get statementSendMessage;
+
+  /// No description provided for @statementWithPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar com PDF'**
+  String get statementWithPdf;
+
+  /// No description provided for @statementTextOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o texto'**
+  String get statementTextOnly;
+
+  /// No description provided for @statementTextHello.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Estas são as OS em aberto com {company}:'**
+  String statementTextHello(String name, String company);
+
+  /// No description provided for @statementTextHelloNoCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Estas são as OS em aberto:'**
+  String statementTextHelloNoCompany(String name);
+
+  /// No description provided for @statementOrderNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String statementOrderNumber(String number);
+
+  /// No description provided for @statementOpenLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta {amount}'**
+  String statementOpenLine(String amount);
+
+  /// No description provided for @statementInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'em andamento'**
+  String get statementInProgress;
+
+  /// No description provided for @statementTotalOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total em aberto: {amount}'**
+  String statementTotalOpen(String amount);
+
+  /// No description provided for @statementPdfTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Extrato'**
+  String get statementPdfTitle;
+
+  /// No description provided for @statementPdfSentence.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS em aberto de {name} em {date}.'**
+  String statementPdfSentence(String name, String date);
+
+  /// No description provided for @statementItemColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço ou peça'**
+  String get statementItemColumn;
+
+  /// No description provided for @statementOrderTotals.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total {total}  ·  Pago {paid}  ·  Falta {open}'**
+  String statementOrderTotals(String total, String paid, String open);
+
+  /// No description provided for @statementPdfTotalOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total em aberto'**
+  String get statementPdfTotalOpen;
+
+  /// No description provided for @statementFileName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Extrato-{date}'**
+  String statementFileName(String date);
 }
 
 class _AppLocalizationsDelegate

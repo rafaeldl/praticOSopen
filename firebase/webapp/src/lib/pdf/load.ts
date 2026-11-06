@@ -5,7 +5,7 @@
 // see them never receives them (the API drops them) and the PDF has none.
 import { locale, t } from '@/i18n'
 import { firestoreLite } from '@/lib/firebase'
-import { formatDate, formatMoney } from '@/lib/format'
+import { formatDate, formatDayMonth, formatMoney } from '@/lib/format'
 import { normalizeOrderForm, optionText, labelOf, titleOf, type OrderForm } from '@/lib/forms/model'
 import { loadCustomer } from '@/lib/customers/data'
 import { normalizeOrder, type OrderStatus } from '@/lib/orders/model'
@@ -14,6 +14,9 @@ import { country, orderName, statusText } from '@/lib/orders/text'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { api, can, effectiveUseFinancial, session } from '@/lib/session'
 import { buildOrdersPdf, pdfFileName, type PdfCompany, type PdfImage, type PdfOrderPart, type PdfTexts } from './order-pdf'
+import { buildStatementPdf } from './statement-pdf'
+import type { OpenOrder } from '@/lib/receive/model'
+import { statementLightOf, statementOrderOf, type StatementOrder, type StatementTexts } from '@/lib/receive/statement'
 
 /** The app's limits (OsPdfOptions): 30 photos of the order, 8 per checklist question. */
 const MAX_ORDER_PHOTOS = 30
@@ -231,4 +234,74 @@ export async function ordersPdf(ids: readonly string[]): Promise<OrdersPdf> {
     fileName: pdfFileName(texts.serviceOrder, found.map((part) => part.order.number)),
     missing: ids.length - found.length,
   }
+}
+
+// ---------------------------------------------------------------------------
+// "Mandar extrato" (pay.customer.statement)
+// ---------------------------------------------------------------------------
+
+/** The checked orders with their services and parts; an order that cannot be read keeps only number and balance. */
+export async function statementOrders(orders: readonly OpenOrder[]): Promise<StatementOrder[]> {
+  return Promise.all(
+    orders.map(async (open) => {
+      try {
+        const raw = await readDoc(['companies', session.companyId as string, 'orders', open.id])
+        return raw ? statementOrderOf(normalizeOrder(open.id, raw, true)) : statementLightOf(open)
+      } catch (error) {
+        console.warn('statement: order not read', open.id, error)
+        return statementLightOf(open)
+      }
+    }),
+  )
+}
+
+export function statementTexts(): StatementTexts {
+  const where = country()
+  const company = session.company?.name?.trim() ?? ''
+  return {
+    hello: (name) => (company ? t('statementTextHello', { name, company }) : t('statementTextHelloNoCompany', { name })),
+    orderNumber: (number) => t('statementOrderNumber', { number }),
+    openLine: (amount) => t('statementOpenLine', { amount }),
+    inProgress: t('statementInProgress'),
+    totalOpen: (amount) => t('statementTotalOpen', { amount }),
+    money: (value) => formatMoney(value, where),
+    dayMonth: (iso) => formatDayMonth(iso, where),
+  }
+}
+
+/** The extrato's PDF, with the company's band and logo. */
+export async function statementPdf(orders: readonly StatementOrder[], customerName: string): Promise<{ file: File; fileName: string }> {
+  const where = country()
+  const companyRaw = (await readDoc(['companies', session.companyId as string]).catch(() => null)) ?? {}
+  const text = (value: unknown) => (typeof value === 'string' ? value : null)
+  const logoUrl = text(companyRaw.logo)
+  const logo = logoUrl ? await imageOf(logoUrl).catch(() => null) : null
+  const company: PdfCompany = {
+    name: text(companyRaw.name) ?? session.company?.name ?? '',
+    address: text(companyRaw.address),
+    phone: text(companyRaw.phone),
+    email: text(companyRaw.email),
+    logo,
+  }
+  const now = new Date()
+  const today = formatDate(now, where)
+  const bytes = await buildStatementPdf(orders, company, {
+    title: t('statementPdfTitle'),
+    date: today,
+    sentence: t('statementPdfSentence', { name: customerName || t('customerWithoutName'), date: today }),
+    itemColumn: t('statementItemColumn'),
+    quantityColumn: t('quantityShort'),
+    valueColumn: t('valueColumn'),
+    orderNumber: (number) => t('statementOrderNumber', { number }),
+    completed: t('statusCompleted'),
+    inProgress: t('statusInProgress'),
+    discount: t('discount'),
+    totals: (total, paid, open) => t('statementOrderTotals', { total, paid, open }),
+    totalOpen: t('statementPdfTotalOpen'),
+    money: (value) => formatMoney(value, where),
+    day: (iso) => formatDate(iso, where),
+  })
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const fileName = `${t('statementFileName', { date: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` })}.pdf`
+  return { file: new File([bytes as BlobPart], fileName, { type: 'application/pdf' }), fileName }
 }
