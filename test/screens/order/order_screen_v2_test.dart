@@ -212,6 +212,11 @@ class FakeAssistant implements AiOrderAssistClient {
   final List<String?> texts = [];
   final List<int> photoCounts = [];
   final List<AiOrderSnapshot?> orders = [];
+  final List<List<String>> histories = [];
+  final List<AiOrderContext?> contexts = [];
+
+  /// Answers in order, one per call, before falling back to [draft].
+  final List<AiOrderDraft> queue = [];
 
   @override
   Future<AiOrderDraft> assist({
@@ -219,7 +224,12 @@ class FakeAssistant implements AiOrderAssistClient {
     List<AiPhoto> photos = const [],
     String? locale,
     AiOrderSnapshot? order,
+    List<String> history = const [],
+    AiOrderContext? context,
   }) async {
+    histories.add(List.of(history));
+    contexts.add(context);
+    if (queue.isNotEmpty) draft = queue.removeAt(0);
     texts.add(text);
     photoCounts.add(photos.length);
     orders.add(order);
@@ -1062,6 +1072,177 @@ void main() {
         find.byKey(const ValueKey('new_order_pick_customer')),
         findsOneWidget,
       );
+    });
+
+    group('corrects what it put and remembers (#631)', () {
+      String requestText(WidgetTester tester) => tester
+          .widget<CupertinoTextField>(
+            find.byKey(const ValueKey('new_order_request')),
+          )
+          .controller!
+          .text;
+
+      Future<void> talk(WidgetTester tester) async {
+        await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets(
+        'a new message replaces the vehicle, request and deadline it put; '
+        '"Desfazer" goes back and forgets the message',
+        (tester) async {
+          final store = OrderStore();
+          final assistant = FakeAssistant(const AiOrderDraft());
+          assistant.queue.addAll([
+            AiOrderDraft(
+              customer: const AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+              deviceGuessName: 'Gol',
+              deviceGuessSerial: 'ABC1234',
+              notes: 'Barulho na suspensão',
+              dueDate: DateTime(2026, 12, 11, 18),
+            ),
+            AiOrderDraft(
+              deviceGuessName: 'Gol',
+              deviceGuessSerial: 'ABC1D23',
+              deviceReplaces: 0,
+              notes: 'Barulho no freio',
+              dueDate: DateTime(2026, 12, 14, 18),
+            ),
+            const AiOrderDraft(),
+          ]);
+          await _pump(tester, assistantScreen(store, assistant), hosted: true);
+
+          await talk(tester);
+          expect(store.devices.single.serial, 'ABC1234');
+          expect(assistant.histories.first, isEmpty);
+
+          await talk(tester);
+          expect(store.devices.single.serial, 'ABC1D23');
+          expect(rowOf(tester, 'Gol').marked, isTrue);
+          expect(requestText(tester), 'Barulho no freio');
+          expect(store.order!.dueDate, DateTime(2026, 12, 14, 18));
+          expect(store.customer!.id, 'c9');
+          expect(assistant.histories[1], ['Revenda Sul, troca de óleo']);
+          final sent = assistant.contexts[1]!.toJson();
+          expect(sent['customer'], {'chosen': true, 'fromAi': true});
+          expect(sent['devices'], [
+            {'name': 'Gol', 'serial': 'ABC1234', 'fromAi': true},
+          ]);
+          expect(sent['request'], {
+            'text': 'Barulho na suspensão',
+            'fromAi': true,
+          });
+          expect(sent['due'], {'date': '2026-12-11T18:00', 'fromAi': true});
+          expect(sent.toString(), isNot(contains('Revenda Sul')));
+
+          await tester.tap(find.text('Desfazer'));
+          await tester.pumpAndSettle();
+          expect(store.devices.single.serial, 'ABC1234');
+          expect(requestText(tester), 'Barulho na suspensão');
+          expect(store.order!.dueDate, DateTime(2026, 12, 11, 18));
+          expect(store.customer!.id, 'c9');
+
+          await talk(tester);
+          // The undone message left the history; the first one stays.
+          expect(assistant.histories[2], ['Revenda Sul, troca de óleo']);
+          expect(assistant.contexts[2]!.devices.single.fromAi, isTrue);
+        },
+      );
+
+      testWidgets('replaces the customer it put; "Desfazer" brings it back', (
+        tester,
+      ) async {
+        final store = OrderStore();
+        final assistant = FakeAssistant(const AiOrderDraft());
+        assistant.queue.addAll([
+          const AiOrderDraft(
+            customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+          ),
+          const AiOrderDraft(
+            customer: AiCustomerHit(id: 'c10', name: 'Pedro Exemplo'),
+          ),
+        ]);
+        await _pump(tester, assistantScreen(store, assistant));
+        await talk(tester);
+        await talk(tester);
+        expect(store.customer!.id, 'c10');
+        expect(rowOf(tester, 'Pedro Exemplo').marked, isTrue);
+
+        await tester.tap(find.text('Desfazer'));
+        await tester.pumpAndSettle();
+        expect(store.customer!.id, 'c9');
+        expect(rowOf(tester, 'Revenda Sul').marked, isTrue);
+      });
+
+      testWidgets('typed by the person: the request is never replaced', (
+        tester,
+      ) async {
+        final store = OrderStore();
+        final assistant = FakeAssistant(const AiOrderDraft());
+        assistant.queue.addAll([
+          const AiOrderDraft(
+            customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+            notes: 'Barulho',
+          ),
+          const AiOrderDraft(notes: 'Outro relato'),
+        ]);
+        await _pump(tester, assistantScreen(store, assistant));
+        await talk(tester);
+        expect(requestText(tester), 'Barulho');
+        expect(
+          find.byKey(const ValueKey('new_order_request_marked')),
+          findsOneWidget,
+        );
+
+        await tester.enterText(
+          find.byKey(const ValueKey('new_order_request')),
+          'Cliente pediu revisão',
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('new_order_request_marked')),
+          findsNothing,
+        );
+
+        await talk(tester);
+        expect(requestText(tester), 'Cliente pediu revisão');
+        expect(assistant.contexts[1]!.requestFromAi, isFalse);
+        expect(assistant.contexts[1]!.request, 'Cliente pediu revisão');
+      });
+
+      testWidgets('a vehicle the person chose is never replaced', (
+        tester,
+      ) async {
+        final store = OrderStore();
+        final assistant = FakeAssistant(const AiOrderDraft());
+        assistant.queue.addAll([
+          const AiOrderDraft(
+            customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+            device: AiDeviceHit(id: 'd1', name: 'Corsa', serial: 'MMM0099'),
+          ),
+          const AiOrderDraft(
+            deviceGuessName: 'Corsa',
+            deviceGuessSerial: 'ABC1D23',
+            deviceReplaces: 0,
+          ),
+        ]);
+        await _pump(tester, assistantScreen(store, assistant), hosted: true);
+        await talk(tester);
+        // The person takes the assistant's out and adds the same one by hand.
+        await tester.tap(find.text('Desfazer'));
+        await tester.pumpAndSettle();
+        store.addDevice(
+          Device()
+            ..id = 'd1'
+            ..name = 'Corsa'
+            ..serial = 'MMM0099',
+        );
+        await tester.pumpAndSettle();
+
+        await talk(tester);
+        expect(store.devices.first.id, 'd1');
+        expect(assistant.contexts[1]!.devices.single.fromAi, isFalse);
+      });
     });
 
     testWidgets('sends the order; changes and takes out the lines named', (
@@ -3296,7 +3477,9 @@ void main() {
       await _pump(
         tester,
         screenWith(OrderStore(), FakeActions()),
-        args: {'order': visit(readings: {'d1': 98000})},
+        args: {
+          'order': visit(readings: {'d1': 98000}),
+        },
       );
       expect(find.text('Quilometragem: 98.000 km'), findsOneWidget);
       expect(find.byKey(const ValueKey('order_reading_add_d1')), findsNothing);
@@ -3309,11 +3492,7 @@ void main() {
         ..streamOrder = ((_, _) => const Stream.empty())
         ..writeOrderFields = (_, _, _) async {};
       final actions = FakeActions();
-      await _pump(
-        tester,
-        screenWith(store, actions),
-        args: {'order': visit()},
-      );
+      await _pump(tester, screenWith(store, actions), args: {'order': visit()});
       final add = find.byKey(const ValueKey('order_reading_add_d1'));
       expect(add, findsOneWidget);
       expect(find.text('Horímetro'), findsOneWidget);
