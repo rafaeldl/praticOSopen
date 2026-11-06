@@ -5,7 +5,7 @@
 | Plataforma | Acesso | Credenciais | Escrita via API |
 |------------|--------|-------------|-----------------|
 | Google Ads | Conectado | `~/.google-ads.yaml` | Ativo |
-| Meta Ads | Conectado | `~/.meta-ads.yaml` | Ativo |
+| Meta Ads | Token vencido (abr/2026) | `~/.meta-ads.yaml` | Renovar o token |
 
 ## Contas
 
@@ -23,12 +23,14 @@
 - **Moeda**: BRL
 - **Lib Python**: facebook-business
 
-## Campanhas Ativas
+## Campanhas
+
+Em 05/11/2026 todas as campanhas do Google Ads estavam PAUSED e a do Meta parada por erro no pagamento.
 
 ### Google Ads
 
 #### 1. App-Android (ID: 23543314920)
-- **Status**: ENABLED / SERVING / LEARNING
+- **Status**: PAUSED (05/11/2026)
 - **Tipo**: Multi-channel (App Install)
 - **Bidding**: Maximize Conversions
 - **Budget**: R$10/dia
@@ -56,7 +58,7 @@
   - Funciona offline e facilita o atendimento. Gestão prática no dia a dia.
 
 #### 2. App-iOS (ID: 23598117814)
-- **Status**: ENABLED / SERVING
+- **Status**: PAUSED (05/11/2026)
 - **Tipo**: Multi-channel (App Install)
 - **Bidding**: Maximize Conversions (OPTIMIZE_INSTALLS_WITHOUT_TARGET_INSTALL_COST)
 - **Budget**: R$10/dia (Budget ID: 15389228376)
@@ -81,51 +83,50 @@
 - **Criada**: 23/02/2026 via API
 
 #### 3. Website traffic-Search-1 (ID: 23582521389)
-- **Status**: ENABLED / SERVING / LEARNING
+- **Status**: PAUSED (conferido em 05/11/2026)
 - **Tipo**: Search
 - **Bidding**: Maximize Conversions
 - **Budget**: R$10/dia
 - **URL**: https://praticos.app
-- **Ad Group**: Grupo de anúncios 1
-- **Anúncio**: RSA (Responsive Search Ad) - APPROVED
-- **Sitelinks**: 6 configurados
-- **Callouts**: 15 configurados
+- **Ad Group**: prestador serviços (ID: 200308660464)
+- **Anúncio**: RSA ID 830591134272 (ENABLED, criado em 05/11/2026). O RSA antigo 797983539259 está PAUSED: citava o bot do WhatsApp (desligado) e números inventados
 - **Keywords**: 56 (18 PHRASE + 38 BROAD)
 - **Negative Keywords**: 25 (nível de campanha)
 - **Headlines (15)**:
   1. PraticOS - Gestão de OS
   2. App de Ordem de Serviço
-  3. Crie OS Pelo WhatsApp
-  4. Comece Grátis Hoje
-  5. Controle OS Pelo Celular
-  6. Sistema de OS Completo
-  7. Gestão de Serviços Fácil
-  8. Clientes, OS e Financeiro
-  9. +10.000 OS Criadas
-  10. Avaliação 4.8 nas Lojas
-  11. Agenda e Equipe na Palma
-  12. Ordem de Serviço online
-  13. Envie Orçamentos em 1 Clique
-  14. Para Técnicos e Autônomos
-  15. Assistente IA no WhatsApp
+  3. Comece Grátis Hoje
+  4. Controle OS Pelo Celular
+  5. Sistema de OS Completo
+  6. Gestão de Serviços Fácil
+  7. Clientes, OS e Financeiro
+  8. Agenda e Equipe na Palma
+  9. Ordem de Serviço Online
+  10. Envie Orçamentos em 1 Clique
+  11. Para Técnicos e Autônomos
+  12. Crie a OS por Foto ou Voz
+  13. Cliente Aprova pelo Link
+  14. Fotos e Checklist na OS
+  15. App para iPhone e Android
 - **Descriptions (4)**:
-  1. Gestão de Ordens de Serviço Simplificada
-  2. Crie OS, registre serviços e acompanhe o status. Organização na rotina.
-  3. Faça orçamento, registre fotos e finalize serviços com agilidade.
-  4. Clientes, aparelhos e histórico em um só lugar. Simples e rápido.
-- **Sitelinks**:
-  1. Planos e Preços → /pricing.html
-  2. Assistente WhatsApp IA → /funcionalidades/whatsapp-bot.html
-  3. Perguntas Frequentes → /faq.html
-  4. Tutoriais e Guias → /docs/
-  5. Agenda e Equipe → /docs/agenda.html
-  6. Controle Financeiro → /docs/financeiro.html
-- **Callouts**: Comece Grátis, Sem Fidelidade, App iOS e Android, Assistente WhatsApp IA, +10.000 OS Criadas, Avaliação 4.8 Estrelas, Suporte Humanizado, Agenda e Calendário, Controle Financeiro, Crie OS por Voz e Foto, Gestão de Equipe, Relatórios em Tempo Real, Envie Orçamentos Fácil, 14 Segmentos Atendidos, Sem Cartão para Começar
+  1. Crie OS, registre serviços e acompanhe o status. Organização na rotina.
+  2. Faça orçamento, registre fotos e finalize serviços com agilidade.
+  3. Clientes, aparelhos e histórico em um só lugar. Simples e rápido.
+  4. Mande o orçamento por link no WhatsApp e o cliente aprova pelo celular.
+- **Sitelinks** (todos em https://praticos.app):
+  1. Perguntas Frequentes → /faq.html
+  2. Tutoriais e Guias → /docs/
+  3. Agenda e Equipe → /docs/agenda.html
+  4. Controle Financeiro → /docs/financeiro.html
+  5. Lembretes Automáticos → /docs/lembretes.html
+  6. Link para o Cliente → /docs/compartilhar.html
+- **Callouts**: Comece Grátis, Sem Fidelidade, App iOS e Android, Suporte Humanizado, Agenda e Calendário, Controle Financeiro, Crie OS por Voz e Foto, Gestão de Equipe, Envie Orçamentos Fácil, Sem Cartão para Começar, Fotos e Checklist, Link de Aprovação
+- **Antes de reativar**: revisar as keywords (ver Pendências)
 
 ### Meta Ads
 
 #### 1. PraticOS - App Install (ID: 6916166716575)
-- **Status**: ACTIVE
+- **Status**: ACTIVE, mas sem veicular por erro no pagamento (05/11/2026)
 - **Objetivo**: OUTCOME_APP_PROMOTION (App Installs)
 - **Plataformas**: Facebook (Feed) + Instagram (Feed, Stories, Reels)
 - **Segmentação**: Brasil, Português, Android + iOS, 25-65 anos
@@ -248,6 +249,8 @@
 
 ### Prioridade Alta
 
+- [ ] **Meta Ads - Textos e criativos**: anúncios citam "Avaliação 4.8" e "+10.000 OS criadas" (números sem fonte) e o bot do WhatsApp (desligado). Trocar antes de voltar a veicular; renovar o token da API (venceu em abr/2026) e resolver o erro no pagamento.
+
 - [x] **Google Ads - Vinculação Analytics/iOS**: Revinculação do Google Analytics sincronizou o stream iOS. Concluída em 22/02/2026.
 - [x] **Google Ads - Criar campanha App-iOS**: Campanha App-iOS criada (ID: 23598117814) via API em 23/02/2026. Mesmos criativos do Android. Status: ENABLED/SERVING.
 - [x] **Meta Ads - Criar campanha de instalações**: Campanha Facebook/Instagram para installs do PraticOS (Android). Criada em 23/02/2026.
@@ -278,6 +281,12 @@
 - [ ] **Google Ads - Otimização contínua**: Depois de 2 semanas de dados, analisar termos de busca, pausar keywords ruins, ajustar bids.
 
 ## Histórico de Alterações
+
+### 05/11/2026 (Domínio praticos.app)
+- Search: URL final e sitelinks passaram de praticos.web.app para praticos.app
+- Sitelinks "Assistente WhatsApp IA" (bot desligado) e "Planos e Preços" (página redireciona para a inicial) trocados por "Lembretes Automáticos" e "Link para o Cliente"
+- Novo RSA 830591134272 sem o bot e sem números inventados ("+10.000 OS", "Avaliação 4.8"); RSA 797983539259 pausado
+- Callouts removidos: Assistente WhatsApp IA, +10.000 OS Criadas, Avaliação 4.8 Estrelas, Relatórios em Tempo Real, 14 Segmentos Atendidos. Adicionados: Link de Aprovação, Fotos e Checklist
 
 ### 24/02/2026 (Firebase Analytics iOS + SKAdNetwork)
 - Habilitou `IS_ANALYTICS_ENABLED` e `IS_ADS_ENABLED` no `GoogleService-Info.plist`
