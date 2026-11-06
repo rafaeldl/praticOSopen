@@ -736,7 +736,9 @@ app.use(globalErrorHandler);
 export const api = onRequest(
   {
     region: 'southamerica-east1',
-    memory: '256MiB',
+    // Slack only: lists of big companies read in pages with select() (app-directory, app-finance).
+    // At 256MiB the Clientes list of a company with ~3.000 open orders went past it and took the instance down.
+    memory: '512MiB',
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,

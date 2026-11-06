@@ -125,6 +125,26 @@ interface QueryState {
   offset?: number;
   /** Values of the order fields (and the id) the results start after. */
   after?: unknown[];
+  /** select(): only these field paths come back, like Firestore. */
+  fields?: string[];
+}
+
+/** Every query read since resetFakeDb: how many documents and which fields (select) came back. */
+export const queryLog: Array<{ path: string; docs: number; fields?: string[] }> = [];
+
+/** The document with only the selected field paths (a selected map comes whole). */
+function project(data: Data, fields: string[] | undefined): Data {
+  if (!fields) return data;
+  const out: Data = {};
+  for (const path of fields) {
+    const value = getField(data, path);
+    if (value === undefined) continue;
+    const keys = path.split('.');
+    let target = out;
+    for (const key of keys.slice(0, -1)) target = (target[key] = isPlainObject(target[key]) ? target[key] : {}) as Data;
+    target[keys[keys.length - 1]] = clone(value);
+  }
+  return out;
 }
 
 class FakeQuery {
@@ -147,6 +167,9 @@ class FakeQuery {
   }
   limit(n: number) {
     return this.next({ limit: n });
+  }
+  select(...fields: string[]) {
+    return this.next({ fields });
   }
   offset(n: number) {
     return this.next({ offset: n });
@@ -191,7 +214,8 @@ class FakeQuery {
     }
     if (this.state.offset) rows = rows.slice(this.state.offset);
     if (this.state.limit !== undefined) rows = rows.slice(0, this.state.limit);
-    const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), d.value));
+    const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), project(d.value, this.state.fields)));
+    queryLog.push({ path: this.path, docs: docs.length, fields: this.state.fields });
     return { empty: docs.length === 0, size: docs.length, docs };
   }
 }
@@ -477,6 +501,7 @@ export function list(collectionPath: string) {
 export function resetFakeDb() {
   fakeDb.reset();
   fakeStorage.reset();
+  queryLog.length = 0;
 }
 
 /**

@@ -16,8 +16,8 @@ import type { Order, UserAggr, CompanyAggr } from '../models/types';
 import { projectOrderSummary } from './order-projection';
 import { generatePhoneKeywords, generateSearchKeywords } from '../utils/search.utils';
 import { timestampToDate } from '../utils/date.utils';
-import { ordersWithMoneyOpen } from './app-finance.service';
-import { countsByCustomer, customerOwed, owedByCustomer, OPEN_STATUSES } from './customer-summary';
+import { eachOrderWithMoneyOpen } from './app-finance.service';
+import { countOrder, customerOwed, OPEN_STATUSES, OwedTally, type CustomerCounts, type SummaryOrder } from './customer-summary';
 import { orderVersion, versionMatches } from './order-version';
 import { OrderRuleError } from './order-errors';
 import { deletePhotoFileIn, recordPhotoFolder, storagePathOfUrl, type PhotoInput } from './record-photo';
@@ -54,6 +54,45 @@ export async function scopedOrders(companyId: string, scope: OrderScope, build: 
     for (const doc of snapshot.docs) byId.set(doc.id, { ...(doc.data() as Order), id: doc.id });
   }
   return [...byId.values()];
+}
+
+/** Orders per page when a list only adds them up. */
+const PAGE = 1000;
+
+/**
+ * [scopedOrders] for lists that only add the orders up: each slice is read in
+ * pages of PAGE with only `fields`, and each order (once, by id) goes to
+ * `onOrder`. Nothing of the orders is kept but their ids.
+ */
+async function eachScopedOrder(
+  companyId: string,
+  scope: OrderScope,
+  build: (base: Query) => Query,
+  fields: string[],
+  onOrder: (order: SummaryOrder) => void,
+): Promise<void> {
+  const orders = getTenantCollection(companyId, 'orders') as unknown as Query;
+  const bases: Query[] = scope.all
+    ? [orders]
+    : [
+      orders.where('createdBy.id', '==', scope.userId),
+      ...(scope.assigned ? [orders.where('assignedTo.id', '==', scope.userId)] : []),
+    ];
+  const seen = new Set<string>();
+  for (const base of bases) {
+    const query = build(base).orderBy('__name__').select(...fields);
+    let last: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+    for (;;) {
+      const page = await (last ? query.startAfter(last) : query).limit(PAGE).get();
+      for (const doc of page.docs) {
+        if (seen.has(doc.id)) continue;
+        seen.add(doc.id);
+        onOrder(doc.data() as SummaryOrder);
+      }
+      if (page.docs.length < PAGE) break;
+      last = page.docs[page.docs.length - 1];
+    }
+  }
 }
 
 const time = (value: unknown): number => timestampToDate(value as string | undefined)?.getTime() ?? 0;
@@ -93,13 +132,19 @@ export async function customerDirectory(
   options: { zone: string; withOwed: boolean; now?: Date },
 ): Promise<{ customers: DirectoryCustomer[]; truncated: boolean }> {
   const now = options.now ?? new Date();
-  const [snapshot, open, money] = await Promise.all([
-    getTenantCollection(companyId, 'customers').limit(DIRECTORY_LIMIT + 1).get(),
-    scopedOrders(companyId, scope, (base) => [base.where('status', 'in', [...OPEN_STATUSES])]),
-    options.withOwed ? ordersWithMoneyOpen(companyId) : null,
+  // Only the counts and the sums are kept: a big company has thousands of open orders.
+  const counts = new Map<string, CustomerCounts>();
+  const tally = options.withOwed ? new OwedTally() : null;
+  const [snapshot, , money] = await Promise.all([
+    getTenantCollection(companyId, 'customers')
+      .select('name', 'phone', 'email', 'taxId', 'legalName', 'address')
+      .limit(DIRECTORY_LIMIT + 1)
+      .get(),
+    eachScopedOrder(companyId, scope, (base) => base.where('status', 'in', [...OPEN_STATUSES]), ['status', 'customer.id', 'dueDate'], (order) =>
+      countOrder(counts, order, now, options.zone)),
+    tally ? eachOrderWithMoneyOpen(companyId, (order) => tally.add(order)) : null,
   ]);
-  const counts = countsByCustomer(open, now, options.zone);
-  const owed = money ? owedByCustomer(money.orders) : null;
+  const owed = tally ? tally.result() : null;
   const customers = snapshot.docs.slice(0, DIRECTORY_LIMIT).map((doc) => {
     const data = doc.data();
     return {
