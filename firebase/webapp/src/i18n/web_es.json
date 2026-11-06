@@ -856,6 +856,7 @@
   "web.quick.deviceData": "Datos de {name}",
   "web.nfseDirect.dropHere": "Arrastra el archivo .pfx o .p12 aquí",
   "web.nfseDirect.send": "Enviar",
+  "web.nfseDirect.importHint": "Importa las notas que este CNPJ ya emitió: completan el servicio, la ciudad y la serie de las notas de PraticOS.",
   "web.nfseDirect.problem.certificate": "Este CNPJ no tiene certificado digital. Envíe el certificado para emitir.",
   "web.nfseDirect.problem.certificateExpired": "El certificado de este CNPJ venció. Envíe uno nuevo para emitir.",
   "web.nfseDirect.problem.notEnabledInCity": "Este CNPJ todavía no puede emitir facturas en su ciudad.",

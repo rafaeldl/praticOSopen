@@ -394,3 +394,12 @@ export async function setTemplateInB(id: string, fields: Record<string, unknown>
 export async function readUser(uid: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`users/${uid}`).get()).data()
 }
+
+/** Writes a document of the company with the direct nota on (the emitters the server would write: e2e/nfse-direct.spec.ts). */
+export async function writeDocInN(path: string, data: Record<string, unknown>, merge = false): Promise<void> {
+  await db().doc(`companies/company-nfse/${path}`).set(data, { merge })
+}
+
+export async function deleteDocInN(path: string): Promise<void> {
+  await db().doc(`companies/company-nfse/${path}`).delete()
+}

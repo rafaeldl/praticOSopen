@@ -225,10 +225,14 @@ class EmitterDescriptionStyleScreen extends StatefulWidget {
     super.key,
     required this.emitter,
     this.service,
+    this.ownServices = const [],
   });
 
   final FiscalEmitter emitter;
   final NfseDirectApiService? service;
+
+  /// The company's services, for the sample ([descriptionSamples]).
+  final List<String> ownServices;
 
   @override
   State<EmitterDescriptionStyleScreen> createState() =>
@@ -279,7 +283,7 @@ class _EmitterDescriptionStyleScreenState
                 uppercase: _style.uppercase,
                 separator: separator,
               ),
-              [l10n.nfseDirectSampleService1, l10n.nfseDirectSampleService2],
+              descriptionSamples(l10n, widget.ownServices),
             ),
           ),
       ],
@@ -293,10 +297,10 @@ class _EmitterDescriptionStyleScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final sample = descriptionStylePreview(_style, [
-      l10n.nfseDirectSampleService1,
-      l10n.nfseDirectSampleService2,
-    ]);
+    final sample = descriptionStylePreview(
+      _style,
+      descriptionSamples(l10n, widget.ownServices),
+    );
     return MorePage(
       title: l10n.nfseDirectStyleRow,
       subtitle: l10n.nfseDirectStyleHead,

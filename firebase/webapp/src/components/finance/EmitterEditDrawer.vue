@@ -14,7 +14,8 @@ import { country } from '@/lib/orders/text'
 
 export type EmitterField = 'service' | 'registration' | 'style'
 
-const props = defineProps<{ emitter: Emitter; field: EmitterField }>()
+/** `samples`: the two services the style preview joins (the company's own, or neutral ones). */
+const props = defineProps<{ emitter: Emitter; field: EmitterField; samples: string[] }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
 const service = props.emitter.service
@@ -42,7 +43,7 @@ const valid = computed(() => {
   return dirty.value
 })
 const sample = computed(() =>
-  stylePreview({ uppercase: uppercase.value, separator: separator.value }, [t('nfseDirectSampleService1'), t('nfseDirectSampleService2')]),
+  stylePreview({ uppercase: uppercase.value, separator: separator.value }, props.samples),
 )
 
 function guard(): boolean {
@@ -113,7 +114,7 @@ async function save() {
             <legend class="field-label">{{ t('nfseDirectSeparatorQuestion') }}</legend>
             <label v-for="option in SEPARATORS" :key="option" class="check-row">
               <input v-model="separator" class="check" type="radio" name="em-sep" :value="option" />
-              <span>{{ stylePreview({ uppercase, separator: option }, [t('nfseDirectSampleService1'), t('nfseDirectSampleService2')]) }}</span>
+              <span>{{ stylePreview({ uppercase, separator: option }, samples) }}</span>
             </label>
           </fieldset>
           <p class="sub">{{ t('nfseDirectStyleSample', { sample }) }}</p>

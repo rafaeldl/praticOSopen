@@ -240,6 +240,8 @@ Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
 | App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
 | Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |
 
+Sem cidade gravada (antes da importação), o emitente diz "Ainda não conferimos se este CNPJ já pode emitir nota pelo governo." em vez de "Ainda não habilitado para emitir em" sem nome (`notEnabledInCityText` no app, `cityText` no web). O exemplo do "Estilo da descrição" usa dois serviços do catálogo da própria empresa (no web, os mais usados primeiro); com menos de dois, mostra "Serviço 1, Serviço 2" (`descriptionSamples` / `sampleServices`), nunca um exemplo de outro ramo.
+
 Certificado: verde vale, âmbar a menos de 30 dias, vermelho e negrito vencido, cinza sem certificado.
 
 ### Rotas novas (`routes/v1/nfse-settings.routes.ts`, em `/v1/app/nfse/setup` na `nfseApi`)
@@ -368,4 +370,8 @@ A `nfseDaily` lê a caixa de cada emitente com certificado válido a partir do `
 
 `__tests__/import.test.ts` com XMLs e caixa do ADN sintéticos (`import-fixture.ts`, CNPJs e nomes inventados): leitura em páginas e com limite de tempo, cancelamento, recebidas, proposta, aplicar, "Sim"/"Não", desfazer, 30 dias, ligar/desligar e leitura diária. App: `test/screens/nfse/nfse_import_test.dart`.
 
-Fora desta etapa: importação no app web e notas recebidas → despesas.
+### No app web
+
+`NfseImportDrawer.vue` (gaveta) chama as mesmas rotas (`src/lib/nfse/import.ts`): `POST /imports`, `continue` até `status: proposed`, e só o "Importar" (botão amarelo) manda `apply` com as respostas. Abre sozinha depois do certificado de um CNPJ novo (`created: true` na resposta do `POST /emitters/certificate`) e pelo botão "Importar notas do governo" do emitente com certificado válido; enquanto o CNPJ nunca importou (`importBatchId` vazio), o botão é amarelo e vem com a frase do porquê. "Este é o mesmo cliente?" vira Sim / Não, criar outro na própria gaveta; sem resposta, cliente novo. "Desfazer importação" (vermelho, confirma) aparece no emitente enquanto o `nfseImports/{importBatchId}` está `applied` e dentro dos 30 dias. Testes: `firebase/webapp/tests/nfse-import.test.ts` e `e2e/nfse-direct.spec.ts` (rotas simuladas, nada vai ao governo).
+
+Fora desta etapa: notas recebidas → despesas.

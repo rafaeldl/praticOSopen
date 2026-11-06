@@ -11058,6 +11058,12 @@ abstract class AppLocalizations {
   /// **'Ainda não habilitado para emitir em {city}'**
   String nfseDirectNotEnabledInCity(String city);
 
+  /// No description provided for @nfseDirectNotEnabledNoCity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não conferimos se este CNPJ já pode emitir nota pelo governo.'**
+  String get nfseDirectNotEnabledNoCity;
+
   /// No description provided for @nfseDirectServiceRow.
   ///
   /// In pt, this message translates to:
@@ -11145,13 +11151,13 @@ abstract class AppLocalizations {
   /// No description provided for @nfseDirectSampleService1.
   ///
   /// In pt, this message translates to:
-  /// **'Troca de óleo'**
+  /// **'Serviço 1'**
   String get nfseDirectSampleService1;
 
   /// No description provided for @nfseDirectSampleService2.
   ///
   /// In pt, this message translates to:
-  /// **'Alinhamento'**
+  /// **'Serviço 2'**
   String get nfseDirectSampleService2;
 
   /// No description provided for @nfseDirectCertificateRow.

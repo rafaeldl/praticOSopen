@@ -856,6 +856,7 @@
   "web.quick.deviceData": "Details of {name}",
   "web.nfseDirect.dropHere": "Drag the .pfx or .p12 file here",
   "web.nfseDirect.send": "Send",
+  "web.nfseDirect.importHint": "Import the notas this CNPJ already issued: they fill in the service, the city and the series of the PraticOS notas.",
   "web.nfseDirect.problem.certificate": "This CNPJ has no digital certificate. Send the certificate to issue.",
   "web.nfseDirect.problem.certificateExpired": "The certificate of this CNPJ has expired. Send a new one to issue.",
   "web.nfseDirect.problem.notEnabledInCity": "This CNPJ cannot issue invoices in its city yet.",

@@ -6806,6 +6806,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get nfseDirectNotEnabledNoCity =>
+      'We haven\'t checked yet whether this CNPJ can issue notas through the government.';
+
+  @override
   String get nfseDirectServiceRow => 'Invoice service';
 
   @override
@@ -6853,10 +6857,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nfseDirectSampleService1 => 'Oil change';
+  String get nfseDirectSampleService1 => 'Service 1';
 
   @override
-  String get nfseDirectSampleService2 => 'Wheel alignment';
+  String get nfseDirectSampleService2 => 'Service 2';
 
   @override
   String get nfseDirectCertificateRow => 'Certificate';
