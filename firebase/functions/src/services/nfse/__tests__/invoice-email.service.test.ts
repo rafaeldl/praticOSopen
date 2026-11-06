@@ -76,6 +76,16 @@ describe('sendInvoiceEmail', () => {
     expect(email.idempotencyKey).toBe('nfse-c1-nf1-issued');
   });
 
+  it('reply-to falls back to the owner e-mail when the company has none, and is left out when neither is valid', async () => {
+    seed('companies/c1', { name: 'Oficina Exemplo', email: '', owner: { id: 'u1', name: 'Dono', email: 'dono@example.com' } });
+    await sendInvoiceEmail('c1', 'nf1', 'issued', {}, deps);
+    expect(sent[0].replyTo).toBe('dono@example.com');
+
+    seed('companies/c1', { name: 'Oficina Exemplo', email: 'sem-arroba', owner: { id: 'u1', email: 'tambem-invalido' } });
+    await sendInvoiceEmail('c1', 'nf1', 'issued', { manual: true }, deps);
+    expect(sent[1].replyTo).toBeNull();
+  });
+
   it('canceled: the notice with the PDF only (the watermarked one)', async () => {
     seedNota({ status: 'canceled' });
     await sendInvoiceEmail('c1', 'nf1', 'canceled', {}, deps);
