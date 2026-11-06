@@ -125,24 +125,23 @@ interface QueryState {
   offset?: number;
   /** Values of the order fields (and the id) the results start after. */
   after?: unknown[];
-  /** select(): only these field paths come back, like Firestore. */
+  /** select(...): only these fields come back (none: the ids only). */
   fields?: string[];
 }
 
 /** Every query read since resetFakeDb: how many documents and which fields (select) came back. */
 export const queryLog: Array<{ path: string; docs: number; fields?: string[] }> = [];
 
-/** The document with only the selected field paths (a selected map comes whole). */
-function project(data: Data, fields: string[] | undefined): Data {
-  if (!fields) return data;
+/** Copy of `value` with only the given (dotted) fields. */
+function project(value: Data, fields: string[]): Data {
   const out: Data = {};
-  for (const path of fields) {
-    const value = getField(data, path);
-    if (value === undefined) continue;
-    const keys = path.split('.');
-    let target = out;
-    for (const key of keys.slice(0, -1)) target = (target[key] = isPlainObject(target[key]) ? target[key] : {}) as Data;
-    target[keys[keys.length - 1]] = clone(value);
+  for (const field of fields) {
+    const v = getField(value, field);
+    if (v === undefined) continue;
+    const parts = field.split('.');
+    let at = out;
+    for (const part of parts.slice(0, -1)) at = (at[part] ??= {}) as Data;
+    at[parts[parts.length - 1]] = v;
   }
   return out;
 }
@@ -214,8 +213,9 @@ class FakeQuery {
     }
     if (this.state.offset) rows = rows.slice(this.state.offset);
     if (this.state.limit !== undefined) rows = rows.slice(0, this.state.limit);
-    const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), project(d.value, this.state.fields)));
-    queryLog.push({ path: this.path, docs: docs.length, fields: this.state.fields });
+    const fields = this.state.fields;
+    const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), fields ? project(d.value, fields) : d.value));
+    queryLog.push({ path: this.path, docs: docs.length, fields });
     return { empty: docs.length === 0, size: docs.length, docs };
   }
 }
