@@ -20,8 +20,9 @@ test('abre pelo quadro, sem valores, e acompanha as mudanças sozinho', async ({
   await updateOrderDoc(order.id, { status: 'progress' })
   await expect(page.getByTestId('tv-col-progress').getByText(name)).toBeVisible()
   await expect(page.getByTestId('tv-col-approved').getByText(name)).toHaveCount(0)
-  // Done now: in "Concluídas hoje".
-  await updateOrderDoc(order.id, { status: 'done', completedAt: new Date().toISOString() })
+  // Done now: in "Concluídas hoje". Other tests leave many done orders stamped a little ahead
+  // (makeOrder), so this one goes further ahead to sit among the newest 50 of the column.
+  await updateOrderDoc(order.id, { status: 'done', completedAt: new Date(Date.now() + 30 * 60_000).toISOString() })
   await expect(page.getByTestId('tv-col-done').getByText(name)).toBeVisible()
   await expect(page.getByTestId('tv-col-done')).toContainText('Concluídas hoje')
   // "Sair" goes back to the board.
