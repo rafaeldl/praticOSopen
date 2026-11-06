@@ -388,21 +388,38 @@ interface Budget {
 }
 const budgetOf = (max: number): Budget => ({ left: max, truncated: false });
 
-async function readAll(query: Query, budget: Budget): Promise<FinanceOrder[]> {
-  const orders: FinanceOrder[] = [];
+/**
+ * The fields of FinanceOrder, plus the ones the queries sort by (a cursor needs
+ * them): the rest of the order (photos, checklists, search keywords, notes) is
+ * never read. A whole order weighs ~10x this; reading thousands of them took the
+ * `api` past its memory (Clientes of a company with ~3.000 open orders).
+ */
+const FINANCE_FIELDS = [
+  'number', 'status', 'customer', 'devices', 'device', 'services', 'products',
+  'total', 'paidAmount', 'payment', 'transactions', 'createdAt', 'updatedAt', 'lastPaymentAt',
+];
+
+/** Reads `query` page by page on the budget, handing each document to `onDoc` (nothing is kept here). */
+async function eachPage(query: Query, budget: Budget, onDoc: (doc: FirebaseFirestore.QueryDocumentSnapshot) => void): Promise<void> {
   let last: FirebaseFirestore.QueryDocumentSnapshot | null = null;
   for (;;) {
     const size = Math.min(PAGE, budget.left);
     if (size <= 0) {
       budget.truncated = true;
-      return orders;
+      return;
     }
     const page = await (last ? query.startAfter(last) : query).limit(size).get();
-    for (const doc of page.docs) orders.push({ ...(doc.data() as Omit<FinanceOrder, 'id'>), id: doc.id });
+    page.docs.forEach(onDoc);
     budget.left -= page.docs.length;
-    if (page.docs.length < size) return orders;
+    if (page.docs.length < size) return;
     last = page.docs[page.docs.length - 1];
   }
+}
+
+async function readAll(query: Query, budget: Budget): Promise<FinanceOrder[]> {
+  const orders: FinanceOrder[] = [];
+  await eachPage(query.select(...FINANCE_FIELDS), budget, (doc) => orders.push({ ...(doc.data() as Omit<FinanceOrder, 'id'>), id: doc.id }));
+  return orders;
 }
 
 interface ReadMeta {
@@ -430,20 +447,39 @@ function createdIn(companyId: string, period: Period): Query {
  * single-field index sorts them by date): when the limit cuts, any of them may
  * be the one missing.
  */
-async function openOrders(companyId: string, budget: Budget): Promise<FinanceOrder[]> {
-  const unpaid = await readAll(ordersOf(companyId).where('payment', 'in', ['unpaid', 'partial']).orderBy('__name__'), budget);
-  const missing = await readAll(
+function openQueries(companyId: string): Query[] {
+  return [
+    ordersOf(companyId).where('payment', 'in', ['unpaid', 'partial']).orderBy('__name__'),
     ordersOf(companyId).where('payment', '==', null).where('status', 'in', ['approved', 'progress', 'done']).orderBy('__name__'),
-    budget,
-  );
-  return [...unpaid, ...missing];
+  ];
 }
 
-/** Every order with money open (the A receber query of financeSummary), for the Clientes list. */
-export async function ordersWithMoneyOpen(companyId: string, max = MAX_ORDERS): Promise<{ orders: FinanceOrder[] } & ReadMeta> {
+async function openOrders(companyId: string, budget: Budget): Promise<FinanceOrder[]> {
+  const [unpaid, missing] = openQueries(companyId);
+  return [...(await readAll(unpaid, budget)), ...(await readAll(missing, budget))];
+}
+
+/**
+ * Every order with money open (the A receber query of financeSummary), for the
+ * Clientes list: hands each one to `onOrder` with only the fields of "Falta
+ * receber" and keeps none, so a company with thousands of them reads in pages
+ * of PAGE orders. Same queries, order and limit as openOrders.
+ */
+export async function eachOrderWithMoneyOpen(
+  companyId: string,
+  onOrder: (order: Pick<FinanceOrder, 'id' | 'status' | 'customer' | 'total' | 'paidAmount' | 'payment'>) => void,
+  max = MAX_ORDERS,
+): Promise<ReadMeta> {
   const budget = budgetOf(max);
-  const open = await openOrders(companyId, budget);
-  return { orders: [...new Map(open.map((order) => [order.id, order])).values()], ...metaOf(budget, max) };
+  const seen = new Set<string>();
+  for (const query of openQueries(companyId)) {
+    await eachPage(query.select('status', 'customer.id', 'total', 'paidAmount', 'payment'), budget, (doc) => {
+      if (seen.has(doc.id)) return;
+      seen.add(doc.id);
+      onOrder({ ...(doc.data() as Omit<FinanceOrder, 'id'>), id: doc.id });
+    });
+  }
+  return metaOf(budget, max);
 }
 
 export async function financeSummary(companyId: string, period: Period, max = MAX_ORDERS): Promise<FinanceSummary & ReadMeta> {

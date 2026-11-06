@@ -129,6 +129,9 @@ interface QueryState {
   fields?: string[];
 }
 
+/** Every query read since resetFakeDb: how many documents and which fields (select) came back. */
+export const queryLog: Array<{ path: string; docs: number; fields?: string[] }> = [];
+
 /** Copy of `value` with only the given (dotted) fields. */
 function project(value: Data, fields: string[]): Data {
   const out: Data = {};
@@ -212,6 +215,7 @@ class FakeQuery {
     if (this.state.limit !== undefined) rows = rows.slice(0, this.state.limit);
     const fields = this.state.fields;
     const docs = rows.map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), fields ? project(d.value, fields) : d.value));
+    queryLog.push({ path: this.path, docs: docs.length, fields });
     return { empty: docs.length === 0, size: docs.length, docs };
   }
 }
@@ -497,6 +501,7 @@ export function list(collectionPath: string) {
 export function resetFakeDb() {
   fakeDb.reset();
   fakeStorage.reset();
+  queryLog.length = 0;
 }
 
 /**
