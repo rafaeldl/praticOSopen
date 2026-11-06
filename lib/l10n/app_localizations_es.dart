@@ -2453,7 +2453,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderItemsSection => 'Qué se va a hacer';
 
   @override
-  String get orderItemSearchPlaceholder => 'Buscar servicio o pieza';
+  String orderItemSearchPlaceholder(String product) {
+    return 'Buscar servicio o $product';
+  }
 
   @override
   String get orderCreateItemError => 'No se pudo crear. Inténtelo de nuevo.';
@@ -4515,7 +4517,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'El micrófono no está permitido. Permítelo en Ajustes o escribe el servicio.';
 
   @override
-  String get orderAddItemRow => 'Agregar servicio o pieza';
+  String orderAddItemRow(String product) {
+    return 'Agregar servicio o $product';
+  }
 
   @override
   String get orderPickCustomerRow => 'Elegir cliente';
@@ -4699,7 +4703,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get pickerNewItem => 'Nuevo servicio o pieza';
+  String pickerNewItem(String product) {
+    return 'Nuevo servicio o $product';
+  }
 
   @override
   String get pickerNewChecklist => 'Nuevo checklist';
@@ -4715,8 +4721,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String pickerNoItemWith(String query) {
-    return 'Ningún servicio o pieza con “$query”. Regístrelo y entra directo en la OS.';
+  String pickerNoItemWith(String product, String query) {
+    return 'Ningún servicio o $product con “$query”. Regístrelo y entra directo en la OS.';
   }
 
   @override
@@ -5765,7 +5771,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseListOnlyServices =>
-      'Solo los servicios entran en la factura. Las piezas quedan fuera, por eso el total es distinto de lo Vendido.';
+      'Solo los servicios entran en la factura, por eso el total puede ser distinto de lo Vendido.';
 
   @override
   String nfseListNoResults(String month) {

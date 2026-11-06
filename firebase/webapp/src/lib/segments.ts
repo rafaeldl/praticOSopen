@@ -126,6 +126,16 @@ export function segmentLabels(): Record<string, string> {
   return state.labels
 }
 
+/**
+ * What the order sells besides services, lower case ("Buscar serviço ou licença"):
+ * the segment's own `product._entity`, otherwise [fallback] ("peça"). Same as
+ * SegmentConfigService.productWord in the app.
+ */
+export function productWord(fallback: string, labels: Record<string, string> = state.labels): string {
+  const custom = labels['product._entity']
+  return custom ? custom.toLocaleLowerCase() : fallback
+}
+
 export function segmentDocs(): readonly (SegmentDoc | null)[] {
   return state.docs
 }

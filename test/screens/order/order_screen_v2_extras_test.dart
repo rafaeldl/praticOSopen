@@ -18,6 +18,7 @@ import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/models/fiscal_emitter.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
@@ -1165,6 +1166,47 @@ void main() {
         );
         expect(blue(), findsNothing);
       });
+    });
+
+    group('NFS-e direct (#612)', () {
+      NfseController direct() => NfseController(
+        canIssue: true,
+        settingsStream: Stream.value(PaymentSettings(nfseDirectEnabled: true)),
+        invoicesOf: (_) => Stream.value(const []),
+        emittersStream: Stream.value([
+          FiscalEmitter(legalName: 'OFICINA')..id = 'e1',
+        ]),
+      );
+
+      testWidgets('approved order: the row offers "Emitir"', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: direct()),
+          args: {'order': _order(status: 'approved')..total = 500},
+        );
+        expect(find.byKey(const ValueKey('order_nfse_issue')), findsOneWidget);
+        expect(find.text('Não emitida'), findsNothing);
+      });
+
+      testWidgets('a quote still has no row', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: direct()),
+          args: {'order': _order()..total = 500},
+        );
+        expect(find.byKey(const ValueKey('order_nfse_issue')), findsNothing);
+      });
+    });
+
+    testWidgets('through Asaas, an approved order keeps it in the "…"', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse()),
+        args: {'order': _order(status: 'approved')..total = 500},
+      );
+      expect(find.byKey(const ValueKey('order_nfse_issue')), findsNothing);
     });
 
     testWidgets('the nota shows as a row and blocks a second one', (

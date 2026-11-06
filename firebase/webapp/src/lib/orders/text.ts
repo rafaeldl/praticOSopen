@@ -2,7 +2,7 @@
 // literal so the build keeps them (docs/WEB_APP.md, Contrato gerado).
 import { t, type MessageKey } from '@/i18n'
 import { formatDayMonth, formatMoney, formatTime } from '@/lib/format'
-import { resolveLabel, segmentLabels } from '@/lib/segments'
+import { productWord, resolveLabel, segmentLabels } from '@/lib/segments'
 import { session } from '@/lib/session'
 import { hasTime, holdDays, isActive, lateness, relativeDay, type HoldReason, type Order, type OrderStatus } from './model'
 
@@ -113,5 +113,5 @@ export function headerPhrase(order: Order, now: Date, remaining: number | null):
 }
 
 export function lineKindText(kind: 'service' | 'product'): string {
-  return kind === 'service' ? t('orderItemKindService') : t('orderItemKindPart')
+  return kind === 'service' ? t('orderItemKindService') : productWord(t('orderItemKindPart'))
 }

@@ -8,7 +8,8 @@ import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
 
 export type { Choice }
 
-const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anchor?: HTMLElement | null; suggested?: string | null }>()
+// closeLabel: when "Cancelar" would read as one of the choices ("Cancelar a nota?").
+const props = defineProps<{ title: string; sub?: string; choices: Choice[]; anchor?: HTMLElement | null; suggested?: string | null; closeLabel?: string }>()
 // With an anchor it is a menu held under its button, not a box in the middle of the screen.
 // Placed again after the layer opens and on resize: opening can still move the
 // button (the panel settling), and the menu must stay held under it.
@@ -49,7 +50,7 @@ const emit = defineEmits<{ pick: [id: string]; close: [] }>()
         <ChoiceList :label="title" :choices="choices" :suggested="suggested" @pick="(id) => emit('pick', id)" />
       </div>
       <div class="layer-foot">
-        <button type="button" class="btn btn--ghost" @click="close()">{{ t('cancel') }}</button>
+        <button type="button" class="btn btn--ghost" @click="close()">{{ closeLabel ?? t('cancel') }}</button>
       </div>
     </template>
   </Layer>

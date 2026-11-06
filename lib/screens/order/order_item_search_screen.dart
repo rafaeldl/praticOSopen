@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/screens/catalog/catalog_item_form.dart';
@@ -13,6 +14,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/utils/search_utils.dart';
+import 'package:provider/provider.dart';
 
 /// What the user picked in "O que vai na OS?".
 class OrderItemPick {
@@ -214,11 +216,14 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final product = context.read<SegmentConfigProvider>().productWord(
+      l10n.orderItemKindPart,
+    );
     final entries = _loading ? const <_Entry>[] : _entries;
     return PickerScaffold<_Entry>(
       title: l10n.pickerItemTitle,
       itemCount: entries.length,
-      searchPlaceholder: l10n.orderItemSearchPlaceholder,
+      searchPlaceholder: l10n.orderItemSearchPlaceholder(product),
       // Typing is how a new item is created here, so the search is always
       // there (as in the prototype), whatever the size of the catalog.
       alwaysShowSearch: true,
@@ -226,10 +231,10 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       loading: _loading && !_hasError,
       hasError: _hasError,
       onRetry: _listen,
-      addLabel: _createKind == null ? null : l10n.pickerNewItem,
+      addLabel: _createKind == null ? null : l10n.pickerNewItem(product),
       onAdd: _createKind == null ? null : _add,
       onCreate: _createKind == null ? null : _create,
-      noMatchText: l10n.pickerNoItemWith,
+      noMatchText: (query) => l10n.pickerNoItemWith(product, query),
       emptyTitle: l10n.orderCatalogEmpty,
       onSelect: _pick,
       sections: (query) => _sections(entries, query),

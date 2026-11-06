@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, test, vi } from 'vitest'
 import { decideAccess, type AccessContext } from '../src/lib/access'
 import { appRoleOf, hasAnyPermission, roleHasPermission } from '../src/lib/permissions'
-import { pickCompany, resolveCompanies, shouldRefreshForStale, staleCompanyIds } from '../src/lib/session'
+import { companyEntryName, pickCompany, resolveCompanies, shouldRefreshForStale, staleCompanyIds } from '../src/lib/session'
 import { ROLE_PERMISSIONS } from '../src/generated/permissions'
 import { NAV } from '../src/navigation'
 
@@ -245,5 +245,17 @@ describe('warm-up of the API on the login screen', () => {
     warmUpApi('https://api.test', request)
     await Promise.resolve()
     expect(calls).toEqual([['https://api.test/v1/app/web-access', { credentials: 'omit' }]])
+  })
+})
+
+describe('company name in the menu (#612)', () => {
+  const entry = { id: 'a', name: 'Rafael Laurindo', role: 'owner' }
+  test('the current company uses its own document, not the copy in the user', () => {
+    expect(companyEntryName(entry, { name: 'Rafsoft' }, 'a')).toBe('Rafsoft')
+  })
+  test('other companies, or no name yet, keep the copy', () => {
+    expect(companyEntryName(entry, { name: 'Rafsoft' }, 'b')).toBe('Rafael Laurindo')
+    expect(companyEntryName(entry, { name: '  ' }, 'a')).toBe('Rafael Laurindo')
+    expect(companyEntryName(entry, null, 'a')).toBe('Rafael Laurindo')
   })
 })

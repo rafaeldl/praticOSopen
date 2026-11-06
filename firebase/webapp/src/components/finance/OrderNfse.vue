@@ -1,18 +1,18 @@
 <script setup lang="ts">
 // The nota of the order (order.nfse.row, order.nfse.issue-row): "Nota fiscal ·
-// Emitida · nº 123" opening the nota, or, on a finished order without one,
-// "Não emitida" (the blue step offers it, once paid) or "Emitir" (the nota may
-// come before the money). Live: the webhook changes it while the order is open.
+// Emitida · nº 123" opening the nota, or, on an order without one (finished,
+// or approved too with the NFS-e direct), "Não emitida" (the blue step offers
+// it, once paid) or "Emitir" (the nota may come before the money). Live: the webhook changes it while the order is open.
 import { computed, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
 import { t } from '@/i18n'
 import { monthOf } from '@/lib/finance/period'
 import { today } from '@/lib/finance/text'
 import { watchInvoicesOf } from '@/lib/nfse/data'
-import { canHaveNfse, currentInvoiceOf, isActive, type NfseInvoice } from '@/lib/nfse/model'
+import { currentInvoiceOf, nfseIssueRow, type NfseInvoice } from '@/lib/nfse/model'
 import { DOT, invoiceStatusText } from '@/lib/nfse/text'
 import type { Order } from '@/lib/orders/model'
 
-const props = defineProps<{ order: Order; ready: boolean; remaining: number }>()
+const props = defineProps<{ order: Order; ready: boolean; remaining: number; direct?: boolean }>()
 const emit = defineEmits<{ issue: []; current: [invoice: NfseInvoice | null]; loaded: [loaded: boolean] }>()
 
 const invoices = shallowRef<NfseInvoice[]>([])
@@ -49,8 +49,7 @@ watch(loaded, (value) => emit('loaded', value), { immediate: true })
 
 const current = computed(() => currentInvoiceOf(invoices.value))
 watch(current, (value) => emit('current', value), { immediate: true })
-/** A finished order that can have a nota and has no active one. */
-const canIssue = computed(() => loaded.value && props.ready && props.order.status === 'done' && canHaveNfse(props.order) && !(current.value && isActive(current.value)))
+const issueRow = computed(() => (loaded.value ? nfseIssueRow(props.order, current.value, props.ready, props.direct === true, props.remaining) : null))
 const day = today()
 </script>
 
@@ -65,9 +64,9 @@ const day = today()
       <span class="dot" :class="`dot--${DOT[current.status]}`" aria-hidden="true"></span><span>{{ invoiceStatusText(current, day) }}</span>
     </RouterLink>
   </div>
-  <div v-if="canIssue" class="od-nfse" data-testid="order-nfse-issue-row">
+  <div v-if="issueRow" class="od-nfse" data-testid="order-nfse-issue-row">
     <span>{{ t('nfseRowTitle') }}</span>
-    <span v-if="remaining <= 0" class="sub">{{ t('nfseNotIssued') }}</span>
+    <span v-if="issueRow === 'notIssued'" class="sub">{{ t('nfseNotIssued') }}</span>
     <button v-else type="button" class="link" data-testid="order-nfse-issue" @click="emit('issue')">{{ t('nfseIssueLink') }}</button>
   </div>
 </template>

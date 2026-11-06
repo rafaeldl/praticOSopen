@@ -74,6 +74,16 @@ interface UserCompanyEntry {
   company?: { id?: unknown; name?: unknown }
 }
 
+/**
+ * Name of a company of the list. The `companies` copy in the user document is
+ * written when the person joins and never follows a rename, so the current
+ * company's own document wins (#612: "Rafael Laurindo" after it became "Rafsoft").
+ */
+export function companyEntryName(entry: CompanyEntry, current: { name?: string | null } | null = session.company, currentId: string | null = session.companyId): string {
+  const own = entry.id === currentId ? current?.name?.trim() : ''
+  return own || entry.name
+}
+
 /** Companies confirmed by the claim, in the order of the user document. */
 export function resolveCompanies(entries: unknown, roles: Record<string, string>): CompanyEntry[] {
   const list: CompanyEntry[] = []

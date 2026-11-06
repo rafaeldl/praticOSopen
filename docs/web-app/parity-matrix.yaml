@@ -3430,7 +3430,7 @@ rows:
 - id: order.nfse.issue-row
   screen: lib/screens/order/order_screen_v2.dart
   route: null
-  action: "Emitir pela linha \"Não emitida\""
+  action: "Emitir pela linha \"Não emitida\" (com a nota direta, também na OS aprovada)"
   kind: action
   roles: [owner, admin, manager]
   segments: all
@@ -3444,6 +3444,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
+  note: "App e web: na OS concluída, \"Não emitida\" quando o botão azul oferece, senão \"Emitir\". Com a NFS-e direta a linha \"Emitir\" aparece em qualquer OS que pode ter nota, aprovada também (#612; nfseIssueRow em lib/nfse/model.ts)."
 - id: order.delete
   screen: lib/screens/order/order_screen_v2.dart
   route: null

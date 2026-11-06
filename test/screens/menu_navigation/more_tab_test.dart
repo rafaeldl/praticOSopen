@@ -158,6 +158,31 @@ void main() {
   });
 
   group('Sua conta', () {
+    test('the current company shows its own name, not the copy (#612)', () {
+      expect(
+        companyEntryName(
+          'a',
+          'Rafael Laurindo',
+          currentId: 'a',
+          currentName: 'Rafsoft',
+        ),
+        'Rafsoft',
+      );
+      expect(
+        companyEntryName('b', 'Outra', currentId: 'a', currentName: 'Rafsoft'),
+        'Outra',
+      );
+      expect(
+        companyEntryName(
+          'a',
+          'Rafael Laurindo',
+          currentId: 'a',
+          currentName: ' ',
+        ),
+        'Rafael Laurindo',
+      );
+    });
+
     Future<List<String>> pumpAccount(
       WidgetTester tester, {
       Future<void> Function()? onDelete,
