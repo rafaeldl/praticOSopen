@@ -211,6 +211,15 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
   StreamSubscription<NfseInvoice?>? _subscription;
   bool _busy = false;
 
+  /// What is happening now ("Cancelando a nota…"): replaces the sentence at
+  /// the top while the server works, so the tap shows an answer at once.
+  String? _progress;
+
+  void _stopBusy() {
+    _busy = false;
+    _progress = null;
+  }
+
   /// Result of "Enviar de novo" until the live nota brings it.
   NfseEmailDelivery? _resent;
 
@@ -303,7 +312,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
         );
       }
     }
-    if (mounted) setState(() => _busy = false);
+    if (mounted) setState(_stopBusy);
   }
 
   /// Opens the PDF or the XML of a direct nota.
@@ -324,7 +333,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
         );
       }
     }
-    if (mounted) setState(() => _busy = false);
+    if (mounted) setState(_stopBusy);
   }
 
   /// Emits again: the sheet asks for what is missing.
@@ -375,7 +384,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
         );
       }
     }
-    if (mounted) setState(() => _busy = false);
+    if (mounted) setState(_stopBusy);
   }
 
   /// A direct nota with a PDF can go to the customer's e-mail (issue #611).
@@ -410,12 +419,16 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
   Future<void> _resendEmail() async {
     if (_busy) return;
     final l10n = context.l10n;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _progress = l10n.nfseEmailSendingProgress;
+    });
     try {
       final delivery = await _direct.resendInvoiceEmail(_invoice.id);
       if (!mounted) return;
       setState(() {
         _busy = false;
+        _progress = null;
         _resent = delivery;
       });
       final sent = delivery?.sent == true;
@@ -432,7 +445,10 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() {
+        _busy = false;
+        _progress = null;
+      });
       showAppToast(
         context,
         nfseDirectErrorText(l10n, e),
@@ -541,12 +557,16 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       ),
     );
     if (reason == null || !mounted) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _progress = l10n.nfseCancelingProgress;
+    });
     try {
       final updated = await _direct.cancelInvoice(_invoice.id, reason);
       if (!mounted) return;
       setState(() {
         _busy = false;
+        _progress = null;
         if (updated.id.isNotEmpty) _invoice = updated;
       });
       showAppToast(
@@ -556,7 +576,10 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() {
+        _busy = false;
+        _progress = null;
+      });
       final portal = e is NfseDirectApiException && e.code == 'CANCEL_REFUSED';
       await showCupertinoDialog<void>(
         context: context,
@@ -604,7 +627,10 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
 
   Future<void> _cancel({bool onlyOnAsaas = false}) async {
     final l10n = context.l10n;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _progress = l10n.nfseCancelingProgress;
+    });
     try {
       final updated = await _service.cancelInvoice(
         _invoice.id,
@@ -613,6 +639,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       if (!mounted) return;
       setState(() {
         _busy = false;
+        _progress = null;
         if (updated.id.isNotEmpty) _invoice = updated;
       });
       showAppToast(
@@ -624,7 +651,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       );
     } on AsaasApiException catch (e) {
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(_stopBusy);
       if (e.code == 'CANCEL_NOT_SUPPORTED' && !onlyOnAsaas) {
         await _askCanceledAtCity();
         return;
@@ -636,7 +663,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       );
     } catch (_) {
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(_stopBusy);
       showAppToast(
         context,
         l10n.asaasErrorGeneric,
@@ -687,7 +714,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     return MorePage(
       title: l10n.nfseRowTitle,
       previousPageTitle: widget.previousPageTitle,
-      subtitle: nfseHeadline(l10n, invoice),
+      subtitle: _progress ?? nfseHeadline(l10n, invoice),
       floatingButton: _floatingButton(),
       trailing: _busy
           ? const CupertinoActivityIndicator()
@@ -754,7 +781,9 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               AppListRow(
                 key: const Key('nfseInvoiceEmail'),
                 title: l10n.nfseEmailRow,
-                subtitle: _emailText(l10n, _resent ?? invoice.emailDelivery),
+                subtitle: _progress == l10n.nfseEmailSendingProgress
+                    ? _progress
+                    : _emailText(l10n, _resent ?? invoice.emailDelivery),
                 trailing: (_resent ?? invoice.emailDelivery) == null
                     ? l10n.nfseEmailSend
                     : l10n.nfseEmailSendAgain,

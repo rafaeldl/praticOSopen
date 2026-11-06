@@ -195,12 +195,15 @@ function close() {
 
 const asking = ref<'cancel' | 'atCity' | 'reason' | null>(null)
 const working = ref(false)
+/** Canceling now: the panel says so while the government answers. */
+const canceling = ref(false)
 const fixing = ref<NfseInvoice | null>(null)
 
 async function cancel(onlyOnAsaas = false) {
   const invoice = opened.value
   if (!invoice || working.value) return
   working.value = true
+  canceling.value = true
   try {
     const answer = await cancelInvoice(invoice.id, onlyOnAsaas)
     asking.value = null
@@ -224,6 +227,7 @@ async function cancel(onlyOnAsaas = false) {
     )
   } finally {
     working.value = false
+    canceling.value = false
   }
 }
 
@@ -241,6 +245,7 @@ async function cancelWithReason(reason: string) {
   const invoice = opened.value
   if (!invoice || working.value) return
   working.value = true
+  canceling.value = true
   asking.value = null
   try {
     await cancelDirect(invoice.id, reason as CancelReason)
@@ -252,6 +257,7 @@ async function cancelWithReason(reason: string) {
     await load()
   } finally {
     working.value = false
+    canceling.value = false
   }
 }
 
@@ -406,7 +412,8 @@ async function fixed() {
           <span class="status" :class="{ 'status--late': opened.status === 'error' }">
             <span class="dot" :class="`dot--${DOT[opened.status]}`" aria-hidden="true"></span><span data-testid="nfse-status">{{ statusOf(opened) }}</span>
           </span>
-          <p>{{ headOf(opened) }}</p>
+          <p v-if="canceling" class="nfse-progress" role="status" data-testid="nfse-progress">{{ t('nfseCancelingProgress') }}</p>
+          <p v-else>{{ headOf(opened) }}</p>
           <p v-if="external(opened)" class="sub nfse-tag">{{ t('web.nfseDirect.external') }}</p>
           <div class="nfse-actions">
             <button v-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
@@ -453,7 +460,7 @@ async function fixed() {
         <p v-if="opened.conflict" class="field-error" role="note">{{ t('nfseConflictNotice') }}</p>
         <p v-if="panelNote && panelNote.id === opened.id" class="field-error" role="alert" data-testid="nfse-panel-note">{{ panelNote.text }}</p>
         <div v-if="canCancel(opened)" class="nfse-danger">
-          <button type="button" class="link link--danger" :disabled="working" data-testid="nfse-cancel" @click="asking = opened.provider === 'direct' ? 'reason' : 'cancel'">{{ t('nfseCancelAction') }}</button>
+          <button type="button" class="link link--danger" :disabled="working" data-testid="nfse-cancel" @click="asking = opened.provider === 'direct' ? 'reason' : 'cancel'">{{ canceling ? t('nfseCancelingProgress') : t('nfseCancelAction') }}</button>
         </div>
       </aside>
     </div>

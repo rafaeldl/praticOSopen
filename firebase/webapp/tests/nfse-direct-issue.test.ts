@@ -450,6 +450,31 @@ describe('InvoicesView com nota direta', () => {
     wrapper.unmount()
   })
 
+  test('enquanto manda o e-mail ou cancela, a tela diz o que está fazendo', async () => {
+    listed.invoices = [doc('n1', { xmlPath: 'tenants/c1/invoices/n1/nfse.xml' })]
+    const { wrapper } = await view('/invoices?invoice=n1')
+    let answer!: (value: unknown) => void
+    nfseApi.mockImplementation(() => new Promise((resolve) => (answer = resolve)))
+
+    await wrapper.get('[data-testid="nfse-email-send"]').trigger('click')
+    await flush()
+    expect(wrapper.get('[data-testid="nfse-email-text"]').text()).toBe('Mandando o e-mail…')
+    answer({ emailDelivery: { status: 'sent', kind: 'issued', to: 'nota@example.com', at: new Date().toISOString(), manual: true } })
+    await flush()
+    expect(wrapper.get('[data-testid="nfse-email-text"]').text()).not.toBe('Mandando o e-mail…')
+
+    await wrapper.get('[data-testid="nfse-cancel"]').trigger('click')
+    await flush()
+    document.querySelectorAll<HTMLButtonElement>('button.opt')[1]!.click()
+    await flush()
+    expect(wrapper.get('[data-testid="nfse-progress"]').text()).toBe('Cancelando a nota…')
+    expect(wrapper.get('[data-testid="nfse-cancel"]').text()).toBe('Cancelando a nota…')
+    answer({ status: 'canceled' })
+    await flush()
+    expect(wrapper.find('[data-testid="nfse-progress"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   test('cidade recusa o cancelamento: manda ao portal do governo', async () => {
     const { wrapper } = await view('/invoices?invoice=n1')
     nfseApi.mockRejectedValue(new ApiError('CANCEL_REFUSED', 422, 'web.error.validation', undefined, { usePortal: true }))

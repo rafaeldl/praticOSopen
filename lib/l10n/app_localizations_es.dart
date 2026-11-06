@@ -7516,6 +7516,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nfseEmailSend => 'Enviar';
 
   @override
+  String get nfseIssuingProgress =>
+      'Emitiendo la factura… puede tardar unos segundos.';
+
+  @override
+  String get nfseCancelingProgress => 'Cancelando la factura…';
+
+  @override
+  String get nfseEmailSendingProgress => 'Enviando el correo…';
+
+  @override
   String nfseEmailSentToast(String email) {
     return 'Factura enviada a $email';
   }

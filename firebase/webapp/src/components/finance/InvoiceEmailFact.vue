@@ -47,7 +47,7 @@ async function send() {
   <div v-if="shown" data-testid="nfse-email">
     <dt>{{ t('nfseEmailRow') }}</dt>
     <dd>
-      <span :class="{ 'nfse-email-failed': delivery?.status === 'failed' }" data-testid="nfse-email-text">{{ emailDeliveryText(delivery, country()) }}</span>
+      <span :class="{ 'nfse-email-failed': !sending && delivery?.status === 'failed' }" role="status" data-testid="nfse-email-text">{{ sending ? t('nfseEmailSendingProgress') : emailDeliveryText(delivery, country()) }}</span>
       <button type="button" class="link nfse-email-send" :disabled="sending" data-testid="nfse-email-send" @click="send">
         {{ delivery ? t('nfseEmailSendAgain') : t('nfseEmailSend') }}
       </button>

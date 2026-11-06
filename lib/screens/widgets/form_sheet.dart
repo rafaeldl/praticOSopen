@@ -14,7 +14,8 @@ import 'package:praticos/theme/app_typography.dart';
 /// - With something filled ([dirty]) the "X" asks before discarding, and
 ///   dragging the sheet down is locked (when opened with [FormSheet.show]).
 /// - The "✓" calls [onSave]; the screen saves and pops with the record.
-///   [busy] shows a spinner in its place.
+///   [busy] shows a spinner in its place, and [busyText] ("Emitindo a
+///   nota…") says under the top bar what is happening while it waits.
 ///
 /// Wrap it in a [Form] when the fields validate.
 class FormSheet extends StatefulWidget {
@@ -27,6 +28,7 @@ class FormSheet extends StatefulWidget {
     required this.children,
     this.missingHint,
     this.busy = false,
+    this.busyText,
   });
 
   final String title;
@@ -42,6 +44,9 @@ class FormSheet extends StatefulWidget {
   /// What is missing to save ("Escreva o nome para salvar.").
   final String? missingHint;
   final bool busy;
+
+  /// Shown under the top bar while [busy], for a save that takes a while.
+  final String? busyText;
 
   /// Opens [builder] (whose root is a [FormSheet]) as a large Cupertino sheet
   /// and resolves with what it pops (null when closed).
@@ -144,6 +149,35 @@ class _FormSheetState extends State<FormSheet> {
                 onSave: widget.canSave && !widget.busy ? widget.onSave : null,
                 busy: widget.busy,
               ),
+              if (widget.busy && widget.busyText != null)
+                Padding(
+                  key: const ValueKey('form_sheet_busy'),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.pageMargin,
+                    AppSpacing.sm,
+                    AppSpacing.pageMargin,
+                    AppSpacing.sm,
+                  ),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Row(
+                      children: [
+                        const CupertinoActivityIndicator(),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            widget.busyText!,
+                            style: AppTypography.body.copyWith(
+                              color: AppColors.textSecondary.resolveFrom(
+                                context,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               Expanded(
                 child: ListView(
                   keyboardDismissBehavior:
