@@ -134,6 +134,8 @@
   "web.newOrder.otherDevices": "Other: {device}",
   "web.newOrder.priceOf": "Price of {name}",
   "web.newOrder.removeLine": "Remove {name}",
+  "web.newOrder.addDescription": "+ Description",
+  "web.newOrder.descriptionOf": "Description of {name}",
   "web.newOrder.save": "Create {order}",
   "web.newOrder.saving": "Saving…",
   "web.order.addPhoto": "Choose, paste or drop a photo",

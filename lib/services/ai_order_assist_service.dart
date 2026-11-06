@@ -4,6 +4,10 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:praticos/services/api_headers.dart';
 
+/// Photos the server reads per request (`MAX_PHOTOS` in order-assist.service.ts).
+/// More go into the order, only these are read.
+const int kAiMaxPhotos = 4;
+
 /// One photo sent to the assistant (JPEG bytes).
 class AiPhoto {
   const AiPhoto(this.bytes, {this.mimeType = 'image/jpeg'});
@@ -566,7 +570,7 @@ class AiOrderAssistService implements AiOrderAssistClient {
       if (text != null && text.trim().isNotEmpty) 'text': text.trim(),
       if (photos.isNotEmpty)
         'photos': [
-          for (final p in photos)
+          for (final p in photos.take(kAiMaxPhotos))
             {'mimeType': p.mimeType, 'data': base64Encode(p.bytes)},
         ],
       if (locale != null && const ['pt', 'en', 'es'].contains(locale))

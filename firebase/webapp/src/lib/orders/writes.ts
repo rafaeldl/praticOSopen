@@ -39,8 +39,8 @@ export interface NewOrderInput {
   clientOrderId?: string
   customerId: string
   deviceId?: string
-  services: { serviceId: string; value?: number | null }[]
-  products: { productId: string; quantity: number; value?: number | null }[]
+  services: { serviceId: string; value?: number | null; description?: string }[]
+  products: { productId: string; quantity: number; value?: number | null; description?: string }[]
   status?: OrderStatus
   dueDate?: string
   scheduledDate?: string

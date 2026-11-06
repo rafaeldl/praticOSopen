@@ -1,5 +1,5 @@
 // What the assistant's answer does to an order (POST /v1/app/ai/order-assist),
-// the app's _applyDraft (order_screen_v2.dart): it never replaces a customer
+// new or saved, as the app's _applyDraft (order_screen_v2.dart): it never replaces a customer
 // already chosen, a request already typed or a date already set; it never
 // receives, cancels or deletes on its own (money waits for the card). Pure.
 import { whatsappNumber } from '@/lib/phone'
@@ -99,6 +99,33 @@ export function deviceStep(draft: AssistDraft, state: { devices: { id?: string |
   if (state.isNew && state.canRegister && (device.serial || (device.name && !options.length))) return { kind: 'new', device }
   const label = [d.guess.name?.trim(), device.serial].filter(Boolean).join(' · ')
   return label ? { kind: 'ask', label, device, options } : { kind: 'none' }
+}
+
+/**
+ * What an answer does to the header of an order already saved, as the app's
+ * _applyDraft on a saved order: a customer only when the order has none, a
+ * registered device it does not have yet, the request only into a blank
+ * field. Nothing new is registered on its own: an unknown plate or name
+ * becomes a row that asks ("Cadastrar … como novo" is one tap).
+ */
+export function savedOrderFill(
+  draft: AssistDraft,
+  state: {
+    hasCustomer: boolean
+    devices: { id?: string | null; serial?: string | null }[]
+    canRegisterCustomers: boolean
+    canRegisterDevices: boolean
+    /** The segment's "O que o cliente pediu" field exists. */
+    hasRequestField: boolean
+    request: string
+  },
+): { customer: CustomerStep; device: DeviceStep; request: string | null } {
+  const notes = draft.notes?.trim() ?? ''
+  return {
+    customer: customerStep(draft, { hasCustomer: state.hasCustomer, isNew: false, canRegister: state.canRegisterCustomers }),
+    device: deviceStep(draft, { devices: state.devices, isNew: false, canRegister: state.canRegisterDevices }),
+    request: notes && state.hasRequestField && !state.request.trim() ? notes : null,
+  }
 }
 
 /**

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -17,6 +19,7 @@ import 'package:praticos/screens/share/receipt_question.dart';
 import 'package:praticos/screens/share/which_order_sheet.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/services/order_saved_elsewhere.dart';
@@ -98,12 +101,22 @@ class ReceiveShareService {
       if (choice == null || !context.mounted) return;
       String? orderId = choice.order?.id;
       if (choice.isNewOrder) {
+        // The photos open in the Nova OS ("Fotos" card) and the assistant
+        // reads them; they go up with the order. What could not be read as
+        // a photo, and the PDFs, are saved after the ✓ as before.
+        final shared = await photosForNewOrder(batch.photos);
+        if (!context.mounted) return;
         try {
-          orderId = await _createOrder(context);
+          orderId = await _createOrder(context, shared.photos);
         } on TimeoutException {
           if (context.mounted) await _confirm(context, null, null);
           return;
         }
+        if (orderId == null || !context.mounted) return;
+        final rest = ReceivedBatch([...shared.left, ...batch.pdfs]);
+        if (rest.isEmpty) return;
+        await _saveAndConfirm(context, companyId, orderId, rest);
+        return;
       }
       if (orderId == null || !context.mounted) return;
       if (!choice.isNewOrder &&
@@ -190,11 +203,11 @@ class ReceiveShareService {
     }
   }
 
-  /// "+" in "Em qual OS?": opens the Nova OS and returns its id once saved,
-  /// or null when it is closed without saving.
-  Future<String?> _createOrder(BuildContext context) {
+  /// "+" in "Em qual OS?": opens the Nova OS with [photos] and returns its id
+  /// once saved, or null when it is closed without saving.
+  Future<String?> _createOrder(BuildContext context, List<AiPhoto> photos) {
     final created = Completer<String>();
-    final closed = openNewOrder(context, onCreated: (id) {
+    final closed = openNewOrder(context, photos: photos, onCreated: (id) {
       if (!created.isCompleted) created.complete(id);
     });
     return newOrderIdAfter(closed, created.future);
@@ -358,6 +371,43 @@ class ReceiveShareService {
     return fresh;
   }
 }
+
+/// The shared photos as the Nova OS takes them: JPEG up to 1600 px, quality
+/// 70, as "Foto" (a shared image can be a large HEIC). A file that cannot be
+/// read stays in [left], to be saved as before.
+@visibleForTesting
+Future<({List<AiPhoto> photos, List<ReceivedFile> left})> photosForNewOrder(
+  List<ReceivedFile> files, {
+  Future<Uint8List?> Function(String path)? compress,
+}) async {
+  final read = compress ?? _compressShared;
+  final photos = <AiPhoto>[];
+  final left = <ReceivedFile>[];
+  for (final f in files) {
+    Uint8List? bytes;
+    try {
+      bytes = await read(f.path);
+    } catch (e) {
+      debugPrint('ReceiveShare: photo not read: $e');
+    }
+    if (bytes == null || bytes.isEmpty) {
+      left.add(f);
+    } else {
+      photos.add(AiPhoto(bytes));
+    }
+  }
+  return (photos: photos, left: left);
+}
+
+Future<Uint8List?> _compressShared(String path) =>
+    FlutterImageCompress.compressWithFile(
+      path,
+      minWidth: 1600,
+      minHeight: 1600,
+      quality: 70,
+      format: CompressFormat.jpeg,
+      keepExif: false,
+    );
 
 /// Id of the Nova OS opened from "Em qual OS?": null when the sheet [closed]
 /// without saving ("X"); after "✓" ([closed] resolves with `true`), waits for

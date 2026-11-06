@@ -354,6 +354,50 @@ test('assistente: lê o pedido, põe na OS com ✦ e desfaz (order.ai.type, orde
   await expect(line).toHaveCount(0)
 })
 
+test('assistente numa OS salva põe o veículo e o pedido do cliente, e desfaz (#630)', async ({ page }) => {
+  await page.route(/\/v1\/app\/ai\/status/, (route) => route.fulfill({ json: { success: true, data: { enabled: true, usage: { used: 10, limit: 100 } } } }))
+  await page.route(/\/v1\/app\/ai\/order-assist/, (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [],
+          changes: [],
+          device: { match: { id: 'device-3', name: 'Veículo 3', serial: 'TST0003' }, guess: null, alternatives: [] },
+          notes: 'Barulho no freio',
+          usage: { used: 11, limit: 100 },
+        },
+      },
+    }),
+  )
+  const order = await makeOrder('admin', { device: null, devices: [], deviceIds: [] })
+  await openOrder(page, 'admin', order.id)
+  await panel(page).getByLabel('Pedir ao assistente').fill('é o veículo placa TST0003, barulho no freio')
+  await panel(page).getByTestId('assistant').getByRole('button', { name: 'Enviar' }).click()
+  await expect(panel(page).getByTestId('assistant')).toContainText('Coloquei na OS o que está marcado. Confira.')
+  await expect.poll(async () => ((await readOrder(order.id))?.deviceIds as string[] | undefined) ?? []).toEqual(['device-3'])
+  await expect.poll(async () => ((await readOrder(order.id))?.customData as { observation?: string } | undefined)?.observation).toBe('Barulho no freio')
+  await page.locator('.toast').getByRole('button', { name: 'Desfazer' }).click()
+  await expect.poll(async () => ((await readOrder(order.id))?.deviceIds as string[] | undefined) ?? []).toEqual([])
+  await expect.poll(async () => ((await readOrder(order.id))?.customData as { observation?: string } | undefined)?.observation).toBeUndefined()
+})
+
+test('assistente numa OS salva: placa nova pergunta e cadastra com um toque (#630)', async ({ page }) => {
+  await page.route(/\/v1\/app\/ai\/status/, (route) => route.fulfill({ json: { success: true, data: { enabled: true, usage: { used: 10, limit: 100 } } } }))
+  await page.route(/\/v1\/app\/ai\/order-assist/, (route) =>
+    route.fulfill({ json: { success: true, data: { items: [], changes: [], device: { match: null, guess: { name: 'Gol', serial: 'NEW1A23' }, alternatives: [] }, usage: { used: 11, limit: 100 } } } }),
+  )
+  const order = await makeOrder('admin', { device: null, devices: [], deviceIds: [] })
+  await openOrder(page, 'admin', order.id)
+  await panel(page).getByLabel('Pedir ao assistente').fill('é um Gol placa NEW1A23')
+  await panel(page).getByTestId('assistant').getByRole('button', { name: 'Enviar' }).click()
+  // Nothing registered on its own: the row asks.
+  await panel(page).getByTestId('assist-ask-device').click()
+  await page.getByRole('button', { name: /Cadastrar Gol · NEW1A23/ }).click()
+  await expect.poll(async () => ((await readOrder(order.id))?.devices as { serial?: string }[] | undefined)?.map((d) => d.serial) ?? []).toEqual(['NEW1A23'])
+  await expect(panel(page).getByTestId('assist-ask-device')).toHaveCount(0)
+})
+
 // B6: the live channel stuck must never leave the order in "Carregando…".
 const LISTEN = '**/google.firestore.v1.Firestore/Listen/**'
 

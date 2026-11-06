@@ -5,6 +5,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 
 /// `/order`: the order screen ([OrderScreenV2]). It reads the route
@@ -29,7 +30,8 @@ class OrderRoute extends StatelessWidget {
 ///
 /// [repeat] starts the order with "Repetir" turned on (from Contratos).
 /// [onCreated] gets the new order id once it is saved (files shared from
-/// another app are attached then). [startTalking] opens it already listening,
+/// another app are attached then). [photos] start in its "Fotos" card and the
+/// assistant reads them (an image shared from another app). [startTalking] opens it already listening,
 /// from the assistant's first-use sheet. [prefill] starts it with a customer,
 /// devices and services (next maintenance). Resolves with `true` on "✓"; the
 /// offers that follow a save ([runNewOrderOffers]) do not hold it up.
@@ -39,6 +41,7 @@ Future<Object?> openNewOrder(
   bool startTalking = false,
   void Function(String orderId)? onCreated,
   Order? prefill,
+  List<AiPhoto> photos = const [],
 }) async {
   final saved = Completer<Order>();
   final arguments = {
@@ -46,6 +49,7 @@ Future<Object?> openNewOrder(
       repeat: repeat,
       startTalking: startTalking,
       onCreated: onCreated,
+      photos: photos,
     ),
     'order': ?prefill,
     'onSaved': saved.complete,
@@ -97,11 +101,15 @@ Map<String, dynamic>? newOrderArguments({
   bool repeat = false,
   bool startTalking = false,
   void Function(String orderId)? onCreated,
+  List<AiPhoto> photos = const [],
 }) {
-  if (!repeat && !startTalking && onCreated == null) return null;
+  if (!repeat && !startTalking && onCreated == null && photos.isEmpty) {
+    return null;
+  }
   return {
     if (repeat) 'repeat': true,
     if (startTalking) 'startTalking': true,
     if (onCreated != null) 'onCreated': onCreated,
+    if (photos.isNotEmpty) 'photos': photos,
   };
 }
