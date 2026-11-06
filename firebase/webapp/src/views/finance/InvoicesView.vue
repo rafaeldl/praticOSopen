@@ -22,9 +22,9 @@ import { monthName, monthYear, today } from '@/lib/finance/text'
 import { formatDate } from '@/lib/format'
 import { cancelInvoice, customerInvoices, monthInvoices, nfseSettings, type NfseSettings } from '@/lib/nfse/data'
 import { can } from '@/lib/session'
-import { DOT, invoiceStatusText } from '@/lib/nfse/text'
-import { SEARCH_FROM, byEmitter, canCancel, canFix, canReconcile, emittersOf, matches, monthList, orderNumbers, refusalMessage, type NfseInvoice } from '@/lib/nfse/model'
-import { CANCEL_REASONS, cancelDirect, cancelFailureText, directPdfPath, reconcileDirect, storageUrl, type CancelReason } from '@/lib/nfse/direct-issue'
+import { DOT, autoFailureReason, invoiceStatusText } from '@/lib/nfse/text'
+import { SEARCH_FROM, byEmitter, canCancel, canFix, canReconcile, canRetryAuto, emittersOf, isAutoDirectFailure, matches, monthList, orderNumbers, refusalMessage, type NfseInvoice } from '@/lib/nfse/model'
+import { CANCEL_REASONS, cancelDirect, cancelFailureText, directFailure, directPdfPath, reconcileDirect, retryAutoIssue, storageUrl, type CancelReason } from '@/lib/nfse/direct-issue'
 import { formatTaxId } from '@/lib/tax-id'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -173,6 +173,7 @@ function reasonOf(invoice: NfseInvoice): string | null {
   if (invoice.status !== 'error' && invoice.status !== 'cancellationDenied') return null
   // NFS-e direct: the government's refusal in plain words, in the language on screen.
   if (invoice.refusal) return refusalMessage(invoice.refusal, locale.value)
+  if (isAutoDirectFailure(invoice)) return autoFailureReason(invoice.errorCode ?? '')
   const known = invoice.errorCode ? REASON[invoice.errorCode] : undefined
   return known ? t(known) : invoice.statusDescription
 }
@@ -258,6 +259,23 @@ async function cancelWithReason(reason: string) {
   } finally {
     working.value = false
     canceling.value = false
+  }
+}
+
+/** "Tentar novamente" of an automatic nota that did not go out (issue #571): the failure stays on the panel, never an alert. */
+async function retryAuto() {
+  const invoice = opened.value
+  if (!invoice || working.value) return
+  working.value = true
+  try {
+    const answer = await retryAutoIssue(invoice.orderIds)
+    panelNote.value = null
+    showToast(answer.status === 'creating' ? t('web.nfseDirect.waitingGov') : answer.number ? t('nfseStatusIssuedNumber', { number: answer.number }) : t('nfseStatusIssued'))
+    await load()
+  } catch (error) {
+    panelNote.value = { id: invoice.id, text: directFailure(error, locale.value).text }
+  } finally {
+    working.value = false
   }
 }
 
@@ -416,7 +434,8 @@ async function fixed() {
           <p v-else>{{ headOf(opened) }}</p>
           <p v-if="external(opened)" class="sub nfse-tag">{{ t('web.nfseDirect.external') }}</p>
           <div class="nfse-actions">
-            <button v-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
+            <button v-if="canRetryAuto(opened)" type="button" class="btn btn--primary" :disabled="working" data-testid="nfse-retry-auto" @click="retryAuto">{{ t('tryAgain') }}</button>
+            <button v-else-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
             <template v-if="opened.provider === 'direct'">
               <button v-if="canReconcile(opened)" type="button" class="btn btn--primary" :disabled="working" data-testid="nfse-reconcile" @click="reconcile">{{ t('web.nfseDirect.checkNow') }}</button>
               <button v-if="opened.accessKey && (opened.status === 'authorized' || opened.status === 'cancellationDenied' || opened.status === 'canceled')" type="button" class="btn btn--primary" data-testid="nfse-pdf" @click="openFile('pdf')">{{ t('nfseOpenPdf') }}</button>

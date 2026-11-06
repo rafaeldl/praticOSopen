@@ -278,4 +278,27 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
       expect(read(ORDER_PATH)).toMatchObject({ payment: 'unpaid', updatedAt: 'x' });
     });
   });
+
+  it('OS concluída numa empresa com NFS-e direta em "todas as OS": grava só o pedido da nota (não emite aqui)', async () => {
+    seed(SETTINGS_PATH, { nfseDirectEnabled: true });
+    seed('companies/c1/settings/nfse', { provider: 'direct', autoIssue: 'allOrders' });
+    seed('companies/c1/customers/cu1', { name: 'Cliente Exemplo' });
+    seed(ORDER_PATH, { status: 'done', total: 100, customer: { id: 'cu1' }, services: [{ value: 100 }] });
+
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress', total: 100 }, { status: 'done', total: 100 });
+
+    expect(read('companies/c1/private/nfse/autoIssue/o1')).toMatchObject({ status: 'pending', rule: 'allOrders' });
+    expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'completed');
+  });
+
+  it('NFS-e direta com regra do Asaas ("completed"): nenhum pedido do motor direto', async () => {
+    seed(SETTINGS_PATH, { nfseDirectEnabled: true });
+    seed('companies/c1/settings/nfse', { autoIssue: 'completed' });
+    seed('companies/c1/customers/cu1', { name: 'Cliente Exemplo', autoIssueInvoice: true });
+    seed(ORDER_PATH, { status: 'done', total: 100, customer: { id: 'cu1' } });
+
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress', total: 100 }, { status: 'done', total: 100 });
+
+    expect(read('companies/c1/private/nfse/autoIssue/o1')).toBeUndefined();
+  });
 });

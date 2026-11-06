@@ -5689,6 +5689,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get nfseStatusIssuedAuto => 'Issued automatically';
+
+  @override
+  String nfseStatusIssuedAutoNumber(String number) {
+    return 'Issued automatically · no. $number';
+  }
+
+  @override
+  String get nfseAutoMissingTaxId => 'The customer\'s tax ID is missing';
+
+  @override
+  String get nfseAutoCertificateExpired => 'Certificate expired';
+
+  @override
+  String get nfseAutoEmitterNotReady => 'The invoice CNPJ needs setup';
+
+  @override
+  String get nfseAutoDailyLimit => 'Today\'s invoice limit';
+
+  @override
+  String get nfseAutoNotIssued => 'Not issued automatically';
+
+  @override
+  String get nfseAutoErrorPickEmitter =>
+      'Choose the default CNPJ in Invoice so invoices go out automatically.';
+
+  @override
   String get nfseStatusCanceling => 'Canceling';
 
   @override

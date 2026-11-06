@@ -3,7 +3,7 @@
 import { t } from '@/i18n'
 import { formatDate } from '@/lib/format'
 import { country } from '@/lib/orders/text'
-import type { NfseInvoice, NfseStatus } from './model'
+import { isAutoDirectFailure, type NfseInvoice, type NfseStatus } from './model'
 
 export const DOT: Record<NfseStatus, string> = {
   creating: 'warning',
@@ -24,6 +24,7 @@ export function invoiceStatusText(invoice: NfseInvoice, todayDay: string): strin
         ? t('nfseStatusScheduledFor', { date: formatDate(`${invoice.effectiveDate}T12:00:00`, country()) })
         : t('nfseStatusWaiting')
     case 'authorized':
+      if (invoice.auto) return invoice.number ? t('nfseStatusIssuedAutoNumber', { number: invoice.number }) : t('nfseStatusIssuedAuto')
       return invoice.number ? t('nfseStatusIssuedNumber', { number: invoice.number }) : t('nfseStatusIssued')
     case 'processingCancellation':
       return t('nfseStatusCanceling')
@@ -32,8 +33,48 @@ export function invoiceStatusText(invoice: NfseInvoice, todayDay: string): strin
     case 'canceled':
       return t('nfseStatusCanceled')
     case 'error':
-      return t('nfseStatusError')
+      return isAutoDirectFailure(invoice) ? autoFailureShort(invoice.errorCode ?? '') : t('nfseStatusError')
     default:
       return t('nfseStatusWaiting')
+  }
+}
+
+/** Short reason of an automatic direct nota that did not go out (the app's nfseAutoErrorShort). */
+export function autoFailureShort(code: string): string {
+  switch (code) {
+    case 'RECIPIENT_TAX_ID_REQUIRED':
+      return t('nfseAutoMissingTaxId')
+    case 'CERT_EXPIRED':
+      return t('nfseAutoCertificateExpired')
+    case 'CERT_NOT_FOUND':
+    case 'EMITTER_NOT_READY':
+    case 'EMITTER_NOT_FOUND':
+      return t('nfseAutoEmitterNotReady')
+    case 'DAILY_LIMIT_REACHED':
+      return t('nfseAutoDailyLimit')
+    default:
+      return t('nfseAutoNotIssued')
+  }
+}
+
+/** Why an automatic direct nota did not go out, in full (the app's nfseAutoErrorReason). */
+export function autoFailureReason(code: string): string {
+  switch (code) {
+    case 'RECIPIENT_TAX_ID_REQUIRED':
+      return t('nfseDirectErrorRecipientTaxId')
+    case 'CERT_EXPIRED':
+      return t('nfseDirectErrorExpired')
+    case 'CERT_NOT_FOUND':
+    case 'EMITTER_NOT_READY':
+      return t('nfseDirectErrorEmitterNotReady')
+    case 'EMITTER_NOT_FOUND':
+      return t('nfseAutoErrorPickEmitter')
+    case 'DAILY_LIMIT_REACHED':
+      return t('nfseDirectErrorDailyLimit')
+    case 'SEFIN_UNAVAILABLE':
+    case 'KEY_VAULT_UNAVAILABLE':
+      return t('nfseDirectErrorUnavailable')
+    default:
+      return t('nfseDirectErrorGeneric')
   }
 }

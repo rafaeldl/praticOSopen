@@ -169,7 +169,7 @@ const step = computed(() => {
   // Finished and paid: the nota is the next step, for who issues (order.nfse.next-step).
   if (!base && nfseOn.value && nfseLoaded.value && can('chargeOrder')) {
     const nota = nfseNextStep(order.value, nfseCurrent.value, nfseReady.value, money$.value?.remaining ?? 0)
-    if (nota) return { kind: 'nfse' as const, fix: nota === 'fix' }
+    if (nota) return { kind: 'nfse' as const, fix: nota === 'fix', retry: nota === 'retry' }
   }
   if (base?.kind !== 'status') return base
   const preferred = preferredStep(session.companyId, order.value.status, access.value.transitions)
@@ -260,7 +260,7 @@ const stepLabel = computed(() => {
   if (!value) return ''
   if (value.kind === 'resume') return t('orderHoldResume')
   if (value.kind === 'receive') return t('orderNextStepReceive', { amount: money(value.amount) })
-  if (value.kind === 'nfse') return value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
+  if (value.kind === 'nfse') return value.retry ? t('tryAgain') : value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
   return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('web.order.markDone')
 })
 const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
@@ -495,8 +495,24 @@ async function runStep() {
   if (!value || !order.value) return
   if (value.kind === 'status') await setStatus(value.to)
   else if (value.kind === 'resume') await run(() => writes.resumeOrder(order.value!.id), t('web.order.resumed'))
+  else if (value.kind === 'nfse' && value.retry) await retryAutoNfse(order.value.id)
   else if (value.kind === 'nfse') issuing.value = true
   else dialog.value = { kind: 'receive' }
+}
+
+/** The automatic nota did not go out for a reason a new try may fix: one click issues it (issue #571). */
+async function retryAutoNfse(orderId: string) {
+  busy.value = true
+  // On demand, like the issue dialog: the order screen does not carry the nota code.
+  const [{ retryAutoIssue, directFailure }] = await Promise.all([import('@/lib/nfse/direct-issue'), loadTexts('finance')])
+  try {
+    const answer = await retryAutoIssue([orderId])
+    showToast(answer.status === 'creating' ? t('web.nfseDirect.waitingGov') : answer.number ? t('nfseStatusIssuedNumber', { number: answer.number }) : t('nfseStatusIssued'))
+  } catch (error) {
+    showToast(directFailure(error, locale.value).text)
+  } finally {
+    busy.value = false
+  }
 }
 
 async function hold(reason: HoldReason, note: string) {

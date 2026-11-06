@@ -228,6 +228,18 @@ export const byEmitter = (invoice: NfseInvoice, emitterId: string | null): boole
 /** "Corrigir e emitir": a refused nota of ours, with its orders. */
 export const canFix = (invoice: NfseInvoice): boolean => invoice.status === 'error' && !invoice.conflict && invoice.orderIds.length > 0
 
+/** An automatic direct nota that the server could not issue, with our reason in `errorCode` (not a refusal of the government). */
+export const isAutoDirectFailure = (invoice: NfseInvoice): boolean =>
+  invoice.provider === 'direct' && invoice.auto && invoice.status === 'error' && !!invoice.errorCode && !invoice.refusal
+
+/**
+ * An automatic direct nota that did not go out for a reason a new try may fix
+ * (daily limit, certificate renewed, service out): "Tentar novamente" issues it
+ * again with one click. Missing customer data opens the issue dialog instead (issue #571).
+ */
+export const canRetryAuto = (invoice: NfseInvoice): boolean =>
+  isAutoDirectFailure(invoice) && invoice.errorCode !== 'RECIPIENT_TAX_ID_REQUIRED' && !invoice.conflict && invoice.orderIds.length > 0
+
 export const orderNumbers = (invoice: NfseInvoice): string =>
   invoice.orders.map((o) => o.orderNumber).filter((n): n is number => n !== null).join(', ')
 
@@ -422,10 +434,11 @@ export const canHaveNfse = (order: NfseOrderLike): boolean => order.status !== '
  * "Corrigir e emitir" after a refused nota. Nothing with an active nota, after
  * one canceled on purpose, or before the setup is done.
  */
-export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, remaining: number, now = Date.now()): 'issue' | 'fix' | null {
+export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, remaining: number, now = Date.now()): 'issue' | 'fix' | 'retry' | null {
   if (!ready || order.status !== 'done' || remaining > 0 || !canHaveNfse(order)) return null
   if (!current) return 'issue'
   if (isActive(current, now)) return null
+  if (canRetryAuto(current)) return 'retry'
   return current.status === 'error' ? 'fix' : null
 }
 

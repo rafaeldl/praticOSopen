@@ -9314,6 +9314,54 @@ abstract class AppLocalizations {
   /// **'Emitida · nº {number}'**
   String nfseStatusIssuedNumber(String number);
 
+  /// No description provided for @nfseStatusIssuedAuto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida sozinha'**
+  String get nfseStatusIssuedAuto;
+
+  /// No description provided for @nfseStatusIssuedAutoNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida sozinha · nº {number}'**
+  String nfseStatusIssuedAutoNumber(String number);
+
+  /// No description provided for @nfseAutoMissingTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o CPF ou CNPJ do cliente'**
+  String get nfseAutoMissingTaxId;
+
+  /// No description provided for @nfseAutoCertificateExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado vencido'**
+  String get nfseAutoCertificateExpired;
+
+  /// No description provided for @nfseAutoEmitterNotReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta configurar o CNPJ da nota'**
+  String get nfseAutoEmitterNotReady;
+
+  /// No description provided for @nfseAutoDailyLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite de notas de hoje'**
+  String get nfseAutoDailyLimit;
+
+  /// No description provided for @nfseAutoNotIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não saiu sozinha'**
+  String get nfseAutoNotIssued;
+
+  /// No description provided for @nfseAutoErrorPickEmitter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o CNPJ padrão em Nota fiscal para as notas saírem sozinhas.'**
+  String get nfseAutoErrorPickEmitter;
+
   /// No description provided for @nfseStatusCanceling.
   ///
   /// In pt, this message translates to:

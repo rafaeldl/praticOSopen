@@ -69,6 +69,9 @@ String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
       return refusal.text(l10n.localeName.split('_').first) ??
           l10n.nfseDirectRefusedGeneric;
     }
+    if (invoice.isAutoDirectFailure) {
+      return nfseAutoErrorReason(l10n, invoice.errorCode!);
+    }
     return invoice.statusDescription;
   }
   switch (invoice.errorCode) {
@@ -366,6 +369,21 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     }
   }
 
+  /// "Tentar novamente" of an automatic nota that did not go out: issues it
+  /// now, without the sheet; back to the order when it went.
+  Future<void> _retryAuto() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final invoice = await retryAutoNfse(
+      context,
+      _invoice,
+      service: widget.directService,
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (invoice != null) await Navigator.of(context).maybePop();
+  }
+
   /// Asks the government now about a direct nota with no clear answer.
   Future<void> _reconcile() async {
     if (_busy) return;
@@ -476,6 +494,14 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
         label: l10n.nfseSharePdf,
         floating: true,
         onPressed: _busy ? null : _sharePdf,
+      );
+    }
+    if (invoice.canRetryAuto && !invoice.conflict) {
+      return PrimaryButton(
+        key: const Key('nfseRetryAuto'),
+        label: l10n.tryAgain,
+        floating: true,
+        onPressed: _busy ? null : _retryAuto,
       );
     }
     if (invoice.status == NfseStatus.error &&

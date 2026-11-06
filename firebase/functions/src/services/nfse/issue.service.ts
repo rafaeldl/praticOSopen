@@ -495,7 +495,11 @@ async function sendDps(
   orderCustomerId?: string,
 ): Promise<DirectInvoice> {
   const snapshot = (await dpsSnapshotRef(companyId, invoiceId).get()).data() as { dps: Omit<DpsInput, 'issuedAt' | 'competenceDate' | 'environment' | 'appVersion'> };
-  const cert = await deps.loadCertificate(companyId, emitterId, { purpose: 'issue', invoiceId, by: invoice.createdBy ?? null });
+  // An automatic nota has its own reason in the audit and nobody behind it (issue #571).
+  const use: CertificateUse = invoice.auto
+    ? { purpose: 'autoIssue', invoiceId, by: null }
+    : { purpose: 'issue', invoiceId, by: invoice.createdBy ?? null };
+  const cert = await deps.loadCertificate(companyId, emitterId, use);
   const client = new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
   const stamp = brasiliaTimestamps(deps.now());
   const input: DpsInput = { ...snapshot.dps, ...stamp, environment: config.environment, appVersion: config.appVersion };

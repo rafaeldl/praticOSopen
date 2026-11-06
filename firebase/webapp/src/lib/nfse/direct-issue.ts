@@ -95,6 +95,9 @@ export const previewDirect = (input: { orderIds: string[]; emitterId?: string | 
 export const issueDirect = (input: DirectIssueInput) =>
   nfseApi<{ id: string; status: string; number?: string | null }>(`${BASE}/invoices`, { method: 'POST', body: input })
 
+/** "Tentar novamente" of an automatic nota that did not go out: the same nota the server would make (issue #571). */
+export const retryAutoIssue = (orderIds: string[]) => issueDirect({ orderIds })
+
 export type CancelReason = 'issueError' | 'serviceNotProvided'
 export const CANCEL_REASONS: readonly CancelReason[] = ['issueError', 'serviceNotProvided']
 

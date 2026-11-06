@@ -85,7 +85,8 @@ export type CertificateAuditAction =
   | 'open';
 
 /** Why the certificate is being opened (audited on every opening). */
-export type CertificatePurpose = 'issue' | 'cancel' | 'reconcile' | 'import' | 'unspecified';
+/** `autoIssue`: the nota the server issues by itself when the order is done (issue #571). */
+export type CertificatePurpose = 'issue' | 'autoIssue' | 'cancel' | 'reconcile' | 'import' | 'unspecified';
 
 export interface CertificateUse {
   purpose: CertificatePurpose;
