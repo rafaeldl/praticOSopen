@@ -557,11 +557,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
         </div>
         <div class="step">
           <label class="field-label" for="no-due"><span v-if="marked.has('due')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('web.newOrder.due') }}</label>
-          <input id="no-due" v-model="due" class="field" type="datetime-local" :data-empty="!due || undefined" />
+          <input id="no-due" v-model="due" class="field" type="datetime-local" :data-empty="!due || undefined" @input="marked.delete('due')" />
         </div>
         <div class="step">
           <label class="field-label" for="no-request"><span v-if="marked.has('request')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('orderCustomerRequestTitle') }}</label>
-          <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
+          <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" @input="marked.delete('request')" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
         </div>
         <NewOrderPhotos v-if="can('attachPhotos')" v-model="photos" />
         <NewOrderCustomFields v-if="customFields.length" :values="customValues" :tried="customTried" />

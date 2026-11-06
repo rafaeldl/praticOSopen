@@ -34,6 +34,9 @@ export const MAX_AUDIO_BYTES = 3 * 1024 * 1024;
 export const MAX_PHOTOS = 4;
 export const MAX_ORDER_LINES = 50;
 const MAX_OPERATIONS = 30;
+export const MAX_HISTORY = 3;
+export const MAX_HISTORY_CHARS = 500;
+export const MAX_CONTEXT_DEVICES = 10;
 
 const orderLineSchema = z
   .object({
@@ -44,6 +47,38 @@ const orderLineSchema = z
     quantity: z.number().finite().positive().optional(),
   })
   .strict();
+
+/**
+ * What the order already has, so a new message can correct what the assistant
+ * put ("não, a placa é…") and never touch what the person chose. The customer
+ * goes only as chosen or not: its name never reaches the model.
+ */
+const contextSchema = z
+  .object({
+    customer: z.object({ chosen: z.boolean(), fromAi: z.boolean().optional() }).strict().optional(),
+    devices: z
+      .array(
+        z
+          .object({
+            name: z.string().trim().max(200).optional(),
+            serial: z.string().trim().max(40).optional(),
+            fromAi: z.boolean().optional(),
+          })
+          .strict(),
+      )
+      .max(MAX_CONTEXT_DEVICES)
+      .optional(),
+    request: z.object({ text: z.string().trim().max(2000), fromAi: z.boolean().optional() }).strict().optional(),
+    due: z
+      .object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}(T([01]\d|2[0-3]):[0-5]\d)?$/), fromAi: z.boolean().optional() })
+      .strict()
+      .optional(),
+    /** Which question the screen is asking ("Qual Juliene?", "Qual Pintura?"). */
+    pending: z.array(z.enum(['customer', 'device', 'line'])).max(3).optional(),
+  })
+  .strict();
+
+export type OrderAssistContext = z.infer<typeof contextSchema>;
 
 const base64Of = (maxBytes: number) =>
   z
@@ -86,6 +121,12 @@ export const orderAssistInputSchema = z
       })
       .strict()
       .optional(),
+    /**
+     * The last messages of this order, oldest first, kept only in the screen's
+     * memory. Already applied: they only help to read the new one.
+     */
+    history: z.array(z.string().trim().min(1).max(MAX_HISTORY_CHARS)).max(MAX_HISTORY).optional(),
+    context: contextSchema.optional(),
   })
   .strict()
   .refine((v) => !!v.text || !!v.audio || (v.photos?.length ?? 0) > 0, {
@@ -154,7 +195,15 @@ export const llmDraftSchema = z.object({
   transcript: optionalText,
   customer: z.object({ name: optionalText, phone: optionalText }).nullable().optional().catch(undefined),
   device: z
-    .object({ name: optionalText, serial: optionalText, manufacturer: optionalText })
+    .object({
+      name: optionalText,
+      serial: optionalText,
+      manufacturer: optionalText,
+      /** Vehicle from the assistant this one corrects (V1, V2…), from the context. */
+      replaces: z
+        .preprocess((v) => (typeof v === 'string' ? v.trim().toUpperCase() : undefined), z.string().regex(/^V[1-9]\d?$/).optional())
+        .catch(undefined),
+    })
     .nullable()
     .optional()
     .catch(undefined),
@@ -179,7 +228,7 @@ export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
     device: {
       type: 'object',
       additionalProperties: false,
-      properties: { name: STRING, serial: STRING, manufacturer: STRING },
+      properties: { name: STRING, serial: STRING, manufacturer: STRING, replaces: STRING },
     },
     operations: {
       type: 'array',
@@ -246,6 +295,30 @@ export const LLM_RESPONSE_SCHEMA_WITH_ACTIONS: Record<string, unknown> = {
   required: [...(LLM_RESPONSE_SCHEMA.required as string[]), 'actions'],
 };
 
+const NULLABLE_STRING = { type: ['string', 'null'] };
+
+/**
+ * [schema] for requests with `context`/`history`: `device` is required (null
+ * when no vehicle was said). With it optional, Claude left out the corrected
+ * vehicle on "não, é um Corsa" (scripts/ai-memory-eval.ts), as it skipped
+ * `payment` before `actions` parts were required.
+ */
+export function withMemorySchema(schema: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ...schema,
+    properties: {
+      ...(schema.properties as Record<string, unknown>),
+      device: {
+        type: ['object', 'null'],
+        additionalProperties: false,
+        properties: { name: NULLABLE_STRING, serial: NULLABLE_STRING, manufacturer: NULLABLE_STRING, replaces: NULLABLE_STRING },
+        required: ['name', 'serial', 'manufacturer', 'replaces'],
+      },
+    },
+    required: [...(schema.required as string[]), 'device'],
+  };
+}
+
 /**
  * Parses the model's JSON text. Tolerates ```json fences and drops invalid
  * items instead of failing the whole draft. Throws [LlmUnavailableError] when
@@ -300,6 +373,23 @@ export function todayLabel(now: Date = new Date(), timeZone = 'America/Sao_Paulo
   return `${date} (${weekday})`;
 }
 
+/**
+ * " (Saturday 2026-11-07, …)": the 7 days after today, so a weekday needs no
+ * counting (Gemini put "quarta" on a Thursday). Empty when [today] has no date.
+ */
+export function nextDays(today: string): string {
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(today);
+  if (!match) return '';
+  const date = new Date(`${match[1]}T12:00:00Z`);
+  const days: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    const weekday = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'long' }).format(date);
+    days.push(`${weekday} ${date.toISOString().slice(0, 10)}`);
+  }
+  return ` (${days.join(', ')})`;
+}
+
 /** Rules of `actions`. Only companies with `financeActions` on get them. */
 const ACTIONS_PROMPT = [
   '- actions: only what was said or typed, never read from a photo. A part that was not said is null.',
@@ -328,11 +418,38 @@ const ACTIONS_PROMPT = [
   '  status: "aprovou", "aprovado", "fechou", "fechou o orçamento" → "approved"; "comecei" → "progress"; "pronto", "terminei", "finaliza", "concluído", "entregue" → "done".',
 ];
 
+/**
+ * Rules for the current order and the earlier messages (issue #631). Only
+ * requests that send `context` or `history` get them: older apps keep the
+ * prompt they had.
+ */
+const MEMORY_PROMPT = [
+  'Answer only the NEW message. "Current order" shows what the order has now, and who filled each field:',
+  '"(from assistant)" or "(set by the user)". A field from the assistant may be corrected by the new message.',
+  'A field set by the user is NEVER changed: leave it out.',
+  '"Earlier messages" were already applied: what they said is already in "Current order". Never return again',
+  'something only an earlier message said. Use them only to understand the new message ("o mesmo valor", "o dele',
+  'também", "não, era 350"). Whatever the new message says or corrects, return it as you would with no history.',
+  '- A correction of a line ("não, era 350", "não, são 2") is an "update" on that line, never a new line.',
+  '- device: a vehicle in the new message is returned, also when it corrects one. A correction of a vehicle from the',
+  '  assistant returns the whole corrected vehicle (keep what was right) with "replaces" set to its id.',
+  '  "não, a placa é QRS1B45" with V1 "Palio 2015, plate QRS1234 (from assistant)" → device {name "Palio 2015",',
+  '  serial "QRS1B45", replaces "V1"}. "não, é um Fiesta" → device {name "Fiesta", replaces "V1"}.',
+  '  "Não", "errada", "errei" or "é…" about the plate or model is a correction: always set "replaces".',
+  '  Never replace a vehicle set by the user. Another vehicle ("e o outro carro…") has no "replaces".',
+  '- customer: only when the new message says a customer, or corrects the customer from the assistant.',
+  '- notes: only when the new message says a defect or request, or corrects the note from the assistant; then return the',
+  '  whole new note.',
+  '- dueDate: only when the new message says a deadline ("o prazo é segunda" corrects the one from the assistant).',
+  '- When the screen is waiting for the user to pick a customer, vehicle or line, a name, plate or price in the new',
+  '  message answers that question.',
+];
+
 export function buildSystemPrompt(
   locale: string,
   deviceLabel?: string,
   today: string = todayLabel(),
-  options: { financeActions?: boolean } = {},
+  options: { financeActions?: boolean; memory?: boolean } = {},
 ): string {
   const device = deviceLabel || 'device (vehicle, appliance, equipment)';
   return [
@@ -362,12 +479,40 @@ export function buildSystemPrompt(
     '  no price was said. "200 cada" means unit value 200 with quantity. "garantia" or "cortesia" means value 0.',
     '  Parts/materials are kind "product"; labor is kind "service".',
     `- dueDate: when the order must be ready ("pronto sexta", "entregar amanhã", "dia 20"), as YYYY-MM-DD.`,
-    `  Today is ${today}; a weekday means the next one after today. dueTime as HH:MM only when a time was said.`,
+    `  Today is ${today}; a weekday means the next one after today${nextDays(today)}. dueTime as HH:MM only when a time was said.`,
     '  Leave both out when no deadline was said, and do not repeat the deadline in notes.',
     '- notes: what the customer asked or the defect (seen in the photo or said), short. Not the deadline.',
     ...(options.financeActions ? ACTIONS_PROMPT : []),
+    ...(options.memory ? MEMORY_PROMPT : []),
     `Write names and notes in ${LANGUAGE[locale] ?? LANGUAGE.pt}.`,
   ].join('\n');
+}
+
+/** Sends `context` or `history`: gets [MEMORY_PROMPT] and "Current order". */
+export function hasMemory(input: OrderAssistInput): boolean {
+  return !!input.context || (input.history?.length ?? 0) > 0;
+}
+
+const who = (fromAi?: boolean) => (fromAi ? '(from assistant)' : '(set by the user)');
+
+/** "Current order" block: never the customer's name. Empty for older apps. */
+function currentOrder(input: OrderAssistInput): string[] {
+  if (!hasMemory(input)) return [];
+  const c = input.context ?? {};
+  const devices = (c.devices ?? []).map((d, i) => {
+    const plate = d.serial ? `, plate/serial ${d.serial}` : '';
+    return `V${i + 1}: ${d.name || '-'}${plate} ${who(d.fromAi)}`;
+  });
+  const pending = c.pending?.length ? [`Waiting for the user to pick: ${c.pending.join(', ')}`] : [];
+  return [
+    'Current order:',
+    `Customer: ${c.customer?.chosen ? `chosen ${who(c.customer.fromAi)}` : 'none'}`,
+    'Vehicles:',
+    devices.join('\n') || '(none)',
+    `Request: ${c.request?.text ? `"${c.request.text}" ${who(c.request.fromAi)}` : 'none'}`,
+    `Deadline: ${c.due?.date ? `${c.due.date} ${who(c.due.fromAi)}` : 'none'}`,
+    ...pending,
+  ];
 }
 
 export function buildUserText(input: OrderAssistInput, catalog: CompanyCatalog): string {
@@ -391,8 +536,15 @@ export function buildUserText(input: OrderAssistInput, catalog: CompanyCatalog):
     list(catalog.products),
     'Lines already in the order:',
     current.join('\n') || '(none: new order)',
+    ...currentOrder(input),
   ];
-  if (input.text) parts.push('Text from the user:', input.text);
+  if (input.history?.length) {
+    parts.push(
+      'Earlier messages (already applied, oldest first):',
+      ...input.history.map((text, i) => `${i + 1}. ${text}`),
+    );
+  }
+  if (input.text) parts.push(input.history?.length ? 'New message from the user:' : 'Text from the user:', input.text);
   if (input.audio) parts.push('An audio from the user is attached.');
   if (input.photos?.length) parts.push(`${input.photos.length} photo(s) attached.`);
   return parts.join('\n');
@@ -535,6 +687,8 @@ export interface OrderDraft {
     match: DeviceHit | null;
     guess: { name?: string; serial?: string; manufacturer?: string } | null;
     alternatives: DeviceHit[];
+    /** Index in `input.context.devices` of the vehicle from the assistant this one corrects. */
+    replaces?: number;
   } | null;
   /** New lines to add (older apps read only this). */
   items: DraftItem[];
@@ -644,13 +798,45 @@ async function resolveCustomer(companyId: string, draft: LlmDraft, deps: OrderAs
   return { match, guess, alternatives };
 }
 
-async function resolveDevice(companyId: string, draft: LlmDraft, deps: OrderAssistDeps): Promise<OrderDraft['device']> {
+async function resolveDevice(
+  companyId: string,
+  draft: LlmDraft,
+  deps: OrderAssistDeps,
+  context: OrderAssistContext | undefined,
+): Promise<OrderDraft['device']> {
   const d = draft.device;
   if (!d || (!d.name && !d.serial && !d.manufacturer)) return null;
+  const { replaces: said, ...read } = d;
   // Kept as read (Mercosul stays Mercosul): it may become a new vehicle.
-  const guess = { ...d, serial: d.serial ? d.serial.toUpperCase().replace(/[^A-Z0-9]/g, '') || undefined : undefined };
+  const guess = { ...read, serial: read.serial ? read.serial.toUpperCase().replace(/[^A-Z0-9]/g, '') || undefined : undefined };
   const { match, alternatives } = matchDevice(guess, await deps.findDevices(companyId, guess));
-  return { match, guess, alternatives };
+  const replaces = replacedDevice(said, context);
+  return { match, guess, alternatives, ...(replaces !== undefined ? { replaces } : {}) };
+}
+
+/** "V2" → 1, only for a vehicle the assistant put (one set by the user is never replaced). */
+export function replacedDevice(id: string | undefined, context: OrderAssistContext | undefined): number | undefined {
+  if (!id) return undefined;
+  const index = Number(id.slice(1)) - 1;
+  return context?.devices?.[index]?.fromAi ? index : undefined;
+}
+
+/**
+ * Drops what would touch a field the person filled: the screens never apply
+ * it anyway, and this keeps the rule in one place for every client.
+ */
+export function guardUserFields(draft: LlmDraft, context: OrderAssistContext | undefined): LlmDraft {
+  if (!context) return draft;
+  const userCustomer = context.customer?.chosen && !context.customer.fromAi;
+  const userRequest = !!context.request?.text && !context.request.fromAi;
+  const userDue = !!context.due?.date && !context.due.fromAi;
+  return {
+    ...draft,
+    customer: userCustomer ? undefined : draft.customer,
+    notes: userRequest ? undefined : draft.notes,
+    dueDate: userDue ? undefined : draft.dueDate,
+    dueTime: userDue ? undefined : draft.dueTime,
+  };
 }
 
 /**
@@ -692,13 +878,16 @@ export async function runOrderAssist(
     const raw = await deps.llm.generateJson({
       systemPrompt: buildSystemPrompt(locale, await deps.deviceLabel?.(companyId), undefined, {
         financeActions: useActions,
+        memory: hasMemory(input),
       }),
       userText: buildUserText(input, catalog),
       media,
-      responseSchema: useActions ? LLM_RESPONSE_SCHEMA_WITH_ACTIONS : LLM_RESPONSE_SCHEMA,
+      responseSchema: ((schema) => (hasMemory(input) ? withMemorySchema(schema) : schema))(
+        useActions ? LLM_RESPONSE_SCHEMA_WITH_ACTIONS : LLM_RESPONSE_SCHEMA,
+      ),
       provider: useActions ? 'claude' : settings.provider,
     });
-    draft = parseLlmDraft(raw);
+    draft = guardUserFields(parseLlmDraft(raw), input.context);
   } catch (error) {
     try {
       await deps.release(companyId, reservation.monthKey);
@@ -714,7 +903,7 @@ export async function runOrderAssist(
   const actions = useActions ? toActions(draft.actions, todayLabel().slice(0, 10)) : null;
   const [customer, device, nfseAutoIssue] = await Promise.all([
     resolveCustomer(companyId, draft, deps),
-    resolveDevice(companyId, draft, deps),
+    resolveDevice(companyId, draft, deps, input.context),
     actions ? deps.nfseAutoIssue?.(companyId) : null,
   ]);
 

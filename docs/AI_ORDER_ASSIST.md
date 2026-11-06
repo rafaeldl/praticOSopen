@@ -93,7 +93,8 @@ Nova OS em branco (ou já com fotos compartilhadas de outro app, ver docs/RECEIV
   Foto → câmera (só aqui) → sheet com a foto ─┐
   Falar → sheet (texto/ditado) ───────────────┤ "Pronto"
                                               ▼
-POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio?, locale, order?{services[], products[]}}
+POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio?, locale, order?{services[], products[]},
+                              history?[até 3 falas], context?{customer, devices, request, due, pending}}
   1. ligada? (settings/ai.enabled, senão config/ai.enabledForAll) senão 403 AI_DISABLED
   2. cota: transação em aiUsage/{mês}; no limite → 429 AI_QUOTA_EXCEEDED {used, limit}
   3. catálogo da empresa (até 300 serviços e 300 produtos, nome + preço)
@@ -146,6 +147,75 @@ No app (`_applyDraft` em `order_screen_v2.dart`):
 O erro comum ("tira o óleo e o filtro", com o serviço "Troca de óleo" e a peça "Óleo" na OS) é o modelo perguntar qual das duas linhas: aceitável, o app pergunta. O caminho C errou uma vez a peça "Pastilha de freio dianteira" e somou uma chamada.
 
 **Jev para escolher do catálogo: por enquanto não.** O catálogo no prompt é pequeno: metade das empresas tem 2 serviços e 2 peças, 90% até 17, e só 3 empresas passam de 150 (o limite do prompt). O caminho A acerta o mesmo, é mais rápido e simples. Rever quando houver empresas com catálogo grande ou erros de casamento medidos: o Jev entra no passo 5, só para o nome que não casou.
+
+## Corrigir o que a IA pôs e lembrar o que foi dito
+
+Issue #631. A IA pode trocar o que **ela mesma** pôs, e a fala nova vai junto com as últimas falas da OS. Assim funcionam "não, a placa é…", "o prazo é segunda", "não, era 350" e "o mesmo valor".
+
+**Quem preencheu cada campo.** Cliente, veículo, relato e prazo têm ✦ quando vieram da IA. Enquanto a pessoa não mexe, a fala nova pode trocar esse valor. Quando a pessoa mexe à mão (escolhe outro cliente, troca o veículo, digita o relato, escolhe a data), o ✦ sai e a IA não toca mais naquele campo. As linhas de serviço e peça já mudavam (ver [Mudar e tirar itens](#mudar-e-tirar-itens)).
+
+| Onde | Como sabe que é da IA |
+|---|---|
+| App (`order_screen_v2.dart`) | `_marked` (`'customer'`, `'request'`, `'due'`) e `_markedDevices`; mexer à mão tira a marca |
+| Web, Nova OS (`NewOrderAssist.vue`) | `form.marked`; digitar no relato ou no prazo tira a marca (`NewOrderDrawer.vue`) |
+| Web, OS salva (`OrderAssistant.vue`) | `put`: o que a IA gravou; vale enquanto o valor na OS continua igual |
+
+**Histórico curto.** As 3 últimas falas desta OS (até 500 caracteres cada) ficam **só na memória da tela**: fechou a tela, sumiu. Nada vai para o banco. "Desfazer" tira a fala desfeita do histórico. Fala por áudio entra pela transcrição.
+
+**O que vai para o servidor** (os dois campos são opcionais, e o app antigo continua igual):
+
+```json
+{
+  "history": ["Gol placa ABC1234, troca de óleo"],
+  "context": {
+    "customer": { "chosen": true, "fromAi": true },
+    "devices": [{ "name": "Gol", "serial": "ABC1234", "fromAi": true }],
+    "request": { "text": "Barulho na suspensão", "fromAi": true },
+    "due": { "date": "2026-11-13T18:00", "fromAi": false },
+    "pending": ["customer"]
+  }
+}
+```
+
+- O cliente vai só como escolhido ou não, **nunca o nome**. Veículos vão com nome e placa.
+- `pending`: a tela está perguntando ("Qual Juliene?", "Qual Pintura?"). Um nome, placa ou preço na fala nova responde.
+
+**No servidor** (`order-assist.service.ts`):
+
+- Com `history` ou `context`, o prompt ganha o bloco "Current order" (quem preencheu cada campo) e as regras de `MEMORY_PROMPT`: responder só à fala nova; o histórico já foi aplicado e **nunca é aplicado de novo**, serve só para entender a fala; só campo "(from assistant)" pode ser corrigido.
+- O veículo corrigido volta com `replaces` (`V1`, `V2`…). O servidor converte em índice (`device.replaces`) só quando aquele veículo veio da IA. App e web trocam aquele veículo em vez de somar outro.
+- `guardUserFields`: cliente, relato e prazo que a pessoa preencheu são tirados da resposta. A regra vale para qualquer cliente do servidor, mesmo que a tela já não aplicasse.
+- Com memória, `device` é obrigatório no formato da resposta (`null` quando nenhum veículo foi dito). Opcional, o Claude deixava de fora o veículo corrigido, o mesmo problema que já aconteceu com `payment`.
+- O prompt lista os 7 dias depois de hoje (`nextDays`), porque o Gemini errava o dia da semana ("quarta" virava quinta).
+- Log: só a quantidade de falas no histórico e se veio contexto (`history=2 context=true`), nunca texto.
+
+Custo: de 50 a 400 tokens de entrada a mais por fala. A cota não muda: 1 por fala.
+
+**"Desfazer"** volta ao valor de antes: o veículo, o cliente, o relato ou o prazo que a IA tinha posto, com o ✦.
+
+**Fora daqui:** a IA trocar o que a pessoa preencheu. Precisa de spec e muda as regras 1 e 16.
+
+### Teste de frases em sequência (2026-11-06)
+
+`firebase/functions/scripts/ai-memory-eval.ts` usa o prompt, o parser e o `runOrderAssist` reais com os modelos reais. A OS é simulada com as regras das telas. São 17 cenários de 1 a 4 falas: corrigir placa, modelo, prazo, valor, quantidade, cliente e relato; "o mesmo valor"; falas seguidas sem repetir item; segundo veículo; e cliente, veículo, relato e prazo escolhidos pela pessoa. As frases não têm dados de clientes.
+
+| Conjunto | Claude Sonnet 5.5 | Gemini 2.5 Flash |
+|---|---|---|
+| Ajuste (17 cenários × 3 rodadas, 102 falas) | 102/102 | 102/102 |
+| Inéditos (7 cenários × 2 rodadas, 30 falas, prompt travado) | 30/30 | 30/30 |
+| Itens duplicados | 0 | 0 |
+| Correções aplicadas | 43/43 | 43/43 |
+| Algo da pessoa trocado | 0 | 0 |
+
+Antes dos ajustes, o Claude deixava de fora o veículo corrigido em 4 de 6 casos e o Gemini errava o dia da semana. Os ajustes foram `device` obrigatório e a lista dos próximos dias.
+
+```bash
+cd firebase/functions
+GCLOUD_PROJECT=praticos ANTHROPIC_API_KEY=... npx ts-node scripts/ai-memory-eval.ts --runs 3
+GCLOUD_PROJECT=praticos ANTHROPIC_API_KEY=... npx ts-node scripts/ai-memory-eval.ts --runs 2 --only h-   # inéditos
+```
+
+Rodar de novo ao mudar o prompt, o formato da resposta ou o modelo.
 
 ## Cliente e veículo pela voz
 
@@ -264,18 +334,19 @@ O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `f
 ## Regras de Negócio
 
 1. **A IA propõe, o usuário salva.** Na Nova OS nada é gravado até o ✓ do topo; as marcas somem ao salvar. "Desfazer" tira o que a última leitura colocou, volta os valores que ela mudou e põe de volta o que ela tirou.
+16. **A IA troca só o que ela mesma pôs.** Cliente, veículo, relato e prazo com ✦, que a pessoa ainda não mexeu, podem ser trocados por uma fala nova. O que a pessoa escolheu ou digitou continua intocável (ver [Corrigir o que a IA pôs](#corrigir-o-que-a-ia-pôs-e-lembrar-o-que-foi-dito)).
 2. **Tirar só por pedido.** A IA só tira uma linha quando o usuário pede ("tira…", "remove…"); nunca cancela a OS, e só recebe depois do cartão de confirmar (ver "Receber, desconto e status pela voz").
 3. **Cada chamada conta**, aplicada ou não. Chamada que falha antes de o modelo responder é devolvida.
 4. **Limite por plano** (spec 2026-10-09 §4.2): Free 10, Starter 150, Pro 400, Business 1.000 por mês. `settings/ai.monthlyLimit` sobrepõe (piloto; `-1` = ilimitado). Mês = mês UTC; mês novo = documento novo, sem job de reset.
 5. **Cota esgotada** → mensagem clara e o fluxo manual continua livre.
 6. **Catálogo nunca é poluído:** item sem correspondência entra na OS só com o nome (sem `id` de catálogo). Preço: o falado; senão o do catálogo; senão `null` ("sem valor").
-7. **Cliente:** escolhido sozinho só quando a busca tem certeza (mesmo telefone, mesmo nome, ou um único nome muito próximo). Parecidos → "Qual Juliene?". Nada parecido → cliente novo, cadastrado no ✓ (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)). Nunca troca um cliente já escolhido.
+7. **Cliente:** escolhido sozinho só quando a busca tem certeza (mesmo telefone, mesmo nome, ou um único nome muito próximo). Parecidos → "Qual Juliene?". Nada parecido → cliente novo, cadastrado no ✓ (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)). Nunca troca um cliente escolhido pela pessoa; o que a IA pôs pode ser corrigido ("não, o cliente é o Pedro").
 8. **Veículo:** escolhido sozinho pela placa/série (com ou sem traço, Mercosul ou antiga) ou por um único modelo do mesmo jeito. Placa que não existe → veículo novo, cadastrado no ✓. Modelo sem placa: se nenhum cadastrado é parecido, veículo novo cadastrado no ✓; se há parecidos, pergunta qual, com "Cadastrar" como opção (para não criar repetidos sem perguntar).
 14. **Cadastro só no ✓.** Cliente e veículo novos ganham o id na tela, mas só são gravados quando a OS é salva; "Desfazer" antes disso não deixa nada. Numa OS já salva, o novo não entra sozinho: a linha pede para tocar ("Cadastrar … como cliente novo").
 15. **Serviços e peças não vão para o catálogo pela voz.** Entram só na OS (regra 6). Um "Salvar no catálogo" na linha fica para depois.
 9. **Isolamento:** a empresa vem do token + `X-Company-Id` validado pela membership; o corpo não aceita `companyId` (schema `strict`). Toda busca recebe esse `companyId`.
-10. **Relato e prazo:** `notes` (o que o cliente pediu ou o defeito) vai para "O que o cliente pediu" se estiver vazio. `dueDate` ("pronto sexta", "amanhã") vem como `YYYY-MM-DD` (ou `YYYY-MM-DDTHH:MM` quando a hora foi dita) e preenche "Fica pronto" se não houver data; sem hora, fica às 18:00. O modelo recebe a data de hoje no fuso de São Paulo para resolver dias da semana.
-11. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor). Logs só têm empresa, contagem de itens, código de erro e latência — nunca texto, transcrição ou imagem.
+10. **Relato e prazo:** `notes` (o que o cliente pediu ou o defeito) vai para "O que o cliente pediu" se estiver vazio ou com o texto que a IA pôs. `dueDate` ("pronto sexta", "amanhã") vem como `YYYY-MM-DD` (ou `YYYY-MM-DDTHH:MM` quando a hora foi dita) e preenche "Fica pronto" se não houver data ou se a data for a que a IA pôs; sem hora, fica às 18:00. O modelo recebe a data de hoje no fuso de São Paulo para resolver dias da semana.
+11. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor); o `context` diz só se há cliente escolhido. O histórico das falas fica só na memória da tela e vai para o modelo junto com a fala nova, sem ser gravado. Logs só têm empresa, contagem de itens e de falas no histórico, código de erro e latência — nunca texto, transcrição ou imagem.
 12. **Permissão:** `write:orders` (técnico não usa).
 13. **Fotos por pedido:** no máximo 4 (`kAiMaxPhotos`, igual a `MAX_PHOTOS` da Function). Mais fotos entram na OS, mas só as 4 primeiras são lidas. Antes, 5 ou mais da galeria davam 400 e "IA indisponível".
 16. **OS salva** (app e web): cliente só quando a OS não tem; veículo cadastrado (placa ou modelo único) entra com ✦; placa ou nome novo vira a linha "Ouvi…"/"… não está no cadastro", que cadastra com um toque; relato só em campo vazio. "Desfazer" tira o que a fala pôs. No web: `savedOrderFill` em `lib/orders/assist-draft.ts`.
@@ -302,4 +373,6 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 ## Testes
 
 - Functions: `src/services/ai/__tests__/` (`fuzzy-match`, `ai-quota.service`, `order-assist.service` com o grupo "changes to lines already in the order", `llm.client`, `gemini.client`, `claude.client`), `src/routes/v1/__tests__/ai.routes.test.ts` (`/status` e `/order-assist`) e `src/__tests__/ai-settings-script.test.ts`.
-- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha, cliente novo salvo no ✓, "Qual Juliene?", veículo novo pela placa e pelo modelo, "Qual Super Classic?"), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).
+- Web: `tests/assist-memory.test.ts` (histórico, `context`, trocar só o da IA) e `e2e/ai-memory.spec.ts` (Nova OS e OS salva: placa, relato e prazo corrigidos, histórico no corpo, Desfazer).
+- Functions: grupo "history and context (issue #631)" em `order-assist.service.test.ts` (schema, prompt, `replaces`, `guardUserFields`, `withMemorySchema`, `nextDays`).
+- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant", com "corrects what it put and remembers (#631)": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha, cliente novo salvo no ✓, "Qual Juliene?", veículo novo pela placa e pelo modelo, "Qual Super Classic?"), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).

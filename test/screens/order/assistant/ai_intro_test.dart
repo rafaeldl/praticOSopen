@@ -19,6 +19,8 @@ class _Assistant implements AiOrderAssistClient {
     List<AiPhoto> photos = const [],
     String? locale,
     AiOrderSnapshot? order,
+    List<String> history = const [],
+    AiOrderContext? context,
   }) => throw UnimplementedError();
 }
 
@@ -42,13 +44,15 @@ void main() {
           ),
         ),
       );
-      return tester.runAsync(
-        () => showAiIntroOnce(
-          context,
-          isSettled: () => settled,
-          assistant: _Assistant(on),
-        ),
-      ).then((done) => done ?? false);
+      return tester
+          .runAsync(
+            () => showAiIntroOnce(
+              context,
+              isSettled: () => settled,
+              assistant: _Assistant(on),
+            ),
+          )
+          .then((done) => done ?? false);
     }
 
     Future<bool?> seen() async =>

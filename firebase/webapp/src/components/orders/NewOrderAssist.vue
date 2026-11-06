@@ -4,8 +4,9 @@
 // .change-lines): the app's _applyDraft. It fills the same blank form, marks
 // with ✦ what it filled and offers Desfazer; nothing is saved before the ✓, and
 // a customer or device that is not in the register is registered only then.
-// It never replaces a customer already chosen, a request already typed or a
-// date already set. Money said here waits: the "Confere?" card opens on the
+// It never replaces a customer chosen, a request typed or a date set by the
+// person; what it put itself (still ✦) a new message may correct (issue #631).
+// The last 3 messages stay only in this screen's memory and go with the next one. Money said here waits: the "Confere?" card opens on the
 // order once it exists (aiActionsAfterSave).
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { ImagePlus } from '@lucide/vue'
@@ -13,7 +14,7 @@ import { t } from '@/i18n'
 import { aiInput, aiResult, logAiEvent } from '@/lib/analytics'
 import { ApiError } from '@/lib/api'
 import type { DraftActions, NfseMoment } from '@/lib/orders/ai-actions'
-import { assistValue, changeTarget, customerStep, deviceStep, dueFromDraft, noteKey, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
+import { assistContext, assistValue, changeTarget, customerStep, deviceStep, dueFromDraft, forget, noteKey, remember, replacedDevice, usesLeft as usesLeftOf, type CustomerHit, type DeviceHit, type DraftChange, type NewDevice } from '@/lib/orders/assist-draft'
 import { ASSIST_MAX_PHOTOS, assistPhoto } from '@/lib/orders/assist-photo'
 import { assistStatus, requestAssist } from '@/lib/orders/assistant'
 import type { CatalogItem, Customer, Device } from '@/lib/orders/catalog'
@@ -69,6 +70,8 @@ const customerAsk = shallowRef<{ name: string; phone?: string; options: Customer
 const deviceAsk = shallowRef<{ label: string; device: NewDevice; options: DeviceHit[] } | null>(null)
 const choosing = ref<null | 'customer' | 'device'>(null)
 const lastUndo = shallowRef<Undo | null>(null)
+/** The last messages of this Nova OS, only here (gone when the drawer closes). */
+let history: string[] = []
 const asking = shallowRef<{ change: DraftChange; lines: FormLine[]; resolve: (line: FormLine | null) => void } | null>(null)
 
 onMounted(async () => {
@@ -113,9 +116,16 @@ interface Undo {
   added: string[]
   changed: { key: string; value: number | null; quantity: number; description?: string }[]
   removed: { line: FormLine; index: number }[]
-  request: string | null
-  due: string | null
+  /** What the field had and what this answer wrote, when it wrote. */
+  request: { before: string; after: string } | null
+  due: { before: string; after: string } | null
+  /** The ✦ before this answer, put back by Desfazer. */
+  marks: Record<'customer' | 'device' | 'request' | 'due', boolean>
+  newCustomer: AssistForm['newCustomer']
+  newDevice: AssistForm['newDevice']
   asks: { customer: typeof customerAsk.value; device: typeof deviceAsk.value }
+  /** What was said, taken out of the history by Desfazer. */
+  said: string
 }
 
 async function run(files: File[] = [], audio?: { mimeType: string; data: string }) {
@@ -132,10 +142,32 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     if (images.length) f.photos = [...f.photos, ...images]
     const photos = await Promise.all(images.map((file) => assistPhoto(file)))
     const sent = { services: f.lines.filter((l) => l.item.kind === 'service'), products: f.lines.filter((l) => l.item.kind === 'product') }
-    const draft = await requestAssist({ text: value, photos, audio, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, description: l.description ?? null, value: l.value, quantity: l.quantity })) })
+    const mark = (key: 'customer' | 'device' | 'request' | 'due') => f.marked.has(key)
+    const context = assistContext({
+      customer: { chosen: !!f.customer, fromAi: mark('customer') },
+      devices: f.device ? [{ name: f.device.name, serial: f.device.serial, fromAi: mark('device') }] : [],
+      request: { text: f.request, fromAi: mark('request') },
+      due: { date: f.due, fromAi: mark('due') },
+      pending: [...(customerAsk.value ? ['customer' as const] : []), ...(deviceAsk.value ? ['device' as const] : [])],
+    })
+    const draft = await requestAssist({ text: value, photos, audio, history, context, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, description: l.description ?? null, value: l.value, quantity: l.quantity })) })
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
-    const undo: Undo = { customer: f.customer, device: f.device, added: [], changed: [], removed: [], request: null, due: null, asks: { customer: customerAsk.value, device: deviceAsk.value } }
+    const said = value || draft.transcript?.trim() || ''
+    const undo: Undo = {
+      customer: f.customer,
+      device: f.device,
+      added: [],
+      changed: [],
+      removed: [],
+      request: null,
+      due: null,
+      marks: { customer: mark('customer'), device: mark('device'), request: mark('request'), due: mark('due') },
+      newCustomer: f.newCustomer,
+      newDevice: f.newDevice,
+      asks: { customer: customerAsk.value, device: deviceAsk.value },
+      said,
+    }
     // 0. Changes on the lines that were sent: value, quantity, or out (only when asked).
     for (const change of draft.changes) {
       let { line } = changeTarget(change, sent)
@@ -164,25 +196,29 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
       if (newDescription !== undefined) current.description = newDescription
       f.marked.add(current.key)
     }
-    // 1. Customer, only when none is chosen.
-    const c = customerStep(draft, { hasCustomer: !!f.customer, isNew: true, canRegister: can('manageCustomers') })
+    // 1. Customer, when none is chosen or the one there is the assistant's (✦).
+    const c = customerStep(draft, { hasCustomer: !!f.customer && !mark('customer'), isNew: true, canRegister: can('manageCustomers') })
     if (c.kind === 'match') {
       f.customer = { id: c.customer.id, name: c.customer.name, ...(c.customer.phone ? { phone: c.customer.phone } : {}) }
+      f.newCustomer = null
       f.marked.add('customer')
       customerAsk.value = null
     } else if (c.kind === 'new') {
       setNewCustomer(c.name, c.phone)
       f.marked.add('customer')
     } else if (c.kind === 'ask') customerAsk.value = { name: c.name, ...(c.phone ? { phone: c.phone } : {}), options: c.options }
-    // 2. Device.
-    const d = deviceStep(draft, { devices: f.device ? [f.device] : [], isNew: true, canRegister: can('manageDevices') })
-    if (d.kind === 'match' && !f.device) {
+    // 2. Device: into an empty slot, or over the assistant's when the answer corrects it ("não, a placa é…").
+    const swap = replacedDevice(draft, f.device ? [{ fromAi: mark('device') }] : []) === 0
+    const free = !f.device || swap
+    const d = deviceStep(draft, { devices: f.device && !swap ? [f.device] : [], isNew: true, canRegister: can('manageDevices') })
+    if (d.kind === 'match' && free) {
       f.device = { id: d.device.id, name: d.device.name, serial: d.device.serial ?? null }
+      f.newDevice = null
       f.marked.add('device')
-    } else if (d.kind === 'new' && !f.device) {
+    } else if (d.kind === 'new' && free) {
       setNewDevice(d.device)
       f.marked.add('device')
-    } else if (d.kind === 'ask' && !f.device) deviceAsk.value = { label: d.label, device: d.device, options: d.options }
+    } else if (d.kind === 'ask' && free) deviceAsk.value = { label: d.label, device: d.device, options: d.options }
     // 3. Items: catalog ones with their price, the rest by name only (never into the catalog).
     for (const item of draft.items) {
       const known = item.catalogId ? props.catalog.find((entry) => entry.id === item.catalogId && entry.kind === item.kind) : null
@@ -193,16 +229,17 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
       f.marked.add(line.key)
       undo.added.push(line.key)
     }
-    // 4. "O que o cliente pediu" and 5. "Fica pronto", only when blank.
-    if (draft.notes && !f.request.trim()) {
-      f.request = draft.notes
-      undo.request = draft.notes
+    // 4. "O que o cliente pediu" and 5. "Fica pronto": when blank or still the assistant's.
+    const notes = draft.notes?.trim() ?? ''
+    if (notes && notes !== f.request.trim() && (!f.request.trim() || mark('request'))) {
+      undo.request = { before: f.request, after: notes }
+      f.request = notes
       f.marked.add('request')
     }
     const due = dueFromDraft(draft.dueDate)
-    if (due && !f.due) {
+    if (due && due !== f.due && (!f.due || mark('due'))) {
+      undo.due = { before: f.due, after: due }
       f.due = due
-      undo.due = due
       f.marked.add('due')
     }
     // 6. Money waits for the order (order.ai.money-card).
@@ -216,6 +253,7 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     note.value = key ? t(key) : ''
     // Desfazer sits in the note: the drawer is modal, a toast behind it could not be reached.
     lastUndo.value = filled ? undo : null
+    history = remember(history, said)
     if (filled) announce(note.value)
   } catch (error) {
     console.warn('new order assistant: failed', error)
@@ -244,13 +282,17 @@ function undoDraft(undo: Undo) {
   logAiEvent('ai_assist_undone')
   const f = props.form
   f.actions = null
+  // Only what is still this answer's (✦): what the person changed afterwards stays.
+  const back = (key: 'customer' | 'device' | 'request' | 'due') => (undo.marks[key] ? f.marked.add(key) : f.marked.delete(key))
   if (f.customer !== undo.customer && f.marked.has('customer')) {
     f.customer = undo.customer
-    f.newCustomer = null
+    f.newCustomer = undo.newCustomer
+    back('customer')
   }
   if (f.device !== undo.device && f.marked.has('device')) {
     f.device = undo.device
-    f.newDevice = null
+    f.newDevice = undo.newDevice
+    back('device')
   }
   for (const changed of undo.changed) {
     const line = f.lines.find((l) => l.key === changed.key)
@@ -259,9 +301,16 @@ function undoDraft(undo: Undo) {
   const lines = f.lines.filter((l) => !undo.added.includes(l.key))
   for (const { line, index } of [...undo.removed].reverse()) lines.splice(Math.min(index, lines.length), 0, line)
   f.lines = lines
-  if (undo.request && f.request === undo.request) f.request = ''
-  if (undo.due && f.due === undo.due) f.due = ''
-  for (const key of ['customer', 'device', 'request', 'due', ...undo.added, ...undo.changed.map((c) => c.key)]) f.marked.delete(key)
+  if (undo.request && f.request === undo.request.after && f.marked.has('request')) {
+    f.request = undo.request.before
+    back('request')
+  }
+  if (undo.due && f.due === undo.due.after && f.marked.has('due')) {
+    f.due = undo.due.before
+    back('due')
+  }
+  for (const key of [...undo.added, ...undo.changed.map((c) => c.key)]) f.marked.delete(key)
+  history = forget(history, undo.said)
   customerAsk.value = undo.asks.customer
   deviceAsk.value = undo.asks.device
   note.value = ''
@@ -336,10 +385,10 @@ defineExpose({
       <button v-if="lastUndo" type="button" class="link" data-testid="new-order-assistant-undo" @click="undoDraft(lastUndo)">{{ t('orderAssistantUndo') }}</button>
     </p>
     <p v-if="usesLeft !== null" class="assist-note small">{{ t('orderAssistantUsesLeft', { count: usesLeft }) }}</p>
-    <button v-if="customerAsk && !form.customer" type="button" class="assist-ask" data-testid="assist-ask-customer" @click="choosing = 'customer'">
+    <button v-if="customerAsk && (!form.customer || form.marked.has('customer'))" type="button" class="assist-ask" data-testid="assist-ask-customer" @click="choosing = 'customer'">
       <span class="ai" aria-hidden="true">✦</span> {{ t('orderAssistantCustomerGuess', { name: customerAsk.name }) }}
     </button>
-    <button v-if="deviceAsk && !form.device" type="button" class="assist-ask" data-testid="assist-ask-device" @click="choosing = 'device'">
+    <button v-if="deviceAsk && (!form.device || form.marked.has('device'))" type="button" class="assist-ask" data-testid="assist-ask-device" @click="choosing = 'device'">
       <span class="ai" aria-hidden="true">✦</span> {{ t('orderAssistantDeviceGuess', { device: deviceAsk.label }) }}
     </button>
   </div>

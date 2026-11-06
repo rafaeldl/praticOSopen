@@ -319,6 +319,95 @@ class AiOrderActions {
   }
 }
 
+/// What the order already has, sent with each message (issue #631) so the
+/// assistant can correct what it put itself and never touch what the person
+/// chose. The customer goes only as chosen or not: never its name.
+class AiOrderContext {
+  const AiOrderContext({
+    this.customerChosen = false,
+    this.customerFromAi = false,
+    this.devices = const [],
+    this.request,
+    this.requestFromAi = false,
+    this.due,
+    this.dueFromAi = false,
+    this.pending = const [],
+  });
+
+  final bool customerChosen;
+  final bool customerFromAi;
+
+  /// Vehicles in screen order: the answer's `replaces` points at them.
+  final List<({String? name, String? serial, bool fromAi})> devices;
+  final String? request;
+  final bool requestFromAi;
+  final DateTime? due;
+  final bool dueFromAi;
+
+  /// Questions the screen is asking: 'customer', 'device', 'line'.
+  final List<String> pending;
+
+  static String _cut(String text, int max) =>
+      text.length > max ? text.substring(0, max) : text;
+
+  Map<String, dynamic> toJson() {
+    String two(int n) => n.toString().padLeft(2, '0');
+    final d = due;
+    final request = this.request?.trim() ?? '';
+    return {
+      'customer': {'chosen': customerChosen, 'fromAi': customerFromAi},
+      if (devices.isNotEmpty)
+        'devices': [
+          for (final v in devices.take(10))
+            {
+              if (v.name?.trim().isNotEmpty ?? false)
+                'name': _cut(v.name!.trim(), 200),
+              if (v.serial?.trim().isNotEmpty ?? false)
+                'serial': _cut(v.serial!.trim(), 40),
+              'fromAi': v.fromAi,
+            },
+        ],
+      if (request.isNotEmpty)
+        'request': {'text': _cut(request, 2000), 'fromAi': requestFromAi},
+      if (d != null)
+        'due': {
+          'date':
+              '${d.year}-${two(d.month)}-${two(d.day)}T${two(d.hour)}:${two(d.minute)}',
+          'fromAi': dueFromAi,
+        },
+      if (pending.isNotEmpty) 'pending': pending,
+    };
+  }
+}
+
+/// The last messages of this order, only in the screen's memory: at most 3,
+/// up to 500 characters each (issue #631).
+const kAiHistorySize = 3;
+const kAiHistoryChars = 500;
+
+List<String> rememberAiMessage(List<String> history, String? said) {
+  final text = said?.trim() ?? '';
+  if (text.isEmpty) return List.of(history);
+  final cut = text.length > kAiHistoryChars
+      ? text.substring(0, kAiHistoryChars)
+      : text;
+  final next = [...history, cut];
+  return next.length > kAiHistorySize
+      ? next.sublist(next.length - kAiHistorySize)
+      : next;
+}
+
+/// "Desfazer": that message never happened.
+List<String> forgetAiMessage(List<String> history, String? said) {
+  final text = said?.trim() ?? '';
+  final cut = text.length > kAiHistoryChars
+      ? text.substring(0, kAiHistoryChars)
+      : text;
+  final at = cut.isEmpty ? -1 : history.lastIndexOf(cut);
+  if (at < 0) return List.of(history);
+  return [...history]..removeAt(at);
+}
+
 /// Structured draft returned by `aiOrderAssist`: what to add ([items]) and
 /// what to change in the lines already in the order ([changes]). The function
 /// saves nothing: the app applies it on screen.
@@ -334,6 +423,7 @@ class AiOrderDraft {
     this.deviceGuessSerial,
     this.deviceGuessManufacturer,
     this.deviceOptions = const [],
+    this.deviceReplaces,
     this.items = const [],
     this.changes = const [],
     this.notes,
@@ -361,6 +451,10 @@ class AiOrderDraft {
 
   /// Registered vehicles close to the guess (same model, other plate).
   final List<AiDeviceHit> deviceOptions;
+
+  /// Index in the context's devices of the assistant's vehicle this one
+  /// corrects ("não, a placa é…").
+  final int? deviceReplaces;
   final List<AiDraftItem> items;
 
   /// Changes to lines already in the order (only when the order was sent).
@@ -414,6 +508,7 @@ class AiOrderDraft {
                 if (a is Map)
                   AiDeviceHit.fromJson(Map<String, dynamic>.from(a)),
             ],
+      deviceReplaces: (device?['replaces'] as num?)?.toInt(),
       items: [
         for (final i in (json['items'] as List? ?? const []))
           AiDraftItem.fromJson(Map<String, dynamic>.from(i as Map)),
@@ -471,6 +566,8 @@ abstract class AiOrderAssistClient {
     List<AiPhoto> photos = const [],
     String? locale,
     AiOrderSnapshot? order,
+    List<String> history = const [],
+    AiOrderContext? context,
   });
 
   /// Whether the assistant is on for the selected company. Never throws: any
@@ -565,6 +662,8 @@ class AiOrderAssistService implements AiOrderAssistClient {
     List<AiPhoto> photos = const [],
     String? locale,
     AiOrderSnapshot? order,
+    List<String> history = const [],
+    AiOrderContext? context,
   }) async {
     final body = <String, dynamic>{
       if (text != null && text.trim().isNotEmpty) 'text': text.trim(),
@@ -576,6 +675,16 @@ class AiOrderAssistService implements AiOrderAssistClient {
       if (locale != null && const ['pt', 'en', 'es'].contains(locale))
         'locale': locale,
       if (order != null && !order.isEmpty) 'order': order.toJson(),
+      if (history.isNotEmpty)
+        'history': [
+          for (final h in history.skip(
+            history.length > kAiHistorySize
+                ? history.length - kAiHistorySize
+                : 0,
+          ))
+            h.length > kAiHistoryChars ? h.substring(0, kAiHistoryChars) : h,
+        ],
+      if (context != null) 'context': context.toJson(),
     };
     final http.Response response;
     try {
@@ -591,7 +700,10 @@ class AiOrderAssistService implements AiOrderAssistClient {
     } catch (_) {
       throw const AiOrderAssistException(AiAssistError.unavailable);
     }
-    final draft = parseAiOrderAssistResponse(response.statusCode, response.body);
+    final draft = parseAiOrderAssistResponse(
+      response.statusCode,
+      response.body,
+    );
     // The use of the month changed: "Plano" reads it again.
     clearStatusCache();
     return draft;
