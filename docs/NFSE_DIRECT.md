@@ -458,12 +458,16 @@ Código: `firebase/functions/src/services/nfse/adn-reader.ts`, `import-proposal.
 - `GET {adn}/contribuintes/DFe/{NSU}?cnpjConsulta={cnpj}&lote=true`, até 50 documentos por página (XML em GZip + Base64). A resposta não diz se a página começa no NSU pedido ou depois dele: o servidor pede a partir do último NSU guardado e descarta o que já tem (`nsu <= lastNsu`). Caixa vazia responde 404.
 - Cada chamada lê por até ~45 s (`READ_BUDGET_MS`) e guarda o ponto em `private/nfse/emitters/{id}.lastNsu`; o app chama `continue` até a proposta ficar pronta.
 - Erro na leitura: só falta de resposta do governo (timeout, rede, 5xx, `SefinUnavailableError`) vira `SEFIN_UNAVAILABLE` (503, tentar de novo). Qualquer outro erro vira `IMPORT_FAILED` (500) e vai ao log com nome, código e mensagem, sem sequências longas de dígitos (CPF/CNPJ, chaves). O que já foi lido fica.
+- Memória: a proposta lê OS, clientes e notas em páginas de 300 (`scanFields`) e só os campos que usa (`select`). Antes vinham todas as OS inteiras (fotos, histórico) de uma vez, e uma oficina com anos de uso passou dos 512 MiB depois de ler as notas (06/11). Medido no emulador com 1.000 documentos e 3.000 OS pesadas: +300 MiB antes, +41 MiB agora. O `nfseApi` roda com 1 GiB de margem.
+- Retomar depois de uma queda (estouro de memória, instância derrubada): o lote fica `reading`, o `lastNsu` só avança com a página inteira lida, e as notas já gravadas (`ext-{chave}`) e recebidas (pela chave) não são criadas de novo. Tentar de novo segue do mesmo lote e só monta a proposta se a caixa já foi toda lida.
 - Emitente recém-cadastrado ainda não tem regime: a nota importada leva no resumo do emitente o regime da própria nota (o Firestore recusa `undefined`).
 - **Emitidas** pelo CNPJ viram `invoices/ext-{chave}` com `source: 'external'`, `provider: 'direct'`, XML em `tenants/{cid}/invoices/{id}/nfse.xml`, `customer: null`, sem OS, e `external { regime, IM, cidade, código do serviço, alíquota... }` para a proposta. Nota que já existe (emitida pelo PraticOS, mesma chave) não é criada de novo.
 - **Eventos** e101101/e105102 cancelam a nota (status `canceled`, `canceledOutside: true`) e liberam a OS travada. Evento lido antes da nota fica em `private/nfse/emitters/{id}/canceledKeys/{chave}` até a nota chegar.
 - **Recebidas** (o CNPJ é o tomador): registro mínimo só no servidor, `private/nfse/emitters/{id}/received/{nsu}` (`accessKey`, `providerTaxId`, `providerName`, `value`, `date`, `status`), para a etapa posterior A (despesas).
 
 ### Proposta (`nfseImports/{batchId}`, `status: proposed`)
+
+A proposta aprende só com as notas recentes (`recentNotas`): as dos 3 meses antes da nota mais nova (`RECENT_NOTA_DAYS`) ou, se forem menos de 10, as 10 mais novas (`RECENT_NOTA_MIN`): emitente, serviços, clientes, série e ligação às OS. As OS entram a partir de 30 dias antes da nota mais antiga dessa janela. As notas mais antigas são lidas e ficam no histórico, sem criar cliente nem ligar a OS.
 
 | Parte | Regra |
 |---|---|

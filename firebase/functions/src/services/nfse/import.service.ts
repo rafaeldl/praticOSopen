@@ -23,6 +23,7 @@
  * Logs carry ids and counts only: never names, CNPJs or the XML.
  */
 
+import type { DocumentData, Query } from 'firebase-admin/firestore';
 import { db, FieldValue, storage } from '../firestore.service';
 import type { Customer, Order, UserAggr } from '../../models/types';
 import { toDate } from '../../models/types';
@@ -73,6 +74,25 @@ const receivedRef = (cid: string, emitterId: string) => emitterPrivateRef(cid, e
 /** A cancel event read before its nota: applied when the nota arrives. */
 const pendingCancelRef = (cid: string, emitterId: string, key: string) => emitterPrivateRef(cid, emitterId).collection('canceledKeys').doc(key);
 const orderLockRef = (cid: string, orderId: string) => privateNfse(cid).collection('orders').doc(orderId);
+
+/** Documents per page when a whole collection is read (see scanFields). */
+export const SCAN_PAGE_SIZE = 300;
+
+/**
+ * Reads a query page by page and only the given fields. A workshop with years
+ * of orders (photos, checklists, history) took the nfseApi past 512 MiB when
+ * every order came whole at once; here each page is dropped before the next.
+ * `fields` empty reads the ids only.
+ */
+export async function scanFields(query: Query, fields: string[], visit: (id: string, data: DocumentData) => void, pageSize = SCAN_PAGE_SIZE): Promise<void> {
+  const base = query.select(...fields).orderBy('__name__').limit(pageSize);
+  let page = await base.get();
+  for (;;) {
+    for (const d of page.docs) visit(d.id, d.data());
+    if (page.size < pageSize) return;
+    page = await base.startAfter(page.docs[page.size - 1]).get();
+  }
+}
 
 export const externalInvoiceId = (accessKey: string) => `ext-${accessKey}`;
 const xmlPathOf = (cid: string, invoiceId: string) => `tenants/${cid}/invoices/${invoiceId}/nfse.xml`;
@@ -357,7 +377,11 @@ async function applyCancelEvent(cid: string, emitter: FiscalEmitter, accessKey: 
 
 async function recalcTotals(cid: string, emitterId: string, deps: ImportDeps) {
   const today = todayInSaoPaulo(deps.now());
-  const snap = await invoicesRef(cid).where('emitter.id', '==', emitterId).where('effectiveDate', '>=', `${today.slice(0, 4)}-01-01`).get();
+  const snap = await invoicesRef(cid)
+    .where('emitter.id', '==', emitterId)
+    .where('effectiveDate', '>=', `${today.slice(0, 4)}-01-01`)
+    .select('status', 'value', 'effectiveDate')
+    .get();
   await emittersRef(cid).doc(emitterId).set({ totals: emitterTotals(snap.docs.map((d) => d.data() as TotalsInvoice), today) }, { merge: true });
 }
 
@@ -489,12 +513,13 @@ function orderDate(order: Order): string | null {
 
 /** Orders and customers of the company in the shape the proposal reads. */
 async function loadCompanyData(cid: string): Promise<{ customers: ImportCustomer[]; orders: ImportOrder[] }> {
-  const [customerSnap, orderSnap, lockSnap] = await Promise.all([customersRef(cid).get(), ordersRef(cid).get(), privateNfse(cid).collection('orders').get()]);
-  const locked = new Set(lockSnap.docs.map((d) => d.id));
-  const customers = customerSnap.docs.map((d) => {
-    const c = d.data() as Customer & CustomerFiscalFields;
-    return {
-      id: d.id,
+  const locked = new Set<string>();
+  await scanFields(privateNfse(cid).collection('orders'), [], (id) => locked.add(id));
+  const customers: ImportCustomer[] = [];
+  await scanFields(customersRef(cid), CUSTOMER_FIELDS, (id, data) => {
+    const c = data as Customer & CustomerFiscalFields;
+    customers.push({
+      id,
       name: c.name ?? '',
       taxId: c.taxId ?? null,
       legalName: c.legalName ?? null,
@@ -502,31 +527,41 @@ async function loadCompanyData(cid: string): Promise<{ customers: ImportCustomer
       invoiceEmail: c.invoiceEmail ?? null,
       email: c.email ?? null,
       invoiceRecipient: c.invoiceRecipient ?? null,
-    };
+    });
   });
   const orders: ImportOrder[] = [];
-  for (const d of orderSnap.docs) {
-    const o = d.data() as Order;
-    if (o.status === 'quote' || o.status === 'canceled') continue;
+  await scanFields(ordersRef(cid), ORDER_FIELDS, (id, data) => {
+    const o = data as Order;
+    if (o.status === 'quote' || o.status === 'canceled') return;
     orders.push({
-      id: d.id,
+      id,
       number: typeof o.number === 'number' ? o.number : null,
       customerId: o.customer?.id ?? null,
       customerName: o.customer?.name ?? null,
       value: invoiceValueOfOrder(o).value,
       date: orderDate(o),
       done: o.status === 'done',
-      locked: locked.has(d.id),
+      locked: locked.has(id),
     });
-  }
+  });
   return { customers, orders };
 }
 
+/** What the proposal reads of each customer, order and imported nota. */
+const CUSTOMER_FIELDS = ['name', 'taxId', 'legalName', 'fiscalAddress', 'invoiceEmail', 'email', 'invoiceRecipient'];
+const ORDER_FIELDS = ['status', 'number', 'customer.id', 'customer.name', 'services', 'products', 'discount', 'completedAt', 'createdAt'];
+const NOTA_FIELDS = ['source', 'status', 'effectiveDate', 'value', 'recipient', 'dps.series', 'serviceDescription', 'external', 'orderIds'];
+
 async function prepareProposal(cid: string, emitter: FiscalEmitter, client: SefinClient, deps: ImportDeps): Promise<{ proposal: ImportProposal; enabledInCity: boolean | null }> {
-  const invoiceSnap = await invoicesRef(cid).where('emitter.id', '==', emitter.id).get();
-  const notas = invoiceSnap.docs.filter((d) => (d.data() as NfseInvoice).source === 'external').map(notaOf);
-  const { customers, orders } = await loadCompanyData(cid);
-  const proposal = buildProposal({ emitter, notas, customers, orders });
+  const notas: ImportNota[] = [];
+  await scanFields(invoicesRef(cid).where('emitter.id', '==', emitter.id), NOTA_FIELDS, (id, data) => {
+    if ((data as NfseInvoice).source === 'external') notas.push(notaOf({ id, data: () => data }));
+  });
+  const { customers, orders: allOrders } = await loadCompanyData(cid);
+  // The proposal learns from the recent notas only (3 months or the 10 newest); the older ones stay in the history.
+  const { notas: recent, since } = recentNotas(notas);
+  const orders = since ? allOrders.filter((o) => !o.date || o.date >= addDays(since, -ORDER_MARGIN_DAYS)) : allOrders;
+  const proposal = buildProposal({ emitter, notas: recent, customers, orders });
   const fill = proposal.emitter.fill;
   const today = todayInSaoPaulo(deps.now());
 
@@ -568,6 +603,23 @@ async function prepareProposal(cid: string, emitter: FiscalEmitter, client: Sefi
     service: emitter.service ?? fill.service ?? null,
   };
   return { proposal, enabledInCity };
+}
+
+/** The proposal reads the notas of the last 3 months before the newest one... */
+export const RECENT_NOTA_DAYS = 90;
+/** ...or, when they are fewer, the 10 newest. */
+export const RECENT_NOTA_MIN = 10;
+/** Orders a little older than the oldest recent nota can still be its order. */
+const ORDER_MARGIN_DAYS = 30;
+
+/** The recent notas (3 months from the newest, at least the 10 newest) and the date they start. */
+export function recentNotas(notas: ImportNota[]): { notas: ImportNota[]; since: string | null } {
+  const dated = notas.filter((n) => n.date).sort((a, b) => (a.date! < b.date! ? 1 : a.date! > b.date! ? -1 : 0));
+  if (dated.length === 0) return { notas, since: null };
+  const window = addDays(dated[0].date!, -RECENT_NOTA_DAYS);
+  const tenth = dated[Math.min(RECENT_NOTA_MIN, dated.length) - 1].date!;
+  const since = tenth < window ? tenth : window;
+  return { notas: notas.filter((n) => !n.date || n.date >= since), since };
 }
 
 function addDays(date: string, days: number): string {

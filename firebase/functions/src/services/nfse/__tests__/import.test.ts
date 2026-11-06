@@ -1,6 +1,7 @@
 jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 
 import { list, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
+import { db } from '../../firestore.service';
 import { parseDfePage, parseEvent, parseNfse } from '../adn-reader';
 import { NfseServiceError } from '../errors';
 import {
@@ -20,6 +21,8 @@ import {
   externalInvoiceId,
   linkCandidates,
   linkInvoiceToOrder,
+  recentNotas,
+  scanFields,
   startImport,
   syncCompanyMailboxes,
   undoImport,
@@ -457,6 +460,107 @@ describe('import: reading', () => {
     expect(p.counts).toMatchObject({ notas: 9, canceled: 1, linked: 7, historyOnly: 2 });
     expect(p.autoIssue.map((s) => s.customerId)).toEqual(['norte']);
   });
+});
+
+describe('import: a big company', () => {
+  it('scanFields reads page by page, only the fields asked (none: ids only)', async () => {
+    for (let i = 0; i < 21; i++) seed(`companies/c1/heavy/h${String(i).padStart(2, '0')}`, { a: i, b: { c: 1, d: 2 }, photos: ['x'.repeat(100)] });
+    const seen: Array<[string, unknown]> = [];
+    await scanFields(db.collection('companies/c1/heavy'), ['a', 'b.c'], (id, data) => seen.push([id, data]), 7);
+    expect(seen).toHaveLength(21);
+    expect(seen[0]).toEqual(['h00', { a: 0, b: { c: 1 } }]);
+    expect(seen[20][0]).toBe('h20');
+    const ids: string[] = [];
+    await scanFields(db.collection('companies/c1/heavy'), [], (id, data) => {
+      ids.push(id);
+      expect(data).toEqual({});
+    }, 5);
+    expect(ids).toHaveLength(21);
+  });
+
+  it('the proposal learns from the last 3 months, or the 10 newest notas; an older nota stays in the history', async () => {
+    const at = (date: string | null) => ({ date } as ImportNota);
+    // Many notas: the 3 months before the newest.
+    const busy = [...Array.from({ length: 12 }, (_, i) => at(`2026-10-${String(10 + i).padStart(2, '0')}`)), at('2026-07-23'), at('2026-07-21'), at(null)];
+    const recent = recentNotas(busy);
+    expect(recent.since).toBe('2026-07-23');
+    expect(recent.notas).toHaveLength(14);
+    // Few notas: the 10 newest, however old.
+    const quiet = [at('2026-10-01'), ...Array.from({ length: 10 }, (_, i) => at(`2024-0${1 + (i % 9)}-${10 + i}`))];
+    expect(recentNotas(quiet).since).toBe('2024-01-19');
+    expect(recentNotas(quiet).notas).toHaveLength(10);
+    expect(recentNotas([at(null)]).since).toBeNull();
+
+    const OLD = '00000000000779';
+    // Ten recent notas (one more than the company has), then one from 2024.
+    mailbox.push({ nsu: mailbox.length + 1, kind: 'nfse', xml: nfseXml({ n: 12, value: 60, date: '2026-10-12', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }) });
+    mailbox.push({ nsu: mailbox.length + 1, kind: 'nfse', xml: nfseXml({ n: 300, value: 40, date: '2024-05-02', recipient: { taxId: OLD, name: 'CLIENTE ANTIGO EXEMPLO' } }) });
+    const batch = await proposed();
+    expect(read(`companies/c1/invoices/${externalInvoiceId(accessKeyOf(300))}`)).toMatchObject({ source: 'external', effectiveDate: '2024-05-02' });
+    expect(batch.proposal!.groups.map((g) => g.key)).not.toContain(OLD);
+    expect(batch.proposal!.counts.notas).toBe(10);
+  });
+
+  it('1,000 documents and 1,500 orders with photos: proposes; a crash mid-page or before the proposal retries without duplicating', async () => {
+    resetFakeDb();
+    seedCompany();
+    const recipients = [REVENDA, MODELO, NOVA];
+    mailbox = [];
+    for (let n = 1; n <= 1000; n++) {
+      mailbox.push({ nsu: n, kind: 'nfse', xml: nfseXml({ n, value: 50 + (n % 300), date: `2026-${String(1 + (n % 10)).padStart(2, '0')}-1${n % 10}`, recipient: { taxId: recipients[n % 3], name: `CLIENTE EXEMPLO ${n % 3}` } }) });
+    }
+    for (let i = 0; i < 1500; i++) {
+      seed(`companies/c1/orders/big${i}`, {
+        number: 1000 + i,
+        status: 'done',
+        customer: { id: 'norte', name: 'Loja Exemplo Norte' },
+        services: [{ service: { id: 's', name: 'Revisão' }, value: 100 }],
+        photos: Array.from({ length: 5 }, (_, k) => ({ url: `https://example.com/${i}/${k}.jpg`, note: 'x'.repeat(200) })),
+        createdAt: '2025-01-10T12:00:00.000Z',
+      });
+    }
+    const memoryBefore = process.memoryUsage().heapUsed;
+
+    // 1) A crash in the middle of a page (the instance dies after some notas of the page were saved).
+    let files = 0;
+    const saveFile = deps.saveFile!;
+    deps.saveFile = async (path, contents, type) => {
+      if (++files === 620) throw new Error('instance stopped');
+      return saveFile(path, contents, type);
+    };
+    expect(await errorOf(startImport('c1', 'e1', USER, deps))).toBe('IMPORT_FAILED');
+    const batchId = list('companies/c1/nfseImports')[0].id;
+    expect(read(`companies/c1/nfseImports/${batchId}`)).toMatchObject({ status: 'reading' });
+    // Only whole pages count as read: the page cut short is read again.
+    const stoppedAt = read('companies/c1/private/nfse/emitters/e1')!.lastNsu as number;
+    expect(stoppedAt).toBeGreaterThan(500);
+    expect(stoppedAt).toBeLessThan(620);
+    expect(list('companies/c1/invoices').length).toBeGreaterThan(stoppedAt);
+
+    // 2) The mailbox all read, a crash while the proposal is built.
+    deps.saveFile = saveFile;
+    deps.lookupCnc = (() => {
+      throw new Error('out of memory');
+    }) as unknown as ImportDeps['lookupCnc'];
+    await expect(startImport('c1', 'e1', USER, deps)).rejects.toThrow('out of memory');
+    expect(read(`companies/c1/nfseImports/${batchId}`)).toMatchObject({ status: 'reading' });
+    expect(read('companies/c1/private/nfse/emitters/e1')).toMatchObject({ lastNsu: 1000 });
+
+    // 3) Trying again (the app starts it again): the same batch goes on and proposes.
+    deps.lookupCnc = async () => ({ municipalRegistration: '12345', enabledInCity: true, legalName: null });
+    const batch = await startImport('c1', 'e1', USER, deps);
+    expect(batch.id).toBe(batchId);
+    expect(batch.status).toBe('proposed');
+    expect(list('companies/c1/nfseImports')).toHaveLength(1);
+    const invoices = list('companies/c1/invoices');
+    expect(invoices).toHaveLength(1000);
+    expect(new Set(invoices.map((i) => i.data.accessKey)).size).toBe(1000);
+    expect(batch.read.lastNsu).toBe(1000);
+    // The proposal reads only the last 3 months of them.
+    expect(batch.proposal!.counts.notas).toBe(300);
+    // Logged, not asserted: the fake db holds everything in this same heap.
+    process.stdout.write(`[import 1000 docs] heap +${Math.round((process.memoryUsage().heapUsed - memoryBefore) / 1048576)} MiB\n`);
+  }, 120000);
 });
 
 describe('import: apply and undo', () => {
