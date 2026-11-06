@@ -8,6 +8,7 @@ import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -43,6 +44,12 @@ class Order extends BaseAuditCompany {
   /// on a full save, or a stale copy would bring a removed mark back.
   @JsonKey(includeToJson: false)
   OrderHold? onHold;
+
+  /// Work stage while in progress (Pintura, Polimento…), docs/WORK_STAGES.md.
+  /// Written only by the server (`OrderStore.moveToStage` calls it): never
+  /// sent on a full save, or a stale copy would move the order back.
+  @JsonKey(includeToJson: false)
+  OrderStage? stage;
 
   /// Valor total pago (soma dos pagamentos parciais)
   double? paidAmount;

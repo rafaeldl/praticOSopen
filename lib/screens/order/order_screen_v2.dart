@@ -30,6 +30,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/screens/order/order_missing_data.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
@@ -986,6 +987,45 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _store.hold != null && _permissions.canChangeHold(order);
 
   /// One tap opens the reasons and the reason saves it: two taps in all.
+  /// Name of the stage the order is in, while in progress with stages.
+  String? _stageName(Order order, SegmentConfigProvider config) {
+    _store.stage; // observed: the line changes as soon as the stage does
+    return WorkStage.of(order, config.workStages)?.name;
+  }
+
+  bool _canChangeStage(Order order, SegmentConfigProvider config) =>
+      order.id != null &&
+      _store.status == 'progress' &&
+      config.workStages.length > 1 &&
+      _permissions.canChangeHold(order);
+
+  Future<void> _pickStage() async {
+    final order = _store.order;
+    if (order == null) return;
+    final config = context.read<SegmentConfigProvider>();
+    if (!_canChangeStage(order, config)) return;
+    final current = WorkStage.of(order, config.workStages);
+    final picked = await pickOne<String>(
+      context,
+      title: context.l10n.orderStagePickerTitle,
+      selected: current?.id,
+      options: [
+        for (final stage in config.workStages)
+          PickerItem<String>(value: stage.id, title: stage.name),
+      ],
+    );
+    if (picked != null && picked != current?.id && mounted) {
+      await _moveToStage(picked);
+    }
+  }
+
+  Future<void> _moveToStage(String stageId) => _store.moveToStage(
+    stageId,
+    onFailed: () {
+      if (mounted) showAppToast(context, context.l10n.orderStageSaveError);
+    },
+  );
+
   Future<void> _markOnHold() async {
     final order = _store.order;
     if (order == null || !_canMarkOnHold(order)) return;
@@ -1060,6 +1100,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               label: l10n.orderMenuChangeStatus,
               icon: CupertinoIcons.arrow_right_arrow_left,
               submenu: true,
+            ),
+          if (_canChangeStage(order, config))
+            PullDownItem(
+              value: 'stage',
+              label: l10n.orderMenuChangeStage,
+              icon: CupertinoIcons.square_stack_3d_up,
             ),
           if (_canMarkOnHold(order))
             PullDownItem(
@@ -1184,6 +1230,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     switch (choice) {
       case 'status':
         await _selectStatus();
+      case 'stage':
+        await _pickStage();
       case 'hold':
         await _markOnHold();
       case 'resume':
@@ -3525,6 +3573,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       case 'approved':
         return to(l10n.orderActionStartService, 'progress');
       case 'progress':
+        // With stages, the next step is the next stage until the last one.
+        final next = WorkStage.next(order, config.workStages);
+        if (next != null &&
+            order.id != null &&
+            _permissions.canChangeHold(order)) {
+          return (
+            l10n.orderStageMoveTo(next.name),
+            afterCooldown(() => _moveToStage(next.id)),
+          );
+        }
         return to(l10n.orderActionMarkReady, 'done');
       case 'done':
         final remaining = _store.remainingBalance;
@@ -3725,9 +3783,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      overdue
-                          ? '${config.getStatus(status)} · ${l10n.orderOverdue}'
-                          : config.getStatus(status),
+                      [
+                        config.getStatus(status),
+                        ?_stageName(order, config),
+                        if (overdue) l10n.orderOverdue,
+                      ].join(' · '),
                       style: statusStyle,
                     ),
                   ),

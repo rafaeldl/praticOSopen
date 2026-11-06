@@ -6458,6 +6458,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderHoldSaveError => 'No se pudo guardar. Inténtalo de nuevo.';
 
   @override
+  String orderStageMoveTo(String stage) {
+    return 'Pasar a $stage';
+  }
+
+  @override
+  String get orderMenuChangeStage => 'Cambiar etapa';
+
+  @override
+  String get orderStagePickerTitle => '¿En qué etapa está?';
+
+  @override
+  String get orderStageSaveError =>
+      'No se pudo cambiar la etapa. Revisa la conexión e inténtalo de nuevo.';
+
+  @override
   String get orderHoldSheetTitle => '¿Por qué se detuvo?';
 
   @override

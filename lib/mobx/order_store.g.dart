@@ -142,6 +142,21 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$stageAtom = Atom(name: '_OrderStore.stage', context: context);
+
+  @override
+  OrderStage? get stage {
+    _$stageAtom.reportRead();
+    return super.stage;
+  }
+
+  @override
+  set stage(OrderStage? value) {
+    _$stageAtom.reportWrite(value, super.stage, () {
+      super.stage = value;
+    });
+  }
+
   late final _$formsStreamAtom = Atom(
     name: '_OrderStore.formsStream',
     context: context,
@@ -1021,6 +1036,18 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$moveToStageAsyncAction = AsyncAction(
+    '_OrderStore.moveToStage',
+    context: context,
+  );
+
+  @override
+  Future<void> moveToStage(String stageId, {VoidCallback? onFailed}) {
+    return _$moveToStageAsyncAction.run(
+      () => super.moveToStage(stageId, onFailed: onFailed),
+    );
+  }
+
   late final _$loadOrdersAsyncAction = AsyncAction(
     '_OrderStore.loadOrders',
     context: context,
@@ -1770,6 +1797,7 @@ mixin _$OrderStore on _OrderStore, Store {
 orderList: ${orderList},
 orderStream: ${orderStream},
 hold: ${hold},
+stage: ${stage},
 formsStream: ${formsStream},
 dueDate: ${dueDate},
 scheduledDate: ${scheduledDate},

@@ -17,6 +17,7 @@ import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/models/fiscal_emitter.dart';
 import 'package:praticos/models/nfse.dart';
@@ -1360,6 +1361,75 @@ void main() {
         args: {'order': _order()},
       );
       expect(find.byKey(const ValueKey('order_missing_phone_')), findsNothing);
+    });
+  });
+
+  group('work stages (docs/WORK_STAGES.md)', () {
+    const stages = [
+      WorkStage('paint', 'Pintura'),
+      WorkStage('polish', 'Polimento'),
+    ];
+    Order inStage(String? stageId) =>
+        _order(status: 'progress')
+          ..stage = stageId == null ? null : (OrderStage()..id = stageId);
+    Finder blue() => find.byKey(const ValueKey('order_primary_button'));
+
+    testWidgets(
+      'the stage beside the status, the blue button goes to the next one',
+      (tester) async {
+        final config = await _pump(
+          tester,
+          screen(OrderStore()),
+          args: {'order': inStage(null)},
+        );
+        config.setWorkStages(stages);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Em Andamento · Pintura'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: blue(),
+            matching: find.text('Passar para Polimento'),
+          ),
+          findsOneWidget,
+        );
+        await _openMenu(tester);
+        expect(_menuLabels(tester), contains('Mudar etapa'));
+      },
+    );
+
+    testWidgets('on the last stage the blue button marks it ready', (
+      tester,
+    ) async {
+      final config = await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': inStage('polish')},
+      );
+      config.setWorkStages(stages);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Em Andamento · Polimento'), findsOneWidget);
+      expect(
+        find.descendant(of: blue(), matching: find.text('Marcar como pronta')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('without stages nothing changes', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': inStage('paint')},
+      );
+
+      expect(find.textContaining('Pintura'), findsNothing);
+      expect(
+        find.descendant(of: blue(), matching: find.text('Marcar como pronta')),
+        findsOneWidget,
+      );
+      await _openMenu(tester);
+      expect(_menuLabels(tester), isNot(contains('Mudar etapa')));
     });
   });
 }
