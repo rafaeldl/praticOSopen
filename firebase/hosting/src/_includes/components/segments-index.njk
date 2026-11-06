@@ -18,7 +18,7 @@
     <div class="reels" data-reels>
         {% for side in [1, 0] %}
         <ul class="reel{% if side == 0 %} reel--back{% endif %}" role="list" data-reel>
-            {% for segment in seg.links %}
+            {% for segment in seg.links | enabledLinks(site.flags) %}
             {% if loop.index % 2 == side %}
             {% set slug = segment.href | replace('segmentos/', '') | replace('-en.html', '') | replace('-es.html', '') | replace('.html', '') %}
             {{ tradeCard(segment, slug, slug in wideSlugs, relPath) }}

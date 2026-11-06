@@ -1,0 +1,26 @@
+---js
+{
+  // Behind site.flags.softwareItPage: the page claims the automatic service
+  // invoice (#571), so it is only built once that ships (docs/SEGMENT_SOFTWARE_IT.md).
+  layout: "layouts/segment.njk",
+  segmentStyles: true,
+  segmentSlug: "software-ti",
+  langCode: "es",
+  lang: "es",
+  relPath: "../",
+  title: "Sistema para Empresas de TI y Software | PraticOS",
+  description: "App de órdenes de servicio para empresas de TI: el contrato mensual abre la orden del mes, la factura de servicio sale sola al concluir y el cliente aprueba por enlace.",
+  keywords: "sistema para empresa de TI, app de soporte técnico mensual, factura de servicio automática, sistema para software house, mensualidades de TI",
+  ogTitle: "Sistema para Empresas de TI y Software | PraticOS",
+  ogDescription: "Factura de servicio cada mes, sola: el contrato abre la orden y la factura sale al concluir.",
+  indexPage: "index-es.html",
+  langSwitch: [
+    { code: "PT", href: "software-ti.html", active: false },
+    { code: "EN", href: "software-ti-en.html", active: false },
+    { code: "ES", href: "software-ti-es.html", active: true }
+  ],
+  eleventyComputed: {
+    permalink: (data) => (data.site.flags.softwareItPage ? "segmentos/software-ti-es.html" : false),
+  },
+}
+---

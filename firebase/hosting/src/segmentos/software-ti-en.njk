@@ -1,0 +1,26 @@
+---js
+{
+  // Behind site.flags.softwareItPage: the page claims the automatic service
+  // invoice (#571), so it is only built once that ships (docs/SEGMENT_SOFTWARE_IT.md).
+  layout: "layouts/segment.njk",
+  segmentStyles: true,
+  segmentSlug: "software-ti",
+  langCode: "en",
+  lang: "en",
+  relPath: "../",
+  title: "Work Order App for IT & Software Businesses | PraticOS",
+  description: "Work order app for IT businesses: the monthly contract opens each month's work order, the service invoice goes out on its own on completion, quotes approved by link.",
+  keywords: "IT support business app, managed services work order app, monthly IT billing, software house management app, recurring service invoice",
+  ogTitle: "Work Order App for IT & Software Businesses | PraticOS",
+  ogDescription: "Service invoices every month, on their own: the contract opens the work order and the invoice goes out on completion.",
+  indexPage: "index-en.html",
+  langSwitch: [
+    { code: "PT", href: "software-ti.html", active: false },
+    { code: "EN", href: "software-ti-en.html", active: true },
+    { code: "ES", href: "software-ti-es.html", active: false }
+  ],
+  eleventyComputed: {
+    permalink: (data) => (data.site.flags.softwareItPage ? "segmentos/software-ti-en.html" : false),
+  },
+}
+---

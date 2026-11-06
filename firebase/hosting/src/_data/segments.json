@@ -21,7 +21,8 @@
       { "href": "segmentos/obras-publicas.html", "label": "Obras Públicas / Prefeituras" },
       { "href": "segmentos/automotivo.html", "label": "Oficina Mecânica" },
       { "href": "segmentos/refrigeracao.html", "label": "Refrigeração" },
-      { "href": "segmentos/seguranca-cftv.html", "label": "Segurança CFTV" }
+      { "href": "segmentos/seguranca-cftv.html", "label": "Segurança CFTV" },
+      { "href": "segmentos/software-ti.html", "label": "Software e TI", "flag": "softwareItPage" }
     ]
   },
   "en": {
@@ -46,6 +47,7 @@
       { "href": "segmentos/hidraulica-en.html", "label": "Plumbing" },
       { "href": "segmentos/impressoras-en.html", "label": "Printers & Copiers" },
       { "href": "segmentos/obras-publicas-en.html", "label": "Public Works / Municipalities" },
+      { "href": "segmentos/software-ti-en.html", "label": "Software & IT Services", "flag": "softwareItPage" },
       { "href": "segmentos/energia-solar-en.html", "label": "Solar Installer" }
     ]
   },
@@ -71,6 +73,7 @@
       { "href": "segmentos/moveis-es.html", "label": "Muebles" },
       { "href": "segmentos/obras-publicas-es.html", "label": "Obras Públicas / Municipios" },
       { "href": "segmentos/refrigeracao-es.html", "label": "Refrigeración" },
+      { "href": "segmentos/software-ti-es.html", "label": "Software y TI", "flag": "softwareItPage" },
       { "href": "segmentos/automotivo-es.html", "label": "Taller Mecánico" }
     ]
   }

@@ -71,6 +71,11 @@ module.exports = function(eleventyConfig) {
     return base + "/" + cleanPath;
   });
 
+  // Segment links behind a flag (segments.json "flag") show only when site.flags turns it on
+  eleventyConfig.addFilter("enabledLinks", function(links, flags) {
+    return (links || []).filter((link) => !link.flag || (flags && flags[link.flag]));
+  });
+
   // Format a date as YYYY-MM-DD for sitemap <lastmod>
   eleventyConfig.addFilter("dateToISO", function(date) {
     return date.toISOString().split('T')[0];

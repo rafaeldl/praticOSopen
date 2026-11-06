@@ -27,7 +27,7 @@
             </div>
         </div>
         {% if not simpleFooter %}
-        <p class="footer__segments"><span>{{ foot.segmentsLabel }}</span>{% for segment in seg.links %}<a href="{{ relPath }}{{ segment.href | prettyUrl }}">{{ segment.label }}</a>{% if not loop.last %} <i aria-hidden="true">·</i> {% endif %}{% endfor %}</p>
+        <p class="footer__segments"><span>{{ foot.segmentsLabel }}</span>{% for segment in seg.links | enabledLinks(site.flags) %}<a href="{{ relPath }}{{ segment.href | prettyUrl }}">{{ segment.label }}</a>{% if not loop.last %} <i aria-hidden="true">·</i> {% endif %}{% endfor %}</p>
         {% endif %}
         <div class="footer__bottom">
             <span>© {{ site.year }} {{ site.name }}. {{ foot.copyright }}</span>

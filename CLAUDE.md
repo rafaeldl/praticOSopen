@@ -744,6 +744,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/APP_TRACKING_TRANSPARENCY.md` - Permissão de rastreamento no iOS (ATT) e exigências da App Review
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
+- `docs/SEGMENT_SOFTWARE_IT.md` - Ramo Software e TI: nomes (Sistema, Licença), exemplos, termos, página do site atrás de `flags.softwareItPage` e como criar o ramo em produção
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
 - `docs/DEVICE_NEXT_MAINTENANCE.md` - Próxima manutenção por aparelho: pergunta ao concluir, Início, aviso diário

@@ -4225,13 +4225,13 @@ abstract class AppLocalizations {
   /// No description provided for @serviceNameHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: {segment, select, automotive{Troca de óleo} hvac{Limpeza do split} smartphones{Troca de tela} computers{Formatação} appliances{Conserto de geladeira} electrical{Troca de disjuntor} plumbing{Conserto de vazamento} security{Instalação de câmera} solar{Limpeza das placas} printers{Troca de toner} bicycles{Revisão completa} other{Manutenção}}'**
+  /// **'Ex.: {segment, select, automotive{Troca de óleo} hvac{Limpeza do split} smartphones{Troca de tela} computers{Formatação} appliances{Conserto de geladeira} electrical{Troca de disjuntor} plumbing{Conserto de vazamento} security{Instalação de câmera} solar{Limpeza das placas} printers{Troca de toner} bicycles{Revisão completa} software_it{Suporte técnico mensal} other{Manutenção}}'**
   String serviceNameHint(String segment);
 
   /// No description provided for @productNameHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: {segment, select, automotive{Filtro de óleo} hvac{Capacitor} smartphones{Tela} computers{Memória RAM} appliances{Resistência} electrical{Disjuntor} plumbing{Registro} security{Câmera} solar{Inversor} printers{Toner} bicycles{Câmara de ar} other{Peça de reposição}}'**
+  /// **'Ex.: {segment, select, automotive{Filtro de óleo} hvac{Capacitor} smartphones{Tela} computers{Memória RAM} appliances{Resistência} electrical{Disjuntor} plumbing{Registro} security{Câmera} solar{Inversor} printers{Toner} bicycles{Câmara de ar} software_it{Licença Microsoft 365} other{Peça de reposição}}'**
   String productNameHint(String segment);
 
   /// No description provided for @serviceNameRequired.
@@ -7333,7 +7333,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderCustomerRequestPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: {segment, select, automotive{barulho ao frear} hvac{não está gelando} smartphones{tela quebrada} computers{não liga} appliances{parou de funcionar} electrical{tomada sem energia} plumbing{vazamento na pia} security{câmera sem imagem} solar{geração baixa} printers{papel enroscando} bicycles{corrente pulando} other{não está funcionando}}'**
+  /// **'Ex.: {segment, select, automotive{barulho ao frear} hvac{não está gelando} smartphones{tela quebrada} computers{não liga} appliances{parou de funcionar} electrical{tomada sem energia} plumbing{vazamento na pia} security{câmera sem imagem} solar{geração baixa} printers{papel enroscando} bicycles{corrente pulando} software_it{relatório não abre} other{não está funcionando}}'**
   String orderCustomerRequestPlaceholder(String segment);
 
   /// No description provided for @orderDeliverySection.
@@ -7951,7 +7951,7 @@ abstract class AppLocalizations {
   /// No description provided for @checklistQuestionPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: {segment, select, automotive{Os pneus estão bons?} hvac{O dreno está livre?} smartphones{A tela liga?} computers{O ventilador gira?} appliances{O aparelho liga?} electrical{O quadro está identificado?} plumbing{Há sinal de vazamento?} security{As câmeras estão gravando?} solar{As placas estão limpas?} printers{A impressão sai nítida?} bicycles{Os freios estão bons?} other{Está funcionando?}}'**
+  /// **'Ex.: {segment, select, automotive{Os pneus estão bons?} hvac{O dreno está livre?} smartphones{A tela liga?} computers{O ventilador gira?} appliances{O aparelho liga?} electrical{O quadro está identificado?} plumbing{Há sinal de vazamento?} security{As câmeras estão gravando?} solar{As placas estão limpas?} printers{A impressão sai nítida?} bicycles{Os freios estão bons?} software_it{O backup rodou?} other{Está funcionando?}}'**
   String checklistQuestionPlaceholder(String segment);
 
   /// No description provided for @checklistAnswerType.

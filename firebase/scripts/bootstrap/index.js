@@ -15,5 +15,6 @@ module.exports = {
   solar: require('./solar'),
   printers: require('./printers'),
   bicycles: require('./bicycles'),
+  software_it: require('./software_it'),
   other: require('./other'),
 };
