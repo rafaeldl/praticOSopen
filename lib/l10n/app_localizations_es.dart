@@ -5800,6 +5800,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nfseRowTitle => 'Factura de servicio';
 
   @override
+  String get nfseCompanyRowNoCnpj => 'Falta registrar el CNPJ';
+
+  @override
+  String get nfseCompanyRowPending => 'Falta terminar la configuración';
+
+  @override
+  String get nfseCompanyRowReady => 'Lista para emitir';
+
+  @override
   String get nfseIssueAction => 'Emitir factura de servicio';
 
   @override

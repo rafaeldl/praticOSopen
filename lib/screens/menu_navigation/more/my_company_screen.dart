@@ -11,6 +11,13 @@ import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_setup_screen.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/field_diff.dart';
 import 'package:praticos/utils/firestore_fields.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +29,27 @@ enum CompanyFeature {
   fieldService,
   useContracts,
   useDeviceManagement,
+}
+
+/// Where the NFS-e direct setup stands, shown on the "Nota fiscal" row.
+enum NfseSetupStatus {
+  /// No CNPJ yet.
+  noCnpj,
+
+  /// A CNPJ, but none can issue yet (certificate, service or city missing).
+  pending,
+
+  /// At least one CNPJ can issue now.
+  ready,
+}
+
+/// [NfseSetupStatus] of the company's CNPJs on [now].
+NfseSetupStatus nfseSetupStatusOf(NfseController nfse, {DateTime? now}) {
+  final emitters = nfse.emitters;
+  if (emitters.isEmpty) return NfseSetupStatus.noCnpj;
+  return emitters.any((e) => e.canIssue(now: now))
+      ? NfseSetupStatus.ready
+      : NfseSetupStatus.pending;
 }
 
 /// "Sua empresa": what shows on the customer's order (name, logo, contact
@@ -44,7 +72,16 @@ class MyCompanyScreen extends StatelessWidget {
     this.onFinancialChanged,
     this.features = const {},
     this.onFeatureChanged,
+    this.nfseStatus = NfseSetupStatus.noCnpj,
+    this.onOpenNfse,
   });
+
+  /// Where the nota setup stands ("Nota fiscal" row).
+  final NfseSetupStatus nfseStatus;
+
+  /// Opens the NFS-e direct setup; null hides the "Nota fiscal" row (pilot
+  /// off, or the user does not manage the company).
+  final VoidCallback? onOpenNfse;
 
   /// Opens "Nome, logo e contato".
   final VoidCallback onOpenCompanyData;
@@ -140,6 +177,13 @@ class MyCompanyScreen extends StatelessWidget {
               value: useFinancial,
               onChanged: onFinancialChanged,
             ),
+            if (onOpenNfse != null)
+              AppListRow(
+                key: const ValueKey('company_nfse'),
+                title: l10n.nfseRowTitle,
+                subtitleWidget: _NfseStatusLine(status: nfseStatus),
+                onTap: onOpenNfse,
+              ),
             feature(
               CompanyFeature.useScheduling,
               l10n.schedulingRow,
@@ -162,6 +206,39 @@ class MyCompanyScreen extends StatelessWidget {
                 l10n.deviceControlRowHint,
               ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Status dot + text of the "Nota fiscal" row: amber while something is
+/// missing, green when it can issue.
+class _NfseStatusLine extends StatelessWidget {
+  const _NfseStatusLine({required this.status});
+
+  final NfseSetupStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ready = status == NfseSetupStatus.ready;
+    final text = switch (status) {
+      NfseSetupStatus.noCnpj => l10n.nfseCompanyRowNoCnpj,
+      NfseSetupStatus.pending => l10n.nfseCompanyRowPending,
+      NfseSetupStatus.ready => l10n.nfseCompanyRowReady,
+    };
+    return Row(
+      children: [
+        StatusDot(color: ready ? AppColors.success : AppColors.warning),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            text,
+            style: AppTypography.callout.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
         ),
       ],
     );
@@ -247,6 +324,10 @@ class MyCompanySettings extends StatefulWidget {
     CompanyLoader? loadCompany,
     SegmentsLoader? loadSegments,
     this.uploadLogo,
+    this.nfse,
+    this.canSetUpNfse,
+    this.openNfseSetup,
+    this.now,
   }) : writer = writer ?? _writeCompanyFields,
        loadCompany = loadCompany ?? _loadCompanyWithStore,
        loadSegments = loadSegments ?? _loadActiveSegments;
@@ -264,6 +345,18 @@ class MyCompanySettings extends StatefulWidget {
   final SegmentsLoader loadSegments;
   final CompanyLogoUploader? uploadLogo;
 
+  /// Test seam; defaults to a new [NfseController] (settings + CNPJs).
+  final NfseController? nfse;
+
+  /// Who sees the "Nota fiscal" row; defaults to "manages the company".
+  final bool? canSetUpNfse;
+
+  /// Test seam; defaults to [NfseDirectSetupScreen.open].
+  final void Function(BuildContext context)? openNfseSetup;
+
+  /// Test seam for the certificate validity.
+  final DateTime? now;
+
   @override
   State<MyCompanySettings> createState() => _MyCompanySettingsState();
 }
@@ -272,11 +365,39 @@ class _MyCompanySettingsState extends State<MyCompanySettings> {
   bool _saving = false;
   Company? _company;
   List<OnboardingSegment>? _segments;
+  late final NfseController _nfse = widget.nfse ?? NfseController();
 
   @override
   void initState() {
     super.initState();
+    _nfse.addListener(_onNfse);
     _load();
+  }
+
+  @override
+  void dispose() {
+    _nfse.removeListener(_onNfse);
+    if (widget.nfse == null) _nfse.dispose();
+    super.dispose();
+  }
+
+  void _onNfse() {
+    if (mounted) setState(() {});
+  }
+
+  /// The "Nota fiscal" row shows with the NFS-e direct on and for who
+  /// manages the company (the setup screens are owner/admin).
+  bool get _showNfse =>
+      _nfse.direct &&
+      (widget.canSetUpNfse ?? AuthorizationService.instance.canManageCompany);
+
+  void _openNfse() {
+    final open = widget.openNfseSetup;
+    if (open != null) {
+      open(context);
+    } else {
+      NfseDirectSetupScreen.open(context);
+    }
   }
 
   Future<void> _load() async {
@@ -567,6 +688,8 @@ class _MyCompanySettingsState extends State<MyCompanySettings> {
       onFinancialChanged: enabled ? _change : null,
       features: _features(provider),
       onFeatureChanged: enabled ? _changeFeature : null,
+      nfseStatus: nfseSetupStatusOf(_nfse, now: widget.now),
+      onOpenNfse: _showNfse ? _openNfse : null,
     );
   }
 }

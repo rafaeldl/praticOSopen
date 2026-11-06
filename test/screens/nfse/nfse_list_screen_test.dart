@@ -216,14 +216,17 @@ void main() {
     expect(find.text('Ana Ribeiro'), findsNothing);
   });
 
-  testWidgets('the "…" is only for who sets it up', (tester) async {
+  testWidgets('the setup button is only for who sets it up', (tester) async {
     await _pump(tester, _screen([_nota('a')]));
-    expect(find.byKey(const Key('nfseListMenu')), findsNothing);
+    expect(find.byKey(const Key('nfseListSetup')), findsNothing);
     await _pump(
       tester,
       _screen([_nota('a')], canSetUp: true, month: DateTime(2026, 10, 2)),
     );
-    expect(find.byKey(const Key('nfseListMenu')), findsOneWidget);
+    // One tap to the setup, no "…" menu in between.
+    expect(find.byKey(const Key('nfseListSetup')), findsOneWidget);
+    expect(find.byKey(const Key('nfseListMenu')), findsNothing);
+    expect(find.bySemanticsLabel('Configurar nota fiscal'), findsOneWidget);
   });
 
   testWidgets('a read failure offers to try again', (tester) async {

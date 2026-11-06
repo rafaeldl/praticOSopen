@@ -5787,6 +5787,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseRowTitle => 'Nota fiscal';
 
   @override
+  String get nfseCompanyRowNoCnpj => 'Falta cadastrar o CNPJ';
+
+  @override
+  String get nfseCompanyRowPending => 'Falta terminar a configuração';
+
+  @override
+  String get nfseCompanyRowReady => 'Pronta para emitir';
+
+  @override
   String get nfseIssueAction => 'Emitir nota fiscal';
 
   @override

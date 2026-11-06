@@ -9452,6 +9452,24 @@ abstract class AppLocalizations {
   /// **'Nota fiscal'**
   String get nfseRowTitle;
 
+  /// No description provided for @nfseCompanyRowNoCnpj.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta cadastrar o CNPJ'**
+  String get nfseCompanyRowNoCnpj;
+
+  /// No description provided for @nfseCompanyRowPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta terminar a configuração'**
+  String get nfseCompanyRowPending;
+
+  /// No description provided for @nfseCompanyRowReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronta para emitir'**
+  String get nfseCompanyRowReady;
+
   /// No description provided for @nfseIssueAction.
   ///
   /// In pt, this message translates to:

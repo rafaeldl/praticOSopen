@@ -5786,6 +5786,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseRowTitle => 'Service invoice';
 
   @override
+  String get nfseCompanyRowNoCnpj => 'Add your CNPJ to start';
+
+  @override
+  String get nfseCompanyRowPending => 'Setup not finished';
+
+  @override
+  String get nfseCompanyRowReady => 'Ready to issue';
+
+  @override
   String get nfseIssueAction => 'Issue service invoice';
 
   @override
