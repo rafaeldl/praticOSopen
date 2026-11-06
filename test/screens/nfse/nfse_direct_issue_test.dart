@@ -783,6 +783,75 @@ void main() {
       expect(find.byKey(const Key('nfseReissue')), findsOneWidget);
     });
 
+    testWidgets('issued by itself when the order was done: "Emitida sozinha"', (
+      tester,
+    ) async {
+      await pumpInvoice(
+        tester,
+        'authorized',
+        extra: {'number': '29', 'auto': true},
+      );
+      expect(find.text('Emitida sozinha · nº 29'), findsWidgets);
+    });
+
+    testWidgets(
+      'automatic nota stopped by the daily limit: reason and one-tap retry',
+      (tester) async {
+        final (server, _) = await pumpInvoice(
+          tester,
+          'error',
+          extra: {'auto': true, 'errorCode': 'DAILY_LIMIT_REACHED'},
+          handler: (path, body) =>
+              _invoiceJson('authorized', extra: {'number': '31'}),
+        );
+        expect(find.text('Limite de notas de hoje'), findsWidgets);
+        expect(
+          find.textContaining('chegou ao limite de notas de hoje'),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('nfseReissue')), findsNothing);
+
+        await tester.tap(find.byKey(const Key('nfseRetryAuto')));
+        await tester.pumpAndSettle();
+        expect(server.calls.single.$1, '/invoices');
+        expect(server.calls.single.$2, {
+          'orderIds': ['o1'],
+        });
+      },
+    );
+
+    testWidgets(
+      'retry that fails again: the reason in a toast, never an alert',
+      (tester) async {
+        await pumpInvoice(
+          tester,
+          'error',
+          extra: {'auto': true, 'errorCode': 'CERT_EXPIRED'},
+          handler: (path, body) => _error('CERT_EXPIRED', status: 400),
+        );
+        expect(find.text('Certificado vencido'), findsWidgets);
+        await tester.tap(find.byKey(const Key('nfseRetryAuto')));
+        await tester.pump();
+        expect(find.byType(CupertinoAlertDialog), findsNothing);
+        expect(find.textContaining('já venceu'), findsWidgets);
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+      },
+    );
+
+    testWidgets(
+      'automatic nota without the customer\'s CPF/CNPJ: the sheet fixes it',
+      (tester) async {
+        await pumpInvoice(
+          tester,
+          'error',
+          extra: {'auto': true, 'errorCode': 'RECIPIENT_TAX_ID_REQUIRED'},
+        );
+        expect(find.text('Falta o CPF ou CNPJ do cliente'), findsWidgets);
+        expect(find.byKey(const Key('nfseRetryAuto')), findsNothing);
+        expect(find.byKey(const Key('nfseReissue')), findsOneWidget);
+      },
+    );
+
     testWidgets('no answer for minutes: "Conferir agora" asks again', (
       tester,
     ) async {

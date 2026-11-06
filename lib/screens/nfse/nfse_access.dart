@@ -16,12 +16,14 @@ import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/nfse/direct/nfse_direct_issue_sheet.dart';
 import 'package:praticos/screens/nfse/direct/nfse_direct_setup_screen.dart';
+import 'package:praticos/screens/nfse/direct/nfse_direct_texts.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/nfse_direct_api_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -252,6 +254,11 @@ String nfseStatusText(
     case NfseStatus.synchronized:
       return l10n.nfseStatusWaiting;
     case NfseStatus.authorized:
+      if (invoice.auto) {
+        return invoice.number == null
+            ? l10n.nfseStatusIssuedAuto
+            : l10n.nfseStatusIssuedAutoNumber(invoice.number!);
+      }
       return invoice.number == null
           ? l10n.nfseStatusIssued
           : l10n.nfseStatusIssuedNumber(invoice.number!);
@@ -262,7 +269,61 @@ String nfseStatusText(
     case NfseStatus.canceled:
       return l10n.nfseStatusCanceled;
     case NfseStatus.error:
+      if (invoice.isAutoDirectFailure) {
+        return nfseAutoErrorShort(l10n, invoice.errorCode!);
+      }
       return l10n.nfseStatusError;
+  }
+}
+
+/// Short reason of an automatic direct nota that did not go out, for the
+/// "Nota fiscal" row of the order ("Falta o CPF ou CNPJ do cliente").
+String nfseAutoErrorShort(AppLocalizations l10n, String code) {
+  switch (code) {
+    case 'RECIPIENT_TAX_ID_REQUIRED':
+      return l10n.nfseAutoMissingTaxId;
+    case 'CERT_EXPIRED':
+      return l10n.nfseAutoCertificateExpired;
+    case 'CERT_NOT_FOUND':
+    case 'EMITTER_NOT_READY':
+    case 'EMITTER_NOT_FOUND':
+      return l10n.nfseAutoEmitterNotReady;
+    case 'DAILY_LIMIT_REACHED':
+      return l10n.nfseAutoDailyLimit;
+    default:
+      return l10n.nfseAutoNotIssued;
+  }
+}
+
+/// "Tentar novamente" of an automatic direct nota that did not go out
+/// ([NfseInvoice.canRetryAuto]): issues it now like the server would (same
+/// emitter, description and value), without the sheet. Errors go to a toast.
+Future<NfseInvoice?> retryAutoNfse(
+  BuildContext context,
+  NfseInvoice failed, {
+  NfseDirectApiService? service,
+}) async {
+  final l10n = context.l10n;
+  try {
+    final invoice = await (service ?? NfseDirectApiService.instance)
+        .issueInvoice(failed.orderIds);
+    if (!context.mounted) return invoice;
+    final waiting = invoice.status == NfseStatus.creating;
+    showAppToast(
+      context,
+      waiting ? l10n.nfseDirectWaitingToast : l10n.nfseDirectIssuedToast,
+      icon: waiting ? CupertinoIcons.clock : CupertinoIcons.checkmark_circle,
+    );
+    return invoice;
+  } catch (e) {
+    if (context.mounted) {
+      showAppToast(
+        context,
+        nfseDirectErrorText(l10n, e),
+        icon: CupertinoIcons.exclamationmark_circle,
+      );
+    }
+    return null;
   }
 }
 

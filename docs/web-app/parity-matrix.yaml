@@ -3426,7 +3426,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Web: linha \"Nota fiscal\" com a situação ao vivo (invoices com orderIds array-contains), abre a nota em Notas fiscais no mês dela."
+  note: "Web: linha \"Nota fiscal\" com a situação ao vivo (invoices com orderIds array-contains), abre a nota em Notas fiscais no mês dela. Nota direta automática (#571): \"Emitida sozinha\" quando saiu sozinha, e o motivo curto (\"Falta o CPF ou CNPJ do cliente\", \"Limite de notas de hoje\") quando não saiu (invoiceStatusText / nfseStatusText; tests/nfse-auto-issue.test.ts)."
 - id: order.nfse.issue-row
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3955,7 +3955,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul. Web: só para quem tem chargeOrder; o botão fica desligado enquanto grava (busy)."
+  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul. Web: só para quem tem chargeOrder; o botão fica desligado enquanto grava (busy). Nota direta automática que não saiu por motivo que uma nova tentativa resolve (limite, certificado, serviço fora): \"Tentar novamente\" emite na hora sem a folha (#571, canRetryAuto); falta de dado do cliente segue em Corrigir e emitir."
 - id: order.ai.money-card
   screen: lib/screens/order/assistant/ai_actions_sheet.dart
   route: null

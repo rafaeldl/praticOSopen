@@ -335,6 +335,28 @@ class NfseInvoice {
 
   bool get isDirect => provider == NfseProvider.direct;
 
+  /// An automatic direct nota that did not go out for a reason a new try may
+  /// fix (daily limit, certificate renewed, service out): "Tentar novamente"
+  /// issues it again with one tap. Missing customer data, or a refusal of
+  /// the government, opens the issue sheet instead (issue #571).
+  bool get canRetryAuto =>
+      isDirect &&
+      auto &&
+      status == NfseStatus.error &&
+      errorCode != null &&
+      refusal == null &&
+      errorCode != 'RECIPIENT_TAX_ID_REQUIRED' &&
+      orderIds.isNotEmpty;
+
+  /// An automatic direct nota that the server could not issue, with our
+  /// reason in [errorCode] (not a refusal of the government).
+  bool get isAutoDirectFailure =>
+      isDirect &&
+      auto &&
+      status == NfseStatus.error &&
+      errorCode != null &&
+      refusal == null;
+
   /// Made outside PraticOS (portal or another system), read from the
   /// government: "Emitida fora do PraticOS".
   bool get isExternal => source == NfseSource.external;

@@ -1247,6 +1247,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (!_nfse.ready || !_canIssueNfse(order)) return null;
     final current = _nfse.current;
     if (current != null && current.status != NfseStatus.error) return null;
+    // The automatic nota did not go out for a reason a new try may fix:
+    // one tap issues it again (issue #571).
+    if (current != null && current.canRetryAuto) {
+      return (context.l10n.tryAgain, () => retryAutoNfse(context, current));
+    }
     return (
       current == null
           ? context.l10n.nfseIssueAction

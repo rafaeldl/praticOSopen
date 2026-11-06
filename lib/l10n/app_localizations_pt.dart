@@ -5690,6 +5690,33 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get nfseStatusIssuedAuto => 'Emitida sozinha';
+
+  @override
+  String nfseStatusIssuedAutoNumber(String number) {
+    return 'Emitida sozinha · nº $number';
+  }
+
+  @override
+  String get nfseAutoMissingTaxId => 'Falta o CPF ou CNPJ do cliente';
+
+  @override
+  String get nfseAutoCertificateExpired => 'Certificado vencido';
+
+  @override
+  String get nfseAutoEmitterNotReady => 'Falta configurar o CNPJ da nota';
+
+  @override
+  String get nfseAutoDailyLimit => 'Limite de notas de hoje';
+
+  @override
+  String get nfseAutoNotIssued => 'Não saiu sozinha';
+
+  @override
+  String get nfseAutoErrorPickEmitter =>
+      'Escolha o CNPJ padrão em Nota fiscal para as notas saírem sozinhas.';
+
+  @override
   String get nfseStatusCanceling => 'Cancelando';
 
   @override

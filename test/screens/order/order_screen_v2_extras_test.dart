@@ -1158,6 +1158,54 @@ void main() {
         );
       });
 
+      testWidgets(
+        'automatic direct nota stopped by the limit: row says why, blue "Tentar novamente"',
+        (tester) async {
+          final failed = NfseInvoice.fromJson({
+            'status': 'error',
+            'provider': 'direct',
+            'auto': true,
+            'errorCode': 'DAILY_LIMIT_REACHED',
+            'orderIds': ['o1'],
+            'value': 500,
+            'createdAt': DateTime.now().toIso8601String(),
+          }, id: 'auto-o1');
+          await _pump(
+            tester,
+            screen(OrderStore(), nfse: nfse(invoices: [failed])),
+            args: {'order': paid()},
+          );
+          expect(find.text('Limite de notas de hoje'), findsOneWidget);
+          expect(
+            find.descendant(
+              of: blue(),
+              matching: find.text('Tentar novamente'),
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets('issued by itself: "Emitida sozinha" on the row', (
+        tester,
+      ) async {
+        final issued = NfseInvoice.fromJson({
+          'status': 'authorized',
+          'provider': 'direct',
+          'auto': true,
+          'number': '29',
+          'orderIds': ['o1'],
+          'value': 500,
+          'createdAt': DateTime.now().toIso8601String(),
+        }, id: 'inv1');
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse(invoices: [issued])),
+          args: {'order': paid()},
+        );
+        expect(find.text('Emitida sozinha · nº 29'), findsOneWidget);
+      });
+
       testWidgets('canceled on purpose: no blue button', (tester) async {
         await _pump(
           tester,

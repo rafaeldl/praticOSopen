@@ -62,7 +62,7 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 8. Arquivo: o .pfx com contagem de iterações acima de 100 mil numa derivação, ou 400 mil somando todas, é recusado (`CERT_INVALID_FILE`) antes de qualquer conta. A checagem fica nas funções de derivação do `node-forge` (MAC, PBE do PKCS#12 e PBES2), então vale também para o que vem dentro de partes cifradas.
 9. Envios: no máximo 5 tentativas de enviar certificado por hora por pessoa e por empresa, contando senha errada e arquivo ruim (`TOO_MANY_ATTEMPTS`, 429). Contagem em `/nfseUploadLimits/{user-…|company-…}` (fechado nas regras).
 10. Uma troca por vez em cada emitente: enviar, trocar, apagar e a nova tentativa de destruição pegam uma trava com prazo de 3 min em `/nfseCertificateLocks/{emitter-…|taxid-…}` (fechado). Ocupado: `CERT_BUSY` (409). Depois de cada troca ou apagamento, toda versão viva da chave que não seja a do certificado atual é destruída (precisa de `cloudkms.cryptoKeyVersions.list` no `nfseKeyManager`).
-11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
+11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `autoIssue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
 12. Exclusão de conta: o `accountApi` (outra conta de serviço) só apaga o material e põe o emitente na fila; quem destrói as versões é a `nfseDaily`. A fila guarda o emitente e, na hora de tentar, mantém só a versão do certificado que existir então. Depois de 2 tentativas sem sucesso a rotina loga `[nfse-alert] key destruction still pending`, que tem alerta no Cloud Monitoring.
 13. Emitir e cancelar: dono, admin e gerente; o dono pode tirar o gerente (`settings/nfse.managerCanIssue = false`, interruptor "Gerente pode emitir notas", só o dono muda). Quando outra pessoa emite ou cancela, o dono recebe aviso (sino + push, `type: nfse_invoice_by_team`).
 14. Teto diário por emitente: 60 notas por dia (São Paulo), contadas na reserva do número da DPS (`private/nfse/emitters/{id}.issuedOn/issuedToday`). Passou: `DAILY_LIMIT_REACHED` (429). Para um emitente que precise de mais, gravar `dailyIssueLimit` à mão no mesmo documento (máximo 1000).
@@ -197,7 +197,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571. A folha de emitir está em "Emitir a nota pela OS".
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática está em "Emitir nota sozinha" (#571). A folha de emitir está em "Emitir a nota pela OS".
 
 Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 
@@ -360,6 +360,71 @@ Com `settings/payments.nfseDirectEnabled` ligada, a nota direta substitui a do A
 O app web chama o ViaCEP do navegador: `https://viacep.com.br` entrou no `connect-src` da CSP de `/web/**` (`firebase.json`).
 
 Fora desta etapa: limite de CNPJs por plano na folha ("Disponível no Pro"), compartilhar o PDF direto pelo web e a oferta da 3ª nota.
+
+## Emitir nota sozinha ao concluir a OS (issue #571)
+
+Quando a OS vira `done` numa empresa com `nfseDirectEnabled`, a nota sai sozinha conforme `settings/nfse.autoIssue` (lido por `directAutoIssueOf`) e o interruptor do cliente `autoIssueInvoice`:
+
+| `autoIssue` | Emite quando |
+|---|---|
+| `never` (padrão) | nunca |
+| `selectedCustomers` | o cliente tem `autoIssueInvoice: true` |
+| `allOrders` | o cliente não tem `autoIssueInvoice: false` |
+
+Os valores do Asaas (`manual`, `paid`, `completed`) contam como `never` aqui, e o motor do Asaas não age nos valores do direto. Como a chave é uma só, a mesma OS nunca recebe nota pelos dois. Só ao concluir (receber e aprovar ficam de fora) e uma vez por OS: OS que já teve nota (qualquer motor, qualquer situação) fica com a pessoa.
+
+### Como funciona
+
+```
+OS vira done → onOrderUpdatedAsaas (conta padrão, sem certificado)
+  → requestDirectAutoIssue: grava companies/{cid}/private/nfse/autoIssue/{orderId} (create; o id é a OS)
+      → nfseAutoIssue (onDocumentCreated, conta nfse-api@)
+          → processDirectAutoIssue: pega o pedido numa transação e chama issueDirectInvoice
+```
+
+| Arquivo | O quê |
+|---|---|
+| `services/nfse/auto-issue.service.ts` | `requestDirectAutoIssue` (gatilho), `processDirectAutoIssue` (nfse-api), `processPendingDirectAutoIssues` (rotina diária) |
+| `services/asaas/order-trigger.service.ts` | chama `requestDirectAutoIssue` quando `status` vira `done` (o gatilho único da OS) |
+| `nfse-api.ts` | `nfseAutoIssue`, gatilho no documento do pedido, com a conta `nfse-api@` |
+
+- **Mesma nota da folha**: `issueDirectInvoice` com só a OS: emitente da decisão 3 (o último usado para o cliente, senão o padrão, senão o único), descrição pela regra fixa, valor pela regra de hoje, destinatário pelo "Nota fiscal para". Autor `{ id: 'system', name: 'PraticOS' }` e `auto: true` na nota.
+- **Certificado**: abre com o motivo `autoIssue` na auditoria (`private/nfse/audit`), sem pessoa (`by: null`).
+- **Limite diário**: conta como qualquer nota (60 por dia por emitente).
+- **Idempotência**: o pedido é criado com `create()` (gatilho repetido ou OS concluída de novo acha o documento e não faz nada); o processamento pega o pedido numa transação (`pending` → `processing` → `done`) e confere de novo se a OS já tem nota; o registro de erro tem id fixo `auto-{orderId}`. Um pedido preso em `processing` há mais de 10 minutos volta na rotina diária.
+- **Nunca trava a OS**: o gatilho só grava o pedido; tudo que falha na emissão fica gravado, nada é relançado.
+
+### Quando não sai
+
+| Caso | O que fica na OS |
+|---|---|
+| Cliente sem CPF/CNPJ | `auto-{orderId}` em `error`, `errorCode: RECIPIENT_TAX_ID_REQUIRED`: "Nota fiscal · Falta o CPF ou CNPJ do cliente"; o botão abre a folha ("Corrigir e emitir") |
+| Certificado vencido / sem certificado / CNPJ sem configurar / sem CNPJ padrão com vários | `CERT_EXPIRED`, `CERT_NOT_FOUND`, `EMITTER_NOT_READY`, `EMITTER_NOT_FOUND` |
+| Limite do dia | `DAILY_LIMIT_REACHED` |
+| Cofre indisponível / erro inesperado | `KEY_VAULT_UNAVAILABLE` / `AUTO_ISSUE_FAILED` (este loga `console.error`, é o único que vira alerta) |
+| Governo fora (sem resposta) | a própria nota fica `creating` e a reconciliação termina depois |
+| Governo recusou | a própria nota fica `error` com a recusa em palavras simples (`refusal`) |
+| OS sem valor de serviço, sem cliente, orçamento/cancelada | nada (não há o que emitir) |
+
+Erros esperados só logam `console.warn` com o código; nunca alerta. Nos casos com `errorCode` nosso (não recusa do governo) e que não sejam falta de dado do cliente, o app e o web mostram **"Tentar novamente"** (botão azul na OS e na nota): emite na hora pela mesma rota da folha (`POST /v1/app/nfse/direct/invoices` com só `orderIds`), sem abrir a folha; se falhar de novo, o motivo aparece em aviso (app) ou no painel (web), nunca em alerta.
+
+### Na tela
+
+- Nota que saiu sozinha: "Emitida sozinha · nº 29" na linha "Nota fiscal" da OS, na lista e no detalhe (app: `nfseStatusText`; web: `invoiceStatusText`). Vale também para a nota automática do Asaas.
+- Nota que não saiu: o motivo curto na linha (`nfseAutoErrorShort` / `autoFailureShort`) e o completo no detalhe (`nfseAutoErrorReason` / `autoFailureReason`).
+
+### Ligar (passo manual)
+
+1. **Antes do primeiro deploy**: dar à conta `nfse-api@praticos.iam.gserviceaccount.com` o papel `roles/eventarc.eventReceiver` no projeto (gatilho do Firestore com conta própria). O deploy dá à conta o `run.invoker` da função.
+   ```bash
+   gcloud projects add-iam-policy-binding praticos --member=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com --role=roles/eventarc.eventReceiver
+   ```
+   Sem isso o pedido fica `pending` e só sai na rotina diária (6h30).
+2. Na empresa: "Nota fiscal" → "Emitir sozinha quando concluir a OS" → "Para os clientes escolhidos" (e ligar "Emitir nota sozinha" no cliente) ou "Para todas as OS".
+
+Testes: `services/nfse/__tests__/auto-issue.service.test.ts` (as três regras, idempotência, falhas), `services/asaas/__tests__/order-trigger.service.test.ts`, `__tests__/nfse-api-deploy.test.ts`; app em `test/screens/nfse/nfse_direct_issue_test.dart` e `test/screens/order/order_screen_v2_extras_test.dart`; web em `firebase/webapp/tests/nfse-auto-issue.test.ts`.
+
+Fora desta etapa: a oferta na 3ª nota manual do mesmo cliente e "Ligar para todos os clientes com CNPJ".
 
 ## Importação das notas (etapa #569)
 
