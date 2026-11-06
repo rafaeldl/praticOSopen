@@ -4,8 +4,9 @@
 // default) with their certificate, "Adicionar CNPJ" (drag the .pfx in),
 // "Emitir sozinha quando concluir a OS", and the chosen CNPJ beside the list
 // (master-detail): totals, the lines that open their editor, use as default,
-// replace and delete the certificate.
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+// replace and delete the certificate. After a new CNPJ's certificate, and from
+// a CNPJ that never imported, "Importar notas" (NfseImportDrawer, spec §4.3).
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Plus } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -13,9 +14,11 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHead from '@/components/PageHead.vue'
 import CertificateDrawer from '@/components/finance/CertificateDrawer.vue'
 import EmitterEditDrawer, { type EmitterField } from '@/components/finance/EmitterEditDrawer.vue'
+import NfseImportDrawer from '@/components/finance/NfseImportDrawer.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
+import { loadCatalogList } from '@/lib/catalog/data'
 import { formatDate, formatMoney } from '@/lib/format'
 import {
   AUTO_ISSUE,
@@ -25,6 +28,7 @@ import {
   defaultEmitterId,
   deleteCertificate,
   directEnabled,
+  sampleServices,
   stylePreview,
   updateDirectSettings,
   watchDirect,
@@ -32,7 +36,9 @@ import {
   type DirectSettings,
   type Emitter,
 } from '@/lib/nfse/direct'
+import { canUndo, loadBatch, undoImport, type ImportBatch } from '@/lib/nfse/import'
 import { country } from '@/lib/orders/text'
+import { LAYER_PARAM, withoutParam } from '@/lib/route-layer'
 import { formatTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
 import '@/styles/finance.css'
@@ -47,6 +53,11 @@ const adding = ref(false)
 const replacing = ref(false)
 const deleting = ref(false)
 const editing = ref<EmitterField | null>(null)
+/** The emitter whose notas are being imported (the drawer is open). */
+const importing = ref<string | null>(null)
+const undoing = ref(false)
+const lastImport = shallowRef<ImportBatch | null>(null)
+const ownServices = shallowRef<string[]>([])
 let stop: (() => void) | undefined
 
 async function load() {
@@ -57,6 +68,7 @@ async function load() {
       state.value = 'off'
       return
     }
+    loadServices()
     stop = await watchDirect(
       (list) => {
         emitters.value = list
@@ -79,7 +91,62 @@ const defaultId = computed(() => defaultEmitterId(list.value, settings.value))
 const selectedId = computed(() => (typeof route.query.e === 'string' ? route.query.e : null))
 const selected = computed(() => list.value.find((e) => e.id === selectedId.value) ?? null)
 const select = (id: string | null) => router.replace({ query: { ...route.query, e: id ?? undefined } })
-const samples = () => [t('nfseDirectSampleService1'), t('nfseDirectSampleService2')]
+const samples = computed(() => sampleServices(ownServices.value, [t('nfseDirectSampleService1'), t('nfseDirectSampleService2')]))
+
+/** The company's services, most used first, for the "Estilo da descrição" sample. */
+async function loadServices() {
+  try {
+    const list = await loadCatalogList('service')
+    const byId = new Map(list.items.map((item) => [item.id, item.name]))
+    const used = list.mostUsed.map((id) => byId.get(id)).filter((name): name is string => !!name)
+    ownServices.value = [...used, ...list.items.map((item) => item.name)]
+  } catch {
+    ownServices.value = []
+  }
+}
+
+/** Only an active certificate reads the government (the server's rule). */
+const canImport = (emitter: Emitter) => ['valid', 'expiring'].includes(certificateState(emitter))
+/** City line: empty city means nothing was checked yet. */
+const cityText = (emitter: Emitter) =>
+  emitter.cityName ? t('nfseDirectNotEnabledInCity', { city: emitter.cityName }) : t('nfseDirectNotEnabledNoCity')
+
+// The last import of the chosen CNPJ, for "Desfazer importação" (30 days).
+watch(
+  () => [selected.value?.id, selected.value?.importBatchId] as const,
+  async ([, batchId]) => {
+    lastImport.value = null
+    if (!batchId) return
+    try {
+      const batch = await loadBatch(batchId)
+      if (batch && selected.value?.importBatchId === batchId) lastImport.value = batch
+    } catch {
+      lastImport.value = null
+    }
+  },
+  { immediate: true },
+)
+
+/** A new CNPJ: choose it and read its notas right away. */
+async function onAdded(result: { emitterId: string | null; created: boolean }) {
+  adding.value = false
+  showToast(t('nfseDirectCnpjAdded'))
+  if (!result.created || !result.emitterId) return
+  await nextTick()
+  await router.replace({ query: { ...withoutParam(route.query, LAYER_PARAM), e: result.emitterId } })
+  importing.value = result.emitterId
+}
+
+function onImported() {
+  importing.value = null
+  showToast(t('nfseImportDone'))
+}
+
+async function confirmUndo() {
+  const batch = lastImport.value
+  undoing.value = false
+  if (batch) await run(() => undoImport(batch.id), t('nfseImportUndone'))
+}
 
 const DOT: Record<string, string> = { valid: 'dot--success', expiring: 'dot--warning', expired: 'dot--danger', pending: 'dot--neutral', missing: 'dot--neutral' }
 function certText(emitter: Emitter): string {
@@ -151,7 +218,7 @@ function back() {
     </PageHead>
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :body="t('nfseDirectErrorGeneric')" :retry="load" />
-    <p v-else-if="state === 'off'" class="muted" data-testid="nfse-direct-off">{{ t('nfseDirectErrorNotEnabled') }}</p>
+    <p v-else-if="state === 'off'" class="sub" data-testid="nfse-direct-off">{{ t('nfseDirectErrorNotEnabled') }}</p>
     <div v-else-if="list.length" class="nfse-direct-grid">
       <section aria-labelledby="nfse-emitters-title">
         <h2 id="nfse-emitters-title" class="form-section">{{ t('nfseDirectEmittersSection') }}</h2>
@@ -173,13 +240,17 @@ function back() {
         </fieldset>
       </section>
       <section v-if="selected" class="nfse-emitter" :aria-label="selected.legalName" data-testid="nfse-emitter-detail">
-        <h2 class="form-section">{{ selected.legalName }}</h2>
+        <h2 class="nfse-name">{{ selected.legalName }}</h2>
         <p class="sub">{{ formatTaxId(selected.taxId) }} · {{ regime(selected) }}<template v-if="selected.id === defaultId"> · {{ t('nfseDirectDefault') }}</template></p>
         <p data-testid="nfse-emitter-totals">{{ t('nfseDirectTotals', { year: formatMoney(totals.year, country()), month: formatMoney(totals.month, country()) }) }}</p>
         <p v-if="selected.regime === 'mei'" class="sub" :class="{ 'is-warning': totals.year >= MEI_LIMIT * 0.8 }">
           {{ t('nfseDirectMeiLimit', { value: formatMoney(totals.year, country()), limit: formatMoney(MEI_LIMIT, country()) }) }}
         </p>
-        <p v-if="!selected.enabledInCity" class="sub">{{ t('nfseDirectNotEnabledInCity', { city: selected.cityName }) }}</p>
+        <p v-if="!selected.enabledInCity" class="sub" data-testid="nfse-emitter-city">{{ cityText(selected) }}</p>
+        <div v-if="canImport(selected) && !selected.importBatchId" class="nfse-import-offer" data-testid="nfse-emitter-import-offer">
+          <p>{{ t('web.nfseDirect.importHint') }}</p>
+          <button type="button" class="btn btn--primary" data-testid="nfse-emitter-import" @click="importing = selected.id">{{ t('nfseImportAction') }}</button>
+        </div>
         <ul class="nfse-steps">
           <li>
             <button type="button" class="nfse-step" data-testid="nfse-emitter-service" @click="editing = 'service'">
@@ -193,7 +264,7 @@ function back() {
           </li>
           <li>
             <button type="button" class="nfse-step" @click="editing = 'style'">
-              <span>{{ t('nfseDirectStyleRow') }}</span><span class="sub">{{ stylePreview(selected.descriptionStyle, samples()) }}</span>
+              <span>{{ t('nfseDirectStyleRow') }}</span><span class="sub" data-testid="nfse-emitter-style">{{ stylePreview(selected.descriptionStyle, samples) }}</span>
             </button>
           </li>
           <li>
@@ -205,13 +276,16 @@ function back() {
         </ul>
         <p class="row-actions">
           <button v-if="selected.id !== defaultId" type="button" class="btn" :disabled="busy" data-testid="nfse-emitter-default" @click="useAsDefault(selected.id)">{{ t('nfseDirectUseAsDefault') }}</button>
+          <button v-if="canImport(selected) && selected.importBatchId" type="button" class="btn" data-testid="nfse-emitter-import" @click="importing = selected.id">{{ t('nfseImportAction') }}</button>
           <button type="button" class="btn" @click="replacing = true">{{ certificateState(selected) === 'missing' ? t('nfseDirectSendCertificate') : t('nfseDirectReplaceTitle') }}</button>
+          <button v-if="canUndo(lastImport)" type="button" class="link link--danger" :disabled="busy" data-testid="nfse-emitter-undo-import" @click="undoing = true">{{ t('nfseImportUndoAction') }}</button>
           <button v-if="certificateState(selected) !== 'missing'" type="button" class="link link--danger" :disabled="busy" data-testid="nfse-emitter-delete" @click="deleting = true">{{ t('nfseDirectDeleteAction') }}</button>
         </p>
       </section>
     </div>
   </div>
-  <CertificateDrawer v-if="adding" @saved="adding = false; showToast(t('nfseDirectCnpjAdded'))" @close="adding = false" />
+  <CertificateDrawer v-if="adding" @saved="onAdded" @close="adding = false" />
+  <NfseImportDrawer v-if="importing" :emitter-id="importing" @applied="onImported" @close="importing = null" />
   <CertificateDrawer
     v-if="replacing && selected"
     :emitter-id="selected.id"
@@ -219,7 +293,7 @@ function back() {
     @saved="replacing = false; showToast(t('nfseDirectCertificateReplaced'))"
     @close="replacing = false"
   />
-  <EmitterEditDrawer v-if="editing && selected" :emitter="selected" :field="editing" @saved="editing = null; showToast(t('nfseDirectSaved'))" @close="editing = null" />
+  <EmitterEditDrawer v-if="editing && selected" :emitter="selected" :field="editing" :samples="samples" @saved="editing = null; showToast(t('nfseDirectSaved'))" @close="editing = null" />
   <ConfirmDialog
     v-if="deleting && selected"
     :title="t('nfseDirectDeleteTitle')"
@@ -229,5 +303,15 @@ function back() {
     danger
     @confirm="confirmDelete"
     @close="deleting = false"
+  />
+  <ConfirmDialog
+    v-if="undoing && lastImport"
+    :title="t('nfseImportUndoQuestion')"
+    :body="t('nfseImportUndoMessage')"
+    :confirm="t('nfseImportUndoAction')"
+    :keep="t('cancel')"
+    danger
+    @confirm="confirmUndo"
+    @close="undoing = false"
   />
 </template>

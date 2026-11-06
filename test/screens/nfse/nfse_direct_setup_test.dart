@@ -456,6 +456,7 @@ void main() {
       WidgetTester tester,
       FiscalEmitter emitter, {
       String? defaultId,
+      Future<List<String>> Function()? serviceNames,
     }) async {
       final server = _Server();
       await _pump(
@@ -469,6 +470,7 @@ void main() {
           service: server.api,
           pickFile: _file,
           now: _now,
+          serviceNames: serviceNames,
         ),
       );
       return server;
@@ -525,6 +527,41 @@ void main() {
       await pumpEmitter(tester, _emitter(notAfter: DateTime(2026, 10, 1)));
       expect(find.text('Certificado vencido'), findsOneWidget);
       expect(find.textContaining('Venceu em 01/10/2026'), findsOneWidget);
+    });
+
+    testWidgets('without a city: a sentence that stands alone, neutral sample', (
+      tester,
+    ) async {
+      await pumpEmitter(
+        tester,
+        _emitter()
+          ..cityName = null
+          ..enabledInCity = false,
+      );
+      expect(
+        find.text(
+          'Ainda não conferimos se este CNPJ já pode emitir nota pelo governo.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('emitir em'), findsNothing);
+      expect(find.text('Serviço 1, Serviço 2'), findsOneWidget);
+      expect(find.textContaining('Troca de óleo'), findsNothing);
+    });
+
+    testWidgets('with a city: names it; the sample uses the own services', (
+      tester,
+    ) async {
+      await pumpEmitter(
+        tester,
+        _emitter()..enabledInCity = false,
+        serviceNames: () async => ['Limpeza do split', 'Carga de gás'],
+      );
+      expect(
+        find.text('Ainda não habilitado para emitir em Cidade Exemplo'),
+        findsOneWidget,
+      );
+      expect(find.text('Limpeza do split, Carga de gás'), findsOneWidget);
     });
 
     testWidgets('"…" uses as default and deletes after confirming', (

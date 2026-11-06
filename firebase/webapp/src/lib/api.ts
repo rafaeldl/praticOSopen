@@ -66,6 +66,10 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   CERT_NOT_FOUND: 'nfseDirectErrorNotFound',
   NFSE_DIRECT_NOT_ENABLED: 'nfseDirectErrorNotEnabled',
   KEY_VAULT_UNAVAILABLE: 'nfseDirectErrorUnavailable',
+  // NFS-e direct: "Importar notas" (the app's nfse_import_screen.dart).
+  SEFIN_UNAVAILABLE: 'nfseDirectErrorGovUnavailable',
+  IMPORT_NOT_FOUND: 'nfseDirectErrorNotFound',
+  IMPORT_UNDO_EXPIRED: 'nfseImportErrorUndoExpired',
 }
 
 /** The sentence for a code the server sends, when there is one of its own (tests). */

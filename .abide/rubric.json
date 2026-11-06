@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "dcb8498e8513189d1583511e2a1f5222b228addbdcaff9c495165f1105217198",
+      "sha": "0149135303da4141bbb3c0c30c9a9530f4cb202c69baff55f1f4ff952ff19ad5",
       "scope": "**/*"
     },
     {
@@ -25,7 +25,7 @@
       "text": "SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco",
       "source": {
         "path": "CLAUDE.md",
-        "line": 603
+        "line": 604
       },
       "scope": [
         "lib/**/*.dart",
@@ -49,11 +49,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 4,
-        "median": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
         "min": 0,
-        "max": 0.07,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -63,7 +63,7 @@
       "text": "SEMPRE usar `context.l10n` para strings visíveis ao usuário, NUNCA hardcoded",
       "source": {
         "path": "CLAUDE.md",
-        "line": 604
+        "line": 605
       },
       "scope": [
         "lib/screens/**/*.dart",
@@ -83,7 +83,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -112,11 +112,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 1,
-        "median": 0.14,
-        "min": 0.14,
-        "max": 0.14,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -126,7 +126,7 @@
       "text": "SEMPRE usar `FormatService` para datas, números e moedas, NUNCA formatar manualmente. NUNCA usar `toStringAsFixed()` direto",
       "source": {
         "path": "CLAUDE.md",
-        "line": 605
+        "line": 606
       },
       "scope": [
         "lib/**/*.dart"
@@ -145,11 +145,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.04,
-        "min": 0.03,
-        "max": 0.06,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -159,7 +159,7 @@
       "text": "Labels customizáveis DEVEM ter fallback com `context.l10n`",
       "source": {
         "path": "CLAUDE.md",
-        "line": 606
+        "line": 607
       },
       "scope": [
         "lib/**/*.dart"
@@ -178,11 +178,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.07,
-        "min": 0.06,
-        "max": 0.22,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -207,7 +207,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -252,7 +252,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -285,7 +285,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -299,7 +299,7 @@
       "text": "Sempre usar `.resolveFrom(context)` para cores dinâmicas",
       "source": {
         "path": "CLAUDE.md",
-        "line": 613
+        "line": 614
       },
       "scope": [
         "lib/**/*.dart"
@@ -331,7 +331,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -381,11 +381,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 1,
-        "median": 0.06,
-        "min": 0.06,
-        "max": 0.06,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -427,7 +427,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -460,7 +460,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -474,7 +474,7 @@
       "text": "Site Eleventy: Editar APENAS em `src/`, nunca em `public/`.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 615
+        "line": 616
       },
       "scope": [
         "firebase/hosting/public/**/*"
@@ -489,7 +489,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -518,11 +518,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 1,
-        "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -547,11 +547,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 1,
-        "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -561,7 +561,7 @@
       "text": "Dados de clientes (nomes, telefones, conversas) nunca entram no repositório — ele é público. Só números agregados.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 587
+        "line": 588
       },
       "when": "edit",
       "check": {
@@ -577,10 +577,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.02,
+        "min": 0.01,
         "max": 0.03,
         "fired": 0,
         "verdict": "decisive"
@@ -607,12 +607,12 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 2,
-        "median": 0.465,
-        "min": 0.13,
-        "max": 0.8,
-        "fired": 1,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "fired": 0,
         "verdict": "skipped"
       }
     },
@@ -621,7 +621,7 @@
       "text": "Build Runner: Executar após alterar Stores/Models, e `fvm flutter gen-l10n` após alterar .arb",
       "source": {
         "path": "CLAUDE.md",
-        "line": 609
+        "line": 610
       },
       "check": {
         "type": "unenforceable",
@@ -634,7 +634,7 @@
       "text": "AuthService: Usar para criar novos usuários (não gravar direto no banco)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 610
+        "line": 611
       },
       "scope": [
         "lib/**/*.dart"
@@ -649,11 +649,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.02,
-        "min": 0.01,
-        "max": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -663,7 +663,7 @@
       "text": "CollaboratorStore: Usar para gerenciar membros da equipe (não usar CompanyStore)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 611
+        "line": 612
       },
       "scope": [
         "lib/**/*.dart"
@@ -678,11 +678,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -692,7 +692,7 @@
       "text": "Documentação Obrigatória: Documentar toda nova funcionalidade",
       "source": {
         "path": "CLAUDE.md",
-        "line": 614
+        "line": 615
       },
       "check": {
         "type": "deferred",
@@ -705,7 +705,7 @@
       "text": "Multi-Tenancy é Prioridade: Sempre verificar estrutura de company/roles",
       "source": {
         "path": "CLAUDE.md",
-        "line": 608
+        "line": 609
       },
       "check": {
         "type": "deferred",
@@ -718,7 +718,7 @@
       "text": "Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 607
+        "line": 608
       },
       "check": {
         "type": "unenforceable",
@@ -731,7 +731,7 @@
       "text": "Sempre criar branch `tipo/descricao-curta` a partir da master antes de implementar. Nunca commitar direto na master.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 616
+        "line": 617
       },
       "check": {
         "type": "unenforceable",
@@ -744,7 +744,7 @@
       "text": "Issues no GitHub devem ser escritas em português",
       "source": {
         "path": "CLAUDE.md",
-        "line": 617
+        "line": 618
       },
       "check": {
         "type": "unenforceable",
@@ -757,7 +757,7 @@
       "text": "WIP: no máximo 2 PRs de agente abertos.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 584
+        "line": 585
       },
       "check": {
         "type": "unenforceable",
@@ -770,7 +770,7 @@
       "text": "Não mergear PR `risk:high`. Não fazer deploy nem promover release fora do fluxo de CI.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 585
+        "line": 586
       },
       "check": {
         "type": "unenforceable",
@@ -783,7 +783,7 @@
       "text": "Não criar docs de planejamento sem pedido.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 588
+        "line": 589
       },
       "check": {
         "type": "unenforceable",
@@ -841,11 +841,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.03,
-        "min": 0.03,
-        "max": 0.04,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -874,11 +874,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.01,
-        "min": 0.01,
-        "max": 0.01,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -916,11 +916,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.05,
-        "min": 0.04,
-        "max": 0.06,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -945,11 +945,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -974,11 +974,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.03,
-        "min": 0.03,
-        "max": 0.03,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1003,11 +1003,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.04,
-        "min": 0.02,
-        "max": 0.04,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1049,11 +1049,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.03,
-        "min": 0.03,
-        "max": 0.03,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1082,7 +1082,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
+        "at": "2026-11-05T22:58:04.650Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1111,11 +1111,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-05T19:34:02.060Z",
-        "hunks": 3,
-        "median": 0.05,
-        "min": 0.04,
-        "max": 0.06,
+        "at": "2026-11-05T22:58:04.650Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1216,7 +1216,7 @@
       "text": "Bloqueio em passo manual (lojas, consoles, contas, credenciais): label `needs-human`, comentário curto dizendo exatamente o que falta, e seguir para a próxima issue.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 586
+        "line": 587
       },
       "check": {
         "type": "unenforceable",
@@ -1234,6 +1234,32 @@
       "check": {
         "type": "unenforceable",
         "reason": "about the developer's local setup, not the code"
+      },
+      "status": "active"
+    },
+    {
+      "id": "merge-risk-low-after-green-ci",
+      "text": "CI verde em PR `risk:low`: o próprio agente mescla (`gh pr merge --merge`), sem esperar revisão. A `master` não tem checks obrigatórios, então o auto-merge do GitHub não espera o CI: não usar.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 582
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about the PR and merge process, not the code"
+      },
+      "status": "active"
+    },
+    {
+      "id": "space-functions-merges",
+      "text": "Em PR que mexe em `firebase/functions`, esperar o deploy do merge anterior terminar antes de mesclar o próximo.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 582
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about merge timing, not the code"
       },
       "status": "active"
     }

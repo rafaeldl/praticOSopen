@@ -6,7 +6,9 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/fiscal_emitter.dart';
 import 'package:praticos/models/nfse_import.dart';
 import 'package:praticos/repositories/tenant/fiscal_emitter_repository.dart';
+import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/nfse_import_repository.dart';
+import 'package:praticos/repositories/tenant/tenant_service_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/nfse/direct/certificate_upload_sheet.dart';
 import 'package:praticos/screens/nfse/direct/fiscal_emitter_editors.dart';
@@ -40,12 +42,16 @@ class FiscalEmitterScreen extends StatefulWidget {
     this.pickFile,
     this.now,
     this.importBatchOf,
+    this.serviceNames,
   });
 
   final String emitterId;
 
   /// Test seam: the import batch named by the emitter's `importBatchId`.
   final Stream<NfseImportBatch?> Function(String batchId)? importBatchOf;
+
+  /// Test seam: the company's service names, for the style sample.
+  final Future<List<String>> Function()? serviceNames;
 
   /// Test seams; default to Firestore and the real API.
   final Stream<FiscalEmitter?>? emitter;
@@ -68,6 +74,7 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
   NfseDirectSettings _settings = const NfseDirectSettings();
   bool _loaded = false;
   bool _failed = false;
+  List<String> _ownServices = const [];
 
   NfseDirectApiService get _api =>
       widget.service ?? NfseDirectApiService.instance;
@@ -76,6 +83,30 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
   void initState() {
     super.initState();
     _listen();
+    _loadServices();
+  }
+
+  /// Two of the company's services, so the style sample is of its own work.
+  Future<void> _loadServices() async {
+    try {
+      final load =
+          widget.serviceNames ??
+          (widget.emitter != null
+              ? null
+              : () async => [
+                  for (final s in await TenantServiceRepository().getQueryList(
+                    Global.companyAggr?.id ?? '',
+                    orderBy: [OrderBy('name')],
+                    limit: 2,
+                  ))
+                    ?s?.name,
+                ]);
+      if (load == null) return;
+      final names = await load();
+      if (mounted) setState(() => _ownServices = names);
+    } catch (_) {
+      // The neutral sample stays.
+    }
   }
 
   void _listen() {
@@ -382,7 +413,7 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
           if (!emitter.enabledInCity) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              l10n.nfseDirectNotEnabledInCity(emitter.cityName ?? ''),
+              notEnabledInCityText(l10n, emitter.cityName),
               key: const Key('emitterNotEnabled'),
               style: AppTypography.callout.copyWith(color: secondary),
             ),
@@ -462,13 +493,14 @@ class _FiscalEmitterScreenState extends State<FiscalEmitterScreen> {
               title: l10n.nfseDirectStyleRow,
               subtitle: descriptionStylePreview(
                 style ?? FiscalDescriptionStyle(),
-                [l10n.nfseDirectSampleService1, l10n.nfseDirectSampleService2],
+                descriptionSamples(l10n, _ownServices),
               ),
               onTap: () => Navigator.of(context).push<void>(
                 CupertinoPageRoute<void>(
                   builder: (_) => EmitterDescriptionStyleScreen(
                     emitter: emitter,
                     service: api,
+                    ownServices: _ownServices,
                   ),
                 ),
               ),

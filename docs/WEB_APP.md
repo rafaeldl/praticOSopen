@@ -239,6 +239,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 - **Relatório (`/finance/report`)**: dia, semana (domingo a sábado, contrato `finance-period.json`), mês, ano ou datas próprias; filtros por pagamento e cliente. "Exportar CSV" (BOM, `;` onde o país usa vírgula, proteção contra fórmula), "Exportar planilha" (XLSX montado no navegador) e "Imprimir ou salvar PDF".
 - **Notas fiscais (`/invoices`)**: para quem tem `chargeOrder`, com a nota ligada (`docs/NFSE_ASAAS.md`). Lista do mês com "Precisa de atenção", nota ao lado, emitir pela OS com prévia do servidor, corrigir e cancelar. "Notas de X" em `/invoices?customer=`. Na OS, a linha "Nota fiscal" com a situação ao vivo e, concluída e paga, "Emitir nota fiscal" como botão azul. No cliente, "Notas fiscais · N emitidas" e "Emitir uma nota com várias OS".
 - **Configurar a nota (`/invoices/setup`)**: dono e admin (`manageCompany`), pelas rotas `/v1/app/nfse/setup*`. Dados fiscais, acesso à prefeitura (painel do Asaas, confere de novo ao voltar à aba), serviço buscado na lista da prefeitura ou digitado, impostos e quando emitir. Sem configuração pronta, a folha de emitir diz o que falta antes da prévia.
+- **Nota direta (`/invoices/direct`)**: com `settings/payments.nfseDirectEnabled`, dono e admin. CNPJs e o emitente lado a lado, certificado arrastado para a gaveta e "Importar notas" (gaveta que lê as notas no governo e só aplica no "Importar"), depois do certificado de um CNPJ novo ou pelo emitente (`docs/NFSE_DIRECT.md`).
 
 ### Checklists
 
