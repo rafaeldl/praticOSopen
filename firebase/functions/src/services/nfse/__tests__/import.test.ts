@@ -26,7 +26,7 @@ import {
   unlinkInvoice,
   type ImportDeps,
 } from '../import.service';
-import type { HttpRequest } from '../sefin-client';
+import { SefinUnavailableError, type HttpRequest } from '../sefin-client';
 import { accessKeyOf, cancelEventXml, dfeAnswer, EMITTER_TAX_ID, nfseXml, type MailboxItem } from './import-fixture';
 
 // Invented companies only: REVENDA EXEMPLO (stores Loja Norte/Loja Sul), AUTO PECAS MODELO, a CPF.
@@ -400,6 +400,48 @@ describe('import: reading', () => {
     seed('companies/c1/settings/payments', { nfseDirectEnabled: true });
     seed('companies/c1/fiscalEmitters/e1', { taxId: EMITTER_TAX_ID, certificate: { status: 'deleted' } });
     expect(await errorOf(startImport('c1', 'e1', USER, deps))).toBe('CERT_NOT_FOUND');
+  });
+
+  // Production refuses undefined (no ignoreUndefinedProperties); the fake db does not, so look for it.
+  function undefinedPaths(value: unknown, path = ''): string[] {
+    if (value === undefined) return [path];
+    if (!value || typeof value !== 'object') return [];
+    return Object.entries(value).flatMap(([k, v]) => undefinedPaths(v, path ? `${path}.${k}` : k));
+  }
+
+  it('an emitter just added (no regime yet): the notas take the regime of the nota, nothing undefined', async () => {
+    expect(read('companies/c1/fiscalEmitters/e1')?.regime).toBeUndefined();
+    await proposed();
+    const invoices = list('companies/c1/invoices');
+    expect(invoices).toHaveLength(9);
+    for (const invoice of invoices) expect(undefinedPaths(invoice.data)).toEqual([]);
+    expect(read(`companies/c1/invoices/${externalInvoiceId(accessKeyOf(1))}`)).toMatchObject({ emitter: { id: 'e1', regime: 'simples' } });
+  });
+
+  it('only a government without answer is SEFIN_UNAVAILABLE; any other failure is IMPORT_FAILED, logged with its message', async () => {
+    deps.transport = async () => {
+      throw new SefinUnavailableError(502, 'GET ADN failed');
+    };
+    expect(await errorOf(startImport('c1', 'e1', USER, deps))).toBe('SEFIN_UNAVAILABLE');
+
+    resetFakeDb();
+    seedCompany();
+    deps.transport = async () => {
+      throw Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' });
+    };
+    expect(await errorOf(startImport('c1', 'e1', USER, deps))).toBe('SEFIN_UNAVAILABLE');
+
+    resetFakeDb();
+    seedCompany();
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    deps.transport = async (req) => dfeAnswer(mailbox, Number(req.url.match(/DFe\/(\d+)/)?.[1] ?? 0));
+    deps.saveFile = async () => {
+      throw Object.assign(new Error(`permission denied on tenants/c1/invoices/ext-${accessKeyOf(1)}/nfse.xml`), { code: 403 });
+    };
+    expect(await errorOf(startImport('c1', 'e1', USER, deps))).toBe('IMPORT_FAILED');
+    const logged = String(error.mock.calls[0]?.[0]);
+    expect(logged).toContain('failed (Error 403: permission denied');
+    expect(logged).not.toContain(accessKeyOf(1));
   });
 
   it('the proposal: emitter data, stores, customers and the "Emitir sozinha" suggestion', async () => {

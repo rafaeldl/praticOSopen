@@ -47,7 +47,7 @@ import {
   type ProposedGroup,
 } from './import-proposal';
 import { cityUsesNationalIssuer, issRateOf, lookupCnc, lookupCnpj, type CncInfo, type CnpjInfo } from './registry.service';
-import { SefinClient, type Transport } from './sefin-client';
+import { SefinClient, SefinUnavailableError, type Transport } from './sefin-client';
 import { emitterTotals, type TotalsInvoice } from './totals';
 
 /** "Desfazer importação" is offered for this long after applying. */
@@ -132,6 +132,24 @@ async function clientFor(cid: string, emitter: FiscalEmitter, deps: ImportDeps):
   const config = await deps.config();
   const cert = await deps.loadCertificate(cid, emitter.id);
   return new SefinClient({ environment: config.environment, keyPem: cert.keyPem, chainPem: cert.chainPem, transport: deps.transport });
+}
+
+const NETWORK_CODES = new Set(['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'EPIPE', 'ENETUNREACH', 'EHOSTUNREACH', 'ECONNABORTED']);
+
+/** No clear answer from the government (timeout, network, 5xx): worth trying again. */
+export function isGovernmentUnavailable(error: unknown): boolean {
+  if (error instanceof SefinUnavailableError) return true;
+  const e = error as { code?: unknown; message?: unknown } | null;
+  if (typeof e?.code === 'string' && NETWORK_CODES.has(e.code)) return true;
+  return e?.message === 'timeout';
+}
+
+/** What failed, for the log: name, code and message, without long digit runs (CPF/CNPJ, access keys). */
+export function describeError(error: unknown): string {
+  const e = error as { name?: unknown; code?: unknown; status?: unknown; message?: unknown } | null;
+  const code = e?.code ?? e?.status;
+  const message = String(e?.message ?? error ?? '').replace(/\d{11,}/g, '…').slice(0, 300);
+  return `${String(e?.name ?? 'Error')}${code !== undefined && code !== null ? ` ${String(code)}` : ''}: ${message}`;
 }
 
 const clean = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -261,7 +279,7 @@ async function saveIssued(cid: string, emitter: FiscalEmitter, nota: ParsedNfse,
     status: pending.exists ? 'canceled' : 'authorized',
     provider: 'direct',
     source: 'external',
-    emitter: fiscalEmitterAggr(emitter),
+    emitter: fiscalEmitterAggr({ ...emitter, regime: emitter.regime ?? nota.regime ?? undefined }),
     recipient: nota.recipient
       ? {
           customerId: customer?.id ?? null,
@@ -412,9 +430,13 @@ export async function continueImport(cid: string, batchId: string, override?: Pa
   try {
     result = await readMailbox(cid, emitter, client, deps, { importBatchId: batchId });
   } catch (error) {
-    // The government did not answer: the app tries again; what was read stays.
-    console.warn(`[nfse-import] batch ${batchId} of company ${cid} paused (${(error as Error)?.name})`);
-    throw new NfseServiceError('SEFIN_UNAVAILABLE', 'The government did not answer; try again');
+    // What was read stays: the next call goes on from the last NSU saved.
+    if (isGovernmentUnavailable(error)) {
+      console.warn(`[nfse-import] batch ${batchId} of company ${cid} paused, government unavailable (${describeError(error)})`);
+      throw new NfseServiceError('SEFIN_UNAVAILABLE', 'The government did not answer; try again');
+    }
+    console.error(`[nfse-import] batch ${batchId} of company ${cid} failed (${describeError(error)})`);
+    throw new NfseServiceError('IMPORT_FAILED', 'The notas could not be imported');
   }
   const read = { documents: (batch.read?.documents ?? 0) + result.documents, lastNsu: result.lastNsu };
   if (!result.done) {
@@ -924,7 +946,7 @@ export async function syncCompanyMailboxes(cid: string, override?: Partial<Impor
       read += result.documents;
       if (result.documents > 0) await recalcTotals(cid, emitter.id, deps);
     } catch (error) {
-      console.warn(`[nfse-sync] emitter ${emitter.id} of company ${cid} not read (${(error as NfseServiceError)?.code ?? (error as Error)?.name})`);
+      console.warn(`[nfse-sync] emitter ${emitter.id} of company ${cid} not read (${describeError(error)})`);
     }
   }
   return read;

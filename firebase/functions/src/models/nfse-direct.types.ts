@@ -108,7 +108,8 @@ export interface FiscalEmitterAggr {
   id: string;
   taxId: string;
   legalName: string;
-  regime: FiscalRegime;
+  /** Null for an emitter not configured yet (the import reads notas before the regime is set). */
+  regime: FiscalRegime | null;
 }
 
 /** Structured address of the nota (customer and recipient). */
@@ -226,5 +227,6 @@ export function nfseProviderOf(doc: { provider?: unknown } | null | undefined): 
 
 /** The emitter as embedded in an invoice. */
 export function fiscalEmitterAggr(emitter: Pick<FiscalEmitter, 'id' | 'taxId' | 'legalName' | 'regime'>): FiscalEmitterAggr {
-  return { id: emitter.id, taxId: emitter.taxId, legalName: emitter.legalName, regime: emitter.regime };
+  // Firestore refuses undefined: a field the emitter does not have yet goes as null.
+  return { id: emitter.id, taxId: emitter.taxId, legalName: emitter.legalName ?? '', regime: emitter.regime ?? null };
 }
