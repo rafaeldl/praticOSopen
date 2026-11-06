@@ -87,6 +87,26 @@ for (const user of ['owner', 'supervisor', 'consultant'] as const) {
   })
 }
 
+test('Nova OS: descrição do item vai para a linha da OS (#632)', async ({ page }) => {
+  await home(page, 'owner')
+  await page.getByTestId('new-order').click()
+  await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
+  await expect(page.getByRole('option', { name: /^Cliente 01/ })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await expect(drawer(page).getByRole('button', { name: 'Trocar' }).first()).toBeVisible()
+  await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Serviço 1')
+  await expect(page.getByRole('option', { name: /^Serviço 1/ })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await drawer(page).getByRole('button', { name: '+ Descrição' }).click()
+  await expect(drawer(page).getByLabel('Descrição de Serviço 1')).toBeFocused()
+  await drawer(page).getByLabel('Descrição de Serviço 1').fill('Lateral esquerda com friso azul')
+  await page.getByTestId('save-order').click()
+  await expect(page.locator('.toast')).toContainText(/OS \d+ criada/)
+  const id = await savedId(page)
+  await expect.poll(async () => ((await readOrder(id))?.services as { description?: string }[] | undefined)?.[0]?.description).toBe('Lateral esquerda com friso azul')
+  await expect(panel(page).getByTestId('order-line').first()).toContainText('Lateral esquerda com friso azul')
+})
+
 test('consultor só escolhe orçamento ou aprovada; nunca cancelada (order.new.status-pick)', async ({ page }) => {
   await home(page, 'consultant')
   await page.getByTestId('new-order').click()

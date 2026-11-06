@@ -30,6 +30,8 @@ export interface FormLine {
   value: number | null
   quantity: number
   free?: boolean
+  /** What only this line has ("Para-choque"); see NewOrderDrawer's Line. */
+  description?: string
 }
 /** The Nova OS form, shared with the drawer (refs unwrapped by reactive()). */
 export interface AssistForm {
@@ -109,7 +111,7 @@ interface Undo {
   customer: Customer | null
   device: Device | null
   added: string[]
-  changed: { key: string; value: number | null; quantity: number }[]
+  changed: { key: string; value: number | null; quantity: number; description?: string }[]
   removed: { line: FormLine; index: number }[]
   request: string | null
   due: string | null
@@ -130,7 +132,7 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     if (images.length) f.photos = [...f.photos, ...images]
     const photos = await Promise.all(images.map((file) => assistPhoto(file)))
     const sent = { services: f.lines.filter((l) => l.item.kind === 'service'), products: f.lines.filter((l) => l.item.kind === 'product') }
-    const draft = await requestAssist({ text: value, photos, audio, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, value: l.value, quantity: l.quantity })) })
+    const draft = await requestAssist({ text: value, photos, audio, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, description: l.description ?? null, value: l.value, quantity: l.quantity })) })
     usesLeft.value = usesLeftOf(draft.usage)
     monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const undo: Undo = { customer: f.customer, device: f.device, added: [], changed: [], removed: [], request: null, due: null, asks: { customer: customerAsk.value, device: deviceAsk.value } }
@@ -153,10 +155,13 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
       // The price only for who edits prices (the ✓ sends only theirs).
       const newValue = change.value !== undefined && editPrices ? change.value : undefined
       const newQuantity = change.quantity !== undefined && current.item.kind === 'product' ? change.quantity : undefined
-      if (newValue === undefined && newQuantity === undefined) continue
-      undo.changed.push({ key: current.key, value: current.value, quantity: current.quantity })
+      // "A pintura é no capô": a free line has no description of its own (its name is it).
+      const newDescription = change.description !== undefined && !current.free ? change.description : undefined
+      if (newValue === undefined && newQuantity === undefined && newDescription === undefined) continue
+      undo.changed.push({ key: current.key, value: current.value, quantity: current.quantity, description: current.description })
       if (newValue !== undefined) current.value = newValue
       if (newQuantity !== undefined) current.quantity = newQuantity
+      if (newDescription !== undefined) current.description = newDescription
       f.marked.add(current.key)
     }
     // 1. Customer, only when none is chosen.
@@ -182,7 +187,7 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     for (const item of draft.items) {
       const known = item.catalogId ? props.catalog.find((entry) => entry.id === item.catalogId && entry.kind === item.kind) : null
       const line: FormLine = known
-        ? { key: crypto.randomUUID(), item: known, value: assistValue(item.value, known.value, editPrices), quantity: item.kind === 'product' ? Math.max(1, Math.round(item.quantity || 1)) : 1 }
+        ? { key: crypto.randomUUID(), item: known, value: assistValue(item.value, known.value, editPrices), quantity: item.kind === 'product' ? Math.max(1, Math.round(item.quantity || 1)) : 1, ...(item.description?.trim() ? { description: item.description.trim() } : {}) }
         : { key: crypto.randomUUID(), item: { id: '', kind: 'service', name: item.name, value: null }, value: assistValue(item.value, null, editPrices), quantity: 1, free: true }
       f.lines = [...f.lines, line]
       f.marked.add(line.key)
@@ -249,7 +254,7 @@ function undoDraft(undo: Undo) {
   }
   for (const changed of undo.changed) {
     const line = f.lines.find((l) => l.key === changed.key)
-    if (line) Object.assign(line, { value: changed.value, quantity: changed.quantity })
+    if (line) Object.assign(line, { value: changed.value, quantity: changed.quantity, description: changed.description })
   }
   const lines = f.lines.filter((l) => !undo.added.includes(l.key))
   for (const { line, index } of [...undo.removed].reverse()) lines.splice(Math.min(index, lines.length), 0, line)

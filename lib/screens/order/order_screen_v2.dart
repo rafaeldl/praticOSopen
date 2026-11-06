@@ -433,6 +433,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// known to be on.
   bool _startTalking = false;
 
+  /// Opened with photos shared from another app: the assistant reads them
+  /// once it is known to be on, as after "Foto".
+  bool _readShared = false;
+
   /// What the last draft added, for "Desfazer".
   _DraftUndo? _undo;
 
@@ -501,7 +505,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _onSaved = args?['onSaved'] as void Function(Order)?;
       _opensAsContract = args?['repeat'] == true;
       _startTalking = args?['startTalking'] == true;
-      if (widget.showAssistant != null) _talkIfAsked();
+      final shared = (args?['photos'] as List?)?.cast<AiPhoto>() ?? const [];
+      if (shared.isNotEmpty) {
+        _photos.addAll(shared);
+        _readShared = true;
+      }
+      if (widget.showAssistant != null) {
+        _talkIfAsked();
+        _readSharedIfAsked();
+      }
       _startNew(order);
       if (args?['repeat'] == true) {
         // From Contratos: the order starts as a contract, with the
@@ -518,6 +530,19 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final on = await client.isEnabled();
     if (mounted && on != _assistantOn) setState(() => _assistantOn = on);
     _talkIfAsked();
+    _readSharedIfAsked();
+  }
+
+  /// Shared photos: read once, like the photos of "Foto" (up to
+  /// [kAiMaxPhotos]). With the assistant off they just stay in "Fotos".
+  void _readSharedIfAsked() {
+    if (!_readShared || !_assistantOn) return;
+    _readShared = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _photos.isNotEmpty) {
+        _runAssistant(photos: _photos.take(kAiMaxPhotos).toList());
+      }
+    });
   }
 
   void _talkIfAsked() {
@@ -1702,7 +1727,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     } else {
       _actions.uploadPhotos(_store, picked);
     }
-    if (_assistantOn) await _runAssistant(photos: picked);
+    if (_assistantOn) {
+      await _runAssistant(photos: picked.take(kAiMaxPhotos).toList());
+    }
   }
 
   Future<void> _onPhotoTapped(int index) async {

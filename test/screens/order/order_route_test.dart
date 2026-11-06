@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 
 void main() {
   group('/order', () {
@@ -60,6 +63,14 @@ void main() {
       void onCreated(String id) {}
       expect(newOrderArguments(repeat: true), {'repeat': true});
       expect(newOrderArguments(onCreated: onCreated), {'onCreated': onCreated});
+    });
+
+    test('carries photos shared from another app (#633)', () {
+      final photo = AiPhoto(Uint8List.fromList([1, 2, 3]));
+      expect(newOrderArguments(photos: [photo]), {
+        'photos': [photo],
+      });
+      expect(newOrderArguments(photos: const []), isNull);
     });
   });
 }

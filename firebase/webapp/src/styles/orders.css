@@ -136,6 +136,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .chosen .field-label { margin: 0; }
 .drawer-items { list-style: none; margin: 0.35rem 0 0; padding: 0; display: grid; gap: 2px; }
 .drawer-items li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 9rem) auto; gap: 0.5rem; align-items: center; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.25rem 0.3rem 0.25rem 0.6rem; }
+.drawer-items .line-desc { grid-column: 1 / -1; }
+.drawer-items .line-desc-add { grid-column: 1 / -1; justify-self: start; min-height: 2.75rem; font-size: 0.875rem; }
 .drawer-items .line-price .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .more-options summary { cursor: pointer; font-weight: 600; min-height: 2.75rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .more-body { display: grid; gap: 0.75rem; padding-top: 0.25rem; }

@@ -1313,7 +1313,8 @@ watch(
     </div>
     <OrderAssistant v-if="order && access?.canEditMainFields" :order="order" :pending-checklists="orderForms.filter((form) => form.status !== 'completed').length"
       @hide="(ids: string[]) => (hiddenLines = [...hiddenLines, ...ids])"
-      @unhide="(ids: string[]) => (hiddenLines = hiddenLines.filter((id) => !ids.includes(id)))" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))" />
+      @unhide="(ids: string[]) => (hiddenLines = hiddenLines.filter((id) => !ids.includes(id)))" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))"
+      @other-customer="openPicker('customer')" @other-device="openPicker('device')" />
   </section>
 
   <template v-if="order && access && dialog">

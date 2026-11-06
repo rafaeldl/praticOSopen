@@ -1702,6 +1702,55 @@ void main() {
 
       expect(assistant.texts, ['Revenda Sul, troca de óleo']);
     });
+
+    testWidgets(
+      'opened with photos shared from another app: they go in "Fotos" and '
+      'the assistant reads up to 4 once (#633)',
+      (tester) async {
+        final assistant = FakeAssistant(draft);
+        await _pump(
+          tester,
+          assistantScreen(OrderStore(), assistant),
+          args: {
+            'photos': [for (var i = 0; i < 5; i++) AiPhoto(png)],
+          },
+        );
+        await tester.pumpAndSettle();
+
+        expect(assistant.photoCounts, [4]);
+        expect(assistant.texts, [null]);
+        expect(find.text(filledNote), findsOneWidget);
+        // All five stay in "Fotos" (further down, below what was filled).
+        await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('new_order_photo_4')),
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.byKey(const ValueKey('new_order_photo_4')), findsOneWidget);
+      },
+    );
+
+    testWidgets('shared photos with the assistant off: only attached (#633)', (
+      tester,
+    ) async {
+      final assistant = FakeAssistant(draft, enabled: false);
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: OrderStore(),
+          permissions: _permissions(),
+          actions: FakeActions(),
+          assistant: assistant,
+        ),
+        args: {
+          'photos': [AiPhoto(png)],
+        },
+      );
+      await tester.pumpAndSettle();
+
+      expect(assistant.photoCounts, isEmpty);
+      expect(find.byKey(const ValueKey('new_order_photo_0')), findsOneWidget);
+    });
   });
 
   group('"O que vai na OS?"', () {
