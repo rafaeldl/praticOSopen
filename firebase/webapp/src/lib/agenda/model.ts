@@ -153,6 +153,12 @@ export function snapMinutes(minutes: number): number {
   return Math.max(0, Math.min(24 * 60 - SLOT_MINUTES, snapped))
 }
 
+/** The half hour a click on the grid falls in: 14:20 is 14:00 (the slot under the pointer). */
+export function slotAt(minutes: number): number {
+  const slot = Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES
+  return Math.max(0, Math.min(24 * 60 - SLOT_MINUTES, slot))
+}
+
 export interface Target {
   day: string
   /** null: "Dia todo" (00:00). */
@@ -183,6 +189,11 @@ export function targetInstant(target: Target, zone: string): Date {
 export function storedText(target: Target): string {
   const minutes = target.minutes ?? 0
   return `${target.day}T${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}:00.000`
+}
+
+/** A target as the value of a datetime-local field of Nova OS ("Dia todo" is midnight). */
+export function localInput(target: Target): string {
+  return storedText(target).slice(0, 16)
 }
 
 export function sameTarget(a: Target, b: Target): boolean {

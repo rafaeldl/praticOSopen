@@ -1,12 +1,14 @@
 <script setup lang="ts">
 // Hours down, days across (one for Dia, seven for Semana). Dragging a visit to
 // another hour or day moves it; the keyboard does the same (WCAG 2.5.7):
-// Shift + arrows move a preview, Enter confirms, Esc puts it back.
+// Shift + arrows move a preview, Enter confirms, Esc puts it back. Clicking a
+// free hour (or the "Dia todo" row) starts a Nova OS there; nothing is saved
+// until its ✓.
 import { computed, ref } from 'vue'
 import { t } from '@/i18n'
 import type { AgendaOrder } from '@/lib/agenda/data'
-import { layoutColumn, snapMinutes, type Target, type Visit } from '@/lib/agenda/model'
-import { dayShort, hourLabel, timeOf, weekdayShort, dayMonth } from '@/lib/agenda/text'
+import { layoutColumn, slotAt, snapMinutes, type Target, type Visit } from '@/lib/agenda/model'
+import { dayShort, hourLabel, minutesLabel, timeOf, weekdayShort, dayMonth } from '@/lib/agenda/text'
 import { lateText, orderShort, statusText } from '@/lib/orders/text'
 
 export type ArrowKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
@@ -21,6 +23,8 @@ const props = defineProps<{
   timed: boolean
   pendingId: string | null
   canMove: (item: AgendaOrder) => boolean
+  /** Who can create orders: a free hour opens Nova OS. */
+  canCreate: boolean
 }>()
 const emit = defineEmits<{
   open: [item: AgendaOrder]
@@ -29,6 +33,7 @@ const emit = defineEmits<{
   confirm: [item: AgendaOrder]
   cancel: []
   showDay: [day: string]
+  create: [target: Target]
 }>()
 
 const dragging = ref<string | null>(null)
@@ -39,6 +44,8 @@ const allDay = (day: string) => visitsOf(day).filter((visit) => visit.allDay)
 const timedVisits = (day: string) => visitsOf(day).filter((visit) => !visit.allDay)
 const layouts = computed(() => new Map(props.days.map((day) => [day, layoutColumn(visitsOf(day))])))
 const single = computed(() => props.days.length === 1)
+/** The free half hour under the pointer: a "+ 14:00" shows where a click lands. */
+const hover = ref<Target | null>(null)
 
 function blockStyle(day: string, visit: Visit<AgendaOrder>) {
   const place = layouts.value.get(day)?.get(visit) ?? { lane: 0, lanes: 1 }
@@ -134,6 +141,35 @@ function dropOnHours(event: DragEvent, day: string) {
   emit('drop', item, { day, minutes: snapMinutes(minutes) })
 }
 
+/** The half hour under the pointer on a column, or null over a visit. */
+function slotOf(event: MouseEvent, day: string): Target | null {
+  const element = event.currentTarget as HTMLElement
+  if (event.target !== element) return null
+  const rect = element.getBoundingClientRect()
+  const perMinute = rect.height / ((props.span.end - props.span.start) * 60)
+  return { day, minutes: slotAt(props.span.start * 60 + (event.clientY - rect.top) / perMinute) }
+}
+
+function onHover(event: MouseEvent, day: string) {
+  if (!props.canCreate || dragging.value) return
+  // Deliveries have no hour: the whole day is the slot.
+  const slot = slotOf(event, day)
+  hover.value = slot && !props.timed ? { day, minutes: null } : slot
+}
+
+function onClickHours(event: MouseEvent, day: string) {
+  if (!props.canCreate) return
+  const slot = slotOf(event, day)
+  if (slot) emit('create', props.timed ? slot : { day, minutes: null })
+}
+
+function onClickAllDay(event: MouseEvent, day: string) {
+  if (props.canCreate && event.target === event.currentTarget) emit('create', { day, minutes: null })
+}
+
+const ghostStyle = (minutes: number) => ({ top: `calc(${(minutes - props.span.start * 60) / 60} * var(--hour))` })
+const ghostText = (target: Target) => (target.minutes === null ? '+' : `+ ${minutesLabel(target.minutes)}`)
+
 function dropAllDay(day: string, event: DragEvent) {
   const item = find(dragging.value ?? event.dataTransfer?.getData('text/plain') ?? null)
   end()
@@ -161,8 +197,10 @@ function dropAllDay(day: string, event: DragEvent) {
         v-for="day in days"
         :key="`a-${day}`"
         class="tg-allday"
-        :class="{ 'is-over': over === `a-${day}` }"
+        :class="{ 'is-over': over === `a-${day}`, 'can-create': canCreate }"
         :data-allday="day"
+        :title="canCreate ? t('web.agenda.newAt', { when: dayShort(day) }) : undefined"
+        @click="onClickAllDay($event, day)"
         @dragover.prevent="over = `a-${day}`"
         @dragleave.self="over = null"
         @drop.prevent="dropAllDay(day, $event)"
@@ -198,14 +236,25 @@ function dropAllDay(day: string, event: DragEvent) {
       v-for="day in days"
       :key="`c-${day}`"
       class="tg-col"
-      :class="{ 'is-over': over === day, 'is-today': day === today }"
+      :class="{ 'is-over': over === day, 'is-today': day === today, 'can-create': canCreate }"
       :data-day="day"
       role="group"
       :aria-label="dayShort(day)"
+      @mousemove="onHover($event, day)"
+      @mouseleave="hover = null"
+      @click="onClickHours($event, day)"
       @dragover.prevent="over = day"
       @dragleave.self="over = null"
       @drop.prevent="dropOnHours($event, day)"
     >
+      <div
+        v-if="hover && hover.day === day"
+        class="tg-ghost"
+        :class="{ 'tg-ghost--day': hover.minutes === null }"
+        aria-hidden="true"
+        data-testid="agenda-ghost"
+        :style="hover.minutes === null ? undefined : ghostStyle(hover.minutes)"
+      >{{ ghostText(hover) }}</div>
       <div v-if="day === today && nowMinutes >= span.start * 60 && nowMinutes < span.end * 60" class="tg-now" aria-hidden="true" :style="{ top: `calc(${(nowMinutes - span.start * 60) / 60} * var(--hour))` }"></div>
       <button
         v-for="visit in timedVisits(day)"

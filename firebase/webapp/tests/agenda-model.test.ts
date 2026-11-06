@@ -8,11 +8,13 @@ import {
   hourSpan,
   isDay,
   layoutColumn,
+  localInput,
   monthGrid,
   nudge,
   parseStored,
   placeVisits,
   queryRange,
+  slotAt,
   snapMinutes,
   step,
   targetInstant,
@@ -163,5 +165,20 @@ describe('visitas', () => {
     expect(of('b')).toEqual({ lane: 1, lanes: 2 })
     expect(of('c')).toEqual({ lane: 0, lanes: 1 })
     expect(of('d')).toBeUndefined()
+  })
+})
+
+describe('clicar num horário livre (agenda.slot-new-order)', () => {
+  test('o clique cai na meia hora sob o ponteiro, dentro do dia', () => {
+    expect(slotAt(14 * 60 + 20)).toBe(14 * 60)
+    expect(slotAt(14 * 60 + 30)).toBe(14 * 60 + 30)
+    expect(slotAt(14 * 60 + 59)).toBe(14 * 60 + 30)
+    expect(slotAt(-5)).toBe(0)
+    expect(slotAt(24 * 60 + 10)).toBe(23 * 60 + 30)
+  })
+
+  test('vira o valor do campo de data e hora da Nova OS; Dia todo é meia-noite', () => {
+    expect(localInput({ day: '2031-03-12', minutes: 9 * 60 + 30 })).toBe('2031-03-12T09:30')
+    expect(localInput({ day: '2031-03-12', minutes: null })).toBe('2031-03-12T00:00')
   })
 })

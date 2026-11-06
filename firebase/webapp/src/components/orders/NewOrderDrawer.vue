@@ -110,7 +110,9 @@ const repeat = !!ui.newOrderSeed?.repeat
 const today = toIsoDay(new Date())
 const repeatForm = ref<RepeatForm>({ repeat: { frequency: 'monthly', interval: 1 }, startDay: today, endDay: null, autoGenerate: true })
 const title = computed(() => (repeat ? t('contractNew') : t('orderNewTitle', { order: orderShort() })))
-const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value || visit.value || address.value.trim() || photos.value.length || Object.values(customValues).some((v) => v !== null && v !== undefined && v !== '')))
+// What came from the Agenda's clicked hour is not the person's work: closing untouched does not ask.
+const seeded = { due: ui.newOrderSeed?.due ?? '', visit: (useScheduling && ui.newOrderSeed?.visit) || '' }
+const dirty = computed(() => !!(customer.value || device.value || lines.value.length || request.value.trim() || due.value !== seeded.due || visit.value !== seeded.visit || address.value.trim() || photos.value.length || Object.values(customValues).some((v) => v !== null && v !== undefined && v !== '')))
 const total = computed(() => lines.value.reduce((sum, line) => sum + (line.value ?? 0) * line.quantity, 0))
 const unpriced = computed(() => lines.value.filter((line) => line.value === null).length)
 const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
@@ -131,6 +133,11 @@ onMounted(async () => {
   ui.newOrderSeed = null
   if (seed?.customer) customer.value = { ...seed.customer }
   if (seed?.device) device.value = { ...seed.device }
+  // A free hour of the Agenda: the visit (or the delivery) and the filtered person come filled; the options show them.
+  if (seed?.visit && useScheduling) visit.value = seed.visit
+  if (seed?.due) due.value = seed.due
+  if (seed?.assignee && can('assignOrder')) assignee.value = seed.assignee
+  if (visit.value || assignee.value) more.value = true
   try {
     const [c, d, k] = await Promise.all([loadCustomers(), loadDevices(), loadCatalog()])
     customers.value = c
