@@ -290,6 +290,35 @@ test('vazio, erro com tentar de novo e carregando sem vazio por baixo (agenda.vi
   await expect(page.getByTestId('agenda-empty')).toBeVisible()
 })
 
+test('semana vazia mostra a grade; clicar às 14:00 abre a Nova OS com a visita e a pessoa do filtro, sem gravar (agenda.slot-new-order)', async ({ page }) => {
+  await openAgenda(page, 'admin', 'd=2034-02-15&who=e2e-technician')
+  await expect(page.getByTestId('agenda-empty')).toContainText('Clique num horário')
+  const column = page.locator('.tg-col[data-day="2034-02-15"]')
+  const label = page.locator('.tg-hour', { hasText: /^14:00$/ })
+  const [col, line] = [await column.boundingBox(), await label.boundingBox()]
+  if (!col || !line) throw new Error('grade sem coluna ou hora')
+  const position = { x: 20, y: line.y + line.height / 2 - col.y + 8 }
+  await column.hover({ position })
+  await expect(page.getByTestId('agenda-ghost')).toHaveText('+ 14:00')
+  await column.click({ position })
+  const drawer = page.getByRole('dialog', { name: 'Nova OS' })
+  await expect(drawer.locator('#no-visit')).toHaveValue('2034-02-15T14:00')
+  await expect(drawer.locator('#no-assignee')).toHaveValue('e2e-technician')
+  // Nothing typed: closing does not ask to discard.
+  await drawer.getByRole('button', { name: 'Fechar' }).click()
+  await expect(drawer).toHaveCount(0)
+})
+
+test('técnico não cria OS pela grade (agenda.slot-new-order)', async ({ page }) => {
+  await openAgenda(page, 'technician', 'd=2034-02-15')
+  await expect(page.getByTestId('agenda-empty')).toContainText('Nenhuma OS agendada nesta semana')
+  const column = page.locator('.tg-col[data-day="2034-02-15"]')
+  await column.hover({ position: { x: 20, y: 200 } })
+  await expect(page.getByTestId('agenda-ghost')).toHaveCount(0)
+  await column.click({ position: { x: 20, y: 200 } })
+  await expect(page.getByRole('dialog', { name: 'Nova OS' })).toHaveCount(0)
+})
+
 test('tirar o agendamento pela OS aberta da agenda some da agenda (order.schedule.clear)', async ({ page }) => {
   const order = await makeOrder('admin', { scheduledDate: '2031-12-16T13:00:00.000Z' })
   await openAgenda(page, 'admin', 'd=2031-12-16')

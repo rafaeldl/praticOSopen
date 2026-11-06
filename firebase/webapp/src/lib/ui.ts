@@ -23,6 +23,11 @@ export const ui = reactive({
     repeat?: boolean
     /** "Experimentar agora" of the assistant's presentation: the cursor starts in the assistant (order.ai.intro-try). */
     assist?: boolean
+    /** A free hour clicked on the Agenda: the visit (or the delivery, without useScheduling), as a datetime-local value. */
+    visit?: string
+    due?: string
+    /** The person of the Agenda's "De quem" filter. */
+    assignee?: string
   },
   /** Money said to the assistant on a Nova OS: the "Confere?" card opens on that order once it exists (order.ai.money-card). */
   aiActionsFor: null as null | { orderId: string; actions: DraftActions; nfse: NfseMoment | null },

@@ -226,6 +226,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 `src/views/agenda/`, `src/lib/agenda/`. Pela API para todos os papéis.
 
 - Semana ou Dia (`/schedule`, `?d=`, `?view=day`, `?who=`), grade de 7 às 19 que cresce, faixa "Dia todo", mês ao lado. No celular, faixa da semana e a lista do dia.
+- **Grade sempre na tela** (tela grande), mesmo na semana vazia. **Clicar num horário livre** abre a Nova OS com a visita naquela meia hora (`ui.newOrderSeed.visit`), na faixa "Dia todo" só o dia, e sem `useScheduling` a entrega do dia (`due`). Com "De quem" numa pessoa, ela vem como responsável. Nada é gravado até o ✓, e fechar sem mexer não pergunta. Só para quem cria OS (`canCreateOrders`); o "+ 14:00" ao passar o mouse mostra onde cai.
 - **Arrastar** de meia em meia hora, ou `Shift` + setas e `Enter`. Visita que o cliente esperava pergunta antes. "Desfazer" depois.
 - **Fuso.** Visita e entrega são gravadas como o app grava: hora da empresa sem fuso (`2026-11-03T14:00:00.000`; "Dia todo" é `T00:00:00.000`). O fuso vem do país da empresa (`lib/zone.ts`); o do computador vale quando é do mesmo país.
 - Sem `useScheduling`, mostra as entregas. Admin, gerente e supervisor filtram por responsável.

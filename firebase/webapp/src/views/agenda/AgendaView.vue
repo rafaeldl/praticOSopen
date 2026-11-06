@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // Agenda: the visits (or the deliveries, without useScheduling) of a day or a
 // week, in the company's zone, with the month on the side. On a big screen a
-// visit is moved by dragging or by Shift + arrows; a move the customer counts
+// visit is moved by dragging or by Shift + arrows, and a click on a free hour
+// starts a Nova OS there (agenda.slot-new-order); a move the customer counts
 // on asks first, and every move can be undone. Reads and writes go through the
 // API (lib/agenda/data.ts): who sees what and the values come from the server.
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
@@ -23,6 +24,7 @@ import {
   firstDayOfWeek,
   hourSpan,
   isDay,
+  localInput,
   monthGrid,
   nudge,
   placeVisits,
@@ -43,14 +45,14 @@ import { agendaLocale, dayLong, dayMonth, dayNumber, dayShort, targetText, timeO
 import '@/styles/agenda.css'
 import { onOrderEvent, orderChanged } from '@/lib/orders/bus'
 import { loadTeam, type Member } from '@/lib/orders/catalog'
-import { accessOf } from '@/lib/orders/model'
+import { accessOf, canCreateOrders } from '@/lib/orders/model'
 import { lateText, orderShort, statusText } from '@/lib/orders/text'
 import { orderOf } from '@/lib/orders/writes'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
-import { announce } from '@/lib/ui'
+import { announce, ui } from '@/lib/ui'
 
 const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
 
@@ -82,6 +84,8 @@ const grid = computed(() => monthGrid(day.value, firstDay.value))
 const timed = computed(() => (session.company as { useScheduling?: boolean } | null)?.useScheduling !== false)
 const field = computed<AgendaField>(() => (timed.value ? 'scheduledDate' : 'dueDate'))
 /** "De quem": admin, manager and supervisor (app: isAdmin, isManager, isSupervisor). */
+/** Technician does not create (canCreateOrders, like the shell's +). */
+const canCreate = computed(() => canCreateOrders(session.role, can('createOrder')))
 const canFilter = computed(() => ['owner', 'admin', 'manager', 'supervisor'].includes(session.role ?? ''))
 const who = computed(() => (canFilter.value && typeof route.query.who === 'string' && route.query.who ? route.query.who : null))
 const whoName = computed(() => team.value.find((member) => member.id === who.value)?.name || t('noName'))
@@ -282,6 +286,14 @@ function open(item: AgendaOrder) {
   void panel.open(item.order.id)
 }
 
+/** A free hour (or "Dia todo") clicked: Nova OS with that visit, or delivery, and the filtered person. Nothing is saved until its ✓. */
+function createAt(target: Target) {
+  if (!canCreate.value || pending.value) return
+  const value = localInput(target)
+  ui.newOrderSeed = { ...(timed.value ? { visit: value } : { due: value }), ...(who.value ? { assignee: who.value } : {}) }
+  ui.newOrder = true
+}
+
 function closePanel() {
   const id = panel.value.value
   panel.close()
@@ -414,8 +426,12 @@ onBeforeUnmount(() => {
           </nav>
           <LoadingState v-if="state === 'loading'" />
           <ErrorState v-else-if="state === 'failed'" :body="t('web.agenda.loadError')" :retry="() => load()" />
-          <EmptyState v-else-if="!visibleVisits.length" :title="emptyTitle" :body="t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue')" data-testid="agenda-empty" />
-          <div v-else-if="wide" class="ag-scroll">
+          <EmptyState v-else-if="!wide && !visibleVisits.length" :title="emptyTitle" :body="t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue')" data-testid="agenda-empty" />
+          <p v-if="wide && state === 'ready' && (canCreate || !visibleVisits.length)" class="ag-hint" :data-testid="visibleVisits.length ? 'agenda-hint' : 'agenda-empty'">
+            <strong v-if="!visibleVisits.length">{{ emptyTitle }}.</strong>
+            {{ canCreate ? t(timed ? 'web.agenda.clickHint' : 'web.agenda.clickHintDue') : t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue') }}
+          </p>
+          <div v-if="wide && state === 'ready'" class="ag-scroll">
             <TimeGrid
               :days="days"
               :visits="placed"
@@ -426,15 +442,17 @@ onBeforeUnmount(() => {
               :timed="timed"
               :pending-id="pending?.item.order.id ?? null"
               :can-move="canMove"
+              :can-create="canCreate"
               @open="open"
               @drop="onDrop"
               @nudge="onNudge"
               @confirm="(item) => pending && commit(item, pending.target, pending.from)"
               @cancel="onCancel"
+              @create="createAt"
               @show-day="(next) => setQuery({ d: next === todayDay ? undefined : next, view: 'day' })"
             />
           </div>
-          <section v-else class="ag-list" aria-labelledby="ag-day-title">
+          <section v-else-if="!wide && state === 'ready' && visibleVisits.length" class="ag-list" aria-labelledby="ag-day-title">
             <h2 id="ag-day-title" class="ag-day-title">{{ dayShort(day) }} <span class="sub">· {{ t('agendaDayCount', { count: dayVisits.length }) }}</span></h2>
             <ul>
               <li v-for="visit in dayVisits" :key="visit.item.order.id">

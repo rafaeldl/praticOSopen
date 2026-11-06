@@ -40,6 +40,9 @@
 .ag-row-top { display: flex; justify-content: space-between; gap: 0.5rem; font-weight: 600; }
 .ag-row .status { white-space: normal; }
 
+.ag-hint { margin: 0 0 0.6rem; color: var(--color-muted); font-size: 0.875rem; }
+.ag-hint strong { color: var(--color-ink); }
+
 /* Time grid */
 .tg { --hour: 3.25rem; display: grid; grid-template-columns: 3.75rem repeat(var(--cols), minmax(8.5rem, 1fr)); min-width: min-content; position: relative; }
 .tg--single { grid-template-columns: 3.75rem minmax(0, 1fr); min-width: 0; }
@@ -67,6 +70,9 @@
 .tg-block.is-pending { border-style: dashed; border-width: 2px; border-left-width: 4px; background: var(--color-selected); z-index: 4; }
 .tg-line { display: block; color: var(--color-muted); }
 .tg-block.is-late .tg-line:first-of-type { color: var(--color-danger-text); font-weight: 700; }
+.tg-col.can-create, .tg-allday.can-create { cursor: pointer; }
+.tg-ghost { position: absolute; left: 2px; right: 2px; height: calc(var(--hour) / 2 - 2px); z-index: 1; pointer-events: none; display: flex; align-items: center; padding: 0 0.4rem; border: 1px dashed var(--color-accent); border-radius: 4px; background: var(--color-accent-soft, var(--color-selected)); color: var(--color-ink); font-family: var(--font-num); font-size: 0.8125rem; font-weight: 600; }
+.tg-ghost--day { top: 0; bottom: 0; height: auto; align-items: flex-start; padding-top: 0.3rem; }
 .tg-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--color-danger); z-index: 1; pointer-events: none; }
 
 @media (max-width: 68.75rem) {
