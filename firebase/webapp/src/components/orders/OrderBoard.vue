@@ -1,7 +1,9 @@
 <script setup lang="ts">
-// Board of orders, a tab of the list: one column per status. Dragging moves a
-// card, and always has an alternative (WCAG 2.5.7): the "Mover" button or
-// Shift + arrow with the card in focus. Only moves this person may make.
+// Board of orders, a tab of the list: one column per status. With work stages
+// (docs/WORK_STAGES.md), "Em andamento" becomes one column per stage, ordered by
+// dragging, each with its own print. Dragging always has an alternative
+// (WCAG 2.5.7): the "Mover" button, Shift + arrow (column) and Alt + arrow
+// (place in the stage) with the card in focus. Only moves this person may make.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { MoreHorizontal } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -20,18 +22,37 @@ import { useRoutePanel } from '@/lib/route-layer'
 import { effectiveUseFinancial, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
-import ChoiceDialog from './ChoiceDialog.vue'
+import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
+import StagePrint from './StagePrint.vue'
+import { rankAt, sortInStage, stageIdOf, suggestedStage, workStages, type WorkStage } from '@/lib/orders/stages'
 import OrderDetail from './OrderDetail.vue'
 
-const COLUMNS: OrderStatus[] = ['quote', 'approved', 'progress', 'done']
+const STATUSES: OrderStatus[] = ['quote', 'approved', 'progress', 'done']
 const DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
+interface Column {
+  key: string
+  status: OrderStatus
+  stage?: WorkStage
+}
+const stages = computed(workStages)
+/** Statuses, with "Em andamento" split into the company's stages when it has them. */
+const columns = computed<Column[]>(() =>
+  STATUSES.flatMap((status): Column[] =>
+    status === 'progress' && stages.value.length
+      ? stages.value.map((stage) => ({ key: `stage-${stage.id}`, status, stage }))
+      : [{ key: status, status }],
+  ),
+)
+const columnLabel = (column: Column) => column.stage?.name ?? statusText(column.status)
 const ctx = listContext()
-const loader = createListLoader(ctx, COLUMNS)
+const loader = createListLoader(ctx, STATUSES)
 const rows = shallowRef<Order[]>([])
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const now = ref(new Date())
 const dragging = ref<string | null>(null)
-const over = ref<OrderStatus | null>(null)
+const over = ref<string | null>(null)
+/** Place in the column under the dragged card (stage columns only); null is the end. */
+const overIndex = ref<number | null>(null)
 const moving = ref<Order | null>(null)
 const panel = useRoutePanel('order')
 
@@ -42,9 +63,17 @@ const searching = ref(false)
 const searchFailed = ref(false)
 let searchToken = 0
 const shown = computed(() => found.value ?? rows.value)
-const cards = computed(
-  () => Object.fromEntries(COLUMNS.map((status) => [status, shown.value.filter((order) => order.status === status)])) as Record<OrderStatus, Order[]>,
-)
+function columnKeyOf(order: Order): string {
+  const stageId = stageIdOf(order, stages.value)
+  return stageId ? `stage-${stageId}` : order.status
+}
+const cards = computed(() => {
+  const byKey: Record<string, Order[]> = Object.fromEntries(columns.value.map((column) => [column.key, []]))
+  for (const order of shown.value) byKey[columnKeyOf(order)]?.push(order)
+  for (const column of columns.value) if (column.stage) byKey[column.key] = sortInStage(byKey[column.key] ?? [], column.stage.id)
+  return byKey
+})
+const cardsOf = (key: string): Order[] => cards.value[key] ?? []
 
 /** The search of the toolbar: the same server query as the list (number, customer, vehicle). */
 async function runSearch(text: string) {
@@ -61,7 +90,7 @@ async function runSearch(text: string) {
     const result = await searchOrders(ctx, text)
     if (token !== searchToken) return
     found.value = mergeById([], result)
-    announce(t('web.orders.count', { count: COLUMNS.reduce((sum, status) => sum + cards.value[status].length, 0) }))
+    announce(t('web.orders.count', { count: columns.value.reduce((sum, column) => sum + cardsOf(column.key).length, 0) }))
   } catch (error) {
     console.warn('board: search failed', error)
     if (token === searchToken) searchFailed.value = true
@@ -128,40 +157,164 @@ function onVisible() {
   if (document.visibilityState === 'visible') void refresh()
 }
 
-async function move(order: Order, to: OrderStatus) {
+/** Who may put this order in a stage column, or reorder it there (canChangeOrderStage; starting also needs the transition). */
+function canStage(order: Order): boolean {
+  const access = accessOf(order, session.role, session.uid, effectiveUseFinancial())
+  if (!access.canChangeHold) return false
+  return order.status === 'progress' || (order.status === 'approved' && access.transitions.includes('progress'))
+}
+
+function canPlace(order: Order, column: Column): boolean {
+  if (column.stage) return canStage(order)
+  return column.status !== order.status && access(order).transitions.includes(column.status)
+}
+
+const canDrag = (order: Order) => columns.value.some((column) => canPlace(order, column))
+
+function keep(fresh: Order) {
+  rows.value = mergeById(rows.value, [fresh])
+  if (found.value) found.value = mergeById(found.value, [fresh])
+}
+
+async function focusCard(id: string) {
+  await nextTick()
+  document.getElementById(`card-${id}`)?.focus()
+}
+
+/** Moves to a column; in a stage column, to `index` of it (the end when absent). */
+async function move(order: Order, column: Column, index?: number) {
   moving.value = null
-  if (order.status === to) return
-  if (!access(order).transitions.includes(to)) {
-    showToast(t('web.board.notAllowed', { status: statusText(to) }))
+  if (column.stage) return placeInStage(order, column.stage, index)
+  if (order.status === column.status) return
+  if (!access(order).transitions.includes(column.status)) {
+    showToast(t('web.board.notAllowed', { status: statusText(column.status) }))
     return
   }
   try {
-    const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: to }, order.version), ctx.showsMoney)
+    const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: column.status }, order.version), ctx.showsMoney)
     if (fresh) {
-      rows.value = mergeById(rows.value, [fresh])
-      if (found.value) found.value = mergeById(found.value, [fresh])
+      keep(fresh)
       orderChanged(fresh)
     }
-    announce(t('web.order.statusChanged', { status: statusText(to) }))
-    await nextTick()
-    document.getElementById(`card-${order.id}`)?.focus()
+    announce(t('web.order.statusChanged', { status: statusText(column.status) }))
+    await focusCard(order.id)
   } catch (error) {
     showToast(t(errorMessageKey(error)))
   }
 }
 
+/**
+ * Stage and place, shown at once (a reorder must feel instant) and put back if
+ * the server refuses. An approved order starts (`progress`) in the same write.
+ */
+async function placeInStage(order: Order, stage: WorkStage, index?: number) {
+  if (!canStage(order)) {
+    showToast(t('web.board.notAllowed', { status: stage.name }))
+    return
+  }
+  const key = `stage-${stage.id}`
+  const others = cardsOf(key).filter((row) => row.id !== order.id)
+  const at = index === undefined ? others.length : Math.max(0, Math.min(index, others.length))
+  const sameColumn = columnKeyOf(order) === key
+  if (sameColumn && cardsOf(key).indexOf(order) === at && order.stage?.id === stage.id) return
+  const rank = rankAt(others, at, stage.id)
+  const before = order
+  keep({ ...order, status: 'progress', stage: { id: stage.id, rank: rank ?? Number.MAX_SAFE_INTEGER, since: sameColumn && order.stage?.since ? order.stage.since : new Date().toISOString() } })
+  try {
+    const fresh = writes.orderOf(await writes.setStage(order.id, stage.id, rank), ctx.showsMoney)
+    if (fresh) {
+      keep(fresh)
+      orderChanged(fresh)
+    }
+    announce(sameColumn ? t('web.board.placed', { stage: stage.name, place: at + 1 }) : t('web.board.stageChanged', { stage: stage.name }))
+    await focusCard(order.id)
+  } catch (error) {
+    keep(before)
+    showToast(t(errorMessageKey(error)))
+  }
+}
+
+/** Up or down one place in its stage column ("…" and Alt + arrow). */
+function shift(order: Order, by: -1 | 1) {
+  moving.value = null
+  const column = columns.value.find((col) => col.key === columnKeyOf(order))
+  if (!column?.stage) return
+  const place = cardsOf(column.key).indexOf(order) + by
+  if (place < 0 || place >= cardsOf(column.key).length) return
+  void placeInStage(order, column.stage, place)
+}
+
 function onKey(event: KeyboardEvent, order: Order) {
+  if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+    event.preventDefault()
+    shift(order, event.key === 'ArrowUp' ? -1 : 1)
+    return
+  }
   if (!event.shiftKey || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return
   event.preventDefault()
-  const next = COLUMNS[COLUMNS.indexOf(order.status) + (event.key === 'ArrowRight' ? 1 : -1)]
+  const list = columns.value
+  const next = list[list.findIndex((column) => column.key === columnKeyOf(order)) + (event.key === 'ArrowRight' ? 1 : -1)]
   if (next) void move(order, next)
 }
 
-function drop(status: OrderStatus) {
-  const order = rows.value.find((row) => row.id === dragging.value)
+/** Over a card of a stage column: before it in its top half, after it in the bottom one. */
+function dragOverCard(event: DragEvent, column: Column, index: number) {
+  if (!column.stage) return
+  const box = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  overIndex.value = event.clientY > box.top + box.height / 2 ? index + 1 : index
+}
+
+/** A new column under the pointer starts at its end; its cards then say the place. */
+function overColumn(column: Column) {
+  if (over.value === column.key) return
+  over.value = column.key
+  overIndex.value = null
+}
+
+/** Over the empty part of a column, under its cards: the end. */
+function dragOverList(event: DragEvent) {
+  if (event.target === event.currentTarget) overIndex.value = null
+}
+
+function drop(column: Column) {
+  const order = shown.value.find((row) => row.id === dragging.value)
+  let index = overIndex.value ?? undefined
+  // The dragged card leaves its own column first: a place under it moves up by one.
+  if (order && index !== undefined && columnKeyOf(order) === column.key && cardsOf(column.key).indexOf(order) < index) index -= 1
   dragging.value = null
   over.value = null
-  if (order) void move(order, status)
+  overIndex.value = null
+  if (order) void move(order, column, index)
+}
+
+/** "…": the columns it may go to, and up/down in its stage. */
+function moveChoices(order: Order) {
+  const current = columnKeyOf(order)
+  const list: Choice[] = columns.value
+    .filter((column) => column.key === current || canPlace(order, column))
+    .map((column) => ({ id: column.key, label: columnLabel(column), dot: DOT[column.status], current: column.key === current }))
+  const column = columns.value.find((col) => col.key === current)
+  if (column?.stage && canStage(order)) {
+    const place = cardsOf(current).indexOf(order)
+    if (place > 0) list.push({ id: 'up', label: t('web.board.up') })
+    if (place < cardsOf(current).length - 1) list.push({ id: 'down', label: t('web.board.down') })
+  }
+  return list
+}
+
+function pick(order: Order, id: string) {
+  if (id === 'up' || id === 'down') return shift(order, id === 'up' ? -1 : 1)
+  const column = columns.value.find((col) => col.key === id)
+  if (column) void move(order, column)
+}
+
+/** The stage being printed (StagePrint stays hidden on screen until the next print). */
+const printing = shallowRef<{ stage: WorkStage; orders: Order[] } | null>(null)
+async function printStage(column: Column) {
+  if (!column.stage) return
+  printing.value = { stage: column.stage, orders: cardsOf(column.key) }
+  await nextTick()
+  requestAnimationFrame(() => window.print())
 }
 
 const stop = onOrderEvent(({ order, removedId }) => {
@@ -190,49 +343,59 @@ onBeforeUnmount(() => {
   <LoadingState v-if="state === 'loading' || searching" />
   <ErrorState v-else-if="state === 'failed'" :retry="load" />
   <ErrorState v-else-if="searchFailed" :retry="() => runSearch(props.search ?? '')" />
-  <div v-else-if="found && !found.some((order) => COLUMNS.includes(order.status))" class="empty" data-testid="board-no-match">
+  <div v-else-if="found && !found.some((order) => STATUSES.includes(order.status))" class="empty" data-testid="board-no-match">
     <h2>{{ t('web.orders.noMatch', { query: props.search ?? '' }) }}</h2>
   </div>
   <div v-else class="board-wrap" :class="{ 'has-panel': panel.value.value }">
-    <div class="board" data-testid="board">
+    <div class="board" data-testid="board" :style="{ '--board-cols': columns.length }">
       <section
-        v-for="status in COLUMNS"
-        :key="status"
+        v-for="column in columns"
+        :key="column.key"
         class="col"
-        :class="{ 'is-over': over === status }"
-        :aria-labelledby="`col-${status}`"
-        @dragover.prevent="over = status"
-        @dragleave.self="over = null"
-        @drop.prevent="drop(status)"
+        :class="{ 'is-over': over === column.key }"
+        :aria-labelledby="`col-${column.key}`"
+        :data-column="column.key"
+        @dragover.prevent="overColumn(column)"
+        @dragleave.self="over = null; overIndex = null"
+        @drop.prevent="drop(column)"
       >
-        <h2 :id="`col-${status}`" class="col-head">
-          <span class="dot" :class="`dot--${DOT[status]}`" aria-hidden="true"></span>{{ statusText(status) }}<span class="num">{{ cards[status].length }}</span>
+        <h2 :id="`col-${column.key}`" class="col-head">
+          <span class="dot" :class="`dot--${DOT[column.status]}`" aria-hidden="true"></span>{{ columnLabel(column) }}<span class="num">{{ cardsOf(column.key).length }}</span>
         </h2>
-        <ul class="col-list">
+        <button
+          v-if="column.stage && cardsOf(column.key).length"
+          type="button"
+          class="link col-print"
+          :data-testid="`print-${column.key}`"
+          :aria-label="t('web.board.printStage', { stage: column.stage.name })"
+          @click="printStage(column)"
+        >{{ t('web.board.print') }}</button>
+        <ul class="col-list" @dragover="dragOverList">
           <li
-            v-for="order in cards[status]"
+            v-for="(order, index) in cardsOf(column.key)"
             :key="order.id"
             class="card"
-            :class="{ 'is-dragging': dragging === order.id }"
-            :draggable="access(order).transitions.length > 0"
+            :class="{ 'is-dragging': dragging === order.id, 'drop-before': column.stage && over === column.key && overIndex === index && dragging !== order.id }"
+            :draggable="canDrag(order)"
             :data-order="order.id"
             @dragstart="dragging = order.id"
-            @dragend="dragging = null; over = null"
+            @dragend="dragging = null; over = null; overIndex = null"
+            @dragover="dragOverCard($event, column, index)"
           >
             <button :id="`card-${order.id}`" type="button" class="card-open" :aria-describedby="`card-${order.id}-state`" @click="panel.open(order.id)" @keydown="onKey($event, order)">
-              <span class="card-top"><strong class="who">{{ order.customer?.name }}</strong><span class="num">{{ order.number }}</span></span>
+              <span class="card-top"><strong class="who"><span v-if="column.stage" class="num card-place">{{ index + 1 }}</span>{{ order.customer?.name }}</strong><span class="num">{{ order.number }}</span></span>
               <span class="sub">{{ deviceSummary(order) }}</span>
             </button>
             <span :id="`card-${order.id}-state`" class="card-flag" :class="{ 'card-flag--late': lateText(order, now) }">
-              {{ lateText(order, now) || (isHeld(order) ? holdText(order, now) : '') }}
+              {{ lateText(order, now) || (isHeld(order) ? holdText(order, now) : '') || (column.status === 'approved' && suggestedStage(order, stages) ? t('web.board.nextStage', { stage: suggestedStage(order, stages)!.name }) : '') }}
             </span>
             <span v-if="order.showsMoney" class="num card-money" :aria-label="prefs.hideValues ? t('web.money.hiddenA11y') : undefined">{{ shownMoney(remainingOnRow(order) ?? order.total) }}</span>
-            <button v-if="access(order).transitions.length" type="button" class="icon-btn card-move" :aria-label="t('web.board.move', { order: orderShort(), number: order.number ?? '' })" @click="moving = order">
+            <button v-if="canDrag(order)" type="button" class="icon-btn card-move" :aria-label="t('web.board.move', { order: orderShort(), number: order.number ?? '' })" @click="moving = order">
               <MoreHorizontal :size="16" aria-hidden="true" />
             </button>
           </li>
         </ul>
-        <p v-if="!cards[status].length" class="muted small">{{ t('web.board.emptyColumn') }}</p>
+        <p v-if="!cardsOf(column.key).length" class="muted small">{{ t('web.board.emptyColumn') }}</p>
       </section>
     </div>
     <aside v-if="panel.value.value" class="panel" :aria-label="t('web.orders.panel')">
@@ -243,8 +406,9 @@ onBeforeUnmount(() => {
     v-if="moving"
     :title="t('web.board.moveTitle')"
     :sub="`${moving.number} · ${moving.customer?.name ?? ''}`"
-    :choices="COLUMNS.filter((status) => status === moving!.status || access(moving!).transitions.includes(status)).map((status) => ({ id: status, label: statusText(status), dot: DOT[status], current: status === moving!.status }))"
-    @pick="(id) => move(moving as Order, id as OrderStatus)"
+    :choices="moveChoices(moving)"
+    @pick="(id) => pick(moving as Order, id)"
     @close="moving = null"
   />
+  <StagePrint v-if="printing" :key="printing.stage.id" :stage="printing.stage" :orders="printing.orders" />
 </template>

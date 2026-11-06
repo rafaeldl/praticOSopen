@@ -27,18 +27,18 @@ export interface TestOrder {
   number: number
 }
 
-/** A fresh order in company A. Number is unique, so the row is easy to find. */
-export async function makeOrder(author: UserKey, data: Record<string, unknown> = {}): Promise<TestOrder> {
+/** A fresh order (company A unless another is given). Number is unique, so the row is easy to find. */
+export async function makeOrder(author: UserKey, data: Record<string, unknown> = {}, company: string = COMPANY_A): Promise<TestOrder> {
   const id = `t-${randomUUID().slice(0, 8)}`
   const number = 700000 + Math.floor(Math.random() * 99999)
   const now = new Date().toISOString()
   const services = (data.services as unknown[]) ?? [{ service: { id: 'service-1', name: 'Serviço 1', value: 50 }, value: 50 }]
   await db()
-    .doc(`companies/${COMPANY_A}/orders/${id}`)
+    .doc(`companies/${company}/orders/${id}`)
     .set({
       number,
       status: 'approved',
-      company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name },
+      company: { id: company, name: (COMPANIES as Record<string, { name: string }>)[company]?.name },
       customer: { id: 'customer-2', name: 'Cliente 02' },
       device: { id: 'device-2', name: 'Veículo 2', serial: 'TST0002' },
       devices: [{ id: 'device-2', name: 'Veículo 2', serial: 'TST0002' }],
@@ -96,8 +96,8 @@ export async function countOrders(field: string, value: unknown): Promise<number
   return (await db().collection(`companies/${COMPANY_A}/orders`).where(field, '==', value).get()).size
 }
 
-export async function readOrder(id: string): Promise<Record<string, unknown> | undefined> {
-  return (await db().doc(`companies/${COMPANY_A}/orders/${id}`).get()).data()
+export async function readOrder(id: string, company: string = COMPANY_A): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${company}/orders/${id}`).get()).data()
 }
 
 /** A fresh customer in company A, with a unique name (fatia 03 tests write and run in parallel). */

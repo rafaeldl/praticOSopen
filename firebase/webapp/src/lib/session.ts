@@ -27,6 +27,8 @@ export interface CompanyProfile {
   useDeviceManagement?: boolean
   /** Contratos on (company.settings.contracts). */
   useContracts?: boolean
+  /** Work stages inside `progress` (lib/orders/stages.ts), as stored. */
+  workStages?: unknown
 }
 
 export interface SessionState {

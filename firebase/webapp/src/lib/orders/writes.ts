@@ -121,6 +121,11 @@ export function resumeOrder(id: string) {
   return api<OrderResponse>(`${base(id)}/hold`, { method: 'DELETE' })
 }
 
+/** Puts the order in a work stage at `rank` (end of the column when absent); an approved one starts (docs/WORK_STAGES.md). */
+export function setStage(id: string, stageId: string, rank?: number) {
+  return api<OrderResponse>(`${base(id)}/stage`, { method: 'PUT', body: { stageId, ...(rank === undefined ? {} : { rank }) } })
+}
+
 // ---------------------------------------------------------------------------
 // Firestore: no money in these fields
 // ---------------------------------------------------------------------------

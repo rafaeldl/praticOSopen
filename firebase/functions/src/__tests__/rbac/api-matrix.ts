@@ -128,6 +128,12 @@ export const API_CASES: ApiCase[] = [
     allow: SEE_ALL_ORDERS,
   },
   {
+    // Starts the approved order (progress) in a work stage: who moves it and sees it.
+    id: 'orders.stage.set', area: 'OS', title: 'pôr OS aprovada de outra pessoa numa etapa',
+    method: 'put', path: `${O}/o1/stage`, body: { stageId: 'paint' },
+    allow: SEE_ALL_ORDERS,
+  },
+  {
     id: 'orders.create.done', area: 'OS', title: 'criar OS já concluída',
     method: 'post', path: O, body: { customerId: 'cust1', status: 'done' },
     allow: ADMINS,

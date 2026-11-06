@@ -125,6 +125,7 @@ async function seedCompanies() {
       // Contratos on (fatia 07); company C keeps it off for contract.off.*.
       ...(id === COMPANY_A ? { useDeviceManagement: true, useContracts: true } : {}),
       ...(company.useFinancial === false ? { useFinancial: false } : {}),
+      ...(company.workStages ? { workStages: company.workStages } : {}),
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
       // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..509), like a real counter.

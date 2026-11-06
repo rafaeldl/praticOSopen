@@ -19,6 +19,8 @@ export const COMPANY_R = 'company-resume'
 export const COMPANY_P = 'company-paging'
 /** NFS-e direta on (settings/payments.nfseDirectEnabled): "Dados para nota" of the customer (e2e/customer-invoice.spec.ts). */
 export const COMPANY_N = 'company-nfse'
+/** Work stages on (docs/WORK_STAGES.md): the board splits Em andamento, so no other board test reads it. */
+export const COMPANY_S = 'company-stages'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -94,6 +96,9 @@ export const USERS = {
   pSuper: { ...user('p-super', 'Priscila Supervisora Paginas'), roles: { [COMPANY_P]: 'supervisor' } },
   // Company nfse: the direct nota on, so the customer form has "Dados para nota".
   nOwner: { ...user('n-owner', 'Nadia Dona Nota'), roles: { [COMPANY_N]: 'owner' } },
+  // Company stages: Pintura → Polimento inside Em andamento.
+  sOwner: { ...user('s-owner', 'Sonia Dona Etapas'), roles: { [COMPANY_S]: 'owner' } },
+  sConsultant: { ...user('s-consultant', 'Simone Consultora Etapas'), roles: { [COMPANY_S]: 'consultant' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -118,6 +123,10 @@ export const COMPANIES = {
   [COMPANY_R]: { name: 'Retoma Sem Ramo', country: 'BR', segment: null, phone: '(48) 3333-4444', owner: USERS.resumer },
   [COMPANY_P]: { name: 'Oficina Paginas', country: 'BR', segment: 'automotive', owner: USERS.pOwner },
   [COMPANY_N]: { name: 'Oficina Nota Direta', country: 'BR', segment: 'automotive', owner: USERS.nOwner },
+  [COMPANY_S]: {
+    name: 'Funilaria Etapas', country: 'BR', segment: 'automotive', owner: USERS.sOwner,
+    workStages: [{ id: 'paint', name: 'Pintura', keywords: ['pint'] }, { id: 'polish', name: 'Polimento', keywords: ['polim', 'higien'] }],
+  },
 }
 
 /** Invites of the team company: one waiting, one expired (the app hides it; the web offers "Convidar de novo"). */

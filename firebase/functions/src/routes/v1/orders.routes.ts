@@ -19,6 +19,7 @@ import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware
 import {
   can,
   canChangeOrderHold,
+  canChangeOrderStage,
   canChangeOrderStatus,
   canCreateOrderWithStatus,
   canDeleteOrder,
@@ -38,6 +39,7 @@ import * as financeService from '../../services/order-finance.service';
 import * as catalogService from '../../services/catalog.service';
 import { deleteOrder } from '../../services/order-delete.service';
 import { removeOrderHold, setOrderHold } from '../../services/order-hold.service';
+import { setOrderStage } from '../../services/order-stage.service';
 import { memberAggr } from '../../services/membership.service';
 import { projectOrder, projectOrderSummary } from '../../services/order-projection';
 import { forbiddenOrder, OrderRuleError } from '../../services/order-errors';
@@ -54,6 +56,7 @@ import {
   discountSchema,
   markPaidSchema,
   orderHoldSchema,
+  orderStageSchema,
   receiptFileSchema,
   listOrdersQuerySchema,
   orderVersionSchema,
@@ -571,6 +574,24 @@ router.delete('/:id/hold', requireOrderAccess(), route('Failed to resume', async
     guard: (fresh) => {
       if (!canRemoveOrderHold(req, fresh)) throw forbiddenOrder('Not allowed to resume this order');
     },
+  });
+  if (!order) return notFound(res);
+  await sendOrder(req, res, order);
+}));
+
+// ============================================================================
+// Work stage (docs/WORK_STAGES.md)
+// ============================================================================
+
+/** PUT /orders/:id/stage: moves to a stage or reorders it. An approved order starts (`progress`). */
+router.put('/:id/stage', requireOrderAccess(), route('Failed to set the stage', async (req, res, companyId) => {
+  const validation = validateInput(orderStageSchema, req.body);
+  if (!validation.success) return validationError(res, validation.errors);
+  const order = await setOrderStage(companyId, param(req, 'id'), validation.data, getUserAggr(req), {
+    guard: (fresh) => {
+      if (!canChangeOrderStage(req, fresh)) throw forbiddenOrder('Not allowed to change the stage of this order');
+    },
+    canStart: (fresh) => canChangeOrderStatus(req, fresh, 'progress'),
   });
   if (!order) return notFound(res);
   await sendOrder(req, res, order);
