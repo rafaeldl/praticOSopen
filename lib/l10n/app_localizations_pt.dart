@@ -7461,6 +7461,70 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.';
 
   @override
+  String get nfseEmailRow => 'E-mail ao cliente';
+
+  @override
+  String nfseEmailSentTo(String email, String date) {
+    return 'Enviada para $email em $date';
+  }
+
+  @override
+  String nfseEmailCancelSentTo(String email, String date) {
+    return 'Aviso de cancelamento enviado para $email em $date';
+  }
+
+  @override
+  String nfseEmailFailedTo(String email, String date) {
+    return 'Não deu para mandar para $email em $date';
+  }
+
+  @override
+  String get nfseEmailSkippedNoEmail =>
+      'Não foi: o cliente não tem e-mail no cadastro';
+
+  @override
+  String get nfseEmailSkippedTurnedOff =>
+      'Não foi: o envio automático está desligado';
+
+  @override
+  String get nfseEmailNotSentYet => 'Ainda não foi por e-mail';
+
+  @override
+  String get nfseEmailSendAgain => 'Enviar de novo';
+
+  @override
+  String get nfseEmailSend => 'Enviar';
+
+  @override
+  String nfseEmailSentToast(String email) {
+    return 'Nota enviada para $email';
+  }
+
+  @override
+  String get nfseEmailFailedToast =>
+      'Não deu para mandar o e-mail. Tente de novo daqui a pouco.';
+
+  @override
+  String get nfseEmailNoAddressToast =>
+      'O cliente não tem e-mail. Coloque o e-mail no cadastro dele e envie de novo.';
+
+  @override
+  String get nfseDirectEmailToCustomer => 'Mandar a nota por e-mail ao cliente';
+
+  @override
+  String get nfseDirectEmailToCustomerHint =>
+      'Vai sozinha ao emitir e ao cancelar, com o PDF e o XML. Desligue se você manda pelo WhatsApp.';
+
+  @override
+  String nfseDirectIssueEmailGoesTo(String email) {
+    return 'A nota vai por e-mail para $email.';
+  }
+
+  @override
+  String get nfseDirectIssueEmailOff =>
+      'A nota não vai por e-mail: o envio automático está desligado.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }

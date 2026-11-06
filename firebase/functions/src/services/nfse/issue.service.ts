@@ -19,11 +19,14 @@
 
 import { db, storage } from '../firestore.service';
 import { refreshDanfse } from './danfse.service';
+import { notifyInvoiceEmail } from './invoice-email.service';
 import type { Customer, UserAggr } from '../../models/types';
 import type { NfseInvoice } from '../../models/asaas.types';
 import type {
   CustomerFiscalFields,
   FiscalAddress,
+  NfseEmailDelivery,
+  NfseEmailKind,
   FiscalEmitter,
   FiscalEmitterPrivate,
   NfseCancelReason,
@@ -80,6 +83,8 @@ export interface IssueDeps {
   saveFile: (path: string, contents: string, contentType: string) => Promise<void>;
   /** Makes the PDF after issuing or canceling (best effort; tests replace it). */
   refreshPdf: (companyId: string, invoiceId: string) => Promise<void>;
+  /** E-mails the nota to the customer (issue #611; best effort, never throws; tests replace it). */
+  sendEmail: (companyId: string, invoiceId: string, kind: NfseEmailKind) => Promise<NfseEmailDelivery | null>;
 }
 
 export function defaultIssueDeps(): IssueDeps {
@@ -91,6 +96,7 @@ export function defaultIssueDeps(): IssueDeps {
       await storage.bucket().file(path).save(contents, { contentType, resumable: false });
     },
     refreshPdf: (companyId, invoiceId) => refreshDanfse(companyId, invoiceId),
+    sendEmail: (companyId, invoiceId, kind) => notifyInvoiceEmail(companyId, invoiceId, kind),
   };
 }
 
@@ -246,6 +252,8 @@ export interface DirectPreview {
     viaInvoiceRecipient: boolean;
   };
   missing: Array<'taxId' | 'address' | 'email'>;
+  /** settings/nfse.emailToCustomer: the sheet says whether the nota goes by e-mail (issue #611). */
+  emailToCustomer: boolean;
   meiWarning: MeiWarning;
   invoicedOrders: Record<string, string>;
 }
@@ -282,7 +290,8 @@ export async function previewDirectInvoice(companyId: string, input: DirectPrevi
   if (!clean(target.invoiceEmail) && !clean(target.email)) missing.push('email');
 
   const all = await emittersRef(companyId).get();
-  const defaultId = (await companyRef(companyId).collection('settings').doc('nfse').get()).data()?.defaultEmitterId as string | undefined;
+  const nfseSettings = (await companyRef(companyId).collection('settings').doc('nfse').get()).data();
+  const defaultId = nfseSettings?.defaultEmitterId as string | undefined;
   const summary = (e: FiscalEmitter): EmitterSummary => ({
     id: e.id,
     legalName: e.legalName,
@@ -319,6 +328,7 @@ export async function previewDirectInvoice(companyId: string, input: DirectPrevi
       viaInvoiceRecipient: target.id !== customer.id,
     },
     missing,
+    emailToCustomer: nfseSettings?.emailToCustomer !== false,
     meiWarning: meiWarning(emitter.regime, emitter.totals, loaded.value, today, config.meiAnnualLimit),
     invoicedOrders,
   };
@@ -555,7 +565,8 @@ async function applyIssueResult(
     console.error(`[nfse] totals of emitter ${emitterId} not updated`, (error as Error)?.name);
   });
   await deps.refreshPdf(companyId, invoiceId);
-  return { ...invoice, ...update } as DirectInvoice;
+  const emailDelivery = await deps.sendEmail(companyId, invoiceId, 'issued').catch(() => null);
+  return { ...invoice, ...update, ...(emailDelivery ? { emailDelivery } : {}) } as DirectInvoice;
 }
 
 async function releaseLocks(companyId: string, invoiceId: string, orderIds: string[]): Promise<void> {
@@ -695,7 +706,8 @@ export async function cancelDirectInvoice(
   // The PDF now needs the "CANCELADA" watermark (NT 008, item 2.5.1).
   await deps.refreshPdf(companyId, invoiceId);
   console.log(`[nfse] invoice ${invoiceId} of company ${companyId} canceled`);
-  return { ...invoice, ...update };
+  const emailDelivery = await deps.sendEmail(companyId, invoiceId, 'canceled').catch(() => null);
+  return { ...invoice, ...update, ...(emailDelivery ? { emailDelivery } : {}) };
 }
 
 // ----------------------------------------------------------------------------

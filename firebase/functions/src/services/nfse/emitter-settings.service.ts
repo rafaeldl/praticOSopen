@@ -34,6 +34,8 @@ export interface NfseSettingsUpdate {
   autoIssue?: NfseDirectAutoIssue;
   /** May the manager issue and cancel notas (default yes). Owner only, checked by the route. */
   managerCanIssue?: boolean;
+  /** Does the nota go to the customer's e-mail on its own (default yes, issue #611). */
+  emailToCustomer?: boolean;
 }
 
 /** Saves the fields given; the others stay. Returns the emitter as saved. */
@@ -79,8 +81,14 @@ export async function updateNfseSettings(companyId: string, update: NfseSettings
   }
   if (update.autoIssue !== undefined) changes.autoIssue = update.autoIssue;
   if (update.managerCanIssue !== undefined) changes.managerCanIssue = update.managerCanIssue;
+  if (update.emailToCustomer !== undefined) changes.emailToCustomer = update.emailToCustomer;
   const ref = companyRef(companyId).collection('settings').doc('nfse');
   await ref.set(changes, { merge: true });
   const saved = (await ref.get()).data() ?? {};
-  return { defaultEmitterId: saved.defaultEmitterId, autoIssue: saved.autoIssue, managerCanIssue: saved.managerCanIssue !== false };
+  return {
+    defaultEmitterId: saved.defaultEmitterId,
+    autoIssue: saved.autoIssue,
+    managerCanIssue: saved.managerCanIssue !== false,
+    emailToCustomer: saved.emailToCustomer !== false,
+  };
 }

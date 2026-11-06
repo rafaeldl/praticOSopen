@@ -24,6 +24,7 @@ import {
   issueDirect,
   lookupPostalCode,
   meiWarningText,
+  emailLine,
   previewDirect,
   problemText,
   recipientInput,
@@ -125,6 +126,7 @@ const recipientLine = computed(() => {
   return `${name} · ${kind} ${formatTaxId(r.taxId)}`
 })
 const meiText = computed(() => (preview.value ? meiWarningText(preview.value.meiWarning) : null))
+const mailText = computed(() => (preview.value ? emailLine(preview.value, asking.value) : null))
 const discounted = computed(() => preview.value?.orders.some((o) => o.discount > 0) ?? false)
 
 const emitterChoices = computed(() =>
@@ -343,6 +345,8 @@ const mark = () => (touched.value = true)
             <label class="field-label" for="dx-text">{{ t('nfseDescriptionLabel') }}</label>
             <textarea id="dx-text" v-model="description" class="field" rows="4" maxlength="2000" aria-describedby="dx-info"></textarea>
             <p id="dx-info" class="sub dx-small" data-testid="nfse-info">{{ preview.complementaryInfo }}</p>
+
+            <p v-if="mailText" class="sub dx-small" data-testid="nfse-email-line">{{ mailText }}</p>
 
             <p v-if="meiText" class="dx-warning" role="note" data-testid="nfse-mei">{{ meiText }}</p>
 

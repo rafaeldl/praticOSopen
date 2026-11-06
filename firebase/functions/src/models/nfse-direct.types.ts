@@ -166,6 +166,28 @@ export interface NfseDirectInvoiceFields {
   refusal?: { code: string | null; group: 'customerData' | 'emitterSetup' | 'certificate' | 'other'; message: Record<'pt' | 'en' | 'es', string>; govText: string | null } | null;
   /** Last send without a clear answer (the reconcile waits 3 minutes from it). */
   lastAttemptAt?: string | null;
+  /** Last e-mail of the nota to the customer (issue #611). */
+  emailDelivery?: NfseEmailDelivery | null;
+}
+
+/** Which e-mail: the issued nota or the notice that it was canceled. */
+export type NfseEmailKind = 'issued' | 'canceled';
+
+/**
+ * Result of the last e-mail to the customer, saved on the invoice:
+ * `sent` (to, at), `failed` (errorCode) or `skipped` (reason: the customer
+ * has no e-mail, or the company turned the automatic send off).
+ */
+export interface NfseEmailDelivery {
+  status: 'sent' | 'failed' | 'skipped';
+  kind: NfseEmailKind;
+  to: string | null;
+  at: string;
+  /** "Enviar de novo" (not the automatic send). */
+  manual: boolean;
+  reason?: 'noEmail' | 'turnedOff';
+  errorCode?: string;
+  providerId?: string | null;
 }
 
 /** Fields of companies/{cid}/settings/nfse added by the direct engine. */
@@ -173,6 +195,8 @@ export interface NfseDirectSettingsFields {
   provider?: NfseProvider;
   defaultEmitterId?: string | null;
   autoIssue?: NfseDirectAutoIssue;
+  /** false: the nota does not go to the customer's e-mail on its own (issue #611). Absent = true. */
+  emailToCustomer?: boolean;
 }
 
 /** Fields of companies/{cid}/customers/{id} for the nota (written by the app and by the import). */

@@ -6579,6 +6579,24 @@ rows:
   web_exception: null
   permission: chargeOrder
   note: "Prefeitura que não deixa cancelar por API. Web: CANCEL_NOT_SUPPORTED abre Cancele no site da prefeitura e Já cancelei na prefeitura manda onlyOnAsaas."
+- id: nfse.invoice.email
+  screen: lib/screens/nfse/nfse_invoice_screen.dart
+  route: null
+  action: "Ver para onde foi o e-mail da nota e enviar de novo"
+  kind: action
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/invoices", "api:POST /v1/app/nfse/direct/invoices/{id}/email"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: chargeOrder
+  note: "Só nota direta com XML (emitida, cancelamento negado ou cancelada). Linha E-mail ao cliente: Enviada para fulano em dd/mm, aviso de cancelamento enviado, Não deu para mandar (falha fica na nota, nunca derruba a emissão) ou por que não foi (sem e-mail, envio automático desligado). Enviar de novo manda agora, mesmo com o envio automático desligado. Web: InvoiceEmailFact.vue no painel da nota (issue #611)."
 - id: nfse.setup.view
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -12075,6 +12093,24 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Tela de escolher (pickOne). Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.email-to-customer
+  screen: lib/screens/nfse/direct/nfse_direct_setup_screen.dart
+  route: null
+  action: "Ligar ou desligar o envio da nota por e-mail ao cliente"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["settings/nfse", "api:PUT /v1/app/nfse/setup/settings"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "settings/nfse.emailToCustomer (ligado por padrão). Desligado, a nota não vai sozinha ao emitir nem ao cancelar e a folha de emitir avisa; quem manda pelo WhatsApp desliga. Web: caixa embaixo de Emitir sozinha (issue #611)."
 - id: nfse.direct.add-certificate
   screen: lib/screens/nfse/direct/certificate_upload_sheet.dart
   route: null

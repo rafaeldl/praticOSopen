@@ -6,8 +6,9 @@ import { t, type MessageKey } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { firestoreLite, storageClient } from '@/lib/firebase'
 import { nfseApi, session } from '@/lib/session'
+import { formatDate } from '@/lib/format'
 import { isValidTaxId, normalizeTaxId } from '@/lib/tax-id'
-import { refusalMessage, refusalOf, type DirectRefusal } from './model'
+import { emailDeliveryOf, refusalMessage, refusalOf, type DirectRefusal, type EmailDelivery } from './model'
 
 export type EmitterProblem = 'certificate' | 'certificateExpired' | 'notEnabledInCity' | 'city' | 'service' | 'series' | 'regime'
 
@@ -58,6 +59,8 @@ export interface DirectPreview {
   missing: RecipientField[]
   meiWarning: 'none' | 'near' | 'over'
   invoicedOrders: Record<string, string>
+  /** settings/nfse.emailToCustomer: the nota goes to the customer's e-mail on its own (issue #611). */
+  emailToCustomer?: boolean
 }
 
 export interface DirectRecipientInput {
@@ -99,6 +102,27 @@ export const cancelDirect = (id: string, reason: CancelReason) =>
   nfseApi<{ status: string }>(path(id, 'cancel'), { method: 'POST', body: { reason } })
 
 export const reconcileDirect = (id: string) => nfseApi<{ status: string }>(path(id, 'reconcile'), { method: 'POST', body: {} })
+
+/** "Enviar de novo": e-mails the nota (or the cancellation notice) to the customer now. */
+export const resendDirectEmail = async (id: string) =>
+  emailDeliveryOf((await nfseApi<{ emailDelivery: unknown }>(path(id, 'email'), { method: 'POST', body: {} })).emailDelivery)
+
+/** Under the sheet: whether the nota goes by e-mail. Null when the sheet asks for the e-mail (the field says it). */
+export function emailLine(preview: DirectPreview, asking: readonly RecipientField[]): string | null {
+  if (preview.emailToCustomer === false) return t('nfseDirectIssueEmailOff')
+  if (asking.includes('email') || !preview.recipient.email) return null
+  return t('nfseDirectIssueEmailGoesTo', { email: preview.recipient.email })
+}
+
+/** "Enviada para fulano@… em 05/11/2026", or why it did not go (same words as the app). */
+export function emailDeliveryText(delivery: EmailDelivery | null, country?: string | null): string {
+  if (!delivery) return t('nfseEmailNotSentYet')
+  const to = delivery.to ?? ''
+  const date = delivery.at === null ? '' : formatDate(delivery.at, country)
+  if (delivery.status === 'sent') return t(delivery.canceled ? 'nfseEmailCancelSentTo' : 'nfseEmailSentTo', { email: to, date })
+  if (delivery.status === 'failed') return t('nfseEmailFailedTo', { email: to, date })
+  return t(delivery.reason === 'turnedOff' ? 'nfseEmailSkippedTurnedOff' : 'nfseEmailSkippedNoEmail')
+}
 
 /** Makes the PDF (DANFSe) when needed and returns its Storage path. */
 export const directPdfPath = async (id: string) => (await nfseApi<{ pdfPath: string }>(path(id, 'pdf'), { method: 'POST', body: {} })).pdfPath

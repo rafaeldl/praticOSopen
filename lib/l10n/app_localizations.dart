@@ -12084,6 +12084,102 @@ abstract class AppLocalizations {
   /// **'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.'**
   String get nfseDirectManagerCanIssueHint;
 
+  /// No description provided for @nfseEmailRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail ao cliente'**
+  String get nfseEmailRow;
+
+  /// No description provided for @nfseEmailSentTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviada para {email} em {date}'**
+  String nfseEmailSentTo(String email, String date);
+
+  /// No description provided for @nfseEmailCancelSentTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso de cancelamento enviado para {email} em {date}'**
+  String nfseEmailCancelSentTo(String email, String date);
+
+  /// No description provided for @nfseEmailFailedTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mandar para {email} em {date}'**
+  String nfseEmailFailedTo(String email, String date);
+
+  /// No description provided for @nfseEmailSkippedNoEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi: o cliente não tem e-mail no cadastro'**
+  String get nfseEmailSkippedNoEmail;
+
+  /// No description provided for @nfseEmailSkippedTurnedOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi: o envio automático está desligado'**
+  String get nfseEmailSkippedTurnedOff;
+
+  /// No description provided for @nfseEmailNotSentYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não foi por e-mail'**
+  String get nfseEmailNotSentYet;
+
+  /// No description provided for @nfseEmailSendAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar de novo'**
+  String get nfseEmailSendAgain;
+
+  /// No description provided for @nfseEmailSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get nfseEmailSend;
+
+  /// No description provided for @nfseEmailSentToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota enviada para {email}'**
+  String nfseEmailSentToast(String email);
+
+  /// No description provided for @nfseEmailFailedToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mandar o e-mail. Tente de novo daqui a pouco.'**
+  String get nfseEmailFailedToast;
+
+  /// No description provided for @nfseEmailNoAddressToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente não tem e-mail. Coloque o e-mail no cadastro dele e envie de novo.'**
+  String get nfseEmailNoAddressToast;
+
+  /// No description provided for @nfseDirectEmailToCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar a nota por e-mail ao cliente'**
+  String get nfseDirectEmailToCustomer;
+
+  /// No description provided for @nfseDirectEmailToCustomerHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai sozinha ao emitir e ao cancelar, com o PDF e o XML. Desligue se você manda pelo WhatsApp.'**
+  String get nfseDirectEmailToCustomerHint;
+
+  /// No description provided for @nfseDirectIssueEmailGoesTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota vai por e-mail para {email}.'**
+  String nfseDirectIssueEmailGoesTo(String email);
+
+  /// No description provided for @nfseDirectIssueEmailOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota não vai por e-mail: o envio automático está desligado.'**
+  String get nfseDirectIssueEmailOff;
+
   /// Reading of a device at this visit (odometer, hour meter), label from the segment
   ///
   /// In pt, this message translates to:

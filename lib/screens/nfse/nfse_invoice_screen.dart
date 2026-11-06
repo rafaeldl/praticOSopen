@@ -211,6 +211,9 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
   StreamSubscription<NfseInvoice?>? _subscription;
   bool _busy = false;
 
+  /// Result of "Enviar de novo" until the live nota brings it.
+  NfseEmailDelivery? _resent;
+
   AsaasApiService get _service => widget.service ?? AsaasApiService.instance;
 
   NfseDirectApiService get _direct =>
@@ -238,7 +241,12 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
             ? null
             : NfseInvoiceRepository().watch(companyId, widget.invoice.id));
     _subscription = stream?.listen((invoice) {
-      if (invoice != null && mounted) setState(() => _invoice = invoice);
+      if (invoice != null && mounted) {
+        setState(() {
+          _invoice = invoice;
+          _resent = null;
+        });
+      }
     }, onError: (Object _) {});
   }
 
@@ -368,6 +376,69 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       }
     }
     if (mounted) setState(() => _busy = false);
+  }
+
+  /// A direct nota with a PDF can go to the customer's e-mail (issue #611).
+  bool get _canEmail {
+    final status = _invoice.status;
+    return _invoice.isDirect &&
+        _invoice.xmlPath != null &&
+        (status == NfseStatus.authorized ||
+            status == NfseStatus.cancellationDenied ||
+            status == NfseStatus.canceled);
+  }
+
+  /// "Enviada para fulano@… em 05/11/2026", or why it did not go.
+  String _emailText(AppLocalizations l10n, NfseEmailDelivery? delivery) {
+    if (delivery == null) return l10n.nfseEmailNotSentYet;
+    final to = delivery.to ?? '';
+    final date = delivery.at == null
+        ? ''
+        : _format.formatDate(delivery.at!.toLocal());
+    if (delivery.sent) {
+      return delivery.canceled
+          ? l10n.nfseEmailCancelSentTo(to, date)
+          : l10n.nfseEmailSentTo(to, date);
+    }
+    if (delivery.failed) return l10n.nfseEmailFailedTo(to, date);
+    return delivery.reason == 'turnedOff'
+        ? l10n.nfseEmailSkippedTurnedOff
+        : l10n.nfseEmailSkippedNoEmail;
+  }
+
+  /// "Enviar de novo": the nota (or the cancellation notice) goes now.
+  Future<void> _resendEmail() async {
+    if (_busy) return;
+    final l10n = context.l10n;
+    setState(() => _busy = true);
+    try {
+      final delivery = await _direct.resendInvoiceEmail(_invoice.id);
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _resent = delivery;
+      });
+      final sent = delivery?.sent == true;
+      showAppToast(
+        context,
+        sent
+            ? l10n.nfseEmailSentToast(delivery!.to ?? '')
+            : delivery?.reason == 'noEmail'
+            ? l10n.nfseEmailNoAddressToast
+            : l10n.nfseEmailFailedToast,
+        icon: sent
+            ? CupertinoIcons.checkmark_circle
+            : CupertinoIcons.exclamationmark_circle,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      showAppToast(
+        context,
+        nfseDirectErrorText(l10n, e),
+        icon: CupertinoIcons.exclamationmark_circle,
+      );
+    }
   }
 
   Widget? _floatingButton() {
@@ -678,6 +749,19 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               AppListRow(
                 title: l10n.nfseDirectCancelReasonRow,
                 trailing: nfseCancelReasonText(l10n, invoice.cancelReason!),
+              ),
+            if (_canEmail)
+              AppListRow(
+                key: const Key('nfseInvoiceEmail'),
+                title: l10n.nfseEmailRow,
+                subtitle: _emailText(l10n, _resent ?? invoice.emailDelivery),
+                trailing: (_resent ?? invoice.emailDelivery) == null
+                    ? l10n.nfseEmailSend
+                    : l10n.nfseEmailSendAgain,
+                trailingStyle: AppTypography.body.copyWith(
+                  color: AppColors.accentText.resolveFrom(context),
+                ),
+                onTap: _busy ? null : _resendEmail,
               ),
             if (invoice.accessKey != null)
               AppListRow(

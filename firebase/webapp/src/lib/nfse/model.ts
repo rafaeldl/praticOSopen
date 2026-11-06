@@ -46,6 +46,31 @@ export interface NfseInvoice {
   cancelReason: string | null
   /** The government's refusal in plain words (direct only). */
   refusal: DirectRefusal | null
+  /** Last e-mail of the nota to the customer (direct only, issue #611). */
+  emailDelivery: EmailDelivery | null
+}
+
+/** `emailDelivery` of a direct nota: sent, failed or skipped (no e-mail, or the automatic send is off). */
+export interface EmailDelivery {
+  status: 'sent' | 'failed' | 'skipped'
+  canceled: boolean
+  to: string | null
+  at: number | null
+  reason: 'noEmail' | 'turnedOff' | null
+}
+
+export function emailDeliveryOf(value: unknown): EmailDelivery | null {
+  if (!value || typeof value !== 'object') return null
+  const d = value as Record<string, unknown>
+  const status = (['sent', 'failed', 'skipped'] as const).find((s) => s === d.status)
+  if (!status) return null
+  return {
+    status,
+    canceled: d.kind === 'canceled',
+    to: str(d.to),
+    at: millis(d.at),
+    reason: d.reason === 'noEmail' || d.reason === 'turnedOff' ? d.reason : null,
+  }
 }
 
 export type RefusalGroup = 'customerData' | 'emitterSetup' | 'certificate' | 'other'
@@ -142,6 +167,7 @@ export function invoiceOf(id: string, data: Record<string, unknown>): NfseInvoic
     pdfPath: str(data.pdfPath),
     cancelReason: str(data.cancelReason),
     refusal: refusalOf(data.refusal),
+    emailDelivery: emailDeliveryOf(data.emailDelivery),
   }
 }
 

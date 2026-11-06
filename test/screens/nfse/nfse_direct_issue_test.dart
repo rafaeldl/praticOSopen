@@ -89,6 +89,7 @@ Map<String, dynamic> _preview({
   Map<String, dynamic>? recipient,
   List<String> missing = const [],
   String meiWarning = 'none',
+  bool emailToCustomer = true,
 }) {
   final marked =
       emitter ?? _emitterJson('e1', 'OFICINA EXEMPLO LTDA', isDefault: true);
@@ -124,6 +125,7 @@ Map<String, dynamic> _preview({
     'missing': missing,
     'meiWarning': meiWarning,
     'invoicedOrders': <String, String>{},
+    'emailToCustomer': emailToCustomer,
   };
 }
 
@@ -208,6 +210,15 @@ Future<List<NfseInvoice?>> _openSheet(
   return results;
 }
 
+Future<void> _scrollToEmailLine(WidgetTester tester) async {
+  await tester.scrollUntilVisible(
+    find.byKey(const Key('nfseDirectIssueEmailLine')),
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pumpAndSettle();
+}
+
 Future<void> _save(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('new_order_save')));
   await tester.pumpAndSettle();
@@ -284,6 +295,32 @@ void main() {
       expect(issued.containsKey('recipient'), isFalse);
       expect(results.single?.status, NfseStatus.authorized);
       expect(results.single?.number, '29');
+    });
+
+    testWidgets('says whether the nota goes by e-mail (issue #611)', (
+      tester,
+    ) async {
+      final server = _Server((path, body) => _preview());
+      await _openSheet(tester, server);
+      await _scrollToEmailLine(tester);
+      expect(
+        find.text('A nota vai por e-mail para nota@example.com.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('automatic e-mail off: the sheet says it does not go', (
+      tester,
+    ) async {
+      final server = _Server((path, body) => _preview(emailToCustomer: false));
+      await _openSheet(tester, server);
+      await _scrollToEmailLine(tester);
+      expect(
+        find.text(
+          'A nota não vai por e-mail: o envio automático está desligado.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('edited text goes only in this nota', (tester) async {
@@ -760,6 +797,128 @@ void main() {
       await tester.pumpAndSettle();
       expect(server.calls.single.$1, '/invoices/inv1/reconcile');
       expect(find.text('Emitida · nº 30'), findsWidgets);
+    });
+
+    const issued = {
+      'number': '29',
+      'xmlPath': 'tenants/c1/invoices/inv1/nfse.xml',
+    };
+
+    testWidgets('e-mail: "Enviada para fulano em dd/mm" (issue #611)', (
+      tester,
+    ) async {
+      await pumpInvoice(
+        tester,
+        'authorized',
+        extra: {
+          ...issued,
+          'emailDelivery': {
+            'status': 'sent',
+            'kind': 'issued',
+            'to': 'nota@example.com',
+            'at': '2026-11-05T13:00:00.000Z',
+            'manual': false,
+          },
+        },
+      );
+      expect(find.text('E-mail ao cliente'), findsOneWidget);
+      expect(
+        find.text('Enviada para nota@example.com em 05/11/2026'),
+        findsOneWidget,
+      );
+      expect(find.text('Enviar de novo'), findsOneWidget);
+    });
+
+    testWidgets('e-mail failed: says so, "Enviar de novo" sends it now', (
+      tester,
+    ) async {
+      final (server, _) = await pumpInvoice(
+        tester,
+        'authorized',
+        extra: {
+          ...issued,
+          'emailDelivery': {
+            'status': 'failed',
+            'kind': 'issued',
+            'to': 'nota@example.com',
+            'at': '2026-11-05T13:00:00.000Z',
+            'errorCode': 'EMAIL_UNREACHABLE',
+          },
+        },
+        handler: (path, body) => {
+          'emailDelivery': {
+            'status': 'sent',
+            'kind': 'issued',
+            'to': 'nota@example.com',
+            'at': '2026-11-05T14:00:00.000Z',
+            'manual': true,
+          },
+        },
+      );
+      expect(
+        find.text('Não deu para mandar para nota@example.com em 05/11/2026'),
+        findsOneWidget,
+      );
+      await tester.ensureVisible(find.byKey(const Key('nfseInvoiceEmail')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('nfseInvoiceEmail')));
+      await tester.pumpAndSettle();
+      expect(server.calls.single.$1, '/invoices/inv1/email');
+      expect(find.text('Nota enviada para nota@example.com'), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+    });
+
+    testWidgets('e-mail skipped: says why', (tester) async {
+      await pumpInvoice(
+        tester,
+        'authorized',
+        extra: {
+          ...issued,
+          'emailDelivery': {
+            'status': 'skipped',
+            'kind': 'issued',
+            'at': '2026-11-05T13:00:00.000Z',
+            'reason': 'noEmail',
+          },
+        },
+      );
+      expect(
+        find.text('Não foi: o cliente não tem e-mail no cadastro'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('never sent (imported nota): "Enviar"', (tester) async {
+      await pumpInvoice(tester, 'authorized', extra: issued);
+      expect(find.text('Ainda não foi por e-mail'), findsOneWidget);
+      expect(find.text('Enviar'), findsOneWidget);
+    });
+
+    testWidgets('canceled: the cancellation notice', (tester) async {
+      await pumpInvoice(
+        tester,
+        'canceled',
+        extra: {
+          ...issued,
+          'emailDelivery': {
+            'status': 'sent',
+            'kind': 'canceled',
+            'to': 'nota@example.com',
+            'at': '2026-11-06T13:00:00.000Z',
+          },
+        },
+      );
+      expect(
+        find.text(
+          'Aviso de cancelamento enviado para nota@example.com em 06/11/2026',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no e-mail row before the nota is issued', (tester) async {
+      await pumpInvoice(tester, 'creating');
+      expect(find.byKey(const Key('nfseInvoiceEmail')), findsNothing);
     });
   });
 
