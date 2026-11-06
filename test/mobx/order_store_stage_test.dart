@@ -113,4 +113,15 @@ void main() {
     expect(store.stage, isNull);
     expect(store.order!.stage, isNull);
   });
+
+  test('a refused status brings the stage back', () {
+    store.order = order('progress', 'polish');
+    store.stage = store.order!.stage;
+
+    store.setStatus('done');
+    store.restoreStatus('progress');
+
+    expect(store.stage?.id, 'polish');
+    expect(store.order!.stage?.id, 'polish');
+  });
 }

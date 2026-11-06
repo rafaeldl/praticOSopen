@@ -422,6 +422,15 @@ abstract class _OrderStore with Store {
     if (server == null || local == null || base == null || deferSave) return;
     if (server.id == null || server.id != local.id) return;
     if (_savedSnapshotId != null && _savedSnapshotId != local.id) return;
+    // Stage moved by the web board or another phone; not while this one is
+    // waiting for its own move.
+    if (_stageMoves == 0 &&
+        local.status == 'progress' &&
+        server.status == 'progress' &&
+        server.stage?.id != local.stage?.id) {
+      local.stage = server.stage;
+      stage = server.stage;
+    }
     final remote = OrderFieldDiff.snapshotOf(server);
     final current = OrderFieldDiff.snapshotOf(local);
     var adopted = false;
@@ -914,6 +923,7 @@ abstract class _OrderStore with Store {
     if (status == null) return null;
     final previousPayment = order!.payment;
     _holdBeforeStatus = order!.onHold;
+    _stageBeforeStatus = order!.stage;
     order!.status = status;
     this.status = status;
     updatePayment();
@@ -953,6 +963,9 @@ abstract class _OrderStore with Store {
   /// "Parada" mark before the last [setStatus], for [restoreStatus].
   OrderHold? _holdBeforeStatus;
 
+  /// Stage before the last [setStatus], for [restoreStatus].
+  OrderStage? _stageBeforeStatus;
+
   /// Puts the status back on screen after the server refused [setStatus]: the
   /// server never took the new one. The "parada" mark [setStatus] took away
   /// comes back too, and is written again, because that separate write may
@@ -965,6 +978,11 @@ abstract class _OrderStore with Store {
     final mark = _holdBeforeStatus;
     if (mark != null && order?.onHold == null) {
       _saveHold(mark, undoOnFailure: false);
+    }
+    // The server kept the stage (the status never left progress).
+    if (status == 'progress' && order != null && order!.stage == null) {
+      order!.stage = _stageBeforeStatus;
+      stage = _stageBeforeStatus;
     }
   }
 
@@ -1057,6 +1075,7 @@ abstract class _OrderStore with Store {
       ..since = holdClock().toUtc();
     target.stage = next;
     stage = next;
+    _stageMoves++;
     try {
       await writeStage(company, orderId, stageId);
     } catch (e) {
@@ -1068,8 +1087,13 @@ abstract class _OrderStore with Store {
         });
       }
       onFailed?.call();
+    } finally {
+      _stageMoves--;
     }
   }
+
+  /// Stage moves still waiting for the server.
+  int _stageMoves = 0;
 
   String dateToString(DateTime? date) {
     if (date == null) return 'Não definida';

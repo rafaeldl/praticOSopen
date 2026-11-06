@@ -3580,7 +3580,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             _permissions.canChangeHold(order)) {
           return (
             l10n.orderStageMoveTo(next.name),
-            afterCooldown(() => _moveToStage(next.id)),
+            () {
+              // The label changes at once: a second tap must not land on the
+              // next stage or on "Marcar como pronta".
+              if (_statusCooldown?.isActive ?? false) return;
+              _statusCooldown = Timer(kStatusTapCooldown, () {});
+              _moveToStage(next.id);
+            },
           );
         }
         return to(l10n.orderActionMarkReady, 'done');

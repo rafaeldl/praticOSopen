@@ -63,10 +63,7 @@ void main() {
   /// When true, the money transaction can't reach the server (offline).
   var offline = false;
 
-  Order loaded() => Order.fromJson({
-    ...serverDoc,
-    'id': 'o1',
-  });
+  Order loaded() => Order.fromJson({...serverDoc, 'id': 'o1'});
 
   setUp(() {
     Global.companyAggr = CompanyAggr()..id = 'c1';
@@ -165,7 +162,10 @@ void main() {
   test('mergeMoney recomputes the total from the merged items', () {
     final merged = OrderFieldDiff.mergeMoney(
       {
-        'services': [serviceJson('s1', 'A', 100.0), serviceJson('s2', 'B', 40.0)],
+        'services': [
+          serviceJson('s1', 'A', 100.0),
+          serviceJson('s2', 'B', 40.0),
+        ],
         'products': <Map<String, dynamic>>[],
         'discount': 5.0,
         'total': 999.0,
@@ -240,31 +240,33 @@ void main() {
     expect(writes.single, {'status': 'progress'});
   });
 
-  test('items added by the web show up and are kept with the app item',
-      () async {
-    (serverDoc['services'] as List).add(serviceJson('s2', 'Filtro', 40.0));
-    serverDoc['total'] = 140.0;
-    store.applyServerOrder(loaded());
+  test(
+    'items added by the web show up and are kept with the app item',
+    () async {
+      (serverDoc['services'] as List).add(serviceJson('s2', 'Filtro', 40.0));
+      serverDoc['total'] = 140.0;
+      store.applyServerOrder(loaded());
 
-    expect(store.services!.map((s) => s.service?.id), ['s1', 's2']);
-    expect(store.total, 140.0);
+      expect(store.services!.map((s) => s.service?.id), ['s1', 's2']);
+      expect(store.total, 140.0);
 
-    store.order!.services!.add(
-      OrderService()
-        ..service = (ServiceAggr()
-          ..id = 's3'
-          ..name = 'Alinhamento')
-        ..value = 60.0,
-    );
-    store.updateTotal();
-    await store.createItem();
+      store.order!.services!.add(
+        OrderService()
+          ..service = (ServiceAggr()
+            ..id = 's3'
+            ..name = 'Alinhamento')
+          ..value = 60.0,
+      );
+      store.updateTotal();
+      await store.createItem();
 
-    final ids = (serverDoc['services'] as List).map(
-      (s) => (s as Map)['service']['id'],
-    );
-    expect(ids, ['s1', 's2', 's3']);
-    expect(serverDoc['total'], 200.0);
-  });
+      final ids = (serverDoc['services'] as List).map(
+        (s) => (s as Map)['service']['id'],
+      );
+      expect(ids, ['s1', 's2', 's3']);
+      expect(serverDoc['total'], 200.0);
+    },
+  );
 
   test('a list the app changed is not replaced by the server copy', () {
     store.order!.services!.clear();
@@ -282,5 +284,33 @@ void main() {
     store.createItem(onError: (e) => reported = e);
     await pumpEventQueue();
     expect(reported, isA<Exception>());
+  });
+
+  group('work stage from the server', () {
+    test('a move made elsewhere shows up', () {
+      store.order!.status = 'progress';
+      serverDoc['status'] = 'progress';
+      serverDoc['stage'] = {'id': 'polish'};
+
+      store.applyServerOrder(loaded());
+
+      expect(store.stage?.id, 'polish');
+      expect(store.order!.stage?.id, 'polish');
+    });
+
+    test('not while this phone waits for its own move', () async {
+      store.order!.status = 'progress';
+      final pending = Completer<void>();
+      store.writeStage = (_, _, _) => pending.future;
+      final move = store.moveToStage('polish');
+      serverDoc['status'] = 'progress';
+      serverDoc['stage'] = {'id': 'paint'};
+
+      store.applyServerOrder(loaded());
+      expect(store.stage?.id, 'polish');
+
+      pending.complete();
+      await move;
+    });
   });
 }
