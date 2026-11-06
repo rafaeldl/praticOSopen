@@ -146,6 +146,18 @@ abstract class OnboardingSetup {
   Future<void> finish();
 }
 
+/// `segments/global` holds labels for every segment; it is not a segment to
+/// pick, even with `active: true` (as `seed_segments.js` writes it).
+const globalSegmentId = 'global';
+
+/// Segments a company can pick, from the active segment documents.
+List<OnboardingSegment> pickableSegments(
+  Iterable<MapEntry<String, Map<String, dynamic>>> docs,
+) => [
+  for (final doc in docs)
+    if (doc.key != globalSegmentId) OnboardingSegment.fromMap(doc.key, doc.value),
+];
+
 /// Active segments, ordered by name.
 Stream<List<OnboardingSegment>> firestoreOnboardingSegments() {
   return FirebaseFirestore.instance
@@ -153,10 +165,9 @@ Stream<List<OnboardingSegment>> firestoreOnboardingSegments() {
       .where('active', isEqualTo: true)
       .orderBy('name')
       .snapshots()
-      .map((snapshot) => [
-            for (final doc in snapshot.docs)
-              OnboardingSegment.fromMap(doc.id, doc.data()),
-          ]);
+      .map((snapshot) => pickableSegments(
+            snapshot.docs.map((doc) => MapEntry(doc.id, doc.data())),
+          ));
 }
 
 /// [OnboardingSetup] over Firestore, using the same writes as the previous

@@ -53,7 +53,8 @@ export function toSegment(id: string, data: Record<string, unknown>): Onboarding
 /** Only `active == true`, ordered by name (firestoreOnboardingSegments). */
 export function activeSegments(docs: { id: string; data: Record<string, unknown> }[]): OnboardingSegment[] {
   return docs
-    .filter((doc) => doc.data.active === true)
+    // segments/global holds labels for every segment: never one to pick
+    .filter((doc) => doc.data.active === true && doc.id !== 'global')
     .map((doc) => toSegment(doc.id, doc.data))
     .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
 }
