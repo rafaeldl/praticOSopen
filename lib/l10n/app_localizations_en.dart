@@ -7635,4 +7635,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checklistDoneAskReopenBody =>
       'To change an answer, ask whoever manages the team to reopen the checklist.';
+
+  @override
+  String get statementSend => 'Send statement';
+
+  @override
+  String statementSendTitle(String name) {
+    return 'Send $name what is still owed';
+  }
+
+  @override
+  String get statementSendMessage =>
+      'A message goes with the checked orders and how much is owed on each. Send the PDF too?';
+
+  @override
+  String get statementWithPdf => 'Send with PDF';
+
+  @override
+  String get statementTextOnly => 'Text only';
+
+  @override
+  String statementTextHello(String name, String company) {
+    return 'Hi $name! These are your open orders with $company:';
+  }
+
+  @override
+  String statementTextHelloNoCompany(String name) {
+    return 'Hi $name! These are your open orders:';
+  }
+
+  @override
+  String statementOrderNumber(String number) {
+    return 'Order $number';
+  }
+
+  @override
+  String statementOpenLine(String amount) {
+    return 'Owed $amount';
+  }
+
+  @override
+  String get statementInProgress => 'in progress';
+
+  @override
+  String statementTotalOpen(String amount) {
+    return 'Total owed: $amount';
+  }
+
+  @override
+  String get statementPdfTitle => 'Statement';
+
+  @override
+  String statementPdfSentence(String name, String date) {
+    return 'Open orders of $name on $date.';
+  }
+
+  @override
+  String get statementItemColumn => 'Service or part';
+
+  @override
+  String statementOrderTotals(String total, String paid, String open) {
+    return 'Total $total  ·  Paid $paid  ·  Owed $open';
+  }
+
+  @override
+  String get statementPdfTotalOpen => 'Total owed';
+
+  @override
+  String statementFileName(String date) {
+    return 'Statement-$date';
+  }
 }

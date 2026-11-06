@@ -22,6 +22,7 @@ import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChargeDialog from './ChargeDialog.vue'
+import StatementDialog from './StatementDialog.vue'
 import '@/styles/receive.css'
 
 // startCharge: opened by the Financeiro's "Próxima cobrança" (pay.customer.start-charge): the charge
@@ -38,7 +39,7 @@ const method = ref('')
 const today = localDay(new Date())
 const day = ref(today)
 const saving = ref(false)
-const dialog = ref<null | 'confirm' | 'charge' | 'cancelCharge' | 'replace'>(null)
+const dialog = ref<null | 'confirm' | 'charge' | 'cancelCharge' | 'replace' | 'statement'>(null)
 /** Open links of one order each (pay.customer.replace-single): the row says so and a new charge asks first. */
 const singleLinks = shallowRef(new Map<string, Charge>())
 let startedCharge = false
@@ -364,6 +365,7 @@ const preview = computed(() => {
         </div>
         <div class="layer-foot">
           <button v-if="canCharge" type="button" class="btn" data-testid="customer-charge-new" @click="newCharge">{{ t('chargeSend') }}</button>
+          <button v-if="orders.length" type="button" class="btn btn--ghost" :disabled="!chosen.length || saving" data-testid="customer-statement" @click="dialog = 'statement'">{{ t('statementSend') }}</button>
           <span class="spacer"></span>
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
           <button v-if="orders.length" type="submit" class="btn" :class="{ 'btn--primary': !charge }" :disabled="!!problem || saving" data-testid="receive-customer-save">{{ t('receiveMarkReceived') }}</button>
@@ -397,6 +399,13 @@ const preview = computed(() => {
     :confirm="t('chargeReplace')"
     :keep="t('cancel')"
     @confirm="replaceConfirmed"
+    @close="dialog = null"
+  />
+  <StatementDialog
+    v-else-if="dialog === 'statement'"
+    :customer-id="customerId"
+    :customer-name="customerName"
+    :orders="chosen"
     @close="dialog = null"
   />
   <ChargeDialog

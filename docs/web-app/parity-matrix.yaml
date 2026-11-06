@@ -5548,7 +5548,42 @@ rows:
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "No …, que só aparece com cobrança aberta e some durante uma operação. Alerta Cancelar o link de R$ X? com ação padrão Manter link de R$ X. Sucesso e erro aparecem em aviso (toast)."
+  note: "No … (o item só aparece com cobrança aberta; o … some durante uma operação). Alerta Cancelar o link de R$ X? com ação padrão Manter link de R$ X. Sucesso e erro aparecem em aviso (toast)."
+- id: pay.customer.statement
+  screen: lib/screens/payments/receive_customer_screen.dart
+  route: null
+  action: "Mandar extrato (OS não pagas, texto e PDF opcional)"
+  kind: action
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: ["useFinancial"]
+  hardware: [share_sheet]
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/tests/statement.test.ts
+  web_exception: null
+  permission: null
+  note: "No … de Receber de {cliente}, com as OS marcadas. App: compartilhar do sistema com texto e PDF. Web: baixa o PDF e abre o WhatsApp do cliente com a mensagem (sem número, copia)."
+- id: pay.customer.statement.share
+  screen: lib/screens/payments/statement_share.dart
+  route: null
+  action: "Perguntar se vai o PDF, montar o extrato e compartilhar"
+  kind: flow
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, error]
+  feature_flags: ["useFinancial"]
+  hardware: [share_sheet, pdf_generation]
+  data: ["companies/{id}", "companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/tests/statement.test.ts
+  web_exception: null
+  note: "App: folha de ações Mandar com PDF / Só o texto; spinner num alerta enquanto o PDF é feito; erro em alerta curto, como o recibo. Web: StatementDialog com os mesmos dois botões."
 - id: pay.customer.open-order
   screen: lib/screens/payments/receive_customer_screen.dart
   route: "/order"

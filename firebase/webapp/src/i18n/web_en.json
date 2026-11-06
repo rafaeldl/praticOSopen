@@ -443,6 +443,7 @@
   "web.share.nfseText": "Here is the invoice {number}:",
   "web.share.nfseTextNoNumber": "Here is the invoice:",
   "web.share.pdfAttach": "PDF downloaded. Attach it in the WhatsApp chat.",
+  "web.statement.pdfAndCopied": "PDF downloaded and message copied. Paste the message and attach the PDF in the chat.",
   "web.share.download": "Download",
   "web.share.downloadFailed": "Could not download. Try again.",
   "web.customers.changedElsewhere": "Someone else changed this customer while you were editing. Showing the new version; nothing was written over it.",

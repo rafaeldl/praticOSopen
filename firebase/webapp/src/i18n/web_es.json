@@ -443,6 +443,7 @@
   "web.share.nfseText": "Te envío la factura {number}:",
   "web.share.nfseTextNoNumber": "Te envío la factura:",
   "web.share.pdfAttach": "PDF descargado. Adjúntalo en la conversación de WhatsApp.",
+  "web.statement.pdfAndCopied": "PDF descargado y mensaje copiado. Pega el mensaje y adjunta el PDF en la conversación.",
   "web.share.download": "Descargar",
   "web.share.downloadFailed": "No se pudo descargar. Inténtalo de nuevo.",
   "web.customers.changedElsewhere": "Otra persona cambió este cliente mientras usted editaba. Mostrando la versión nueva; no se grabó nada encima.",

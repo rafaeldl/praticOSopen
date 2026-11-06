@@ -18,6 +18,7 @@ import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_customer_charge_screen.dart';
+import 'package:praticos/screens/payments/statement_share.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart'
@@ -37,11 +38,13 @@ import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/customer_statement_pdf.dart';
 import 'package:praticos/services/pdf/receipt_pdf.dart'
     show orderShortDescription;
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:share_plus/share_plus.dart';
@@ -93,7 +96,12 @@ class ReceiveCustomerScreen extends StatefulWidget {
     this.reloadOrder,
     this.orderCharges,
     this.startCharge = false,
+    this.sendStatement,
   });
+
+  /// "Mandar extrato" (tests). Defaults to [sendCustomerStatement].
+  final Future<void> Function(BuildContext context, CustomerStatementData data)?
+  sendStatement;
 
   /// Open single-order links by order id (tests). Defaults to Firestore.
   final Stream<Map<String, OrderCharge>>? orderCharges;
@@ -486,32 +494,44 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     if (url != null) await _share(url);
   }
 
-  /// The "…" of the top bar, only with a charge open.
+  /// The "…" of the top bar: "Mandar extrato" and, with a charge open, copy
+  /// or cancel its link.
   Future<void> _showMenu() async {
     final l10n = context.l10n;
     final charge = _openCharge;
-    if (charge == null) return;
     final choice = await showPullDownMenu(
       context,
       groups: [
         PullDownGroup([
           PullDownItem(
-            value: 'copy',
-            label: l10n.chargeCopyLink,
-            icon: CupertinoIcons.doc_on_doc,
+            value: 'statement',
+            label: l10n.statementSend,
+            icon: CupertinoIcons.doc_text,
           ),
+          if (charge != null)
+            PullDownItem(
+              value: 'copy',
+              label: l10n.chargeCopyLink,
+              icon: CupertinoIcons.doc_on_doc,
+            ),
         ]),
-        PullDownGroup([
-          PullDownItem(
-            value: 'cancel',
-            label: l10n.chargeCancelLink,
-            icon: CupertinoIcons.xmark_circle,
-            destructive: true,
-          ),
-        ]),
+        if (charge != null)
+          PullDownGroup([
+            PullDownItem(
+              value: 'cancel',
+              label: l10n.chargeCancelLink,
+              icon: CupertinoIcons.xmark_circle,
+              destructive: true,
+            ),
+          ]),
       ],
     );
     if (!mounted) return;
+    if (choice == 'statement') {
+      await _sendStatement();
+      return;
+    }
+    if (charge == null) return;
     final url = charge.invoiceUrl;
     if (choice == 'copy' && url != null) {
       await Clipboard.setData(ClipboardData(text: url));
@@ -524,6 +544,29 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       }
     }
     if (choice == 'cancel') _confirmCancelCharge(charge);
+  }
+
+  /// What "Mandar extrato" sends: the orders checked, oldest first, with
+  /// what is owed on each.
+  CustomerStatementData _statementData() => CustomerStatementData(
+    customerName: _name,
+    companyName: Global.companyAggr?.name,
+    date: DateTime.now(),
+    orders: [
+      for (final order in _allOrders)
+        if (_checked.contains(order.id) &&
+            OrderPaymentMath.remainingBalance(order) > 0)
+          StatementOrder.fromOrder(order),
+    ],
+  );
+
+  Future<void> _sendStatement() async {
+    if (_active.isEmpty) {
+      showAppToast(context, context.l10n.receiveCustomerNoneChecked);
+      return;
+    }
+    final send = widget.sendStatement ?? sendCustomerStatement;
+    await send(context, _statementData());
   }
 
   void _confirmCancelCharge(CustomerCharge charge) {
@@ -781,7 +824,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       navigationBar: CupertinoNavigationBar(
         backgroundColor: AppNavBar.barBackground(context),
         border: null,
-        trailing: !_busy && charge != null
+        trailing: !_busy
             ? GlassBarButton(
                 key: const Key('receiveCustomerMenu'),
                 label: l10n.receiveMoreOptions,

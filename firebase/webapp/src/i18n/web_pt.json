@@ -443,6 +443,7 @@
   "web.share.nfseText": "Segue a nota fiscal {number}:",
   "web.share.nfseTextNoNumber": "Segue a nota fiscal:",
   "web.share.pdfAttach": "PDF baixado. Anexe na conversa do WhatsApp.",
+  "web.statement.pdfAndCopied": "PDF baixado e mensagem copiada. Cole a mensagem e anexe o PDF na conversa.",
   "web.share.download": "Baixar",
   "web.share.downloadFailed": "Não deu para baixar. Tente de novo.",
   "web.customers.changedElsewhere": "Outra pessoa mudou este cliente enquanto você editava. Mostrando a versão nova; nada foi gravado por cima.",

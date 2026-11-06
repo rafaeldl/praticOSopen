@@ -231,7 +231,14 @@ class ReceiptPdfService {
           pageFormat: PdfStyles.pageFormat,
           margin: PdfStyles.pageMargin,
         ),
-        header: (_) => _header(content, company, logo, base, bold),
+        header: (_) => pdfCompanyHeader(
+          title: content.title,
+          subtitle: content.number,
+          company: company,
+          logo: logo,
+          base: base,
+          bold: bold,
+        ),
         build: (_) => _body(content, base, bold),
       ),
     );
@@ -242,87 +249,6 @@ class ReceiptPdfService {
   Future<void> share(ReceiptPdfContent content, Company company) async {
     final bytes = await generate(content, company);
     await Printing.sharePdf(bytes: bytes, filename: '${content.fileName}.pdf');
-  }
-
-  pw.Widget _header(
-    ReceiptPdfContent content,
-    Company company,
-    pw.MemoryImage? logo,
-    pw.Font base,
-    pw.Font bold,
-  ) {
-    const soft = PdfColor.fromInt(0xBBFFFFFF);
-    pw.Widget info(String? text) => (text ?? '').isEmpty
-        ? pw.SizedBox()
-        : pw.Text(
-            pdfSafeText(text!),
-            style: pw.TextStyle(font: base, fontSize: 8, color: soft),
-          );
-    return pw.Container(
-      width: double.infinity,
-      decoration: const pw.BoxDecoration(
-        gradient: pw.LinearGradient(
-          colors: [PdfStyles.headerGradientStart, PdfStyles.headerGradientEnd],
-          begin: pw.Alignment.centerLeft,
-          end: pw.Alignment.centerRight,
-        ),
-      ),
-      padding: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          if (logo != null) ...[
-            pw.Container(
-              width: 40,
-              height: 40,
-              decoration: pw.BoxDecoration(
-                color: PdfColors.white,
-                borderRadius: pw.BorderRadius.circular(8),
-              ),
-              padding: const pw.EdgeInsets.all(4),
-              child: pw.Image(logo, fit: pw.BoxFit.contain),
-            ),
-            pw.SizedBox(width: 12),
-          ],
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  pdfSafeText(company.name ?? ''),
-                  style: pw.TextStyle(
-                    font: bold,
-                    fontSize: 10,
-                    color: PdfColors.white,
-                  ),
-                ),
-                pw.SizedBox(height: 2),
-                info(company.address),
-                info(company.phone),
-                info(company.email),
-              ],
-            ),
-          ),
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.end,
-            children: [
-              pw.Text(
-                pdfSafeText(content.title.toUpperCase()),
-                style: pw.TextStyle(
-                  font: bold,
-                  fontSize: 22,
-                  color: PdfColors.white,
-                ),
-              ),
-              pw.Text(
-                pdfSafeText(content.number),
-                style: pw.TextStyle(font: base, fontSize: 9, color: soft),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   List<pw.Widget> _body(ReceiptPdfContent content, pw.Font base, pw.Font bold) {
@@ -423,4 +349,88 @@ class ReceiptPdfService {
       ),
     ];
   }
+}
+
+/// Teal band on top of the recibo and the extrato: logo, company contacts,
+/// [title] in capitals and [subtitle] under it.
+pw.Widget pdfCompanyHeader({
+  required String title,
+  required String subtitle,
+  required Company company,
+  required pw.MemoryImage? logo,
+  required pw.Font base,
+  required pw.Font bold,
+}) {
+  const soft = PdfColor.fromInt(0xBBFFFFFF);
+  pw.Widget info(String? text) => (text ?? '').isEmpty
+      ? pw.SizedBox()
+      : pw.Text(
+          pdfSafeText(text!),
+          style: pw.TextStyle(font: base, fontSize: 8, color: soft),
+        );
+  return pw.Container(
+    width: double.infinity,
+    decoration: const pw.BoxDecoration(
+      gradient: pw.LinearGradient(
+        colors: [PdfStyles.headerGradientStart, PdfStyles.headerGradientEnd],
+        begin: pw.Alignment.centerLeft,
+        end: pw.Alignment.centerRight,
+      ),
+    ),
+    padding: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+    child: pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        if (logo != null) ...[
+          pw.Container(
+            width: 40,
+            height: 40,
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white,
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            padding: const pw.EdgeInsets.all(4),
+            child: pw.Image(logo, fit: pw.BoxFit.contain),
+          ),
+          pw.SizedBox(width: 12),
+        ],
+        pw.Expanded(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                pdfSafeText(company.name ?? ''),
+                style: pw.TextStyle(
+                  font: bold,
+                  fontSize: 10,
+                  color: PdfColors.white,
+                ),
+              ),
+              pw.SizedBox(height: 2),
+              info(company.address),
+              info(company.phone),
+              info(company.email),
+            ],
+          ),
+        ),
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Text(
+              pdfSafeText(title.toUpperCase()),
+              style: pw.TextStyle(
+                font: bold,
+                fontSize: 22,
+                color: PdfColors.white,
+              ),
+            ),
+            pw.Text(
+              pdfSafeText(subtitle),
+              style: pw.TextStyle(font: base, fontSize: 9, color: soft),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }

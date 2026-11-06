@@ -78,7 +78,8 @@
             "steps": [
               "Abra o cliente (em Clientes ou na lista da aba Financeiro) e toque em <strong>Receber</strong>.",
               "Marque as OS que ele está pagando e toque em <strong>Marcar como recebido</strong>.",
-              "Confira o valor e toque no <strong>✓</strong>. Se o valor não der para tudo, as OS mais antigas são pagas primeiro. Depois, dá para mandar o recibo para o cliente."
+              "Confira o valor e toque no <strong>✓</strong>. Se o valor não der para tudo, as OS mais antigas são pagas primeiro. Depois, dá para mandar o recibo para o cliente.",
+              "Para o cliente conferir o que falta pagar, toque em <strong>…</strong> › <strong>Mandar extrato</strong>. Vai uma mensagem com cada OS marcada (inclusive as em andamento) e quanto falta, e, se quiser, um PDF com os serviços e peças de cada OS."
             ]
           },
           {
@@ -361,7 +362,8 @@
             "steps": [
               "Open the customer (in Customers or in the Financial tab list) and tap <strong>Receive</strong>.",
               "Check the orders they are paying and tap <strong>Mark as received</strong>.",
-              "Check the amount and tap the <strong>✓</strong>. If the amount doesn't cover everything, the oldest orders are paid first. Then you can send the receipt to the customer."
+              "Check the amount and tap the <strong>✓</strong>. If the amount doesn't cover everything, the oldest orders are paid first. Then you can send the receipt to the customer.",
+              "For the customer to check what is still owed, tap <strong>…</strong> › <strong>Send statement</strong>. A message goes with each checked order (in progress ones too) and how much is owed, and, if you want, a PDF with the services and parts of each order."
             ]
           },
           {
@@ -644,7 +646,8 @@
             "steps": [
               "Abre el cliente (en Clientes o en la lista de la pestaña Financiero) y toca <strong>Cobrar</strong>.",
               "Marca las OS que está pagando y escribe cuánto recibiste.",
-              "Revisa el valor y toca el <strong>✓</strong>. Si el valor no alcanza para todo, se pagan primero las OS más antiguas. Después puedes enviar el recibo al cliente."
+              "Revisa el valor y toca el <strong>✓</strong>. Si el valor no alcanza para todo, se pagan primero las OS más antiguas. Después puedes enviar el recibo al cliente.",
+              "Para que el cliente revise lo que falta pagar, toca <strong>…</strong> › <strong>Enviar extracto</strong>. Se envía un mensaje con cada OS marcada (también las en curso) y cuánto falta y, si quieres, un PDF con los servicios y piezas de cada OS."
             ]
           },
           {

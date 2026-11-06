@@ -7656,4 +7656,74 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get checklistDoneAskReopenBody =>
       'Para cambiar una respuesta, pida a quien gestiona el equipo que reabra el checklist.';
+
+  @override
+  String get statementSend => 'Enviar extracto';
+
+  @override
+  String statementSendTitle(String name) {
+    return 'Enviar a $name lo que falta pagar';
+  }
+
+  @override
+  String get statementSendMessage =>
+      'Se envía un mensaje con las OS marcadas y cuánto falta en cada una. ¿Enviar también el PDF?';
+
+  @override
+  String get statementWithPdf => 'Enviar con PDF';
+
+  @override
+  String get statementTextOnly => 'Solo el texto';
+
+  @override
+  String statementTextHello(String name, String company) {
+    return '¡Hola, $name! Estas son las OS pendientes con $company:';
+  }
+
+  @override
+  String statementTextHelloNoCompany(String name) {
+    return '¡Hola, $name! Estas son las OS pendientes:';
+  }
+
+  @override
+  String statementOrderNumber(String number) {
+    return 'OS $number';
+  }
+
+  @override
+  String statementOpenLine(String amount) {
+    return 'Falta $amount';
+  }
+
+  @override
+  String get statementInProgress => 'en curso';
+
+  @override
+  String statementTotalOpen(String amount) {
+    return 'Total pendiente: $amount';
+  }
+
+  @override
+  String get statementPdfTitle => 'Extracto';
+
+  @override
+  String statementPdfSentence(String name, String date) {
+    return 'OS pendientes de $name al $date.';
+  }
+
+  @override
+  String get statementItemColumn => 'Servicio o pieza';
+
+  @override
+  String statementOrderTotals(String total, String paid, String open) {
+    return 'Total $total  ·  Pagado $paid  ·  Falta $open';
+  }
+
+  @override
+  String get statementPdfTotalOpen => 'Total pendiente';
+
+  @override
+  String statementFileName(String date) {
+    return 'Extracto-$date';
+  }
 }
