@@ -1110,7 +1110,6 @@
   "orderAllItems": "All",
   "orderItemKindService": "service",
   "orderItemKindProduct": "product",
-  "orderItemPartWord": "part",
   "orderItemQuantityValue": "{count} units",
   "@orderItemQuantityValue": {
     "placeholders": {

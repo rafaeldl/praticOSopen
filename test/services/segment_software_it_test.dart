@@ -115,10 +115,10 @@ void main() {
     final service = SegmentConfigService()..setL10n(l10n);
 
     // Segment without its own product name: the workshop word.
-    expect(provider.productWord(l10n.orderItemPartWord), 'peça');
+    expect(provider.productWord(l10n.orderItemKindPart), 'peça');
     expect(
       l10n.orderItemSearchPlaceholder(
-        provider.productWord(l10n.orderItemPartWord),
+        provider.productWord(l10n.orderItemKindPart),
       ),
       'Buscar serviço ou peça',
     );
@@ -130,7 +130,7 @@ void main() {
         'labels': {'pt-BR': 'Licença'},
       }),
     ]);
-    final word = provider.productWord(l10n.orderItemPartWord);
+    final word = provider.productWord(l10n.orderItemKindPart);
     expect(word, 'licença');
     expect(l10n.orderItemSearchPlaceholder(word), 'Buscar serviço ou licença');
     expect(l10n.orderAddItemRow(word), 'Adicionar serviço ou licença');

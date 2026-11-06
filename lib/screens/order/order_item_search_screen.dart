@@ -217,7 +217,7 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final product = context.read<SegmentConfigProvider>().productWord(
-      l10n.orderItemPartWord,
+      l10n.orderItemKindPart,
     );
     final entries = _loading ? const <_Entry>[] : _entries;
     return PickerScaffold<_Entry>(

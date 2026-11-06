@@ -529,7 +529,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
         </div>
         <div class="step">
           <QuickCreate v-if="quick?.kind === 'item'" id="no-quick-item" kind="item" :text="quick.text" @saved="onQuickSaved" @cancel="onQuickCancel" />
-          <Combobox v-else id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder', { product: productWord(t('orderItemPartWord')) })" :groups="itemGroups" :loading="loading" @pick="pickItem" />
+          <Combobox v-else id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder', { product: productWord(t('orderItemKindPart')) })" :groups="itemGroups" :loading="loading" @pick="pickItem" />
           <ul v-if="lines.length" class="drawer-items" :aria-label="t('orderItemsSection')">
             <li v-for="line in lines" :key="line.key">
               <span><span v-if="marked.has(line.key)" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>

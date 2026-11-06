@@ -51,7 +51,7 @@ const root = ref<HTMLElement | null>(null)
 const onPhone = useMask(toRef(form, 'phone'), () => fieldMasks(segmentField('customer.phone'), country.value))
 const onSerial = useMask(toRef(form, 'serial'), () => fieldMasks(segmentField('device.serial'), country.value), (text) => text.toUpperCase())
 
-const title = computed(() => (props.kind === 'customer' ? t('web.quick.newCustomer') : props.kind === 'device' ? t('web.quick.newDevice', { device: deviceLabel() }) : t('web.quick.newItem', { product: productWord(t('orderItemPartWord')) })))
+const title = computed(() => (props.kind === 'customer' ? t('web.quick.newCustomer') : props.kind === 'device' ? t('web.quick.newDevice', { device: deviceLabel() }) : t('web.quick.newItem', { product: productWord(t('orderItemKindPart')) })))
 const duplicate = computed(() => {
   if (props.kind !== 'customer' || !form.phone.trim()) return null
   const found = findByPhone((props.customers ?? []).map((c) => ({ ...c, phone: c.phone ?? null })), form.phone, country.value)

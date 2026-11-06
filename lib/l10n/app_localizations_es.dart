@@ -2477,9 +2477,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderItemKindProduct => 'producto';
 
   @override
-  String get orderItemPartWord => 'pieza';
-
-  @override
   String orderItemQuantityValue(String count) {
     return '$count unidades';
   }

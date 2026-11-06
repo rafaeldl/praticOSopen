@@ -1146,8 +1146,6 @@
   "orderAllItems": "Todos",
   "orderItemKindService": "serviço",
   "orderItemKindProduct": "produto",
-  "orderItemPartWord": "peça",
-  "@orderItemPartWord": {"description": "What the order sells besides services when the segment does not name it (product._entity)."},
   "orderItemQuantityValue": "{count} unidades",
   "@orderItemQuantityValue": {
     "placeholders": {

@@ -2825,7 +2825,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           icon: CupertinoIcons.add_circled,
           title: l10n.orderAddItemRow(
             context.read<SegmentConfigProvider>().productWord(
-              l10n.orderItemPartWord,
+              l10n.orderItemKindPart,
             ),
           ),
           accent: true,
@@ -4058,12 +4058,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final product = products[i];
     final quantity = product.quantity ?? 1;
     final total = productLineTotal(product);
+    final part = context.read<SegmentConfigProvider>().productWord(
+      l10n.orderItemKindPart,
+    );
     return _itemRow(
       title: _productName(product),
       detail: _productDetail(product),
       kind: quantity > 1
-          ? '${l10n.orderItemKindPart} · ${l10n.orderItemQuantityValue('$quantity')}'
-          : l10n.orderItemKindPart,
+          ? '$part · ${l10n.orderItemQuantityValue('$quantity')}'
+          : part,
       value: money && total != null ? _format.formatCurrency(total) : null,
       noPrice: money && product.value == null,
       marked: _marked.contains(product),
@@ -4096,7 +4099,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _link(
           l10n.orderAddItemRow(
             context.read<SegmentConfigProvider>().productWord(
-              l10n.orderItemPartWord,
+              l10n.orderItemKindPart,
             ),
           ),
           key: const ValueKey('order_add_item'),

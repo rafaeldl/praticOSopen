@@ -2470,9 +2470,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderItemKindProduct => 'product';
 
   @override
-  String get orderItemPartWord => 'part';
-
-  @override
   String orderItemQuantityValue(String count) {
     return '$count units';
   }

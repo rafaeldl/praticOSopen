@@ -1110,7 +1110,6 @@
   "orderAllItems": "Todos",
   "orderItemKindService": "servicio",
   "orderItemKindProduct": "producto",
-  "orderItemPartWord": "pieza",
   "orderItemQuantityValue": "{count} unidades",
   "@orderItemQuantityValue": {
     "placeholders": {

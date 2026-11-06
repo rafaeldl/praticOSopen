@@ -4468,12 +4468,6 @@ abstract class AppLocalizations {
   /// **'produto'**
   String get orderItemKindProduct;
 
-  /// What the order sells besides services when the segment does not name it (product._entity).
-  ///
-  /// In pt, this message translates to:
-  /// **'peça'**
-  String get orderItemPartWord;
-
   /// No description provided for @orderItemQuantityValue.
   ///
   /// In pt, this message translates to:
