@@ -841,7 +841,7 @@
   "web.push.promptMessage": "PraticOS te avisa en este navegador cuando el cliente aprueba un presupuesto, comenta en una OS o paga. El navegador preguntará si puede enviar estos avisos.",
   "web.quick.newCustomer": "Cliente nuevo",
   "web.quick.newDevice": "{device} nuevo",
-  "web.quick.newItem": "Servicio o pieza nuevo",
+  "web.quick.newItem": "Servicio o {product} nuevo",
   "web.quick.needsName": "Escriba el nombre para registrarlo",
   "web.quick.itemName": "Nombre",
   "web.quick.itemKind": "Es un",

@@ -6,7 +6,7 @@ import { Menu, Plus, Search, Settings, User, UserPlus } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { can, canAny, reloadCompany, selectCompany, session } from '@/lib/session'
+import { can, canAny, companyEntryName, reloadCompany, selectCompany, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
         <div v-else class="company-pick">
           <label class="sr" for="company-pick">{{ t('web.nav.company') }}</label>
           <select id="company-pick" class="company-select" :value="session.companyId ?? ''" @change="onCompanyChange">
-            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ companyLabel(company.name) }}</option>
+            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ companyLabel(companyEntryName(company)) }}</option>
           </select>
         </div>
       </div>

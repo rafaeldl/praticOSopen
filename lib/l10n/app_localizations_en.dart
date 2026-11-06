@@ -2446,7 +2446,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderItemsSection => 'What will be done';
 
   @override
-  String get orderItemSearchPlaceholder => 'Search service or part';
+  String orderItemSearchPlaceholder(String product) {
+    return 'Search service or $product';
+  }
 
   @override
   String get orderCreateItemError => 'Could not create it. Try again.';
@@ -4509,7 +4511,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The microphone is not allowed. Allow it in Settings or type the job.';
 
   @override
-  String get orderAddItemRow => 'Add service or part';
+  String orderAddItemRow(String product) {
+    return 'Add service or $product';
+  }
 
   @override
   String get orderPickCustomerRow => 'Choose customer';
@@ -4695,7 +4699,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get pickerNewItem => 'New service or part';
+  String pickerNewItem(String product) {
+    return 'New service or $product';
+  }
 
   @override
   String get pickerNewChecklist => 'New checklist';
@@ -4711,8 +4717,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String pickerNoItemWith(String query) {
-    return 'No service or part matching “$query”. Add it and it goes straight on the order.';
+  String pickerNoItemWith(String product, String query) {
+    return 'No service or $product matching “$query”. Add it and it goes straight on the order.';
   }
 
   @override
@@ -5751,7 +5757,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseListOnlyServices =>
-      'Only services go on the invoice. Parts stay out, so the total differs from Sold.';
+      'Only services go on the invoice, so the total may differ from Sold.';
 
   @override
   String nfseListNoResults(String month) {

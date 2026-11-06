@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { canHaveNfse, cityAccessKind, currentInvoiceOf, eligibleOrderIds, invoiceOf, nextSetupStep, nfseNextStep, nfseValueOf, parsePercent } from '../src/lib/nfse/model'
+import { canHaveNfse, cityAccessKind, currentInvoiceOf, eligibleOrderIds, invoiceOf, nextSetupStep, nfseIssueRow, nfseNextStep, nfseValueOf, parsePercent } from '../src/lib/nfse/model'
 
 const nota = (id: string, data: Record<string, unknown>) => invoiceOf(id, { orderIds: ['o1'], createdAt: new Date(Date.now() - 1000).toISOString(), ...data })
 const order = (status: string, services: number[], products: { value: number; quantity?: number }[] = [], discount = 0) => ({
@@ -34,6 +34,18 @@ describe('nota da OS (order.nfse.*)', () => {
     expect(nfseNextStep(done, nota('x', { status: 'canceled' }), true, 0)).toBeNull()
     expect(nfseNextStep(done, nota('x', { status: 'authorized' }), true, 0)).toBeNull()
     expect(nfseNextStep(order('progress', [100]), null, true, 0)).toBeNull()
+  })
+
+  test('linha "Nota fiscal": aprovada também com a nota direta (#612)', () => {
+    const approved = order('approved', [100])
+    expect(nfseIssueRow(approved, null, true, true, 100)).toBe('issue')
+    expect(nfseIssueRow(approved, null, true, false, 100)).toBeNull()
+    expect(nfseIssueRow(order('quote', [100]), null, true, true, 100)).toBeNull()
+    expect(nfseIssueRow(approved, nota('x', { status: 'authorized' }), true, true, 100)).toBeNull()
+    expect(nfseIssueRow(approved, null, false, true, 100)).toBeNull()
+    const done = order('done', [100])
+    expect(nfseIssueRow(done, null, true, false, 0)).toBe('notIssued')
+    expect(nfseIssueRow(done, null, true, false, 10)).toBe('issue')
   })
 
   test('várias OS do cliente: elegível pelo valor dos serviços, como o app (B7)', () => {

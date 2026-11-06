@@ -429,6 +429,18 @@ export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, 
   return current.status === 'error' ? 'fix' : null
 }
 
+/**
+ * The "Nota fiscal" row of an order without an active nota (order.nfse.issue-row):
+ * "Não emitida" when the blue step offers it (finished and paid), else "Emitir".
+ * With the NFS-e direct on any order that can have a nota (approved too: some
+ * shops issue on every order and leave it approved); otherwise finished only.
+ */
+export function nfseIssueRow(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, direct: boolean, remaining: number, now = Date.now()): 'issue' | 'notIssued' | null {
+  if (!ready || !canHaveNfse(order) || (current && isActive(current, now))) return null
+  if (order.status === 'done') return remaining <= 0 ? 'notIssued' : 'issue'
+  return direct ? 'issue' : null
+}
+
 /** Orders that may go in a nota now: can have one and no active nota (nfse.orders.pick). */
 export function eligibleOrderIds(orders: { id: string; order: NfseOrderLike }[], invoices: NfseInvoice[], now = Date.now()): string[] {
   const taken = new Set(invoices.filter((invoice) => isActive(invoice, now)).flatMap((invoice) => invoice.orderIds))

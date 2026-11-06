@@ -70,7 +70,7 @@ describe('parseNfseXml', () => {
       cityCodeAndPostalCode: '4200000 / 88.000-001',
       address: 'Avenida Teste, 100, Industrial',
       email: 'oficina@example.com',
-      simplesNacional: 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)',
+      simplesNacional: 'Optante - ME/EPP',
       simplesRegime: 'Regime de apuração dos tributos federais e municipal pelo Simples Nacional',
     });
     expect(data.taker).toEqual({
@@ -101,7 +101,7 @@ describe('parseNfseXml', () => {
   it('MEI: no Simples regime and the taxes line still printed (note 10)', () => {
     const xml = nfseXml(dpsInput({ emitter: { taxId: '00000000000191', cityCode: '4200000', regime: 'mei' } as never, simplesTaxRate: undefined }));
     const data = parseNfseXml(xml, CITIES);
-    expect(data.provider.simplesNacional).toBe('Optante - Microempreendedor Individual (MEI)');
+    expect(data.provider.simplesNacional).toBe('Optante - MEI');
     expect(data.provider.simplesRegime).toBe('-');
     expect(data.complementaryInfo).toMatch(/Totais Aproximados dos Tributos cfe\. Lei nº 12\.741\/2012: Federais: -; Estaduais: -; Municipais: -$/);
   });

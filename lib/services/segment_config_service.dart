@@ -117,9 +117,13 @@ class SegmentConfigService {
       // 1. Carrega labels e campos globais (se segmentId != 'global')
       if (segmentId != 'global') {
         try {
-          final globalDoc = await _db.collection('segments').doc('global').get();
+          final globalDoc = await _db
+              .collection('segments')
+              .doc('global')
+              .get();
           if (globalDoc.exists) {
-            final globalCustomFields = globalDoc.data()!['customFields'] as List? ?? [];
+            final globalCustomFields =
+                globalDoc.data()!['customFields'] as List? ?? [];
             for (final json in globalCustomFields) {
               final field = CustomField.fromJson(json as Map<String, dynamic>);
               if (field.isLabel) {
@@ -367,6 +371,17 @@ class SegmentConfigService {
   String get serviceOrder => label('service_order._entity');
   String get serviceOrderPlural => label('service_order._entity_plural');
 
+  /// What the order sells besides services, lower case, for sentences like
+  /// "Buscar serviço ou licença". The segment's own name (`product._entity`)
+  /// when it has one, otherwise [fallback] ("peça").
+  String productWord(String fallback) {
+    const key = 'product._entity';
+    final custom =
+        _labelCache[key] ??
+        _customFields.where((f) => f.key == key).firstOrNull?.getLabel(_locale);
+    return custom == null || custom.isEmpty ? fallback : custom.toLowerCase();
+  }
+
   /// Obtém label de status customizado
   ///
   /// Mapeia chaves técnicas para labels (com fallback)
@@ -390,9 +405,7 @@ class SegmentConfigService {
   /// Retorna apenas campos reais (isField = true), não labels
   CustomField? getField(String key) {
     try {
-      return _customFields.firstWhere(
-        (f) => f.key == key && f.isField,
-      );
+      return _customFields.firstWhere((f) => f.key == key && f.isField);
     } catch (e) {
       return null;
     }

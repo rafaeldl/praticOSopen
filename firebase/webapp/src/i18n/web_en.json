@@ -841,7 +841,7 @@
   "web.push.promptMessage": "PraticOS tells you in this browser when a customer approves a quote, comments on an order or pays. Your browser will ask if it can send these notifications.",
   "web.quick.newCustomer": "New customer",
   "web.quick.newDevice": "New {device}",
-  "web.quick.newItem": "New service or part",
+  "web.quick.newItem": "New service or {product}",
   "web.quick.needsName": "Type the name to add it",
   "web.quick.itemName": "Name",
   "web.quick.itemKind": "It is a",
