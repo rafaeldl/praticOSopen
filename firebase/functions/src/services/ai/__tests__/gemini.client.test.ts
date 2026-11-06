@@ -10,7 +10,7 @@ describe('toGeminiSchema', () => {
         customer: { type: 'OBJECT', properties: { name: { type: 'STRING' }, phone: { type: 'STRING' } } },
         device: {
           type: 'OBJECT',
-          properties: { name: { type: 'STRING' }, serial: { type: 'STRING' }, manufacturer: { type: 'STRING' } },
+          properties: { name: { type: 'STRING' }, serial: { type: 'STRING' }, manufacturer: { type: 'STRING' }, replaces: { type: 'STRING' } },
         },
         operations: {
           type: 'ARRAY',

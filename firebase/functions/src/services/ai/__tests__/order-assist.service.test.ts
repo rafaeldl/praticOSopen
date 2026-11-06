@@ -483,3 +483,96 @@ describe('finance actions', () => {
     expect(draft).not.toHaveProperty('nfseAutoIssue');
   });
 });
+
+describe('history and context (issue #631)', () => {
+  const context = {
+    customer: { chosen: true, fromAi: true },
+    devices: [
+      { name: 'Gol 2018', serial: 'ABC1234', fromAi: true },
+      { name: 'Corsa', serial: 'MMM0099', fromAi: false },
+    ],
+    request: { text: 'Barulho na suspensão', fromAi: true },
+    due: { date: '2026-11-06T18:00', fromAi: false },
+    pending: ['line' as const],
+  };
+
+  it('accepts up to 3 messages of 500 characters and the context', () => {
+    expect(orderAssistInputSchema.safeParse({ text: 'x', history: ['a', 'b', 'c'], context }).success).toBe(true);
+    expect(orderAssistInputSchema.safeParse({ text: 'x' }).success).toBe(true);
+  });
+
+  it.each([
+    [{ text: 'x', history: ['a', 'b', 'c', 'd'] }],
+    [{ text: 'x', history: ['a'.repeat(501)] }],
+    [{ text: 'x', history: ['  '] }],
+    [{ text: 'x', context: { customer: { chosen: true, name: 'Juliana' } } }],
+    [{ text: 'x', context: { other: 1 } }],
+    [{ text: 'x', context: { due: { date: 'sexta' } } }],
+    [{ text: 'x', context: { pending: ['payment'] } }],
+    [{ text: 'x', context: { devices: Array(11).fill({ name: 'Gol' }) } }],
+  ])('rejects %j', (body) => {
+    expect(orderAssistInputSchema.safeParse(body).success).toBe(false);
+  });
+
+  it('older apps keep the same prompt: no current order, no memory rules', () => {
+    const text = buildUserText({ text: 'capô 500' }, CATALOG);
+    expect(text).not.toContain('Current order');
+    expect(text).toContain('Text from the user:');
+    expect(buildSystemPrompt('pt')).not.toContain('ALREADY applied');
+  });
+
+  it('lists the order with who filled each field, never the customer name, and the earlier messages', () => {
+    const text = buildUserText({ text: 'não, a placa é ABC1D23', history: ['Gol placa ABC1234, barulho'], context }, CATALOG);
+    expect(text).toContain('Customer: chosen (from assistant)');
+    expect(text).toContain('V1: Gol 2018, plate/serial ABC1234 (from assistant)');
+    expect(text).toContain('V2: Corsa, plate/serial MMM0099 (set by the user)');
+    expect(text).toContain('Request: "Barulho na suspensão" (from assistant)');
+    expect(text).toContain('Deadline: 2026-11-06T18:00 (set by the user)');
+    expect(text).toContain('Waiting for the user to pick: line');
+    expect(text).toContain('Earlier messages (ALREADY applied');
+    expect(text).toContain('1. Gol placa ABC1234, barulho');
+    expect(text).toContain('New message from the user:\nnão, a placa é ABC1D23');
+    const prompt = buildSystemPrompt('pt', undefined, undefined, { memory: true });
+    expect(prompt).toContain('Never apply them again');
+    expect(prompt).toContain('A field set by the user is NEVER changed');
+    expect(prompt).toContain('"replaces"');
+  });
+
+  it('sends the memory rules only with context or history', async () => {
+    const d = deps({}, { operations: [] });
+    await runOrderAssist('c1', { text: 'x', history: ['y'] }, d);
+    expect(d.llm.generateJson.mock.calls[0][0].systemPrompt).toContain('ALREADY applied');
+    await runOrderAssist('c1', { text: 'x' }, d);
+    expect(d.llm.generateJson.mock.calls[1][0].systemPrompt).not.toContain('ALREADY applied');
+  });
+
+  it('a corrected vehicle from the assistant says which one it replaces; one set by the user never', async () => {
+    const d = deps({}, { device: { name: 'Gol 2018', serial: 'ABC1D23', replaces: 'V1' }, operations: [] });
+    const draft = await runOrderAssist('c1', { text: 'não, a placa é ABC1D23', context }, d);
+    expect(draft.device).toMatchObject({ guess: { name: 'Gol 2018', serial: 'ABC1D23' }, replaces: 0 });
+    expect(draft.device?.guess).not.toHaveProperty('replaces');
+    const user = deps({}, { device: { name: 'Corsa', serial: 'XYZ9999', replaces: 'v2' }, operations: [] });
+    const other = await runOrderAssist('c1', { text: 'x', context }, user);
+    expect(other.device).not.toHaveProperty('replaces');
+    const none = deps({}, { device: { name: 'Uno', replaces: 'V7' }, operations: [] });
+    expect((await runOrderAssist('c1', { text: 'x', context }, none)).device).not.toHaveProperty('replaces');
+  });
+
+  it('drops a customer, note or deadline over what the person set', async () => {
+    const answer = { customer: { name: 'Outro' }, notes: 'Troca', dueDate: '2026-11-09', dueTime: '10:00', operations: [] };
+    const userSet = {
+      customer: { chosen: true },
+      request: { text: 'Barulho', fromAi: false },
+      due: { date: '2026-11-06' },
+    };
+    const draft = await runOrderAssist('c1', { text: 'x', context: userSet }, deps({}, answer));
+    expect(draft).toMatchObject({ customer: null, notes: null, dueDate: null });
+    const fromAi = {
+      customer: { chosen: true, fromAi: true },
+      request: { text: 'Barulho', fromAi: true },
+      due: { date: '2026-11-06', fromAi: true },
+    };
+    const fixed = await runOrderAssist('c1', { text: 'x', context: fromAi }, deps({}, answer));
+    expect(fixed).toMatchObject({ customer: { guess: { name: 'Outro' } }, notes: 'Troca', dueDate: '2026-11-09T10:00' });
+  });
+});
