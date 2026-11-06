@@ -234,7 +234,7 @@ O governo não manda e-mail para nota emitida pela API, e o Asaas (que mandava) 
 
 **Provedor:** [Resend](https://resend.com), por chamada direta à API (`POST https://api.resend.com/emails`). A extensão Trigger Email não serve: o PDF e o XML anexados não cabem num documento do Firestore (1 MB). O DNS de `praticos.app` está no Cloudflare, que só recebe e-mail (Email Routing); o envio do Cloudflare ainda é beta e só por Workers, por isso Resend.
 
-**Remetente:** `"Nome da empresa" <notas@praticos.app>`, com "responder para" o e-mail da empresa (`companies/{cid}.email`). Assim a resposta do cliente vai para a empresa, não para o PraticOS.
+**Remetente:** `"Nome da empresa" <notas@praticos.app>`, com "responder para" o e-mail da empresa (`companies/{cid}.email`) ou, se a empresa não tiver, o do dono (`companies/{cid}.owner.email`). Sem nenhum válido, o e-mail sai sem "responder para". Assim a resposta do cliente vai para a empresa, não para o PraticOS.
 
 **Destinatário:** `invoiceEmail` do cliente que recebe a nota (o "Nota fiscal para", quando há), senão o e-mail do cadastro, senão o e-mail com que a nota saiu. Sem nenhum, não envia (`skipped`, motivo `noEmail`). A folha de emitir diz para onde vai ("A nota vai por e-mail para …") ou que não vai (envio desligado).
 

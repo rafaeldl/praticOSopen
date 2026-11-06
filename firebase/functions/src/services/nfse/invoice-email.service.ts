@@ -247,7 +247,8 @@ export async function sendInvoiceEmail(
   try {
     const companyData = (await company.get()).data() ?? {};
     const companyName = displayName(clean(companyData.name) ?? clean(invoice.emitter?.legalName) ?? 'PraticOS');
-    const replyTo = clean(companyData.email);
+    // Replies go to the company e-mail; without one, to the owner's (else nobody reads them at notas@).
+    const replyTo = [clean(companyData.email), clean(companyData.owner?.email)].find((e) => e && EMAIL_PATTERN.test(e)) ?? null;
     const pdf = await deps.readFile(await deps.ensurePdf(companyId, invoiceId));
     const file = `nota-${(invoice.number ?? invoiceId).replace(/[^\w-]/g, '')}`;
     const attachments: OutgoingEmail['attachments'] = [{ filename: `${file}.pdf`, content: pdf, contentType: 'application/pdf' }];
@@ -265,7 +266,7 @@ export async function sendInvoiceEmail(
     const { id } = await deps.send({
       from: `"${companyName}" <${NFSE_EMAIL_FROM}>`,
       to,
-      replyTo: replyTo && EMAIL_PATTERN.test(replyTo) ? replyTo : null,
+      replyTo,
       ...content,
       attachments,
       idempotencyKey: options.manual ? `nfse-${companyId}-${invoiceId}-${kind}-${at}` : `nfse-${companyId}-${invoiceId}-${kind}`,
