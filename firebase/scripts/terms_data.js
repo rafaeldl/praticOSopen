@@ -693,6 +693,59 @@ const DEFAULT_TERMS = {
   },
 
   // ═══════════════════════════════════════════════════════════
+  // SOFTWARE E TI
+  // ═══════════════════════════════════════════════════════════
+  software_it: {
+    'pt-BR': `Ao aprovar este orçamento, o cliente declara estar ciente e de acordo com as seguintes condições:
+
+1. ESCOPO: O serviço cobre o que está descrito nesta ordem de serviço. Pedidos novos ou mudanças de escopo serão orçados à parte e só serão feitos com aprovação do cliente.
+
+2. ACESSOS E SENHAS: O cliente fornece os acessos necessários ao serviço. Senhas e dados acessados são tratados com sigilo e usados só para fins técnicos. Recomenda-se trocar as senhas ao final do atendimento.
+
+3. BACKUP: Antes de qualquer alteração em sistema, servidor ou banco de dados, será feito ou confirmado um backup. A empresa não responde por perda de dados que não estavam em backup antes do atendimento.
+
+4. LICENÇAS: Só são instalados programas com licença válida. Licenças, domínios e serviços de terceiros são do cliente e seguem as condições de cada fornecedor.
+
+5. MENSALIDADES: Serviços mensais (suporte, manutenção, hospedagem) são cobrados todo mês enquanto estiverem ativos e podem ser cancelados com 30 dias de aviso.
+
+6. GARANTIA: Correções de defeitos no que foi entregue têm garantia de 90 dias. A garantia não cobre mudanças feitas por terceiros, falhas de serviços externos ou uso fora do combinado.
+
+7. PAGAMENTO: O pagamento é devido na data combinada. Em caso de atraso, os serviços mensais podem ser suspensos até a regularização.`,
+
+    'en-US': `By approving this quote, the customer acknowledges and agrees to the following terms and conditions:
+
+1. SCOPE: The service covers what is described in this work order. New requests or scope changes will be quoted separately and only carried out with the customer's approval.
+
+2. ACCESS AND PASSWORDS: The customer provides the access needed for the service. Passwords and any accessed data are kept confidential and used solely for technical purposes. Changing passwords after the service is recommended.
+
+3. BACKUP: Before any change to a system, server or database, a backup will be made or confirmed. The company is not liable for loss of data that was not backed up before the service.
+
+4. LICENSES: Only properly licensed software is installed. Licenses, domains and third-party services belong to the customer and follow each provider's terms.
+
+5. MONTHLY SERVICES: Monthly services (support, maintenance, hosting) are billed every month while active and may be cancelled with 30 days' notice.
+
+6. WARRANTY: Fixes for defects in delivered work carry a 90-day warranty. The warranty does not cover changes made by third parties, failures of external services or use outside what was agreed.
+
+7. PAYMENT: Payment is due on the agreed date. If payment is late, monthly services may be suspended until it is settled.`,
+
+    'es-ES': `Al aprobar este presupuesto, el cliente declara estar al tanto y de acuerdo con las siguientes condiciones:
+
+1. ALCANCE: El servicio cubre lo descrito en esta orden de servicio. Los pedidos nuevos o cambios de alcance se presupuestarán aparte y solo se realizarán con la aprobación del cliente.
+
+2. ACCESOS Y CONTRASEÑAS: El cliente proporciona los accesos necesarios para el servicio. Las contraseñas y los datos accedidos se tratan con confidencialidad y se usan solo para fines técnicos. Se recomienda cambiar las contraseñas al final de la atención.
+
+3. COPIA DE SEGURIDAD: Antes de cualquier cambio en un sistema, servidor o base de datos, se hará o confirmará una copia de seguridad. La empresa no responde por la pérdida de datos que no tenían copia antes de la atención.
+
+4. LICENCIAS: Solo se instalan programas con licencia válida. Las licencias, dominios y servicios de terceros son del cliente y siguen las condiciones de cada proveedor.
+
+5. MENSUALIDADES: Los servicios mensuales (soporte, mantenimiento, hosting) se cobran cada mes mientras estén activos y pueden cancelarse con 30 días de aviso.
+
+6. GARANTÍA: Las correcciones de defectos en lo entregado tienen garantía de 90 días. La garantía no cubre cambios hechos por terceros, fallas de servicios externos ni uso fuera de lo acordado.
+
+7. PAGO: El pago vence en la fecha acordada. En caso de atraso, los servicios mensuales pueden suspenderse hasta su regularización.`,
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   other: {

@@ -25,6 +25,7 @@
   "flags": {
     "whatsappBot": false,
     "whatsappContact": false,
-    "webApp": false
+    "webApp": false,
+    "softwareItPage": false
   }
 }

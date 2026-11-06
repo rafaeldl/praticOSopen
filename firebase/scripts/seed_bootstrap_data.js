@@ -1,13 +1,17 @@
 const { initializeFirebase, admin } = require('./firebase-init');
 
-// Inicializar Firebase (aceita caminho do service account como argumento)
+// Inicializar Firebase (aceita caminho do service account como argumento;
+// `--only=software_it` grava só esse segmento)
+const args = process.argv.slice(2);
 try {
-  initializeFirebase(process.argv[2]);
+  initializeFirebase(args.find((arg) => !arg.startsWith('--')));
 } catch (error) {
   process.exit(1);
 }
 
 const db = admin.firestore();
+const onlyFlag = args.find((arg) => arg.startsWith('--only='));
+const onlyIds = onlyFlag ? onlyFlag.slice('--only='.length).split(',').filter(Boolean) : null;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DADOS DE BOOTSTRAP POR SEGMENTO/SUBCATEGORIA
@@ -32,6 +36,7 @@ async function seedBootstrapData() {
     let errors = 0;
 
     for (const [segmentId, subspecialties] of Object.entries(BOOTSTRAP_DATA)) {
+      if (onlyIds && !onlyIds.includes(segmentId)) continue;
       console.log(`\n📦 Processando segmento: ${segmentId}`);
 
       // Verifica se o segmento existe

@@ -124,6 +124,8 @@ class SegmentConfigProvider extends ChangeNotifier {
         return CupertinoIcons.printer;
       case 'public_works':
         return CupertinoIcons.hammer;
+      case 'software_it':
+        return CupertinoIcons.chevron_left_slash_chevron_right;
       default:
         return CupertinoIcons.tag; // Genérico
     }

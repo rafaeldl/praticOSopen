@@ -1,0 +1,528 @@
+{
+  "slug": "software-ti",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Empresa de TI e Software | PraticOS",
+    "description": "App de ordem de serviço para empresa de TI: contrato mensal abre a OS do mês, nota fiscal de serviço sai sozinha ao concluir, orçamento aprovado por link e cobrança pelo celular.",
+    "keywords": "sistema para empresa de TI, app para suporte técnico mensal, nota fiscal de serviço automática, emissão de NFS-e mensal, sistema para software house, controle de mensalidade de TI",
+    "ogTitle": "Sistema para Empresa de TI e Software | PraticOS",
+    "ogDescription": "Nota fiscal de serviço todo mês, sozinha: o contrato abre a OS, a nota sai ao concluir e o cliente aprova por link.",
+    "hero": {
+      "title": "Nota fiscal de serviço todo mês,",
+      "titleMark": "sozinha.",
+      "lede": "PraticOS é o app de ordem de serviço para quem vende suporte técnico, desenvolvimento e mensalidades de TI. O contrato abre a OS do mês, a nota fiscal de serviço sai quando a OS é concluída e você manda a cobrança para o cliente.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0418",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Ricardo Almeida"
+          },
+          {
+            "label": "Sistema",
+            "value": "Sistema de gestão · erp.exemplo.com.br"
+          },
+          {
+            "label": "Serviço",
+            "value": "Suporte técnico mensal · novembro"
+          },
+          {
+            "label": "Nota fiscal",
+            "value": "Emitida ao concluir"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 600,00",
+        "stamp": "Nota fiscal emitida",
+        "steps": [
+          "Orçamento",
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
+        ],
+        "current": 3
+      }
+    },
+    "workflow": {
+      "title": "Do contrato à nota, sem planilha",
+      "lede": "Combine o serviço uma vez. Todo mês a OS aparece, a nota sai e você vê quem já pagou.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Combine a mensalidade uma vez",
+          "tab": "Contrato",
+          "text": "Monte o contrato do cliente com o suporte mensal, a manutenção ou a hospedagem. Todo mês o PraticOS abre a OS daquele mês com os mesmos serviços e valores.",
+          "facts": [
+            "Uma OS por mês, com o mês no nome",
+            "Valor e serviços iguais aos do contrato",
+            "Mude o valor e vale para os próximos meses"
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Fale o pedido. A IA abre a OS.",
+          "tab": "Falar",
+          "text": "Chamado fora do contrato? Toque em Falar: “Ricardo pediu um relatório novo de vendas no ERP, umas 6 horas”. A IA preenche cliente, sistema, serviço e preço do seu catálogo. Você confere e salva.",
+          "facts": [
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “são 8 horas”",
+            "Ou tire foto do pedido anotado"
+          ]
+        },
+        {
+          "number": "03",
+          "title": "O cliente aprova por link",
+          "tab": "Aprovar",
+          "text": "Mande o orçamento do desenvolvimento ou da consultoria. O cliente abre no navegador, lê seus termos (escopo, acessos, backup, mensalidade) e aprova.",
+          "facts": [
+            "Aprovação guardada para qualquer dúvida",
+            "Termos de escopo e mensalidade antes da aprovação",
+            "PDF da OS para enviar"
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Concluiu, a nota sai",
+          "tab": "Nota fiscal",
+          "text": "Ao concluir a OS, a nota fiscal de serviço vai direto para o Emissor Nacional com o seu certificado digital. Escolha se ela sai sozinha para todos os clientes ou só para alguns.",
+          "facts": [
+            "Direto no Emissor Nacional, sem outro sistema",
+            "Você escolhe para quais clientes a nota sai sozinha",
+            "Faltou um dado? A OS mostra o que falta"
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Mande a cobrança e receba",
+          "tab": "Receber",
+          "text": "Receba o mês inteiro ou em partes. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança.",
+          "facts": [
+            "Quem deve há mais tempo aparece primeiro",
+            "Pagamento em partes e desconto na mesma OS",
+            "Relatório do mês com o que entrou"
+          ],
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+        }
+      ]
+    },
+    "problems": {
+      "title": "O que a empresa de TI perde todo mês sem perceber",
+      "lede": "O serviço está feito. O que escapa é a nota, a cobrança e o chamado que ninguém anotou.",
+      "answerLabel": "No PraticOS",
+      "items": [
+        {
+          "problem": "Dia de emitir nota",
+          "detail": "Todo começo de mês, uma tarde inteira no site da prefeitura copiando as mesmas notas.",
+          "answer": "Concluiu a OS do mês, a nota sai sozinha para os clientes que você escolher."
+        },
+        {
+          "problem": "Mensalidade esquecida",
+          "detail": "Um cliente ficou dois meses sem receber a nota e sem pagar, e ninguém notou.",
+          "answer": "O contrato abre a OS todo mês. Nenhum cliente fica de fora."
+        },
+        {
+          "problem": "Chamado avulso que some",
+          "detail": "O cliente pediu um ajuste pelo WhatsApp, você fez e esqueceu de cobrar.",
+          "answer": "Fale o pedido e a IA abre a OS na hora, com o preço do seu catálogo."
+        },
+        {
+          "problem": "Escopo que cresce",
+          "detail": "“Era só um relatório”, e virou uma semana de trabalho sem orçamento aprovado.",
+          "answer": "O cliente aprova o orçamento por link, com seus termos de escopo. Pedido novo, orçamento novo."
+        },
+        {
+          "problem": "Senha em mensagem perdida",
+          "detail": "Acesso do servidor do cliente espalhado em conversas e e-mails.",
+          "answer": "Anote os acessos de cada sistema do cliente num lugar só, junto do endereço, da plataforma e do histórico de OS."
+        },
+        {
+          "problem": "Quem ainda não pagou?",
+          "detail": "Pix, boleto e transferência em lugares diferentes. Fechar o mês vira caça ao tesouro.",
+          "answer": "O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança."
+        }
+      ]
+    },
+    "faq": {
+      "title": "Antes de usar na sua empresa de TI",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
+      "items": [
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
+        },
+        {
+          "question": "Como a nota fiscal é emitida?",
+          "answer": "A nota de serviço vai direto para o Emissor Nacional da NFS-e, com o seu certificado digital A1, nas cidades que já usam o Emissor Nacional. Você escolhe se ela sai sozinha ao concluir a OS, para todos os clientes ou só para alguns."
+        },
+        {
+          "question": "Serve para suporte e para desenvolvimento?",
+          "answer": "Sim. Suporte mensal, manutenção de sistema, hospedagem, desenvolvimento por hora, consultoria e treinamento. Mensalidade entra como contrato; trabalho avulso, como OS com orçamento."
+        },
+        {
+          "question": "Posso colocar minhas regras de escopo e mensalidade?",
+          "answer": "Sim. Em Termos para o cliente (no botão do perfil, no topo do Início) há um texto padrão para TI (escopo, acessos, backup, licenças, mensalidade) que você edita. O cliente vê os termos antes de aprovar, e eles saem no PDF da OS."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador e vê a OS com os serviços e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
+      ]
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Work Order App for IT & Software Businesses | PraticOS",
+    "description": "Work order app for IT businesses: the monthly contract opens each month's work order, the service invoice goes out on its own on completion, quotes approved by link.",
+    "keywords": "IT support business app, managed services work order app, monthly IT billing, software house management app, recurring service invoice",
+    "ogTitle": "Work Order App for IT & Software Businesses | PraticOS",
+    "ogDescription": "Service invoices every month, on their own: the contract opens the work order and the invoice goes out on completion.",
+    "hero": {
+      "title": "Service invoices every month,",
+      "titleMark": "on their own.",
+      "lede": "PraticOS is the work order app for businesses that sell IT support, software development and monthly IT plans. The contract opens each month's work order, the service invoice goes out when the order is completed and you send the payment request to the customer.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0418",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Richard Allen"
+          },
+          {
+            "label": "System",
+            "value": "Management system · erp.example.com"
+          },
+          {
+            "label": "Service",
+            "value": "Monthly IT support · November"
+          },
+          {
+            "label": "Invoice",
+            "value": "Issued on completion"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$600.00",
+        "stamp": "Invoice issued",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Completed"
+        ],
+        "current": 3
+      }
+    },
+    "workflow": {
+      "title": "From contract to invoice, no spreadsheet",
+      "lede": "Agree on the service once. Every month the work order appears, the invoice goes out and you see who has paid.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Set up the monthly plan once",
+          "tab": "Contract",
+          "text": "Create the customer's contract with monthly support, maintenance or hosting. Every month PraticOS opens that month's work order with the same services and prices.",
+          "facts": [
+            "One work order per month, named after the month",
+            "Same services and prices as the contract",
+            "Change the price and it applies from next month"
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Say the request. AI opens the work order.",
+          "tab": "Speak",
+          "text": "A request outside the contract? Tap Speak: “Richard wants a new sales report in the ERP, about 6 hours”. AI fills in customer, system, service and price from your catalog. You check and save.",
+          "facts": [
+            "What AI filled in is marked with ✦",
+            "Correct it by speaking: “make it 8 hours”",
+            "Or take a photo of the written request"
+          ]
+        },
+        {
+          "number": "03",
+          "title": "The customer approves by link",
+          "tab": "Approve",
+          "text": "Send the quote for development or consulting. The customer opens it in the browser, reads your terms (scope, access, backup, monthly plan) and approves.",
+          "facts": [
+            "Approval kept for any question later",
+            "Scope and monthly plan terms before approval",
+            "Work order PDF to send"
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Completed, the invoice goes out",
+          "tab": "Invoice",
+          "text": "When you complete the work order, the service invoice goes straight to Brazil's national NFS-e system with your digital certificate. Choose whether it goes out on its own for every customer or just some.",
+          "facts": [
+            "Straight to the national NFS-e system, no other software",
+            "You pick which customers get invoices on their own",
+            "Missing data? The work order shows what is missing"
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Send the payment request and get paid",
+          "tab": "Get paid",
+          "text": "Receive the month in full or in parts. Financial shows how much is still owed and by whom, with a button to send the payment request.",
+          "facts": [
+            "Whoever has owed the longest shows first",
+            "Partial payments and discounts on the same work order",
+            "Monthly report of what came in"
+          ],
+          "image": "financial.png",
+          "alt": "Financial screen with what is still owed and the button to send the payment request"
+        }
+      ]
+    },
+    "problems": {
+      "title": "What an IT business loses every month without noticing",
+      "lede": "The work is done. What slips is the invoice, the payment and the request nobody wrote down.",
+      "answerLabel": "With PraticOS",
+      "items": [
+        {
+          "problem": "Invoice day",
+          "detail": "Every start of the month, a whole afternoon on the city website copying the same invoices.",
+          "answer": "Complete the month's work order and the invoice goes out on its own for the customers you choose."
+        },
+        {
+          "problem": "Forgotten monthly fee",
+          "detail": "One customer went two months without an invoice and without paying, and nobody noticed.",
+          "answer": "The contract opens the work order every month. No customer is left out."
+        },
+        {
+          "problem": "One-off requests that vanish",
+          "detail": "The customer asked for a tweak by WhatsApp, you did it and forgot to bill it.",
+          "answer": "Say the request and AI opens the work order right away, with the price from your catalog."
+        },
+        {
+          "problem": "Growing scope",
+          "detail": "“It was just a report”, and it turned into a week of work without an approved quote.",
+          "answer": "The customer approves the quote by link, with your scope terms. New request, new quote."
+        },
+        {
+          "problem": "Passwords lost in chats",
+          "detail": "Access to the customer's server scattered across chats and emails.",
+          "answer": "Write down each customer system's access in one place, next to its address, platform and work order history."
+        },
+        {
+          "problem": "Who hasn't paid yet?",
+          "detail": "Transfers, bank slips and cards in different places. Closing the month becomes a treasure hunt.",
+          "answer": "Financial shows how much is still owed and by whom, with a button to send the payment request."
+        }
+      ]
+    },
+    "faq": {
+      "title": "Before using it in your IT business",
+      "lede": "Any questions? Send an email: the PraticOS team answers.",
+      "items": [
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has monthly limits on photos and AI use and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock the team."
+        },
+        {
+          "question": "How is the invoice issued?",
+          "answer": "The service invoice goes straight to Brazil's national NFS-e system (Emissor Nacional) with your A1 digital certificate, in cities that already use it. You choose whether it goes out on its own when the work order is completed, for every customer or just some."
+        },
+        {
+          "question": "Does it work for support and for development?",
+          "answer": "Yes. Monthly support, system maintenance, hosting, hourly development, consulting and training. Monthly plans go in as contracts; one-off work, as a work order with a quote."
+        },
+        {
+          "question": "Can I add my own scope and monthly plan rules?",
+          "answer": "Yes. In Customer terms (profile button, top of Home) there is a default IT text (scope, access, backup, licenses, monthly plan) that you can edit. The customer sees the terms before approving, and they appear on the work order PDF."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in the browser and see the work order with services and prices. Right there they approve the quote and leave comments."
+        }
+      ]
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Empresas de TI y Software | PraticOS",
+    "description": "App de órdenes de servicio para empresas de TI: el contrato mensual abre la orden del mes, la factura de servicio sale sola al concluir y el cliente aprueba por enlace.",
+    "keywords": "sistema para empresa de TI, app de soporte técnico mensual, factura de servicio automática, sistema para software house, mensualidades de TI",
+    "ogTitle": "Sistema para Empresas de TI y Software | PraticOS",
+    "ogDescription": "Factura de servicio cada mes, sola: el contrato abre la orden y la factura sale al concluir.",
+    "hero": {
+      "title": "Factura de servicio cada mes,",
+      "titleMark": "sola.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien vende soporte técnico, desarrollo y mensualidades de TI. El contrato abre la orden del mes, la factura de servicio sale cuando la orden se concluye y usted envía el cobro al cliente.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "Nº 0418",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Ricardo Álvarez"
+          },
+          {
+            "label": "Sistema",
+            "value": "Sistema de gestión · erp.ejemplo.com"
+          },
+          {
+            "label": "Servicio",
+            "value": "Soporte técnico mensual · noviembre"
+          },
+          {
+            "label": "Factura",
+            "value": "Emitida al concluir"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 600,00",
+        "stamp": "Factura emitida",
+        "steps": [
+          "Presupuesto",
+          "Aprobada",
+          "En curso",
+          "Concluida"
+        ],
+        "current": 3
+      }
+    },
+    "workflow": {
+      "title": "Del contrato a la factura, sin planilla",
+      "lede": "Acuerde el servicio una vez. Cada mes aparece la orden, sale la factura y usted ve quién ya pagó.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Acuerde la mensualidad una vez",
+          "tab": "Contrato",
+          "text": "Arme el contrato del cliente con el soporte mensual, el mantenimiento o el hosting. Cada mes PraticOS abre la orden de ese mes con los mismos servicios y valores.",
+          "facts": [
+            "Una orden por mes, con el mes en el nombre",
+            "Mismos servicios y valores del contrato",
+            "Cambie el valor y vale para los próximos meses"
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Diga el pedido. La IA abre la orden.",
+          "tab": "Hablar",
+          "text": "¿Pedido fuera del contrato? Toque Hablar: “Ricardo pidió un informe nuevo de ventas en el ERP, unas 6 horas”. La IA completa cliente, sistema, servicio y precio de su catálogo. Usted revisa y guarda.",
+          "facts": [
+            "Lo que completó la IA queda marcado con ✦",
+            "Corrija hablando: “son 8 horas”",
+            "O tome una foto del pedido anotado"
+          ]
+        },
+        {
+          "number": "03",
+          "title": "El cliente aprueba por enlace",
+          "tab": "Aprobar",
+          "text": "Envíe el presupuesto del desarrollo o de la consultoría. El cliente lo abre en el navegador, lee sus términos (alcance, accesos, copia de seguridad, mensualidad) y aprueba.",
+          "facts": [
+            "Aprobación guardada para cualquier duda",
+            "Términos de alcance y mensualidad antes de aprobar",
+            "PDF de la orden para enviar"
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Concluyó, sale la factura",
+          "tab": "Factura",
+          "text": "Al concluir la orden, la factura de servicio va directo al Emisor Nacional de Brasil con su certificado digital. Elija si sale sola para todos los clientes o solo para algunos.",
+          "facts": [
+            "Directo al Emisor Nacional, sin otro sistema",
+            "Usted elige para qué clientes sale sola",
+            "¿Falta un dato? La orden muestra lo que falta"
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Envíe el cobro y reciba",
+          "tab": "Recibir",
+          "text": "Reciba el mes completo o en partes. Finanzas muestra cuánto falta por cobrar y de quién, con el botón para enviar el cobro.",
+          "facts": [
+            "Quien debe hace más tiempo aparece primero",
+            "Pago en partes y descuento en la misma orden",
+            "Informe del mes con lo que entró"
+          ],
+          "image": "financial.png",
+          "alt": "Finanzas con lo que falta por cobrar y el botón para enviar el cobro"
+        }
+      ]
+    },
+    "problems": {
+      "title": "Lo que una empresa de TI pierde cada mes sin notarlo",
+      "lede": "El trabajo está hecho. Lo que se escapa es la factura, el cobro y el pedido que nadie anotó.",
+      "answerLabel": "En PraticOS",
+      "items": [
+        {
+          "problem": "Día de emitir facturas",
+          "detail": "Cada inicio de mes, una tarde entera en el sitio de la municipalidad copiando las mismas facturas.",
+          "answer": "Concluya la orden del mes y la factura sale sola para los clientes que usted elija."
+        },
+        {
+          "problem": "Mensualidad olvidada",
+          "detail": "Un cliente pasó dos meses sin factura y sin pagar, y nadie lo notó.",
+          "answer": "El contrato abre la orden cada mes. Ningún cliente queda afuera."
+        },
+        {
+          "problem": "Pedido suelto que desaparece",
+          "detail": "El cliente pidió un ajuste por WhatsApp, usted lo hizo y olvidó cobrarlo.",
+          "answer": "Diga el pedido y la IA abre la orden en el momento, con el precio de su catálogo."
+        },
+        {
+          "problem": "Alcance que crece",
+          "detail": "“Era solo un informe”, y se volvió una semana de trabajo sin presupuesto aprobado.",
+          "answer": "El cliente aprueba el presupuesto por enlace, con sus términos de alcance. Pedido nuevo, presupuesto nuevo."
+        },
+        {
+          "problem": "Contraseñas perdidas en chats",
+          "detail": "Accesos al servidor del cliente repartidos en chats y correos.",
+          "answer": "Anote los accesos de cada sistema del cliente en un solo lugar, junto a la dirección, la plataforma y el historial de órdenes."
+        },
+        {
+          "problem": "¿Quién no pagó todavía?",
+          "detail": "Transferencias, boletos y tarjetas en lugares distintos. Cerrar el mes es una búsqueda del tesoro.",
+          "answer": "Finanzas muestra cuánto falta por cobrar y de quién, con el botón para enviar el cobro."
+        }
+      ]
+    },
+    "faq": {
+      "title": "Antes de usarlo en su empresa de TI",
+      "lede": "¿Alguna duda? Envíe un correo: responde el equipo de PraticOS.",
+      "items": [
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "Puede empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA y una plantilla de checklist. Los planes pagos, contratados en la app, aumentan esos límites y habilitan al equipo."
+        },
+        {
+          "question": "¿Cómo se emite la factura?",
+          "answer": "La factura de servicio va directo al Emisor Nacional de NFS-e de Brasil con su certificado digital A1, en las ciudades que ya lo usan. Usted elige si sale sola al concluir la orden, para todos los clientes o solo para algunos."
+        },
+        {
+          "question": "¿Sirve para soporte y para desarrollo?",
+          "answer": "Sí. Soporte mensual, mantenimiento de sistema, hosting, desarrollo por hora, consultoría y capacitación. La mensualidad entra como contrato; el trabajo suelto, como orden con presupuesto."
+        },
+        {
+          "question": "¿Puedo poner mis reglas de alcance y mensualidad?",
+          "answer": "Sí. En Términos para el cliente (botón del perfil, arriba en Inicio) hay un texto estándar para TI (alcance, accesos, copia de seguridad, licencias, mensualidad) que usted edita. El cliente ve los términos antes de aprobar, y salen en el PDF de la orden."
+        },
+        {
+          "question": "¿El cliente necesita instalar una app?",
+          "answer": "No. Recibe un enlace, lo abre en el navegador y ve la orden con los servicios y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
+      ]
+    }
+  }
+}

@@ -1,14 +1,4 @@
-const { initializeFirebase, admin } = require('./firebase-init');
 const { DEFAULT_TERMS } = require('./terms_data');
-
-// Inicializar Firebase (aceita caminho do service account como argumento)
-try {
-  initializeFirebase(process.argv[2]);
-} catch (error) {
-  process.exit(1);
-}
-
-const db = admin.firestore();
 
 // Segmentos iniciais do sistema com labels dinâmicos e campos customizados
 const SEGMENTS = [
@@ -2043,6 +2033,68 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // SOFTWARE E TI (suporte, desenvolvimento, mensalidades)
+  // ═══════════════════════════════════════════════════════════
+  // The "device" is the customer's system (ERP, site, app), not a machine.
+  // Suggestions not switched on here (docs/SEGMENT_SOFTWARE_IT.md): monthly
+  // contracts (useContracts) and NFS-e service codes 01.07.01 / 01.01.01.
+  {
+    id: 'software_it',
+    name: 'Software e TI',
+    nameI18n: { 'pt-BR': 'Software e TI', 'en-US': 'Software & IT', 'es-ES': 'Software y TI' },
+    icon: '🧑‍💻',
+    active: true,
+    fieldService: false, // Remote work: support and development happen online
+    customFields: [
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistema', 'en-US': 'System', 'es-ES': 'Sistema' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Sistema', 'en-US': 'Add System', 'es-ES': 'Agregar Sistema' }
+      },
+      {
+        key: 'device.category',
+        type: 'label',
+        labels: { 'pt-BR': 'Tipo', 'en-US': 'Type', 'es-ES': 'Tipo' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Plataforma', 'en-US': 'Platform', 'es-ES': 'Plataforma' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Versão', 'en-US': 'Version', 'es-ES': 'Versión' }
+      },
+      {
+        key: 'device.serial',
+        type: 'label',
+        labels: { 'pt-BR': 'Endereço', 'en-US': 'Address', 'es-ES': 'Dirección' }
+      },
+      {
+        key: 'product._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Licença', 'en-US': 'License', 'es-ES': 'Licencia' }
+      },
+      {
+        key: 'actions.create_product',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Licença', 'en-US': 'Add License', 'es-ES': 'Agregar Licencia' }
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
@@ -2056,7 +2108,18 @@ const SEGMENTS = [
   },
 ];
 
-async function seedSegments() {
+/** `--only=software_it` (or `--only=a,b`) writes just those segments. */
+function selectSegments(segments, argv) {
+  const flag = argv.find((arg) => arg.startsWith('--only='));
+  if (!flag) return segments;
+  const ids = flag.slice('--only='.length).split(',').filter(Boolean);
+  const picked = segments.filter((segment) => ids.includes(segment.id));
+  const missing = ids.filter((id) => !picked.some((segment) => segment.id === id));
+  if (missing.length) throw new Error(`Unknown segment(s): ${missing.join(', ')}`);
+  return picked;
+}
+
+async function seedSegments(db, admin) {
   console.log('════════════════════════════════════════════════════════════');
   console.log('  POPULANDO SEGMENTOS NO FIRESTORE');
   console.log('════════════════════════════════════════════════════════════\n');
@@ -2065,7 +2128,7 @@ async function seedSegments() {
     let created = 0;
     let updated = 0;
 
-    for (const segment of SEGMENTS) {
+    for (const segment of selectSegments(SEGMENTS, process.argv)) {
       const { id, ...data } = segment;
       const segmentRef = db.collection('segments').doc(id);
 
@@ -2105,7 +2168,7 @@ async function seedSegments() {
     console.log('════════════════════════════════════════════════════════════');
     console.log(`  • Segmentos criados: ${created}`);
     console.log(`  • Segmentos atualizados: ${updated}`);
-    console.log(`  • Total processado: ${SEGMENTS.length}`);
+    console.log(`  • Total processado: ${created + updated}`);
     console.log('════════════════════════════════════════════════════════════\n');
 
     process.exit(0);
@@ -2115,5 +2178,16 @@ async function seedSegments() {
   }
 }
 
-// Executar seed
-seedSegments();
+module.exports = { SEGMENTS, selectSegments };
+
+// Executar seed (só quando rodado direto: o teste lê SEGMENTS sem Firebase)
+if (require.main === module) {
+  const { initializeFirebase, admin } = require('./firebase-init');
+  // Inicializar Firebase (aceita caminho do service account como argumento)
+  try {
+    initializeFirebase(process.argv.slice(2).find((arg) => !arg.startsWith('--')));
+  } catch (error) {
+    process.exit(1);
+  }
+  seedSegments(admin.firestore(), admin);
+}

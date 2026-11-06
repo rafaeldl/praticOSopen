@@ -2301,6 +2301,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'solar': 'Limpeza das placas',
       'printers': 'Troca de toner',
       'bicycles': 'Revisão completa',
+      'software_it': 'Suporte técnico mensal',
       'other': 'Manutenção',
     });
     return 'Ex.: $_temp0';
@@ -2320,6 +2321,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'solar': 'Inversor',
       'printers': 'Toner',
       'bicycles': 'Câmara de ar',
+      'software_it': 'Licença Microsoft 365',
       'other': 'Peça de reposição',
     });
     return 'Ex.: $_temp0';
@@ -4457,6 +4459,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'solar': 'geração baixa',
       'printers': 'papel enroscando',
       'bicycles': 'corrente pulando',
+      'software_it': 'relatório não abre',
       'other': 'não está funcionando',
     });
     return 'Ex.: $_temp0';
@@ -4842,6 +4845,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'solar': 'As placas estão limpas?',
       'printers': 'A impressão sai nítida?',
       'bicycles': 'Os freios estão bons?',
+      'software_it': 'O backup rodou?',
       'other': 'Está funcionando?',
     });
     return 'Ex.: $_temp0';

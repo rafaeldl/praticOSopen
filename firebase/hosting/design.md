@@ -92,7 +92,10 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
   portrait, retouched from a real photo, if they approve the final image.
 - Claim only what the app does. Segment fields marked "para evolução futura" in `firebase/scripts/seed_segments.js` are not claims.
 - Feature flags in `site.json`: `flags.whatsappBot` (assistant pages/sections,
-  currently **off** — bot is shut down), `flags.whatsappContact` (float button).
+  currently **off** — bot is shut down), `flags.whatsappContact` (float button),
+  `flags.softwareItPage` (the Software e TI page claims the automatic service
+  invoice; **off** until it ships). A `segments.json` link with `"flag"` shows
+  only when that flag is on (`enabledLinks` filter).
 - pt-BR, en, es always updated together.
 
 ## Per-page allowances
