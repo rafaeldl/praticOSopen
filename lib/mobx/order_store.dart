@@ -9,6 +9,8 @@ import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/work_stage.dart';
+import 'package:praticos/services/order_stage_api_service.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
@@ -147,6 +149,16 @@ abstract class _OrderStore with Store {
   late Future<void> Function(String companyId, String orderId, OrderHold? hold)
   writeHold = (companyId, orderId, hold) =>
       repository.setHold(companyId, orderId, hold, actor: Global.userAggr);
+
+  /// Work stage of the open order while in progress (docs/WORK_STAGES.md).
+  @observable
+  OrderStage? stage;
+
+  /// Asks the server to move the order to a stage. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(String companyId, String orderId, String stageId)
+  writeStage = (companyId, orderId, stageId) =>
+      OrderStageApiService.instance.setStage(companyId, orderId, stageId);
 
   @observable
   ObservableStream<List<of_model.OrderForm>>? formsStream;
@@ -410,6 +422,15 @@ abstract class _OrderStore with Store {
     if (server == null || local == null || base == null || deferSave) return;
     if (server.id == null || server.id != local.id) return;
     if (_savedSnapshotId != null && _savedSnapshotId != local.id) return;
+    // Stage moved by the web board or another phone; not while this one is
+    // waiting for its own move.
+    if (_stageMoves == 0 &&
+        local.status == 'progress' &&
+        server.status == 'progress' &&
+        server.stage?.id != local.stage?.id) {
+      local.stage = server.stage;
+      stage = server.stage;
+    }
     final remote = OrderFieldDiff.snapshotOf(server);
     final current = OrderFieldDiff.snapshotOf(local);
     var adopted = false;
@@ -526,6 +547,7 @@ abstract class _OrderStore with Store {
         : null;
     status = order.status;
     hold = order.isOnHold ? order.onHold : null;
+    stage = order.status == 'progress' ? order.stage : null;
     address = order.address;
     latitude = order.latitude;
     longitude = order.longitude;
@@ -901,6 +923,7 @@ abstract class _OrderStore with Store {
     if (status == null) return null;
     final previousPayment = order!.payment;
     _holdBeforeStatus = order!.onHold;
+    _stageBeforeStatus = order!.stage;
     order!.status = status;
     this.status = status;
     updatePayment();
@@ -910,6 +933,11 @@ abstract class _OrderStore with Store {
     // it, so there is nothing to undo.
     if (order!.onHold != null && !order!.canBeOnHold) {
       _saveHold(null, undoOnFailure: false);
+    }
+    // The stage only lives in progress; the server removes it too.
+    if (status != 'progress') {
+      order!.stage = null;
+      stage = null;
     }
     // createItem no longer writes `payment`: persist the status-driven change.
     if (order!.id != null && order!.payment != previousPayment) {
@@ -935,6 +963,9 @@ abstract class _OrderStore with Store {
   /// "Parada" mark before the last [setStatus], for [restoreStatus].
   OrderHold? _holdBeforeStatus;
 
+  /// Stage before the last [setStatus], for [restoreStatus].
+  OrderStage? _stageBeforeStatus;
+
   /// Puts the status back on screen after the server refused [setStatus]: the
   /// server never took the new one. The "parada" mark [setStatus] took away
   /// comes back too, and is written again, because that separate write may
@@ -947,6 +978,11 @@ abstract class _OrderStore with Store {
     final mark = _holdBeforeStatus;
     if (mark != null && order?.onHold == null) {
       _saveHold(mark, undoOnFailure: false);
+    }
+    // The server kept the stage (the status never left progress).
+    if (status == 'progress' && order != null && order!.stage == null) {
+      order!.stage = _stageBeforeStatus;
+      stage = _stageBeforeStatus;
     }
   }
 
@@ -1018,6 +1054,46 @@ abstract class _OrderStore with Store {
       },
     );
   }
+
+  /// Moves the saved, in-progress order to [stageId] (at the end of that
+  /// stage). The screen changes at once; the server needs the connection,
+  /// and when it refuses the previous stage comes back and [onFailed] runs.
+  @action
+  Future<void> moveToStage(String stageId, {VoidCallback? onFailed}) async {
+    final target = order;
+    final orderId = target?.id;
+    final company = companyId;
+    if (target == null ||
+        orderId == null ||
+        company == null ||
+        target.status != 'progress') {
+      return;
+    }
+    final previous = target.stage;
+    final next = OrderStage()
+      ..id = stageId
+      ..since = holdClock().toUtc();
+    target.stage = next;
+    stage = next;
+    _stageMoves++;
+    try {
+      await writeStage(company, orderId, stageId);
+    } catch (e) {
+      debugPrint('Could not set the order stage: $e');
+      if (identical(target.stage, next)) {
+        runInAction(() {
+          target.stage = previous;
+          if (identical(order, target)) stage = previous;
+        });
+      }
+      onFailed?.call();
+    } finally {
+      _stageMoves--;
+    }
+  }
+
+  /// Stage moves still waiting for the server.
+  int _stageMoves = 0;
 
   String dateToString(DateTime? date) {
     if (date == null) return 'Não definida';

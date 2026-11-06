@@ -60,6 +60,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..onHold = json['onHold'] == null
       ? null
       : OrderHold.fromJson(json['onHold'] as Map<String, dynamic>)
+  ..stage = json['stage'] == null
+      ? null
+      : OrderStage.fromJson(json['stage'] as Map<String, dynamic>)
   ..paidAmount = (json['paidAmount'] as num?)?.toDouble()
   ..transactions = (json['transactions'] as List<dynamic>?)
       ?.map((e) => PaymentTransaction.fromJson(e as Map<String, dynamic>))

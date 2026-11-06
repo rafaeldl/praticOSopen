@@ -753,7 +753,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/AI_ORDER_ASSIST.md` - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
 - `docs/ONBOARDING.md` - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
 - `docs/ORDER_ON_HOLD.md` - Marca de OS parada (motivo, dias parados, filtro Paradas)
-- `docs/WORK_STAGES.md` - Etapas dentro de "Em andamento" (Pintura, Polimento): `company.workStages`, `order.stage`, colunas, ordem e impressão no Quadro e no modo TV
+- `docs/WORK_STAGES.md` - Etapas dentro de "Em andamento" (Pintura, Polimento): `company.workStages`, `order.stage`, colunas, ordem e impressão no Quadro e no modo TV; no app, etapa na tela da OS e "Passar para X"
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - `docs/QUICK_REGISTER.md` - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS

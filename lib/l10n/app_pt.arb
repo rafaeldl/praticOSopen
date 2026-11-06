@@ -2997,6 +2997,17 @@
   "orderHoldMark": "Marcar como parada",
   "orderHoldResume": "Retomar serviço",
   "orderHoldSaveError": "Não deu para salvar. Tente de novo.",
+  "orderStageMoveTo": "Passar para {stage}",
+  "@orderStageMoveTo": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMenuChangeStage": "Mudar etapa",
+  "orderStagePickerTitle": "Em que etapa está?",
+  "orderStageSaveError": "Não deu para mudar a etapa. Confira a internet e tente de novo.",
   "orderHoldSheetTitle": "Por que parou?",
   "orderHoldNoteHint": "Observação (opcional)",
   "orderHoldReasonPart": "Esperando peça",

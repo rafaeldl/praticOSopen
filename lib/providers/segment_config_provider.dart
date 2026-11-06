@@ -1,6 +1,7 @@
 import 'package:praticos/utils/device_reading.dart';
 import 'package:flutter/cupertino.dart';
 import '../models/custom_field.dart';
+import '../models/work_stage.dart';
 import '../services/segment_config_service.dart';
 
 /// Provider que gerencia labels dinâmicos e campos customizados
@@ -64,6 +65,16 @@ class SegmentConfigProvider extends ChangeNotifier {
 
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _service.defaultTermsOfService;
+
+  /// Stages inside "Em andamento" (`company.workStages`); empty when the
+  /// company has none, which keeps every screen as before.
+  List<WorkStage> get workStages => _workStages;
+  List<WorkStage> _workStages = const [];
+
+  void setWorkStages(List<WorkStage> stages) {
+    _workStages = List.unmodifiable(stages);
+    notifyListeners();
+  }
 
   /// Updates the resolved `useFinancial` value and notifies listeners.
   void setUseFinancial(bool value) {

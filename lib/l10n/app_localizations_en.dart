@@ -6442,6 +6442,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderHoldSaveError => 'Could not save. Try again.';
 
   @override
+  String orderStageMoveTo(String stage) {
+    return 'Move to $stage';
+  }
+
+  @override
+  String get orderMenuChangeStage => 'Change stage';
+
+  @override
+  String get orderStagePickerTitle => 'Which stage is it in?';
+
+  @override
+  String get orderStageSaveError =>
+      'Could not change the stage. Check the connection and try again.';
+
+  @override
   String get orderHoldSheetTitle => 'Why did it stop?';
 
   @override

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-**Etapas** dizem em que ponto da oficina está uma OS em andamento (por exemplo, Pintura e depois Polimento) e em que ordem cada equipe trabalha. A situação da OS não muda: a etapa só vale enquanto a OS está em `progress`. Financeiro, nota fiscal, filtros, IA, bot e o app não leem nada novo.
+**Etapas** dizem em que ponto da oficina está uma OS em andamento (por exemplo, Pintura e depois Polimento) e em que ordem cada equipe trabalha. A situação da OS não muda: a etapa só vale enquanto a OS está em `progress`. Financeiro, nota fiscal, filtros, IA e bot não leem nada novo.
 
 Origem: pedido de uma funilaria com duas equipes, em que o dono monta todo dia a ordem de cada equipe e entrega impressa (issue #637). Cada OS fica em **uma etapa por vez**.
 
@@ -52,7 +52,7 @@ Na OS, `/companies/{companyId}/orders/{orderId}`:
 | Permissão | `canChangeOrderStage` (mesma da OS parada) e `canChangeOrderStatus(..., 'progress')` para começar uma aprovada |
 | Limpeza | `updateOrder` tira a etapa quando a situação sai de `progress`; o trigger `handleOrderUpdatedAsaas` cobre os outros caminhos (app, bot, MCP) |
 | Web | `src/lib/orders/stages.ts` (leitura, coluna, ordem, serviços da etapa), `OrderBoard.vue`, `StagePrint.vue`, `TvBoardView.vue` |
-| App Flutter | Nada. O app grava a OS com `set(merge)` e não conhece `stage`, então nunca o apaga nem o reescreve |
+| App Flutter | `lib/models/work_stage.dart` (`WorkStage.listFrom/of/next`, `OrderStage`), `SegmentConfigProvider.workStages` (lido em `auth_wrapper.dart`), `OrderStore.moveToStage`, `lib/services/order_stage_api_service.dart` (chama a mesma rota) e a tela da OS (`order_screen_v2.dart`). `Order.stage` tem `includeToJson: false`: o save completo nunca o grava |
 
 ## Fluxo de Dados
 
@@ -68,6 +68,10 @@ Arrastar dentro de Pintura (ou Alt + ↑/↓, ou "Subir/Descer na fila")
 De Polimento para Concluído
   → PATCH /orders/:id {status: done} → updateOrder apaga stage
 
+Tela da OS no app: botão azul "Passar para Polimento" (ou "…" → "Mudar etapa")
+  → PUT /orders/:id/stage {stageId} (sem rank: fim da coluna)
+  → a tela muda na hora e volta, com aviso, se o servidor recusar ou não houver internet
+
 Situação mudada pelo app, bot ou MCP
   → trigger onOrderUpdated → clearOrderStage (só se a OS saiu de progress)
 ```
@@ -82,6 +86,7 @@ Situação mudada pelo app, bot ou MCP
 6. Folha impressa: data, nome da etapa e, na ordem da coluna, número, cliente, veículo, os serviços da etapa (pelas palavras; todos, se nenhum bater) e um quadrado para marcar. Nunca valores.
 7. Modo TV: "Em andamento" vira uma coluna por etapa, na ordem do quadro.
 8. A OS parada continua com a marca na etapa; atrasada e parada aparecem no cartão como sempre.
+9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". "Mudar etapa" no "…" aparece com duas etapas ou mais. Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
 
 ## Exemplos de Uso
 
@@ -106,11 +111,15 @@ Desligar: apagar `workStages` (as OS mantêm `stage` até sair de em andamento, 
 | `firebase/functions/src/routes/v1/__tests__/orders.routes.test.ts` | Grupo "etapas da OS": começar, reordenar, comentário, recusas, sair de em andamento |
 | `firebase/functions/src/__tests__/rbac/api-matrix.ts` | `orders.stage.set` por perfil |
 | `firebase/webapp/tests/work-stages.test.ts` | Coluna, ordem, posição entre vizinhas, serviços da etapa, sugestão |
+| `test/models/work_stage_test.dart` | Leitura de `workStages`, etapa atual e próxima, save sem `stage` |
+| `test/mobx/order_store_stage_test.dart` | Mudança na hora, volta quando o servidor recusa, limpeza ao sair de em andamento |
+| `test/services/order_stage_api_service_test.dart` | `PUT` com etapa, token e empresa; recusa |
+| `test/screens/order/order_screen_v2_extras_test.dart` | Grupo "work stages": linha da situação, botão azul, "Mudar etapa", sem etapas igual |
 | `firebase/webapp/e2e/work-stages.spec.ts` | Quadro com etapas: começar, Alt + seta, imprimir, Shift + seta, consultor |
 
 ## Limites conhecidos
 
 - Sem tela para criar e ordenar etapas; é por script.
-- O app do celular não mostra a etapa. A OS aparece como "Em andamento" e, se o app a concluir, a etapa sai.
+- No app, a etapa só aparece na tela da OS (não na Início nem nas listas). Mudar de etapa pelo app precisa de internet.
 - O Quadro carrega as 130 OS mais novas; uma OS em andamento muito antiga pode ficar de fora da coluna.
 - Quem lê pela API (sem valores) não tem os serviços na lista: a folha impressa sai sem eles e o cartão não sugere a próxima etapa.

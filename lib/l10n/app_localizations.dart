@@ -10508,6 +10508,30 @@ abstract class AppLocalizations {
   /// **'Não deu para salvar. Tente de novo.'**
   String get orderHoldSaveError;
 
+  /// No description provided for @orderStageMoveTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passar para {stage}'**
+  String orderStageMoveTo(String stage);
+
+  /// No description provided for @orderMenuChangeStage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar etapa'**
+  String get orderMenuChangeStage;
+
+  /// No description provided for @orderStagePickerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em que etapa está?'**
+  String get orderStagePickerTitle;
+
+  /// No description provided for @orderStageSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mudar a etapa. Confira a internet e tente de novo.'**
+  String get orderStageSaveError;
+
   /// No description provided for @orderHoldSheetTitle.
   ///
   /// In pt, this message translates to:
