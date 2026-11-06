@@ -738,44 +738,4 @@ Antes de finalizar uma feature, verificar:
 
 ## Documentação Adicional
 
-- `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
-- `docs/CI_BUDGET.md` - Orçamento do GitHub Actions, o que roda onde e hook de pre-push
-- `docs/STORE_LISTING.md` - Ficha das lojas: textos, prints (como gerar, dados demo), conta da revisão e envio sem publicar
-- `docs/APP_TRACKING_TRANSPARENCY.md` - Permissão de rastreamento no iOS (ATT) e exigências da App Review
-- `docs/I18N.md` - Sistema de internacionalização completo
-- `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
-- `docs/SEGMENT_SOFTWARE_IT.md` - Ramo Software e TI: nomes (Sistema, Licença), exemplos, termos, página do site atrás de `flags.softwareItPage` e como criar o ramo em produção
-- `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
-- `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
-- `docs/DEVICE_NEXT_MAINTENANCE.md` - Próxima manutenção por aparelho: pergunta ao concluir, Início, aviso diário
-- `docs/DEVICE_READING.md` - Leitura do equipamento por visita (quilometragem, horímetro): campo do ramo com `reading: true`, `Order.deviceReadings` e última leitura no equipamento
-- `docs/REMINDERS_AND_NOTICES.md` - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
-- `docs/AI_ORDER_ASSIST.md` - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
-- `docs/ONBOARDING.md` - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
-- `docs/ORDER_ON_HOLD.md` - Marca de OS parada (motivo, dias parados, filtro Paradas)
-- `docs/WORK_STAGES.md` - Etapas dentro de "Em andamento" (Pintura, Polimento): `company.workStages`, `order.stage`, colunas, ordem e impressão no Quadro e no modo TV; no app, etapa na tela da OS e "Passar para X"
-- `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
-- `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
-- `docs/QUICK_REGISTER.md` - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS
-- `docs/CUSTOMER_CONTACTS.md` - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
-- `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
-- `docs/DOMAIN.md` - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
-- `docs/ACCOUNT_DELETION.md` - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
-- `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
-- `docs/NFSE_ASAAS.md` - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
-- `docs/NFSE_DIRECT.md` - NFS-e direta (Emissor Nacional): dados e regras, cofre do certificado com KMS por emitente (crypto-shredding), rotas e passo manual do KMS
-- `docs/NFSE_DIRECT_DISCOVERY.md` - Discovery da NFS-e direto no Emissor Nacional (sem Asaas): regras do certificado, spike em produção, APIs do governo, cliente piloto e direção do desenho (emitentes, importar notas ao subir o certificado)
-- `docs/WEB_APP.md` - App web em `firebase/webapp` (Vue + Vite em `/web`): arquitetura, como rodar com o emulador, como adicionar tela
-- `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
-- `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
-- `docs/WEB_APP_DESIGN.md` - Padrão do app web: tokens, mestre-detalhe, teclado
-- `docs/web-app/discovery-report.md` - Descoberta do app web: uso real, arquitetura, matriz de paridade e roteiro
-- `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
-- `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
-- `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
-- `docs/formularios_dinamicos.md` - Especificação de checklists/vistorias
-- `docs/DEPLOYMENT.md` - Guia completo de deploy
-- `docs/praticos-bot-central.md` - Bot WhatsApp: arquitetura e features
-- `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
-- `docs/GOOGLE_ADS_API.md` - Acesso ao Google Ads via Claude Code
-- `docs/ADS_CAMPAIGNS.md` - Status de campanhas, pendências e progresso
+O índice dos documentos técnicos está em [`docs/README.md`](docs/README.md). Ao criar um documento novo em `docs/`, acrescente a linha dele lá, não aqui.
