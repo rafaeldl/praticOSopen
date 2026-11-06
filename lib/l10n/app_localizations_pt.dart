@@ -7515,6 +7515,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseEmailSend => 'Enviar';
 
   @override
+  String get nfseIssuingProgress =>
+      'Emitindo a nota… pode levar alguns segundos.';
+
+  @override
+  String get nfseCancelingProgress => 'Cancelando a nota…';
+
+  @override
+  String get nfseEmailSendingProgress => 'Mandando o e-mail…';
+
+  @override
   String nfseEmailSentToast(String email) {
     return 'Nota enviada para $email';
   }

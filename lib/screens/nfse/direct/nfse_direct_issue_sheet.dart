@@ -535,6 +535,7 @@ class _NfseDirectIssueSheetState extends State<NfseDirectIssueSheet> {
       missingHint: missing,
       dirty: _dirty,
       busy: _submitting,
+      busyText: context.l10n.nfseIssuingProgress,
       onSave: _submit,
       children: preview == null
           ? [

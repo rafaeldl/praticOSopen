@@ -235,6 +235,7 @@ const mark = () => (touched.value = true)
           </template>
         </div>
         <div class="layer-foot">
+          <p v-if="busy" class="layer-progress" role="status" data-testid="nfse-issuing">{{ t('nfseIssuingProgress') }}</p>
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
           <button type="submit" class="btn btn--primary" :disabled="state !== 'ready' || !!blocker || busy" data-testid="nfse-send">{{ t('web.nfse.issue') }}</button>
         </div>

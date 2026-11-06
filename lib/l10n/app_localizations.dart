@@ -12162,6 +12162,24 @@ abstract class AppLocalizations {
   /// **'Enviar'**
   String get nfseEmailSend;
 
+  /// No description provided for @nfseIssuingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitindo a nota… pode levar alguns segundos.'**
+  String get nfseIssuingProgress;
+
+  /// No description provided for @nfseCancelingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelando a nota…'**
+  String get nfseCancelingProgress;
+
+  /// No description provided for @nfseEmailSendingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandando o e-mail…'**
+  String get nfseEmailSendingProgress;
+
   /// No description provided for @nfseEmailSentToast.
   ///
   /// In pt, this message translates to:

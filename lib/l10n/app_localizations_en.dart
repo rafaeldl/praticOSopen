@@ -7510,6 +7510,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseEmailSend => 'Send';
 
   @override
+  String get nfseIssuingProgress =>
+      'Issuing the invoice… it may take a few seconds.';
+
+  @override
+  String get nfseCancelingProgress => 'Canceling the invoice…';
+
+  @override
+  String get nfseEmailSendingProgress => 'Sending the e-mail…';
+
+  @override
   String nfseEmailSentToast(String email) {
     return 'Invoice sent to $email';
   }
