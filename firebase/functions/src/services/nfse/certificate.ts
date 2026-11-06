@@ -7,12 +7,15 @@
  *
  * node-forge opens the "legacy" PFX (RC2/3DES) common in ICP-Brasil A1s, which
  * Node/OpenSSL 3 refuses. The chain is checked with Node's X509Certificate
- * against the pinned ICP-Brasil roots (icp-brasil-roots.ts).
+ * against the pinned ICP-Brasil roots (icp-brasil-roots.ts). Many A1s bring
+ * only the holder's certificate, so the pinned intermediate ACs
+ * (icp-brasil-intermediates.ts) fill the gaps; nothing is fetched online.
  */
 
 import { X509Certificate } from 'node:crypto';
 import forge from 'node-forge';
 import { NfseServiceError } from './errors';
+import { ICP_BRASIL_INTERMEDIATES } from './icp-brasil-intermediates';
 import { ICP_BRASIL_ROOTS } from './icp-brasil-roots';
 
 /** ICP-Brasil OID of the CNPJ in the subjectAltName otherName of an e-CNPJ (DOC-ICP-04). */
@@ -38,6 +41,8 @@ export interface OpenCertificateOptions {
   now?: Date;
   /** Trusted roots in PEM; defaults to ICP-Brasil. Tests pass their own. */
   trustedRoots?: readonly string[];
+  /** Known intermediate ACs in PEM, used when the .pfx lacks them; defaults to ICP-Brasil. */
+  intermediates?: readonly string[];
 }
 
 const MAX_PFX_BYTES = 64 * 1024;
@@ -165,22 +170,57 @@ function utf8Safe(text: string): string {
   }
 }
 
-/** True when [chain] (leaf first) ends in one of [roots]: each certificate signed by the next. */
-export function chainsToTrustedRoot(chainPem: string[], roots: readonly string[], now: Date): boolean {
+let pinnedCache: { source: readonly string[]; certs: X509Certificate[] } | null = null;
+
+function parsePinned(pems: readonly string[]): X509Certificate[] {
+  if (pinnedCache?.source === pems) return pinnedCache.certs;
+  const certs = pems.map((pem) => new X509Certificate(pem));
+  pinnedCache = { source: pems, certs };
+  return certs;
+}
+
+const validAt = (cert: X509Certificate, now: Date) => now >= new Date(cert.validFrom) && now <= new Date(cert.validTo);
+
+/**
+ * Path from the holder's certificate (first of [chainPem]) to one of [roots],
+ * as PEM: holder followed by the intermediates, root left out. Each link must
+ * be signed by the next, be a CA and be valid at [now]. Intermediates come
+ * from the .pfx itself and, when it lacks them, from [intermediates] (pinned,
+ * never from the internet). Null when no such path exists.
+ */
+export function buildTrustedChain(
+  chainPem: string[],
+  roots: readonly string[],
+  now: Date,
+  intermediates: readonly string[] = [],
+): string[] | null {
   const certs = chainPem.map((pem) => new X509Certificate(pem));
   const trusted = roots.map((pem) => new X509Certificate(pem));
-  const pool = [...certs.slice(1)];
+  const pool = [...certs.slice(1), ...parsePinned(intermediates)];
+  const issues = (child: X509Certificate, issuer: X509Certificate) =>
+    issuer.ca && child.checkIssued(issuer) && child.verify(issuer.publicKey);
+  const path = [certs[0]];
   let current = certs[0];
   for (let depth = 0; depth < 8; depth++) {
-    const root = trusted.find((r) => current.checkIssued(r) && current.verify(r.publicKey));
-    if (root) return now >= new Date(root.validFrom) && now <= new Date(root.validTo);
-    const next = pool.find((c) => current.checkIssued(c) && current.verify(c.publicKey));
-    if (!next) return false;
-    if (now < new Date(next.validFrom) || now > new Date(next.validTo)) return false;
-    pool.splice(pool.indexOf(next), 1);
+    const root = trusted.find((r) => issues(current, r) && validAt(r, now));
+    if (root) return path.map((cert) => cert.toString());
+    // Several certificates may share the issuer name (AC renewals): try them all.
+    const next = pool.find((c) => !path.includes(c) && issues(current, c) && validAt(c, now));
+    if (!next) return null;
+    path.push(next);
     current = next;
   }
-  return false;
+  return null;
+}
+
+/** True when [chain] (leaf first) ends in one of [roots]: each certificate signed by the next. */
+export function chainsToTrustedRoot(
+  chainPem: string[],
+  roots: readonly string[],
+  now: Date,
+  intermediates: readonly string[] = [],
+): boolean {
+  return buildTrustedChain(chainPem, roots, now, intermediates) !== null;
 }
 
 /**
@@ -213,8 +253,14 @@ export function openCertificate(pfx: Buffer, password: string, options: OpenCert
   if (now < leaf.validity.notBefore) throw new NfseServiceError('CERT_NOT_YET_VALID', 'Certificate not yet valid');
   if (now > leaf.validity.notAfter) throw new NfseServiceError('CERT_EXPIRED', 'Certificate expired');
 
-  const chain = [leaf, ...certs.filter((cert) => cert !== leaf)].map((cert) => forge.pki.certificateToPem(cert));
-  if (!chainsToTrustedRoot(chain, options.trustedRoots ?? ICP_BRASIL_ROOTS, now)) {
+  const fromFile = [leaf, ...certs.filter((cert) => cert !== leaf)].map((cert) => forge.pki.certificateToPem(cert));
+  const chain = buildTrustedChain(
+    fromFile,
+    options.trustedRoots ?? ICP_BRASIL_ROOTS,
+    now,
+    options.intermediates ?? ICP_BRASIL_INTERMEDIATES,
+  );
+  if (!chain) {
     throw new NfseServiceError('CERT_NOT_ICP_BRASIL', 'Certificate does not chain to an ICP-Brasil root');
   }
 

@@ -73,7 +73,14 @@ export interface TestPki {
     withCnSuffix?: boolean;
     withIntermediate?: boolean;
     selfSigned?: boolean;
+    /** Holder issued by an AC under the test root that is not in the pinned list. */
+    outsider?: boolean;
   }): Buffer;
+  /**
+   * PFX where a valid holder (not a CA) signs a certificate for another CNPJ
+   * with its own key and ships its real certificate as if it were an AC.
+   */
+  forgedByHolderPfx(): Buffer;
 }
 
 const name = (cn: string): Attrs => [
@@ -98,6 +105,11 @@ export function testPki(): TestPki {
     subject: name('AC Intermediaria de Teste'), issuer: name('Raiz de Teste'), publicKey: interKeys.publicKey,
     signer: rootKeys.privateKey, ca: true, notBefore: longAgo, notAfter: farAway, serial: '02',
   });
+  const outsiderKeys = rsaKeys();
+  const outsider = makeCert({
+    subject: name('AC Fora da Lista'), issuer: name('Raiz de Teste'), publicKey: outsiderKeys.publicKey,
+    signer: rootKeys.privateKey, ca: true, notBefore: longAgo, notAfter: farAway, serial: '03',
+  });
   const holderKeys = rsaKeys();
   let serial = 10;
 
@@ -109,19 +121,38 @@ export function testPki(): TestPki {
       const holderName = options.holderName ?? 'OFICINA EXEMPLO LTDA';
       const cn = options.withCnSuffix === false ? holderName : `${holderName}:${cnpj}`;
       const selfSigned = options.selfSigned === true;
+      const issuerName = options.outsider ? 'AC Fora da Lista' : 'AC Intermediaria de Teste';
+      const issuerKey = options.outsider ? outsiderKeys.privateKey : interKeys.privateKey;
       const leaf = makeCert({
         subject: name(cn),
-        issuer: selfSigned ? name(cn) : name('AC Intermediaria de Teste'),
+        issuer: selfSigned ? name(cn) : name(issuerName),
         publicKey: holderKeys.publicKey,
-        signer: selfSigned ? holderKeys.privateKey : interKeys.privateKey,
+        signer: selfSigned ? holderKeys.privateKey : issuerKey,
         ca: false,
         notBefore: options.notBefore ?? new Date('2026-01-01T00:00:00Z'),
         notAfter: options.notAfter ?? new Date('2027-03-12T00:00:00Z'),
         serial: (serial++).toString(16).padStart(2, '0'),
         extra: options.withSan === false ? [] : [icpSan(cnpj)],
       });
-      const chain = options.withIntermediate === false || selfSigned ? [leaf] : [leaf, inter];
+      const chain = options.withIntermediate === false || selfSigned ? [leaf] : [leaf, options.outsider ? outsider : inter];
       const p12 = forge.pkcs12.toPkcs12Asn1(holderKeys.privateKey, chain, options.password ?? 'senha-teste', {
+        algorithm: '3des',
+      });
+      return Buffer.from(forge.asn1.toDer(p12).getBytes(), 'binary');
+    },
+    forgedByHolderPfx() {
+      const attacker = makeCert({
+        subject: name('ATACANTE LTDA:11111111000191'), issuer: name('AC Intermediaria de Teste'),
+        publicKey: holderKeys.publicKey, signer: interKeys.privateKey, ca: false,
+        notBefore: longAgo, notAfter: farAway, serial: 'a1', extra: [icpSan('11111111000191')],
+      });
+      const victimKeys = rsaKeys();
+      const forged = makeCert({
+        subject: name('VITIMA LTDA:22222222000191'), issuer: name('ATACANTE LTDA:11111111000191'),
+        publicKey: victimKeys.publicKey, signer: holderKeys.privateKey, ca: false,
+        notBefore: longAgo, notAfter: farAway, serial: 'a2', extra: [icpSan('22222222000191')],
+      });
+      const p12 = forge.pkcs12.toPkcs12Asn1(victimKeys.privateKey, [forged, attacker, inter], 'senha-teste', {
         algorithm: '3des',
       });
       return Buffer.from(forge.asn1.toDer(p12).getBytes(), 'binary');

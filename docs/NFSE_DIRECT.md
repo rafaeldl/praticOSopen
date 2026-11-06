@@ -28,6 +28,7 @@ Código: `firebase/functions/src/services/nfse/`.
 |---|---|
 | `certificate.ts` | Abre o .pfx na memória (`node-forge`, aceita PFX "legacy" RC2/3DES), acha o certificado do titular pela chave, confere validade, cadeia até uma raiz ICP-Brasil (`X509Certificate` do Node) e lê o CNPJ (otherName `2.16.76.1.3.3` ou o sufixo `:CNPJ` do CN) |
 | `icp-brasil-roots.ts` | Raízes v5, v10, v11 e v12 baixadas do ITI, com a impressão SHA-256 de cada uma. Raiz nova: acrescentar aqui |
+| `icp-brasil-intermediates.ts` | ACs intermediárias credenciadas (gerado, não editar à mão). Completa a cadeia quando o .pfx traz só o certificado do titular. Ver "ACs intermediárias" abaixo |
 | `envelope.ts` | DEK nova de 256 bits por certificado, AES-256-GCM, com dado adicional `praticos/nfse-cert/v1/{companyId}/{emitterId}` (cópia para outro documento não abre) |
 | `key-vault.ts` | Cloud KMS: chave `nfse-certs/emitter-{emitterId}` por emitente, criada com `destroyScheduledDuration` de 24 h; versão nova na troca; destruição da versão ao apagar |
 | `certificate-vault.service.ts` | `storeCertificate` (adicionar CNPJ ou trocar), `loadCertificate` (para uma chamada, sem cache), `deleteCertificate`, `purgeExpiredCertificates` (vencido há mais de 90 dias), `deleteCompanyCertificates` (exclusão de conta), `processPendingKeyDestructions` |
@@ -38,6 +39,26 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 - `POST /certificate` `{ pfxBase64, password, termsVersion }`: adiciona o CNPJ (cria o emitente com CNPJ e razão social do certificado; regime, cidade e serviço vêm das consultas da etapa #563 e da importação).
 - `PUT /:emitterId/certificate`: troca (o CNPJ tem de ser o do emitente).
 - `DELETE /:emitterId/certificate`: apaga de verdade.
+
+### ACs intermediárias
+
+Muitos A1 vêm só com o certificado do titular, sem as ACs do meio (ex.: e-CNPJ da AC VALID RFB v5). Sem elas a cadeia não chegava à raiz e o envio era recusado com `CERT_NOT_ICP_BRASIL`, mesmo com certificado válido.
+
+- `buildTrustedChain` monta o caminho do titular até uma raiz de `icp-brasil-roots.ts` usando primeiro os certificados do próprio .pfx e, no que faltar, as ACs fixadas em `icp-brasil-intermediates.ts`. Cada elo tem de ser assinado pelo seguinte, ser AC (`basicConstraints` CA) e estar na validade. O CNPJ continua conferido como antes.
+- Nada é buscado na internet na hora (sem AIA): um arquivo enviado nunca escolhe de onde baixar uma AC.
+- O cofre guarda o titular e as intermediárias do caminho (sem a raiz), e é isso que vai no mTLS.
+- Fonte: pacote do ITI com todas as ACs credenciadas, `https://acraiz.icpbrasil.gov.br/credenciadas/CertificadosAC-ICP-Brasil/ACcompactado.zip`. Versão atual baixada em 2026-11-06 (SHA-256 do zip no cabeçalho do arquivo gerado): 173 de 182 certificados ficaram (AC, na validade, ligando a uma raiz fixada).
+- Atualizar quando: um cliente com certificado válido for recusado com `CERT_NOT_ICP_BRASIL` (AC nova ou renovada), o ITI publicar raiz nova (acrescentar a raiz antes, em `icp-brasil-roots.ts`), ou uma vez por ano. Uma AC vencida já é recusada sozinha pela checagem de validade.
+- Como atualizar (em `firebase/functions`):
+
+```bash
+curl -sSLO https://acraiz.icpbrasil.gov.br/credenciadas/CertificadosAC-ICP-Brasil/ACcompactado.zip
+unzip -d /tmp/acs ACcompactado.zip
+npx ts-node scripts/nfse/update-icp-brasil-intermediates.ts /tmp/acs "$(shasum -a 256 ACcompactado.zip | cut -d' ' -f1)"
+npm test -- certificate
+```
+
+Revisar o diff (ACs novas e retiradas) antes de abrir o PR; mudança aqui é `risk:high`.
 
 ### Termo do certificado (issue #572)
 
