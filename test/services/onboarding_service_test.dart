@@ -29,6 +29,14 @@ OnboardingBusiness business({
     );
 
 void main() {
+  test('global is never a segment to pick, even when active', () {
+    final list = pickableSegments([
+      const MapEntry('global', {'name': 'Global', 'active': true}),
+      const MapEntry('software_it', {'name': 'Software e TI', 'active': true}),
+    ]);
+    expect(list.map((s) => s.id), ['software_it']);
+  });
+
   group('OnboardingSegment.fromMap', () {
     test('reads name, icon, specialties and defaults', () {
       final s = OnboardingSegment.fromMap('hvac', {

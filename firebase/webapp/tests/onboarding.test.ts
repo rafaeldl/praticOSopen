@@ -45,6 +45,7 @@ describe('first access (onboarding_service.dart)', () => {
       { id: 'off', data: { name: 'Antigo', active: false } },
       { id: 'a', data: { name: 'Eletrônica', active: true } },
       { id: 'none', data: { name: 'Sem campo' } },
+      { id: 'global', data: { name: 'Global', active: true } },
     ])
     expect(list.map((segment) => segment.id)).toEqual(['a', 'b'])
   })
