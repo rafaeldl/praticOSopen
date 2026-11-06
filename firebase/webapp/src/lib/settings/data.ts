@@ -6,7 +6,7 @@
 import { createApi, type ApiOptions } from '@/lib/api'
 import { authClient, firestoreClient, firestoreLite, storageClient } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
-import { accountApiBase, normalizeInviteCode, toSegmentOption, type AssignableRole, type Member, type SegmentOption, type TeamInvite } from './model'
+import { accountApiBase, normalizeInviteCode, pickableSegmentOptions, type AssignableRole, type Member, type SegmentOption, type TeamInvite } from './model'
 
 const companyId = (): string => {
   if (!session.companyId) throw new Error('settings: no company')
@@ -174,9 +174,7 @@ export async function uploadLogo(file: File, expected?: unknown): Promise<{ url:
 export async function loadSegments(): Promise<SegmentOption[]> {
   const [db, { collection, getDocs, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
   const snapshot = await getDocs(query(collection(db, 'segments'), where('active', '==', true)))
-  return snapshot.docs
-    .map((doc) => toSegmentOption(doc.id, doc.data()))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  return pickableSegmentOptions(snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() })))
 }
 
 // ── Plan ─────────────────────────────────────────────────────────────────

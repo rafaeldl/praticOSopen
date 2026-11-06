@@ -489,3 +489,11 @@ export function normalizeInviteCode(value: string): string {
   if (!code) return ''
   return code.startsWith('INV_') ? code : `INV_${code}`
 }
+
+/** Segment options without `global` (labels for every segment, never one to pick), by stored name. */
+export function pickableSegmentOptions(docs: { id: string; data: Record<string, unknown> }[]): SegmentOption[] {
+  return docs
+    .filter((doc) => doc.id !== 'global')
+    .map((doc) => toSegmentOption(doc.id, doc.data))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}

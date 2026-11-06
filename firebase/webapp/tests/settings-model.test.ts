@@ -21,6 +21,7 @@ import {
   isWebsite,
   leavesNoAdmin,
   normalizeInviteCode,
+  pickableSegmentOptions,
   PERMISSION_GROUPS,
   PERMISSION_LABEL,
   permissionCell,
@@ -225,5 +226,16 @@ describe('review #528', () => {
     expect(codes).not.toContain('DE')
     expect(codes.length).toBe(16)
     expect(companyCountries('DE')).toContain('DE')
+  })
+})
+
+describe('pickableSegmentOptions', () => {
+  test('leaves out global, even when active, and sorts by name', () => {
+    const options = pickableSegmentOptions([
+      { id: 'software_it', data: { name: 'Software e TI', active: true } },
+      { id: 'global', data: { name: 'Global', active: true } },
+      { id: 'hvac', data: { name: 'Ar Condicionado', active: true } },
+    ])
+    expect(options.map((option) => option.id)).toEqual(['hvac', 'software_it'])
   })
 })
