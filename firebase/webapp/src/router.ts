@@ -99,6 +99,13 @@ export const routes: RouteRecordRaw[] = [
   ),
   // Same list under its own name: shared links and the performance test use it.
   { path: '/orders', name: 'orders', component: OrdersView, meta: { access: NAV[0]!.access, title: 'orders' } },
+  // Modo TV (#627): the board alone, big and live, for a screen in the shop. Every order, so viewAllOrders.
+  {
+    path: '/tv',
+    name: 'tv',
+    component: () => Promise.all([import('@/views/TvBoardView.vue'), loadOrderTexts()]).then(([m]) => m),
+    meta: { access: { kind: 'member', anyOf: ['viewAllOrders'] }, title: 'web.tv.title', bare: true },
+  },
   {
     path: '/customers/import',
     name: 'customersImport',

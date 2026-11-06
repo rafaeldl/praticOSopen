@@ -318,3 +318,4 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .quick-foot p { margin: 0; }
 .quick-btns { display: flex; gap: 0.5rem; margin-left: auto; }
 .od-missing { display: flex; gap: 0.9rem; flex-wrap: wrap; margin: 0.15rem 0 0; }
+.tv-open { display: inline-flex; align-items: center; gap: 0.35rem; }
