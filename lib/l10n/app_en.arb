@@ -2378,6 +2378,7 @@
   "nfseListEmpty": "No invoices in {month}",
   "@nfseListEmpty": {"placeholders": {"month": {"type": "String"}}},
   "nfseListEmptyHint": "To issue one, open the order and tap “…”.",
+  "nfseListEmptyHintDirect": "To issue one, open the order and tap “Service invoice”.",
   "nfseListSearch": "Customer, invoice or order number",
   "nfseListAttention": "Needs attention",
   "nfseListAttentionCount": "{count, plural, =1{1 needs attention} other{{count} need attention}}",

@@ -5743,6 +5743,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nfseListEmptyHint => 'Para emitirla, abre la OS y toca “…”.';
 
   @override
+  String get nfseListEmptyHintDirect =>
+      'Para emitirla, abre la OS y toca “Factura de servicio”.';
+
+  @override
   String get nfseListSearch => 'Cliente, número de factura u OS';
 
   @override

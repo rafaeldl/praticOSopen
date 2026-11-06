@@ -2745,6 +2745,7 @@
   "nfseListEmpty": "Nenhuma nota em {month}",
   "@nfseListEmpty": {"placeholders": {"month": {"type": "String"}}},
   "nfseListEmptyHint": "Para emitir, abra a OS e toque em “…”.",
+  "nfseListEmptyHintDirect": "Para emitir, abra a OS e toque em “Nota fiscal”.",
   "nfseListSearch": "Cliente, número da nota ou OS",
   "nfseListAttention": "Precisa de atenção",
   "nfseListAttentionCount": "{count, plural, =1{1 precisa de atenção} other{{count} precisam de atenção}}",

@@ -9368,6 +9368,12 @@ abstract class AppLocalizations {
   /// **'Para emitir, abra a OS e toque em “…”.'**
   String get nfseListEmptyHint;
 
+  /// No description provided for @nfseListEmptyHintDirect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para emitir, abra a OS e toque em “Nota fiscal”.'**
+  String get nfseListEmptyHintDirect;
+
   /// No description provided for @nfseListSearch.
   ///
   /// In pt, this message translates to:

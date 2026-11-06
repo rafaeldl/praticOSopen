@@ -5729,6 +5729,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseListEmptyHint => 'To issue one, open the order and tap “…”.';
 
   @override
+  String get nfseListEmptyHintDirect =>
+      'To issue one, open the order and tap “Service invoice”.';
+
+  @override
   String get nfseListSearch => 'Customer, invoice or order number';
 
   @override

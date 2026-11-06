@@ -2378,6 +2378,7 @@
   "nfseListEmpty": "Ninguna factura en {month}",
   "@nfseListEmpty": {"placeholders": {"month": {"type": "String"}}},
   "nfseListEmptyHint": "Para emitirla, abre la OS y toca “…”.",
+  "nfseListEmptyHintDirect": "Para emitirla, abre la OS y toca “Factura de servicio”.",
   "nfseListSearch": "Cliente, número de factura u OS",
   "nfseListAttention": "Necesita atención",
   "nfseListAttentionCount": "{count, plural, =1{1 necesita atención} other{{count} necesitan atención}}",

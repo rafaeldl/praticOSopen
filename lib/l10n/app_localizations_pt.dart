@@ -5730,6 +5730,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseListEmptyHint => 'Para emitir, abra a OS e toque em “…”.';
 
   @override
+  String get nfseListEmptyHintDirect =>
+      'Para emitir, abra a OS e toque em “Nota fiscal”.';
+
+  @override
   String get nfseListSearch => 'Cliente, número da nota ou OS';
 
   @override

@@ -229,6 +229,28 @@ void main() {
     expect(find.bySemanticsLabel('Configurar nota fiscal'), findsOneWidget);
   });
 
+  testWidgets('empty month: the hint points to the order\'s row', (
+    tester,
+  ) async {
+    await _pump(tester, _screen(const []));
+    expect(find.text('Para emitir, abra a OS e toque em “…”.'), findsOneWidget);
+    await _pump(
+      tester,
+      NfseListScreen(
+        key: const ValueKey('direct'),
+        month: DateTime(2026, 10, 3),
+        today: _today,
+        canSetUp: false,
+        nfse: _controller((_) => Stream.value(const []), direct: true),
+      ),
+    );
+    // The direct nota has its own "Nota fiscal" row on the order (#612).
+    expect(
+      find.text('Para emitir, abra a OS e toque em “Nota fiscal”.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a read failure offers to try again', (tester) async {
     await _pump(
       tester,

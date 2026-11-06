@@ -296,7 +296,10 @@ class _NfseListScreenState extends State<NfseListScreen> {
           hasScrollBody: false,
           child: EmptyState(
             title: l10n.nfseListEmpty(monthName),
-            message: l10n.nfseListEmptyHint,
+            // The direct nota has its own "Nota fiscal" row on the order.
+            message: _nfse.direct
+                ? l10n.nfseListEmptyHintDirect
+                : l10n.nfseListEmptyHint,
           ),
         ),
       ];
