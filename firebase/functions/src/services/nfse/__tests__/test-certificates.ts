@@ -107,7 +107,7 @@ export function testPki(): TestPki {
   });
   const outsiderKeys = rsaKeys();
   const outsider = makeCert({
-    subject: name('AC Fora da Lista'), issuer: name('Raiz de Teste'), publicKey: outsiderKeys.publicKey,
+    subject: name('Unlisted Test AC'), issuer: name('Raiz de Teste'), publicKey: outsiderKeys.publicKey,
     signer: rootKeys.privateKey, ca: true, notBefore: longAgo, notAfter: farAway, serial: '03',
   });
   const holderKeys = rsaKeys();
@@ -121,7 +121,7 @@ export function testPki(): TestPki {
       const holderName = options.holderName ?? 'OFICINA EXEMPLO LTDA';
       const cn = options.withCnSuffix === false ? holderName : `${holderName}:${cnpj}`;
       const selfSigned = options.selfSigned === true;
-      const issuerName = options.outsider ? 'AC Fora da Lista' : 'AC Intermediaria de Teste';
+      const issuerName = options.outsider ? 'Unlisted Test AC' : 'AC Intermediaria de Teste';
       const issuerKey = options.outsider ? outsiderKeys.privateKey : interKeys.privateKey;
       const leaf = makeCert({
         subject: name(cn),
@@ -142,13 +142,13 @@ export function testPki(): TestPki {
     },
     forgedByHolderPfx() {
       const attacker = makeCert({
-        subject: name('ATACANTE LTDA:11111111000191'), issuer: name('AC Intermediaria de Teste'),
+        subject: name('ATTACKER LTDA:11111111000191'), issuer: name('AC Intermediaria de Teste'),
         publicKey: holderKeys.publicKey, signer: interKeys.privateKey, ca: false,
         notBefore: longAgo, notAfter: farAway, serial: 'a1', extra: [icpSan('11111111000191')],
       });
       const victimKeys = rsaKeys();
       const forged = makeCert({
-        subject: name('VITIMA LTDA:22222222000191'), issuer: name('ATACANTE LTDA:11111111000191'),
+        subject: name('VICTIM LTDA:22222222000191'), issuer: name('ATTACKER LTDA:11111111000191'),
         publicKey: victimKeys.publicKey, signer: holderKeys.privateKey, ca: false,
         notBefore: longAgo, notAfter: farAway, serial: 'a2', extra: [icpSan('22222222000191')],
       });
