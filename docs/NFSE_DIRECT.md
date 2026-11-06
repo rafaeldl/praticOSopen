@@ -467,7 +467,7 @@ Código: `firebase/functions/src/services/nfse/adn-reader.ts`, `import-proposal.
 
 ### Proposta (`nfseImports/{batchId}`, `status: proposed`)
 
-A proposta aprende só com as notas recentes (`recentNotas`): as dos 3 meses antes da nota mais nova (`RECENT_NOTA_DAYS`) ou, se forem menos de 10, as 10 mais novas (`RECENT_NOTA_MIN`): emitente, serviços, clientes, série e ligação às OS. As OS entram a partir de 30 dias antes da nota mais antiga dessa janela. As notas mais antigas são lidas e ficam no histórico, sem criar cliente nem ligar a OS.
+Os clientes e a ligação às OS usam todas as notas lidas. Os dados do emitente (serviço mais usado, regime, estilo da descrição, série) vêm só das notas recentes (`recentNotas` + `proposeEmitter`): as dos 3 meses antes da nota mais nova (`RECENT_NOTA_DAYS`) ou, se forem menos de 10, as 10 mais novas (`RECENT_NOTA_MIN`). Assim um serviço que a empresa deixou de fazer não vira o padrão.
 
 | Parte | Regra |
 |---|---|

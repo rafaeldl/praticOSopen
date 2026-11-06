@@ -478,7 +478,7 @@ describe('import: a big company', () => {
     expect(ids).toHaveLength(21);
   });
 
-  it('the proposal learns from the last 3 months, or the 10 newest notas; an older nota stays in the history', async () => {
+  it('the emitter data comes from the last 3 months (or the 10 newest notas); customers come from every nota', async () => {
     const at = (date: string | null) => ({ date } as ImportNota);
     // Many notas: the 3 months before the newest.
     const busy = [...Array.from({ length: 12 }, (_, i) => at(`2026-10-${String(10 + i).padStart(2, '0')}`)), at('2026-07-23'), at('2026-07-21'), at(null)];
@@ -492,13 +492,16 @@ describe('import: a big company', () => {
     expect(recentNotas([at(null)]).since).toBeNull();
 
     const OLD = '00000000000779';
-    // Ten recent notas (one more than the company has), then one from 2024.
+    // Ten recent notas (one more than the company has), then one from 2024 with another service.
     mailbox.push({ nsu: mailbox.length + 1, kind: 'nfse', xml: nfseXml({ n: 12, value: 60, date: '2026-10-12', recipient: { taxId: NOVA, name: 'NOVA EMPRESA EXEMPLO' } }) });
-    mailbox.push({ nsu: mailbox.length + 1, kind: 'nfse', xml: nfseXml({ n: 300, value: 40, date: '2024-05-02', recipient: { taxId: OLD, name: 'CLIENTE ANTIGO EXEMPLO' } }) });
+    mailbox.push({ nsu: mailbox.length + 1, kind: 'nfse', xml: nfseXml({ n: 300, value: 40, date: '2024-05-02', recipient: { taxId: OLD, name: 'CLIENTE ANTIGO EXEMPLO' } }).replace(/<cTribNac>\d+<\/cTribNac>/, '<cTribNac>990101</cTribNac>') });
     const batch = await proposed();
     expect(read(`companies/c1/invoices/${externalInvoiceId(accessKeyOf(300))}`)).toMatchObject({ source: 'external', effectiveDate: '2024-05-02' });
-    expect(batch.proposal!.groups.map((g) => g.key)).not.toContain(OLD);
-    expect(batch.proposal!.counts.notas).toBe(10);
+    expect(batch.proposal!.groups.map((g) => g.key)).toContain(OLD);
+    expect(batch.proposal!.counts.notas).toBe(11);
+    // The service of the 2024 nota does not count for the emitter.
+    expect(batch.proposal!.emitter.fill.service).toMatchObject({ nationalCode: '140101' });
+    expect(JSON.stringify(batch.proposal!.emitter)).not.toContain('990101');
   });
 
   it('1,000 documents and 1,500 orders with photos: proposes; a crash mid-page or before the proposal retries without duplicating', async () => {
@@ -556,8 +559,7 @@ describe('import: a big company', () => {
     expect(invoices).toHaveLength(1000);
     expect(new Set(invoices.map((i) => i.data.accessKey)).size).toBe(1000);
     expect(batch.read.lastNsu).toBe(1000);
-    // The proposal reads only the last 3 months of them.
-    expect(batch.proposal!.counts.notas).toBe(300);
+    expect(batch.proposal!.counts.notas).toBe(1000);
     // Logged, not asserted: the fake db holds everything in this same heap.
     process.stdout.write(`[import 1000 docs] heap +${Math.round((process.memoryUsage().heapUsed - memoryBefore) / 1048576)} MiB\n`);
   }, 120000);

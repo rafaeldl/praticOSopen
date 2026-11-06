@@ -40,6 +40,7 @@ import { fetchDfePage, parseEvent, parseNfse, type DfeDocument, type ParsedNfse 
 import {
   buildProposal,
   fillsFor,
+  proposeEmitter,
   rankOrdersForNota,
   type ImportCustomer,
   type ImportNota,
@@ -557,11 +558,11 @@ async function prepareProposal(cid: string, emitter: FiscalEmitter, client: Sefi
   await scanFields(invoicesRef(cid).where('emitter.id', '==', emitter.id), NOTA_FIELDS, (id, data) => {
     if ((data as NfseInvoice).source === 'external') notas.push(notaOf({ id, data: () => data }));
   });
-  const { customers, orders: allOrders } = await loadCompanyData(cid);
-  // The proposal learns from the recent notas only (3 months or the 10 newest); the older ones stay in the history.
-  const { notas: recent, since } = recentNotas(notas);
-  const orders = since ? allOrders.filter((o) => !o.date || o.date >= addDays(since, -ORDER_MARGIN_DAYS)) : allOrders;
-  const proposal = buildProposal({ emitter, notas: recent, customers, orders });
+  const { customers, orders } = await loadCompanyData(cid);
+  // Customers and order links come from every nota; the emitter data (service, regime,
+  // description style, series) only from the recent ones (3 months or the 10 newest).
+  const proposal = buildProposal({ emitter, notas, customers, orders });
+  proposal.emitter = proposeEmitter(emitter, recentNotas(notas).notas);
   const fill = proposal.emitter.fill;
   const today = todayInSaoPaulo(deps.now());
 
@@ -605,12 +606,10 @@ async function prepareProposal(cid: string, emitter: FiscalEmitter, client: Sefi
   return { proposal, enabledInCity };
 }
 
-/** The proposal reads the notas of the last 3 months before the newest one... */
+/** The emitter data comes from the notas of the 3 months before the newest one... */
 export const RECENT_NOTA_DAYS = 90;
 /** ...or, when they are fewer, the 10 newest. */
 export const RECENT_NOTA_MIN = 10;
-/** Orders a little older than the oldest recent nota can still be its order. */
-const ORDER_MARGIN_DAYS = 30;
 
 /** The recent notas (3 months from the newest, at least the 10 newest) and the date they start. */
 export function recentNotas(notas: ImportNota[]): { notas: ImportNota[]; since: string | null } {
