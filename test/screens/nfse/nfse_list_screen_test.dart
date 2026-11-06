@@ -216,14 +216,39 @@ void main() {
     expect(find.text('Ana Ribeiro'), findsNothing);
   });
 
-  testWidgets('the "…" is only for who sets it up', (tester) async {
+  testWidgets('the setup button is only for who sets it up', (tester) async {
     await _pump(tester, _screen([_nota('a')]));
-    expect(find.byKey(const Key('nfseListMenu')), findsNothing);
+    expect(find.byKey(const Key('nfseListSetup')), findsNothing);
     await _pump(
       tester,
       _screen([_nota('a')], canSetUp: true, month: DateTime(2026, 10, 2)),
     );
-    expect(find.byKey(const Key('nfseListMenu')), findsOneWidget);
+    // One tap to the setup, no "…" menu in between.
+    expect(find.byKey(const Key('nfseListSetup')), findsOneWidget);
+    expect(find.byKey(const Key('nfseListMenu')), findsNothing);
+    expect(find.bySemanticsLabel('Configurar nota fiscal'), findsOneWidget);
+  });
+
+  testWidgets('empty month: the hint points to the order\'s row', (
+    tester,
+  ) async {
+    await _pump(tester, _screen(const []));
+    expect(find.text('Para emitir, abra a OS e toque em “…”.'), findsOneWidget);
+    await _pump(
+      tester,
+      NfseListScreen(
+        key: const ValueKey('direct'),
+        month: DateTime(2026, 10, 3),
+        today: _today,
+        canSetUp: false,
+        nfse: _controller((_) => Stream.value(const []), direct: true),
+      ),
+    );
+    // The direct nota has its own "Nota fiscal" row on the order (#612).
+    expect(
+      find.text('Para emitir, abra a OS e toque em “Nota fiscal”.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a read failure offers to try again', (tester) async {

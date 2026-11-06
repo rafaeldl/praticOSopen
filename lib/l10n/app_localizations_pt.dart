@@ -5730,6 +5730,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseListEmptyHint => 'Para emitir, abra a OS e toque em “…”.';
 
   @override
+  String get nfseListEmptyHintDirect =>
+      'Para emitir, abra a OS e toque em “Nota fiscal”.';
+
+  @override
   String get nfseListSearch => 'Cliente, número da nota ou OS';
 
   @override
@@ -5785,6 +5789,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseRowTitle => 'Nota fiscal';
+
+  @override
+  String get nfseCompanyRowNoCnpj => 'Falta cadastrar o CNPJ';
+
+  @override
+  String get nfseCompanyRowPending => 'Falta terminar a configuração';
+
+  @override
+  String get nfseCompanyRowReady => 'Pronta para emitir';
 
   @override
   String get nfseIssueAction => 'Emitir nota fiscal';

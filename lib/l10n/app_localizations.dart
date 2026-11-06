@@ -9368,6 +9368,12 @@ abstract class AppLocalizations {
   /// **'Para emitir, abra a OS e toque em “…”.'**
   String get nfseListEmptyHint;
 
+  /// No description provided for @nfseListEmptyHintDirect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para emitir, abra a OS e toque em “Nota fiscal”.'**
+  String get nfseListEmptyHintDirect;
+
   /// No description provided for @nfseListSearch.
   ///
   /// In pt, this message translates to:
@@ -9451,6 +9457,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nota fiscal'**
   String get nfseRowTitle;
+
+  /// No description provided for @nfseCompanyRowNoCnpj.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta cadastrar o CNPJ'**
+  String get nfseCompanyRowNoCnpj;
+
+  /// No description provided for @nfseCompanyRowPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta terminar a configuração'**
+  String get nfseCompanyRowPending;
+
+  /// No description provided for @nfseCompanyRowReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronta para emitir'**
+  String get nfseCompanyRowReady;
 
   /// No description provided for @nfseIssueAction.
   ///

@@ -6201,7 +6201,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Web: link \"Configurar nota fiscal\" em Notas fiscais para quem tem manageCompany; tela em /invoices/setup."
+  note: "App: botão de engrenagem no topo de Notas fiscais abre a configuração direto (antes ficava dentro de um menu …). Web: link \"Configurar nota fiscal\" em Notas fiscais para quem tem manageCompany; tela em /invoices/setup."
 - id: nfse.list.rules
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: "/nfse_list"
@@ -10739,6 +10739,24 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Desligar pede confirmação; nega permissões financeiras a todos. Web: some na hora também quando a mudança vem do app ou de outra aba (companies/{id} escutado ao vivo)."
+- id: company.settings.nfse
+  screen: lib/screens/menu_navigation/more/my_company_screen.dart
+  route: null
+  action: "Abrir a configuração da nota fiscal (NFS-e direta) por Sua empresa"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["settings/payments", "companies/{id}/fiscalEmitters"]
+  web_status: todo
+  e2e: null
+  web_exception: {status: proposed, reason: "Na web, Notas fiscais fica sempre no menu lateral e o link Configurar nota fiscal aparece no topo da lista; no app, Notas fiscais só aparece no Financeiro, por isso a entrada fica também em Sua empresa."}
+  permission: manageCompany
+  note: "Linha Nota fiscal com ponto âmbar (Falta cadastrar o CNPJ / Falta terminar a configuração) ou verde (Pronta para emitir); abre NfseDirectSetupScreen. Entrada que não depende de já ter notas (achado do Piloto 1: o envio do certificado só era alcançável pelo … da lista)."
 - id: company.settings.scheduling
   screen: lib/screens/menu_navigation/more/my_company_screen.dart
   route: null
