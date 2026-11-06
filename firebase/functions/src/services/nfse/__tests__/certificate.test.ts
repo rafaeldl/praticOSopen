@@ -1,6 +1,8 @@
 import forge from 'node-forge';
-import { MAX_PFX_ITERATIONS, openCertificate, taxIdOfCertificate } from '../certificate';
+import { X509Certificate } from 'node:crypto';
+import { MAX_PFX_ITERATIONS, buildTrustedChain, openCertificate, taxIdOfCertificate } from '../certificate';
 import { NfseServiceError } from '../errors';
+import { ICP_BRASIL_INTERMEDIATES } from '../icp-brasil-intermediates';
 import { ICP_BRASIL_ROOTS } from '../icp-brasil-roots';
 import { testPki } from './test-certificates';
 
@@ -76,6 +78,56 @@ describe('openCertificate', () => {
     ).toBe('CERT_NOT_ICP_BRASIL');
   });
 
+  it('completes the chain of a holder-only PFX with a pinned intermediate', () => {
+    const cert = openCertificate(pki.pfx({ withIntermediate: false }), 'senha-teste', {
+      now,
+      trustedRoots: roots,
+      intermediates: [pki.intermediatePem],
+    });
+    expect(cert.taxId).toBe('00000000000191');
+    // Holder + the pinned intermediate go to the vault (mTLS), the root does not.
+    expect(cert.chainPem.match(/BEGIN CERTIFICATE/g)).toHaveLength(2);
+    expect(new X509Certificate(cert.chainPem.slice(cert.certPem.length)).subject).toContain('AC Intermediaria de Teste');
+  });
+
+  it('refuses a holder-only PFX whose AC is not pinned, even under a trusted root', () => {
+    expect(
+      codeOf(() =>
+        openCertificate(pki.pfx({ outsider: true, withIntermediate: false }), 'senha-teste', {
+          now,
+          trustedRoots: roots,
+          intermediates: [pki.intermediatePem],
+        }),
+      ),
+    ).toBe('CERT_NOT_ICP_BRASIL');
+  });
+
+  it('still accepts the full chain inside the PFX, with or without the pinned list', () => {
+    for (const intermediates of [[], [pki.intermediatePem], ICP_BRASIL_INTERMEDIATES]) {
+      expect(openCertificate(pki.pfx(), 'senha-teste', { now, trustedRoots: roots, intermediates }).taxId).toBe(
+        '00000000000191',
+      );
+    }
+  });
+
+  it('refuses a pinned intermediate that is out of its validity', () => {
+    expect(
+      codeOf(() =>
+        openCertificate(pki.pfx({ withIntermediate: false, notAfter: new Date('2045-01-01T00:00:00Z') }), 'senha-teste', {
+          now: new Date('2041-01-01T00:00:00Z'),
+          trustedRoots: roots,
+          intermediates: [pki.intermediatePem],
+        }),
+      ),
+    ).toBe('CERT_NOT_ICP_BRASIL');
+  });
+
+  it('refuses a certificate signed by a holder that is not a CA', () => {
+    expect(codeOf(() => openCertificate(pki.forgedByHolderPfx(), 'senha-teste', { now, trustedRoots: roots }))).toBe(
+      'CERT_NOT_ICP_BRASIL',
+    );
+  });
+
   it('refuses a certificate without CNPJ/CPF', () => {
     const pfx = pki.pfx({ withSan: false, withCnSuffix: false });
     expect(codeOf(() => openCertificate(pfx, 'senha-teste', { now, trustedRoots: roots }))).toBe('CERT_NO_TAX_ID');
@@ -86,6 +138,24 @@ describe('openCertificate', () => {
     for (const pem of ICP_BRASIL_ROOTS) {
       expect(forge.pki.certificateFromPem(pem).subject.getField('O')?.value).toBe('ICP-Brasil');
     }
+  });
+});
+
+describe('ICP_BRASIL_INTERMEDIATES', () => {
+  it('pins only CA certificates that chain to a pinned ICP-Brasil root', () => {
+    const generatedOn = new Date('2026-11-06T12:00:00Z');
+    expect(ICP_BRASIL_INTERMEDIATES.length).toBeGreaterThan(100);
+    for (const pem of ICP_BRASIL_INTERMEDIATES) {
+      const cert = new X509Certificate(pem);
+      expect(cert.ca).toBe(true);
+      expect(buildTrustedChain([pem], ICP_BRASIL_ROOTS, generatedOn, ICP_BRASIL_INTERMEDIATES)).not.toBeNull();
+    }
+  });
+
+  it('includes the RFB ACs that issue e-CNPJ without the chain in the file', () => {
+    const subjects = ICP_BRASIL_INTERMEDIATES.map((pem) => new X509Certificate(pem).subject);
+    expect(subjects.some((s) => s.includes('CN=AC VALID RFB v5'))).toBe(true);
+    expect(subjects.some((s) => s.includes('CN=AC Secretaria da Receita Federal do Brasil v5'))).toBe(true);
   });
 });
 
