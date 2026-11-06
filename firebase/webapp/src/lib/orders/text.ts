@@ -1,8 +1,9 @@
 // Words for orders: status, lateness, dates and segment labels. Keys stay
 // literal so the build keeps them (docs/WEB_APP.md, Contrato gerado).
 import { t, type MessageKey } from '@/i18n'
-import { formatDayMonth, formatMoney, formatTime } from '@/lib/format'
+import { countryFormat, formatDayMonth, formatMoney, formatTime } from '@/lib/format'
 import { productWord, resolveLabel, segmentLabels } from '@/lib/segments'
+import { prefs } from '@/lib/prefs'
 import { session } from '@/lib/session'
 import { hasTime, holdDays, isActive, lateness, relativeDay, type HoldReason, type Order, type OrderStatus } from './model'
 
@@ -34,6 +35,21 @@ export const orderTitle = (order: Pick<Order, 'number'>) => t('orderNumberTitle'
 
 export function money(value: number | null | undefined): string {
   return formatMoney(value ?? 0, country())
+}
+
+/** "R$ •••" ("$•••", "••• €"): the company's currency with dots in place of the number. */
+export function hiddenMoney(): string {
+  const { currency, locale } = countryFormat(country())
+  let dots = false
+  return new Intl.NumberFormat(locale, { style: 'currency', currency })
+    .formatToParts(0)
+    .map((part) => (['integer', 'group', 'decimal', 'fraction'].includes(part.type) ? (dots ? '' : ((dots = true), '•••')) : part.value))
+    .join('')
+}
+
+/** A value on the order screens: hidden when the eye is on (prefs.hideValues). */
+export function shownMoney(value: number | null | undefined): string {
+  return prefs.hideValues ? hiddenMoney() : money(value)
 }
 
 export function holdReasonText(reason: HoldReason): string {
@@ -105,7 +121,7 @@ export function whenCell(order: Order, now: Date): { text: string; late: boolean
 
 /** The phrase under the header (order.detail.overdue-line / remaining-line). */
 export function headerPhrase(order: Order, now: Date, remaining: number | null): { text: string; late: boolean } | null {
-  if (order.status === 'done' && remaining && remaining > 0) return { text: t('orderRemainingToReceive', { amount: money(remaining) }), late: false }
+  if (order.status === 'done' && remaining && remaining > 0) return { text: t('orderRemainingToReceive', { amount: shownMoney(remaining) }), late: false }
   if (order.status === 'canceled' || order.status === 'done' || !order.dueDate) return null
   const late = lateness(order, now)
   if (late) return { text: t('orderDueLatePhrase', { when: whenText(order.dueDate, now) }), late: true }

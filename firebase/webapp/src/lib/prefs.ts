@@ -10,10 +10,16 @@ export interface Prefs {
   language: LanguagePref
   /** WCAG 2.1.4: single-letter shortcuts can be turned off. */
   singleKeyShortcuts: boolean
+  /**
+   * Values of the order screens shown as "R$ •••" (the eye, like bank apps).
+   * Per browser, not per person: the shop's TV stays hidden while the office
+   * computer shows them. Only on screen: the values still reach the browser.
+   */
+  hideValues: boolean
 }
 
 const KEY = 'praticos.prefs'
-const DEFAULTS: Prefs = { theme: 'system', language: 'system', singleKeyShortcuts: true }
+const DEFAULTS: Prefs = { theme: 'system', language: 'system', singleKeyShortcuts: true, hideValues: false }
 
 function read(): Prefs {
   try {
