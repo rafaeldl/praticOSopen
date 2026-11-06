@@ -197,12 +197,18 @@ export async function watchFirstRows(
   size: number,
   onRows: (rows: OrderRow[]) => void,
   onError: (error: unknown) => void,
+  /**
+   * Also the rows the SDK already has (fromCache). Needed when this is the only
+   * read: a query the cache can answer gets no second event when the server
+   * agrees, so skipping the cached one would leave the screen empty (Modo TV).
+   */
+  acceptCache = false,
 ): Promise<() => void> {
   const [db, firestore] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   return firestore.onSnapshot(
     buildQuery(firestore, db, query, size) as unknown as import('firebase/firestore').Query,
     (snapshot) => {
-      if (!snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot))
+      if (acceptCache || !snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot))
     },
     onError,
   )

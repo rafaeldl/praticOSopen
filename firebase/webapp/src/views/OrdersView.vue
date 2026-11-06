@@ -5,7 +5,7 @@
 // pickers load on demand so the first paint stays inside the budget.
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, Eye, EyeOff } from '@lucide/vue'
+import { Bell, Eye, EyeOff, Tv } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -570,6 +570,10 @@ const columns = 5 + (showsMoney ? 1 : 0)
 
   <div class="toolbar home-bar" :class="{ 'board-bar': board }">
     <p v-if="board" class="board-hint sub">{{ t('web.board.hint') }}</p>
+    <!-- Modo TV (#627): the same board alone, big and live, for a screen in the shop. -->
+    <RouterLink v-if="board && can('viewAllOrders')" class="btn btn--ghost tv-open hide-phone" to="/tv" data-testid="open-tv">
+      <Tv :size="18" aria-hidden="true" /> {{ t('web.tv.open') }}
+    </RouterLink>
     <BatchActions v-else-if="selected.length" :orders="selectedOrders" @done="selected = []" />
     <template v-if="board || !selected.length">
       <template v-if="!board">

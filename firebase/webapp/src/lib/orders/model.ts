@@ -71,6 +71,8 @@ export interface Order {
   scheduledDate?: string | null
   createdAt?: string | null
   updatedAt?: string | null
+  /** When it became done (UTC ISO, written only by the server; gone when it leaves done). */
+  completedAt?: string | null
   /** Opaque version for expectedUpdatedAt (versionOf): sent back as is, never converted by zone. */
   version?: string | null
   createdBy?: Aggr | null
@@ -212,6 +214,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     scheduledDate: isoOf(raw.scheduledDate),
     createdAt: isoOf(raw.createdAt),
     updatedAt: isoOf(raw.updatedAt),
+    completedAt: isoOf(raw.completedAt),
     version: versionOf(raw),
     createdBy: (raw.createdBy as Aggr | null) ?? null,
     showsMoney,
