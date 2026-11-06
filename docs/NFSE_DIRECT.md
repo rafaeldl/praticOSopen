@@ -417,7 +417,7 @@ Erros esperados só logam `console.warn` com o código; nunca alerta. Nos casos 
 
 1. **Antes do primeiro deploy**: dar à conta `nfse-api@praticos.iam.gserviceaccount.com` o papel `roles/eventarc.eventReceiver` no projeto (gatilho do Firestore com conta própria). O deploy dá à conta o `run.invoker` da função.
    ```bash
-   gcloud projects add-iam-policy-binding praticos --member=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com --role=roles/eventarc.eventReceiver
+   gcloud projects add-iam-policy-binding praticos --member=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com --role=roles/eventarc.eventReceiver --condition=None
    ```
    Sem isso o pedido fica `pending` e só sai na rotina diária (6h30).
 2. Na empresa: "Nota fiscal" → "Emitir sozinha quando concluir a OS" → "Para os clientes escolhidos" (e ligar "Emitir nota sozinha" no cliente) ou "Para todas as OS".
