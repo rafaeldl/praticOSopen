@@ -75,7 +75,7 @@ Situação mudada pelo app, bot ou MCP
 ## Regras de Negócio
 
 1. A etapa só existe em `progress`. Lida fora disso, é ignorada (`normalizeOrder`) até ser apagada.
-2. Uma OS em andamento sem etapa (posta em andamento pelo app ou antes das etapas), ou com uma etapa que a empresa tirou, aparece na **primeira** coluna, no fim.
+2. Uma OS em andamento sem etapa (posta em andamento pelo app ou antes das etapas), ou com uma etapa que a empresa tirou, aparece na **primeira** coluna, pela data de criação. É a mesma escala do `rank` que o servidor grava sem posição (a hora), então dá para pôr um cartão acima, entre ou abaixo dessas OS.
 3. Pôr uma OS aprovada numa etapa a passa para em andamento na mesma gravação. Quem não pode fazer essa passagem recebe 403.
 4. Quem muda de etapa e reordena: dono, admin, gerente, supervisor e o técnico nas OS que vê. O consultor não (mesma regra da OS parada).
 5. Sem `rank`, a OS vai para o fim da coluna (o servidor usa a hora). Na tela, a ordem muda na hora e volta se o servidor recusar.

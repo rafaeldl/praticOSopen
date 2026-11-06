@@ -65,11 +65,13 @@ export async function setOrderStage(
 ): Promise<Order | null> {
   const companyRef = db.collection('companies').doc(companyId);
   const ref = companyRef.collection('orders').doc(orderId);
+  // Read apart: stages rarely change, and a read in the transaction would lock
+  // the company document (order counters write it often).
+  const stages = workStagesOf((await companyRef.get()).data());
   return db.runTransaction(async (tx) => {
-    const companySnap = await tx.get(companyRef);
     const order = await readOrderForWrite(tx, ref, options);
     if (!order) return null;
-    const target = workStagesOf(companySnap.data()).find((stage) => stage.id === input.stageId);
+    const target = stages.find((stage) => stage.id === input.stageId);
     if (!target) throw new OrderRuleError('STAGE_UNKNOWN', 422, 'The company has no such work stage');
     if (order.status !== 'approved' && order.status !== 'progress') {
       throw new OrderRuleError('STAGE_NOT_ALLOWED', 409, 'Only approved or in-progress orders have a work stage');

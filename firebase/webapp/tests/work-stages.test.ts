@@ -48,10 +48,12 @@ describe('stage of an order', () => {
 
 describe('order inside a stage', () => {
   const ranked = (id: string, rank: number, stage = 'paint') => order(id, { stage: { id: stage, rank } })
+  // Put in progress outside the board: no place, only the creation date.
+  const loose = (id: string, createdAt: string) => order(id, { createdAt })
 
-  test('by rank, then the ones with no place yet in the order they came', () => {
-    const rows = [order('new1'), ranked('b', 20), ranked('other', 1, 'polish'), ranked('a', 10), order('new2')]
-    expect(sortInStage(rows, 'paint').map((row) => row.id)).toEqual(['a', 'b', 'new1', 'other', 'new2'])
+  test('by rank; orders with no place count by creation, then the ones without a date', () => {
+    const rows = [order('nodate'), ranked('b', Date.parse('2026-11-06T12:00:00Z')), loose('u1', '2026-11-06T10:00:00Z'), ranked('other', 1, 'polish'), ranked('a', 10)]
+    expect(sortInStage(rows, 'paint').map((row) => row.id)).toEqual(['a', 'u1', 'b', 'nodate', 'other'])
   })
 
   test('rank between the neighbours, before the first, after the last', () => {
@@ -60,11 +62,21 @@ describe('order inside a stage', () => {
     expect(rankAt(column, 0, 'paint')).toBe(10 - 1024)
     expect(rankAt(column, 2, 'paint')).toBe(20 + 1024)
     expect(rankAt([], 0, 'paint')).toBeUndefined()
-    // Only cards without a place: first of the column, or the end.
-    expect(rankAt([order('x')], 0, 'paint')).toBe(0)
-    expect(rankAt([order('x')], 1, 'paint')).toBeUndefined()
-    // After the ranked ones, before the ones with no place.
-    expect(rankAt([ranked('a', 10), order('x')], 1, 'paint')).toBe(10 + 1024)
+    expect(rankAt([order('nodate')], 1, 'paint')).toBeUndefined()
+  })
+
+  test('a card goes below or between orders that have no place yet', () => {
+    const u1 = loose('u1', '2026-11-06T10:00:00Z')
+    const u2 = loose('u2', '2026-11-06T11:00:00Z')
+    const t1 = Date.parse('2026-11-06T10:00:00Z')
+    const t2 = Date.parse('2026-11-06T11:00:00Z')
+    expect(rankAt([u1, u2], 1, 'paint')).toBe((t1 + t2) / 2)
+    expect(rankAt([u1, u2], 2, 'paint')).toBe(t2 + 1024)
+    expect(rankAt([u1, u2], 0, 'paint')).toBe(t1 - 1024)
+    // Alt + ↓ on the first card of [A, U1, U2] lands between U1 and U2, and stays there.
+    const a = ranked('a', 5)
+    const moved = { ...a, stage: { id: 'paint', rank: rankAt([u1, u2], 1, 'paint')!, since: '' } }
+    expect(sortInStage([moved, u1, u2], 'paint').map((row) => row.id)).toEqual(['u1', 'a', 'u2'])
   })
 })
 

@@ -35,30 +35,44 @@ export function stageIdOf(order: Pick<Order, 'status' | 'stage'>, stages: WorkSt
   return stages.some((stage) => stage.id === order.stage?.id) ? order.stage!.id : stages[0]!.id
 }
 
-/** Ordered by rank; orders without a place in that stage go last, newest first as the board read them. */
-export function sortInStage<T extends Pick<Order, 'stage'>>(orders: T[], stageId: string): T[] {
-  const rank = (order: T) => (order.stage?.id === stageId && Number.isFinite(order.stage.rank) ? order.stage.rank : Number.POSITIVE_INFINITY)
+type Ranked = Pick<Order, 'stage' | 'createdAt'>
+
+/**
+ * Place of a card in a stage. Orders without one (put in progress by the app,
+ * the API or before stages) count by when they were created: the same scale as
+ * the server's default rank (the time), so a card can go above, between or
+ * below them. Without a date either, last.
+ */
+export function rankIn(order: Ranked, stageId: string): number {
+  if (order.stage?.id === stageId && Number.isFinite(order.stage.rank)) return order.stage.rank
+  const created = order.createdAt ? Date.parse(order.createdAt) : NaN
+  return Number.isNaN(created) ? Number.POSITIVE_INFINITY : created
+}
+
+/** Ordered by place in the stage; ties stay as the board read them. */
+export function sortInStage<T extends Ranked>(orders: T[], stageId: string): T[] {
   return orders
-    .map((order, index) => ({ order, index }))
-    .sort((a, b) => rank(a.order) - rank(b.order) || a.index - b.index)
+    .map((order, index) => ({ order, index, rank: rankIn(order, stageId) }))
+    .sort((a, b) => (a.rank === b.rank ? 0 : a.rank - b.rank) || a.index - b.index)
     .map(({ order }) => order)
 }
 
 /**
  * Rank to put a card at `index` of a column (the card itself already left out).
- * `undefined` means the end: the server stamps the time, larger than any rank
- * the board makes.
+ * `undefined` means the end with nothing ranked around: the server stamps the
+ * time.
  */
-export function rankAt(column: Pick<Order, 'stage'>[], index: number, stageId: string): number | undefined {
-  const rankOf = (order: Pick<Order, 'stage'> | undefined) =>
-    order?.stage?.id === stageId && Number.isFinite(order.stage.rank) ? order.stage.rank : undefined
+export function rankAt(column: Ranked[], index: number, stageId: string): number | undefined {
+  const rankOf = (order: Ranked | undefined) => {
+    const rank = order ? rankIn(order, stageId) : NaN
+    return Number.isFinite(rank) ? rank : undefined
+  }
   const before = rankOf(column[index - 1])
   const after = rankOf(column[index])
   if (before !== undefined && after !== undefined) return (before + after) / 2
   if (before !== undefined) return before + 1024
   if (after !== undefined) return after - 1024
-  // Only cards with no place around: first of the column, or the end.
-  return index === 0 && column.length > 0 ? 0 : undefined
+  return undefined
 }
 
 const fold = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
