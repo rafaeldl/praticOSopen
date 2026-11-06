@@ -67,7 +67,10 @@ export const nfseApi = onRequest(
     serviceAccount: NFSE_SERVICE_ACCOUNT,
     // The nota goes to the customer's e-mail (issue #611); the reconcile in nfseDaily may issue too.
     secrets: [RESEND_API_KEY],
-    memory: '512MiB',
+    // 1 GiB: the import of a CNPJ with ~200 notas in a workshop with years of
+    // orders went past 512 MiB (it now reads only the fields it uses, page by
+    // page; the margin stays for the PDF and the certificate work).
+    memory: '1GiB',
     timeoutSeconds: 120,
     minInstances: 0,
     maxInstances: 10,
