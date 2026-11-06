@@ -2445,7 +2445,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderItemsSection => 'O que vai ser feito';
 
   @override
-  String get orderItemSearchPlaceholder => 'Buscar serviço ou peça';
+  String orderItemSearchPlaceholder(String product) {
+    return 'Buscar serviço ou $product';
+  }
 
   @override
   String get orderCreateItemError => 'Não deu para criar. Tente de novo.';
@@ -2465,6 +2467,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get orderItemKindProduct => 'produto';
+
+  @override
+  String get orderItemPartWord => 'peça';
 
   @override
   String orderItemQuantityValue(String count) {
@@ -4505,7 +4510,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'O microfone não está liberado. Libere em Ajustes ou digite o serviço.';
 
   @override
-  String get orderAddItemRow => 'Adicionar serviço ou peça';
+  String orderAddItemRow(String product) {
+    return 'Adicionar serviço ou $product';
+  }
 
   @override
   String get orderPickCustomerRow => 'Escolher cliente';
@@ -4690,7 +4697,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get pickerNewItem => 'Novo serviço ou peça';
+  String pickerNewItem(String product) {
+    return 'Novo serviço ou $product';
+  }
 
   @override
   String get pickerNewChecklist => 'Novo checklist';
@@ -4706,8 +4715,8 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String pickerNoItemWith(String query) {
-    return 'Nenhum serviço ou peça com “$query”. Cadastre e ele já entra na OS.';
+  String pickerNoItemWith(String product, String query) {
+    return 'Nenhum serviço ou $product com “$query”. Cadastre e ele já entra na OS.';
   }
 
   @override
@@ -5752,7 +5761,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseListOnlyServices =>
-      'Só os serviços entram na nota. As peças ficam de fora, por isso o total é diferente do Vendido.';
+      'Só os serviços entram na nota, por isso o total pode ser diferente do Vendido.';
 
   @override
   String nfseListNoResults(String month) {

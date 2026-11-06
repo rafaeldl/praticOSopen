@@ -43,14 +43,22 @@ void main() {
   tearDown(SegmentConfigService().clear);
 
   test('the examples speak of software, in the three languages', () {
-    expect(AppLocalizationsPt().serviceNameHint('software_it'),
-        'Ex.: Suporte técnico mensal');
-    expect(AppLocalizationsPt().productNameHint('software_it'),
-        'Ex.: Licença Microsoft 365');
-    expect(AppLocalizationsEn().orderCustomerRequestPlaceholder('software_it'),
-        "E.g.: report won't open");
-    expect(AppLocalizationsEs().checklistQuestionPlaceholder('software_it'),
-        'Ej.: ¿Se hizo la copia de seguridad?');
+    expect(
+      AppLocalizationsPt().serviceNameHint('software_it'),
+      'Ex.: Suporte técnico mensal',
+    );
+    expect(
+      AppLocalizationsPt().productNameHint('software_it'),
+      'Ex.: Licença Microsoft 365',
+    );
+    expect(
+      AppLocalizationsEn().orderCustomerRequestPlaceholder('software_it'),
+      "E.g.: report won't open",
+    );
+    expect(
+      AppLocalizationsEs().checklistQuestionPlaceholder('software_it'),
+      'Ej.: ¿Se hizo la copia de seguridad?',
+    );
 
     for (final l10n in <AppLocalizations>[
       AppLocalizationsPt(),
@@ -59,8 +67,11 @@ void main() {
     ]) {
       for (final text in _examples(l10n)) {
         for (final term in _hardwareTerms) {
-          expect(text.toLowerCase().contains(term), isFalse,
-              reason: '"$text" has "$term"');
+          expect(
+            text.toLowerCase().contains(term),
+            isFalse,
+            reason: '"$text" has "$term"',
+          );
         }
       }
     }
@@ -85,11 +96,51 @@ void main() {
         }),
     ]);
 
-    expect(provider.deviceIcon, CupertinoIcons.chevron_left_slash_chevron_right);
+    expect(
+      provider.deviceIcon,
+      CupertinoIcons.chevron_left_slash_chevron_right,
+    );
     expect(provider.label('device._entity'), 'Sistema');
     expect(provider.label('product._entity'), 'Licença');
-    expect(provider.serialValue('erp.cliente.com.br'),
-        'Endereço erp.cliente.com.br');
+    expect(
+      provider.serialValue('erp.cliente.com.br'),
+      'Endereço erp.cliente.com.br',
+    );
     expect(provider.serialLabelInSentence, 'endereço');
+  });
+
+  test('order item texts name the license, other segments keep "peça"', () {
+    final l10n = AppLocalizationsPt();
+    final provider = SegmentConfigProvider();
+    final service = SegmentConfigService()..setL10n(l10n);
+
+    // Segment without its own product name: the workshop word.
+    expect(provider.productWord(l10n.orderItemPartWord), 'peça');
+    expect(
+      l10n.orderItemSearchPlaceholder(
+        provider.productWord(l10n.orderItemPartWord),
+      ),
+      'Buscar serviço ou peça',
+    );
+
+    service.debugSetCustomFields([
+      CustomField.fromJson({
+        'key': 'product._entity',
+        'type': 'label',
+        'labels': {'pt-BR': 'Licença'},
+      }),
+    ]);
+    final word = provider.productWord(l10n.orderItemPartWord);
+    expect(word, 'licença');
+    expect(l10n.orderItemSearchPlaceholder(word), 'Buscar serviço ou licença');
+    expect(l10n.orderAddItemRow(word), 'Adicionar serviço ou licença');
+    expect(
+      l10n.pickerNoItemWith(word, 'x'),
+      startsWith('Nenhum serviço ou licença'),
+    );
+    expect(
+      AppLocalizationsPt().nfseListOnlyServices.toLowerCase(),
+      isNot(contains('peça')),
+    );
   });
 }

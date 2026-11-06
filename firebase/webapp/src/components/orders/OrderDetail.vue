@@ -61,7 +61,7 @@ import QuickCreate from './QuickCreate.vue'
 import Layer from '@/components/Layer.vue'
 import { loadCustomer, loadDevice, saveDevice, type CustomerDetail, type DeviceDetail } from '@/lib/customers/data'
 import { customerSummary, missingOnOrder, type Missing } from '@/lib/orders/quick-create'
-import { resolveLabel, segmentLabels } from '@/lib/segments'
+import { productWord, resolveLabel, segmentLabels } from '@/lib/segments'
 import * as maintenance from '@/lib/orders/maintenance-offer'
 import { askNotificationsOnce } from '@/lib/push'
 import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
@@ -1189,7 +1189,7 @@ watch(
         <section v-if="showItems" class="od-sec od-sec--items" aria-labelledby="od-items-title">
           <h3 id="od-items-title">
             {{ t('orderServicesAndParts') }}
-            <button v-if="canAddItems" type="button" class="link" @click="openPicker('addItem')">{{ t('orderAddItemRow') }}</button>
+            <button v-if="canAddItems" type="button" class="link" @click="openPicker('addItem')">{{ t('orderAddItemRow', { product: productWord(t('orderItemPartWord')) }) }}</button>
           </h3>
           <template v-for="group in groups" :key="group.device?.id ?? 'general'">
             <h4 v-if="order.devices.length > 1" class="od-group">{{ group.device ? [group.device.name, group.device.serial].filter(Boolean).join(' - ') : t('generalNoDevice') }}</h4>
@@ -1238,7 +1238,7 @@ watch(
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
-        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
+        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :direct="nfseDirect" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
         <OrderPhotos :order="order" />
         <OrderDocuments :order="order" :can-edit="true" />
         <OrderComments :order-id="order.id" />
@@ -1384,7 +1384,7 @@ watch(
       @save="saveRequest"
       @close="dialog = null"
     />
-    <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
+    <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder', { product: productWord(t('orderItemPartWord')) })" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
     <DevicePickerDialog v-else-if="dialog.kind === 'devicesFor'" :devices="order.devices" :sub="dialog.name" @pick="addOnPicked" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="currentCustomerId(order.customer, customers, session.company?.country) ?? undefined" @pick="pickCustomerItem" @close="dialog = null" />
     <ComboDialog
@@ -1398,7 +1398,7 @@ watch(
       @pick="pickDeviceItem"
       @close="dialog = null"
     />
-    <Layer v-else-if="dialog.kind === 'quick'" kind="sheet" :label="dialog.quick === 'item' ? t('web.quick.newItem') : t('web.quick.newDevice', { device: deviceLabel() })" @close="dialog = null">
+    <Layer v-else-if="dialog.kind === 'quick'" kind="sheet" :label="dialog.quick === 'item' ? t('web.quick.newItem', { product: productWord(t('orderItemPartWord')) }) : t('web.quick.newDevice', { device: deviceLabel() })" @close="dialog = null">
       <div class="layer-body">
         <QuickCreate :id="`od-quick-${dialog.quick}`" :kind="dialog.quick" :text="dialog.text" @saved="onQuickSaved" @more="onQuickMore" @cancel="dialog = null" />
       </div>

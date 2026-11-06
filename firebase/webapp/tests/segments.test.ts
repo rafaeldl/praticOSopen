@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { buildLabels, fieldLabel, resolveLabel } from '../src/lib/segments'
+import { buildLabels, fieldLabel, productWord, resolveLabel } from '../src/lib/segments'
 import type { MessageKey } from '../src/generated/message-keys'
 
 vi.mock('../src/lib/firebase', () => ({ firestoreClient: vi.fn(), firestoreLite: vi.fn() }))
@@ -38,5 +38,12 @@ describe('labels of a segment', () => {
 
   test('missing documents are fine', () => {
     expect(buildLabels([null, undefined, {}], 'pt')).toEqual({})
+  })
+})
+
+describe('product word in order texts', () => {
+  test('the segment name, lower case, or the workshop word', () => {
+    expect(productWord('peça', { 'product._entity': 'Licença' })).toBe('licença')
+    expect(productWord('peça', {})).toBe('peça')
   })
 })

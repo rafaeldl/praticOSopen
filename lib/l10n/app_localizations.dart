@@ -4429,8 +4429,8 @@ abstract class AppLocalizations {
   /// No description provided for @orderItemSearchPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar serviço ou peça'**
-  String get orderItemSearchPlaceholder;
+  /// **'Buscar serviço ou {product}'**
+  String orderItemSearchPlaceholder(String product);
 
   /// No description provided for @orderCreateItemError.
   ///
@@ -4467,6 +4467,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'produto'**
   String get orderItemKindProduct;
+
+  /// What the order sells besides services when the segment does not name it (product._entity).
+  ///
+  /// In pt, this message translates to:
+  /// **'peça'**
+  String get orderItemPartWord;
 
   /// No description provided for @orderItemQuantityValue.
   ///
@@ -7411,8 +7417,8 @@ abstract class AppLocalizations {
   /// No description provided for @orderAddItemRow.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar serviço ou peça'**
-  String get orderAddItemRow;
+  /// **'Adicionar serviço ou {product}'**
+  String orderAddItemRow(String product);
 
   /// No description provided for @orderPickCustomerRow.
   ///
@@ -7711,8 +7717,8 @@ abstract class AppLocalizations {
   /// No description provided for @pickerNewItem.
   ///
   /// In pt, this message translates to:
-  /// **'Novo serviço ou peça'**
-  String get pickerNewItem;
+  /// **'Novo serviço ou {product}'**
+  String pickerNewItem(String product);
 
   /// No description provided for @pickerNewChecklist.
   ///
@@ -7735,8 +7741,8 @@ abstract class AppLocalizations {
   /// No description provided for @pickerNoItemWith.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum serviço ou peça com “{query}”. Cadastre e ele já entra na OS.'**
-  String pickerNoItemWith(String query);
+  /// **'Nenhum serviço ou {product} com “{query}”. Cadastre e ele já entra na OS.'**
+  String pickerNoItemWith(String product, String query);
 
   /// No description provided for @pickerNoMatch.
   ///
@@ -9401,7 +9407,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseListOnlyServices.
   ///
   /// In pt, this message translates to:
-  /// **'Só os serviços entram na nota. As peças ficam de fora, por isso o total é diferente do Vendido.'**
+  /// **'Só os serviços entram na nota, por isso o total pode ser diferente do Vendido.'**
   String get nfseListOnlyServices;
 
   /// No description provided for @nfseListNoResults.

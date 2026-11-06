@@ -480,6 +480,7 @@ async function fixed() {
       :title="t('nfseCancelQuestion', { value: money(opened.value) })"
       :sub="t('web.nfseDirect.cancelWhy')"
       :choices="reasonChoices"
+      :close-label="t('nfseKeep')"
       @pick="cancelWithReason"
       @close="asking = null"
     />

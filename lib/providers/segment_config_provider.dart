@@ -211,6 +211,9 @@ class SegmentConfigProvider extends ChangeNotifier {
   String get serviceOrder => _service.serviceOrder;
   String get serviceOrderPlural => _service.serviceOrderPlural;
 
+  /// See [SegmentConfigService.productWord].
+  String productWord(String fallback) => _service.productWord(fallback);
+
   /// Obtém label de status customizado
   ///
   /// Mapeia chaves técnicas para labels customizados:
@@ -240,8 +243,7 @@ class SegmentConfigProvider extends ChangeNotifier {
   Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
     String namespace, {
     Set<String>? exclude,
-  }) =>
-      _service.fieldsGroupedBySectionLocalized(namespace, exclude: exclude);
+  }) => _service.fieldsGroupedBySectionLocalized(namespace, exclude: exclude);
 
   // ════════════════════════════════════════════════════════════
   // FIELD VALIDATION & MASKS

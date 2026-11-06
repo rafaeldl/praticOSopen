@@ -1259,19 +1259,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     await issueNfse(context, _nfse, orderIds: [order.id!]);
   }
 
-  /// A finished order without a nota: "Não emitida" when the blue button
-  /// already offers it, else the "Emitir" link (the nota may come before the
-  /// money). Other statuses keep it in the "…".
+  /// An order without a nota: "Não emitida" when the blue button already
+  /// offers it (finished and paid), else the "Emitir" link (the nota may come
+  /// before the money). With the NFS-e direct it shows on any order that can
+  /// have a nota (approved too: some shops issue on every order and leave it
+  /// approved); otherwise only finished orders, the others keep it in the "…".
   Widget? _buildNfseIssueRow() {
     final order = _store.order;
+    final done = _store.status == 'done';
     if (order == null ||
-        _store.status != 'done' ||
+        (!done && !_nfse.direct) ||
         !_nfse.ready ||
         !_canIssueNfse(order)) {
       return null;
     }
     final l10n = context.l10n;
-    final issuedByButton = _store.remainingBalance <= 0;
+    final issuedByButton = done && _store.remainingBalance <= 0;
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
       child: ConstrainedBox(
@@ -2820,7 +2823,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         FormRow(
           key: const ValueKey('new_order_add_item'),
           icon: CupertinoIcons.add_circled,
-          title: l10n.orderAddItemRow,
+          title: l10n.orderAddItemRow(
+            context.read<SegmentConfigProvider>().productWord(
+              l10n.orderItemPartWord,
+            ),
+          ),
           accent: true,
           onTap: _addItem,
         ),
@@ -3769,7 +3776,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         child: SizedBox(
           width: double.infinity,
           child: _link(
-            _store.devices.length < 2 ? label : '$label · ${_deviceName(device)}',
+            _store.devices.length < 2
+                ? label
+                : '$label · ${_deviceName(device)}',
             key: ValueKey('order_reading_add_$id'),
             icon: CupertinoIcons.add,
             onTap: () => _editReading(device, field, config),
@@ -4085,7 +4094,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ],
       if (canEdit)
         _link(
-          l10n.orderAddItemRow,
+          l10n.orderAddItemRow(
+            context.read<SegmentConfigProvider>().productWord(
+              l10n.orderItemPartWord,
+            ),
+          ),
           key: const ValueKey('order_add_item'),
           icon: CupertinoIcons.add,
           onTap: _addItem,
