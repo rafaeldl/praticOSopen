@@ -2613,7 +2613,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         draft.customer != null ||
         (guessed.isNotEmpty &&
             guessed != _store.customer?.name?.trim().toLowerCase());
-    if (aiCustomer && heard && draft.customer?.id != _store.customer?.id) {
+    // On a saved order only for a sure match: it is never left without one.
+    if (aiCustomer &&
+        heard &&
+        (_isNew || draft.customer != null) &&
+        draft.customer?.id != _store.customer?.id) {
       undo
         ..customer = true
         ..customerBefore = _store.customer
