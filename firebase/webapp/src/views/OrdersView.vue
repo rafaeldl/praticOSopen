@@ -5,7 +5,7 @@
 // pickers load on demand so the first paint stays inside the budget.
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell } from '@lucide/vue'
+import { Bell, Eye, EyeOff } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -40,7 +40,8 @@ import {
   type Order,
 } from '@/lib/orders/model'
 import { watchListEnd } from '@/lib/orders/list-end'
-import { country, deviceLabel, holdText, lateText, money, orderShort, statusLine, statusText, whenCell } from '@/lib/orders/text'
+import { country, deviceLabel, holdText, lateText, orderShort, shownMoney as money, statusLine, statusText, whenCell } from '@/lib/orders/text'
+import { prefs } from '@/lib/prefs'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -536,6 +537,20 @@ const columns = 5 + (showsMoney ? 1 : 0)
       <span class="sr">{{ unread ? t('notificationsA11y', { count: unread }) : t('noticesTitle') }}</span>
       <span v-if="unread" class="bell-count num" aria-hidden="true" data-testid="bell-count">{{ unread > 99 ? '99+' : unread }}</span>
     </RouterLink>
+    <!-- The eye of bank apps: values as "R$ •••" in this browser (a TV in the shop). Only on screen, not a permission. -->
+    <button
+      v-if="showsMoney"
+      type="button"
+      class="btn btn--ghost eye"
+      :aria-pressed="prefs.hideValues"
+      data-testid="hide-values"
+      :title="prefs.hideValues ? t('web.money.show') : t('web.money.hide')"
+      @click="prefs.hideValues = !prefs.hideValues"
+    >
+      <EyeOff v-if="prefs.hideValues" :size="18" aria-hidden="true" />
+      <Eye v-else :size="18" aria-hidden="true" />
+      <span class="sr">{{ t('web.money.hide') }}</span>
+    </button>
     <div class="tabs" role="group" :aria-label="t('web.orders.viewAs')">
       <button type="button" :aria-pressed="!board" @click="setView('list')">{{ t('web.orders.list') }}</button>
       <button type="button" :aria-pressed="board" @click="setView('board')">{{ t('web.orders.board') }}</button>
@@ -671,7 +686,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
                 <span v-if="whenCell(order, now)" :class="{ 'is-late': whenCell(order, now)?.late }">{{ whenCell(order, now)?.text }}</span>
               </td>
               <td v-if="showsMoney" class="c-money">
-                <span class="num">{{ money(order.total) }}</span>
+                <span class="num" :aria-label="prefs.hideValues ? t('web.money.hiddenA11y') : undefined">{{ money(order.total) }}</span>
                 <span v-if="remainingOnRow(order)" class="owed">{{ t('web.orders.owed', { amount: money(remainingOnRow(order)) }) }}</span>
               </td>
             </tr>

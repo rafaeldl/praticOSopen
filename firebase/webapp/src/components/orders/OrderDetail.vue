@@ -37,6 +37,7 @@ import {
   lateText,
   lineKindText,
   money,
+  shownMoney,
   orderShort,
   orderTitle,
   statusText,
@@ -259,7 +260,7 @@ const stepLabel = computed(() => {
   const value = step.value
   if (!value) return ''
   if (value.kind === 'resume') return t('orderHoldResume')
-  if (value.kind === 'receive') return t('orderNextStepReceive', { amount: money(value.amount) })
+  if (value.kind === 'receive') return t('orderNextStepReceive', { amount: shownMoney(value.amount) })
   if (value.kind === 'nfse') return value.retry ? t('tryAgain') : value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
   return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('web.order.markDone')
 })
@@ -312,7 +313,7 @@ watch(showCharge, (shown) => (linkOpen.value = shown ? null : false))
 
 async function removePayment(payment: Payment) {
   if (!order.value || !payment.id) return
-  await run(() => removeTransaction(order.value!.id, payment.id as string, payment.type), t('web.receive.removed', { amount: money(payment.amount) }))
+  await run(() => removeTransaction(order.value!.id, payment.id as string, payment.type), t('web.receive.removed', { amount: shownMoney(payment.amount) }))
 }
 
 async function undoAllPayments() {
@@ -546,7 +547,7 @@ async function receive(value: { amount: number; paymentMethod?: string; paidAt?:
       if (receiptFile) await dropUpload(receiptFile.storagePath)
       throw error
     }
-  }, t('web.order.received', { amount: money(value.amount) }))
+  }, t('web.order.received', { amount: shownMoney(value.amount) }))
   if (ok) dialog.value = null
 }
 
@@ -1216,7 +1217,7 @@ watch(
                   <span class="sub">{{ lineKindText(line.kind) }}<template v-if="line.kind === 'product'"> · {{ t('orderItemQuantityValue', { count: line.quantity ?? 1 }) }}</template></span>
                   <span v-if="line.description && line.description !== line.name" class="sub">{{ line.description }}</span>
                 </span>
-                <span v-if="showsMoney" class="num">{{ (line.kind === 'product' ? line.total : line.value) === null ? t('catalogNoPrice') : money(line.kind === 'product' ? line.total : line.value) }}</span>
+                <span v-if="showsMoney" class="num">{{ (line.kind === 'product' ? line.total : line.value) === null ? t('catalogNoPrice') : shownMoney(line.kind === 'product' ? line.total : line.value) }}</span>
                 <span v-else></span>
                 <button v-if="access.canEditMainFields && line.id" type="button" class="link" :aria-label="t('web.order.editLine', { name: line.name })" @click="dialog = { kind: 'item', line }">{{ t('web.order.change') }}</button>
                 <span v-else></span>
@@ -1229,11 +1230,11 @@ watch(
         <section v-if="showsMoney && money$" class="od-sec od-sec--money" aria-labelledby="od-money-title">
           <h3 id="od-money-title" class="sr">{{ t('orderTotalLabel') }}</h3>
           <dl class="receipt" data-testid="order-totals">
-            <div v-if="money$.discount"><dt>{{ t('subtotal') }}</dt><dd>{{ money(money$.subtotal) }}</dd></div>
-            <div v-if="money$.discount"><dt>{{ t('discount') }}</dt><dd>− {{ money(money$.discount) }}</dd></div>
-            <div class="is-total"><dt>{{ t('orderTotalLabel') }}</dt><dd>{{ money(money$.total) }}</dd></div>
-            <div v-if="money$.paid && moneyRowTone"><dt>{{ t('received') }}</dt><dd>{{ money(money$.paid) }}</dd></div>
-            <div v-if="moneyRowTone && money$.remaining > 0" class="is-rest"><dt>{{ t('financialToReceive') }}</dt><dd>{{ money(money$.remaining) }}</dd></div>
+            <div v-if="money$.discount"><dt>{{ t('subtotal') }}</dt><dd>{{ shownMoney(money$.subtotal) }}</dd></div>
+            <div v-if="money$.discount"><dt>{{ t('discount') }}</dt><dd>− {{ shownMoney(money$.discount) }}</dd></div>
+            <div class="is-total"><dt>{{ t('orderTotalLabel') }}</dt><dd>{{ shownMoney(money$.total) }}</dd></div>
+            <div v-if="money$.paid && moneyRowTone"><dt>{{ t('received') }}</dt><dd>{{ shownMoney(money$.paid) }}</dd></div>
+            <div v-if="moneyRowTone && money$.remaining > 0" class="is-rest"><dt>{{ t('financialToReceive') }}</dt><dd>{{ shownMoney(money$.remaining) }}</dd></div>
             <div v-else-if="moneyRowTone && money$.total > 0" class="is-paid"><dt>{{ t('orderFullyPaid') }}</dt><dd>✓</dd></div>
           </dl>
           <p v-if="money$.unpricedCount" class="sub">{{ t('orderUnpricedCount', { count: money$.unpricedCount }) }}</p>

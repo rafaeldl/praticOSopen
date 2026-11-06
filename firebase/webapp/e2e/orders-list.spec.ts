@@ -218,6 +218,44 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
   await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
 })
 
+test('quadro ao vivo: mudança feita em outro aparelho move o cartão sem recarregar (#626)', async ({ page }) => {
+  const name = `Ao vivo ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name } })
+  await openHome(page, 'admin', './?view=board')
+  const board = page.getByTestId('board')
+  await expect(board.getByRole('region', { name: /^Aprovado/ }).getByText(name)).toBeVisible()
+  await updateOrderDoc(order.id, { status: 'progress' })
+  await expect(board.getByRole('region', { name: /^Na oficina/ }).getByText(name)).toBeVisible()
+})
+
+test('olho: esconde os valores no quadro e na lista, e lembra neste navegador (#625)', async ({ page }) => {
+  const name = `Olho ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name }, total: 4321 })
+  await openHome(page, 'admin', './?view=board')
+  const card = page.getByTestId('board').locator('li.card').filter({ hasText: name })
+  await expect(card).toContainText('4.321,00')
+  const eye = page.getByTestId('hide-values')
+  await expect(eye).toHaveAttribute('aria-pressed', 'false')
+  await eye.click()
+  await expect(eye).toHaveAttribute('aria-pressed', 'true')
+  await expect(card).toContainText('•••')
+  await expect(card).not.toContainText('4.321')
+  // Remembered in this browser: a reload (or the TV turned back on) stays hidden.
+  await page.reload()
+  await expect(card).toContainText('•••')
+  await page.getByRole('button', { name: 'Lista', exact: true }).click()
+  await expect(row(page, order.number)).toContainText('•••')
+  await expect(page.getByTestId('summary')).not.toContainText(/\d+,\d\d/)
+  await page.getByTestId('hide-values').click()
+  await expect(row(page, order.number)).toContainText('R$ 4.321,00')
+})
+
+test('olho: só para quem vê valores', async ({ page }) => {
+  await openHome(page, 'supervisor')
+  await expect(page.getByTestId('summary')).toBeVisible()
+  await expect(page.getByTestId('hide-values')).toHaveCount(0)
+})
+
 test('idiomas: filtros em inglês e espanhol, moeda continua do Brasil', async ({ page }) => {
   await login(page, 'admin', 'settings')
   await page.getByLabel('Idioma').selectOption('en')

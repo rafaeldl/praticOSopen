@@ -12,7 +12,9 @@ import { mergeById } from '@/lib/order-list'
 import { onOrderEvent, orderChanged } from '@/lib/orders/bus'
 import { createListLoader, listContext } from '@/lib/orders/data'
 import { accessOf, deviceSummary, isHeld, remainingOnRow, type Order, type OrderStatus } from '@/lib/orders/model'
-import { holdText, lateText, money, orderShort, statusText } from '@/lib/orders/text'
+import { FIRST_PAGE, PAGE_SIZE } from '@/lib/orders-query'
+import { holdText, lateText, orderShort, shownMoney, statusText } from '@/lib/orders/text'
+import { prefs } from '@/lib/prefs'
 import * as writes from '@/lib/orders/writes'
 import { useRoutePanel } from '@/lib/route-layer'
 import { effectiveUseFinancial, session } from '@/lib/session'
@@ -27,7 +29,7 @@ const ctx = listContext()
 const loader = createListLoader(ctx, COLUMNS)
 const rows = shallowRef<Order[]>([])
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
-const now = new Date()
+const now = ref(new Date())
 const dragging = ref<string | null>(null)
 const over = ref<OrderStatus | null>(null)
 const moving = ref<Order | null>(null)
@@ -70,17 +72,60 @@ async function runSearch(text: string) {
 watch(() => props.search ?? '', (text) => void runSearch(text), { immediate: true })
 const access = (order: Order) => accessOf(order, session.role, session.uid, effectiveUseFinancial())
 
+/** The board's cards: the first page and the next one, newest first. */
+const BOARD_SIZE = FIRST_PAGE + PAGE_SIZE
+/** Who reads the API (no values) has no live rows: the board asks again this often and when the tab comes back. */
+const API_REFRESH_MS = 2 * 60_000
+let stopLive: (() => void) | undefined
+let refreshTimer: ReturnType<typeof setInterval> | undefined
+let unmounted = false
+
+async function read(): Promise<Order[]> {
+  const page = await loader.first()
+  return page.hasMore ? mergeById(page.rows, (await loader.more()).rows) : page.rows
+}
+
 async function load() {
   state.value = 'loading'
   try {
-    const page = await loader.first()
-    rows.value = page.rows
-    if (page.hasMore) rows.value = mergeById(rows.value, (await loader.more()).rows)
+    rows.value = await read()
     state.value = 'ready'
+    void goLive()
   } catch (error) {
     console.error('board: failed', error)
     state.value = 'failed'
   }
+}
+
+/**
+ * The board stays open on a screen all day (a TV in the shop): another
+ * person's change must show without reloading. Firestore readers watch the
+ * same query the board read; API readers ask again from time to time.
+ */
+async function goLive() {
+  stopLive?.()
+  stopLive = undefined
+  if (ctx.showsMoney) {
+    const stop = await loader.watch(BOARD_SIZE, (fresh) => (rows.value = fresh), (error) => console.warn('board: live stopped', error))
+    if (unmounted) stop()
+    else stopLive = stop
+    return
+  }
+  refreshTimer ??= setInterval(() => void refresh(), API_REFRESH_MS)
+}
+
+/** Quiet reload: keeps the cards on screen if it fails. */
+async function refresh() {
+  if (ctx.showsMoney || state.value !== 'ready' || document.visibilityState !== 'visible') return
+  try {
+    rows.value = await read()
+  } catch (error) {
+    console.warn('board: refresh failed', error)
+  }
+}
+
+function onVisible() {
+  if (document.visibilityState === 'visible') void refresh()
 }
 
 async function move(order: Order, to: OrderStatus) {
@@ -125,8 +170,20 @@ const stop = onOrderEvent(({ order, removedId }) => {
   if (found.value && removedId) found.value = found.value.filter((row) => row.id !== removedId)
   if (found.value && order && found.value.some((row) => row.id === order.id)) found.value = mergeById(found.value.filter((row) => row.id !== order.id), order.status === 'canceled' ? [] : [order])
 })
-onMounted(load)
-onBeforeUnmount(stop)
+// "Atrasada" and "parada há" follow the clock, like the list.
+const clock = setInterval(() => (now.value = new Date()), 60_000)
+onMounted(() => {
+  void load()
+  document.addEventListener('visibilitychange', onVisible)
+})
+onBeforeUnmount(() => {
+  unmounted = true
+  stop()
+  stopLive?.()
+  clearInterval(clock)
+  if (refreshTimer) clearInterval(refreshTimer)
+  document.removeEventListener('visibilitychange', onVisible)
+})
 </script>
 
 <template>
@@ -169,7 +226,7 @@ onBeforeUnmount(stop)
             <span :id="`card-${order.id}-state`" class="card-flag" :class="{ 'card-flag--late': lateText(order, now) }">
               {{ lateText(order, now) || (isHeld(order) ? holdText(order, now) : '') }}
             </span>
-            <span v-if="order.showsMoney" class="num card-money">{{ money(remainingOnRow(order) ?? order.total) }}</span>
+            <span v-if="order.showsMoney" class="num card-money" :aria-label="prefs.hideValues ? t('web.money.hiddenA11y') : undefined">{{ shownMoney(remainingOnRow(order) ?? order.total) }}</span>
             <button v-if="access(order).transitions.length" type="button" class="icon-btn card-move" :aria-label="t('web.board.move', { order: orderShort(), number: order.number ?? '' })" @click="moving = order">
               <MoreHorizontal :size="16" aria-hidden="true" />
             </button>
