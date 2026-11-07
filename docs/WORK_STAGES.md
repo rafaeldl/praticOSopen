@@ -29,7 +29,7 @@ Na empresa, `/companies/{companyId}`:
 | `name` | Obrigatório, o que aparece na coluna e na folha |
 | `keywords` | Opcional. Pedaços do nome do serviço que pertencem à etapa, sem acento e sem maiúscula. Decidem a folha impressa e a sugestão "Próxima: X" |
 
-A ordem da lista é a ordem das colunas. Entrada sem `id` ou sem `name` é ignorada. Ainda não há tela para configurar: a lista é gravada por script.
+A ordem da lista é a ordem das colunas. Entrada sem `id` ou sem `name` é ignorada. Dono e admin configuram no web, em Ajustes › Sua empresa › Etapas do serviço (ver abaixo).
 
 Na OS, `/companies/{companyId}/orders/{orderId}`:
 
@@ -88,9 +88,20 @@ Situação mudada pelo app, bot ou MCP
 8. A OS parada continua com a marca na etapa; atrasada e parada aparecem no cartão como sempre.
 9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". "Mudar etapa" no "…" aparece com duas etapas ou mais. Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
 
+## Etapas do serviço (web)
+
+Em Ajustes › Sua empresa, linha "Etapas do serviço" (só dono e admin, como o resto da tela). A linha mostra as etapas em ordem ("Pintura → Polimento") ou "Desligado". Abre uma gaveta onde se adiciona, renomeia, sobe, desce e tira etapas, e escreve as palavras dos serviços que sugerem cada uma (opcional, separadas por vírgula).
+
+- Grava direto no documento da empresa (`saveCompany`, igual aos outros ajustes; as regras já deixam dono e admin gravar) e atualiza `session.company`, então o Quadro muda sem recarregar.
+- Etapa que já existia mantém o `id`, mesmo trocando o nome: as OS continuam onde estão. Etapa nova ganha um `id` tirado do nome, sem acento e sem repetir (`stageIdFor`).
+- Nome vazio ou repetido não salva e mostra o erro. Palavras são guardadas em minúsculas, sem repetir.
+- Tirar todas grava `workStages: []`: etapas desligadas e Quadro de volta a uma coluna por situação. OS numa etapa tirada aparecem na primeira.
+- No app, as etapas novas aparecem quando o app recarrega a empresa (ao abrir de novo).
+- Código: `src/components/settings/StagesForm.vue`, `stagesFromDrafts`/`draftsOf`/`stageIdFor` em `src/lib/orders/stages.ts`.
+
 ## Exemplos de Uso
 
-Ligar para uma empresa (script, Admin SDK):
+Ligar para uma empresa por script (Admin SDK), sem a tela:
 
 ```js
 await db.doc(`companies/${companyId}`).set({
@@ -110,7 +121,8 @@ Desligar: apagar `workStages` (as OS mantêm `stage` até sair de em andamento, 
 | `firebase/functions/src/services/__tests__/order-stage.service.test.ts` | Limpeza pelo trigger, leitura de `workStages` |
 | `firebase/functions/src/routes/v1/__tests__/orders.routes.test.ts` | Grupo "etapas da OS": começar, reordenar, comentário, recusas, sair de em andamento |
 | `firebase/functions/src/__tests__/rbac/api-matrix.ts` | `orders.stage.set` por perfil |
-| `firebase/webapp/tests/work-stages.test.ts` | Coluna, ordem, posição entre vizinhas, serviços da etapa, sugestão |
+| `firebase/webapp/tests/work-stages.test.ts` | Coluna, ordem, posição entre vizinhas, serviços da etapa, sugestão, e a edição (ids mantidos, ids novos, nome vazio ou repetido) |
+| `firebase/webapp/e2e/company.spec.ts` | Etapas do serviço: criar, ordenar, ver no Quadro e desligar |
 | `test/models/work_stage_test.dart` | Leitura de `workStages`, etapa atual e próxima, save sem `stage` |
 | `test/mobx/order_store_stage_test.dart` | Mudança na hora, volta quando o servidor recusa, limpeza ao sair de em andamento |
 | `test/services/order_stage_api_service_test.dart` | `PUT` com etapa, token e empresa; recusa |
@@ -119,7 +131,7 @@ Desligar: apagar `workStages` (as OS mantêm `stage` até sair de em andamento, 
 
 ## Limites conhecidos
 
-- Sem tela para criar e ordenar etapas; é por script.
+- A tela de etapas existe só no web; no app ainda não.
 - No app, a etapa só aparece na tela da OS (não na Início nem nas listas). Mudar de etapa pelo app precisa de internet.
 - O Quadro carrega as 130 OS mais novas; uma OS em andamento muito antiga pode ficar de fora da coluna.
 - Quem lê pela API (sem valores) não tem os serviços na lista: a folha impressa sai sem eles e o cartão não sugere a próxima etapa.
