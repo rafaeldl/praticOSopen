@@ -256,7 +256,7 @@ color: Color(0xFF116BB5)
 
 **Status:** ponto colorido + texto em `textSecondary`, nunca selo colorido. Orçamento cinza, aprovada azul (`accentText`), em andamento âmbar (`warning`), concluída verde (`success`), cancelada cinza. Atrasada é problema: ponto e texto em `danger`, texto em negrito.
 
-### Web (tema "Ordem de Serviço")
+### Web (tema "Campo")
 
 O site institucional usa **Eleventy (11ty)** como Static Site Generator com templates Nunjucks.
 
@@ -287,13 +287,15 @@ npm run watch               # Watch mode
 ```
 
 **Design System** (travado em `firebase/hosting/design.md` — ler antes de mexer no site):
-- Linguagem visual de "ordem de serviço": papel claro, tinta grafite, réguas de formulário, números em mono
-- Tokens em `src/css/tokens.css`; base compartilhada em `src/css/site.css`; tema claro por padrão, escuro via `data-theme="dark"`
-- Fontes: `Archivo` (títulos), `IBM Plex Sans` (texto), `IBM Plex Mono` (números/labels)
-- Azul da marca como acento, amarelo do logo só como marca-texto; sem gradientes, glassmorphism ou cards com ícone
+- Tema "Campo": papel quente, tinta e faixas em marinho, botões amarelos, títulos grandes e fotos de gente trabalhando
+- Tokens em `src/css/tokens.css`; base compartilhada em `src/css/site.css`; tema claro por padrão, escuro via `data-theme="dark"` (faixas continuam marinho)
+- Fontes: `Outfit` 800 (títulos), `DM Sans` (texto), `IBM Plex Mono` (números, preços e labels)
+- Amarelo do logo (`--color-marker`, texto marinho) é a ação principal; azul da marca (`--color-accent`) para link e foco; sem gradientes, vidro ou cards com ícone
 - Nada de números inventados (usuários, notas, depoimentos)
 - Flags em `src/_data/site.json` (`flags.whatsappBot` desligada enquanto o bot estiver fora)
 - `src/style.css` é legado: só `order/` e `login` ainda usam
+
+**Outros apps:** o app web (`firebase/webapp`) importa os mesmos tokens do site, com IBM Plex Sans em tudo (ver `docs/WEB_APP_DESIGN.md`). O app do celular ainda usa a paleta do iPhone (`lib/theme/app_colors.dart`); o tema Campo no celular está em avaliação no protótipo (página "Tema Campo" em https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz).
 
 Ver `docs/WEBSITE_STRUCTURE.md` para documentação completa.
 
