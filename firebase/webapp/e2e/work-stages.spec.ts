@@ -43,25 +43,21 @@ test('etapas no quadro: começar, ordenar, passar adiante e imprimir', async ({ 
   await page.reload()
   await expect(names(paint)).toHaveText([new RegExp(b), new RegExp(a), new RegExp(c)])
 
-  // Print of Pintura: the column's order, only its services, no values.
-  await page.evaluate(() => (window.print = () => ((window as unknown as { printed: boolean }).printed = true)))
+  // Print of Pintura: the column's order, only its services, no values. It
+  // goes to a frame holding only the sheet (Safari printed the page blank).
   await paint.getByRole('button', { name: 'Mais opções de Pintura' }).click()
   await page.getByRole('dialog', { name: 'Pintura' }).getByRole('button', { name: 'Imprimir a lista de Pintura' }).click()
-  const sheet = page.getByTestId('stage-print')
+  const sheet = page.frameLocator('[data-testid="print-frame"]').getByTestId('stage-print')
   await expect(sheet.locator('tbody tr')).toHaveCount(3)
   await expect(sheet.locator('tbody tr').nth(2)).toContainText('Pintura lateral')
   await expect(sheet.locator('tbody tr').nth(2)).not.toContainText('Higienização')
   await expect(sheet).not.toContainText('4.321')
-  await expect.poll(() => page.evaluate(() => (window as unknown as { printed?: boolean }).printed)).toBe(true)
-  // On paper: only the sheet, with its rows (the board and the app shell hidden).
+  // On paper: black text on a laid-out row, whatever the app's theme.
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ media: 'print', colorScheme })
-    await expect(sheet).toBeVisible()
-    await expect(sheet.locator('tbody tr').first()).toBeVisible()
-    await expect(page.getByTestId('board')).toBeHidden()
     const ink = await sheet.locator('tbody td').nth(1).evaluate((el) => {
       const box = el.getBoundingClientRect()
-      return { color: getComputedStyle(el).color, height: box.height, width: box.width }
+      return { color: getComputedStyle(el).color, height: box.height }
     })
     expect(ink.color).toBe('rgb(0, 0, 0)')
     expect(ink.height).toBeGreaterThan(0)

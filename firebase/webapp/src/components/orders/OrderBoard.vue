@@ -24,6 +24,7 @@ import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import StagePrint from './StagePrint.vue'
+import { printSheet } from '@/lib/print-frame'
 import { rankAt, sortInStage, stageIdOf, suggestedStage, workStages, type WorkStage } from '@/lib/orders/stages'
 import OrderDetail from './OrderDetail.vue'
 
@@ -316,7 +317,9 @@ async function printStage(column: Column) {
   if (!column.stage) return
   printing.value = { stage: column.stage, orders: cardsOf(column.key) }
   await nextTick()
-  requestAnimationFrame(() => window.print())
+  const sheet = document.querySelector('[data-testid="stage-print"]')
+  if (sheet) printSheet(sheet)
+  else requestAnimationFrame(() => window.print())
 }
 
 const stop = onOrderEvent(({ order, removedId }) => {

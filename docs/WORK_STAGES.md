@@ -51,7 +51,7 @@ Na OS, `/companies/{companyId}/orders/{orderId}`:
 | Rota | `PUT /v1/app/orders/:id/stage` (`docs/WEB_API.md`) |
 | Permissão | `canChangeOrderStage` (mesma da OS parada) e `canChangeOrderStatus(..., 'progress')` para começar uma aprovada |
 | Limpeza | `updateOrder` tira a etapa quando a situação sai de `progress`; o trigger `handleOrderUpdatedAsaas` cobre os outros caminhos (app, bot, MCP) |
-| Web | `src/lib/orders/stages.ts` (leitura, coluna, ordem, serviços da etapa), `OrderBoard.vue`, `StagePrint.vue`, `TvBoardView.vue` |
+| Web | `src/lib/orders/stages.ts` (leitura, coluna, ordem, serviços da etapa), `OrderBoard.vue`, `StagePrint.vue`, `lib/print-frame.ts`, `TvBoardView.vue` |
 | App Flutter | `lib/models/work_stage.dart` (`WorkStage.listFrom/of/next`, `OrderStage`), `SegmentConfigProvider.workStages` (lido em `auth_wrapper.dart`), `OrderStore.moveToStage`, `lib/services/order_stage_api_service.dart` (chama a mesma rota) e a tela da OS (`order_screen_v2.dart`). `Order.stage` tem `includeToJson: false`: o save completo nunca o grava |
 
 ## Fluxo de Dados
@@ -83,7 +83,7 @@ Situação mudada pelo app, bot ou MCP
 3. Pôr uma OS aprovada numa etapa a passa para em andamento na mesma gravação. Quem não pode fazer essa passagem recebe 403.
 4. Quem muda de etapa e reordena: dono, admin, gerente, supervisor e o técnico nas OS que vê. O consultor não (mesma regra da OS parada).
 5. Sem `rank`, a OS vai para o fim da coluna (o servidor usa a hora). Na tela, a ordem muda na hora e volta se o servidor recusar.
-6. Folha impressa: data, nome da etapa e, na ordem da coluna, número, cliente, veículo, os serviços da etapa (pelas palavras; todos, se nenhum bater) e um quadrado para marcar. Nunca valores.
+6. Folha impressa: data, nome da etapa e, na ordem da coluna, número, cliente, veículo, os serviços da etapa (pelas palavras; todos, se nenhum bater) e um quadrado para marcar. Nunca valores. Abre pelo "…" do cabeçalho da coluna e sai por um quadro escondido só com a folha (`src/lib/print-frame.ts`): imprimir a página inteira saía em branco no Safari.
 7. Modo TV: "Em andamento" vira uma coluna por etapa, na ordem do quadro.
 8. A OS parada continua com a marca na etapa; atrasada e parada aparecem no cartão como sempre.
 9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". "Mudar etapa" no "…" aparece com duas etapas ou mais. Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
