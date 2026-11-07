@@ -1,8 +1,8 @@
 <template>
   <div v-if="forms?.length" class="space-y-4">
     <div
-      v-for="form in forms"
-      :key="form.id"
+      v-for="(form, formIndex) in forms"
+      :key="formIndex"
       class="card-stagger card-v2 rounded-2xl bg-white p-5 shadow-[0_2px_10px_rgba(27,94,123,0.03)] lg:p-6"
     >
       <!-- Header: icon + title + badge -->
@@ -13,7 +13,7 @@
             <rect x="9" y="3" width="6" height="4" rx="1"/>
             <path d="M9 14l2 2 4-4"/>
           </svg>
-          <h3 class="text-sm font-bold text-[#1A2B3C]">{{ form.name || t.checklist }}</h3>
+          <h3 class="text-sm font-bold text-[#1A2B3C]">{{ form.title || form.name || t.checklist }}</h3>
         </div>
         <span class="rounded-xl bg-[#E8F5E9] px-2.5 py-[3px] text-[11px] font-semibold text-[#2E7D32]">
           {{ completedCount(form) }}/{{ totalCount(form) }}
@@ -31,8 +31,8 @@
       <!-- Items -->
       <div class="flex flex-col gap-2">
         <div
-          v-for="item in form.items"
-          :key="item.id"
+          v-for="(item, itemIndex) in form.items"
+          :key="itemIndex"
           class="flex items-center justify-between gap-2 py-0.5"
         >
           <div class="flex items-center gap-2">
@@ -58,7 +58,7 @@
               'text-[#A0AEC0]'
             ]"
           >
-            {{ itemStatus(item) === 'ok' ? 'OK' : itemStatus(item) === 'attention' ? t.attention : t.pending }}
+            {{ answerText(item) }}
           </span>
         </div>
       </div>
@@ -73,11 +73,28 @@ const props = defineProps<{
 
 const { t } = useOrderI18n()
 
+function hasAnswer(value: any): boolean {
+  if (value === null || value === undefined || value === '') return false
+  if (Array.isArray(value)) return value.length > 0
+  return true
+}
+
 function itemStatus(item: any): string {
   if (item.status) return item.status
-  if (item.value === true || item.checked) return 'ok'
   if (item.value === 'attention') return 'attention'
+  if (item.checked || hasAnswer(item.value) || item.photos?.length) return 'ok'
   return 'pending'
+}
+
+// The api sends only completed checklists: question, answer and photos.
+function answerText(item: any): string {
+  const value = item.value
+  if (value === true) return t.value.yes
+  if (value === false) return t.value.no
+  if (Array.isArray(value) && value.length) return value.join(', ')
+  if (typeof value === 'number' || (typeof value === 'string' && value && value !== 'attention')) return String(value)
+  const status = itemStatus(item)
+  return status === 'ok' ? 'OK' : status === 'attention' ? t.value.attention : t.value.pending
 }
 
 function completedCount(form: any): number {
