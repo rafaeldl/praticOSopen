@@ -120,7 +120,7 @@
   "web.board.placed": "{stage}: ahora es la {place}.ª.",
   "web.board.stageChanged": "Pasó a {stage}.",
   "web.board.nextStage": "Siguiente: {stage}",
-  "web.board.print": "Imprimir",
+  "web.board.columnMore": "Más opciones de {stage}",
   "web.board.printStage": "Imprimir la lista de {stage}",
   "web.board.printCount": "{count, plural, =1{1 OS} other{{count} OS}}, en el orden del tablero",
   "web.board.printTodo": "Qué hacer",

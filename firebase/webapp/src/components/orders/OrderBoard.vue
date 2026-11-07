@@ -24,6 +24,7 @@ import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import StagePrint from './StagePrint.vue'
+import { printSheet } from '@/lib/print-frame'
 import { rankAt, sortInStage, stageIdOf, suggestedStage, workStages, type WorkStage } from '@/lib/orders/stages'
 import OrderDetail from './OrderDetail.vue'
 
@@ -309,12 +310,16 @@ function pick(order: Order, id: string) {
 }
 
 /** The stage being printed (StagePrint stays hidden on screen until the next print). */
+/** The column whose "…" is open (its rare actions: print the stage's list). */
+const columnMenu = shallowRef<Column | null>(null)
 const printing = shallowRef<{ stage: WorkStage; orders: Order[] } | null>(null)
 async function printStage(column: Column) {
   if (!column.stage) return
   printing.value = { stage: column.stage, orders: cardsOf(column.key) }
   await nextTick()
-  requestAnimationFrame(() => window.print())
+  const sheet = document.querySelector('[data-testid="stage-print"]')
+  if (sheet) printSheet(sheet)
+  else requestAnimationFrame(() => window.print())
 }
 
 const stop = onOrderEvent(({ order, removedId }) => {
@@ -361,15 +366,17 @@ onBeforeUnmount(() => {
       >
         <h2 :id="`col-${column.key}`" class="col-head">
           <span class="dot" :class="`dot--${DOT[column.status]}`" aria-hidden="true"></span>{{ columnLabel(column) }}<span class="num">{{ cardsOf(column.key).length }}</span>
+          <button
+            v-if="column.stage && cardsOf(column.key).length"
+            type="button"
+            class="icon-btn col-more"
+            :data-testid="`column-more-${column.key}`"
+            :aria-label="t('web.board.columnMore', { stage: column.stage.name })"
+            @click="columnMenu = column"
+          >
+            <MoreHorizontal :size="16" aria-hidden="true" />
+          </button>
         </h2>
-        <button
-          v-if="column.stage && cardsOf(column.key).length"
-          type="button"
-          class="link col-print"
-          :data-testid="`print-${column.key}`"
-          :aria-label="t('web.board.printStage', { stage: column.stage.name })"
-          @click="printStage(column)"
-        >{{ t('web.board.print') }}</button>
         <ul class="col-list" @dragover="dragOverList">
           <li
             v-for="(order, index) in cardsOf(column.key)"
@@ -409,6 +416,14 @@ onBeforeUnmount(() => {
     :choices="moveChoices(moving)"
     @pick="(id) => pick(moving as Order, id)"
     @close="moving = null"
+  />
+  <ChoiceDialog
+    v-if="columnMenu?.stage"
+    :title="columnMenu.stage.name"
+    :sub="t('web.board.printCount', { count: cardsOf(columnMenu.key).length })"
+    :choices="[{ id: 'print', label: t('web.board.printStage', { stage: columnMenu.stage.name }) }]"
+    @pick="() => { const column = columnMenu as Column; columnMenu = null; void printStage(column) }"
+    @close="columnMenu = null"
   />
   <StagePrint v-if="printing" :key="printing.stage.id" :stage="printing.stage" :orders="printing.orders" />
 </template>

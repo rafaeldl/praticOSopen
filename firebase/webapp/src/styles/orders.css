@@ -164,7 +164,7 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .col-head { display: flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.75rem; font-weight: 700; font-size: 1rem; margin: 0; flex-wrap: wrap; }
 .col-head .num { margin-left: auto; color: var(--color-muted); }
 /* Work stages (docs/WORK_STAGES.md): print of the column, place in it and where a dragged card lands. */
-.col-print { align-self: flex-start; margin: -0.35rem 0.75rem 0.35rem; min-height: 2.75rem; }
+.col-head .col-more { margin: -0.4rem -0.4rem -0.4rem 0; }
 .card-place { display: inline-block; min-width: 1.4em; margin-right: 0.3rem; color: var(--color-muted); font-weight: 400; }
 .card.drop-before { box-shadow: 0 -3px 0 var(--color-focus); }
 .col-list { flex: 1; min-height: 0; overflow: auto; padding: 0 0.5rem 0.75rem; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }

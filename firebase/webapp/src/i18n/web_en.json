@@ -120,7 +120,7 @@
   "web.board.placed": "{stage}: now number {place}.",
   "web.board.stageChanged": "Moved to {stage}.",
   "web.board.nextStage": "Next: {stage}",
-  "web.board.print": "Print",
+  "web.board.columnMore": "More options for {stage}",
   "web.board.printStage": "Print the {stage} list",
   "web.board.printCount": "{count, plural, =1{1 order} other{{count} orders}}, in the board's order",
   "web.board.printTodo": "To do",
