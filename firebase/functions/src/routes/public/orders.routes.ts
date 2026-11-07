@@ -4,12 +4,13 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest, Order, Company } from '../../models/types';
+import { AuthenticatedRequest, Order, Company, OrderForm, DeviceAggr } from '../../models/types';
 import { shareTokenAuth, requireSharePermission } from '../../middleware/share-token.middleware';
 import { getTenantCollection, db } from '../../services/firestore.service';
 import * as shareTokenService from '../../services/share-token.service';
 import * as commentService from '../../services/comment.service';
 import * as orderService from '../../services/order.service';
+import * as formsService from '../../services/forms.service';
 import * as notificationService from '../../services/notification.service';
 import { timestampToDate } from '../../utils/date.utils';
 import { maskName, maskPhone, maskSerial } from '../../utils/mask.utils';
@@ -117,6 +118,87 @@ export function companyShowsValues(company: Pick<Company, 'useFinancial'> | null
 }
 
 /**
+ * Devices of the order with an opaque key ("d1", "d2", ...) instead of the
+ * Firestore id. The page only needs the key to group items by device, so the
+ * same key replaces `deviceId` on services, products and forms.
+ */
+export function buildPublicDevices(order: Pick<Order, 'device' | 'devices'>): {
+  devices: Array<{ id: string; name?: string; serial?: string | null }>;
+  keyOf: (deviceId?: string | null) => string | null;
+} {
+  const list: DeviceAggr[] = order.devices?.length
+    ? order.devices
+    : (order.device ? [order.device] : []);
+  const keys = new Map<string, string>();
+  const devices = list.map((d, index) => {
+    const key = `d${index + 1}`;
+    if (d.id && !keys.has(d.id)) keys.set(d.id, key);
+    return { id: key, name: d.name, serial: maskSerial(d.serial) };
+  });
+  return {
+    devices,
+    keyOf: (deviceId) => (deviceId ? keys.get(deviceId) ?? null : null),
+  };
+}
+
+export interface PublicFormItem {
+  label: string;
+  value: string | number | boolean | string[] | null;
+  photos: string[];
+}
+
+export interface PublicForm {
+  title: string;
+  deviceId: string | null;
+  items: PublicFormItem[];
+}
+
+function publicAnswer(value: unknown): PublicFormItem['value'] {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value;
+  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
+  return null;
+}
+
+/**
+ * Completed checklists, reduced to question, answer and photos.
+ * Template ids, item ids, status, dates and who filled them never leave.
+ * Unanswered questions without photos are left out.
+ */
+export function toPublicForms(
+  forms: OrderForm[],
+  keyOf: (deviceId?: string | null) => string | null,
+): PublicForm[] {
+  return forms
+    .filter((f) => f.status === 'completed')
+    .map((f) => {
+      const responses = f.responses ?? [];
+      const items = (f.items ?? []).flatMap((item) => {
+        const response = responses.find((r) => r.itemId === item.id);
+        const value = publicAnswer(response?.value);
+        const photos = (response?.photoUrls ?? []).filter((u) => typeof u === 'string' && u.length > 0);
+        const answered = value !== null && value !== '' && !(Array.isArray(value) && value.length === 0);
+        if (!answered && photos.length === 0) return [];
+        return [{ label: item.label, value: answered ? value : null, photos }];
+      });
+      return { title: f.title, deviceId: keyOf(f.deviceId), items };
+    })
+    .filter((f) => f.items.length > 0);
+}
+
+/**
+ * Load the order checklists for the magic link.
+ * A failure here must not break the order page, so it degrades to [].
+ */
+async function getOrderFormsSafe(companyId: string, orderId: string): Promise<OrderForm[]> {
+  try {
+    return await formsService.listOrderForms(companyId, orderId);
+  } catch (error) {
+    console.error('Failed to load order forms:', error instanceof Error ? error.message : 'unknown error');
+    return [];
+  }
+}
+
+/**
  * GET /public/orders/:token
  * View order details via share token
  */
@@ -143,10 +225,13 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
     const showValues = companyShowsValues(company);
 
     // Get customer-visible comments
-    const [comments, charge] = await Promise.all([
+    const [comments, charge, forms] = await Promise.all([
       commentService.getCustomerVisibleComments(companyId, orderId),
       showValues ? getPublicCharge(companyId, orderId) : Promise.resolve(null),
+      getOrderFormsSafe(companyId, orderId),
     ]);
+
+    const { devices, keyOf } = buildPublicDevices(order);
 
     const values = showValues ? {
       total: order.total,
@@ -173,28 +258,19 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
             serial: maskSerial(order.device.serial),
             // Other internal device fields removed
           } : null,
-          devices: (() => {
-            const list = order.devices?.length
-              ? order.devices
-              : (order.device ? [order.device] : []);
-            return list.map((d) => ({
-              id: d.id,
-              name: d.name,
-              serial: maskSerial(d.serial),
-            }));
-          })(),
+          devices,
           services: order.services?.map((s) => ({
             name: s.service?.name ?? s.description ?? '',
             ...(showValues ? { value: s.value } : {}),
             description: s.description,
-            deviceId: s.deviceId || null,
+            deviceId: keyOf(s.deviceId),
           })),
           products: order.products?.map((p) => ({
             name: p.product?.name ?? p.description ?? '',
             ...(showValues ? { value: p.value } : {}),
             quantity: p.quantity,
             description: p.description,
-            deviceId: p.deviceId || null,
+            deviceId: keyOf(p.deviceId),
           })),
           status: order.status,
           ...values,
@@ -205,6 +281,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
             url: p.url,
             description: p.description,
           })),
+          forms: toPublicForms(forms, keyOf),
           rating: order.rating ? {
             score: order.rating.score,
             comment: order.rating.comment,
@@ -216,7 +293,6 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           name: company.name,
           logo: company.logo,
           phone: company.phone,
-          email: company.email,
           address: company.address,
           country: company.country,
           segment: company.segment || null,
@@ -492,7 +568,7 @@ router.post(
  * GET /public/orders/:token/comments
  * Get comments for order
  */
-router.get('/:token/comments', shareTokenAuth, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:token/comments', shareTokenAuth, requireSharePermission('view'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { companyId, orderId } = req.shareTokenAuth!;
 
@@ -527,6 +603,7 @@ router.get('/:token/comments', shareTokenAuth, async (req: AuthenticatedRequest,
 router.post(
   '/:token/rating',
   shareTokenAuth,
+  requireSharePermission('view'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { companyId, orderId, customer } = req.shareTokenAuth!;
