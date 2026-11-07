@@ -94,3 +94,54 @@ export function suggestedStage(order: Pick<Order, 'lines'>, stages: WorkStage[])
   const services = order.lines.filter((line) => line.kind === 'service')
   return stages.find((stage) => services.some((line) => matches(line, stage))) ?? null
 }
+
+// ── Editing (Sua empresa › Etapas do serviço) ─────────────────────────────
+
+/** A stage as typed in the editor: keywords as one comma-separated text. */
+export interface StageDraft {
+  id?: string
+  name: string
+  keywords: string
+}
+
+export const draftsOf = (stages: WorkStage[]): StageDraft[] => stages.map((stage) => ({ id: stage.id, name: stage.name, keywords: (stage.keywords ?? []).join(', ') }))
+
+/** Stable id for a new stage, from its name ("Pintura" → "pintura"), unique in the company. */
+export function stageIdFor(name: string, taken: Set<string>): string {
+  const base =
+    name
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'stage'
+  let id = base
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`
+  return id
+}
+
+export type StagesProblem = { kind: 'empty'; index: number } | { kind: 'repeated'; index: number }
+
+/**
+ * What gets saved: names trimmed, keywords split and lower-cased, ids kept
+ * (orders point to them) and new ones made from the name. A blank or repeated
+ * name is a problem to show, not something to drop silently.
+ */
+export function stagesFromDrafts(drafts: StageDraft[]): { stages: WorkStage[] } | { problem: StagesProblem } {
+  const seen = new Set<string>()
+  for (const [index, draft] of drafts.entries()) {
+    const name = draft.name.trim()
+    if (!name) return { problem: { kind: 'empty', index } }
+    const key = name.toLocaleLowerCase()
+    if (seen.has(key)) return { problem: { kind: 'repeated', index } }
+    seen.add(key)
+  }
+  const taken = new Set(drafts.map((draft) => draft.id).filter((id): id is string => !!id))
+  const stages = drafts.map((draft) => {
+    const id = draft.id || stageIdFor(draft.name, taken)
+    taken.add(id)
+    const keywords = [...new Set(draft.keywords.split(',').map((word) => word.trim().toLocaleLowerCase()).filter(Boolean))]
+    return { id, name: draft.name.trim(), ...(keywords.length ? { keywords } : {}) }
+  })
+  return { stages }
+}

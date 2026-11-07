@@ -100,3 +100,35 @@ describe('services of a stage', () => {
     expect(suggestedStage(order('e', { services: [service('Avaliação')] }), STAGES)).toBeNull()
   })
 })
+
+describe('editing stages (company.stages.edit)', async () => {
+  const { draftsOf, stageIdFor, stagesFromDrafts } = await import('../src/lib/orders/stages')
+
+  test('new ids come from the name, without accents, and never repeat', () => {
+    expect(stageIdFor('Pintura', new Set())).toBe('pintura')
+    expect(stageIdFor('Higienização / Polimento', new Set())).toBe('higienizacao-polimento')
+    expect(stageIdFor('Pintura', new Set(['pintura', 'pintura-2']))).toBe('pintura-3')
+    expect(stageIdFor('!!!', new Set())).toBe('stage')
+  })
+
+  test('kept stages keep their id, so orders stay where they are', () => {
+    const drafts = draftsOf([{ id: 'paint', name: 'Pintura', keywords: ['pint'] }])
+    drafts[0]!.name = ' Pintura geral '
+    drafts.push({ name: 'Polimento', keywords: ' Polim, HIGIEN,, polim ' })
+    expect(stagesFromDrafts(drafts)).toEqual({
+      stages: [
+        { id: 'paint', name: 'Pintura geral', keywords: ['pint'] },
+        { id: 'polimento', name: 'Polimento', keywords: ['polim', 'higien'] },
+      ],
+    })
+  })
+
+  test('a blank or repeated name is a problem, not dropped', () => {
+    expect(stagesFromDrafts([{ name: 'Pintura', keywords: '' }, { name: '  ', keywords: '' }])).toEqual({ problem: { kind: 'empty', index: 1 } })
+    expect(stagesFromDrafts([{ name: 'Pintura', keywords: '' }, { name: 'pintura ', keywords: '' }])).toEqual({ problem: { kind: 'repeated', index: 1 } })
+  })
+
+  test('no stages turns them off', () => {
+    expect(stagesFromDrafts([])).toEqual({ stages: [] })
+  })
+})

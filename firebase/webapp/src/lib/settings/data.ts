@@ -98,6 +98,8 @@ export interface CompanyDoc {
   fieldService?: boolean
   useContracts?: boolean
   useDeviceManagement?: boolean
+  /** Stages inside "Em andamento" (docs/WORK_STAGES.md); empty turns them off. */
+  workStages?: { id: string; name: string; keywords?: string[] }[] | null
   subscription?: unknown
   /** Version: the other side may have saved after this copy was read. */
   updatedAt?: unknown
@@ -147,7 +149,7 @@ export async function saveCompanyChecked(fields: Partial<CompanyDoc>, expected: 
 
 function applyToSession(fields: Partial<CompanyDoc>): void {
   if (!session.company) return
-  for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement', 'useContracts'] as const) {
+  for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement', 'useContracts', 'workStages'] as const) {
     if (key in fields) (session.company as Record<string, unknown>)[key] = fields[key] ?? undefined
   }
 }
