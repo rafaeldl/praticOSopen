@@ -327,14 +327,18 @@ export async function getByToken(token: string): Promise<Invite | null> {
  * List pending invites for a company
  */
 export async function listByCompany(companyId: string): Promise<Invite[]> {
+  // No orderBy: company.id + status + createdAt has no composite index in
+  // production (FAILED_PRECONDITION, the web team screen failed). Equality only
+  // uses the deployed company.id + status index; pending invites of one company
+  // are few (they expire in 7 days), so they are sorted here, newest first.
   const snapshot = await getInvitesCollection()
     .where('company.id', '==', companyId)
     .where('status', '==', 'pending')
-    .orderBy('createdAt', 'desc')
     .limit(100)
     .get();
 
-  return snapshot.docs.map((doc) => doc.data() as Invite);
+  const time = (invite: Invite) => toDate(invite.createdAt)?.getTime() ?? 0;
+  return snapshot.docs.map((doc) => doc.data() as Invite).sort((a, b) => time(b) - time(a));
 }
 
 /**
