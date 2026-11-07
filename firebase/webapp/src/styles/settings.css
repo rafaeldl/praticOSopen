@@ -1,7 +1,11 @@
 /* Configurações, conta, empresa, equipe, plano e integrações. Loaded with
    their screens, out of the first download. Drawers reuse orders.css. */
 
-.set-page { padding: 0.75rem 1rem 2rem; display: grid; gap: 1.5rem; align-content: start; max-width: 52rem; }
+.set-page { padding: 0.75rem 1rem 2rem; display: grid; gap: 1.5rem; align-content: start; }
+/* The page is also the scroll box: it fills the work area, so the scrollbar sits
+   at the window edge (with max-width it stood in the middle, like a divider over
+   an empty strip). The reading width stays 50rem through the right padding. */
+.set-page { padding-inline-end: max(1rem, calc(100% - 51rem)); }
 .set-section { display: grid; gap: 0.4rem; min-width: 0; }
 .set-h { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0; }
 .set-lead { margin: 0; color: var(--color-muted); max-width: 40rem; }

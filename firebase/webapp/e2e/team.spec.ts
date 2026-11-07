@@ -18,6 +18,18 @@ async function openTeam(page: Page, user: 'tAdmin' | 'tOwner' = 'tAdmin') {
   await expect(members(page)).toBeVisible()
 }
 
+test('Equipe: a rolagem ocupa a área toda e o texto fica na largura de leitura (sem faixa vazia com a barra no meio)', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await openTeam(page)
+  const box = await page.locator('.workspace').evaluate((workspace) => {
+    const pane = workspace.querySelector('.set-page') as HTMLElement
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+    return { workspace: workspace.clientWidth, pane: pane.offsetWidth, members: (pane.querySelector('[data-testid="team-members"]') as HTMLElement).offsetWidth / rem }
+  })
+  expect(box.pane).toBe(box.workspace)
+  expect(box.members).toBeLessThanOrEqual(50.5)
+})
+
 test('Equipe: resumo, convite esperando com os dias, vencido à mostra e você primeiro, sem abrir (team.list.load, team.view.list, team.member.self-row, team.invite-share.copy, team.invite-share.share)', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await openTeam(page)
