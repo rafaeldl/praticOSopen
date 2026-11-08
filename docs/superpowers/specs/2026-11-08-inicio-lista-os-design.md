@@ -1,6 +1,6 @@
 # Início: lista de OS com seções, etapas e seleção em lote
 
-**Data:** 2026-11-08 · **Status:** aprovado no protótipo, não implementado · **Protótipo:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Tema Campo", fileira "Início: lista de OS" (`inicio-padrao`, `inicio-busca`, `inicio-sem-valores`, `etapa-pintura`, `etapa-pintura-selecionar`, `etapa-escolher`, `etapa-pintura-feito`).
+**Data:** 2026-11-08 · **Status:** aprovado no protótipo, não implementado · **Protótipo:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Tema Campo", fileira "Início: lista de OS" (`inicio-padrao`, `inicio-busca`, `inicio-sem-valores`, `etapa-pintura`, `etapa-pintura-selecionar`, `etapa-escolher`, `etapa-pintura-feito`, `secao-aprovadas`, `secao-aprovadas-selecionar`).
 
 Revê a parte "Início" de `docs/APP_DESIGN_SYSTEM.md` (lista sem grupos, busca sempre visível, ponto de status na linha). Etapas: `docs/WORK_STAGES.md`. As cores do protótipo são as do tema Campo, que ainda está em avaliação; o layout vale com qualquer paleta.
 
@@ -24,7 +24,7 @@ A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, ve�
    3. **Aprovadas**.
    4. **Uma seção por etapa** (`Company.workStages`, na ordem configurada). Sem etapas, uma seção só, **Em andamento**.
 5. **Seção vazia some.** Sem atrasadas, a lista começa em Paradas ou na próxima.
-6. **Título de etapa abre a fila da etapa** ("Pintura · 3 ›", em `accentText`). O número conta **todas** as OS da etapa, inclusive as que aparecem em Atrasadas ou Paradas, para bater com a fila.
+6. **Todo título de seção abre a lista dela** ("Pintura · 3 ›", "Aprovadas · 3 ›"). O título mantém a cor da seção e ganha a setinha; nenhum fica azul, para não parecer que só alguns abrem. O número de uma etapa conta **todas** as OS da etapa, inclusive as que aparecem em Atrasadas ou Paradas, para bater com a fila.
 7. **OS em Atrasadas ou Paradas diz onde está**: o texto cinza começa com a situação ou a etapa em `textPrimary` ("**Pintura** · …", "**Aprovada** · …"). Nas outras seções o título já diz.
 
 ### Linha da OS
@@ -37,6 +37,11 @@ A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, ve�
 11. **Empresa sem valores** (`Company.useFinancial` desligado): o número da OS ("nº 1042") no lugar do valor, sem cifrão.
 12. **Cliente e veículo não quebram no tamanho padrão** (terminam em "…"). Nos tamanhos de acessibilidade quebram, e o valor e o cifrão descem para baixo do nome, como já faz o `AppListRow`.
 
+### Lista da seção
+
+- **Etapa:** a fila abaixo, numerada e com ordem manual.
+- **Situação** (Atrasadas, Paradas, Aprovadas, Em andamento): mesma tela, sem número e sem alças, na ordem da Início; a linha de baixo diz desde quando ("Aprovada há 3 dias"). O "Selecionar" mostra só os círculos e a barra.
+
 ### Fila da etapa
 
 13. **Tela própria** (empurrada), com voltar, título grande com o nome da etapa e uma frase ("3 carros na fila, 1 parado. O primeiro está aqui desde ontem.").
@@ -45,7 +50,7 @@ A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, ve�
 
 ### Selecionar várias
 
-16. **Botão "Selecionar"** no topo da fila da etapa. No modo:
+16. **Botão "Selecionar"** no topo da lista de qualquer seção (nas situações, sem as alças). No modo:
     - Círculo à esquerda de cada linha (marcada: `accent` com ✓ e fundo `accentSoft`) e alças ≡ à direita para arrastar e mudar a ordem (grava `stage.rank`, como o web).
     - Topo: "Selecionar todas" à esquerda e "OK" em `accent` à direita.
     - No lugar das abas, uma barra de vidro com **Mudar etapa** e **Mudar situação**.
