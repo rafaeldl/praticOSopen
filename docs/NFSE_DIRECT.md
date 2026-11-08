@@ -6,6 +6,30 @@ Documento técnico da emissão de NFS-e direto no Sistema Nacional (Sefin/ADN). 
 
 Uma empresa tem um ou mais **emitentes fiscais** (`companies/{cid}/fiscalEmitters`), cada um com o seu certificado A1. O servidor guarda o certificado cifrado, monta e assina a DPS, envia ao governo e grava a nota em `companies/{cid}/invoices` com `provider: 'direct'`. A cobrança pelo Asaas não muda.
 
+## Quem tem a nota (plano pago)
+
+Decisão de 2026-11-08: a nota vem com os planos pagos (Starter, Pro, Business) e com a cortesia (`subscription.source: 'grace'`), só para empresa do Brasil (`country` `BR` ou vazio). O Free não tem nota. Vale o plano em vigor (`effectivePlan` de `services/plan-limits.service.ts`: plano da loja, plano pago antigo sem `source` e cortesia; vencido é Free). Não depende de `config/paidPlans.enabled`.
+
+O app, o web e as rotas continuam lendo só `settings/payments.nfseDirectEnabled`. Quem liga e desliga essa chave é `services/nfse/nfse-access.service.ts`, que grava junto a origem:
+
+| `nfseDirectSource` | Significado |
+|---|---|
+| `plan` | Ligada (ou desligada) pelo plano; segue o plano. |
+| `manual`, ou ausente com a chave ligada | Posta à mão (piloto, Rafsoft). Nunca é mexida. `manual` com a chave desligada bloqueia a empresa: o plano não liga. |
+
+Também grava `nfseDirectUpdatedAt`. Pontos que mantêm a chave:
+
+- **Gatilho `onCompanyWrittenNfseAccess`** (`companies/{cid}`, `index.ts`): quando mudam `country`, `subscription.plan`, `status`, `source` ou `expiresAt` (webhook do RevenueCat, cortesia, rotina de vencimento). As outras gravações da empresa (contadores, `updatedAt`) voltam sem ler nada.
+- **Rotina diária `scheduledExpireSubscriptions`** (04:30): depois de vencer os planos, `reconcileNfseAccess` passa pelas empresas em plano pago e pelas que têm a chave ligada, e acerta o que o gatilho perdeu.
+- **Carga inicial** (uma vez, depois do deploy), em `firebase/functions`:
+
+```bash
+npm run nfse:plan-access -- --project praticos --dry-run
+npm run nfse:plan-access -- --project praticos
+```
+
+O `--project` é obrigatório; no emulador usa o projeto dele. Desligar a nota de quem saiu do plano não apaga emitente, certificado nem notas: só fecha as rotas e esconde as telas, como antes.
+
 ## Dados (etapa #562)
 
 Ver a tabela da §7 da spec. Resumo das regras do Firestore:
