@@ -225,6 +225,7 @@ import { expireSubscriptions, resetMonthlyUsage } from './services/subscription.
 import { sendCourtesyNotices } from './services/courtesy-notice.service';
 import { sendMaintenanceNotices } from './services/maintenance-notice.service';
 import { fetchSubscriber } from './services/revenuecat.client';
+import { handleCompanyWrittenNfseAccess, reconcileNfseAccess } from './services/nfse/nfse-access.service';
 
 /**
  * Scheduled function to reset monthly usage counters for subscriptions.
@@ -271,6 +272,28 @@ export const scheduledExpireSubscriptions = onSchedule(
       fetchSubscriber: (companyId) => fetchSubscriber(companyId, apiKey),
     });
     console.log(`[Scheduled] Subscription expiry completed. ${expired} companies moved to Free.`);
+    // Backstop of onCompanyWrittenNfseAccess: the nota follows the plan
+    // (docs/NFSE_DIRECT.md, "Quem tem a nota").
+    await reconcileNfseAccess(new Date()).catch((error) =>
+      console.error('[Scheduled] NFS-e access reconcile failed', error),
+    );
+  }
+);
+
+/**
+ * The NFS-e direct comes with the paid plans and the courtesy
+ * (services/nfse/nfse-access.service.ts): when a company's plan or country
+ * changes, settings/payments.nfseDirectEnabled is turned on or off. A key set
+ * by hand is never touched. Other writes of the company return at once.
+ */
+export const onCompanyWrittenNfseAccess = onDocumentWritten(
+  { document: 'companies/{companyId}', region: 'southamerica-east1' },
+  async (event) => {
+    await handleCompanyWrittenNfseAccess(
+      event.params.companyId,
+      event.data?.before.data(),
+      event.data?.after.data(),
+    );
   }
 );
 

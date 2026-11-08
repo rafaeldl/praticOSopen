@@ -37,6 +37,7 @@ Iguais ao app, provadas pelos casos:
 - **Cortesia** em vigor é Pro (o que estiver gravado em `limits`).
 - **Limites gravados** ganham do padrão do plano; campo faltando vira o padrão do Free (Pro com só `photosPerMonth` gravado fica com 1 checklist). `collaborators` é o nome antigo de `users`.
 - **Marca d'água no PDF**: só com a chave ligada e `pdfWatermark` do plano em vigor.
+- **Nota fiscal (NFS-e direta)**: vem com qualquer plano em vigor diferente do Free, no Brasil, sem depender das chaves acima. O servidor liga e desliga `settings/payments.nfseDirectEnabled` pelo plano (ver "Quem tem a nota" em [`NFSE_DIRECT.md`](NFSE_DIRECT.md)).
 
 ### Uso contado no servidor
 
