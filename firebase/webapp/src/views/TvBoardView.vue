@@ -2,7 +2,7 @@
 // Modo TV (#627): the board on a screen in the shop. No menu, no values, no
 // clicks on the cards; big type; updates by itself and keeps the screen awake.
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { Maximize, X } from '@lucide/vue'
+import { Columns3, Maximize, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import { t } from '@/i18n'
 import { formatTime } from '@/lib/format'
@@ -11,6 +11,7 @@ import { deviceSummary, isHeld, type Order, type OrderStatus } from '@/lib/order
 import { country, holdText, lateText, statusText } from '@/lib/orders/text'
 import { TV_COLUMNS, TV_LIMIT, dayStartIso, emptyColumns, sortForTv, watchTv, type TvColumns } from '@/lib/orders/tv'
 import { session } from '@/lib/session'
+import { prefs } from '@/lib/prefs'
 import { sortInStage, stageIdOf, workStages } from '@/lib/orders/stages'
 import '@/styles/tv.css'
 
@@ -27,7 +28,7 @@ const full = ref(false)
  * With work stages (docs/WORK_STAGES.md), "Em andamento" shows one column per
  * stage, in the order set on the board: that is the queue the team follows.
  */
-const shown = computed(() => {
+const all = computed(() => {
   const stages = workStages()
   return TV_COLUMNS.flatMap((status) => {
     if (status === 'progress' && stages.length) {
@@ -49,6 +50,31 @@ const shown = computed(() => {
     }]
   })
 })
+
+/** The columns the person left on (Colunas): never none, the last one cannot be turned off. */
+const shown = computed(() => {
+  const hidden = new Set(Array.isArray(prefs.tvHidden) ? prefs.tvHidden : [])
+  const kept = all.value.filter((col) => !hidden.has(col.key))
+  return kept.length ? kept : all.value
+})
+const isShown = (key: string) => shown.value.some((col) => col.key === key)
+function toggleColumn(key: string) {
+  const hidden = new Set(Array.isArray(prefs.tvHidden) ? prefs.tvHidden : [])
+  if (hidden.has(key)) hidden.delete(key)
+  else if (shown.value.length > 1) hidden.add(key)
+  prefs.tvHidden = [...hidden]
+}
+
+const colsMenu = ref<HTMLDetailsElement | null>(null)
+function closeColumns() {
+  if (!colsMenu.value?.open) return
+  colsMenu.value.open = false
+  colsMenu.value.querySelector('summary')?.focus()
+}
+// A click outside closes the list, like a menu.
+const onDocClick = (event: MouseEvent) => {
+  if (colsMenu.value?.open && !colsMenu.value.contains(event.target as Node)) colsMenu.value.open = false
+}
 
 let live: ReturnType<typeof watchTv> | null = null
 let day = ''
@@ -113,6 +139,7 @@ onMounted(() => {
   void keepAwake()
   document.addEventListener('visibilitychange', onVisible)
   document.addEventListener('fullscreenchange', onFullscreen)
+  document.addEventListener('click', onDocClick)
 })
 onBeforeUnmount(() => {
   live?.stop()
@@ -120,6 +147,7 @@ onBeforeUnmount(() => {
   void lock?.release().catch(() => {})
   document.removeEventListener('visibilitychange', onVisible)
   document.removeEventListener('fullscreenchange', onFullscreen)
+  document.removeEventListener('click', onDocClick)
 })
 
 const flag = (order: Order) => lateText(order, now.value) || (isHeld(order) ? holdText(order, now.value) : '')
@@ -131,6 +159,22 @@ const flag = (order: Order) => lateText(order, now.value) || (isHeld(order) ? ho
       <h1 class="tv-title">{{ session.company?.name ?? t('web.tv.title') }}</h1>
       <p class="tv-clock num" aria-hidden="true">{{ formatTime(now, country()) }}</p>
       <div class="tv-actions">
+        <details ref="colsMenu" class="tv-cols-menu" data-testid="tv-columns" @keydown.esc="closeColumns">
+          <summary class="btn btn--ghost"><Columns3 :size="18" aria-hidden="true" /> {{ t('web.tv.columns') }}</summary>
+          <fieldset class="tv-cols-box">
+            <legend>{{ t('web.tv.columnsTitle') }}</legend>
+            <label v-for="col in all" :key="col.key" class="tv-cols-opt">
+              <input
+                type="checkbox"
+                :checked="isShown(col.key)"
+                :disabled="isShown(col.key) && shown.length === 1"
+                :data-testid="`tv-show-${col.key}`"
+                @change="toggleColumn(col.key)"
+              />
+              {{ col.title }}
+            </label>
+          </fieldset>
+        </details>
         <button v-if="canFullscreen && !full" type="button" class="btn btn--ghost" data-testid="tv-fullscreen" @click="toggleFullscreen">
           <Maximize :size="18" aria-hidden="true" /> {{ t('web.tv.fullscreen') }}
         </button>

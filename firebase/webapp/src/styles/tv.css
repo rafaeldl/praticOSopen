@@ -1,11 +1,19 @@
 /* Modo TV (views/TvBoardView.vue). */
 /* Big type for a TV across the room: everything grows with the screen width. */
-.tv { height: 100dvh; display: flex; flex-direction: column; background: var(--color-paper); color: var(--color-ink); font-size: clamp(1rem, 0.55rem + 0.9vw, 2.2rem); }
-.tv-head { display: flex; align-items: center; gap: 1em; padding: 0.5em 1em; border-bottom: 2px solid var(--color-ink); flex-wrap: wrap; }
+.tv { height: 100dvh; display: flex; flex-direction: column; background: var(--color-grouped, var(--color-paper)); color: var(--color-ink); font-size: clamp(1rem, 0.55rem + 0.9vw, 2.2rem); }
+.tv-head { display: flex; align-items: center; gap: 1em; padding: 0.5em 1em; border-bottom: 1px solid var(--color-rule); flex-wrap: wrap; }
 .tv-title { margin: 0; font-size: 1.4em; flex: 1 1 auto; }
 .tv-clock { margin: 0; font-size: 1.4em; font-weight: 700; }
 .tv-actions { display: flex; gap: 0.5rem; font-size: 1rem; }
 .tv-actions .btn { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 44px; }
+.tv-cols-menu { position: relative; }
+.tv-cols-menu > summary { list-style: none; cursor: pointer; }
+.tv-cols-menu > summary::-webkit-details-marker { display: none; }
+.tv-cols-box { position: absolute; right: 0; top: calc(100% + 0.35rem); z-index: 5; min-width: 15rem; margin: 0; padding: 0.6rem 0.75rem 0.7rem;
+  display: grid; gap: 0.15rem; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 8px; box-shadow: var(--shadow-card); }
+.tv-cols-box legend { float: left; width: 100%; padding: 0 0 0.35rem; font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+.tv-cols-opt { display: flex; align-items: center; gap: 0.55rem; min-height: 44px; font-weight: 500; cursor: pointer; }
+.tv-cols-opt input { width: 1.15rem; height: 1.15rem; accent-color: var(--color-accent); }
 .tv-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(var(--tv-cols, 4), minmax(0, 1fr)); }
 .tv-col { min-height: 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--color-rule); }
 .tv-col:last-child { border-right: 0; }
@@ -13,7 +21,7 @@
 .tv-col-head .dot { width: 0.7em; height: 0.7em; }
 .tv .tv-count { margin-left: auto; color: var(--color-muted); font-size: 1em; }
 .tv-list { flex: 1; min-height: 0; overflow: hidden; list-style: none; margin: 0; padding: 0 0.4em 0.4em; display: flex; flex-direction: column; gap: 0.35em; }
-.tv-card { background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.35em 0.55em; display: grid; gap: 0.05em; }
+.tv-card { background: var(--color-tile, var(--color-card)); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.35em 0.55em; display: grid; gap: 0.05em; }
 .tv-card.is-late { border-left: 0.3em solid var(--color-danger); }
 .tv-card-top { display: flex; justify-content: space-between; gap: 0.5em; align-items: baseline; }
 .tv-who { font-size: 1.05em; overflow-wrap: anywhere; }

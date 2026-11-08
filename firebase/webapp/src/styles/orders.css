@@ -160,7 +160,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .board-hint { padding: 0 1.25rem 0.5rem; }
 .board-wrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--color-rule); }
 .board-wrap.has-panel { grid-template-columns: minmax(0, 1fr) clamp(27rem, 40%, 42rem); }
-.board { min-height: 0; display: grid; grid-template-columns: repeat(var(--board-cols, 4), minmax(12rem, 1fr)); overflow-x: auto; }
+/* Grouped background (docs/DESIGN_TOKENS.md): white cards stand out on the warm grey. */
+.board { background: var(--color-grouped); min-height: 0; display: grid; grid-template-columns: repeat(var(--board-cols, 4), minmax(12rem, 1fr)); overflow-x: auto; }
 .col { min-height: 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--color-rule); }
 .col:last-child { border-right: 0; }
 .col.is-over { background: var(--color-selected); }
@@ -172,7 +173,7 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .card.drop-before { box-shadow: 0 -3px 0 var(--color-focus); }
 .col-list { flex: 1; min-height: 0; overflow: auto; padding: 0 0.5rem 0.75rem; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
 .col > .muted { padding: 0 0.75rem; }
-.card { position: relative; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.45rem 0.6rem; display: grid; gap: 0.1rem; }
+.card { position: relative; background: var(--color-tile, var(--color-card)); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.45rem 0.6rem; display: grid; gap: 0.1rem; }
 .card:hover { border-color: var(--color-control); }
 .card.is-dragging { opacity: 0.45; }
 .card-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }

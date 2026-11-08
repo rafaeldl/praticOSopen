@@ -954,5 +954,9 @@
   "web.stages.removeHint": "Se tirar uma etapa que tem OS, elas passam para a primeira etapa.",
   "web.stages.nameMissing": "Dê um nome para cada etapa.",
   "web.stages.nameRepeated": "Já existe uma etapa com esse nome.",
-  "web.stages.turnedOff": "Etapas desligadas"
+  "web.stages.turnedOff": "Etapas desligadas",
+  "web.theme.toDark": "Modo escuro",
+  "web.theme.toLight": "Modo claro",
+  "web.tv.columns": "Colunas",
+  "web.tv.columnsTitle": "Colunas que aparecem na TV"
 }
