@@ -11,7 +11,7 @@ vi.mock('../src/lib/firebase', () => ({
 }))
 
 const { normalizeOrder } = await import('../src/lib/orders/model')
-const { linesForStage, rankAt, sortInStage, stageIdOf, stagesOf, suggestedStage } = await import('../src/lib/orders/stages')
+const { linesForStage, rankAt, sortInStage, stageIdOf, stageNameOf, stagesOf, suggestedStage } = await import('../src/lib/orders/stages')
 
 const STAGES = stagesOf([
   { id: 'paint', name: 'Pintura', keywords: ['pint', 'lataria'] },
@@ -38,6 +38,13 @@ describe('stage of an order', () => {
     expect(stageIdOf(order('c', { stage: { id: 'gone', rank: 1 } }), STAGES)).toBe('paint')
     expect(stageIdOf(order('d', { status: 'approved' }), STAGES)).toBeNull()
     expect(stageIdOf(order('e'), [])).toBeNull()
+  })
+
+  test('stage name in place of the status: its stage, the first one, or none outside progress', () => {
+    expect(stageNameOf(order('a', { stage: { id: 'polish', rank: 1 } }), STAGES)).toBe('Polimento')
+    expect(stageNameOf(order('b'), STAGES)).toBe('Pintura')
+    expect(stageNameOf(order('c', { status: 'approved' }), STAGES)).toBeNull()
+    expect(stageNameOf(order('d'), [])).toBeNull()
   })
 
   test('a stage left outside progress is ignored when read', () => {

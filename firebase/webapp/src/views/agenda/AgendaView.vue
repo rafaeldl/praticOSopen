@@ -460,9 +460,9 @@ onBeforeUnmount(() => {
                   <span class="ag-row-top"><span class="who">{{ visit.item.order.customer?.name || t('web.orders.noCustomer') }}</span><span class="num">{{ visitTime(visit) }}</span></span>
                   <StatusLabel
                     :status="visit.item.order.status"
-                    :late-text="lateText(visit.item.order, now) ? `${lateText(visit.item.order, now)} · ${visit.item.order.number ?? ''}` : null"
-                    :text="`${statusText(visit.item.order.status)} · ${visit.item.order.number ?? ''}`"
-                  />
+                    :late-text="lateText(visit.item.order, now)"
+                    :text="statusText(visit.item.order.status)"
+                  > · {{ visit.item.order.number ?? '' }}</StatusLabel>
                   <span v-if="lineOf(visit.item)" class="sub">{{ lineOf(visit.item) }}</span>
                 </button>
               </li>

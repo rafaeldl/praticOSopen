@@ -1167,7 +1167,7 @@ watch(
           <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
         </p>
         <div class="od-state">
-          <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="lateText(order, now) ? undefined : statusText(order.status)" data-testid="order-status" />
+          <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText(order.status)" data-testid="order-status" />
           <button v-if="phrase && phraseActs" type="button" class="od-sentence link-plain" :class="{ 'od-sentence--late': phrase.late }" @click="onPhrase">{{ phrase.text }}</button>
           <span v-else-if="phrase" class="od-sentence" :class="{ 'od-sentence--late': phrase.late }">{{ phrase.text }}</span>
         </div>

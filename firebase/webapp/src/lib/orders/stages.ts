@@ -35,6 +35,12 @@ export function stageIdOf(order: Pick<Order, 'status' | 'stage'>, stages: WorkSt
   return stages.some((stage) => stage.id === order.stage?.id) ? order.stage!.id : stages[0]!.id
 }
 
+/** Name of the stage an in-progress order is in ("Pintura"), shown in place of the status; null without stages. */
+export function stageNameOf(order: Pick<Order, 'status' | 'stage'>, stages: WorkStage[]): string | null {
+  const id = stageIdOf(order, stages)
+  return id ? (stages.find((stage) => stage.id === id)?.name ?? null) : null
+}
+
 type Ranked = Pick<Order, 'stage' | 'createdAt'>
 
 /**
