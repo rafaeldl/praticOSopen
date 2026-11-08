@@ -53,11 +53,35 @@ void main() {
       expect(find.text('Nova OS'), findsOneWidget);
     });
 
-    testWidgets('floating variant renders on glass', (tester) async {
+    testWidgets('floating variant stays opaque: glass is for navigation', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(PrimaryButton(label: 'Nova OS', floating: true, onPressed: () {})),
       );
-      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.byType(BackdropFilter), findsNothing);
+    });
+
+    testWidgets('is the yellow action with navy text and a hairline', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(PrimaryButton(label: 'Nova OS', onPressed: () {})),
+      );
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(PrimaryButton),
+          matching: find.byType(DecoratedBox),
+        ).first,
+      );
+      final decoration = box.decoration as BoxDecoration;
+      expect(decoration.color!.toARGB32(), AppColors.action.color.toARGB32());
+      expect(decoration.border, isNotNull);
+      final label = tester.widget<Text>(find.text('Nova OS'));
+      expect(
+        label.style!.color!.toARGB32(),
+        AppColors.onAction.color.toARGB32(),
+      );
     });
   });
 

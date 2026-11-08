@@ -10,6 +10,7 @@ import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/search_utils.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// The search field shows only when the list has more than this many items
 /// (or when the user already typed something). Product decision.
@@ -505,7 +506,7 @@ class PickerConfirmButton extends StatelessWidget {
     final icon = Icon(
       CupertinoIcons.checkmark_alt,
       color: enabled
-          ? AppColors.onAccent.resolveFrom(context)
+          ? AppColors.onAction.resolveFrom(context)
           : AppColors.textSecondary.resolveFrom(context),
     );
     return Semantics(
@@ -522,12 +523,13 @@ class PickerConfirmButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: enabled
-            // The one blue action of the screen: opaque, not glass.
+            // The one yellow action of the screen: opaque, not glass.
             ? Container(
                 width: AppSizes.minTouchTarget,
                 height: AppSizes.minTouchTarget,
-                decoration: BoxDecoration(
-                  color: AppColors.accent.resolveFrom(context),
+                decoration: PrimaryButton.actionDecoration(
+                  context,
+                  null,
                   shape: BoxShape.circle,
                 ),
                 child: icon,

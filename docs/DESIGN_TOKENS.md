@@ -12,7 +12,7 @@ O tema **Campo** é a identidade visual do PraticOS nos três lugares: o site, o
 
 A regra em uma frase: **o site é bege porque vende; o sistema é branco porque trabalha. As cores da marca são as mesmas.**
 
-**Status:** aprovado no protótipo em 08/11/2026 e ainda não aplicado. O site já está no tema. O web e o app recebem a camada "sistema" depois. Cada item abaixo diz onde já vale.
+**Status:** aprovado no protótipo em 08/11/2026. O site já está no tema; a paleta do app foi aplicada (cores e componentes compartilhados, não o novo layout da Início). O web recebe a camada "sistema" depois. Cada item abaixo diz onde já vale.
 
 Protótipo: https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Tema Campo" (OS aberta, Nova OS, Financeiro, Início, telas da etapa e "Web: fundo bege ou branco?"). A Início tem spec própria: `docs/superpowers/specs/2026-11-08-inicio-lista-os-design.md`.
 
@@ -62,7 +62,7 @@ Os hex do claro e do escuro são os do protótipo. No CSS a fonte da verdade con
 | Cartão | branco | `#1D2228` | igual | `surface` | `--color-card` |
 | Preenchimento de apoio | `#F1EEE7` | `#1D2228` | igual | `secondaryFill` | `--color-paper-2` |
 | Texto principal | `#07294F` | `#F1EEE8` | igual | `text` | `--color-ink` |
-| Texto secundário | `#6B7178` | `#B4BAC2` | `#3A3F45` | `textSecondary` | `--color-muted` |
+| Texto secundário | `#6B7178` (app: `#646A71`) | `#B4BAC2` | `#3A3F45` | `textSecondary` | `--color-muted` |
 | Texto terciário | `#8A8F96` | `#8A9099` | `#5E636A` | **novo** `textTertiary` | **novo** `--color-faint` |
 | Linha | `#E3E0DA` | `#2A3038` | mais escura | `separator` | `--color-rule` |
 | Seleção (fundo da linha marcada) | `#EAF2FB` | `#16304A` | igual | `accentSoft` | `--color-selected` |
@@ -79,13 +79,15 @@ Os hex do claro e do escuro são os do protótipo. No CSS a fonte da verdade con
 
 A bolinha mostra a situação; o problema vem em texto.
 
-| Situação | Ponto | Texto |
+| Situação | Ponto (`OrderStatusStyle.dotColor`) | Texto |
 |---|---|---|
-| Orçamento | cinza | cinza |
-| Aprovada | azul | cinza |
-| Em andamento (e qualquer etapa) | âmbar (`warningDot`) | cinza, com o nome da etapa quando houver |
-| Concluída | verde | cinza |
-| Cancelada | vazio | cinza |
+| Orçamento | cinza (`textSecondary`) | cinza |
+| Aprovada | azul (`accentText`) | cinza |
+| Em andamento (e qualquer etapa) | âmbar (`warningDot`) | cinza, com o nome da etapa em `text` quando houver |
+| Concluída | verde (`success`) | cinza |
+| Cancelada | cinza (`textSecondary`; vazio no protótipo) | cinza |
+
+No app vale desde a troca da paleta: cabeçalho da OS, Agenda e histórico de OS (cliente e veículo). A lista da Início ganha esse formato com a spec dela.
 
 Problemas não são situação, aparecem junto dela:
 
@@ -109,7 +111,7 @@ Isso troca a regra antiga (ponto e texto em `danger` só com "Atrasada 2 dias"):
 | Par | Contraste | Decisão |
 |---|---|---|
 | Texto terciário `#8A8F96` no branco | 3,3:1 | Só em apoio (serviço, observação, valor). Com "Aumentar contraste": `#5E636A` |
-| Texto secundário `#6B7178` no branco | ~5:1 | Passa |
+| Texto secundário `#6B7178` no branco | ~5:1 | Passa no branco; no `#F2F0EC` dá 4,3:1, por isso o app usa `#646A71` (4,8:1) |
 | Âmbar `#975800` no branco | ~6:1 | Passa |
 | Marinho no amarelo | alto | Passa |
 | Borda do amarelo no branco | 1,4:1 | Contorno fino |
@@ -124,8 +126,8 @@ Isso troca a regra antiga (ponto e texto em `danger` só com "Atrasada 2 dias"):
 
 | Item | Site | Web | App |
 |---|---|---|---|
-| Camada da marca | aplicado | aplicado | falta (azul e amarelo) |
-| Fundo branco e linhas finas | não se aplica | falta | falta |
-| Texto terciário | não se aplica | falta | falta |
-| Situação + problema juntos | não se aplica | falta | falta |
+| Camada da marca | aplicado | aplicado | aplicado |
+| Fundo branco e linhas finas | não se aplica | falta | aplicado |
+| Texto terciário | não se aplica | falta | papel criado (`textTertiary`); telas usam aos poucos |
+| Situação + problema juntos | não se aplica | falta | OS, Agenda e histórico; falta a Início |
 | Linha de OS e seções da Início | não se aplica | falta | falta |

@@ -67,28 +67,15 @@ class GlassTabBar extends CupertinoTabBar {
       this.activeColor ?? AppColors.accentText,
       context,
     )!;
-    final shadowAlpha = CupertinoTheme.brightnessOf(context) == Brightness.dark
-        ? 0.4
-        : 0.14;
-
     return SizedBox(
       height: barHeight + safeBottom,
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, bottomGap),
-          child: _layout(DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(capsuleHeight / 2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF000000).withValues(alpha: shadowAlpha),
-                  blurRadius: 24,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: AppGlass(
+          child: _layout(
+            AppGlass(
+              elevated: true,
               reduceTransparency: reduceTransparency,
               borderRadius: BorderRadius.circular(capsuleHeight / 2),
               opacity: GlassTabBar.glassOpacity,
@@ -106,8 +93,12 @@ class GlassTabBar extends CupertinoTabBar {
                             selected: i == currentIndex,
                             activeColor: activeColor,
                             inactiveColor: AppColors.text.resolveFrom(context),
-                            selectedFill: AppColors.secondaryFill.resolveFrom(
-                              context,
+                            selectedFill: activeColor.withValues(
+                              alpha:
+                                  CupertinoTheme.brightnessOf(context) ==
+                                      Brightness.dark
+                                  ? 0.16
+                                  : 0.12,
                             ),
                             onTap: onTap == null ? null : () => onTap!(i),
                           ),
@@ -117,7 +108,7 @@ class GlassTabBar extends CupertinoTabBar {
                 ),
               ),
             ),
-          )),
+          ),
         ),
       ),
     );
@@ -178,9 +169,9 @@ class GlassTabBar extends CupertinoTabBar {
   }
 }
 
-/// The blue "+" beside the tab capsule: starts a new order from any tab.
-/// Solid accent with no glass, so it never reads as one more tab (the round
-/// glass slot next to the tabs is iOS's search tab).
+/// The navy "+" beside the tab capsule: starts a new order from any tab.
+/// Solid [AppColors.navyFill] with no glass, so it never reads as one more
+/// tab (the round glass slot next to the tabs is iOS's search tab).
 class NewOrderTabButton extends StatelessWidget {
   const NewOrderTabButton({
     super.key,
@@ -194,7 +185,6 @@ class NewOrderTabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = AppColors.accent.resolveFrom(context);
     return Semantics(
       identifier: 'add_order_button',
       button: true,
@@ -207,20 +197,13 @@ class NewOrderTabButton extends StatelessWidget {
           width: GlassTabBar.capsuleHeight,
           height: GlassTabBar.capsuleHeight,
           decoration: BoxDecoration(
-            color: accent,
+            color: AppColors.navyFill.resolveFrom(context),
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: accent.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Icon(
             CupertinoIcons.add,
             size: 30,
-            color: AppColors.onAccent.resolveFrom(context),
+            color: AppColors.onNavyFill.resolveFrom(context),
           ),
         ),
       ),

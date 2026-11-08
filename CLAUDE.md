@@ -222,17 +222,17 @@ O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou red
 
 **Regras de tela** (público não técnico, então clareza primeiro):
 - Uma pergunta por tela ("o que eu faço agora?"), respondida no topo em uma frase
-- Um botão azul (`accent`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`)
+- Um botão amarelo (`action`, texto marinho `onAction`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`). Azul é só link, seleção e aba atual
 - Português do dia a dia ("Falta receber R$ 166"), sem siglas nem jargão
 - Mostrar só o que o registro tem; recurso ocasional entra pelo menu "…"/"+" ou pelo assistente
-- Cadastro novo abre em sheet grande: "X" à esquerda e "✓" à direita no topo (cinza até dar para salvar, azul quando dá), formulário em cartões brancos sobre fundo cinza. Edição do que já existe abre empurrada
-- Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco
+- Cadastro novo abre em sheet grande: "X" à esquerda e "✓" à direita no topo (cinza até dar para salvar, amarelo quando dá), formulário em cartões brancos sobre fundo cinza. Edição do que já existe abre empurrada
+- Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas, sem sombra e com contorno fino. Conteúdo sempre opaco
 - Escolher algo (cliente, veículo, situação, responsável, checklist) abre a tela de escolher (`PickerScaffold`/`pickOne`), nunca menu de ações: pergunta como título, "+" no topo para cadastrar, ✓ no atual, "Nenhum …" para tirar, busca só com mais de 10 itens
 - Menu "…" (`showPullDownMenu`) só para o raro, em grupos com ícone, destrutivas em vermelho no fim. Sem botão "Editar": cada linha abre o seu editor
 - IA (barra de vidro Foto/Falar embaixo) aplica na hora, marca com ✦ azul o que preencheu e mostra aviso opaco com "Desfazer"; nunca recebe, cancela ou apaga sozinha; erro no aviso, nunca em alerta
 - Tela de um registro (OS): título pequeno no topo, cabeçalho com quem identifica (cliente), situação e uma frase, e o botão azul do próximo passo logo abaixo
 - Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44
-- Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o "+" azul (Nova OS) ao lado. Clientes e o que era "Mais" abrem pelo botão do perfil, no topo da Início
+- Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o "+" marinho (Nova OS, `navyFill`) ao lado. Clientes e o que era "Mais" abrem pelo botão do perfil, no topo da Início
 
 **Widgets:**
 - `CupertinoPageScaffold` + `CupertinoSliverNavigationBar` (título grande)
@@ -241,20 +241,20 @@ O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou red
 - `CupertinoAlertDialog` para confirmações, `CupertinoActionSheet` para menus, `CupertinoSearchTextField` para busca
 - Componente nativo do iPhone quando existe (interruptor, menu "…", "Continuar com Apple"); não desenhar uma versão própria
 
-**Cores:** usar os papéis de `AppColors` (`lib/theme/app_colors.dart`), nunca hex, sempre com `.resolveFrom(context)` (é assim que funcionam o modo escuro e o "Aumentar contraste"):
+**Cores:** tema Campo (`docs/DESIGN_TOKENS.md`): fundo branco, texto marinho, cinzas quentes, amarelo para a ação principal, azul para link e seleção. Usar os papéis de `AppColors` (`lib/theme/app_colors.dart`), nunca hex, sempre com `.resolveFrom(context)` (é assim que funcionam o modo escuro e o "Aumentar contraste"):
 ```dart
 // CORRETO
-color: AppColors.accent.resolveFrom(context)
+color: AppColors.accentText.resolveFrom(context)
 
 // ERRADO - não adapta ao modo escuro
-color: AppColors.accent
-color: Color(0xFF116BB5)
+color: AppColors.accentText
+color: Color(0xFF1467C2)
 ```
 `CupertinoColors` direto e `lib/theme/app_theme.dart` são o padrão antigo, que só continua nas telas ainda não redesenhadas. Ao mudar uma cor, rodar `fvm flutter test test/theme/`.
 
-**Texto:** `AppTypography` (corpo 19, título 34). O texto cresce com o tamanho do texto do iPhone: nunca travar o `textScaler`, nunca usar altura fixa em linha com texto, nunca reticências em nome, título ou valor (a linha quebra).
+**Texto:** `AppTypography` (corpo 19, título 34), fonte do sistema, títulos em 700 (nunca 800). Texto de apoio fraco (serviço, observação) em `textTertiary`. O texto cresce com o tamanho do texto do iPhone: nunca travar o `textScaler`, nunca usar altura fixa em linha com texto, nunca reticências em nome, título ou valor (a linha quebra).
 
-**Status:** ponto colorido + texto em `textSecondary`, nunca selo colorido. Orçamento cinza, aprovada azul (`accentText`), em andamento âmbar (`warning`), concluída verde (`success`), cancelada cinza. Atrasada é problema: ponto e texto em `danger`, texto em negrito.
+**Status:** ponto colorido + texto em `textSecondary`, nunca selo colorido. Orçamento cinza, aprovada azul (`accentText`), em andamento e etapas âmbar (`warningDot`), concluída verde (`success`), cancelada cinza. Atrasada e parada são problema, não situação: vêm depois dela em negrito ("● Pintura · **Atrasada 2 dias**" em `danger`, "Parada" em `warning`) e o ponto continua com a cor da situação.
 
 ### Web (tema "Campo")
 
@@ -295,7 +295,7 @@ npm run watch               # Watch mode
 - Flags em `src/_data/site.json` (`flags.whatsappBot` desligada enquanto o bot estiver fora)
 - `src/style.css` é legado: só `order/` e `login` ainda usam
 
-**Outros apps:** o app web (`firebase/webapp`) importa os mesmos tokens do site, com IBM Plex Sans em tudo (ver `docs/WEB_APP_DESIGN.md`). O app do celular ainda usa a paleta do iPhone (`lib/theme/app_colors.dart`); o tema Campo no celular está em avaliação no protótipo (página "Tema Campo" em https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz).
+**Outros apps:** o app web (`firebase/webapp`) importa os mesmos tokens do site, com IBM Plex Sans em tudo (ver `docs/WEB_APP_DESIGN.md`). O app do celular usa as mesmas cores da marca na camada "sistema" (fundo branco, fonte do sistema) em `lib/theme/app_colors.dart`; o que é igual e o que muda entre site, web e app está em `docs/DESIGN_TOKENS.md`.
 
 Ver `docs/WEBSITE_STRUCTURE.md` para documentação completa.
 

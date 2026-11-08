@@ -275,7 +275,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       dot = OrderStatusStyle.overdueColor;
     } else if (summary != null && summary.open > 0) {
       status = l10n.openOrdersCount(summary.open);
-      dot = AppColors.warning;
+      dot = AppColors.warningDot;
     }
     final owed = _owed[customer.id] ?? 0;
     final owes = owed > 0

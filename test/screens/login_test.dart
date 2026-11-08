@@ -247,7 +247,7 @@ void main() {
     );
     final panelColor =
         (panel.decoration! as BoxDecoration).color! as CupertinoDynamicColor;
-    expect(panelColor.darkColor, const Color(0xFF1C1C1E));
+    expect(panelColor.darkColor, AppColors.surface.darkColor);
     expect(panelColor.color, const Color(0xFFFFFFFF));
 
     final apple = tester.widget<SignInWithAppleButton>(

@@ -781,7 +781,9 @@ void main() {
       expect(find.text('Fica pronto amanhã'), findsOneWidget);
     });
 
-    testWidgets('late: dot and status in danger, in bold', (tester) async {
+    testWidgets('late: status stays, "Atrasada" in bold danger after it', (
+      tester,
+    ) async {
       final now = DateTime.now();
       final due = DateTime(now.year, now.month, now.day - 1);
       await _pump(
@@ -790,11 +792,16 @@ void main() {
         args: {'order': _order(status: 'progress')..dueDate = due},
       );
       expect(find.text('Era para ficar pronto ontem'), findsOneWidget);
-      final status = tester.widget<Text>(find.textContaining('Atrasada'));
-      expect(status.style?.fontWeight, FontWeight.w700);
+      final late = _spanStyle(tester, 'Atrasada');
+      expect(late?.fontWeight, FontWeight.w700);
+      expect(
+        late?.color?.toARGB32(),
+        OrderStatusStyle.overdueColor.color.toARGB32(),
+      );
+      // The dot keeps the status color (in progress: amber dot).
       expect(
         tester.widget<StatusDot>(find.byType(StatusDot)).color,
-        OrderStatusStyle.overdueColor,
+        OrderStatusStyle.dotColor('progress'),
       );
     });
   });
@@ -1432,4 +1439,20 @@ void main() {
       expect(_menuLabels(tester), isNot(contains('Mudar etapa')));
     });
   });
+}
+
+/// Style of the inline span whose text is [text] (status lines are rich text).
+TextStyle? _spanStyle(WidgetTester tester, String text) {
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    TextStyle? found;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text == text) {
+        found = span.style;
+        return false;
+      }
+      return true;
+    });
+    if (found != null) return found;
+  }
+  return null;
 }

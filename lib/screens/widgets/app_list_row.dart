@@ -49,9 +49,8 @@ class AppListRow extends StatelessWidget {
   final TextStyle? titleStyle;
   final TextStyle? trailingStyle;
 
-  /// Highlighter (marca-texto): the assistant filled this row. Yellow
-  /// [AppColors.marker] background with [AppColors.onMarker] text, in both
-  /// modes.
+  /// The assistant filled this row: [AppColors.accentSoft] background (the
+  /// blue of the ✦ mark), text unchanged.
   final bool marked;
 
   /// The current choice of a picker: blue check mark at the end of the row,
@@ -68,12 +67,12 @@ class AppListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onMarker = AppColors.onMarker.resolveFrom(context);
-    final textColor = marked ? onMarker : AppColors.text.resolveFrom(context);
-    final secondary = marked
-        ? onMarker.withValues(alpha: 0.75)
-        : AppColors.textSecondary.resolveFrom(context);
-    final stacked = MediaQuery.textScalerOf(context).scale(100) / 100 >=
+    final textColor = marked
+        ? AppColors.onAccentSoft.resolveFrom(context)
+        : AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(100) / 100 >=
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
 
@@ -109,10 +108,7 @@ class AppListRow extends StatelessWidget {
         else
           titleText,
         if (subtitleWidget != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: subtitleWidget,
-          )
+          Padding(padding: const EdgeInsets.only(top: 2), child: subtitleWidget)
         else if (subtitle != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -163,11 +159,7 @@ class AppListRow extends StatelessWidget {
             ],
             if (chevron) ...[
               const SizedBox(width: AppSpacing.sm),
-              Icon(
-                CupertinoIcons.chevron_forward,
-                size: 18,
-                color: secondary,
-              ),
+              Icon(CupertinoIcons.chevron_forward, size: 18, color: secondary),
             ],
           ],
         ),
@@ -175,7 +167,10 @@ class AppListRow extends StatelessWidget {
     );
 
     final content = marked
-        ? ColoredBox(color: AppColors.marker.resolveFrom(context), child: row)
+        ? ColoredBox(
+            color: AppColors.accentSoft.resolveFrom(context),
+            child: row,
+          )
         : row;
 
     if (onTap == null) {

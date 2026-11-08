@@ -14,6 +14,7 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/screens/widgets/failure_alert.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// New / edit service or product (one form for both [CatalogKind]s).
 ///
@@ -288,24 +289,26 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
               left: AppSpacing.blockMargin,
               right: AppSpacing.blockMargin,
               bottom: AppSpacing.lg,
-              child: CupertinoButton(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size.fromHeight(
-                  AppSizes.primaryButtonHeight,
-                ),
-                color: AppColors.accent.resolveFrom(context),
-                borderRadius: BorderRadius.circular(AppRadii.button),
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const CupertinoActivityIndicator()
-                    : Text(
-                        _isService
-                            ? l10n.saveServiceButton
-                            : l10n.saveProductButton,
-                        style: AppTypography.bodyStrong.copyWith(
-                          color: AppColors.onAccent.resolveFrom(context),
+              child: ActionOutline(
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size.fromHeight(
+                    AppSizes.primaryButtonHeight,
+                  ),
+                  color: AppColors.action.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(AppRadii.button),
+                  onPressed: _saving ? null : _save,
+                  child: _saving
+                      ? const CupertinoActivityIndicator()
+                      : Text(
+                          _isService
+                              ? l10n.saveServiceButton
+                              : l10n.saveProductButton,
+                          style: AppTypography.bodyStrong.copyWith(
+                            color: AppColors.onAction.resolveFrom(context),
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
           ],

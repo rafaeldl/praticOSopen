@@ -31,6 +31,7 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/screens/widgets/failure_alert.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// [value] of a number field, grouped for reading ("98.000"), or null to show
 /// it as it is. The saved value does not change. Year has the number type but
@@ -761,16 +762,18 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-      color: AppColors.accent.resolveFrom(context),
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: AppTypography.bodyStrong.copyWith(
-          color: AppColors.onAccent.resolveFrom(context),
+    return ActionOutline(
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+        color: AppColors.action.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: AppTypography.bodyStrong.copyWith(
+            color: AppColors.onAction.resolveFrom(context),
+          ),
         ),
       ),
     );

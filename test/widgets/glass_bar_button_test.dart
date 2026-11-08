@@ -32,16 +32,19 @@ void main() {
       ),
     )));
     expect(find.byType(AppGlass), findsOneWidget);
-    // Lifted off the page: soft shadow so white glass shows on white.
+    // Campo theme: a hairline edge so white glass shows on white, no shadow.
     expect(tester.widget<AppGlass>(find.byType(AppGlass)).elevated, isTrue);
-    final shadow = find.descendant(
-      of: find.byType(AppGlass),
-      matching: find.byWidgetPredicate((w) =>
-          w is DecoratedBox &&
-          w.decoration is BoxDecoration &&
-          ((w.decoration as BoxDecoration).boxShadow?.isNotEmpty ?? false)),
-    );
-    expect(shadow, findsOneWidget);
+    final boxes = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
+            of: find.byType(AppGlass),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((w) => w.decoration)
+        .whereType<BoxDecoration>();
+    expect(boxes.any((d) => d.boxShadow?.isNotEmpty ?? false), isFalse);
+    expect(boxes.any((d) => d.border != null), isTrue);
     expect(find.bySemanticsLabel('Mais opções'), findsOneWidget);
     expect(tester.getSize(find.byType(GlassBarButton)), const Size(44, 44));
     await tester.tap(find.byType(GlassBarButton));

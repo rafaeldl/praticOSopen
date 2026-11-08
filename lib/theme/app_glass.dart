@@ -5,8 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'app_colors.dart';
 
 /// Glass material for the navigation layer only (design system rule 11):
-/// tab bar, top bar buttons, "…" menus, small sheets and the floating primary
-/// button. Content (lists, next-step block, fields, background) stays opaque.
+/// tab bar, top bar buttons, "…" menus and small sheets. Content (lists, next-step block, fields, background) stays opaque.
 ///
 /// Renders a translucent fill over a backdrop blur, clipped to [borderRadius].
 /// Falls back to an opaque fill (no blur) when:
@@ -33,8 +32,7 @@ class AppGlass extends StatelessWidget {
   final Widget child;
   final BorderRadius borderRadius;
 
-  /// Fill color; defaults to [AppColors.surface]. Use [AppColors.accent] for
-  /// the floating primary button (glass tinted with the brand blue).
+  /// Fill color; defaults to [AppColors.surface].
   final CupertinoDynamicColor? tint;
 
   final bool enabled;
@@ -44,12 +42,12 @@ class AppGlass extends StatelessWidget {
   /// Alpha of the fill while translucent (0..1).
   final double opacity;
 
-  /// Floating controls (top bar buttons): soft shadow and a hairline edge, so
-  /// the glass stays visible over a background of the same color.
+  /// Floating controls (tab bar, top bar buttons, menus): hairline edge in
+  /// [AppColors.glassEdge], no shadow.
   final bool elevated;
 
   static const double defaultBlurSigma = 20;
-  static const double defaultOpacity = 0.72;
+  static const double defaultOpacity = 0.78;
 
   /// Whether glass must render as an opaque fill in this [context].
   static bool isOpaque(
@@ -66,34 +64,18 @@ class AppGlass extends StatelessWidget {
   Widget build(BuildContext context) {
     final glass = _buildGlass(context);
     if (!elevated) return glass;
-    final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    // Campo theme: no shadow, a hairline edge so the glass stays visible over
+    // a background of the same color.
     return DecoratedBox(
+      position: DecorationPosition.foreground,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            // Short shadow: it must fade out inside the navigation bar,
-            // which clips anything drawn past its edge.
-            color: const Color(
-              0xFF000000,
-            ).withValues(alpha: dark ? 0.35 : 0.10),
-            blurRadius: 3,
-            offset: const Offset(0, 0.5),
-          ),
-        ],
-      ),
-      position: DecorationPosition.background,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          border: Border.all(
-            width: 0.5,
-            color: AppColors.separator.resolveFrom(context),
-          ),
+        border: Border.all(
+          width: 1,
+          color: AppColors.glassEdge.resolveFrom(context),
         ),
-        child: glass,
       ),
+      child: glass,
     );
   }
 

@@ -102,7 +102,7 @@ void main() {
     );
     expect(
       (capsule.decoration! as BoxDecoration).color!.toARGB32(),
-      AppColors.secondaryFill.color.toARGB32(),
+      AppColors.accentText.color.withValues(alpha: 0.12).toARGB32(),
     );
   });
 

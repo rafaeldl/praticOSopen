@@ -9,7 +9,7 @@ void main() {
   group('OrderStatusStyle.dotColor', () {
     test('maps each status to its design-system role', () {
       expect(OrderStatusStyle.dotColor('approved'), AppColors.accentText);
-      expect(OrderStatusStyle.dotColor('progress'), AppColors.warning);
+      expect(OrderStatusStyle.dotColor('progress'), AppColors.warningDot);
       expect(OrderStatusStyle.dotColor('done'), AppColors.success);
       expect(OrderStatusStyle.dotColor('quote'), AppColors.textSecondary);
     });
@@ -24,7 +24,14 @@ void main() {
       expect(OrderStatusStyle.dotColor('xyz'), AppColors.textSecondary);
     });
 
-    test('overdue uses danger', () {
+    test('the dot never turns into a problem color', () {
+      for (final status in ['quote', 'approved', 'progress', 'done']) {
+        expect(OrderStatusStyle.dotColor(status), isNot(AppColors.danger));
+        expect(OrderStatusStyle.dotColor(status), isNot(AppColors.warning));
+      }
+    });
+
+    test('overdue text uses danger', () {
       expect(OrderStatusStyle.overdueColor, AppColors.danger);
     });
   });
@@ -32,7 +39,7 @@ void main() {
   group('DeviceStatusStyle.dotColor', () {
     test('maps device statuses', () {
       expect(DeviceStatusStyle.dotColor('active'), AppColors.success);
-      expect(DeviceStatusStyle.dotColor('maintenance'), AppColors.warning);
+      expect(DeviceStatusStyle.dotColor('maintenance'), AppColors.warningDot);
       expect(DeviceStatusStyle.dotColor('inactive'), AppColors.textSecondary);
       expect(
           DeviceStatusStyle.dotColor('decommissioned'), AppColors.textSecondary);

@@ -27,6 +27,7 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/report_week.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// Relatório financeiro (gráficos, ranking de clientes/serviços/produtos e
 /// escolha de outro período), aberto a partir da aba Financeiro.
@@ -2382,18 +2383,20 @@ class _SendPdfBar extends StatelessWidget {
             AppSpacing.blockMargin,
             AppSpacing.md,
           ),
-          child: CupertinoButton(
-            key: const Key('financialSendReportPdf'),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-            color: AppColors.accent.resolveFrom(context),
-            borderRadius: BorderRadius.circular(AppRadii.button),
-            onPressed: onPressed,
-            child: Text(
-              context.l10n.financialSendReportPdf,
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyStrong.copyWith(
-                color: AppColors.onAccent.resolveFrom(context),
+          child: ActionOutline(
+            child: CupertinoButton(
+              key: const Key('financialSendReportPdf'),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+              color: AppColors.action.resolveFrom(context),
+              borderRadius: BorderRadius.circular(AppRadii.button),
+              onPressed: onPressed,
+              child: Text(
+                context.l10n.financialSendReportPdf,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyStrong.copyWith(
+                  color: AppColors.onAction.resolveFrom(context),
+                ),
               ),
             ),
           ),

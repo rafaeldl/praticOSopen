@@ -8,6 +8,7 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// Pieces of the "Nova OS" sheet (prototype "Nova OS · campos por ordem de
 /// importância"), drawn like the Lembretes and Calendário sheets: gray
@@ -91,7 +92,7 @@ class _SaveButton extends StatelessWidget {
     final icon = Icon(
       CupertinoIcons.checkmark_alt,
       color: enabled
-          ? AppColors.onAccent.resolveFrom(context)
+          ? AppColors.onAction.resolveFrom(context)
           : AppColors.textSecondary.resolveFrom(context),
     );
     return Semantics(
@@ -108,12 +109,13 @@ class _SaveButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: enabled
-            // The one blue action of the sheet: opaque, not glass.
+            // The one yellow action of the sheet: opaque, not glass.
             ? Container(
                 width: AppSizes.minTouchTarget,
                 height: AppSizes.minTouchTarget,
-                decoration: BoxDecoration(
-                  color: AppColors.accent.resolveFrom(context),
+                decoration: PrimaryButton.actionDecoration(
+                  context,
+                  null,
                   shape: BoxShape.circle,
                 ),
                 child: icon,

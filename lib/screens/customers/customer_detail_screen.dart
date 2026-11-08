@@ -37,6 +37,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/failure_alert.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
@@ -771,16 +772,18 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-      color: AppColors.accent.resolveFrom(context),
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: AppTypography.bodyStrong.copyWith(
-          color: AppColors.onAccent.resolveFrom(context),
+    return ActionOutline(
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+        color: AppColors.action.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: AppTypography.bodyStrong.copyWith(
+            color: AppColors.onAction.resolveFrom(context),
+          ),
         ),
       ),
     );

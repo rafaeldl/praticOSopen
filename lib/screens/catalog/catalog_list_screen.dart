@@ -18,6 +18,7 @@ import 'package:praticos/utils/order_items.dart' show catalogItemKey;
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// Catalog of services and products.
 ///
@@ -296,18 +297,20 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-            color: AppColors.accent.resolveFrom(context),
-            borderRadius: BorderRadius.circular(AppRadii.button),
-            onPressed: _create,
-            child: Text(
-              _kind == CatalogKind.service
-                  ? l10n.catalogNewService
-                  : l10n.catalogNewProduct,
-              style: AppTypography.bodyStrong.copyWith(
-                color: AppColors.onAccent.resolveFrom(context),
+          child: ActionOutline(
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+              color: AppColors.action.resolveFrom(context),
+              borderRadius: BorderRadius.circular(AppRadii.button),
+              onPressed: _create,
+              child: Text(
+                _kind == CatalogKind.service
+                    ? l10n.catalogNewService
+                    : l10n.catalogNewProduct,
+                style: AppTypography.bodyStrong.copyWith(
+                  color: AppColors.onAction.resolveFrom(context),
+                ),
               ),
             ),
           ),
