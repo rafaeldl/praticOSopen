@@ -20,7 +20,7 @@ A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, ve�
 
 4. **A lista é agrupada na ordem do quadro do web**, do que pede ação primeiro:
    1. **Atrasadas** (título em `danger`), vindas de qualquer situação.
-   2. **Paradas** (`Order.onHold`).
+   2. **Paradas** (`Order.onHold`), título em `warning`, a mesma cor de "Parada" na fila da etapa. As outras seções têm título em `textSecondary`.
    3. **Aprovadas**.
    4. **Uma seção por etapa** (`Company.workStages`, na ordem configurada). Sem etapas, uma seção só, **Em andamento**.
 5. **Seção vazia some.** Sem atrasadas, a lista começa em Paradas ou na próxima.
