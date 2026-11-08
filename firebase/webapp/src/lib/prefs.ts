@@ -1,5 +1,5 @@
 // Per-person preferences kept in this browser.
-import { reactive, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { readStorage, writeStorage } from './storage'
 
 export type ThemePref = 'system' | 'light' | 'dark'
@@ -31,9 +31,19 @@ function read(): Prefs {
 
 export const prefs = reactive<Prefs>(read())
 
+const systemDark = ref(false)
+
+/** Whether the screen is dark now: the person's choice, or the system's. */
+export const isDark = () => prefs.theme === 'dark' || (prefs.theme === 'system' && systemDark.value)
+
+/** The quick switch of the sidebar: the other of what is on screen, kept as the person's choice. */
+export function toggleTheme(): void {
+  prefs.theme = isDark() ? 'light' : 'dark'
+}
+
 function applyTheme(): void {
-  const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+  systemDark.value = matchMedia('(prefers-color-scheme: dark)').matches
+  document.documentElement.setAttribute('data-theme', isDark() ? 'dark' : 'light')
 }
 
 export function startPrefs(): void {

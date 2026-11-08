@@ -954,5 +954,7 @@
   "web.stages.removeHint": "If you remove a stage that has orders, they move to the first stage.",
   "web.stages.nameMissing": "Give each stage a name.",
   "web.stages.nameRepeated": "There is already a stage with that name.",
-  "web.stages.turnedOff": "Stages turned off"
+  "web.stages.turnedOff": "Stages turned off",
+  "web.theme.toDark": "Dark mode",
+  "web.theme.toLight": "Light mode"
 }

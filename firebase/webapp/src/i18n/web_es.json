@@ -954,5 +954,7 @@
   "web.stages.removeHint": "Si quita una etapa que tiene órdenes, pasan a la primera etapa.",
   "web.stages.nameMissing": "Dé un nombre a cada etapa.",
   "web.stages.nameRepeated": "Ya existe una etapa con ese nombre.",
-  "web.stages.turnedOff": "Etapas desactivadas"
+  "web.stages.turnedOff": "Etapas desactivadas",
+  "web.theme.toDark": "Modo oscuro",
+  "web.theme.toLight": "Modo claro"
 }

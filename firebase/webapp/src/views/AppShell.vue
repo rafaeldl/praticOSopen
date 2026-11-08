@@ -2,7 +2,7 @@
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Menu, Plus, Search, Settings, User, UserPlus } from '@lucide/vue'
+import { Menu, Moon, Plus, Search, Settings, Sun, User, UserPlus } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
@@ -12,6 +12,7 @@ import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { canOpen, router } from '@/router'
 import { ui } from '@/lib/ui'
+import { isDark, toggleTheme } from '@/lib/prefs'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
@@ -149,6 +150,9 @@ onBeforeUnmount(() => {
         </RouterLink>
       </nav>
       <div class="side-foot">
+        <button type="button" class="nav-item" data-testid="theme-toggle" @click="toggleTheme">
+          <component :is="isDark() ? Sun : Moon" :size="18" aria-hidden="true" /><span>{{ t(isDark() ? 'web.theme.toLight' : 'web.theme.toDark') }}</span>
+        </button>
         <RouterLink
           class="nav-item"
           to="/settings"

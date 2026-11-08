@@ -76,7 +76,7 @@ Fonte única: `firebase/hosting/src/css/tokens.css`, importado por `src/main.ts`
 
 Os tokens só do web existem porque o site foi desenhado para títulos: `--color-warning` e `--color-danger` como texto pequeno não passam de 4,5:1, e `--color-rule` como borda de campo fica abaixo de 3:1. Cada um tem valor próprio para o escuro (`:root[data-theme="dark"]`).
 
-Tema: claro por padrão; escuro pelo sistema ou pela escolha em Configurações › Neste navegador (`data-theme`). Com `prefers-contrast: more`, texto secundário e réguas viram `--color-ink`, o terciário escurece e as bordas engrossam. Com `forced-colors`, pontos, aba atual e seleção ganham contorno do sistema.
+Tema: claro por padrão; escuro pelo sistema ou pela escolha em Configurações › Neste navegador (`data-theme`). O botão "Modo escuro" / "Modo claro" no pé da barra lateral troca na hora o que está na tela e guarda a escolha neste navegador (`toggleTheme` em `lib/prefs.ts`); "Igual ao sistema" volta pelas Configurações. Com `prefers-contrast: more`, texto secundário e réguas viram `--color-ink`, o terciário escurece e as bordas engrossam. Com `forced-colors`, pontos, aba atual e seleção ganham contorno do sistema.
 
 ## Tipografia
 
