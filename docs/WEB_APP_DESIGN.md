@@ -58,7 +58,7 @@ Fonte única: `firebase/hosting/src/css/tokens.css`, importado por `src/main.ts`
 | Fundo | `--color-paper` (sobrescrito: branco, escuro `#0C1015`) | Fundo da página e da lista |
 | Superfície | `--color-card` (sobrescrito: branco, escuro `#1D2228`) | Painel da OS, gavetas, diálogos, campos |
 | Preenchimento de apoio | `--color-paper-2` (sobrescrito: `#F1EEE7`, escuro `#1D2228`) | O bege do sistema, só apoio: busca, "Lista / Quadro", cabeçalho da tabela, botões secundários, faixa "sem conexão" |
-| Fundo agrupado | `--color-grouped` (só web: `#ECE9E3`, escuro `#13181D`) | Fundo do quadro e da TV. Os cartões ali usam `--color-tile` (`#FBFAF8`, escuro `#1D2228`), um branco menos forte. Um pouco mais escuro que o `#F2F0EC` do protótipo, que no quadro ficava claro demais |
+| Fundo agrupado | `--color-grouped` (só web: branco no claro, `#13181D` no escuro) | Fundo do quadro e da TV. Os cartões ali usam `--color-tile` (`#FBFAF8`, escuro `#1D2228`), um branco menos forte, com contorno `--color-rule`. Em teste: no claro já foi `#ECE9E3` (cartões mais destacados) |
 | Linha com o mouse | `--color-hover` (só web: `#F7F5F0`, escuro `#151A20`) | Linha da tabela com o mouse em cima |
 | Texto | `--color-ink` | Marinho no claro, quase branco no escuro |
 | Texto secundário | `--color-muted` | Subtítulos, rótulos, situação |

@@ -25,7 +25,7 @@
   --color-hover: #F7F5F0;
   --color-rule: #E3E0DA;
   --color-faint: #6B7178;
-  --color-grouped: #ECE9E3;
+  --color-grouped: #FFFFFF;
   --color-tile: #FBFAF8; }
 :root[data-theme="dark"] { --color-warning-text: oklch(78% 0.13 70);
   --color-paper: #0C1015;
