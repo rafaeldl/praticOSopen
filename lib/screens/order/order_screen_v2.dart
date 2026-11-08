@@ -89,6 +89,7 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// The order screen (`/order`, see `OrderRoute`).
 ///
@@ -3854,12 +3855,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       onPhrase = canEdit ? _pickDueDate : null;
     }
     final action = _nextAction(config);
-    final statusStyle = overdue
-        ? AppTypography.callout.copyWith(
-            color: OrderStatusStyle.overdueColor.resolveFrom(context),
-            fontWeight: FontWeight.w700,
-          )
-        : AppTypography.callout.copyWith(color: secondary);
+    final statusStyle = AppTypography.callout.copyWith(color: secondary);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -3968,20 +3964,44 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               ),
               child: Row(
                 children: [
-                  StatusDot(
-                    color: overdue
-                        ? OrderStatusStyle.overdueColor
-                        : OrderStatusStyle.dotColor(status),
-                    size: 10,
-                  ),
+                  // The dot keeps the status color; "Atrasada" follows the
+                  // status and the stage, in bold red.
+                  StatusDot(color: OrderStatusStyle.dotColor(status), size: 10),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
-                      [
-                        config.getStatus(status),
-                        ?_stageName(order, config),
-                        if (overdue) l10n.orderOverdue,
-                      ].join(' · '),
+                    child: Text.rich(
+                      TextSpan(
+                        text: config.getStatus(status),
+                        children: [
+                          if (_stageName(order, config) case final stage?)
+                            TextSpan(
+                              text: ' · ',
+                              children: [
+                                TextSpan(
+                                  text: stage,
+                                  style: TextStyle(
+                                    color: text,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (overdue)
+                            TextSpan(
+                              text: ' · ',
+                              children: [
+                                TextSpan(
+                                  text: l10n.orderOverdue,
+                                  style: TextStyle(
+                                    color: OrderStatusStyle.overdueColor
+                                        .resolveFrom(context),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
                       style: statusStyle,
                     ),
                   ),
@@ -4920,21 +4940,23 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Widget _primaryButton(String label, VoidCallback? onPressed, {Key? key}) {
-    return CupertinoButton(
-      key: key,
-      padding: EdgeInsets.zero,
-      minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-      color: AppColors.accent.resolveFrom(context),
-      disabledColor: AppColors.secondaryFill.resolveFrom(context),
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: AppTypography.bodyStrong.copyWith(
-          color: onPressed == null
-              ? AppColors.textSecondary.resolveFrom(context)
-              : AppColors.onAccent.resolveFrom(context),
+    return ActionOutline(
+      child: CupertinoButton(
+        key: key,
+        padding: EdgeInsets.zero,
+        minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+        color: AppColors.action.resolveFrom(context),
+        disabledColor: AppColors.secondaryFill.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyStrong.copyWith(
+            color: onPressed == null
+                ? AppColors.textSecondary.resolveFrom(context)
+                : AppColors.onAction.resolveFrom(context),
+          ),
         ),
       ),
     );

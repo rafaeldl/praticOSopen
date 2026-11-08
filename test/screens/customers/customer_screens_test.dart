@@ -1189,8 +1189,12 @@ void main() {
           },
         ),
       );
-      final text = tester.widget<Text>(find.text('Atrasada'));
-      expect(text.style?.fontWeight, FontWeight.w700);
+      // The status stays; "Atrasada" follows it in bold.
+      expect(
+        find.textContaining(' · Atrasada', findRichText: true),
+        findsOneWidget,
+      );
+      expect(_spanStyle(tester, 'Atrasada')?.fontWeight, FontWeight.w700);
       expect(find.text('R\$ 1.250,00'), findsOneWidget);
     });
 
@@ -1680,4 +1684,20 @@ void main() {
       expect(find.text('Cadastrar o primeiro cliente'), findsOneWidget);
     });
   });
+}
+
+/// Style of the inline span whose text is [text] (status lines are rich text).
+TextStyle? _spanStyle(WidgetTester tester, String text) {
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    TextStyle? found;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text == text) {
+        found = span.style;
+        return false;
+      }
+      return true;
+    });
+    if (found != null) return found;
+  }
+  return null;
 }

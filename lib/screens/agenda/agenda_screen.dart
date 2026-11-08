@@ -487,21 +487,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
         !useScheduling || date == null || (date.hour == 0 && date.minute == 0);
 
     final overdue = HomeRules.isOverdue(order, now);
-    final String status;
+    // The status never disappears: the delay comes after it, in red.
+    final status = _statusLabel(context, order.status);
+    String? problem;
     if (overdue) {
       final (unit, count) = HomeRules.overdueSpan(order, now);
-      status = switch (unit) {
+      problem = switch (unit) {
         OverdueUnit.days => l10n.orderLateDays(count),
         OverdueUnit.months => l10n.orderLateMonths(count),
         OverdueUnit.years => l10n.orderLateYears(count),
       };
-    } else {
-      status = _statusLabel(context, order.status);
     }
-    final statusLine = [
-      if (status.isNotEmpty) status,
-      if (order.number != null) l10n.orderRowNumber('${order.number}'),
-    ].join(' · ');
+    final number = order.number == null
+        ? null
+        : l10n.orderRowNumber('${order.number}');
 
     final devices = order.effectiveDevices;
     final deviceName = devices.firstOrNull?.name ?? '';
@@ -519,11 +518,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
         customerName: order.customer?.name ?? '',
         time: allDay ? l10n.allDay : _format.formatTime(date),
         allDay: allDay,
-        statusText: statusLine,
-        statusColor: overdue
-            ? OrderStatusStyle.overdueColor
-            : OrderStatusStyle.dotColor(order.status),
-        overdue: overdue,
+        statusText: status,
+        problemText: problem,
+        numberText: number,
+        // The dot keeps the status color; the delay shows in the text.
+        statusColor: OrderStatusStyle.dotColor(order.status),
         detailText: detail.isEmpty ? null : detail,
         onTap: () {
           Navigator.of(context, rootNavigator: true).pushNamed(
@@ -628,7 +627,8 @@ class _AgendaRow extends StatelessWidget {
     required this.allDay,
     required this.statusText,
     required this.statusColor,
-    required this.overdue,
+    this.problemText,
+    this.numberText,
     required this.onTap,
     this.detailText,
   });
@@ -638,7 +638,12 @@ class _AgendaRow extends StatelessWidget {
   final bool allDay;
   final String statusText;
   final Color statusColor;
-  final bool overdue;
+
+  /// "Atrasada 2 dias", after the status in bold red.
+  final String? problemText;
+
+  /// "OS 20", last on the status line.
+  final String? numberText;
   final String? detailText;
   final VoidCallback onTap;
 
@@ -646,12 +651,7 @@ class _AgendaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = AppColors.text.resolveFrom(context);
     final secondary = AppColors.textSecondary.resolveFrom(context);
-    final statusStyle = overdue
-        ? AppTypography.callout.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.danger.resolveFrom(context),
-          )
-        : AppTypography.callout.copyWith(color: secondary);
+    final statusStyle = AppTypography.callout.copyWith(color: secondary);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -710,8 +710,32 @@ class _AgendaRow extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
-                      statusText,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          for (final (i, part) in [
+                            (statusText, false),
+                            if (problemText != null) (problemText!, true),
+                            if (numberText != null) (numberText!, false),
+                          ].where((p) => p.$1.isNotEmpty).indexed)
+                            TextSpan(
+                              text: i == 0 ? null : ' · ',
+                              children: [
+                                TextSpan(
+                                  text: part.$1,
+                                  style: part.$2
+                                      ? TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.danger.resolveFrom(
+                                            context,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
                       style: statusStyle.copyWith(
                         fontFeatures: AppTypography.tabular,
                       ),

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "compiledAt": "2026-11-06T21:37:13.000Z",
+  "compiledAt": "2026-11-08T12:00:00.000Z",
   "compiledBy": "claude",
   "sources": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "77450a6c1d5cea51dd92fad5208fdfcff620fed01ece7a6c34321d79d799ab05",
+      "sha": "78484707c4b03ee360ab64fd22c2740028d945d61b8716350cc0cbc654a0a226",
       "scope": "**/*"
     },
     {
@@ -49,11 +49,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 4,
-        "median": 0.015,
+        "median": 0.025,
         "min": 0,
-        "max": 0.22,
+        "max": 0.18,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -83,7 +83,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -112,7 +112,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -145,7 +145,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -178,7 +178,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -207,7 +207,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -252,7 +252,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -285,7 +285,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -313,7 +313,7 @@
     },
     {
       "id": "status-dots-not-badges",
-      "text": "Status: ponto colorido + texto em `textSecondary`, nunca selo colorido.",
+      "text": "Status: ponto colorido + texto em `textSecondary`, nunca selo colorido. Atrasada e parada são problema, não situação: vêm depois dela em negrito e o ponto continua com a cor da situação.",
       "source": {
         "path": "CLAUDE.md",
         "line": 257
@@ -331,7 +331,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -358,8 +358,8 @@
       "status": "active"
     },
     {
-      "id": "one-accent-button",
-      "text": "Um botão azul (`accent`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`).",
+      "id": "one-action-button",
+      "text": "Um botão amarelo (`action`, texto marinho `onAction`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`). Azul é só link, seleção e aba atual",
       "source": {
         "path": "CLAUDE.md",
         "line": 225
@@ -372,23 +372,14 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Does this change leave a single screen with two or more buttons filled with AppColors.accent (or PrimaryButton), instead of one accent button and the rest in secondaryFill or as accentText links?",
+          "instructions": "Does this change leave a single screen with two or more filled main-action buttons (AppColors.action fill or PrimaryButton), or add a button filled with AppColors.accent, instead of one yellow action and the rest in secondaryFill or as accentText links?",
           "criteria": {
-            "true": "two CupertinoButton(color: AppColors.accent.resolveFrom(context)) in the same build method",
-            "false": "one accent button plus CupertinoButton(color: AppColors.secondaryFill.resolveFrom(context))"
+            "true": "two PrimaryButton widgets in the same build method, or CupertinoButton(color: AppColors.accent.resolveFrom(context))",
+            "false": "one PrimaryButton plus CupertinoButton(color: AppColors.secondaryFill.resolveFrom(context))"
           }
         }
       },
-      "status": "active",
-      "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "fired": 0,
-        "verdict": "skipped"
-      }
+      "status": "active"
     },
     {
       "id": "new-record-sheet",
@@ -405,7 +396,7 @@
     },
     {
       "id": "glass-only-in-navigation",
-      "text": "Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco.",
+      "text": "Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas, sem sombra e com contorno fino. Conteúdo sempre opaco",
       "source": {
         "path": "CLAUDE.md",
         "line": 229
@@ -427,7 +418,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -460,7 +451,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -489,7 +480,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -518,7 +509,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -547,7 +538,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -577,10 +568,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.01,
+        "min": 0.02,
         "max": 0.03,
         "fired": 0,
         "verdict": "decisive"
@@ -607,7 +598,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -649,7 +640,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -678,7 +669,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -819,7 +810,7 @@
     },
     {
       "id": "app-tab-order",
-      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" azul (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
+      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" marinho (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
       "source": {
         "path": "CLAUDE.md",
         "line": 235
@@ -841,7 +832,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -874,7 +865,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -916,7 +907,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -945,7 +936,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -974,7 +965,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1003,7 +994,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1049,7 +1040,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1082,7 +1073,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1111,7 +1102,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -1284,11 +1275,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-08T17:55:36.191Z",
+        "at": "2026-11-08T17:55:54.022Z",
         "hunks": 8,
-        "median": 0.065,
-        "min": 0.04,
-        "max": 0.47,
+        "median": 0.07,
+        "min": 0.05,
+        "max": 0.46,
         "fired": 0,
         "verdict": "decisive"
       }

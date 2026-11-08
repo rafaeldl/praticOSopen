@@ -5,9 +5,11 @@ import 'package:praticos/theme/app_colors.dart';
 
 /// Status of an order -> dot color + localized label.
 ///
-/// Rule (docs/APP_DESIGN_SYSTEM.md): the color lives only on the dot; the
-/// status text is always [AppColors.textSecondary]. "Overdue" is not a status,
-/// it is a problem: dot and text use [AppColors.danger], text in bold.
+/// Rule (docs/DESIGN_TOKENS.md, "Situação da OS"): the color lives only on
+/// the dot; the status text is always [AppColors.textSecondary]. "Overdue" and
+/// "Parada" are problems, not statuses: they come after the status in text
+/// ("● Pintura · Atrasada 2 dias"), bold, in [AppColors.danger] /
+/// [AppColors.warning], and the dot keeps the status color.
 class OrderStatusStyle {
   OrderStatusStyle._();
 
@@ -17,7 +19,7 @@ class OrderStatusStyle {
       case 'approved':
         return AppColors.accentText;
       case 'progress':
-        return AppColors.warning;
+        return AppColors.warningDot;
       case 'done':
         return AppColors.success;
       case 'quote':
@@ -27,7 +29,7 @@ class OrderStatusStyle {
     }
   }
 
-  /// Dot color for an overdue order.
+  /// Color of the "Atrasada" text (never of the dot).
   static const CupertinoDynamicColor overdueColor = AppColors.danger;
 
   /// Default (non segment-customized) label. Where the segment may rename
@@ -57,20 +59,22 @@ class OrderStatusStyle {
       );
 
   /// Text style of the "Atrasada" label: danger, bold.
-  static TextStyle overdueTextStyle(BuildContext context,
-          {double fontSize = 13}) =>
-      TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w700,
-        color: overdueColor.resolveFrom(context),
-      );
+  static TextStyle overdueTextStyle(
+    BuildContext context, {
+    double fontSize = 13,
+  }) => TextStyle(
+    fontSize: fontSize,
+    fontWeight: FontWeight.w700,
+    color: overdueColor.resolveFrom(context),
+  );
 }
 
 /// "Parada" mark of an order -> color + localized text.
 class OrderHoldStyle {
   OrderHoldStyle._();
 
-  /// Dot and icon of a stopped order. Resolve with `.resolveFrom(context)`.
+  /// Text and icon of a stopped order ("Parada"). Resolve with
+  /// `.resolveFrom(context)`.
   static const CupertinoDynamicColor color = AppColors.warning;
 
   /// Localized reason ("Esperando peça").
@@ -100,7 +104,7 @@ class DeviceStatusStyle {
   static CupertinoDynamicColor dotColor(String? status) {
     switch (status) {
       case 'maintenance':
-        return AppColors.warning;
+        return AppColors.warningDot;
       case 'inactive':
       case 'decommissioned':
         return AppColors.textSecondary;

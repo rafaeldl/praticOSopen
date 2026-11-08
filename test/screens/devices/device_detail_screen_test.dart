@@ -484,7 +484,7 @@ void main() {
     expect(find.text('Dados'), findsNothing);
     expect(find.text('Ativo'), findsNothing);
     expect(find.text('OS 183 · Revisão completa'), findsOneWidget);
-    expect(find.text('Atrasada'), findsOneWidget);
+    expect(find.textContaining('Atrasada', findRichText: true), findsOneWidget);
     expect(
       tester.getTopLeft(find.textContaining('Abrir uma OS para este')).dy,
       lessThan(tester.getTopLeft(find.text('Nova OS')).dy),
