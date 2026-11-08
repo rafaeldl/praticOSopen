@@ -6,6 +6,14 @@
 .tv-clock { margin: 0; font-size: 1.4em; font-weight: 700; }
 .tv-actions { display: flex; gap: 0.5rem; font-size: 1rem; }
 .tv-actions .btn { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 44px; }
+.tv-cols-menu { position: relative; }
+.tv-cols-menu > summary { list-style: none; cursor: pointer; }
+.tv-cols-menu > summary::-webkit-details-marker { display: none; }
+.tv-cols-box { position: absolute; right: 0; top: calc(100% + 0.35rem); z-index: 5; min-width: 15rem; margin: 0; padding: 0.6rem 0.75rem 0.7rem;
+  display: grid; gap: 0.15rem; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 8px; box-shadow: var(--shadow-card); }
+.tv-cols-box legend { float: left; width: 100%; padding: 0 0 0.35rem; font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+.tv-cols-opt { display: flex; align-items: center; gap: 0.55rem; min-height: 44px; font-weight: 500; cursor: pointer; }
+.tv-cols-opt input { width: 1.15rem; height: 1.15rem; accent-color: var(--color-accent); }
 .tv-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(var(--tv-cols, 4), minmax(0, 1fr)); }
 .tv-col { min-height: 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--color-rule); }
 .tv-col:last-child { border-right: 0; }

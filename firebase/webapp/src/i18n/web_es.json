@@ -956,5 +956,7 @@
   "web.stages.nameRepeated": "Ya existe una etapa con ese nombre.",
   "web.stages.turnedOff": "Etapas desactivadas",
   "web.theme.toDark": "Modo oscuro",
-  "web.theme.toLight": "Modo claro"
+  "web.theme.toLight": "Modo claro",
+  "web.tv.columns": "Columnas",
+  "web.tv.columnsTitle": "Columnas que aparecen en la TV"
 }

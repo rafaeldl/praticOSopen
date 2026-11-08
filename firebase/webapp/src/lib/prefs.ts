@@ -16,10 +16,12 @@ export interface Prefs {
    * computer shows them. Only on screen: the values still reach the browser.
    */
   hideValues: boolean
+  /** Columns the Modo TV leaves out ("quote", "stage-pintura"): per browser, it is the shop's TV. */
+  tvHidden: string[]
 }
 
 const KEY = 'praticos.prefs'
-const DEFAULTS: Prefs = { theme: 'system', language: 'system', singleKeyShortcuts: true, hideValues: false }
+const DEFAULTS: Prefs = { theme: 'system', language: 'system', singleKeyShortcuts: true, hideValues: false, tvHidden: [] }
 
 function read(): Prefs {
   try {
