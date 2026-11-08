@@ -100,6 +100,10 @@
             "answer": "Dá. A nota sai da OS, sem digitar de novo o cliente e o valor como no app do governo. Para emitir por aqui, o MEI precisa do certificado A1."
           },
           {
+            "question": "Minha empresa não é do Simples nem MEI. Dá para emitir?",
+            "answer": "Ainda não. Por enquanto a nota sai para empresa do Simples e para o MEI. Empresas do Lucro Presumido e do Lucro Real vêm em breve."
+          },
+          {
             "question": "Preciso de certificado digital?",
             "answer": "Sim, o certificado A1 da sua empresa. Ele vale 1 ano e é comprado numa certificadora; o preço varia, então pergunte ao seu contador. Você envia uma vez, e o app avisa antes de vencer. Veja o <a href=\"termo-certificado.html\">termo de uso do certificado</a>."
           },

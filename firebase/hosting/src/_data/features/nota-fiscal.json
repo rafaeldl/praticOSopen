@@ -74,7 +74,8 @@
           "title": "MEI",
           "text": "Também dá para emitir a nota do MEI pelo PraticOS. Em vez de digitar cada nota no app do governo, ela sai da OS que você já fez, com o cliente e o valor preenchidos. Para isso, o MEI precisa do certificado A1. Vale para quem já faz a OS no PraticOS e não quer digitar cada nota duas vezes."
         }
-      ]
+      ],
+      "note": "Empresa do Lucro Presumido ou do Lucro Real ainda não emite pelo PraticOS. Estamos preparando e avisamos quando estiver pronto."
     },
     "faq": {
       "title": "Perguntas sobre a nota",
@@ -82,6 +83,10 @@
         {
           "question": "Qual plano emite nota?",
           "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. A nota não tem limite nem custo por nota. O plano grátis não emite."
+        },
+        {
+          "question": "Minha empresa não é do Simples nem MEI. Dá para emitir?",
+          "answer": "Ainda não. Por enquanto a nota sai para empresa do Simples e para o MEI. Empresas do Lucro Presumido e do Lucro Real vêm em breve."
         },
         {
           "question": "Preciso de certificado digital?",

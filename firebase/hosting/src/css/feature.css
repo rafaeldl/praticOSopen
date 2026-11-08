@@ -107,6 +107,7 @@
 .fx-grid li { padding-block: var(--space-md); border-bottom: var(--rule); }
 .fx-grid h3 { font-size: var(--text-md); line-height: 1.25; }
 .fx-grid p { margin-top: var(--space-3xs); color: var(--color-muted); max-width: 52ch; }
+.nf-audience-note { margin-top: var(--space-md); color: var(--color-muted); max-width: 60ch; }
 @media (min-width: 52rem) {
   .fx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
