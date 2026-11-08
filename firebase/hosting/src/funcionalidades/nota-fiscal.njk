@@ -6,10 +6,11 @@ langCode: pt
 featureStyles: true
 relPath: "../"
 indexPage: ./
-title: "Nota fiscal de serviço direto da OS | Emissor Nacional | PraticOS"
-description: "Emita a nota fiscal de serviço pelo Emissor Nacional direto da OS, com o certificado A1 da sua empresa. Para empresas do Simples e MEI, nos planos pagos, sem custo por nota."
+title: "Emitir nota fiscal de serviço pelo celular | Simples e MEI | PraticOS"
 keywords: "nota fiscal de serviço, emissor nacional nfse, nota fiscal simples nacional, emitir nota fiscal mei, app para emitir nota fiscal de serviço, nota fiscal pelo celular"
 # Brazil only: no -en/-es versions, so the switch lists PT alone (one hreflang).
+eleventyComputed:
+  description: "Tire a nota fiscal de serviço pelo Emissor Nacional direto da OS, no celular{% if site.flags.webApp %} ou no computador{% endif %}. Para Simples e MEI, sem custo por nota, a partir de R$ 59,90."
 langSwitch:
   - code: PT
     href: nota-fiscal.html
@@ -29,14 +30,14 @@ langSwitch:
                 <a href="#baixar" class="btn btn--primary" data-ga="cta_click" data-ga-detail="nfse_hero_download">{{ data.hero.cta }}</a>
                 <a href="#como-funciona" class="btn btn--secondary" data-ga="select_content" data-ga-detail="nfse_hero_how">{{ data.hero.ctaSecondary }}</a>
             </div>
-            <p class="fx-price mono">{{ data.hero.price }}</p>
+            <p class="fx-price">{{ data.hero.price | safe }}</p>
         </div>
         <aside class="fx-facts" aria-labelledby="fx-facts-label">
-            <p class="label" id="fx-facts-label">{{ data.hero.factsLabel }}</p>
+            <h2 class="label" id="fx-facts-label">{{ data.hero.factsLabel }}</h2>
             <ul role="list">
                 {% for fact in data.hero.facts %}
                 <li>
-                    <h2>{{ fact.title }}</h2>
+                    <h3>{{ fact.title }}</h3>
                     <p>{{ fact.text }}</p>
                 </li>
                 {% endfor %}
@@ -112,6 +113,7 @@ langSwitch:
             {% endif %}
             {% endfor %}
         </dl>
+        <p class="fx-more">{{ data.end.title }} <a class="btn btn--text" href="{{ relPath }}docs/nota-fiscal.html" data-ga="select_content" data-ga-detail="nfse_guide_end">{{ data.end.guide }}</a></p>
     </div>
 </section>
 

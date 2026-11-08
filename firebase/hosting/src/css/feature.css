@@ -100,9 +100,9 @@
 .fx-facts { border-top: var(--rule-strong); padding-top: var(--space-sm); }
 .fx-facts ul { margin-top: var(--space-2xs); }
 .fx-facts li { padding-block: var(--space-sm); border-bottom: var(--rule); }
-.fx-facts h2 { font-size: var(--text-md); line-height: 1.25; letter-spacing: -0.01em; }
+.fx-facts h3 { font-size: var(--text-md); line-height: 1.25; letter-spacing: -0.01em; }
 .fx-facts p { margin-top: var(--space-3xs); color: var(--color-muted); }
-.fx-more { margin-top: var(--space-lg); }
+.fx-more { margin-top: var(--space-lg); color: var(--color-muted); }
 .fx-grid { display: grid; gap: 0 var(--space-xl); grid-template-columns: minmax(0, 1fr); border-top: var(--rule); }
 .fx-grid li { padding-block: var(--space-md); border-bottom: var(--rule); }
 .fx-grid h3 { font-size: var(--text-md); line-height: 1.25; }

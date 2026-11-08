@@ -25,7 +25,8 @@
     "menu": "Abrir menu",
     "themeToggle": "Alternar tema claro/escuro",
     "language": "Idioma",
-    "login": "Entrar"
+    "login": "Entrar",
+    "loginLong": "Entrar no sistema"
   },
   "en": {
     "skip": "Skip to content",
@@ -53,7 +54,8 @@
     "menu": "Open menu",
     "themeToggle": "Toggle light/dark theme",
     "language": "Language",
-    "login": "Sign in"
+    "login": "Sign in",
+    "loginLong": "Sign in to the system"
   },
   "es": {
     "skip": "Saltar al contenido",
@@ -81,6 +83,7 @@
     "menu": "Abrir menú",
     "themeToggle": "Cambiar tema claro/oscuro",
     "language": "Idioma",
-    "login": "Entrar"
+    "login": "Entrar",
+    "loginLong": "Entrar al sistema"
   }
 }

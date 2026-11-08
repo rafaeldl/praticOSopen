@@ -4,10 +4,10 @@
       {
         "id": "visao-geral",
         "title": "Para que serve",
-        "intro": "O PraticOS emite a nota fiscal de serviço pelo Emissor Nacional do governo, direto da OS. Cliente, serviço e valor vêm da OS, e a nota fica guardada junto dela. Desde 1º de novembro, empresa do Simples emite a nota de serviço por esse emissor.",
+        "intro": "O PraticOS emite a nota fiscal de serviço pelo Emissor Nacional do governo, direto da OS. Cliente, serviço e valor vêm da OS, e a nota fica guardada junto dela. Desde 1º de novembro de 2026, empresa do Simples emite a nota de serviço por esse emissor.",
         "infoCard": {
           "title": "Nos planos pagos",
-          "content": "A nota está em todos os planos pagos, a partir do Starter, sem limite e sem custo por nota. Configurar e emitir é com o dono ou o administrador. O gerente também pode emitir e cancelar."
+          "content": "A nota está em todos os planos pagos, a partir do Starter, sem limite e sem custo por nota. Veja <a href=\"../funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>. Quem prepara e emite é o dono ou o administrador. O gerente também pode emitir e cancelar."
         }
       },
       {
@@ -31,7 +31,7 @@
       },
       {
         "id": "configurar",
-        "title": "Configurar uma vez",
+        "title": "Antes da primeira nota",
         "intro": "No app, toque no botão do perfil, no topo do Início, e vá em <strong>Sua empresa › Nota fiscal</strong>.",
         "subsections": [
           {
@@ -60,7 +60,7 @@
       {
         "id": "emitir",
         "title": "Emitir a nota",
-        "intro": "Na OS concluída, toque em <strong>Emitir nota fiscal</strong>. Confira para quem vai, o valor e a descrição, e toque em ✓. Se faltar algum dado do cliente, como CPF ou CNPJ e endereço, os campos aparecem ali mesmo.",
+        "intro": "Na OS concluída, toque em <strong>Emitir nota fiscal</strong>. Confira para quem vai, o valor e a descrição, e toque em ✓. Se faltar algum dado do cliente, como CPF ou CNPJ e endereço, o app pede o que falta ali mesmo.",
         "features": [
           {
             "title": "Por e-mail para o cliente",
@@ -95,7 +95,7 @@
           },
           {
             "question": "O governo recusou a nota. E agora?",
-            "answer": "O app mostra o motivo numa frase. Se faltar dado do cliente, os campos abrem para você completar e tentar de novo."
+            "answer": "O app mostra o motivo numa frase. Se faltar dado do cliente, o app pede o que falta e tentar de novo."
           },
           {
             "question": "Onde vejo as notas que emiti?",
