@@ -218,6 +218,26 @@
       ],
       "cta": "Entrar no sistema",
       "guide": "Ver como usar no computador"
+    },
+    "nfse": {
+      "title": "Nota fiscal de serviço direto da OS",
+      "lede": "Desde novembro, empresa do Simples emite pelo Emissor Nacional. O PraticOS emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "items": [
+        {
+          "title": "Um toque na OS pronta",
+          "text": "Conclua o serviço e toque em “Emitir nota fiscal”. Se preferir, a nota sai sozinha quando você conclui a OS."
+        },
+        {
+          "title": "O cliente recebe por e-mail",
+          "text": "A nota vai com o PDF para o e-mail do cliente e fica guardada junto da OS."
+        },
+        {
+          "title": "Sem custo por nota",
+          "text": "Usa o certificado A1 da sua empresa, enviado uma vez. A nota não tem limite nos planos pagos."
+        }
+      ],
+      "cta": "Ver como funciona a nota",
+      "price": "Nos planos pagos, a partir de R$ 59,90 por mês."
     }
   },
   "en": {
