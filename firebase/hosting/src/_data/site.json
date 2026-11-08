@@ -25,9 +25,9 @@
   "flags": {
     "whatsappBot": false,
     "whatsappContact": false,
-    "webApp": false,
+    "webApp": true,
     "softwareItPage": false,
-    "nfsePage": false
+    "nfsePage": true
   },
   "webAppUrl": "/web"
 }
