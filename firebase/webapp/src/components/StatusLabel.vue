@@ -1,6 +1,9 @@
 <script setup lang="ts">
-// Dot + text, never a colored badge. Late is a problem: danger and bold.
-// `text` replaces the status name (the list's "Situação · entrega 15/10").
+// Dot + text, never a colored badge. The dot always shows the status; a problem
+// comes as text next to it, never in its place: "● Pintura · Atrasada 2 dias"
+// (danger, bold), "● Aprovada · Parada" (dark amber, bold). docs/DESIGN_TOKENS.md.
+// `text` replaces the status name (a stage name, "Situação · entrega 15/10").
+// The default slot goes after everything (the agenda's " · 1042").
 import { computed } from 'vue'
 import { t, type MessageKey } from '@/i18n'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -19,18 +22,16 @@ const STATUS: Record<OrderStatus, { label: string; dot: string }> = {
 
 const meta = computed(() => STATUS[props.status as OrderStatus])
 const late = computed(() => props.lateText || (props.lateDays ? t('web.status.late', { count: props.lateDays }) : ''))
-const dot = computed(() => (late.value ? 'danger' : props.held ? 'held' : (meta.value?.dot ?? 'neutral')))
-const label = computed(() => {
-  if (late.value) return late.value
-  if (props.text) return props.text
-  if (props.held) return t('web.status.held')
-  return meta.value ? resolveLabel(meta.value.label, segmentLabels(), (key: MessageKey) => t(key)) : props.status
-})
+const problem = computed(() => (late.value ? { kind: 'late', text: late.value } : props.held ? { kind: 'held', text: t('web.status.held') } : null))
+const label = computed(() => props.text || (meta.value ? resolveLabel(meta.value.label, segmentLabels(), (key: MessageKey) => t(key)) : props.status))
 </script>
 
 <template>
-  <span class="status" :class="{ 'status--late': late }">
-    <span class="dot" :class="`dot--${dot}`" aria-hidden="true"></span>
-    <span>{{ label }}</span>
+  <span class="status">
+    <span class="dot" :class="`dot--${meta?.dot ?? 'neutral'}`" aria-hidden="true"></span>
+    <span
+      >{{ label }}<template v-if="problem"> · <strong class="status-problem" :class="`status-problem--${problem.kind}`">{{ problem.text }}</strong></template
+      ><slot
+    /></span>
   </span>
 </template>

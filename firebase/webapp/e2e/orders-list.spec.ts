@@ -44,7 +44,7 @@ test.describe('lista por papel (home.list.load, home.view.default-technician)', 
 test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ page }) => {
   await openHome(page, 'admin')
   await expect(row(page, 501)).toContainText('Atrasada 3 dias')
-  await expect(row(page, 501).locator('.dot--danger')).toHaveCount(1)
+  await expect(row(page, 501).locator('.status-problem--late')).toHaveText('Atrasada 3 dias')
   // The plate after the device (P3 17 of the user tests of #515).
   await expect(row(page, 501)).toContainText('Veículo 3 · TST0003 · Serviço 2')
   // Wide screen: "Quando" is a column; the status column keeps only the status.

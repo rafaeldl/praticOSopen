@@ -44,7 +44,7 @@ import { country, deviceLabel, holdText, lateText, orderShort, shownMoney as mon
 import { prefs } from '@/lib/prefs'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, session } from '@/lib/session'
-import { workStages } from '@/lib/orders/stages'
+import { stageNameOf, workStages } from '@/lib/orders/stages'
 import { registerShortcut } from '@/lib/shortcuts'
 import { announce, ui } from '@/lib/ui'
 
@@ -681,7 +681,7 @@ const columns = 5 + (showsMoney ? 1 : 0)
               </td>
               <td>
                 <span v-if="visitTime(order)" class="num visit-time" data-testid="visit-time">{{ visitTime(order) }}</span>
-                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="statusText(order.status)" /><span
+                <StatusLabel :status="order.status" :late-text="lateText(order, now)" :held="isHeld(order)" :text="stageNameOf(order, workStages()) ?? statusText(order.status)" /><span
                   v-if="rowDates(order)"
                   class="st-narrow"
                 >{{ rowDates(order) }}</span>

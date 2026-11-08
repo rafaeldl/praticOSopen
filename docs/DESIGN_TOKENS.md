@@ -110,7 +110,7 @@ Isso troca a regra antiga (ponto e texto em `danger` só com "Atrasada 2 dias"):
 
 | Par | Contraste | Decisão |
 |---|---|---|
-| Texto terciário `#8A8F96` no branco | 3,3:1 | Só em apoio (serviço, observação, valor). Com "Aumentar contraste": `#5E636A` |
+| Texto terciário `#8A8F96` no branco | 3,3:1 | Só em apoio (serviço, observação, valor). Com "Aumentar contraste": `#5E636A`. No web fica `#6B7178` (4,9:1), porque o teste axe exige 4,5:1 |
 | Texto secundário `#6B7178` no branco | ~5:1 | Passa no branco; no `#F2F0EC` dá 4,3:1, por isso o app usa `#646A71` (4,8:1) |
 | Âmbar `#975800` no branco | ~6:1 | Passa |
 | Marinho no amarelo | alto | Passa |
@@ -127,7 +127,7 @@ Isso troca a regra antiga (ponto e texto em `danger` só com "Atrasada 2 dias"):
 | Item | Site | Web | App |
 |---|---|---|---|
 | Camada da marca | aplicado | aplicado | aplicado |
-| Fundo branco e linhas finas | não se aplica | falta | aplicado |
-| Texto terciário | não se aplica | falta | papel criado (`textTertiary`); telas usam aos poucos |
-| Situação + problema juntos | não se aplica | falta | OS, Agenda e histórico; falta a Início |
+| Fundo branco e linhas finas | não se aplica | aplicado | aplicado |
+| Texto terciário | não se aplica | aplicado | papel criado (`textTertiary`); telas usam aos poucos |
+| Situação + problema juntos | não se aplica | aplicado | OS, Agenda e histórico; falta a Início |
 | Linha de OS e seções da Início | não se aplica | falta | falta |

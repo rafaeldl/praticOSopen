@@ -27,7 +27,7 @@ test('cabeçalho: cliente, veículo, situação, frase do prazo e totais (order.
   await openOrder(page, 'admin', 'scn-late')
   await expect(panel(page).getByRole('heading', { level: 2 })).toHaveText('Cliente 03')
   await expect(panel(page)).toContainText('Veículo 3 · TST0003')
-  await expect(status(page)).toHaveText('Atrasada')
+  await expect(status(page)).toHaveText(/ · Atrasada$/)
   await expect(panel(page).getByRole('button', { name: /Era para ficar pronto/ })).toBeVisible()
   await expect(nextStep(page)).toHaveText('Começar serviço')
   await expect(panel(page).getByTestId('order-totals')).toContainText('R$ 100,00')

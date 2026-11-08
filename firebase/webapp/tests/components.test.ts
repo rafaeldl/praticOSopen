@@ -88,10 +88,25 @@ describe('StatusLabel', () => {
     expect(wrapper.text()).toBe(t('statusInProgress'))
   })
 
-  test('late wins and is marked', () => {
-    const wrapper = mount(StatusLabel, { props: { status: 'progress', lateDays: 2 } })
-    expect(wrapper.classes()).toContain('status--late')
-    expect(wrapper.text()).toBe('Atrasada 2 dias')
+  test('late comes next to the status, which keeps its dot', () => {
+    const wrapper = mount(StatusLabel, { props: { status: 'progress', lateDays: 2, text: 'Pintura' } })
+    expect(wrapper.find('.dot--warning').exists()).toBe(true)
+    expect(wrapper.find('.dot--danger').exists()).toBe(false)
+    expect(wrapper.text()).toBe('Pintura · Atrasada 2 dias')
+    expect(wrapper.get('.status-problem--late').text()).toBe('Atrasada 2 dias')
+  })
+
+  test('held shows "Parada" next to the status', () => {
+    const wrapper = mount(StatusLabel, { props: { status: 'approved', held: true } })
+    expect(wrapper.find('.dot--accent').exists()).toBe(true)
+    expect(wrapper.text()).toBe(`${t('statusApproved')} · Parada`)
+    expect(wrapper.get('.status-problem--held').text()).toBe('Parada')
+  })
+
+  test('late wins over held', () => {
+    const wrapper = mount(StatusLabel, { props: { status: 'approved', held: true, lateDays: 1 } })
+    expect(wrapper.findAll('.status-problem')).toHaveLength(1)
+    expect(wrapper.get('.status-problem--late').text()).toBe('Atrasada 1 dia')
   })
 })
 
