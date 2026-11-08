@@ -95,6 +95,7 @@ langSwitch:
             </li>
             {% endfor %}
         </ul>
+        {% if data.audience.note %}<p class="nf-audience-note">{{ data.audience.note }}</p>{% endif %}
     </div>
 </section>
 

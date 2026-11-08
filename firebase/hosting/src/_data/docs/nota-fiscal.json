@@ -90,6 +90,10 @@
             "answer": "Para emitir pelo PraticOS, sim. Pelo app do governo o MEI emite sem certificado, mas aí precisa digitar cada nota."
           },
           {
+            "question": "Minha empresa não é do Simples nem MEI. Dá para emitir?",
+            "answer": "Ainda não. Por enquanto a nota sai para empresa do Simples e para o MEI. Empresas do Lucro Presumido e do Lucro Real vêm em breve."
+          },
+          {
             "question": "O PraticOS decide o código e o imposto?",
             "answer": "Não. Quem decide é o seu contador. O app só guarda o que você colocou para usar nas próximas notas."
           },
