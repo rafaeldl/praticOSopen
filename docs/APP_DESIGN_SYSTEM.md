@@ -6,6 +6,8 @@ Padrão visual do aplicativo PraticOS. Vale para toda tela nova ou redesenhada. 
 
 Ele complementa o `docs/UX_GUIDELINES.md` (widgets Cupertino, listas, formulários). Quando os dois divergirem em cor, tipografia ou estrutura de tela, vale este documento.
 
+**Tema Campo:** as cores da marca e o novo padrão do sistema (fundo, texto terciário, situação + problema) estão em `docs/DESIGN_TOKENS.md`, aprovados e ainda não aplicados no app. Ao aplicar, atualizar a seção "Cores" abaixo.
+
 Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — página "Telas do app" (todas as telas, ligadas pelo Play) e a prancha "Padrão do app".
 
 ## Arquitetura
