@@ -52,8 +52,8 @@ A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, ve�
 
 16. **Botão "Selecionar"** no topo da lista de qualquer seção (nas situações, sem as alças). No modo:
     - Círculo à esquerda de cada linha (marcada: `accent` com ✓ e fundo `accentSoft`) e alças ≡ à direita para arrastar e mudar a ordem (grava `stage.rank`, como o web).
-    - Topo: "Selecionar todas" à esquerda e "OK" em `accent` à direita.
-    - No lugar das abas, uma barra de vidro com **Mudar etapa** e **Mudar situação**.
+    - Topo: "Selecionar todas" à esquerda e "OK" com a cor da ação principal (amarelo do tema, como o ✓ da Nova OS) à direita.
+    - No lugar das abas, uma barra de vidro com **Mudar etapa** e **Mudar situação** em `textPrimary` com ícone, como as abas; cinza enquanto nada estiver marcado. O azul fica só na seleção.
     - Tocar na linha marca ou desmarca; não abre a OS.
 17. **Na Início**, segurar uma linha abre o menu do iPhone com "Selecionar", que entra no mesmo modo com a OS já marcada (sem alças, porque a Início não tem ordem manual).
 18. **Mudar etapa / Mudar situação** abrem a tela de escolher (`pickOne`): "Para qual etapa?" (✓ na atual, "Nenhuma etapa" volta para Aprovada) e "Para qual situação?".
