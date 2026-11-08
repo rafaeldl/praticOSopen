@@ -30,6 +30,8 @@ modern-minimal (custom theme "Campo")
   60–65ch measure, sticky "Nesta página" index on wide screens, no hero art.
 
 ## Theme
+Brand colors (navy, action yellow, brand blue, status colors) are shared with the web app and the phone app: see `docs/DESIGN_TOKENS.md`. The paper background, Outfit and the rules are site-only.
+
 Tokens live in `src/css/tokens.css`. Light is the default; dark follows the OS
 or the saved toggle (`html[data-theme="dark"]`).
 

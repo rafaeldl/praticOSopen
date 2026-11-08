@@ -4,6 +4,8 @@
 
 Revê a parte "Início" de `docs/APP_DESIGN_SYSTEM.md` (lista sem grupos, busca sempre visível, ponto de status na linha). Etapas: `docs/WORK_STAGES.md`. As cores do protótipo são as do tema Campo, que ainda está em avaliação; o layout vale com qualquer paleta.
 
+Cores e regras gerais do tema (marca, sistema, situação + problema): `docs/DESIGN_TOKENS.md`.
+
 ## Problema
 
 A linha da OS chegou a ter nove coisas (ponto, nome, avisos, valor, setinha, veículo, placa, serviço, situação), e a pessoa não sabia para onde olhar. A situação só aparecia pela cor do ponto, as etapas do serviço (que o web já mostra em colunas) não apareciam no celular, e não havia como mudar a situação ou a etapa de várias OS de uma vez.

@@ -8,6 +8,8 @@ A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** 
 
 **Status: construído.** Este documento descreve o que está no ar. A referência visual foi o protótipo da branch `claude/web-app-prototype-bb3bbf`; onde a proposta antiga deste documento e o protótipo divergiam, venceu o protótipo.
 
+**Tema Campo, próxima versão:** `docs/DESIGN_TOKENS.md` define o que web e app dividem e o que o web muda (fundo branco, linhas finas, texto terciário, situação junto do atraso). Ainda não aplicado; os tokens de superfície devem ser sobrescritos em `app.css`, nunca em `tokens.css`.
+
 ### O que mudou desde a proposta
 
 | Proposta (out/2026) | Construído |
