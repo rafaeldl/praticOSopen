@@ -220,8 +220,8 @@
       "guide": "Ver como usar no computador"
     },
     "nfse": {
-      "title": "Nota fiscal de serviço direto da OS",
-      "lede": "Desde novembro, empresa do Simples emite pelo Emissor Nacional. O PraticOS emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "title": "Nota fiscal de serviço direto da OS, para empresa do Simples e para o MEI",
+      "lede": "Desde novembro, empresa do Simples emite pelo Emissor Nacional, onde o MEI já emitia. O PraticOS emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
       "items": [
         {
           "title": "Um toque na OS pronta",

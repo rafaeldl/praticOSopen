@@ -85,7 +85,7 @@
         "items": [
           {
             "question": "O PraticOS emite nota fiscal de serviço?",
-            "answer": "Emite, pelo Emissor Nacional do governo, direto da OS: cliente, serviço e valor vêm da OS, sem digitar de novo. Veja <a href=\"funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>."
+            "answer": "Emite, para empresa do Simples e para o MEI, pelo Emissor Nacional do governo, direto da OS: cliente, serviço e valor vêm da OS, sem digitar de novo. Veja <a href=\"funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>."
           },
           {
             "question": "Qual plano emite nota?",
@@ -96,8 +96,8 @@
             "answer": "Serve. Desde novembro, empresa do Simples emite a nota de serviço pelo Emissor Nacional, que é por onde o PraticOS emite."
           },
           {
-            "question": "Sou MEI. Vale a pena?",
-            "answer": "Se você já faz a OS no PraticOS, a nota sai dela, sem digitar o cliente e o valor de novo. Para emitir por aqui, o MEI precisa do certificado A1."
+            "question": "Sou MEI. Dá para emitir pelo PraticOS?",
+            "answer": "Dá. A nota sai da OS, sem digitar de novo o cliente e o valor como no app do governo. Para emitir por aqui, o MEI precisa do certificado A1."
           },
           {
             "question": "Preciso de certificado digital?",
