@@ -24,7 +24,8 @@
   --color-paper-2: #F1EEE7;
   --color-hover: #F7F5F0;
   --color-rule: #E3E0DA;
-  --color-faint: #6B7178; }
+  --color-faint: #6B7178;
+  --color-grouped: #ECE9E3; }
 :root[data-theme="dark"] { --color-warning-text: oklch(78% 0.13 70);
   --color-paper: #0C1015;
   --color-card: #1D2228;
@@ -32,6 +33,7 @@
   --color-hover: #151A20;
   --color-rule: #2A3038;
   --color-faint: #8A9099;
+  --color-grouped: #13181D;
   --color-danger-text: oklch(74% 0.15 28);
   --color-control: oklch(58% 0.015 255);
   --color-selected: oklch(30% 0.05 250);
