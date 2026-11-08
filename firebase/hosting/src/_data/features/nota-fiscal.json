@@ -1,0 +1,60 @@
+{
+  "pt": {
+    "hero": {
+      "title": "A nota de serviço sai da OS.",
+      "lede": "Desde novembro, empresa do Simples emite pelo Emissor Nacional. O PraticOS já emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "cta": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "price": "Nos planos pagos, a partir de R$ 59,90 por mês.",
+      "factsLabel": "O que vem junto",
+      "facts": [
+        { "title": "Sem custo por nota", "text": "A nota está incluída no plano pago, sem limite." },
+        { "title": "Com o certificado da sua empresa", "text": "Você envia o certificado A1 uma vez. O app avisa antes de vencer." },
+        { "title": "O cliente recebe por e-mail", "text": "A nota vai com o PDF para o e-mail do cliente e fica guardada junto da OS." }
+      ]
+    },
+    "steps": {
+      "title": "Como funciona",
+      "lede": "Três passos. O primeiro você faz uma vez só.",
+      "items": [
+        { "title": "Envie o certificado", "text": "Em Sua empresa › Nota fiscal, coloque o CNPJ e o certificado A1. O código do serviço e a descrição que o seu contador passou ficam salvos para as próximas notas." },
+        { "title": "Conclua a OS", "text": "Faça o serviço como sempre. O cliente, o serviço e o valor já estão na OS." },
+        { "title": "Toque em “Emitir nota fiscal”", "text": "Confira o que vai na nota e emita. Se preferir, a nota pode sair sozinha quando você conclui a OS.", "textWeb": "Confira o que vai na nota e emita, pelo celular ou pelo computador. Se preferir, a nota pode sair sozinha quando você conclui a OS." }
+      ]
+    },
+    "why": {
+      "title": "Por que não direto no portal do governo?",
+      "lede": "O portal emite a nota. O PraticOS poupa o trabalho de preencher cada uma.",
+      "items": [
+        { "title": "Nada de digitar de novo", "text": "Cliente, serviço e valor vêm da OS que você já fez." },
+        { "title": "Tudo no mesmo lugar", "text": "A nota fica junto da OS e do cliente. Achar depois é fácil." },
+        { "title": "Sem entrar no portal toda vez", "text": "Emita do app, sem login e senha do portal a cada nota." },
+        { "title": "Seu jeito de descrever o serviço", "text": "O app guarda o serviço e o estilo de descrição que você usa." }
+      ]
+    },
+    "audience": {
+      "title": "Para quem é",
+      "items": [
+        { "title": "Empresa do Simples", "text": "Desde 1º de novembro, a nota de serviço do Simples sai pelo Emissor Nacional, e não mais pelo sistema da prefeitura. Se você já tem certificado A1, é só enviar e começar." },
+        { "title": "MEI", "text": "Já emite pelo app do governo? Com o PraticOS, a nota sai da OS, sem digitar de novo o cliente e o valor. Para emitir por aqui, o MEI também precisa do certificado A1." }
+      ]
+    },
+    "faq": {
+      "title": "Perguntas sobre a nota",
+      "items": [
+        { "question": "Qual plano emite nota?", "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. A nota não tem limite nem custo por nota. O plano grátis não emite." },
+        { "question": "Preciso de certificado digital?", "answer": "Sim, o certificado A1 da sua empresa (um arquivo .pfx). O governo pede esse certificado para emitir por um sistema como o PraticOS. Peça ao seu contador ou a uma certificadora. Você envia uma vez, e o app avisa 30 e 7 dias antes de vencer." },
+        { "question": "Minha cidade funciona?", "answer": "As cidades aderiram ao Emissor Nacional, mas cada uma libera a emissão no seu tempo. Confira a sua na <a class=\"link\" href=\"https://www.gov.br/nfse/pt-br/municipios/monitoramento-adesoes\" target=\"_blank\" rel=\"noopener\">consulta oficial do governo</a>. Se o seu CNPJ ainda não puder emitir, o app avisa." },
+        { "question": "E o meu contador?", "answer": "Continua com ele. O contador diz qual é o código do serviço e o imposto. Você coloca isso uma vez no app, e as próximas notas usam o mesmo." },
+        { "question": "O PraticOS cobra por nota?", "answer": "Não. A nota está incluída no plano pago, sem custo por nota." },
+        { "question": "Dá para cancelar uma nota?", "answer": "Dá, pelo próprio app, escolhendo o motivo. O cliente recebe o aviso de cancelamento por e-mail." },
+        { "question": "Dá para emitir pelo computador?", "answer": "Dá. Tire a nota pelo celular ou pelo computador, com a mesma conta.", "flag": "webApp" },
+        { "question": "Onde fica guardado o meu certificado?", "answer": "Guardado com uma chave só da sua empresa, e a senha não fica guardada. Você pode apagar o certificado quando quiser. Os detalhes estão no <a class=\"link\" href=\"../termo-certificado.html\">termo de uso do certificado</a>." }
+      ]
+    },
+    "end": {
+      "title": "Pronto para tirar a nota pela OS?",
+      "guide": "Ver o passo a passo na ajuda"
+    }
+  }
+}

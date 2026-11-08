@@ -68,7 +68,44 @@
         "items": [
           {
             "question": "Quanto custa?",
-            "answer": "Comece grátis. Planos pagos disponíveis no app."
+            "answer": "Comece grátis. Planos pagos disponíveis no app.",
+            "hideWhenFlag": "nfsePage"
+          },
+          {
+            "question": "Quanto custa?",
+            "answer": "Comece grátis. Planos pagos a partir de R$ 59,90 por mês, com nota fiscal sem limite e sem custo por nota. A assinatura é feita no app.",
+            "flag": "nfsePage"
+          }
+        ]
+      },
+      {
+        "id": "nota-fiscal",
+        "title": "Nota fiscal",
+        "flag": "nfsePage",
+        "items": [
+          {
+            "question": "O PraticOS emite nota fiscal de serviço?",
+            "answer": "Emite, pelo Emissor Nacional do governo, direto da OS: cliente, serviço e valor vêm da OS, sem digitar de novo. Veja <a href=\"funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>."
+          },
+          {
+            "question": "Qual plano emite nota?",
+            "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. A nota não tem limite nem custo por nota. O plano grátis não emite."
+          },
+          {
+            "question": "Sou do Simples. Serve para mim?",
+            "answer": "Serve. Desde novembro, empresa do Simples emite a nota de serviço pelo Emissor Nacional, que é por onde o PraticOS emite."
+          },
+          {
+            "question": "Sou MEI. Vale a pena?",
+            "answer": "Se você já faz a OS no PraticOS, a nota sai dela, sem digitar o cliente e o valor de novo. Para emitir por aqui, o MEI precisa do certificado A1."
+          },
+          {
+            "question": "Preciso de certificado digital?",
+            "answer": "Sim, o certificado A1 da sua empresa. Peça ao seu contador ou a uma certificadora. Você envia uma vez, e o app avisa antes de vencer. Veja o <a href=\"termo-certificado.html\">termo de uso do certificado</a>."
+          },
+          {
+            "question": "Minha cidade funciona?",
+            "answer": "Cada cidade libera a emissão pelo Emissor Nacional no seu tempo. Confira a sua na <a href=\"https://www.gov.br/nfse/pt-br/municipios/monitoramento-adesoes\" target=\"_blank\" rel=\"noopener\">consulta oficial do governo</a>. Se o seu CNPJ ainda não puder emitir, o app avisa."
           }
         ]
       },

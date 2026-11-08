@@ -25,6 +25,7 @@
         {% endif %}
         {% endif %}
             {% endfor %}
+        {% if site.flags.webApp %}<a href="{{ site.webAppUrl }}" data-ga="select_content" data-ga-detail="navbar_login_mobile">{{ nav.login }}</a>{% endif %}
     </nav>
     <div class="mobile-menu__foot">
         {% if langSwitch %}

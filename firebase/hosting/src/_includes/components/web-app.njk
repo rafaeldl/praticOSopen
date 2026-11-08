@@ -1,0 +1,23 @@
+{# Web app band — only rendered when site.flags.webApp is true. Text only: no web screens captured yet. #}
+{% set web = data.webApp %}
+{% set guideHref = {pt: 'docs/computador.html', en: 'docs/computador-en.html', es: 'docs/computador-es.html'}[langCode] | default('docs/computador.html') %}
+<section class="section section--alt web-band" id="computador">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ web.title }}</h2>
+            <p>{{ web.lede }}</p>
+        </div>
+        <ul class="web-band__list" role="list">
+            {% for item in web.items %}
+            <li>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="btn-row web-band__actions">
+            <a href="{{ site.webAppUrl }}" class="btn btn--secondary" data-ga="select_content" data-ga-detail="home_web_login">{{ web.cta }}</a>
+            <a href="{{ relPath }}{{ guideHref }}" class="btn btn--text" data-ga="select_content" data-ga-detail="home_web_guide">{{ web.guide }}</a>
+        </div>
+    </div>
+</section>

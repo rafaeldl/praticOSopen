@@ -8,6 +8,7 @@ pageType: homepage
 {% include "components/hero.njk" %}
 {% include "components/workflow.njk" %}
 {% include "components/ai.njk" %}
+{% if site.flags.webApp %}{% include "components/web-app.njk" %}{% endif %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
 {% include "components/segments-index.njk" %}
 {% include "components/testimonial.njk" %}
