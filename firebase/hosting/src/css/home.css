@@ -154,10 +154,11 @@
   .quote__body--photo img { width: 128px; }
 }
 
-/* Web app band (site.flags.webApp) */
-.web-band__list { display: grid; gap: 0 var(--space-xl); grid-template-columns: minmax(0, 1fr); }
-.web-band__list li { padding-block: var(--space-md); border-top: var(--rule); }
-.web-band__list h3 { font-size: 1.45rem; line-height: 1.15; }
-.web-band__list p { margin-top: var(--space-3xs); color: var(--color-muted); }
-.web-band__actions { margin-top: var(--space-lg); gap: var(--space-md); }
-@media (min-width: 48rem) { .web-band__list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Fact bands on the home: web app (site.flags.webApp) and service invoice (site.flags.nfsePage) */
+.facts-band__list { display: grid; gap: 0 var(--space-xl); grid-template-columns: minmax(0, 1fr); }
+.facts-band__list li { padding-block: var(--space-md); border-top: var(--rule); }
+.facts-band__list h3 { font-size: 1.45rem; line-height: 1.15; }
+.facts-band__list p { margin-top: var(--space-3xs); color: var(--color-muted); }
+.facts-band__actions { margin-top: var(--space-lg); gap: var(--space-md); }
+.facts-band__note { font-size: var(--text-sm); color: var(--color-muted); }
+@media (min-width: 48rem) { .facts-band__list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

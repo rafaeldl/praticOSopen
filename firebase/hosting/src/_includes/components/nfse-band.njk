@@ -1,0 +1,23 @@
+{# Service invoice band — Portuguese only (the NFS-e is Brazil-only): rendered when site.flags.nfsePage is on
+   and the language block has `nfse` (only homepage.json pt does). #}
+{% set nf = data.nfse %}
+<section class="section facts-band facts-band--nfse" id="nota-fiscal">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ nf.title }}</h2>
+            <p>{{ nf.lede }}</p>
+        </div>
+        <ul class="facts-band__list" role="list">
+            {% for item in nf.items %}
+            <li>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="btn-row facts-band__actions">
+            <a href="{{ relPath }}funcionalidades/nota-fiscal.html" class="btn btn--secondary" data-ga="select_content" data-ga-detail="home_nfse_page">{{ nf.cta }}</a>
+            <span class="facts-band__note mono">{{ nf.price }}</span>
+        </div>
+    </div>
+</section>
