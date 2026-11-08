@@ -13,7 +13,7 @@
 .tv-col-head .dot { width: 0.7em; height: 0.7em; }
 .tv .tv-count { margin-left: auto; color: var(--color-muted); font-size: 1em; }
 .tv-list { flex: 1; min-height: 0; overflow: hidden; list-style: none; margin: 0; padding: 0 0.4em 0.4em; display: flex; flex-direction: column; gap: 0.35em; }
-.tv-card { background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.35em 0.55em; display: grid; gap: 0.05em; }
+.tv-card { background: var(--color-tile, var(--color-card)); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.35em 0.55em; display: grid; gap: 0.05em; }
 .tv-card.is-late { border-left: 0.3em solid var(--color-danger); }
 .tv-card-top { display: flex; justify-content: space-between; gap: 0.5em; align-items: baseline; }
 .tv-who { font-size: 1.05em; overflow-wrap: anywhere; }
