@@ -96,8 +96,19 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 - Feature flags in `site.json`: `flags.whatsappBot` (assistant pages/sections,
   currently **off** — bot is shut down), `flags.whatsappContact` (float button),
   `flags.softwareItPage` (the Software e TI page claims the automatic service
-  invoice; **off** until it ships). A `segments.json` link with `"flag"` shows
-  only when that flag is on (`enabledLinks` filter).
+  invoice; **off** until it ships), `flags.webApp` (the "Entrar" link to `/web`
+  in the bar, menu and footer, the home's "Também no computador" band and the
+  help article "Usar no computador"; turn it on together with opening
+  `config/webApp` to everyone) and `flags.nfsePage` (the service invoice page
+  `funcionalidades/nota-fiscal.html`, its help article, the FAQ section and the
+  priced "Quanto custa?"; both pages are not even built while it is off). A
+  `segments.json` link, footer/nav link, FAQ group or item with `"flag"` shows
+  only when that flag is on (`enabledLinks` / `flagShown` filters); a FAQ entry
+  with `"hideWhenFlag"` shows only while it is off.
+- The service invoice (NFS-e) is Brazil-only: it lives only in the `pt` blocks
+  and pt pages, with a PT-only `langSwitch`. `npm run build` ends with
+  `scripts/check-br-only.js`, which fails if "nota fiscal", "NFS-e" or "Emissor
+  Nacional" shows up on an `-en`/`-es` page (legal texts excepted).
 - pt-BR, en, es always updated together.
 
 ## Per-page allowances

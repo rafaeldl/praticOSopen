@@ -43,6 +43,6 @@
 
 <div class="strip">
     <ul class="wrap" role="list">
-        {% for item in hero.strip %}<li>{{ item }}</li>{% endfor %}
+        {% for item in (hero.stripWebApp if site.flags.webApp else hero.strip) %}<li>{{ item }}</li>{% endfor %}
     </ul>
 </div>

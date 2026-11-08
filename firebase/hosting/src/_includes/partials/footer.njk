@@ -19,7 +19,7 @@
                     <h2>{{ col.title }}</h2>
                     <ul>
                         {% for link in col.links %}{% if not link.flag or site.flags[link.flag] %}
-                        <li><a href="{% if (link.href | first) == '#' %}{% if isHomepage %}{{ link.href }}{% else %}{{ homeHref }}{{ link.href }}{% endif %}{% else %}{{ relPath }}{{ link.href | prettyUrl }}{% endif %}">{{ link.label }}</a></li>{% endif %}
+                        <li><a href="{% if (link.href | first) == '/' %}{{ link.href }}{% elif (link.href | first) == '#' %}{% if isHomepage %}{{ link.href }}{% else %}{{ homeHref }}{{ link.href }}{% endif %}{% else %}{{ relPath }}{{ link.href | prettyUrl }}{% endif %}">{{ link.label }}</a></li>{% endif %}
                         {% endfor %}
                     </ul>
                 </div>

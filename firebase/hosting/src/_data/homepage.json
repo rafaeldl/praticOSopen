@@ -60,7 +60,12 @@
         "total": "R$ 200,00",
         "done": "OS pronta para enviar",
         "again": "Ver de novo"
-      }
+      },
+      "stripWebApp": [
+        "Comece grátis",
+        "Celular e computador",
+        "Cliente aprova sem instalar nada"
+      ]
     },
     "workflow": {
       "title": "Menos papelada. Mais serviço e dinheiro no bolso.",
@@ -193,6 +198,26 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Oficina mecânica",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "Também no computador",
+      "lede": "No celular para quem está na rua, no computador para quem está no balcão. É a mesma conta, com as mesmas OS.",
+      "items": [
+        {
+          "title": "A mesma conta",
+          "text": "Entre com o mesmo login do celular. O que você muda no computador aparece no app, e o contrário também."
+        },
+        {
+          "title": "Sem instalar nada",
+          "text": "Abre no navegador do computador. Lista e OS lado a lado, quadro com as etapas e agenda de arrastar."
+        },
+        {
+          "title": "Imprimir e planilhas",
+          "text": "Imprima a OS, gere o PDF e traga seus clientes e serviços de uma planilha."
+        }
+      ],
+      "cta": "Entrar no sistema",
+      "guide": "Ver como usar no computador"
     }
   },
   "en": {
@@ -256,7 +281,12 @@
         "total": "$200.00",
         "done": "Order ready to send",
         "again": "Play again"
-      }
+      },
+      "stripWebApp": [
+        "Start free",
+        "Phone and computer",
+        "Customers approve with nothing to install"
+      ]
     },
     "workflow": {
       "title": "Less paperwork. More jobs done and money in your pocket.",
@@ -389,6 +419,26 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Auto repair shop",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "Also on your computer",
+      "lede": "On the phone when you are out on a job, on the computer when you are at the counter. Same account, same work orders.",
+      "items": [
+        {
+          "title": "Same account",
+          "text": "Sign in with the same login you use on the phone. What you change on the computer shows up in the app, and the other way around."
+        },
+        {
+          "title": "Nothing to install",
+          "text": "It opens in the computer's browser. List and work order side by side, a board with the stages and a drag-and-drop schedule."
+        },
+        {
+          "title": "Print and spreadsheets",
+          "text": "Print the work order, make the PDF and bring your customers and services in from a spreadsheet."
+        }
+      ],
+      "cta": "Sign in to the system",
+      "guide": "See how to use it on a computer"
     }
   },
   "es": {
@@ -452,7 +502,12 @@
         "total": "$ 200,00",
         "done": "Orden lista para enviar",
         "again": "Ver de nuevo"
-      }
+      },
+      "stripWebApp": [
+        "Empieza gratis",
+        "Celular y computadora",
+        "El cliente aprueba sin instalar nada"
+      ]
     },
     "workflow": {
       "title": "Menos papeleo. Más trabajos y dinero en el bolsillo.",
@@ -585,6 +640,26 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Taller mecánico",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "También en la computadora",
+      "lede": "En el celular cuando estás en la calle, en la computadora cuando estás en el mostrador. La misma cuenta, las mismas órdenes.",
+      "items": [
+        {
+          "title": "La misma cuenta",
+          "text": "Entra con el mismo usuario del celular. Lo que cambias en la computadora aparece en la app, y al revés también."
+        },
+        {
+          "title": "Sin instalar nada",
+          "text": "Se abre en el navegador de la computadora. Lista y orden lado a lado, tablero con las etapas y agenda para arrastrar."
+        },
+        {
+          "title": "Imprimir y planillas",
+          "text": "Imprime la orden, genera el PDF y trae tus clientes y servicios desde una planilla."
+        }
+      ],
+      "cta": "Entrar al sistema",
+      "guide": "Ver cómo usarlo en la computadora"
     }
   }
 }

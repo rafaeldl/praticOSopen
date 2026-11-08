@@ -24,7 +24,8 @@
     "cta": "Baixar grátis",
     "menu": "Abrir menu",
     "themeToggle": "Alternar tema claro/escuro",
-    "language": "Idioma"
+    "language": "Idioma",
+    "login": "Entrar"
   },
   "en": {
     "skip": "Skip to content",
@@ -51,7 +52,8 @@
     "cta": "Download free",
     "menu": "Open menu",
     "themeToggle": "Toggle light/dark theme",
-    "language": "Language"
+    "language": "Language",
+    "login": "Sign in"
   },
   "es": {
     "skip": "Saltar al contenido",
@@ -78,6 +80,7 @@
     "cta": "Descargar gratis",
     "menu": "Abrir menú",
     "themeToggle": "Cambiar tema claro/oscuro",
-    "language": "Idioma"
+    "language": "Idioma",
+    "login": "Entrar"
   }
 }

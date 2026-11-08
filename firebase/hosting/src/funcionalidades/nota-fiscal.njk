@@ -1,0 +1,131 @@
+---
+layout: layouts/base.njk
+pageType: feature
+lang: pt-BR
+langCode: pt
+featureStyles: true
+relPath: "../"
+indexPage: ./
+title: "Nota fiscal de serviço direto da OS | Emissor Nacional | PraticOS"
+description: "Emita a nota fiscal de serviço pelo Emissor Nacional direto da OS, com o certificado A1 da sua empresa. Para empresas do Simples e MEI, nos planos pagos, sem custo por nota."
+keywords: "nota fiscal de serviço, emissor nacional nfse, nota fiscal simples nacional, emitir nota fiscal mei, app para emitir nota fiscal de serviço, nota fiscal pelo celular"
+# Brazil only: no -en/-es versions, so the switch lists PT alone (one hreflang).
+langSwitch:
+  - code: PT
+    href: nota-fiscal.html
+    active: true
+---
+{# Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow · design-system: design.md
+ # Service invoice (NFS-e) page. Built only when site.flags.nfsePage is on (nota-fiscal.11tydata.js). #}
+{% set data = features['nota-fiscal'].pt %}
+{% set homeHref = relPath %}
+
+<section class="fx-hero">
+    <div class="wrap fx-hero__grid">
+        <div class="fx-hero__copy">
+            <h1>{{ data.hero.title }}</h1>
+            <p class="lede">{{ data.hero.lede }}</p>
+            <div class="btn-row">
+                <a href="#baixar" class="btn btn--primary" data-ga="cta_click" data-ga-detail="nfse_hero_download">{{ data.hero.cta }}</a>
+                <a href="#como-funciona" class="btn btn--secondary" data-ga="select_content" data-ga-detail="nfse_hero_how">{{ data.hero.ctaSecondary }}</a>
+            </div>
+            <p class="fx-price mono">{{ data.hero.price }}</p>
+        </div>
+        <aside class="fx-facts" aria-labelledby="fx-facts-label">
+            <p class="label" id="fx-facts-label">{{ data.hero.factsLabel }}</p>
+            <ul role="list">
+                {% for fact in data.hero.facts %}
+                <li>
+                    <h2>{{ fact.title }}</h2>
+                    <p>{{ fact.text }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </div>
+</section>
+
+<section class="section section--alt" id="como-funciona">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ data.steps.title }}</h2>
+            <p>{{ data.steps.lede }}</p>
+        </div>
+        <ol class="fx-tasks" role="list">
+            {% for item in data.steps.items %}
+            <li class="fx-task">
+                <span class="fx-task__num mono" aria-hidden="true">0{{ loop.index }}</span>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.textWeb if (item.textWeb and site.flags.webApp) else item.text }}</p>
+            </li>
+            {% endfor %}
+        </ol>
+        <p class="fx-more"><a class="btn btn--text" href="{{ relPath }}docs/nota-fiscal.html" data-ga="select_content" data-ga-detail="nfse_guide">{{ data.end.guide }}</a></p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ data.why.title }}</h2>
+            <p>{{ data.why.lede }}</p>
+        </div>
+        <ul class="fx-grid" role="list">
+            {% for item in data.why.items %}
+            <li>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ data.audience.title }}</h2>
+        </div>
+        <ul class="fx-grid fx-grid--2" role="list">
+            {% for item in data.audience.items %}
+            <li>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap fx-faq">
+        <div class="section-head">
+            <h2>{{ data.faq.title }}</h2>
+        </div>
+        <dl class="fx-faq__list">
+            {% for item in data.faq.items %}
+            {% if not item.flag or site.flags[item.flag] %}
+            <div class="fx-faq__item">
+                <dt>{{ item.question }}</dt>
+                <dd>{{ item.answer | safe }}</dd>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </dl>
+    </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% set sep = joiner(",") %}
+    {% for item in data.faq.items %}{% if not item.flag or site.flags[item.flag] %}{{ sep() }}
+    { "@type": "Question", "name": {{ item.question | dump | safe }}, "acceptedAnswer": { "@type": "Answer", "text": {{ item.answer | striptags | dump | safe }} } }
+    {% endif %}{% endfor %}
+  ]
+}
+</script>
+
+{% include "components/download.njk" %}

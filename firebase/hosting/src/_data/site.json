@@ -26,6 +26,8 @@
     "whatsappBot": false,
     "whatsappContact": false,
     "webApp": false,
-    "softwareItPage": false
-  }
+    "softwareItPage": false,
+    "nfsePage": false
+  },
+  "webAppUrl": "/web"
 }

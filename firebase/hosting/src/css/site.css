@@ -181,7 +181,7 @@ strong, b { font-weight: 600; }
 }
 .nav .brand__word { color: var(--color-on-navy); }
 .nav .brand__word b, .footer .brand__word b { color: inherit; }
-.nav .lang-switch, .nav .lang-switch a + a, .nav .icon-btn { border-color: color-mix(in oklch, var(--color-on-navy) 30%, var(--color-navy)); }
+.nav .lang-switch, .nav .lang-switch a + a, .nav .icon-btn, .nav__login { border-color: color-mix(in oklch, var(--color-on-navy) 30%, var(--color-navy)); }
 .nav__inner {
   max-width: var(--page-max); margin-inline: auto; padding-inline: var(--page-gutter);
   height: 4rem;
@@ -248,14 +248,14 @@ strong, b { font-weight: 600; }
 .theme-toggle .theme-icon-moon { display: none; }
 :root[data-theme="dark"] .theme-toggle .theme-icon-sun { display: none; }
 :root[data-theme="dark"] .theme-toggle .theme-icon-moon { display: block; }
-.nav__cta { display: none; }
+.nav__cta, .nav__login { display: none; }
 .nav-toggle { display: inline-grid; }
 .nav-toggle .i-close { display: none; }
 .nav-toggle[aria-expanded="true"] .i-open { display: none; }
 .nav-toggle[aria-expanded="true"] .i-close { display: block; }
 
 @media (min-width: 40rem) {
-  .nav__cta { display: inline-flex; }
+  .nav__cta, .nav__login { display: inline-flex; }
 }
 @media (min-width: 64rem) {
   .nav__center { display: flex; }

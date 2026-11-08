@@ -1,0 +1,108 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Para que serve",
+        "intro": "O PraticOS emite a nota fiscal de serviço pelo Emissor Nacional do governo, direto da OS. Cliente, serviço e valor vêm da OS, e a nota fica guardada junto dela. Desde 1º de novembro, empresa do Simples emite a nota de serviço por esse emissor.",
+        "infoCard": {
+          "title": "Nos planos pagos",
+          "content": "A nota está em todos os planos pagos, a partir do Starter, sem limite e sem custo por nota. Configurar e emitir é com o dono ou o administrador. O gerente também pode emitir e cancelar."
+        }
+      },
+      {
+        "id": "antes",
+        "title": "O que você precisa",
+        "intro": "Tenha à mão estas três coisas antes de começar.",
+        "features": [
+          {
+            "title": "Certificado A1",
+            "description": "O arquivo do certificado digital da sua empresa (.pfx ou .p12) e a senha dele. Peça ao seu contador ou a uma certificadora."
+          },
+          {
+            "title": "Código do serviço",
+            "description": "O código do serviço e o ISS que o seu contador usa nas suas notas."
+          },
+          {
+            "title": "Cidade liberada",
+            "description": "Cada cidade libera a emissão pelo Emissor Nacional no seu tempo. Confira a sua na <a href=\"https://www.gov.br/nfse/pt-br/municipios/monitoramento-adesoes\" target=\"_blank\" rel=\"noopener\">consulta oficial do governo</a>."
+          }
+        ]
+      },
+      {
+        "id": "configurar",
+        "title": "Configurar uma vez",
+        "intro": "No app, toque no botão do perfil, no topo do Início, e vá em <strong>Sua empresa › Nota fiscal</strong>.",
+        "subsections": [
+          {
+            "title": "Em três passos",
+            "validationList": [
+              {
+                "label": "1. Adicione o CNPJ",
+                "text": "Toque em <strong>Adicionar CNPJ</strong> e confira o regime da empresa (Simples ou MEI)."
+              },
+              {
+                "label": "2. Envie o certificado",
+                "text": "Escolha o arquivo, digite a senha e aceite o <a href=\"../termo-certificado.html\">termo de uso do certificado</a>. A senha não fica guardada."
+              },
+              {
+                "label": "3. Diga qual é o serviço",
+                "text": "Coloque o código do serviço e o ISS que o seu contador passou. As próximas notas usam o mesmo."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Certificado perto de vencer",
+          "content": "O app avisa 30 e 7 dias antes de o certificado vencer. Peça um novo ao contador e troque em <strong>Sua empresa › Nota fiscal</strong>."
+        }
+      },
+      {
+        "id": "emitir",
+        "title": "Emitir a nota",
+        "intro": "Na OS concluída, toque em <strong>Emitir nota fiscal</strong>. Confira para quem vai, o valor e a descrição, e toque em ✓. Se faltar algum dado do cliente, como CPF ou CNPJ e endereço, os campos aparecem ali mesmo.",
+        "features": [
+          {
+            "title": "Por e-mail para o cliente",
+            "description": "A nota vai com o PDF para o e-mail do cliente e fica guardada na OS."
+          },
+          {
+            "title": "Nota sozinha",
+            "description": "Em <strong>Sua empresa › Nota fiscal</strong>, escolha se a nota sai sozinha ao concluir a OS: nunca, só para alguns clientes ou para todas."
+          },
+          {
+            "title": "Várias OS numa nota",
+            "description": "Na tela do cliente, emita uma nota só para várias OS."
+          }
+        ]
+      },
+      {
+        "id": "cancelar",
+        "title": "Cancelar uma nota",
+        "intro": "Abra a nota, toque em <strong>…</strong> e em <strong>Cancelar nota</strong>. Escolha o motivo: erro na nota ou serviço não prestado. O cliente recebe o aviso por e-mail."
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas frequentes",
+        "faq": [
+          {
+            "question": "Sou MEI. Preciso de certificado?",
+            "answer": "Para emitir pelo PraticOS, sim. Pelo app do governo o MEI emite sem certificado, mas aí precisa digitar cada nota."
+          },
+          {
+            "question": "O PraticOS decide o código e o imposto?",
+            "answer": "Não. Quem decide é o seu contador. O app só guarda o que você colocou para usar nas próximas notas."
+          },
+          {
+            "question": "O governo recusou a nota. E agora?",
+            "answer": "O app mostra o motivo numa frase. Se faltar dado do cliente, os campos abrem para você completar e tentar de novo."
+          },
+          {
+            "question": "Onde vejo as notas que emiti?",
+            "answer": "Na OS e na lista de notas fiscais, no Financeiro."
+          }
+        ]
+      }
+    ]
+  }
+}
