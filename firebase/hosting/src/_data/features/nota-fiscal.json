@@ -1,16 +1,16 @@
 {
   "pt": {
     "hero": {
-      "title": "A nota de serviço sai da OS.",
-      "lede": "Para empresa do Simples e para o MEI. Desde novembro, o Simples também emite pelo Emissor Nacional, e o PraticOS já emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "title": "A nota fiscal de serviço sai da OS.",
+      "lede": "Para empresa do Simples e para o MEI. O PraticOS emite pelo Emissor Nacional do governo: cliente, serviço e valor vêm da OS, sem digitar de novo.",
       "cta": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "price": "Nos planos pagos, a partir de R$ 59,90 por mês.",
+      "price": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
       "factsLabel": "O que vem junto",
       "facts": [
         {
-          "title": "Sem custo por nota",
-          "text": "A nota está incluída no plano pago, sem limite."
+          "title": "Nota sem limite no plano pago",
+          "text": "Sem pagar por nota, quantas você precisar."
         },
         {
           "title": "Com o certificado da sua empresa",
@@ -68,11 +68,11 @@
       "items": [
         {
           "title": "Empresa do Simples",
-          "text": "Desde 1º de novembro, a nota de serviço do Simples sai pelo Emissor Nacional, e não mais pelo sistema da prefeitura. Se você já tem certificado A1, é só enviar e começar."
+          "text": "Desde 1º de novembro de 2026, a nota de serviço do Simples passa a sair pelo Emissor Nacional. Se você já tem certificado A1, é só enviar e começar."
         },
         {
           "title": "MEI",
-          "text": "Também dá para emitir a nota do MEI pelo PraticOS. Em vez de digitar cada nota no app do governo, ela sai da OS que você já fez, com o cliente e o valor preenchidos. Para isso, o MEI precisa do certificado A1."
+          "text": "Também dá para emitir a nota do MEI pelo PraticOS. Em vez de digitar cada nota no app do governo, ela sai da OS que você já fez, com o cliente e o valor preenchidos. Para isso, o MEI precisa do certificado A1. Vale para quem já faz a OS no PraticOS e não quer digitar cada nota duas vezes."
         }
       ]
     },
@@ -85,7 +85,7 @@
         },
         {
           "question": "Preciso de certificado digital?",
-          "answer": "Sim, o certificado A1 da sua empresa (um arquivo .pfx). O governo pede esse certificado para emitir por um sistema como o PraticOS. Peça ao seu contador ou a uma certificadora. Você envia uma vez, e o app avisa 30 e 7 dias antes de vencer."
+          "answer": "Sim, o certificado A1 da sua empresa (um arquivo .pfx). O governo pede esse certificado para emitir por um sistema como o PraticOS. Ele vale 1 ano e é comprado numa certificadora; o preço varia, então pergunte ao seu contador. Você envia uma vez, e o app avisa 30 e 7 dias antes de vencer."
         },
         {
           "question": "Minha cidade funciona?",
@@ -115,7 +115,7 @@
       ]
     },
     "end": {
-      "title": "Pronto para tirar a nota pela OS?",
+      "title": "Baixe o app, escolha um plano pago e envie o certificado em Sua empresa › Nota fiscal.",
       "guide": "Ver o passo a passo na ajuda"
     }
   }

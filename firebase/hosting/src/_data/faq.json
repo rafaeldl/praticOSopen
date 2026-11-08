@@ -93,7 +93,7 @@
           },
           {
             "question": "Sou do Simples. Serve para mim?",
-            "answer": "Serve. Desde novembro, empresa do Simples emite a nota de serviço pelo Emissor Nacional, que é por onde o PraticOS emite."
+            "answer": "Serve. Desde 1º de novembro de 2026, empresa do Simples emite a nota de serviço pelo Emissor Nacional, que é por onde o PraticOS emite."
           },
           {
             "question": "Sou MEI. Dá para emitir pelo PraticOS?",
@@ -101,7 +101,7 @@
           },
           {
             "question": "Preciso de certificado digital?",
-            "answer": "Sim, o certificado A1 da sua empresa. Peça ao seu contador ou a uma certificadora. Você envia uma vez, e o app avisa antes de vencer. Veja o <a href=\"termo-certificado.html\">termo de uso do certificado</a>."
+            "answer": "Sim, o certificado A1 da sua empresa. Ele vale 1 ano e é comprado numa certificadora; o preço varia, então pergunte ao seu contador. Você envia uma vez, e o app avisa antes de vencer. Veja o <a href=\"termo-certificado.html\">termo de uso do certificado</a>."
           },
           {
             "question": "Minha cidade funciona?",

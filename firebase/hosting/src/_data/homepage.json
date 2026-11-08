@@ -65,7 +65,8 @@
         "Comece grátis",
         "Celular e computador",
         "Cliente aprova sem instalar nada"
-      ]
+      ],
+      "stripNfse": "Nota fiscal de serviço"
     },
     "workflow": {
       "title": "Menos papelada. Mais serviço e dinheiro no bolso.",
@@ -209,7 +210,7 @@
         },
         {
           "title": "Sem instalar nada",
-          "text": "Abre no navegador do computador. Lista e OS lado a lado, quadro com as etapas e agenda de arrastar."
+          "text": "Abre no navegador do computador. Veja a OS ao lado da lista e mude o horário arrastando na agenda."
         },
         {
           "title": "Imprimir e planilhas",
@@ -220,8 +221,8 @@
       "guide": "Ver como usar no computador"
     },
     "nfse": {
-      "title": "Nota fiscal de serviço direto da OS, para empresa do Simples e para o MEI",
-      "lede": "Desde novembro, empresa do Simples emite pelo Emissor Nacional, onde o MEI já emitia. O PraticOS emite por lá: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "title": "Nota fiscal de serviço direto da OS",
+      "lede": "Para empresa do Simples e para o MEI. O PraticOS emite pelo Emissor Nacional do governo: cliente, serviço e valor vêm da OS, sem digitar de novo.",
       "items": [
         {
           "title": "Um toque na OS pronta",
@@ -232,12 +233,12 @@
           "text": "A nota vai com o PDF para o e-mail do cliente e fica guardada junto da OS."
         },
         {
-          "title": "Sem custo por nota",
-          "text": "Usa o certificado A1 da sua empresa, enviado uma vez. A nota não tem limite nos planos pagos."
+          "title": "Nota sem limite no plano pago",
+          "text": "Sem pagar por nota. Usa o certificado digital A1 da sua empresa, enviado uma vez."
         }
       ],
       "cta": "Ver como funciona a nota",
-      "price": "Nos planos pagos, a partir de R$ 59,90 por mês."
+      "price": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês."
     }
   },
   "en": {
@@ -450,7 +451,7 @@
         },
         {
           "title": "Nothing to install",
-          "text": "It opens in the computer's browser. List and work order side by side, a board with the stages and a drag-and-drop schedule."
+          "text": "It opens in the computer's browser. See the work order next to the list and move a visit by dragging it on the schedule."
         },
         {
           "title": "Print and spreadsheets",
@@ -671,7 +672,7 @@
         },
         {
           "title": "Sin instalar nada",
-          "text": "Se abre en el navegador de la computadora. Lista y orden lado a lado, tablero con las etapas y agenda para arrastrar."
+          "text": "Se abre en el navegador de la computadora. Ve la orden al lado de la lista y cambia el horario arrastrando en la agenda."
         },
         {
           "title": "Imprimir y planillas",
