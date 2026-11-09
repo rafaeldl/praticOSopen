@@ -29,10 +29,10 @@
                 {% endif %}
             </div>
             {% if stage.scene.kind == 'talk' %}
-            {# Animated: the hero scene (Nova OS filled from speech). With ?hero=mix the hero already
-               plays it, so this tab falls back to its still (the spoken correction). #}
+            {# Animated: the hero scene, short screen (Nova OS filled from speech). With ?hero=app the
+               hero already plays it, so this tab falls back to its still (the spoken correction). #}
             <div class="panel__scene panel__scene--live" data-stage-wrap>
-                <div data-stage="hero" role="img" aria-label="{{ data.hero.stage.label }}"><script type="application/json">{{ data.hero.stage | dump | safe }}</script></div>
+                <div data-stage="hero" data-short role="img" aria-label="{{ data.hero.stage.label }}"><script type="application/json">{{ data.hero.stage | dump | safe }}</script></div>
                 <button class="stage-again" type="button" data-stage-replay hidden>{{ data.hero.demo.again }}</button>
             </div>
             <div class="panel__scene panel__scene--still" data-stage="tab" role="img" aria-label="{{ stage.scene.label }}"><script type="application/json">{{ stage.scene | dump | safe }}</script></div>

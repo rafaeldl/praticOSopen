@@ -1,5 +1,5 @@
 /* Hallmark · genre: modern-minimal · macrostructure: Photographic · theme: "Campo" (design.md)
- * enrichment: spoken order building over trade photos (test: ?hero=mix puts the app's phone over one photo) · nav: N1b · footer: Ft4 · design-system: design.md
+ * enrichment: spoken order building over trade photos (test: ?hero=app puts the app's phone in place of the card) · nav: N1b · footer: Ft4 · design-system: design.md
  * motion: one demo pass + manual replay
  */
 
@@ -47,17 +47,12 @@
 .demo__again { margin-left: auto; font: 700 0.9rem var(--font-body); color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap; }
 .demo__again:hover { text-decoration-thickness: 2px; }
 
-/* Test variant (?hero=mix): one trade photo with the app's phone over it */
-.mix { display: none; }
-:root[data-hero="mix"] .media { display: none; }
-:root[data-hero="mix"] .mix { display: block; position: relative; min-width: 0; height: min(620px, calc(100svh - 150px)); min-height: 520px; border-radius: var(--radius-card); overflow: hidden; background: var(--color-navy-2); }
-.mix__photo { position: absolute; inset: 0; margin: 0; }
-.mix__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 48% 42%; transform: scale(1.6); transform-origin: 18% 80%; }
-.mix__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(270deg, transparent 45%, rgb(7 26 51 / 0.45)); }
-/* The scene's phone already runs off its top; the photo's rounded edge does the crop */
-.mix__stage { position: absolute; left: -76px; bottom: 0; width: 520px; }
-.mix .tag { left: auto; right: var(--space-xs); }
-.mix__again { position: absolute; right: var(--space-sm); bottom: var(--space-xs); }
+/* Test variant (?hero=app): the app's phone in place of the card, cropped at the photos' foot */
+.app { display: none; }
+:root[data-hero="app"] .demo { display: none; }
+:root[data-hero="app"] .app { display: block; position: absolute; z-index: 2; left: calc(var(--space-xl) * -1); bottom: 0; width: 22rem; }
+.app .ss-phone { box-shadow: 0 24px 48px -20px rgb(0 0 0 / 0.55); }
+.app__again { position: absolute; top: calc(100% + var(--space-2xs)); left: 0; right: 0; margin-inline: auto; width: max-content; }
 
 /* "Ver de novo" next to a product scene */
 .stage-again { font: 700 0.95rem var(--font-body); color: var(--color-ink); background: none; border: 0; padding: var(--space-2xs) 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -88,13 +83,13 @@
 .panel li::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
 /* The app screen (stage/scenes/tabs): the phone runs off the panel's foot */
 .panel__scene { align-self: end; justify-self: center; width: min(100%, 420px); margin-top: var(--space-xl); }
-/* Falar plays the hero scene; the ?hero=mix test shows its still instead */
+/* Falar plays the hero scene; the ?hero=app test shows its still instead */
 .panel__scene--live { display: flex; flex-direction: column; width: min(100%, 520px); }
 .panel__scene--live .ss-phone { box-shadow: 0 12px 28px -14px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(0 0 0 / 0.04); }
 .panel__scene--live .stage-again { align-self: flex-end; margin-bottom: var(--space-xs); }
 .panel__scene--still { display: none; }
-:root[data-hero="mix"] .panel__scene--live { display: none; }
-:root[data-hero="mix"] .panel__scene--still { display: block; }
+:root[data-hero="app"] .panel__scene--live { display: none; }
+:root[data-hero="app"] .panel__scene--still { display: block; }
 .panel__more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm) var(--space-md); margin-top: var(--space-lg); }
 .panel__note { flex: 1 1 16rem; color: var(--color-muted); font-size: 0.92rem; }
 
@@ -140,13 +135,8 @@
   .tag { left: var(--space-2xs); top: var(--space-2xs); font-size: 0.8rem; padding: 3px 6px; max-width: none; white-space: nowrap; }
   .demo { position: relative; left: auto; bottom: auto; grid-column: 1 / -1; width: 100%; max-width: 25rem; margin: -84px auto 0; }
   .demo__done { font-size: 0.86rem; white-space: nowrap; }
-  :root[data-hero="mix"] .mix { height: auto; min-height: 0; margin-inline: calc(var(--page-gutter) * -1); border-radius: 0; background: transparent; }
-  .mix__photo { position: relative; height: 240px; }
-  .mix__photo img { transform: none; object-position: 50% 22%; }
-  .mix__photo::after { background: linear-gradient(180deg, transparent 55%, var(--color-navy)); }
-  .mix .tag { left: var(--page-gutter); right: auto; }
-  .mix__stage { position: relative; left: auto; width: 100%; margin-top: -24px; }
-  .mix__again { position: static; display: block; margin: 0 var(--page-gutter) 0 auto; }
+  :root[data-hero="app"] .app { position: relative; left: auto; grid-column: 1 / -1; width: 100%; max-width: 22rem; margin: -96px auto 0; }
+  .app__again { position: static; display: block; margin: var(--space-2xs) 0 0 auto; }
   .hero__stores .btn { flex: 1 1 100%; }
   .strip ul { flex-direction: column; }
   .work { padding-block: var(--space-2xl); }

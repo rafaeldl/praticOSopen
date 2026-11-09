@@ -12,11 +12,11 @@ As abas de "Como funciona" usam o mesmo kit, com uma tela parada por aba: corrig
 "Aprovar orçamento", a Agenda com o lembrete chegando e o Financeiro com quem deve e o botão de
 cobrança.
 
-**Em teste (2026-11-09):** o hero voltou a ser o de fotos com o cartão da fala, e a animação da
-Nova OS passou para a aba "Falar". Com `?hero=mix` na home, o hero mostra a foto do mecânico com o
-celular por cima (a mesma cena), e a aba "Falar" volta para a tela parada da correção. Em português,
-com `flags.nfsePage`, a última aba é "Nota fiscal" (`homepage.json` → `pt.nfse.tab`, cena `invoice`),
-no lugar da faixa da nota que ficava abaixo das abas.
+**Em teste (2026-11-09):** o hero é o de fotos com o cartão da fala. Com `?hero=app` na home,
+o cartão dá lugar ao celular da Nova OS em versão curta (só cliente, veículo e serviços,
+`data-short` na cena), sobre as mesmas fotos, e a aba "Falar" volta para a tela parada da correção.
+Sem o parâmetro, a aba "Falar" toca a mesma animação curta. Em português, com `flags.nfsePage`, a
+última aba é "Nota fiscal" (`homepage.json` → `pt.nfse.tab`, cena `invoice`).
 
 ## Arquitetura
 

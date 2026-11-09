@@ -354,3 +354,14 @@
   -webkit-mask-image: linear-gradient(#000 calc(100% - 150px), transparent calc(100% - 88px));
   mask-image: linear-gradient(#000 calc(100% - 150px), transparent calc(100% - 88px));
 }
+
+/* Short: customer and services only. The phone keeps its real size, so the
+   sheet starts lower on the screen (its cards end just above the notice once
+   filled) and the stage crops the empty top and the header away */
+.ph-hero--short .ph-phone {
+  left: 20px;
+  top: -278px;
+}
+.ph-hero--short .ph-scroll {
+  padding-top: 195px;
+}

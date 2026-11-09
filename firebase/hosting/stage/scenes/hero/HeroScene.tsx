@@ -111,24 +111,26 @@ function Wave() {
   )
 }
 
-export function HeroScene({ copy }: { copy: HeroCopy }) {
+// short: only the customer and the services, on a shorter screen, for the
+// hero over the trade photos (no request, photos or due-date cards)
+export function HeroScene({ copy, short = false }: { copy: HeroCopy; short?: boolean }) {
   const all = copy.items.length
   const poster: S = { phase: 'done', words: words(copy.line), heard: false, client: true, items: all, notice: true }
   return (
     <Stage<S>
-      width={560}
-      height={664}
-      compact={{ below: 520, width: 358, height: 608 }}
+      width={short ? 400 : 560}
+      height={short ? 506 : 664}
+      compact={short ? undefined : { below: 520, width: 358, height: 608 }}
       initial={START}
       poster={poster}
       script={makeScript(copy)}
       play="once"
       cursor={{ at: { x: 470, y: 700 }, style: 'touch' }}
-      className="ph-hero"
+      className={short ? 'ph-hero ph-hero--short' : 'ph-hero'}
     >
       {(s, _rect, layout) => {
         return (
-          <Phone width={layout === 'compact' ? 330 : 360} className="ph-phone" aria-label={copy.label}>
+          <Phone width={short ? 360 : layout === 'compact' ? 330 : 360} className="ph-phone" aria-label={copy.label}>
             <div className="ph-screen">
               <div className="ph-scroll">
               <div className="ph-top">
@@ -206,6 +208,7 @@ export function HeroScene({ copy }: { copy: HeroCopy }) {
               </div>
               </section>
 
+              {!short && (<>
               <section className="ph-sec">
               <div className="ph-label">{copy.request}</div>
               <div className="ph-card"><div className="ph-row ph-request">{copy.requestHint}</div></div>
@@ -232,6 +235,7 @@ export function HeroScene({ copy }: { copy: HeroCopy }) {
                 </div>
               </div>
               </section>
+              </>)}
 
               </div>
               {/* Foot: the transcript card, the notice, then the bar */}

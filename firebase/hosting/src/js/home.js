@@ -202,8 +202,8 @@
 
   // The card stays complete at rest; one pass plays on load, replays are manual.
   var demo = document.querySelector('[data-demo]');
-  // The ?hero=mix test hides the card and plays the app scene instead
-  if (document.documentElement.dataset.hero === 'mix') return;
+  // The ?hero=app test hides the card and plays the app scene instead
+  if (document.documentElement.dataset.hero === 'app') return;
   if (!demo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var line = demo.querySelector('[data-demo-line]');

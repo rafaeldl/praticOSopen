@@ -1,7 +1,7 @@
 {# Photographic hero — headline left, trade photos right, the spoken order building over them.
-   Test: ?hero=mix swaps the trade grid and card for one photo with the app's phone over it
-   (stage/scenes/hero). Both variants render; html[data-hero] picks one. #}
-<script>try{if(new URLSearchParams(location.search).get('hero')==='mix')document.documentElement.dataset.hero='mix'}catch(e){}</script>
+   Test: ?hero=app swaps the card for the app's phone filling the order (stage/scenes/hero,
+   short screen) over the same photos. Both render; html[data-hero] picks one. #}
+<script>try{if(new URLSearchParams(location.search).get('hero')==='app')document.documentElement.dataset.hero='app'}catch(e){}</script>
 {% set hero = data.hero %}
 {% set demo = hero.demo %}
 <section class="hero" id="hero">
@@ -40,20 +40,14 @@
                 </div>
                 <div class="demo__done" data-demo-done>{{ demo.done }}<button class="demo__again" type="button" data-demo-again hidden>{{ demo.again }}</button></div>
             </div>
+
+            {# Variant "app": the app's phone filling the order, in place of the card #}
+            <div class="app" data-stage-wrap>
+                <div class="app__scene" data-stage="hero" data-short role="img" aria-label="{{ hero.stage.label }}"><script type="application/json">{{ hero.stage | dump | safe }}</script></div>
+                <button class="stage-again stage-again--on-navy app__again" type="button" data-stage-replay hidden>{{ demo.again }}</button>
+            </div>
         </div>
 
-            {# Variant "mix": the mechanic's photo with the phone filling the order over it #}
-            {% set lead = hero.tiles[0] %}
-            <div class="mix" data-stage-wrap>
-                <figure class="mix__photo">
-                    <img src="{{ relPath }}assets/images/site/{{ lead.image }}" alt="{{ lead.alt }}" width="{{ lead.width }}" height="{{ lead.height }}" decoding="async" loading="lazy">
-                    <figcaption class="tag">{{ lead.label }}</figcaption>
-                </figure>
-                <div class="mix__stage">
-                    <div class="mix__scene" data-stage="hero" role="img" aria-label="{{ hero.stage.label }}"><script type="application/json">{{ hero.stage | dump | safe }}</script></div>
-                </div>
-                <button class="stage-again stage-again--on-navy mix__again" type="button" data-stage-replay hidden>{{ demo.again }}</button>
-            </div>
     </div>
 </section>
 
