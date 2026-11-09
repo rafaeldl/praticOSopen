@@ -103,7 +103,30 @@
             "Sistema com tipo e número de canais",
             "Corrija falando: “a mão de obra é 900”",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Mercado Bom Preço",
+            "vehicle": "CFTV · NVR 8 canais",
+            "vehicleEmpty": "Escolher sistema",
+            "deviceIcon": "cctv",
+            "line": "Mercado Bom Preço, instalação de 8 câmeras e um NVR de 8 canais, vistoria na quinta",
+            "items": [
+              {
+                "name": "8 câmeras IP",
+                "price": "R$ 2.320,00"
+              },
+              {
+                "name": "NVR 8 canais",
+                "price": "R$ 890,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 2.320,00",
+              "R$ 3.210,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,38 @@
             "Tipo de sistema: CFTV, alarme, controle de acesso, interfonia",
             "Internet e pontos de energia no local",
             "Fotos dos pontos de instalação"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Vistoria do local com fotos: Pontos de câmera, 8",
+            "back": "OS 587",
+            "title": "Vistoria do local",
+            "progress": "8 de 10 respondidas",
+            "items": [
+              {
+                "q": "Pontos de câmera",
+                "a": "8",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Internet no local",
+                "a": "Fibra 300 MB",
+                "flag": false
+              },
+              {
+                "q": "Pontos de energia",
+                "a": "Faltam 2",
+                "flag": true
+              },
+              {
+                "q": "Rack",
+                "a": "Sim",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,7 +179,34 @@
             "O sim do cliente fica guardado",
             "Notificação quando o cliente aprova ou comenta",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 587",
+            "client": "Mercado Bom Preço",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "8 câmeras IP",
+                "price": "R$ 2.320,00"
+              },
+              {
+                "name": "NVR 8 canais",
+                "price": "R$ 890,00"
+              },
+              {
+                "name": "Mão de obra",
+                "price": "R$ 900,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 4.110,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -136,7 +217,57 @@
             "Semana no topo e os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
             "Nas palavras do ramo: em instalação, operacional"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Mercado Bom Preço",
+                "time": "09:00",
+                "status": "Aprovada · OS 587",
+                "kind": "approved",
+                "sub": "CFTV · NVR 8 canais · com Bruno"
+              },
+              {
+                "name": "Farmácia Vida",
+                "time": "14:30",
+                "status": "Orçamento · OS 588",
+                "kind": "quote",
+                "sub": "Alarme · 6 sensores · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Mercado Bom Preço às 09:00 · CFTV · NVR 8 canais",
+            "now": "agora"
+          }
         },
         {
           "number": "05",
@@ -148,10 +279,63 @@
             "Senhas padrão alteradas e acesso remoto pronto",
             "Pagamento parcial e desconto na mesma OS"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 6.240 de 3 clientes",
+            "nextSub": "Mercado São Jorge deve R$ 1.650 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Mercado São Jorge",
+                "amount": "R$ 1.650",
+                "sub": "OS 583 · desde 02/10"
+              },
+              {
+                "name": "Mercado Bom Preço",
+                "amount": "R$ 4.110",
+                "sub": "OS 587 · desde 28/10"
+              },
+              {
+                "name": "Farmácia Vida",
+                "amount": "R$ 480",
+                "sub": "OS 588 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #587",
+        "client": "Mercado Bom Preço",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "8 câmeras IP",
+            "price": "R$ 2.320,00"
+          },
+          {
+            "name": "NVR 8 canais",
+            "price": "R$ 890,00"
+          },
+          {
+            "name": "Mão de obra",
+            "price": "R$ 900,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 4.110,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para bompreco@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que o instalador de segurança quer saber antes de começar",
@@ -283,7 +467,30 @@
             "System with type and number of channels",
             "Fix it by voice: “labor is 900”",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Good Price Market",
+            "vehicle": "CCTV · 8-channel NVR",
+            "vehicleEmpty": "Choose system",
+            "deviceIcon": "cctv",
+            "line": "Good Price Market, install 8 cameras and an 8-channel NVR, site survey on Thursday",
+            "items": [
+              {
+                "name": "8 IP cameras",
+                "price": "$2,320.00"
+              },
+              {
+                "name": "8-channel NVR",
+                "price": "$890.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$2,320.00",
+              "$3,210.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +501,38 @@
             "System type: CCTV, alarm, access control, intercom",
             "Internet and power available on site",
             "Photos of each mounting point"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Site survey with photos: Camera spots, 8",
+            "back": "WO 587",
+            "title": "Site survey",
+            "progress": "8 of 10 answered",
+            "items": [
+              {
+                "q": "Camera spots",
+                "a": "8",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Internet on site",
+                "a": "300 Mb fiber",
+                "flag": false
+              },
+              {
+                "q": "Power outlets",
+                "a": "2 missing",
+                "flag": true
+              },
+              {
+                "q": "Rack",
+                "a": "Yes",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -305,7 +543,34 @@
             "The customer's yes stays on file",
             "Notification when the customer approves or comments",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 587",
+            "client": "Good Price Market",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "8 IP cameras",
+                "price": "$2,320.00"
+              },
+              {
+                "name": "8-channel NVR",
+                "price": "$890.00"
+              },
+              {
+                "name": "Labor",
+                "price": "$900.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$4,110.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -316,7 +581,57 @@
             "The week on top and the day's visits",
             "Daily summary at 9am, if you want it",
             "Statuses in your trade's words: installing, operational"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Good Price Market",
+                "time": "9:00 AM",
+                "status": "Approved · WO 587",
+                "kind": "approved",
+                "sub": "CCTV · 8-channel NVR · with Ben"
+              },
+              {
+                "name": "LifeCare Pharmacy",
+                "time": "2:30 PM",
+                "status": "Quote · WO 588",
+                "kind": "quote",
+                "sub": "Alarm · 6 sensors · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Good Price Market at 9:00 AM · CCTV · 8-channel NVR",
+            "now": "now"
+          }
         },
         {
           "number": "05",
@@ -328,8 +643,32 @@
             "Default passwords changed and remote access set up",
             "Partial payment and discount on the same work order"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing how much is still due and from which customers"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$6,240 to collect from 3 customers",
+            "nextSub": "Corner Market on 5th owes $1,650 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Corner Market on 5th",
+                "amount": "$1,650",
+                "sub": "WO 583 · since 10/02"
+              },
+              {
+                "name": "Good Price Market",
+                "amount": "$4,110",
+                "sub": "WO 587 · since 10/28"
+              },
+              {
+                "name": "LifeCare Pharmacy",
+                "amount": "$480",
+                "sub": "WO 588 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +802,30 @@
             "Sistema con tipo y número de canales",
             "Corrige hablando: “la mano de obra es 900”",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Mercado Buen Precio",
+            "vehicle": "CCTV · NVR de 8 canales",
+            "vehicleEmpty": "Elegir sistema",
+            "deviceIcon": "cctv",
+            "line": "Mercado Buen Precio, instalación de 8 cámaras y un NVR de 8 canales, relevamiento el jueves",
+            "items": [
+              {
+                "name": "8 cámaras IP",
+                "price": "$ 2.320,00"
+              },
+              {
+                "name": "NVR de 8 canales",
+                "price": "$ 890,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 2.320,00",
+              "$ 3.210,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +836,38 @@
             "Tipo de sistema: CCTV, alarma, control de acceso, intercomunicador",
             "Internet y puntos de energía en el lugar",
             "Fotos de los puntos de instalación"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Relevamiento con fotos: Puntos de cámara, 8",
+            "back": "OS 587",
+            "title": "Relevamiento",
+            "progress": "8 de 10 respondidas",
+            "items": [
+              {
+                "q": "Puntos de cámara",
+                "a": "8",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Internet en el lugar",
+                "a": "Fibra 300 MB",
+                "flag": false
+              },
+              {
+                "q": "Tomas de energía",
+                "a": "Faltan 2",
+                "flag": true
+              },
+              {
+                "q": "Rack",
+                "a": "Sí",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -485,7 +878,34 @@
             "El sí del cliente queda guardado",
             "Notificación cuando el cliente aprueba o comenta",
             "PDF de la orden para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 587",
+            "client": "Mercado Buen Precio",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "8 cámaras IP",
+                "price": "$ 2.320,00"
+              },
+              {
+                "name": "NVR de 8 canales",
+                "price": "$ 890,00"
+              },
+              {
+                "name": "Mano de obra",
+                "price": "$ 900,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 4.110,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -496,7 +916,57 @@
             "La semana arriba y las visitas del día",
             "Resumen del día a las 9, si lo quieres",
             "En las palabras del rubro: en instalación, operativo"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Mercado Buen Precio",
+                "time": "09:00",
+                "status": "Aprobada · OS 587",
+                "kind": "approved",
+                "sub": "CCTV · NVR de 8 canales · con Bruno"
+              },
+              {
+                "name": "Farmacia Vida",
+                "time": "14:30",
+                "status": "Presupuesto · OS 588",
+                "kind": "quote",
+                "sub": "Alarma · 6 sensores · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Mercado Buen Precio a las 09:00 · CCTV · NVR de 8 canales",
+            "now": "ahora"
+          }
         },
         {
           "number": "05",
@@ -508,8 +978,32 @@
             "Contraseñas de fábrica cambiadas y acceso remoto listo",
             "Pago parcial y descuento en la misma orden"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 6.240 de 3 clientes",
+            "nextSub": "Minimarket San Jorge debe $ 1.650 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Minimarket San Jorge",
+                "amount": "$ 1.650",
+                "sub": "OS 583 · desde 02/10"
+              },
+              {
+                "name": "Mercado Buen Precio",
+                "amount": "$ 4.110",
+                "sub": "OS 587 · desde 28/10"
+              },
+              {
+                "name": "Farmacia Vida",
+                "amount": "$ 480",
+                "sub": "OS 588 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

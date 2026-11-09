@@ -103,7 +103,25 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “a visita é 120”",
             "Ou tire foto do pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Sandra Ribeiro",
+            "vehicle": "Geladeira frost free",
+            "vehicleEmpty": "Escolher eletrodoméstico",
+            "deviceIcon": "washer",
+            "line": "Geladeira da dona Sandra, não está gelando, visita amanhã às 9",
+            "items": [
+              {
+                "name": "Visita técnica",
+                "price": "R$ 100,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 100,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +132,57 @@
             "Semana no topo, atendimentos do dia embaixo",
             "Lembrete no celular antes do horário",
             "Resumo do dia às 9h, se você quiser"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Sandra Ribeiro",
+                "time": "09:00",
+                "status": "Aprovada · OS 638",
+                "kind": "approved",
+                "sub": "Geladeira frost free · com Bruno"
+              },
+              {
+                "name": "Jorge Silva",
+                "time": "14:30",
+                "status": "Orçamento · OS 639",
+                "kind": "quote",
+                "sub": "Micro-ondas 30 L · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Sandra Ribeiro às 09:00 · Geladeira frost free",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -125,7 +193,38 @@
             "Geladeira: compressor, gás, termostato, borracha, degelo",
             "Lavadora: enchimento, drenagem, centrifugação, motor, rolamentos",
             "Micro-ondas: magnetron, capacitor, trava da porta"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Diagnóstico · geladeira com fotos: Termostato, Com defeito",
+            "back": "OS 638",
+            "title": "Diagnóstico · geladeira",
+            "progress": "7 de 11 respondidas",
+            "items": [
+              {
+                "q": "Termostato",
+                "a": "Com defeito",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Compressor",
+                "a": "Liga",
+                "flag": false
+              },
+              {
+                "q": "Gás",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Borracha da porta",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -136,7 +235,30 @@
             "O “sim” do cliente fica guardado",
             "Cliente acompanha o conserto sem ligar",
             "PDF da OS com checklists e fotos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 638",
+            "client": "Sandra Ribeiro",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Visita técnica",
+                "price": "R$ 120,00"
+              },
+              {
+                "name": "Troca do termostato",
+                "price": "R$ 180,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 300,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -148,10 +270,59 @@
             "Pagamento em partes e desconto na mesma OS",
             "Quem deve há mais tempo aparece primeiro"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 870 de 3 clientes",
+            "nextSub": "Márcia Lopes deve R$ 420 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Márcia Lopes",
+                "amount": "R$ 420",
+                "sub": "OS 634 · desde 02/10"
+              },
+              {
+                "name": "Sandra Ribeiro",
+                "amount": "R$ 300",
+                "sub": "OS 638 · desde 28/10"
+              },
+              {
+                "name": "Jorge Silva",
+                "amount": "R$ 150",
+                "sub": "OS 639 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #638",
+        "client": "Sandra Ribeiro",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Visita técnica",
+            "price": "R$ 120,00"
+          },
+          {
+            "name": "Troca do termostato",
+            "price": "R$ 180,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 300,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para sandra@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Dúvidas de quem conserta eletrodomésticos",
@@ -283,7 +454,25 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the visit is 120”",
             "Or take a photo of the written request"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Sandra Reed",
+            "vehicle": "Frost-free fridge",
+            "vehicleEmpty": "Choose appliance",
+            "deviceIcon": "washer",
+            "line": "Sandra’s fridge, not cooling, visit tomorrow at 9",
+            "items": [
+              {
+                "name": "Service call",
+                "price": "$100.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$100.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +483,57 @@
             "The week on top, the day’s appointments below",
             "Phone reminder before the appointment",
             "Daily summary at 9 a.m., if you want it"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Sandra Reed",
+                "time": "9:00 AM",
+                "status": "Approved · WO 638",
+                "kind": "approved",
+                "sub": "Frost-free fridge · with Ben"
+              },
+              {
+                "name": "George Wells",
+                "time": "2:30 PM",
+                "status": "Quote · WO 639",
+                "kind": "quote",
+                "sub": "30 L microwave · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Sandra Reed at 9:00 AM · Frost-free fridge",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -305,7 +544,38 @@
             "Fridge: compressor, gas, thermostat, door seal, defrost",
             "Washer: filling, draining, spin, motor, bearings",
             "Microwave: magnetron, capacitor, door latch"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Diagnosis · fridge with photos: Thermostat, Faulty",
+            "back": "WO 638",
+            "title": "Diagnosis · fridge",
+            "progress": "7 of 11 answered",
+            "items": [
+              {
+                "q": "Thermostat",
+                "a": "Faulty",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Compressor",
+                "a": "Runs",
+                "flag": false
+              },
+              {
+                "q": "Refrigerant",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Door gasket",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -316,7 +586,30 @@
             "The customer's yes is on file",
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 638",
+            "client": "Sandra Reed",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Service call",
+                "price": "$120.00"
+              },
+              {
+                "name": "Thermostat replacement",
+                "price": "$180.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$300.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "05",
@@ -328,8 +621,32 @@
             "Partial payments and discounts in the same order",
             "Whoever has owed the longest shows up first"
           ],
-          "image": "financial.png",
-          "alt": "Financial with how much is left to collect and the button to send a payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$870 to collect from 3 customers",
+            "nextSub": "Martha Lopez owes $420 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Martha Lopez",
+                "amount": "$420",
+                "sub": "WO 634 · since 10/02"
+              },
+              {
+                "name": "Sandra Reed",
+                "amount": "$300",
+                "sub": "WO 638 · since 10/28"
+              },
+              {
+                "name": "George Wells",
+                "amount": "$150",
+                "sub": "WO 639 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +780,25 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “la visita es 120”",
             "O saca una foto del pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Sandra Ribera",
+            "vehicle": "Refrigerador no frost",
+            "vehicleEmpty": "Elegir electrodoméstico",
+            "deviceIcon": "washer",
+            "line": "Refrigerador de la señora Sandra, no enfría, visita mañana a las 9",
+            "items": [
+              {
+                "name": "Visita técnica",
+                "price": "$ 100,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 100,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +809,57 @@
             "La semana arriba, las citas del día abajo",
             "Aviso en el celular antes del horario",
             "Resumen del día a las 9 h, si lo quieres"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Sandra Ribera",
+                "time": "09:00",
+                "status": "Aprobada · OS 638",
+                "kind": "approved",
+                "sub": "Refrigerador no frost · con Bruno"
+              },
+              {
+                "name": "Jorge Silva",
+                "time": "14:30",
+                "status": "Presupuesto · OS 639",
+                "kind": "quote",
+                "sub": "Microondas 30 L · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Sandra Ribera a las 09:00 · Refrigerador no frost",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -485,7 +870,38 @@
             "Refrigerador: compresor, gas, termostato, burlete, descongelamiento",
             "Lavadora: llenado, desagote, centrifugado, motor, rodamientos",
             "Microondas: magnetrón, capacitor, traba de puerta"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Diagnóstico · refrigerador con fotos: Termostato, Con falla",
+            "back": "OS 638",
+            "title": "Diagnóstico · refrigerador",
+            "progress": "7 de 11 respondidas",
+            "items": [
+              {
+                "q": "Termostato",
+                "a": "Con falla",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Compressor",
+                "a": "Arranca",
+                "flag": false
+              },
+              {
+                "q": "Gas",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Burlete",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -496,7 +912,30 @@
             "El “sí” del cliente queda guardado",
             "El cliente sigue la reparación sin llamar",
             "PDF de la OS con checklists y fotos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 638",
+            "client": "Sandra Ribera",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Visita técnica",
+                "price": "$ 120,00"
+              },
+              {
+                "name": "Cambio de termostato",
+                "price": "$ 180,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 300,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -508,8 +947,32 @@
             "Pago en partes y descuento en la misma OS",
             "Quien debe hace más tiempo aparece primero"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 870 de 3 clientes",
+            "nextSub": "Marcia López debe $ 420 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Marcia López",
+                "amount": "$ 420",
+                "sub": "OS 634 · desde 02/10"
+              },
+              {
+                "name": "Sandra Ribera",
+                "amount": "$ 300",
+                "sub": "OS 638 · desde 28/10"
+              },
+              {
+                "name": "Jorge Silva",
+                "amount": "$ 150",
+                "sub": "OS 639 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

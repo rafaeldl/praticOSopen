@@ -444,3 +444,21 @@
 }
 
 .ph-tab .ss-stage[data-layout='compact'] .ph-nf__sub { font-size: 17px; }
+
+/* orders: the list of orders with their status, as on Início. Dots follow
+   the app: quote gray, approved blue, in progress amber, done green */
+.ph-tab--orders .ph-screen {
+  background: #fff;
+}
+
+.ph-tab--orders .ph-list {
+  margin-top: 14px;
+}
+
+.ph-tab .ph-agenda__status[data-kind='progress'] .ph-dot {
+  background: #d98b09;
+}
+
+.ph-tab .ph-agenda__status[data-kind='done'] .ph-dot {
+  background: #248a3d;
+}

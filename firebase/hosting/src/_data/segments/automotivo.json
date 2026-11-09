@@ -104,8 +104,29 @@
             "Corrija falando: “o alinhamento é 100”",
             "Pela placa, antiga ou Mercosul, você puxa as OS anteriores do carro"
           ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Costa",
+            "vehicle": "Onix",
+            "vehicleEmpty": "Escolher veículo",
+            "deviceIcon": "car",
+            "line": "Onix da Juliana, troca de óleo e alinhamento",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 120,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 80,00",
+              "R$ 200,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -117,8 +138,37 @@
             "Quilometragem, nível de combustível e luzes acesas no painel",
             "Pertences deixados no veículo"
           ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Para-choque dianteiro, Riscado",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Para-choque dianteiro",
+                "a": "Riscado",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Faróis",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Nível de combustível",
+                "a": "1/2",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -130,8 +180,29 @@
             "Cliente acompanha o andamento sem ligar",
             "PDF da OS para imprimir ou enviar"
           ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Juliana Costa",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 180,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -143,10 +214,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.610 de 3 clientes",
+            "nextSub": "Ana Ribeiro deve R$ 1.250 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Ana Ribeiro",
+                "amount": "R$ 1.250",
+                "sub": "OS 182 · desde 02/10"
+              },
+              {
+                "name": "Juliana Costa",
+                "amount": "R$ 180",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Lima",
+                "amount": "R$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #186",
+        "client": "Juliana Costa",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Troca de óleo",
+            "price": "R$ 80,00"
+          },
+          {
+            "name": "Alinhamento",
+            "price": "R$ 100,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 180,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para juliana@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Antes de usar na sua oficina",
@@ -279,8 +399,29 @@
             "Fix it by speaking: “the alignment is 100”",
             "Searching by plate brings up the car's past work orders"
           ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Costa",
+            "vehicle": "Onix",
+            "vehicleEmpty": "Choose vehicle",
+            "deviceIcon": "car",
+            "line": "Juliana's Onix, oil change and alignment",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$120.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$80.00",
+              "$200.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -292,8 +433,37 @@
             "Mileage, fuel level and warning lights on the dashboard",
             "Belongings left in the vehicle"
           ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Front bumper, Scratched",
+            "back": "WO 186",
+            "title": "Check-in checklist",
+            "progress": "7 of 10 answered",
+            "items": [
+              {
+                "q": "Front bumper",
+                "a": "Scratched",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Headlights",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Mirrors",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Fuel level",
+                "a": "1/2",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -305,8 +475,29 @@
             "Customers follow progress without calling",
             "Work order PDF to print or send"
           ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 186",
+            "client": "Juliana Costa",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$100.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$180.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -318,8 +509,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,610 to collect from 3 customers",
+            "nextSub": "Anna Reed owes $1,250 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Anna Reed",
+                "amount": "$1,250",
+                "sub": "WO 182 · since 10/02"
+              },
+              {
+                "name": "Juliana Costa",
+                "amount": "$180",
+                "sub": "WO 186 · since 10/28"
+              },
+              {
+                "name": "Mark Lee",
+                "amount": "$180",
+                "sub": "WO 187 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -454,8 +669,29 @@
             "Corrige hablando: “la alineación es 100”",
             "Buscar por placa trae las órdenes anteriores del auto"
           ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Costa",
+            "vehicle": "Onix",
+            "vehicleEmpty": "Elegir vehículo",
+            "deviceIcon": "car",
+            "line": "Onix de Juliana, cambio de aceite y alineación",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 120,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 80,00",
+              "$ 200,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -467,8 +703,37 @@
             "Kilometraje, nivel de combustible y luces encendidas en el tablero",
             "Pertenencias que quedaron en el vehículo"
           ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Parachoques delantero, Rayado",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Parachoques delantero",
+                "a": "Rayado",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Faros",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Nivel de combustible",
+                "a": "1/2",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -480,8 +745,29 @@
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
           ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Juliana Costa",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 180,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -493,8 +779,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.610 de 3 clientes",
+            "nextSub": "Ana Ruiz debe $ 1.250 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Ana Ruiz",
+                "amount": "$ 1.250",
+                "sub": "OS 182 · desde 02/10"
+              },
+              {
+                "name": "Juliana Costa",
+                "amount": "$ 180",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Ruiz",
+                "amount": "$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

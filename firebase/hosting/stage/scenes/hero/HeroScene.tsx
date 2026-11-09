@@ -1,4 +1,4 @@
-import { Camera, Car, Check, ChevronRight, Clock, Mic, Square, User, X } from 'lucide-react'
+import { Camera, Check, ChevronRight, Clock, Mic, Square, User, X } from 'lucide-react'
 // Import each part from its own file: the kit's index pulls every part's CSS
 import { Stage } from '../../kit/stage'
 import type { Act } from '../../kit/act'
@@ -9,6 +9,7 @@ import { Roll } from '../../kit/motion/Roll'
 import { States } from '../../kit/motion/States'
 import { Stream } from '../../kit/motion/Stream'
 import { Toast } from '../../kit/parts/Toast'
+import { DeviceIcon } from '../shared/DeviceIcon'
 import './hero.css'
 
 // The home hero: you speak, PraticOS writes the work order.
@@ -35,6 +36,8 @@ export type HeroCopy = {
   clientEmpty: string
   vehicle: string
   vehicleEmpty: string
+  /** The second row's icon, by trade (shared/DeviceIcon); the car by default. */
+  deviceIcon?: string
   work: string
   add: string
   due: string
@@ -164,7 +167,7 @@ export function HeroScene({ copy, short = false }: { copy: HeroCopy; short?: boo
                 </div>
                 <div className="ph-row">
                   <span className="ph-ico">
-                    <Car size={18} strokeWidth={2} />
+                    <DeviceIcon name={copy.deviceIcon} />
                   </span>
                   <States
                     align="start"

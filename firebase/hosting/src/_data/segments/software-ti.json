@@ -61,7 +61,36 @@
             "Uma OS por mês, com o mês no nome",
             "Valor e serviços iguais aos do contrato",
             "Mude o valor e vale para os próximos meses"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Suporte mensal: as OS com a situação de cada uma",
+            "title": "Suporte mensal",
+            "subtitle": "Ricardo Almeida · R$ 600,00 por mês",
+            "rows": [
+              {
+                "name": "Suporte mensal · novembro",
+                "status": "Em andamento · OS 418",
+                "kind": "progress",
+                "sub": "Aberta pelo contrato em 01/11",
+                "right": "R$ 600,00"
+              },
+              {
+                "name": "Suporte mensal · outubro",
+                "status": "Concluída · OS 397",
+                "kind": "done",
+                "sub": "Aberta pelo contrato em 01/10",
+                "right": "R$ 600,00"
+              },
+              {
+                "name": "Suporte mensal · setembro",
+                "status": "Concluída · OS 371",
+                "kind": "done",
+                "sub": "Aberta pelo contrato em 01/09",
+                "right": "R$ 600,00"
+              }
+            ]
+          }
         },
         {
           "number": "02",
@@ -72,7 +101,25 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “são 8 horas”",
             "Ou tire foto do pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Almeida",
+            "vehicle": "ERP · erp.exemplo.com.br",
+            "vehicleEmpty": "Escolher sistema",
+            "deviceIcon": "server",
+            "line": "Ricardo pediu um relatório novo de vendas no ERP, umas 6 horas",
+            "items": [
+              {
+                "name": "Relatório de vendas · 6 h",
+                "price": "R$ 900,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 900,00"
+            ]
+          }
         },
         {
           "number": "03",
@@ -83,7 +130,26 @@
             "Aprovação guardada para qualquer dúvida",
             "Termos de escopo e mensalidade antes da aprovação",
             "PDF da OS para enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 418",
+            "client": "Ricardo Almeida",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Relatório de vendas · 8 h",
+                "price": "R$ 1.200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 1.200,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -94,7 +160,28 @@
             "Direto no Emissor Nacional, sem outro sistema",
             "Você escolhe para quais clientes a nota sai sozinha",
             "Faltou um dado? A OS mostra o que falta"
-          ]
+          ],
+          "scene": {
+            "kind": "invoice",
+            "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+            "back": "Início",
+            "title": "OS #418",
+            "client": "Ricardo Almeida",
+            "status": "Concluída",
+            "items": [
+              {
+                "name": "Relatório de vendas · 8 h",
+                "price": "R$ 1.200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 1.200,00",
+            "invoice": "Nota fiscal",
+            "invoiceStatus": "Emitida · nº 29",
+            "pdf": "PDF",
+            "email": "E-mail ao cliente",
+            "emailSent": "Enviada para ricardo@email.com em 08/11"
+          }
         },
         {
           "number": "05",
@@ -106,8 +193,32 @@
             "Pagamento em partes e desconto na mesma OS",
             "Relatório do mês com o que entrou"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 2.850 de 3 clientes",
+            "nextSub": "Clínica Bem Estar deve R$ 1.200 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Clínica Bem Estar",
+                "amount": "R$ 1.200",
+                "sub": "OS 414 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Almeida",
+                "amount": "R$ 1.200",
+                "sub": "OS 418 · desde 28/10"
+              },
+              {
+                "name": "Loja Ponto Certo",
+                "amount": "R$ 450",
+                "sub": "OS 419 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },
@@ -236,7 +347,36 @@
             "One work order per month, named after the month",
             "Same services and prices as the contract",
             "Change the price and it applies from next month"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Monthly support: orders with their status",
+            "title": "Monthly support",
+            "subtitle": "Richard Allen · $600.00 a month",
+            "rows": [
+              {
+                "name": "Monthly support · November",
+                "status": "In progress · WO 418",
+                "kind": "progress",
+                "sub": "Opened by the contract on 11/01",
+                "right": "$600.00"
+              },
+              {
+                "name": "Monthly support · October",
+                "status": "Completed · WO 397",
+                "kind": "done",
+                "sub": "Opened by the contract on 10/01",
+                "right": "$600.00"
+              },
+              {
+                "name": "Monthly support · September",
+                "status": "Completed · WO 371",
+                "kind": "done",
+                "sub": "Opened by the contract on 09/01",
+                "right": "$600.00"
+              }
+            ]
+          }
         },
         {
           "number": "02",
@@ -247,7 +387,25 @@
             "What AI filled in is marked with ✦",
             "Correct it by speaking: “make it 8 hours”",
             "Or take a photo of the written request"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Richard Allen",
+            "vehicle": "ERP · erp.example.com",
+            "vehicleEmpty": "Choose system",
+            "deviceIcon": "server",
+            "line": "Richard wants a new sales report in the ERP, about 6 hours",
+            "items": [
+              {
+                "name": "Sales report · 6 h",
+                "price": "$900.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$900.00"
+            ]
+          }
         },
         {
           "number": "03",
@@ -258,7 +416,26 @@
             "Approval kept for any question later",
             "Scope and monthly plan terms before approval",
             "Work order PDF to send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 418",
+            "client": "Richard Allen",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Sales report · 8 h",
+                "price": "$1,200.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$1,200.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -269,7 +446,28 @@
             "Straight to the national NFS-e system, no other software",
             "You pick which customers get invoices on their own",
             "Missing data? The work order shows what is missing"
-          ]
+          ],
+          "scene": {
+            "kind": "invoice",
+            "label": "Completed order with the invoice issued and e-mailed to the customer",
+            "back": "Home",
+            "title": "WO #418",
+            "client": "Richard Allen",
+            "status": "Completed",
+            "items": [
+              {
+                "name": "Sales report · 8 h",
+                "price": "$1,200.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$1,200.00",
+            "invoice": "Invoice",
+            "invoiceStatus": "Issued · #29",
+            "email": "E-mail to customer",
+            "emailSent": "Sent to ricardo@email.com on 11/08",
+            "pdf": "PDF"
+          }
         },
         {
           "number": "05",
@@ -281,8 +479,32 @@
             "Partial payments and discounts on the same work order",
             "Monthly report of what came in"
           ],
-          "image": "financial.png",
-          "alt": "Financial screen with what is still owed and the button to send the payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$2,850 to collect from 3 customers",
+            "nextSub": "Wellness Clinic owes $1,200 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Wellness Clinic",
+                "amount": "$1,200",
+                "sub": "WO 414 · since 10/02"
+              },
+              {
+                "name": "Richard Allen",
+                "amount": "$1,200",
+                "sub": "WO 418 · since 10/28"
+              },
+              {
+                "name": "Right Spot Store",
+                "amount": "$450",
+                "sub": "WO 419 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -411,7 +633,36 @@
             "Una orden por mes, con el mes en el nombre",
             "Mismos servicios y valores del contrato",
             "Cambie el valor y vale para los próximos meses"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Soporte mensual: órdenes con su estado",
+            "title": "Soporte mensual",
+            "subtitle": "Ricardo Álvarez · $ 600,00 por mes",
+            "rows": [
+              {
+                "name": "Soporte mensual · noviembre",
+                "status": "En curso · OS 418",
+                "kind": "progress",
+                "sub": "Abierta por el contrato el 01/11",
+                "right": "$ 600,00"
+              },
+              {
+                "name": "Soporte mensual · octubre",
+                "status": "Concluida · OS 397",
+                "kind": "done",
+                "sub": "Abierta por el contrato el 01/10",
+                "right": "$ 600,00"
+              },
+              {
+                "name": "Soporte mensual · septiembre",
+                "status": "Concluida · OS 371",
+                "kind": "done",
+                "sub": "Abierta por el contrato el 01/09",
+                "right": "$ 600,00"
+              }
+            ]
+          }
         },
         {
           "number": "02",
@@ -422,7 +673,25 @@
             "Lo que completó la IA queda marcado con ✦",
             "Corrija hablando: “son 8 horas”",
             "O tome una foto del pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Álvarez",
+            "vehicle": "ERP · erp.ejemplo.com",
+            "vehicleEmpty": "Elegir sistema",
+            "deviceIcon": "server",
+            "line": "Ricardo pidió un informe nuevo de ventas en el ERP, unas 6 horas",
+            "items": [
+              {
+                "name": "Informe de ventas · 6 h",
+                "price": "$ 900,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 900,00"
+            ]
+          }
         },
         {
           "number": "03",
@@ -433,7 +702,26 @@
             "Aprobación guardada para cualquier duda",
             "Términos de alcance y mensualidad antes de aprobar",
             "PDF de la orden para enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 418",
+            "client": "Ricardo Álvarez",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Informe de ventas · 8 h",
+                "price": "$ 1.200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 1.200,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -444,7 +732,28 @@
             "Directo al Emisor Nacional, sin otro sistema",
             "Usted elige para qué clientes sale sola",
             "¿Falta un dato? La orden muestra lo que falta"
-          ]
+          ],
+          "scene": {
+            "kind": "invoice",
+            "label": "Orden concluida con la factura emitida y enviada al correo del cliente",
+            "back": "Inicio",
+            "title": "OS #418",
+            "client": "Ricardo Álvarez",
+            "status": "Concluida",
+            "items": [
+              {
+                "name": "Informe de ventas · 8 h",
+                "price": "$ 1.200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 1.200,00",
+            "invoice": "Factura",
+            "invoiceStatus": "Emitida · n.º 29",
+            "email": "Correo al cliente",
+            "emailSent": "Enviada a ricardo@email.com el 08/11",
+            "pdf": "PDF"
+          }
         },
         {
           "number": "05",
@@ -456,8 +765,32 @@
             "Pago en partes y descuento en la misma orden",
             "Informe del mes con lo que entró"
           ],
-          "image": "financial.png",
-          "alt": "Finanzas con lo que falta por cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 2.850 de 3 clientes",
+            "nextSub": "Clínica Bienestar debe $ 1.200 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Clínica Bienestar",
+                "amount": "$ 1.200",
+                "sub": "OS 414 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Álvarez",
+                "amount": "$ 1.200",
+                "sub": "OS 418 · desde 28/10"
+              },
+              {
+                "name": "Tienda Punto Justo",
+                "amount": "$ 450",
+                "sub": "OS 419 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

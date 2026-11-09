@@ -98,7 +98,30 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o fusor é 250”",
             "Cada impressora com o seu número de série"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Patrícia Mendes",
+            "vehicle": "Multifuncional laser",
+            "vehicleEmpty": "Escolher impressora",
+            "deviceIcon": "printer",
+            "line": "Impressora da Patrícia, reparo de fusor e limpeza de trilhos",
+            "items": [
+              {
+                "name": "Reparo de fusor",
+                "price": "R$ 280,00"
+              },
+              {
+                "name": "Limpeza de trilhos",
+                "price": "R$ 120,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 280,00",
+              "R$ 400,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -109,7 +132,38 @@
             "Do seu jeito, com sim/não, anotações e fotos",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as máquinas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Impressão, Manchada",
+            "back": "OS 433",
+            "title": "Checklist de entrada",
+            "progress": "5 de 7 respondidas",
+            "items": [
+              {
+                "q": "Impressão",
+                "a": "Manchada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Contador de páginas",
+                "a": "48.210",
+                "flag": false
+              },
+              {
+                "q": "Toner",
+                "a": "30%",
+                "flag": false
+              },
+              {
+                "q": "Cabo de força",
+                "a": "Deixado",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -120,7 +174,30 @@
             "O “sim” do cliente fica guardado",
             "Cliente vê quando a impressora fica pronta",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 433",
+            "client": "Patrícia Mendes",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Reparo de fusor",
+                "price": "R$ 250,00"
+              },
+              {
+                "name": "Limpeza de trilhos",
+                "price": "R$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 370,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -132,10 +209,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.220 de 3 clientes",
+            "nextSub": "Escritório Lima & Souza deve R$ 640 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Escritório Lima & Souza",
+                "amount": "R$ 640",
+                "sub": "OS 429 · desde 02/10"
+              },
+              {
+                "name": "Patrícia Mendes",
+                "amount": "R$ 370",
+                "sub": "OS 433 · desde 28/10"
+              },
+              {
+                "name": "Gráfica Rápida",
+                "amount": "R$ 210",
+                "sub": "OS 434 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #433",
+        "client": "Patrícia Mendes",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Reparo de fusor",
+            "price": "R$ 250,00"
+          },
+          {
+            "name": "Limpeza de trilhos",
+            "price": "R$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 370,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para patricia@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Dúvidas de quem conserta impressoras",
@@ -262,7 +388,30 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the fuser is 250”",
             "Every printer identified by its serial number"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Patricia White",
+            "vehicle": "Laser multifunction",
+            "vehicleEmpty": "Choose printer",
+            "deviceIcon": "printer",
+            "line": "Patricia's printer, fuser repair and rail cleaning",
+            "items": [
+              {
+                "name": "Fuser repair",
+                "price": "$280.00"
+              },
+              {
+                "name": "Rail cleaning",
+                "price": "$120.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$280.00",
+              "$400.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -273,7 +422,38 @@
             "Your way, with yes/no, notes and photos",
             "Photos on every checklist item",
             "One template for every machine"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Print quality, Smudged",
+            "back": "WO 433",
+            "title": "Check-in checklist",
+            "progress": "5 of 7 answered",
+            "items": [
+              {
+                "q": "Print quality",
+                "a": "Smudged",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Page count",
+                "a": "48,210",
+                "flag": false
+              },
+              {
+                "q": "Toner",
+                "a": "30%",
+                "flag": false
+              },
+              {
+                "q": "Power cord",
+                "a": "Left",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -284,7 +464,30 @@
             "The customer's yes is on file",
             "Customers see when the printer is ready",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 433",
+            "client": "Patricia White",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Fuser repair",
+                "price": "$250.00"
+              },
+              {
+                "name": "Rail cleaning",
+                "price": "$120.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$370.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -296,8 +499,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,220 to collect from 3 customers",
+            "nextSub": "Lima & Shaw Law owes $640 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Lima & Shaw Law",
+                "amount": "$640",
+                "sub": "WO 429 · since 10/02"
+              },
+              {
+                "name": "Patricia White",
+                "amount": "$370",
+                "sub": "WO 433 · since 10/28"
+              },
+              {
+                "name": "QuickPrint Shop",
+                "amount": "$210",
+                "sub": "WO 434 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -426,7 +653,30 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “el fusor es 250”",
             "Cada impresora con su número de serie"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Patricia Morales",
+            "vehicle": "Multifuncional láser",
+            "vehicleEmpty": "Elegir impresora",
+            "deviceIcon": "printer",
+            "line": "Impresora de Patricia, reparación de fusor y limpieza de rieles",
+            "items": [
+              {
+                "name": "Reparación de fusor",
+                "price": "$ 280,00"
+              },
+              {
+                "name": "Limpieza de rieles",
+                "price": "$ 120,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 280,00",
+              "$ 400,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -437,7 +687,38 @@
             "A tu manera, con sí/no, notas y fotos",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las máquinas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Impresión, Manchada",
+            "back": "OS 433",
+            "title": "Checklist de entrada",
+            "progress": "5 de 7 respondidas",
+            "items": [
+              {
+                "q": "Impresión",
+                "a": "Manchada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Contador de páginas",
+                "a": "48.210",
+                "flag": false
+              },
+              {
+                "q": "Toner",
+                "a": "30%",
+                "flag": false
+              },
+              {
+                "q": "Cable de poder",
+                "a": "Dejado",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -448,7 +729,30 @@
             "El “sí” del cliente queda guardado",
             "El cliente ve cuándo la impresora está lista",
             "PDF de la orden para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 433",
+            "client": "Patricia Morales",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Reparación de fusor",
+                "price": "$ 250,00"
+              },
+              {
+                "name": "Limpieza de rieles",
+                "price": "$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 370,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -460,8 +764,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.220 de 3 clientes",
+            "nextSub": "Estudio Lima & Sosa debe $ 640 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Estudio Lima & Sosa",
+                "amount": "$ 640",
+                "sub": "OS 429 · desde 02/10"
+              },
+              {
+                "name": "Patricia Morales",
+                "amount": "$ 370",
+                "sub": "OS 433 · desde 28/10"
+              },
+              {
+                "name": "Imprenta Rápida",
+                "amount": "$ 210",
+                "sub": "OS 434 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

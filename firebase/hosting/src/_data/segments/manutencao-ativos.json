@@ -104,7 +104,30 @@
             "Ativo com tag, fabricante, número de série, localização e categoria",
             "Corrija falando: “o filtro é 180”",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Metalúrgica Vale Verde",
+            "vehicle": "GER-004 · Gerador 180 kVA",
+            "vehicleEmpty": "Escolher ativo",
+            "deviceIcon": "factory",
+            "line": "Metalúrgica Vale Verde, gerador GER-004, preventiva com troca de óleo e filtros",
+            "items": [
+              {
+                "name": "Preventiva",
+                "price": "R$ 650,00"
+              },
+              {
+                "name": "Troca de óleo e filtros",
+                "price": "R$ 560,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 650,00",
+              "R$ 1.210,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -115,7 +138,57 @@
             "Preventiva e corretiva na mesma agenda",
             "Resumo do dia às 9h, se você quiser",
             "Aviso de orçamento parado há 7 dias"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Metalúrgica Vale Verde",
+                "time": "09:00",
+                "status": "Aprovada · OS 2091",
+                "kind": "approved",
+                "sub": "GER-004 · Gerador 180 kVA · com Bruno"
+              },
+              {
+                "name": "Hospital São Lucas",
+                "time": "14:30",
+                "status": "Orçamento · OS 2092",
+                "kind": "quote",
+                "sub": "CHL-002 · Chiller · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Metalúrgica Vale Verde às 09:00 · GER-004 · Gerador 180 kVA",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -126,7 +199,38 @@
             "Marque, anote e fotografe cada item",
             "Leituras e observações guardadas na OS",
             "O mesmo padrão em todas as visitas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Preventiva · gerador com fotos: Bateria de partida, Fraca",
+            "back": "OS 2091",
+            "title": "Preventiva · gerador",
+            "progress": "11 de 14 respondidas",
+            "items": [
+              {
+                "q": "Bateria de partida",
+                "a": "Fraca",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Horas de operação",
+                "a": "4.320 h",
+                "flag": false
+              },
+              {
+                "q": "Óleo do motor",
+                "a": "Trocado",
+                "flag": false
+              },
+              {
+                "q": "Filtros",
+                "a": "Trocados",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -137,9 +241,65 @@
             "Aprovação do cliente guardada com o serviço",
             "PDF com uma página por checklist",
             "Total e saldo a receber à vista"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 2091",
+            "client": "Metalúrgica Vale Verde",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Preventiva",
+                "price": "R$ 650,00"
+              },
+              {
+                "name": "Troca de óleo e filtros",
+                "price": "R$ 520,00"
+              },
+              {
+                "name": "Bateria de partida",
+                "price": "R$ 780,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 1.950,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #2091",
+        "client": "Metalúrgica Vale Verde",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Preventiva",
+            "price": "R$ 650,00"
+          },
+          {
+            "name": "Troca de óleo e filtros",
+            "price": "R$ 520,00"
+          },
+          {
+            "name": "Bateria de partida",
+            "price": "R$ 780,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 1.950,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para manutencao@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que perguntam os gestores de manutenção",
@@ -272,7 +432,30 @@
             "Asset with tag, manufacturer, serial number, location and category",
             "Fix it by voice: “the filter is 180”",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Vale Verde Metalworks",
+            "vehicle": "GER-004 · 180 kVA generator",
+            "vehicleEmpty": "Choose asset",
+            "deviceIcon": "factory",
+            "line": "Vale Verde Metalworks, generator GER-004, preventive service with oil and filter change",
+            "items": [
+              {
+                "name": "Preventive service",
+                "price": "$650.00"
+              },
+              {
+                "name": "Oil and filter change",
+                "price": "$560.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$650.00",
+              "$1,210.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -283,7 +466,57 @@
             "Preventive and corrective on one schedule",
             "Daily summary at 9am, if you want it",
             "Reminder for quotes with no answer for 7 days"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Vale Verde Metalworks",
+                "time": "9:00 AM",
+                "status": "Approved · WO 2091",
+                "kind": "approved",
+                "sub": "GER-004 · 180 kVA generator · with Ben"
+              },
+              {
+                "name": "St. Luke's Hospital",
+                "time": "2:30 PM",
+                "status": "Quote · WO 2092",
+                "kind": "quote",
+                "sub": "CHL-002 · Chiller · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Vale Verde Metalworks at 9:00 AM · GER-004 · 180 kVA generator",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -294,7 +527,38 @@
             "Check, note and photograph every item",
             "Readings and notes saved on the order",
             "The same standard on every visit"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Preventive · generator with photos: Starter battery, Weak",
+            "back": "WO 2091",
+            "title": "Preventive · generator",
+            "progress": "11 of 14 answered",
+            "items": [
+              {
+                "q": "Starter battery",
+                "a": "Weak",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Run hours",
+                "a": "4,320 h",
+                "flag": false
+              },
+              {
+                "q": "Engine oil",
+                "a": "Changed",
+                "flag": false
+              },
+              {
+                "q": "Filters",
+                "a": "Replaced",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -305,7 +569,34 @@
             "Customer approval kept with the job",
             "PDF with a page per checklist",
             "Total and balance due at a glance"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 2091",
+            "client": "Vale Verde Metalworks",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Preventive service",
+                "price": "$650.00"
+              },
+              {
+                "name": "Oil and filter change",
+                "price": "$520.00"
+              },
+              {
+                "name": "Starter battery",
+                "price": "$780.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$1,950.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         }
       ]
     },
@@ -440,7 +731,30 @@
             "Activo con etiqueta, fabricante, número de serie, ubicación y categoría",
             "Corrige hablando: “el filtro es 180”",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Metalúrgica Vale Verde",
+            "vehicle": "GER-004 · Generador 180 kVA",
+            "vehicleEmpty": "Elegir activo",
+            "deviceIcon": "factory",
+            "line": "Metalúrgica Vale Verde, generador GER-004, preventivo con cambio de aceite y filtros",
+            "items": [
+              {
+                "name": "Servicio preventivo",
+                "price": "$ 650,00"
+              },
+              {
+                "name": "Cambio de aceite y filtros",
+                "price": "$ 560,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 650,00",
+              "$ 1.210,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -451,7 +765,57 @@
             "Preventivo y correctivo en la misma agenda",
             "Resumen del día a las 9, si lo quieres",
             "Aviso de presupuesto sin respuesta hace 7 días"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Metalúrgica Vale Verde",
+                "time": "09:00",
+                "status": "Aprobada · OS 2091",
+                "kind": "approved",
+                "sub": "GER-004 · Generador 180 kVA · con Bruno"
+              },
+              {
+                "name": "Hospital San Lucas",
+                "time": "14:30",
+                "status": "Presupuesto · OS 2092",
+                "kind": "quote",
+                "sub": "CHL-002 · Chiller · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Metalúrgica Vale Verde a las 09:00 · GER-004 · Generador 180 kVA",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -462,7 +826,38 @@
             "Marca, anota y fotografía cada ítem",
             "Lecturas y observaciones guardadas en la orden",
             "El mismo estándar en todas las visitas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Preventivo · generador con fotos: Batería de arranque, Débil",
+            "back": "OS 2091",
+            "title": "Preventivo · generador",
+            "progress": "11 de 14 respondidas",
+            "items": [
+              {
+                "q": "Batería de arranque",
+                "a": "Débil",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Horas de operación",
+                "a": "4.320 h",
+                "flag": false
+              },
+              {
+                "q": "Aceite de motor",
+                "a": "Cambiado",
+                "flag": false
+              },
+              {
+                "q": "Filtros",
+                "a": "Cambiados",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -473,7 +868,34 @@
             "Aprobación del cliente guardada con el trabajo",
             "PDF con una página por checklist",
             "Total y saldo por cobrar a la vista"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 2091",
+            "client": "Metalúrgica Vale Verde",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Servicio preventivo",
+                "price": "$ 650,00"
+              },
+              {
+                "name": "Cambio de aceite y filtros",
+                "price": "$ 520,00"
+              },
+              {
+                "name": "Batería de arranque",
+                "price": "$ 780,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 1.950,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         }
       ]
     },

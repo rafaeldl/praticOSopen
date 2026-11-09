@@ -103,7 +103,25 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “troca do contato da porta, 350”",
             "Ou tire foto da ordem anotada"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Condomínio Solar",
+            "vehicle": "Elevador 2",
+            "vehicleEmpty": "Escolher equipamento",
+            "deviceIcon": "elevator",
+            "line": "Condomínio Solar, elevador 2, preventiva mensal na quinta às 8",
+            "items": [
+              {
+                "name": "Preventiva mensal",
+                "price": "R$ 450,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 450,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +132,57 @@
             "Semana no topo, visitas do dia embaixo",
             "Lembrete de 15 minutos a 2 horas antes",
             "Com equipe, a agenda de cada técnico"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 3,
+            "dots": [
+              0,
+              3,
+              4
+            ],
+            "dayLine": "Quinta-feira, 12 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Condomínio Solar",
+                "time": "08:00",
+                "status": "Aprovada · OS 1047",
+                "kind": "approved",
+                "sub": "Elevador 2 · com Bruno"
+              },
+              {
+                "name": "Cond. Jardim das Acácias",
+                "time": "14:30",
+                "status": "Orçamento · OS 1048",
+                "kind": "quote",
+                "sub": "Elevador social · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Condomínio Solar às 08:00 · Elevador 2",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -125,7 +193,38 @@
             "Marque, anote e fotografe cada item",
             "Os mesmos itens em todas as visitas",
             "Checklist concluído fica protegido: só Administrador, Gerente ou Supervisor reabre"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Preventiva mensal com fotos: Contato da porta, Desgastado",
+            "back": "OS 1047",
+            "title": "Preventiva mensal",
+            "progress": "18 de 24 respondidas",
+            "items": [
+              {
+                "q": "Contato da porta",
+                "a": "Desgastado",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Casa de máquinas",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Nivelamento",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Poço",
+                "a": "Limpo",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -136,7 +235,30 @@
             "O sim do síndico fica guardado",
             "PDF da OS para o arquivo do condomínio",
             "Comentários do síndico guardados com o serviço"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 1047",
+            "client": "Condomínio Solar",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Preventiva mensal",
+                "price": "R$ 450,00"
+              },
+              {
+                "name": "Troca do contato da porta",
+                "price": "R$ 350,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 800,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -148,10 +270,59 @@
             "Quem deve há mais tempo aparece primeiro",
             "Relatório do mês com o que entrou"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 2.680 de 3 clientes",
+            "nextSub": "Edifício Monte Azul deve R$ 1.200 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Edifício Monte Azul",
+                "amount": "R$ 1.200",
+                "sub": "OS 1043 · desde 02/10"
+              },
+              {
+                "name": "Condomínio Solar",
+                "amount": "R$ 800",
+                "sub": "OS 1047 · desde 28/10"
+              },
+              {
+                "name": "Cond. Jardim das Acácias",
+                "amount": "R$ 680",
+                "sub": "OS 1048 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #1047",
+        "client": "Condomínio Solar",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Preventiva mensal",
+            "price": "R$ 450,00"
+          },
+          {
+            "name": "Troca do contato da porta",
+            "price": "R$ 350,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 800,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para sindico@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que as empresas de elevadores perguntam",
@@ -283,7 +454,25 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “door contact replacement, 350”",
             "Or take a photo of the written order"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Solar Building",
+            "vehicle": "Elevator 2",
+            "vehicleEmpty": "Choose equipment",
+            "deviceIcon": "elevator",
+            "line": "Solar Building, elevator 2, monthly maintenance on Thursday at 8",
+            "items": [
+              {
+                "name": "Monthly maintenance",
+                "price": "$450.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$450.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +483,57 @@
             "The week on top, the day’s visits below",
             "Reminder 15 minutes to 2 hours before",
             "With a team, each technician's schedule"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 3,
+            "dots": [
+              0,
+              3,
+              4
+            ],
+            "dayLine": "Thursday, November 12 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Solar Building",
+                "time": "8:00 AM",
+                "status": "Approved · WO 1047",
+                "kind": "approved",
+                "sub": "Elevator 2 · with Ben"
+              },
+              {
+                "name": "Maple Court Condos",
+                "time": "2:30 PM",
+                "status": "Quote · WO 1048",
+                "kind": "quote",
+                "sub": "Passenger elevator · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Solar Building at 8:00 AM · Elevator 2",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -305,7 +544,38 @@
             "Check, note and photograph every item",
             "The same items on every visit",
             "Completed checklists are protected: only Admin, Manager or Supervisor can reopen them"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Monthly maintenance with photos: Door contact, Worn",
+            "back": "WO 1047",
+            "title": "Monthly maintenance",
+            "progress": "18 of 24 answered",
+            "items": [
+              {
+                "q": "Door contact",
+                "a": "Worn",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Machine room",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Leveling",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Pit",
+                "a": "Clean",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -316,7 +586,30 @@
             "The manager's yes is kept on file",
             "Work order PDF for the building’s records",
             "Manager comments kept with the job"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 1047",
+            "client": "Solar Building",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Monthly maintenance",
+                "price": "$450.00"
+              },
+              {
+                "name": "Door contact replacement",
+                "price": "$350.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$800.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "05",
@@ -328,8 +621,32 @@
             "Whoever has owed the longest shows up first",
             "Monthly report of what came in"
           ],
-          "image": "financial.png",
-          "alt": "Financial with how much is left to collect and the button to send a payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$2,680 to collect from 3 customers",
+            "nextSub": "Blue Ridge Tower owes $1,200 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Blue Ridge Tower",
+                "amount": "$1,200",
+                "sub": "WO 1043 · since 10/02"
+              },
+              {
+                "name": "Solar Building",
+                "amount": "$800",
+                "sub": "WO 1047 · since 10/28"
+              },
+              {
+                "name": "Maple Court Condos",
+                "amount": "$680",
+                "sub": "WO 1048 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +780,25 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “cambio del contacto de puerta, 350”",
             "O saca una foto de la orden anotada"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Edificio Solar",
+            "vehicle": "Ascensor 2",
+            "vehicleEmpty": "Elegir equipo",
+            "deviceIcon": "elevator",
+            "line": "Edificio Solar, ascensor 2, mantenimiento mensual el jueves a las 8",
+            "items": [
+              {
+                "name": "Mantenimiento mensual",
+                "price": "$ 450,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 450,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +809,57 @@
             "La semana arriba, las visitas del día abajo",
             "Aviso de 15 minutos a 2 horas antes",
             "Con equipo, la agenda de cada técnico"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 3,
+            "dots": [
+              0,
+              3,
+              4
+            ],
+            "dayLine": "Jueves, 12 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Edificio Solar",
+                "time": "08:00",
+                "status": "Aprobada · OS 1047",
+                "kind": "approved",
+                "sub": "Ascensor 2 · con Bruno"
+              },
+              {
+                "name": "Edificio Los Álamos",
+                "time": "14:30",
+                "status": "Presupuesto · OS 1048",
+                "kind": "quote",
+                "sub": "Ascensor principal · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Edificio Solar a las 08:00 · Ascensor 2",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -485,7 +870,38 @@
             "Marca, anota y fotografía cada ítem",
             "Los mismos ítems en todas las visitas",
             "Checklist completado protegido: solo Administrador, Gerente o Supervisor lo reabre"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Mantenimiento mensual con fotos: Contacto de puerta, Gastado",
+            "back": "OS 1047",
+            "title": "Mantenimiento mensual",
+            "progress": "18 de 24 respondidas",
+            "items": [
+              {
+                "q": "Contacto de puerta",
+                "a": "Gastado",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Sala de máquinas",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Nivelación",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Foso",
+                "a": "Limpio",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -496,7 +912,30 @@
             "El sí del administrador queda guardado",
             "PDF de la OS para el archivo del edificio",
             "Comentarios del administrador guardados junto al trabajo"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 1047",
+            "client": "Edificio Solar",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Mantenimiento mensual",
+                "price": "$ 450,00"
+              },
+              {
+                "name": "Cambio del contacto de puerta",
+                "price": "$ 350,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 800,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -508,8 +947,32 @@
             "Quien debe hace más tiempo aparece primero",
             "Informe del mes con lo que entró"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 2.680 de 3 clientes",
+            "nextSub": "Edificio Monte Azul debe $ 1.200 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Edificio Monte Azul",
+                "amount": "$ 1.200",
+                "sub": "OS 1043 · desde 02/10"
+              },
+              {
+                "name": "Edificio Solar",
+                "amount": "$ 800",
+                "sub": "OS 1047 · desde 28/10"
+              },
+              {
+                "name": "Edificio Los Álamos",
+                "amount": "$ 680",
+                "sub": "OS 1048 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

@@ -28,6 +28,7 @@ firebase/hosting/
 │   ├── scenes/tabs/            # TabScenes.tsx (5 telas paradas), tabs.css, mount.tsx, REHEARSAL.md
 │   ├── preview/index.html      # Prévia do hero sobre o azul do hero
 │   ├── preview/tabs.html       # Prévia das 5 abas (?only=talk|record|approve|schedule|receive)
+│   ├── preview/segments.html   # Prévia das abas de um ramo (?seg=<slug>&lang=…&only=…)
 │   ├── vite.config.ts          # Build: uma entrada por cena → ../src/assets/stage/
 │   └── vite.preview.config.ts  # Servidor da prévia (porta 5174)
 └── src/assets/stage/           # Saída do build, commitada: shared.js e shared.css (React, kit
@@ -93,6 +94,31 @@ node ../../../.claude/skills/stageshow/scripts/film.mjs 'http://127.0.0.1:5174/t
 Nova cena: crie `scenes/<nome>/` com o componente e um `mount.tsx`, some a entrada em
 `vite.config.ts` e monte no template com `<div data-stage="<nome>">`, `shared.css` e o módulo
 da cena.
+
+## Páginas de segmento (`components/segment/workflow.njk`)
+
+As 21 páginas de ramo usam as mesmas cenas nas abas de "Como funciona", com o mesmo formato da home
+(painéis na mesma célula do grid, `data-active`, sem piscar). Cada aba tem `scene` em
+`_data/segments/<slug>.json` (pt, en, es), com o exemplo do ramo: cliente, aparelho/local,
+serviços e valores, itens do checklist, quem deve. Qual cena cada aba mostra:
+
+| Aba | Cena |
+|---|---|
+| Falar | `talk`: o hero curto animado. O JSON guarda só o que é do ramo (cliente, `vehicle`, `vehicleEmpty`, `deviceIcon`, a fala, itens e totais); o template junta com `homepage.json` → `hero.stage` (filtro `merge`) |
+| Registrar, Vistoriar, Testar, Executar, Instalar, Consertar, Limpar, Entregar, Medir | `record` (checklist; `flag` marca em âmbar a resposta que é problema) |
+| Aprovar | `approve` (preços depois da correção falada, mais o que entrou depois do diagnóstico) |
+| Agendar | `schedule` |
+| Receber | `receive` |
+| Acompanhar (eletrônica), Contrato (software/TI), Receber (obras públicas) | `orders`: lista de OS ou contratos com a situação (ponto cinza, azul, âmbar ou verde) |
+| Nota fiscal | `invoice`. Em pt, com `flags.nfsePage`, a última aba é a da home (`homepage.pt.nfse.tab`) com a OS do ramo (`workflow.invoice`); não entra em obras públicas nem em software/TI, que já tem a aba própria |
+
+O ícone da segunda linha da OS vem de `deviceIcon` (`stage/scenes/shared/DeviceIcon.tsx`: car, bike,
+phone, laptop, tv, printer, washer, ac, cctv, solar, elevator, sofa, server, factory, building, house,
+power, place); sem ele, o carro da home.
+
+Os JSONs foram gerados por um script com os exemplos de cada ramo, tirados do que a página já diz
+(a fala do texto de "Falar", a correção, os itens dos checklists). Para mudar um exemplo, edite o
+JSON direto, nos 3 idiomas. Prévia: `stage/preview/segments.html?seg=<slug>&lang=pt|en|es&only=<kind>`.
 
 ## Também no computador (`stage/scenes/web`)
 

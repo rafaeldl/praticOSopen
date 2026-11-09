@@ -98,7 +98,30 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a válvula é 120”",
             "O app já fala Instalação, como você"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Célia Martins",
+            "vehicle": "Apartamento · banheiro",
+            "vehicleEmpty": "Escolher instalação",
+            "deviceIcon": "house",
+            "line": "Banheiro da Célia, caça vazamento e troca de válvula",
+            "items": [
+              {
+                "name": "Caça vazamento",
+                "price": "R$ 250,00"
+              },
+              {
+                "name": "Troca de válvula",
+                "price": "R$ 150,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 250,00",
+              "R$ 400,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -109,7 +132,38 @@
             "Do seu jeito, com o que você sempre confere",
             "Fotos em cada item do checklist",
             "Todo atendimento com o mesmo padrão"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Vistoria do local com fotos: Parede do banheiro, Úmida",
+            "back": "OS 323",
+            "title": "Vistoria do local",
+            "progress": "5 de 7 respondidas",
+            "items": [
+              {
+                "q": "Parede do banheiro",
+                "a": "Úmida",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Válvula de descarga",
+                "a": "Vazando",
+                "flag": true
+              },
+              {
+                "q": "Registro geral",
+                "a": "Fechado",
+                "flag": false
+              },
+              {
+                "q": "Pressão da água",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -120,7 +174,30 @@
             "O sim do cliente fica guardado",
             "Cliente acompanha sem precisar ligar",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 323",
+            "client": "Célia Martins",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Caça vazamento",
+                "price": "R$ 250,00"
+              },
+              {
+                "name": "Troca de válvula",
+                "price": "R$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 370,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -132,10 +209,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 900 de 3 clientes",
+            "nextSub": "Rogério Paiva deve R$ 380 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Rogério Paiva",
+                "amount": "R$ 380",
+                "sub": "OS 319 · desde 02/10"
+              },
+              {
+                "name": "Célia Martins",
+                "amount": "R$ 370",
+                "sub": "OS 323 · desde 28/10"
+              },
+              {
+                "name": "Fábio Nunes",
+                "amount": "R$ 150",
+                "sub": "OS 324 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #323",
+        "client": "Célia Martins",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Caça vazamento",
+            "price": "R$ 250,00"
+          },
+          {
+            "name": "Troca de válvula",
+            "price": "R$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 370,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para celia@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que o encanador quer saber antes de começar",
@@ -262,7 +388,30 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the valve is 120”",
             "The app says Installation, just like you do"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Celia Martin",
+            "vehicle": "Apartment · bathroom",
+            "vehicleEmpty": "Choose installation",
+            "deviceIcon": "house",
+            "line": "Celia's bathroom, leak detection and flush valve replacement",
+            "items": [
+              {
+                "name": "Leak detection",
+                "price": "$250.00"
+              },
+              {
+                "name": "Valve replacement",
+                "price": "$150.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$250.00",
+              "$400.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -273,7 +422,38 @@
             "Your way, with what you always check",
             "Photos on every checklist item",
             "One standard for every visit"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Site check with photos: Bathroom wall, Damp",
+            "back": "WO 323",
+            "title": "Site check",
+            "progress": "5 of 7 answered",
+            "items": [
+              {
+                "q": "Bathroom wall",
+                "a": "Damp",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Flush valve",
+                "a": "Leaking",
+                "flag": true
+              },
+              {
+                "q": "Main shutoff",
+                "a": "Closed",
+                "flag": false
+              },
+              {
+                "q": "Water pressure",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -284,7 +464,30 @@
             "The customer's yes stays on file",
             "Customers follow along without calling",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 323",
+            "client": "Celia Martin",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Leak detection",
+                "price": "$250.00"
+              },
+              {
+                "name": "Valve replacement",
+                "price": "$120.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$370.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -296,8 +499,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$900 to collect from 3 customers",
+            "nextSub": "Roger Payne owes $380 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Roger Payne",
+                "amount": "$380",
+                "sub": "WO 319 · since 10/02"
+              },
+              {
+                "name": "Celia Martin",
+                "amount": "$370",
+                "sub": "WO 323 · since 10/28"
+              },
+              {
+                "name": "Frank Nolan",
+                "amount": "$150",
+                "sub": "WO 324 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -426,7 +653,30 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la válvula es 120”",
             "La app dice Instalación, igual que tú"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Celia Martínez",
+            "vehicle": "Apartamento · baño",
+            "vehicleEmpty": "Elegir instalación",
+            "deviceIcon": "house",
+            "line": "Baño de Celia, detección de fugas y cambio de válvula",
+            "items": [
+              {
+                "name": "Detección de fugas",
+                "price": "$ 250,00"
+              },
+              {
+                "name": "Cambio de válvula",
+                "price": "$ 150,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 250,00",
+              "$ 400,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -437,7 +687,38 @@
             "A tu manera, con lo que siempre revisas",
             "Fotos en cada ítem del checklist",
             "El mismo estándar en cada visita"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Revisión del lugar con fotos: Pared del baño, Húmeda",
+            "back": "OS 323",
+            "title": "Revisión del lugar",
+            "progress": "5 de 7 respondidas",
+            "items": [
+              {
+                "q": "Pared del baño",
+                "a": "Húmeda",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Válvula de descarga",
+                "a": "Con fuga",
+                "flag": true
+              },
+              {
+                "q": "Llave de paso",
+                "a": "Cerrada",
+                "flag": false
+              },
+              {
+                "q": "Presión del agua",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -448,7 +729,30 @@
             "El sí del cliente queda guardado",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 323",
+            "client": "Celia Martínez",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Detección de fugas",
+                "price": "$ 250,00"
+              },
+              {
+                "name": "Cambio de válvula",
+                "price": "$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 370,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -460,8 +764,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 900 de 3 clientes",
+            "nextSub": "Rogelio Paiva debe $ 380 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Rogelio Paiva",
+                "amount": "$ 380",
+                "sub": "OS 319 · desde 02/10"
+              },
+              {
+                "name": "Celia Martínez",
+                "amount": "$ 370",
+                "sub": "OS 323 · desde 28/10"
+              },
+              {
+                "name": "Fabio Núñez",
+                "amount": "$ 150",
+                "sub": "OS 324 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },
