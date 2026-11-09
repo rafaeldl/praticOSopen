@@ -143,8 +143,11 @@
   .work { padding-block: var(--space-2xl); }
   .panel { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .panel__copy { padding-block: var(--space-lg) 0; }
-  .panel__scene--live { width: auto; align-self: end; margin-top: var(--space-lg); }
   .panel__scene { width: auto; justify-self: stretch; margin: var(--space-lg) calc(clamp(24px, 5vw, 64px) * -1) 0; }
+  /* Falar's phone is cropped at its top: it goes first, so the crop sits on the panel's top edge */
+  .panel__scene--live { order: -1; width: auto; align-self: start; margin: 0 calc(clamp(24px, 5vw, 64px) * -1); }
+  .panel__scene--live .stage-again { margin-inline-end: clamp(24px, 5vw, 64px); }
+  .panel__scene--live + .panel__copy, .panel__copy:has(+ .panel__scene--live) { padding-block: var(--space-sm) var(--space-lg); }
   .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--page-gutter) * -1); padding-inline: var(--page-gutter); padding-block: var(--space-3xs); scrollbar-width: none; }
   .tabs button { flex: none; }
   .ai { padding-block: var(--space-lg) var(--space-2xl); }
