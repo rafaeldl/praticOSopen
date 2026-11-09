@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segments preview</title>
+<style>
+  body { margin: 0; background: #f4f1ea; font-family: system-ui, sans-serif; }
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; }
+  .panel { width: 420px; max-width: 100%; background: #e8e3d8; border-radius: 16px; overflow: hidden; }
+  .panel--live { width: 520px; }
+</style>
+</head>
+<body>
+<div class="grid" id="grid"></div>
+<script type="module">
+  // The trade pages' tab scenes: ?seg=<slug>&lang=pt|en|es&only=<kind>
+  // "Falar" draws the short hero (talk), the others the tab stills; in pt the
+  // invoice tab is appended as on the page (workflow.invoice).
+  import home from '../../src/_data/homepage.json'
+  import icon from '../../src/assets/images/logo-96.png'
+  const segs = import.meta.glob('../../src/_data/segments/*.json', { eager: true, import: 'default' })
+  const q = new URLSearchParams(location.search)
+  const lang = q.get('lang') || 'pt'
+  const slug = q.get('seg') || 'automotivo'
+  const only = q.get('only')
+  const seg = segs[`../../src/_data/segments/${slug}.json`][lang]
+  const scenes = seg.workflow.stages.map((s) => s.scene)
+  if (seg.workflow.invoice) scenes.push(seg.workflow.invoice)
+  const grid = document.getElementById('grid')
+  for (const scene of scenes) {
+    if (only && scene.kind !== only) continue
+    const p = document.createElement('div')
+    p.className = 'panel'
+    const h = document.createElement('div')
+    let copy = scene
+    if (scene.kind === 'talk') {
+      p.classList.add('panel--live')
+      h.dataset.stage = 'hero'
+      h.dataset.short = ''
+      copy = { ...home[lang].hero.stage, ...scene }
+    } else {
+      h.dataset.stage = 'tab'
+      h.dataset.icon = icon
+    }
+    const s = document.createElement('script')
+    s.type = 'application/json'
+    s.textContent = JSON.stringify(copy)
+    h.append(s); p.append(h); grid.append(p)
+  }
+  await import('../scenes/tabs/mount.tsx')
+  await import('../scenes/hero/mount.tsx')
+</script>
+</body>
+</html>

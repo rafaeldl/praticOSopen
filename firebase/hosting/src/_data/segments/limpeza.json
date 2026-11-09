@@ -103,7 +103,30 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “os vidros são 180”",
             "Ou tire foto do pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Luciana Prado",
+            "vehicle": "Apartamento 302",
+            "vehicleEmpty": "Escolher local",
+            "deviceIcon": "house",
+            "line": "Faxina pós-obra no apartamento da Luciana, sábado às 8, com limpeza de vidros",
+            "items": [
+              {
+                "name": "Faxina pós-obra",
+                "price": "R$ 900,00"
+              },
+              {
+                "name": "Limpeza de vidros",
+                "price": "R$ 220,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 900,00",
+              "R$ 1.120,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,57 @@
             "Semana no topo, serviços do dia embaixo",
             "Lembrete no celular antes do horário",
             "Com equipe, agenda filtrada por pessoa"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 5,
+            "dots": [
+              0,
+              3,
+              5
+            ],
+            "dayLine": "Sábado, 14 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Luciana Prado",
+                "time": "08:00",
+                "status": "Aprovada · OS 466",
+                "kind": "approved",
+                "sub": "Apartamento 302 · com Bruno"
+              },
+              {
+                "name": "Escritório Nova Era",
+                "time": "14:00",
+                "status": "Orçamento · OS 467",
+                "kind": "quote",
+                "sub": "Sala 1504 · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Luciana Prado às 08:00 · Apartamento 302",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -125,7 +198,38 @@
             "Confira, anote ou fotografe cada item",
             "Um modelo por tipo de limpeza",
             "Checklist concluído só um responsável reabre"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Pós-obra · cozinha com fotos: Piso, Limpo",
+            "back": "OS 466",
+            "title": "Pós-obra · cozinha",
+            "progress": "9 de 12 respondidas",
+            "items": [
+              {
+                "q": "Piso",
+                "a": "Limpo",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Azulejos",
+                "a": "Limpos",
+                "flag": false
+              },
+              {
+                "q": "Armários por dentro",
+                "a": "Limpos",
+                "flag": false
+              },
+              {
+                "q": "Vidros",
+                "a": "Falta fazer",
+                "flag": true
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -136,7 +240,30 @@
             "O “sim” do cliente fica guardado",
             "Avaliação do cliente depois de concluída",
             "PDF da OS com checklist e fotos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 466",
+            "client": "Luciana Prado",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Faxina pós-obra",
+                "price": "R$ 900,00"
+              },
+              {
+                "name": "Limpeza de vidros",
+                "price": "R$ 180,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 1.080,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -148,10 +275,59 @@
             "Quem deve há mais tempo aparece primeiro",
             "Relatório do mês com o que entrou"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 2.840 de 3 clientes",
+            "nextSub": "Clínica Vida Plena deve R$ 1.440 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Clínica Vida Plena",
+                "amount": "R$ 1.440",
+                "sub": "OS 462 · desde 02/10"
+              },
+              {
+                "name": "Luciana Prado",
+                "amount": "R$ 1.080",
+                "sub": "OS 466 · desde 28/10"
+              },
+              {
+                "name": "Escritório Nova Era",
+                "amount": "R$ 320",
+                "sub": "OS 467 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #466",
+        "client": "Luciana Prado",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Faxina pós-obra",
+            "price": "R$ 900,00"
+          },
+          {
+            "name": "Limpeza de vidros",
+            "price": "R$ 180,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 1.080,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para luciana@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Dúvidas de quem trabalha com limpeza",
@@ -283,7 +459,30 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the windows are 180”",
             "Or take a photo of the written request"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Luciana Prado",
+            "vehicle": "Apartment 302",
+            "vehicleEmpty": "Choose location",
+            "deviceIcon": "house",
+            "line": "Post-construction clean at Luciana’s apartment, Saturday at 8, with window cleaning",
+            "items": [
+              {
+                "name": "Post-construction clean",
+                "price": "$900.00"
+              },
+              {
+                "name": "Window cleaning",
+                "price": "$220.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$900.00",
+              "$1,120.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +493,57 @@
             "The week on top, the day’s jobs below",
             "Phone reminder before the job",
             "With a crew, schedule filtered by person"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 5,
+            "dots": [
+              0,
+              3,
+              5
+            ],
+            "dayLine": "Saturday, November 14 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Luciana Prado",
+                "time": "8:00 AM",
+                "status": "Approved · WO 466",
+                "kind": "approved",
+                "sub": "Apartment 302 · with Ben"
+              },
+              {
+                "name": "Nova Era Office",
+                "time": "2:00 PM",
+                "status": "Quote · WO 467",
+                "kind": "quote",
+                "sub": "Suite 1504 · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Luciana Prado at 8:00 AM · Apartment 302",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -305,7 +554,38 @@
             "Check, note or photograph each item",
             "One template per type of cleaning",
             "Only a lead can reopen a finished checklist"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Post-construction · kitchen with photos: Floor, Clean",
+            "back": "WO 466",
+            "title": "Post-construction · kitchen",
+            "progress": "9 of 12 answered",
+            "items": [
+              {
+                "q": "Floor",
+                "a": "Clean",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Tiles",
+                "a": "Clean",
+                "flag": false
+              },
+              {
+                "q": "Inside cabinets",
+                "a": "Clean",
+                "flag": false
+              },
+              {
+                "q": "Windows",
+                "a": "To do",
+                "flag": true
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -316,7 +596,30 @@
             "The customer's yes is on file",
             "Customer rating after completion",
             "Work order PDF with checklist and photos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 466",
+            "client": "Luciana Prado",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Post-construction clean",
+                "price": "$900.00"
+              },
+              {
+                "name": "Window cleaning",
+                "price": "$180.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$1,080.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "05",
@@ -328,8 +631,32 @@
             "Whoever has owed the longest shows up first",
             "Monthly report of what came in"
           ],
-          "image": "financial.png",
-          "alt": "Financial with how much is left to collect and the button to send a payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$2,840 to collect from 3 customers",
+            "nextSub": "Bright Family Dental owes $1,440 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Bright Family Dental",
+                "amount": "$1,440",
+                "sub": "WO 462 · since 10/02"
+              },
+              {
+                "name": "Luciana Prado",
+                "amount": "$1,080",
+                "sub": "WO 466 · since 10/28"
+              },
+              {
+                "name": "Nova Era Office",
+                "amount": "$320",
+                "sub": "WO 467 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +790,30 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “los vidrios son 180”",
             "O saca una foto del pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Luciana Prado",
+            "vehicle": "Departamento 302",
+            "vehicleEmpty": "Elegir lugar",
+            "deviceIcon": "house",
+            "line": "Limpieza de fin de obra en el departamento de Luciana, sábado a las 8, con limpieza de vidrios",
+            "items": [
+              {
+                "name": "Limpieza de fin de obra",
+                "price": "$ 900,00"
+              },
+              {
+                "name": "Limpieza de vidrios",
+                "price": "$ 220,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 900,00",
+              "$ 1.120,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +824,57 @@
             "La semana arriba, los servicios del día abajo",
             "Aviso en el celular antes del horario",
             "Con equipo, agenda filtrada por persona"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 5,
+            "dots": [
+              0,
+              3,
+              5
+            ],
+            "dayLine": "Sábado, 14 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Luciana Prado",
+                "time": "08:00",
+                "status": "Aprobada · OS 466",
+                "kind": "approved",
+                "sub": "Departamento 302 · con Bruno"
+              },
+              {
+                "name": "Oficina Nueva Era",
+                "time": "14:00",
+                "status": "Presupuesto · OS 467",
+                "kind": "quote",
+                "sub": "Oficina 1504 · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Luciana Prado a las 08:00 · Departamento 302",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -485,7 +885,38 @@
             "Revisa, anota o fotografía cada ítem",
             "Un modelo por tipo de limpieza",
             "El checklist completado solo lo reabre un responsable"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Fin de obra · cocina con fotos: Piso, Limpio",
+            "back": "OS 466",
+            "title": "Fin de obra · cocina",
+            "progress": "9 de 12 respondidas",
+            "items": [
+              {
+                "q": "Piso",
+                "a": "Limpio",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Azulejos",
+                "a": "Limpios",
+                "flag": false
+              },
+              {
+                "q": "Interior de muebles",
+                "a": "Limpios",
+                "flag": false
+              },
+              {
+                "q": "Vidrios",
+                "a": "Falta hacer",
+                "flag": true
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -496,7 +927,30 @@
             "El “sí” del cliente queda guardado",
             "Calificación del cliente al completar",
             "PDF de la OS con checklist y fotos"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 466",
+            "client": "Luciana Prado",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Limpieza de fin de obra",
+                "price": "$ 900,00"
+              },
+              {
+                "name": "Limpieza de vidrios",
+                "price": "$ 180,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 1.080,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -508,8 +962,32 @@
             "Quien debe hace más tiempo aparece primero",
             "Informe del mes con lo que entró"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 2.840 de 3 clientes",
+            "nextSub": "Clínica Vida Plena debe $ 1.440 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Clínica Vida Plena",
+                "amount": "$ 1.440",
+                "sub": "OS 462 · desde 02/10"
+              },
+              {
+                "name": "Luciana Prado",
+                "amount": "$ 1.080",
+                "sub": "OS 466 · desde 28/10"
+              },
+              {
+                "name": "Oficina Nueva Era",
+                "amount": "$ 320",
+                "sub": "OS 467 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

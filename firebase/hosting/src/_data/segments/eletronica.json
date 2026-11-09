@@ -103,7 +103,25 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “o diagnóstico é 80”",
             "Ou tire foto da etiqueta ou do pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Carlos Pereira",
+            "vehicle": "TV Samsung 50″",
+            "vehicleEmpty": "Escolher aparelho",
+            "deviceIcon": "tv",
+            "line": "TV Samsung 50 do Carlos, liga e apaga, orçamento de diagnóstico",
+            "items": [
+              {
+                "name": "Diagnóstico",
+                "price": "R$ 60,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 60,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +132,38 @@
             "Fotos e avarias guardadas para qualquer dúvida",
             "Defeito relatado e acessórios deixados",
             "Checklists que você ajusta aos seus aparelhos"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Tela, Risco no canto",
+            "back": "OS 532",
+            "title": "Checklist de entrada",
+            "progress": "6 de 8 respondidas",
+            "items": [
+              {
+                "q": "Tela",
+                "a": "Risco no canto",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Liga",
+                "a": "Liga e apaga",
+                "flag": false
+              },
+              {
+                "q": "Nº de série",
+                "a": "Anotado",
+                "flag": false
+              },
+              {
+                "q": "Acessórios",
+                "a": "Controle remoto",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,7 +174,30 @@
             "Aprovação ou recusa guardada, sem disse me disse",
             "O cliente comenta direto na OS, sem ligar",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 532",
+            "client": "Carlos Pereira",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Diagnóstico",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Troca da fonte",
+                "price": "R$ 260,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 340,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -136,7 +208,41 @@
             "Veja o que está em aberto e o que já foi concluído",
             "Aviso de orçamento sem resposta há 7 dias",
             "Ache qualquer aparelho pelo número de série ou pelo cliente"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Início: as OS com a situação de cada uma",
+            "title": "Início",
+            "subtitle": "3 em aberto · 1 concluída",
+            "rows": [
+              {
+                "name": "Carlos Pereira",
+                "status": "Em andamento · OS 532",
+                "kind": "progress",
+                "sub": "TV Samsung 50″ · troca da fonte",
+                "right": "Entrega 12/11"
+              },
+              {
+                "name": "Roberto Lima",
+                "status": "Aprovada · OS 527",
+                "kind": "approved",
+                "sub": "Smart TV 50″ · barras de LED",
+                "right": "Entrega 13/11"
+              },
+              {
+                "name": "Lúcia Ramos",
+                "status": "Orçamento · OS 533",
+                "kind": "quote",
+                "sub": "Som Philips · sem áudio"
+              },
+              {
+                "name": "Paulo Dias",
+                "status": "Concluída · OS 523",
+                "kind": "done",
+                "sub": "Micro system Sony · troca do CD"
+              }
+            ]
+          }
         },
         {
           "number": "05",
@@ -148,10 +254,59 @@
             "Quem deve há mais tempo aparece primeiro",
             "Relatório do mês com o que entrou"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 970 de 3 clientes",
+            "nextSub": "Roberto Lima deve R$ 480 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Roberto Lima",
+                "amount": "R$ 480",
+                "sub": "OS 528 · desde 02/10"
+              },
+              {
+                "name": "Carlos Pereira",
+                "amount": "R$ 340",
+                "sub": "OS 532 · desde 28/10"
+              },
+              {
+                "name": "Lúcia Ramos",
+                "amount": "R$ 150",
+                "sub": "OS 533 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #532",
+        "client": "Carlos Pereira",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Diagnóstico",
+            "price": "R$ 80,00"
+          },
+          {
+            "name": "Troca da fonte",
+            "price": "R$ 260,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 340,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para carlos@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Antes de usar na sua assistência",
@@ -283,7 +438,25 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the diagnosis is 80”",
             "Or take a photo of the label or the written request"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Carlos Pereira",
+            "vehicle": "Samsung 50″ TV",
+            "vehicleEmpty": "Choose device",
+            "deviceIcon": "tv",
+            "line": "Carlos’s Samsung 50-inch TV, turns on and off, diagnostic quote",
+            "items": [
+              {
+                "name": "Diagnosis",
+                "price": "$60.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$60.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +467,38 @@
             "Photos and damage kept on hand in case of any doubt",
             "Reported fault and accessories left",
             "Checklists you adjust to your devices"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Screen, Scratch on corner",
+            "back": "WO 532",
+            "title": "Check-in checklist",
+            "progress": "6 of 8 answered",
+            "items": [
+              {
+                "q": "Screen",
+                "a": "Scratch on corner",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Powers on",
+                "a": "Turns on and off",
+                "flag": false
+              },
+              {
+                "q": "Serial number",
+                "a": "Logged",
+                "flag": false
+              },
+              {
+                "q": "Accessories",
+                "a": "Remote",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -305,7 +509,30 @@
             "Approval or rejection kept on hand, no he-said-she-said",
             "The customer comments right on the order, no call needed",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 532",
+            "client": "Carlos Pereira",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Diagnosis",
+                "price": "$80.00"
+              },
+              {
+                "name": "Power board replacement",
+                "price": "$260.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$340.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -316,7 +543,41 @@
             "See what's open and what's done",
             "Alert for quotes with no reply after 7 days",
             "Find any device by serial number or customer"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Home: orders with their status",
+            "title": "Home",
+            "subtitle": "3 open · 1 completed",
+            "rows": [
+              {
+                "name": "Carlos Pereira",
+                "status": "In progress · WO 532",
+                "kind": "progress",
+                "sub": "Samsung 50″ TV · power board",
+                "right": "Due 11/12"
+              },
+              {
+                "name": "Robert Lane",
+                "status": "Approved · WO 527",
+                "kind": "approved",
+                "sub": "50″ smart TV · LED strips",
+                "right": "Due 11/13"
+              },
+              {
+                "name": "Lucy Rhodes",
+                "status": "Quote · WO 533",
+                "kind": "quote",
+                "sub": "Philips stereo · no sound"
+              },
+              {
+                "name": "Paul Davis",
+                "status": "Completed · WO 523",
+                "kind": "done",
+                "sub": "Sony mini system · CD drive"
+              }
+            ]
+          }
         },
         {
           "number": "05",
@@ -328,8 +589,32 @@
             "Whoever has owed the longest shows up first",
             "Monthly report of what came in"
           ],
-          "image": "financial.png",
-          "alt": "Financial with how much is left to collect and the button to send a payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$970 to collect from 3 customers",
+            "nextSub": "Robert Lane owes $480 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Robert Lane",
+                "amount": "$480",
+                "sub": "WO 528 · since 10/02"
+              },
+              {
+                "name": "Carlos Pereira",
+                "amount": "$340",
+                "sub": "WO 532 · since 10/28"
+              },
+              {
+                "name": "Lucy Rhodes",
+                "amount": "$150",
+                "sub": "WO 533 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +748,25 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “el diagnóstico es 80”",
             "O saca una foto de la etiqueta o del pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Carlos Pereira",
+            "vehicle": "TV Samsung 50″",
+            "vehicleEmpty": "Elegir equipo",
+            "deviceIcon": "tv",
+            "line": "TV Samsung 50 de Carlos, enciende y se apaga, presupuesto de diagnóstico",
+            "items": [
+              {
+                "name": "Diagnóstico",
+                "price": "$ 60,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 60,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +777,38 @@
             "Fotos y daños guardados ante cualquier duda",
             "Falla reportada y accesorios dejados",
             "Checklists que ajustas a tus equipos"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Pantalla, Rayón en la esquina",
+            "back": "OS 532",
+            "title": "Checklist de entrada",
+            "progress": "6 de 8 respondidas",
+            "items": [
+              {
+                "q": "Pantalla",
+                "a": "Rayón en la esquina",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Enciende",
+                "a": "Enciende y se apaga",
+                "flag": false
+              },
+              {
+                "q": "N.º de serie",
+                "a": "Anotado",
+                "flag": false
+              },
+              {
+                "q": "Accesorios",
+                "a": "Control remoto",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -485,7 +819,30 @@
             "Aprobación o rechazo guardados, sin discusiones",
             "El cliente comenta en la orden, sin llamar",
             "PDF de la OS para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 532",
+            "client": "Carlos Pereira",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Diagnóstico",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Cambio de fuente",
+                "price": "$ 260,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 340,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -496,7 +853,41 @@
             "Ve lo que está abierto y lo que ya terminó",
             "Aviso de presupuesto sin respuesta hace 7 días",
             "Encuentra cualquier equipo por número de serie o cliente"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Inicio: órdenes con su estado",
+            "title": "Inicio",
+            "subtitle": "3 abiertas · 1 concluida",
+            "rows": [
+              {
+                "name": "Carlos Pereira",
+                "status": "En curso · OS 532",
+                "kind": "progress",
+                "sub": "TV Samsung 50″ · cambio de fuente",
+                "right": "Entrega 12/11"
+              },
+              {
+                "name": "Roberto Lima",
+                "status": "Aprobada · OS 527",
+                "kind": "approved",
+                "sub": "Smart TV 50″ · tiras de LED",
+                "right": "Entrega 13/11"
+              },
+              {
+                "name": "Lucía Ramos",
+                "status": "Presupuesto · OS 533",
+                "kind": "quote",
+                "sub": "Equipo Philips · sin audio"
+              },
+              {
+                "name": "Pablo Díaz",
+                "status": "Concluida · OS 523",
+                "kind": "done",
+                "sub": "Minicomponente Sony · lector de CD"
+              }
+            ]
+          }
         },
         {
           "number": "05",
@@ -508,8 +899,32 @@
             "Quien debe hace más tiempo aparece primero",
             "Informe del mes con lo que entró"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 970 de 3 clientes",
+            "nextSub": "Roberto Lima debe $ 480 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Roberto Lima",
+                "amount": "$ 480",
+                "sub": "OS 528 · desde 02/10"
+              },
+              {
+                "name": "Carlos Pereira",
+                "amount": "$ 340",
+                "sub": "OS 532 · desde 28/10"
+              },
+              {
+                "name": "Lucía Ramos",
+                "amount": "$ 150",
+                "sub": "OS 533 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

@@ -1,6 +1,7 @@
-import { Camera, Car, Check, ChevronLeft, ChevronRight, FileText, Lock, Mail, User } from 'lucide-react'
+import { Camera, Check, ChevronLeft, ChevronRight, FileText, Lock, Mail, User } from 'lucide-react'
 import { Stage } from '../../kit/stage'
 import { Phone, Notification } from '../../kit/phone'
+import { DeviceIcon } from '../shared/DeviceIcon'
 import '../hero/hero.css'
 import './tabs.css'
 
@@ -12,7 +13,12 @@ import './tabs.css'
 // schedule: the week in Agenda with the reminder banner dropping in;
 // receive: Financeiro, who owes what, oldest first, and the button to charge;
 // invoice (pt only): the finished order with its service invoice issued and
-// already in the customer's e-mail.
+// already in the customer's e-mail;
+// orders: a list of orders with their status (what is on the bench, a
+// contract's monthly orders), for the trade pages' tabs that follow work.
+//
+// The home and the 20 trade pages (segments/*.json) feed the same scenes;
+// the trade data only changes the words and the device icon.
 //
 // Every scene is one iPhone running off the bottom of the panel, at the
 // size it is seen. Words only where the tab's story is; the rest is the
@@ -20,8 +26,8 @@ import './tabs.css'
 
 type Item = { name: string; price: string; changed?: boolean }
 
-export type TalkCopy = { kind: 'talk'; label: string; title: string; client: string; vehicle: string; work: string; items: Item[]; totalLabel: string; total: string; said: string }
-export type RecordCopy = { kind: 'record'; label: string; back: string; title: string; progress: string; items: { q: string; a: string; photos?: number }[]; add: string }
+export type TalkCopy = { kind: 'talk'; label: string; title: string; client: string; vehicle: string; deviceIcon?: string; work: string; items: Item[]; totalLabel: string; total: string; said: string }
+export type RecordCopy = { kind: 'record'; label: string; back: string; title: string; progress: string; items: { q: string; a: string; photos?: number; flag?: boolean }[]; add: string }
 export type ApproveCopy = { kind: 'approve'; label: string; url: string; title: string; client: string; status: string; line: string; items: Item[]; totalLabel: string; total: string; button: string; comment: string }
 export type ScheduleCopy = {
   kind: 'schedule'
@@ -56,7 +62,15 @@ export type InvoiceCopy = {
   emailSent: string
   pdf: string
 }
-export type TabCopy = TalkCopy | RecordCopy | ApproveCopy | ScheduleCopy | ReceiveCopy | InvoiceCopy
+export type OrderStatus = 'quote' | 'approved' | 'progress' | 'done'
+export type OrdersCopy = {
+  kind: 'orders'
+  label: string
+  title: string
+  subtitle?: string
+  rows: { name: string; right?: string; status: string; kind: OrderStatus; sub: string }[]
+}
+export type TabCopy = TalkCopy | RecordCopy | ApproveCopy | ScheduleCopy | ReceiveCopy | InvoiceCopy | OrdersCopy
 
 function Spark() {
   return (
@@ -109,7 +123,7 @@ function Talk({ c }: { c: TalkCopy }) {
         </div>
         <div className="ph-row">
           <span className="ph-ico">
-            <Car size={18} strokeWidth={2} />
+            <DeviceIcon name={c.deviceIcon} />
           </span>
           <span className="ph-val">
             {c.vehicle}
@@ -154,7 +168,7 @@ function Record({ c }: { c: RecordCopy }) {
         {c.items.map((it, i) => (
           <div key={it.q} className="ph-row ph-row--check" data-photos={it.photos || undefined}>
             <span className="ph-check__q">{it.q}</span>
-            <span className="ph-check__a" data-flag={i === 0 || undefined}>
+            <span className="ph-check__a" data-flag={(it.flag ?? i === 0) || undefined}>
               {it.a}
             </span>
             {it.photos ? (
@@ -335,6 +349,30 @@ function Invoice({ c }: { c: InvoiceCopy }) {
   )
 }
 
+function Orders({ c }: { c: OrdersCopy }) {
+  return (
+    <Frame label={c.label} kind="orders">
+      <div className="ph-large ph-large--top">{c.title}</div>
+      {c.subtitle ? <div className="ph-subtitle">{c.subtitle}</div> : null}
+      <div className="ph-list">
+        {c.rows.map((r) => (
+          <div key={r.name + r.sub} className="ph-agenda">
+            <div className="ph-agenda__head">
+              <span className="ph-agenda__name">{r.name}</span>
+              {r.right ? <span className="ph-agenda__time">{r.right}</span> : null}
+            </div>
+            <div className="ph-agenda__status" data-kind={r.kind}>
+              <span className="ph-dot" />
+              {r.status}
+            </div>
+            <div className="ph-agenda__sub">{r.sub}</div>
+          </div>
+        ))}
+      </div>
+    </Frame>
+  )
+}
+
 export function TabScene({ copy }: { copy: TabCopy }) {
   switch (copy.kind) {
     case 'talk':
@@ -349,5 +387,7 @@ export function TabScene({ copy }: { copy: TabCopy }) {
       return <Receive c={copy} />
     case 'invoice':
       return <Invoice c={copy} />
+    case 'orders':
+      return <Orders c={copy} />
   }
 }

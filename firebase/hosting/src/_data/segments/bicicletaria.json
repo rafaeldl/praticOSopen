@@ -103,7 +103,30 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a corrente é 120”",
             "Ficha da bike com tipo, aro, quadro, grupo, freio e número de série"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Marina Alves",
+            "vehicle": "Caloi Elite",
+            "vehicleEmpty": "Escolher bike",
+            "deviceIcon": "bike",
+            "line": "Caloi da Marina, revisão completa e troca de corrente",
+            "items": [
+              {
+                "name": "Revisão completa",
+                "price": "R$ 180,00"
+              },
+              {
+                "name": "Troca de corrente",
+                "price": "R$ 100,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 180,00",
+              "R$ 280,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,38 @@
             "Do seu jeito, com sim/não, anotações e fotos",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as revisões"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Pneu traseiro, Gasto",
+            "back": "OS 279",
+            "title": "Checklist de entrada",
+            "progress": "5 de 8 respondidas",
+            "items": [
+              {
+                "q": "Pneu traseiro",
+                "a": "Gasto",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Freios",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Câmbio",
+                "a": "Precisa regular",
+                "flag": false
+              },
+              {
+                "q": "Nº de série",
+                "a": "Anotado",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,7 +179,30 @@
             "O “sim” do cliente fica guardado",
             "Cliente vê quando a bike fica pronta",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 279",
+            "client": "Marina Alves",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Revisão completa",
+                "price": "R$ 180,00"
+              },
+              {
+                "name": "Troca de corrente",
+                "price": "R$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 300,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -137,10 +214,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 695 de 3 clientes",
+            "nextSub": "André Souza deve R$ 310 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "André Souza",
+                "amount": "R$ 310",
+                "sub": "OS 275 · desde 02/10"
+              },
+              {
+                "name": "Marina Alves",
+                "amount": "R$ 300",
+                "sub": "OS 279 · desde 28/10"
+              },
+              {
+                "name": "Lucas Pereira",
+                "amount": "R$ 85",
+                "sub": "OS 280 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #279",
+        "client": "Marina Alves",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Revisão completa",
+            "price": "R$ 180,00"
+          },
+          {
+            "name": "Troca de corrente",
+            "price": "R$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 300,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para marina@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Dúvidas de quem tem bicicletaria",
@@ -272,7 +398,30 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the chain is 120”",
             "Bike profile with type, wheel size, frame, groupset, brakes and serial number"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Marina Alves",
+            "vehicle": "Caloi Elite",
+            "vehicleEmpty": "Choose bike",
+            "deviceIcon": "bike",
+            "line": "Marina's Caloi, full tune-up and new chain",
+            "items": [
+              {
+                "name": "Full tune-up",
+                "price": "$180.00"
+              },
+              {
+                "name": "Chain replacement",
+                "price": "$100.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$180.00",
+              "$280.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -283,7 +432,38 @@
             "Your way, with yes/no, notes and photos",
             "Photos on every checklist item",
             "One template for every tune-up"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Rear tire, Worn",
+            "back": "WO 279",
+            "title": "Check-in checklist",
+            "progress": "5 of 8 answered",
+            "items": [
+              {
+                "q": "Rear tire",
+                "a": "Worn",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Brakes",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Shifting",
+                "a": "Needs tuning",
+                "flag": false
+              },
+              {
+                "q": "Serial number",
+                "a": "Logged",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -294,7 +474,30 @@
             "The customer's yes is on file",
             "Customers see when the bike is ready",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 279",
+            "client": "Marina Alves",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Full tune-up",
+                "price": "$180.00"
+              },
+              {
+                "name": "Chain replacement",
+                "price": "$120.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$300.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -306,8 +509,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$695 to collect from 3 customers",
+            "nextSub": "Andrew Shaw owes $310 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Andrew Shaw",
+                "amount": "$310",
+                "sub": "WO 275 · since 10/02"
+              },
+              {
+                "name": "Marina Alves",
+                "amount": "$300",
+                "sub": "WO 279 · since 10/28"
+              },
+              {
+                "name": "Lucas Pereira",
+                "amount": "$85",
+                "sub": "WO 280 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -441,7 +668,30 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la cadena es 120”",
             "Ficha de la bici con tipo, rodado, cuadro, grupo, freno y número de serie"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Marina Alves",
+            "vehicle": "Caloi Elite",
+            "vehicleEmpty": "Elegir bici",
+            "deviceIcon": "bike",
+            "line": "Caloi de Marina, service completo y cambio de cadena",
+            "items": [
+              {
+                "name": "Service completo",
+                "price": "$ 180,00"
+              },
+              {
+                "name": "Cambio de cadena",
+                "price": "$ 100,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 180,00",
+              "$ 280,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -452,7 +702,38 @@
             "A tu manera, con sí/no, notas y fotos",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todos los services"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Cubierta trasera, Gastada",
+            "back": "OS 279",
+            "title": "Checklist de entrada",
+            "progress": "5 de 8 respondidas",
+            "items": [
+              {
+                "q": "Cubierta trasera",
+                "a": "Gastada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Frenos",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Cambios",
+                "a": "Necesita ajuste",
+                "flag": false
+              },
+              {
+                "q": "N.º de serie",
+                "a": "Anotado",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -463,7 +744,30 @@
             "El “sí” del cliente queda guardado",
             "El cliente ve cuándo la bici está lista",
             "PDF de la orden para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 279",
+            "client": "Marina Alves",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Service completo",
+                "price": "$ 180,00"
+              },
+              {
+                "name": "Cambio de cadena",
+                "price": "$ 120,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 300,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -475,8 +779,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 695 de 3 clientes",
+            "nextSub": "Andrés Sosa debe $ 310 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Andrés Sosa",
+                "amount": "$ 310",
+                "sub": "OS 275 · desde 02/10"
+              },
+              {
+                "name": "Marina Alves",
+                "amount": "$ 300",
+                "sub": "OS 279 · desde 28/10"
+              },
+              {
+                "name": "Lucas Pereira",
+                "amount": "$ 85",
+                "sub": "OS 280 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

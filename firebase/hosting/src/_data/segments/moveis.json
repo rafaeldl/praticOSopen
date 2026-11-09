@@ -99,7 +99,25 @@
             "Com dia e hora, a montagem entra na Agenda",
             "Corrija falando: “a montagem é 250”",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Loja Casa Bela",
+            "vehicle": "Guarda-roupa 6 portas",
+            "vehicleEmpty": "Escolher móvel",
+            "deviceIcon": "sofa",
+            "line": "Loja Casa Bela, guarda-roupa de 6 portas na casa da Ana, amanhã às 9",
+            "items": [
+              {
+                "name": "Montagem de guarda-roupa",
+                "price": "R$ 220,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 220,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -110,7 +128,38 @@
             "Fotos das caixas e das avarias",
             "Descrição do móvel e defeitos visíveis",
             "Observações sobre o local de montagem"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Caixas, 1 amassada",
+            "back": "OS 736",
+            "title": "Checklist de entrada",
+            "progress": "4 de 6 respondidas",
+            "items": [
+              {
+                "q": "Caixas",
+                "a": "1 amassada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Peças conferidas",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Local da montagem",
+                "a": "Quarto",
+                "flag": false
+              },
+              {
+                "q": "Parede para fixar",
+                "a": "Alvenaria",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -121,7 +170,38 @@
             "Móvel conferido e funcionamento demonstrado",
             "Prazo de garantia por escrito",
             "PDF da OS para enviar à loja ou ao cliente"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrega com fotos: Móvel montado, Sim",
+            "back": "OS 736",
+            "title": "Checklist de entrega",
+            "progress": "6 de 6 respondidas",
+            "items": [
+              {
+                "q": "Móvel montado",
+                "a": "Sim",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Portas reguladas",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Uso demonstrado",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Garantia",
+                "a": "90 dias",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -133,10 +213,55 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.070 de 3 clientes",
+            "nextSub": "Patrícia Lemos deve R$ 280 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Patrícia Lemos",
+                "amount": "R$ 280",
+                "sub": "OS 732 · desde 02/10"
+              },
+              {
+                "name": "Loja Casa Bela",
+                "amount": "R$ 250",
+                "sub": "OS 736 · desde 28/10"
+              },
+              {
+                "name": "Móveis Lar",
+                "amount": "R$ 540",
+                "sub": "OS 737 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #736",
+        "client": "Loja Casa Bela",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Montagem de guarda-roupa",
+            "price": "R$ 250,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 250,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para casabela@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Dúvidas de quem monta móveis",
@@ -264,7 +389,25 @@
             "With a date and time, the job goes on the Schedule",
             "Fix it by voice: “assembly is 250”",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Casa Bela Store",
+            "vehicle": "6-door wardrobe",
+            "vehicleEmpty": "Choose piece",
+            "deviceIcon": "sofa",
+            "line": "Casa Bela store, 6-door wardrobe at Ana's place, tomorrow at 9",
+            "items": [
+              {
+                "name": "Wardrobe assembly",
+                "price": "$220.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$220.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -275,7 +418,38 @@
             "Photos of the boxes and any damage",
             "Description of the piece and visible defects",
             "Notes about the installation spot"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Boxes, 1 dented",
+            "back": "WO 736",
+            "title": "Check-in checklist",
+            "progress": "4 of 6 answered",
+            "items": [
+              {
+                "q": "Boxes",
+                "a": "1 dented",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Parts checked",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Assembly room",
+                "a": "Bedroom",
+                "flag": false
+              },
+              {
+                "q": "Wall for anchoring",
+                "a": "Masonry",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -286,7 +460,38 @@
             "Piece checked and operation demonstrated",
             "Warranty period in writing",
             "Work order PDF to send to the store or customer"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Delivery checklist with photos: Piece assembled, Yes",
+            "back": "WO 736",
+            "title": "Delivery checklist",
+            "progress": "6 of 6 answered",
+            "items": [
+              {
+                "q": "Piece assembled",
+                "a": "Yes",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Doors adjusted",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Use demonstrated",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Warranty",
+                "a": "90 days",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -298,8 +503,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing how much is still due and from which customers"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,070 to collect from 3 customers",
+            "nextSub": "Patricia Lane owes $280 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Patricia Lane",
+                "amount": "$280",
+                "sub": "WO 732 · since 10/02"
+              },
+              {
+                "name": "Casa Bela Store",
+                "amount": "$250",
+                "sub": "WO 736 · since 10/28"
+              },
+              {
+                "name": "HomeStyle Furniture",
+                "amount": "$540",
+                "sub": "WO 737 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -429,7 +658,25 @@
             "Con día y hora, el armado entra en la Agenda",
             "Corrige hablando: “el armado es 250”",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Tienda Casa Bela",
+            "vehicle": "Ropero de 6 puertas",
+            "vehicleEmpty": "Elegir mueble",
+            "deviceIcon": "sofa",
+            "line": "Tienda Casa Bela, ropero de 6 puertas en la casa de Ana, mañana a las 9",
+            "items": [
+              {
+                "name": "Armado de ropero",
+                "price": "$ 220,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 220,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -440,7 +687,38 @@
             "Fotos de las cajas y de los daños",
             "Descripción del mueble y defectos visibles",
             "Notas sobre el lugar de armado"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Cajas, 1 abollada",
+            "back": "OS 736",
+            "title": "Checklist de entrada",
+            "progress": "4 de 6 respondidas",
+            "items": [
+              {
+                "q": "Cajas",
+                "a": "1 abollada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Piezas revisadas",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Lugar de armado",
+                "a": "Dormitorio",
+                "flag": false
+              },
+              {
+                "q": "Pared para fijar",
+                "a": "Mampostería",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -451,7 +729,38 @@
             "Mueble revisado y funcionamiento mostrado",
             "Plazo de garantía por escrito",
             "PDF de la orden para enviar a la tienda o al cliente"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrega con fotos: Mueble armado, Sí",
+            "back": "OS 736",
+            "title": "Checklist de entrega",
+            "progress": "6 de 6 respondidas",
+            "items": [
+              {
+                "q": "Mueble armado",
+                "a": "Sí",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "Puertas reguladas",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Uso mostrado",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Garantía",
+                "a": "90 días",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -463,8 +772,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.070 de 3 clientes",
+            "nextSub": "Patricia Lemus debe $ 280 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Patricia Lemus",
+                "amount": "$ 280",
+                "sub": "OS 732 · desde 02/10"
+              },
+              {
+                "name": "Tienda Casa Bela",
+                "amount": "$ 250",
+                "sub": "OS 736 · desde 28/10"
+              },
+              {
+                "name": "Muebles Hogar",
+                "amount": "$ 540",
+                "sub": "OS 737 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

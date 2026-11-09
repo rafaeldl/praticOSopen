@@ -104,7 +104,30 @@
             "A unidade certa: empreendimento, bloco ou torre, número e andar",
             "Sistema afetado e data de entrega da unidade",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Cond. Jardim das Flores",
+            "vehicle": "Torre B · Apto 1204",
+            "vehicleEmpty": "Escolher unidade",
+            "deviceIcon": "building",
+            "line": "Condomínio Jardim das Flores, torre B, apto 1204, infiltração no teto do banheiro",
+            "items": [
+              {
+                "name": "Caça vazamento",
+                "price": "R$ 180,00"
+              },
+              {
+                "name": "Reparo do teto",
+                "price": "R$ 460,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 180,00",
+              "R$ 640,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -115,7 +138,57 @@
             "A semana inteira à vista, com os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
             "Aviso antes do atendimento, mesmo com o app fechado"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Cond. Jardim das Flores",
+                "time": "09:00",
+                "status": "Aprovada · OS 219",
+                "kind": "approved",
+                "sub": "Torre B · Apto 1204 · com Bruno"
+              },
+              {
+                "name": "Residencial Bela Vista",
+                "time": "14:30",
+                "status": "Orçamento · OS 220",
+                "kind": "quote",
+                "sub": "Bloco A · Apto 302 · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Cond. Jardim das Flores às 09:00 · Torre B · Apto 1204",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -126,7 +199,38 @@
             "Sim, não, não se aplica, anotação e foto em cada item",
             "Fotos do antes e do depois na mesma OS",
             "PDF da OS para enviar ao síndico ou à construtora"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Vistoria · infiltração com fotos: Teto do banheiro, Mancha de umidade",
+            "back": "OS 219",
+            "title": "Vistoria · infiltração",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Teto do banheiro",
+                "a": "Mancha de umidade",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Rejunte do box",
+                "a": "Com falhas",
+                "flag": true
+              },
+              {
+                "q": "Hidráulica",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Elétrica no local",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -137,9 +241,57 @@
             "Aprovação guardada junto ao chamado",
             "Pagamento parcial e desconto na mesma OS",
             "Quanto falta receber de cada cliente no Financeiro"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 219",
+            "client": "Cond. Jardim das Flores",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Caça vazamento",
+                "price": "R$ 180,00"
+              },
+              {
+                "name": "Reparo do teto",
+                "price": "R$ 460,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 640,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #219",
+        "client": "Cond. Jardim das Flores",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Caça vazamento",
+            "price": "R$ 180,00"
+          },
+          {
+            "name": "Reparo do teto",
+            "price": "R$ 460,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 640,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para sindico@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que perguntam os responsáveis pela manutenção predial",
@@ -272,7 +424,30 @@
             "The right unit: development, building or tower, number and floor",
             "Affected system and unit handover date",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Jardim das Flores Condo",
+            "vehicle": "Tower B · Unit 1204",
+            "vehicleEmpty": "Choose unit",
+            "deviceIcon": "building",
+            "line": "Jardim das Flores condo, tower B, unit 1204, leak in the bathroom ceiling",
+            "items": [
+              {
+                "name": "Leak detection",
+                "price": "$180.00"
+              },
+              {
+                "name": "Ceiling repair",
+                "price": "$460.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$180.00",
+              "$640.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -283,7 +458,57 @@
             "The whole week in view, with each day's visits",
             "Daily summary at 9am, if you want it",
             "Reminder before the visit, even with the app closed"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Jardim das Flores Condo",
+                "time": "9:00 AM",
+                "status": "Approved · WO 219",
+                "kind": "approved",
+                "sub": "Tower B · Unit 1204 · with Ben"
+              },
+              {
+                "name": "Bela Vista Residences",
+                "time": "2:30 PM",
+                "status": "Quote · WO 220",
+                "kind": "quote",
+                "sub": "Building A · Unit 302 · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Jardim das Flores Condo at 9:00 AM · Tower B · Unit 1204",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -294,7 +519,38 @@
             "Yes, no, N/A, notes and a photo on each item",
             "Before and after photos on the same work order",
             "Work order PDF to send to the manager or builder"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Inspection · leak with photos: Bathroom ceiling, Damp stain",
+            "back": "WO 219",
+            "title": "Inspection · leak",
+            "progress": "7 of 10 answered",
+            "items": [
+              {
+                "q": "Bathroom ceiling",
+                "a": "Damp stain",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Shower grout",
+                "a": "Cracked",
+                "flag": true
+              },
+              {
+                "q": "Plumbing",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Electrical",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -305,7 +561,30 @@
             "Approval kept with the request",
             "Partial payment and discount on the same work order",
             "What each customer still owes, in Financial"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 219",
+            "client": "Jardim das Flores Condo",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Leak detection",
+                "price": "$180.00"
+              },
+              {
+                "name": "Ceiling repair",
+                "price": "$460.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$640.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         }
       ]
     },
@@ -440,7 +719,30 @@
             "La unidad correcta: proyecto, bloque o torre, número y piso",
             "Sistema afectado y fecha de entrega de la unidad",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Condominio Jardim das Flores",
+            "vehicle": "Torre B · Depto 1204",
+            "vehicleEmpty": "Elegir unidad",
+            "deviceIcon": "building",
+            "line": "Condominio Jardim das Flores, torre B, depto 1204, filtración en el techo del baño",
+            "items": [
+              {
+                "name": "Detección de fugas",
+                "price": "$ 180,00"
+              },
+              {
+                "name": "Reparación del techo",
+                "price": "$ 460,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 180,00",
+              "$ 640,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -451,7 +753,57 @@
             "Toda la semana a la vista, con las visitas del día",
             "Resumen del día a las 9, si lo quieres",
             "Aviso antes de la visita, incluso con la app cerrada"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Condominio Jardim das Flores",
+                "time": "09:00",
+                "status": "Aprobada · OS 219",
+                "kind": "approved",
+                "sub": "Torre B · Depto 1204 · con Bruno"
+              },
+              {
+                "name": "Residencial Bela Vista",
+                "time": "14:30",
+                "status": "Presupuesto · OS 220",
+                "kind": "quote",
+                "sub": "Bloque A · Depto 302 · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Condominio Jardim das Flores a las 09:00 · Torre B · Depto 1204",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -462,7 +814,38 @@
             "Sí, no, no aplica, nota y foto en cada ítem",
             "Fotos del antes y el después en la misma orden",
             "PDF de la orden para enviar al administrador o a la constructora"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Inspección · filtración con fotos: Techo del baño, Mancha de humedad",
+            "back": "OS 219",
+            "title": "Inspección · filtración",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Techo del baño",
+                "a": "Mancha de humedad",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Junta de la ducha",
+                "a": "Con fallas",
+                "flag": true
+              },
+              {
+                "q": "Plomería",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Eléctrica",
+                "a": "OK",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -473,7 +856,30 @@
             "Aprobación guardada junto a la solicitud",
             "Pago parcial y descuento en la misma orden",
             "Cuánto falta cobrar a cada cliente en Financiero"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 219",
+            "client": "Condominio Jardim das Flores",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Detección de fugas",
+                "price": "$ 180,00"
+              },
+              {
+                "name": "Reparación del techo",
+                "price": "$ 460,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 640,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         }
       ]
     },

@@ -20,6 +20,11 @@ module.exports = function(eleventyConfig) {
     return obj;
   });
 
+  // Shallow merge of two objects ({{ a | merge(b) }}): b's keys win
+  eleventyConfig.addFilter("merge", function(a, b) {
+    return Object.assign({}, a, b);
+  });
+
   // Custom filter to get relative path prefix based on depth
   eleventyConfig.addFilter("relPath", function(url) {
     const depth = (url.match(/\//g) || []).length - 1;

@@ -103,7 +103,30 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a programação é 800”",
             "Equipamentos e programação em itens separados"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Teixeira",
+            "vehicle": "Apartamento 802",
+            "vehicleEmpty": "Escolher local",
+            "deviceIcon": "house",
+            "line": "apartamento do Ricardo, seis interruptores inteligentes e programação",
+            "items": [
+              {
+                "name": "6 interruptores inteligentes",
+                "price": "R$ 1.080,00"
+              },
+              {
+                "name": "Programação",
+                "price": "R$ 650,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 1.080,00",
+              "R$ 1.730,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,38 @@
             "Do seu jeito, com o que você sempre confere",
             "Fotos em cada item do checklist",
             "Toda obra com o mesmo padrão"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Vistoria técnica com fotos: Quadro de energia, Sem espaço livre",
+            "back": "OS 158",
+            "title": "Vistoria técnica",
+            "progress": "8 de 12 respondidas",
+            "items": [
+              {
+                "q": "Quadro de energia",
+                "a": "Sem espaço livre",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Neutro nas caixas",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Ponto de rede na sala",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Ambientes",
+                "a": "Sala e suíte",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,7 +179,30 @@
             "O sim do cliente fica guardado",
             "Equipamentos e programação discriminados",
             "PDF da OS para enviar ou imprimir"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 158",
+            "client": "Ricardo Teixeira",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "6 interruptores inteligentes",
+                "price": "R$ 1.080,00"
+              },
+              {
+                "name": "Programação",
+                "price": "R$ 800,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 1.880,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -136,7 +213,57 @@
             "Semana no topo e os atendimentos de cada dia, com horário",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Ricardo Teixeira",
+                "time": "09:00",
+                "status": "Aprovada · OS 158",
+                "kind": "approved",
+                "sub": "Apartamento 802 · com Bruno"
+              },
+              {
+                "name": "Helena Prado",
+                "time": "14:30",
+                "status": "Orçamento · OS 159",
+                "kind": "quote",
+                "sub": "Casa 14 · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Ricardo Teixeira às 09:00 · Apartamento 802",
+            "now": "agora"
+          }
         },
         {
           "number": "05",
@@ -148,10 +275,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 5.230 de 3 clientes",
+            "nextSub": "Marcos Lima deve R$ 2.400 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Marcos Lima",
+                "amount": "R$ 2.400",
+                "sub": "OS 154 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Teixeira",
+                "amount": "R$ 1.880",
+                "sub": "OS 158 · desde 28/10"
+              },
+              {
+                "name": "Helena Prado",
+                "amount": "R$ 950",
+                "sub": "OS 159 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #158",
+        "client": "Ricardo Teixeira",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "6 interruptores inteligentes",
+            "price": "R$ 1.080,00"
+          },
+          {
+            "name": "Programação",
+            "price": "R$ 800,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 1.880,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para ricardo@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "O que o integrador quer saber antes de começar",
@@ -283,7 +459,30 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “programming is 800”",
             "Equipment and programming as separate items"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Teixeira",
+            "vehicle": "Unit 802",
+            "vehicleEmpty": "Choose site",
+            "deviceIcon": "house",
+            "line": "Ricardo's apartment, six smart switches and programming",
+            "items": [
+              {
+                "name": "6 smart switches",
+                "price": "$1,080.00"
+              },
+              {
+                "name": "Programming",
+                "price": "$650.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$1,080.00",
+              "$1,730.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +493,38 @@
             "Your way, with what you always check",
             "Photos on every checklist item",
             "One standard for every job"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Site survey with photos: Electrical panel, No free slots",
+            "back": "WO 158",
+            "title": "Site survey",
+            "progress": "8 of 12 answered",
+            "items": [
+              {
+                "q": "Electrical panel",
+                "a": "No free slots",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Neutral in switch boxes",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Network jack in living room",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Rooms",
+                "a": "Living room and suite",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -305,7 +535,30 @@
             "The customer's yes stays on file",
             "Equipment and programming itemized",
             "Work order PDF to send or print"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 158",
+            "client": "Ricardo Teixeira",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "6 smart switches",
+                "price": "$1,080.00"
+              },
+              {
+                "name": "Programming",
+                "price": "$800.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$1,880.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -316,7 +569,57 @@
             "The week on top and each day's appointments, with times",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Ricardo Teixeira",
+                "time": "9:00 AM",
+                "status": "Approved · WO 158",
+                "kind": "approved",
+                "sub": "Unit 802 · with Ben"
+              },
+              {
+                "name": "Helena Prado",
+                "time": "2:30 PM",
+                "status": "Quote · WO 159",
+                "kind": "quote",
+                "sub": "House 14 · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Ricardo Teixeira at 9:00 AM · Unit 802",
+            "now": "now"
+          }
         },
         {
           "number": "05",
@@ -328,8 +631,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$5,230 to collect from 3 customers",
+            "nextSub": "Mark Lindsay owes $2,400 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Mark Lindsay",
+                "amount": "$2,400",
+                "sub": "WO 154 · since 10/02"
+              },
+              {
+                "name": "Ricardo Teixeira",
+                "amount": "$1,880",
+                "sub": "WO 158 · since 10/28"
+              },
+              {
+                "name": "Helena Prado",
+                "amount": "$950",
+                "sub": "WO 159 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +790,30 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la programación es 800”",
             "Equipos y programación en ítems separados"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Tejeda",
+            "vehicle": "Depto. 802",
+            "vehicleEmpty": "Elegir lugar",
+            "deviceIcon": "house",
+            "line": "departamento de Ricardo, seis interruptores inteligentes y programación",
+            "items": [
+              {
+                "name": "6 interruptores inteligentes",
+                "price": "$ 1.080,00"
+              },
+              {
+                "name": "Programación",
+                "price": "$ 650,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 1.080,00",
+              "$ 1.730,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +824,38 @@
             "A tu manera, con lo que siempre revisas",
             "Fotos en cada ítem del checklist",
             "El mismo estándar en cada obra"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Visita técnica con fotos: Tablero eléctrico, Sin espacio libre",
+            "back": "OS 158",
+            "title": "Visita técnica",
+            "progress": "8 de 12 respondidas",
+            "items": [
+              {
+                "q": "Tablero eléctrico",
+                "a": "Sin espacio libre",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Neutro en las cajas",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Punto de red en la sala",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Ambientes",
+                "a": "Sala y suite",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -485,7 +866,30 @@
             "El sí del cliente queda guardado",
             "Equipos y programación detallados",
             "PDF de la orden para enviar o imprimir"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 158",
+            "client": "Ricardo Tejeda",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "6 interruptores inteligentes",
+                "price": "$ 1.080,00"
+              },
+              {
+                "name": "Programación",
+                "price": "$ 800,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 1.880,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -496,7 +900,57 @@
             "La semana arriba y las visitas de cada día, con horario",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Ricardo Tejeda",
+                "time": "09:00",
+                "status": "Aprobada · OS 158",
+                "kind": "approved",
+                "sub": "Depto. 802 · con Bruno"
+              },
+              {
+                "name": "Helena Prado",
+                "time": "14:30",
+                "status": "Presupuesto · OS 159",
+                "kind": "quote",
+                "sub": "Casa 14 · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Ricardo Tejeda a las 09:00 · Depto. 802",
+            "now": "ahora"
+          }
         },
         {
           "number": "05",
@@ -508,8 +962,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 5.230 de 3 clientes",
+            "nextSub": "Marcos Lima debe $ 2.400 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Marcos Lima",
+                "amount": "$ 2.400",
+                "sub": "OS 154 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Tejeda",
+                "amount": "$ 1.880",
+                "sub": "OS 158 · desde 28/10"
+              },
+              {
+                "name": "Helena Prado",
+                "amount": "$ 950",
+                "sub": "OS 159 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },
