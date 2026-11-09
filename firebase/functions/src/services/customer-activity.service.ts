@@ -9,13 +9,17 @@
  * Trigger events can repeat and arrive out of order, so a write never puts an
  * older date over a newer one. Orders change many times in a row while being
  * edited, so a date less than THROTTLE_MS old is kept instead of rewritten.
- * Writing the date fires the customer trigger again, which sees that only the
- * date changed and stops there.
+ * Writing the date (or the list numbers, customer-aggregates.service.ts) fires
+ * the customer trigger again, which sees that only those changed and stops there.
  */
 import { db } from './firestore.service';
 
 export const ACTIVITY_FIELD = 'lastActivityAt';
 export const THROTTLE_MS = 60_000;
+/** Numbers of the Clientes list, also written only by the server (customer-aggregates.service.ts). */
+export const AGGREGATE_FIELDS = ['openOrders', 'owed', 'openDueDates'] as const;
+/** Fields the server writes on the customer: a write of only these is not activity. */
+const SERVER_FIELDS = [ACTIVITY_FIELD, ...AGGREGATE_FIELDS];
 
 type Data = Record<string, unknown> | undefined;
 
@@ -49,13 +53,13 @@ function stable(value: unknown): string {
   return JSON.stringify(value) ?? 'undefined';
 }
 
-/** Whether a customer write is real activity (created or edited), not just the date the server wrote. */
+/** Whether a customer write is real activity (created or edited), not just what the server wrote (SERVER_FIELDS). */
 export function customerChanged(before: Data, after: Data): boolean {
   if (!after) return false;
   if (!before) return true;
   const strip = (data: Record<string, unknown>) => {
     const copy = { ...data };
-    delete copy[ACTIVITY_FIELD];
+    for (const field of SERVER_FIELDS) delete copy[field];
     return copy;
   };
   return stable(strip(before)) !== stable(strip(after));

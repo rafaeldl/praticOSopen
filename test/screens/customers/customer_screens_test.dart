@@ -49,7 +49,6 @@ class FakeDirectory implements CustomerDirectory {
     this.owners = const {},
     this.orders = const {},
     this.open = const {},
-    this.owed = const {},
   });
 
   final List<Customer> customers;
@@ -61,8 +60,10 @@ class FakeDirectory implements CustomerDirectory {
   /// customer id -> orders
   final Map<String, List<Order>> orders;
   final Map<String, OpenOrdersSummary> open;
-  final Map<String, double> owed;
   final List<Customer> deleted = [];
+
+  /// How many times the open orders were read.
+  int openReads = 0;
 
   @override
   Stream<List<Customer>> watchCustomers() => Stream.value(customers);
@@ -88,10 +89,10 @@ class FakeDirectory implements CustomerDirectory {
       Stream.value(orders[customerId] ?? const []);
 
   @override
-  Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async => open;
-
-  @override
-  Future<Map<String, double>> owedByCustomer() async => owed;
+  Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async {
+    openReads++;
+    return open;
+  }
 
   @override
   Future<List<String>> recentCustomerIds() async => const [];
@@ -1563,6 +1564,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(customers: [noDate, old, today]),
         ),
         direct: true,
@@ -1583,6 +1585,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(customers: [ana, bruno]),
         ),
         direct: true,
@@ -1604,6 +1607,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [alice, ana, bruno],
             open: {'c1': const OpenOrdersSummary(open: 2, late: 1)},
@@ -1635,16 +1639,74 @@ void main() {
       );
     });
 
-    testWidgets('says how much each customer owes to who reads the '
-        'Financeiro', (tester) async {
+    testWidgets('who sees every order reads the badge from the customer, '
+        'with late by day and no order read', (tester) async {
+      final now = DateTime.now();
       final directory = FakeDirectory(
-        customers: [ana, bruno],
-        open: {'c1': const OpenOrdersSummary(open: 2)},
-        owed: {'c1': 166},
+        customers: [
+          customer('c1', 'Ana Ribeiro')
+            ..openOrders = 3
+            ..openDueDates = [
+              DateTime(now.year, now.month, now.day - 2, 10).toUtc(),
+              DateTime(now.year, now.month, now.day, 8).toUtc(),
+              DateTime(now.year, now.month, now.day + 1).toUtc(),
+            ],
+          customer('c2', 'Bruno Lima')..openOrders = 2,
+          customer('c3', 'Carla'),
+        ],
       );
       await Harness().pump(
         tester,
-        HomeCustomerList(canAdd: true, showOwed: true, directory: directory),
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          seesAllOrders: true,
+          directory: directory,
+        ),
+        direct: true,
+      );
+      expect(find.textContaining('1 OS atrasada'), findsOneWidget);
+      expect(find.textContaining('2 OS em aberto'), findsOneWidget);
+      expect(find.byType(StatusDot), findsNWidgets(2));
+      expect(directory.openReads, 0);
+    });
+
+    testWidgets('consultant and technician count only the orders they read', (
+      tester,
+    ) async {
+      final directory = FakeDirectory(
+        customers: [customer('c1', 'Ana Ribeiro')..openOrders = 5],
+        open: {'c1': const OpenOrdersSummary(open: 1)},
+      );
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          seesAllOrders: false,
+          directory: directory,
+        ),
+        direct: true,
+      );
+      expect(find.textContaining('1 OS em aberto'), findsOneWidget);
+      expect(find.textContaining('5 OS'), findsNothing);
+      expect(directory.openReads, 1);
+    });
+
+    testWidgets('says how much each customer owes to who reads the '
+        'Financeiro', (tester) async {
+      final owes = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001')
+        ..openOrders = 2
+        ..owed = 166;
+      final directory = FakeDirectory(customers: [owes, bruno]);
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: true,
+          seesAllOrders: true,
+          directory: directory,
+        ),
         direct: true,
       );
       expect(
@@ -1665,7 +1727,14 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
-          directory: FakeDirectory(customers: [ana], owed: {'c1': 166}),
+          seesAllOrders: true,
+          directory: FakeDirectory(
+            customers: [
+              customer('c1', 'Ana Ribeiro')
+                ..openOrders = 1
+                ..owed = 166,
+            ],
+          ),
         ),
         direct: true,
       );
@@ -1678,6 +1747,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [customer('c9', 'Carla', phone: '+5548981234567')],
           ),
@@ -1694,6 +1764,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [ana, bruno],
             devices: [device('d1', 'Fiat Uno', 'ABC1D23')],
@@ -1717,6 +1788,7 @@ void main() {
         HomeCustomerList(
           canAdd: false,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(),
         ),
         direct: true,
@@ -1734,6 +1806,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(),
         ),
         direct: true,

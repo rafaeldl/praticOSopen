@@ -16,6 +16,7 @@ import { fakeStorage, list, read, resetFakeDb, seed } from '../../../__tests__/h
 import { bearerAuth } from '../../../middleware/auth.middleware';
 import { resolveCompanyContext } from '../../../middleware/company.middleware';
 import appCustomersRoutes from '../app-customers.routes';
+import { recountCustomer } from '../../../services/customer-aggregates.service';
 import appDevicesRoutes from '../app-devices.routes';
 
 type Role = 'owner' | 'admin' | 'manager' | 'supervisor' | 'consultant' | 'technician';
@@ -61,6 +62,11 @@ function seedCompanies(c1: Record<string, unknown> = {}) {
     seed(`users/${uid}`, { name: uid, companies: [{ company: { id: 'c1', name: 'Oficina' }, role }] });
   }
   seed('users/other2', { name: 'Outro', companies: [{ company: { id: 'c2', name: 'Outra' }, role: 'owner' }] });
+}
+
+/** What the order triggers leave on the customers (customer-aggregates.service.ts). */
+async function recountCustomers() {
+  for (const doc of list('companies/c1/customers')) await recountCustomer('c1', doc.id);
 }
 
 function seedOrder(id: string, data: Record<string, unknown> = {}) {
@@ -126,6 +132,7 @@ describe('GET /customers (lista)', () => {
     seedOrder('o3', { status: 'quote' });
     seedOrder('o4', { status: 'done' });
     seedOrder('o5', { status: 'approved', dueDate: new Date().toISOString() });
+    await recountCustomers();
     const res = await call('admin', 'get', CU);
     expect(res.body.data.find((c: any) => c.id === 'ana')).toMatchObject({ open: 4, late: 1 });
     expect(res.body.data.find((c: any) => c.id === 'bia')).toMatchObject({ open: 0, late: 0 });
@@ -136,6 +143,7 @@ describe('GET /customers (lista)', () => {
     seedOrder('o2', { status: 'progress', total: 50, paidAmount: 20, payment: 'partial' });
     seedOrder('o3', { status: 'approved', total: 80 });
     seedOrder('o4', { status: 'done', total: 70, paidAmount: 70, payment: 'paid' });
+    await recountCustomers();
     const admin = await call('admin', 'get', CU);
     expect(admin.body.data.find((c: any) => c.id === 'ana').owed).toBe(230);
     expect(admin.body.data.find((c: any) => c.id === 'bia').owed).toBe(0);
@@ -149,6 +157,7 @@ describe('GET /customers (lista)', () => {
     seedOrder('o1', { createdBy: { id: 'cons1', name: 'Caio' } });
     seedOrder('o2', { createdBy: { id: 'someone', name: 'X' } });
     seedOrder('o3', { createdBy: { id: 'someone', name: 'X' }, assignedTo: { id: 'tech1', name: 'Téo' } });
+    await recountCustomers();
     const consultant = await call('consultant', 'get', CU);
     expect(consultant.body.data.find((c: any) => c.id === 'ana').open).toBe(1);
     expect(consultant.body.meta.partial).toBe(true);

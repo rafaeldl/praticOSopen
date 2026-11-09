@@ -40,6 +40,7 @@ class HomeCustomerList extends StatefulWidget {
     this.directory,
     this.canAdd,
     this.showOwed,
+    this.seesAllOrders,
   });
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
@@ -49,9 +50,15 @@ class HomeCustomerList extends StatefulWidget {
   /// permission (the Firestore rules deny the write otherwise). Test seam.
   final bool? canAdd;
 
-  /// Whether each row says how much the customer owes. Defaults to who reads
-  /// the Financeiro (its query is the one used). Test seam.
+  /// Whether each row says how much the customer owes (`Customer.owed`, of
+  /// every order). Defaults to who reads the Financeiro. Test seam.
   final bool? showOwed;
+
+  /// Whether the badges come from the numbers the server keeps on the
+  /// customer (every order) instead of the orders this person may read.
+  /// Defaults to `viewAllOrders`: consultant and technician count only
+  /// their own orders, as the Firestore rules allow. Test seam.
+  final bool? seesAllOrders;
 
   @override
   State<HomeCustomerList> createState() => _HomeCustomerListState();
@@ -74,8 +81,14 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
   StreamSubscription<List<Customer>>? _subscription;
   List<Customer>? _customers;
-  Map<String, OpenOrdersSummary> _openOrders = const {};
-  Map<String, double> _owed = const {};
+  /// Badges counted from the orders this person may read; null when they
+  /// come from the customer ([HomeCustomerList.seesAllOrders]).
+  Map<String, OpenOrdersSummary>? _openOrders;
+  bool get _seesAllOrders =>
+      widget.seesAllOrders ??
+      AuthorizationService.instance.hasPermission(
+        PermissionType.viewAllOrders,
+      );
   bool get _showOwed =>
       widget.showOwed ??
       AuthorizationService.instance.hasPermission(
@@ -101,17 +114,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         })
         .catchError((_) {});
     _plates.load();
-    _directory
-        .openOrdersByCustomer()
-        .then((summary) {
-          if (mounted) setState(() => _openOrders = summary);
-        })
-        .catchError((_) {});
-    if (_showOwed) {
+    if (!_seesAllOrders) {
+      _openOrders = const {};
       _directory
-          .owedByCustomer()
-          .then((owed) {
-            if (mounted) setState(() => _owed = owed);
+          .openOrdersByCustomer()
+          .then((summary) {
+            if (mounted) setState(() => _openOrders = summary);
           })
           .catchError((_) {});
     }
@@ -330,7 +338,11 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
   Widget _row(Customer customer, {String? plate}) {
     final l10n = context.l10n;
-    final summary = _openOrders[customer.id];
+    final summary =
+        _openOrders?[customer.id] ??
+        (_openOrders == null
+            ? customerOpenSummary(customer, DateTime.now())
+            : null);
     String? status;
     CupertinoDynamicColor? dot;
     if (summary != null && summary.late > 0) {
@@ -340,7 +352,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       status = l10n.openOrdersCount(summary.open);
       dot = AppColors.warningDot;
     }
-    final owed = _owed[customer.id] ?? 0;
+    final owed = _showOwed ? customer.owed ?? 0 : 0;
     final owes = owed > 0
         ? l10n.customerOwesValue(
             (FormatService()..setLocale(l10n.localeName)).formatCurrency(owed),
