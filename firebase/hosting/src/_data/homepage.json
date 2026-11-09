@@ -428,19 +428,19 @@
       "tab": {
         "id": "nota-fiscal",
         "tab": "Nota fiscal",
-        "title": "Nota fiscal de serviço direto da OS",
-        "text": "Para empresa do Simples e para o MEI. O PraticOS emite pelo Emissor Nacional do governo: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+        "title": "Nota fiscal direto da OS",
+        "text": "Para Simples e MEI, pelo Emissor Nacional. Cliente, serviço e valor vêm da OS.",
         "facts": [
-          "Um toque em “Emitir nota fiscal” na OS pronta, ou a nota sai sozinha ao concluir",
+          "Um toque em “Emitir nota fiscal” na OS pronta",
           "O cliente recebe a nota e o PDF por e-mail",
-          "Sem pagar por nota no plano pago, com o certificado A1 da empresa"
+          "Sem pagar por nota no plano pago"
         ],
         "cta": {
           "label": "Ver como funciona a nota",
           "href": "funcionalidades/nota-fiscal.html",
           "ga": "home_nfse_page"
         },
-        "note": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
+        "note": "Nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
         "scene": {
           "kind": "invoice",
           "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",

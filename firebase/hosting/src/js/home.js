@@ -6,7 +6,11 @@
       var on = t === tab;
       t.setAttribute('aria-selected', on ? 'true' : 'false');
       t.tabIndex = on ? 0 : -1;
-      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      // Panels stay laid out (one grid cell, see .panels): hide with visibility, not display
+      var panel = document.getElementById(t.getAttribute('aria-controls'));
+      panel.toggleAttribute('data-active', on);
+      panel.toggleAttribute('inert', !on);
+      if (on) panel.removeAttribute('aria-hidden'); else panel.setAttribute('aria-hidden', 'true');
     });
     if (focus) tab.focus();
   }
