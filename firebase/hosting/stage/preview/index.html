@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage preview</title>
+<style>
+  body { margin: 0; background: #12284a; font-family: system-ui, sans-serif; color: #fff; }
+  .band { display: grid; grid-template-columns: minmax(0, 1fr) 560px; gap: 48px; max-width: 1184px; margin: 0 auto; padding: 0 24px; }
+  .copy { padding: 96px 0; }
+  .copy h1 { font-size: 64px; line-height: 1; margin: 0; }
+  #example { overflow: hidden; }
+  @media (max-width: 900px) { .band { grid-template-columns: 1fr; } .copy { padding: 48px 0 24px; } }
+</style>
+</head>
+<body>
+<div class="band">
+  <div class="copy"><h1>Você fala.<br>O PraticOS faz a OS.</h1></div>
+  <div id="example" data-stage="hero"><script type="application/json" id="copy"></script></div>
+</div>
+<script type="module">
+  import data from '../../src/_data/homepage.json'
+  const lang = new URLSearchParams(location.search).get('lang') || 'pt'
+  document.getElementById('copy').textContent = JSON.stringify(data[lang].hero.stage)
+  await import('../scenes/hero/mount.tsx')
+</script>
+</body>
+</html>

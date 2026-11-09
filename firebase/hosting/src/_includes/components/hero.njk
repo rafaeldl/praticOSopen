@@ -1,4 +1,4 @@
-{# Photographic hero — headline left, trade photos right, the spoken order building over them #}
+{# Product hero — headline left, the app on an iPhone writing the work order from speech right #}
 {% set hero = data.hero %}
 {% set demo = hero.demo %}
 <section class="hero" id="hero">
@@ -13,30 +13,11 @@
             </div>
         </div>
 
-        <div class="media">
-            {% for tile in hero.tiles %}
-            <figure class="tile">
-                <img src="{{ relPath }}assets/images/site/{{ tile.image }}" alt="{{ tile.alt }}" width="{{ tile.width }}" height="{{ tile.height }}" decoding="async"{% if loop.first %} fetchpriority="high"{% endif %}>
-                <figcaption class="tag">{{ tile.label }}</figcaption>
-            </figure>
-            {% endfor %}
-
-            <div class="demo" data-demo aria-label="{{ demo.label }}">
-                <div class="demo__said">
-                    <div class="demo__top">
-                        <span>{{ demo.said }}</span>
-                        <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-                    </div>
-                    <p class="demo__line" data-demo-line>{{ demo.line }}</p>
-                </div>
-                <div class="demo__order">
-                    {% for row in demo.rows %}
-                    <div class="demo__row" data-demo-row><span>{{ row.label }}</span><span>{{ row.value }}</span></div>
-                    {% endfor %}
-                    <div class="demo__row demo__row--total" data-demo-row><span>{{ demo.totalLabel }}</span><span>{{ demo.total }}</span></div>
-                </div>
-                <div class="demo__done" data-demo-done>{{ demo.done }}<button class="demo__again" type="button" data-demo-again hidden>{{ demo.again }}</button></div>
-            </div>
+        {# The product scene: the app's "Nova OS" sheet filling itself from speech
+           (stage/scenes/hero, built into assets/stage/). Plays once; replay below. #}
+        <div class="hero__stage">
+            <div class="hero__scene" data-stage="hero" role="img" aria-label="{{ hero.stage.label }}"><script type="application/json">{{ hero.stage | dump | safe }}</script></div>
+            <button class="hero__again" type="button" data-stage-replay="hero" hidden>{{ demo.again }}</button>
         </div>
     </div>
 </section>
@@ -46,3 +27,5 @@
         {% for item in (hero.stripWebApp if site.flags.webApp else hero.strip) %}<li>{% if loop.last and site.flags.nfsePage and hero.stripNfse %}<a class="strip__link" href="#nota-fiscal">{{ hero.stripNfse }}</a>{% else %}{{ item }}{% endif %}</li>{% endfor %}
     </ul>
 </div>
+<link rel="stylesheet" href="{{ relPath }}assets/stage/hero.css">
+<script type="module" src="{{ relPath }}assets/stage/hero.js"></script>

@@ -66,7 +66,45 @@
         "Celular e computador",
         "Cliente aprova sem instalar nada"
       ],
-      "stripNfse": "Nota fiscal de serviço"
+      "stripNfse": "Nota fiscal de serviço",
+      "stage": {
+        "label": "Exemplo: a fala vira uma ordem de serviço",
+        "title": "Nova OS",
+        "client": "Juliana Costa",
+        "clientEmpty": "Escolher cliente",
+        "vehicle": "Onix",
+        "vehicleEmpty": "Escolher veículo",
+        "work": "O que vai ser feito",
+        "add": "+ Adicionar serviço ou peça",
+        "photos": "Fotos",
+        "photo": "Foto",
+        "talk": "Falar",
+        "listening": "Ouvindo…",
+        "line": "Onix da Juliana, troca de óleo e alinhamento",
+        "items": [
+          {
+            "name": "Troca de óleo",
+            "price": "R$ 80,00"
+          },
+          {
+            "name": "Alinhamento",
+            "price": "R$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "R$ 0,00",
+          "R$ 80,00",
+          "R$ 200,00"
+        ],
+        "filled": "Preenchi o que está marcado. Confira e salve.",
+        "undo": "Desfazer",
+        "due": "Fica pronto",
+        "request": "O que o cliente pediu",
+        "requestHint": "Ex.: barulho ao frear",
+        "more": "Mais opções",
+        "moreHint": "Situação, visita, responsável, local"
+      }
     },
     "workflow": {
       "title": "Menos papelada. Mais serviço e dinheiro no bolso.",
@@ -307,7 +345,45 @@
         "Start free",
         "Phone and computer",
         "Customers approve with nothing to install"
-      ]
+      ],
+      "stage": {
+        "label": "Example: speech turns into a work order",
+        "title": "New WO",
+        "client": "Julia Carter",
+        "clientEmpty": "Choose customer",
+        "vehicle": "Civic",
+        "vehicleEmpty": "Choose vehicle",
+        "work": "What will be done",
+        "add": "+ Add service or part",
+        "photos": "Photos",
+        "photo": "Photo",
+        "talk": "Speak",
+        "listening": "Listening…",
+        "line": "Julia's Civic, oil change and alignment",
+        "items": [
+          {
+            "name": "Oil change",
+            "price": "$80.00"
+          },
+          {
+            "name": "Alignment",
+            "price": "$120.00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "$0.00",
+          "$80.00",
+          "$200.00"
+        ],
+        "filled": "I filled in what's marked. Check it and save.",
+        "undo": "Undo",
+        "due": "Ready by",
+        "request": "What the customer asked",
+        "requestHint": "E.g.: noise when braking",
+        "more": "More options",
+        "moreHint": "Status, visit, assignee, location"
+      }
     },
     "workflow": {
       "title": "Less paperwork. More jobs done and money in your pocket.",
@@ -528,7 +604,45 @@
         "Empieza gratis",
         "Celular y computadora",
         "El cliente aprueba sin instalar nada"
-      ]
+      ],
+      "stage": {
+        "label": "Ejemplo: lo que dices se convierte en una orden de servicio",
+        "title": "Nueva OS",
+        "client": "Julia Gómez",
+        "clientEmpty": "Elegir cliente",
+        "vehicle": "Corolla",
+        "vehicleEmpty": "Elegir vehículo",
+        "work": "Qué se va a hacer",
+        "add": "+ Agregar servicio o pieza",
+        "photos": "Fotos",
+        "photo": "Foto",
+        "talk": "Hablar",
+        "listening": "Escuchando…",
+        "line": "El Corolla de Julia, cambio de aceite y alineación",
+        "items": [
+          {
+            "name": "Cambio de aceite",
+            "price": "$ 80,00"
+          },
+          {
+            "name": "Alineación",
+            "price": "$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "$ 0,00",
+          "$ 80,00",
+          "$ 200,00"
+        ],
+        "filled": "Completé lo marcado. Revísalo y guarda.",
+        "undo": "Deshacer",
+        "due": "Listo el",
+        "request": "Lo que pidió el cliente",
+        "requestHint": "Ej.: ruido al frenar",
+        "more": "Más opciones",
+        "moreHint": "Estado, visita, responsable, lugar"
+      }
     },
     "workflow": {
       "title": "Menos papeleo. Más trabajos y dinero en el bolsillo.",
