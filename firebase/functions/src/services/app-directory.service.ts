@@ -124,9 +124,11 @@ export interface DirectoryCustomer {
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value : null);
 
-/** Most recent of `lastActivityAt`, `updatedAt` and `createdAt` (customer-activity.service.ts), UTC ISO. */
+/** `lastActivityAt` (customer-activity.service.ts); before the backfill, the most recent of `updatedAt` and `createdAt`. UTC ISO. */
 export function lastActivityOf(data: Record<string, unknown>): string | null {
-  const times = [data.lastActivityAt, data.updatedAt, data.createdAt].map(dateMillis).filter((ms): ms is number => ms != null);
+  const stamped = dateMillis(data.lastActivityAt);
+  if (stamped != null) return new Date(stamped).toISOString();
+  const times = [data.updatedAt, data.createdAt].map(dateMillis).filter((ms): ms is number => ms != null);
   return times.length ? new Date(Math.max(...times)).toISOString() : null;
 }
 

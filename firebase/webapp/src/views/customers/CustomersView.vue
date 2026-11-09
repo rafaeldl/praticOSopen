@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
                 </span>
               </td>
               <td v-if="showOwed" class="num dir-money" data-testid="customer-owed">{{ row.owed ? money(row.owed) : '' }}</td>
-              <td class="sub c-activity" data-testid="customer-activity">{{ activityText(row.lastActivity) }}</td>
+              <td class="c-activity"><span class="status" data-testid="customer-activity">{{ activityText(row.lastActivity) }}</span></td>
             </tr>
           </tbody>
         </table>

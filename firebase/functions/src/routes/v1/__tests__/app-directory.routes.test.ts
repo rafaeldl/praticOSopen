@@ -111,11 +111,13 @@ describe('GET /customers (lista)', () => {
     seed('companies/c1/customers/ana', { name: 'Ana', createdAt: '2026-01-01T00:00:00.000Z', lastActivityAt: '2026-11-09T12:00:00.000Z' });
     seed('companies/c1/customers/bia', { name: 'Bia', createdAt: '2026-02-01T00:00:00.000Z', updatedAt: { seconds: 1767225600, nanoseconds: 0 } });
     seed('companies/c1/customers/cris', { name: 'Cris' });
+    seed('companies/c1/customers/davi', { name: 'Davi', createdAt: '2026-11-09T00:00:00.000Z', lastActivityAt: '2026-10-01T00:00:00.000Z' });
     const res = await call('technician', 'get', CU);
     const by = (id: string) => res.body.data.find((c: any) => c.id === id).lastActivity;
     expect(by('ana')).toBe('2026-11-09T12:00:00.000Z');
     expect(by('bia')).toBe('2026-02-01T00:00:00.000Z');
     expect(by('cris')).toBeNull();
+    expect(by('davi')).toBe('2026-10-01T00:00:00.000Z');
   });
 
   test('selos: em aberto é o da Início (orçamento conta) e atrasada é por dia', async () => {
