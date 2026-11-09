@@ -18,3 +18,4 @@ pageType: homepage
 <link rel="stylesheet" href="{{ relPath }}assets/stage/shared.css">
 <script type="module" src="{{ relPath }}assets/stage/hero.js"></script>
 <script type="module" src="{{ relPath }}assets/stage/tabs.js"></script>
+{% if site.flags.webApp %}<script type="module" src="{{ relPath }}assets/stage/web.js"></script>{% endif %}

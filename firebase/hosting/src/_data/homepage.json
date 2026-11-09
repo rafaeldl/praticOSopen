@@ -404,7 +404,96 @@
         }
       ],
       "cta": "Entrar no sistema",
-      "guide": "Ver como usar no computador"
+      "guide": "Ver como usar no computador",
+      "scene": {
+        "label": "O quadro de OS no computador com a OS 186 arrastada para Concluída, e a mesma OS no celular já concluída",
+        "url": "praticos.app/web",
+        "nav": [
+          "Início",
+          "Agenda",
+          "Financeiro",
+          "Clientes",
+          "Notas fiscais",
+          "Catálogo"
+        ],
+        "title": "Início",
+        "summary": "12 em aberto · 2 atrasadas",
+        "newOrder": "Nova OS",
+        "views": [
+          "Lista",
+          "Quadro"
+        ],
+        "columns": [
+          {
+            "name": "Aprovada",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Bruno Lima",
+                "num": "184",
+                "sub": "Gol · QRT4E21",
+                "money": "R$ 310,00"
+              },
+              {
+                "who": "Carla Dias",
+                "num": "183",
+                "sub": "HB20 · RFA2B90",
+                "money": "R$ 450,00"
+              }
+            ]
+          },
+          {
+            "name": "Em andamento",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Juliana Costa",
+                "num": "186",
+                "sub": "Onix · BRA2E19",
+                "money": "R$ 200,00"
+              },
+              {
+                "who": "Paulo Nunes",
+                "num": "185",
+                "sub": "Fiat Uno · ABC1D23",
+                "money": "R$ 166,00"
+              }
+            ]
+          },
+          {
+            "name": "Concluída",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Ana Souza",
+                "num": "181",
+                "sub": "Corolla · PXT3C44",
+                "money": "R$ 520,00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Início",
+          "title": "OS #186",
+          "client": "Juliana Costa",
+          "device": "Onix · BRA2E19",
+          "from": "Em andamento",
+          "to": "Concluída",
+          "items": [
+            {
+              "name": "Troca de óleo",
+              "price": "R$ 80,00"
+            },
+            {
+              "name": "Alinhamento",
+              "price": "R$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "R$ 200,00"
+        }
+      }
     },
     "nfse": {
       "title": "Nota fiscal de serviço direto da OS",
@@ -873,7 +962,96 @@
         }
       ],
       "cta": "Sign in to the system",
-      "guide": "See how to use it on a computer"
+      "guide": "See how to use it on a computer",
+      "scene": {
+        "label": "The work order board on the computer with order 186 dragged to Completed, and the same order on the phone already completed",
+        "url": "praticos.app/web",
+        "nav": [
+          "Home",
+          "Schedule",
+          "Finance",
+          "Customers",
+          "Catalog",
+          "Team"
+        ],
+        "title": "Home",
+        "summary": "12 open · 2 late",
+        "newOrder": "New order",
+        "views": [
+          "List",
+          "Board"
+        ],
+        "columns": [
+          {
+            "name": "Approved",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Brian Lee",
+                "num": "184",
+                "sub": "Civic · 7KLM204",
+                "money": "$310.00"
+              },
+              {
+                "who": "Carla Diaz",
+                "num": "183",
+                "sub": "Corolla · 8TRS551",
+                "money": "$450.00"
+              }
+            ]
+          },
+          {
+            "name": "In progress",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Julia Carter",
+                "num": "186",
+                "sub": "Camry · 6ABC123",
+                "money": "$200.00"
+              },
+              {
+                "who": "Paul Newman",
+                "num": "185",
+                "sub": "F-150 · 9XYZ882",
+                "money": "$166.00"
+              }
+            ]
+          },
+          {
+            "name": "Completed",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Anna Scott",
+                "num": "181",
+                "sub": "Accord · 5DEF310",
+                "money": "$520.00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Home",
+          "title": "Order #186",
+          "client": "Julia Carter",
+          "device": "Camry · 6ABC123",
+          "from": "In progress",
+          "to": "Completed",
+          "items": [
+            {
+              "name": "Oil change",
+              "price": "$80.00"
+            },
+            {
+              "name": "Wheel alignment",
+              "price": "$120.00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "$200.00"
+        }
+      }
     }
   },
   "es": {
@@ -1280,7 +1458,96 @@
         }
       ],
       "cta": "Entrar al sistema",
-      "guide": "Ver cómo usarlo en la computadora"
+      "guide": "Ver cómo usarlo en la computadora",
+      "scene": {
+        "label": "El tablero de órdenes en la computadora con la orden 186 arrastrada a Terminada, y la misma orden en el celular ya terminada",
+        "url": "praticos.app/web",
+        "nav": [
+          "Inicio",
+          "Agenda",
+          "Finanzas",
+          "Clientes",
+          "Catálogo",
+          "Equipo"
+        ],
+        "title": "Inicio",
+        "summary": "12 abiertas · 2 atrasadas",
+        "newOrder": "Nueva orden",
+        "views": [
+          "Lista",
+          "Tablero"
+        ],
+        "columns": [
+          {
+            "name": "Aprobada",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Bruno Gómez",
+                "num": "184",
+                "sub": "Gol · AB123CD",
+                "money": "$ 310,00"
+              },
+              {
+                "who": "Carla Díaz",
+                "num": "183",
+                "sub": "Corolla · AC456EF",
+                "money": "$ 450,00"
+              }
+            ]
+          },
+          {
+            "name": "En curso",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Julia Torres",
+                "num": "186",
+                "sub": "Onix · AD789GH",
+                "money": "$ 200,00"
+              },
+              {
+                "who": "Pablo Núñez",
+                "num": "185",
+                "sub": "Fiat Uno · AE321JK",
+                "money": "$ 166,00"
+              }
+            ]
+          },
+          {
+            "name": "Terminada",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Ana Ruiz",
+                "num": "181",
+                "sub": "Hilux · AF654LM",
+                "money": "$ 520,00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Inicio",
+          "title": "Orden #186",
+          "client": "Julia Torres",
+          "device": "Onix · AD789GH",
+          "from": "En curso",
+          "to": "Terminada",
+          "items": [
+            {
+              "name": "Cambio de aceite",
+              "price": "$ 80,00"
+            },
+            {
+              "name": "Alineación",
+              "price": "$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "$ 200,00"
+        }
+      }
     }
   }
 }

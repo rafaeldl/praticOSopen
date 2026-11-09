@@ -14,7 +14,7 @@ export default defineConfig({
     emptyOutDir: true,
     modulePreload: false,
     rollupOptions: {
-      input: { hero: 'scenes/hero/mount.tsx', tabs: 'scenes/tabs/mount.tsx' },
+      input: { hero: 'scenes/hero/mount.tsx', tabs: 'scenes/tabs/mount.tsx', web: 'scenes/web/mount.tsx' },
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',

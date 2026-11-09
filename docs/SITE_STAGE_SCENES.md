@@ -93,3 +93,11 @@ node ../../../.claude/skills/stageshow/scripts/film.mjs 'http://127.0.0.1:5174/t
 Nova cena: crie `scenes/<nome>/` com o componente e um `mount.tsx`, some a entrada em
 `vite.config.ts` e monte no template com `<div data-stage="<nome>">`, `shared.css` e o módulo
 da cena.
+
+## Também no computador (`stage/scenes/web`)
+
+A seção do sistema web (`components/web-app.njk`, só com `flags.webApp`) tem o texto à esquerda e,
+à direita, a janela do navegador com o quadro do Início e o celular com a mesma OS. O cursor
+arrasta a OS 186 de "Em andamento" para "Concluída" e, logo depois, o celular mostra a OS concluída.
+Toca uma vez. Os textos estão em `homepage.json` → `webApp.scene` (pt, en, es); em inglês e
+espanhol o menu não cita notas fiscais. Prévia: `stage/preview/web.html`.
