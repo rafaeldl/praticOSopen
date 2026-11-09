@@ -30,6 +30,7 @@
 .seg-gains__answer::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
 
 /* ---------- Tabs without a screen ---------- */
+.panels--own .panel:not([data-active]) { display: none; }
 .panel--text { align-items: center; }
 .panel--text .panel__copy { padding-block: var(--space-xl); }
 ul.panel__facts { margin: var(--space-lg) 0; max-width: none; padding: var(--space-md) var(--space-lg); background: var(--color-card); border-radius: var(--radius-card); }

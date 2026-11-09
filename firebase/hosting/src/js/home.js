@@ -6,7 +6,11 @@
       var on = t === tab;
       t.setAttribute('aria-selected', on ? 'true' : 'false');
       t.tabIndex = on ? 0 : -1;
-      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      // Panels stay laid out (one grid cell, see .panels): hide with visibility, not display
+      var panel = document.getElementById(t.getAttribute('aria-controls'));
+      panel.toggleAttribute('data-active', on);
+      panel.toggleAttribute('inert', !on);
+      if (on) panel.removeAttribute('aria-hidden'); else panel.setAttribute('aria-hidden', 'true');
     });
     if (focus) tab.focus();
   }
@@ -18,6 +22,14 @@
       if (!d) return;
       e.preventDefault();
       select(tabs[(i + d + tabs.length) % tabs.length], true);
+    });
+  });
+
+  // Links elsewhere on the page can open a tab by id (the strip's "Nota fiscal de serviço")
+  [].slice.call(document.querySelectorAll('[data-tab-open]')).forEach(function (a) {
+    a.addEventListener('click', function () {
+      var tab = document.querySelector('[data-tab-id="' + a.getAttribute('data-tab-open') + '"]');
+      if (tab) select(tab);
     });
   });
 
@@ -194,6 +206,8 @@
 
   // The card stays complete at rest; one pass plays on load, replays are manual.
   var demo = document.querySelector('[data-demo]');
+  // The ?hero=app test hides the card and plays the app scene instead
+  if (document.documentElement.dataset.hero === 'app') return;
   if (!demo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var line = demo.querySelector('[data-demo-line]');

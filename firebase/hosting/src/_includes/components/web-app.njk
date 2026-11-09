@@ -1,23 +1,29 @@
-{# Web app band — only rendered when site.flags.webApp is true. Text only: no web screens captured yet. #}
+{# Web app band — only rendered when site.flags.webApp is true.
+   Copy on the left; on the right the web app's board and the app on the phone
+   telling one event (stage/scenes/web): an order dragged to done on the
+   computer turns done on the phone. #}
 {% set web = data.webApp %}
 {% set guideHref = {pt: 'docs/computador.html', en: 'docs/computador-en.html', es: 'docs/computador-es.html'}[langCode] | default('docs/computador.html') %}
-<section class="section section--alt facts-band" id="computador">
-    <div class="wrap">
-        <div class="section-head">
+<section class="section section--alt web" id="computador">
+    <div class="wrap web__grid">
+        <div class="web__copy">
             <h2>{{ web.title }}</h2>
-            <p>{{ web.lede }}</p>
+            <p class="web__lede">{{ web.lede }}</p>
+            <ul class="web__list" role="list">
+                {% for item in web.items %}
+                <li>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="btn-row web__actions">
+                <a href="{{ site.webAppUrl }}" class="btn btn--secondary" data-ga="select_content" data-ga-detail="home_web_login">{{ web.cta }}</a>
+                <a href="{{ relPath }}{{ guideHref }}" class="btn btn--text" data-ga="select_content" data-ga-detail="home_web_guide">{{ web.guide }}</a>
+            </div>
         </div>
-        <ul class="facts-band__list" role="list">
-            {% for item in web.items %}
-            <li>
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.text }}</p>
-            </li>
-            {% endfor %}
-        </ul>
-        <div class="btn-row facts-band__actions">
-            <a href="{{ site.webAppUrl }}" class="btn btn--secondary" data-ga="select_content" data-ga-detail="home_web_login">{{ web.cta }}</a>
-            <a href="{{ relPath }}{{ guideHref }}" class="btn btn--text" data-ga="select_content" data-ga-detail="home_web_guide">{{ web.guide }}</a>
-        </div>
+        {% if web.scene %}
+        <div class="web__scene" data-stage="web" role="img" aria-label="{{ web.scene.label }}"><script type="application/json">{{ web.scene | dump | safe }}</script></div>
+        {% endif %}
     </div>
 </section>

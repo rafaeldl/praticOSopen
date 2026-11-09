@@ -37,6 +37,7 @@
 - [`web-app/discovery-report.md`](web-app/discovery-report.md) - Descoberta do app web: uso real, arquitetura, matriz de paridade e roteiro
 - [`WEB_UX_GUIDELINES.md`](WEB_UX_GUIDELINES.md) - Padrões para site institucional
 - [`WEBSITE_STRUCTURE.md`](WEBSITE_STRUCTURE.md) - Estrutura completa do site Eleventy
+- [`SITE_STAGE_SCENES.md`](SITE_STAGE_SCENES.md) - Cenas do produto no site (skill Stageshow em `.claude/skills/stageshow`): pacote React em `firebase/hosting/stage`, build para `src/assets/stage`, prévia e gate
 - [`MULTI_TENANCY.md`](MULTI_TENANCY.md) - Detalhes da arquitetura multi-tenant
 - [`formularios_dinamicos.md`](formularios_dinamicos.md) - Especificação de checklists/vistorias
 - [`DEPLOYMENT.md`](DEPLOYMENT.md) - Guia completo de deploy

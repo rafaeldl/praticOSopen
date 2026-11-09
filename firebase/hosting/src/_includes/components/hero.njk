@@ -1,4 +1,7 @@
-{# Photographic hero — headline left, trade photos right, the spoken order building over them #}
+{# Photographic hero — headline left, trade photos right, the spoken order building over them.
+   Test: ?hero=app swaps the card for the app's phone filling the order (stage/scenes/hero,
+   short screen) over the same photos. Both render; html[data-hero] picks one. #}
+<script>try{if(new URLSearchParams(location.search).get('hero')==='app')document.documentElement.dataset.hero='app'}catch(e){}</script>
 {% set hero = data.hero %}
 {% set demo = hero.demo %}
 <section class="hero" id="hero">
@@ -37,12 +40,19 @@
                 </div>
                 <div class="demo__done" data-demo-done>{{ demo.done }}<button class="demo__again" type="button" data-demo-again hidden>{{ demo.again }}</button></div>
             </div>
+
+            {# Variant "app": the app's phone filling the order, in place of the card #}
+            <div class="app" data-stage-wrap>
+                <div class="app__scene" data-stage="hero" data-short role="img" aria-label="{{ hero.stage.label }}"><script type="application/json">{{ hero.stage | dump | safe }}</script></div>
+                <button class="stage-again stage-again--on-navy app__again" type="button" data-stage-replay hidden>{{ demo.again }}</button>
+            </div>
         </div>
+
     </div>
 </section>
 
 <div class="strip">
     <ul class="wrap" role="list">
-        {% for item in (hero.stripWebApp if site.flags.webApp else hero.strip) %}<li>{% if loop.last and site.flags.nfsePage and hero.stripNfse %}<a class="strip__link" href="#nota-fiscal">{{ hero.stripNfse }}</a>{% else %}{{ item }}{% endif %}</li>{% endfor %}
+        {% for item in (hero.stripWebApp if site.flags.webApp else hero.strip) %}<li>{% if loop.last and site.flags.nfsePage and hero.stripNfse %}<a class="strip__link" href="#como-funciona" data-tab-open="nota-fiscal">{{ hero.stripNfse }}</a>{% else %}{{ item }}{% endif %}</li>{% endfor %}
     </ul>
 </div>

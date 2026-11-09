@@ -1,0 +1,360 @@
+/* The web app on the computer next to the app on the phone (WebScene.tsx).
+   The window draws the web app with its own tokens (firebase/webapp,
+   WEB_APP_DESIGN.md): navy sidebar, white board, 6px corners, yellow button.
+   Fixed values, light mode, so the scene reads the same on the site's dark
+   theme. Inside the Phone the hero's iOS tokens apply (../hero/hero.css). */
+
+.wb {
+  --wb-navy: #0b2340;
+  --wb-navy-2: #16345a;
+  --wb-on-navy: #fff;
+  --wb-on-navy-2: #b9c6d6;
+  --wb-paper: #fff;
+  --wb-grouped: #f6f4f0;
+  --wb-ink: #14202e;
+  --wb-muted: #5f6873;
+  --wb-faint: #8a9099;
+  --wb-rule: #e3e0da;
+  --wb-yellow: #ffc83d;
+  --wb-accent: #1f6fbf;
+  --wb-warning: #c27c0e;
+  --wb-success: #248a3d;
+  --wb-selected: #e4eefb;
+  --wb-font: 'IBM Plex Sans', 'DM Sans', system-ui, sans-serif;
+  --wb-card-h: 66px;
+}
+
+.wb .ss-stage {
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Window: top right, running off the bottom (wide) or the right (narrow) */
+.wb .wb-window {
+  position: absolute;
+  top: 0;
+  left: 118px;
+  width: 562px;
+  height: 520px;
+  font-family: var(--wb-font);
+  color: var(--wb-ink);
+}
+
+.wb .ss-stage[data-layout='compact'] .wb-window {
+  top: 16px;
+  left: 16px;
+  width: 520px;
+  height: 330px;
+}
+
+.wb .wb-app {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  height: 100%;
+  background: var(--wb-paper);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.wb .ss-stage[data-layout='compact'] .wb-app {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.wb .wb-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  background: var(--wb-navy);
+  color: var(--wb-on-navy-2);
+}
+
+.wb .wb-logo {
+  margin: 0 6px 10px;
+  color: var(--wb-on-navy);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.wb .wb-nav {
+  padding: 5px 6px;
+  border-radius: 6px;
+}
+
+.wb .wb-nav[data-on] {
+  background: var(--wb-on-navy);
+  color: var(--wb-navy);
+  font-weight: 600;
+}
+
+.wb .wb-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wb .wb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 8px;
+}
+
+.wb .wb-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.wb .wb-summary {
+  margin-top: 2px;
+  color: var(--wb-muted);
+}
+
+.wb .wb-new {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--wb-yellow);
+  color: var(--wb-navy);
+  font-weight: 700;
+}
+
+.wb .wb-views {
+  display: flex;
+  gap: 2px;
+  margin: 0 14px 10px;
+  padding: 2px;
+  width: max-content;
+  border-radius: 6px;
+  background: var(--wb-grouped);
+  color: var(--wb-muted);
+}
+
+.wb .wb-views span {
+  padding: 3px 10px;
+  border-radius: 5px;
+}
+
+.wb .wb-views span[data-on] {
+  background: var(--wb-paper);
+  color: var(--wb-ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.wb .wb-board {
+  flex: 1;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--wb-rule);
+}
+
+.wb .ss-stage[data-layout='compact'] .wb-board {
+  grid-auto-columns: 163px;
+}
+
+.wb .wb-col {
+  border-right: 1px solid var(--wb-rule);
+  transition: background-color 0.18s ease;
+}
+
+.wb .wb-col[data-over] {
+  background: var(--wb-selected);
+}
+
+.wb .wb-col__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 10px;
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.wb .wb-col__count {
+  margin-left: auto;
+  color: var(--wb-muted);
+  font-weight: 400;
+}
+
+.wb .wb-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.wb .wb-dot--accent { background: var(--wb-accent); }
+.wb .wb-dot--warning { background: var(--wb-warning); }
+.wb .wb-dot--success { background: var(--wb-success); }
+
+.wb .wb-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+}
+
+.wb .wb-list > .wb-card {
+  will-change: transform;
+  margin-bottom: 6px;
+}
+
+/* A card's place: empty under the moving card. While the hand holds it,
+   the place it left and the one it will land in show as a faint well */
+.wb .wb-slot {
+  height: var(--wb-card-h);
+  margin-bottom: 6px;
+  border-radius: 6px;
+  background: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.wb .wb-slot[data-empty] {
+  background: rgba(11, 35, 64, 0.07);
+}
+
+.wb .wb-card {
+  box-sizing: border-box;
+  height: var(--wb-card-h);
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  padding: 7px 9px;
+  border: 1px solid var(--wb-rule);
+  border-radius: 6px;
+  background: var(--wb-paper);
+  font-family: var(--wb-font);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--wb-ink);
+}
+
+.wb .wb-mover[data-landed] {
+  animation: wb-land 0.6s var(--ph-ease);
+}
+
+@keyframes wb-land {
+  from { box-shadow: 0 0 0 2px var(--wb-accent); }
+  to { box-shadow: 0 0 0 0 transparent; }
+}
+
+.wb .wb-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.wb .wb-card__sub {
+  color: var(--wb-faint);
+  white-space: nowrap;
+}
+
+.wb .wb-card__top strong {
+  white-space: nowrap;
+}
+
+.wb .wb-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.wb .wb-card__money {
+  color: var(--wb-muted);
+}
+
+/* The moving card: one element over its slot, lifted while held */
+.wb .wb-mover {
+  will-change: transform;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: rotate 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wb .wb-mover[data-lifted] {
+  rotate: -2deg;
+  box-shadow: 0 12px 24px -8px rgba(11, 35, 64, 0.35);
+}
+
+/* Phone: over the window's sidebar (wide) or the board's empty foot (narrow),
+   running off the bottom. Its text set larger than iOS so it reads at this size */
+.wb .ph-phone,
+.wb .ss-stage[data-layout='compact'] .ph-phone {
+  position: absolute;
+  z-index: 2;
+  top: 190px;
+  left: 14px;
+  box-shadow: 0 24px 40px -18px rgba(11, 35, 64, 0.45);
+}
+
+.wb .ss-stage[data-layout='compact'] .ph-phone {
+  top: 318px;
+  left: 59px;
+}
+
+.wb .ph-screen {
+  font-size: 22px;
+}
+
+.wb .ph-nav {
+  padding-left: 20px;
+  font-size: 21px;
+}
+
+.wb .ph-large {
+  padding: 2px 0 0;
+  margin-left: 20px;
+  font-size: 40px;
+}
+
+.wb .ph-head__client {
+  font-size: 28px;
+}
+
+.wb .wb-device {
+  margin-top: 2px;
+  color: var(--ph-text-2);
+}
+
+.wb .wb-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--ph-text-2);
+}
+
+.wb .wb-status .ph-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #b25000;
+  transition: background-color 0.3s ease;
+}
+
+.wb .wb-status[data-done] .ph-dot {
+  background: #248a3d;
+}
+
+.wb .wb-items {
+  margin: 18px 0 0;
+  border-radius: 0;
+}
+
+.wb .wb-items .ph-row {
+  padding-inline: 20px;
+}
+
+.wb .wb-rest {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+.wb .wb-items .ph-row {
+  justify-content: space-between;
+}

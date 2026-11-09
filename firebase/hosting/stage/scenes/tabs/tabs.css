@@ -1,0 +1,446 @@
+/* The tab stills share the hero's tokens and cards (../hero/hero.css). Here:
+   where the phone sits, and the parts only these screens have. */
+
+.ph-tab .ss-stage {
+  overflow: hidden;
+}
+
+/* The phone stands a gutter from the top and runs off the bottom, which is
+   the panel's bottom edge on the page */
+.ph-tab .ph-phone,
+.ph-tab .ss-stage[data-layout='compact'] .ph-phone {
+  top: 28px;
+  left: 30px;
+}
+
+.ph-tab .ss-stage[data-layout='compact'] .ph-phone {
+  top: 27px;
+  left: 27px;
+}
+
+/* Compact is its own design: a narrower phone with a full gutter on both
+   sides, and the screen set in iOS's larger text sizes so it still reads at
+   the column's width */
+.ph-tab .ss-stage[data-layout='compact'] .ph-screen { font-size: 19px; }
+.ph-tab .ss-stage[data-layout='compact'] .ph-label,
+.ph-tab .ss-stage[data-layout='compact'] .ph-day__w { font-size: 15px; }
+.ph-tab .ss-stage[data-layout='compact'] .ph-subtitle,
+.ph-tab .ss-stage[data-layout='compact'] .ph-dayline,
+.ph-tab .ss-stage[data-layout='compact'] .ph-agenda__status,
+.ph-tab .ss-stage[data-layout='compact'] .ph-agenda__sub,
+.ph-tab .ss-stage[data-layout='compact'] .ph-money__sub,
+.ph-tab .ss-stage[data-layout='compact'] .ph-next__sub,
+.ph-tab .ss-stage[data-layout='compact'] .ph-page__title,
+.ph-tab .ss-stage[data-layout='compact'] .ph-url { font-size: 17px; }
+.ph-tab .ss-stage[data-layout='compact'] .ss-notification__time { font-size: 15px; }
+
+/* Pushed screens: back link, large title, one line under it */
+.ph-tab .ph-nav {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0;
+}
+
+.ph-tab .ph-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ph-accent);
+}
+
+.ph-tab .ph-large {
+  padding: 2px 20px 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.ph-tab .ph-large--top {
+  padding-top: 52px;
+}
+
+.ph-tab .ph-subtitle {
+  padding: 2px 20px 0;
+  color: var(--ph-text-2);
+}
+
+.ph-tab .ph-large + .ph-card,
+.ph-tab .ph-subtitle + .ph-card {
+  margin-top: 18px;
+}
+
+/* talk: what was said, a satellite over the phone's left edge, and the
+   changed row lit in the app's soft accent */
+.ph-tab .ph-said {
+  position: absolute;
+  top: 404px;
+  left: 30px;
+  max-width: 230px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--ss-shadow-hero);
+  color: var(--ph-text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ph-tab .ss-stage[data-layout='compact'] .ph-said {
+  top: 352px;
+  left: 27px;
+  font-size: 15px;
+}
+
+.ph-tab .ph-row--item[data-changed] {
+  background: var(--ph-accent-soft);
+}
+
+.ph-tab .ph-row--item[data-changed] .ph-price {
+  color: var(--ph-accent);
+  font-weight: 600;
+}
+
+/* record: question, answer, photos */
+.ph-tab .ph-row--check {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 10px;
+  padding-block: 14px;
+}
+
+.ph-tab .ph-check__a {
+  color: var(--ph-text-2);
+}
+
+.ph-tab .ph-check__a[data-flag] {
+  color: #b25000;
+  font-weight: 600;
+}
+
+.ph-tab .ph-check__photos {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.ph-tab .ph-shot {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+}
+
+.ph-tab .ph-shot--0 { background: linear-gradient(150deg, #8c95a3, #4f5866 70%, #3b424d); }
+.ph-tab .ph-shot--1 { background: linear-gradient(200deg, #a7aeb8, #69717d 60%, #444b55); }
+
+.ph-tab .ph-shot--add {
+  display: grid;
+  place-items: center;
+  background: var(--ph-bg);
+  color: var(--ph-accent);
+}
+
+/* approve: the order in the customer's browser */
+.ph-tab .ph-url {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  margin: 4px 20px 0;
+  border-radius: 19px;
+  background: #e9e9ee;
+  color: var(--ph-text);
+  font-size: 15px;
+}
+
+.ph-tab--approve .ph-screen {
+  background: #fff;
+}
+
+.ph-tab .ph-page {
+  padding: 28px 20px 0;
+}
+
+.ph-tab .ph-page__title {
+  color: var(--ph-text-2);
+  font-size: 15px;
+}
+
+.ph-tab .ph-page__client {
+  margin-top: 4px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.ph-tab .ph-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--ph-text-2);
+}
+
+.ph-tab .ph-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: #8e8e93;
+}
+
+.ph-tab .ph-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 58px;
+  margin-top: 20px;
+  border-radius: 16px;
+  background: var(--ph-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.ph-tab .ph-card--flat {
+  margin: 20px 0 0;
+  border-radius: 0;
+  box-shadow: inset 0 0.5px 0 var(--ph-sep);
+}
+
+.ph-tab .ph-card--flat .ph-row {
+  padding: 0;
+}
+
+.ph-tab .ph-link {
+  display: block;
+  margin-top: 14px;
+  color: var(--ph-accent);
+}
+
+/* schedule */
+.ph-tab .ph-banner {
+  z-index: 2;
+}
+
+.ph-tab .ph-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.ph-tab .ph-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 20px 0;
+  color: var(--ph-accent);
+}
+
+.ph-tab .ph-month span {
+  color: var(--ph-text);
+  font-weight: 600;
+}
+
+.ph-tab .ph-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin: 12px 12px 0;
+}
+
+.ph-tab .ph-day {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-radius: 14px;
+}
+
+.ph-tab .ph-day[data-pick] {
+  background: var(--ph-accent-soft);
+  color: var(--ph-accent);
+}
+
+.ph-tab .ph-day__w {
+  color: var(--ph-text-2);
+  font-size: 13px;
+}
+
+.ph-tab .ph-day__n {
+  font-weight: 600;
+}
+
+.ph-tab .ph-day__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.ph-tab .ph-day__dot[data-on] {
+  background: #aeaeb2;
+}
+
+.ph-tab .ph-dayline {
+  margin: 22px 20px 0;
+  color: var(--ph-text-2);
+  font-size: 15px;
+}
+
+.ph-tab .ph-list {
+  margin: 6px 20px 0;
+}
+
+.ph-tab .ph-agenda,
+.ph-tab .ph-money {
+  padding: 12px 0;
+  box-shadow: inset 0 -0.5px 0 var(--ph-sep);
+}
+
+.ph-tab .ph-agenda__head,
+.ph-tab .ph-money__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.ph-tab .ph-agenda__time {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.ph-tab .ph-agenda__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  color: var(--ph-text-2);
+  font-size: 15px;
+}
+
+.ph-tab .ph-agenda__status[data-kind='approved'] .ph-dot {
+  background: var(--ph-accent);
+}
+
+.ph-tab .ph-agenda__sub,
+.ph-tab .ph-money__sub {
+  margin-top: 2px;
+  color: var(--ph-text-2);
+  font-size: 15px;
+}
+
+/* receive: the next step block, then who owes */
+.ph-tab .ph-next {
+  margin: 18px 20px 0;
+  padding: 18px 16px 16px;
+  border-radius: 20px;
+  background: var(--ph-accent-soft);
+}
+
+.ph-tab .ph-next__line {
+  color: #0b3d80;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ph-tab .ph-next__sub {
+  margin-top: 4px;
+  color: #0b3d80;
+  font-size: 15px;
+}
+
+.ph-tab .ph-next .ph-primary {
+  margin-top: 14px;
+}
+
+.ph-tab--receive .ph-screen,
+.ph-tab--schedule .ph-screen {
+  background: #fff;
+}
+
+/* The reminder banner sits over the top of the screen; Agenda's title
+   starts under it, as the screen does when the banner drops in */
+.ph-tab--schedule .ph-large--top {
+  padding-top: 146px;
+}
+
+/* One reading edge for the block's words, the header and the rows */
+.ph-tab--receive .ph-label {
+  margin-left: 36px;
+}
+
+.ph-tab--receive .ph-list {
+  margin-inline: 36px;
+}
+
+/* invoice: the finished order, its service invoice issued and e-mailed */
+.ph-tab .ph-head {
+  padding: 0 20px 4px;
+}
+
+.ph-tab .ph-head__client {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ph-tab .ph-status--done .ph-dot,
+.ph-tab .ph-nf__sub--ok .ph-dot {
+  background: #248a3d;
+}
+
+.ph-tab .ph-nf {
+  margin-top: 16px;
+}
+
+.ph-tab .ph-nf__row {
+  align-items: center;
+  gap: 12px;
+}
+
+.ph-tab .ph-nf__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--ph-accent-soft);
+  color: var(--ph-accent);
+}
+
+.ph-tab .ph-nf__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.ph-tab .ph-nf__title {
+  font-weight: 600;
+}
+
+.ph-tab .ph-nf__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ph-text-2);
+  font-size: 0.82em;
+  line-height: 1.3;
+}
+
+.ph-tab .ph-nf__pdf {
+  flex: none;
+  margin: 0;
+}
+
+.ph-tab .ph-nf + .ph-card {
+  margin-top: 16px;
+}
+
+.ph-tab .ss-stage[data-layout='compact'] .ph-nf__sub { font-size: 17px; }

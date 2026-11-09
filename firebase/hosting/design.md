@@ -11,16 +11,17 @@ They belong to the app and still load the legacy `style.css` — do not touch.
 
 The site shows the people it serves. Warm paper, navy ink and navy bands, solid
 yellow actions, big type, and photos of people at work. The product moment is a
-spoken request turning into a work order. No gradients, no orbs, no glass, no
-icon-tile card grids, no fake device frames.
+spoken request turning into a work order, shown as a product scene (below).
+No gradients, no orbs, no icon-tile card grids. Device frames and glass only
+inside a product scene.
 
 ## Genre
 modern-minimal (custom theme "Campo")
 
 ## Macrostructure family
-- **Home**: Photographic — headline beside trade photos with the spoken-order
-  card over them, then feature tabs with real screens, the AI list, the moving
-  trades reels and the closing band.
+- **Home**: Product hero — headline beside the app on an iPhone writing a work
+  order from speech (Stageshow scene), then feature tabs with app screens drawn
+  as stills (Stageshow), the AI list, the moving trades reels and the closing band.
 - **Segments and feature pages**: Narrative Workflow — the life of a work order
   in numbered stages. Segments may swap stage content for their trade and add a
   problem → solution split (Split Studio rows).
@@ -71,7 +72,7 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 
 ## Motion
 - Easings `--ease-out` / `--ease-in` / `--ease-in-out`; 160–240 ms.
-- No scroll reveals. Hover/focus/press, plus one pass of the home demo card with a manual replay. The card rests complete, and reduced motion skips the pass.
+- No scroll reveals. Hover/focus/press, plus one pass of the home hero scene with a manual replay ("Ver de novo"). The scene rests on its payoff, and reduced motion shows only that frame.
 - The home trades reels move slowly and continuously. Rows can be dragged with the mouse or swiped, and a click or tap opens the trade's page. They pause on hover and through a visible toggle, keyboard focus stops them, and reduced motion leaves still rows that can be dragged and swiped. Nothing else loops.
 
 ## Microinteractions stance
@@ -134,6 +135,20 @@ the ticket.
 The header, final band and footer are navy in both themes, as in the prototype.
 The bar keeps links, language and theme controls. The final band uses two plain
 buttons, not store cards. The WhatsApp float is icon only, so it never covers text.
+
+## Product scenes (Stageshow)
+
+Faux product UI built with the Stageshow skill (`.claude/skills/stageshow`) in
+`stage/`, built into `src/assets/stage/` (see `docs/SITE_STAGE_SCENES.md`).
+The skill's own rules apply inside a scene (framing, restraint, motion, the
+`film.mjs --gate`); this file still governs the page around it.
+
+- The scene draws the app as it is: its screens, its colors
+  (`lib/theme/app_colors.dart`), its strings from `lib/l10n`. It only shows what
+  the app does.
+- The phone comes from the kit, runs off an edge of the stage and is never a
+  whole device floating on the band.
+- Both widths pass the gate (the shown width and 390) before merging.
 
 ## Segment pages
 
