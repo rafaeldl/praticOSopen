@@ -722,7 +722,7 @@
           ],
           "scene": {
             "kind": "talk",
-            "client": "Condominio Jardim das Flores",
+            "client": "Cond. Jardim das Flores",
             "vehicle": "Torre B · Depto 1204",
             "vehicleEmpty": "Elegir unidad",
             "deviceIcon": "building",
@@ -786,7 +786,7 @@
             "dayLine": "Martes, 10 de noviembre · 2 agendados",
             "rows": [
               {
-                "name": "Condominio Jardim das Flores",
+                "name": "Cond. Jardim das Flores",
                 "time": "09:00",
                 "status": "Aprobada · OS 219",
                 "kind": "approved",
@@ -801,7 +801,7 @@
               }
             ],
             "notifyTitle": "Recordatorio de cita",
-            "notifyBody": "Condominio Jardim das Flores a las 09:00 · Torre B · Depto 1204",
+            "notifyBody": "Cond. Jardim das Flores a las 09:00 · Torre B · Depto 1204",
             "now": "ahora"
           }
         },
@@ -862,7 +862,7 @@
             "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
             "url": "praticos.app",
             "title": "OS 219",
-            "client": "Condominio Jardim das Flores",
+            "client": "Cond. Jardim das Flores",
             "status": "Presupuesto",
             "line": "Esperando tu aprobación",
             "items": [
