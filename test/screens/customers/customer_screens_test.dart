@@ -1547,9 +1547,56 @@ void main() {
     final alice = customer('c3', 'Alice');
     final bruno = customer('c2', 'Bruno Lima');
 
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    testWidgets('opens in Recentes: last activity first, with the day', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      final old = customer('c4', 'Zeca')
+        ..lastActivityAt = DateTime(now.year - 1, 3, 5);
+      final today = customer('c5', 'Yara')..lastActivityAt = now;
+      final noDate = customer('c6', 'Abel');
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          directory: FakeDirectory(customers: [noDate, old, today]),
+        ),
+        direct: true,
+      );
+      final y = tester.getTopLeft(find.text('Yara')).dy;
+      final z = tester.getTopLeft(find.text('Zeca')).dy;
+      final a = tester.getTopLeft(find.text('Abel')).dy;
+      expect(y < z && z < a, isTrue);
+      expect(find.text('Hoje'), findsOneWidget);
+      expect(find.text('05/03/${now.year - 1}'), findsOneWidget);
+      // No letters in Recentes.
+      expect(find.text('A'), findsNothing);
+    });
+
+    testWidgets('A–Z is kept on the device', (tester) async {
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          directory: FakeDirectory(customers: [ana, bruno]),
+        ),
+        direct: true,
+      );
+      await tester.tap(find.text('A–Z'));
+      await tester.pumpAndSettle();
+      expect(find.text('A'), findsOneWidget);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('customersOrder'), 'name');
+    });
+
     testWidgets('groups by initial, counts, and opens the customer', (
       tester,
     ) async {
+      SharedPreferences.setMockInitialValues({'customersOrder': 'name'});
       final h = Harness();
       await h.pump(
         tester,

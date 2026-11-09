@@ -3,9 +3,10 @@
 ## Visão Geral
 
 Cada cliente guarda a data da última movimentação (`lastActivityAt`). A lista de
-clientes do web abre em **Recentes**: quem teve movimento mais recente fica no
-topo. A opção **A–Z** volta para a lista por nome, agrupada por letra. A escolha
-fica guardada no navegador (`praticos.customersOrder`).
+clientes do web e a aba Clientes do app abrem em **Recentes**: quem teve
+movimento mais recente fica no topo. A opção **A–Z** volta para a lista por nome,
+agrupada por letra. A escolha fica guardada no navegador
+(`praticos.customersOrder`) e no aparelho (`customersOrder` no SharedPreferences).
 
 Conta como movimentação:
 - cliente criado;
@@ -30,6 +31,14 @@ Conta como movimentação:
   `byRecent` em `lib/customers/model.ts`). A coluna "Última movimentação" só
   aparece quando cabe: com texto grande ou com o cliente aberto ao lado, ela some,
   mas a ordem continua.
+
+- **App:** `Customer.lastActivityAt` só é lido (`includeToJson: false`), então
+  salvar o cliente nunca grava uma data velha por cima. A aba Clientes
+  (`lib/screens/menu_navigation/home_customer_list.dart`) tem o controle
+  Recentes / A–Z e mostra o dia ("Hoje", "Ontem", "06/11") à direita de cada
+  linha. A ordem e a data vêm de `sortByRecent` e `customerLastActivity` em
+  `lib/utils/customer_utils.dart`, com a mesma regra do web para quem ainda não
+  tem a data.
 
 ## Regras de Negócio
 

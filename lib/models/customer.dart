@@ -42,6 +42,12 @@ class Customer extends BaseAuditCompany {
   @JsonKey(includeIfNull: false)
   String? lastEmitterId;
 
+  /// Last activity (created, edited or one of the orders changed), kept by
+  /// the server (docs/CUSTOMER_LAST_ACTIVITY.md). Read only: the app never
+  /// writes it, so a save never puts back an older date.
+  @JsonKey(includeToJson: false)
+  DateTime? lastActivityAt;
+
   Customer();
   factory Customer.fromJson(Map<String, dynamic> json) =>
       _$CustomerFromJson(json);

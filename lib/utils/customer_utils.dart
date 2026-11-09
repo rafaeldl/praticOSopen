@@ -53,6 +53,32 @@ String customerInitial(Customer customer) {
   return RegExp(r'[A-Z]').hasMatch(c) ? c : '#';
 }
 
+/// When the customer last had activity: `lastActivityAt` (server), or the
+/// most recent of `updatedAt`/`createdAt` before the backfill.
+DateTime? customerLastActivity(Customer customer) {
+  if (customer.lastActivityAt != null) return customer.lastActivityAt;
+  final updated = customer.updatedAt;
+  final created = customer.createdAt;
+  if (updated == null) return created;
+  if (created == null) return updated;
+  return updated.isAfter(created) ? updated : created;
+}
+
+/// Most recent activity first; customers without a date last, by name.
+List<Customer> sortByRecent(List<Customer> customers) {
+  int byName(Customer a, Customer b) =>
+      (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase());
+  return [...customers]..sort((a, b) {
+    final at = customerLastActivity(a);
+    final bt = customerLastActivity(b);
+    if (at == null && bt == null) return byName(a, b);
+    if (at == null) return 1;
+    if (bt == null) return -1;
+    final cmp = bt.compareTo(at);
+    return cmp != 0 ? cmp : byName(a, b);
+  });
+}
+
 /// Groups [customers] (already sorted by name) by initial, keeping order.
 Map<String, List<Customer>> groupByInitial(List<Customer> customers) {
   final groups = <String, List<Customer>>{};

@@ -21,11 +21,19 @@ import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/models/permission.dart';
 
-/// Clientes tab: searchable list (name, phone or vehicle plate) grouped by
-/// initial. A row opens the customer screen; "+" opens the new-customer sheet.
+/// Clientes tab: searchable list (name, phone or vehicle plate). "Recentes"
+/// (default) puts the last activity first (docs/CUSTOMER_LAST_ACTIVITY.md);
+/// "A–Z" groups by initial. The choice is kept on the device. A row opens the
+/// customer screen; "+" opens the new-customer sheet.
+/// How the Clientes list is ordered.
+enum CustomerListOrder { recent, name }
+
+const _orderKey = 'customersOrder';
+
 class HomeCustomerList extends StatefulWidget {
   const HomeCustomerList({
     super.key,
@@ -75,11 +83,23 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       );
   bool _hasError = false;
   String _query = '';
+  CustomerListOrder _order = CustomerListOrder.recent;
 
   @override
   void initState() {
     super.initState();
     _listen();
+    SharedPreferences.getInstance()
+        .then((prefs) {
+          final saved = prefs.getString(_orderKey);
+          if (!mounted || saved == null) return;
+          setState(
+            () => _order = saved == CustomerListOrder.name.name
+                ? CustomerListOrder.name
+                : CustomerListOrder.recent,
+          );
+        })
+        .catchError((_) {});
     _plates.load();
     _directory
         .openOrdersByCustomer()
@@ -127,6 +147,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       '/customer_detail',
       arguments: {'customer': customer},
     );
+  }
+
+  void _setOrder(CustomerListOrder order) {
+    setState(() => _order = order);
+    SharedPreferences.getInstance()
+        .then((prefs) => prefs.setString(_orderKey, order.name))
+        .catchError((_) => false);
   }
 
   Future<void> _addCustomer() async {
@@ -178,6 +205,37 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               ),
             ),
           ),
+          if (_customers?.isNotEmpty ?? false)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.blockMargin,
+                  AppSpacing.xs,
+                  AppSpacing.blockMargin,
+                  0,
+                ),
+                child: CupertinoSlidingSegmentedControl<CustomerListOrder>(
+                  groupValue: _order,
+                  onValueChanged: (order) {
+                    if (order != null) _setOrder(order);
+                  },
+                  children: {
+                    for (final order in CustomerListOrder.values)
+                      order: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.xs,
+                        ),
+                        child: Text(
+                          order == CustomerListOrder.recent
+                              ? l10n.customersOrderRecent
+                              : l10n.customersOrderName,
+                          style: AppTypography.callout,
+                        ),
+                      ),
+                  },
+                ),
+              ),
+            ),
           ..._buildBody(),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
@@ -222,8 +280,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         ? const <PlateHit>[]
         : _plates.hits(query, customers);
     final hitIds = hits.map((h) => h.customer.id).toSet();
+    final recent = _order == CustomerListOrder.recent;
     final matches = filterCustomers(
-      customers,
+      recent ? sortByRecent(customers) : customers,
       query,
     ).where((c) => !hitIds.contains(c.id)).toList();
 
@@ -258,9 +317,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               '${SegmentConfigProvider.instance.serialValue(hit.device.serial)} · ${hit.device.name ?? ''}',
         ),
     ];
-    for (final entry in groupByInitial(matches).entries) {
-      children.add(SectionLabel(entry.key));
-      children.addAll(entry.value.map(_row));
+    if (recent) {
+      children.addAll(matches.map(_row));
+    } else {
+      for (final entry in groupByInitial(matches).entries) {
+        children.add(SectionLabel(entry.key));
+        children.addAll(entry.value.map(_row));
+      }
     }
     return [SliverList(delegate: SliverChildListDelegate(children))];
   }
@@ -291,7 +354,24 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       leading: dot == null ? null : StatusDot(color: dot),
       title: customer.name ?? '',
       subtitle: subtitle.isEmpty ? null : subtitle,
+      trailing: _activityText(customerLastActivity(customer)),
       onTap: () => _open(customer),
+    );
+  }
+
+  /// "Hoje", "Ontem", "06/11"; another year with the year.
+  String? _activityText(DateTime? date) {
+    if (date == null) return null;
+    final l10n = context.l10n;
+    final local = date.toLocal();
+    final now = DateTime.now();
+    final day = DateTime(local.year, local.month, local.day);
+    if (day == DateTime(now.year, now.month, now.day)) return l10n.today;
+    if (day == DateTime(now.year, now.month, now.day - 1)) {
+      return l10n.yesterday;
+    }
+    return (FormatService()..setLocale(l10n.localeName)).formatDayMonthOrDate(
+      local,
     );
   }
 }
