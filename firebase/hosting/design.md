@@ -160,8 +160,8 @@ Avoid "campo", "cadastro" and "configurar".
 
 ## Segment page screens
 
-The app screenshots in `assets/screenshots/` come from a car-repair demo account
-(Onix, oil change, vehicle check-in). Only the `automotivo` page may show them,
-plus the neutral `financial.png`, which is the one screen other trades share.
-Stages without `image` render as text. Add a screen to another trade only when
-it was captured with that trade's data.
+App screens on the site are drawn with the Stageshow kit (`stage/`, see
+`docs/SITE_STAGE_SCENES.md`), not screenshots. Each trade page feeds the home's
+scenes with its own example (`scene` on each stage in `_data/segments/<slug>.json`):
+show only what the trade does, with the customer, device and services its copy
+already names.

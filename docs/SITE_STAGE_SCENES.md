@@ -120,6 +120,13 @@ Os JSONs foram gerados por um script com os exemplos de cada ramo, tirados do qu
 (a fala do texto de "Falar", a correção, os itens dos checklists). Para mudar um exemplo, edite o
 JSON direto, nos 3 idiomas. Prévia: `stage/preview/segments.html?seg=<slug>&lang=pt|en|es&only=<kind>`.
 
+## Páginas de recurso (`layouts/feature.njk`)
+
+A página do assistente de WhatsApp, com `flags.whatsappBot` desligada, mostra no topo a mesma cena
+da aba "Falar" da home (`hero.stage`, tela curta), num cartão com a legenda e "Ver de novo". Não há
+mais prints do app no site: `src/assets/screenshots/` foi apagada. A lane `screenshots_website` do
+Fastlane (`ios/fastlane/Fastfile`) ainda copia prints para lá, mas nada no site os usa.
+
 ## Também no computador (`stage/scenes/web`)
 
 A seção do sistema web (`components/web-app.njk`, só com `flags.webApp`) tem o texto à esquerda e,
