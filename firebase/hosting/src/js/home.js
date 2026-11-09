@@ -21,6 +21,14 @@
     });
   });
 
+  // Links elsewhere on the page can open a tab by id (the strip's "Nota fiscal de serviço")
+  [].slice.call(document.querySelectorAll('[data-tab-open]')).forEach(function (a) {
+    a.addEventListener('click', function () {
+      var tab = document.querySelector('[data-tab-id="' + a.getAttribute('data-tab-open') + '"]');
+      if (tab) select(tab);
+    });
+  });
+
   // Rows are plain scrollers, so touch swipes work natively. The script adds the slow
   // advance and mouse dragging; clones make the loop seamless and stay out of the tab order.
   var reels = document.querySelector('[data-reels]');
@@ -191,4 +199,58 @@
       startReels();
     }
   }
+
+  // The card stays complete at rest; one pass plays on load, replays are manual.
+  var demo = document.querySelector('[data-demo]');
+  // The ?hero=mix test hides the card and plays the app scene instead
+  if (document.documentElement.dataset.hero === 'mix') return;
+  if (!demo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var line = demo.querySelector('[data-demo-line]');
+  var done = demo.querySelector('[data-demo-done]');
+  var again = demo.querySelector('[data-demo-again]');
+  var rows = [].slice.call(demo.querySelectorAll('[data-demo-row]'));
+  var words = line.textContent.trim().split(' ').map(function (w) {
+    var s = document.createElement('span');
+    s.textContent = w;
+    return s;
+  });
+
+  line.textContent = '';
+  words.forEach(function (s, i) {
+    if (i) line.appendChild(document.createTextNode(' '));
+    line.appendChild(s);
+  });
+
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+
+  function showAll() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    words.forEach(function (s) { s.classList.remove('is-off'); });
+    rows.forEach(function (r) { r.classList.remove('is-off'); });
+    done.classList.remove('is-off');
+    demo.classList.remove('is-speaking');
+    again.hidden = false;
+  }
+
+  function play() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    again.hidden = true;
+    words.forEach(function (s) { s.classList.add('is-off'); });
+    rows.forEach(function (r) { r.classList.add('is-off'); });
+    done.classList.add('is-off');
+    demo.classList.add('is-speaking');
+    words.forEach(function (s, i) { at(350 + i * 300, function () { s.classList.remove('is-off'); }); });
+    var t = 350 + words.length * 300 + 250;
+    at(t, function () { demo.classList.remove('is-speaking'); });
+    rows.forEach(function (r, i) { at(t + 200 + i * 240, function () { r.classList.remove('is-off'); }); });
+    at(t + 200 + rows.length * 240 + 150, showAll);
+  }
+
+  again.addEventListener('click', play);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) showAll(); });
+  play();
 })();

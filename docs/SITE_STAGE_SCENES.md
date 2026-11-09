@@ -12,8 +12,11 @@ As abas de "Como funciona" usam o mesmo kit, com uma tela parada por aba: corrig
 "Aprovar orçamento", a Agenda com o lembrete chegando e o Financeiro com quem deve e o botão de
 cobrança.
 
-O hero substitui as fotos e o cartão HTML que ficavam lá. As fotos continuam nos dados
-(`hero.tiles`), sem uso, até decidirmos o destino delas.
+**Em teste (2026-11-09):** o hero voltou a ser o de fotos com o cartão da fala, e a animação da
+Nova OS passou para a aba "Falar". Com `?hero=mix` na home, o hero mostra a foto do mecânico com o
+celular por cima (a mesma cena), e a aba "Falar" volta para a tela parada da correção. Em português,
+com `flags.nfsePage`, a última aba é "Nota fiscal" (`homepage.json` → `pt.nfse.tab`, cena `invoice`),
+no lugar da faixa da nota que ficava abaixo das abas.
 
 ## Arquitetura
 

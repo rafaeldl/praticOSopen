@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { HeroScene, type HeroCopy } from './HeroScene'
 
 // Mounts the hero scene on the Eleventy page:
-//   <div data-stage="hero"><script type="application/json">{copy}</script></div>
-//   <button data-stage-replay="hero" hidden>Ver de novo</button>
+//   <div data-stage-wrap>
+//     <div data-stage="hero"><script type="application/json">{copy}</script></div>
+//     <button data-stage-replay hidden>Ver de novo</button>
+//   </div>
+// The page can hold more than one (the hero test variant and the Falar tab);
+// each replay button sits next to its scene.
 // The copy comes from homepage.json, so pt, en and es share one scene. The
 // scene plays once; the replay button remounts it (kit.md, Explicit replay).
 
@@ -24,7 +28,7 @@ export function mountHero(host: HTMLElement) {
   const data = host.querySelector('script[type="application/json"]')
   if (!data?.textContent) return
   const copy = JSON.parse(data.textContent) as HeroCopy
-  const replay = document.querySelector<HTMLButtonElement>('[data-stage-replay="hero"]')
+  const replay = host.closest('[data-stage-wrap]')?.querySelector<HTMLButtonElement>('[data-stage-replay]') ?? null
   const root = document.createElement('div')
   host.append(root)
   createRoot(root).render(<Hero copy={copy} replay={replay} />)

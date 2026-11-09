@@ -424,7 +424,49 @@
         }
       ],
       "cta": "Ver como funciona a nota",
-      "price": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês."
+      "price": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
+      "tab": {
+        "id": "nota-fiscal",
+        "tab": "Nota fiscal",
+        "title": "Nota fiscal de serviço direto da OS",
+        "text": "Para empresa do Simples e para o MEI. O PraticOS emite pelo Emissor Nacional do governo: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+        "facts": [
+          "Um toque em “Emitir nota fiscal” na OS pronta, ou a nota sai sozinha ao concluir",
+          "O cliente recebe a nota e o PDF por e-mail",
+          "Sem pagar por nota no plano pago, com o certificado A1 da empresa"
+        ],
+        "cta": {
+          "label": "Ver como funciona a nota",
+          "href": "funcionalidades/nota-fiscal.html",
+          "ga": "home_nfse_page"
+        },
+        "note": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
+        "scene": {
+          "kind": "invoice",
+          "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+          "back": "Início",
+          "title": "OS #186",
+          "client": "Juliana Costa",
+          "status": "Concluída",
+          "items": [
+            {
+              "name": "Troca de óleo",
+              "price": "R$ 80,00"
+            },
+            {
+              "name": "Alinhamento",
+              "price": "R$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "R$ 200,00",
+          "invoice": "Nota fiscal",
+          "invoiceStatus": "Emitida · nº 29",
+          "pdf": "PDF",
+          "email": "E-mail ao cliente",
+          "emailSent": "Enviada para juliana@email.com em 08/11"
+        }
+      }
     }
   },
   "en": {

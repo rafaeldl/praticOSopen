@@ -1,4 +1,4 @@
-import { Camera, Car, Check, ChevronLeft, ChevronRight, Lock, User } from 'lucide-react'
+import { Camera, Car, Check, ChevronLeft, ChevronRight, FileText, Lock, Mail, User } from 'lucide-react'
 import { Stage } from '../../kit/stage'
 import { Phone, Notification } from '../../kit/phone'
 import '../hero/hero.css'
@@ -10,7 +10,9 @@ import './tabs.css'
 // record: the check-in checklist with photos of the damage;
 // approve: the customer's phone, the order in the browser, the approve button;
 // schedule: the week in Agenda with the reminder banner dropping in;
-// receive: Financeiro, who owes what, oldest first, and the button to charge.
+// receive: Financeiro, who owes what, oldest first, and the button to charge;
+// invoice (pt only): the finished order with its service invoice issued and
+// already in the customer's e-mail.
 //
 // Every scene is one iPhone running off the bottom of the panel, at the
 // size it is seen. Words only where the tab's story is; the rest is the
@@ -38,7 +40,23 @@ export type ScheduleCopy = {
   icon?: string
 }
 export type ReceiveCopy = { kind: 'receive'; label: string; title: string; next: string; nextSub: string; button: string; section: string; rows: { name: string; amount: string; sub: string }[] }
-export type TabCopy = TalkCopy | RecordCopy | ApproveCopy | ScheduleCopy | ReceiveCopy
+export type InvoiceCopy = {
+  kind: 'invoice'
+  label: string
+  back: string
+  title: string
+  client: string
+  status: string
+  items: Item[]
+  totalLabel: string
+  total: string
+  invoice: string
+  invoiceStatus: string
+  email: string
+  emailSent: string
+  pdf: string
+}
+export type TabCopy = TalkCopy | RecordCopy | ApproveCopy | ScheduleCopy | ReceiveCopy | InvoiceCopy
 
 function Spark() {
   return (
@@ -260,6 +278,63 @@ function Receive({ c }: { c: ReceiveCopy }) {
   )
 }
 
+function Invoice({ c }: { c: InvoiceCopy }) {
+  return (
+    <Frame label={c.label} kind="invoice">
+      <div className="ph-nav">
+        <span className="ph-back">
+          <ChevronLeft size={16} strokeWidth={2.6} />
+          {c.back}
+        </span>
+      </div>
+      <div className="ph-large">{c.title}</div>
+      <div className="ph-head">
+        <div className="ph-head__client">{c.client}</div>
+        <div className="ph-status ph-status--done">
+          <span className="ph-dot" />
+          {c.status}
+        </div>
+      </div>
+      <div className="ph-card ph-nf">
+        <div className="ph-row ph-nf__row">
+          <span className="ph-nf__ico">
+            <FileText size={18} strokeWidth={2} />
+          </span>
+          <span className="ph-nf__text">
+            <span className="ph-nf__title">{c.invoice}</span>
+            <span className="ph-nf__sub ph-nf__sub--ok">
+              <span className="ph-dot" />
+              {c.invoiceStatus}
+            </span>
+          </span>
+          <span className="ph-link ph-nf__pdf">{c.pdf}</span>
+        </div>
+        <div className="ph-row ph-nf__row">
+          <span className="ph-nf__ico">
+            <Mail size={18} strokeWidth={2} />
+          </span>
+          <span className="ph-nf__text">
+            <span className="ph-nf__title">{c.email}</span>
+            <span className="ph-nf__sub">{c.emailSent}</span>
+          </span>
+        </div>
+      </div>
+      <div className="ph-card">
+        {c.items.map((it) => (
+          <div key={it.name} className="ph-row ph-row--item">
+            <span className="ph-val">{it.name}</span>
+            <span className="ph-price">{it.price}</span>
+          </div>
+        ))}
+        <div className="ph-row ph-row--total">
+          <span>{c.totalLabel}</span>
+          <span className="ph-price">{c.total}</span>
+        </div>
+      </div>
+    </Frame>
+  )
+}
+
 export function TabScene({ copy }: { copy: TabCopy }) {
   switch (copy.kind) {
     case 'talk':
@@ -272,5 +347,7 @@ export function TabScene({ copy }: { copy: TabCopy }) {
       return <Schedule c={copy} />
     case 'receive':
       return <Receive c={copy} />
+    case 'invoice':
+      return <Invoice c={copy} />
   }
 }

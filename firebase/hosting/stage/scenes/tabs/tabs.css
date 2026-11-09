@@ -376,3 +376,71 @@
 .ph-tab--receive .ph-list {
   margin-inline: 36px;
 }
+
+/* invoice: the finished order, its service invoice issued and e-mailed */
+.ph-tab .ph-head {
+  padding: 0 20px 4px;
+}
+
+.ph-tab .ph-head__client {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ph-tab .ph-status--done .ph-dot,
+.ph-tab .ph-nf__sub--ok .ph-dot {
+  background: #248a3d;
+}
+
+.ph-tab .ph-nf {
+  margin-top: 16px;
+}
+
+.ph-tab .ph-nf__row {
+  align-items: center;
+  gap: 12px;
+}
+
+.ph-tab .ph-nf__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--ph-accent-soft);
+  color: var(--ph-accent);
+}
+
+.ph-tab .ph-nf__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.ph-tab .ph-nf__title {
+  font-weight: 600;
+}
+
+.ph-tab .ph-nf__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ph-text-2);
+  font-size: 0.82em;
+  line-height: 1.3;
+}
+
+.ph-tab .ph-nf__pdf {
+  flex: none;
+  margin: 0;
+}
+
+.ph-tab .ph-nf + .ph-card {
+  margin-top: 16px;
+}
+
+.ph-tab .ss-stage[data-layout='compact'] .ph-nf__sub { font-size: 17px; }
