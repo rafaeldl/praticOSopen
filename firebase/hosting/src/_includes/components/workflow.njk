@@ -1,4 +1,4 @@
-{# Feature tabs — the five stages of a work order, each with a real app screen #}
+{# Feature tabs — the five stages of a work order, each with the app screen drawn as a still #}
 {% set wf = data.workflow %}
 <section class="work" id="como-funciona">
     <div class="wrap">
@@ -18,11 +18,10 @@
                     {% for fact in stage.facts %}<li>{{ fact }}</li>{% endfor %}
                 </ul>
             </div>
-            <figure class="panel__shot">
-                <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="820" height="1240">
-                <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="820" height="1240">
-            </figure>
+            {# The app screen for this stage, drawn as a still (stage/scenes/tabs) #}
+            <div class="panel__scene" data-stage="tab" data-icon="{{ relPath }}assets/images/logo-96.png" role="img" aria-label="{{ stage.scene.label }}"><script type="application/json">{{ stage.scene | dump | safe }}</script></div>
         </div>
         {% endfor %}
     </div>
 </section>
+<script type="module" src="{{ relPath }}assets/stage/tabs.js"></script>

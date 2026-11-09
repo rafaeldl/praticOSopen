@@ -120,7 +120,29 @@
           ],
           "image": "ai-order.png",
           "alt": "Nova OS preenchida pelo assistente de IA, com cliente, veículo e serviços marcados",
-          "tab": "Falar"
+          "tab": "Falar",
+          "scene": {
+            "kind": "talk",
+            "label": "Correção falada: o alinhamento passa para R$ 100,00 e o total para R$ 180,00",
+            "title": "Nova OS",
+            "client": "Juliana Costa",
+            "vehicle": "Onix",
+            "work": "O que vai ser feito",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 100,00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 180,00",
+            "said": "“O alinhamento é 100”"
+          }
         },
         {
           "title": "Prove o serviço com fotos",
@@ -132,7 +154,34 @@
           ],
           "image": "checklist.png",
           "alt": "Checklist de entrada preenchido com fotos das avarias",
-          "tab": "Registrar"
+          "tab": "Registrar",
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos das avarias",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Para-choque dianteiro",
+                "a": "Riscado",
+                "photos": 2
+              },
+              {
+                "q": "Faróis",
+                "a": "OK"
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK"
+              },
+              {
+                "q": "Nível de combustível",
+                "a": "1/2"
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "title": "Orçamento aprovado pelo celular do cliente",
@@ -144,7 +193,30 @@
           ],
           "image": "order.png",
           "alt": "Tela de uma OS com o cliente, a situação, o botão do próximo passo, serviços e total",
-          "tab": "Aprovar"
+          "tab": "Aprovar",
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Juliana Costa",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 180,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "title": "Nenhum atendimento esquecido",
@@ -156,7 +228,57 @@
           ],
           "image": "agenda.png",
           "alt": "Agenda da semana com um atendimento marcado",
-          "tab": "Agendar"
+          "tab": "Agendar",
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Juliana Costa",
+                "time": "09:00",
+                "status": "Aprovada · OS 186",
+                "kind": "approved",
+                "sub": "Onix · com Bruno"
+              },
+              {
+                "name": "Marcos Lima",
+                "time": "14:30",
+                "status": "Orçamento · OS 187",
+                "kind": "quote",
+                "sub": "Civic · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Juliana Costa às 09:00 · Onix",
+            "now": "agora"
+          }
         },
         {
           "title": "Receba o que é seu",
@@ -168,7 +290,33 @@
           ],
           "image": "financial.png",
           "alt": "Aba Financeiro com o total que falta receber e a lista de clientes",
-          "tab": "Receber"
+          "tab": "Receber",
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.730 de 3 clientes",
+            "nextSub": "Ana Ribeiro deve R$ 1.250 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Ana Ribeiro",
+                "amount": "R$ 1.250",
+                "sub": "OS 183 · desde 02/10"
+              },
+              {
+                "name": "Juliana Costa",
+                "amount": "R$ 300",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Lima",
+                "amount": "R$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "Recursos do app"
@@ -399,7 +547,29 @@
           ],
           "image": "ai-order.png",
           "alt": "New work order filled in by the AI assistant, with customer, vehicle and services marked",
-          "tab": "Talk"
+          "tab": "Talk",
+          "scene": {
+            "kind": "talk",
+            "label": "Spoken correction: alignment becomes $100.00 and the total $180.00",
+            "title": "New WO",
+            "client": "Julia Carter",
+            "vehicle": "Civic",
+            "work": "What will be done",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$100.00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$180.00",
+            "said": "“Alignment is 100”"
+          }
         },
         {
           "title": "Show your work with photos",
@@ -411,7 +581,34 @@
           ],
           "image": "checklist.png",
           "alt": "Check-in checklist filled in with photos of the damage",
-          "tab": "Record"
+          "tab": "Record",
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos of the damage",
+            "back": "WO 186",
+            "title": "Check-in checklist",
+            "progress": "7 of 10 answered",
+            "items": [
+              {
+                "q": "Front bumper",
+                "a": "Scratched",
+                "photos": 2
+              },
+              {
+                "q": "Headlights",
+                "a": "OK"
+              },
+              {
+                "q": "Mirrors",
+                "a": "OK"
+              },
+              {
+                "q": "Fuel level",
+                "a": "1/2"
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "title": "Get quotes approved from the customer's phone",
@@ -423,7 +620,30 @@
           ],
           "image": "order.png",
           "alt": "A work order screen with the customer, status, next-step button, services and total",
-          "tab": "Approve"
+          "tab": "Approve",
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 186",
+            "client": "Julia Carter",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$100.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$180.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "title": "Never miss a job",
@@ -435,7 +655,57 @@
           ],
           "image": "agenda.png",
           "alt": "Weekly schedule with one appointment booked",
-          "tab": "Schedule"
+          "tab": "Schedule",
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Julia Carter",
+                "time": "9:00 AM",
+                "status": "Approved · WO 186",
+                "kind": "approved",
+                "sub": "Civic · with Ben"
+              },
+              {
+                "name": "Mark Lee",
+                "time": "2:30 PM",
+                "status": "Quote · WO 187",
+                "kind": "quote",
+                "sub": "Corolla · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Julia Carter at 9:00 AM · Civic",
+            "now": "now"
+          }
         },
         {
           "title": "Get paid what you're owed",
@@ -447,7 +717,33 @@
           ],
           "image": "financial.png",
           "alt": "Financial tab with the total left to collect and the list of customers",
-          "tab": "Collect"
+          "tab": "Collect",
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,730 to collect from 3 customers",
+            "nextSub": "Anna Reed owes $1,250 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Anna Reed",
+                "amount": "$1,250",
+                "sub": "WO 183 · since 10/02"
+              },
+              {
+                "name": "Julia Carter",
+                "amount": "$300",
+                "sub": "WO 186 · since 10/28"
+              },
+              {
+                "name": "Mark Lee",
+                "amount": "$180",
+                "sub": "WO 187 · since 11/05"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "App features"
@@ -658,7 +954,29 @@
           ],
           "image": "ai-order.png",
           "alt": "Nueva orden rellenada por el asistente de IA, con cliente, vehículo y servicios marcados",
-          "tab": "Hablar"
+          "tab": "Hablar",
+          "scene": {
+            "kind": "talk",
+            "label": "Corrección hablada: la alineación pasa a $ 100,00 y el total a $ 180,00",
+            "title": "Nueva OS",
+            "client": "Julia Gómez",
+            "vehicle": "Corolla",
+            "work": "Qué se va a hacer",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 100,00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 180,00",
+            "said": "“La alineación es 100”"
+          }
         },
         {
           "title": "Demuestra tu trabajo con fotos",
@@ -670,7 +988,34 @@
           ],
           "image": "checklist.png",
           "alt": "Checklist de entrada rellenado con fotos de los daños",
-          "tab": "Registrar"
+          "tab": "Registrar",
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos de los daños",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Parachoques delantero",
+                "a": "Rayado",
+                "photos": 2
+              },
+              {
+                "q": "Faros",
+                "a": "OK"
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK"
+              },
+              {
+                "q": "Nivel de combustible",
+                "a": "1/2"
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "title": "Presupuesto aprobado desde el celular del cliente",
@@ -682,7 +1027,30 @@
           ],
           "image": "order.png",
           "alt": "Pantalla de una orden con el cliente, el estado, el botón del siguiente paso, servicios y total",
-          "tab": "Aprobar"
+          "tab": "Aprobar",
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Julia Gómez",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 180,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "title": "Ningún trabajo olvidado",
@@ -694,7 +1062,57 @@
           ],
           "image": "agenda.png",
           "alt": "Agenda de la semana con una visita marcada",
-          "tab": "Agendar"
+          "tab": "Agendar",
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Julia Gómez",
+                "time": "09:00",
+                "status": "Aprobada · OS 186",
+                "kind": "approved",
+                "sub": "Corolla · con Bruno"
+              },
+              {
+                "name": "Marcos Ruiz",
+                "time": "14:30",
+                "status": "Presupuesto · OS 187",
+                "kind": "quote",
+                "sub": "Civic · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Julia Gómez a las 09:00 · Corolla",
+            "now": "ahora"
+          }
         },
         {
           "title": "Cobra lo que es tuyo",
@@ -706,7 +1124,33 @@
           ],
           "image": "financial.png",
           "alt": "Pestaña Financiero con el total que falta cobrar y la lista de clientes",
-          "tab": "Cobrar"
+          "tab": "Cobrar",
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.730 de 3 clientes",
+            "nextSub": "Ana Ruiz debe $ 1.250 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Ana Ruiz",
+                "amount": "$ 1.250",
+                "sub": "OS 183 · desde 02/10"
+              },
+              {
+                "name": "Julia Gómez",
+                "amount": "$ 300",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Ruiz",
+                "amount": "$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "Funciones de la app"

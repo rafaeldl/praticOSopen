@@ -20,8 +20,8 @@ modern-minimal (custom theme "Campo")
 
 ## Macrostructure family
 - **Home**: Product hero — headline beside the app on an iPhone writing a work
-  order from speech (Stageshow scene), then feature tabs with real screens, the
-  AI list, the moving trades reels and the closing band.
+  order from speech (Stageshow scene), then feature tabs with app screens drawn
+  as stills (Stageshow), the AI list, the moving trades reels and the closing band.
 - **Segments and feature pages**: Narrative Workflow — the life of a work order
   in numbered stages. Segments may swap stage content for their trade and add a
   problem → solution split (Split Studio rows).

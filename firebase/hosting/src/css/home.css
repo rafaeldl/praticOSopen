@@ -42,8 +42,8 @@
 .panel ul { margin-top: var(--space-sm); display: grid; gap: var(--space-2xs); max-width: 46ch; }
 .panel li { position: relative; padding-left: 26px; color: var(--color-ink); font-weight: 500; }
 .panel li::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
-.panel__shot { justify-self: center; width: min(100%, 20rem); margin-block: var(--space-xl); border: var(--rule); border-radius: 20px; overflow: hidden; background: var(--color-card); box-shadow: var(--shadow-card); }
-.panel__shot img { width: 100%; height: auto; }
+/* The app screen (stage/scenes/tabs): the phone runs off the panel's foot */
+.panel__scene { align-self: end; justify-self: center; width: min(100%, 420px); margin-top: var(--space-xl); }
 
 /* ---------- AI ---------- */
 .ai { padding-block: var(--space-2xl) var(--space-3xl); }
@@ -90,7 +90,7 @@
   .work { padding-block: var(--space-2xl); }
   .panel { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .panel__copy { padding-block: var(--space-lg) 0; }
-  .panel__shot { margin-block: var(--space-lg); width: min(100%, 17.5rem); }
+  .panel__scene { width: auto; justify-self: stretch; margin: var(--space-lg) calc(clamp(24px, 5vw, 64px) * -1) 0; }
   .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--page-gutter) * -1); padding-inline: var(--page-gutter); padding-block: var(--space-3xs); scrollbar-width: none; }
   .tabs button { flex: none; }
   .ai { padding-block: var(--space-lg) var(--space-2xl); }
