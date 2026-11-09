@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/permission.dart';
@@ -1615,7 +1616,17 @@ void main() {
       expect(find.text('B'), findsOneWidget);
       // Late order shows as text next to the dot.
       expect(find.textContaining('1 OS atrasada'), findsOneWidget);
-      await tester.tap(find.text('Ana Ribeiro'));
+      // The dot sits after the name, so names stay aligned.
+      final name = find.textContaining('Ana Ribeiro');
+      expect(
+        tester.getTopLeft(find.byType(StatusDot)).dx,
+        greaterThan(tester.getTopLeft(name).dx),
+      );
+      expect(
+        tester.getTopLeft(name).dx,
+        tester.getTopLeft(find.text('Alice')).dx,
+      );
+      await tester.tap(name);
       await tester.pumpAndSettle();
       expect(h.pushed.last.name, '/customer_detail');
       expect(

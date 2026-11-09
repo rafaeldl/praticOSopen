@@ -282,7 +282,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     final hitIds = hits.map((h) => h.customer.id).toSet();
     final recent = _order == CustomerListOrder.recent;
     final matches = filterCustomers(
-      recent ? sortByRecent(customers) : customers,
+      recent ? sortByRecent(customers) : sortByName(customers),
       query,
     ).where((c) => !hitIds.contains(c.id)).toList();
 
@@ -351,7 +351,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         : null;
     final subtitle = [?plate, ?status, ?owes, ?phone].join(' · ');
     return AppListRow(
-      leading: dot == null ? null : StatusDot(color: dot),
+      titleBadge: dot == null ? null : StatusDot(color: dot),
       title: customer.name ?? '',
       subtitle: subtitle.isEmpty ? null : subtitle,
       trailing: _activityText(customerLastActivity(customer)),

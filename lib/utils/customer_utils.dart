@@ -64,6 +64,12 @@ DateTime? customerLastActivity(Customer customer) {
   return updated.isAfter(created) ? updated : created;
 }
 
+/// By name, ignoring case and accents (the order of [groupByInitial]).
+List<Customer> sortByName(List<Customer> customers) {
+  String key(Customer c) => customerInitial(c) + (c.name ?? '').toLowerCase();
+  return [...customers]..sort((a, b) => key(a).compareTo(key(b)));
+}
+
 /// Most recent activity first; customers without a date last, by name.
 List<Customer> sortByRecent(List<Customer> customers) {
   int byName(Customer a, Customer b) =>

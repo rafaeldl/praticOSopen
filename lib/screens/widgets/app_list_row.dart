@@ -22,6 +22,7 @@ class AppListRow extends StatelessWidget {
     this.subtitleWidget,
     this.trailing,
     this.leading,
+    this.titleBadge,
     this.onTap,
     this.showChevron,
     this.titleStyle,
@@ -42,6 +43,11 @@ class AppListRow extends StatelessWidget {
   /// Value shown at the end of the row (e.g. a formatted amount or status).
   final String? trailing;
   final Widget? leading;
+
+  /// Small mark right after the title (e.g. a status dot). It follows the
+  /// last word when the title wraps, so rows with and without it stay
+  /// aligned (unlike [leading]).
+  final Widget? titleBadge;
   final VoidCallback? onTap;
 
   /// Overrides the chevron. Defaults to `onTap != null`.
@@ -76,10 +82,34 @@ class AppListRow extends StatelessWidget {
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
 
-    final titleText = Text(
-      title,
-      style: (titleStyle ?? AppTypography.body).copyWith(color: textColor),
+    final style = (titleStyle ?? AppTypography.body).copyWith(
+      color: textColor,
     );
+    final plainTitle = Text(title, style: style);
+    // The badge sits after the name, centered on its first line: never alone
+    // on a line of its own when the name wraps.
+    final lineHeight =
+        MediaQuery.textScalerOf(context).scale(style.fontSize ?? 17) *
+        (style.height ?? 1.2);
+    final Widget titleText = titleBadge == null
+        ? plainTitle
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  style: style,
+                  textWidthBasis: TextWidthBasis.longestLine,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              SizedBox(
+                height: lineHeight,
+                child: Center(child: titleBadge),
+              ),
+            ],
+          );
     final valueText = trailing == null
         ? null
         : Text(
