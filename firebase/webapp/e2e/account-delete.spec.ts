@@ -2,7 +2,7 @@
 // function of the Emulator Suite (never a real project). Strong confirmation,
 // the server's refusal when the owner has a team, re-authentication with the
 // password when the server asks for a recent sign-in, and the real deletion.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_A, COMPANY_D, PASSWORD, USERS } from './fixtures.mjs'
 import { chooseCompany, login } from './helpers'
 import { authUserExists, readPath } from './settings-data'

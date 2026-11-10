@@ -46,6 +46,12 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     await countNewOrderPhotos(context.params.companyId, undefined, data).catch((error) =>
       console.error('Could not count the photos of the new order', error),
     );
+    await touchCustomerOfOrder(context.params.companyId, data, context.timestamp).catch((error) =>
+      console.error('Could not stamp the customer activity of the new order', error),
+    );
+    await recountCustomersOfOrder(context.params.companyId, undefined, data).catch((error) =>
+      console.error('Could not recount the customer of the new order', error),
+    );
     if (!data || data.number) return;
 
     const companyId = context.params.companyId;
@@ -161,11 +167,33 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
     await countNewOrderPhotos(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
       console.error('Could not count the new photos of the order', error),
     );
+    await touchCustomerOfOrder(companyId, event.data?.after.data(), event.time).catch((error) =>
+      console.error('Could not stamp the customer activity of the order', error),
+    );
+    await recountCustomersOfOrder(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
+      console.error('Could not recount the customers of the order', error),
+    );
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
   }
 );
 
 import { cleanupDeletedOrder } from './services/order-cleanup.service';
+import { touchCustomerOfOrder, touchCustomerOnWrite } from './services/customer-activity.service';
+import { recountCustomersOfOrder } from './services/customer-aggregates.service';
+
+/**
+ * [V2] Customer activity (services/customer-activity.service.ts): created or
+ * edited stamps `lastActivityAt`, which orders the customer list by the most
+ * recent. The order triggers above stamp it too. A write of only the date
+ * stops here, so this does not loop.
+ */
+export const onCustomerWrittenActivity = onDocumentWritten(
+  { document: 'companies/{companyId}/customers/{customerId}', region: 'southamerica-east1' },
+  async (event) => {
+    const { companyId, customerId } = event.params;
+    await touchCustomerOnWrite(companyId, customerId, event.data?.before.data(), event.data?.after.data(), event.time);
+  }
+);
 
 /**
  * [V2] Plan usage counters kept by the server (services/usage-counter.service.ts):
@@ -213,6 +241,9 @@ export const onOrderDeletedCleanup = onDocumentDeleted(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
+    await recountCustomersOfOrder(companyId, event.data?.data(), undefined).catch((error) =>
+      console.error('Could not recount the customer of the deleted order', error),
+    );
     await cleanupDeletedOrder(companyId, orderId);
   }
 );

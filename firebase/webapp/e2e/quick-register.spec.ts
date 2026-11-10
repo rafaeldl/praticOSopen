@@ -1,6 +1,6 @@
 // Cadastro rápido de dentro da OS (docs/QUICK_REGISTER.md): pedir o essencial na
 // hora e completar depois sem sair da OS (order.quick.*).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeDevice, makeOrder, readDoc, readOrder } from './data'
 import { login, type UserKey } from './helpers'
 

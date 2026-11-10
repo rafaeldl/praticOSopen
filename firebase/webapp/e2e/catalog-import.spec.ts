@@ -2,7 +2,7 @@
 // columns guessed and confirmed, repeated names out, prices read as typed,
 // nothing saved before "Importar", and a retry that never doubles a line.
 import { resolve } from 'node:path'
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { catalogNamed } from './data'
 import { login } from './helpers'
 

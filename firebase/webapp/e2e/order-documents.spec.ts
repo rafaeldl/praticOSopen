@@ -2,7 +2,7 @@
 // order.document.open, order.media.document-view, order.document.delete,
 // order.media.document-delete): add with the type asked first, open in a new
 // tab, take out asked first; per role where it changes.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, readOrder } from './data'
 import { expectNoAxeViolations, login, setTheme, type UserKey } from './helpers'
 

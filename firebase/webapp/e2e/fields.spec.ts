@@ -1,7 +1,7 @@
 // One look for every field (web.fields.*): a select is as tall as the inputs
 // beside it, a filled date reads in the text colour (not the placeholder's),
 // and the search hint of Início fits its box at any width and text size.
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from './test'
 import { login, startWithPrefs } from './helpers'
 
 const height = (locator: Locator) => locator.evaluate((element) => element.getBoundingClientRect().height)

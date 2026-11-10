@@ -37,11 +37,21 @@ export interface WebAccessRouterOptions {
 }
 
 /**
+ * The local Emulator Suite (FUNCTIONS_EMULATOR is never set in Cloud Functions)
+ * has no req.ip, so every caller shares one counter: the web E2E suite logs in
+ * hundreds of times a minute and got 429 on random tests.
+ */
+export function skipWebAccessLimit(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.FUNCTIONS_EMULATOR === 'true';
+}
+
+/**
  * Every web start asks once, before anything else, so it has its own limit
  * instead of spending the shared apiCoreLimiter budget of the same IP (a
  * workshop with several computers shares one).
  */
 const webAccessLimiter = rateLimit({
+  skip: () => skipWebAccessLimit(),
   windowMs: 60 * 1000,
   max: 300,
   standardHeaders: true,

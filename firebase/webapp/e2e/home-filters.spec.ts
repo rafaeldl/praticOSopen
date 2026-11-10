@@ -3,7 +3,7 @@
 // A filter that looked only at the loaded rows missed the ones further down;
 // now each filter is its own query, paged with "Mostrar mais" and counted by
 // the server. Nothing here writes, so the numbers are fixed.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { login, type UserKey } from './helpers'
 
 const table = (page: Page) => page.getByTestId('orders-table')

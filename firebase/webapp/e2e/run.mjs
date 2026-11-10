@@ -26,12 +26,13 @@
 //
 // Everything it starts runs in one process group (e2e/group.mjs). Ctrl+C, SIGTERM, SIGHUP,
 // the parent process dying or this one being killed take the whole group down and remove
-// the generated files (fake .secret.local, firebase.e2e.offset-<offset>.json, .env.e2e.local).
+// the generated files (fake .secret.local, firebase.e2e.offset-<offset>.json, .env.e2e.local,
+// the emulators' TMPDIR).
 // Parallel test runs belong in different worktrees: dist-e2e and .env.e2e.local are per copy.
 // The exit code is Playwright's.
 import { execFileSync, spawn } from 'node:child_process'
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, rmSync, statSync, writeFileSync, writeSync } from 'node:fs'
-import { constants, homedir } from 'node:os'
+import { closeSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeFileSync, writeSync } from 'node:fs'
+import { constants, homedir, tmpdir } from 'node:os'
 import { createServer } from 'node:net'
 import { join, resolve } from 'node:path'
 
@@ -79,7 +80,7 @@ function killGroup(pid, signal) {
 }
 
 function removeFiles() {
-  generated.forEach((file) => rmSync(file, { force: true }))
+  generated.forEach((file) => rmSync(file, { recursive: true, force: true }))
   generated.length = 0
   if (createdSecrets) rmSync(secretFile, { force: true })
   createdSecrets = false
@@ -342,11 +343,20 @@ if (serve) {
 // The Firestore emulator is the only JVM; JAVA_TOOL_OPTIONS reaches it through firebase-tools.
 const picksSpecs = (process.env.PW_ARGS ?? '').split(/\s+/).some((arg) => arg && !arg.startsWith('-'))
 const heap = process.env.E2E_JAVA_HEAP ?? (process.env.CI ? '' : serve || perf || picksSpecs ? '1g' : '4g')
-const javaOptions = [process.env.JAVA_TOOL_OPTIONS, heap && `-Xmx${heap}`].filter(Boolean).join(' ')
+// Quiet Firestore listen-channel warnings: see e2e/emulator-logging.properties.
+const logging = `-Djava.util.logging.config.file=${resolve(webapp, 'e2e/emulator-logging.properties')}`
+const javaOptions = [process.env.JAVA_TOOL_OPTIONS, logging, heap && `-Xmx${heap}`].filter(Boolean).join(' ')
+
+// The Storage emulator keeps its files in $TMPDIR/firebase/storage/blobs and
+// deletes that folder when it stops: another suite ending on this machine
+// (another worktree) wiped this one's files and the run died. Own folder per run.
+const emulatorTmp = mkdtempSync(join(tmpdir(), 'praticos-e2e-'))
+generated.push(emulatorTmp)
+
 const status = await runInGroup(
   'npx',
   ['firebase', 'emulators:exec', '--config', config, '--project', 'demo-praticos', '--only', only, `node e2e/seed.mjs && ${test}`],
-  javaOptions ? { ...process.env, JAVA_TOOL_OPTIONS: javaOptions } : process.env,
+  { ...process.env, TMPDIR: emulatorTmp, JAVA_TOOL_OPTIONS: javaOptions },
 )
 if (stopping) await new Promise(() => {})
 removeFiles()

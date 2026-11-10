@@ -2,7 +2,7 @@
 // (GET /v1/app/finance/*): the tests check the server's answer on screen and
 // that the browser never reads the orders for it. March 2026 is a closed month
 // seeded with known numbers (seed.mjs seedFinance), in São Paulo.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
 
 const MARCH = 'finance?month=2026-03'

@@ -1,7 +1,7 @@
 // Importar clientes de planilha (desk extra of fatia 03): CSV and XLSX, columns
 // guessed and confirmed, repeated phones out, nothing saved before "Importar".
 import { resolve } from 'node:path'
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { countCustomersNamed, makeCustomer } from './data'
 import { login } from './helpers'
 

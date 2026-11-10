@@ -1,7 +1,7 @@
 // Preços em lote (desk extra of fatia 05): select rows, raise or lower by a
 // percentage, see every item before and after, confirm, and undo. The server
 // changes all or none; each change carries the price the person saw.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCatalogItem, readCatalogItem, updateCatalogItem } from './data'
 import { login } from './helpers'
 

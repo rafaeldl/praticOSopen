@@ -1,7 +1,7 @@
 // The assistant corrects what it put itself and remembers what was said
 // (issue #631, docs/AI_ORDER_ASSIST.md): the model is simulated with
 // page.route, one answer per message, and the test reads what each request sent.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeOrder } from './data'
 import { login } from './helpers'
 
@@ -82,12 +82,17 @@ test('OS aberta: troca o prazo que a IA pôs e manda o contexto sem o nome do cl
   await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
   const bar = panel(page).getByTestId('assistant')
 
+  // The context is built from the order the listener shows: wait for the new
+  // deadline there before the next message, or it may still carry the old one.
+  const due = (day: string) => expect(panel(page).getByRole('button', { name: new RegExp(`^${day}`) })).toBeVisible()
   await say(bar, 'pronto sexta', bodies, 1)
   expect(bodies[0]?.context).toMatchObject({ customer: { chosen: true, fromAi: false } })
   expect(JSON.stringify(bodies[0]?.context)).not.toContain('Cliente 02')
+  await due('11/12')
   await say(bar, 'não, o prazo é segunda', bodies, 2)
   expect(bodies[1]?.history).toEqual(['pronto sexta'])
   expect(bodies[1]?.context).toMatchObject({ due: { date: '2026-12-11T18:00', fromAi: true } })
+  await due('14/12')
   await say(bar, 'ok', bodies, 3)
   expect(bodies[2]?.history).toEqual(['pronto sexta', 'não, o prazo é segunda'])
   expect(bodies[2]?.context).toMatchObject({ due: { date: '2026-12-14T18:00', fromAi: true } })

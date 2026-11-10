@@ -1,6 +1,6 @@
 // Fixes from the red team (revisao-pr515) and the simulated users (usuarios-pr515).
 // Each test names the item it covers.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc, writeOrderFieldsRaw } from './data'
 import { login, setTheme, signOut } from './helpers'
 

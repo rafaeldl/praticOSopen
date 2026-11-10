@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 // The audit is split in four tests per theme (screens, open order, order lists, components):

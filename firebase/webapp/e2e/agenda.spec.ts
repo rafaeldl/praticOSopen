@@ -2,7 +2,7 @@
 // the side, person filter, open the order, and moving a visit by dragging or by
 // keyboard, with confirmation and undo. Each test uses its own month far in the
 // future, so the orders other tests create never land on its screen.
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from './test'
 import { deleteOrderDocs, makeOrder as makeOrderInA, makeOrderInB as makeOrderInBDoc, readOrder, updateCompanyB, updateOrderDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
 

@@ -1,6 +1,6 @@
 // Fatia 03, aparelhos (device.*), against the Emulator Suite. Company A has
 // useDeviceManagement on and the automotive segment ("Veículo", "Placa").
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeDevice, makeOrder, readDoc } from './data'
 import { login, signOut } from './helpers'
 

@@ -3,7 +3,7 @@
 // answered here, as receive.spec does with charges, and the documents the
 // server would write are written by the test.
 import { randomUUID } from 'node:crypto'
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeOrder, writeDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
 

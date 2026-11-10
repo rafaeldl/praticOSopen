@@ -104,24 +104,31 @@ for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(signal, () => s
 
 const child = spawn(command, args, { stdio: 'inherit' })
 
-const watch = setInterval(() => {
-  track()
-  let alive = process.ppid === parent
+function parentAlive() {
   try {
     process.kill(parent, 0)
   } catch {
-    alive = false
+    return false
   }
-  if (alive || stopping) return
+  return process.ppid === parent
+}
+
+// The files run.mjs would have removed: generated ones, and its machine slot if still its.
+function cleanUpForParent() {
+  for (const file of JSON.parse(process.env.E2E_GROUP_CLEANUP ?? '[]')) {
+    try {
+      if (file.endsWith('.lock') && JSON.parse(readFileSync(file, 'utf8')).pid !== parent) continue
+      rmSync(file, { recursive: true, force: true })
+    } catch {}
+  }
+}
+
+const watch = setInterval(() => {
+  track()
+  if (stopping || parentAlive()) return
   console.error('[e2e] run.mjs sumiu: encerrando os emuladores e o Playwright')
   stopAll().then(() => {
-    // The files run.mjs would have removed: generated ones, and its machine slot if still its.
-    for (const file of JSON.parse(process.env.E2E_GROUP_CLEANUP ?? '[]')) {
-      try {
-        if (file.endsWith('.lock') && JSON.parse(readFileSync(file, 'utf8')).pid !== parent) continue
-        rmSync(file, { force: true })
-      } catch {}
-    }
+    cleanUpForParent()
     process.exit(1)
   })
 }, 1000)
@@ -134,5 +141,7 @@ child.on('exit', async (code, signal) => {
   clearInterval(watch)
   // Whatever the command left behind (a Chrome, a java) goes too.
   await stopAll()
+  // run.mjs killed while this was shutting down: nobody else removes its files.
+  if (!parentAlive()) cleanUpForParent()
   process.exit(code ?? (signal ? 128 + (constants.signals[signal] ?? 1) : 1))
 })
