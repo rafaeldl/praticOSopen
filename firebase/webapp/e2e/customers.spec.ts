@@ -1,7 +1,7 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
 import { expect, test, type Page } from '@playwright/test'
-import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc } from './data'
+import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc, waitForOpenOrders } from './data'
 import { chooseCompany, login, signOut } from './helpers'
 
 const list = (page: Page) => page.getByTestId('customers-table')
@@ -35,6 +35,7 @@ test('selos: atrasada vence aberta (customer.list.badges)', async ({ page }) => 
   // Company B: a late order in A would change the order list's "1 atrasada".
   const late = await makeCustomer({}, 'company-beta')
   await makeLateOrderInB(late)
+  await waitForOpenOrders(late.id, 1, 'company-beta')
   await login(page, 'owner', `customers?q=${encodeURIComponent(late.name)}`)
   await chooseCompany(page, 'Beta Repairs')
   await expect(row(page, late.name)).toContainText('1 atrasada')
@@ -44,6 +45,7 @@ test('selos: consultor e técnico contam só as OS que leem (customer.list.badge
   const mine = await makeCustomer()
   await makeOrder('consultant', { customer: { id: mine.id, name: mine.name }, status: 'approved' })
   await makeOrder('admin', { customer: { id: mine.id, name: mine.name }, status: 'progress' })
+  await waitForOpenOrders(mine.id, 2)
 
   await openCustomers(page, 'admin', `?q=${encodeURIComponent(mine.name)}`)
   await expect(row(page, mine.name)).toContainText('2 em aberto')
