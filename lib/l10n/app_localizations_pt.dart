@@ -3962,6 +3962,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String customerOwedTrailing(String value) {
+    return 'Deve $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return 'Abrir uma OS para $name?';
   }

@@ -231,7 +231,6 @@
   "web.customers.noMatch": "Ningún cliente con «{query}»",
   "web.customers.ordersColumn": "OS abiertas",
   "web.customers.owedColumn": "Por cobrar",
-  "web.customers.activityColumn": "Último movimiento",
   "web.customers.orderBy": "Ordenar por",
   "web.customers.orderRecent": "Recientes",
   "web.customers.orderName": "A–Z",

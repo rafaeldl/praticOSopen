@@ -697,11 +697,8 @@ void main() {
     group('contacts', () {
       Finder link() => find.byKey(const Key('customerPickContact'));
 
-      Finder field(String text) => find.widgetWithText(
-            CupertinoTextField,
-            text,
-            skipOffstage: false,
-          );
+      Finder field(String text) =>
+          find.widgetWithText(CupertinoTextField, text, skipOffstage: false);
 
       testWidgets('new customer fills name, phone and e-mail, without saving', (
         tester,
@@ -1551,7 +1548,7 @@ void main() {
 
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    testWidgets('opens in Recentes: last activity first, with the day', (
+    testWidgets('opens in Recentes: last activity first, without the day', (
       tester,
     ) async {
       final now = DateTime.now();
@@ -1573,8 +1570,9 @@ void main() {
       final z = tester.getTopLeft(find.text('Zeca')).dy;
       final a = tester.getTopLeft(find.text('Abel')).dy;
       expect(y < z && z < a, isTrue);
-      expect(find.text('Hoje'), findsOneWidget);
-      expect(find.text('05/03/${now.year - 1}'), findsOneWidget);
+      // The order says it: no date on the rows.
+      expect(find.text('Hoje'), findsNothing);
+      expect(find.text('05/03/${now.year - 1}'), findsNothing);
       // No letters in Recentes.
       expect(find.text('A'), findsNothing);
     });
@@ -1709,14 +1707,19 @@ void main() {
         ),
         direct: true,
       );
+      // Phone under the name; what is pending on the right, owed first.
+      expect(find.text('(11) 90000-0001'), findsOneWidget);
+      final owed = find.text('Deve ${FormatService().formatCurrency(166)}');
+      final open = find.text('2 OS em aberto');
+      expect(owed, findsOneWidget);
+      expect(open, findsOneWidget);
       expect(
-        find.text(
-          '2 OS em aberto · Falta receber '
-          '${FormatService().formatCurrency(166)} · (11) 90000-0001',
-        ),
-        findsOneWidget,
+        tester.getTopLeft(owed).dx,
+        greaterThan(tester.getTopLeft(find.text('Ana Ribeiro')).dx),
       );
-      expect(find.textContaining('Falta receber'), findsOneWidget);
+      expect(tester.getTopLeft(owed).dy, lessThan(tester.getTopLeft(open).dy));
+      // Nothing pending, nothing on the right.
+      expect(find.textContaining('Deve '), findsOneWidget);
     });
 
     testWidgets('hides what is owed from who does not read the Financeiro', (
@@ -1738,7 +1741,7 @@ void main() {
         ),
         direct: true,
       );
-      expect(find.textContaining('Falta receber'), findsNothing);
+      expect(find.textContaining('Deve '), findsNothing);
     });
 
     testWidgets('shows the phone formatted for the country', (tester) async {

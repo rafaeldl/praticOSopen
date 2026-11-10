@@ -28,17 +28,21 @@ Conta como movimentação:
   (`lastActivityOf` em `app-directory.service.ts`). Antes do preenchimento, usa a
   data mais recente entre `updatedAt` e `createdAt` do cliente.
 - **Tela:** `firebase/webapp/src/views/customers/CustomersView.vue` (ordem
-  `byRecent` em `lib/customers/model.ts`). A coluna "Última movimentação" só
-  aparece quando cabe: com texto grande ou com o cliente aberto ao lado, ela some,
-  mas a ordem continua.
+  `byRecent` em `lib/customers/model.ts`). A data não aparece na lista: o
+  "Recentes" já diz a ordem, e as colunas mostram o que pede ação (OS em aberto
+  ou atrasadas e Falta receber).
 
 - **App:** `Customer.lastActivityAt` só é lido (`includeToJson: false`), então
   salvar o cliente nunca grava uma data velha por cima. A aba Clientes
   (`lib/screens/menu_navigation/home_customer_list.dart`) tem o controle
-  Recentes / A–Z e mostra o dia ("Hoje", "Ontem", "06/11") à direita de cada
-  linha. A ordem e a data vêm de `sortByRecent` e `customerLastActivity` em
+  Recentes / A–Z. A ordem vem de `sortByRecent` e `customerLastActivity` em
   `lib/utils/customer_utils.dart`, com a mesma regra do web para quem ainda não
-  tem a data.
+  tem a data. A linha não mostra a data: à esquerda o nome e o telefone; à
+  direita o que está pendente, o Falta receber ("Deve R$ 166,00", só para quem
+  lê o Financeiro) em cima da situação (ponto e "2 OS em aberto", ou "1 OS
+  atrasada" em vermelho e negrito). Cliente sem nada pendente fica sem nada à
+  direita. Com texto grande, o lado direito desce para baixo do nome
+  (`AppListRow.trailingWidget`).
 
 ## Regras de Negócio
 

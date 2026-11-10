@@ -231,7 +231,6 @@
   "web.customers.noMatch": "No customer matches “{query}”",
   "web.customers.ordersColumn": "Open orders",
   "web.customers.owedColumn": "To receive",
-  "web.customers.activityColumn": "Last activity",
   "web.customers.orderBy": "Sort by",
   "web.customers.orderRecent": "Recent",
   "web.customers.orderName": "A–Z",
