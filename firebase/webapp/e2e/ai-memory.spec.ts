@@ -82,12 +82,17 @@ test('OS aberta: troca o prazo que a IA pôs e manda o contexto sem o nome do cl
   await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
   const bar = panel(page).getByTestId('assistant')
 
+  // The context is built from the order the listener shows: wait for the new
+  // deadline there before the next message, or it may still carry the old one.
+  const due = (day: string) => expect(panel(page).getByRole('button', { name: new RegExp(`^${day}`) })).toBeVisible()
   await say(bar, 'pronto sexta', bodies, 1)
   expect(bodies[0]?.context).toMatchObject({ customer: { chosen: true, fromAi: false } })
   expect(JSON.stringify(bodies[0]?.context)).not.toContain('Cliente 02')
+  await due('11/12')
   await say(bar, 'não, o prazo é segunda', bodies, 2)
   expect(bodies[1]?.history).toEqual(['pronto sexta'])
   expect(bodies[1]?.context).toMatchObject({ due: { date: '2026-12-11T18:00', fromAi: true } })
+  await due('14/12')
   await say(bar, 'ok', bodies, 3)
   expect(bodies[2]?.history).toEqual(['pronto sexta', 'não, o prazo é segunda'])
   expect(bodies[2]?.context).toMatchObject({ due: { date: '2026-12-14T18:00', fromAi: true } })
