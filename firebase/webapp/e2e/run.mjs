@@ -17,8 +17,11 @@
 //                       (E2E_LOCK_DIR), holding the PID; a lock whose process is gone is taken
 //                       back. Not used on CI (env CI).
 //   E2E_SLOT_TIMEOUT    minutes to wait for a slot before giving up (default 30)
-//   E2E_JAVA_HEAP       max heap of the Firestore emulator (default 1g). Without it the JVM
-//                       takes up to 1/4 of the RAM (12 GB seen on a 24 GB Mac).
+//   E2E_JAVA_HEAP       max heap of the Firestore emulator. Without it the JVM takes up to 1/4
+//                       of the RAM (12 GB seen on a 24 GB Mac). Default 1g when PW_ARGS picks
+//                       specs, in perf and in serve; 4g for the whole suite (the emulator keeps
+//                       every closed browser's listen channel: with 1g a CI shard stopped
+//                       answering after ~230 tests); no limit on CI (a runner of its own).
 //   E2E_SERVE_TTL       minutes `serve` (npm run emulators) stays up (default 30, 0 = no limit)
 //
 // Everything it starts runs in one process group (e2e/group.mjs). Ctrl+C, SIGTERM, SIGHUP,
@@ -337,12 +340,13 @@ if (serve) {
 }
 
 // The Firestore emulator is the only JVM; JAVA_TOOL_OPTIONS reaches it through firebase-tools.
-const heap = process.env.E2E_JAVA_HEAP ?? '1g'
-const javaOptions = [process.env.JAVA_TOOL_OPTIONS, `-Xmx${heap}`].filter(Boolean).join(' ')
+const picksSpecs = (process.env.PW_ARGS ?? '').split(/\s+/).some((arg) => arg && !arg.startsWith('-'))
+const heap = process.env.E2E_JAVA_HEAP ?? (process.env.CI ? '' : serve || perf || picksSpecs ? '1g' : '4g')
+const javaOptions = [process.env.JAVA_TOOL_OPTIONS, heap && `-Xmx${heap}`].filter(Boolean).join(' ')
 const status = await runInGroup(
   'npx',
   ['firebase', 'emulators:exec', '--config', config, '--project', 'demo-praticos', '--only', only, `node e2e/seed.mjs && ${test}`],
-  { ...process.env, JAVA_TOOL_OPTIONS: javaOptions },
+  javaOptions ? { ...process.env, JAVA_TOOL_OPTIONS: javaOptions } : process.env,
 )
 if (stopping) await new Promise(() => {})
 removeFiles()
