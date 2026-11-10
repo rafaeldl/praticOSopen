@@ -327,9 +327,23 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 
 ```bash
 PW_ARGS=e2e/auth npm run e2e                   # um arquivo
+PW_ARGS="e2e/team.spec.ts e2e/auth.spec.ts" E2E_SKIP_BUILD=1 npm run e2e   # só o que mudou, sem novo build
 E2E_ONLY=auth,firestore,storage npm run e2e    # sem Functions (mais rápido)
-E2E_PORT_OFFSET=1000 npm run e2e               # outra cópia do repositório rodando ao mesmo tempo
 ```
+
+**Recursos da máquina.** Cada execução local (emuladores, Functions, Chromium e build) custa de 2 a 4 GB, e o `e2e/run.mjs` limita isso:
+
+| Env | Padrão | O que faz |
+|---|---|---|
+| `E2E_MAX_CONCURRENT` | 2 | Execuções ao mesmo tempo na máquina, somando todas as cópias do repositório. As outras esperam ("aguardando vaga de E2E…", checando a cada 5 s). Travas em `~/.cache/praticos-e2e/slot-N.lock` (`E2E_LOCK_DIR`) com o PID; a de processo morto é tomada de volta. Não vale no CI |
+| `E2E_SLOT_TIMEOUT` | 30 | Minutos esperando vaga antes de desistir |
+| `E2E_PORT_OFFSET` | da vaga | Sem ele, as portas vêm da vaga: vaga 0 = +1000, vaga 1 = +2000. Passos de 1000 porque as portas base ficam a 100 uma da outra (19099, 19199, 19299…). Se alguma porta da vaga estiver ocupada por outro processo, a vaga anda `E2E_MAX_CONCURRENT` × 1000 (até +9000). No CI fica 0 |
+| `E2E_JAVA_HEAP` | `1g` / `4g` | Heap máximo do emulador do Firestore (`-Xmx`, via `JAVA_TOOL_OPTIONS`). Sem limite a JVM pega até 1/4 da RAM (12 GB vistos num Mac de 24 GB). `1g` quando o `PW_ARGS` escolhe specs, no perf (10 mil OS passam com pico de 1,2 GB de RSS) e no `serve`; `4g` na suíte inteira, porque o emulador guarda o canal de cada navegador fechado e com 1g ele parou de responder depois de uns 230 testes. No CI fica sem limite |
+| `E2E_SERVE_TTL` | 30 | Minutos que o `npm run emulators` fica de pé (0 = sem limite) |
+| `PW_WORKERS` | 2 local, 3 no CI | Workers do Playwright (o perf usa 1) |
+| `E2E_SKIP_BUILD` | — | Reusa o `dist-e2e`. Ele guarda as portas do build (`dist-e2e/.e2e-port-offset`); se a vaga mudou, gera de novo |
+
+Tudo o que o `run.mjs` inicia roda num grupo de processos próprio (`e2e/group.mjs`), que também guarda os grupos que o firebase-tools (java) e o Playwright (Chrome) abrem. Ctrl+C, SIGTERM, SIGHUP, o processo pai morrer (agente que matou o `npm` ou estourou o tempo) ou o próprio `run.mjs` levar SIGKILL derrubam tudo e apagam os arquivos gerados (`.secret.local` falso, `firebase.e2e.offset-<offset>.json`, `.env.e2e.local` e o `TMPDIR` próprio dos emuladores). O código de saída é o do Playwright. Execuções em paralelo devem estar em cópias diferentes do repositório: `dist-e2e` e `.env.e2e.local` são da cópia.
 
 **Desempenho.** Fast 4G, CPU 4x, 10 mil OS, p75 de 7 rodadas, cada passo marcado com `performance.mark`. A visita medida é a de quem já usa: login e "sim" da lista de acesso guardados, sem cache HTTP nem do Firestore. Falha acima de 1,5 s. A "primeira visita fria" (`e2e:perf:cold`) liga o emulador de Functions e não usa o "sim" guardado.
 
@@ -370,7 +384,7 @@ npm ci
 npm test && npm run typecheck && npm run build
 
 (cd ../functions && npm ci && npm run build)   # uma vez
-npm run emulators    # terminal 1: suíte + seed
+npm run emulators    # terminal 1: suíte + seed (desliga sozinho em 30 min, E2E_SERVE_TTL)
 npm run dev          # terminal 2: http://localhost:5180/web/
 ```
 

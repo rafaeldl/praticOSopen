@@ -583,6 +583,12 @@ Prioridade vem do [`ROADMAP.md`](ROADMAP.md). Trabalho vem de issues.
 5. Se o CI falhar, corrigir no mesmo PR antes de pegar outra issue.
 6. **CI verde em PR `risk:low`: o próprio agente mescla** (`gh pr merge --merge`), sem esperar revisão. A `master` não tem checks obrigatórios, então o auto-merge do GitHub não espera o CI: não usar. Em PR que mexe em `firebase/functions`, esperar o deploy do merge anterior terminar antes de mesclar o próximo.
 
+### E2E do app web (máquina compartilhada)
+Vários agentes rodam ao mesmo tempo e cada E2E custa de 2 a 4 GB. O `e2e/run.mjs` já limita a 2 execuções na máquina e escolhe as portas sozinho (não passar `E2E_PORT_OFFSET`); ver `docs/WEB_APP.md`.
+- Rodar só os specs do que mudou: `PW_ARGS="e2e/x.spec.ts e2e/y.spec.ts" npm run e2e`. A suíte completa fica para o CI.
+- `E2E_SKIP_BUILD=1` quando o `dist-e2e` já tem o código atual.
+- Desligar o `npm run emulators` ao terminar (ele cai sozinho em 30 min, `E2E_SERVE_TTL`) e conferir com `ps` que não ficou java, firebase nem Chrome seu.
+
 ### Limites
 - **WIP: no máximo 2 PRs de agente abertos.** Acima disso, não abrir novos: revisar/consertar os existentes.
 - Não mergear PR `risk:high`. Não fazer deploy nem promover release fora do fluxo de CI.
