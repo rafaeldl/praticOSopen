@@ -2,7 +2,7 @@
 // device.maintenance.answer, device.maintenance.no-repeat, device.maintenance.limit),
 // per role: only who manages devices is asked. The question sits inside the order
 // (not over it), so going on needs no dismissal; "Agora não" is the refusal.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeContract, makeCustomer, makeDevice, makeOrder, readDoc } from './data'
 import { login, type UserKey } from './helpers'
 

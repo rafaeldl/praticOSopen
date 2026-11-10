@@ -7,7 +7,7 @@
 // direct key is not a choice). The decisions of each path are written by the test.
 // Needs the default seed (scenario orders), so it only runs when asked:
 // CMP=1 E2E_PERF=1 PW_ARGS=e2e/perf/timed-comparison npm run e2e  (or with the suite up: CMP=1 E2E_PERF=1 npx playwright test e2e/perf/timed-comparison --workers=1)
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '../test'
 import { makeDevice, makeOrder, readOrder } from '../data'
 import { login } from '../helpers'
 

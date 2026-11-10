@@ -2,7 +2,7 @@
 // Storage emulator and its rules. Company A is automotive ("Veículo", "Placa").
 // The photo goes up only after ✓ (the app creates the device on picking it),
 // the button says it is uploading, and a failed upload is said.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeDevice, queryDocs, readDoc } from './data'
 import { login } from './helpers'
 

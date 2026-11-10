@@ -1,6 +1,6 @@
 // Fatia 07 (checklists) on every screen: axe in light and dark, 320 to 2560 px
 // without side scroll, text at 200%, and the three languages.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, makeOrderForm } from './data'
 import { expectNoAxeViolations, expectNoSideScroll, login, startWithPrefs } from './helpers'
 

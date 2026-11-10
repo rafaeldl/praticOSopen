@@ -1,5 +1,5 @@
 // Nova OS (order.new.*, order.route.new): keyboard only, timed, per role.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { readComments, readOrder } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 

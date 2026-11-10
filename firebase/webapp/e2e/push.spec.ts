@@ -3,7 +3,7 @@
 // (lib/push/token.ts), and what the service worker hands the page is sent the
 // way it sends it (a message on navigator.serviceWorker). The worker itself is
 // tested in tests/push.test.ts.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeOrder, readUser, writeDoc } from './data'
 import { COMPANY_A, COMPANY_B, USERS } from './fixtures.mjs'
 import { login, signOut } from './helpers'

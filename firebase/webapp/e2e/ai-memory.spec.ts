@@ -1,7 +1,7 @@
 // The assistant corrects what it put itself and remembers what was said
 // (issue #631, docs/AI_ORDER_ASSIST.md): the model is simulated with
 // page.route, one answer per message, and the test reads what each request sent.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeOrder } from './data'
 import { login } from './helpers'
 

@@ -2,7 +2,7 @@
 // and the box stays inside the window, on common notebook and desktop sizes
 // and at 200% zoom (half the CSS width). The cause in "Mandar para o cliente"
 // was a long link that never wrapped and widened the body's grid column.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeOrder } from './data'
 import { login, type UserKey } from './helpers'
 

@@ -1,5 +1,5 @@
 // Accepting an invite on the web: API route, then the token gets the new company.
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { chooseCompany, login } from './helpers'
 
 test('quem já trabalha numa empresa aceita convite de outra e entra nela', async ({ page }) => {

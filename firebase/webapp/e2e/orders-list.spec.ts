@@ -1,7 +1,7 @@
 // Início: list, filters, rows, search, selection, board and live updates.
 // Seeded scenario orders (seed.mjs seedScenario) give the late, today, on hold,
 // owed and old quote rows; tests that write make their own orders (data.ts).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 

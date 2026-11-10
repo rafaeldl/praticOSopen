@@ -3,7 +3,7 @@
 // (lib/analytics.ts) takes the events, and only the tests that ask for it
 // (praticos.analyticsE2E) see the notice. Checks the app's names, that nothing
 // leaves before "Aceitar" or after "Recusar", and that no name, phone or e-mail goes.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeOrder } from './data'
 import { USERS } from './fixtures.mjs'
 import { expectNoAxeViolations, login } from './helpers'

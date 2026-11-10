@@ -3,7 +3,7 @@
 // of the first access, accepting and refusing invites without a company,
 // "Tentar de novo" when the account does not load, Avaliações, the plan note
 // for who is not an administrator and the company options as the app reads them.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_B, COMPANY_M, USERS } from './fixtures.mjs'
 import { expectNoAxeViolations, login, signOut } from './helpers'
 import { readPath } from './settings-data'

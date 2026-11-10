@@ -4,7 +4,7 @@
 // so an order far from the loaded pages shows. Company paging (seed.mjs
 // seedPaging): order 900, of Zeca Antiguidades with the Fusca OLD1970, is the
 // oldest of 140, out of what the board loads.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoSideScroll, login, type UserKey } from './helpers'
 
 type Box = { x: number; y: number; width: number; height: number }

@@ -1,7 +1,7 @@
 // The open order (order.detail.*, order.status.*, order.item.*, order.hold.*,
 // dates, person in charge, money, comments, photos, print, delete, assistant).
 // Every write goes through /v1/app/orders; tests check what the server saved.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeDevice, makeOrder, readOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey, signOut } from './helpers'
 

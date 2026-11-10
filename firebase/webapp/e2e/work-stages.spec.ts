@@ -1,7 +1,7 @@
 // Work stages on the board (docs/WORK_STAGES.md): Em andamento split into the
 // company's stages, order inside a stage by keyboard and the "…" button, print
 // of a stage. Company stages is its own, so no other board test sees it.
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { makeOrder, readOrder } from './data'
 import { COMPANY_S } from './fixtures.mjs'
 import { login } from './helpers'

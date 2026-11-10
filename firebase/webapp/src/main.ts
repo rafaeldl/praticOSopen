@@ -10,7 +10,7 @@ import { firestoreLite } from './lib/firebase'
 import { filterQueries, firstOrdersPage } from './lib/orders-query'
 import { roleHasPermission } from './lib/permissions'
 import { startPrefs } from './lib/prefs'
-import { onSessionHint, startSession } from './lib/session'
+import { followCompany, onSessionHint, startSession } from './lib/session'
 import { router } from './router'
 import { watchForStaleBuild } from './lib/stale-build'
 
@@ -34,7 +34,18 @@ void startSession()
 if (hasSavedSession()) void firestoreLite()
 // Text first: nothing on screen can render without it.
 void startI18n().then(() => {
-  createApp(App).use(router).mount('#app')
+  const app = createApp(App).use(router)
+  app.mount('#app')
+  // E2E build: each test stops every live listener before its browser closes
+  // (e2e/test.ts). Unmounting runs each screen's own stop; the session follows
+  // the company outside any screen. A listener left open keeps the emulator
+  // queuing every write for a browser that is gone, until it stalls.
+  if (import.meta.env.VITE_USE_EMULATORS === '1') {
+    ;(window as unknown as { __e2eStopListeners?: () => void }).__e2eStopListeners = () => {
+      app.unmount()
+      void followCompany(null)
+    }
+  }
 })
 
 function hasSavedSession(): boolean {

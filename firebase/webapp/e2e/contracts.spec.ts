@@ -4,7 +4,7 @@
 // company's local time without a zone. The web never creates the orders of a
 // contract: no test here expects one. Each test makes the contracts it uses;
 // company A has Contratos on, company C has it off.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { brShown, brWall, makeContract, makeOrder, readCompany, readOrder, setCompanyFields, writeOrderFieldsRaw } from './data'
 import { COMPANY_C } from './fixtures.mjs'
 import { login, signOut, type UserKey } from './helpers'

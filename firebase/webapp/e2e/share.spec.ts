@@ -4,7 +4,7 @@
 // shown: window.open and navigator.share are replaced here and the tests read
 // what they got (the link, the text, the file).
 import { randomUUID } from 'node:crypto'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeOrder, readOrder, writeDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
