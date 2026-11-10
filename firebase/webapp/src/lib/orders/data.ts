@@ -171,6 +171,22 @@ export function createListLoader(ctx: ListContext, statuses: OrderStatus[] | nul
   return makeLoader(ctx, [{ firestore: { companyId: ctx.companyId, createdBy: ctx.seesAll ? null : ctx.uid, statuses }, api }])
 }
 
+/**
+ * Concluded since `since` (the board's Concluída), newest conclusion first. Who
+ * sees every order and values reads `completedAt >= since` (single-field range:
+ * no composite index, like the TV). Everyone else reads the newest concluded
+ * orders and the screen keeps the recent ones (lib/orders/board.ts).
+ */
+export function createDoneSinceLoader(ctx: ListContext, since: string) {
+  if (!ctx.showsMoney || !ctx.seesAll) return createListLoader(ctx, ['done'])
+  return makeLoader(ctx, [
+    {
+      firestore: { companyId: ctx.companyId, createdBy: null, where: [['completedAt', '>=', since]], order: { field: 'completedAt', dir: 'desc' } },
+      api: { status: 'done' },
+    },
+  ])
+}
+
 export type ListLoader = ReturnType<typeof createListLoader>
 
 const OPEN_PARAM = OPEN_STATUSES.join(',')

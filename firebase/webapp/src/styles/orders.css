@@ -173,6 +173,7 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .card.drop-before { box-shadow: 0 -3px 0 var(--color-focus); }
 .col-list { flex: 1; min-height: 0; overflow: auto; padding: 0 0.5rem 0.75rem; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
 .col > .muted { padding: 0 0.75rem; }
+.col > .col-foot { margin: 0; padding: 0.5rem 0.75rem 0.75rem; border-top: 1px solid var(--color-rule); }
 .card { position: relative; background: var(--color-tile, var(--color-card)); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.45rem 0.6rem; display: grid; gap: 0.1rem; }
 .card:hover { border-color: var(--color-control); }
 .card.is-dragging { opacity: 0.45; }
