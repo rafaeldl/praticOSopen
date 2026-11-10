@@ -146,6 +146,8 @@ AppListRow(
 )
 ```
 
+Quando o lado direito tem mais de uma informação (a lista de clientes: "Deve R$ 166,00" em cima da situação), use `trailingWidget` em vez de `trailing`. Ele segue a mesma regra: alinhado à direita e, com texto grande, embaixo do nome.
+
 ## Telas de escolher
 
 Toda tela que escolhe algo (cliente, veículo, serviço/peça, checklist, situação, responsável, valor acumulado, vários veículos) usa `PickerScaffold<T>` (`lib/screens/widgets/picker_screen.dart`):

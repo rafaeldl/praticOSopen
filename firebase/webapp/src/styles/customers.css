@@ -47,7 +47,7 @@
 .imp-table td { overflow-wrap: anywhere; }
 /* The badge ("12 atrasadas") wraps instead of pushing the table past a narrow screen with large text. */
 .dir-customers .status { white-space: normal; }
-
+/* Last activity only with room: "Recentes" already orders by it (large text or the panel open hide it). */
 /* Device photo (device.form.photo): only replaced, as the app. */
 .dev-photo { display: grid; gap: 0.35rem; }
 .dev-photo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }

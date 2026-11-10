@@ -22,6 +22,7 @@
 - [`VALUES_AND_BILLING_TOGGLE.md`](VALUES_AND_BILLING_TOGGLE.md) - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - [`QUICK_REGISTER.md`](QUICK_REGISTER.md) - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS
 - [`CUSTOMER_CONTACTS.md`](CUSTOMER_CONTACTS.md) - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
+- [`CUSTOMER_LAST_ACTIVITY.md`](CUSTOMER_LAST_ACTIVITY.md) - Última movimentação do cliente (`lastActivityAt`): gatilhos no servidor, lista do web por Recentes, números da lista gravados no cliente (`openOrders`, `owed`, `openDueDates`) e scripts de preenchimento
 - [`SHARE_LINK.md`](SHARE_LINK.md) - Sistema de compartilhamento via magic link
 - [`DOMAIN.md`](DOMAIN.md) - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
 - [`ACCOUNT_DELETION.md`](ACCOUNT_DELETION.md) - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações

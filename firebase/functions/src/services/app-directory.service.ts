@@ -16,9 +16,10 @@ import type { Order, UserAggr, CompanyAggr } from '../models/types';
 import { projectOrderSummary } from './order-projection';
 import { generatePhoneKeywords, generateSearchKeywords } from '../utils/search.utils';
 import { timestampToDate } from '../utils/date.utils';
-import { eachOrderWithMoneyOpen } from './app-finance.service';
-import { countOrder, customerOwed, OPEN_STATUSES, OwedTally, type CustomerCounts, type SummaryOrder } from './customer-summary';
+import { countOrder, customerOwed, OPEN_STATUSES, type CustomerCounts, type SummaryOrder } from './customer-summary';
+import { dayIn, instantOf } from '../utils/company-zone';
 import { orderVersion, versionMatches } from './order-version';
+import { dateMillis } from './customer-activity.service';
 import { OrderRuleError } from './order-errors';
 import { deletePhotoFileIn, recordPhotoFolder, storagePathOfUrl, type PhotoInput } from './record-photo';
 
@@ -117,14 +118,40 @@ export interface DirectoryCustomer {
   late: number;
   /** "Falta receber" (A receber rule); null for who does not read the Financeiro. */
   owed: number | null;
+  /** Last activity (UTC ISO): `lastActivityAt`, or the customer's own dates before the backfill. */
+  lastActivity: string | null;
 }
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value : null);
 
+/** `lastActivityAt` (customer-activity.service.ts); before the backfill, the most recent of `updatedAt` and `createdAt`. UTC ISO. */
+export function lastActivityOf(data: Record<string, unknown>): string | null {
+  const stamped = dateMillis(data.lastActivityAt);
+  if (stamped != null) return new Date(stamped).toISOString();
+  const times = [data.updatedAt, data.createdAt].map(dateMillis).filter((ms): ms is number => ms != null);
+  return times.length ? new Date(Math.max(...times)).toISOString() : null;
+}
+
+/** Late of a customer from `openDueDates` (customer-aggregates.service.ts): promised days behind today, in the company's zone. */
+export function lateOf(openDueDates: unknown, now: Date, zone: string): number {
+  if (!Array.isArray(openDueDates)) return 0;
+  const today = dayIn(now, zone);
+  return openDueDates.filter((value) => {
+    const due = instantOf(value, zone);
+    return !!due && dayIn(due, zone) < today;
+  }).length;
+}
+
+const count = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
+
 /**
  * Every customer of the company with the order badges of the list
- * (customer-summary.ts). `withOwed`: also what each one owes, from the query of
- * the Financeiro (every order with money open, not every order of the company).
+ * (customer-summary.ts). The numbers come from the customer itself
+ * (`openOrders`, `openDueDates`, `owed`, kept by the server:
+ * customer-aggregates.service.ts), so who sees every order reads no order.
+ * Consultant and technician count only the orders they may read (OrderScope),
+ * so for them the open and late still come from those orders. `withOwed`
+ * (who reads the Financeiro, that is, every order) adds `owed`.
  */
 export async function customerDirectory(
   companyId: string,
@@ -132,19 +159,18 @@ export async function customerDirectory(
   options: { zone: string; withOwed: boolean; now?: Date },
 ): Promise<{ customers: DirectoryCustomer[]; truncated: boolean }> {
   const now = options.now ?? new Date();
-  // Only the counts and the sums are kept: a big company has thousands of open orders.
-  const counts = new Map<string, CustomerCounts>();
-  const tally = options.withOwed ? new OwedTally() : null;
-  const [snapshot, , money] = await Promise.all([
+  // Only the counts are kept: a big company has thousands of open orders.
+  const counts = scope.all ? null : new Map<string, CustomerCounts>();
+  const [snapshot] = await Promise.all([
     getTenantCollection(companyId, 'customers')
-      .select('name', 'phone', 'email', 'taxId', 'legalName', 'address')
+      .select('name', 'phone', 'email', 'taxId', 'legalName', 'address', 'lastActivityAt', 'updatedAt', 'createdAt', 'openOrders', 'openDueDates', 'owed')
       .limit(DIRECTORY_LIMIT + 1)
       .get(),
-    eachScopedOrder(companyId, scope, (base) => base.where('status', 'in', [...OPEN_STATUSES]), ['status', 'customer.id', 'dueDate'], (order) =>
-      countOrder(counts, order, now, options.zone)),
-    tally ? eachOrderWithMoneyOpen(companyId, (order) => tally.add(order)) : null,
+    counts
+      ? eachScopedOrder(companyId, scope, (base) => base.where('status', 'in', [...OPEN_STATUSES]), ['status', 'customer.id', 'dueDate'], (order) =>
+        countOrder(counts, order, now, options.zone))
+      : null,
   ]);
-  const owed = tally ? tally.result() : null;
   const customers = snapshot.docs.slice(0, DIRECTORY_LIMIT).map((doc) => {
     const data = doc.data();
     return {
@@ -155,11 +181,14 @@ export async function customerDirectory(
       taxId: text(data.taxId),
       legalName: text(data.legalName),
       address: text(data.address),
-      ...(counts.get(doc.id) ?? { open: 0, late: 0 }),
-      owed: owed ? owed.get(doc.id) ?? 0 : null,
+      ...(counts
+        ? counts.get(doc.id) ?? { open: 0, late: 0 }
+        : { open: count(data.openOrders), late: lateOf(data.openDueDates, now, options.zone) }),
+      owed: options.withOwed ? count(data.owed) : null,
+      lastActivity: lastActivityOf(data),
     };
   });
-  return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT || !!money?.truncated };
+  return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT };
 }
 
 /** Devices of a list of orders, with how many orders each one is in (distinctVehicles). */

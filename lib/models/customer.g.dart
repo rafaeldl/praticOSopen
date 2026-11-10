@@ -43,7 +43,15 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer()
       ? null
       : CustomerAggr.fromJson(json['invoiceRecipient'] as Map<String, dynamic>)
   ..autoIssueInvoice = json['autoIssueInvoice'] as bool?
-  ..lastEmitterId = json['lastEmitterId'] as String?;
+  ..lastEmitterId = json['lastEmitterId'] as String?
+  ..lastActivityAt = json['lastActivityAt'] == null
+      ? null
+      : DateTime.parse(json['lastActivityAt'] as String)
+  ..openOrders = (json['openOrders'] as num?)?.toInt()
+  ..owed = (json['owed'] as num?)?.toDouble()
+  ..openDueDates = (json['openDueDates'] as List<dynamic>?)
+      ?.map((e) => DateTime.parse(e as String))
+      .toList();
 
 Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
   'id': instance.id,

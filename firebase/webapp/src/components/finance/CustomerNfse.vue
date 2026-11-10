@@ -7,7 +7,8 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import Layer from '@/components/Layer.vue'
 import { t } from '@/i18n'
 import { formatDate } from '@/lib/format'
-import { customerOrdersForNfse, nfseSettings, watchInvoicesOf } from '@/lib/nfse/data'
+import { customerOrdersForNfse, nfseSettings, watchInvoicesOf, type NfseOrdersPage } from '@/lib/nfse/data'
+import type { OrderRow } from '@/lib/orders-query'
 import { canHaveNfse, eligibleOrderIds, isIssued, nfseValueOf, type NfseInvoice } from '@/lib/nfse/model'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { showToast } from '@/lib/toast'
@@ -29,20 +30,39 @@ onMounted(async () => {
   ready.value = settings.ready
   direct.value = settings.direct === true
   stop = await watchInvoicesOf({ customerId: props.customerId }, (list) => (invoices.value = list), () => {})
-  full.value = await customerOrdersForNfse(props.customerId).catch(() => [])
+  await loadMore()
 })
 onBeforeUnmount(() => stop?.())
 
 const issued = computed(() => invoices.value.filter(isIssued).length)
-/** The customer's orders with their lines (the API's list has only totals). */
-const full = shallowRef<Awaited<ReturnType<typeof customerOrdersForNfse>>>([])
+/** The customer's orders read so far, newest first, with their lines (the API's list has only totals). */
+const full = shallowRef<NfseOrdersPage['orders']>([])
+/** Paging (50 at a time): a customer can have thousands of orders, the nota takes the recent ones. */
+const last = shallowRef<OrderRow | null>(null)
+const hasMore = ref(false)
+const loadingMore = ref(false)
+
+async function loadMore() {
+  if (loadingMore.value) return
+  loadingMore.value = true
+  try {
+    const page = await customerOrdersForNfse(props.customerId, last.value)
+    full.value = [...full.value, ...page.orders]
+    last.value = page.last
+    hasMore.value = page.hasMore
+  } catch {
+    // Keeps what was read; the button stays to try again.
+  } finally {
+    loadingMore.value = false
+  }
+}
 /** May go in a nota now: services of some value, not a quote nor canceled, no active nota (B7, as the app). */
 const eligible = computed(() => {
   const ids = new Set(eligibleOrderIds(full.value, invoices.value))
   return full.value.filter((o) => ids.has(o.id)).sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
 })
-/** Some order could ever have a nota (the button stays; all already with a nota says so). */
-const anyBillable = computed(() => full.value.some((o) => canHaveNfse(o.order)))
+/** Some order could ever have a nota (the button stays; all already with a nota says so). Older pages may still have one. */
+const anyBillable = computed(() => hasMore.value || full.value.some((o) => canHaveNfse(o.order)))
 const picking = ref(false)
 const picked = ref<string[]>([])
 const query = ref('')
@@ -59,7 +79,7 @@ function start() {
     if (!issuing.value.length) issuing.value = null
     else return
   }
-  if (!eligible.value.length) {
+  if (!eligible.value.length && !hasMore.value) {
     showToast(t('nfseNoOrdersToPick'))
     return
   }
@@ -105,6 +125,10 @@ function done() {
             <span class="sub"> · {{ t('nfsePickOrderSubtitle', { value: money(nfseValueOf(order.order)), date: order.createdAt ? formatDate(order.createdAt, country()) : '' }) }}</span>
           </label>
         </div>
+        <p v-if="!eligible.length && !hasMore" class="muted">{{ t('nfseNoOrdersToPick') }}</p>
+        <button v-if="hasMore" type="button" class="btn btn--ghost more-orders" :disabled="loadingMore" data-testid="nfse-pick-more" @click="loadMore">
+          {{ loadingMore ? t('web.loading') : t('web.nfse.loadMoreOrders') }}
+        </button>
       </div>
       <div class="layer-foot">
         <button type="button" class="btn btn--ghost" @click="close()">{{ t('cancel') }}</button>
@@ -118,4 +142,5 @@ function done() {
 <style scoped>
 .cust-nfse { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 .pick-row { min-height: 2.75rem; }
+.more-orders { margin-top: 0.75rem; min-height: 2.75rem; }
 </style>

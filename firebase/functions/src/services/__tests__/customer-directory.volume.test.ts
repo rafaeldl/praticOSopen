@@ -1,8 +1,10 @@
 /**
  * Clientes of a big company (a workshop with thousands of orders left
- * "approved" without payment): the list reads the orders in pages with only the
- * fields it adds up, and the numbers per customer are the ones of the whole
- * orders (countsByCustomer / owedByCustomer over every document, as before).
+ * "approved" without payment). Who sees every order reads only the customers:
+ * the numbers the server keeps on each one (customer-aggregates.service.ts) are
+ * the ones of the whole orders (countsByCustomer and the customer screen's
+ * customerOwed over every document). Consultant and technician still read
+ * their orders, in pages with only the fields they add up.
  *
  * Before, the list kept every open order whole, twice (open and money open):
  * ~3.000 of them took the `api` past its 256 MiB.
@@ -11,7 +13,8 @@ jest.mock('../firestore.service', () => jest.requireActual('../../__tests__/help
 
 import { list, queryLog, resetFakeDb, seed } from '../../__tests__/helpers/fake-firestore';
 import { customerDirectory } from '../app-directory.service';
-import { countsByCustomer, owedByCustomer, OPEN_STATUSES, type SummaryOrder } from '../customer-summary';
+import { recountCustomer } from '../customer-aggregates.service';
+import { countsByCustomer, customerOwed, OPEN_STATUSES, type SummaryOrder } from '../customer-summary';
 
 const ORDERS = 2600; // more than two pages of 1.000
 const CUSTOMERS = 300;
@@ -54,14 +57,18 @@ function expected(scope: { all: boolean; userId: string; assigned: boolean }) {
   const orders = list('companies/c1/orders').map((d) => d.data as unknown as SummaryOrder & { createdBy: { id: string }; assignedTo: { id: string } });
   const inScope = orders.filter((o) => scope.all || o.createdBy.id === scope.userId || (scope.assigned && o.assignedTo.id === scope.userId));
   const counts = countsByCustomer(inScope.filter((o) => (OPEN_STATUSES as readonly unknown[]).includes(o.status)), NOW, ZONE);
-  const unpaid = orders.filter((o) => o.payment === 'unpaid' || o.payment === 'partial');
-  const missing = orders.filter((o) => (o.payment === null) && ['approved', 'progress', 'done'].includes(String(o.status)));
-  return { counts, owed: owedByCustomer([...unpaid, ...missing]) };
+  // The customer screen's sum over every order of the customer.
+  const owed = new Map<string, number>();
+  for (let c = 0; c < CUSTOMERS; c++) owed.set(`cust${c}`, customerOwed(orders.filter((o) => o.customer?.id === `cust${c}`)));
+  return { counts, owed };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   resetFakeDb();
   seedCompany();
+  // What the order triggers (or the backfill) leave on each customer.
+  for (let c = 0; c < CUSTOMERS; c++) await recountCustomer('c1', `cust${c}`, ZONE);
+  queryLog.length = 0;
 });
 
 describe('Clientes de uma empresa grande', () => {
@@ -90,10 +97,20 @@ describe('Clientes de uma empresa grande', () => {
     }
   });
 
-  it('lê as OS em páginas de no máximo 1.000, só com os campos da conta', async () => {
+  it('quem vê tudo não lê nenhuma OS', async () => {
     await customerDirectory('c1', { all: true, userId: 'owner1', assigned: false }, { zone: ZONE, withOwed: true, now: NOW });
+    expect(queryLog.filter((q) => q.path === 'companies/c1/orders')).toEqual([]);
+    expect(queryLog.filter((q) => q.path === 'companies/c1/customers')).toHaveLength(1);
+  });
+
+  it('técnico lê as OS dele em páginas de no máximo 1.000, só com os campos da conta', async () => {
+    seed('companies/c1/orders/zzz-extra', { status: 'approved', customer: { id: 'cust1' }, createdBy: { id: 'tech1' } });
+    for (let i = 0; i < 1200; i++) {
+      seed(`companies/c1/orders/t${String(i).padStart(5, '0')}`, { status: 'approved', customer: { id: 'cust2' }, createdBy: { id: 'tech1' }, photos: [] });
+    }
+    await customerDirectory('c1', { all: false, userId: 'tech1', assigned: true }, { zone: ZONE, withOwed: false, now: NOW });
     const orderReads = queryLog.filter((q) => q.path === 'companies/c1/orders');
-    expect(orderReads.length).toBeGreaterThan(3); // paged, not one read of everything
+    expect(orderReads.length).toBeGreaterThan(2); // paged, not one read of everything
     for (const read of orderReads) {
       expect(read.docs).toBeLessThanOrEqual(1000);
       expect(read.fields).toBeDefined();

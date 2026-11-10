@@ -21,6 +21,7 @@ class AppListRow extends StatelessWidget {
     this.subtitle,
     this.subtitleWidget,
     this.trailing,
+    this.trailingWidget,
     this.leading,
     this.onTap,
     this.showChevron,
@@ -41,6 +42,11 @@ class AppListRow extends StatelessWidget {
 
   /// Value shown at the end of the row (e.g. a formatted amount or status).
   final String? trailing;
+
+  /// Value at the end of the row built by the caller (e.g. an amount over a
+  /// status). Wins over [trailing]; goes under the title at accessibility
+  /// text sizes like it ([kAppListRowStackScale]).
+  final Widget? trailingWidget;
   final Widget? leading;
   final VoidCallback? onTap;
 
@@ -76,20 +82,20 @@ class AppListRow extends StatelessWidget {
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
 
-    final titleText = Text(
-      title,
-      style: (titleStyle ?? AppTypography.body).copyWith(color: textColor),
-    );
-    final valueText = trailing == null
-        ? null
-        : Text(
-            trailing!,
-            textAlign: stacked ? TextAlign.start : TextAlign.end,
-            style: (trailingStyle ?? AppTypography.body).copyWith(
-              color: valueBesideTitle ? textColor : secondary,
-              fontFeatures: AppTypography.tabular,
-            ),
-          );
+    final style = (titleStyle ?? AppTypography.body).copyWith(color: textColor);
+    final titleText = Text(title, style: style);
+    final valueText =
+        trailingWidget ??
+        (trailing == null
+            ? null
+            : Text(
+                trailing!,
+                textAlign: stacked ? TextAlign.start : TextAlign.end,
+                style: (trailingStyle ?? AppTypography.body).copyWith(
+                  color: valueBesideTitle ? textColor : secondary,
+                  fontFeatures: AppTypography.tabular,
+                ),
+              ));
     final beside = valueBesideTitle && !stacked && valueText != null;
 
     final main = Column(

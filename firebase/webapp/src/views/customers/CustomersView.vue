@@ -2,6 +2,8 @@
 // Clientes: everyone of the company, by initial, with the orders that are open
 // or late on each row (customer.list.*). Search by name, phone or plate (from
 // 3 characters). The open customer sits beside the list, its id in the URL.
+// "Recentes" (default) puts the last activity first: created, edited or one of
+// the orders changed (lastActivityAt, written by the server); "A–Z" groups by initial.
 // Read from the API, filtered by role on the server: the app's list loses the
 // badges and the plate search for consultant and technician (defect 2).
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
@@ -16,17 +18,32 @@ import DirectoryTabs from '@/components/customers/DirectoryTabs.vue'
 import { t } from '@/i18n'
 import { registerSearcher } from '@/lib/commands'
 import { loadCustomerDirectory, loadDevice, loadDeviceDirectory } from '@/lib/customers/data'
-import { badgeOf, canOfferCreate, customerMatches, draftFromSearch, groupByInitial, plateMatches, type CustomerRow, type DeviceRow } from '@/lib/customers/model'
+import {
+  badgeOf,
+  byName,
+  byRecent,
+  canOfferCreate,
+  CUSTOMER_ORDERS,
+  customerMatches,
+  draftFromSearch,
+  groupByInitial,
+  plateMatches,
+  type CustomerOrder,
+  type CustomerRow,
+  type DeviceRow,
+} from '@/lib/customers/model'
 import { money } from '@/lib/orders/text'
 import { formatPhone } from '@/lib/phone'
 import { useRoutePanel } from '@/lib/route-layer'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { can, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { announce, ui } from '@/lib/ui'
 import '@/styles/customers.css'
 
 const PAGE = 200
+const ORDER_KEY = 'praticos.customersOrder'
 const route = useRoute()
 const router = useRouter()
 const panel = useRoutePanel('customer')
@@ -38,6 +55,8 @@ const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const shown = ref(PAGE)
 const searchEl = ref<HTMLInputElement | null>(null)
 const form = ref<{ draft: { name: string; phone: string } } | null>(null)
+const stored = readStorage(ORDER_KEY) as CustomerOrder | null
+const order = ref<CustomerOrder>(stored && CUSTOMER_ORDERS.includes(stored) ? stored : 'recent')
 
 const canManage = computed(() => can('manageCustomers'))
 /** The server sends what each one owes only to who reads the Financeiro. */
@@ -47,10 +66,11 @@ const serialLabel = computed(() => label('device.serial'))
 const country = computed(() => session.company?.country)
 const panelOpen = computed(() => !!panel.value.value)
 const query = computed(() => search.value.trim())
-const visible = computed(() => (query.value ? rows.value.filter((row) => customerMatches(row, query.value)) : rows.value))
+const sorted = computed(() => [...rows.value].sort(order.value === 'recent' ? byRecent : byName))
+const visible = computed(() => (query.value ? sorted.value.filter((row) => customerMatches(row, query.value)) : sorted.value))
 const plates = computed(() => plateMatches(devices.value, query.value))
 const groups = computed(() =>
-  query.value ? [{ initial: '', rows: visible.value.slice(0, shown.value) }] : groupByInitial(visible.value.slice(0, shown.value)),
+  query.value || order.value === 'recent' ? [{ initial: '', rows: visible.value.slice(0, shown.value) }] : groupByInitial(visible.value.slice(0, shown.value)),
 )
 const offerCreate = computed(() => canManage.value && !!query.value && canOfferCreate(rows.value, query.value))
 
@@ -58,7 +78,7 @@ async function load(fresh = false) {
   state.value = 'loading'
   try {
     const [directory, deviceList] = await Promise.all([loadCustomerDirectory(fresh), loadDeviceDirectory(fresh).catch(() => null)])
-    rows.value = [...directory.rows].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+    rows.value = directory.rows
     partial.value = directory.partial
     devices.value = deviceList?.rows ?? []
     state.value = 'ready'
@@ -67,6 +87,12 @@ async function load(fresh = false) {
     console.error('customers: list failed', error)
     state.value = 'failed'
   }
+}
+
+function setOrder(next: CustomerOrder) {
+  order.value = next
+  shown.value = PAGE
+  writeStorage(ORDER_KEY, next)
 }
 
 function open(id: string) {
@@ -218,6 +244,10 @@ onBeforeUnmount(() => {
 
   <div class="toolbar">
     <DirectoryTabs current="customers" />
+    <div class="tabs" role="group" :aria-label="t('web.customers.orderBy')" data-testid="customers-order">
+      <button type="button" :aria-pressed="order === 'recent'" @click="setOrder('recent')">{{ t('web.customers.orderRecent') }}</button>
+      <button type="button" :aria-pressed="order === 'name'" @click="setOrder('name')">{{ t('web.customers.orderName') }}</button>
+    </div>
     <span class="spacer"></span>
     <label class="sr" for="customers-search">{{ t('searchCustomerPlaceholder', { serial: serialLabel.toLocaleLowerCase() }) }}</label>
     <input

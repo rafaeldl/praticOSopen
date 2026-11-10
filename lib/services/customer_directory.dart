@@ -32,13 +32,10 @@ abstract class CustomerDirectory {
   Stream<List<Order>> watchOrdersOf(String customerId);
 
   /// Open/overdue order counts per customer id, from the same query as the
-  /// Início "Em aberto" (same statuses, same reader scope, same limit).
+  /// Início "Em aberto" (same statuses, same reader scope, same limit). Only
+  /// for who does not see every order: the others read the numbers kept on
+  /// the customer (docs/CUSTOMER_LAST_ACTIVITY.md).
   Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer();
-
-  /// What each customer owes now (A receber rule), from the query the
-  /// Financeiro already runs (every order with money open). Only for who
-  /// reads the Financeiro.
-  Future<Map<String, double>> owedByCustomer();
 
   /// Customer ids of the last ~50 orders, newest first, distinct.
   Future<List<String>> recentCustomerIds();
@@ -112,10 +109,6 @@ class FirestoreCustomerDirectory implements CustomerDirectory {
     );
     return summarizeOpenOrders(orders, DateTime.now());
   }
-
-  @override
-  Future<Map<String, double>> owedByCustomer() async =>
-      owedByCustomerOf(await OrderRepositoryV2().getUnpaidOrders(_companyId));
 
   @override
   Future<List<String>> recentCustomerIds() async {
