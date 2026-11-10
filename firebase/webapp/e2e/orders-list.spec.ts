@@ -213,7 +213,10 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
   await page.getByRole('dialog', { name: 'Mover para onde?' }).getByRole('button', { name: 'Na oficina' }).click()
   const progress = board.getByRole('region', { name: /^Na oficina/ })
   await expect(progress.getByText(name)).toBeVisible()
-  await progress.locator(`#card-${order.id}`).focus()
+  // The live list can show the card there before the write answers; the board
+  // focuses it only once the write is back with the new version. Moving before
+  // that sends the old version and the server refuses it.
+  await expect(progress.locator(`#card-${order.id}`)).toBeFocused()
   await page.keyboard.press('Shift+ArrowRight')
   await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
 })
