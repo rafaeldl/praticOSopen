@@ -7786,7 +7786,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Lista vem das OS do cliente (distinctVehicles), não de devices: aparelho sem OS não aparece. Subtítulo 'série · N OS'. Parcial para consultor e técnico."
+  note: "Lista vem das OS do cliente (distinctVehicles), não de devices: aparelho sem OS não aparece. Subtítulo 'série · N OS'. Parcial para consultor e técnico. Web: o aparelho da OS mais recente em cima (não por nome); 5 por vez com 'Ver todos os N' que abre no lugar, e busca (nome ou placa) com a lista aberta e mais de 10."
 - id: customer.detail.add-device
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/device_form"
@@ -7822,7 +7822,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
+  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite. Web: 5 por vez com 'Ver todas as N OS' que abre no lugar, e busca pelo número com a lista aberta e mais de 10."
 - id: customer.detail.receipts
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null

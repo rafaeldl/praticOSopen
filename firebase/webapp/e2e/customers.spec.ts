@@ -222,6 +222,31 @@ test('aparelhos e OS do cliente; abrir o aparelho (customer.detail.devices, cust
   await expect(page.getByTestId('device-detail').getByRole('heading', { name: device.name })).toBeVisible()
 })
 
+test('5 veículos e 5 OS, o mais recente em cima; "Ver todos" abre o resto e busca pela placa (customer.detail.devices, customer.detail.orders)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const devices = []
+  for (let i = 0; i < 12; i++) devices.push(await makeDevice({ name: `Gol ${String(i).padStart(2, '0')} ${customer.id}` }))
+  // Uma OS por veículo, um dia depois da outra: o último veículo tem a OS mais nova.
+  for (const [i, device] of devices.entries()) {
+    const createdAt = new Date(Date.UTC(2026, 9, 1 + i, 12)).toISOString()
+    await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, createdAt, devices: [{ id: device.id, name: device.name, serial: device.serial }], deviceIds: [device.id] })
+  }
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  const list = panel(page).getByTestId('customer-devices')
+  await expect(list.locator('li')).toHaveCount(5)
+  await expect(list.locator('li').first()).toContainText(devices[11]!.name)
+  await expect(panel(page).getByTestId('customer-orders').locator('li')).toHaveCount(5)
+  await expect(panel(page).getByTestId('customer-devices-search')).toHaveCount(0)
+
+  await panel(page).getByTestId('customer-devices-more').click()
+  await expect(list.locator('li')).toHaveCount(12)
+  await panel(page).getByTestId('customer-devices-search').fill(devices[3]!.serial)
+  await expect(list.locator('li')).toHaveCount(1)
+  await expect(list).toContainText(devices[3]!.name)
+  await panel(page).getByTestId('customer-devices-more').click()
+  await expect(list.locator('li')).toHaveCount(5)
+})
+
 test('editar pelo menu, CPF/CNPJ validado e campo do segmento gravado (customer.detail.edit, customer.form.tax-id, customer.form.custom-fields)', async ({ page }) => {
   const customer = await makeCustomer({ createdBy: { id: 'someone', name: 'Alguém' }, createdAt: '2026-01-01T00:00:00.000Z' })
   await openCustomers(page, 'admin', `?customer=${customer.id}`)

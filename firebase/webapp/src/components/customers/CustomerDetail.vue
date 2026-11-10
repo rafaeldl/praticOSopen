@@ -15,7 +15,7 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { loadTexts, locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { deleteCustomer, loadCustomer, type CustomerDetail } from '@/lib/customers/data'
-import { firstName, mapsUrl, type CustomerRow } from '@/lib/customers/model'
+import { deviceMatches, firstName, mapsUrl, orderNumberMatches, shortList, type CustomerRow } from '@/lib/customers/model'
 import { formatDate, fromIsoDay } from '@/lib/format'
 import { canCreateOrders } from '@/lib/orders/model'
 import { money, orderShort } from '@/lib/orders/text'
@@ -49,6 +49,13 @@ const invoice = ref<InvoiceConfig>(INVOICE_OFF)
 const canReceipts = computed(() => effectiveUseFinancial() && (can('viewFinancialReports') || session.role === 'consultant'))
 const menuButton = ref<HTMLElement | null>(null)
 const busy = ref(false)
+// 5 devices and 5 orders; "Ver todos" opens the rest in place, with a search past 10 (customer.detail.devices, customer.detail.orders).
+const devicesOpen = ref(false)
+const ordersOpen = ref(false)
+const deviceQuery = ref('')
+const orderQuery = ref('')
+const devices = computed(() => shortList(detail.value?.devices ?? [], devicesOpen.value, deviceQuery.value, deviceMatches))
+const orders = computed(() => shortList(detail.value?.orders ?? [], ordersOpen.value, orderQuery.value, orderNumberMatches))
 
 const country = computed(() => session.company?.country)
 const label = (key: string) => resolveLabel(key, segmentLabels(), (k) => t(k))
@@ -127,6 +134,16 @@ async function onReceived() {
 
 function openOrder(id: string) {
   void router.push({ path: '/', query: { order: id } })
+}
+
+function toggleDevices() {
+  devicesOpen.value = !devicesOpen.value
+  deviceQuery.value = ''
+}
+
+function toggleOrders() {
+  ordersOpen.value = !ordersOpen.value
+  orderQuery.value = ''
 }
 
 function openDevice(id: string) {
@@ -269,26 +286,55 @@ onMounted(() => {
           {{ label('device._entity_plural') }}
           <button v-if="can('manageDevices')" type="button" class="link" data-testid="customer-add-device" @click="dialog = 'device'">{{ t('web.customers.addDevice', { device: label('device._entity').toLocaleLowerCase() }) }}</button>
         </h3>
-        <ul v-if="detail.devices.length" class="dir-list" data-testid="customer-devices">
-          <li v-for="device in detail.devices" :key="device.id">
+        <input
+          v-if="devices.searchable"
+          v-model="deviceQuery"
+          class="field dir-search"
+          type="search"
+          autocomplete="off"
+          data-testid="customer-devices-search"
+          :aria-label="t('web.customers.searchDevices', { devices: label('device._entity_plural').toLocaleLowerCase() })"
+          :placeholder="t('web.customers.searchDevices', { devices: label('device._entity_plural').toLocaleLowerCase() })"
+        />
+        <ul v-if="devices.shown.length" class="dir-list" data-testid="customer-devices">
+          <li v-for="device in devices.shown" :key="device.id">
             <button type="button" class="row-btn" @click="openDevice(device.id)">{{ device.name || label('device._entity') }}</button>
             <span class="sub"><template v-if="device.serial"><span class="num">{{ device.serial }}</span> · </template>{{ t('web.customers.orderCount', { count: device.count, order: orderShort() }) }}</span>
           </li>
         </ul>
+        <p v-else-if="deviceQuery.trim() && devices.searchable" class="muted">{{ t('web.customers.noMatchList', { query: deviceQuery.trim() }) }}</p>
         <p v-else class="muted">{{ t('web.customers.noDevices', { devices: label('device._entity_plural').toLocaleLowerCase() }) }}</p>
+        <button v-if="devices.canOpen" type="button" class="link dir-more" data-testid="customer-devices-more" :aria-expanded="devicesOpen" @click="toggleDevices">
+          {{ devicesOpen ? t('web.customers.showLess') : t('web.customers.showAllDevices', { count: detail.devices.length, devices: label('device._entity_plural').toLocaleLowerCase() }) }}
+        </button>
       </section>
 
       <section class="od-sec" :aria-label="t('web.customers.orders')">
         <h3>{{ t('web.customers.orders') }}</h3>
-        <ul v-if="detail.orders.length" class="dir-list" data-testid="customer-orders">
-          <li v-for="order in detail.orders" :key="order.id" class="dir-order">
+        <input
+          v-if="orders.searchable"
+          v-model="orderQuery"
+          class="field dir-search"
+          type="search"
+          inputmode="numeric"
+          autocomplete="off"
+          data-testid="customer-orders-search"
+          :aria-label="t('web.customers.searchOrders', { order: orderShort() })"
+          :placeholder="t('web.customers.searchOrders', { order: orderShort() })"
+        />
+        <ul v-if="orders.shown.length" class="dir-list" data-testid="customer-orders">
+          <li v-for="order in orders.shown" :key="order.id" class="dir-order">
             <button type="button" class="row-btn" @click="openOrder(order.id)"><span class="num">{{ orderShort() }} {{ order.number }}</span></button>
             <OrderStatus :status="order.status" />
             <span v-if="order.total !== undefined" class="num dir-money">{{ money(order.total) }}</span>
             <span v-if="order.createdAt" class="sub">{{ formatDate(order.createdAt, country) }}</span>
           </li>
         </ul>
+        <p v-else-if="orderQuery.trim() && orders.searchable" class="muted">{{ t('web.customers.noMatchList', { query: orderQuery.trim() }) }}</p>
         <p v-else class="muted">{{ t('web.customers.noOrders') }}</p>
+        <button v-if="orders.canOpen" type="button" class="link dir-more" data-testid="customer-orders-more" :aria-expanded="ordersOpen" @click="toggleOrders">
+          {{ ordersOpen ? t('web.customers.showLess') : t('web.customers.showAllOrders', { count: detail.orders.length, order: orderShort() }) }}
+        </button>
         <p v-if="detail.ordersTruncated" class="sub" data-testid="orders-truncated">{{ t('web.customers.ordersTruncated', { count: detail.orders.length }) }}</p>
       </section>
     </div>

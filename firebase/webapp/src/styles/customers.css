@@ -55,3 +55,6 @@
 .dev-photo-row label.btn:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .dev-thumb { display: inline-grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 6px; background: var(--color-paper-2); color: var(--color-muted); object-fit: cover; flex: none; }
 .od-head .dev-thumb { width: 4.5rem; height: 4.5rem; margin-bottom: 0.4rem; }
+/* customer.detail.short-lists: search over the open list, "Ver todos" under it */
+.dir-search { margin: 0 0 0.5rem; }
+.dir-more { margin-top: 0.5rem; min-height: 44px; }

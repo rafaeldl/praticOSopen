@@ -187,9 +187,10 @@ describe('GET /customers/:id (tela do cliente)', () => {
     expect(res.body.data.owed).toBe(200);
     expect(res.body.data.orders.map((o: any) => o.id)).toEqual(['o5', 'o4', 'o3', 'o2', 'o1']);
     expect(res.body.data.receivable.sort()).toEqual(['o1', 'o3']);
+    // Pela OS mais recente: o Uno está na o5, o Gol só na o3.
     expect(res.body.data.devices).toEqual([
-      { id: 'gol', name: 'Gol', serial: null, count: 1 },
       { id: 'uno', name: 'Uno', serial: 'ABC1D23', count: 4 },
+      { id: 'gol', name: 'Gol', serial: null, count: 1 },
     ]);
   });
 
