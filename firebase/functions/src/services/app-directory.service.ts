@@ -191,7 +191,11 @@ export async function customerDirectory(
   return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT };
 }
 
-/** Devices of a list of orders, with how many orders each one is in (distinctVehicles). */
+/**
+ * Devices of a list of orders, with how many orders each one is in (distinctVehicles).
+ * The orders come newest first, so the device of the latest order comes first:
+ * what is in the shop now is on top, not the first name in the alphabet.
+ */
 function devicesOf(orders: Order[]): { id: string; name: string; serial: string | null; count: number }[] {
   const found = new Map<string, { id: string; name: string; serial: string | null; count: number }>();
   for (const order of orders) {
@@ -205,7 +209,7 @@ function devicesOf(orders: Order[]): { id: string; name: string; serial: string 
       found.set(device.id, current);
     }
   }
-  return [...found.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...found.values()];
 }
 
 /** "gastou" (customer_utils totalSpent): total of the done orders. */

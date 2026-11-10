@@ -18,6 +18,8 @@ import {
   findByPhone,
   groupByInitial,
   isBrazilianPlate,
+  orderNumberMatches,
+  shortList,
   modelSuggestions,
   plateMatches,
   serialError,
@@ -254,5 +256,40 @@ describe('lista por Recentes', () => {
       { name: 'Davi', lastActivity: '2026-11-01T10:00:00.000Z' },
     ]
     expect([...people].sort(byRecent).map((p) => p.name)).toEqual(['Caio', 'Ana', 'Davi', 'Alex', 'Bia'])
+  })
+})
+
+describe('listas curtas da tela do cliente (customer.detail.devices, customer.detail.orders)', () => {
+  const list = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `d${i}`, name: `Carro ${i}`, serial: `ABC${String(i).padStart(4, '0')}` }))
+
+  test('até 5 itens: tudo aparece e não tem "Ver todos"', () => {
+    const view = shortList(list(5), false, '', deviceMatches)
+    expect(view.shown).toHaveLength(5)
+    expect(view.canOpen).toBe(false)
+    expect(view.searchable).toBe(false)
+  })
+
+  test('mais de 5: mostra os 5 primeiros e abre o resto no lugar', () => {
+    const items = list(8)
+    const closed = shortList(items, false, '', deviceMatches)
+    expect(closed.shown.map((d) => d.id)).toEqual(['d0', 'd1', 'd2', 'd3', 'd4'])
+    expect(closed.canOpen).toBe(true)
+    const open = shortList(items, true, '', deviceMatches)
+    expect(open.shown).toHaveLength(8)
+    expect(open.searchable).toBe(false)
+  })
+
+  test('busca só com a lista aberta e mais de 10 itens, pela placa', () => {
+    const items = list(12)
+    expect(shortList(items, false, 'ABC0011', deviceMatches).searchable).toBe(false)
+    const open = shortList(items, true, 'abc-0011', deviceMatches)
+    expect(open.searchable).toBe(true)
+    expect(open.shown.map((d) => d.id)).toEqual(['d11'])
+  })
+
+  test('OS pelo número', () => {
+    expect(orderNumberMatches({ number: 1234 }, 'OS 123')).toBe(true)
+    expect(orderNumberMatches({ number: 1234 }, '99')).toBe(false)
+    expect(orderNumberMatches({ number: 1234 }, 'abc')).toBe(false)
   })
 })

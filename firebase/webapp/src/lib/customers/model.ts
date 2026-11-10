@@ -82,7 +82,7 @@ export function plateMatches(devices: DeviceRow[], query: string, max = 5): Devi
 }
 
 /** Device search: model, serial (without hyphen or space) and brand, ignoring accents (device.list.search). */
-export function deviceMatches(device: DeviceRow, query: string): boolean {
+export function deviceMatches(device: Pick<DeviceRow, 'name' | 'serial'> & { manufacturer?: string | null }, query: string): boolean {
   const text = query.trim()
   if (!text) return true
   const plate = normalizePlate(text)
@@ -194,3 +194,25 @@ export function mapsUrl(address: string | null | undefined, latitude?: number | 
 
 /** First name for "Nova OS para Ana". */
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name
+
+/** The customer screen shows 5 devices and 5 orders; "Ver todos" opens the rest in place. */
+export const SHORT_LIST = 5
+/** The open list gets a search box only past 10 items, as the app's pickers. */
+export const SEARCH_FROM = 10
+
+/**
+ * One list of the customer screen (customer.detail.devices, customer.detail.orders): the first 5 while closed,
+ * everything (filtered by the search) once open. With 5 or fewer there is no "Ver todos".
+ */
+export function shortList<T>(items: T[], open: boolean, query: string, matches: (item: T, query: string) => boolean) {
+  const canOpen = items.length > SHORT_LIST
+  const searchable = open && items.length > SEARCH_FROM
+  const shown = !canOpen || open ? (searchable && query.trim() ? items.filter((item) => matches(item, query)) : items) : items.slice(0, SHORT_LIST)
+  return { shown, canOpen, searchable }
+}
+
+/** An order of the customer screen by its number ("OS 123", "123"). */
+export function orderNumberMatches(order: { number?: number | string | null }, query: string): boolean {
+  const digits = query.replace(/\D/g, '')
+  return !!digits && String(order.number ?? '').includes(digits)
+}
