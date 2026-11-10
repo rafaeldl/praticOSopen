@@ -4,6 +4,8 @@
 // dragging, each with its own print. Dragging always has an alternative
 // (WCAG 2.5.7): the "Mover" button, Shift + arrow (column) and Alt + arrow
 // (place in the stage) with the card in focus. Only moves this person may make.
+// The board shows the work of now (lib/orders/board.ts): Concluída keeps the last
+// week, and quotes idle for three months go aside, with a button to cancel them.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { MoreHorizontal } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -12,8 +14,9 @@ import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { mergeById } from '@/lib/order-list'
 import { onOrderEvent, orderChanged } from '@/lib/orders/bus'
-import { createListLoader, listContext } from '@/lib/orders/data'
-import { accessOf, deviceSummary, isHeld, remainingOnRow, type Order, type OrderStatus } from '@/lib/orders/model'
+import { createDoneSinceLoader, createListLoader, listContext } from '@/lib/orders/data'
+import { BOARD_DONE_DAYS, STALE_QUOTE_DAYS, boardRows, doneSinceIso, idleMonths } from '@/lib/orders/board'
+import { OPEN_STATUSES, accessOf, defaultFilter, deviceSummary, filtersFor, isHeld, remainingOnRow, type Order, type OrderStatus } from '@/lib/orders/model'
 import { FIRST_PAGE, PAGE_SIZE } from '@/lib/orders-query'
 import { holdText, lateText, orderShort, shownMoney, statusText } from '@/lib/orders/text'
 import { prefs } from '@/lib/prefs'
@@ -23,6 +26,7 @@ import { effectiveUseFinancial, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
+import BatchConfirm from './BatchConfirm.vue'
 import StagePrint from './StagePrint.vue'
 import { printSheet } from '@/lib/print-frame'
 import { rankAt, sortInStage, stageIdOf, suggestedStage, workStages, type WorkStage } from '@/lib/orders/stages'
@@ -46,10 +50,11 @@ const columns = computed<Column[]>(() =>
 )
 const columnLabel = (column: Column) => column.stage?.name ?? statusText(column.status)
 const ctx = listContext()
-const loader = createListLoader(ctx, STATUSES)
+const now = ref(new Date())
+const openLoader = createListLoader(ctx, OPEN_STATUSES)
+const doneLoader = createDoneSinceLoader(ctx, doneSinceIso(now.value))
 const rows = shallowRef<Order[]>([])
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
-const now = ref(new Date())
 const dragging = ref<string | null>(null)
 const over = ref<string | null>(null)
 /** Place in the column under the dragged card (stage columns only); null is the end. */
@@ -63,7 +68,10 @@ const found = shallowRef<Order[] | null>(null)
 const searching = ref(false)
 const searchFailed = ref(false)
 let searchToken = 0
-const shown = computed(() => found.value ?? rows.value)
+/** A search shows everything it found; otherwise old concluded orders and stale quotes stay out. */
+const split = computed(() => (found.value ? { cards: found.value, staleQuotes: [] as Order[] } : boardRows(rows.value, now.value)))
+const shown = computed(() => split.value.cards)
+const staleQuotes = computed(() => split.value.staleQuotes)
 function columnKeyOf(order: Order): string {
   const stageId = stageIdOf(order, stages.value)
   return stageId ? `stage-${stageId}` : order.status
@@ -102,17 +110,40 @@ async function runSearch(text: string) {
 watch(() => props.search ?? '', (text) => void runSearch(text), { immediate: true })
 const access = (order: Order) => accessOf(order, session.role, session.uid, effectiveUseFinancial())
 
-/** The board's cards: the first page and the next one, newest first. */
+/** Concluded orders read: the first page and the next one. */
 const BOARD_SIZE = FIRST_PAGE + PAGE_SIZE
+/** Open orders read: all of them, up to this many (the newest when there are more). */
+const OPEN_MAX = FIRST_PAGE + 9 * PAGE_SIZE
 /** Who reads the API (no values) has no live rows: the board asks again this often and when the tab comes back. */
 const API_REFRESH_MS = 2 * 60_000
 let stopLive: (() => void) | undefined
 let refreshTimer: ReturnType<typeof setInterval> | undefined
 let unmounted = false
 
+/** What each query last gave: the live listeners replace their part. */
+const parts: { open: Order[]; done: Order[] } = { open: [], done: [] }
+const join = () => (rows.value = mergeById(parts.open, parts.done))
+
+async function readOpen(): Promise<Order[]> {
+  let page = await openLoader.first()
+  let list = page.rows
+  while (page.hasMore && list.length < OPEN_MAX) {
+    page = await openLoader.more()
+    list = mergeById(list, page.rows)
+  }
+  return list
+}
+
+async function readDone(): Promise<Order[]> {
+  const page = await doneLoader.first()
+  const list = page.hasMore ? mergeById(page.rows, (await doneLoader.more()).rows) : page.rows
+  // The completedAt query has every status: an order reopened since is in its own column.
+  return list.filter((order) => order.status === 'done')
+}
+
 async function read(): Promise<Order[]> {
-  const page = await loader.first()
-  return page.hasMore ? mergeById(page.rows, (await loader.more()).rows) : page.rows
+  ;[parts.open, parts.done] = await Promise.all([readOpen(), readDone()])
+  return join()
 }
 
 async function load() {
@@ -136,12 +167,25 @@ async function goLive() {
   stopLive?.()
   stopLive = undefined
   if (ctx.showsMoney) {
-    const stop = await loader.watch(BOARD_SIZE, (fresh) => (rows.value = fresh), (error) => console.warn('board: live stopped', error))
+    const lost = (error: unknown) => console.warn('board: live stopped', error)
+    const stops = await Promise.all([
+      openLoader.watch(OPEN_MAX, (fresh) => ((parts.open = fresh), join()), lost),
+      doneLoader.watch(BOARD_SIZE, (fresh) => ((parts.done = [...fresh.filter((order) => order.status === 'done'), ...waitingStamp(fresh)]), join()), lost),
+    ])
+    const stop = () => stops.forEach((each) => each())
     if (unmounted) stop()
     else stopLive = stop
     return
   }
   refreshTimer ??= setInterval(() => void refresh(), API_REFRESH_MS)
+}
+
+/** Concluded here a moment ago, still without the server's completedAt (so not in the query yet). */
+function waitingStamp(fresh: Order[]): Order[] {
+  const since = Date.now() - 60_000
+  return parts.done.filter(
+    (order) => !fresh.some((row) => row.id === order.id) && !parts.open.some((row) => row.id === order.id) && Date.parse(order.completedAt ?? '') > since,
+  )
 }
 
 /** Quiet reload: keeps the cards on screen if it fails. */
@@ -172,8 +216,42 @@ function canPlace(order: Order, column: Column): boolean {
 
 const canDrag = (order: Order) => columns.value.some((column) => canPlace(order, column))
 
+/**
+ * Orders concluded from this board, by when: the live listener may take the
+ * card out before the API answers, so "it was concluded here" cannot be read
+ * from the card that was on screen.
+ */
+const concludedHere = new Map<string, string>()
+
+/** completedAt of a concluded order, before the server's own arrives. */
+function doneStamp(order: Order, before: Order | undefined): string | null | undefined {
+  const here = concludedHere.get(order.id)
+  // A stamp from before this conclusion (a minute of clock slack) is of an older one.
+  if (here && (!order.completedAt || Date.parse(here) - Date.parse(order.completedAt) > 60_000)) return here
+  if (!before) return order.completedAt
+  // Concluded here: the stamp it had (if any) is of an older conclusion.
+  if (before.status !== 'done') return order.completedAt && order.completedAt !== before.completedAt ? order.completedAt : new Date().toISOString()
+  // Already concluded on the board: never older than the stamp it showed.
+  if (before.completedAt && (!order.completedAt || order.completedAt < before.completedAt)) return before.completedAt
+  return order.completedAt
+}
+
+/**
+ * Puts an order in its part (open or concluded), or takes it out (canceled,
+ * deleted). The server writes completedAt a moment after the conclusion (a
+ * trigger): until it arrives, an order just concluded counts as concluded now.
+ */
+function place(id: string, order: Order | null) {
+  const before = rows.value.find((row) => row.id === id)
+  parts.open = parts.open.filter((row) => row.id !== id)
+  parts.done = parts.done.filter((row) => row.id !== id)
+  if (order?.status === 'done') parts.done = mergeById(parts.done, [{ ...order, completedAt: doneStamp(order, before) }])
+  else if (order && order.status !== 'canceled') parts.open = mergeById(parts.open, [order])
+  join()
+}
+
 function keep(fresh: Order) {
-  rows.value = mergeById(rows.value, [fresh])
+  place(fresh.id, fresh)
   if (found.value) found.value = mergeById(found.value, [fresh])
 }
 
@@ -191,6 +269,7 @@ async function move(order: Order, column: Column, index?: number) {
     showToast(t('web.board.notAllowed', { status: statusText(column.status) }))
     return
   }
+  if (column.status === 'done') concludedHere.set(order.id, new Date().toISOString())
   try {
     const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: column.status }, order.version), ctx.showsMoney)
     if (fresh) {
@@ -322,9 +401,68 @@ async function printStage(column: Column) {
   else requestAnimationFrame(() => window.print())
 }
 
+/** Where "Ver todas" of Concluída goes: the list's Concluídas, or Todas for who has no such filter. */
+const doneLink = computed(() => {
+  const filter = filtersFor(session.role, ctx.showsMoney).includes('done') ? 'done' : 'all'
+  return { query: { f: filter === defaultFilter(session.role) ? undefined : filter } }
+})
+
+/** Stale quotes this person may cancel; the others are only counted. */
+const cancelable = computed(() => staleQuotes.value.filter((order) => access(order).transitions.includes('canceled')))
+const askingStale = ref(false)
+const cancelingStale = ref(false)
+
+const idleText = (order: Order) => t('web.board.idleFor', { count: Math.max(idleMonths(order, now.value), 1) })
+
+/** Cancels the stale quotes one by one through the API; undo puts them back as quotes where allowed. */
+async function cancelStale() {
+  const list = cancelable.value
+  cancelingStale.value = true
+  const back: Order[] = []
+  let failed = 0
+  for (const order of list) {
+    try {
+      const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: 'canceled' }, order.version), ctx.showsMoney)
+      if (fresh) {
+        orderChanged(fresh)
+        if (access(fresh).transitions.includes('quote')) back.push(fresh)
+      }
+    } catch (error) {
+      console.warn('board: quote not canceled', order.id, error)
+      failed++
+    }
+  }
+  cancelingStale.value = false
+  askingStale.value = false
+  const changed = list.length - failed
+  const message = failed ? t('web.batch.partial', { changed, failed }) : t('web.board.staleCanceled', { count: changed })
+  showToast(message, back.length ? { undo: () => void restoreQuotes(back) } : {})
+  announce(message)
+}
+
+async function restoreQuotes(list: Order[]) {
+  let failed = 0
+  for (const order of list) {
+    try {
+      const fresh = writes.orderOf(await writes.patchOrder(order.id, { status: 'quote' }, order.version), ctx.showsMoney)
+      if (fresh) {
+        keep(fresh)
+        orderChanged(fresh)
+      }
+    } catch (error) {
+      // Someone changed it since: the server refuses (409) and it stays as it is now.
+      console.warn('board: undo refused', order.id, error)
+      failed++
+    }
+  }
+  const message = failed ? t('web.batch.undoPartial', { count: failed }) : t('web.batch.undone')
+  showToast(message)
+  announce(message)
+}
+
 const stop = onOrderEvent(({ order, removedId }) => {
-  if (removedId) rows.value = rows.value.filter((row) => row.id !== removedId)
-  if (order) rows.value = mergeById(rows.value.filter((row) => row.id !== order.id), order.status === 'canceled' ? [] : [order])
+  if (removedId) place(removedId, null)
+  if (order) place(order.id, order)
   if (found.value && removedId) found.value = found.value.filter((row) => row.id !== removedId)
   if (found.value && order && found.value.some((row) => row.id === order.id)) found.value = mergeById(found.value.filter((row) => row.id !== order.id), order.status === 'canceled' ? [] : [order])
 })
@@ -403,6 +541,14 @@ onBeforeUnmount(() => {
           </li>
         </ul>
         <p v-if="!cardsOf(column.key).length" class="muted small">{{ t('web.board.emptyColumn') }}</p>
+        <p v-if="column.status === 'done' && !found" class="col-foot muted small" data-testid="board-done-note">
+          {{ t('web.board.doneWindow', { count: BOARD_DONE_DAYS }) }}
+          <RouterLink :to="doneLink" data-testid="board-done-all">{{ t('web.board.doneAll') }}</RouterLink>
+        </p>
+        <p v-if="column.status === 'quote' && staleQuotes.length" class="col-foot muted small" data-testid="board-stale-note">
+          {{ t('web.board.staleQuotes', { count: staleQuotes.length, months: Math.round(STALE_QUOTE_DAYS / 30) }) }}
+          <button v-if="cancelable.length" type="button" class="link" data-testid="board-stale-open" @click="askingStale = true">{{ t('web.board.staleSee') }}</button>
+        </p>
       </section>
     </div>
     <aside v-if="panel.value.value" class="panel" :aria-label="t('web.orders.panel')">
@@ -424,6 +570,16 @@ onBeforeUnmount(() => {
     :choices="[{ id: 'print', label: t('web.board.printStage', { stage: columnMenu.stage.name }) }]"
     @pick="() => { const column = columnMenu as Column; columnMenu = null; void printStage(column) }"
     @close="columnMenu = null"
+  />
+  <BatchConfirm
+    v-if="askingStale"
+    :title="t('web.board.staleTitle', { count: cancelable.length })"
+    :lines="cancelable.map((order) => ({ id: order.id, text: `${order.number ?? ''} · ${order.customer?.name ?? ''}`, right: idleText(order) }))"
+    :note="[t('web.board.staleNote'), staleQuotes.length > cancelable.length ? t('web.board.staleNotYours', { count: staleQuotes.length - cancelable.length }) : ''].filter(Boolean).join(' ')"
+    :confirm="t('web.board.staleConfirm', { count: cancelable.length })"
+    :disabled="cancelingStale"
+    @confirm="cancelStale"
+    @close="askingStale = false"
   />
   <StagePrint v-if="printing" :key="printing.stage.id" :stage="printing.stage" :orders="printing.orders" />
 </template>

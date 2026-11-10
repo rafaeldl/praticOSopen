@@ -2,7 +2,7 @@
 // Seeded scenario orders (seed.mjs seedScenario) give the late, today, on hold,
 // owed and old quote rows; tests that write make their own orders (data.ts).
 import { expect, test, type Page } from './test'
-import { makeOrder, updateOrderDoc } from './data'
+import { makeOrder, readOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
 const table = (page: Page) => page.getByTestId('orders-table')
@@ -228,6 +228,38 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
     }
     await expect(done).toBeVisible({ timeout: 4000 })
   }).toPass({ timeout: 20000 })
+})
+
+test('quadro limpo: Concluído só da semana, orçamentos parados à parte e cancelados de uma vez', async ({ page }) => {
+  const tag = `Limpo ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const ago = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString()
+  const customer = (name: string) => ({ id: 'customer-1', name: `${tag} ${name}` })
+  await makeOrder('admin', { status: 'done', customer: customer('recente'), completedAt: ago(2) })
+  await makeOrder('admin', { status: 'quote', customer: customer('novo'), payment: null })
+  const stale = await makeOrder('admin', { status: 'quote', customer: customer('parado'), payment: null, createdAt: ago(200), updatedAt: ago(120) })
+  await openHome(page, 'admin', './?view=board')
+  const board = page.getByTestId('board')
+  const done = board.getByRole('region', { name: /^Concluído/ })
+  await expect(done.getByText(`${tag} recente`)).toBeVisible()
+  // The 7-day cut itself is in tests/board-clean.test.ts: the server re-stamps completedAt
+  // from its triggers (delivered at least once), so an aged order cannot be kept old here.
+  await expect(done.getByTestId('board-done-note')).toContainText('últimos 7 dias')
+
+  const quotes = board.getByRole('region', { name: /^Orçamento/ })
+  await expect(quotes.getByText(`${tag} novo`)).toBeVisible()
+  await expect(quotes.getByText(`${tag} parado`)).toHaveCount(0)
+  await quotes.getByTestId('board-stale-open').click()
+  const dialog = page.getByRole('dialog', { name: /^Cancelar \d+ orçamentos? parados?\?$/ })
+  await expect(dialog).toContainText(`${stale.number} · ${tag} parado`)
+  await expect(dialog).toContainText('parado há 4 meses')
+  await dialog.getByRole('button', { name: /^Cancelar (1|os \d+)$/ }).click()
+  await expect(page.locator('.toast')).toContainText(/orçamentos? cancelados?/)
+  await expect(quotes.getByTestId('board-stale-note')).toHaveCount(0)
+  await expect.poll(async () => (await readOrder(stale.id))?.status).toBe('canceled')
+
+  await done.getByTestId('board-done-all').click()
+  await expect(page).toHaveURL(/f=done/)
+  await expect(page).not.toHaveURL(/view=board/)
 })
 
 test('quadro ao vivo: mudança feita em outro aparelho move o cartão sem recarregar (#626)', async ({ page }) => {
