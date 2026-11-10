@@ -26,8 +26,8 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/models/permission.dart';
 
 /// Clientes tab: searchable list (name, phone or vehicle plate). "Recentes"
-/// (default) puts the last activity first (docs/CUSTOMER_LAST_ACTIVITY.md);
-/// "A–Z" groups by initial. The choice is kept on the device. A row opens the
+/// (default) puts the last activity first (docs/CUSTOMER_LAST_ACTIVITY.md),
+/// without showing the date; "A–Z" groups by initial. The choice is kept on the device. A row opens the
 /// customer screen; "+" opens the new-customer sheet.
 /// How the Clientes list is ordered.
 enum CustomerListOrder { recent, name }
@@ -40,6 +40,7 @@ class HomeCustomerList extends StatefulWidget {
     this.directory,
     this.canAdd,
     this.showOwed,
+    this.seesAllOrders,
   });
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
@@ -49,9 +50,15 @@ class HomeCustomerList extends StatefulWidget {
   /// permission (the Firestore rules deny the write otherwise). Test seam.
   final bool? canAdd;
 
-  /// Whether each row says how much the customer owes. Defaults to who reads
-  /// the Financeiro (its query is the one used). Test seam.
+  /// Whether each row says how much the customer owes (`Customer.owed`, of
+  /// every order). Defaults to who reads the Financeiro. Test seam.
   final bool? showOwed;
+
+  /// Whether the badges come from the numbers the server keeps on the
+  /// customer (every order) instead of the orders this person may read.
+  /// Defaults to `viewAllOrders`: consultant and technician count only
+  /// their own orders, as the Firestore rules allow. Test seam.
+  final bool? seesAllOrders;
 
   @override
   State<HomeCustomerList> createState() => _HomeCustomerListState();
@@ -74,8 +81,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
   StreamSubscription<List<Customer>>? _subscription;
   List<Customer>? _customers;
-  Map<String, OpenOrdersSummary> _openOrders = const {};
-  Map<String, double> _owed = const {};
+
+  /// Badges counted from the orders this person may read; null when they
+  /// come from the customer ([HomeCustomerList.seesAllOrders]).
+  Map<String, OpenOrdersSummary>? _openOrders;
+  bool get _seesAllOrders =>
+      widget.seesAllOrders ??
+      AuthorizationService.instance.hasPermission(PermissionType.viewAllOrders);
   bool get _showOwed =>
       widget.showOwed ??
       AuthorizationService.instance.hasPermission(
@@ -101,17 +113,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         })
         .catchError((_) {});
     _plates.load();
-    _directory
-        .openOrdersByCustomer()
-        .then((summary) {
-          if (mounted) setState(() => _openOrders = summary);
-        })
-        .catchError((_) {});
-    if (_showOwed) {
+    if (!_seesAllOrders) {
+      _openOrders = const {};
       _directory
-          .owedByCustomer()
-          .then((owed) {
-            if (mounted) setState(() => _owed = owed);
+          .openOrdersByCustomer()
+          .then((summary) {
+            if (mounted) setState(() => _openOrders = summary);
           })
           .catchError((_) {});
     }
@@ -328,50 +335,80 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     return [SliverList(delegate: SliverChildListDelegate(children))];
   }
 
+  /// Name with the phone (or the plate found) under it; on the right what
+  /// needs doing: what the customer owes over the open or late orders.
+  /// Nothing pending, nothing on the right.
   Widget _row(Customer customer, {String? plate}) {
-    final l10n = context.l10n;
-    final summary = _openOrders[customer.id];
-    String? status;
-    CupertinoDynamicColor? dot;
-    if (summary != null && summary.late > 0) {
-      status = l10n.lateOrdersCount(summary.late);
-      dot = OrderStatusStyle.overdueColor;
-    } else if (summary != null && summary.open > 0) {
-      status = l10n.openOrdersCount(summary.open);
-      dot = AppColors.warningDot;
-    }
-    final owed = _owed[customer.id] ?? 0;
-    final owes = owed > 0
-        ? l10n.customerOwesValue(
-            (FormatService()..setLocale(l10n.localeName)).formatCurrency(owed),
-          )
-        : null;
     final phone = (customer.phone?.isNotEmpty ?? false)
         ? formatPhone(customer.phone)
         : null;
-    final subtitle = [?plate, ?status, ?owes, ?phone].join(' · ');
+    final subtitle = [?plate, ?phone].join(' · ');
     return AppListRow(
-      titleBadge: dot == null ? null : StatusDot(color: dot),
       title: customer.name ?? '',
       subtitle: subtitle.isEmpty ? null : subtitle,
-      trailing: _activityText(customerLastActivity(customer)),
+      trailingWidget: _pending(customer),
       onTap: () => _open(customer),
     );
   }
 
-  /// "Hoje", "Ontem", "06/11"; another year with the year.
-  String? _activityText(DateTime? date) {
-    if (date == null) return null;
+  Widget? _pending(Customer customer) {
     final l10n = context.l10n;
-    final local = date.toLocal();
-    final now = DateTime.now();
-    final day = DateTime(local.year, local.month, local.day);
-    if (day == DateTime(now.year, now.month, now.day)) return l10n.today;
-    if (day == DateTime(now.year, now.month, now.day - 1)) {
-      return l10n.yesterday;
-    }
-    return (FormatService()..setLocale(l10n.localeName)).formatDayMonthOrDate(
-      local,
+    final summary =
+        _openOrders?[customer.id] ??
+        (_openOrders == null
+            ? customerOpenSummary(customer, DateTime.now())
+            : null);
+    final late = (summary?.late ?? 0) > 0;
+    final open = summary?.open ?? 0;
+    final owed = _showOwed ? customer.owed ?? 0 : 0;
+    if (!late && open == 0 && owed <= 0) return null;
+
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(100) / 100 >=
+        kAppListRowStackScale;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final danger = OrderStatusStyle.overdueColor.resolveFrom(context);
+    final align = stacked ? TextAlign.start : TextAlign.end;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: stacked
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: [
+        if (owed > 0)
+          Text(
+            l10n.customerOwedTrailing(
+              (FormatService()..setLocale(l10n.localeName)).formatCurrency(
+                owed,
+              ),
+            ),
+            textAlign: align,
+            style: AppTypography.callout.copyWith(
+              color: AppColors.text.resolveFrom(context),
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+        if (late || open > 0)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatusDot(color: late ? danger : AppColors.warningDot),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  late
+                      ? l10n.lateOrdersCount(summary!.late)
+                      : l10n.openOrdersCount(open),
+                  textAlign: align,
+                  style: AppTypography.callout.copyWith(
+                    color: late ? danger : secondary,
+                    fontWeight: late ? FontWeight.w600 : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }

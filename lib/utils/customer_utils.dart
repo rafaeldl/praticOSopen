@@ -187,6 +187,23 @@ Map<String, OpenOrdersSummary> summarizeOpenOrders(
   };
 }
 
+/// The Clientes badge from the numbers the server keeps on the customer
+/// (`openOrders`, `openDueDates`: docs/CUSTOMER_LAST_ACTIVITY.md), so the
+/// list reads no order. Late are the promised days behind today, by day
+/// ([HomeRules.isOverdueAt]), so it changes with time without a write.
+OpenOrdersSummary customerOpenSummary(Customer customer, DateTime now) {
+  final late = (customer.openDueDates ?? const <DateTime>[])
+      .where(
+        (due) => HomeRules.isOverdueAt(
+          status: 'approved',
+          due: due.toLocal(),
+          now: now,
+        ),
+      )
+      .length;
+  return OpenOrdersSummary(open: customer.openOrders ?? 0, late: late);
+}
+
 int _newestFirst(Order a, Order b) {
   final da = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
   final db = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);

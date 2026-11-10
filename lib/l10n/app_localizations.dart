@@ -6730,6 +6730,12 @@ abstract class AppLocalizations {
   /// **'Falta receber {value}'**
   String customerOwesValue(String value);
 
+  /// Clientes list, right side: what the customer still owes
+  ///
+  /// In pt, this message translates to:
+  /// **'Deve {value}'**
+  String customerOwedTrailing(String value);
+
   /// No description provided for @askOrderForCustomer.
   ///
   /// In pt, this message translates to:

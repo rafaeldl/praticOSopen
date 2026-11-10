@@ -21,8 +21,8 @@ class AppListRow extends StatelessWidget {
     this.subtitle,
     this.subtitleWidget,
     this.trailing,
+    this.trailingWidget,
     this.leading,
-    this.titleBadge,
     this.onTap,
     this.showChevron,
     this.titleStyle,
@@ -42,12 +42,12 @@ class AppListRow extends StatelessWidget {
 
   /// Value shown at the end of the row (e.g. a formatted amount or status).
   final String? trailing;
-  final Widget? leading;
 
-  /// Small mark right after the title (e.g. a status dot). It follows the
-  /// last word when the title wraps, so rows with and without it stay
-  /// aligned (unlike [leading]).
-  final Widget? titleBadge;
+  /// Value at the end of the row built by the caller (e.g. an amount over a
+  /// status). Wins over [trailing]; goes under the title at accessibility
+  /// text sizes like it ([kAppListRowStackScale]).
+  final Widget? trailingWidget;
+  final Widget? leading;
   final VoidCallback? onTap;
 
   /// Overrides the chevron. Defaults to `onTap != null`.
@@ -82,44 +82,20 @@ class AppListRow extends StatelessWidget {
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
 
-    final style = (titleStyle ?? AppTypography.body).copyWith(
-      color: textColor,
-    );
-    final plainTitle = Text(title, style: style);
-    // The badge sits after the name, centered on its first line: never alone
-    // on a line of its own when the name wraps.
-    final lineHeight =
-        MediaQuery.textScalerOf(context).scale(style.fontSize ?? 17) *
-        (style.height ?? 1.2);
-    final Widget titleText = titleBadge == null
-        ? plainTitle
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Text(
-                  title,
-                  style: style,
-                  textWidthBasis: TextWidthBasis.longestLine,
+    final style = (titleStyle ?? AppTypography.body).copyWith(color: textColor);
+    final titleText = Text(title, style: style);
+    final valueText =
+        trailingWidget ??
+        (trailing == null
+            ? null
+            : Text(
+                trailing!,
+                textAlign: stacked ? TextAlign.start : TextAlign.end,
+                style: (trailingStyle ?? AppTypography.body).copyWith(
+                  color: valueBesideTitle ? textColor : secondary,
+                  fontFeatures: AppTypography.tabular,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              SizedBox(
-                height: lineHeight,
-                child: Center(child: titleBadge),
-              ),
-            ],
-          );
-    final valueText = trailing == null
-        ? null
-        : Text(
-            trailing!,
-            textAlign: stacked ? TextAlign.start : TextAlign.end,
-            style: (trailingStyle ?? AppTypography.body).copyWith(
-              color: valueBesideTitle ? textColor : secondary,
-              fontFeatures: AppTypography.tabular,
-            ),
-          );
+              ));
     final beside = valueBesideTitle && !stacked && valueText != null;
 
     final main = Column(

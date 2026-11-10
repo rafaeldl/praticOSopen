@@ -52,4 +52,29 @@ void main() {
     expect(subtitle.height, lessThan(title.height * 1.5));
     expect(subtitle.top, greaterThan(title.bottom - 1));
   });
+
+  testWidgets('trailingWidget: beside the title, under it at large text',
+      (tester) async {
+    Widget row() => AppListRow(
+          title: 'Ana Ribeiro',
+          subtitle: '(11) 90000-0001',
+          trailingWidget: const Text('R\$ 166 a receber'),
+          trailing: 'ignored',
+          onTap: () {},
+        );
+    await tester.pumpWidget(host(row()));
+    expect(find.text('ignored'), findsNothing);
+    var title = tester.getRect(find.text('Ana Ribeiro'));
+    var value = tester.getRect(find.text('R\$ 166 a receber'));
+    expect(value.left, greaterThan(title.right));
+
+    await tester.pumpWidget(host(MediaQuery(
+      data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+      child: row(),
+    )));
+    title = tester.getRect(find.text('Ana Ribeiro'));
+    value = tester.getRect(find.text('R\$ 166 a receber'));
+    expect(value.top, greaterThan(title.bottom - 1));
+    expect(value.left, title.left);
+  });
 }

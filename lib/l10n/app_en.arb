@@ -1871,6 +1871,8 @@
   "companySettingSaveError": "Couldn't save. Check your connection and try again.",
   "customerSpentValue": "spent {value}",
   "customerOwesValue": "Owes {value}",
+  "customerOwedTrailing": "Owes {value}",
+  "@customerOwedTrailing": {"description": "Clientes list, right side: what the customer still owes", "placeholders": {"value": {"type": "String"}}},
   "askOrderForCustomer": "Open a work order for {name}?",
   "askOrderForDevice": "Open a work order for this {device}?",
   "addAnotherDevice": "Add another {device}",

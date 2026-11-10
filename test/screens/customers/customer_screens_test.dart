@@ -49,7 +49,6 @@ class FakeDirectory implements CustomerDirectory {
     this.owners = const {},
     this.orders = const {},
     this.open = const {},
-    this.owed = const {},
   });
 
   final List<Customer> customers;
@@ -61,8 +60,10 @@ class FakeDirectory implements CustomerDirectory {
   /// customer id -> orders
   final Map<String, List<Order>> orders;
   final Map<String, OpenOrdersSummary> open;
-  final Map<String, double> owed;
   final List<Customer> deleted = [];
+
+  /// How many times the open orders were read.
+  int openReads = 0;
 
   @override
   Stream<List<Customer>> watchCustomers() => Stream.value(customers);
@@ -88,10 +89,10 @@ class FakeDirectory implements CustomerDirectory {
       Stream.value(orders[customerId] ?? const []);
 
   @override
-  Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async => open;
-
-  @override
-  Future<Map<String, double>> owedByCustomer() async => owed;
+  Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async {
+    openReads++;
+    return open;
+  }
 
   @override
   Future<List<String>> recentCustomerIds() async => const [];
@@ -696,11 +697,8 @@ void main() {
     group('contacts', () {
       Finder link() => find.byKey(const Key('customerPickContact'));
 
-      Finder field(String text) => find.widgetWithText(
-            CupertinoTextField,
-            text,
-            skipOffstage: false,
-          );
+      Finder field(String text) =>
+          find.widgetWithText(CupertinoTextField, text, skipOffstage: false);
 
       testWidgets('new customer fills name, phone and e-mail, without saving', (
         tester,
@@ -1550,7 +1548,7 @@ void main() {
 
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    testWidgets('opens in Recentes: last activity first, with the day', (
+    testWidgets('opens in Recentes: last activity first, without the day', (
       tester,
     ) async {
       final now = DateTime.now();
@@ -1563,6 +1561,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(customers: [noDate, old, today]),
         ),
         direct: true,
@@ -1571,8 +1570,9 @@ void main() {
       final z = tester.getTopLeft(find.text('Zeca')).dy;
       final a = tester.getTopLeft(find.text('Abel')).dy;
       expect(y < z && z < a, isTrue);
-      expect(find.text('Hoje'), findsOneWidget);
-      expect(find.text('05/03/${now.year - 1}'), findsOneWidget);
+      // The order says it: no date on the rows.
+      expect(find.text('Hoje'), findsNothing);
+      expect(find.text('05/03/${now.year - 1}'), findsNothing);
       // No letters in Recentes.
       expect(find.text('A'), findsNothing);
     });
@@ -1583,6 +1583,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(customers: [ana, bruno]),
         ),
         direct: true,
@@ -1604,6 +1605,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [alice, ana, bruno],
             open: {'c1': const OpenOrdersSummary(open: 2, late: 1)},
@@ -1635,26 +1637,89 @@ void main() {
       );
     });
 
-    testWidgets('says how much each customer owes to who reads the '
-        'Financeiro', (tester) async {
+    testWidgets('who sees every order reads the badge from the customer, '
+        'with late by day and no order read', (tester) async {
+      final now = DateTime.now();
       final directory = FakeDirectory(
-        customers: [ana, bruno],
-        open: {'c1': const OpenOrdersSummary(open: 2)},
-        owed: {'c1': 166},
+        customers: [
+          customer('c1', 'Ana Ribeiro')
+            ..openOrders = 3
+            ..openDueDates = [
+              DateTime(now.year, now.month, now.day - 2, 10).toUtc(),
+              DateTime(now.year, now.month, now.day, 8).toUtc(),
+              DateTime(now.year, now.month, now.day + 1).toUtc(),
+            ],
+          customer('c2', 'Bruno Lima')..openOrders = 2,
+          customer('c3', 'Carla'),
+        ],
       );
       await Harness().pump(
         tester,
-        HomeCustomerList(canAdd: true, showOwed: true, directory: directory),
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          seesAllOrders: true,
+          directory: directory,
+        ),
         direct: true,
       );
-      expect(
-        find.text(
-          '2 OS em aberto · Falta receber '
-          '${FormatService().formatCurrency(166)} · (11) 90000-0001',
-        ),
-        findsOneWidget,
+      expect(find.textContaining('1 OS atrasada'), findsOneWidget);
+      expect(find.textContaining('2 OS em aberto'), findsOneWidget);
+      expect(find.byType(StatusDot), findsNWidgets(2));
+      expect(directory.openReads, 0);
+    });
+
+    testWidgets('consultant and technician count only the orders they read', (
+      tester,
+    ) async {
+      final directory = FakeDirectory(
+        customers: [customer('c1', 'Ana Ribeiro')..openOrders = 5],
+        open: {'c1': const OpenOrdersSummary(open: 1)},
       );
-      expect(find.textContaining('Falta receber'), findsOneWidget);
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          seesAllOrders: false,
+          directory: directory,
+        ),
+        direct: true,
+      );
+      expect(find.textContaining('1 OS em aberto'), findsOneWidget);
+      expect(find.textContaining('5 OS'), findsNothing);
+      expect(directory.openReads, 1);
+    });
+
+    testWidgets('says how much each customer owes to who reads the '
+        'Financeiro', (tester) async {
+      final owes = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001')
+        ..openOrders = 2
+        ..owed = 166;
+      final directory = FakeDirectory(customers: [owes, bruno]);
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: true,
+          seesAllOrders: true,
+          directory: directory,
+        ),
+        direct: true,
+      );
+      // Phone under the name; what is pending on the right, owed first.
+      expect(find.text('(11) 90000-0001'), findsOneWidget);
+      final owed = find.text('Deve ${FormatService().formatCurrency(166)}');
+      final open = find.text('2 OS em aberto');
+      expect(owed, findsOneWidget);
+      expect(open, findsOneWidget);
+      expect(
+        tester.getTopLeft(owed).dx,
+        greaterThan(tester.getTopLeft(find.text('Ana Ribeiro')).dx),
+      );
+      expect(tester.getTopLeft(owed).dy, lessThan(tester.getTopLeft(open).dy));
+      // Nothing pending, nothing on the right.
+      expect(find.textContaining('Deve '), findsOneWidget);
     });
 
     testWidgets('hides what is owed from who does not read the Financeiro', (
@@ -1665,11 +1730,18 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
-          directory: FakeDirectory(customers: [ana], owed: {'c1': 166}),
+          seesAllOrders: true,
+          directory: FakeDirectory(
+            customers: [
+              customer('c1', 'Ana Ribeiro')
+                ..openOrders = 1
+                ..owed = 166,
+            ],
+          ),
         ),
         direct: true,
       );
-      expect(find.textContaining('Falta receber'), findsNothing);
+      expect(find.textContaining('Deve '), findsNothing);
     });
 
     testWidgets('shows the phone formatted for the country', (tester) async {
@@ -1678,6 +1750,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [customer('c9', 'Carla', phone: '+5548981234567')],
           ),
@@ -1694,6 +1767,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(
             customers: [ana, bruno],
             devices: [device('d1', 'Fiat Uno', 'ABC1D23')],
@@ -1717,6 +1791,7 @@ void main() {
         HomeCustomerList(
           canAdd: false,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(),
         ),
         direct: true,
@@ -1734,6 +1809,7 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           showOwed: false,
+          seesAllOrders: false,
           directory: FakeDirectory(),
         ),
         direct: true,

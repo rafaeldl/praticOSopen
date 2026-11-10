@@ -3965,6 +3965,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String customerOwedTrailing(String value) {
+    return 'Owes $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return 'Open a work order for $name?';
   }

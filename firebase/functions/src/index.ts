@@ -49,6 +49,9 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     await touchCustomerOfOrder(context.params.companyId, data, context.timestamp).catch((error) =>
       console.error('Could not stamp the customer activity of the new order', error),
     );
+    await recountCustomersOfOrder(context.params.companyId, undefined, data).catch((error) =>
+      console.error('Could not recount the customer of the new order', error),
+    );
     if (!data || data.number) return;
 
     const companyId = context.params.companyId;
@@ -167,12 +170,16 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
     await touchCustomerOfOrder(companyId, event.data?.after.data(), event.time).catch((error) =>
       console.error('Could not stamp the customer activity of the order', error),
     );
+    await recountCustomersOfOrder(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
+      console.error('Could not recount the customers of the order', error),
+    );
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
   }
 );
 
 import { cleanupDeletedOrder } from './services/order-cleanup.service';
 import { touchCustomerOfOrder, touchCustomerOnWrite } from './services/customer-activity.service';
+import { recountCustomersOfOrder } from './services/customer-aggregates.service';
 
 /**
  * [V2] Customer activity (services/customer-activity.service.ts): created or
@@ -234,6 +241,9 @@ export const onOrderDeletedCleanup = onDocumentDeleted(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
+    await recountCustomersOfOrder(companyId, event.data?.data(), undefined).catch((error) =>
+      console.error('Could not recount the customer of the deleted order', error),
+    );
     await cleanupDeletedOrder(companyId, orderId);
   }
 );

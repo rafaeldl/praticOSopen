@@ -32,8 +32,7 @@ import {
   type CustomerRow,
   type DeviceRow,
 } from '@/lib/customers/model'
-import { formatDate } from '@/lib/format'
-import { dayWord, money } from '@/lib/orders/text'
+import { money } from '@/lib/orders/text'
 import { formatPhone } from '@/lib/phone'
 import { useRoutePanel } from '@/lib/route-layer'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -58,7 +57,6 @@ const searchEl = ref<HTMLInputElement | null>(null)
 const form = ref<{ draft: { name: string; phone: string } } | null>(null)
 const stored = readStorage(ORDER_KEY) as CustomerOrder | null
 const order = ref<CustomerOrder>(stored && CUSTOMER_ORDERS.includes(stored) ? stored : 'recent')
-const now = new Date()
 
 const canManage = computed(() => can('manageCustomers'))
 /** The server sends what each one owes only to who reads the Financeiro. */
@@ -95,12 +93,6 @@ function setOrder(next: CustomerOrder) {
   order.value = next
   shown.value = PAGE
   writeStorage(ORDER_KEY, next)
-}
-
-/** "hoje", "ontem", "15/10"; another year with the year. */
-function activityText(iso: string | null | undefined): string {
-  if (!iso) return ''
-  return new Date(iso).getFullYear() === now.getFullYear() ? dayWord(iso, now) : formatDate(iso, country.value)
 }
 
 function open(id: string) {
@@ -305,12 +297,11 @@ onBeforeUnmount(() => {
               <th scope="col">{{ t('phone') }}</th>
               <th scope="col">{{ t('web.customers.ordersColumn') }}</th>
               <th v-if="showOwed" scope="col" class="num">{{ t('web.customers.owedColumn') }}</th>
-              <th scope="col" class="c-activity">{{ t('web.customers.activityColumn') }}</th>
             </tr>
           </thead>
           <tbody v-for="group in groups" :key="group.initial || 'all'">
             <tr v-if="group.initial" class="group-row no-click">
-              <th :colspan="showOwed ? 5 : 4" scope="rowgroup">{{ group.initial }}</th>
+              <th :colspan="showOwed ? 4 : 3" scope="rowgroup">{{ group.initial }}</th>
             </tr>
             <tr v-for="row in group.rows" :id="`customer-${row.id}`" :key="row.id" :class="{ 'is-open': row.id === panel.value.value }" @click="open(row.id)">
               <td>
@@ -324,7 +315,6 @@ onBeforeUnmount(() => {
                 </span>
               </td>
               <td v-if="showOwed" class="num dir-money" data-testid="customer-owed">{{ row.owed ? money(row.owed) : '' }}</td>
-              <td class="c-activity"><span class="status" data-testid="customer-activity">{{ activityText(row.lastActivity) }}</span></td>
             </tr>
           </tbody>
         </table>
