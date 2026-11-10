@@ -217,8 +217,17 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
   // focuses it only once the write is back with the new version. Moving before
   // that sends the old version and the server refuses it.
   await expect(progress.locator(`#card-${order.id}`)).toBeFocused()
-  await page.keyboard.press('Shift+ArrowRight')
-  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
+  // A live update can redraw the column between the focus and the key, and the
+  // key then goes nowhere. Focus and press again only while it is still there,
+  // so it never moves twice.
+  const done = board.getByRole('region', { name: /^Concluído/ }).getByText(name)
+  await expect(async () => {
+    if (await progress.getByText(name).count()) {
+      await progress.locator(`#card-${order.id}`).focus()
+      await page.keyboard.press('Shift+ArrowRight')
+    }
+    await expect(done).toBeVisible({ timeout: 4000 })
+  }).toPass({ timeout: 20000 })
 })
 
 test('quadro ao vivo: mudança feita em outro aparelho move o cartão sem recarregar (#626)', async ({ page }) => {
