@@ -7726,4 +7726,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String statementFileName(String date) {
     return 'Extrato-$date';
   }
+
+  @override
+  String get customersOrderRecent => 'Recentes';
+
+  @override
+  String get customersOrderName => 'A–Z';
 }

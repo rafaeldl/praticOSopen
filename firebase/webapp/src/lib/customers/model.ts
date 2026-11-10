@@ -17,6 +17,24 @@ export interface CustomerRow {
   late: number
   /** "Falta receber" (A receber rule of the Financeiro); null for who does not read the Financeiro. */
   owed: number | null
+  /** Last activity (UTC ISO): created, edited or one of the orders changed (older servers do not send it). */
+  lastActivity?: string | null
+}
+
+/** How the list is ordered: most recent activity first, or by name grouped by initial. */
+export type CustomerOrder = 'recent' | 'name'
+export const CUSTOMER_ORDERS: CustomerOrder[] = ['recent', 'name']
+
+/** Most recent activity first; who has no date goes last, by name. */
+export function byRecent<T extends { name: string; lastActivity?: string | null }>(a: T, b: T): number {
+  const at = a.lastActivity ? Date.parse(a.lastActivity) : NaN
+  const bt = b.lastActivity ? Date.parse(b.lastActivity) : NaN
+  if (!Number.isNaN(at) || !Number.isNaN(bt)) {
+    if (Number.isNaN(at)) return 1
+    if (Number.isNaN(bt)) return -1
+    if (at !== bt) return bt - at
+  }
+  return byName(a, b)
 }
 
 export type DeviceStatus = 'active' | 'maintenance' | 'inactive' | 'decommissioned'

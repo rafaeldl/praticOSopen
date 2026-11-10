@@ -19,6 +19,7 @@ import { timestampToDate } from '../utils/date.utils';
 import { eachOrderWithMoneyOpen } from './app-finance.service';
 import { countOrder, customerOwed, OPEN_STATUSES, OwedTally, type CustomerCounts, type SummaryOrder } from './customer-summary';
 import { orderVersion, versionMatches } from './order-version';
+import { dateMillis } from './customer-activity.service';
 import { OrderRuleError } from './order-errors';
 import { deletePhotoFileIn, recordPhotoFolder, storagePathOfUrl, type PhotoInput } from './record-photo';
 
@@ -117,9 +118,19 @@ export interface DirectoryCustomer {
   late: number;
   /** "Falta receber" (A receber rule); null for who does not read the Financeiro. */
   owed: number | null;
+  /** Last activity (UTC ISO): `lastActivityAt`, or the customer's own dates before the backfill. */
+  lastActivity: string | null;
 }
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value : null);
+
+/** `lastActivityAt` (customer-activity.service.ts); before the backfill, the most recent of `updatedAt` and `createdAt`. UTC ISO. */
+export function lastActivityOf(data: Record<string, unknown>): string | null {
+  const stamped = dateMillis(data.lastActivityAt);
+  if (stamped != null) return new Date(stamped).toISOString();
+  const times = [data.updatedAt, data.createdAt].map(dateMillis).filter((ms): ms is number => ms != null);
+  return times.length ? new Date(Math.max(...times)).toISOString() : null;
+}
 
 /**
  * Every customer of the company with the order badges of the list
@@ -137,7 +148,7 @@ export async function customerDirectory(
   const tally = options.withOwed ? new OwedTally() : null;
   const [snapshot, , money] = await Promise.all([
     getTenantCollection(companyId, 'customers')
-      .select('name', 'phone', 'email', 'taxId', 'legalName', 'address')
+      .select('name', 'phone', 'email', 'taxId', 'legalName', 'address', 'lastActivityAt', 'updatedAt', 'createdAt')
       .limit(DIRECTORY_LIMIT + 1)
       .get(),
     eachScopedOrder(companyId, scope, (base) => base.where('status', 'in', [...OPEN_STATUSES]), ['status', 'customer.id', 'dueDate'], (order) =>
@@ -157,6 +168,7 @@ export async function customerDirectory(
       address: text(data.address),
       ...(counts.get(doc.id) ?? { open: 0, late: 0 }),
       owed: owed ? owed.get(doc.id) ?? 0 : null,
+      lastActivity: lastActivityOf(data),
     };
   });
   return { customers, truncated: snapshot.docs.length > DIRECTORY_LIMIT || !!money?.truncated };

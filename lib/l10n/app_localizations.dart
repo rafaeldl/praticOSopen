@@ -12478,6 +12478,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Extrato-{date}'**
   String statementFileName(String date);
+
+  /// No description provided for @customersOrderRecent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recentes'**
+  String get customersOrderRecent;
+
+  /// No description provided for @customersOrderName.
+  ///
+  /// In pt, this message translates to:
+  /// **'A–Z'**
+  String get customersOrderName;
 }
 
 class _AppLocalizationsDelegate

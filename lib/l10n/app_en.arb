@@ -2987,5 +2987,7 @@
   "@statementOrderTotals": {"placeholders": {"total": {"type": "String"}, "paid": {"type": "String"}, "open": {"type": "String"}}},
   "statementPdfTotalOpen": "Total owed",
   "statementFileName": "Statement-{date}",
-  "@statementFileName": {"placeholders": {"date": {"type": "String"}}}
+  "@statementFileName": {"placeholders": {"date": {"type": "String"}}},
+  "customersOrderRecent": "Recent",
+  "customersOrderName": "A–Z"
 }

@@ -10,6 +10,7 @@ import { applyMask, useMask, buildFields, fieldMasks, namespaceFields, readCusto
 import {
   addMonths,
   badgeOf,
+  byRecent,
   canOfferCreate,
   customerMatches,
   deviceMatches,
@@ -240,5 +241,18 @@ describe('spreadsheet import', () => {
     const rows = await parseXlsx(xlsx.buffer.slice(xlsx.byteOffset, xlsx.byteOffset + xlsx.byteLength))
     expect(rows[0]).toEqual(['Nome', 'Telefone', 'E-mail'])
     expect(rows[1]).toEqual(['Planilha Um', '(47) 90000-2201', 'um@exemplo.com'])
+  })
+})
+
+describe('lista por Recentes', () => {
+  test('última movimentação primeiro; sem data no fim, por nome', () => {
+    const people = [
+      { name: 'Bia', lastActivity: null },
+      { name: 'Ana', lastActivity: '2026-11-01T10:00:00.000Z' },
+      { name: 'Caio', lastActivity: '2026-11-09T08:00:00.000Z' },
+      { name: 'Alex' },
+      { name: 'Davi', lastActivity: '2026-11-01T10:00:00.000Z' },
+    ]
+    expect([...people].sort(byRecent).map((p) => p.name)).toEqual(['Caio', 'Ana', 'Davi', 'Alex', 'Bia'])
   })
 })
