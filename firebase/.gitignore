@@ -71,4 +71,4 @@ node_modules/
 yarn.lock
 
 # Ports of one e2e run (firebase/webapp/e2e/run.mjs, E2E_PORT_OFFSET)
-firebase.e2e.offset.json
+firebase.e2e.offset*.json

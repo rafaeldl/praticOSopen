@@ -14,7 +14,8 @@ export default defineConfig({
   // listeners there can take over 8 s, which failed random tests (#552).
   expect: { timeout: process.env.CI ? 15_000 : 8_000 },
   fullyParallel: !process.env.E2E_PERF,
-  workers: process.env.E2E_PERF ? 1 : 3,
+  // PW_WORKERS sets it; 2 by default on a dev machine shared with other runs, 3 on CI.
+  workers: process.env.E2E_PERF ? 1 : Number(process.env.PW_WORKERS) || (process.env.CI ? 3 : 2),
   retries: 0,
   forbidOnly: !!process.env.CI,
   reporter: [['list']],
