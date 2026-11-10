@@ -250,7 +250,10 @@ test('item em OS com dois veículos: "Em quais veículos?", Geral ou todos (orde
   await expect(panel(page).getByText('Carregando…')).toHaveCount(0)
   const add = async (name: string) => {
     await panel(page).getByRole('button', { name: 'Adicionar serviço ou peça' }).click()
-    await page.getByRole('dialog', { name: 'O que vai ser feito?' }).getByRole('combobox').fill(name)
+    const search = page.getByRole('dialog', { name: 'O que vai ser feito?' })
+    await search.getByRole('combobox').fill(name)
+    // Enter takes the first result: wait for this search, not the last one's list.
+    await expect(search.getByRole('option').first()).toContainText(name)
     await page.keyboard.press('Enter')
   }
   await add('Serviço 4')

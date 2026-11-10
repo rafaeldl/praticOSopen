@@ -104,7 +104,16 @@ const result = spawnSync(
     only,
     `node e2e/seed.mjs && ${test}`,
   ],
-  { cwd: webapp, stdio: 'inherit', env: { ...process.env, TMPDIR: emulatorTmp } },
+  {
+    cwd: webapp,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      TMPDIR: emulatorTmp,
+      // Quiet Firestore listen-channel warnings: see e2e/emulator-logging.properties.
+      JAVA_TOOL_OPTIONS: `${process.env.JAVA_TOOL_OPTIONS ?? ''} -Djava.util.logging.config.file=${resolve(webapp, 'e2e/emulator-logging.properties')}`.trim(),
+    },
+  },
 )
 
 rmSync(emulatorTmp, { recursive: true, force: true })
