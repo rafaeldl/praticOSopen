@@ -10,9 +10,9 @@ export default defineConfig({
   // from webapp_check.yml); the light pass and dark-mode behavior tests still run.
   grepInvert: process.env.E2E_SKIP_DARK_AXE ? /axe.*(tema escuro|\(dark\))/ : undefined,
   timeout: process.env.E2E_PERF ? 180_000 : 30_000,
-  // CI runs 3 workers next to the emulators on a shared runner: Firestore
-  // listeners there can take over 8 s, which failed random tests (#552).
-  expect: { timeout: process.env.CI ? 15_000 : 8_000 },
+  // 3 workers next to the emulators: Firestore listeners can take over 8 s,
+  // on the CI runner (#552) and on a busy laptop running the whole suite.
+  expect: { timeout: 15_000 },
   fullyParallel: !process.env.E2E_PERF,
   workers: process.env.E2E_PERF ? 1 : 3,
   retries: 0,

@@ -4,8 +4,9 @@
 // E2E_PORT_OFFSET (another worktree already uses the ports: every emulator and the
 // page server move by this much, e.g. 100).
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 
 const webapp = resolve(import.meta.dirname, '..')
 const functionsDir = resolve(webapp, '../functions')
@@ -83,6 +84,11 @@ const test = serve
     ? `E2E_PERF=1 ${process.env.PERF_COLD ? 'PERF_COLD=1 ' : ''}npx playwright test e2e/perf`
     : `npx playwright test ${process.env.PW_ARGS ?? ''}`
 
+// The Storage emulator keeps its files in $TMPDIR/firebase/storage/blobs and
+// deletes that folder when it stops: another suite ending on this machine
+// (another worktree) wiped this one's files and the run died. Own folder per run.
+const emulatorTmp = mkdtempSync(join(tmpdir(), 'praticos-e2e-'))
+
 // Ctrl+C reaches the emulators too; stay alive to remove the fake secrets.
 process.on('SIGINT', () => {})
 const result = spawnSync(
@@ -98,9 +104,10 @@ const result = spawnSync(
     only,
     `node e2e/seed.mjs && ${test}`,
   ],
-  { cwd: webapp, stdio: 'inherit' },
+  { cwd: webapp, stdio: 'inherit', env: { ...process.env, TMPDIR: emulatorTmp } },
 )
 
+rmSync(emulatorTmp, { recursive: true, force: true })
 if (createdSecrets) rmSync(secretFile, { force: true })
 cleanUp()
 process.exit(result.status ?? 1)
