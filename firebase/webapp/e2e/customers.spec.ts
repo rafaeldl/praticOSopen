@@ -1,6 +1,6 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc, waitForOpenOrders } from './data'
 import { chooseCompany, login, signOut } from './helpers'
 

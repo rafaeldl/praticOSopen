@@ -1,7 +1,7 @@
 // PDF of the order and of several (order.pdf.view, order.pdf.viewer, order.pdf.close,
 // order.pdf.batch): made in the browser like the app's, read back here as text.
 import { readFileSync } from 'node:fs'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { randomUUID } from 'node:crypto'

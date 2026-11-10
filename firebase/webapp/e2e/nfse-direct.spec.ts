@@ -3,7 +3,7 @@
 // after a new CNPJ's certificate and from a CNPJ that never imported. The
 // government is never called: /v1/app/nfse/* is answered here and the emitters
 // the server would write are written by the test. All data is fictional.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { deleteDocInN, writeDocInN } from './data'
 import { expectNoAxeViolations, login, setTheme } from './helpers'
 

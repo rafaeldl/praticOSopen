@@ -3,7 +3,7 @@
 // and take out from "Já recebido". The file goes to the Storage emulator and the
 // server checks it (validateReceiptFile accepts the emulator's http URL only
 // inside the Functions emulator).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getStorage } from 'firebase-admin/storage'
 import { makeOrder, readOrder } from './data'

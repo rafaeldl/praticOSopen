@@ -1,7 +1,7 @@
 // Fatia 07, equipe: list, invites and role changes through the API, against the
 // Emulator Suite. Everything happens in the team company (fixtures COMPANY_T),
 // in order: the tests share its people and invites.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_T, TEAM_INVITES, USERS } from './fixtures.mjs'
 import { login } from './helpers'
 import { invitesOf, readPath } from './settings-data'

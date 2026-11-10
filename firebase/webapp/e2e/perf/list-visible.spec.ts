@@ -1,7 +1,7 @@
 // Time until the order list shows, on Fast 4G with CPU 4x, like ADR-001.
 // Run with npm run e2e:perf (10 thousand orders in the seed). Prints the p75 of
 // every startup step, so a regression shows where the time went.
-import { expect, test, type BrowserContext, type Page } from '@playwright/test'
+import { expect, test, type BrowserContext, type Page } from '../test'
 import { login } from '../helpers'
 
 const RUNS = Number(process.env.PERF_RUNS ?? 7)

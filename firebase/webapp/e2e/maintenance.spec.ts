@@ -2,7 +2,7 @@
 // late, today, in 2 days and in 7 days show; in 8 days and the one under an
 // active contract do not (the technician cannot read contracts, so for him the
 // contract one shows, as in the app).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 const section = (page: Page) => page.getByRole('region', { name: 'Manutenções chegando' })

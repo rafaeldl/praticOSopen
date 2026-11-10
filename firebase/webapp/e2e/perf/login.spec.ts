@@ -4,7 +4,7 @@
 // The provider's own page is not timed: e-mail sign-in is the same path that
 // follows Google or Apple answering (hydrate, access, company, list).
 // PERF_LOGIN=1 npm run e2e:perf:login
-import { expect, test, type BrowserContext, type Page } from '@playwright/test'
+import { expect, test, type BrowserContext, type Page } from '../test'
 import { PASSWORD, USERS } from '../fixtures.mjs'
 
 test.skip(!process.env.PERF_LOGIN, 'só com PERF_LOGIN=1')

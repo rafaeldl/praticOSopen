@@ -1,7 +1,7 @@
 // Fatia 07, Integrações: MCP connections (real API in the emulator) and the
 // Asaas connection (the routes that reach Asaas are answered by the test: no
 // Asaas account exists in the emulator). Owner and admin only.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_G } from './fixtures.mjs'
 import { login, newPersonPage } from './helpers'
 import { listPath } from './settings-data'

@@ -2,7 +2,7 @@
 // what this slice added (open the customer and the device, rating, photo viewer
 // and cover, catalog item from the search, the Nova OS extras). Every write is
 // checked in what the server or Firestore saved.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { catalogNamed, makeCustomer, makeDevice, makeOrder, readOrder, updateOrderDoc } from './data'
 import { login, type UserKey } from './helpers'
 
