@@ -32,9 +32,14 @@ test('Nova OS só com teclado: cliente, veículo, item e valor em menos de 45 s'
   const focused = () => page.evaluate(() => document.activeElement?.id ?? '')
   await expect.poll(focused).toMatch(/^no-(device|item)$/)
   if ((await focused()) === 'no-device') await page.keyboard.press('Enter')
+  // The vehicle may come in after the focus moved on, and choosing it focuses
+  // the item field again: wait for it, or that focus lands after the Tab below.
+  await expect(drawer(page)).toContainText('Veículo 3')
   await expect(item).toBeFocused()
   await page.keyboard.type('Serviço 2')
   await page.keyboard.press('Enter')
+  await expect(item).toHaveValue('')
+  await expect(item).toBeFocused()
   // Tab only after the line is on screen: on a slow runner the price field can
   // render after the key, and Tab then skips it.
   const price = page.getByRole('textbox', { name: 'Valor de Serviço 2' })
