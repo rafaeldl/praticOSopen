@@ -223,7 +223,10 @@ test('quadro limpo: Concluído só da semana, orçamentos parados à parte e can
   const ago = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString()
   const customer = (name: string) => ({ id: 'customer-1', name: `${tag} ${name}` })
   await makeOrder('admin', { status: 'done', customer: customer('recente'), completedAt: ago(2) })
-  await makeOrder('admin', { status: 'done', customer: customer('antiga'), completedAt: ago(30) })
+  // Created concluded, the server stamps completedAt with the creation (a trigger): wait for it, then age it.
+  const oldDone = await makeOrder('admin', { status: 'done', customer: customer('antiga') })
+  await expect.poll(async () => (await readOrder(oldDone.id))?.completedAt, { timeout: 15_000 }).toBeTruthy()
+  await updateOrderDoc(oldDone.id, { completedAt: ago(30) })
   await makeOrder('admin', { status: 'quote', customer: customer('novo'), payment: null })
   const stale = await makeOrder('admin', { status: 'quote', customer: customer('parado'), payment: null, createdAt: ago(200), updatedAt: ago(120) })
   await openHome(page, 'admin', './?view=board')
