@@ -1,7 +1,7 @@
 // "O que o cliente pediu" on the open order (order.request.edit): the segment's
 // field service_order.observation, the same one the app reads and writes. The
 // request the old web Nova OS saved as a comment shows while the field is empty.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { addCommentDoc, makeOrder, readComments, readOrder } from './data'
 import { login, type UserKey } from './helpers'
 

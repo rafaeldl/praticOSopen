@@ -1,6 +1,6 @@
 // The bell on Início and Avisos (home.notifications.*, notifications.*), company D:
 // what notification.service.ts writes, for each person only their own.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 const bell = (page: Page) => page.getByTestId('bell')

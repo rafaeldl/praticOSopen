@@ -1,6 +1,6 @@
 // Quick light/dark switch in the sidebar: one click flips the screen and the
 // choice stays after reloading (Configurações › Neste navegador shows it).
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { login } from './helpers'
 
 test('botão Modo escuro / Modo claro na barra lateral', async ({ page }) => {

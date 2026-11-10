@@ -1,5 +1,5 @@
 // Modo TV (#627): the board alone, big, live and without values.
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { makeOrder, readOrder, updateOrderDoc, writeOrderFieldsRaw } from './data'
 import { login } from './helpers'
 

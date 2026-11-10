@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import { createWebAccessRouter, hashEmail, isWebAccessAllowed, WebAccessConfig, WebAccessToken } from '../web-access.routes';
+import { createWebAccessRouter, hashEmail, isWebAccessAllowed, skipWebAccessLimit, WebAccessConfig, WebAccessToken } from '../web-access.routes';
 
 const EMAIL = 'Pessoa@Exemplo.test';
 const verified: WebAccessToken = { uid: 'u1', email: EMAIL, email_verified: true };
@@ -23,6 +23,14 @@ function buildApp(token: WebAccessToken | Error, config: WebAccessConfig | null 
   );
   return app;
 }
+
+describe('skipWebAccessLimit', () => {
+  it('skips the limit only in the local emulator', () => {
+    expect(skipWebAccessLimit({ FUNCTIONS_EMULATOR: 'true' })).toBe(true);
+    expect(skipWebAccessLimit({ FUNCTIONS_EMULATOR: 'false' })).toBe(false);
+    expect(skipWebAccessLimit({})).toBe(false);
+  });
+});
 
 describe('hashEmail', () => {
   it('ignores case and spaces', () => {

@@ -1,6 +1,6 @@
 // Extras de tela grande on every layer: axe in light and dark, 320 px to a large
 // screen without side scroll, text at 200%, the three languages and print.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomer, makeOrder, type TestOrder } from './data'
 import { expectNoAxeViolations, expectNoSideScroll, login, startWithPrefs } from './helpers'
 

@@ -2,7 +2,7 @@
 // device.list.pick, device.list.pick-none, order.device.change, order.item-search.most-used):
 // "Recentes" from the orders this role reads, the plate that brings customer and
 // device together, "Nenhum …" when changing a device, "Mais usados" of the catalog.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { deleteOrderDocs, makeCustomer, makeDevice, makeOrder, readOrder } from './data'
 import { login, type UserKey } from './helpers'
 

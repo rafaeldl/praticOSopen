@@ -3,7 +3,7 @@
 // photos in tenants/{cid}/orders/{oid}/forms/{fid}/. Each test makes the
 // templates and orders it changes; the seed has "Vistoria de entrada" copied
 // from the segment, "Teste final" and "Pronto para copiar" still ready.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, makeOrderForm, makeReadyTemplate, makeTemplate, setTemplateInB, readOrder, readOrderForms, readTemplate, templatesNamed, updateTemplateDoc, writeOrderFormRaw } from './data'
 import { chooseCompany, login, signOut, type UserKey } from './helpers'
 

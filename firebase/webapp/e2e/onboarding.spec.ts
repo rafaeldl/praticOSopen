@@ -2,7 +2,7 @@
 // → Para o cliente → Início, the company created with the app's batch and the
 // segment's checklists and samples by the server. Each test that creates a
 // company has its own account (fixtures.mjs: founder*).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { companiesOwnedBy } from './data'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme, signOut } from './helpers'
 

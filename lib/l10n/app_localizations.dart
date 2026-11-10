@@ -6730,6 +6730,12 @@ abstract class AppLocalizations {
   /// **'Falta receber {value}'**
   String customerOwesValue(String value);
 
+  /// Clientes list, right side: what the customer still owes
+  ///
+  /// In pt, this message translates to:
+  /// **'Deve {value}'**
+  String customerOwedTrailing(String value);
+
   /// No description provided for @askOrderForCustomer.
   ///
   /// In pt, this message translates to:
@@ -12478,6 +12484,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Extrato-{date}'**
   String statementFileName(String date);
+
+  /// No description provided for @customersOrderRecent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recentes'**
+  String get customersOrderRecent;
+
+  /// No description provided for @customersOrderName.
+  ///
+  /// In pt, this message translates to:
+  /// **'A–Z'**
+  String get customersOrderName;
 }
 
 class _AppLocalizationsDelegate

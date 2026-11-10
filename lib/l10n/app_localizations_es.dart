@@ -3970,6 +3970,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String customerOwedTrailing(String value) {
+    return 'Debe $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return '¿Abrir una OS para $name?';
   }
@@ -7741,4 +7746,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String statementFileName(String date) {
     return 'Extracto-$date';
   }
+
+  @override
+  String get customersOrderRecent => 'Recientes';
+
+  @override
+  String get customersOrderName => 'A–Z';
 }

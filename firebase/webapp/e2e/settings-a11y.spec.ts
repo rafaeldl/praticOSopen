@@ -1,7 +1,7 @@
 // Fatia 07 (equipe, empresa, plano, conta, integrações) on every screen: axe in
 // light and dark, 320 to 2560 px without side scroll, text at 200%, and the
 // three languages. Only reads: the tests that write are in their own files.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, newPersonPage, setTheme, type UserKey } from './helpers'
 
 const SCREENS: [UserKey, string, string][] = [

@@ -184,6 +184,18 @@ export async function readDoc(path: string): Promise<Record<string, unknown> | u
   return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
 }
 
+/**
+ * Waits for the order triggers to recount the customer (`openOrders`,
+ * customer-aggregates.service.ts): the Clientes list reads it from the customer.
+ */
+export async function waitForOpenOrders(customerId: string, count: number, company: string = COMPANY_A): Promise<void> {
+  const ref = db().doc(`companies/${company}/customers/${customerId}`)
+  for (const deadline = Date.now() + 20_000; Date.now() < deadline; await new Promise((done) => setTimeout(done, 250))) {
+    if ((await ref.get()).data()?.openOrders === count) return
+  }
+  throw new Error(`customer ${customerId} never got openOrders = ${count}`)
+}
+
 /** A customer of the company with the direct nota on (e2e/customer-invoice.spec.ts). */
 export async function makeCustomerInN(data: Record<string, unknown> = {}): Promise<{ id: string; name: string }> {
   return makeCustomer(data, 'company-nfse')

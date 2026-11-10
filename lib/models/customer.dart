@@ -42,6 +42,26 @@ class Customer extends BaseAuditCompany {
   @JsonKey(includeIfNull: false)
   String? lastEmitterId;
 
+  /// Last activity (created, edited or one of the orders changed), kept by
+  /// the server (docs/CUSTOMER_LAST_ACTIVITY.md). Read only: the app never
+  /// writes it, so a save never puts back an older date.
+  @JsonKey(includeToJson: false)
+  DateTime? lastActivityAt;
+
+  /// Open orders (quote, approved, progress) of every user, kept by the
+  /// server for the Clientes list. Read only, like [lastActivityAt].
+  @JsonKey(includeToJson: false)
+  int? openOrders;
+
+  /// "Falta receber" (the A receber rule), kept by the server. Read only.
+  @JsonKey(includeToJson: false)
+  double? owed;
+
+  /// Promised days of the open orders that have one, oldest first, kept by
+  /// the server: the ones before today are the late orders. Read only.
+  @JsonKey(includeToJson: false)
+  List<DateTime>? openDueDates;
+
   Customer();
   factory Customer.fromJson(Map<String, dynamic> json) =>
       _$CustomerFromJson(json);

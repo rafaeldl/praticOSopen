@@ -188,6 +188,11 @@ export function nextOrdersPage(query: OrdersQuery, last: OrderRow, size: number)
   return run(query, size, last)
 }
 
+/** One page of `size` rows after `last` (or the first one), never reused: for screens other than the list. */
+export function ordersPage(query: OrdersQuery, size: number, last?: OrderRow): Promise<OrderRow[]> {
+  return run(query, size, last)
+}
+
 /**
  * Live copy of the first `size` rows: another person's change, a new order or
  * one that left the filter shows without reloading the list. Returns the stop.

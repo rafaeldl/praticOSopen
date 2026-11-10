@@ -1,7 +1,7 @@
 // Início: list, filters, rows, search, selection, board and live updates.
 // Seeded scenario orders (seed.mjs seedScenario) give the late, today, on hold,
 // owed and old quote rows; tests that write make their own orders (data.ts).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, readOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
@@ -213,9 +213,21 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
   await page.getByRole('dialog', { name: 'Mover para onde?' }).getByRole('button', { name: 'Na oficina' }).click()
   const progress = board.getByRole('region', { name: /^Na oficina/ })
   await expect(progress.getByText(name)).toBeVisible()
-  await progress.locator(`#card-${order.id}`).focus()
-  await page.keyboard.press('Shift+ArrowRight')
-  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
+  // The live list can show the card there before the write answers; the board
+  // focuses it only once the write is back with the new version. Moving before
+  // that sends the old version and the server refuses it.
+  await expect(progress.locator(`#card-${order.id}`)).toBeFocused()
+  // A live update can redraw the column between the focus and the key, and the
+  // key then goes nowhere. Focus and press again only while it is still there,
+  // so it never moves twice.
+  const done = board.getByRole('region', { name: /^Concluído/ }).getByText(name)
+  await expect(async () => {
+    if (await progress.getByText(name).count()) {
+      await progress.locator(`#card-${order.id}`).focus()
+      await page.keyboard.press('Shift+ArrowRight')
+    }
+    await expect(done).toBeVisible({ timeout: 4000 })
+  }).toPass({ timeout: 20000 })
 })
 
 test('quadro limpo: Concluído só da semana, orçamentos parados à parte e cancelados de uma vez', async ({ page }) => {

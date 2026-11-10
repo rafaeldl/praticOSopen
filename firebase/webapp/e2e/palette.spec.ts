@@ -1,6 +1,6 @@
 // ⌘K from any screen (web.search.global): orders, customers, devices, catalog
 // and actions in one field, each group only for who may open it.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { login, type UserKey } from './helpers'
 
 const field = (page: Page) => page.getByRole('combobox', { name: /Buscar/ })

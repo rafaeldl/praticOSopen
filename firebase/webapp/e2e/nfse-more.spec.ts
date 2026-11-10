@@ -4,7 +4,7 @@
 // Asaas is never called: /v1/app/nfse/* is answered here and the invoice
 // documents the server would write are written by the test.
 import { randomUUID } from 'node:crypto'
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeCustomer, makeOrder, writeDoc } from './data'
 import { expectNoAxeViolations, login, setTheme, type UserKey } from './helpers'
 

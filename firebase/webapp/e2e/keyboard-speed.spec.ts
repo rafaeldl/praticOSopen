@@ -3,7 +3,7 @@
 // first letter in "Qual a situação?", typed dates in Remarcar, the suggested
 // payment method, ⌘K actions before records and "Cadastrar cliente «…»", and the
 // next-maintenance question inside the order instead of over it. axe on each.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeDevice, makeOrder, readOrder } from './data'
 import { expectNoAxeViolations, login } from './helpers'
 

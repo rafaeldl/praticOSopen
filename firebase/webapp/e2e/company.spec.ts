@@ -1,7 +1,7 @@
 // Fatia 07, Sua empresa: data, logo, terms, segment and the switches of
 // company gamma (fixtures COMPANY_G), in order. Values and billing is switched
 // off and on here, so no other test reads money in this company.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_G } from './fixtures.mjs'
 import { login, newPersonPage } from './helpers'
 import { readPath, writePath } from './settings-data'
