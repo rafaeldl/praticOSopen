@@ -6,6 +6,7 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/theme/app_glass.dart';
 
 FormItemDefinition _item(
   String id,
@@ -113,9 +114,9 @@ void main() {
     expect(find.textContaining(' de '), findsNothing);
     expect(find.byKey(const ValueKey('question_progress')), findsOneWidget);
     expect(_label(tester), 'Pergunta 1');
-    expect(find.text('Pular por agora'), findsOneWidget);
+    expect(find.byKey(const ValueKey('question_skip')), findsOneWidget);
     // First question: nothing to go back to.
-    expect(find.text('Voltar à anterior'), findsNothing);
+    expect(find.byKey(const ValueKey('question_previous')), findsNothing);
   });
 
   testWidgets('yes/no: 64-high buttons, a tap saves and moves on', (
@@ -145,7 +146,7 @@ void main() {
     expect(answers, [('1', true)]);
     expect(_label(tester), 'Pergunta 2');
     expect(find.text('Falta 1'), findsOneWidget);
-    expect(find.text('Voltar à anterior'), findsOneWidget);
+    expect(find.byKey(const ValueKey('question_previous')), findsOneWidget);
 
     await tester.tap(find.text('Não'));
     await tester.pump();
@@ -218,7 +219,7 @@ void main() {
     expect(_label(tester), 'Pergunta 2');
 
     // Back: the saved option shows the ✓.
-    await tester.tap(find.text('Voltar à anterior'));
+    await tester.tap(find.byKey(const ValueKey('question_previous')));
     await tester.pump();
     expect(_label(tester), 'Pergunta 1');
     expect(find.byKey(const ValueKey('answer_check')), findsOneWidget);
@@ -352,7 +353,7 @@ void main() {
       find.byKey(const ValueKey('question_field')),
       '85000',
     );
-    await tester.tap(find.text('Voltar à anterior'));
+    await tester.tap(find.byKey(const ValueKey('question_previous')));
     await tester.pump();
     expect(answers, [('2', '85000')]);
     expect(_label(tester), 'Pergunta 1');
@@ -438,7 +439,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Pular por agora'));
+    await tester.tap(find.byKey(const ValueKey('question_skip')));
     await tester.pump();
     expect(answers, isEmpty);
     expect(_label(tester), 'Pergunta 2');
@@ -448,6 +449,124 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('question_close')));
     expect(closed, isTrue);
   });
+
+  testWidgets('bottom bar: glass "‹ Anterior", "Foto", "Pular ›" on one line', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          form: _form([
+            _item('1', FormItemType.boolean, allowPhotos: true),
+            _item('2', FormItemType.boolean, allowPhotos: true),
+          ]),
+          answers: [],
+          photos: [],
+          initialIndex: 1,
+        ),
+      ),
+    );
+
+    final previous = find.byKey(const ValueKey('question_previous'));
+    final photo = find.byKey(const ValueKey('question_photo'));
+    final skip = find.byKey(const ValueKey('question_skip'));
+    // Short labels; no underlined links left.
+    expect(find.text('Anterior'), findsOneWidget);
+    expect(find.text('Foto'), findsOneWidget);
+    expect(find.text('Pular'), findsOneWidget);
+    expect(find.text('Voltar à anterior'), findsNothing);
+    expect(find.text('Pular por agora'), findsNothing);
+    // Glass capsules at least 44 high, side by side on one line.
+    for (final button in [previous, photo, skip]) {
+      expect(
+        find.descendant(of: button, matching: find.byType(AppGlass)),
+        findsOneWidget,
+      );
+      expect(tester.getSize(button).height, greaterThanOrEqualTo(44));
+    }
+    expect(tester.getCenter(previous).dy, tester.getCenter(skip).dy);
+    expect(tester.getCenter(photo).dy, tester.getCenter(skip).dy);
+    expect(tester.getCenter(previous).dx, lessThan(tester.getCenter(photo).dx));
+    expect(tester.getCenter(photo).dx, lessThan(tester.getCenter(skip).dx));
+    // The screen reader hears the full name.
+    expect(find.bySemanticsLabel('Voltar à anterior'), findsOneWidget);
+    expect(find.bySemanticsLabel('Pular por agora'), findsOneWidget);
+    expect(find.bySemanticsLabel('Foto'), findsOneWidget);
+    handle.dispose();
+  });
+
+  // The test font draws every letter as wide as it is tall, so the widths
+  // that make each case are bigger than on an iPhone.
+  for (final (width, scale, labels) in [
+    (800.0, 1.0, ['Anterior', 'Foto', 'Pular']),
+    // Does not fit: "Foto" becomes just the camera first.
+    (500.0, 1.0, ['Anterior', 'Pular']),
+    // Biggest text: only icons, still one line.
+    (375.0, 3.0, <String>[]),
+  ]) {
+    testWidgets('bottom bar: one line at width $width, text size $scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width * 3, 812 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(scale)),
+              child: _Host(
+                form: _form([
+                  _item('1', FormItemType.boolean, allowPhotos: true),
+                  _item('2', FormItemType.boolean, allowPhotos: true),
+                ]),
+                answers: [],
+                photos: [],
+                initialIndex: 1,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      final keys = ['question_previous', 'question_photo', 'question_skip'];
+      final centers = [
+        for (final k in keys) tester.getCenter(find.byKey(ValueKey(k))),
+      ];
+      // One line, left to right, at least 44 high.
+      expect(centers.map((c) => c.dy).toSet(), hasLength(1));
+      expect(centers[0].dx, lessThan(centers[1].dx));
+      expect(centers[1].dx, lessThan(centers[2].dx));
+      for (final k in keys) {
+        final size = tester.getSize(find.byKey(ValueKey(k)));
+        expect(size.height, greaterThanOrEqualTo(44));
+        expect(size.width, greaterThanOrEqualTo(44));
+      }
+      // The labels that fit stay on one line (no word broken in two).
+      for (final label in ['Anterior', 'Foto', 'Pular']) {
+        expect(
+          find.text(label),
+          labels.contains(label) ? findsOneWidget : findsNothing,
+        );
+      }
+      final line = tester.getSize(find.text('Faltam 2')).height;
+      for (final label in labels) {
+        expect(
+          tester.getSize(find.text(label)).height,
+          lessThanOrEqualTo(line + 1),
+        );
+      }
+      // Icon or not, the screen reader hears the full name.
+      expect(find.bySemanticsLabel('Voltar à anterior'), findsOneWidget);
+      expect(find.bySemanticsLabel('Pular por agora'), findsOneWidget);
+      handle.dispose();
+    });
+  }
 
   test('counting helpers', () {
     final form = _form(
@@ -466,5 +585,145 @@ void main() {
     );
     expect(formItemsMissing(form), 2);
     expect(firstUnansweredIndex(form), 1);
+  });
+
+  group('note', () {
+    setUp(() {
+      final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.physicalSize = const Size(800, 2000);
+      view.devicePixelRatio = 1;
+    });
+    tearDown(() {
+      final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.resetPhysicalSize();
+      view.resetDevicePixelRatio();
+    });
+
+    OrderForm multiForm(Map<String, FormItemNote> notes) => OrderForm(
+      id: 'f1',
+      formDefinitionId: 'd1',
+      title: 'Entrada do veículo',
+      items: [
+        FormItemDefinition(
+          id: 'dano',
+          label: 'Onde tem dano?',
+          type: FormItemType.checklist,
+          options: ['Porta', 'Para-choque', 'Capô'],
+          optionsI18n: {
+            'en': ['Door', 'Bumper', 'Hood'],
+          },
+          allowPhotos: true,
+        ),
+      ],
+      responses: [
+        FormResponse(
+          itemId: 'dano',
+          value: ['Porta', 'Capô'],
+          photoUrls: ['https://x/1.jpg'],
+        ),
+      ],
+      notes: notes,
+    );
+
+    Widget sheet(OrderForm form, List<(String, FormItemNote)> saved) =>
+        _app(
+          FormQuestionSheet(
+            form: form,
+            localeCode: 'pt',
+            onAnswer: (_, _) {},
+            onEnd: () {},
+            onClose: () {},
+            onNote: (item, note) => saved.add((item.id, note)),
+          ),
+        );
+
+    testWidgets('"+ Observação" link when there is none', (tester) async {
+      await tester.pumpWidget(sheet(multiForm({}), []));
+      expect(find.text('+ Observação'), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('question_note_add'))).height,
+        greaterThanOrEqualTo(44),
+      );
+    });
+
+    testWidgets('without onNote the link is not there', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          FormQuestionSheet(
+            form: multiForm({}),
+            onAnswer: (_, _) {},
+            onEnd: () {},
+            onClose: () {},
+          ),
+        ),
+      );
+      expect(find.text('+ Observação'), findsNothing);
+    });
+
+    testWidgets(
+      'shows the question, marked option and photo notes; edited text loses ✦',
+      (tester) async {
+        final saved = <(String, FormItemNote)>[];
+        await tester.pumpWidget(
+          sheet(
+            multiForm({
+              'dano': FormItemNote(
+                text: 'Amassado na lateral',
+                ai: true,
+                options: [
+                  FormOptionNote(option: 'Porta', text: 'perto da maçaneta'),
+                  // Not marked: kept, not shown.
+                  FormOptionNote(option: 'Para-choque', text: 'risco'),
+                ],
+                photos: [
+                  FormPhotoNote(
+                    url: 'https://x/1.jpg',
+                    text: 'Risco no para-lama',
+                    ai: true,
+                  ),
+                ],
+              ),
+            }),
+            saved,
+          ),
+        );
+
+        expect(find.text('Observação'), findsOneWidget);
+        expect(find.text('Amassado na lateral'), findsOneWidget);
+        expect(find.text('Porta: perto da maçaneta'), findsOneWidget);
+        expect(find.text('Para-choque: risco'), findsNothing);
+        expect(find.text('Foto 1: Risco no para-lama'), findsOneWidget);
+        expect(find.text('+ Observação'), findsNothing);
+
+        await tester.tap(find.byKey(const ValueKey('question_note')));
+        await tester.pumpAndSettle();
+        // Question, the two marked options and the photo.
+        expect(find.byKey(const ValueKey('note_option_0')), findsOneWidget);
+        expect(find.byKey(const ValueKey('note_option_1')), findsOneWidget);
+        expect(find.byKey(const ValueKey('note_photo_0')), findsOneWidget);
+
+        await tester.enterText(
+          find.byKey(const ValueKey('note_text')),
+          'Amassado na porta traseira esquerda',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('note_option_1')),
+          'trinca',
+        );
+        await tester.tap(find.text('Pronto').last);
+        await tester.pumpAndSettle();
+
+        final (itemId, note) = saved.single;
+        expect(itemId, 'dano');
+        expect(note.text, 'Amassado na porta traseira esquerda');
+        expect(note.ai, isFalse);
+        // Option key = the saved value, not the translated text.
+        expect(note.optionText('Capô'), 'trinca');
+        expect(note.optionText('Porta'), 'perto da maçaneta');
+        expect(note.optionText('Para-choque'), 'risco');
+        // Untouched AI text keeps its mark.
+        expect(note.photos.single.ai, isTrue);
+      },
+    );
   });
 }

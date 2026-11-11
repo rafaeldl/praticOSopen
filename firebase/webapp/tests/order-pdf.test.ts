@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { normalizeOrder } from '@/lib/orders/model'
-import { normalizeOrderForm } from '@/lib/forms/model'
+import { normalizeOrderForm, noteLines } from '@/lib/forms/model'
 import { buildOrdersPdf, pdfFileName, pdfSafe, type PdfOrderPart, type PdfTexts } from '@/lib/pdf/order-pdf'
 import { pdfPageCount, pdfText } from './pdf-text'
 
@@ -174,6 +174,32 @@ describe('buildOrdersPdf', () => {
       expect(text).toContain(expected)
     }
     expect(pdfPageCount(bytes)).toBe(2)
+  })
+
+  it('a checklist note goes under the answer', async () => {
+    const form = normalizeOrderForm('f1', {
+      formDefinitionId: 't1',
+      title: 'Entrada',
+      status: 'completed',
+      items: [{ id: 'i1', label: 'Lataria', type: 'checklist', options: ['Porta', 'Capo'] }],
+      responses: [{ itemId: 'i1', value: ['Porta'], photoUrls: ['https://x/1.jpg'] }],
+      notes: {
+        i1: {
+          text: 'Amassado na porta traseira esquerda',
+          ai: true,
+          options: [{ option: 'Porta', text: 'perto da macaneta', ai: false }],
+          photos: [{ url: 'https://x/1.jpg', text: 'Risco no para-lama', ai: true }],
+        },
+      },
+    })
+    const withNotes: PdfTexts = {
+      ...texts,
+      noteLines: (f, item) => noteLines(f, item, 'pt', { line: (label, text) => `${label}: ${text}`, photo: (n) => `Foto ${n}` }),
+    }
+    const text = pdfText(await buildOrdersPdf([part(true, {}, { forms: [{ form, photos: {} }] })], company, withNotes, { showValues: true }))
+    for (const expected of ['Amassado na porta traseira esquerda', 'Porta: perto da macaneta', 'Foto 1: Risco no para-lama']) {
+      expect(text).toContain(expected)
+    }
   })
 
   it('a broken image is left out and the PDF still comes out', async () => {

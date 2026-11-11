@@ -2,6 +2,10 @@
 // app's and the web's answers together, and the editor's and plan's rules.
 import { describe, expect, test } from 'vitest'
 import {
+  normalizeNotes,
+  noteLines,
+  noteWithoutPhoto,
+  normalizeOrderForm as readOrderForm,
   activeCount,
   acceptsAnswer,
   activeLimit,
@@ -247,3 +251,56 @@ describe('listas e plano', () => {
     expect(formsAccess('admin', true, true, false)).toEqual({ manage: false, fill: false, reopen: false })
   })
 })
+
+describe('checklist notes (outside responses)', () => {
+  const raw = {
+    formDefinitionId: 't1',
+    title: 'Entrada',
+    status: 'in_progress',
+    items: [
+      { id: 'dano', label: 'Onde tem dano?', type: 'checklist', options: ['Porta', 'Capô'], optionsI18n: { en: ['Door', 'Hood'] } },
+      { id: 'km', label: 'Km', type: 'number' },
+    ],
+    responses: [
+      { itemId: 'dano', value: ['Porta'], photoUrls: ['https://x/1.jpg', 'https://x/2.jpg'] },
+      { itemId: 'km', value: 98000, photoUrls: [] },
+    ],
+    notes: {
+      dano: {
+        text: 'Amassado na lateral',
+        ai: true,
+        options: [
+          { option: 'Porta', text: 'perto da maçaneta', ai: false },
+          { option: 'Capô', text: 'não marcado', ai: false },
+        ],
+        photos: [{ url: 'https://x/2.jpg', text: 'Risco', ai: true }],
+      },
+      bad: 'not a note',
+    },
+    aiFilled: ['km'],
+  }
+  const words = { line: (label: string, text: string) => `${label}: ${text}`, photo: (n: number) => `Foto ${n}` }
+
+  test('reads notes and aiFilled; a bad entry is left out', () => {
+    const form = readOrderForm('f1', raw)
+    expect(Object.keys(form.notes ?? {})).toEqual(['dano'])
+    expect(form.notes?.dano?.ai).toBe(true)
+    expect(form.aiFilled).toEqual(['km'])
+    expect(readOrderForm('f1', { ...raw, notes: undefined, aiFilled: undefined }).notes).toEqual({})
+    expect(normalizeNotes([1, 2])).toEqual({})
+  })
+
+  test('lines: question, marked options in the person\'s language, photos by number', () => {
+    const form = readOrderForm('f1', raw)
+    expect(noteLines(form, form.items[0]!, 'en', words)).toEqual(['Amassado na lateral', 'Door: perto da maçaneta', 'Foto 2: Risco'])
+    expect(noteLines(form, form.items[1]!, 'pt', words)).toEqual([])
+  })
+
+  test('a removed photo takes its note; an empty note is deleted', () => {
+    const note = readOrderForm('f1', raw).notes?.dano
+    expect(noteWithoutPhoto(note, 'https://x/9.jpg')).toBeUndefined()
+    expect(noteWithoutPhoto(note, 'https://x/2.jpg')?.photos).toEqual([])
+    expect(noteWithoutPhoto({ text: null, ai: false, options: [], photos: [{ url: 'u', text: 'x', ai: false }] }, 'u')).toBeNull()
+  })
+})
+

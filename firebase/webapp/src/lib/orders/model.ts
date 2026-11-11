@@ -196,6 +196,17 @@ function statusOf(value: unknown): OrderStatus {
   return STATUSES.includes(value as OrderStatus) ? (value as OrderStatus) : 'quote'
 }
 
+/**
+ * What was paid. Legacy orders marked paid before `paidAmount` existed (old
+ * app, until 2026-01) have `payment: 'paid'` and no paidAmount: their total
+ * counts as paid (server effectivePaidAmount), so they never show a balance.
+ */
+export function paidAmountOf(raw: Raw): number {
+  const paid = num(raw.paidAmount)
+  if (paid !== undefined) return paid
+  return raw.payment === 'paid' ? (num(raw.total) ?? 0) : 0
+}
+
 /** A Firestore document or an API projection. `showsMoney` false drops every value. */
 export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order {
   const hold = raw.onHold as Order['onHold']
@@ -223,7 +234,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     showsMoney,
     total: showsMoney ? (num(raw.total) ?? 0) : undefined,
     discount: showsMoney ? (num(raw.discount) ?? 0) : undefined,
-    paidAmount: showsMoney ? (num(raw.paidAmount) ?? 0) : undefined,
+    paidAmount: showsMoney ? paidAmountOf(raw) : undefined,
     transactions: showsMoney && Array.isArray(raw.transactions) ? (raw.transactions as OrderTransaction[]) : [],
     documents: showsMoney && Array.isArray(raw.documents) ? (raw.documents as unknown[]) : undefined,
     attachments: attachmentsOf(raw.documents, showsMoney),

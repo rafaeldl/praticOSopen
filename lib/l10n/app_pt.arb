@@ -2609,6 +2609,8 @@
   "checklistQuestionDone": "Pronto",
   "checklistSkipForNow": "Pular por agora",
   "checklistPreviousQuestion": "Voltar à anterior",
+  "checklistPreviousShort": "Anterior",
+  "checklistSkipShort": "Pular",
   "checklistQuestionRequired": "Obrigatória",
   "checklistPickFromGallery": "Escolher da galeria",
   "checklistTextPlaceholder": "Escreva aqui",
@@ -3421,5 +3423,12 @@
   "filterLate": "Atrasadas",
   "filterUnpaid": "Sem receber",
   "noLateOrders": "Nada atrasado.",
-  "noUnpaidOrders": "Nada para receber."
+  "noUnpaidOrders": "Nada para receber.",
+  "checklistNoteAdd": "+ Observação",
+  "checklistNote": "Observação",
+  "checklistNotePlaceholder": "O que você viu e onde",
+  "checklistNotePhoto": "Foto {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

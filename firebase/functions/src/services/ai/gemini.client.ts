@@ -7,6 +7,9 @@
  * Model and region come from environment variables:
  * - AI_GEMINI_MODEL    (default gemini-2.5-flash)
  * - AI_VERTEX_LOCATION (default southamerica-east1, São Paulo — dados ficam no Brasil)
+ *
+ * `thinkingLevel` is only sent when given: Gemini 3 models think a lot by
+ * default (slow), Gemini 2.5 rejects the field.
  */
 
 import * as admin from 'firebase-admin';
@@ -16,6 +19,8 @@ import { LlmUnavailableError } from './llm.client';
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DEFAULT_LOCATION = 'southamerica-east1';
 const TIMEOUT_MS = 45_000;
+
+export type GeminiThinkingLevel = 'minimal' | 'low' | 'medium' | 'high';
 
 function projectId(): string | undefined {
   return process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || admin.app().options.projectId;
@@ -48,6 +53,7 @@ export class VertexGeminiClient implements LlmProviderClient {
   constructor(
     private readonly model = process.env.AI_GEMINI_MODEL || DEFAULT_MODEL,
     private readonly location = process.env.AI_VERTEX_LOCATION || DEFAULT_LOCATION,
+    private readonly thinkingLevel?: GeminiThinkingLevel,
   ) {}
 
   supportsMedia(mimeType: string): boolean {
@@ -85,6 +91,7 @@ export class VertexGeminiClient implements LlmProviderClient {
         temperature: 0.1,
         responseMimeType: 'application/json',
         responseSchema: toGeminiSchema(request.responseSchema),
+        ...(this.thinkingLevel ? { thinkingConfig: { thinkingLevel: this.thinkingLevel } } : {}),
       },
     };
 

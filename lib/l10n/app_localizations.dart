@@ -8678,6 +8678,18 @@ abstract class AppLocalizations {
   /// **'Voltar à anterior'**
   String get checklistPreviousQuestion;
 
+  /// No description provided for @checklistPreviousShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anterior'**
+  String get checklistPreviousShort;
+
+  /// No description provided for @checklistSkipShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pular'**
+  String get checklistSkipShort;
+
   /// No description provided for @checklistQuestionRequired.
   ///
   /// In pt, this message translates to:
@@ -12550,6 +12562,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nada para receber.'**
   String get noUnpaidOrders;
+
+  /// No description provided for @checklistNoteAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Observação'**
+  String get checklistNoteAdd;
+
+  /// No description provided for @checklistNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Observação'**
+  String get checklistNote;
+
+  /// No description provided for @checklistNotePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você viu e onde'**
+  String get checklistNotePlaceholder;
+
+  /// No description provided for @checklistNotePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto {number}'**
+  String checklistNotePhoto(int number);
+
+  /// No description provided for @checklistNoteLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {text}'**
+  String checklistNoteLine(String label, String text);
 }
 
 class _AppLocalizationsDelegate

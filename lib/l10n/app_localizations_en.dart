@@ -5316,6 +5316,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistPreviousQuestion => 'Back to the previous one';
 
   @override
+  String get checklistPreviousShort => 'Previous';
+
+  @override
+  String get checklistSkipShort => 'Skip';
+
+  @override
   String get checklistQuestionRequired => 'Required';
 
   @override
@@ -7760,4 +7766,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noUnpaidOrders => 'Nothing to receive.';
+
+  @override
+  String get checklistNoteAdd => '+ Note';
+
+  @override
+  String get checklistNote => 'Note';
+
+  @override
+  String get checklistNotePlaceholder => 'What you saw and where';
+
+  @override
+  String checklistNotePhoto(int number) {
+    return 'Photo $number';
+  }
+
+  @override
+  String checklistNoteLine(String label, String text) {
+    return '$label: $text';
+  }
 }

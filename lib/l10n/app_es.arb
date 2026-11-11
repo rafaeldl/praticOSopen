@@ -2248,6 +2248,8 @@
   "checklistQuestionDone": "Listo",
   "checklistSkipForNow": "Omitir por ahora",
   "checklistPreviousQuestion": "Volver a la anterior",
+  "checklistPreviousShort": "Anterior",
+  "checklistSkipShort": "Omitir",
   "checklistQuestionRequired": "Obligatoria",
   "checklistPickFromGallery": "Elegir de la galería",
   "checklistTextPlaceholder": "Escribe aquí",
@@ -2987,5 +2989,12 @@
   "filterLate": "Atrasadas",
   "filterUnpaid": "Por cobrar",
   "noLateOrders": "Nada atrasado.",
-  "noUnpaidOrders": "Nada por cobrar."
+  "noUnpaidOrders": "Nada por cobrar.",
+  "checklistNoteAdd": "+ Observación",
+  "checklistNote": "Observación",
+  "checklistNotePlaceholder": "Lo que viste y dónde",
+  "checklistNotePhoto": "Foto {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

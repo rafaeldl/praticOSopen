@@ -12326,3 +12326,21 @@ rows:
   web_exception: null
   permission: null
   note: "Tela de escolher com as OS do cliente da nota primeiro. Desligar só em nota feita fora do PraticOS. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: checklist.question.note
+  screen: lib/screens/forms/form_note_sheet.dart
+  route: null
+  action: "Escrever a observação da pergunta, das opções marcadas e das fotos"
+  kind: sheet
+  roles: [owner, admin, supervisor, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders/{id}/forms"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: fillForms
+  note: "Grava só notes.{itemId}, fora de responses (issue #685). O web só mostra nesta etapa; edição na etapa 5 da spec 2026-11-10-checklist-ia-foto-design."

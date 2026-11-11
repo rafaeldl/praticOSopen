@@ -56,6 +56,13 @@ describe('customer-receipt.service', () => {
     expect(Object.keys(list[1]).sort()).toEqual(['createdAt', 'id', 'number', 'open', 'own']);
   });
 
+  it('não lista OS antiga marcada paga sem paidAmount (app antigo)', async () => {
+    seedOrder('o7', { paidAmount: undefined, payment: 'paid', paid: true, createdAt: '2022-07-07T10:00:00.000Z' });
+    seedOrder('o8', { paidAmount: undefined, payment: 'unpaid', createdAt: '2022-07-08T10:00:00.000Z' });
+    const list = await listCustomerOpenOrders('c1', 'cust1', 'cons1');
+    expect(list.map((o) => o.id)).toEqual(['o8', 'o1', 'o2']);
+  });
+
   it('registra o recebimento em OS de outra pessoa: só campos de pagamento + recebimento', async () => {
     const result = await registerCustomerReceipt(
       'c1',

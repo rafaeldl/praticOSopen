@@ -48,6 +48,19 @@ describe('calculateRemainingBalance', () => {
   it('trata valores ausentes como zero', () => {
     expect(calculateRemainingBalance({} as Order)).toBe(0);
   });
+
+  it('OS antiga marcada paga sem paidAmount não tem saldo', () => {
+    expect(calculateRemainingBalance({ total: 650, payment: 'paid' } as Order)).toBe(0);
+    expect(calculateRemainingBalance({ total: 650, paidAmount: null, payment: 'paid' } as unknown as Order)).toBe(0);
+  });
+
+  it('com paidAmount gravado, vale o paidAmount mesmo marcada paga', () => {
+    expect(calculateRemainingBalance({ total: 650, paidAmount: 0, payment: 'paid' } as Order)).toBe(650);
+  });
+
+  it('OS sem paidAmount e não paga deve o total', () => {
+    expect(calculateRemainingBalance({ total: 650, payment: 'unpaid' } as Order)).toBe(650);
+  });
 });
 
 describe('applyPaymentTransaction', () => {

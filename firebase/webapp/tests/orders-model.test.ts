@@ -53,6 +53,15 @@ describe('normalizeOrder', () => {
     expect(remainingOnRow(hidden)).toBeNull()
   })
 
+  test('a legacy order marked paid without paidAmount counts its total as paid', () => {
+    const legacy = normalizeOrder('o1', { status: 'done', total: 650, payment: 'paid' }, true)
+    expect(legacy.paidAmount).toBe(650)
+    expect(totals(legacy).remaining).toBe(0)
+    expect(remainingOnRow(legacy)).toBeNull()
+    expect(normalizeOrder('o2', { status: 'done', total: 650, paidAmount: 0, payment: 'paid' }, true).paidAmount).toBe(0)
+    expect(normalizeOrder('o3', { status: 'done', total: 650 }, true).paidAmount).toBe(0)
+  })
+
   test('a hold mark outside approved and progress is ignored', () => {
     expect(order('o', { status: 'done', onHold: { reason: 'part', since: day(-2) } }).onHold).toBeNull()
     expect(order('o', { status: 'progress', onHold: { reason: 'part', since: day(-2) } }).onHold?.reason).toBe('part')

@@ -2248,6 +2248,8 @@
   "checklistQuestionDone": "Done",
   "checklistSkipForNow": "Skip for now",
   "checklistPreviousQuestion": "Back to the previous one",
+  "checklistPreviousShort": "Previous",
+  "checklistSkipShort": "Skip",
   "checklistQuestionRequired": "Required",
   "checklistPickFromGallery": "Choose from library",
   "checklistTextPlaceholder": "Type here",
@@ -2999,5 +3001,12 @@
   "filterLate": "Late",
   "filterUnpaid": "To receive",
   "noLateOrders": "Nothing late.",
-  "noUnpaidOrders": "Nothing to receive."
+  "noUnpaidOrders": "Nothing to receive.",
+  "checklistNoteAdd": "+ Note",
+  "checklistNote": "Note",
+  "checklistNotePlaceholder": "What you saw and where",
+  "checklistNotePhoto": "Photo {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

@@ -12,6 +12,7 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/theme/app_colors.dart';
 
 class _FakeForms implements FormsService {
   _FakeForms({this.fail = false, List<FormResponse>? server})
@@ -24,6 +25,20 @@ class _FakeForms implements FormsService {
   final changes = <FormAnswerChange>[];
   final known = <List<FormResponse>>[];
   final statuses = <FormStatus>[];
+  final localNotes = <FormItemNote?>[];
+  final notes = <(String, FormItemNote?)>[];
+
+  @override
+  Future<void> saveNote(
+    String companyId,
+    String orderId,
+    String formId,
+    String itemId,
+    FormItemNote? note,
+  ) async {
+    if (fail) throw StateError('permission-denied');
+    notes.add((itemId, note));
+  }
 
   /// The response of the question changed, as the screen will show it.
   List<FormResponse> get saved => [
@@ -37,9 +52,11 @@ class _FakeForms implements FormsService {
     String formId,
     FormAnswerChange change, {
     List<FormResponse> localKnown = const [],
+    FormItemNote? localNote,
   }) async {
     if (fail) throw StateError('permission-denied');
     changes.add(change);
+    localNotes.add(localNote);
     known.add(localKnown);
     server = applyAnswerChange(server, change);
     return server;
@@ -82,12 +99,14 @@ OrderForm _form({
   String title = 'Entrada do veículo',
   FormStatus status = FormStatus.pending,
   List<FormResponse> responses = const [],
+  Map<String, FormItemNote>? notes,
 }) => OrderForm(
   id: 'f1',
   formDefinitionId: 'd1',
   title: title,
   status: status,
   responses: responses,
+  notes: notes,
   items: [
     FormItemDefinition(
       id: 'a',
@@ -479,5 +498,109 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(forms.statuses, isEmpty);
+  });
+
+  testWidgets('the note shows under the answer, in tertiary text', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          responses: [
+            FormResponse(itemId: 'a', value: true),
+            FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg']),
+          ],
+          notes: {
+            'a': FormItemNote(text: 'Estepe careca'),
+            'c': FormItemNote(
+              photos: [FormPhotoNote(url: 'https://x/1.jpg', text: 'Risco')],
+            ),
+          },
+        ),
+        formsService: _FakeForms(),
+        photoService: _FakePhotos(),
+      ),
+    );
+
+    final note = tester.widget<Text>(find.text('Estepe careca'));
+    expect(
+      note.style?.color?.toARGB32(),
+      AppColors.textTertiary.color.toARGB32(),
+    );
+    expect(find.text('Foto 1: Risco'), findsOneWidget);
+  });
+
+  testWidgets('"+ Observação" saves only the note, never the answers', (
+    tester,
+  ) async {
+    final forms = _FakeForms();
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(responses: [FormResponse(itemId: 'a', value: true)]),
+        formsService: forms,
+        photoService: _FakePhotos(),
+      ),
+    );
+    await tester.tap(find.text('Continuar'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('question_note_add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('note_text')),
+      'Tanque com cheiro de gasolina',
+    );
+    await tester.tap(find.text('Pronto'));
+    await tester.pumpAndSettle();
+
+    expect(forms.changes, isEmpty);
+    expect(forms.notes.single.$1, 'b');
+    expect(forms.notes.single.$2?.text, 'Tanque com cheiro de gasolina');
+    expect(forms.notes.single.$2?.ai, isFalse);
+    expect(find.text('Tanque com cheiro de gasolina'), findsWidgets);
+  });
+
+  testWidgets('removing a photo takes its note along', (tester) async {
+    final forms = _FakeForms(
+      server: [FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg'])],
+    );
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          responses: [FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg'])],
+          notes: {
+            'c': FormItemNote(
+              photos: [FormPhotoNote(url: 'https://x/1.jpg', text: 'Risco')],
+            ),
+          },
+        ),
+        formsService: forms,
+        photoService: _FakePhotos(),
+      ),
+    );
+    expect(find.text('Foto 1: Risco'), findsOneWidget);
+
+    await tester.tap(find.byType(FormPhotoThumb));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(CupertinoIcons.trash));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Excluir'));
+    await tester.pumpAndSettle();
+
+    expect(forms.changes.single, isA<FormPhotoRemoved>());
+    expect(forms.localNotes.single?.photos.single.text, 'Risco');
+    expect(
+      find.text('Foto 1: Risco', skipOffstage: false),
+      findsNothing,
+    );
   });
 }

@@ -15,6 +15,35 @@ Hoje o app usa `FormDefinition` como template e `OrderForm` como instância vinc
 - Itens do template: `FormItemDefinition` (`id`, `label`, `type`, `options?`, `required`, `allowPhotos`).
 - Instâncias (snapshot do template na OS): `OrderForm` (`formDefinitionId`, `title`, `items`, `status`, `responses`).
 - Respostas: `FormResponse` (`itemId`, `value`, `photoUrls[]`).
+- Observações: `OrderForm.notes` (`Map<String, FormItemNote>`, por `itemId`) e `OrderForm.aiFilled` (perguntas cuja resposta veio da IA e não foi mexida). Ver "Observação" abaixo.
+
+### Observação (#685)
+Campo novo do checklist da OS, **fora de `responses`**:
+
+```json
+// companies/{companyId}/orders/{orderId}/forms/{instanceId}
+{
+  "responses": [{ "itemId": "body", "value": ["Porta"], "photoUrls": ["https://…/1.jpg"] }],
+  "notes": {
+    "body": {
+      "text": "Amassado na porta traseira esquerda",
+      "ai": false,
+      "options": [{ "option": "Porta", "text": "perto da maçaneta", "ai": false }],
+      "photos": [{ "url": "https://…/1.jpg", "text": "Risco no para-lama", "ai": false }]
+    }
+  },
+  "aiFilled": []
+}
+```
+
+- **Por que fora de `responses`:** o app 1.56, o app web (`firebase/webapp/src/lib/forms/data.ts`) e o app atual regravam cada resposta só com `itemId`, `value` e `photoUrls`, e a gravação sem internet do app atual tira a resposta com `arrayRemove` do objeto exato. Um campo a mais na resposta seria apagado ou duplicaria a resposta. Campo novo no documento passa intacto por todos, que gravam com `update` de campos fixos.
+- **Três níveis, todos opcionais:** da pergunta (toda pergunta), da opção marcada (só em várias escolhas, `checklist`; chave = valor gravado da opção, o texto original do modelo, o mesmo de `value`) e da foto (chave = URL, a mesma de `photoUrls`). Na pergunta Sim/Não e na de uma opção, a observação da pergunta basta.
+- **Gravação:** `FormsService.saveNote` grava só `notes.{itemId}` (e `updatedAt`), com `FieldPath`; sem internet a escrita fica na fila. Salvar uma resposta (`FormsService.answerWrite`) nunca escreve `notes`.
+- **Foto apagada leva a observação junto**, na mesma escrita da resposta (`notes.{itemId}` sem aquela foto; se não sobrar texto, o campo é apagado). Vale no app (online e na fila) e no web.
+- **Opção desmarcada:** a observação fica guardada e só aparece de novo se a opção voltar a ser marcada. PDF, web e link do cliente mostram só as das opções marcadas e das fotos que ainda existem.
+- **`ai`:** `true` enquanto o texto é o da IA; a primeira edição da pessoa grava `false`. `aiFilled` lista as perguntas cuja resposta veio da IA. Os dois já existem no modelo, mas nesta etapa nada grava `true` (a IA entra nas etapas 3 e 4 da spec `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`).
+- **Onde aparece:** sheet da pergunta (“+ Observação” como link embaixo da resposta; com texto, a linha “Observação” e o texto, tocar edita), resumo do checklist (embaixo da resposta, em `textTertiary`), PDF do app e do web (embaixo da resposta: o texto, “Porta: …” e “Foto 2: …”), link do cliente (`note`, `optionNotes` e `photoNotes` em cada item de `forms`, sem a marca `ai`) e app web (só leitura nesta etapa; edição na etapa 5).
+- Tipos: Dart (`FormItemNote`, `FormOptionNote`, `FormPhotoNote` em `lib/models/order_form.dart`), Functions (`firebase/functions/src/models/types.ts`) e web (`firebase/webapp/src/lib/forms/model.ts`).
 
 ### Tipos suportados (atual)
 `text`, `number`, `select`, `checklist`, `boolean`, `photo_only`.
@@ -64,6 +93,7 @@ O core atual cobre a criação e preenchimento de formulários na OS. As regras 
   - `text`/`number`: campo grande com teclado aberto (numérico para `number`); “Próxima” (botão ou teclado) salva e passa. Voltar ou fechar mantém o que foi digitado.
   - `photo_only`: “Tirar foto” abre a câmera; “Escolher da galeria” é link. Com foto, o botão vira “Próxima” e aparece “Tirar outra foto”.
   - Qualquer item com `allowPhotos`: botão “Foto” em vidro embaixo, sempre no mesmo lugar (Câmera/Galeria).
+  - Embaixo da resposta (e das fotos): “+ Observação” como link. Abre a sheet pequena “Observação” (`lib/screens/forms/form_note_sheet.dart`) com um campo para a pergunta, um por opção marcada (várias escolhas) e um por foto; “Pronto” grava. Com texto, a linha mostra “Observação” e o texto; tocar edita.
   - Embaixo: “Voltar à anterior” (a partir da 2ª) e “Pular por agora” em toda pergunta. Obrigatória não trava: a pulada continua em “Faltam N”.
   - Depois da última pergunta a sheet fecha; se não faltar nada, o checklist é concluído (`status=completed`) e volta para a OS. Faltando algo, volta ao resumo.
   - Upload e caminhos de Storage não mudaram (`tenants/{companyId}/orders/{orderId}/forms/{formId}/{itemId}_{timestamp}.jpg`).

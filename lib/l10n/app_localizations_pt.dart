@@ -5315,6 +5315,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get checklistPreviousQuestion => 'Voltar à anterior';
 
   @override
+  String get checklistPreviousShort => 'Anterior';
+
+  @override
+  String get checklistSkipShort => 'Pular';
+
+  @override
   String get checklistQuestionRequired => 'Obrigatória';
 
   @override
@@ -7766,4 +7772,23 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noUnpaidOrders => 'Nada para receber.';
+
+  @override
+  String get checklistNoteAdd => '+ Observação';
+
+  @override
+  String get checklistNote => 'Observação';
+
+  @override
+  String get checklistNotePlaceholder => 'O que você viu e onde';
+
+  @override
+  String checklistNotePhoto(int number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String checklistNoteLine(String label, String text) {
+    return '$label: $text';
+  }
 }
