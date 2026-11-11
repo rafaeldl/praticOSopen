@@ -153,6 +153,40 @@ void main() {
     expect(pressed, 1);
   });
 
+  testWidgets('"+" is yellow when primary and navy otherwise', (tester) async {
+    Color fill() {
+      final box = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(NewOrderTabButton),
+          matching: find.byType(Container),
+        ),
+      );
+      return Color((box.decoration! as BoxDecoration).color!.toARGB32());
+    }
+
+    Color icon() => Color(
+      tester.widget<Icon>(find.byIcon(CupertinoIcons.add)).color!.toARGB32(),
+    );
+
+    await _pump(
+      tester,
+      action: NewOrderTabButton(
+        label: 'Nova OS',
+        onPressed: () {},
+        primary: true,
+      ),
+    );
+    expect(fill(), Color(AppColors.action.color.toARGB32()));
+    expect(icon(), Color(AppColors.onAction.color.toARGB32()));
+
+    await _pump(
+      tester,
+      action: NewOrderTabButton(label: 'Nova OS', onPressed: () {}),
+    );
+    expect(fill(), Color(AppColors.navyFill.color.toARGB32()));
+    expect(icon(), Color(AppColors.onNavyFill.color.toARGB32()));
+  });
+
   testWidgets('two tabs and no "+" (technician): centered capsule', (
     tester,
   ) async {

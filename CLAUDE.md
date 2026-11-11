@@ -232,7 +232,7 @@ O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou red
 - IA (barra de vidro Foto/Falar embaixo) aplica na hora, marca com ✦ azul o que preencheu e mostra aviso opaco com "Desfazer"; nunca recebe, cancela ou apaga sozinha; erro no aviso, nunca em alerta
 - Tela de um registro (OS): título pequeno no topo, cabeçalho com quem identifica (cliente), situação e uma frase, e o botão azul do próximo passo logo abaixo
 - Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44
-- Abas sempre na ordem Início, Clientes, Agenda, Financeiro (`visibleAppTabs()`), com o "+" marinho (Nova OS, `navyFill`) ao lado. Clientes aparece para todos; Agenda só com agendamento ligado e Financeiro só com permissão. O que era "Mais" (catálogo, equipe, ajustes) abre pelo botão do perfil, no topo da Início
+- Abas sempre na ordem Início, Clientes, Agenda, Financeiro (`visibleAppTabs()`), com o "+" (Nova OS) ao lado: amarelo na primeira tela da aba, marinho com outra tela aberta por cima. Tocar numa aba sempre volta à primeira tela dela. Clientes aparece para todos; Agenda só com agendamento ligado e Financeiro só com permissão. O que era "Mais" (catálogo, equipe, ajustes) abre pelo botão do perfil, no topo da Início
 
 **Widgets:**
 - `CupertinoPageScaffold` + `CupertinoSliverNavigationBar` (título grande)

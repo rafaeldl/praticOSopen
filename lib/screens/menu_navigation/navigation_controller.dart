@@ -3,7 +3,7 @@ import 'package:praticos/screens/order/order_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:mobx/mobx.dart'; // Import for reaction
+import 'package:mobx/mobx.dart' show ReactionDisposer, reaction;
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
@@ -22,6 +22,7 @@ import 'package:praticos/services/tracking_transparency_service.dart';
 import 'home.dart';
 import 'home_customer_list.dart';
 import 'app_tabs.dart';
+import 'tab_stack.dart';
 import 'tab_routes.dart';
 import 'widgets/glass_tab_bar.dart';
 
@@ -40,6 +41,32 @@ class _NavigationControllerState extends State<NavigationController>
 
   /// Tabs currently shown, in the fixed [AppTab] order.
   List<AppTab> _tabs = AppTab.values;
+
+  /// Navigator of each visible tab (same order as [_tabs]). Rebuilt with the
+  /// tab set, like the tab views.
+  List<TabStack> _stacks = [for (final _ in AppTab.values) TabStack()];
+
+  /// Repaints the "+" when the tab or the screens open on it change.
+  late Listenable _plusChanges = _plusListenable();
+
+  Listenable _plusListenable() => Listenable.merge([
+    _tabController,
+    for (final stack in _stacks) stack.changes,
+  ]);
+
+  /// The "+" is the screen's yellow action only on a tab's first screen, as
+  /// the web's "Nova OS" is only while no order is open: any screen opened on
+  /// top may bring its own yellow button, so the "+" turns navy there.
+  bool get _plusIsPrimary {
+    final index = _tabController.index;
+    return index < _stacks.length && _stacks[index].atRoot;
+  }
+
+  /// Tapping a tab always shows its first screen (the order list, the
+  /// customer list, the week, the month), closing what was open on it.
+  void _onTabTap(int index) {
+    if (index < _stacks.length) _stacks[index].popToRoot();
+  }
 
   Widget _buildPage(AppTab tab) {
     return switch (tab) {
@@ -64,10 +91,16 @@ class _NavigationControllerState extends State<NavigationController>
     _tabs = tabs;
 
     final oldController = _tabController;
+    final oldStacks = _stacks;
     _tabController = CupertinoTabController(initialIndex: newIndex)
       ..addListener(_onTabChanged);
+    _stacks = [for (final _ in tabs) TabStack()];
+    _plusChanges = _plusListenable();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       oldController.dispose();
+      for (final stack in oldStacks) {
+        stack.dispose();
+      }
       if (!mounted) return;
       Provider.of<BottomNavigationBarStore>(
         context,
@@ -154,6 +187,9 @@ class _NavigationControllerState extends State<NavigationController>
     WidgetsBinding.instance.removeObserver(this);
     _disposer?.call();
     _tabController.dispose();
+    for (final stack in _stacks) {
+      stack.dispose();
+    }
     super.dispose();
   }
 
@@ -191,18 +227,26 @@ class _NavigationControllerState extends State<NavigationController>
           tabBar: GlassTabBar(
             // currentIndex is handled by the controller
             onTap: (index) {
+              _onTabTap(index);
               navigationStore.setCurrentIndex(index);
             },
             items: [for (final tab in tabs) buildAppTabItem(context, tab)],
             action: _canCreateOrder
-                ? NewOrderTabButton(
-                    label: context.l10n.newOrderButton,
-                    onPressed: _newOrder,
+                ? ListenableBuilder(
+                    listenable: _plusChanges,
+                    builder: (context, _) => NewOrderTabButton(
+                      label: context.l10n.newOrderButton,
+                      onPressed: _newOrder,
+                      primary: _plusIsPrimary,
+                    ),
                   )
                 : null,
           ),
           tabBuilder: (BuildContext context, int index) {
+            final stack = _stacks[index];
             return CupertinoTabView(
+              navigatorKey: stack.key,
+              navigatorObservers: [stack.observer],
               // Back buttons one level down read the tab name ("Início").
               defaultTitle: buildAppTabItem(context, tabs[index]).label,
               routes: appRoutes,

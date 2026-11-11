@@ -169,19 +169,27 @@ class GlassTabBar extends CupertinoTabBar {
   }
 }
 
-/// The navy "+" beside the tab capsule: starts a new order from any tab.
-/// Solid [AppColors.navyFill] with no glass, so it never reads as one more
-/// tab (the round glass slot next to the tabs is iOS's search tab).
+/// The "+" beside the tab capsule: starts a new order from any tab.
+///
+/// Solid, with no glass, so it never reads as one more tab (the round glass
+/// slot next to the tabs is iOS's search tab). On a tab's first screen it is
+/// the screen's yellow action ([primary]); with another screen open on the
+/// tab, which may have its own yellow button, it is navy
+/// ([AppColors.navyFill]), as the web's "Nova OS" while an order is open.
 class NewOrderTabButton extends StatelessWidget {
   const NewOrderTabButton({
     super.key,
     required this.label,
     required this.onPressed,
+    this.primary = false,
   });
 
   /// Spoken name ("Nova OS").
   final String label;
   final VoidCallback onPressed;
+
+  /// Yellow ([AppColors.action]) when true, navy otherwise.
+  final bool primary;
 
   @override
   Widget build(BuildContext context) {
@@ -197,13 +205,20 @@ class NewOrderTabButton extends StatelessWidget {
           width: GlassTabBar.capsuleHeight,
           height: GlassTabBar.capsuleHeight,
           decoration: BoxDecoration(
-            color: AppColors.navyFill.resolveFrom(context),
+            color: (primary ? AppColors.action : AppColors.navyFill)
+                .resolveFrom(context),
             shape: BoxShape.circle,
+            border: primary
+                ? Border.all(
+                    color: AppColors.actionBorder.resolveFrom(context),
+                  )
+                : null,
           ),
           child: Icon(
             CupertinoIcons.add,
             size: 30,
-            color: AppColors.onNavyFill.resolveFrom(context),
+            color: (primary ? AppColors.onAction : AppColors.onNavyFill)
+                .resolveFrom(context),
           ),
         ),
       ),
