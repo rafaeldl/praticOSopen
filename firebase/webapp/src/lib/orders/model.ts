@@ -336,6 +336,21 @@ export function totals(order: Order) {
   return { total, paid, discount, subtotal, unpricedCount, remaining: remainingBalance(total, paid) }
 }
 
+/**
+ * Payment under the total on every row that charges something (not quotes or
+ * canceled): "Pago" when all came in, "falta R$ X" when part did, nothing when
+ * nothing did (the total is what is left). Same rule as the app's list.
+ */
+export function paymentOnRow(order: Order): { paid: true } | { left: number } | null {
+  if (!order.showsMoney || order.status === 'quote' || order.status === 'canceled') return null
+  const total = order.total ?? 0
+  if (total <= 0) return null
+  const paid = order.paidAmount ?? 0
+  const left = total - paid
+  if (left <= 0.009) return { paid: true }
+  return paid > 0.009 ? { left: roundMoney(left) } : null
+}
+
 /** "falta receber R$ X" on a done row (home.row.remaining): total > 0 and balance above 0,009. */
 export function remainingOnRow(order: Order): number | null {
   if (!order.showsMoney || order.status !== 'done') return null

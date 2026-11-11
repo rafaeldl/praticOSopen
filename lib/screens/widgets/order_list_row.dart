@@ -2,25 +2,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/theme/status_style.dart';
 
 /// Row of an order in a list, in the style of Mail: customer and value on
 /// the first line, what is being done ("Fiat Uno · troca de embreagem") on
-/// the second, the status in grey on the third. Color is spent only on what
-/// needs attention: an overdue order gets a red dot on the left (where Mail
-/// puts "unread") and its status in danger, bold. A stopped order gets an
-/// orange dot there and one more line with the reason and the days. No photo,
-/// no status dot on the other rows.
+/// the second, the status on the third: "● Pintura · Pago", the dot in the
+/// status color and the text in grey (docs/DESIGN_TOKENS.md, "Situação da
+/// OS"). A problem (overdue, stopped) goes on the right of that line, bold,
+/// in its own color: "Atrasada 2 dias", "Parada há 3 dias".
 class OrderListRow extends StatelessWidget {
   const OrderListRow({
     super.key,
     required this.customerName,
     required this.statusText,
+    this.statusColor,
     this.valueText,
     this.detailText,
     this.statusExtra,
-    this.overdue = false,
-    this.holdText,
+    this.statusExtraColor,
+    this.problemText,
+    this.problemColor,
     this.onTap,
   });
 
@@ -31,32 +31,75 @@ class OrderListRow extends StatelessWidget {
 
   /// Second line: device and services.
   final String? detailText;
+
+  /// Status or stage ("Pintura", "Pronto para retirada"), in grey.
   final String statusText;
 
-  /// Bold piece after the status ("falta receber R$ 180").
+  /// Dot before the status; none when null.
+  final Color? statusColor;
+
+  /// Bold piece after the status: the payment ("Pago", "falta R$ 180").
   final String? statusExtra;
 
-  /// Overdue: red dot on the left, status in danger and bold.
-  final bool overdue;
+  /// Color of [statusExtra]; the text color when null.
+  final Color? statusExtraColor;
 
-  /// Stopped: "Parada há 3 dias · Esperando peça", under the status.
-  final String? holdText;
+  /// Problem on the right of the status line ("Atrasada 2 dias").
+  final String? problemText;
+
+  /// Color of [problemText] (danger for overdue, warning for stopped).
+  final Color? problemColor;
   final VoidCallback? onTap;
 
-  /// Room on the left for the overdue dot; dividers start here too.
-  static const double leadingInset = 36;
+  /// Left margin of the row; dividers start here too.
+  static const double leadingInset = AppSpacing.pageMargin;
 
   @override
   Widget build(BuildContext context) {
     final text = AppColors.text.resolveFrom(context);
     final secondary = AppColors.textSecondary.resolveFrom(context);
-    final danger = AppColors.danger.resolveFrom(context);
-    final statusStyle = overdue
-        ? AppTypography.callout.copyWith(
-            fontWeight: FontWeight.w700,
-            color: danger,
-          )
-        : AppTypography.callout.copyWith(color: secondary);
+    final statusStyle = AppTypography.callout.copyWith(
+      color: secondary,
+      fontFeatures: AppTypography.tabular,
+    );
+
+    final status = Text.rich(
+      TextSpan(
+        children: [
+          if (statusColor != null)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Container(
+                  key: const Key('order_row_status_dot'),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          TextSpan(text: statusText),
+          if (statusExtra != null)
+            TextSpan(
+              text: ' · ',
+              children: [
+                TextSpan(
+                  text: statusExtra,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: statusExtraColor ?? text,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+      style: statusStyle,
+    );
 
     final row = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
@@ -67,106 +110,72 @@ class OrderListRow extends StatelessWidget {
           AppSpacing.pageMargin,
           AppSpacing.md,
         ),
-        child: Stack(
-          clipBehavior: Clip.none,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (overdue || holdText != null)
-              Positioned(
-                left: -23,
-                top: 9,
-                child: Container(
-                  key: Key(
-                    overdue ? 'order_row_overdue_dot' : 'order_row_hold_dot',
-                  ),
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: overdue
-                        ? danger
-                        : OrderHoldStyle.color.resolveFrom(context),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        customerName,
-                        style: AppTypography.bodyStrong.copyWith(color: text),
-                      ),
-                    ),
-                    if (valueText != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        valueText!,
-                        style: AppTypography.callout.copyWith(
-                          color: secondary,
-                          fontFeatures: AppTypography.tabular,
-                        ),
-                      ),
-                    ],
-                    if (onTap != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      Icon(
-                        CupertinoIcons.chevron_forward,
-                        size: 14,
-                        color: AppColors.separator.resolveFrom(context),
-                      ),
-                    ],
-                  ],
-                ),
-                if (detailText != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    detailText!,
-                    style: AppTypography.callout.copyWith(color: text),
-                  ),
-                ],
-                const SizedBox(height: 2),
-                Text.rich(
-                  TextSpan(
-                    text: statusText,
-                    children: [
-                      if (statusExtra != null)
-                        TextSpan(
-                          text: ' · ',
-                          children: [
-                            TextSpan(
-                              text: statusExtra,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: text,
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                  style: statusStyle.copyWith(
-                    fontFeatures: AppTypography.tabular,
+                Expanded(
+                  child: Text(
+                    customerName,
+                    style: AppTypography.bodyStrong.copyWith(color: text),
                   ),
                 ),
-                if (holdText != null) ...[
-                  const SizedBox(height: 2),
+                if (valueText != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
-                    holdText!,
-                    key: const Key('order_row_hold'),
+                    valueText!,
                     style: AppTypography.callout.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: text,
+                      color: secondary,
                       fontFeatures: AppTypography.tabular,
                     ),
                   ),
                 ],
+                if (onTap != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Icon(
+                    CupertinoIcons.chevron_forward,
+                    size: 14,
+                    color: AppColors.separator.resolveFrom(context),
+                  ),
+                ],
               ],
             ),
+            if (detailText != null) ...[
+              const SizedBox(height: 3),
+              Text(
+                detailText!,
+                style: AppTypography.callout.copyWith(color: text),
+              ),
+            ],
+            const SizedBox(height: 2),
+            if (problemText == null)
+              status
+            else
+              // Status on the left, problem on the right; with large text the
+              // problem drops below the status instead of squeezing it.
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  spacing: AppSpacing.sm,
+                  children: [
+                    status,
+                    Text(
+                      problemText!,
+                      key: const Key('order_row_problem'),
+                      style: statusStyle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: problemColor ?? text,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

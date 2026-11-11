@@ -11,7 +11,8 @@
 .grid tbody tr.is-open .row-detail, .grid tbody tr.is-selected .row-detail { color: var(--color-muted); }
 .row-hold { color: var(--color-warning-text); font-weight: 600; }
 /* Wraps between words at 200% text; the amount itself never breaks (Intl puts a no-break space after R$). */
-.owed { display: block; font-size: 0.8125rem; color: var(--color-muted); font-weight: 400; white-space: normal; font-family: var(--font-body); }
+.owed { display: block; font-size: 0.8125rem; color: var(--color-ink); font-weight: 600; white-space: nowrap; font-family: var(--font-body); }
+.owed.is-paid { color: var(--color-success-ink); }
 .grid .status { white-space: normal; align-items: baseline; }
 .grid .status .dot { align-self: center; }
 .grid td.c-money { white-space: normal; }

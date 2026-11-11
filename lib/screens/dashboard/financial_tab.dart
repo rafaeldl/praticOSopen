@@ -268,8 +268,9 @@ class _FinancialTabState extends State<FinancialTab> {
     return true;
   }
 
-  /// Próxima cobrança: "Mandar cobrança" or "Agora não", which only pauses
-  /// the suggestion. With Asaas, several orders of a customer go in one
+  /// Próxima cobrança: "Mandar cobrança", "Já recebi" (opens Receber, for
+  /// what was paid outside the app) or "Agora não", which only pauses the
+  /// suggestion. With Asaas, several orders of a customer go in one
   /// charge; otherwise it asks which order, as only one link can be shared.
   Future<void> _showNextCharge(Debtor debtor) async {
     if (_sendingCharge) return;
@@ -293,6 +294,11 @@ class _FinancialTabState extends State<FinancialTab> {
             child: Text(l10n.financialSendCharge),
           ),
           CupertinoActionSheetAction(
+            key: const Key('financialAlreadyReceived'),
+            onPressed: () => Navigator.pop(sheet, _NextChargeChoice.received),
+            child: Text(l10n.financialAlreadyReceived),
+          ),
+          CupertinoActionSheetAction(
             key: const Key('financialNotNow'),
             onPressed: () => Navigator.pop(sheet, _NextChargeChoice.snooze),
             child: Text(l10n.notNow),
@@ -307,6 +313,10 @@ class _FinancialTabState extends State<FinancialTab> {
     if (!mounted) return;
     if (choice == _NextChargeChoice.snooze) {
       await _store.snoozeNextCharge(debtor);
+    } else if (choice == _NextChargeChoice.received) {
+      // Paid outside the app: record it where every payment is recorded, so
+      // the order leaves A receber and Próxima cobrança.
+      await _openDebtor(debtor);
     } else if (choice == _NextChargeChoice.send) {
       if (!debtor.hasSingleOrder &&
           debtor.customerId != null &&
@@ -639,7 +649,7 @@ class _FinancialTabState extends State<FinancialTab> {
   }
 }
 
-enum _NextChargeChoice { send, snooze }
+enum _NextChargeChoice { send, received, snooze }
 
 /// The two month values side by side; stacked at accessibility text sizes.
 class _MonthBlocks extends StatelessWidget {

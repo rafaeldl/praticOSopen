@@ -30,7 +30,7 @@ import {
   nextVisit,
   queryStatuses,
   sameDay,
-  remainingOnRow,
+  paymentOnRow,
   rowsFor,
   servicesSummary,
   summaryFromCounts,
@@ -690,7 +690,10 @@ const columns = 5 + (showsMoney ? 1 : 0)
               </td>
               <td v-if="showsMoney" class="c-money">
                 <span class="num" :aria-label="prefs.hideValues ? t('web.money.hiddenA11y') : undefined">{{ money(order.total) }}</span>
-                <span v-if="remainingOnRow(order)" class="owed">{{ t('web.orders.owed', { amount: money(remainingOnRow(order)) }) }}</span>
+                <template v-if="paymentOnRow(order)">
+                  <span v-if="'paid' in paymentOnRow(order)!" class="owed is-paid" data-testid="row-paid">{{ t('web.orders.paid') }}</span>
+                  <span v-else class="owed" data-testid="row-left">{{ t('web.orders.owedShort', { amount: money((paymentOnRow(order) as { left: number }).left) }) }}</span>
+                </template>
               </td>
             </tr>
           </tbody>

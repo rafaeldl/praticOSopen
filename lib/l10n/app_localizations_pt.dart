@@ -2879,6 +2879,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialNextCharge => 'Próxima cobrança';
 
   @override
+  String get financialAlreadyReceived => 'Já recebi';
+
+  @override
   String financialNextChargeMessage(String name, String amount, String date) {
     return '$name deve $amount desde $date';
   }
@@ -4427,6 +4430,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String remainingToReceive(String amount) {
     return 'falta receber $amount';
+  }
+
+  @override
+  String remainingShort(String amount) {
+    return 'falta $amount';
   }
 
   @override

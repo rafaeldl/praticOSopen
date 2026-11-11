@@ -78,7 +78,7 @@ test('Sem receber: o número do filtro e a frase vêm do servidor e batem com a 
   await loadAll(page)
   await expect(rows(page)).toHaveCount(33)
   await expect(row(page, 1)).toHaveCount(0)
-  await expect(row(page, 233)).toContainText('falta receber R$ 60,00')
+  await expect(row(page, 233)).toContainText('falta R$ 60,00')
 })
 
 test('consultor: só as OS dele em cada filtro, e a contagem também (papel restrito)', async ({ page }) => {

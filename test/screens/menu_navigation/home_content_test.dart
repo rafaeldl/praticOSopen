@@ -12,6 +12,7 @@ import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/order_list_row.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 
 final _now = DateTime(2026, 10, 12, 10);
@@ -54,9 +55,11 @@ class _Host extends StatefulWidget {
     this.onOpenMaintenance,
     this.initialView,
     this.showPrices = true,
+    this.stageName,
   });
 
   final bool showPrices;
+  final String? Function(Order)? stageName;
   final HomeView? initialView;
   final List<Device> maintenances;
   final ValueChanged<Device>? onOpenMaintenance;
@@ -77,8 +80,7 @@ class _Host extends StatefulWidget {
 
 class _HostState extends State<_Host> {
   late HomeView view =
-      widget.initialView ??
-      (widget.technician ? HomeView.mine : HomeView.open);
+      widget.initialView ?? (widget.technician ? HomeView.mine : HomeView.open);
 
   /// What the store would load for each view.
   List<Order> get _orders => switch (view) {
@@ -112,6 +114,7 @@ class _HostState extends State<_Host> {
       showDevice: true,
       unreadCount: widget.unread,
       companyName: 'Oficina do Zé',
+      stageName: widget.stageName,
       statusLabel: (s) => switch (s) {
         'quote' => 'Orçamento',
         'approved' => 'Aprovado',
@@ -240,10 +243,7 @@ void main() {
     testWidgets('does not change the order count', (tester) async {
       await tester.pumpWidget(
         _app(
-          _Host(
-            orders: mixed,
-            maintenances: [device('A', 'X', '2026-10-15')],
-          ),
+          _Host(orders: mixed, maintenances: [device('A', 'X', '2026-10-15')]),
         ),
       );
       expect(find.text('3 em aberto · 1 atrasada'), findsOneWidget);
@@ -272,10 +272,7 @@ void main() {
     testWidgets('stays out of the finished orders', (tester) async {
       await tester.pumpWidget(
         _app(
-          _Host(
-            orders: mixed,
-            maintenances: [device('A', 'X', '2026-10-15')],
-          ),
+          _Host(orders: mixed, maintenances: [device('A', 'X', '2026-10-15')]),
         ),
       );
       await _tapFilter(tester, 'Concluídas');
@@ -284,9 +281,7 @@ void main() {
     });
   });
 
-  testWidgets('Em aberto: summary, overdue first with a red dot, no groups', (
-    tester,
-  ) async {
+  testWidgets('Em aberto: summary, overdue first, no groups', (tester) async {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
 
     expect(find.text('3 em aberto · 1 atrasada'), findsOneWidget);
@@ -294,8 +289,9 @@ void main() {
     expect(y('Ana'), lessThan(y('Bruno')));
     expect(y('Bruno'), lessThan(y('Caio')));
     expect(find.text('Atrasada 4 dias'), findsOneWidget);
-    // Only the overdue row gets color: one dot, no group headers.
-    expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
+    // Every row has its status dot; the overdue one says so on the right.
+    expect(find.byKey(const Key('order_row_status_dot')), findsNWidgets(3));
+    expect(find.byKey(const Key('order_row_problem')), findsOneWidget);
     // No "Atrasadas" section: only the filter button has the word.
     expect(find.text('Atrasadas'), findsOneWidget);
     expect(find.text('Duda'), findsNothing);
@@ -307,8 +303,12 @@ void main() {
   testWidgets('the row shows the visit date of an open order', (tester) async {
     final visit = _order('Ana', 'approved')
       ..scheduledDate = DateTime(2030, 5, 12, 14);
-    final both = _order('Bruno', 'approved', number: 2, due: DateTime(2030, 5, 20))
-      ..scheduledDate = DateTime(2030, 5, 12, 14);
+    final both = _order(
+      'Bruno',
+      'approved',
+      number: 2,
+      due: DateTime(2030, 5, 20),
+    )..scheduledDate = DateTime(2030, 5, 12, 14);
     final finished = _order('Caio', 'done', number: 3)
       ..scheduledDate = DateTime(2030, 5, 12, 14);
     await tester.pumpWidget(_app(_Host(orders: [visit, both, finished])));
@@ -345,26 +345,60 @@ void main() {
     expect(find.text('Ana'), findsNothing);
   });
 
-  testWidgets('Concluídas: total stays on the right, only what is left to '
-      'receive goes on the status line', (tester) async {
+  testWidgets('Concluídas: total on the right, payment on the status line', (
+    tester,
+  ) async {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
     await _tapFilter(tester, 'Concluídas');
     await tester.pumpAndSettle();
 
     expect(find.textContaining('380,00'), findsOneWidget);
+    // Part received: what is left; all received: "Pago".
     expect(
-      find.textContaining(
-        RegExp(r'falta\sreceber\s.*180,00'),
-        findRichText: true,
+      find.textContaining('falta\u00A0R\$\u00A0180,00', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.textContaining('· Pago', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('payment shows in every filter, not on quotes', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            _order('Paga', 'progress', number: 1, total: 500, paid: 500),
+            _order('Parte', 'approved', number: 2, total: 500, paid: 100),
+            _order('Nada', 'progress', number: 3, total: 500),
+            _order('Orc', 'quote', number: 4, total: 500, paid: 500),
+          ],
+        ),
       ),
-      findsOneWidget,
     );
-    // Paid order: no payment text at all.
-    expect(find.textContaining('paga', findRichText: true), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('· Pago', findRichText: true), findsOneWidget);
     expect(
-      find.textContaining('falta\u00A0receber', findRichText: true),
+      find.textContaining('falta\u00A0R\$\u00A0400,00', findRichText: true),
       findsOneWidget,
     );
+    await _tapFilter(tester, 'Todas');
+    await tester.pumpAndSettle();
+    // The quote, even with money in, gets no payment mark.
+    expect(find.textContaining('· Pago', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('an order in progress shows its stage instead of the status', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [_order('Ana', 'progress')],
+          stageName: (o) => o.status == 'progress' ? 'Pintura' : null,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Pintura', findRichText: true), findsOneWidget);
   });
 
   testWidgets('Todas shows month sections', (tester) async {
@@ -463,7 +497,12 @@ void main() {
       _app(
         _Host(
           orders: [
-            _order('Recente', 'approved', number: 1, due: DateTime(2026, 10, 9)),
+            _order(
+              'Recente',
+              'approved',
+              number: 1,
+              due: DateTime(2026, 10, 9),
+            ),
             _order('Antiga', 'progress', number: 2, due: DateTime(2026, 9, 1)),
             _order('Em dia', 'approved', number: 3, due: DateTime(2026, 12, 1)),
           ],
@@ -546,7 +585,7 @@ void main() {
         ..reason = reason
         ..since = since);
 
-    testWidgets('shows only stopped orders with reason and days, the oldest '
+    testWidgets('shows only stopped orders with their days, the oldest '
         'first', (tester) async {
       await tester.pumpWidget(
         _app(
@@ -577,15 +616,15 @@ void main() {
 
       expect(find.text('2 paradas'), findsOneWidget);
       expect(find.text('Sem parada'), findsNothing);
-      expect(find.text('Parada há 3 dias · Esperando peça'), findsOneWidget);
-      expect(find.text('Parada há 1 dia · Esperando cliente'), findsOneWidget);
+      expect(find.text('Parada há 3 dias'), findsOneWidget);
+      expect(find.text('Parada há 1 dia'), findsOneWidget);
       expect(
         tester.getTopLeft(find.text('Parada antiga')).dy,
         lessThan(tester.getTopLeft(find.text('Parada recente')).dy),
       );
     });
 
-    testWidgets('the mark shows in the other filters too, beside the dot', (
+    testWidgets('the mark shows in the other filters too, on the right', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -603,22 +642,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Em aberto, and overdue on top: the red dot wins, the line stays.
-      expect(
-        find.text('Parada desde hoje · Esperando autorização'),
-        findsOneWidget,
-      );
-      expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
+      // Em aberto, and overdue on top: both problems, in red.
+      expect(find.text('Atrasada 2 dias · Parada desde hoje'), findsOneWidget);
 
       await _tapFilter(tester, 'Todas');
       await tester.pumpAndSettle();
-      expect(
-        find.text('Parada desde hoje · Esperando autorização'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Parada desde hoje'), findsOneWidget);
     });
 
-    testWidgets('a stopped order that is not overdue gets the orange dot', (
+    testWidgets('a stopped order that is not overdue says so in orange', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -631,8 +663,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('order_row_hold_dot')), findsOneWidget);
-      expect(find.byKey(const Key('order_row_overdue_dot')), findsNothing);
+      final style = tester.widget<Text>(find.text('Parada há 2 dias')).style!;
+      expect(style.color!.toARGB32(), AppColors.warning.color.toARGB32());
     });
 
     testWidgets('a leftover mark on a finished order is not shown', (
@@ -655,13 +687,11 @@ void main() {
       await tester.pumpAndSettle();
       await _tapFilter(tester, 'Concluídas');
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('order_row_hold')), findsNothing);
+      expect(find.byKey(const Key('order_row_problem')), findsNothing);
     });
 
     testWidgets('nothing stopped says so', (tester) async {
-      await tester.pumpWidget(
-        _app(_Host(orders: [_order('Ana', 'progress')])),
-      );
+      await tester.pumpWidget(_app(_Host(orders: [_order('Ana', 'progress')])));
       await tester.pumpAndSettle();
       await _tapFilter(tester, 'Paradas');
       await tester.pumpAndSettle();
@@ -669,9 +699,7 @@ void main() {
     });
 
     testWidgets('technicians have the filter too', (tester) async {
-      await tester.pumpWidget(
-        _app(_Host(orders: const [], technician: true)),
-      );
+      await tester.pumpWidget(_app(_Host(orders: const [], technician: true)));
       await tester.pumpAndSettle();
       expect(find.text('Paradas'), findsOneWidget);
     });
@@ -775,10 +803,12 @@ void main() {
 
     ScrollPosition position(WidgetTester tester) => tester
         .state<ScrollableState>(
-          find.ancestor(
-            of: find.text('Em aberto'),
-            matching: find.byType(Scrollable),
-          ).first,
+          find
+              .ancestor(
+                of: find.text('Em aberto'),
+                matching: find.byType(Scrollable),
+              )
+              .first,
         )
         .position;
 
@@ -804,10 +834,16 @@ void main() {
           for (final label in labels) tester.getCenter(find.text(label)).dy,
         };
         expect(tops, hasLength(1));
-        expect(tester.getRect(button(labels.first)).left, AppSpacing.pageMargin);
+        expect(
+          tester.getRect(button(labels.first)).left,
+          AppSpacing.pageMargin,
+        );
 
         final rects = labels.map((label) => tester.getRect(button(label)));
-        expect(rects.where((r) => r.left < width && r.right > width), hasLength(1));
+        expect(
+          rects.where((r) => r.left < width && r.right > width),
+          hasLength(1),
+        );
       });
     }
 
@@ -821,7 +857,10 @@ void main() {
       await tester.drag(find.text('Em aberto'), const Offset(-3000, 0));
       await tester.pumpAndSettle();
 
-      expect(tester.getRect(button('Todas')).right, width - AppSpacing.pageMargin);
+      expect(
+        tester.getRect(button('Todas')).right,
+        width - AppSpacing.pageMargin,
+      );
       // Still the filters: the list did not move.
       expect(find.text('Ana'), findsOneWidget);
     });
@@ -1017,10 +1056,7 @@ void main() {
       });
 
       test('moves just enough to the right, leaving the margin', () {
-        expect(
-          target(340, 450),
-          450 + AppSpacing.pageMargin - 375,
-        );
+        expect(target(340, 450), 450 + AppSpacing.pageMargin - 375);
       });
 
       test('moves just enough to the left, leaving the margin', () {

@@ -14,6 +14,7 @@ import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/mobx/whatsapp_setup_banner_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -47,9 +48,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
+
   /// Technicians start on "Minhas" (prototype "Início · técnico").
-  late HomeView _view =
-      _authService.isTechnician ? HomeView.mine : HomeView.open;
+  late HomeView _view = _authService.isTechnician
+      ? HomeView.mine
+      : HomeView.open;
   bool? _companyHasOrders;
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
@@ -146,8 +149,10 @@ class _HomeState extends State<Home> {
     final companyId = Global.companyAggr?.id;
     if (companyId == null) return;
     try {
-      final snapshot = await orderStore.repository
-          .getOrdersWithPagination(companyId, limit: 1);
+      final snapshot = await orderStore.repository.getOrdersWithPagination(
+        companyId,
+        limit: 1,
+      );
       if (mounted) setState(() => _companyHasOrders = snapshot.docs.isNotEmpty);
     } catch (_) {
       // Unknown: keep showing the regular empty state.
@@ -166,9 +171,8 @@ class _HomeState extends State<Home> {
     _maintenanceSub = _maintenance.devices
         .streamMaintenanceUntil(companyId, until)
         .asyncMap(
-          (list) => _maintenance.withoutContract(
-            list.whereType<Device>().toList(),
-          ),
+          (list) =>
+              _maintenance.withoutContract(list.whereType<Device>().toList()),
         )
         .listen((list) {
           if (mounted) setState(() => _maintenances = list);
@@ -201,10 +205,7 @@ class _HomeState extends State<Home> {
         case MaintenanceAction.viewDevice:
           await Navigator.of(context, rootNavigator: true).pushNamed(
             '/device_detail',
-            arguments: {
-              'device': device,
-              'previousTitle': context.l10n.home,
-            },
+            arguments: {'device': device, 'previousTitle': context.l10n.home},
           );
         case null:
           break;
@@ -223,10 +224,10 @@ class _HomeState extends State<Home> {
 
   void _openOrder(Order order) {
     Navigator.of(context, rootNavigator: true)
-        .pushNamed('/order', arguments: {
-          'order': order,
-          'previousTitle': context.l10n.home,
-        })
+        .pushNamed(
+          '/order',
+          arguments: {'order': order, 'previousTitle': context.l10n.home},
+        )
         .then((_) => _loadOrders());
   }
 
@@ -264,6 +265,7 @@ class _HomeState extends State<Home> {
         currentUserId: Global.currentUser?.uid,
         unreadCount: notificationStore.unreadCount?.value ?? 0,
         statusLabel: (status) => config.getStatus(status ?? ''),
+        stageName: (order) => WorkStage.of(order, config.workStages)?.name,
         customerFilterName: orderStore.customerFilter?.name,
         onClearCustomerFilter: () {
           HapticFeedback.lightImpact();
@@ -274,10 +276,11 @@ class _HomeState extends State<Home> {
         onOpenProfile: _openProfile,
         companyName: Global.companyAggr?.name,
         onRetry: _loadOrders,
-        onLoadMore: () =>
-            orderStore.loadMoreOrdersInfinite(_view.queryField),
-        onOpenNotifications: () => Navigator.of(context, rootNavigator: true)
-            .pushNamed('/notifications'),
+        onLoadMore: () => orderStore.loadMoreOrdersInfinite(_view.queryField),
+        onOpenNotifications: () => Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pushNamed('/notifications'),
         leading: _buildWhatsAppNavButton(context),
         banner: _buildCourtesyBanner() ?? _buildWhatsAppBanner(),
         maintenances: _maintenances,
@@ -327,7 +330,9 @@ class _HomeState extends State<Home> {
             onPressed: () {
               HapticFeedback.lightImpact();
               if (isLinked) {
-                final uri = Uri.parse('https://wa.me/${_whatsappStore.botNumber}');
+                final uri = Uri.parse(
+                  'https://wa.me/${_whatsappStore.botNumber}',
+                );
                 launchUrl(uri, mode: LaunchMode.externalApplication);
               } else {
                 LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {

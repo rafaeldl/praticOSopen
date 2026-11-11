@@ -69,10 +69,12 @@ void main() {
         wrap(PrimaryButton(label: 'Nova OS', onPressed: () {})),
       );
       final box = tester.widget<DecoratedBox>(
-        find.descendant(
-          of: find.byType(PrimaryButton),
-          matching: find.byType(DecoratedBox),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(PrimaryButton),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
       );
       final decoration = box.decoration as BoxDecoration;
       expect(decoration.color!.toARGB32(), AppColors.action.color.toARGB32());
@@ -188,30 +190,74 @@ void main() {
       expect(find.text('R\$ 1.250,00'), findsOneWidget);
       expect(find.text('Fiat Uno · troca de embreagem'), findsOneWidget);
       expect(find.textContaining('Em andamento'), findsOneWidget);
-      expect(find.byKey(const Key('order_row_overdue_dot')), findsNothing);
+      expect(find.byKey(const Key('order_row_problem')), findsNothing);
     });
 
-    testWidgets('overdue: red dot and bold danger status', (tester) async {
+    testWidgets('status dot before the status, in the status color', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           const OrderListRow(
             customerName: 'Ana',
-            statusText: 'Atrasada 2 dias',
-            overdue: true,
+            statusText: 'Pintura',
+            statusColor: Color(0xFFD98B09),
           ),
         ),
       );
-      expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
+      final dot = tester.widget<Container>(
+        find.byKey(const Key('order_row_status_dot')),
+      );
+      expect((dot.decoration! as BoxDecoration).color, const Color(0xFFD98B09));
+    });
+
+    testWidgets('payment after the status, in its color', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const OrderListRow(
+            customerName: 'Ana',
+            statusText: 'Pronto',
+            statusExtra: 'Pago',
+            statusExtraColor: Color(0xFF1D7D3E),
+          ),
+        ),
+      );
+      expect(
+        find.textContaining('Pronto · Pago', findRichText: true),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a problem goes on the right, bold, in its color', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          const OrderListRow(
+            customerName: 'Ana',
+            statusText: 'Pintura',
+            problemText: 'Atrasada 2 dias',
+            problemColor: Color(0xFFC93029),
+          ),
+        ),
+      );
       final style = tester.widget<Text>(find.text('Atrasada 2 dias')).style!;
       expect(style.fontWeight, FontWeight.w700);
-      expect(style.color!.toARGB32(), AppColors.danger.color.toARGB32());
+      expect(style.color, const Color(0xFFC93029));
+      expect(
+        tester.getTopRight(find.text('Atrasada 2 dias')).dx,
+        greaterThan(tester.getTopRight(find.text('Ana')).dx - 1),
+      );
     });
 
     testWidgets('normal status text is neutral, not colored', (tester) async {
       await tester.pumpWidget(
         wrap(const OrderListRow(customerName: 'Ana', statusText: 'Aprovado')),
       );
-      final style = tester.widget<Text>(find.text('Aprovado')).style!;
+      final style = tester
+          .widget<RichText>(find.textContaining('Aprovado', findRichText: true))
+          .text
+          .style!;
       expect(style.color!.toARGB32(), AppColors.textSecondary.color.toARGB32());
     });
   });
