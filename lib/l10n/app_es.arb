@@ -2696,6 +2696,7 @@
   "orderCreateFailedMessage": "Revisa la conexión y crea la OS de nuevo.",
   "receiveChargeMaybeOpen": "Puede haber un enlace de pago abierto en esta OS. Consulta con quien lleva las finanzas antes de marcarla como recibida.",
   "checklistAnswerSaveFailed": "No se pudo guardar la respuesta. Inténtalo de nuevo.",
+  "checklistReadingBelowLastVisit": "Menor que los {reading} de la última visita. ¿Es correcto?",
   "profileSaveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
   "saveFailedTryAgain": "No se pudo guardar. Inténtalo de nuevo.",
   "deleteFailedTryAgain": "No se pudo eliminar. Inténtalo de nuevo.",

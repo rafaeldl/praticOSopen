@@ -764,6 +764,9 @@ class _QuestionEditorState extends State<_QuestionEditor> {
       options: options,
       required: _type == FormItemType.photoOnly ? false : _required,
       allowPhotos: _allowPhotos,
+      // A question linked to the device's reading stays linked while it is
+      // a number (docs/DEVICE_READING.md).
+      reading: _type == FormItemType.number && (existing?.reading ?? false),
       // Keep the translations of a ready checklist while the text is the same.
       labelI18n: existing?.label == label ? existing?.labelI18n : null,
       optionsI18n:

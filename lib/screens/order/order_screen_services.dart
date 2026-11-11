@@ -12,7 +12,9 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
-import 'package:praticos/utils/device_reading.dart' show readingAdvances;
+import 'package:praticos/utils/checklist_reading.dart';
+import 'package:praticos/utils/device_reading.dart'
+    show deviceReading, readingAdvances;
 import 'package:praticos/models/device.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
@@ -173,6 +175,19 @@ class OrderScreenActions {
         .catchError((Object e) {
           debugPrint('Could not record the device reading: $e');
         });
+  }
+
+  /// The device's last reading ([field] in its `customData`), or null.
+  Future<int?> deviceLastReading(String deviceId, CustomField field) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    try {
+      final device = await DeviceRepositoryV2().getSingle(companyId, deviceId);
+      return deviceReading(device?.customData, field);
+    } catch (e) {
+      debugPrint('Could not read the device reading: $e');
+      return null;
+    }
   }
 
   /// "+ Placa" / "+ Modelo" on the order: the device's own form, pushed.
@@ -348,7 +363,11 @@ class OrderScreenActions {
 
   /// Picks a checklist template (and the vehicle, with 2 or more), adds it
   /// to the order and opens it to fill.
-  Future<void> addChecklist(BuildContext context, OrderStore store) async {
+  Future<void> addChecklist(
+    BuildContext context,
+    OrderStore store, {
+    ChecklistReadingLink? Function(of_model.OrderForm form)? readingLinkFor,
+  }) async {
     final companyId = store.companyId;
     final orderId = store.order?.id;
     if (companyId == null || orderId == null) return;
@@ -380,14 +399,22 @@ class OrderScreenActions {
       deviceId: deviceId,
     );
     if (!context.mounted) return;
-    await openChecklist(context, store, form);
+    await openChecklist(
+      context,
+      store,
+      form,
+      readingLink: readingLinkFor?.call(form),
+    );
   }
 
+  /// [readingLink]: the checklist's reading question is the order's reading
+  /// (`docs/DEVICE_READING.md`).
   Future<void> openChecklist(
     BuildContext context,
     OrderStore store,
-    of_model.OrderForm form,
-  ) {
+    of_model.OrderForm form, {
+    ChecklistReadingLink? readingLink,
+  }) {
     final companyId = store.companyId;
     final orderId = store.order?.id;
     if (companyId == null || orderId == null) return Future.value();
@@ -400,6 +427,7 @@ class OrderScreenActions {
           companyId: companyId,
           orderForm: form,
           devices: store.devices.toList(),
+          readingLink: readingLink,
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/models/device.dart';
@@ -21,6 +23,8 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/checklist_reading.dart';
+import 'package:praticos/utils/device_reading.dart';
 import 'package:provider/provider.dart';
 
 /// A checklist of the OS: the summary of the answers, and the questions one
@@ -34,6 +38,12 @@ import 'package:provider/provider.dart';
 /// - "Perguntas": a white card with each question and its answer; a tap opens
 ///   that question or, when completed, says so and offers "Reabrir".
 ///
+/// A question linked to the device's reading ([readingLink],
+/// `docs/DEVICE_READING.md`) is also the order's reading: answering it saves
+/// both, an order that already has the reading answers it on opening, and a
+/// value below the last visit's gets a notice ("Menor que os 102.000 km da
+/// última visita. Está certo?") without blocking.
+///
 /// A checklist with no answer yet opens straight on the first question.
 /// Answering the last one with nothing left completes the checklist and goes
 /// back to the OS.
@@ -42,6 +52,9 @@ class FormFillScreen extends StatefulWidget {
   final String companyId;
   final OrderForm orderForm;
   final List<DeviceAggr>? devices;
+
+  /// Links the reading question to the order; null: plain number question.
+  final ChecklistReadingLink? readingLink;
 
   /// Injected in tests (the defaults talk to Firebase).
   final FormsService? formsService;
@@ -60,6 +73,7 @@ class FormFillScreen extends StatefulWidget {
     required this.companyId,
     required this.orderForm,
     this.devices,
+    this.readingLink,
     this.formsService,
     this.photoService,
     this.canReopen,
@@ -92,14 +106,66 @@ class _FormFillScreenState extends State<FormFillScreen> {
     _currentForm = widget.orderForm;
     // The model may come with const lists; answers are added in place.
     _currentForm.responses = List.of(_currentForm.responses);
+    final nothingAnswered = _currentForm.responses.isEmpty;
+    final prefill = _prefillReading();
     if (widget.openQuestionsOnStart &&
         !_isCompleted &&
         _currentForm.items.isNotEmpty &&
-        _currentForm.responses.isEmpty) {
+        nothingAnswered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _openQuestions(0);
+        if (mounted) _openQuestions();
       });
     }
+    if (prefill.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        for (final (change, before) in prefill) {
+          if (!mounted) return;
+          await _persistChange(change, before);
+        }
+      });
+    }
+  }
+
+  /// The order's reading answers the reading questions still empty: shown
+  /// right away, saved after the first frame (returned as the changes to
+  /// save, each with the responses before it).
+  List<(FormAnswerChange, List<FormResponse>)> _prefillReading() {
+    final link = widget.readingLink;
+    final value = link?.orderReading();
+    if (link == null || value == null) return const [];
+    return [
+      for (final item in unansweredReadingItems(_currentForm))
+        () {
+          final before = List.of(_currentForm.responses);
+          // Saved as typed answers are (text).
+          final change = FormValueChange(item.id, '$value');
+          _applyLocally(change);
+          return (change, before);
+        }(),
+    ];
+  }
+
+  /// An answer to the reading question is also the order's reading (and
+  /// the device's last one). Below the last visit's: a notice, not a block.
+  Future<void> _syncReading(String itemId, dynamic value) async {
+    final link = widget.readingLink;
+    if (link == null) return;
+    final item = _currentForm.items.where((i) => i.id == itemId).firstOrNull;
+    if (item == null || !item.isReading) return;
+    final reading = parseReading(value);
+    if (reading == null) return;
+    if (reading != link.orderReading()) link.onReading(reading);
+    final last = await link.lastVisit;
+    if (!mounted || !readingBelowLastVisit(reading, last)) return;
+    final format = FormatService()..setLocale(context.l10n.localeName);
+    showAppToast(
+      context,
+      context.l10n.checklistReadingBelowLastVisit(
+        formatReading(link.field, last, format) ?? '$last',
+      ),
+      icon: CupertinoIcons.exclamationmark_triangle_fill,
+      duration: const Duration(seconds: 5),
+    );
   }
 
   @override
@@ -143,6 +209,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
     final before = List.of(_currentForm.responses);
     final change = FormValueChange(itemId, value);
     _update(() => _applyLocally(change));
+    unawaited(_syncReading(itemId, value));
     await _persistChange(change, before);
   }
 

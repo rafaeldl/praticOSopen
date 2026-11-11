@@ -12,7 +12,7 @@ Documento de solução para formulários dinâmicos no PraticOS, seguindo as dir
 Hoje o app usa `FormDefinition` como template e `OrderForm` como instância vinculada à OS.
 
 - Templates (definição): `FormDefinition` (`id`, `title`, `description?`, `isActive`, `items`).
-- Itens do template: `FormItemDefinition` (`id`, `label`, `type`, `options?`, `required`, `allowPhotos`).
+- Itens do template: `FormItemDefinition` (`id`, `label`, `type`, `options?`, `required`, `allowPhotos`, `reading?`).
 - Instâncias (snapshot do template na OS): `OrderForm` (`formDefinitionId`, `title`, `items`, `status`, `responses`).
 - Respostas: `FormResponse` (`itemId`, `value`, `photoUrls[]`).
 - Observações: `OrderForm.notes` (`Map<String, FormItemNote>`, por `itemId`) e `OrderForm.aiFilled` (perguntas cuja resposta veio da IA e não foi mexida). Ver "Observação" abaixo.
@@ -44,6 +44,16 @@ Campo novo do checklist da OS, **fora de `responses`**:
 - **`ai`:** `true` enquanto o texto é o da IA; a primeira edição da pessoa grava `false`. `aiFilled` lista as perguntas cuja resposta veio da IA. Os dois já existem no modelo, mas nesta etapa nada grava `true` (a IA entra nas etapas 3 e 4 da spec `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`).
 - **Onde aparece:** sheet da pergunta (“+ Observação” como link embaixo da resposta; com texto, a linha “Observação” e o texto, tocar edita), resumo do checklist (embaixo da resposta, em `textTertiary`), PDF do app e do web (embaixo da resposta: o texto, “Porta: …” e “Foto 2: …”), link do cliente (`note`, `optionNotes` e `photoNotes` em cada item de `forms`, sem a marca `ai`) e app web (só leitura nesta etapa; edição na etapa 5).
 - Tipos: Dart (`FormItemNote`, `FormOptionNote`, `FormPhotoNote` em `lib/models/order_form.dart`), Functions (`firebase/functions/src/models/types.ts`) e web (`firebase/webapp/src/lib/forms/model.ts`).
+
+### Pergunta ligada à leitura do equipamento (#646)
+Uma pergunta numérica com `reading: true` é a leitura do equipamento (km, horímetro; ver `docs/DEVICE_READING.md`). Só vale para `number` e em ramo com campo de leitura; fora disso é uma pergunta normal.
+
+- **Responder** (à mão; pela IA, #688, pelo mesmo caminho) grava também `orders/{id}.deviceReadings.{deviceId}` e, se a pessoa pode cadastrar equipamentos e o número não volta, a última leitura do equipamento. A OS deixa de mostrar "+ Quilometragem".
+- **OS que já tem a leitura**: a pergunta vazia já vem respondida com ela ao abrir o checklist (gravada como texto, igual às respostas digitadas). Checklist concluído não muda.
+- **Menor que a última visita**: aviso opaco (`showAppToast`, 5 s) "Menor que os 102.000 km da última visita. Está certo?". Não trava nem desfaz.
+- **Qual equipamento**: o do checklist (`OrderForm.deviceId`) ou, sem ele, o único da OS. OS sem equipamento, ou com vários e checklist "de todos": pergunta normal.
+- **Onde fica**: `reading` vai no item do modelo e no snapshot da OS (só é gravado quando `true`). Modelos do seed: `km_atual` em `checklist_entrada_auto` (automotive) e `horas_operacao` em `checklist_entrada_asset` (asset_maintenance, modelo novo). O editor de modelo do app preserva a marca ao editar a pergunta, mas ainda não liga nem desliga; o web não usa a marca.
+- Código: `lib/utils/checklist_reading.dart` (`ChecklistReadingLink`, regras puras), `FormFillScreen.readingLink` (`_prefillReading`, `_syncReading`), `_readingLinkFor` em `order_screen_v2.dart`.
 
 ### Tipos suportados (atual)
 `text`, `number`, `select`, `checklist`, `boolean`, `photo_only`.
@@ -120,6 +130,7 @@ Os templates globais são “padrões de mercado” para aumentar qualidade, red
 - Hidráulica: `checklist_seguranca_hidraulica`, `teste_estanqueidade`, `entrega_hidraulica`
 - Segurança eletrônica: `vistoria_pre_instalacao_seguranca`, `comissionamento_seguranca`, `termo_privacidade_seguranca`
 - Energia solar: `checklist_seguranca_solar`, `comissionamento_solar`, `entrega_solar`
+- Manutenção de ativos: `checklist_entrada_asset` (horímetro ligado à leitura)
 - Impressoras: `checklist_entrada_printers`, `manutencao_preventiva_printers`, `teste_pos_servico_printers`
 
 Fonte: `firebase/scripts/seed_forms.js`.

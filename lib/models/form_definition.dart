@@ -73,6 +73,14 @@ class FormItemDefinition {
   bool required;
   bool allowPhotos;
 
+  /// A number question that is the device's reading (km, hour meter): its
+  /// answer is also the order's reading of the checklist's device, and an
+  /// order that already has the reading answers it. Only for number
+  /// questions, in segments with a reading field. See
+  /// `docs/DEVICE_READING.md`.
+  @JsonKey(defaultValue: false, includeToJson: false)
+  bool reading;
+
   /// i18n translations for label: {'pt': 'Label PT', 'en': 'Label EN', 'es': 'Label ES'}
   Map<String, String>? labelI18n;
 
@@ -86,6 +94,7 @@ class FormItemDefinition {
     this.options,
     this.required = false,
     this.allowPhotos = true,
+    this.reading = false,
     this.labelI18n,
     this.optionsI18n,
   });
@@ -102,7 +111,15 @@ class FormItemDefinition {
     return optionsI18n![localeCode] ?? optionsI18n!['pt'] ?? options;
   }
 
+  /// Whether this question is linked to the device's reading.
+  bool get isReading => reading && type == FormItemType.number;
+
   factory FormItemDefinition.fromJson(Map<String, dynamic> json) =>
       _$FormItemDefinitionFromJson(json);
-  Map<String, dynamic> toJson() => _$FormItemDefinitionToJson(this);
+  /// `reading` is written only when true, so templates and snapshots
+  /// without it stay as they were.
+  Map<String, dynamic> toJson() => {
+    ..._$FormItemDefinitionToJson(this),
+    if (reading) 'reading': true,
+  };
 }

@@ -10890,6 +10890,12 @@ abstract class AppLocalizations {
   /// **'Não deu para guardar a resposta. Tente de novo.'**
   String get checklistAnswerSaveFailed;
 
+  /// Notice when the reading typed in a checklist is below the device's last visit (does not block)
+  ///
+  /// In pt, this message translates to:
+  /// **'Menor que os {reading} da última visita. Está certo?'**
+  String checklistReadingBelowLastVisit(String reading);
+
   /// No description provided for @profileSaveFailed.
   ///
   /// In pt, this message translates to:

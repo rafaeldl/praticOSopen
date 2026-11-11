@@ -51,6 +51,7 @@ import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/devices/next_maintenance_offer.dart';
 import 'package:praticos/screens/order/device_reading_sheet.dart';
+import 'package:praticos/utils/checklist_reading.dart';
 import 'package:praticos/utils/device_reading.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_hold_sheet.dart';
@@ -631,7 +632,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (_addChecklistOnOpen) {
       _addChecklistOnOpen = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _actions.addChecklist(context, _store);
+        if (mounted) {
+          _actions.addChecklist(
+            context,
+            _store,
+            readingLinkFor: _readingLinkFor,
+          );
+        }
       });
     }
     if (_scrollToComments) {
@@ -973,7 +980,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (open == true && mounted) {
-      await _actions.openChecklist(context, _store, pending.first);
+      await _actions.openChecklist(
+        context,
+        _store,
+        pending.first,
+        readingLink: _readingLinkFor(pending.first),
+      );
     }
   }
 
@@ -1311,7 +1323,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       case 'comment':
         await _actions.openComments(context, order);
       case 'checklist':
-        await _actions.addChecklist(context, _store);
+        await _actions.addChecklist(
+          context,
+          _store,
+          readingLinkFor: _readingLinkFor,
+        );
       case 'discount':
         await _giveDiscount();
       case 'responsible':
@@ -4132,6 +4148,39 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
   }
 
+  /// Links the checklist's reading question ("Quilometragem Atual") to
+  /// this order's reading of its device; null when the segment has no
+  /// reading, the checklist has no such question, or no device.
+  ChecklistReadingLink? _readingLinkFor(of_model.OrderForm form) {
+    final field = context.read<SegmentConfigProvider>().readingField;
+    if (field == null || !form.items.any((i) => i.isReading)) return null;
+    final deviceId = checklistReadingDeviceId(form.deviceId, [
+      for (final d in _store.devices)
+        if (d.id != null) d.id!,
+    ]);
+    if (deviceId == null) return null;
+    int? orderReading() => parseReading(_store.deviceReadings?[deviceId]);
+    final atOpen = orderReading();
+    return ChecklistReadingLink(
+      deviceId: deviceId,
+      field: field,
+      orderReading: orderReading,
+      onReading: (value) {
+        if (mounted) {
+          setState(() => _store.setDeviceReading(deviceId, value));
+        } else {
+          _store.setDeviceReading(deviceId, value);
+        }
+        if (_permissions.canRegisterDevices()) {
+          _actions.recordDeviceReading(deviceId, field, value);
+        }
+      },
+      lastVisit: _actions
+          .deviceLastReading(deviceId, field)
+          .then((device) => lastVisitReading(device: device, order: atOpen)),
+    );
+  }
+
   /// Why the order is stopped, since when, and the note.
   Widget _buildHold(OrderHold hold) {
     final note = hold.note;
@@ -4925,7 +4974,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         subtitle: form.status == of_model.FormStatus.completed
             ? completedChecklistLabel(l10n, form)
             : l10n.orderChecklistProgress(answered, total),
-        onTap: () => _actions.openChecklist(context, _store, form),
+        onTap: () => _actions.openChecklist(
+          context,
+          _store,
+          form,
+          readingLink: _readingLinkFor(form),
+        ),
       ),
     );
   }

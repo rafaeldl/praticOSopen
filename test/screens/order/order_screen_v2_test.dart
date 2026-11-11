@@ -12,6 +12,10 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:mobx/mobx.dart' show ObservableStream;
+import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/models/order_form.dart' as of_model;
+import 'package:praticos/utils/checklist_reading.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
@@ -123,6 +127,27 @@ class FakeActions extends OrderScreenActions {
   @override
   Future<void> logOrderEvent(Order order, String text) async =>
       calls.add('log: $text');
+
+  /// The reading link of the last checklist opened.
+  ChecklistReadingLink? readingLink;
+
+  @override
+  Future<void> openChecklist(
+    BuildContext context,
+    OrderStore store,
+    of_model.OrderForm form, {
+    ChecklistReadingLink? readingLink,
+  }) async {
+    this.readingLink = readingLink;
+    calls.add('checklist ${form.id}');
+  }
+
+  /// The device's last reading, as its record has it.
+  int? lastReading;
+
+  @override
+  Future<int?> deviceLastReading(String deviceId, CustomField field) async =>
+      lastReading;
 }
 
 /// Registration without Firebase: ids in order, writes kept in lists.
@@ -3512,6 +3537,67 @@ void main() {
       expect(store.order!.deviceReadings, {'d1': 1250});
       expect(actions.calls, contains('reading d1 device.operatingHours 1250'));
       expect(find.text('Horímetro: 1.250 h'), findsOneWidget);
+    });
+
+    of_model.OrderForm checkIn() => of_model.OrderForm(
+      id: 'f1',
+      formDefinitionId: 'checklist_entrada_auto',
+      title: 'Entrada do veículo',
+      items: [
+        FormItemDefinition(
+          id: 'km_atual',
+          label: 'Quilometragem Atual',
+          type: FormItemType.number,
+          reading: true,
+        ),
+        FormItemDefinition(
+          id: 'estepe',
+          label: 'Tem estepe?',
+          type: FormItemType.boolean,
+        ),
+      ],
+    );
+
+    testWidgets("checklist km: the answer is this order's reading and the "
+        "vehicle's; the last visit's comes for the notice", (tester) async {
+      SegmentConfigService().debugSetCustomFields(const [mileage]);
+      final store = OrderStore()
+        ..streamOrder = ((_, _) => const Stream.empty())
+        ..writeOrderFields = (_, _, _) async {}
+        ..formsStream = ObservableStream(Stream.value([checkIn()]));
+      final actions = FakeActions()..lastReading = 102000;
+      await _pump(tester, screenWith(store, actions), args: {'order': visit()});
+
+      await tester.tap(find.text('0 de 2 respondidas'));
+      await tester.pumpAndSettle();
+      final link = actions.readingLink!;
+      expect(link.deviceId, 'd1');
+      expect(link.field.key, 'device.mileage');
+      expect(link.orderReading(), isNull);
+      expect(await link.lastVisit, 102000);
+
+      link.onReading(98000);
+      await tester.pumpAndSettle();
+      expect(store.order!.deviceReadings, {'d1': 98000});
+      expect(link.orderReading(), 98000);
+      expect(actions.calls, contains('reading d1 device.mileage 98000'));
+      // "+ Quilometragem" is gone: the order does not ask twice.
+      expect(find.text('Quilometragem: 98.000 km'), findsOneWidget);
+      expect(find.byKey(const ValueKey('order_reading_add_d1')), findsNothing);
+    });
+
+    testWidgets('checklist km in a segment without reading: plain question', (
+      tester,
+    ) async {
+      SegmentConfigService().debugSetCustomFields(const [battery]);
+      final store = OrderStore()
+        ..formsStream = ObservableStream(Stream.value([checkIn()]));
+      final actions = FakeActions();
+      await _pump(tester, screenWith(store, actions), args: {'order': visit()});
+      await tester.tap(find.text('0 de 2 respondidas'));
+      await tester.pumpAndSettle();
+      expect(actions.calls, contains('checklist f1'));
+      expect(actions.readingLink, isNull);
     });
 
     testWidgets('phone repair: no reading anywhere', (tester) async {

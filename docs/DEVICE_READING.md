@@ -76,9 +76,28 @@ Ficha do equipamento ← customData.mileage (última) + deviceReadings de cada O
 5. OS com mais de um equipamento: uma leitura por equipamento, com o nome dele ao lado.
 6. A leitura é gravada por chave (`deviceReadings.<deviceId>`), nunca o mapa inteiro: duas pessoas lançando leituras de equipamentos diferentes na mesma OS mantêm as duas (app: `OrderFieldDiff.keyedFields`; web: `writes.setDeviceReading`).
 
-## Fora deste desenho (registrado na #588)
+## Pergunta do checklist ligada à leitura (#646)
 
-- **Vínculo com checklist**: o km digitado num checklist ainda não chega à OS nem ao equipamento. O caminho genérico seria uma pergunta numérica do modelo de checklist marcada como "leitura do equipamento" (`FormItemDefinition.linkedField: 'device.reading'`), que ao ser respondida grava `deviceReadings` do equipamento do checklist. Exige editor de modelo (app e web), preenchimento e modelos globais, por isso ficou para uma issue própria.
+Uma pergunta numérica do modelo de checklist com `FormItemDefinition.reading: true` é a leitura do equipamento do checklist. No seed: "Quilometragem Atual" (`km_atual`) na Entrada do Veículo (automotive) e "Horas de operação" (`horas_operacao`) na Entrada do Equipamento (asset_maintenance).
+
+```
+Checklist: "Quilometragem Atual" → 98000
+  → resposta do checklist (como sempre)
+  → OrderStore.setDeviceReading(deviceId, 98000)    (mesmo caminho do "+ Quilometragem")
+  → TenantDeviceRepository.setReading(...)           (se pode cadastrar equipamentos)
+Abrir checklist com a OS já com leitura → a pergunta vazia já vem respondida
+Resposta < última visita → aviso "Menor que os 102.000 km da última visita. Está certo?" (não trava)
+```
+
+- **Equipamento**: o do checklist (`OrderForm.deviceId`) ou, sem ele, o único da OS. Sem equipamento, com vários e nenhum escolhido, ou em ramo sem leitura: pergunta normal.
+- **Última visita**: a última leitura do equipamento (`customData`), lida ao abrir o checklist. Se ela é igual à leitura desta OS, veio desta visita e não há aviso.
+- **IA (#688)**: a resposta que a IA aplicar deve passar pelo mesmo `_saveItemResponse` do `FormFillScreen`, que já chama `_syncReading`.
+- Código: `lib/utils/checklist_reading.dart`, `FormFillScreen.readingLink`, `_readingLinkFor` em `order_screen_v2.dart`, `OrderScreenActions.deviceLastReading`.
+
+## Fora deste desenho
+
+- **Checklist no web**: o app web não liga a pergunta à leitura (o km respondido lá fica só no checklist).
+- **Editor de modelo**: o editor do app mantém a marca `reading` ao editar a pergunta, mas não tem chave para ligar ou desligar.
 - PDF e página do cliente ainda não mostram a leitura.
 
 ## Exemplos de Uso

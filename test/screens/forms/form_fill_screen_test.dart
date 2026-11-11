@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
@@ -13,6 +14,7 @@ import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/utils/checklist_reading.dart';
 
 class _FakeForms implements FormsService {
   _FakeForms({this.fail = false, List<FormResponse>? server})
@@ -147,6 +149,53 @@ Future<void> _open(WidgetTester tester, Widget screen) async {
   await tester.pumpWidget(_app(screen));
   await tester.tap(find.text('abrir'));
   await tester.pumpAndSettle();
+}
+
+const _mileage = CustomField(
+  key: 'device.mileage',
+  type: 'number',
+  labels: {'pt-BR': 'Quilometragem'},
+  suffix: 'km',
+  reading: true,
+);
+
+/// Vehicle check-in: the km question is the device's reading.
+OrderForm _readingForm({List<FormResponse> responses = const []}) => OrderForm(
+  id: 'f1',
+  formDefinitionId: 'd1',
+  title: 'Entrada do veículo',
+  responses: responses,
+  items: [
+    FormItemDefinition(
+      id: 'km',
+      label: 'Quilometragem Atual',
+      type: FormItemType.number,
+      reading: true,
+    ),
+    FormItemDefinition(
+      id: 'a',
+      label: 'Tem estepe?',
+      type: FormItemType.boolean,
+    ),
+  ],
+);
+
+ChecklistReadingLink _link({
+  int? order,
+  int? lastVisit,
+  required List<int> recorded,
+}) {
+  var current = order;
+  return ChecklistReadingLink(
+    deviceId: 'd1',
+    field: _mileage,
+    orderReading: () => current,
+    onReading: (value) {
+      recorded.add(value);
+      current = value;
+    },
+    lastVisit: Future.value(lastVisit),
+  );
 }
 
 void main() {
@@ -602,5 +651,116 @@ void main() {
       find.text('Foto 1: Risco', skipOffstage: false),
       findsNothing,
     );
+  });
+
+  group('question linked to the device reading', () {
+    testWidgets("the order's reading answers it on opening", (tester) async {
+      final forms = _FakeForms();
+      final recorded = <int>[];
+      await _open(
+        tester,
+        FormFillScreen(
+          orderId: 'o1',
+          companyId: 'c1',
+          orderForm: _readingForm(),
+          readingLink: _link(order: 98000, recorded: recorded),
+          formsService: forms,
+          photoService: _FakePhotos(),
+        ),
+      );
+
+      final change = forms.changes.single as FormValueChange;
+      expect(change.itemId, 'km');
+      expect(change.value, '98000');
+      // Not written back to the order: it came from there.
+      expect(recorded, isEmpty);
+      // Opens on the first question still without an answer.
+      expect(find.byType(FormQuestionSheet), findsOneWidget);
+      expect(find.text('Tem estepe?'), findsWidgets);
+    });
+
+    testWidgets('the answer is the order reading; below the last visit, a '
+        'notice that does not block', (tester) async {
+      final forms = _FakeForms();
+      final recorded = <int>[];
+      await _open(
+        tester,
+        FormFillScreen(
+          orderId: 'o1',
+          companyId: 'c1',
+          orderForm: _readingForm(),
+          readingLink: _link(lastVisit: 102000, recorded: recorded),
+          formsService: forms,
+          photoService: _FakePhotos(),
+        ),
+      );
+      expect(forms.changes, isEmpty);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('question_field')),
+        '98000',
+      );
+      await tester.tap(find.text('Próxima'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(recorded, [98000]);
+      expect(forms.saved.single.value, '98000');
+      expect(
+        find.text('Menor que os 102.000 km da última visita. Está certo?'),
+        findsOneWidget,
+      );
+      // Moved on to the next question all the same.
+      expect(find.text('Tem estepe?'), findsWidgets);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('above the last visit: saved, no notice', (tester) async {
+      final recorded = <int>[];
+      await _open(
+        tester,
+        FormFillScreen(
+          orderId: 'o1',
+          companyId: 'c1',
+          orderForm: _readingForm(),
+          readingLink: _link(lastVisit: 102000, recorded: recorded),
+          formsService: _FakeForms(),
+          photoService: _FakePhotos(),
+        ),
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('question_field')),
+        '103.500',
+      );
+      await tester.tap(find.text('Próxima'));
+      await tester.pumpAndSettle();
+
+      expect(recorded, [103500]);
+      expect(find.textContaining('da última visita'), findsNothing);
+    });
+
+    testWidgets('without a link (no device, segment without reading): a '
+        'plain number question', (tester) async {
+      final forms = _FakeForms();
+      await _open(
+        tester,
+        FormFillScreen(
+          orderId: 'o1',
+          companyId: 'c1',
+          orderForm: _readingForm(),
+          formsService: forms,
+          photoService: _FakePhotos(),
+        ),
+      );
+      expect(forms.changes, isEmpty);
+      await tester.enterText(
+        find.byKey(const ValueKey('question_field')),
+        '98000',
+      );
+      await tester.tap(find.text('Próxima'));
+      await tester.pumpAndSettle();
+      expect(forms.saved.single.value, '98000');
+    });
   });
 }
