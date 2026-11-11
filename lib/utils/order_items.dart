@@ -78,22 +78,34 @@ List<String> mostUsedItemKeys(List<Order> orders, {int limit = 5}) {
   return keys.take(limit).toList();
 }
 
-/// Service names for one line of a list ("5× pintura, polimento"): the same
-/// service (case and spaces ignored) shows once, with how many times it is in
-/// the order, in the order it first appears. Same rule as the web app
+/// Service names for one line of a list ("5× pintura (capô, porta)"): the
+/// same service (case and spaces ignored) shows once, with how many times it
+/// is in the order, in the order it first appears, followed by the
+/// descriptions of its lines (each once). Same rule as the web app
 /// (`servicesSummary` in firebase/webapp/src/lib/orders/model.ts).
 String servicesSummary(Iterable<OrderService> services) {
-  final counts = <String, int>{};
+  String keyOf(String text) =>
+      text.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   final names = <String, String>{};
+  final counts = <String, int>{};
+  final notes = <String, Map<String, String>>{};
   for (final s in services) {
     final name = (s.service?.name ?? s.description ?? '').trim();
     if (name.isEmpty) continue;
-    final key = name.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    final key = keyOf(name);
     names.putIfAbsent(key, () => name);
     counts[key] = (counts[key] ?? 0) + 1;
+    final note = (s.description ?? '').trim();
+    if (note.isNotEmpty && keyOf(note) != key) {
+      (notes[key] ??= {}).putIfAbsent(keyOf(note), () => note);
+    }
   }
   return [
     for (final key in names.keys)
-      counts[key]! > 1 ? '${counts[key]}× ${names[key]}' : names[key]!,
+      [
+        if (counts[key]! > 1) '${counts[key]}× ',
+        names[key]!,
+        if (notes[key] case final n?) ' (${n.values.join(', ')})',
+      ].join(),
   ].join(', ');
 }

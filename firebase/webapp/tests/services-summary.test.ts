@@ -14,4 +14,9 @@ describe('servicesSummary', () => {
     expect(servicesSummary(order(['Troca de óleo', null, '  ']))).toBe('Troca de óleo, Alinhamento')
     expect(servicesSummary(order([]))).toBe('')
   })
+  it('descriptions follow the service, each once', () => {
+    const lines = [['pintura', 'capô'], ['pintura', 'porta'], ['pintura', 'Capô'], ['pintura', null], ['polimento', 'polimento']]
+    const withNotes = normalizeOrder('o2', { services: lines.map(([name, description]) => ({ service: { id: name, name }, description, value: 100 })) }, true)
+    expect(servicesSummary(withNotes)).toBe('4× pintura (capô, porta), polimento')
+  })
 })
