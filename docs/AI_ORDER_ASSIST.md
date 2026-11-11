@@ -363,15 +363,17 @@ Medição com os modelos reais, prompt e parser da OS. Frases: `ai-memory-eval.t
 | Frases em sequência | 98/98 | 98/98 | 94/96 (2 sem resposta) |
 | Dinheiro (ajuste + bot) | 195/196 (1 resposta cortada) | não medido | não medido |
 | Dinheiro, inéditas | 130/130, nada virou pagamento | — | — |
-| Fotos sem erro | 15/22 | 16/22 | 20/22 (1 sem resposta) |
-| Dado inventado nas fotos | 5 nomes de veículo descritivos ("Veículo com dano na lateral traseira") e 1 marca errada | 1 placa inventada, 1 nome "Meeting02" | 0 |
-| Lado errado nas fotos | 2 | 3 | 1 |
+| Fotos sem erro, prompt antigo | 13/22 | 16/22 | 21/22 (1 sem resposta) |
+| Fotos sem erro, prompt com a regra do nome | 17/22 (+2 sem serviço sugerido) | — | 19/22 |
+| Dado inventado nas fotos, prompt antigo | 5 nomes descritivos ("Veículo com dano na lateral traseira"), 1 marca errada | 1 placa inventada, 1 nome "Meeting02" | 0 |
+| Dado inventado nas fotos, prompt novo | 3 nomes descritivos | — | 1 modelo errado, 1 nome descritivo |
+| Lado errado nas fotos (prompt antigo) | 4 | 1 | 0 |
 | Tempo, texto (mediana / p90) | 1,2 s / 2,0 s | 1,3 s / 2,0 s | 2,3 s / 3,1 s |
-| Tempo, foto (mediana / p90) | 2,2 s / 3,0 s | 3,1 s / 6,7 s | 4,9 s / 14,9 s |
+| Tempo, foto (mediana / p90 / pior) | 2,2 s / 4,4 s / 6,5 s | 3,1 s / 6,7 s | 4,7 s / 12,4 s / 44 s |
 | Custo, texto | US$ 0,0003 | US$ 0,0010 | US$ 0,0018 |
 | Custo, foto | US$ 0,0006 | US$ 0,0021 | US$ 0,0039 |
 
-O Haiku escreve observações mais completas e não repete item. Os nomes descritivos aparecem como veículo novo com ✦ e só são cadastrados no ✓. A resposta cortada ("2 para-choque 850") não se repetiu em 100 chamadas da mesma frase. Ela vira `AI_UNAVAILABLE` e a cota volta. O Gemini 3.8 erra menos nas fotos, mas é o mais lento, e 3 de cerca de 120 chamadas não voltaram em 45 s.
+O Haiku escreve observações mais completas e não repete item. Para os nomes descritivos, o prompt ganhou uma regra (2026-11-11): da foto, o nome é marca e modelo reconhecidos; sem certeza, o veículo fica vazio e a descrição vai para as observações; lado só quando dá para saber. Ela baixou os nomes descritivos do Haiku de 5 para 3 e acabou com a marca errada, mas ele passou a sugerir menos serviço numa foto de amassado. Com a regra, as frases continuaram 98/98 e o dinheiro 97/98 (a falha é segura: nada proposto). O que sobra aparece como veículo novo com ✦ e só é cadastrado no ✓. A resposta cortada ("2 para-choque 850") não se repetiu em 100 chamadas da mesma frase. Ela vira `AI_UNAVAILABLE` e a cota volta. O Gemini 3.8 erra menos nas fotos, mas é o mais lento, e 3 de cerca de 120 chamadas não voltaram em 45 s.
 
 **Ligar** (depois do merge e do deploy da Function `api` terminar):
 
