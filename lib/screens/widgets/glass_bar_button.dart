@@ -150,7 +150,13 @@ class AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canPop = Navigator.canPop(context);
+    // Whether there is a screen *below* this one, as the iOS bar asks.
+    // Navigator.canPop is also true while a screen is open *above*, and it
+    // does not rebuild the page when that screen closes: a page redrawn
+    // while covered (new data, light/dark switch) kept a stray "Voltar" after
+    // coming back to it. ModalRoute.of rebuilds when the routes around change.
+    final route = ModalRoute.of(context);
+    final canPop = route?.canPop ?? Navigator.canPop(context);
     return CupertinoSliverNavigationBar(
       automaticallyImplyLeading: false,
       leading:
