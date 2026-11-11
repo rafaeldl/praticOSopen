@@ -442,13 +442,13 @@ export function nextStep(order: Order, access: OrderAccess): NextStep | null {
 // List: filters, groups, summary
 // ---------------------------------------------------------------------------
 
-export type ListFilter = 'open' | 'late' | 'today' | 'quotes' | 'onHold' | 'unpaid' | 'mine' | 'done' | 'all'
+export type ListFilter = 'open' | 'late' | 'quotes' | 'onHold' | 'unpaid' | 'mine' | 'done' | 'all'
 
 /** Technician: Minhas, Paradas, Todas. Everyone else: the five of the app. */
 export function filtersFor(role: string | null | undefined, showsMoney = false): ListFilter[] {
   if (orderRoleOf(role) === 'technician') return ['mine', 'onHold', 'all']
-  // The app's five, plus Atrasadas, Para hoje and Sem receber of the prototype (Sem receber only with values).
-  return ['open', 'late', 'today', 'quotes', 'onHold', ...(showsMoney ? (['unpaid'] as ListFilter[]) : []), 'done', 'all']
+  // Same filters and order as the app (HomeContent._buildFilters); Sem receber only with values.
+  return ['open', 'late', 'quotes', 'onHold', ...(showsMoney ? (['unpaid'] as ListFilter[]) : []), 'done', 'all']
 }
 
 export function defaultFilter(role: string | null | undefined): ListFilter {
@@ -478,7 +478,7 @@ export function nextVisit(rows: Order[], now: Date, uid: string | null): Order |
  * Rows of a filter in screen order (home.rules.groups). The rows come from the
  * filter's own server query (lib/orders/data.ts), so none is left out here:
  * open: late (oldest promise first), then today, then server order.
- * late: oldest promise first. today: by hour. quotes: oldest first.
+ * late: oldest promise first. quotes: oldest first.
  * onHold: stopped longest first. mine: today's visits by hour first.
  */
 export function rowsFor(filter: ListFilter, rows: Order[], now: Date, uid: string | null): Order[] {
@@ -491,10 +491,6 @@ export function rowsFor(filter: ListFilter, rows: Order[], now: Date, uid: strin
     }
     case 'late':
       return [...rows].sort(byDate('dueDate'))
-    case 'today': {
-      const at = (o: Order) => [o.dueDate, o.scheduledDate].filter((iso) => sameDay(iso, now)).sort()[0] ?? ''
-      return [...rows].sort((a, b) => at(a).localeCompare(at(b)) || a.id.localeCompare(b.id))
-    }
     case 'quotes':
       return [...rows].sort(byDate('createdAt'))
     case 'onHold':
@@ -519,8 +515,6 @@ export function matchesFilter(filter: ListFilter, order: Order, now: Date, uid: 
       return isOpen(order)
     case 'late':
       return isOpen(order) && overdue(order, now)
-    case 'today':
-      return isOpen(order) && (sameDay(order.dueDate, now) || sameDay(order.scheduledDate, now))
     case 'unpaid':
       return remainingOnRow(order) !== null
     case 'quotes':

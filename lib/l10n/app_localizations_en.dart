@@ -7768,6 +7768,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerSearchOrders => 'Search by order number';
 
   @override
+  String get filterLate => 'Late';
+
+  @override
+  String get filterUnpaid => 'To receive';
+
+  @override
+  String get noLateOrders => 'Nothing late.';
+
+  @override
+  String get noUnpaidOrders => 'Nothing to receive.';
+
+  @override
   String get checklistNoteAdd => '+ Note';
 
   @override

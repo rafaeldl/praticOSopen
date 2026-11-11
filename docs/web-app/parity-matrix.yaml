@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 691 linhas, 579 capacidades de usuário e 112 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
+# Contagem: 692 linhas, 579 capacidades de usuário e 113 de lógica ou componente; 58 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -972,6 +972,23 @@ rows:
   web_exception: null
   e2e: firebase/webapp/e2e/analytics.spec.ts
   note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /customers, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
+- id: nav.tabs.back-to-root
+  screen: lib/screens/menu_navigation/tab_stack.dart
+  route: null
+  action: "Tocar numa aba volta à primeira tela dela; o \"+\" é amarelo só ali"
+  kind: logic
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: {status: proposed, reason: "No web cada item do menu já abre a página dele, sem pilha de telas por aba. A cor do botão segue a regra do web: \"Nova OS\" amarela só sem OS aberta no painel (OrdersView)."}
+  e2e: null
+  note: "App: cada aba guarda as telas abertas nela; tocar na aba fecha tudo e mostra a lista de OS, de clientes, a agenda ou o Financeiro. O \"+\" (Nova OS) fica marinho quando há outra tela aberta por cima."
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null

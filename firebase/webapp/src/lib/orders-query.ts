@@ -47,8 +47,8 @@ export interface DayBounds {
 const OPEN = ['quote', 'approved', 'progress']
 
 /**
- * The Firestore queries of an Início filter: one, or two for Para hoje (the
- * delivery today and the visit today). Each query is the filter itself, so a
+ * The Firestore query of an Início filter (in a list, as the loaders take
+ * sources). Each query is the filter itself, so a
  * page never needs filtering on screen and a count of it is the filter's count.
  * Dates are stored as text (the app writes local time without a zone), so the
  * bounds are the company's day in that form. Each query has its composite
@@ -66,12 +66,6 @@ export function filterQueries(
     case 'late':
       // The lower bound leaves out an empty text (no date).
       return day ? [q({ statuses: OPEN, where: [['dueDate', '>', ''], ['dueDate', '<', day.today]], order: { field: 'dueDate', dir: 'asc' } })] : null
-    case 'today':
-      return day
-        ? (['dueDate', 'scheduledDate'] as const).map((field) =>
-            q({ statuses: OPEN, where: [[field, '>=', day.today], [field, '<', day.tomorrow]], order: { field, dir: 'asc' } }),
-          )
-        : null
     case 'quotes':
       // Waiting longest first.
       return [q({ statuses: ['quote'], order: { field: 'createdAt', dir: 'asc' } })]

@@ -7789,6 +7789,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customerSearchOrders => 'Buscar por número de OS';
 
   @override
+  String get filterLate => 'Atrasadas';
+
+  @override
+  String get filterUnpaid => 'Por cobrar';
+
+  @override
+  String get noLateOrders => 'Nada atrasado.';
+
+  @override
+  String get noUnpaidOrders => 'Nada por cobrar.';
+
+  @override
   String get checklistNoteAdd => '+ Observación';
 
   @override

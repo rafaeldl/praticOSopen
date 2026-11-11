@@ -344,7 +344,7 @@ test.describe('Nova OS (usuários)', () => {
 })
 
 test.describe('Início (usuários)', () => {
-  test('P1: Sem receber com contagem; Atrasadas e Para hoje', async ({ page }) => {
+  test('P1: Sem receber com contagem; Atrasadas; sem Para hoje (fica na Agenda)', async ({ page }) => {
     await login(page, 'admin')
     const unpaid = page.getByRole('button', { name: /^Sem receber \d+$/ })
     await expect(unpaid).toBeVisible()
@@ -360,9 +360,7 @@ test.describe('Início (usuários)', () => {
     await page.getByRole('button', { name: 'Atrasadas' }).click()
     await expect(row(page, 501)).toHaveCount(1)
     await expect(row(page, 502)).toHaveCount(0)
-    await page.getByRole('button', { name: 'Para hoje' }).click()
-    await expect(row(page, 502)).toHaveCount(1)
-    await expect(row(page, 501)).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Para hoje' })).toHaveCount(0)
   })
 
   test('P2: busca oferece procurar em todas, com o número exato primeiro, e mostra quantas achou', async ({ page }) => {
