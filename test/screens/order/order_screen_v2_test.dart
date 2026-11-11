@@ -1960,9 +1960,8 @@ void main() {
   });
 
   group('"O que vai na OS?"', () {
-    testWidgets('one search over services and products; tapping adds', (
-      tester,
-    ) async {
+    testWidgets('one search over services and products; tapping opens the '
+        'item sheet, Salvar adds', (tester) async {
       final store = OrderStore();
       await _pump(tester, screen(store));
 
@@ -1977,6 +1976,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Alinhamento'), findsNothing);
       await tester.tap(find.text('Filtro de óleo'));
+      await tester.pumpAndSettle();
+      // Not in the order yet: the sheet asks description, price, quantity.
+      expect(store.products, isEmpty);
+      expect(find.text('Descrição'), findsOneWidget);
+      expect(find.text('Não adicionar'), findsOneWidget);
+      expect(find.text('Tirar da OS'), findsNothing);
+      await tester.tap(find.text('Salvar'));
       await tester.pumpAndSettle();
 
       expect(store.products!.single.product!.name, 'Filtro de óleo');
@@ -2020,6 +2026,9 @@ void main() {
         await tester.enterText(fields.at(1), '150');
         await tester.pump();
         await tester.tap(find.byKey(const ValueKey('new_order_save')).last);
+        await tester.pumpAndSettle();
+        // Then the line itself: description and price for this order.
+        await tester.tap(find.text('Salvar'));
         await tester.pumpAndSettle();
 
         expect(catalog.saved.single.$1, CatalogKind.service);
@@ -2079,6 +2088,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
+      // Cancelar on the new item's sheet still adds it, as picked.
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(store.services, hasLength(1));
       expect(find.text('sem valor'), findsOneWidget);
 
       await tester.tap(find.text('Alinhamento'));
@@ -2099,6 +2112,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Troca de óleo'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Troca de óleo'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Tirar da OS'));
@@ -2107,7 +2122,7 @@ void main() {
       expect(find.text('Troca de óleo'), findsNothing);
     });
 
-    testWidgets('the item sheet writes the description of the line', (
+    testWidgets('picking an item asks its description right away', (
       tester,
     ) async {
       final store = OrderStore();
@@ -2117,8 +2132,6 @@ void main() {
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Alinhamento'));
-      await tester.pumpAndSettle();
       expect(find.text('Descrição'), findsOneWidget);
       final description = find.descendant(
         of: find.widgetWithText(AppFormField, 'Descrição'),
@@ -2139,6 +2152,18 @@ void main() {
       await tester.tap(find.text('Salvar'));
       await tester.pumpAndSettle();
       expect(store.services!.single.description, isNull);
+    });
+
+    testWidgets('"Não adicionar" leaves the order as it was', (tester) async {
+      final store = OrderStore();
+      await _pump(tester, screen(store));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Não adicionar'));
+      await tester.pumpAndSettle();
+      expect(store.services, isEmpty);
     });
 
     testWidgets('exact name match hides the create row', (tester) async {
@@ -3298,6 +3323,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
 
       final added = store.services!.last;
       expect(added.service!.name, 'Alinhamento');
@@ -3328,6 +3355,69 @@ void main() {
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
       expect(store.services, hasLength(3));
+    });
+
+    Future<OrderStore> addToAllCars(
+      WidgetTester tester,
+      Future<void> Function() onSheet,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          devicePicker: (_, _) async =>
+              DevicePickerResult(DevicePickerAction.all),
+        ),
+        args: {'order': twoCars()},
+      );
+      await tester.ensureVisible(find.byKey(const ValueKey('order_add_item')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('order_add_item')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      await onSheet();
+      await tester.pumpAndSettle();
+      return store;
+    }
+
+    testWidgets('"todos": description and price go to every vehicle', (
+      tester,
+    ) async {
+      final store = await addToAllCars(tester, () async {
+        final description = find.descendant(
+          of: find.widgetWithText(AppFormField, 'Descrição'),
+          matching: find.byType(CupertinoTextField),
+        );
+        await tester.enterText(description, 'Eixo dianteiro');
+        await tester.enterText(find.byType(CupertinoTextField).last, '80');
+        await tester.tap(find.text('Salvar'));
+      });
+
+      final added = store.services!.skip(3).toList();
+      expect(added.map((s) => s.deviceId), ['d1', 'd2']);
+      expect(added.map((s) => s.description), everyElement('Eixo dianteiro'));
+      expect(added.map((s) => s.value), everyElement(80));
+      expect(store.pendingDuplicateAll, isFalse);
+    });
+
+    testWidgets('"Não adicionar" after "todos" leaves no pending vehicle', (
+      tester,
+    ) async {
+      final store = await addToAllCars(
+        tester,
+        () => tester.tap(find.text('Não adicionar')),
+      );
+      expect(store.services, hasLength(3));
+      expect(store.pendingDuplicateAll, isFalse);
+      expect(store.pendingDeviceIds, isNull);
     });
 
     test('applyDevicePick maps each answer to the store', () {

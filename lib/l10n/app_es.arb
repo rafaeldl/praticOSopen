@@ -1126,6 +1126,7 @@
   "orderItemLess": "Uno menos",
   "orderItemMore": "Uno más",
   "orderItemRemove": "Quitar de la OS",
+  "orderItemDiscard": "No agregar",
   "orderTotalLabel": "Total",
   "orderRemainingToReceive": "Falta cobrar {amount}",
   "@orderRemainingToReceive": {

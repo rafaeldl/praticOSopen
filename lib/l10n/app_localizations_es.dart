@@ -2508,6 +2508,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderItemRemove => 'Quitar de la OS';
 
   @override
+  String get orderItemDiscard => 'No agregar';
+
+  @override
   String get orderTotalLabel => 'Total';
 
   @override

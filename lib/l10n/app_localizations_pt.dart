@@ -2500,6 +2500,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderItemRemove => 'Tirar da OS';
 
   @override
+  String get orderItemDiscard => 'Não adicionar';
+
+  @override
   String get orderTotalLabel => 'Total';
 
   @override

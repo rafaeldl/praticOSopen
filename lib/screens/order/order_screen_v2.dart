@@ -724,16 +724,32 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (!mounted || pick == null) return;
-    // 2+ vehicles: which vehicle, all of them, several, or general. Set only now so cancelling leaves no state.
+    // 2+ vehicles: which vehicle, all of them, several, or general. Applied
+    // only after the item sheet so cancelling leaves no state.
+    DevicePickerResult? devicePick;
     if (_store.devices.length >= 2) {
-      final result = await (widget.devicePicker ?? DevicePickerSheet.show)(
+      devicePick = await (widget.devicePicker ?? DevicePickerSheet.show)(
         context,
         _store.devices.toList(),
       );
-      if (!mounted || result == null) return;
-      applyDevicePick(_store, result);
+      if (!mounted || devicePick == null) return;
     }
-    addPickToOrder(_store, pick);
+    // Description and price before the item goes in, so "todos" / "vários"
+    // copy them to every vehicle. Cancelar still adds it as picked.
+    final isService = pick.kind == CatalogKind.service;
+    final edit = await AppSheet.show<OrderItemEdit>(
+      context,
+      (_) => OrderItemSheet(
+        name: pick.item.name ?? '',
+        value: pick.item.value,
+        quantity: isService ? null : 1,
+        showPrice: _permissions.canViewPrices(),
+        adding: true,
+      ),
+    );
+    if (!mounted || (edit?.remove ?? false)) return;
+    if (devicePick != null) applyDevicePick(_store, devicePick);
+    addPickToOrder(_store, pick, edit);
   }
 
   /// A saved order's items change only for who can edit its main fields
@@ -5095,10 +5111,18 @@ void applyDevicePick(OrderStore store, DevicePickerResult result) {
   }
 }
 
-/// Adds what was picked in "O que vai na OS?" to the order: price copied from
-/// the catalog (null stays null, "sem valor"), quantity 1.
-void addPickToOrder(OrderStore store, OrderItemPick pick) {
+/// Adds what was picked in "O que vai na OS?" to the order. With an [edit]
+/// from the item sheet, its description, price and quantity; without one
+/// (sheet cancelled), the catalog price (null stays null, "sem valor") and
+/// quantity 1. With 2+ vehicles the store copies them to each line.
+void addPickToOrder(
+  OrderStore store,
+  OrderItemPick pick, [
+  OrderItemEdit? edit,
+]) {
   final item = pick.item;
+  final value = edit == null ? item.value : edit.value;
+  final description = edit?.description;
   if (pick.kind == CatalogKind.service) {
     final origin = item.origin;
     final aggr = origin is Service
@@ -5111,7 +5135,8 @@ void addPickToOrder(OrderStore store, OrderItemPick pick) {
     store.addService(
       OrderService()
         ..service = aggr
-        ..value = item.value,
+        ..description = description
+        ..value = value,
     );
   } else {
     final origin = item.origin;
@@ -5122,12 +5147,14 @@ void addPickToOrder(OrderStore store, OrderItemPick pick) {
             ..name = item.name
             ..value = item.value
             ..photo = item.photo);
+    final quantity = edit?.quantity ?? 1;
     store.addProduct(
       OrderProduct()
         ..product = aggr
-        ..value = item.value
-        ..quantity = 1
-        ..total = item.value,
+        ..description = description
+        ..value = value
+        ..quantity = quantity
+        ..total = value == null ? null : value * quantity,
     );
   }
 }

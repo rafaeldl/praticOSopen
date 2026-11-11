@@ -13,7 +13,7 @@ Specs: `docs/superpowers/specs/2026-10-11-telas-os-ia-design.md` (vale sobre) `2
 | `lib/screens/order/order_route.dart` | `OrderRoute` (rota `/order`): abre a `OrderScreenV2`, que lê os argumentos (`order`, e `scrollToComments`/`commentId` vindos de notificação). `openNewOrder` abre a Nova OS em sheet grande |
 | `lib/screens/order/order_screen_v2.dart` | A tela: status, próximo passo, cliente/veículo, itens, totais, "…" |
 | `lib/screens/order/order_item_search_screen.dart` | "O que vai na OS?": uma busca em serviços e produtos; "Criar “X” e pôr na OS"; "Mais usados" |
-| `lib/screens/order/order_item_sheet.dart` | Sheet do item: preço (em branco = sem valor), quantidade (produto), "Tirar da OS" |
+| `lib/screens/order/order_item_sheet.dart` | Sheet do item: descrição, preço (em branco = sem valor), quantidade (produto), "Tirar da OS" (item novo: "Não adicionar") |
 | `lib/screens/order/order_screen_services.dart` | `OrderPermissions` (preços, status, apagar, campos principais, checklists, fotos) e `OrderScreenActions` (PDF, link do cliente, pagamentos, fotos e documentos, checklists, comentários, mapa, desconto, contrato), injetáveis nos testes |
 | `lib/screens/order/order_extras.dart` | Sheets de data (agendar, prazo) e de endereço; `checklistMissing` |
 | `lib/screens/widgets/order_custom_fields.dart` | Campos do segmento (`service_order.*`): `orderBuiltInFieldKeys`, `orderCustomFieldsFor`, `OrderCustomFieldSections`, `applyCustomFieldValue` |
@@ -30,7 +30,7 @@ Sem modelo novo e sem campo novo (nada muda no Firestore nem nas Functions). Est
 - **OS nova:** `OrderStore.loadOrder()` + `deferSave = true`. Escolher cliente, veículo, itens e status muda só a memória. **"Salvar OS"** (só com cliente) desliga o `deferSave` e chama `createItem()`. Voltar com algo preenchido pergunta "Sair sem salvar?".
 - **OS existente:** busca a versão atual (`getSingle`) e chama `setOrder`. Cada mudança grava na hora.
 - **Cliente:** `/customer_list` ("Quem é o cliente?"); buscar pela placa devolve cliente e veículo (`CustomerPick`).
-- **Itens:** tocar no item da busca já põe na OS com o preço do catálogo. Criar pela busca grava o serviço (ou produto, se só houver `manageProducts`) só com o nome.
+- **Itens:** tocar no item da busca abre o sheet do item (descrição, preço do catálogo, quantidade) antes de pôr na OS. "Salvar" põe com o que foi escrito; "Cancelar" põe como veio do catálogo; "Não adicionar" não põe nada. Criar pela busca grava o serviço (ou produto, se só houver `manageProducts`) só com o nome.
 
 ## Regras de Negócio
 
@@ -46,7 +46,7 @@ Sem modelo novo e sem campo novo (nada muda no Firestore nem nas Functions). Est
 10. Desconto entra como transação (`addDiscountTransaction`, o mesmo do Receber) e aparece acima do total.
 11. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
 12. Campos do segmento (`customData`) aparecem na OS logo depois dos itens, agrupados por seção, (campos já fixos da tela ficam de fora; esvaziar o último apaga `customData`). Gravam na hora numa OS salva e só em memória até "Salvar OS" numa nova.
-13. Com 2 ou mais veículos os itens se agrupam por veículo (e "Geral" para os sem veículo), cada bloco com o seu "Subtotal" (só com `viewPrices`). Ao pôr um item, a pergunta do `DevicePickerSheet`: um veículo, vários, todos ou geral.
+13. Com 2 ou mais veículos os itens se agrupam por veículo (e "Geral" para os sem veículo), cada bloco com o seu "Subtotal" (só com `viewPrices`). Ao pôr um item, a pergunta do `DevicePickerSheet`: um veículo, vários, todos ou geral. Ela vem antes do sheet do item e só é aplicada depois dele, então descrição e preço vão para cada cópia em "todos" e "vários", e "Não adicionar" não deixa veículo pendente.
 14. "Falar o que fazer" (e a leitura da foto pela IA) só aparece quando o servidor diz que a IA está ligada para a empresa (`GET /v1/app/ai/status`; desligada por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
 
 ## Exemplos de Uso

@@ -1126,6 +1126,7 @@
   "orderItemLess": "One less",
   "orderItemMore": "One more",
   "orderItemRemove": "Remove from the order",
+  "orderItemDiscard": "Don't add",
   "orderTotalLabel": "Total",
   "orderRemainingToReceive": "Left to receive {amount}",
   "@orderRemainingToReceive": {
