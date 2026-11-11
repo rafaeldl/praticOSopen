@@ -163,7 +163,9 @@ class _HomeContentState extends State<HomeContent> {
       widget.customerFilterName == null &&
       widget.view != HomeView.done &&
       widget.view != HomeView.quotes &&
-      widget.view != HomeView.onHold;
+      widget.view != HomeView.onHold &&
+      widget.view != HomeView.late &&
+      widget.view != HomeView.unpaid;
 
   /// Orders of the current view before search ("Minhas" keeps only the ones
   /// assigned to the user, "Orçamentos" only the quotes, "Paradas" only the
@@ -172,6 +174,8 @@ class _HomeContentState extends State<HomeContent> {
     HomeView.mine => HomeRules.assignedTo(widget.orders, widget.currentUserId),
     HomeView.quotes => HomeRules.waitingQuotes(widget.orders),
     HomeView.onHold => HomeRules.stopped(widget.orders),
+    HomeView.late => HomeRules.overdue(widget.orders, _now),
+    HomeView.unpaid => HomeRules.unpaidDone(widget.orders),
     _ => widget.orders,
   };
 
@@ -304,6 +308,8 @@ class _HomeContentState extends State<HomeContent> {
         text = l10n.homeQuotesWaiting(base.length);
       } else if (widget.view == HomeView.onHold) {
         text = l10n.homeOnHoldCount(base.length);
+      } else if (widget.view == HomeView.late) {
+        text = l10n.homeLateCount(base.length);
       } else if (widget.view == HomeView.mine) {
         final today = HomeRules.scheduledToday(base, _now).length;
         text = today > 0
@@ -389,6 +395,10 @@ class _HomeContentState extends State<HomeContent> {
                 ? l10n.noQuotesWaiting
                 : widget.view == HomeView.onHold
                 ? l10n.noOrdersOnHold
+                : widget.view == HomeView.late
+                ? l10n.noLateOrders
+                : widget.view == HomeView.unpaid
+                ? l10n.noUnpaidOrders
                 : l10n.noOrdersInView,
             actionLabel: mainView ? l10n.seeAllOrders : null,
             onAction: mainView
@@ -624,8 +634,10 @@ class _HomeContentState extends State<HomeContent> {
           ]
         : [
             (HomeView.open, l10n.filterOpen),
+            (HomeView.late, l10n.filterLate),
             (HomeView.quotes, l10n.filterQuotes),
             (HomeView.onHold, l10n.filterOnHold),
+            if (widget.showPrices) (HomeView.unpaid, l10n.filterUnpaid),
             (HomeView.done, l10n.filterDone),
             (HomeView.all, l10n.filterAll),
           ];
@@ -711,6 +723,8 @@ class _HomeContentState extends State<HomeContent> {
         _addRows(context, items, HomeRules.sortOpen(visible, now), now);
       case HomeView.quotes:
       case HomeView.onHold:
+      case HomeView.late:
+      case HomeView.unpaid:
       case HomeView.done:
         _addRows(context, items, visible, now);
       case HomeView.all:
@@ -1021,10 +1035,10 @@ class _FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final background = selected
-        ? AppColors.accent.resolveFrom(context)
+        ? AppColors.navyFill.resolveFrom(context)
         : AppColors.secondaryFill.resolveFrom(context);
     final foreground = selected
-        ? AppColors.onAccent.resolveFrom(context)
+        ? AppColors.onNavyFill.resolveFrom(context)
         : AppColors.onSecondaryFill.resolveFrom(context);
     return Semantics(
       button: true,

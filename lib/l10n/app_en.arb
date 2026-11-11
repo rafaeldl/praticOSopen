@@ -2996,5 +2996,9 @@
   "customerShowAllOrders": "See all {count} orders",
   "customerShowLess": "Show less",
   "customerSearchDevices": "Search by name or plate",
-  "customerSearchOrders": "Search by order number"
+  "customerSearchOrders": "Search by order number",
+  "filterLate": "Late",
+  "filterUnpaid": "To receive",
+  "noLateOrders": "Nothing late.",
+  "noUnpaidOrders": "Nothing to receive."
 }

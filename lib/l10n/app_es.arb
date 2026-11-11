@@ -2984,5 +2984,9 @@
   "customerShowAllOrders": "Ver las {count} OS",
   "customerShowLess": "Mostrar menos",
   "customerSearchDevices": "Buscar por nombre o placa",
-  "customerSearchOrders": "Buscar por número de OS"
+  "customerSearchOrders": "Buscar por número de OS",
+  "filterLate": "Atrasadas",
+  "filterUnpaid": "Por cobrar",
+  "noLateOrders": "Nada atrasado.",
+  "noUnpaidOrders": "Nada por cobrar."
 }

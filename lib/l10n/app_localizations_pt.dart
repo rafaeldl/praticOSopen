@@ -7756,4 +7756,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get customerSearchOrders => 'Buscar pelo número da OS';
+
+  @override
+  String get filterLate => 'Atrasadas';
+
+  @override
+  String get filterUnpaid => 'Sem receber';
+
+  @override
+  String get noLateOrders => 'Nada atrasado.';
+
+  @override
+  String get noUnpaidOrders => 'Nada para receber.';
 }

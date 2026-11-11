@@ -29,9 +29,9 @@ Camada 2, superfície   site (vitrine)          sistema (ferramenta)
 
 | Papel | Claro | Escuro | Token CSS | `AppColors` | Uso |
 |---|---|---|---|---|---|
-| Marinho | `#07294F` | (faixa continua marinho) | `--color-navy` / `--color-ink` | `brandNavy` / `text` | Texto principal, faixas, barra lateral do web, "+" das abas |
+| Marinho | `#07294F` | (faixa continua marinho) | `--color-navy` / `--color-ink` | `brandNavy` / `text` | Texto principal, faixas, barra lateral do web, "+" das abas, filtro escolhido |
 | Amarelo de ação | `#FFC921`, texto `#07294F` | igual | `--color-marker` / `--color-marker-ink` | **novo** `action` / `onAction` | O botão principal da tela, o ✓ de salvar, o "OK" do modo Selecionar |
-| Azul da marca | `#1467C2` | `#7DB6F2` | `--color-accent` | `accent` / `accentText` | Link, foco, seleção e aba atual. Nunca botão cheio |
+| Azul da marca | `#1467C2` | `#7DB6F2` | `--color-accent` | `accent` / `accentText` | Link, foco, linha marcada e aba atual. Nunca botão cheio nem filtro escolhido |
 | Atrasada | `#C93029` | `#FF7A6B` | `--color-danger` (`--color-danger-text` no web) | `danger` | Problema: atraso, erro, ação destrutiva |
 | Parada e falta receber (texto) | `#975800` | `#F0B45A` | `--color-warning-text` (web) | `warning` | Texto de aviso: "Parada", cifrão de falta receber, título da seção Paradas |
 | Em andamento (ponto) | `#D98B09` | `#F0A93B` | `--color-warning` | **novo** `warningDot` | Só a bolinha de "em andamento" e das etapas |
@@ -70,8 +70,8 @@ Os hex do claro e do escuro são os do protótipo. No CSS a fonte da verdade con
 ## Regras de cor
 
 1. **Amarelo é a ação principal, uma por tela.** Botão principal (58 de altura no app), ✓ de salvar e "OK" de sair do modo Selecionar. No fundo branco o amarelo tem pouca borda (1,4:1), então leva contorno fino `rgba(7,41,79,.28)`.
-2. **Azul é link e seleção.** Nunca botão cheio. Círculo marcado, fundo da linha selecionada, aba atual e "+ Adicionar".
-3. **Marinho é o resto.** Texto, ações da barra de baixo ("Mudar etapa", "Mudar situação"), "+" das abas e botões do topo.
+2. **Azul é link e seleção.** Nunca botão cheio. Círculo marcado, fundo da linha selecionada, aba atual e "+ Adicionar". O filtro escolhido não é azul: é marinho (regra 3).
+3. **Marinho é o resto.** Texto, ações da barra de baixo ("Mudar etapa", "Mudar situação"), "+" das abas, botões do topo e o filtro escolhido (fundo marinho, texto branco; no escuro inverte para creme com texto marinho), como nas abas do site. Pílula no app, cantos de 6 px no web.
 4. **Cor nunca sozinha.** Todo aviso tem texto ou ícone: "Atrasada 2 dias", "Parada", cifrão com nome para o VoiceOver.
 5. **Bege no sistema é só apoio**, nunca fundo de tela.
 

@@ -3418,5 +3418,9 @@
   "customerSearchDevices": "Buscar pelo nome ou placa",
   "customerSearchOrders": "Buscar pelo número da OS",
   "@customerShowAllDevices": {"placeholders": {"count": {"type": "int"}, "devices": {"type": "String"}}},
-  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}}
+  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}},
+  "filterLate": "Atrasadas",
+  "filterUnpaid": "Sem receber",
+  "noLateOrders": "Nada atrasado.",
+  "noUnpaidOrders": "Nada para receber."
 }

@@ -167,7 +167,6 @@ const selectedOrders = computed(() => selected.value.map((id) => rows.value.find
 const FILTER_LABEL: Record<ListFilter, () => string> = {
   open: () => t('filterOpen'),
   late: () => t('web.orders.filterLate'),
-  today: () => t('web.orders.filterToday'),
   unpaid: () => t('web.orders.filterUnpaid'),
   quotes: () => t('filterQuotes'),
   onHold: () => t('filterOnHold'),
@@ -178,7 +177,6 @@ const FILTER_LABEL: Record<ListFilter, () => string> = {
 const EMPTY_TITLE: Record<ListFilter, () => string> = {
   open: () => t('noOpenOrders'),
   late: () => t('web.orders.noLate'),
-  today: () => t('web.orders.noToday'),
   unpaid: () => t('web.orders.noUnpaid'),
   quotes: () => t('noQuotesWaiting'),
   onHold: () => t('noOrdersOnHold'),

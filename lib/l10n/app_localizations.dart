@@ -12526,6 +12526,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Buscar pelo número da OS'**
   String get customerSearchOrders;
+
+  /// No description provided for @filterLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasadas'**
+  String get filterLate;
+
+  /// No description provided for @filterUnpaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem receber'**
+  String get filterUnpaid;
+
+  /// No description provided for @noLateOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada atrasado.'**
+  String get noLateOrders;
+
+  /// No description provided for @noUnpaidOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada para receber.'**
+  String get noUnpaidOrders;
 }
 
 class _AppLocalizationsDelegate
