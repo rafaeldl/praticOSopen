@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/utils/checklist_reading.dart';
 import 'package:mobx/mobx.dart';
@@ -1391,15 +1392,28 @@ void main() {
   });
 
   group('status line', () {
-    Finder chevron() =>
-        find.byKey(const ValueKey('order_header_status_chevron'));
+    // The status text: blue (accentText) like the other links when it opens
+    // the picker, gray otherwise.
+    int? statusColor(WidgetTester tester) => tester
+        .widget<RichText>(
+          find
+              .descendant(
+                of: find.byKey(const ValueKey('order_header_status_button')),
+                matching: find.byType(RichText),
+              )
+              .first,
+        )
+        .text
+        .style
+        ?.color
+        ?.toARGB32();
 
-    testWidgets('looks like a button and opens "Qual a situação?"', (
+    testWidgets('looks like a link and opens "Qual a situação?"', (
       tester,
     ) async {
       await _pump(tester, screen(OrderStore()), args: {'order': _order()});
 
-      expect(chevron(), findsOneWidget);
+      expect(statusColor(tester), AppColors.accentText.color.toARGB32());
       await tester.tap(find.byKey(const ValueKey('order_header_status')));
       await tester.pumpAndSettle();
       expect(find.text('Qual a situação?'), findsWidgets);
@@ -1412,7 +1426,7 @@ void main() {
         args: {'order': _order()},
       );
 
-      expect(chevron(), findsNothing);
+      expect(statusColor(tester), isNot(AppColors.accentText.color.toARGB32()));
       await tester.tap(
         find.byKey(const ValueKey('order_header_status_button')),
       );

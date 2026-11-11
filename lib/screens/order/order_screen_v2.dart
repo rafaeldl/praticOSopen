@@ -3892,6 +3892,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
     final action = _nextAction(config);
     final statusStyle = AppTypography.callout.copyWith(color: secondary);
+    final link = AppColors.accentText.resolveFrom(context);
     final canPickStatus =
         _permissions.availableStatuses(order).isNotEmpty ||
         _canChangeStage(order, config);
@@ -3994,8 +3995,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 ),
               ),
           const SizedBox(height: AppSpacing.sm),
-          // Looks like an iOS pop-up button (gray capsule and ⌃⌄) when it can
-          // be changed: people did not find out the plain line was tappable.
+          // Blue like the other links when it can be changed: people did not
+          // find out the plain gray line was tappable.
           _tappable(
             key: const ValueKey('order_header_status'),
             onTap: canPickStatus ? _selectStatus : null,
@@ -4007,20 +4008,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 alignment: AlignmentDirectional.centerStart,
                 child: Container(
                   key: const ValueKey('order_header_status_button'),
-                  padding: canPickStatus
-                      ? const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
-                        )
-                      : EdgeInsets.zero,
-                  decoration: canPickStatus
-                      ? BoxDecoration(
-                          color: AppColors.secondaryFill.resolveFrom(context),
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.minTouchTarget,
-                          ),
-                        )
-                      : null,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -4043,7 +4030,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                                     TextSpan(
                                       text: stage,
                                       style: TextStyle(
-                                        color: text,
+                                        color: canPickStatus ? link : text,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -4065,18 +4052,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                                 ),
                             ],
                           ),
-                          style: statusStyle,
+                          style: canPickStatus
+                              ? statusStyle.copyWith(color: link)
+                              : statusStyle,
                         ),
                       ),
-                      if (canPickStatus) ...[
-                        const SizedBox(width: AppSpacing.sm),
-                        Icon(
-                          CupertinoIcons.chevron_up_chevron_down,
-                          key: const ValueKey('order_header_status_chevron'),
-                          size: 16,
-                          color: AppColors.accentText.resolveFrom(context),
-                        ),
-                      ],
                     ],
                   ),
                 ),
