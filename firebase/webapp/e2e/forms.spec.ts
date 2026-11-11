@@ -425,6 +425,73 @@ test('fotos: pôr na pergunta, ver, tirar (e o arquivo sai); obrigatória vazia 
   await expect(page.getByTestId('photo-input-p')).toBeFocused()
 })
 
+test('observação: + Observação, editar a da IA, da opção e da foto; grava só notes; foto apagada leva a dela (checklist.question.note)', async ({ page }) => {
+  const order = await makeOrder('admin')
+  const formId = await makeOrderForm(order.id, {
+    items: [
+      { id: 'c', label: 'Onde tem dano?', type: 'checklist', options: ['Porta', 'Capô'] },
+      { id: 't', label: 'Pneus', type: 'text' },
+    ],
+    responses: [{ itemId: 'c', value: ['Porta'], photoUrls: [] }],
+    status: 'in_progress',
+  })
+  // What the AI wrote (the app saves it outside responses).
+  await writeOrderFormRaw(order.id, formId, { notes: { c: { text: 'Amassado na lateral', ai: true, options: [], photos: [] } } })
+  await openOrder(page, 'admin', order.id)
+  await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
+  await expect(fill(page).getByTestId('fill-note-c')).toContainText('Amassado na lateral')
+  await expect(fill(page).getByTestId('fill-note-add-c')).toHaveCount(0)
+  await page.getByTestId('photo-input-c').setInputFiles({ name: 'porta.png', mimeType: 'image/png', buffer: PNG })
+  await expect(fill(page).getByRole('button', { name: 'Ver foto 1 de Onde tem dano?' })).toBeVisible()
+  const responsesBefore = (await readOrderForms(order.id))[0]?.responses as { photoUrls: string[] }[]
+  const url = responsesBefore[0]?.photoUrls[0] as string
+
+  // The question's, the marked option's and the photo's, in one dialog.
+  await fill(page).getByTestId('fill-note-c').click()
+  const dialog = page.getByTestId('note-dialog')
+  await expect(dialog.getByRole('textbox', { name: 'Onde tem dano?' })).toBeFocused()
+  await expect(dialog.getByRole('textbox', { name: 'Onde tem dano?' })).toHaveValue('Amassado na lateral')
+  await expect(dialog.getByRole('textbox', { name: 'Capô' })).toHaveCount(0)
+  await dialog.getByRole('textbox', { name: 'Onde tem dano?' }).fill('Amassado na porta traseira')
+  await dialog.getByRole('textbox', { name: 'Porta' }).fill('perto da maçaneta')
+  await dialog.getByRole('textbox', { name: 'Foto 1' }).fill('Risco no para-lama')
+  await page.getByTestId('note-done').click()
+  await expect(dialog).toBeHidden()
+  await expect(fill(page).getByTestId('fill-note-c')).toContainText('Porta: perto da maçaneta')
+  await expect(fill(page).getByTestId('fill-note-c')).toContainText('Foto 1: Risco no para-lama')
+  await expect.poll(async () => ((await readOrderForms(order.id))[0]?.notes as Record<string, unknown> | undefined)?.c).toEqual({
+    text: 'Amassado na porta traseira',
+    ai: false,
+    options: [{ option: 'Porta', text: 'perto da maçaneta', ai: false }],
+    photos: [{ url, text: 'Risco no para-lama', ai: false }],
+  })
+  // The answers are not written by a note.
+  expect((await readOrderForms(order.id))[0]?.responses).toEqual(responsesBefore)
+
+  // "+ Observação" on a question without one; Enter saves.
+  await fill(page).getByTestId('fill-note-add-t').click()
+  await dialog.getByRole('textbox', { name: 'Pneus' }).fill('Dianteiro careca')
+  await dialog.getByRole('textbox', { name: 'Pneus' }).press('Enter')
+  await expect(dialog).toBeHidden()
+  await expect(fill(page).getByTestId('fill-note-t')).toContainText('Dianteiro careca')
+  await expect.poll(async () => ((await readOrderForms(order.id))[0]?.notes as Record<string, unknown> | undefined)?.t).toEqual({ text: 'Dianteiro careca', ai: false, options: [], photos: [] })
+
+  // A removed photo takes its note along; the rest stays.
+  await fill(page).getByRole('button', { name: 'Ver foto 1 de Onde tem dano?' }).click()
+  await page.getByTestId('photo-remove').click()
+  await page.getByRole('dialog', { name: 'Apagar esta foto?' }).getByRole('button', { name: 'Remover Foto' }).click()
+  await expect(fill(page).getByTestId('fill-note-c')).not.toContainText('Risco no para-lama')
+  await expect.poll(async () => ((await readOrderForms(order.id))[0]?.notes as Record<string, { photos: unknown[]; text: string }>)?.c?.photos).toEqual([])
+  expect(((await readOrderForms(order.id))[0]?.notes as Record<string, { text: string }>).c?.text).toBe('Amassado na porta traseira')
+
+  // Erasing everything removes the note.
+  await fill(page).getByTestId('fill-note-t').click()
+  await dialog.getByRole('textbox', { name: 'Pneus' }).fill('')
+  await page.getByTestId('note-done').click()
+  await expect(fill(page).getByTestId('fill-note-add-t')).toBeVisible()
+  await expect.poll(async () => Object.keys(((await readOrderForms(order.id))[0]?.notes as Record<string, unknown>) ?? {})).toEqual(['c'])
+})
+
 test('concluído em outro lugar enquanto se digita: a resposta não entra (B1)', async ({ page }) => {
   const order = await makeOrder('admin')
   const formId = await makeOrderForm(order.id, { items: [{ id: 't', label: 'Observação', type: 'text' }, { id: 'u', label: 'Outra', type: 'text' }], responses: [{ itemId: 'u', value: 'feito', photoUrls: [] }], status: 'in_progress' })

@@ -644,6 +644,7 @@
   "web.forms.copyMine": "Copy my questions",
   "web.forms.copied": "Questions copied",
   "web.forms.copyFailed": "Could not copy. Select and copy by hand.",
+  "web.forms.noteSaveFailed": "Couldn't save the note. Try again.",
   "web.forms.completedElsewhere": "This checklist was completed. Reopen it to change the answer.",
   "web.fin.tabSummary": "Summary",
   "web.fin.sub": "Only what came from orders. Expenses are not here.",
