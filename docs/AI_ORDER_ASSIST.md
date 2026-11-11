@@ -353,16 +353,16 @@ Campos sem valor não vêm. Erros iguais aos da OS: 400 `VALIDATION_ERROR`, 403 
 
 ### Modelo da foto do checklist
 
-A rota tem variáveis próprias, separadas das da OS. Sem elas, segue a OS: provedor da empresa, `AI_GEMINI_MODEL` e `AI_VERTEX_LOCATION` (São Paulo), e a foto não sai do Brasil quando o provedor é o Gemini.
+Decidido pelo Rafael em 2026-11-11 (#701): **Gemini 3.8 Flash na região `global`, com `thinkingLevel: low`**. No teste abaixo ele leu 78 de 80 fotos sem nenhuma resposta errada dada com certeza; o Gemini 2.5 de São Paulo, padrão da OS, deu 6. O padrão fica no código (`form-photo.deps.ts`), como o da OS; a OS continua com o dela.
 
-| Variável | Valores | Sem ela |
+| Variável | Valores | Padrão |
 |---|---|---|
-| `AI_FORM_PHOTO_PROVIDER` | `gemini` ou `claude`; vale mais que o `provider` da empresa | provedor da empresa, como na OS |
-| `AI_FORM_PHOTO_GEMINI_MODEL` | ex.: `gemini-3.8-flash` | `AI_GEMINI_MODEL` (`gemini-2.5-flash`) |
-| `AI_FORM_PHOTO_VERTEX_LOCATION` | ex.: `global` | `AI_VERTEX_LOCATION` (`southamerica-east1`) |
-| `AI_FORM_PHOTO_GEMINI_THINKING` | `minimal`, `low`, `medium`, `high` (só Gemini 3) | não envia |
+| `AI_FORM_PHOTO_PROVIDER` | `gemini`, `claude` ou `company` (segue o `provider` da empresa, como a OS) | `gemini` |
+| `AI_FORM_PHOTO_GEMINI_MODEL` | ex.: `gemini-2.5-flash` | `gemini-3.8-flash` |
+| `AI_FORM_PHOTO_VERTEX_LOCATION` | ex.: `southamerica-east1` | `global` |
+| `AI_FORM_PHOTO_GEMINI_THINKING` | `minimal`, `low`, `medium`, `high` ou `off` (o Gemini 2.5 recusa o campo) | `low` |
 
-O melhor resultado do teste abaixo foi o Gemini 3.8 Flash com `AI_FORM_PHOTO_VERTEX_LOCATION=global` e `AI_FORM_PHOTO_GEMINI_THINKING=low`. Esse modelo não existe em São Paulo: com `global`, o Google processa a foto em qualquer região dele, fora do Brasil. Ligar isso é decisão do Rafael e pede revisar a política de privacidade (hoje ela cita Google e Anthropic, mas não onde a foto é processada). A OS continua com o padrão dela.
+**Privacidade:** o Gemini 3.8 não existe em São Paulo. Em `global`, o Google escolhe a região que processa a foto, que pode ser fora do Brasil ("Endpoints don't guarantee data residency", na [página de regiões](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations)). Segundo a [página de retenção](https://cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention), o Google não usa os dados para treinar modelos sem permissão, guarda em cache por no máximo 24 horas e pode registrar pedidos para detectar abuso. A política de privacidade (seção "Assistente de IA", em `firebase/hosting/src/_data/legal.json`) diz isso desde 2026-11-11. Para voltar a São Paulo: `AI_FORM_PHOTO_GEMINI_MODEL=gemini-2.5-flash`, `AI_FORM_PHOTO_VERTEX_LOCATION=southamerica-east1`, `AI_FORM_PHOTO_GEMINI_THINKING=off` e tirar a frase da política.
 
 ### Teste antes da rota
 

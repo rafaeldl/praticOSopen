@@ -134,30 +134,30 @@ describe('formPhotoInputSchema', () => {
 });
 
 describe('formPhotoModelConfig', () => {
-  it('unset → follows the order (São Paulo, no thinking, company provider)', () => {
-    expect(formPhotoModelConfig({})).toEqual({
-      provider: undefined,
-      geminiModel: undefined,
-      vertexLocation: undefined,
-      thinkingLevel: undefined,
+  it('default: Gemini 3.8 Flash in global with thinking low (decided in #701), whatever the order uses', () => {
+    expect(formPhotoModelConfig({ AI_GEMINI_MODEL: 'gemini-2.5-flash', AI_VERTEX_LOCATION: 'southamerica-east1', AI_PROVIDER: 'claude' })).toEqual({
+      provider: 'gemini',
+      geminiModel: 'gemini-3.8-flash',
+      vertexLocation: 'global',
+      thinkingLevel: 'low',
     });
   });
 
-  it('reads its own variables, separate from the order ones', () => {
+  it('reads its own variables', () => {
     expect(
       formPhotoModelConfig({
-        AI_GEMINI_MODEL: 'gemini-2.5-flash',
-        AI_FORM_PHOTO_PROVIDER: 'gemini',
-        AI_FORM_PHOTO_GEMINI_MODEL: 'gemini-3.8-flash',
-        AI_FORM_PHOTO_VERTEX_LOCATION: 'global',
-        AI_FORM_PHOTO_GEMINI_THINKING: 'low',
+        AI_FORM_PHOTO_PROVIDER: 'claude',
+        AI_FORM_PHOTO_GEMINI_MODEL: 'gemini-2.5-flash',
+        AI_FORM_PHOTO_VERTEX_LOCATION: 'southamerica-east1',
+        AI_FORM_PHOTO_GEMINI_THINKING: 'off',
       }),
-    ).toEqual({ provider: 'gemini', geminiModel: 'gemini-3.8-flash', vertexLocation: 'global', thinkingLevel: 'low' });
+    ).toEqual({ provider: 'claude', geminiModel: 'gemini-2.5-flash', vertexLocation: 'southamerica-east1', thinkingLevel: undefined });
   });
 
-  it('ignores unknown provider and thinking values', () => {
+  it('company → follows the company provider; unknown values → defaults', () => {
+    expect(formPhotoModelConfig({ AI_FORM_PHOTO_PROVIDER: 'company' }).provider).toBeUndefined();
     const config = formPhotoModelConfig({ AI_FORM_PHOTO_PROVIDER: 'openai', AI_FORM_PHOTO_GEMINI_THINKING: 'max' });
-    expect(config.provider).toBeUndefined();
-    expect(config.thinkingLevel).toBeUndefined();
+    expect(config.provider).toBe('gemini');
+    expect(config.thinkingLevel).toBe('low');
   });
 });
