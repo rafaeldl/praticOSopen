@@ -6712,6 +6712,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save the answer. Try again.';
 
   @override
+  String checklistReadingBelowLastVisit(String reading) {
+    return 'Lower than the $reading of the last visit. Is that right?';
+  }
+
+  @override
   String get profileSaveFailed => 'Couldn\'t save your profile. Try again.';
 
   @override

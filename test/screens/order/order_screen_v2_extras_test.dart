@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/utils/checklist_reading.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
@@ -92,15 +93,25 @@ class FakeActions extends OrderScreenActions {
       calls.add('doc:${doc.fileName}');
 
   @override
-  Future<void> addChecklist(BuildContext context, OrderStore store) async =>
-      calls.add('addChecklist');
+  Future<void> addChecklist(
+    BuildContext context,
+    OrderStore store, {
+    ChecklistReadingLink? Function(of_model.OrderForm form)? readingLinkFor,
+  }) async => calls.add('addChecklist');
+
+  /// The reading link of the last checklist opened.
+  ChecklistReadingLink? lastReadingLink;
 
   @override
   Future<void> openChecklist(
     BuildContext context,
     OrderStore store,
-    of_model.OrderForm form,
-  ) async => calls.add('checklist:${form.id}');
+    of_model.OrderForm form, {
+    ChecklistReadingLink? readingLink,
+  }) async {
+    lastReadingLink = readingLink;
+    calls.add('checklist:${form.id}');
+  }
 
   @override
   Future<void> deleteChecklist(

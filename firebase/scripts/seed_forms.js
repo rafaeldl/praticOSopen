@@ -56,6 +56,7 @@ const GLOBAL_FORMS = {
           type: 'number',
           required: true,
           allowPhotos: true,
+          reading: true, // docs/DEVICE_READING.md: answer = the order's reading
         },
         {
           id: 'pertences',
@@ -2546,6 +2547,58 @@ const GLOBAL_FORMS = {
   // ═══════════════════════════════════════════════════════════
   // OBRAS PÚBLICAS / PREFEITURAS
   // ═══════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════
+  // MANUTENÇÃO DE ATIVOS - Máquinas e equipamentos
+  // ═══════════════════════════════════════════════════════════
+  asset_maintenance: [
+    {
+      id: 'checklist_entrada_asset',
+      title: 'Entrada do Equipamento',
+      description: 'Registre fotos, horímetro e o estado do equipamento ao receber.',
+      subspecialties: [],
+      isActive: true,
+      items: [
+        {
+          id: 'fotos',
+          label: 'Fotos do equipamento',
+          type: 'photo_only',
+          required: true,
+          allowPhotos: true,
+        },
+        {
+          id: 'horas_operacao',
+          label: 'Horas de operação (horímetro)',
+          type: 'number',
+          required: false,
+          allowPhotos: true,
+          reading: true, // docs/DEVICE_READING.md: answer = the order's reading
+        },
+        {
+          id: 'numero_serie',
+          label: 'Número de série',
+          type: 'text',
+          required: false,
+          allowPhotos: true,
+        },
+        {
+          id: 'estado',
+          label: 'Estado geral',
+          type: 'select',
+          options: ['Bom', 'Regular', 'Ruim', 'Parado'],
+          required: true,
+          allowPhotos: false,
+        },
+        {
+          id: 'defeito',
+          label: 'Defeito relatado',
+          type: 'text',
+          required: false,
+          allowPhotos: false,
+        },
+      ],
+    },
+  ],
+
   public_works: [
     {
       id: 'medicao_obra',

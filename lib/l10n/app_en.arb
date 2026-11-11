@@ -2700,6 +2700,7 @@
   "orderCreateFailedMessage": "Check your connection and create the work order again.",
   "receiveChargeMaybeOpen": "There may be an open payment link on this work order. Check with whoever handles billing before marking it as received.",
   "checklistAnswerSaveFailed": "Couldn't save the answer. Try again.",
+  "checklistReadingBelowLastVisit": "Lower than the {reading} of the last visit. Is that right?",
   "profileSaveFailed": "Couldn't save your profile. Try again.",
   "saveFailedTryAgain": "Couldn't save. Try again.",
   "deleteFailedTryAgain": "Couldn't delete. Try again.",

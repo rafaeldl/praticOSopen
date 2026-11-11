@@ -67,6 +67,7 @@ FormItemDefinition _$FormItemDefinitionFromJson(Map<String, dynamic> json) =>
           .toList(),
       required: json['required'] as bool? ?? false,
       allowPhotos: json['allowPhotos'] as bool? ?? true,
+      reading: json['reading'] as bool? ?? false,
       labelI18n: (json['labelI18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),

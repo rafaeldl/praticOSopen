@@ -6719,6 +6719,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não deu para guardar a resposta. Tente de novo.';
 
   @override
+  String checklistReadingBelowLastVisit(String reading) {
+    return 'Menor que os $reading da última visita. Está certo?';
+  }
+
+  @override
   String get profileSaveFailed =>
       'Não deu para salvar o perfil. Tente de novo.';
 

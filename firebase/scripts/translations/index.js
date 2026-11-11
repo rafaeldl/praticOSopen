@@ -15,6 +15,7 @@ const { SOLAR_TRANSLATIONS } = require('./solar');
 const { PRINTERS_TRANSLATIONS } = require('./printers');
 const { PUBLIC_WORKS_TRANSLATIONS } = require('./public_works');
 const { GENERIC_TRANSLATIONS } = require('./generic');
+const { ASSET_MAINTENANCE_TRANSLATIONS } = require('./asset_maintenance');
 
 // Combina todas as traduções em um único objeto
 const FORM_TRANSLATIONS = {
@@ -30,6 +31,7 @@ const FORM_TRANSLATIONS = {
   ...PRINTERS_TRANSLATIONS,
   ...PUBLIC_WORKS_TRANSLATIONS,
   ...GENERIC_TRANSLATIONS,
+  ...ASSET_MAINTENANCE_TRANSLATIONS,
 };
 
 /**

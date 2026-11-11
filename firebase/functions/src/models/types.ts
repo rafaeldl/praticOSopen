@@ -369,6 +369,8 @@ export interface FormItemDefinition {
   options?: string[];
   required: boolean;
   allowPhotos: boolean;
+  /** Number question that is the device's reading (km, hours): docs/DEVICE_READING.md. */
+  reading?: boolean;
   labelI18n?: Record<string, string>;
   optionsI18n?: Record<string, string[]>;
 }

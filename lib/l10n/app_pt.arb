@@ -3089,6 +3089,11 @@
   "orderCreateFailedMessage": "Confira a internet e crie a OS de novo.",
   "receiveChargeMaybeOpen": "Pode haver um link de pagamento aberto nesta OS. Confira com quem cuida do financeiro antes de marcar como recebido.",
   "checklistAnswerSaveFailed": "Não deu para guardar a resposta. Tente de novo.",
+  "checklistReadingBelowLastVisit": "Menor que os {reading} da última visita. Está certo?",
+  "@checklistReadingBelowLastVisit": {
+    "description": "Notice when the reading typed in a checklist is below the device's last visit (does not block)",
+    "placeholders": { "reading": { "type": "String", "example": "102.000 km" } }
+  },
   "profileSaveFailed": "Não deu para salvar o perfil. Tente de novo.",
   "saveFailedTryAgain": "Não deu para salvar. Tente de novo.",
   "deleteFailedTryAgain": "Não deu para apagar. Tente de novo.",
