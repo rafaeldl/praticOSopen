@@ -1,4 +1,5 @@
 import {
+  buildFormPhotoSystemPrompt,
   buildFormPhotoUserText,
   formPhotoResponseSchema,
   parseFormPhotoResult,
@@ -21,6 +22,15 @@ describe('buildFormPhotoUserText', () => {
     expect(text).toContain('Options: "Reserva", "1/4", "1/2", "3/4", "Cheio"');
     expect(text).toContain('Item: Veículo - Fiat Uno 2015');
     expect(text).toContain('Last reading for this item: 102000 km');
+  });
+});
+
+describe('buildFormPhotoSystemPrompt', () => {
+  it('asks for an answer only when sure, or when every digit is readable with the read variant', () => {
+    expect(buildFormPhotoSystemPrompt('pt')).toContain('or you are unsure, set confident to false');
+    const read = buildFormPhotoSystemPrompt('pt', 'read');
+    expect(read).toContain('If you can read every digit or character, answer with confident true');
+    expect(read).not.toContain('or you are unsure');
   });
 });
 

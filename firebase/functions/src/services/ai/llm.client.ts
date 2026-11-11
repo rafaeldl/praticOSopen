@@ -43,6 +43,15 @@ export interface LlmRequest {
   responseSchema: JsonSchema;
   /** Preferred provider; the router falls back to the default when unset. */
   provider?: LlmProvider;
+  /** Called with the tokens the call used (cost measurement in scripts). */
+  onUsage?: (usage: LlmUsage) => void;
+}
+
+export interface LlmUsage {
+  inputTokens: number;
+  /** Output tokens billed, thinking included. */
+  outputTokens: number;
+  model?: string;
 }
 
 export interface LlmClient {

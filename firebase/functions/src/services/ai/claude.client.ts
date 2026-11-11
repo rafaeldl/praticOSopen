@@ -39,6 +39,8 @@ export class ClaudeClient implements LlmProviderClient {
     private readonly apiKey: () => string | undefined = () => process.env.ANTHROPIC_API_KEY,
     private readonly model = process.env.AI_CLAUDE_MODEL || DEFAULT_MODEL,
     private readonly effort: Effort = effortFromEnv(),
+    /** Off in scripts that must measure this model alone. */
+    private readonly serverFallback = true,
   ) {}
 
   supportsMedia(mimeType: string): boolean {
@@ -66,8 +68,7 @@ export class ClaudeClient implements LlmProviderClient {
       response = await this.sdk().beta.messages.create({
         model: this.model,
         max_tokens: MAX_TOKENS,
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
+        ...(this.serverFallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
         system: request.systemPrompt,
         output_config: {
           effort: this.effort,
@@ -82,6 +83,9 @@ export class ClaudeClient implements LlmProviderClient {
       throw new LlmUnavailableError(`model request failed${status ? ` (HTTP ${status})` : ''}`);
     }
 
+    if (response.usage) {
+      request.onUsage?.({ inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens, model: response.model });
+    }
     if (response.stop_reason === 'refusal') throw new LlmUnavailableError('model declined');
     if (response.stop_reason === 'max_tokens') throw new LlmUnavailableError('model answer truncated');
     const text = response.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
