@@ -4,7 +4,7 @@
 // photos, comments and details. Each row opens its own editor; there is no
 // "Editar" mode. Money, status and items go through the API (writes.ts).
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import { MoreHorizontal, X } from '@lucide/vue'
+import { ChevronsUpDown, MoreHorizontal, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
@@ -45,6 +45,7 @@ import {
   country,
 } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
+import { stageIdOf, stageNameOf, workStages } from '@/lib/orders/stages'
 import { formatPhone } from '@/lib/phone'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { useRouter } from 'vue-router'
@@ -975,13 +976,47 @@ async function pickDeviceItem(item: ComboboxItem, query: string) {
   dialog.value = { kind: 'quick', quick: 'device', text: query }
 }
 
+/** Value of a stage row in "Qual a situação?" (statuses never start so). */
+const STAGE_PREFIX = 'stage:'
+/** In progress with two stages or more, "Em andamento" opens into one row per stage (docs/WORK_STAGES.md, as in the app). */
+const stageRows = computed(() => {
+  const o = order.value
+  return !!o && !!access.value?.canChangeHold && o.status === 'progress' && workStages().length > 1
+})
 const statusChoices = computed<Choice[]>(() => {
   const o = order.value
   if (!o || !access.value) return []
   const allowed: OrderStatus[] = access.value.transitions.filter((status) => status !== 'canceled')
+  const currentStage = stageIdOf(o, workStages())
   // In the order of the work (quote → done), the current one marked with ✓.
-  return STATUSES.filter((status) => status === o.status || allowed.includes(status)).map((status) => ({ id: status, label: statusText(status), dot: STATUS_DOT[status], current: status === o.status }))
+  return STATUSES.filter((status) => status === o.status || allowed.includes(status)).flatMap((status) =>
+    status === 'progress' && stageRows.value
+      ? workStages().map((stage) => ({ id: STAGE_PREFIX + stage.id, label: `${statusText(status)} · ${stage.name}`, dot: STATUS_DOT[status], current: stage.id === currentStage }))
+      : [{ id: status, label: statusText(status), dot: STATUS_DOT[status], current: status === o.status }],
+  )
 })
+/** The status line is a button only when there is something to change it to. */
+const canPickStatus = computed(() => statusChoices.value.length > 1)
+const statusText$ = computed(() => {
+  const o = order.value
+  if (!o) return ''
+  const stage = stageNameOf(o, workStages())
+  return stage ? `${statusText(o.status)} · ${stage}` : statusText(o.status)
+})
+async function pickStatus(id: string) {
+  const o = order.value
+  if (!o) return
+  if (!id.startsWith(STAGE_PREFIX)) {
+    if (id === o.status) dialog.value = null
+    else await setStatus(id as OrderStatus)
+    return
+  }
+  dialog.value = null
+  const stageId = id.slice(STAGE_PREFIX.length)
+  if (stageId === stageIdOf(o, workStages())) return
+  const stage = workStages().find((s) => s.id === stageId)
+  await run(() => writes.setStage(o.id, stageId), t('web.order.statusChanged', { status: `${statusText('progress')} · ${stage?.name ?? ''}` }))
+}
 const teamChoices = computed<Choice[]>(() => [
   ...team.value.map((member) => ({ id: member.id, label: member.name, current: member.id === order.value?.assignedTo?.id })),
   ...(order.value?.assignedTo ? [{ id: 'none', label: t('orderResponsibleRemove'), danger: true }] : []),
@@ -1167,7 +1202,20 @@ watch(
           <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
         </p>
         <div class="od-state">
-          <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText(order.status)" data-testid="order-status" />
+          <!-- Looks like a select when it can change: people did not find the plain line was clickable. -->
+          <button
+            v-if="canPickStatus"
+            type="button"
+            class="od-status-btn"
+            :title="t('orderMenuChangeStatus')"
+            aria-haspopup="menu"
+            data-testid="order-status-button"
+            @click="dialog = { kind: 'status' }"
+          >
+            <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText$" data-testid="order-status" />
+            <ChevronsUpDown :size="16" aria-hidden="true" class="od-status-chevron" />
+          </button>
+          <StatusLabel v-else :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText$" data-testid="order-status" />
           <button v-if="phrase && phraseActs" type="button" class="od-sentence link-plain" :class="{ 'od-sentence--late': phrase.late }" @click="onPhrase">{{ phrase.text }}</button>
           <span v-else-if="phrase" class="od-sentence" :class="{ 'od-sentence--late': phrase.late }">{{ phrase.text }}</span>
         </div>
@@ -1319,7 +1367,7 @@ watch(
 
   <template v-if="order && access && dialog">
     <ChoiceDialog v-if="dialog.kind === 'menu'" :anchor="menuButton" :title="orderTitle(order)" :choices="menuChoices" @pick="onMenu" @close="dialog = null" />
-    <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" :suggested="step?.kind === 'status' ? step.to : null" @pick="(id) => (id === order!.status ? (dialog = null) : setStatus(id as OrderStatus))" @close="dialog = null" />
+    <ChoiceDialog v-else-if="dialog.kind === 'status'" :title="t('pickerStatusTitle')" :sub="orderTitle(order)" :choices="statusChoices" :suggested="step?.kind === 'status' ? step.to : null" @pick="pickStatus" @close="dialog = null" />
     <ChoiceDialog v-else-if="dialog.kind === 'assignee'" :title="t('pickerAssigneeTitle')" :choices="teamChoices" @pick="assign" @close="dialog = null" />
     <ConfirmDialog
       v-else-if="dialog.kind === 'cancel'"
