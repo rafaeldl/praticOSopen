@@ -30,11 +30,8 @@
 
       <!-- Items -->
       <div class="flex flex-col gap-2">
-        <div
-          v-for="(item, itemIndex) in form.items"
-          :key="itemIndex"
-          class="flex items-center justify-between gap-2 py-0.5"
-        >
+        <div v-for="(item, itemIndex) in form.items" :key="itemIndex" class="py-0.5">
+        <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <!-- Checkbox icons -->
             <svg v-if="itemStatus(item) === 'ok'" class="h-[18px] w-[18px] flex-shrink-0 text-[#1B5E7B]" viewBox="0 0 24 24" fill="currentColor">
@@ -61,12 +58,23 @@
             {{ answerText(item) }}
           </span>
         </div>
+        <!-- Notes written for the customer: what was seen and where. -->
+        <p
+          v-for="(line, lineIndex) in noteLines(item)"
+          :key="lineIndex"
+          class="ml-[26px] mt-0.5 text-[12px] leading-snug text-[#5A7184]"
+        >
+          {{ line }}
+        </p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { checklistNoteLines } from '~/utils/checklist-notes'
+
 const props = defineProps<{
   forms: any[]
 }>()
@@ -95,6 +103,10 @@ function answerText(item: any): string {
   if (typeof value === 'number' || (typeof value === 'string' && value && value !== 'attention')) return String(value)
   const status = itemStatus(item)
   return status === 'ok' ? 'OK' : status === 'attention' ? t.value.attention : t.value.pending
+}
+
+function noteLines(item: any): string[] {
+  return checklistNoteLines(item, t.value.photo)
 }
 
 function completedCount(form: any): number {

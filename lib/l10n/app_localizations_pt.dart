@@ -7756,4 +7756,23 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get customerSearchOrders => 'Buscar pelo número da OS';
+
+  @override
+  String get checklistNoteAdd => '+ Observação';
+
+  @override
+  String get checklistNote => 'Observação';
+
+  @override
+  String get checklistNotePlaceholder => 'O que você viu e onde';
+
+  @override
+  String checklistNotePhoto(int number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String checklistNoteLine(String label, String text) {
+    return '$label: $text';
+  }
 }

@@ -7771,4 +7771,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get customerSearchOrders => 'Buscar por número de OS';
+
+  @override
+  String get checklistNoteAdd => '+ Observación';
+
+  @override
+  String get checklistNote => 'Observación';
+
+  @override
+  String get checklistNotePlaceholder => 'Lo que viste y dónde';
+
+  @override
+  String checklistNotePhoto(int number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String checklistNoteLine(String label, String text) {
+    return '$label: $text';
+  }
 }

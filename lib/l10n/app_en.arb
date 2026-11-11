@@ -2996,5 +2996,12 @@
   "customerShowAllOrders": "See all {count} orders",
   "customerShowLess": "Show less",
   "customerSearchDevices": "Search by name or plate",
-  "customerSearchOrders": "Search by order number"
+  "customerSearchOrders": "Search by order number",
+  "checklistNoteAdd": "+ Note",
+  "checklistNote": "Note",
+  "checklistNotePlaceholder": "What you saw and where",
+  "checklistNotePhoto": "Photo {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

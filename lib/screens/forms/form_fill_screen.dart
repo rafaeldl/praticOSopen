@@ -6,6 +6,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
+import 'package:praticos/screens/forms/form_note_sheet.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
@@ -282,10 +283,55 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
     if (_currentForm.getResponse(itemId) == null) return;
     final before = List.of(_currentForm.responses);
+    final note = _currentForm.noteOf(itemId);
 
     final change = FormPhotoRemoved(itemId, url);
-    _update(() => _applyLocally(change));
-    await _persistChange(change, before);
+    _update(() {
+      _applyLocally(change);
+      // The photo's note goes with it (saved in the same write).
+      if (note != null) _setNoteLocally(itemId, note.withoutPhoto(url));
+    });
+    try {
+      final fresh = await _formsService.saveAnswer(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        change,
+        localKnown: before,
+        localNote: note,
+      );
+      if (fresh != null) _update(() => _currentForm.responses = fresh);
+    } catch (e) {
+      debugPrint('Could not save the checklist answer: $e');
+      if (mounted) showAppToast(context, context.l10n.checklistAnswerSaveFailed);
+    }
+  }
+
+  void _setNoteLocally(String itemId, FormItemNote note) {
+    _currentForm.notes = {..._currentForm.notes};
+    if (note.isEmpty) {
+      _currentForm.notes.remove(itemId);
+    } else {
+      _currentForm.notes[itemId] = note;
+    }
+  }
+
+  /// Saves the note of a question (only `notes.{itemId}`: the answers are
+  /// never rewritten). Shown right away; a refusal is told.
+  Future<void> _saveNote(String itemId, FormItemNote note) async {
+    _update(() => _setNoteLocally(itemId, note));
+    try {
+      await _formsService.saveNote(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        itemId,
+        note,
+      );
+    } catch (e) {
+      debugPrint('Could not save the checklist note: $e');
+      if (mounted) showAppToast(context, context.l10n.checklistAnswerSaveFailed);
+    }
   }
 
   void _showError(String title, String message) {
@@ -441,6 +487,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
             onAnswer: (item, value) => _saveItemResponse(item.id, value),
             onAddPhoto: (item, source) => _addPhoto(item.id, source),
             onOpenPhoto: (item, i) => _showPhotoPreview(item.id, i),
+            onNote: (item, note) => _saveNote(item.id, note),
             onClose: () => Navigator.of(sheetContext).pop(),
             onEnd: () {
               Navigator.of(sheetContext).pop();
@@ -768,6 +815,21 @@ class _FormFillScreenState extends State<FormFillScreen> {
                           ),
                         ),
                       ],
+                      for (final line in formNoteLines(
+                        l10n,
+                        item,
+                        _currentForm.noteOf(item.id),
+                        response,
+                        _localeCode,
+                      )) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          line,
+                          style: AppTypography.callout.copyWith(
+                            color: AppColors.textTertiary.resolveFrom(context),
+                          ),
+                        ),
+                      ],
                       if (isUploadingThis)
                         const Padding(
                           padding: EdgeInsets.only(top: AppSpacing.sm),
@@ -835,12 +897,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
     return text;
   }
 
-  String _localizedOption(FormItemDefinition item, String original) {
-    final options = item.options ?? const <String>[];
-    final localized = item.getLocalizedOptions(_localeCode) ?? options;
-    final i = options.indexOf(original);
-    return i >= 0 && i < localized.length ? localized[i] : original;
-  }
+  String _localizedOption(FormItemDefinition item, String original) =>
+      localizedOption(item, original, _localeCode);
 }
 
 /// Photos of a question in full screen (black, like the iPhone's photo

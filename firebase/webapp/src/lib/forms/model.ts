@@ -41,6 +41,28 @@ export interface FormResponse {
   photoUrls: string[]
 }
 
+/** Note of an option marked in a multiple choice question (key: the option as saved in `value`). */
+export interface FormOptionNote {
+  option: string
+  text: string
+  ai: boolean
+}
+
+/** Note of a photo (key: its URL, the same as in `photoUrls`). */
+export interface FormPhotoNote {
+  url: string
+  text: string
+  ai: boolean
+}
+
+/** Note of one question (lib/models/order_form.dart FormItemNote); `ai` while the text is the AI's. */
+export interface FormItemNote {
+  text: string | null
+  ai: boolean
+  options: FormOptionNote[]
+  photos: FormPhotoNote[]
+}
+
 export interface OrderForm {
   id: string
   formDefinitionId: string
@@ -49,6 +71,10 @@ export interface OrderForm {
   status: FormStatus
   items: FormItem[]
   responses: FormResponse[]
+  /** Notes by item id, outside `responses` (each writer rewrites responses with only itemId, value and photoUrls). Read only here. */
+  notes?: Record<string, FormItemNote>
+  /** Items whose answer came from the AI and was not changed since. */
+  aiFilled?: string[]
   deviceId: string | null
   startedAt?: string | null
   completedAt?: string | null
@@ -116,11 +142,74 @@ export function normalizeOrderForm(id: string, raw: Raw): OrderForm {
     status,
     items: normalizeItems(raw.items),
     responses: normalizeResponses(raw.responses),
+    notes: normalizeNotes(raw.notes),
+    aiFilled: strings(raw.aiFilled),
     deviceId: stringOr(raw.deviceId),
     startedAt: when(raw.startedAt),
     completedAt: when(raw.completedAt),
     updatedAt: when(raw.updatedAt),
   }
+}
+
+const noteText = (value: unknown): string => (typeof value === 'string' ? value : '')
+
+/** `notes` as the app writes it; what is not a note is left out. */
+export function normalizeNotes(raw: unknown): Record<string, FormItemNote> {
+  if (!isRecord(raw)) return {}
+  const notes: Record<string, FormItemNote> = {}
+  for (const [itemId, value] of Object.entries(raw)) {
+    if (!isRecord(value)) continue
+    notes[itemId] = {
+      text: typeof value.text === 'string' ? value.text : null,
+      ai: value.ai === true,
+      options: (Array.isArray(value.options) ? value.options : [])
+        .filter(isRecord)
+        .filter((o) => typeof o.option === 'string')
+        .map((o) => ({ option: o.option as string, text: noteText(o.text), ai: o.ai === true })),
+      photos: (Array.isArray(value.photos) ? value.photos : [])
+        .filter(isRecord)
+        .filter((p) => typeof p.url === 'string')
+        .map((p) => ({ url: p.url as string, text: noteText(p.text), ai: p.ai === true })),
+    }
+  }
+  return notes
+}
+
+/**
+ * The note of a question in lines, as the app shows it: the question's note,
+ * "Porta: amassado" for each marked option and "Foto 2: risco" for each photo
+ * (notes of unmarked options or removed photos are left out).
+ */
+export function noteLines(
+  form: OrderForm,
+  item: FormItem,
+  locale: string,
+  words: { line: (label: string, text: string) => string; photo: (number: number) => string },
+): string[] {
+  const note = form.notes?.[item.id]
+  if (!note) return []
+  const response = responseOf(form, item.id)
+  const lines: string[] = []
+  if (note.text?.trim()) lines.push(note.text.trim())
+  if (item.type === 'checklist' && Array.isArray(response?.value)) {
+    for (const option of response.value.map(String)) {
+      const text = note.options.find((o) => o.option === option)?.text.trim()
+      if (text) lines.push(words.line(optionText(item, option, locale), text))
+    }
+  }
+  ;(response?.photoUrls ?? []).forEach((url, index) => {
+    const text = note.photos.find((p) => p.url === url)?.text.trim()
+    if (text) lines.push(words.line(words.photo(index + 1), text))
+  })
+  return lines
+}
+
+/** The note of [itemId] without the photo at [url], or null when nothing else is written (removed with the photo). */
+export function noteWithoutPhoto(note: FormItemNote | undefined, url: string): FormItemNote | null | undefined {
+  if (!note || !note.photos.some((p) => p.url === url)) return undefined
+  const next = { ...note, photos: note.photos.filter((p) => p.url !== url) }
+  const empty = !next.text?.trim() && next.options.every((o) => !o.text.trim()) && next.photos.every((p) => !p.text.trim())
+  return empty ? null : next
 }
 
 export function normalizeResponses(raw: unknown): FormResponse[] {

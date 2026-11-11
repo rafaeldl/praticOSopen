@@ -5,6 +5,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/screens/forms/form_note_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -81,6 +82,7 @@ class FormQuestionSheet extends StatefulWidget {
     this.onAddPhoto,
     this.onOpenPhoto,
     this.uploadingItemId,
+    this.onNote,
   });
 
   final OrderForm form;
@@ -96,6 +98,10 @@ class FormQuestionSheet extends StatefulWidget {
 
   /// Opens photo [index] of [item] in full screen.
   final void Function(FormItemDefinition item, int index)? onOpenPhoto;
+
+  /// Saves the note written for [item] ("+ Observação"). Without it the
+  /// note is only shown.
+  final void Function(FormItemDefinition item, FormItemNote note)? onNote;
 
   /// Item whose photos are being uploaded.
   final String? uploadingItemId;
@@ -214,6 +220,19 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
     if (source != null) add(item, source);
   }
 
+  Future<void> _editNote(FormItemDefinition item) async {
+    final onNote = widget.onNote;
+    if (onNote == null) return;
+    final note = await FormNoteSheet.show(
+      context,
+      item: item,
+      note: widget.form.noteOf(item.id),
+      response: _responseOf(item),
+      localeCode: widget.localeCode,
+    );
+    if (note != null) onNote(item, note);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -314,6 +333,23 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
                           : (i) => widget.onOpenPhoto!(item, i),
                     ),
                   ],
+                  _textPad(
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.md),
+                      child: FormNoteSummary(
+                        lines: formNoteLines(
+                          l10n,
+                          item,
+                          widget.form.noteOf(item.id),
+                          response,
+                          widget.localeCode,
+                        ),
+                        onEdit: widget.onNote == null
+                            ? null
+                            : () => _editNote(item),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -194,10 +194,12 @@ class PdfFormsBuilder {
     required FormItemDefinition item,
     required FormResponse? response,
     required List<pw.MemoryImage> photos,
+    FormItemNote? note,
   }) {
     final hasPhotos = photos.isNotEmpty;
     final responseContent = _buildResponseContent(item, response);
-    final hasContent = responseContent is! pw.SizedBox;
+    final noteLines = pdfNoteLines(item, note, response);
+    final hasContent = responseContent is! pw.SizedBox || noteLines.isNotEmpty;
 
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 6),
@@ -244,7 +246,21 @@ class PdfFormsBuilder {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   // Valor da resposta formatado
-                  if (hasContent) responseContent,
+                  if (responseContent is! pw.SizedBox) responseContent,
+
+                  // Observacao da pergunta, das opcoes marcadas e das fotos
+                  for (final line in noteLines)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(top: 3),
+                      child: pw.Text(
+                        line,
+                        style: pw.TextStyle(
+                          font: baseFont,
+                          fontSize: 9,
+                          color: PdfStyles.textSecondary,
+                        ),
+                      ),
+                    ),
 
                   // Fotos do item
                   if (hasPhotos) ...[
@@ -267,6 +283,41 @@ class PdfFormsBuilder {
         ],
       ),
     );
+  }
+
+  /// The note of the question in lines: its text, "Porta: amassado" for each
+  /// marked option with a note and "Foto 2: risco" for each photo with one.
+  List<String> pdfNoteLines(
+    FormItemDefinition item,
+    FormItemNote? note,
+    FormResponse? response,
+  ) {
+    if (note == null) return const [];
+    final lines = <String>[];
+    final text = note.text?.trim() ?? '';
+    if (text.isNotEmpty) lines.add(text);
+    final value = response?.value;
+    if (item.type == FormItemType.checklist && value is List) {
+      for (final option in value.map((e) => e.toString())) {
+        final optionNote = note.optionText(option)?.trim();
+        if (optionNote != null && optionNote.isNotEmpty) {
+          lines.add(localizations.formatNoteLine(option, optionNote));
+        }
+      }
+    }
+    final urls = response?.photoUrls ?? const <String>[];
+    for (var i = 0; i < urls.length; i++) {
+      final photoNote = note.photoText(urls[i])?.trim();
+      if (photoNote != null && photoNote.isNotEmpty) {
+        lines.add(
+          localizations.formatNoteLine(
+            localizations.formatPhotoNumber(i + 1),
+            photoNote,
+          ),
+        );
+      }
+    }
+    return lines;
   }
 
   /// Constroi o conteudo da resposta baseado no tipo do item
@@ -508,6 +559,7 @@ class PdfFormsBuilder {
         item: item,
         response: response,
         photos: photos,
+        note: form.noteOf(item.id),
       ));
     }
 

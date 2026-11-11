@@ -170,6 +170,7 @@ class FormsService {
     String formId,
     FormAnswerChange change, {
     List<FormResponse> localKnown = const [],
+    FormItemNote? localNote,
   }) async {
     final formRef = _getFormsCollection(companyId, orderId).doc(formId);
     try {
@@ -188,6 +189,7 @@ class FormsService {
       batch.update(formRef, {
         'responses': FieldValue.arrayUnion([write.added]),
         'updatedAt': now,
+        ...photoNoteRemoval(change, localNote),
       });
       // Not awaited: offline the batch completes only once synced.
       unawaited(
@@ -210,19 +212,83 @@ class FormsService {
       if (!snapshot.exists) return null;
 
       final orderForm = _orderFormFromJson(snapshot.id, snapshot.data()!);
-      final responses = applyAnswerChange(orderForm.responses, change);
-      var status = orderForm.status;
-      if (status == FormStatus.pending && responses.isNotEmpty) {
-        status = FormStatus.inProgress;
-      }
-
-      transaction.update(formRef, {
-        'responses': responses.map((e) => e.toJson()).toList(),
-        'status': _statusToString(status),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-      return responses;
+      final write = answerWrite(orderForm, change);
+      transaction.update(formRef, write.update);
+      return write.responses;
     });
+  }
+
+  /// What the answer transaction writes for [change] on [form] as read:
+  /// the responses, the status and `updatedAt`, plus the removal of a
+  /// removed photo's note ([photoNoteRemoval]). The other notes are never
+  /// written here, so saving an answer keeps every note.
+  static ({Map<String, dynamic> update, List<FormResponse> responses})
+  answerWrite(OrderForm form, FormAnswerChange change) {
+    final responses = applyAnswerChange(form.responses, change);
+    var status = form.status;
+    if (status == FormStatus.pending && responses.isNotEmpty) {
+      status = FormStatus.inProgress;
+    }
+    return (
+      update: {
+        'responses': responses.map((e) => e.toJson()).toList(),
+        'status': _statusName(status),
+        'updatedAt': DateTime.now().toIso8601String(),
+        ...photoNoteRemoval(change, form.noteOf(change.itemId)),
+      },
+      responses: responses,
+    );
+  }
+
+  /// When [change] removes a photo that has a note in [note], the update of
+  /// `notes.{itemId}` that takes that note out with it (empty otherwise).
+  /// Only for ids that are a plain field name (letters, digits, `_`, `-`),
+  /// as every app, web and seed id is.
+  static Map<String, dynamic> photoNoteRemoval(
+    FormAnswerChange change,
+    FormItemNote? note,
+  ) {
+    if (change is! FormPhotoRemoved || note == null) return const {};
+    if (!note.photos.any((p) => p.url == change.url)) return const {};
+    if (!_plainFieldName.hasMatch(change.itemId)) return const {};
+    final next = note.withoutPhoto(change.url);
+    return {
+      'notes.${change.itemId}': next.isEmpty
+          ? FieldValue.delete()
+          : next.toJson(),
+    };
+  }
+
+  static final RegExp _plainFieldName = RegExp(r'^[A-Za-z0-9_-]+$');
+
+  /// Saves the note of question [itemId] ([note] null or empty: removes it).
+  /// Only `notes.{itemId}` and `updatedAt` are written: the answers stay as
+  /// they are, whoever saves them. Offline the write is queued (it completes
+  /// once synced), so after [responseTransactionTimeout] it is left pending.
+  Future<void> saveNote(
+    String companyId,
+    String orderId,
+    String formId,
+    String itemId,
+    FormItemNote? note,
+  ) async {
+    final formRef = _getFormsCollection(companyId, orderId).doc(formId);
+    final write = formRef.update({
+      FieldPath(['notes', itemId]): note == null || note.isEmpty
+          ? FieldValue.delete()
+          : note.toJson(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+    try {
+      await write.timeout(responseTransactionTimeout);
+    } on TimeoutException {
+      debugPrint('Checklist note queued offline');
+      unawaited(
+        write.catchError((Object e) {
+          debugPrint('Queued checklist note failed: $e');
+        }),
+      );
+    }
   }
 
   /// Atualiza o status do formulário (ex: Finalizar)
@@ -247,7 +313,9 @@ class FormsService {
 
   // --- Helpers ---
 
-  String _statusToString(FormStatus status) {
+  String _statusToString(FormStatus status) => _statusName(status);
+
+  static String _statusName(FormStatus status) {
     switch (status) {
       case FormStatus.pending:
         return 'pending';
