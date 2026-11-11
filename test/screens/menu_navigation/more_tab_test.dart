@@ -39,7 +39,7 @@ final _financialSwitch = find.descendant(
 
 void main() {
   group('MoreView', () {
-    testWidgets('shows the 11 rows in order, each opening a screen', (
+    testWidgets('shows the 10 rows in order, each opening a screen', (
       tester,
     ) async {
       tallScreen(tester);
@@ -54,9 +54,9 @@ void main() {
           .widgetList<AppListRow>(find.byType(AppListRow))
           .map((row) => row.title)
           .toList();
+      expect(titles, isNot(contains('Clientes')));
       expect(titles, [
         'Sua conta',
-        'Clientes',
         'Catálogo',
         'Contratos',
         'Checklists',
@@ -68,7 +68,7 @@ void main() {
         'Avançado',
       ]);
       // every row opens another screen, so every row has a chevron
-      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(11));
+      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(10));
       expect(find.text('Starter'), findsOneWidget);
       expect(find.text('PraticOS 1.0.0'), findsOneWidget);
 
@@ -97,7 +97,7 @@ void main() {
       expect(find.text('Dados na OS, ramo e recursos'), findsOneWidget);
       expect(find.text('Serviços e peças'), findsOneWidget);
       double y(String t) => tester.getTopLeft(find.text(t)).dy;
-      expect(y('Cadastros'), lessThan(y('Clientes')));
+      expect(y('Cadastros'), lessThan(y('Catálogo')));
       expect(y('Avaliações'), lessThan(y('Seu trabalho')));
       expect(y('Seu trabalho'), lessThan(y('Dados para o cliente')));
       expect(y('Plano'), lessThan(y('Você')));
@@ -119,7 +119,6 @@ void main() {
           MoreView(
             onOpen: (_) {},
             visibility: const MoreVisibility(
-              customers: false,
               contracts: false,
               catalog: false,
               checklists: false,
@@ -138,7 +137,6 @@ void main() {
           MoreView(
             onOpen: (_) {},
             visibility: const MoreVisibility(
-              customers: false,
               contracts: false,
               company: false,
               team: false,

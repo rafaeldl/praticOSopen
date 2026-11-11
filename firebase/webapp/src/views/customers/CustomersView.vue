@@ -8,13 +8,14 @@
 // badges and the plate search for consultant and technician (defect 2).
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Upload } from '@lucide/vue'
+import { ArrowUpDown, Upload } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import CustomerDetail from '@/components/customers/CustomerDetail.vue'
 import CustomerForm from '@/components/customers/CustomerForm.vue'
 import DirectoryTabs from '@/components/customers/DirectoryTabs.vue'
+import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import { t } from '@/i18n'
 import { registerSearcher } from '@/lib/commands'
 import { loadCustomerDirectory, loadDevice, loadDeviceDirectory } from '@/lib/customers/data'
@@ -87,6 +88,16 @@ async function load(fresh = false) {
     console.error('customers: list failed', error)
     state.value = 'failed'
   }
+}
+
+// "Ordenar por" is a menu held under its button, ✓ on the current one (the app's top sort button).
+const orderButton = ref<HTMLElement | null>(null)
+const orderMenu = ref(false)
+const orderLabel = (value: CustomerOrder) => t(value === 'name' ? 'web.customers.orderName' : 'web.customers.orderRecent')
+const orderChoices = computed(() => CUSTOMER_ORDERS.map((value) => ({ id: value, label: orderLabel(value), current: order.value === value })))
+function pickOrder(id: string) {
+  orderMenu.value = false
+  if ((CUSTOMER_ORDERS as readonly string[]).includes(id)) setOrder(id as CustomerOrder)
 }
 
 function setOrder(next: CustomerOrder) {
@@ -244,10 +255,17 @@ onBeforeUnmount(() => {
 
   <div class="toolbar">
     <DirectoryTabs current="customers" />
-    <div class="tabs" role="group" :aria-label="t('web.customers.orderBy')" data-testid="customers-order">
-      <button type="button" :aria-pressed="order === 'recent'" @click="setOrder('recent')">{{ t('web.customers.orderRecent') }}</button>
-      <button type="button" :aria-pressed="order === 'name'" @click="setOrder('name')">{{ t('web.customers.orderName') }}</button>
-    </div>
+    <button
+      ref="orderButton"
+      type="button"
+      class="btn btn--ghost"
+      :aria-label="`${t('web.customers.orderBy')}: ${orderLabel(order)}`"
+      aria-haspopup="menu"
+      data-testid="customers-order"
+      @click="orderMenu = true"
+    >
+      <ArrowUpDown :size="15" aria-hidden="true" />{{ orderLabel(order) }}
+    </button>
     <span class="spacer"></span>
     <label class="sr" for="customers-search">{{ t('searchCustomerPlaceholder', { serial: serialLabel.toLocaleLowerCase() }) }}</label>
     <input
@@ -329,4 +347,5 @@ onBeforeUnmount(() => {
   </div>
 
   <CustomerForm v-if="form" :draft="form.draft" :directory="rows" @saved="onSaved" @open="onOpenExisting" @close="form = null" />
+  <ChoiceDialog v-if="orderMenu" :anchor="orderButton" :title="t('web.customers.orderBy')" :choices="orderChoices" @pick="pickOrder" @close="orderMenu = false" />
 </template>

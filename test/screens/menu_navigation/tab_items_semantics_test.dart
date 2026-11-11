@@ -28,7 +28,7 @@ void main() {
       ),
     );
 
-    for (final label in ['Início', 'Agenda', 'Financeiro']) {
+    for (final label in ['Início', 'Clientes', 'Agenda', 'Financeiro']) {
       expect(
         tester.getSemantics(find.text(label)),
         containsSemantics(isButton: true),
@@ -36,5 +36,36 @@ void main() {
       );
     }
     handle.dispose();
+  });
+
+  testWidgets('Clientes sits between Início and Agenda with the people icon', (
+    tester,
+  ) async {
+    late List<BottomNavigationBarItem> items;
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) {
+            items = [
+              for (final tab in AppTab.values) buildAppTabItem(context, tab),
+            ];
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(items.map((item) => item.label), [
+      'Início',
+      'Clientes',
+      'Agenda',
+      'Financeiro',
+    ]);
+    final icon = items[1].icon as Semantics;
+    expect(icon.properties.identifier, 'tab_customers');
+    expect((icon.child! as Icon).icon, CupertinoIcons.person_2);
   });
 }

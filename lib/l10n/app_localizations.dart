@@ -6730,12 +6730,6 @@ abstract class AppLocalizations {
   /// **'Falta receber {value}'**
   String customerOwesValue(String value);
 
-  /// Clientes list, right side: what the customer still owes
-  ///
-  /// In pt, this message translates to:
-  /// **'Deve {value}'**
-  String customerOwedTrailing(String value);
-
   /// No description provided for @askOrderForCustomer.
   ///
   /// In pt, this message translates to:
@@ -7315,7 +7309,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileButtonA11y.
   ///
   /// In pt, this message translates to:
-  /// **'{company}: clientes, catálogo, equipe e ajustes'**
+  /// **'{company}: catálogo, equipe e ajustes'**
   String profileButtonA11y(String company);
 
   /// No description provided for @orderAssistantPhoto.
@@ -12488,14 +12482,20 @@ abstract class AppLocalizations {
   /// No description provided for @customersOrderRecent.
   ///
   /// In pt, this message translates to:
-  /// **'Recentes'**
+  /// **'Mais recentes'**
   String get customersOrderRecent;
 
   /// No description provided for @customersOrderName.
   ///
   /// In pt, this message translates to:
-  /// **'A–Z'**
+  /// **'Nome (A–Z)'**
   String get customersOrderName;
+
+  /// No description provided for @customersSortBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ordenar por'**
+  String get customersSortBy;
 
   /// No description provided for @customerShowAllDevices.
   ///

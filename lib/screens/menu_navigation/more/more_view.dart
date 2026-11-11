@@ -11,7 +11,6 @@ import 'package:praticos/screens/contracts/contracts_title.dart';
 /// Where a row of the profile screen (former "Mais" tab) leads.
 enum MoreDestination {
   account,
-  customers,
   contracts,
   company,
   team,
@@ -24,11 +23,10 @@ enum MoreDestination {
 }
 
 /// Which rows the current role can see. Everything is on by default so the
-/// full list (9 rows) is the reference layout.
+/// full list (10 rows) is the reference layout.
 class MoreVisibility {
   const MoreVisibility({
     this.account = true,
-    this.customers = true,
     this.contracts = true,
     this.company = true,
     this.team = true,
@@ -41,7 +39,6 @@ class MoreVisibility {
   });
 
   final bool account;
-  final bool customers;
   final bool contracts;
   final bool company;
   final bool team;
@@ -56,8 +53,6 @@ class MoreVisibility {
     switch (destination) {
       case MoreDestination.account:
         return account;
-      case MoreDestination.customers:
-        return customers;
       case MoreDestination.contracts:
         return contracts;
       case MoreDestination.company:
@@ -82,7 +77,7 @@ class MoreVisibility {
 
 /// Profile screen, opened from the company button on Início (it replaced the
 /// "Mais" tab). In this order, each row opening a screen (chevron): the
-/// account row (avatar + name), then "Cadastros" (Clientes, Catálogo,
+/// account row (avatar + name), then "Cadastros" (Catálogo,
 /// Contratos, Checklists, Avaliações), "Empresa" (Sua empresa, Equipe, Plano)
 /// and "Você" (Lembretes, Avançado). No colored icons.
 class MoreView extends StatelessWidget {
@@ -125,8 +120,6 @@ class MoreView extends StatelessWidget {
     switch (destination) {
       case MoreDestination.account:
         return l10n.yourAccount;
-      case MoreDestination.customers:
-        return l10n.customers;
       case MoreDestination.contracts:
         return contractsTitleOf(context);
       case MoreDestination.company:
@@ -185,7 +178,6 @@ class MoreView extends StatelessWidget {
   static const sections = <List<MoreDestination>>[
     [MoreDestination.account],
     [
-      MoreDestination.customers,
       MoreDestination.catalog,
       MoreDestination.contracts,
       MoreDestination.checklists,
