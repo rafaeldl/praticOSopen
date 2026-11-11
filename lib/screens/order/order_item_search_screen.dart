@@ -42,7 +42,8 @@ Future<List<String>> loadMostUsedItemKeys() async {
 ///
 /// - Each row says "serviço" or "produto" and shows the price (only with the
 ///   view-prices permission; no price shows "sem valor").
-/// - Tapping a row pops with an [OrderItemPick]: the order adds it right away.
+/// - Tapping a row pops with an [OrderItemPick]: the order opens the item
+///   sheet (description, price) and then adds it.
 /// - The "+" on top opens the new item sheet (asking service or product
 ///   first when both can be created); the saved item goes into the order.
 ///   When nothing has

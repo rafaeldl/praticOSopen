@@ -39,6 +39,7 @@ class OrderItemSheet extends StatefulWidget {
     this.description,
     this.quantity,
     this.showPrice = true,
+    this.adding = false,
   });
 
   final String name;
@@ -50,6 +51,10 @@ class OrderItemSheet extends StatefulWidget {
 
   /// False without the view-prices permission: only quantity and removal.
   final bool showPrice;
+
+  /// Item just picked, not in the order yet: the description gets the
+  /// cursor and the last row reads "Não adicionar" (pops with `remove`).
+  final bool adding;
 
   @override
   State<OrderItemSheet> createState() => _OrderItemSheetState();
@@ -94,6 +99,7 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
                 label: l10n.orderItemDescription,
                 initialValue: widget.description,
                 hint: l10n.orderItemDescriptionHint,
+                autofocus: widget.adding,
                 textCapitalization: TextCapitalization.sentences,
                 maxLines: 3,
                 onSaved: (text) =>
@@ -161,7 +167,7 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
               onPressed: () =>
                   Navigator.pop(context, const OrderItemEdit(remove: true)),
               child: Text(
-                l10n.orderItemRemove,
+                widget.adding ? l10n.orderItemDiscard : l10n.orderItemRemove,
                 style: AppTypography.callout.copyWith(
                   color: AppColors.danger.resolveFrom(context),
                 ),

@@ -4522,6 +4522,12 @@ abstract class AppLocalizations {
   /// **'Tirar da OS'**
   String get orderItemRemove;
 
+  /// No description provided for @orderItemDiscard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não adicionar'**
+  String get orderItemDiscard;
+
   /// No description provided for @orderTotalLabel.
   ///
   /// In pt, this message translates to:
