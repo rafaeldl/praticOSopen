@@ -7722,10 +7722,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get customersOrderRecent => 'Recent';
+  String get customersOrderRecent => 'Most recent';
 
   @override
-  String get customersOrderName => 'A–Z';
+  String get customersOrderName => 'Name (A–Z)';
+
+  @override
+  String get customersSortBy => 'Sort by';
 
   @override
   String customerShowAllDevices(int count, String devices) {

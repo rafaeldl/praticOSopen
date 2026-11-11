@@ -3,9 +3,11 @@
 ## Visão Geral
 
 Cada cliente guarda a data da última movimentação (`lastActivityAt`). A lista de
-clientes do web e a aba Clientes do app abrem em **Recentes**: quem teve
-movimento mais recente fica no topo. A opção **A–Z** volta para a lista por nome,
-agrupada por letra. A escolha fica guardada no navegador
+clientes do web e a aba Clientes do app abrem em **Mais recentes**: quem teve
+movimento mais recente fica no topo. **Nome (A–Z)** volta para a lista por nome,
+agrupada por letra. A ordem se escolhe no botão de ordenar do topo (setas para
+cima e para baixo no app, "↕ Mais recentes" na barra da lista no web), que abre
+o menu "Ordenar por" com ✓ na atual; não ocupa espaço na tela. A escolha fica guardada no navegador
 (`praticos.customersOrder`) e no aparelho (`customersOrder` no SharedPreferences).
 
 Conta como movimentação:
@@ -34,10 +36,12 @@ Conta como movimentação:
 
 - **App:** `Customer.lastActivityAt` só é lido (`includeToJson: false`), então
   salvar o cliente nunca grava uma data velha por cima. A aba Clientes
-  (`lib/screens/menu_navigation/home_customer_list.dart`) tem o controle
-  Recentes / A–Z. A ordem vem de `sortByRecent` e `customerLastActivity` em
+  (`lib/screens/menu_navigation/home_customer_list.dart`) tem o botão de
+  ordenar no topo (Mais recentes / Nome (A–Z)). A ordem vem de `sortByRecent` e `customerLastActivity` em
   `lib/utils/customer_utils.dart`, com a mesma regra do web para quem ainda não
-  tem a data. A linha não mostra a data: à esquerda o nome e o telefone; à
+  tem a data. O botão de ordenar fica ao lado do "+" e só aparece com clientes
+  na lista; o menu é o `showPullDownMenu` com `PullDownItem.checked`. A linha
+  não mostra a data: à esquerda o nome e o telefone; à
   direita o que está pendente, o Falta receber (só o valor, "R$ 166,00", para quem
   lê o Financeiro) em cima da situação (ponto e "2 OS" em aberto, ou "1 OS
   atrasada" em vermelho e negrito). Cliente sem nada pendente fica sem nada à

@@ -1617,7 +1617,9 @@ void main() {
       expect(find.text('A'), findsNothing);
     });
 
-    testWidgets('A–Z is kept on the device', (tester) async {
+    testWidgets('the order is picked in the top sort menu and kept on the '
+        'device', (tester) async {
+      final handle = tester.ensureSemantics();
       await Harness().pump(
         tester,
         HomeCustomerList(
@@ -1628,11 +1630,53 @@ void main() {
         ),
         direct: true,
       );
-      await tester.tap(find.text('A–Z'));
+      // No control taking room under the search: a button at the top.
+      expect(find.byType(CupertinoSlidingSegmentedControl), findsNothing);
+      final sort = find.bySemanticsLabel('Ordenar por');
+      expect(sort, findsOneWidget);
+
+      await tester.tap(sort);
+      await tester.pumpAndSettle();
+      // ✓ on the current order.
+      expect(
+        tester.getSemantics(find.text('Mais recentes')),
+        matchesSemantics(
+          isButton: true,
+          isSelected: true,
+          hasSelectedState: true,
+          label: 'Mais recentes',
+          hasTapAction: true,
+        ),
+      );
+      await tester.tap(find.text('Nome (A–Z)'));
       await tester.pumpAndSettle();
       expect(find.text('A'), findsOneWidget);
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('customersOrder'), 'name');
+
+      await tester.tap(sort);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
+      expect(
+        tester.getCenter(find.byIcon(CupertinoIcons.checkmark_alt)).dy,
+        closeTo(tester.getCenter(find.text('Nome (A–Z)')).dy, 4),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('an empty list has no sort button', (tester) async {
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          canAdd: true,
+          showOwed: false,
+          seesAllOrders: false,
+          directory: FakeDirectory(),
+        ),
+        direct: true,
+      );
+      expect(find.byIcon(CupertinoIcons.arrow_up_arrow_down), findsNothing);
+      expect(find.byIcon(CupertinoIcons.add), findsOneWidget);
     });
 
     testWidgets('groups by initial, counts, and opens the customer', (

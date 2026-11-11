@@ -9,6 +9,7 @@ import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/customer_directory.dart';
@@ -27,7 +28,8 @@ import 'package:praticos/models/permission.dart';
 
 /// Clientes tab: searchable list (name, phone or vehicle plate). "Recentes"
 /// (default) puts the last activity first (docs/CUSTOMER_LAST_ACTIVITY.md),
-/// without showing the date; "A–Z" groups by initial. The choice is kept on the device. A row opens the
+/// without showing the date; "A–Z" groups by initial. The order is picked in
+/// the top sort button (a pull-down menu), so it takes no room on the screen. The choice is kept on the device. A row opens the
 /// customer screen; "+" opens the new-customer sheet.
 /// How the Clientes list is ordered.
 enum CustomerListOrder { recent, name }
@@ -163,6 +165,36 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         .catchError((_) => false);
   }
 
+  /// "Ordenar por" (top button): the iOS pull-down menu, ✓ on the current one.
+  Future<void> _chooseOrder() async {
+    final l10n = context.l10n;
+    final choice = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup(title: l10n.customersSortBy, [
+          PullDownItem(
+            value: CustomerListOrder.recent.name,
+            label: l10n.customersOrderRecent,
+            icon: CupertinoIcons.clock,
+            checked: _order == CustomerListOrder.recent,
+          ),
+          PullDownItem(
+            value: CustomerListOrder.name.name,
+            label: l10n.customersOrderName,
+            icon: CupertinoIcons.textformat_abc,
+            checked: _order == CustomerListOrder.name,
+          ),
+        ]),
+      ],
+    );
+    if (choice == null || !mounted) return;
+    _setOrder(
+      choice == CustomerListOrder.name.name
+          ? CustomerListOrder.name
+          : CustomerListOrder.recent,
+    );
+  }
+
   Future<void> _addCustomer() async {
     final created = await FormSheet.show<Customer>(
       context,
@@ -182,13 +214,26 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         slivers: [
           AppNavBar(
             largeTitle: Text(config.customerPlural),
-            trailing: _canAdd
-                ? GlassBarButton(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_customers?.isNotEmpty ?? false)
+                  GlassBarButton(
+                    identifier: 'customers_sort_button',
+                    label: l10n.customersSortBy,
+                    icon: CupertinoIcons.arrow_up_arrow_down,
+                    onPressed: _chooseOrder,
+                  ),
+                if (_canAdd) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  GlassBarButton(
                     label: l10n.newCustomer,
                     icon: CupertinoIcons.add,
                     onPressed: _addCustomer,
-                  )
-                : null,
+                  ),
+                ],
+              ],
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -212,37 +257,6 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               ),
             ),
           ),
-          if (_customers?.isNotEmpty ?? false)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.blockMargin,
-                  AppSpacing.xs,
-                  AppSpacing.blockMargin,
-                  0,
-                ),
-                child: CupertinoSlidingSegmentedControl<CustomerListOrder>(
-                  groupValue: _order,
-                  onValueChanged: (order) {
-                    if (order != null) _setOrder(order);
-                  },
-                  children: {
-                    for (final order in CustomerListOrder.values)
-                      order: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.xs,
-                        ),
-                        child: Text(
-                          order == CustomerListOrder.recent
-                              ? l10n.customersOrderRecent
-                              : l10n.customersOrderName,
-                          style: AppTypography.callout,
-                        ),
-                      ),
-                  },
-                ),
-              ),
-            ),
           ..._buildBody(),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
