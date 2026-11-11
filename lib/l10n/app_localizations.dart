@@ -8678,6 +8678,18 @@ abstract class AppLocalizations {
   /// **'Voltar à anterior'**
   String get checklistPreviousQuestion;
 
+  /// No description provided for @checklistPreviousShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anterior'**
+  String get checklistPreviousShort;
+
+  /// No description provided for @checklistSkipShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pular'**
+  String get checklistSkipShort;
+
   /// No description provided for @checklistQuestionRequired.
   ///
   /// In pt, this message translates to:

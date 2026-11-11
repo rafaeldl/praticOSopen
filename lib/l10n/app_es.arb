@@ -2248,6 +2248,8 @@
   "checklistQuestionDone": "Listo",
   "checklistSkipForNow": "Omitir por ahora",
   "checklistPreviousQuestion": "Volver a la anterior",
+  "checklistPreviousShort": "Anterior",
+  "checklistSkipShort": "Omitir",
   "checklistQuestionRequired": "Obligatoria",
   "checklistPickFromGallery": "Elegir de la galería",
   "checklistTextPlaceholder": "Escribe aquí",

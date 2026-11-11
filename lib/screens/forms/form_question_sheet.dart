@@ -499,12 +499,46 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
     ];
   }
 
+  /// Glass bar at the bottom: "‹ Anterior" (from the 2nd question), "Foto"
+  /// in the middle and "Pular ›", all glass capsules on one line (rule 11,
+  /// like the order's Foto/Falar bar). Middle buttons go in `middle`, so
+  /// "Falar" can join "Foto" later. With big text the labels that do not fit
+  /// turn into icons (the middle ones first); the screen reader always hears
+  /// the full name.
   Widget _bottomBar(
     BuildContext context, {
     required bool photoButton,
     required bool uploading,
   }) {
     final l10n = context.l10n;
+    final previous = _index > 0
+        ? _GlassBarButton(
+            key: const ValueKey('question_previous'),
+            leadingIcon: CupertinoIcons.chevron_left,
+            label: l10n.checklistPreviousShort,
+            semanticLabel: l10n.checklistPreviousQuestion,
+            onPressed: _previous,
+          )
+        : null;
+    final skip = _GlassBarButton(
+      key: const ValueKey('question_skip'),
+      trailingIcon: CupertinoIcons.chevron_right,
+      label: l10n.checklistSkipShort,
+      semanticLabel: l10n.checklistSkipForNow,
+      onPressed: _skip,
+    );
+    final middle = <_GlassBarButton>[
+      if (photoButton && !uploading)
+        _GlassBarButton(
+          key: const ValueKey('question_photo'),
+          leadingIcon: CupertinoIcons.camera,
+          label: l10n.orderAssistantPhoto,
+          semanticLabel: l10n.orderAssistantPhoto,
+          onPressed: _choosePhotoSource,
+        ),
+    ];
+    final spinner = photoButton && uploading;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pageMargin,
@@ -512,45 +546,57 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
         AppSpacing.pageMargin,
         AppSpacing.sm,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: _index > 0
-                  ? TextLink(
-                      key: const ValueKey('question_previous'),
-                      label: l10n.checklistPreviousQuestion,
-                      onPressed: _previous,
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ),
-          if (photoButton)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: uploading
-                  ? const SizedBox(
-                      width: AppSizes.minTouchTarget,
-                      height: AppSizes.minTouchTarget,
-                      child: CupertinoActivityIndicator(),
-                    )
-                  : _GlassPhotoButton(
-                      label: l10n.orderAssistantPhoto,
-                      onPressed: _choosePhotoSource,
-                    ),
-            ),
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextLink(
-                key: const ValueKey('question_skip'),
-                label: l10n.checklistSkipForNow,
-                onPressed: _skip,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = AppSpacing.xs;
+          const icon = AppSizes.minTouchTarget;
+          double width(_GlassBarButton? b, {bool iconOnly = false}) =>
+              b == null ? 0 : (iconOnly ? icon : b.fullWidth(context));
+          double sides(bool iconOnly) =>
+              2 *
+              [
+                width(previous, iconOnly: iconOnly),
+                width(skip, iconOnly: iconOnly),
+              ].reduce((a, b) => a > b ? a : b);
+          double center(bool iconOnly) =>
+              (spinner ? icon + 2 * gap : 0) +
+              middle.fold(0.0, (sum, b) => sum + width(b, iconOnly: iconOnly)) +
+              2 * gap * middle.length;
+          final max = constraints.maxWidth;
+          final middleIconOnly = sides(false) + center(false) > max;
+          final sidesIconOnly = sides(false) + center(true) > max;
+
+          return Row(
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: previous?.copyWith(iconOnly: sidesIconOnly),
+                ),
               ),
-            ),
-          ),
-        ],
+              if (spinner)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: gap),
+                  child: SizedBox(
+                    width: icon,
+                    height: icon,
+                    child: CupertinoActivityIndicator(),
+                  ),
+                ),
+              for (final button in middle)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: gap),
+                  child: button.copyWith(iconOnly: middleIconOnly),
+                ),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: skip.copyWith(iconOnly: sidesIconOnly),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -880,23 +926,70 @@ class FormPhotoThumb extends StatelessWidget {
   }
 }
 
-/// Glass capsule with a camera and "Foto" (a control, like the OS's photo
-/// button), always at the bottom center of the question.
-class _GlassPhotoButton extends StatelessWidget {
-  const _GlassPhotoButton({required this.label, required this.onPressed});
+/// Glass capsule of the question's bottom bar (a control, like the order's
+/// Foto/Falar buttons): thin edge, no shadow, at least 44 high. The screen
+/// reader hears [semanticLabel] ("Voltar à anterior"), the eye a short label.
+class _GlassBarButton extends StatelessWidget {
+  const _GlassBarButton({
+    super.key,
+    required this.label,
+    required this.semanticLabel,
+    required this.onPressed,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.iconOnly = false,
+  }) : assert(leadingIcon != null || trailingIcon != null);
+
+  static const double _iconSize = 20;
+  static const double _padding = AppSpacing.md;
 
   final String label;
+  final String semanticLabel;
   final VoidCallback onPressed;
+  final IconData? leadingIcon;
+  final IconData? trailingIcon;
+
+  /// Big text that does not fit: a round 44 button with just the icon.
+  final bool iconOnly;
+
+  TextStyle _style(BuildContext context) => AppTypography.callout.copyWith(
+    color: AppColors.text.resolveFrom(context),
+  );
+
+  _GlassBarButton copyWith({required bool iconOnly}) => _GlassBarButton(
+    key: key,
+    label: label,
+    semanticLabel: semanticLabel,
+    onPressed: onPressed,
+    leadingIcon: leadingIcon,
+    trailingIcon: trailingIcon,
+    iconOnly: iconOnly,
+  );
+
+  /// Width with the label at the current text size.
+  double fullWidth(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: _style(context)),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    )..layout();
+    final icons = [leadingIcon, trailingIcon].whereType<IconData>().length;
+    final width =
+        2 * _padding + icons * (_iconSize + AppSpacing.xs) + painter.width;
+    painter.dispose();
+    return width.ceilToDouble() + 1;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final color = AppColors.text.resolveFrom(context);
+    final style = _style(context);
+    final color = style.color;
     return Semantics(
       button: true,
-      label: label,
+      label: semanticLabel,
       excludeSemantics: true,
       child: CupertinoButton(
-        key: const ValueKey('question_photo'),
         padding: EdgeInsets.zero,
         minimumSize: const Size(
           AppSizes.minTouchTarget,
@@ -909,19 +1002,27 @@ class _GlassPhotoButton extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(
               minHeight: AppSizes.minTouchTarget,
+              minWidth: AppSizes.minTouchTarget,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(CupertinoIcons.camera, size: 20, color: color),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  label,
-                  style: AppTypography.callout.copyWith(color: color),
-                ),
-              ],
-            ),
+            padding: iconOnly
+                ? EdgeInsets.zero
+                : const EdgeInsets.symmetric(horizontal: _padding),
+            child: iconOnly
+                ? Icon(leadingIcon ?? trailingIcon, size: 22, color: color)
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (leadingIcon != null) ...[
+                        Icon(leadingIcon, size: _iconSize, color: color),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Flexible(child: Text(label, style: style)),
+                      if (trailingIcon != null) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(trailingIcon, size: _iconSize, color: color),
+                      ],
+                    ],
+                  ),
           ),
         ),
       ),
