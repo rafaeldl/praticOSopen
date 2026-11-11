@@ -56,7 +56,9 @@ Quanto demora para valer:
 
 | Arquivo | Papel |
 |---|---|
-| `src/routes/v1/ai.routes.ts` | `GET /v1/app/ai/status` (ligada? + uso do mês, sem contar) e `POST /v1/app/ai/order-assist` no `api` (bearer + `resolveCompanyContext` + `apiCoreLimiter`); os dois exigem `write:orders` |
+| `src/routes/v1/ai.routes.ts` | `GET /v1/app/ai/status` (ligada? + uso do mês, sem contar), `POST /v1/app/ai/order-assist` e `POST /v1/app/ai/form-photo` no `api` (bearer + `resolveCompanyContext` + limite por IP e por usuário); todos exigem `write:orders` |
+| `src/services/ai/form-photo.service.ts` | Foto do checklist: validação (zod), cota e `runFormPhoto` com dependências injetáveis; prompt e parser em `form-photo.prompt.ts` |
+| `src/services/ai/form-photo.deps.ts` | Dependências de produção da foto do checklist, com modelo e região próprios (`AI_FORM_PHOTO_*`) |
 | `src/services/ai/order-assist.service.ts` | Validação (zod), prompt, parse da resposta, casamento com catálogo, orquestração (`runOrderAssist`) com dependências injetáveis |
 | `src/services/ai/order-assist.deps.ts` | Dependências de produção (Firestore da empresa, cota, Vertex AI); carrega até 2.000 clientes e veículos (só nome, telefone, placa, marca) para comparar na memória |
 | `src/services/ai/fuzzy-match.ts` | Busca por semelhança sem IA: `matchCustomer` e `matchDevice` (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)) |
@@ -313,9 +315,58 @@ Com ações opcionais no formato de resposta, o Claude pulava `payment` em "term
 
 Nenhuma empresa tem a chave ligada.
 
-## Foto do checklist (teste antes da rota)
+## Foto do checklist
 
-Spec: `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`. A rota `form-photo` ainda não existe (#687). O prompt, o formato de resposta e o parser da §7 ficam em `src/services/ai/form-photo.prompt.ts`. O parser descarta resposta fora das opções e qualquer resposta com `confident: false`, mas mantém a observação. `scripts/checklist-photo-eval.ts` manda cada foto com a pergunta e mede o acerto por tipo (km, combustível, número de série, dano, tela, visor), se a observação diz o lugar certo e quanto tempo leva. As fotos e as respostas certas ficam fora do repositório.
+Spec: `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`. A pessoa tira a foto de uma pergunta do checklist e a IA, sabendo a pergunta, responde (km, combustível, número de série) e escreve uma observação editável ("Amassado na porta traseira esquerda"). O app chama a rota (#688); a Function não grava nada.
+
+### Rota `POST /v1/app/ai/form-photo`
+
+Mesmo bearer, `write:orders`, chave de ligar (`settings/ai.enabled` ou `config/ai.enabledForAll`) e cota da OS.
+
+```jsonc
+// Pedido
+{
+  "photo": { "mimeType": "image/jpeg", "data": "<base64, até 2 MB>" },
+  "question": { "label": "Nível de combustível", "type": "select", "options": ["Reserva", "1/4", "1/2", "3/4", "Cheio"] },
+  "device": { "category": "Veículo", "name": "Fiat Uno 2015" },   // opcional, sem placa nem série
+  "segment": "automotive", "locale": "pt",                        // opcionais
+  "lastReading": { "value": 102000, "unit": "km" }                // opcional, só em pergunta de leitura
+}
+// Resposta 200
+{ "success": true, "data": {
+  "answer": "1/2",                       // só quando confident e, com opções, uma delas (a original)
+  "note": "Ponteiro no meio",            // observação da pergunta
+  "optionNotes": [{ "option": "Porta", "text": "Amassado na porta traseira esquerda" }],
+  "photoNote": "Luz de óleo acesa",      // o que a foto mostra e a pergunta não pediu
+  "photoIssue": "dark",                  // dark | blurry | off_target
+  "confident": true,
+  "usage": { "used": 12, "limit": 150 }
+} }
+```
+
+Campos sem valor não vêm. Erros iguais aos da OS: 400 `VALIDATION_ERROR`, 403 `INSUFFICIENT_PERMISSIONS` ou `AI_DISABLED`, 429 `AI_QUOTA_EXCEEDED` (com `used` e `limit`), 503 `AI_UNAVAILABLE`.
+
+- **Resposta fora das opções é descartada** no servidor; maiúscula e espaço não contam ("cheio" vira "Cheio"). `confident: false` nunca devolve `answer`, só a observação.
+- **Cota:** cada foto lida conta 1, inclusive foto escura ou tremida, porque o modelo foi chamado. Só é devolvida quando o modelo não respondeu (erro, fora do ar ou resposta que não é JSON).
+- **Privacidade:** o corpo é `strict`: não há campo para cliente, telefone, placa, série nem `companyId`. O equipamento vai só como categoria e modelo. O log só tem empresa, tipo da pergunta, código de erro e tempo (`[aiFormPhoto] company=… type=number ms=…`), nunca a imagem ou texto.
+- **Pergunta `select` ou `checklist` sem opções** dá 400. `photo_only` é aceita e devolve só observações.
+
+### Modelo da foto do checklist
+
+A rota tem variáveis próprias, separadas das da OS. Sem elas, segue a OS: provedor da empresa, `AI_GEMINI_MODEL` e `AI_VERTEX_LOCATION` (São Paulo), e a foto não sai do Brasil quando o provedor é o Gemini.
+
+| Variável | Valores | Sem ela |
+|---|---|---|
+| `AI_FORM_PHOTO_PROVIDER` | `gemini` ou `claude`; vale mais que o `provider` da empresa | provedor da empresa, como na OS |
+| `AI_FORM_PHOTO_GEMINI_MODEL` | ex.: `gemini-3.8-flash` | `AI_GEMINI_MODEL` (`gemini-2.5-flash`) |
+| `AI_FORM_PHOTO_VERTEX_LOCATION` | ex.: `global` | `AI_VERTEX_LOCATION` (`southamerica-east1`) |
+| `AI_FORM_PHOTO_GEMINI_THINKING` | `minimal`, `low`, `medium`, `high` (só Gemini 3) | não envia |
+
+O melhor resultado do teste abaixo foi o Gemini 3.8 Flash com `AI_FORM_PHOTO_VERTEX_LOCATION=global` e `AI_FORM_PHOTO_GEMINI_THINKING=low`. Esse modelo não existe em São Paulo: com `global`, o Google processa a foto em qualquer região dele, fora do Brasil. Ligar isso é decisão do Rafael e pede revisar a política de privacidade (hoje ela cita Google e Anthropic, mas não onde a foto é processada). A OS continua com o padrão dela.
+
+### Teste antes da rota
+
+O prompt, o formato de resposta e o parser da §7 ficam em `src/services/ai/form-photo.prompt.ts`. O parser descarta resposta fora das opções e qualquer resposta com `confident: false`, mas mantém a observação. `scripts/checklist-photo-eval.ts` manda cada foto com a pergunta e mede o acerto por tipo (km, combustível, número de série, dano, tela, visor), se a observação diz o lugar certo e quanto tempo leva. As fotos e as respostas certas ficam fora do repositório.
 
 ```bash
 cd firebase/functions

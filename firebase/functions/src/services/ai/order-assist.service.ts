@@ -80,7 +80,7 @@ const contextSchema = z
 
 export type OrderAssistContext = z.infer<typeof contextSchema>;
 
-const base64Of = (maxBytes: number) =>
+export const base64Of = (maxBytes: number) =>
   z
     .string()
     .min(4)

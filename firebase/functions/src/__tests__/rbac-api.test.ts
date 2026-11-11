@@ -120,6 +120,15 @@ jest.mock('../services/ai/order-assist.deps', () => ({
   }),
 }));
 
+jest.mock('../services/ai/form-photo.deps', () => ({
+  defaultFormPhotoDeps: () => ({
+    llm: { generateJson: async () => '{"answer":102345,"confident":true}' },
+    getSettings: async () => ({ enabled: true }),
+    reserve: async () => ({ ok: true, used: 1, limit: 10, monthKey: '2026-11' }),
+    release: async () => undefined,
+  }),
+}));
+
 import { resetFakeDb, seed } from './helpers/fake-firestore';
 import { apiKeyAuth, bearerAuth } from '../middleware/auth.middleware';
 import { resolveCompanyContext } from '../middleware/company.middleware';

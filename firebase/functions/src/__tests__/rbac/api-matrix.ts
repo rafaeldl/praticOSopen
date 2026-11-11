@@ -589,4 +589,10 @@ export const API_CASES: ApiCase[] = [
     method: 'post', path: '/v1/app/ai/order-assist', body: { text: 'polimento' },
     allow: MEMBERS, permission: 'editOrder',
   },
+  {
+    id: 'ai.formPhoto', area: 'IA', title: 'ler a foto do checklist com a IA',
+    method: 'post', path: '/v1/app/ai/form-photo',
+    body: { photo: { mimeType: 'image/jpeg', data: 'aGVsbG8=' }, question: { label: 'Quilometragem', type: 'number' } },
+    allow: MEMBERS, permission: 'editOrder',
+  },
 ];
