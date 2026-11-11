@@ -29,6 +29,7 @@ import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import BatchConfirm from './BatchConfirm.vue'
 import StagePrint from './StagePrint.vue'
 import { printSheet } from '@/lib/print-frame'
+import { useHeldFocus } from '@/lib/held-focus'
 import { rankAt, sortInStage, stageIdOf, suggestedStage, workStages, type WorkStage } from '@/lib/orders/stages'
 import OrderDetail from './OrderDetail.vue'
 
@@ -255,8 +256,12 @@ function keep(fresh: Order) {
   if (found.value) found.value = mergeById(found.value, [fresh])
 }
 
+/** A live update can redraw the focused card (the listener's first answer, older than the move just made). */
+const focus = useHeldFocus('card-', 'card-open', cards)
+
 async function focusCard(id: string) {
   await nextTick()
+  focus.hold(id)
   document.getElementById(`card-${id}`)?.focus()
 }
 
