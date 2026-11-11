@@ -60,3 +60,21 @@ describe('thinkingFromEnv', () => {
     expect(thinkingFromEnv('gemini-2.5-flash', {})).toBeUndefined();
   });
 });
+
+describe('VertexGeminiClient usage', () => {
+  it('reports prompt tokens and output plus thinking tokens', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: '{}' }] } }],
+        usageMetadata: { promptTokenCount: 1700, candidatesTokenCount: 90, thoughtsTokenCount: 80 },
+        modelVersion: 'gemini-3.8-flash',
+      }),
+    }) as unknown as typeof fetch;
+    const onUsage = jest.fn();
+
+    await new VertexGeminiClient('gemini-3.8-flash', 'global', 'low').generateJson({ ...request, onUsage });
+
+    expect(onUsage).toHaveBeenCalledWith({ inputTokens: 1700, outputTokens: 170, model: 'gemini-3.8-flash' });
+  });
+});

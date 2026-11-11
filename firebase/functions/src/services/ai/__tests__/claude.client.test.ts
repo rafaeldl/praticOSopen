@@ -50,6 +50,18 @@ describe('ClaudeClient', () => {
     ]);
   });
 
+  it('can skip the server-side fallback and reports the tokens used', async () => {
+    create.mockResolvedValue({ ...answer('{}'), model: 'claude-sonnet-5-5', usage: { input_tokens: 4400, output_tokens: 130 } });
+    const onUsage = jest.fn();
+
+    await new ClaudeClient(() => 'sk-test', 'claude-sonnet-5-5', 'medium', false).generateJson({ ...request, onUsage });
+
+    const body = create.mock.calls[0][0];
+    expect(body.fallbacks).toBeUndefined();
+    expect(body.betas).toBeUndefined();
+    expect(onUsage).toHaveBeenCalledWith({ inputTokens: 4400, outputTokens: 130, model: 'claude-sonnet-5-5' });
+  });
+
   it('defaults to Haiku without server-side fallback (Haiku has none)', async () => {
     create.mockResolvedValue(answer('{"items":[]}'));
     await new ClaudeClient(() => 'sk-test').generateJson(request);

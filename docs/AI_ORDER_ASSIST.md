@@ -385,6 +385,20 @@ Primeira medição (2026-11-11, 40 perguntas em 36 fotos públicas do Wikimedia 
 
 O Gemini 2.5 leu um hodômetro com certeza e errou um dígito, e nas observações trocou esquerda e direita. Os dois Claude quase não erram, mas deixam sem resposta muito km e combustível que estão legíveis. O Gemini 3 pensa demais por padrão: o `VertexGeminiClient` aceita `thinkingLevel`, que só é enviado quando alguém o informa. Fotos públicas não são fotos de balcão, então a decisão da Fase 1 depende de repetir o teste com fotos reais.
 
+Segunda rodada, só o Sonnet 5.5 (2026-11-11, mesmo conjunto, sem `fallbacks`). Nos casos sem resposta da primeira rodada ele lia o número certo na observação, mas marcava `confident: false`. A foto não era o problema: o Sonnet 5.5 recebe a foto de 1920 px inteira (~4.300 tokens de entrada) e reduzir para 1568 px só aumentou os sem resposta. O prompt `read` (`--prompt read`) diz que ler todos os dígitos conta como certeza, mesmo com a foto um pouco tremida, de lado ou com reflexo. O custo usa US$ 2 por milhão de tokens de entrada e US$ 10 por milhão de saída:
+
+| Sonnet 5.5 | Certas | Erradas | Sem resposta | Km certo | Tempo (mediana) | 1.000 fotos |
+|---|---|---|---|---|---|---|
+| `low`, prompt `strict` | 60/80 | 2 | 18 | 15/26 | 2,6 s | US$ 9,97 |
+| `medium`, `strict` | 58/80 | 0 | 22 | 15/26 | 2,6 s | US$ 10,03 |
+| `high`, `strict` | 76/80 | 1 | 3 | 25/26 | 2,9 s | US$ 10,94 |
+| `low`, `read` | 70/80 | 2 | 8 | 22/26 | 2,7 s | US$ 10,00 |
+| `medium`, `read` | 68/80 | 3 | 9 | 23/26 | 2,7 s | US$ 10,06 |
+| `high`, `read` | 75/80 | 1 | 4 | 26/26 | 2,8 s | US$ 10,66 |
+| `low`, `read`, foto em 1568 px | 68/80 | 0 | 12 | 22/26 | 2,6 s | US$ 7,96 |
+
+O que mais muda é o `effort: high`, que custa pouco a mais e não deixa mais lento. O Gemini 3.8 Flash da primeira rodada usa ~1.740 tokens de entrada e ~170 de saída por foto: US$ 1,94 por 1.000 fotos no preço de lançamento (US$ 0,75/3,75 até 31/12/2026) e US$ 3,89 depois.
+
 ## Provedores
 
 A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmRequest` (prompt, texto, fotos/áudio e o JSON Schema da resposta) e o `LlmRouter` entrega para o cliente certo:

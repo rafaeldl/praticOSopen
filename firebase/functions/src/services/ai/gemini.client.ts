@@ -127,7 +127,17 @@ export class VertexGeminiClient implements LlmProviderClient {
     }
     const json = (await response.json()) as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; thoughtsTokenCount?: number };
+      modelVersion?: string;
     };
+    const usage = json.usageMetadata;
+    if (usage) {
+      request.onUsage?.({
+        inputTokens: usage.promptTokenCount ?? 0,
+        outputTokens: (usage.candidatesTokenCount ?? 0) + (usage.thoughtsTokenCount ?? 0),
+        model: json.modelVersion,
+      });
+    }
     const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
     if (!text) throw new LlmUnavailableError('empty model answer');
     return text;

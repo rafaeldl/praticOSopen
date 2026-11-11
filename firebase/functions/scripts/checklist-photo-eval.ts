@@ -18,7 +18,10 @@
  * GCLOUD_PROJECT=praticos ANTHROPIC_API_KEY=... npx ts-node scripts/checklist-photo-eval.ts --dir <dir>
  *   --providers gemini,claude      default both
  *   --gemini-model gemini-3.8-flash --gemini-location global --gemini-thinking low
- *   --claude-model claude-sonnet-5-5 --claude-effort low
+ *   --claude-model claude-sonnet-5-5 --claude-effort low --claude-fallback off
+ *   --prompt strict|read           prompt variant (form-photo.prompt.ts)
+ *   --max-edge 1568                shrink photos to this long edge first (macOS sips)
+ *   --price-in 2 --price-out 10    US$ per million tokens: adds cost per 1,000 photos
  *   --runs 1                       repeats per photo
  *   --only km,fuel                 only these kinds
  *   --out <file.json>              every answer and latency (keep it outside the repo)
@@ -29,11 +32,14 @@
 
 import * as admin from 'firebase-admin';
 import * as fs from 'fs';
+import { execFileSync } from 'child_process';
+import * as os from 'os';
 import * as path from 'path';
 import { ClaudeClient } from '../src/services/ai/claude.client';
 import {
   buildFormPhotoSystemPrompt,
   buildFormPhotoUserText,
+  type FormPhotoPromptVariant,
   formPhotoResponseSchema,
   parseFormPhotoResult,
   type FormPhotoInput,
@@ -67,6 +73,9 @@ interface Outcome {
   /** null when the case does not check the note. */
   note: boolean | null;
   error?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  model?: string;
   result?: FormPhotoResult;
   raw?: string;
 }
@@ -110,8 +119,17 @@ export function judgeNote(c: EvalCase, result: FormPhotoResult): boolean | null 
   return c.expect.noteMentions.every((group) => group.some((word) => text.includes(fold(word))));
 }
 
+let maxEdge: number | undefined;
+let promptVariant: FormPhotoPromptVariant = 'strict';
+const shrunkDir = fs.mkdtempSync(path.join(os.tmpdir(), 'photo-eval-'));
+
 function loadPhoto(dir: string, c: EvalCase): { mimeType: string; data: string } {
-  const file = path.resolve(dir, c.photo);
+  let file = path.resolve(dir, c.photo);
+  if (maxEdge) {
+    const shrunk = path.join(shrunkDir, `${c.id}.jpg`);
+    if (!fs.existsSync(shrunk)) execFileSync('sips', ['-Z', String(maxEdge), '-s', 'format', 'jpeg', file, '--out', shrunk], { stdio: 'ignore' });
+    file = shrunk;
+  }
   const mimeType = MIME[path.extname(file).toLowerCase()];
   if (!mimeType) throw new Error(`${c.id}: convert ${path.extname(file)} to JPEG first`);
   const bytes = fs.readFileSync(file);
@@ -122,18 +140,20 @@ function loadPhoto(dir: string, c: EvalCase): { mimeType: string; data: string }
 async function runCase(provider: string, client: LlmProviderClient, dir: string, c: EvalCase): Promise<Outcome> {
   const base = { provider, id: c.id, kind: c.kind };
   const started = Date.now();
+  const usage: Partial<Outcome> = {};
   try {
     const raw = await client.generateJson({
-      systemPrompt: buildFormPhotoSystemPrompt(c.locale ?? 'pt'),
+      onUsage: (u) => Object.assign(usage, u),
+      systemPrompt: buildFormPhotoSystemPrompt(c.locale ?? 'pt', promptVariant),
       userText: buildFormPhotoUserText(c),
       media: [loadPhoto(dir, c)],
       responseSchema: formPhotoResponseSchema(c.question),
     });
     const ms = Date.now() - started;
     const result = parseFormPhotoResult(raw, c.question);
-    return { ...base, ms, answer: judgeAnswer(c, result), note: judgeNote(c, result), result, raw };
+    return { ...base, ...usage, ms, answer: judgeAnswer(c, result), note: judgeNote(c, result), result, raw };
   } catch (error) {
-    return { ...base, ms: Date.now() - started, answer: 'n/a', note: null, error: (error as Error).message };
+    return { ...base, ...usage, ms: Date.now() - started, answer: 'n/a', note: null, error: (error as Error).message };
   }
 }
 
@@ -158,6 +178,21 @@ function ratio(part: number, whole: number): string {
   return whole === 0 ? '-' : `${part}/${whole} (${Math.round((part / whole) * 100)}%)`;
 }
 
+let priceIn: number | undefined;
+let priceOut: number | undefined;
+
+/** Mean tokens per photo and, with prices, US$ per 1,000 photos. */
+function cost(mine: Outcome[]): string {
+  const billed = mine.filter((o) => o.inputTokens !== undefined);
+  if (!billed.length) return '- | - | -';
+  const mean = (pick: (o: Outcome) => number) => billed.reduce((sum, o) => sum + pick(o), 0) / billed.length;
+  const tokensIn = mean((o) => o.inputTokens ?? 0);
+  const tokensOut = mean((o) => o.outputTokens ?? 0);
+  const perThousand =
+    priceIn !== undefined && priceOut !== undefined ? `US$ ${((tokensIn * priceIn + tokensOut * priceOut) / 1000).toFixed(2)}` : '-';
+  return `${Math.round(tokensIn)} | ${Math.round(tokensOut)} | ${perThousand}`;
+}
+
 function row(label: string, mine: Outcome[]): string {
   const answered = mine.filter((o) => o.answer !== 'n/a');
   const count = (v: AnswerVerdict) => answered.filter((o) => o.answer === v).length;
@@ -172,6 +207,7 @@ function row(label: string, mine: Outcome[]): string {
     String(mine.filter((o) => o.error).length),
     `${(quantile(ms, 0.5) / 1000).toFixed(1)} s`,
     `${(quantile(ms, 0.9) / 1000).toFixed(1)} s`,
+    cost(mine),
   ].join(' | ');
 }
 
@@ -182,6 +218,10 @@ async function main(): Promise<void> {
   const providers = (arg('providers') ?? 'gemini,claude').split(',');
   const runs = Number(arg('runs') ?? 1);
   const only = arg('only')?.split(',');
+  maxEdge = arg('max-edge') ? Number(arg('max-edge')) : undefined;
+  promptVariant = (arg('prompt') ?? 'strict') as FormPhotoPromptVariant;
+  priceIn = arg('price-in') ? Number(arg('price-in')) : undefined;
+  priceOut = arg('price-out') ? Number(arg('price-out')) : undefined;
   const clients: Record<string, LlmProviderClient> = {
     gemini: new VertexGeminiClient(
       arg('gemini-model') ?? process.env.AI_GEMINI_MODEL ?? 'gemini-2.5-flash',
@@ -192,6 +232,7 @@ async function main(): Promise<void> {
       () => process.env.ANTHROPIC_API_KEY,
       arg('claude-model') ?? process.env.AI_CLAUDE_MODEL ?? 'claude-sonnet-5-5',
       (arg('claude-effort') ?? 'low') as 'low',
+      arg('claude-fallback') !== 'off',
     ),
   };
   const cases = (JSON.parse(fs.readFileSync(path.join(dir, 'cases.json'), 'utf8')) as EvalCase[]).filter(
@@ -205,8 +246,8 @@ async function main(): Promise<void> {
   }
 
   const kinds = Array.from(new Set(cases.map((c) => c.kind)));
-  console.log('\nprovider | kind | answer right | wrong | abstained | note right | errors | p50 | p90');
-  console.log('---|---|---|---|---|---|---|---|---');
+  console.log('\nprovider | kind | answer right | wrong | abstained | note right | errors | p50 | p90 | tokens in | tokens out | per 1,000 photos');
+  console.log('---|---|---|---|---|---|---|---|---|---|---|---');
   for (const provider of providers) {
     const mine = outcomes.filter((o) => o.provider === provider);
     for (const kind of kinds) console.log(`${provider} | ${row(kind, mine.filter((o) => o.kind === kind))}`);
@@ -217,6 +258,8 @@ async function main(): Promise<void> {
     console.log(`x ${miss.provider} ${miss.id} [${why}]`);
   }
 
+  const models = Array.from(new Set(outcomes.map((o) => o.model).filter(Boolean)));
+  if (models.length) console.log(`answered by: ${models.join(', ')}`);
   const out = arg('out');
   if (out) fs.writeFileSync(out, JSON.stringify(outcomes, null, 2));
 }

@@ -42,7 +42,22 @@ export interface FormPhotoResult {
 
 const LANGUAGE: Record<string, string> = { pt: 'Brazilian Portuguese', en: 'English', es: 'Spanish' };
 
-export function buildFormPhotoSystemPrompt(locale: string = 'pt'): string {
+/**
+ * `strict` asks for an answer only when sure. `read` tells the model that a
+ * clear reading counts as sure even when the photo is not perfect (Claude is
+ * too cautious with `strict`, #686).
+ */
+export type FormPhotoPromptVariant = 'strict' | 'read';
+
+const UNSURE_LINE: Record<FormPhotoPromptVariant, string> = {
+  strict: '   - If a digit or character is unreadable, or you are unsure, set confident to false and leave answer null.',
+  read: [
+    '   - If you can read every digit or character, answer with confident true, even when the photo is slightly blurry, angled or has glare.',
+    '   - Set confident to false and leave answer null only when a digit or character is hidden, cut off or you would have to guess it.',
+  ].join('\n'),
+};
+
+export function buildFormPhotoSystemPrompt(locale: string = 'pt', variant: FormPhotoPromptVariant = 'strict'): string {
   const language = LANGUAGE[locale] ?? LANGUAGE.pt;
   return [
     'You help a service technician fill in a checklist. You get ONE photo and the checklist question it was taken for.',
@@ -51,7 +66,7 @@ export function buildFormPhotoSystemPrompt(locale: string = 'pt'): string {
     '   - number: digits exactly as shown (odometer, hour meter, page counter). Ignore trip meters, clocks, temperature and speed. Never round or guess a hidden digit.',
     '   - select: exactly one of the given options, copied verbatim. checklist: the options that apply, copied verbatim.',
     '   - boolean: true or false. text: copy codes (serial number, model, part number) character by character, keeping letters, digits and dashes.',
-    '   - If a digit or character is unreadable, or you are unsure, set confident to false and leave answer null.',
+    UNSURE_LINE[variant],
     '2. note: one short sentence on what you see that matters for the question, saying WHERE (side, front/rear, left/right of the vehicle or item, near which part) and size when visible, e.g. "Amassado na porta traseira esquerda, perto da maçaneta". Leave it null when there is nothing worth noting.',
     '   For a checklist question, optionNotes holds one sentence per option that has damage or remarks.',
     'photoNote: anything relevant in the photo that the question did not ask about (e.g. a warning light on the dashboard). Null otherwise.',
