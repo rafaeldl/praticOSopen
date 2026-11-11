@@ -473,3 +473,14 @@ test('B2: sem ler os links das OS, a gaveta avisa e não oferece a cobrança', a
   await expect(d.getByTestId('customer-links-failed')).toHaveCount(0)
   await expect(d.getByTestId('customer-charge-new')).toBeVisible()
 })
+
+test('próxima cobrança: "Já recebi" abre o Receber do cliente, sem cobrança (fin.tab.next-charge-received)', async ({ page }) => {
+  const a = await makeCustomer()
+  const o1 = await done(a, 100)
+  await summaryWith(page, [{ key: a.id, customer: a, since: daysAgo(3), orders: [o1], amount: 100 }])
+  await login(page, 'admin', 'finance')
+  await page.getByTestId('next-charge').getByRole('button').click()
+  await dialog(page, 'Próxima cobrança').getByRole('button', { name: 'Já recebi' }).click()
+  await expect(page.getByTestId('receive-customer')).toBeVisible()
+  await expect(page.getByTestId('receive-customer')).toContainText('R$ 100,00')
+})

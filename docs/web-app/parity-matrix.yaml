@@ -1388,7 +1388,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
-  note: "Situação · entrega dd/mm · visita dd/mm; entrega e visita só em OS não finalizada. Atrasada troca pelo atraso."
+  note: "Situação · entrega dd/mm · visita dd/mm; entrega e visita só em OS não finalizada. Atraso vai em texto à direita (app) ou ao lado (web), sem trocar a situação."
 - id: home.row.hold
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1474,7 +1474,7 @@ rows:
 - id: home.row.remaining
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
-  action: "Ver falta receber na linha da OS concluída"
+  action: "Ver se a OS está paga (Pago / falta R$ X) na linha"
   kind: action
   roles: [owner, admin, manager, consultant]
   segments: all
@@ -1488,7 +1488,7 @@ rows:
   e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
   permission: viewPrices
-  note: "Só status done, total > 0 e saldo acima de 0,009; valor não quebra no meio. No app depende só de viewPrices, sem useFinancial; a flag é requisito do web."
+  note: "Toda situação menos orçamento e cancelada, total > 0: 'Pago' em verde quando o saldo fica até 0,009; 'falta R$ X' quando recebeu parte; nada quando não recebeu nada (o total é o que falta). Valor não quebra no meio. App: depois da situação, na terceira linha. Web: embaixo do Total (paymentOnRow). No app depende só de viewPrices, sem useFinancial; a flag é requisito do web."
 - id: home.row.detail
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -1522,7 +1522,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/orders-list.spec.ts
   web_exception: null
-  note: "'Situação · entrega dd/mm · visita dd/mm' só em OS não finalizada; atrasada troca tudo pelo atraso."
+  note: "'● Situação · entrega dd/mm · visita dd/mm' só em OS não finalizada; bolinha na cor da situação; em andamento com etapas mostra a etapa. App: atraso e parada em texto à direita da linha (vermelho / âmbar escuro), sem bolinha à esquerda; o motivo da parada fica na tela da OS. Web: ao lado da situação, com o motivo embaixo."
 - id: home.all.month-sections
   screen: lib/screens/menu_navigation/home_content.dart
   route: null
@@ -6900,6 +6900,24 @@ rows:
   web_exception: null
   permission: viewFinancialReports
   note: "Com Asaas e várias OS do cliente: uma cobrança só na tela Receber do cliente (startCharge). Sem Asaas que cobre ou sem cliente: escolhe a OS e roda o envio de cobrança (gera cobrança Asaas e compartilha o link, ou compartilha o link da OS). Segundo toque ignorado enquanto roda. Web: várias OS com Asaas abre Receber do cliente já na cobrança; uma OS com Asaas abre a cobrança da OS; sem Asaas abre Mandar com o link da OS. Segundo clique ignorado enquanto roda."
+- id: fin.tab.next-charge-received
+  screen: lib/screens/dashboard/financial_tab.dart
+  route: null
+  action: "Já recebi (registrar o que foi pago fora do app)"
+  kind: action
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/e2e/close-last.spec.ts
+  web_exception: null
+  permission: viewFinancialReports
+  note: "Abre o mesmo Receber de A receber: uma OS abre o Receber da OS; várias do cliente abrem Receber do cliente com as concluídas marcadas; sem cliente pergunta qual OS (app) ou abre a OS (web). Depois de receber, o cliente sai da Próxima cobrança."
 - id: fin.tab.next-charge-snooze
   screen: lib/screens/dashboard/financial_tab.dart
   route: null

@@ -16,6 +16,7 @@ import {
   monthGroups,
   nextStep,
   normalizeOrder,
+  paymentOnRow,
   remainingOnRow,
   rowsFor,
   summaryFromCounts,
@@ -228,5 +229,18 @@ describe('versionOf (revisao-pr515-3 A1)', () => {
     expect(versionOf({ updatedAt: { toMillis: () => 5 } })).toBe('5')
     expect(versionOf({})).toBeNull()
     expect(versionOf({ updatedAt: '2026-10-01T10:00:00.000Z', version: '2026-10-01T07:00:00.000' })).toBe('2026-10-01T07:00:00.000')
+  })
+})
+
+describe('paymentOnRow', () => {
+  test('every status but quote and canceled: paid, part left, or nothing', () => {
+    expect(paymentOnRow(order('a', { status: 'progress', total: 500, paidAmount: 500 }))).toEqual({ paid: true })
+    expect(paymentOnRow(order('b', { status: 'approved', total: 500, paidAmount: 100 }))).toEqual({ left: 400 })
+    expect(paymentOnRow(order('c', { status: 'done', total: 500, paidAmount: 0 }))).toBeNull()
+    expect(paymentOnRow(order('d', { status: 'done', total: 650, payment: 'paid' }))).toEqual({ paid: true })
+    expect(paymentOnRow(order('e', { status: 'quote', total: 500, paidAmount: 500 }))).toBeNull()
+    expect(paymentOnRow(order('f', { status: 'canceled', total: 500, paidAmount: 500 }))).toBeNull()
+    expect(paymentOnRow(order('g', { status: 'progress', total: 0 }))).toBeNull()
+    expect(paymentOnRow(order('h', { status: 'progress', total: 500, paidAmount: 500 }, false))).toBeNull()
   })
 })

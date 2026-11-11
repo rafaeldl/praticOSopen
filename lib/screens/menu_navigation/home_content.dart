@@ -47,6 +47,7 @@ class HomeContent extends StatefulWidget {
     required this.onLoadMore,
     required this.onOpenNotifications,
     required this.onOpenProfile,
+    this.stageName,
     this.companyName,
     this.deviceLabel,
     this.technician = false,
@@ -90,6 +91,10 @@ class HomeContent extends StatefulWidget {
 
   /// Status label by segment (falls back to the l10n default).
   final String Function(String? status) statusLabel;
+
+  /// Work stage of an order in progress ("Pintura"), shown in place of the
+  /// status; null when the company has no stages.
+  final String? Function(Order order)? stageName;
   final ValueChanged<Order> onOpenOrder;
   final VoidCallback onRetry;
   final VoidCallback onLoadMore;
@@ -478,8 +483,7 @@ class _HomeContentState extends State<HomeContent> {
             title: device.name ?? '',
             subtitle: _maintenanceSubtitle(context, device),
             trailing: format.formatDate(device.nextMaintenance),
-            trailingStyle:
-                device.nextMaintenance?.isBefore(today) ?? false
+            trailingStyle: device.nextMaintenance?.isBefore(today) ?? false
                 ? AppTypography.body.copyWith(
                     color: OrderStatusStyle.overdueColor.resolveFrom(context),
                   )
@@ -542,9 +546,8 @@ class _HomeContentState extends State<HomeContent> {
                 placeholder: device == null
                     ? l10n.homeSearchHint
                     : l10n.homeSearchHintDevice(device.toLowerCase()),
-                onChanged: (value) => setState(
-                  () => _query = HomeRules.searchKey(value.trim()),
-                ),
+                onChanged: (value) =>
+                    setState(() => _query = HomeRules.searchKey(value.trim())),
               ),
             ),
           ),
@@ -642,10 +645,7 @@ class _HomeContentState extends State<HomeContent> {
             (HomeView.all, l10n.filterAll),
           ];
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
       child: Semantics(
         container: true,
         identifier: 'home_filters',
@@ -761,39 +761,53 @@ class _HomeContentState extends State<HomeContent> {
     final l10n = context.l10n;
     final format = FormatService();
     final overdue = HomeRules.isOverdue(order, now);
+    final active = !HomeRules.isFinished(order);
 
-    final String statusText;
+    // "● Pintura": the stage stands for "Em andamento" when there is one.
+    final label =
+        widget.stageName?.call(order) ?? widget.statusLabel(order.status);
+    final withDue = order.dueDate != null && active
+        ? l10n.orderStatusDue(label, format.formatDayMonth(order.dueDate))
+        : label;
+    final statusText = order.scheduledDate != null && active
+        ? l10n.orderStatusVisit(
+            withDue,
+            format.formatDayMonth(order.scheduledDate),
+          )
+        : withDue;
+
+    // Problems go on the right: overdue and stopped.
+    final problems = <String>[];
     if (overdue) {
       final (unit, count) = HomeRules.overdueSpan(order, now);
-      statusText = switch (unit) {
+      problems.add(switch (unit) {
         OverdueUnit.days => l10n.orderLateDays(count),
         OverdueUnit.months => l10n.orderLateMonths(count),
         OverdueUnit.years => l10n.orderLateYears(count),
-      };
-    } else {
-      final label = widget.statusLabel(order.status);
-      final active = !HomeRules.isFinished(order);
-      final withDue = order.dueDate != null && active
-          ? l10n.orderStatusDue(label, format.formatDayMonth(order.dueDate))
-          : label;
-      statusText = order.scheduledDate != null && active
-          ? l10n.orderStatusVisit(
-              withDue,
-              format.formatDayMonth(order.scheduledDate),
-            )
-          : withDue;
+      });
+    }
+    if (order.isOnHold) {
+      problems.add(l10n.orderHoldSince(order.onHold!.daysSince(now)));
     }
 
-    // Money on the list only once the work is done: what is left to receive.
-    String? remaining;
+    // Payment on every order that charges something: "Pago" when all of it
+    // came in, "falta R$ 180" when part did. Nothing received: no mark, the
+    // value on the right is what is left.
+    String? payment;
+    Color? paymentColor;
     if (widget.showPrices &&
-        order.status == 'done' &&
-        (order.total ?? 0) > 0 &&
-        order.remainingBalance > 0.009) {
-      // Non-breaking spaces: "falta receber R$ 180" wraps as one piece.
-      remaining = l10n
-          .remainingToReceive(format.formatCurrency(order.remainingBalance))
-          .replaceAll(' ', '\u00A0');
+        order.status != 'quote' &&
+        order.status != 'canceled' &&
+        (order.total ?? 0) > 0) {
+      if (order.isFullyPaid) {
+        payment = l10n.paid;
+        paymentColor = AppColors.success.resolveFrom(context);
+      } else if ((order.paidAmount ?? 0) > 0.009) {
+        // Non-breaking spaces: "falta R$ 180" wraps as one piece.
+        payment = l10n
+            .remainingShort(format.formatCurrency(order.remainingBalance))
+            .replaceAll(' ', '\u00A0');
+      }
     }
 
     return Semantics(
@@ -808,11 +822,14 @@ class _HomeContentState extends State<HomeContent> {
                 : null),
         detailText: _detail(order),
         statusText: statusText,
-        statusExtra: remaining,
-        overdue: overdue,
-        holdText: order.isOnHold
-            ? OrderHoldStyle.line(l10n, order.onHold!, now)
-            : null,
+        statusColor: OrderStatusStyle.dotColor(
+          order.status,
+        ).resolveFrom(context),
+        statusExtra: payment,
+        statusExtraColor: paymentColor,
+        problemText: problems.isEmpty ? null : problems.join(' · '),
+        problemColor: (overdue ? AppColors.danger : OrderHoldStyle.color)
+            .resolveFrom(context),
         onTap: () => widget.onOpenOrder(order),
       ),
     );
@@ -980,9 +997,7 @@ class _HomeFiltersState extends State<_HomeFilters> {
             _labelWidth(context, label, view == widget.selected),
         ], constraints.maxWidth);
         return ScrollConfiguration(
-          behavior: ScrollConfiguration.of(
-            context,
-          ).copyWith(scrollbars: false),
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
             key: _viewport,
             controller: _scroll,

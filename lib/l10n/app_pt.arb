@@ -1449,6 +1449,7 @@
   "financialReceivableCompleted": "Serviços concluídos",
   "financialReceivableOpen": "Serviços em aberto",
   "financialNextCharge": "Próxima cobrança",
+  "financialAlreadyReceived": "Já recebi",
   "financialNextChargeMessage": "{name} deve {amount} desde {date}",
   "@financialNextChargeMessage": {
     "placeholders": {
@@ -2263,6 +2264,8 @@
   "@homeSearchHintDevice": {"placeholders": {"device": {"type": "String"}}},
   "remainingToReceive": "falta receber {amount}",
   "@remainingToReceive": {"placeholders": {"amount": {"type": "String"}}},
+  "remainingShort": "falta {amount}",
+  "@remainingShort": {"placeholders": {"amount": {"type": "String"}}},
   "firstOrderTapPlus": "Toque no + para criar sua primeira OS. Leva menos de um minuto.",
   "profileButtonA11y": "{company}: catálogo, equipe e ajustes",
   "@profileButtonA11y": {"placeholders": {"company": {"type": "String"}}},

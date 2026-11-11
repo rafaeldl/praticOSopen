@@ -349,7 +349,7 @@ test.describe('Início (usuários)', () => {
     const unpaid = page.getByRole('button', { name: /^Sem receber \d+$/ })
     await expect(unpaid).toBeVisible()
     await unpaid.click()
-    await expect(row(page, 504)).toContainText('falta receber R$ 200,00')
+    await expect(row(page, 504)).toContainText('falta R$ 200,00')
     // The sentence waits for the whole list: with the parallel tests' orders (and the Financeiro's seed) it can pass one page.
     const more = page.getByRole('button', { name: 'Mostrar mais' })
     for (let i = 0; i < 20 && (await more.count()); i++) {
@@ -438,7 +438,7 @@ test.describe('Rodada 2 (usuários)', () => {
     await expect(row(page, 504)).toBeVisible()
     await page.getByRole('searchbox', { name: /Buscar OS/ }).fill('Cliente 06')
     await expect(page.getByTestId('summary')).toHaveText(/^\d+ para receber · R\$\s[\d.,]+$/)
-    await expect(row(page, 504)).toContainText('falta receber R$ 200,00')
+    await expect(row(page, 504)).toContainText('falta R$ 200,00')
   })
 
   test('P2 #10: o próximo passo usa o nome da situação', async ({ page }) => {

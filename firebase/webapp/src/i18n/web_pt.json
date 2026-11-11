@@ -207,6 +207,8 @@
   "web.orders.noMatch": "Nada com “{query}”",
   "web.orders.noMatchHint": "Tente o nome, o número, o {device} ou a situação.",
   "web.orders.owed": "falta receber {amount}",
+  "web.orders.paid": "Pago",
+  "web.orders.owedShort": "falta {amount}",
   "web.orders.select": "Selecionar",
   "web.orders.selectOrder": "Selecionar {order} {number}",
   "web.orders.selected": "{count, plural, =0{Nenhuma selecionada} =1{1 selecionada} other{{count} selecionadas}}",

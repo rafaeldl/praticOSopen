@@ -112,7 +112,7 @@ test('filtros do app: orçamentos, paradas, concluídas e todas por mês (home.f
   await expect(page.getByTestId('summary')).toHaveText(count === 1 ? '1 parada' : `${count} paradas`)
 
   await page.getByRole('button', { name: 'Concluídas' }).click()
-  await expect(row(page, 504)).toContainText('falta receber R$ 200,00')
+  await expect(row(page, 504)).toContainText('falta R$ 200,00')
   await expect(row(page, 501)).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Todas' }).click()

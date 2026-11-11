@@ -5080,6 +5080,12 @@ abstract class AppLocalizations {
   /// **'Próxima cobrança'**
   String get financialNextCharge;
 
+  /// No description provided for @financialAlreadyReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já recebi'**
+  String get financialAlreadyReceived;
+
   /// No description provided for @financialNextChargeMessage.
   ///
   /// In pt, this message translates to:
@@ -7299,6 +7305,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'falta receber {amount}'**
   String remainingToReceive(String amount);
+
+  /// No description provided for @remainingShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta {amount}'**
+  String remainingShort(String amount);
 
   /// No description provided for @firstOrderTapPlus.
   ///

@@ -590,6 +590,30 @@ void main() {
       expect(find.textContaining('OS 190'), findsOneWidget);
     });
 
+    testWidgets('"Já recebi" opens Receber for that customer', (tester) async {
+      final opened = <Order>[];
+      await pumpTab(tester, storeWith(open: [ana]), opened: opened);
+
+      await openNextCharge(tester);
+      expect(find.text('Já recebi'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('financialAlreadyReceived')));
+      await tester.pumpAndSettle();
+      // One order: its Receber.
+      expect(opened.single.id, 'a1');
+    });
+
+    testWidgets('"Já recebi" with several orders receives from the customer', (
+      tester,
+    ) async {
+      final received = <Debtor>[];
+      await pumpTab(tester, storeWith(open: [bia1, bia2]), received: received);
+
+      await openNextCharge(tester);
+      await tester.tap(find.byKey(const Key('financialAlreadyReceived')));
+      await tester.pumpAndSettle();
+      expect(received.single.name, 'Bia');
+    });
+
     testWidgets('"Agora não" moves on; the customer stays in A receber', (
       tester,
     ) async {
@@ -813,7 +837,10 @@ void main() {
       locale: const Locale('pt'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: TickerMode(enabled: onScreen, child: FinancialTab(store: store)),
+      home: TickerMode(
+        enabled: onScreen,
+        child: FinancialTab(store: store),
+      ),
     );
     await tester.pumpWidget(tab(true));
     await tester.pumpAndSettle();

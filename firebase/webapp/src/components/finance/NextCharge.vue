@@ -3,8 +3,11 @@
 // charge now, chosen by lib/finance/next-charge.ts. "Mandar cobrança" opens one
 // charge for the customer's orders (Asaas, several orders: pay.customer.start-charge)
 // or the order's own link (one order, or without Asaas: the link of the order).
+// "Já recebi" (paid outside the app) opens Receber of the customer, or the
+// order when it has no customer, as A receber does.
 // "Agora não" hides the customer for 30 days in this browser.
 import { defineAsyncComponent, ref, shallowRef, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import type { Debtor, FinanceRow, FinanceSummary } from '@/lib/finance/data'
@@ -27,7 +30,8 @@ const props = defineProps<{ summary: FinanceSummary }>()
 const emit = defineEmits<{ changed: [] }>()
 
 const next = shallowRef<Debtor | null>(null)
-const step = ref<null | 'sheet' | 'which' | 'customer' | 'charge' | 'share'>(null)
+const step = ref<null | 'sheet' | 'which' | 'customer' | 'received' | 'charge' | 'share'>(null)
+const router = useRouter()
 const order = shallowRef<FinanceRow | null>(null)
 const shared = shallowRef<Order | null>(null)
 const sending = ref(false)
@@ -62,6 +66,15 @@ const nameOf = (debtor: Debtor) => debtor.customer?.name || t('customerWithoutNa
 function sinceText(iso: string | null): string {
   if (!iso) return ''
   return new Date(iso).getFullYear() === new Date().getFullYear() ? formatDayMonth(iso, country()) : formatDate(iso, country())
+}
+
+/** "Já recebi": record a payment made outside the app (fin.tab.next-charge-received). */
+function received() {
+  const debtor = next.value
+  step.value = null
+  if (!debtor) return
+  if (debtor.customer?.id) step.value = 'received'
+  else if (debtor.orders[0]) void router.push({ path: '/', query: { order: debtor.orders[0].id } })
 }
 
 function snooze() {
@@ -138,10 +151,11 @@ function done() {
     :sub="t('financialNextChargeMessage', { name: nameOf(next), amount: money(next.amount), date: sinceText(next.since) })"
     :choices="[
       { id: 'send', label: t('financialSendCharge') },
+      { id: 'received', label: t('financialAlreadyReceived') },
       { id: 'later', label: t('notNow') },
     ]"
     suggested="send"
-    @pick="(id) => (id === 'send' ? send() : snooze())"
+    @pick="(id) => (id === 'send' ? send() : id === 'received' ? received() : snooze())"
     @close="step = null"
   />
   <ChoiceDialog
@@ -158,6 +172,14 @@ function done() {
     :customer-name="nameOf(next)"
     :checked="next.orders.map((o) => o.id)"
     start-charge
+    @done="done"
+    @close="done"
+  />
+  <ReceiveCustomerDialog
+    v-else-if="step === 'received' && next?.customer?.id"
+    :customer-id="next.customer.id"
+    :customer-name="nameOf(next)"
+    :checked="next.orders.map((o) => o.id)"
     @done="done"
     @close="done"
   />
