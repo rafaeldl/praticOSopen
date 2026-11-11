@@ -6,6 +6,9 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/share_token.dart';
+import 'dart:typed_data';
+
+import 'package:praticos/services/pdf/order_pdf_file.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/share_link_service.dart';
@@ -55,6 +58,22 @@ class _FakeService extends ShareLinkService {
   @override
   Future<void> copyToClipboard(String url) async => copied.add(url);
 
+  final pdfs = <String>[];
+  final pdfMessages = <String?>[];
+
+  @override
+  Future<void> shareViaSheetWithPdf({
+    required String url,
+    required Uint8List bytes,
+    required String filename,
+    String? message,
+    String? subject,
+    Rect? sharePositionOrigin,
+  }) async {
+    pdfs.add('$filename $url');
+    pdfMessages.add(message);
+  }
+
   final previews = <String>[];
 
   @override
@@ -68,7 +87,13 @@ Order _order({String? phone = '11999990000'}) => Order()
     ..name = 'Ana'
     ..phone = phone);
 
-Future<void> _pump(WidgetTester tester, Order order, _FakeService service) {
+Future<void> _pump(
+  WidgetTester tester,
+  Order order,
+  _FakeService service, {
+  bool withPdf = false,
+  Future<OrderPdfFile> Function(BuildContext context)? buildPdf,
+}) {
   return tester.pumpWidget(
     CupertinoApp(
       locale: const Locale('pt', 'BR'),
@@ -82,7 +107,17 @@ Future<void> _pump(WidgetTester tester, Order order, _FakeService service) {
       home: CupertinoPageScaffold(
         child: Align(
           alignment: Alignment.bottomCenter,
-          child: ShareLinkSheet(order: order, service: service),
+          child: ShareLinkSheet(
+            order: order,
+            service: service,
+            withPdf: withPdf,
+            buildPdf:
+                buildPdf ??
+                (_) async => OrderPdfFile(
+                  bytes: Uint8List.fromList([1, 2, 3]),
+                  filename: 'OS-183.pdf',
+                ),
+          ),
         ),
       ),
     ),
@@ -219,5 +254,61 @@ void main() {
       ShareLinkService.previewUrl('https://praticos.app/q/ST_1?lang=en'),
       'https://praticos.app/q/ST_1?lang=en&preview=1',
     );
+  });
+
+  group('with the PDF', () {
+    testWidgets('the PDF is the main way; the link alone goes on WhatsApp', (
+      tester,
+    ) async {
+      final service = _FakeService();
+      await _pump(tester, _order(), service, withPdf: true);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mandar o PDF'), findsOneWidget);
+      expect(find.text('Mandar só o link no WhatsApp'), findsOneWidget);
+      expect(find.text('Mandar pelo WhatsApp'), findsNothing);
+
+      await tester.tap(find.text('Mandar o PDF'));
+      await tester.pumpAndSettle();
+      expect(service.pdfs, ['OS-183.pdf https://praticos.app/q/tok1']);
+      expect(service.pdfMessages.single, contains('em PDF'));
+      expect(service.whatsapp, isEmpty);
+
+      await tester.tap(find.text('Mandar só o link no WhatsApp'));
+      await tester.pumpAndSettle();
+      expect(service.whatsapp, ['https://praticos.app/q/tok1']);
+    });
+
+    testWidgets('without a phone the link alone goes by the share sheet', (
+      tester,
+    ) async {
+      final service = _FakeService();
+      await _pump(tester, _order(phone: null), service, withPdf: true);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mandar só o link'));
+      await tester.pumpAndSettle();
+      expect(service.sheets, ['https://praticos.app/q/tok1']);
+      expect(service.pdfs, isEmpty);
+    });
+
+    testWidgets('a PDF that fails shows an alert and sends nothing', (
+      tester,
+    ) async {
+      final service = _FakeService();
+      await _pump(
+        tester,
+        _order(),
+        service,
+        withPdf: true,
+        buildPdf: (_) async => throw StateError('no pdf'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mandar o PDF'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(service.pdfs, isEmpty);
+    });
   });
 }

@@ -5,8 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
-import 'package:praticos/mobx/company_store.dart';
-import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/custom_field.dart';
@@ -40,9 +38,8 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/services/order_comment_service.dart';
+import 'package:praticos/services/pdf/order_pdf_file.dart';
 import 'package:praticos/screens/order/pdf_viewer_screen.dart';
-import 'package:praticos/services/pdf/pdf_localizations.dart';
-import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
 /// Permission checks used by the new order screen, injectable for tests.
@@ -220,10 +217,8 @@ class OrderScreenActions {
     Order order,
     SegmentConfigProvider config,
   ) async {
-    final companyId = order.company?.id;
-    if (companyId == null) return;
+    if (order.company?.id == null) return;
     final navigator = Navigator.of(context, rootNavigator: true);
-    final pdfLocalizations = PdfLocalizations.fromContext(context);
     final l10n = context.l10n;
 
     showCupertinoDialog<void>(
@@ -234,36 +229,7 @@ class OrderScreenActions {
     );
 
     try {
-      final company = await CompanyStore().retrieveCompany(companyId);
-      Customer? customer;
-      if (order.customer != null) {
-        if (order.customer!.id != null) {
-          try {
-            final customerStore = CustomerStore()..companyId = companyId;
-            customer = await customerStore.retrieveCustomer(order.customer!.id);
-          } catch (_) {
-            // Falls back to the aggregate below.
-          }
-        }
-        customer ??= Customer()
-          ..id = order.customer!.id
-          ..name = order.customer!.name
-          ..phone = order.customer!.phone
-          ..email = order.customer!.email;
-      }
-      var forms = <of_model.OrderForm>[];
-      if (order.id != null) {
-        forms = await FormsService().getOrderForms(companyId, order.id!).first;
-      }
-      final data = OsPdfData(
-        order: order,
-        customer: customer,
-        company: company,
-        forms: forms,
-        config: config,
-        localizations: pdfLocalizations,
-      );
-      final bytes = await PdfService().generateOsPdf(data);
+      final pdf = await buildOrderPdf(context, order, config);
       navigator.pop();
       await navigator.push(
         CupertinoPageRoute<void>(
@@ -273,8 +239,8 @@ class OrderScreenActions {
               config.serviceOrder,
               '${order.number ?? ''}',
             ),
-            bytes: bytes,
-            filename: PdfService.osPdfFilename(data),
+            bytes: pdf.bytes,
+            filename: pdf.filename,
           ),
         ),
       );

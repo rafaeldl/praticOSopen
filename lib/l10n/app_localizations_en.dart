@@ -5388,6 +5388,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareCopyLink => 'Copy the link';
 
   @override
+  String get shareSendPdf => 'Send the PDF';
+
+  @override
+  String get sharePreparingPdf => 'Preparing the PDF…';
+
+  @override
+  String get shareSendLinkWhatsApp => 'Send just the link on WhatsApp';
+
+  @override
+  String get shareSendLinkOnly => 'Send just the link';
+
+  @override
   String get shareLinkCopied => 'Link copied';
 
   @override

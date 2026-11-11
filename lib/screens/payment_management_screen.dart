@@ -15,6 +15,7 @@ import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
 import 'package:praticos/screens/payments/receipt_detail_screen.dart';
 import 'package:praticos/screens/payments/receipt_share.dart';
+import 'package:praticos/screens/payments/statement_share.dart';
 import 'package:praticos/screens/payments/widgets/receipt_image_viewer.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
@@ -39,6 +40,7 @@ import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/customer_statement_pdf.dart';
 import 'package:praticos/services/pdf/receipt_pdf.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -111,6 +113,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.onOpenReceipt,
     this.initialReceipt,
     this.onInitialReceiptUsed,
+    this.sendStatement,
   });
 
   /// Order store. When null it comes from the route arguments (`orderStore`).
@@ -166,6 +169,10 @@ class PaymentManagementScreen extends StatefulWidget {
   /// Called once [initialReceipt] is saved as the receipt of a new payment.
   /// When null it comes from the route arguments (`onReceiptUsed`).
   final VoidCallback? onInitialReceiptUsed;
+
+  /// "Mandar extrato" (tests). Defaults to [sendCustomerStatement].
+  final Future<void> Function(BuildContext context, CustomerStatementData data)?
+  sendStatement;
 
   @override
   State<PaymentManagementScreen> createState() =>
@@ -367,8 +374,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         if (store == null || status == 'quote' || status == 'canceled') {
           return const SizedBox.shrink();
         }
-        // Nothing to offer: no discount, no link and no payment to undo.
-        if (!_canDiscount &&
+        // Nothing to offer: no extrato, no discount, no link and no payment
+        // to undo.
+        if (!_canSendStatement(store) &&
+            !_canDiscount &&
             _visibleOpenCharge() == null &&
             !store.transactions.any((t) => !t.isAsaas)) {
           return const SizedBox.shrink();
@@ -853,16 +862,24 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final hasInvoice = (open?.invoiceUrl ?? '').isNotEmpty;
     final canCancel =
         open != null && !chargeHasPaidInstallments(open) && !_cancelingCharge;
+    final canStatement = _canSendStatement(store);
     final choice = await showPullDownMenu(
       context,
       groups: [
-        if (hasInvoice)
+        if (canStatement || hasInvoice)
           PullDownGroup([
-            PullDownItem(
-              value: 'copyLink',
-              label: context.l10n.chargeCopyLink,
-              icon: CupertinoIcons.doc_on_doc,
-            ),
+            if (canStatement)
+              PullDownItem(
+                value: 'statement',
+                label: context.l10n.statementSend,
+                icon: CupertinoIcons.doc_text,
+              ),
+            if (hasInvoice)
+              PullDownItem(
+                value: 'copyLink',
+                label: context.l10n.chargeCopyLink,
+                icon: CupertinoIcons.doc_on_doc,
+              ),
           ]),
         if (_canDiscount)
           PullDownGroup([
@@ -892,6 +909,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
     if (!mounted) return;
     switch (choice) {
+      case 'statement':
+        await _sendStatement(store);
       case 'copyLink':
         if (open != null) _copyChargeLink(open);
       case 'cancelLink':
@@ -901,6 +920,27 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       case 'undo':
         _confirmUndoPayments();
     }
+  }
+
+  /// "Mandar extrato" of this order: there is something left to receive and
+  /// a customer to send it to. Same message and PDF as "Receber de João".
+  bool _canSendStatement(OrderStore store) =>
+      store.remainingBalance > OrderPaymentMath.centTolerance &&
+      (store.order?.customer?.name ?? '').trim().isNotEmpty;
+
+  Future<void> _sendStatement(OrderStore store) async {
+    final order = store.order;
+    if (order == null) return;
+    final send = widget.sendStatement ?? sendCustomerStatement;
+    await send(
+      context,
+      CustomerStatementData(
+        customerName: order.customer!.name!.trim(),
+        companyName: Global.companyAggr?.name,
+        date: DateTime.now(),
+        orders: [StatementOrder.fromOrder(order)],
+      ),
+    );
   }
 
   Future<void> _giveDiscount() async {
