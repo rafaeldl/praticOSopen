@@ -12538,6 +12538,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Buscar pelo número da OS'**
   String get customerSearchOrders;
+
+  /// No description provided for @checklistNoteAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Observação'**
+  String get checklistNoteAdd;
+
+  /// No description provided for @checklistNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Observação'**
+  String get checklistNote;
+
+  /// No description provided for @checklistNotePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você viu e onde'**
+  String get checklistNotePlaceholder;
+
+  /// No description provided for @checklistNotePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto {number}'**
+  String checklistNotePhoto(int number);
+
+  /// No description provided for @checklistNoteLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {text}'**
+  String checklistNoteLine(String label, String text);
 }
 
 class _AppLocalizationsDelegate

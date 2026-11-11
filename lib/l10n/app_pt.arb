@@ -3419,5 +3419,12 @@
   "customerSearchDevices": "Buscar pelo nome ou placa",
   "customerSearchOrders": "Buscar pelo número da OS",
   "@customerShowAllDevices": {"placeholders": {"count": {"type": "int"}, "devices": {"type": "String"}}},
-  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}}
+  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}},
+  "checklistNoteAdd": "+ Observação",
+  "checklistNote": "Observação",
+  "checklistNotePlaceholder": "O que você viu e onde",
+  "checklistNotePhoto": "Foto {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

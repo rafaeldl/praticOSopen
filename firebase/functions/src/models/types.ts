@@ -394,6 +394,28 @@ export interface FormResponse {
   photoUrls: string[];
 }
 
+/** Note of an option marked in a multiple choice question (key: the option as saved in `value`). */
+export interface FormOptionNote {
+  option: string;
+  text: string;
+  ai?: boolean;
+}
+
+/** Note of a photo (key: its URL, the same as in `photoUrls`). */
+export interface FormPhotoNote {
+  url: string;
+  text: string;
+  ai?: boolean;
+}
+
+/** Note of one question; `ai` is true while the text is the AI's. */
+export interface FormItemNote {
+  text?: string | null;
+  ai?: boolean;
+  options?: FormOptionNote[];
+  photos?: FormPhotoNote[];
+}
+
 export interface OrderForm {
   id: string;
   formDefinitionId: string;
@@ -401,6 +423,10 @@ export interface OrderForm {
   status: FormStatus;
   items: FormItemDefinition[];
   responses: FormResponse[];
+  /** Notes by item id, outside `responses` (older apps rewrite each response with only itemId, value, photoUrls). */
+  notes?: Record<string, FormItemNote>;
+  /** Items whose answer came from the AI and was not changed since. */
+  aiFilled?: string[];
   startedAt?: DateValue;
   completedAt?: DateValue;
   updatedAt?: DateValue;

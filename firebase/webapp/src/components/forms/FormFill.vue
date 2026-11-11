@@ -26,6 +26,7 @@ import {
   isAnswered,
   labelOf,
   missingCount,
+  noteLines,
   numberAnswer,
   optionsOf,
   PHOTO_TYPES,
@@ -109,6 +110,10 @@ const status = computed(() => {
   return { dot: 'accent', text: t('checklistRemaining', { count: 0 }) }
 })
 const words = { yes: t('yes'), no: t('no'), photos: (count: number) => t('nPhotosCount', { count }) }
+const noteWords = {
+  line: (label: string, text: string) => t('checklistNoteLine', { label, text }),
+  photo: (number: number) => t('checklistNotePhoto', { number }),
+}
 const country = computed(() => session.company?.country)
 
 const choices = (item: FormItem): string[] => (item.type === 'boolean' ? [t('yes'), t('no')] : optionsOf(item, locale.value))
@@ -479,6 +484,12 @@ onMounted(() => {
                 />
                 <p v-if="invalid[item.id]" class="field-error" role="alert">{{ t('invalidFormat') }}</p>
               </template>
+
+              <!-- The app's note (read only on the web): what was seen and where. -->
+              <div v-if="noteLines(view, item, locale, noteWords).length" class="fill-note" :data-testid="`fill-note-${item.id}`">
+                <p class="sub fill-note-label">{{ t('checklistNote') }}</p>
+                <p v-for="(line, at) in noteLines(view, item, locale, noteWords)" :key="at" class="fill-note-line">{{ line }}</p>
+              </div>
 
               <div v-if="(responseOf(view, item.id)?.photoUrls.length ?? 0) > 0 || (editable && (item.allowPhotos || item.type === 'photo_only'))" class="photos fill-photos">
                 <button

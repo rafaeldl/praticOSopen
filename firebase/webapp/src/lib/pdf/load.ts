@@ -6,7 +6,7 @@
 import { locale, t } from '@/i18n'
 import { firestoreLite } from '@/lib/firebase'
 import { formatDate, formatDayMonth, formatMoney } from '@/lib/format'
-import { normalizeOrderForm, optionText, labelOf, titleOf, type OrderForm } from '@/lib/forms/model'
+import { normalizeOrderForm, noteLines, optionText, labelOf, titleOf, type OrderForm } from '@/lib/forms/model'
 import { loadCustomer } from '@/lib/customers/data'
 import { normalizeOrder, type OrderStatus } from '@/lib/orders/model'
 import { formatPhone } from '@/lib/phone'
@@ -89,6 +89,11 @@ export function pdfTexts(): PdfTexts {
     formTitle: (form: OrderForm) => titleOf(form, locale.value),
     itemLabel: (item) => labelOf(item, locale.value),
     optionText: (item, value) => optionText(item, value, locale.value),
+    noteLines: (form, item) =>
+      noteLines(form, item, locale.value, {
+        line: (label, text) => t('checklistNoteLine', { label, text }),
+        photo: (number) => t('checklistNotePhoto', { number }),
+      }),
   }
 }
 

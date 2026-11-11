@@ -65,6 +65,8 @@ export interface PdfTexts {
   formTitle: (form: OrderForm) => string
   itemLabel: (item: OrderForm['items'][number]) => string
   optionText: (item: OrderForm['items'][number], value: string) => string
+  /** The note of a question in lines (question, marked options, photos). Optional: older callers have none. */
+  noteLines?: (form: OrderForm, item: OrderForm['items'][number]) => string[]
 }
 
 export interface PdfCompany {
@@ -671,8 +673,9 @@ function drawForm(ctx: Ctx, part: PdfOrderPart, entry: PdfOrderPart['forms'][num
     const answer = formAnswer(ctx, form, item)
     const answerLines = answer && !answer.checks ? wrap(answer.text, ctx.font, 8.5, BODY_W - 20, ctx.fallback) : []
     const checks = answer?.checks ?? []
+    const noteLines = (ctx.texts.noteLines?.(form, item) ?? []).flatMap((line) => wrap(line, ctx.font, 8.5, BODY_W - 20, ctx.fallback))
     const itemPhotos = (photos[item.id] ?? []).filter((photo) => imageOf(ctx, photo))
-    const height = 10 + label.length * 11 + 4 + answerLines.length * 11 + checks.length * 11 + 6
+    const height = 10 + label.length * 11 + 4 + answerLines.length * 11 + checks.length * 11 + (noteLines.length ? 3 + noteLines.length * 11 : 0) + 6
     flow.need(height + (itemPhotos.length ? PHOTO + GAP : 0))
     const cardTop = flow.y
     flow.rect(PAD, cardTop, BODY_W, height, { border: C.border })
@@ -688,6 +691,11 @@ function drawForm(ctx: Ctx, part: PdfOrderPart, entry: PdfOrderPart['forms'][num
     }
     for (const check of checks) {
       flow.text(`[${check.on ? 'X' : ' '}] ${check.label}`, PAD + 10, 8.5, { color: check.on ? C.text : C.muted, baseline: y })
+      y += 11
+    }
+    if (noteLines.length) y += 3
+    for (const line of noteLines) {
+      flow.text(line, PAD + 10, 8.5, { color: C.secondary, baseline: y })
       y += 11
     }
     flow.y = cardTop + height + 4

@@ -36,6 +36,10 @@ OrderForm _$OrderFormFromJson(Map<String, dynamic> json) => OrderForm(
     (k, e) => MapEntry(k, e as String),
   ),
   deviceId: json['deviceId'] as String?,
+  notes: _notesFromJson(json['notes']),
+  aiFilled: (json['aiFilled'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
 );
 
 Map<String, dynamic> _$OrderFormToJson(OrderForm instance) => <String, dynamic>{
@@ -50,6 +54,8 @@ Map<String, dynamic> _$OrderFormToJson(OrderForm instance) => <String, dynamic>{
   'updatedAt': instance.updatedAt?.toIso8601String(),
   'titleI18n': instance.titleI18n,
   'deviceId': instance.deviceId,
+  'notes': instance.notes.map((k, e) => MapEntry(k, e.toJson())),
+  'aiFilled': instance.aiFilled,
 };
 
 const _$FormStatusEnumMap = {
@@ -71,4 +77,51 @@ Map<String, dynamic> _$FormResponseToJson(FormResponse instance) =>
       'itemId': instance.itemId,
       'value': instance.value,
       'photoUrls': instance.photoUrls,
+    };
+
+FormItemNote _$FormItemNoteFromJson(Map<String, dynamic> json) => FormItemNote(
+  text: json['text'] as String?,
+  ai: json['ai'] as bool? ?? false,
+  options: (json['options'] as List<dynamic>?)
+      ?.map((e) => FormOptionNote.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  photos: (json['photos'] as List<dynamic>?)
+      ?.map((e) => FormPhotoNote.fromJson(e as Map<String, dynamic>))
+      .toList(),
+);
+
+Map<String, dynamic> _$FormItemNoteToJson(FormItemNote instance) =>
+    <String, dynamic>{
+      'text': instance.text,
+      'ai': instance.ai,
+      'options': instance.options.map((e) => e.toJson()).toList(),
+      'photos': instance.photos.map((e) => e.toJson()).toList(),
+    };
+
+FormOptionNote _$FormOptionNoteFromJson(Map<String, dynamic> json) =>
+    FormOptionNote(
+      option: json['option'] as String,
+      text: json['text'] as String,
+      ai: json['ai'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$FormOptionNoteToJson(FormOptionNote instance) =>
+    <String, dynamic>{
+      'option': instance.option,
+      'text': instance.text,
+      'ai': instance.ai,
+    };
+
+FormPhotoNote _$FormPhotoNoteFromJson(Map<String, dynamic> json) =>
+    FormPhotoNote(
+      url: json['url'] as String,
+      text: json['text'] as String,
+      ai: json['ai'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$FormPhotoNoteToJson(FormPhotoNote instance) =>
+    <String, dynamic>{
+      'url': instance.url,
+      'text': instance.text,
+      'ai': instance.ai,
     };

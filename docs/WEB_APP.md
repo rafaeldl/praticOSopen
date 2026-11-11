@@ -250,6 +250,7 @@ Resumo do que cada área faz e do que é próprio do web. O comportamento de tel
 
 - **Modelos (`/checklists`)**: só com `manageForms`. "Seus checklists" e "Prontos para usar" do segmento; editor em gaveta com perguntas reordenáveis.
 - **Na OS**: adicionar (com o aparelho, se houver vários), preencher em gaveta pelo teclado, fotos no caminho do app (`tenants/{cid}/orders/{oid}/forms/{iid}/…`).
+- **Observação** (`notes`, fora de `responses`, #685): o web só mostra, embaixo da resposta e no PDF; quem escreve é o app. Ao apagar uma foto, a transação tira junto a observação dela (`notes.{itemId}`).
 - **App e web ao mesmo tempo**: cada resposta é uma transação que muda só a pergunta respondida. O app ainda regrava a resposta inteira da pergunta (foto posta no web pode sumir); correção no lote do app.
 
 ### Contratos
