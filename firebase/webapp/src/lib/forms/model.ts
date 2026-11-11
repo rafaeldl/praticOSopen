@@ -71,7 +71,7 @@ export interface OrderForm {
   status: FormStatus
   items: FormItem[]
   responses: FormResponse[]
-  /** Notes by item id, outside `responses` (each writer rewrites responses with only itemId, value and photoUrls). Read only here. */
+  /** Notes by item id, outside `responses` (each writer rewrites responses with only itemId, value and photoUrls). Written only as `notes.{itemId}` (lib/forms/data.ts saveNote). */
   notes?: Record<string, FormItemNote>
   /** Items whose answer came from the AI and was not changed since. */
   aiFilled?: string[]
@@ -204,12 +204,79 @@ export function noteLines(
   return lines
 }
 
+/** Nothing written in the note (the question's, the options' and the photos' texts all blank). */
+export function isEmptyNote(note: FormItemNote | null | undefined): boolean {
+  return !note || (!note.text?.trim() && note.options.every((o) => !o.text.trim()) && note.photos.every((p) => !p.text.trim()))
+}
+
+/** What the note dialog edits: the question's text, one per marked option (multiple choice only), one per photo. */
+export interface NoteFields {
+  text: string
+  options: { option: string; text: string }[]
+  photos: { url: string; text: string }[]
+}
+
+/** The options marked in a multiple choice answer, as saved (the template's own text). */
+export function markedOptions(item: FormItem, response: FormResponse | undefined): string[] {
+  return item.type === 'checklist' && Array.isArray(response?.value) ? response.value.map(String) : []
+}
+
+/** The dialog's fields for [item], filled with its note (form_note_sheet.dart). */
+export function noteFields(form: OrderForm, item: FormItem): NoteFields {
+  const note = form.notes?.[item.id]
+  const response = responseOf(form, item.id)
+  return {
+    text: note?.text ?? '',
+    options: markedOptions(item, response).map((option) => ({ option, text: note?.options.find((o) => o.option === option)?.text ?? '' })),
+    photos: (response?.photoUrls ?? []).map((url) => ({ url, text: note?.photos.find((p) => p.url === url)?.text ?? '' })),
+  }
+}
+
+/**
+ * The note written in the dialog, as the app's sheet makes it: a text left as
+ * it was keeps its `ai` mark, an edited one is the person's (`ai: false`).
+ * Notes of options unmarked meanwhile stay (marking it again shows them);
+ * blank texts are left out. Null when nothing is written (the note is removed).
+ */
+export function noteFromFields(before: FormItemNote | undefined, fields: NoteFields): FormItemNote | null {
+  const keepsAi = (text: string, previous: string | undefined, ai: boolean | undefined) => ai === true && previous !== undefined && text === previous.trim()
+  const marked = fields.options.map((o) => o.option)
+  const text = fields.text.trim()
+  const note: FormItemNote = {
+    text: text || null,
+    ai: !!text && keepsAi(text, before?.text ?? undefined, before?.ai),
+    options: [
+      ...(before?.options ?? []).filter((o) => !marked.includes(o.option)),
+      ...fields.options
+        .filter((o) => o.text.trim())
+        .map((o) => {
+          const old = before?.options.find((entry) => entry.option === o.option)
+          return { option: o.option, text: o.text.trim(), ai: keepsAi(o.text.trim(), old?.text, old?.ai) }
+        }),
+    ],
+    photos: fields.photos
+      .filter((p) => p.text.trim())
+      .map((p) => {
+        const old = before?.photos.find((entry) => entry.url === p.url)
+        return { url: p.url, text: p.text.trim(), ai: keepsAi(p.text.trim(), old?.text, old?.ai) }
+      }),
+  }
+  return isEmptyNote(note) ? null : note
+}
+
+/** A note as FormItemNote.toJson writes it. */
+export const noteDoc = (note: FormItemNote) => ({
+  text: note.text,
+  ai: note.ai,
+  options: note.options.map((o) => ({ option: o.option, text: o.text, ai: o.ai })),
+  photos: note.photos.map((p) => ({ url: p.url, text: p.text, ai: p.ai })),
+})
+
 /** The note of [itemId] without the photo at [url], or null when nothing else is written (removed with the photo). */
 export function noteWithoutPhoto(note: FormItemNote | undefined, url: string): FormItemNote | null | undefined {
   if (!note || !note.photos.some((p) => p.url === url)) return undefined
   const next = { ...note, photos: note.photos.filter((p) => p.url !== url) }
-  const empty = !next.text?.trim() && next.options.every((o) => !o.text.trim()) && next.photos.every((p) => !p.text.trim())
-  return empty ? null : next
+  return isEmptyNote(next) ? null : next
 }
 
 export function normalizeResponses(raw: unknown): FormResponse[] {

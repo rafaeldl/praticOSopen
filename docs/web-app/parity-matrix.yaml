@@ -12374,8 +12374,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["companies/{id}/orders/{id}/forms"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Grava só notes.{itemId}, fora de responses (issue #685). O web só mostra nesta etapa; edição na etapa 5 da spec 2026-11-10-checklist-ia-foto-design."
+  note: "Grava só notes.{itemId}, fora de responses (issues #685 e #689). Web: diálogo com a observação da pergunta, das opções marcadas e das fotos; Enter grava; editar texto da IA grava ai: false."

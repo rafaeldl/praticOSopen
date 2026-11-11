@@ -642,6 +642,7 @@
   "web.forms.copyMine": "Copiar minhas perguntas",
   "web.forms.copied": "Perguntas copiadas",
   "web.forms.copyFailed": "Não deu para copiar. Selecione e copie à mão.",
+  "web.forms.noteSaveFailed": "Não deu para guardar a observação. Tente de novo.",
   "web.forms.completedElsewhere": "Este checklist foi concluído. Reabra para mudar a resposta.",
   "web.fin.tabSummary": "Resumo",
   "web.fin.sub": "Só conta o que veio das OS. Despesas não entram aqui.",
