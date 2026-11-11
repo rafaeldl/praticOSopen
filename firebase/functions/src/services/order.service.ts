@@ -1116,8 +1116,20 @@ export function toOrderAggr(order: Order): OrderAggr {
  * Calculate remaining balance. `total` is already net of discount,
  * so the discount must NOT be subtracted again.
  */
-export function calculateRemainingBalance(order: Pick<Order, 'total' | 'paidAmount'>): number {
-  return Math.max(0, roundMoney((order.total || 0) - (order.paidAmount || 0)));
+/**
+ * What was paid. Legacy orders marked paid before `paidAmount` existed (old
+ * app, until 2026-01) have `payment: 'paid'` and no paidAmount: their total
+ * counts as paid, as in the finance report (app-finance paidCents).
+ */
+export function effectivePaidAmount(order: Pick<Order, 'total' | 'paidAmount'> & Partial<Pick<Order, 'payment'>>): number {
+  if (order.paidAmount === undefined || order.paidAmount === null) {
+    return order.payment === 'paid' ? order.total || 0 : 0;
+  }
+  return order.paidAmount || 0;
+}
+
+export function calculateRemainingBalance(order: Pick<Order, 'total' | 'paidAmount'> & Partial<Pick<Order, 'payment'>>): number {
+  return Math.max(0, roundMoney((order.total || 0) - effectivePaidAmount(order)));
 }
 
 // ============================================================================

@@ -4,7 +4,7 @@
  */
 
 import { getTenantCollection } from './firestore.service';
-import { calculateRemainingBalance, roundMoney } from './order.service';
+import { calculateRemainingBalance, effectivePaidAmount, roundMoney } from './order.service';
 import {
   Order,
   AnalyticsSummary,
@@ -145,7 +145,7 @@ export function calculateRevenue(orders: Order[]): RevenueMetrics {
     // Only count confirmed orders (exclude quote and canceled)
     if (order.status !== 'canceled' && order.status !== 'quote') {
       total += order.total || 0;
-      paid += order.paidAmount || 0;
+      paid += effectivePaidAmount(order);
       discount += order.discount || 0;
       // order.total is already net of discount
       unpaid += calculateRemainingBalance(order);
