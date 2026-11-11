@@ -856,7 +856,7 @@ rows:
 - id: nav.tabs.view
   screen: lib/screens/menu_navigation/navigation_controller.dart
   route: null
-  action: "Navegar pelas abas Início, Agenda e Financeiro"
+  action: "Navegar pelas abas Início, Clientes, Agenda e Financeiro"
   kind: screen
   roles: [owner, admin, supervisor, manager, consultant, technician]
   segments: all
@@ -954,7 +954,7 @@ rows:
   e2e: firebase/webapp/e2e/company.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Web: src/navigation.ts na ordem Início, Agenda, Financeiro."
+  note: "App: Início, Clientes, Agenda, Financeiro (Clientes virou aba em 2026-11-11). Web: src/navigation.ts na ordem Início, Agenda, Financeiro, com Clientes no menu lateral e fora das abas do celular."
 - id: nav.tabs.analytics-names
   screen: lib/screens/menu_navigation/tab_routes.dart
   route: null
@@ -971,7 +971,7 @@ rows:
   web_status: done
   web_exception: null
   e2e: firebase/webapp/e2e/analytics.spec.ts
-  note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
+  note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /customers, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null

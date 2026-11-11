@@ -1989,7 +1989,7 @@
   "homeSearchHintDevice": "Search orders, customers or {device}",
   "remainingToReceive": "{amount} left to receive",
   "firstOrderTapPlus": "Tap + to create your first work order. It takes less than a minute.",
-  "profileButtonA11y": "{company}: customers, catalog, team and settings",
+  "profileButtonA11y": "{company}: catalog, team and settings",
   "orderAssistantPhoto": "Photo",
   "orderAssistantTalkShort": "Speak",
   "orderCustomerRequestTitle": "What the customer asked",

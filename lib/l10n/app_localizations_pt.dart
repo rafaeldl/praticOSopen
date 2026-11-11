@@ -4435,7 +4435,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String profileButtonA11y(String company) {
-    return '$company: clientes, catálogo, equipe e ajustes';
+    return '$company: catálogo, equipe e ajustes';
   }
 
   @override

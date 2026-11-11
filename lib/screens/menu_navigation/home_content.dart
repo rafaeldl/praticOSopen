@@ -95,7 +95,7 @@ class HomeContent extends StatefulWidget {
   final VoidCallback onLoadMore;
   final VoidCallback onOpenNotifications;
 
-  /// Profile button: customers, catalog, team and settings (the former
+  /// Profile button: catalog, team and settings (the former
   /// "Mais" tab).
   final VoidCallback onOpenProfile;
 
@@ -1057,7 +1057,7 @@ class _FilterButton extends StatelessWidget {
   }
 }
 
-/// Company initials in a soft accent circle, top right: opens customers,
+/// Company initials in a soft accent circle, top right: opens
 /// catalog, team and settings.
 class _ProfileButton extends StatelessWidget {
   const _ProfileButton({

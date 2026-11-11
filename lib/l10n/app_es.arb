@@ -1989,7 +1989,7 @@
   "homeSearchHintDevice": "Buscar OS, cliente o {device}",
   "remainingToReceive": "falta cobrar {amount}",
   "firstOrderTapPlus": "Toca + para crear tu primera OS. Toma menos de un minuto.",
-  "profileButtonA11y": "{company}: clientes, catálogo, equipo y ajustes",
+  "profileButtonA11y": "{company}: catálogo, equipo y ajustes",
   "orderAssistantPhoto": "Foto",
   "orderAssistantTalkShort": "Hablar",
   "orderCustomerRequestTitle": "Lo que pidió el cliente",
