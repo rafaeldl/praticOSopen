@@ -4,7 +4,7 @@
 // photos, comments and details. Each row opens its own editor; there is no
 // "Editar" mode. Money, status and items go through the API (writes.ts).
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import { ChevronsUpDown, MoreHorizontal, X } from '@lucide/vue'
+import { MoreHorizontal, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
@@ -1202,7 +1202,7 @@ watch(
           <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
         </p>
         <div class="od-state">
-          <!-- Looks like a select when it can change: people did not find the plain line was clickable. -->
+          <!-- Underlined like the other links on the header (WhatsApp, "Falta receber"), so it reads as clickable. -->
           <button
             v-if="canPickStatus"
             type="button"
@@ -1213,7 +1213,6 @@ watch(
             @click="dialog = { kind: 'status' }"
           >
             <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText$" data-testid="order-status" />
-            <ChevronsUpDown :size="16" aria-hidden="true" class="od-status-chevron" />
           </button>
           <StatusLabel v-else :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText$" data-testid="order-status" />
           <button v-if="phrase && phraseActs" type="button" class="od-sentence link-plain" :class="{ 'od-sentence--late': phrase.late }" @click="onPhrase">{{ phrase.text }}</button>
