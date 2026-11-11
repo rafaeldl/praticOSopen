@@ -1066,6 +1066,46 @@ void main() {
       expect(question.dy, lessThan(button.dy));
     });
 
+    testWidgets('long lists show 5 with "Ver todos", newest vehicle first, '
+        'and a plate search once open past 10', (tester) async {
+      // Newest first, as the directory streams them: o12 has vehicle d12.
+      final orders = [
+        for (var i = 12; i >= 1; i--)
+          order(
+            i,
+            'done',
+            10,
+            devices: [
+              aggr('d$i', 'Carro $i')
+                ..serial = 'ABC${i.toString().padLeft(4, '0')}',
+            ],
+          )..createdAt = DateTime(2026, 10, i),
+      ];
+      // Tall screen: the whole list is built, so what is hidden is hidden.
+      tester.view.physicalSize = const Size(800, 6000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpDetail(tester, FakeDirectory(orders: {'c1': orders}));
+      expect(find.text('Carro 12'), findsOneWidget);
+      expect(find.text('Carro 8'), findsOneWidget);
+      expect(find.text('Carro 6'), findsNothing);
+      expect(find.byKey(const Key('customerVehiclesSearch')), findsNothing);
+      expect(find.byKey(const Key('customerOrdersMore')), findsOneWidget);
+
+      final more = find.byKey(const Key('customerVehiclesMore'));
+      expect(find.textContaining('Ver todos os 12'), findsOneWidget);
+      await tester.tap(more);
+      await tester.pumpAndSettle();
+      expect(find.text('Carro 1'), findsOneWidget);
+      expect(find.text('Mostrar menos'), findsOneWidget);
+
+      final search = find.byKey(const Key('customerVehiclesSearch'));
+      await tester.enterText(search, 'abc0003');
+      await tester.pumpAndSettle();
+      expect(find.text('Carro 3'), findsOneWidget);
+      expect(find.text('Carro 12'), findsNothing);
+    });
+
     testWidgets('vehicles show plate and order count, then the add row, '
         'then "Últimas OS" with the order title', (tester) async {
       final gol = aggr('d1', 'VW Gol 2018')..serial = 'ABC1D23';

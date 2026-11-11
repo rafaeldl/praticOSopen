@@ -2991,5 +2991,10 @@
   "statementFileName": "Statement-{date}",
   "@statementFileName": {"placeholders": {"date": {"type": "String"}}},
   "customersOrderRecent": "Recent",
-  "customersOrderName": "A–Z"
+  "customersOrderName": "A–Z",
+  "customerShowAllDevices": "See all {count} {devices}",
+  "customerShowAllOrders": "See all {count} orders",
+  "customerShowLess": "Show less",
+  "customerSearchDevices": "Search by name or plate",
+  "customerSearchOrders": "Search by order number"
 }

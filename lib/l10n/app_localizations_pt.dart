@@ -7737,4 +7737,23 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get customersOrderName => 'A–Z';
+
+  @override
+  String customerShowAllDevices(int count, String devices) {
+    return 'Ver todos os $count $devices';
+  }
+
+  @override
+  String customerShowAllOrders(int count) {
+    return 'Ver todas as $count OS';
+  }
+
+  @override
+  String get customerShowLess => 'Mostrar menos';
+
+  @override
+  String get customerSearchDevices => 'Buscar pelo nome ou placa';
+
+  @override
+  String get customerSearchOrders => 'Buscar pelo número da OS';
 }

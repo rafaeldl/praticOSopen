@@ -2979,5 +2979,10 @@
   "statementFileName": "Extracto-{date}",
   "@statementFileName": {"placeholders": {"date": {"type": "String"}}},
   "customersOrderRecent": "Recientes",
-  "customersOrderName": "A–Z"
+  "customersOrderName": "A–Z",
+  "customerShowAllDevices": "Ver los {count} {devices}",
+  "customerShowAllOrders": "Ver las {count} OS",
+  "customerShowLess": "Mostrar menos",
+  "customerSearchDevices": "Buscar por nombre o placa",
+  "customerSearchOrders": "Buscar por número de OS"
 }

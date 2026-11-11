@@ -7752,4 +7752,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get customersOrderName => 'A–Z';
+
+  @override
+  String customerShowAllDevices(int count, String devices) {
+    return 'Ver los $count $devices';
+  }
+
+  @override
+  String customerShowAllOrders(int count) {
+    return 'Ver las $count OS';
+  }
+
+  @override
+  String get customerShowLess => 'Mostrar menos';
+
+  @override
+  String get customerSearchDevices => 'Buscar por nombre o placa';
+
+  @override
+  String get customerSearchOrders => 'Buscar por número de OS';
 }

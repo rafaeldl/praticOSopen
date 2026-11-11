@@ -24,6 +24,7 @@ import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/order_history_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
@@ -134,6 +135,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
   /// Last orders shown (the "…" menu picks from them).
   List<Order> _lastOrders = const [];
+
+  /// 5 vehicles and 5 orders; "Ver todos" opens the rest in place, with a
+  /// search field past 10 ([shortList]).
+  bool _vehiclesOpen = false;
+  bool _ordersOpen = false;
+  String _vehicleQuery = '';
+  String _orderQuery = '';
 
   late CustomerInvoiceConfig _invoice =
       widget.invoiceConfig ?? CustomerInvoiceConfig.off;
@@ -639,10 +647,42 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     final config = context.watch<SegmentConfigProvider>();
     final vehicles = distinctVehicles(orders);
     final name = _firstName;
+    final vehicleList = shortList(
+      vehicles,
+      open: _vehiclesOpen,
+      query: _vehicleQuery,
+      matches: vehicleMatches,
+    );
+    final orderList = shortList(
+      orders,
+      open: _ordersOpen,
+      query: _orderQuery,
+      matches: orderNumberMatches,
+    );
 
     return [
       SectionLabel(l10n.devicesOfCustomer(config.devicePlural, name)),
-      for (final v in vehicles) _vehicleRow(v, orders),
+      if (vehicleList.searchable)
+        _searchField(
+          key: const Key('customerVehiclesSearch'),
+          placeholder: l10n.customerSearchDevices,
+          onChanged: (q) => setState(() => _vehicleQuery = q),
+        ),
+      for (final v in vehicleList.shown) _vehicleRow(v, orders),
+      if (vehicleList.canOpen)
+        _toggleLink(
+          key: const Key('customerVehiclesMore'),
+          label: _vehiclesOpen
+              ? l10n.customerShowLess
+              : l10n.customerShowAllDevices(
+                  vehicles.length,
+                  config.devicePlural.toLowerCase(),
+                ),
+          onPressed: () => setState(() {
+            _vehiclesOpen = !_vehiclesOpen;
+            _vehicleQuery = '';
+          }),
+        ),
       if (_can(PermissionType.manageDevices))
         AddRow(
           label: l10n.addAnotherDevice(config.device.toLowerCase()),
@@ -652,10 +692,66 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ?_nfseRow(),
       if (orders.isNotEmpty) ...[
         SectionLabel(l10n.latestOrders),
-        for (final o in orders) _orderRow(o),
+        if (orderList.searchable)
+          _searchField(
+            key: const Key('customerOrdersSearch'),
+            placeholder: l10n.customerSearchOrders,
+            keyboardType: TextInputType.number,
+            onChanged: (q) => setState(() => _orderQuery = q),
+          ),
+        for (final o in orderList.shown) _orderRow(o),
+        if (orderList.canOpen)
+          _toggleLink(
+            key: const Key('customerOrdersMore'),
+            label: _ordersOpen
+                ? l10n.customerShowLess
+                : l10n.customerShowAllOrders(orders.length),
+            onPressed: () => setState(() {
+              _ordersOpen = !_ordersOpen;
+              _orderQuery = '';
+            }),
+          ),
       ],
       if (_receipts != null && _canSeeReceipts) _receiptsSection(),
     ];
+  }
+
+  Widget _searchField({
+    required Key key,
+    required String placeholder,
+    required ValueChanged<String> onChanged,
+    TextInputType? keyboardType,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pageMargin,
+        0,
+        AppSpacing.pageMargin,
+        AppSpacing.sm,
+      ),
+      child: CupertinoSearchTextField(
+        key: key,
+        placeholder: placeholder,
+        keyboardType: keyboardType,
+        onChanged: onChanged,
+        backgroundColor: AppColors.secondaryFill.resolveFrom(context),
+      ),
+    );
+  }
+
+  /// "Ver todos os 23 veículos" / "Mostrar menos" under a list.
+  Widget _toggleLink({
+    required Key key,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: TextLink(key: key, label: label, onPressed: onPressed),
+      ),
+    );
   }
 
   /// "Nota fiscal para · REVENDA EXEMPLO": only when set (and the direct

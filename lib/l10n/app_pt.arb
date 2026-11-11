@@ -3411,5 +3411,12 @@
   "statementFileName": "Extrato-{date}",
   "@statementFileName": {"placeholders": {"date": {"type": "String"}}},
   "customersOrderRecent": "Recentes",
-  "customersOrderName": "A–Z"
+  "customersOrderName": "A–Z",
+  "customerShowAllDevices": "Ver todos os {count} {devices}",
+  "customerShowAllOrders": "Ver todas as {count} OS",
+  "customerShowLess": "Mostrar menos",
+  "customerSearchDevices": "Buscar pelo nome ou placa",
+  "customerSearchOrders": "Buscar pelo número da OS",
+  "@customerShowAllDevices": {"placeholders": {"count": {"type": "int"}, "devices": {"type": "String"}}},
+  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}}
 }
