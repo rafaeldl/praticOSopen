@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "15f35aa04783ae7ad6bad37d319cd6b7355e961e2154adc5f9163072fd3ed0f8",
+      "sha": "ce6882c1d4d10106fb3c9aab36395d26a4c2e56798dbbcec541bb1f9be67599f",
       "scope": "**/*"
     },
     {
@@ -815,7 +815,7 @@
     },
     {
       "id": "app-tab-order",
-      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" marinho (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
+      "text": "Abas sempre na ordem Início, Clientes, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" marinho (Nova OS) ao lado. O que era \"Mais\" (catálogo, equipe, ajustes) abre pelo botão do perfil, no topo da Início",
       "source": {
         "path": "CLAUDE.md",
         "line": 235
@@ -828,23 +828,14 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Agenda, Financeiro in that order, for example adding a Clientes or Mais tab or putting Agenda before Início?",
+          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Clientes, Agenda, Financeiro in that order, for example adding a Mais or Catálogo tab or putting Agenda before Clientes?",
           "criteria": {
-            "true": "tabs: [home, customers, agenda, financial, more]",
-            "false": "tabs: [home, agenda, financial] with a separate + button"
+            "true": "tabs: [home, agenda, customers, financial, more]",
+            "false": "tabs: [home, customers, agenda, financial] with a separate + button"
           }
         }
       },
-      "status": "active",
-      "calibration": {
-        "at": "2026-11-11T13:48:44.417Z",
-        "hunks": 7,
-        "median": 0.05,
-        "min": 0.04,
-        "max": 0.08,
-        "fired": 0,
-        "verdict": "decisive"
-      }
+      "status": "active"
     },
     {
       "id": "picker-not-action-sheet",

@@ -2266,7 +2266,7 @@
   "remainingToReceive": "falta receber {amount}",
   "@remainingToReceive": {"placeholders": {"amount": {"type": "String"}}},
   "firstOrderTapPlus": "Toque no + para criar sua primeira OS. Leva menos de um minuto.",
-  "profileButtonA11y": "{company}: clientes, catálogo, equipe e ajustes",
+  "profileButtonA11y": "{company}: catálogo, equipe e ajustes",
   "@profileButtonA11y": {"placeholders": {"company": {"type": "String"}}},
   "orderAssistantPhoto": "Foto",
   "orderAssistantTalkShort": "Falar",

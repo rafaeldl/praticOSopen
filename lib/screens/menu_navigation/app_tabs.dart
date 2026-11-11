@@ -3,18 +3,20 @@ import 'tab_routes.dart';
 /// Main tabs of the app, in their fixed order (design system: "Abas").
 ///
 /// Only the places people go every day are tabs: Início (which leads to
-/// everything that belongs to an order, customers included), Agenda and
-/// Financeiro. Customers, catalog, team and settings open from the profile
-/// button on Início. Tabs a user does not use are hidden; the remaining ones
-/// keep the same relative order.
+/// everything that belongs to an order), Clientes, Agenda and Financeiro.
+/// Catalog, team and settings open from the profile button on Início. Tabs a
+/// user does not use are hidden; the remaining ones keep the same relative
+/// order.
 enum AppTab {
   home,
+  customers,
   agenda,
   financial;
 
   /// Analytics route name of this tab (see [TabRoutes]).
   String get routeName => switch (this) {
     AppTab.home => TabRoutes.home,
+    AppTab.customers => TabRoutes.customers,
     AppTab.agenda => TabRoutes.agenda,
     AppTab.financial => TabRoutes.financial,
   };
@@ -22,6 +24,7 @@ enum AppTab {
 
 /// Returns the tabs the current user sees, always in [AppTab] order.
 ///
+/// - Clientes is shown to everyone (every role reads customers).
 /// - Agenda is hidden when the company does not use scheduling
 ///   (`Company.useScheduling`).
 /// - Financeiro is shown only with the `viewFinancialReports` permission and

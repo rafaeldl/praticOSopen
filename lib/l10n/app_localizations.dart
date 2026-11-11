@@ -7315,7 +7315,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileButtonA11y.
   ///
   /// In pt, this message translates to:
-  /// **'{company}: clientes, catálogo, equipe e ajustes'**
+  /// **'{company}: catálogo, equipe e ajustes'**
   String profileButtonA11y(String company);
 
   /// No description provided for @orderAssistantPhoto.
