@@ -7,7 +7,7 @@
  */
 import { orderVersion } from './order-version';
 import type { Order, OrderProduct, OrderService } from '../models/types';
-import { calculateRemainingBalance } from './order.service';
+import { calculateRemainingBalance, effectivePaidAmount } from './order.service';
 import { locateLines, productLineTotal, transactionIds } from './order-items';
 import { timestampToDate } from '../utils/date.utils';
 
@@ -65,7 +65,7 @@ function money(order: Order): Json {
   return {
     total: order.total ?? 0,
     discount: order.discount ?? 0,
-    paidAmount: order.paidAmount ?? 0,
+    paidAmount: effectivePaidAmount(order),
     remainingBalance: calculateRemainingBalance(order),
     payment: order.payment ?? null,
     paid: order.paid === true,
@@ -105,7 +105,7 @@ export function projectOrderSummary(order: Order, showPrices: boolean): Json {
     // Opaque: sent back as expectedUpdatedAt without any conversion (order-version.ts).
     version: orderVersion(order.updatedAt) ?? undefined,
     ...(showPrices
-      ? { total: order.total ?? 0, paidAmount: order.paidAmount ?? 0, payment: order.payment ?? null, paid: order.paid === true }
+      ? { total: order.total ?? 0, paidAmount: effectivePaidAmount(order), payment: order.payment ?? null, paid: order.paid === true }
       : {}),
   });
 }
