@@ -90,18 +90,5 @@ void main() {
       );
       expect(servicesSummary(const []), '');
     });
-
-    test('descriptions follow the service, each once', () {
-      expect(
-        servicesSummary([
-          named('pintura', description: 'capô'),
-          named('pintura', description: 'porta'),
-          named('pintura', description: 'Capô'),
-          named('pintura'),
-          named('polimento', description: 'polimento'),
-        ]),
-        '4× pintura (capô, porta), polimento',
-      );
-    });
   });
 }

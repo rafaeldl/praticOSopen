@@ -644,27 +644,21 @@ export function deviceSummary(order: Order): string {
   return more.length ? `${name} +${more.length}` : name
 }
 
-/** Service names for one list line ("5× pintura (capô, porta)"): the same service (case and
- * spaces ignored) shows once, with how many times, in the order it first appears, followed by
- * the descriptions of its lines (each once). Same rule as the app (servicesSummary in
- * lib/utils/order_items.dart). */
+/** Service names for one list line ("5× pintura, polimento"): the same service (case and
+ * spaces ignored) shows once, with how many times, in the order it first appears. Same rule
+ * as the app (servicesSummary in lib/utils/order_items.dart). */
 export function servicesSummary(order: Order): string {
-  const keyOf = (text: string) => text.trim().toLowerCase().replace(/\s+/g, ' ')
-  const seen = new Map<string, { name: string; count: number; notes: Map<string, string> }>()
+  const seen = new Map<string, { name: string; count: number }>()
   for (const line of order.lines) {
     if (line.kind !== 'service') continue
     const name = (line.name ?? '').trim()
     if (!name) continue
-    const key = keyOf(name)
-    let entry = seen.get(key)
-    if (!entry) seen.set(key, (entry = { name, count: 0, notes: new Map() }))
-    entry.count += 1
-    const note = (line.description ?? '').trim()
-    if (note && keyOf(note) !== key && !entry.notes.has(keyOf(note))) entry.notes.set(keyOf(note), note)
+    const key = name.toLowerCase().replace(/\s+/g, ' ')
+    const entry = seen.get(key)
+    if (entry) entry.count += 1
+    else seen.set(key, { name, count: 1 })
   }
-  return [...seen.values()]
-    .map(({ name, count, notes }) => `${count > 1 ? `${count}× ` : ''}${name}${notes.size ? ` (${[...notes.values()].join(', ')})` : ''}`)
-    .join(', ')
+  return [...seen.values()].map(({ name, count }) => (count > 1 ? `${count}× ${name}` : name)).join(', ')
 }
 
 /** Lines grouped by device when the order has two or more (order.item.by-device). */
