@@ -41,9 +41,20 @@ Campo novo do checklist da OS, **fora de `responses`**:
 - **Gravação:** `FormsService.saveNote` grava só `notes.{itemId}` (e `updatedAt`), com `FieldPath`; sem internet a escrita fica na fila. Salvar uma resposta (`FormsService.answerWrite`) nunca escreve `notes`.
 - **Foto apagada leva a observação junto**, na mesma escrita da resposta (`notes.{itemId}` sem aquela foto; se não sobrar texto, o campo é apagado). Vale no app (online e na fila) e no web.
 - **Opção desmarcada:** a observação fica guardada e só aparece de novo se a opção voltar a ser marcada. PDF, web e link do cliente mostram só as das opções marcadas e das fotos que ainda existem.
-- **`ai`:** `true` enquanto o texto é o da IA; a primeira edição da pessoa grava `false`. `aiFilled` lista as perguntas cuja resposta veio da IA. Os dois já existem no modelo, mas nesta etapa nada grava `true` (a IA entra nas etapas 3 e 4 da spec `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`).
+- **`ai`:** `true` enquanto o texto é o da IA; a primeira edição da pessoa grava `false`. `aiFilled` lista as perguntas cuja resposta veio da IA e não foi mexida (`FormsService.markAiFilled`, `arrayUnion`/`arrayRemove`); responder de novo tira a pergunta da lista.
 - **Onde aparece:** sheet da pergunta (“+ Observação” como link embaixo da resposta; com texto, a linha “Observação” e o texto, tocar edita), resumo do checklist (embaixo da resposta, em `textTertiary`), PDF do app e do web (embaixo da resposta: o texto, “Porta: …” e “Foto 2: …”), link do cliente (`note`, `optionNotes` e `photoNotes` em cada item de `forms`, sem a marca `ai`) e app web (só leitura nesta etapa; edição na etapa 5).
 - Tipos: Dart (`FormItemNote`, `FormOptionNote`, `FormPhotoNote` em `lib/models/order_form.dart`), Functions (`firebase/functions/src/models/types.ts`) e web (`firebase/webapp/src/lib/forms/model.ts`).
+
+### A IA lê a foto (#688)
+
+Com a IA ligada para a empresa (`GET /v1/app/ai/status`), a foto tirada numa pergunta (câmera, ou uma foto só da galeria) vai em segundo plano para `POST /v1/app/ai/form-photo` (ver `docs/AI_ORDER_ASSIST.md`), reduzida a JPEG de até 1600 px. A pessoa segue para a próxima pergunta enquanto a IA lê.
+
+- **Serviço:** `lib/services/ai_form_photo_service.dart`: `AiFormPhotoClient`/`AiFormPhotoService` (HTTP, mesmos erros da OS), `aiAnswerValue` (resposta no formato que a pergunta grava: opção original, número como texto) e `planAiFormPhoto` (o que preencher).
+- **Só o vazio:** a resposta só entra se a pergunta está sem resposta; com outra resposta, o aviso diz "A foto mostra: X" com "Trocar". A observação da pergunta, de cada opção marcada e da foto só entra onde está vazia, com `ai: true`; onde a pessoa já escreveu, o aviso oferece "A IA viu também: … · Acrescentar" (o texto acrescentado é da pessoa).
+- **Leitura do equipamento:** a resposta da IA passa pelo mesmo caminho da resposta à mão (`_saveValue` → `_syncReading`), então o km lido vira a leitura da OS. A última leitura vai junto no pedido (`lastReading`).
+- **Tela:** "✦ Lendo a foto…" embaixo das fotos (na pergunta e na lista); ✦ azul ao lado da resposta e de "Observação" enquanto são da IA. O aviso opaco (`ChecklistAiNoticeView`, o mesmo `AssistantNote` da OS) fica 8 s acima da barra de baixo: "Preenchi: 1/4 · Desfazer"; em outra pergunta, "Combustível: 1/4 · Ver". Foto ruim: "Foto escura, não deu para ler · Tirar de novo". Sem rede: "Não deu para ler a foto agora"; sem cota: "Acabaram as leituras da IA deste mês". Nunca alerta. IA desligada: nada aparece além do "+ Observação".
+- **Desfazer** volta a resposta e a observação de antes e tira a pergunta de `aiFilled`.
+- **Analytics:** `checklist_answered` (`type`, `via: ai_photo`) quando a IA responde; `checklist_ai_undone` no "Desfazer".
 
 ### Pergunta ligada à leitura do equipamento (#646)
 Uma pergunta numérica com `reading: true` é a leitura do equipamento (km, horímetro; ver `docs/DEVICE_READING.md`). Só vale para `number` e em ramo com campo de leitura; fora disso é uma pergunta normal.
@@ -107,7 +118,7 @@ O core atual cobre a criação e preenchimento de formulários na OS. As regras 
   - Embaixo: “Voltar à anterior” (a partir da 2ª) e “Pular por agora” em toda pergunta. Obrigatória não trava: a pulada continua em “Faltam N”.
   - Depois da última pergunta a sheet fecha; se não faltar nada, o checklist é concluído (`status=completed`) e volta para a OS. Faltando algo, volta ao resumo.
   - Upload e caminhos de Storage não mudaram (`tenants/{companyId}/orders/{orderId}/forms/{formId}/{itemId}_{timestamp}.jpg`).
-- Fora deste passo: sugestão automática do checklist na OS, IA (“Falar as respostas”, leitura da foto) e câmera abrindo sozinha na pergunta de foto (ver `docs/superpowers/specs/2026-10-10-checklists-design.md`).
+- Fora deste passo: sugestão automática do checklist na OS, IA “Falar as respostas” (a leitura da foto está em “A IA lê a foto”) e câmera abrindo sozinha na pergunta de foto (ver `docs/superpowers/specs/2026-10-10-checklists-design.md`).
 
 ## Componentes e serviços
 - Modelos: `lib/models/form_definition.dart`, `lib/models/order_form.dart`.

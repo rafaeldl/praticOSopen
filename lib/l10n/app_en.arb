@@ -3013,5 +3013,20 @@
   "checklistNotePhoto": "Photo {number}",
   "checklistNoteLine": "{label}: {text}",
   "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
-  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}},
+  "checklistAiReading": "Reading the photo…",
+  "checklistAiFilled": "Filled in: {summary}",
+  "checklistAiFilledMark": "Filled in by AI",
+  "checklistAiSeenAlso": "AI also saw: {text}",
+  "checklistAiAppend": "Add",
+  "checklistAiDiffers": "The photo shows: {answer}",
+  "checklistAiUseAnswer": "Replace",
+  "checklistAiDark": "Photo too dark to read",
+  "checklistAiBlurry": "Photo too blurry to read",
+  "checklistAiOffTarget": "The photo doesn't show what the question asks",
+  "checklistAiRetake": "Retake",
+  "checklistAiFailed": "Couldn't read the photo right now",
+  "checklistAiQuota": "This month's AI readings are used up",
+  "checklistAiNothing": "AI didn't find the answer in the photo",
+  "checklistAiView": "View"
 }

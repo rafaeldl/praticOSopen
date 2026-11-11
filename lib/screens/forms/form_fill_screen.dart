@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/screens/forms/checklist_ai_notice.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/screens/forms/form_note_sheet.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
@@ -14,6 +16,9 @@ import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/ai_form_photo_service.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/forms_service.dart';
@@ -44,6 +49,12 @@ import 'package:provider/provider.dart';
 /// value below the last visit's gets a notice ("Menor que os 102.000 km da
 /// última visita. Está certo?") without blocking.
 ///
+/// With the AI on for the company, a photo taken in a question goes to the
+/// AI in the background (`POST /v1/app/ai/form-photo`): it fills only the
+/// empty answer and the empty notes, marked with ✦, with a notice that can
+/// undo it; what the person wrote is never rewritten (spec
+/// 2026-11-10-checklist-ia-foto-design). Without the AI nothing changes.
+///
 /// A checklist with no answer yet opens straight on the first question.
 /// Answering the last one with nothing left completes the checklist and goes
 /// back to the OS.
@@ -59,6 +70,10 @@ class FormFillScreen extends StatefulWidget {
   /// Injected in tests (the defaults talk to Firebase).
   final FormsService? formsService;
   final PhotoService? photoService;
+  final AiFormPhotoClient? aiClient;
+
+  /// The photo as the AI gets it (JPEG up to 1600 px); null: not read.
+  final Future<Uint8List?> Function(File file)? aiPhotoBytes;
 
   /// Who may reopen a completed checklist; defaults to
   /// [AuthorizationService.canReopenCompletedForms].
@@ -76,6 +91,8 @@ class FormFillScreen extends StatefulWidget {
     this.readingLink,
     this.formsService,
     this.photoService,
+    this.aiClient,
+    this.aiPhotoBytes,
     this.canReopen,
     this.openQuestionsOnStart = true,
   });
@@ -87,6 +104,18 @@ class FormFillScreen extends StatefulWidget {
 class _FormFillScreenState extends State<FormFillScreen> {
   late final FormsService _formsService = widget.formsService ?? FormsService();
   late final PhotoService _photoService = widget.photoService ?? PhotoService();
+  late final AiFormPhotoClient _ai = widget.aiClient ?? AiFormPhotoService();
+
+  /// Photos being read by the AI, per question.
+  final Map<String, int> _aiReading = {};
+
+  /// The notice of the last reading, and what "Desfazer" puts back.
+  ChecklistAiNotice? _aiNotice;
+  _AiUndo? _aiUndo;
+  Timer? _aiNoticeTimer;
+
+  /// The questions sheet is open: the notice shows there, not here too.
+  bool _questionsOpen = false;
   late OrderForm _currentForm;
   bool _isUploading = false;
   bool _isSaving = false;
@@ -170,6 +199,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
   @override
   void dispose() {
+    _aiNoticeTimer?.cancel();
     _changes.dispose();
     super.dispose();
   }
@@ -206,11 +236,289 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
   Future<void> _saveItemResponse(String itemId, dynamic value) async {
     HapticFeedback.selectionClick();
+    // The answer is the person's now: the ✦ goes.
+    if (_currentForm.aiFilled.contains(itemId)) _markAiFilled(itemId, false);
+    if (_aiNotice?.itemId == itemId &&
+        _aiNotice?.kind != ChecklistAiNoticeKind.seenAlso) {
+      _hideAiNotice();
+    }
+    await _saveValue(itemId, value);
+  }
+
+  Future<void> _saveValue(String itemId, dynamic value) async {
     final before = List.of(_currentForm.responses);
     final change = FormValueChange(itemId, value);
     _update(() => _applyLocally(change));
     unawaited(_syncReading(itemId, value));
     await _persistChange(change, before);
+  }
+
+  /// Shows and saves whether the answer of [itemId] is the AI's.
+  void _markAiFilled(String itemId, bool filled) {
+    _update(() {
+      final list = [..._currentForm.aiFilled]..remove(itemId);
+      if (filled) list.add(itemId);
+      _currentForm.aiFilled = list;
+    });
+    unawaited(() async {
+      try {
+        await _formsService.markAiFilled(
+          widget.companyId,
+          widget.orderId,
+          _currentForm.id,
+          itemId,
+          filled: filled,
+        );
+      } catch (e) {
+        debugPrint('Could not save the checklist AI mark: $e');
+      }
+    }());
+  }
+
+  // ─── AI reading the photo ────────────────────────────────────────────────
+
+  /// Sends the photo just taken for [itemId] (saved at [url]) to the AI, in
+  /// the background: the person goes on meanwhile. Any failure is a notice;
+  /// AI off says nothing.
+  Future<void> _readPhoto(String itemId, File file, String url) async {
+    final item = _currentForm.items.where((i) => i.id == itemId).firstOrNull;
+    if (item == null || _isCompleted) return;
+    if (!await _ai.isEnabled() || !mounted) return;
+    final l10n = context.l10n;
+    final device = _deviceAggr();
+    final category = _segmentDeviceLabel();
+    final link = widget.readingLink;
+    _update(() => _aiReading[itemId] = (_aiReading[itemId] ?? 0) + 1);
+    try {
+      final bytes = await (widget.aiPhotoBytes ?? _compressForAi)(file);
+      if (bytes == null || bytes.isEmpty) return;
+      final last = item.isReading && link != null ? await link.lastVisit : null;
+      final result = await _ai.read(
+        photo: AiPhoto(bytes),
+        question: AiFormQuestion(
+          label: item.getLocalizedLabel(_localeCode),
+          type: item.type,
+          options: item.options,
+        ),
+        deviceCategory: device == null ? null : category,
+        deviceName: device?.name,
+        segment: _segmentId(),
+        locale: l10n.localeName,
+        lastReading: last == null
+            ? null
+            : (value: last, unit: link?.field.suffix),
+      );
+      if (!mounted) return;
+      _applyAiResult(item, url, result);
+    } on AiOrderAssistException catch (e) {
+      debugPrint('Checklist photo not read: ${e.error}');
+      switch (e.error) {
+        case AiAssistError.disabled:
+          break;
+        case AiAssistError.quotaExceeded:
+          _showAiNotice(
+            ChecklistAiNotice(
+              itemId: itemId,
+              kind: ChecklistAiNoticeKind.quota,
+            ),
+          );
+        default:
+          _showAiNotice(
+            ChecklistAiNotice(
+              itemId: itemId,
+              kind: ChecklistAiNoticeKind.failed,
+            ),
+          );
+      }
+    } catch (e) {
+      debugPrint('Checklist photo not read: $e');
+      _showAiNotice(
+        ChecklistAiNotice(itemId: itemId, kind: ChecklistAiNoticeKind.failed),
+      );
+    } finally {
+      _update(() {
+        final left = (_aiReading[itemId] ?? 1) - 1;
+        if (left <= 0) {
+          _aiReading.remove(itemId);
+        } else {
+          _aiReading[itemId] = left;
+        }
+      });
+    }
+  }
+
+  static Future<Uint8List?> _compressForAi(File file) =>
+      FlutterImageCompress.compressWithFile(
+        file.absolute.path,
+        minWidth: 1600,
+        minHeight: 1600,
+        quality: 70,
+        format: CompressFormat.jpeg,
+        keepExif: false,
+      );
+
+  String? _segmentId() {
+    try {
+      return context.read<SegmentConfigProvider>().segmentId;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _segmentDeviceLabel() {
+    try {
+      return context.read<SegmentConfigProvider>().device;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Applies what the AI read for [item] as the checklist is now (the
+  /// person may have answered or written meanwhile).
+  void _applyAiResult(
+    FormItemDefinition item,
+    String url,
+    AiFormPhotoResult result,
+  ) {
+    final response = _currentForm.getResponse(item.id);
+    // The photo was removed meanwhile: nothing to read.
+    if (response?.photoUrls.contains(url) != true) return;
+    final note = _currentForm.noteOf(item.id);
+    final plan = planAiFormPhoto(
+      item: item,
+      response: response,
+      note: note,
+      photoUrl: url,
+      result: result,
+    );
+    if (plan.issue != null) {
+      _showAiNotice(
+        ChecklistAiNotice(
+          itemId: item.id,
+          kind: ChecklistAiNoticeKind.badPhoto,
+          issue: plan.issue,
+        ),
+      );
+      return;
+    }
+    if (plan.filled) {
+      _aiUndo = _AiUndo(
+        itemId: item.id,
+        value: plan.answer != null ? response?.value : null,
+        answered: plan.answer != null,
+        note: plan.note != null ? _copyNote(note) : null,
+        noted: plan.note != null,
+      );
+      if (plan.answer case final answer?) {
+        _markAiFilled(item.id, true);
+        unawaited(_saveValue(item.id, answer));
+        AnalyticsService.logAiEvent('checklist_answered', {
+          'type': item.type.name,
+          'via': 'ai_photo',
+        });
+      }
+      if (plan.note case final n?) unawaited(_saveNote(item.id, n));
+      final summary = plan.answer != null
+          ? _valueText(item, plan.answer)
+          : plan.note?.text ??
+                result.photoNote ??
+                plan.note?.options.lastOrNull?.text;
+      _showAiNotice(
+        ChecklistAiNotice(
+          itemId: item.id,
+          kind: ChecklistAiNoticeKind.filled,
+          text: summary,
+        ),
+      );
+      return;
+    }
+    if (plan.answerSeen != null) {
+      _aiUndo = _AiUndo(itemId: item.id, value: plan.answerSeen);
+      _showAiNotice(
+        ChecklistAiNotice(
+          itemId: item.id,
+          kind: ChecklistAiNoticeKind.differs,
+          text: _valueText(item, plan.answerSeen),
+        ),
+      );
+      return;
+    }
+    if (plan.extra != null) {
+      _showAiNotice(
+        ChecklistAiNotice(
+          itemId: item.id,
+          kind: ChecklistAiNoticeKind.seenAlso,
+          text: plan.extra,
+        ),
+      );
+      return;
+    }
+    _showAiNotice(
+      ChecklistAiNotice(itemId: item.id, kind: ChecklistAiNoticeKind.nothing),
+    );
+  }
+
+  static FormItemNote? _copyNote(FormItemNote? note) =>
+      note == null ? null : FormItemNote.fromJson(note.toJson());
+
+  /// An answer in words, as the list shows it ("98000", "Sim", "1/4").
+  String? _valueText(FormItemDefinition item, Object? value) =>
+      _answerText(item, FormResponse(itemId: item.id, value: value));
+
+  void _showAiNotice(ChecklistAiNotice notice) {
+    if (!mounted) return;
+    _aiNoticeTimer?.cancel();
+    _aiNoticeTimer = Timer(const Duration(seconds: 8), _hideAiNotice);
+    _update(() => _aiNotice = notice);
+  }
+
+  void _hideAiNotice() {
+    _aiNoticeTimer?.cancel();
+    _aiNoticeTimer = null;
+    if (_aiNotice == null) return;
+    _update(() {
+      _aiNotice = null;
+      _aiUndo = null;
+    });
+  }
+
+  /// The notice's action on its question: undo, add what the AI saw, use
+  /// the answer it read, or take the photo again.
+  void _onAiNoticeAction() {
+    final notice = _aiNotice;
+    if (notice == null) return;
+    final undo = _aiUndo;
+    final itemId = notice.itemId;
+    _hideAiNotice();
+    switch (notice.kind) {
+      case ChecklistAiNoticeKind.filled:
+        if (undo == null) return;
+        if (undo.answered) {
+          _markAiFilled(itemId, false);
+          unawaited(_saveValue(itemId, undo.value));
+        }
+        if (undo.noted) {
+          unawaited(_saveNote(itemId, undo.note ?? FormItemNote()));
+        }
+        AnalyticsService.logAiEvent('checklist_ai_undone', {
+          'answer': undo.answered ? 1 : 0,
+          'note': undo.noted ? 1 : 0,
+        });
+      case ChecklistAiNoticeKind.seenAlso:
+        final extra = notice.text;
+        if (extra == null) return;
+        unawaited(
+          _saveNote(itemId, appendToNote(_currentForm.noteOf(itemId), extra)),
+        );
+      case ChecklistAiNoticeKind.differs:
+        if (undo == null) return;
+        _markAiFilled(itemId, true);
+        unawaited(_saveValue(itemId, undo.value));
+      case ChecklistAiNoticeKind.badPhoto:
+        unawaited(_addPhoto(itemId, ImageSource.camera));
+      default:
+        break;
+    }
   }
 
   /// Saves a change already shown on screen. Offline it is queued (see
@@ -268,6 +576,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
       }
 
       HapticFeedback.mediumImpact();
+      unawaited(_readPhoto(itemId, file, url));
     } catch (e) {
       HapticFeedback.heavyImpact();
       if (mounted) {
@@ -326,6 +635,10 @@ class _FormFillScreenState extends State<FormFillScreen> {
         }
 
         HapticFeedback.mediumImpact();
+        // One photo at a time is read (several at once: later phase).
+        if (files.length == 1 && uploaded.length == 1) {
+          unawaited(_readPhoto(itemId, files.single, uploaded.single));
+        }
       } else {
         throw Exception('Nenhuma foto foi enviada com sucesso');
       }
@@ -542,6 +855,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
   Future<void> _openQuestions([int? index]) async {
     if (_currentForm.items.isEmpty || _isCompleted) return;
     final start = index ?? firstUnansweredIndex(_currentForm) ?? 0;
+    _update(() => _questionsOpen = true);
     await Navigator.of(context).push(
       CupertinoSheetRoute<void>(
         builder: (sheetContext) => ValueListenableBuilder<int>(
@@ -551,6 +865,10 @@ class _FormFillScreenState extends State<FormFillScreen> {
             initialIndex: start,
             localeCode: _localeCode,
             uploadingItemId: _uploadingItemId,
+            aiReadingItemIds: _aiReading.keys.toSet(),
+            aiNotice: _aiNotice,
+            onAiNoticeAction: _onAiNoticeAction,
+            onAiNoticeClose: _hideAiNotice,
             onAnswer: (item, value) => _saveItemResponse(item.id, value),
             onAddPhoto: (item, source) => _addPhoto(item.id, source),
             onOpenPhoto: (item, i) => _showPhotoPreview(item.id, i),
@@ -565,6 +883,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         ),
       ),
     );
+    _update(() => _questionsOpen = false);
   }
 
   /// A tap on a question of a completed checklist: says it is completed and
@@ -617,38 +936,69 @@ class _FormFillScreenState extends State<FormFillScreen> {
         border: null,
         trailing: _isSaving ? const CupertinoActivityIndicator() : null,
       ),
-      child: CustomScrollView(
-        slivers: [
-          SliverSafeArea(
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.pageMargin,
-                    AppSpacing.lg,
-                    AppSpacing.pageMargin,
-                    AppSpacing.xs,
-                  ),
-                  child: Text(
-                    _currentForm.getLocalizedTitle(_localeCode),
-                    key: const ValueKey('form_fill_title'),
-                    style: AppTypography.title.copyWith(
-                      fontSize: 28,
-                      color: AppColors.text.resolveFrom(context),
-                    ),
+      child: Stack(
+        children: [
+          Positioned.fill(child: _buildList(context)),
+          if (_aiNotice case final notice? when !_questionsOpen)
+            Positioned(
+              left: AppSpacing.blockMargin,
+              right: AppSpacing.blockMargin,
+              bottom: 0,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: ChecklistAiNoticeView(
+                    notice: notice,
+                    onAction: _onAiNoticeAction,
+                    onClose: _hideAiNotice,
                   ),
                 ),
-                _buildHeader(context),
-                if (_currentForm.items.isNotEmpty) ...[
-                  SectionLabel(l10n.checklistQuestionsTitle),
-                  _buildQuestionsCard(context),
-                ],
-                const SizedBox(height: AppSpacing.xxl),
-              ]),
+              ),
             ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
+    final l10n = context.l10n;
+    return CustomScrollView(
+      slivers: [
+        SliverSafeArea(
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pageMargin,
+                  AppSpacing.lg,
+                  AppSpacing.pageMargin,
+                  AppSpacing.xs,
+                ),
+                child: Text(
+                  _currentForm.getLocalizedTitle(_localeCode),
+                  key: const ValueKey('form_fill_title'),
+                  style: AppTypography.title.copyWith(
+                    fontSize: 28,
+                    color: AppColors.text.resolveFrom(context),
+                  ),
+                ),
+              ),
+              _buildHeader(context),
+              if (_currentForm.items.isNotEmpty) ...[
+                SectionLabel(l10n.checklistQuestionsTitle),
+                _buildQuestionsCard(context),
+              ],
+              // Room for the AI notice over the end of the list.
+              SizedBox(
+                height: _aiNotice == null
+                    ? AppSpacing.xxl
+                    : AppSpacing.xxl + AppSizes.primaryButtonHeight,
+              ),
+            ]),
+          ),
+        ),
+      ],
     );
   }
 
@@ -781,13 +1131,14 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  String? _device() {
+  DeviceAggr? _deviceAggr() {
     final deviceId = _currentForm.deviceId;
     if (deviceId == null || widget.devices == null) return null;
-    final device = widget.devices!.cast<DeviceAggr?>().firstWhere(
-      (d) => d?.id == deviceId,
-      orElse: () => null,
-    );
+    return widget.devices!.where((d) => d.id == deviceId).firstOrNull;
+  }
+
+  String? _device() {
+    final device = _deviceAggr();
     if (device == null) return null;
     return device.serial != null && device.serial!.trim().isNotEmpty
         ? '${device.name} · ${device.serial}'
@@ -870,16 +1221,30 @@ class _FormFillScreenState extends State<FormFillScreen> {
                       ),
                       if (subtitle != null && subtitle.isNotEmpty) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: AppTypography.callout.copyWith(
-                            color: answered
-                                ? AppColors.text.resolveFrom(context)
-                                : secondary,
-                            fontWeight: answered
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                subtitle,
+                                style: AppTypography.callout.copyWith(
+                                  color: answered
+                                      ? AppColors.text.resolveFrom(context)
+                                      : secondary,
+                                  fontWeight: answered
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                            if (answered &&
+                                _currentForm.aiFilled.contains(item.id)) ...[
+                              const SizedBox(width: 6),
+                              ChecklistAiMark(
+                                key: ValueKey('form_fill_ai_${item.id}'),
+                              ),
+                            ],
+                          ],
                         ),
                       ],
                       for (final line in formNoteLines(
@@ -901,6 +1266,11 @@ class _FormFillScreenState extends State<FormFillScreen> {
                         const Padding(
                           padding: EdgeInsets.only(top: AppSpacing.sm),
                           child: CupertinoActivityIndicator(),
+                        ),
+                      if (_aiReading.containsKey(item.id))
+                        const Padding(
+                          padding: EdgeInsets.only(top: AppSpacing.sm),
+                          child: ChecklistAiReading(),
                         ),
                       if (photos.isNotEmpty) ...[
                         const SizedBox(height: AppSpacing.sm),
@@ -1135,4 +1505,22 @@ class _ChecklistPhotoGalleryState extends State<ChecklistPhotoGallery> {
       },
     );
   }
+}
+
+/// What "Desfazer" puts back after the AI filled a question, or (for a
+/// different answer read) the AI's answer to use.
+class _AiUndo {
+  const _AiUndo({
+    required this.itemId,
+    this.value,
+    this.answered = false,
+    this.note,
+    this.noted = false,
+  });
+
+  final String itemId;
+  final dynamic value;
+  final bool answered;
+  final FormItemNote? note;
+  final bool noted;
 }

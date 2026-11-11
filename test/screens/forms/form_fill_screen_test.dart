@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 
@@ -11,6 +12,8 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
+import 'package:praticos/services/ai_form_photo_service.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -64,6 +67,19 @@ class _FakeForms implements FormsService {
     return server;
   }
 
+  final aiMarks = <(String, bool)>[];
+
+  @override
+  Future<void> markAiFilled(
+    String companyId,
+    String orderId,
+    String formId,
+    String itemId, {
+    required bool filled,
+  }) async {
+    aiMarks.add((itemId, filled));
+  }
+
   @override
   Future<void> updateStatus(
     String companyId,
@@ -77,6 +93,41 @@ class _FakeForms implements FormsService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
+class _FakeAi implements AiFormPhotoClient {
+  _FakeAi({this.enabled = true, this.result, this.error});
+
+  final bool enabled;
+  AiFormPhotoResult? result;
+  Object? error;
+
+  /// Holds the reading until completed (to see "Lendo a foto…").
+  Completer<void>? gate;
+  final questions = <AiFormQuestion>[];
+  final lastReadings = <({int value, String? unit})?>[];
+
+  @override
+  Future<bool> isEnabled() async => enabled;
+
+  @override
+  Future<AiFormPhotoResult> read({
+    required AiPhoto photo,
+    required AiFormQuestion question,
+    String? deviceCategory,
+    String? deviceName,
+    String? segment,
+    String? locale,
+    ({int value, String? unit})? lastReading,
+  }) async {
+    questions.add(question);
+    lastReadings.add(lastReading);
+    if (gate != null) await gate!.future;
+    if (error != null) throw error!;
+    return result ?? const AiFormPhotoResult();
+  }
+}
+
+Future<Uint8List?> _bytes(File _) async => Uint8List.fromList([1, 2, 3]);
 
 class _FakePhotos implements PhotoService {
   final uploads = <String>[];
@@ -348,7 +399,9 @@ void main() {
     tester,
   ) async {
     final forms = _FakeForms(
-      server: [FormResponse(itemId: 'c', value: 'nota', photoUrls: ['web/c.jpg'])],
+      server: [
+        FormResponse(itemId: 'c', value: 'nota', photoUrls: ['web/c.jpg']),
+      ],
     );
     await _open(
       tester,
@@ -617,7 +670,9 @@ void main() {
 
   testWidgets('removing a photo takes its note along', (tester) async {
     final forms = _FakeForms(
-      server: [FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg'])],
+      server: [
+        FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg']),
+      ],
     );
     await _open(
       tester,
@@ -625,7 +680,9 @@ void main() {
         orderId: 'o1',
         companyId: 'c1',
         orderForm: _form(
-          responses: [FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg'])],
+          responses: [
+            FormResponse(itemId: 'c', photoUrls: ['https://x/1.jpg']),
+          ],
           notes: {
             'c': FormItemNote(
               photos: [FormPhotoNote(url: 'https://x/1.jpg', text: 'Risco')],
@@ -647,10 +704,7 @@ void main() {
 
     expect(forms.changes.single, isA<FormPhotoRemoved>());
     expect(forms.localNotes.single?.photos.single.text, 'Risco');
-    expect(
-      find.text('Foto 1: Risco', skipOffstage: false),
-      findsNothing,
-    );
+    expect(find.text('Foto 1: Risco', skipOffstage: false), findsNothing);
   });
 
   group('question linked to the device reading', () {
@@ -761,6 +815,288 @@ void main() {
       await tester.tap(find.text('Próxima'));
       await tester.pumpAndSettle();
       expect(forms.saved.single.value, '98000');
+    });
+  });
+
+  group('AI reads the photo', () {
+    // Tall enough for the answer, the photos and the note in one screen.
+    setUp(() {
+      final view =
+          TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.physicalSize = const Size(1170, 2532);
+      view.devicePixelRatio = 3;
+    });
+    tearDown(() {
+      final view =
+          TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.resetPhysicalSize();
+      view.resetDevicePixelRatio();
+    });
+
+    OrderForm fuelForm({
+      List<FormResponse> responses = const [],
+      Map<String, FormItemNote>? notes,
+    }) => OrderForm(
+      id: 'f1',
+      formDefinitionId: 'd1',
+      title: 'Entrada do veículo',
+      responses: responses,
+      notes: notes,
+      items: [
+        FormItemDefinition(
+          id: 'fuel',
+          label: 'Combustível',
+          type: FormItemType.select,
+          options: ['Reserva', '1/4', 'Cheio'],
+        ),
+        FormItemDefinition(
+          id: 'a',
+          label: 'Tem estepe?',
+          type: FormItemType.boolean,
+        ),
+      ],
+    );
+
+    FormFillScreen screen(
+      _FakeForms forms,
+      _FakeAi ai, {
+      OrderForm? form,
+      ChecklistReadingLink? link,
+    }) => FormFillScreen(
+      orderId: 'o1',
+      companyId: 'c1',
+      orderForm: form ?? fuelForm(),
+      readingLink: link,
+      formsService: forms,
+      photoService: _FakePhotos(),
+      aiClient: ai,
+      aiPhotoBytes: _bytes,
+    );
+
+    Future<void> takePhoto(WidgetTester tester) async {
+      await tester.tap(find.byKey(const ValueKey('question_photo')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tirar foto'));
+      await tester.pump();
+      await tester.pump();
+    }
+
+    /// Lets the notice's timer run out.
+    Future<void> finish(WidgetTester tester) async {
+      await tester.pump(const Duration(seconds: 9));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('fills the empty answer with ✦; "Desfazer" puts it back', (
+      tester,
+    ) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(
+          answer: '1/4',
+          note: 'Ponteiro em um quarto',
+          confident: true,
+        ),
+      )..gate = Completer<void>();
+      await _open(tester, screen(forms, ai));
+
+      await takePhoto(tester);
+      // In the question and in the list behind it.
+      expect(find.text('Lendo a foto…'), findsWidgets);
+      expect(ai.questions.single.label, 'Combustível');
+      expect(ai.questions.single.options, ['Reserva', '1/4', 'Cheio']);
+
+      ai.gate!.complete();
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Lendo a foto…'), findsNothing);
+      expect(forms.saved.last.value, '1/4');
+      expect(forms.aiMarks, [('fuel', true)]);
+      expect(forms.notes.single.$2!.text, 'Ponteiro em um quarto');
+      expect(forms.notes.single.$2!.ai, isTrue);
+      expect(find.byKey(const ValueKey('question_ai_filled')), findsOneWidget);
+      expect(find.byKey(const ValueKey('question_note_ai')), findsOneWidget);
+      expect(find.text('Preenchi: 1/4'), findsOneWidget);
+
+      await tester.tap(find.text('Desfazer'));
+      await tester.pump();
+      expect(forms.saved.last.value, isNull);
+      expect(forms.aiMarks.last, ('fuel', false));
+      expect(forms.notes.last.$2!.isEmpty, isTrue);
+      expect(find.byKey(const ValueKey('question_ai_filled')), findsNothing);
+      await finish(tester);
+    });
+
+    testWidgets('answering it yourself takes the ✦ away', (tester) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(answer: 'Reserva', confident: true),
+      );
+      await _open(tester, screen(forms, ai));
+      await takePhoto(tester);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('question_ai_filled')), findsOneWidget);
+
+      await tester.tap(find.text('Cheio'));
+      await tester.pump();
+      expect(forms.saved.last.value, 'Cheio');
+      expect(forms.aiMarks, [('fuel', true), ('fuel', false)]);
+      await finish(tester);
+    });
+
+    testWidgets("an answer already given is never replaced; the person's "
+        'note gets "A IA viu também"', (tester) async {
+      final forms = _FakeForms(
+        server: [FormResponse(itemId: 'fuel', value: 'Reserva')],
+      );
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(
+          answer: 'Reserva',
+          note: 'Luz da reserva acesa',
+          confident: true,
+        ),
+      );
+      await _open(
+        tester,
+        screen(
+          forms,
+          ai,
+          form: fuelForm(
+            responses: [FormResponse(itemId: 'fuel', value: 'Reserva')],
+            notes: {'fuel': FormItemNote(text: 'Cliente pediu para abastecer')},
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('form_fill_item_fuel')));
+      await tester.pumpAndSettle();
+      await takePhoto(tester);
+      await tester.pump();
+
+      expect(forms.aiMarks, isEmpty);
+      expect(forms.notes, isEmpty);
+      expect(
+        find.text('A IA viu também: Luz da reserva acesa'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Acrescentar'));
+      await tester.pump();
+      expect(
+        forms.notes.single.$2!.text,
+        'Cliente pediu para abastecer. Luz da reserva acesa',
+      );
+      expect(forms.notes.single.$2!.ai, isFalse);
+      await finish(tester);
+    });
+
+    testWidgets('a dark photo is a notice with "Tirar de novo", not an '
+        'alert', (tester) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(photoIssue: AiPhotoIssue.dark),
+      );
+      await _open(tester, screen(forms, ai));
+      await takePhoto(tester);
+      await tester.pump();
+
+      expect(find.text('Foto escura, não deu para ler'), findsOneWidget);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(forms.aiMarks, isEmpty);
+      expect(forms.saved.last.value, isNull);
+
+      await tester.tap(find.text('Tirar de novo'));
+      await tester.pump();
+      await tester.pump();
+      expect(ai.questions.length, 2);
+      await finish(tester);
+    });
+
+    testWidgets('offline or no quota: a discreet notice, the checklist goes '
+        'on', (tester) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(
+        error: const AiOrderAssistException(AiAssistError.unavailable),
+      );
+      await _open(tester, screen(forms, ai));
+      await takePhoto(tester);
+      await tester.pump();
+      expect(find.text('Não deu para ler a foto agora'), findsOneWidget);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      // The photo was saved all the same.
+      expect(forms.saved.last.photoUrls, ['https://x/1.jpg']);
+
+      ai.error = const AiOrderAssistException(AiAssistError.quotaExceeded);
+      await takePhoto(tester);
+      await tester.pump();
+      expect(find.text('Acabaram as leituras da IA deste mês'), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('AI off: nothing is read, nothing is said', (tester) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(enabled: false);
+      await _open(tester, screen(forms, ai));
+      await takePhoto(tester);
+      await tester.pump();
+      expect(ai.questions, isEmpty);
+      expect(find.text('Lendo a foto…'), findsNothing);
+      expect(find.byKey(const ValueKey('checklist_ai_notice')), findsNothing);
+      expect(find.text('+ Observação'), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('moved on meanwhile: the notice says which question and '
+        '"Ver" goes back', (tester) async {
+      final forms = _FakeForms();
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(answer: '1/4', confident: true),
+      )..gate = Completer<void>();
+      await _open(tester, screen(forms, ai));
+      await takePhoto(tester);
+      await tester.tap(find.byKey(const ValueKey('question_skip')));
+      await tester.pumpAndSettle();
+      expect(find.text('Tem estepe?'), findsWidgets);
+
+      ai.gate!.complete();
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Combustível: 1/4'), findsOneWidget);
+      await tester.tap(find.text('Ver'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('question_label')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const ValueKey('question_label'))).data,
+        'Combustível',
+      );
+      await finish(tester);
+    });
+
+    testWidgets('km read from the panel is also the order reading', (
+      tester,
+    ) async {
+      final forms = _FakeForms();
+      final recorded = <int>[];
+      final ai = _FakeAi(
+        result: const AiFormPhotoResult(answer: 98000, confident: true),
+      );
+      await _open(
+        tester,
+        screen(
+          forms,
+          ai,
+          form: _readingForm(),
+          link: _link(lastVisit: 90000, recorded: recorded),
+        ),
+      );
+      await takePhoto(tester);
+      await tester.pump();
+      await tester.pump();
+
+      expect(ai.lastReadings.single, (value: 90000, unit: 'km'));
+      expect(forms.saved.last.value, '98000');
+      expect(recorded, [98000]);
+      // The field shows the AI's number.
+      expect(find.text('98000'), findsWidgets);
+      await finish(tester);
     });
   });
 }

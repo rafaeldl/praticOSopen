@@ -7823,4 +7823,56 @@ class AppLocalizationsEs extends AppLocalizations {
   String checklistNoteLine(String label, String text) {
     return '$label: $text';
   }
+
+  @override
+  String get checklistAiReading => 'Leyendo la foto…';
+
+  @override
+  String checklistAiFilled(String summary) {
+    return 'Completé: $summary';
+  }
+
+  @override
+  String get checklistAiFilledMark => 'Completado por la IA';
+
+  @override
+  String checklistAiSeenAlso(String text) {
+    return 'La IA también vio: $text';
+  }
+
+  @override
+  String get checklistAiAppend => 'Agregar';
+
+  @override
+  String checklistAiDiffers(String answer) {
+    return 'La foto muestra: $answer';
+  }
+
+  @override
+  String get checklistAiUseAnswer => 'Cambiar';
+
+  @override
+  String get checklistAiDark => 'Foto oscura, no se pudo leer';
+
+  @override
+  String get checklistAiBlurry => 'Foto movida, no se pudo leer';
+
+  @override
+  String get checklistAiOffTarget =>
+      'La foto no muestra lo que pide la pregunta';
+
+  @override
+  String get checklistAiRetake => 'Tomar otra';
+
+  @override
+  String get checklistAiFailed => 'No se pudo leer la foto ahora';
+
+  @override
+  String get checklistAiQuota => 'Se acabaron las lecturas de IA de este mes';
+
+  @override
+  String get checklistAiNothing => 'La IA no encontró la respuesta en la foto';
+
+  @override
+  String get checklistAiView => 'Ver';
 }
