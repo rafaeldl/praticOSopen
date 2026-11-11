@@ -144,7 +144,7 @@ void main() {
       tester,
       action: NewOrderTabButton(label: 'Nova OS', onPressed: () => pressed++),
     );
-    final capsule = tester.getRect(find.byType(AppGlass));
+    final capsule = tester.getRect(find.byType(AppGlass).first);
     final plus = tester.getRect(find.byType(NewOrderTabButton));
     expect(plus.left, greaterThan(capsule.right));
     expect(plus.height, GlassTabBar.capsuleHeight);
@@ -153,17 +153,11 @@ void main() {
     expect(pressed, 1);
   });
 
-  testWidgets('"+" is yellow when primary and navy otherwise', (tester) async {
-    Color fill() {
-      final box = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(NewOrderTabButton),
-          matching: find.byType(Container),
-        ),
-      );
-      return Color((box.decoration! as BoxDecoration).color!.toARGB32());
-    }
-
+  testWidgets('"+" is yellow when primary and glass otherwise', (tester) async {
+    final plusGlass = find.descendant(
+      of: find.byType(NewOrderTabButton),
+      matching: find.byType(AppGlass),
+    );
     Color icon() => Color(
       tester.widget<Icon>(find.byIcon(CupertinoIcons.add)).color!.toARGB32(),
     );
@@ -176,15 +170,25 @@ void main() {
         primary: true,
       ),
     );
-    expect(fill(), Color(AppColors.action.color.toARGB32()));
+    final box = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(NewOrderTabButton),
+        matching: find.byType(Container),
+      ),
+    );
+    expect(
+      Color((box.decoration! as BoxDecoration).color!.toARGB32()),
+      Color(AppColors.action.color.toARGB32()),
+    );
     expect(icon(), Color(AppColors.onAction.color.toARGB32()));
+    expect(plusGlass, findsNothing);
 
     await _pump(
       tester,
       action: NewOrderTabButton(label: 'Nova OS', onPressed: () {}),
     );
-    expect(fill(), Color(AppColors.navyFill.color.toARGB32()));
-    expect(icon(), Color(AppColors.onNavyFill.color.toARGB32()));
+    expect(plusGlass, findsOneWidget);
+    expect(icon(), Color(AppColors.text.color.toARGB32()));
   });
 
   testWidgets('two tabs and no "+" (technician): centered capsule', (
