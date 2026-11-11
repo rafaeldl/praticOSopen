@@ -151,7 +151,7 @@ Saída (structured output, mesmo `LlmRouter` da OS):
 
 - A Function não grava nada. O app aplica e salva (mesmo modelo da OS).
 - Resposta fora das opções é descartada no servidor.
-- **Cota:** cada foto lida conta 1, como na OS. Ver a pergunta aberta na §10.
+- **Cota:** cada foto lida conta 1, como na OS (decidido pelo Rafael em 2026-11-10). Foto ruim (`photoIssue`) também conta, porque o modelo foi chamado.
 - **Privacidade:** não vai nome de cliente, telefone nem placa no pedido. O log só tem empresa, tipo da pergunta, código de erro e latência, nunca a imagem ou o texto (regra 11 do `AI_ORDER_ASSIST.md`).
 - **Modelo:** o padrão da IA (Gemini no Vertex). O Claude como alternativa pela chave `provider`. Ler número de painel e etiqueta é o ponto a testar primeiro (§9).
 
@@ -182,5 +182,4 @@ Documentação: atualizar `docs/formularios_dinamicos.md` e `docs/AI_ORDER_ASSIS
 
 ## 10. Perguntas abertas
 
-- **Cota:** contar 1 por foto, como na OS, ou 1 por checklist? Uma volta no carro pode ter 6 fotos.
 - **Analytics:** acrescentar `via: 'ai_photo'` ao `checklist_answered` e um evento `checklist_ai_undone`, para saber quanto a pessoa desfaz.
