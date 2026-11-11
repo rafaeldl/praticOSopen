@@ -12496,6 +12496,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'A–Z'**
   String get customersOrderName;
+
+  /// No description provided for @customerShowAllDevices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todos os {count} {devices}'**
+  String customerShowAllDevices(int count, String devices);
+
+  /// No description provided for @customerShowAllOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todas as {count} OS'**
+  String customerShowAllOrders(int count);
+
+  /// No description provided for @customerShowLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar menos'**
+  String get customerShowLess;
+
+  /// No description provided for @customerSearchDevices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar pelo nome ou placa'**
+  String get customerSearchDevices;
+
+  /// No description provided for @customerSearchOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar pelo número da OS'**
+  String get customerSearchOrders;
 }
 
 class _AppLocalizationsDelegate

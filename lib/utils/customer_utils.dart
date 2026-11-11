@@ -113,6 +113,65 @@ List<DeviceAggr> distinctVehicles(List<Order> orders) {
   return result;
 }
 
+/// The customer screen shows 5 vehicles and 5 orders; "Ver todos" opens the
+/// rest in place.
+const int kCustomerShortList = 5;
+
+/// The open list gets a search field only past 10 items, as the pickers.
+const int kCustomerListSearchFrom = 10;
+
+/// One list of the customer screen: what is shown, whether it has a
+/// "Ver todos" and whether it has a search field.
+class ShortList<T> {
+  const ShortList(
+    this.shown, {
+    required this.canOpen,
+    required this.searchable,
+  });
+
+  final List<T> shown;
+  final bool canOpen;
+  final bool searchable;
+}
+
+/// The first 5 of [items] while closed; everything (filtered by [query] past
+/// 10 items) once [open]. With 5 or fewer there is no "Ver todos".
+ShortList<T> shortList<T>(
+  List<T> items, {
+  required bool open,
+  String query = '',
+  required bool Function(T item, String query) matches,
+}) {
+  final canOpen = items.length > kCustomerShortList;
+  final searchable = open && items.length > kCustomerListSearchFrom;
+  final q = query.trim();
+  final List<T> shown;
+  if (canOpen && !open) {
+    shown = items.take(kCustomerShortList).toList();
+  } else if (searchable && q.isNotEmpty) {
+    shown = items.where((item) => matches(item, q)).toList();
+  } else {
+    shown = items;
+  }
+  return ShortList(shown, canOpen: canOpen, searchable: searchable);
+}
+
+/// A vehicle of the customer screen by name or plate ("abc-1d23").
+bool vehicleMatches(DeviceAggr vehicle, String query) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  if ((vehicle.name ?? '').toLowerCase().contains(q)) return true;
+  final plate = normalizePlate(q);
+  return plate.length >= kMinPlateQueryLength &&
+      normalizePlate(vehicle.serial).contains(plate);
+}
+
+/// An order of the customer screen by its number ("OS 123", "123").
+bool orderNumberMatches(Order order, String query) {
+  final digits = query.replaceAll(RegExp(r'\D'), '');
+  return digits.isNotEmpty && '${order.number ?? ''}'.contains(digits);
+}
+
 /// Sum of the total of the completed orders ("Total gasto").
 double totalSpent(List<Order> orders) => orders
     .where((o) => o.status == 'done')

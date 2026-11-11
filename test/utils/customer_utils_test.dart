@@ -91,6 +91,79 @@ void main() {
     expect(distinctVehicles(orders).map((d) => d.id), ['b', 'a']);
   });
 
+  group('shortList (customer screen lists)', () {
+    final items = List.generate(
+      12,
+      (i) =>
+          vehicle('d$i', 'Carro $i')
+            ..serial = 'ABC${i.toString().padLeft(4, '0')}',
+    );
+
+    test('5 or fewer: everything, no "Ver todos", no search', () {
+      final view = shortList(
+        items.take(5).toList(),
+        open: false,
+        matches: vehicleMatches,
+      );
+      expect(view.shown, hasLength(5));
+      expect(view.canOpen, isFalse);
+      expect(view.searchable, isFalse);
+    });
+
+    test('more than 5: the first 5, everything once open', () {
+      final closed = shortList(
+        items.take(8).toList(),
+        open: false,
+        matches: vehicleMatches,
+      );
+      expect(closed.shown.map((d) => d.id), ['d0', 'd1', 'd2', 'd3', 'd4']);
+      expect(closed.canOpen, isTrue);
+      final open = shortList(
+        items.take(8).toList(),
+        open: true,
+        matches: vehicleMatches,
+      );
+      expect(open.shown, hasLength(8));
+      expect(open.searchable, isFalse);
+    });
+
+    test('search only open and past 10, by plate or name', () {
+      expect(
+        shortList(
+          items,
+          open: false,
+          query: 'ABC0011',
+          matches: vehicleMatches,
+        ).searchable,
+        isFalse,
+      );
+      final byPlate = shortList(
+        items,
+        open: true,
+        query: 'abc-0011',
+        matches: vehicleMatches,
+      );
+      expect(byPlate.searchable, isTrue);
+      expect(byPlate.shown.map((d) => d.id), ['d11']);
+      expect(
+        shortList(
+          items,
+          open: true,
+          query: 'carro 3',
+          matches: vehicleMatches,
+        ).shown.map((d) => d.id),
+        ['d3'],
+      );
+    });
+
+    test('orders by number', () {
+      final o = order('1')..number = 1234;
+      expect(orderNumberMatches(o, 'OS 123'), isTrue);
+      expect(orderNumberMatches(o, '99'), isFalse);
+      expect(orderNumberMatches(o, 'abc'), isFalse);
+    });
+  });
+
   test('distinctVehicles falls back to the legacy single device', () {
     final o = order('1')..device = vehicle('z', 'Palio');
     expect(distinctVehicles([o]).single.id, 'z');
