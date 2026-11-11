@@ -4,13 +4,14 @@ import 'package:praticos/screens/menu_navigation/tab_routes.dart';
 void main() {
   test('maps tab indexes to analytics route names', () {
     expect(TabRoutes.nameForIndex(0), '/home');
-    expect(TabRoutes.nameForIndex(1), '/agenda');
-    expect(TabRoutes.nameForIndex(2), '/financial');
+    expect(TabRoutes.nameForIndex(1), '/customers');
+    expect(TabRoutes.nameForIndex(2), '/agenda');
+    expect(TabRoutes.nameForIndex(3), '/financial');
   });
 
   test('returns null for out-of-range indexes', () {
     expect(TabRoutes.nameForIndex(-1), isNull);
-    expect(TabRoutes.nameForIndex(3), isNull);
+    expect(TabRoutes.nameForIndex(4), isNull);
   });
 
   test('route names are unique', () {

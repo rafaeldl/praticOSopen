@@ -19,11 +19,14 @@ test('lista: total, grupos por inicial sem acento e "#" no fim (customer.list.vi
   await openCustomers(page, 'admin')
   await expect(page.getByTestId('customers-summary')).toHaveText(/\d+ clientes/)
   // "Recentes" is the default: one list, no letters and no date column (the order says it).
+  // The order is a menu held under its button ("Ordenar por"), ✓ on the current one.
   const order = page.getByTestId('customers-order')
-  await expect(order.getByRole('button', { name: 'Recentes' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(order).toHaveText('Mais recentes')
   await expect(list(page).getByRole('columnheader', { name: 'Última movimentação' })).toHaveCount(0)
   await expect(list(page).locator('.group-row')).toHaveCount(0)
-  await order.getByRole('button', { name: 'A–Z' }).click()
+  await order.click()
+  await page.getByRole('dialog', { name: 'Ordenar por' }).getByRole('button', { name: 'Nome (A–Z)' }).click()
+  await expect(order).toHaveText('Nome (A–Z)')
   const groups = list(page).locator('.group-row th')
   await expect(groups.first()).toHaveText('A')
   await expect(groups.last()).toHaveText('#')

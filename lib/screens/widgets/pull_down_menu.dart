@@ -7,7 +7,9 @@ import 'package:praticos/theme/app_typography.dart';
 
 /// One action of a [showPullDownMenu]: label on the left, icon on the right
 /// (like the iOS pull-down menus). [submenu] adds a "›" (it opens another
-/// choice); [destructive] draws it in red.
+/// choice); [destructive] draws it in red; [checked] marks the current
+/// choice with a ✓ on the left (a group with one keeps the space for it on
+/// every row, so the labels line up).
 class PullDownItem {
   const PullDownItem({
     required this.value,
@@ -15,6 +17,7 @@ class PullDownItem {
     required this.icon,
     this.destructive = false,
     this.submenu = false,
+    this.checked = false,
   });
 
   final String value;
@@ -22,6 +25,7 @@ class PullDownItem {
   final IconData icon;
   final bool destructive;
   final bool submenu;
+  final bool checked;
 }
 
 /// A group of [PullDownItem]s, with an optional small title above them.
@@ -110,11 +114,14 @@ class _PullDownPanel extends StatelessWidget {
           ),
         );
       }
+      final reserveCheck = group.items.any((item) => item.checked);
       for (var i = 0; i < group.items.length; i++) {
         if (i > 0 || group.title != null) {
           children.add(Container(height: 0.5, color: separator));
         }
-        children.add(_PullDownRow(item: group.items[i]));
+        children.add(
+          _PullDownRow(item: group.items[i], reserveCheck: reserveCheck),
+        );
       }
     }
 
@@ -151,9 +158,12 @@ class _PullDownPanel extends StatelessWidget {
 }
 
 class _PullDownRow extends StatelessWidget {
-  const _PullDownRow({required this.item});
+  const _PullDownRow({required this.item, this.reserveCheck = false});
 
   final PullDownItem item;
+
+  /// Keeps the ✓ space on the left (another row of the group is checked).
+  final bool reserveCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +172,7 @@ class _PullDownRow extends StatelessWidget {
         : AppColors.text.resolveFrom(context);
     return Semantics(
       button: true,
+      selected: item.checked ? true : null,
       child: GestureDetector(
         key: ValueKey('pull_down_${item.value}'),
         behavior: HitTestBehavior.opaque,
@@ -175,6 +186,20 @@ class _PullDownRow extends StatelessWidget {
             ),
             child: Row(
               children: [
+                if (reserveCheck)
+                  SizedBox(
+                    width: 22 + AppSpacing.sm,
+                    child: item.checked
+                        ? Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Icon(
+                              CupertinoIcons.checkmark_alt,
+                              size: 20,
+                              color: color,
+                            ),
+                          )
+                        : null,
+                  ),
                 Expanded(
                   child: Text(
                     item.label,

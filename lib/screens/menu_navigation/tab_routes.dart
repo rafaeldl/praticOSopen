@@ -7,11 +7,12 @@ class TabRoutes {
   TabRoutes._();
 
   static const home = '/home';
+  static const customers = '/customers';
   static const agenda = '/agenda';
   static const financial = '/financial';
 
   /// Every tab, in the fixed tab bar order.
-  static const List<String> all = [home, agenda, financial];
+  static const List<String> all = [home, customers, agenda, financial];
 
   /// Returns the route name for a tab [index], or null when out of range.
   ///

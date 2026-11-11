@@ -10,7 +10,6 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/contracts/contracts_off_screen.dart';
-import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/more/account_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/more_view.dart';
@@ -57,7 +56,6 @@ class _SettingsState extends State<Settings> {
       final canViewProducts =
           _authService.hasPermission(PermissionType.viewProducts);
       final visibility = MoreVisibility(
-        customers: _authService.hasPermission(PermissionType.viewCustomers),
         // With the switch off, who can turn it on still finds the row.
         contracts: config.useContracts ||
             _authService.hasPermission(PermissionType.manageCompany),
@@ -109,8 +107,6 @@ class _SettingsState extends State<Settings> {
     switch (destination) {
       case MoreDestination.account:
         _push(context, const AccountScreen());
-      case MoreDestination.customers:
-        _push(context, HomeCustomerList());
       case MoreDestination.contracts:
         if (config.useContracts) {
           Navigator.of(

@@ -20,6 +20,7 @@ import 'package:praticos/services/engagement_scheduler.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 
 import 'home.dart';
+import 'home_customer_list.dart';
 import 'app_tabs.dart';
 import 'tab_routes.dart';
 import 'widgets/glass_tab_bar.dart';
@@ -43,6 +44,7 @@ class _NavigationControllerState extends State<NavigationController>
   Widget _buildPage(AppTab tab) {
     return switch (tab) {
       AppTab.home => Home(),
+      AppTab.customers => const HomeCustomerList(),
       AppTab.agenda => const AgendaScreen(),
       AppTab.financial => ProtectedRoute(
         permission: PermissionType.viewFinancialReports,
@@ -221,6 +223,11 @@ BottomNavigationBarItem buildAppTabItem(BuildContext context, AppTab tab) {
   // is told apart by its capsule and accent color.
   final (id, icon, label) = switch (tab) {
     AppTab.home => ('tab_home', CupertinoIcons.house, context.l10n.home),
+    AppTab.customers => (
+      'tab_customers',
+      CupertinoIcons.person_2,
+      context.l10n.customers,
+    ),
     AppTab.agenda => (
       'tab_agenda',
       CupertinoIcons.calendar,

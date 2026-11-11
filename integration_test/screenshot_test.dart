@@ -103,30 +103,22 @@ void main() {
       print('⚠️ No order on Início: skipping 03 and 06');
     }
 
-    // 07 Customer: profile button → Clientes → the customer of the first
-    // order (the order header's name opens the customer picker instead).
-    final profile = _byId('home_profile_button');
-    if (profile.evaluate().isNotEmpty) {
-      await tester.tap(profile.first);
-      await _wait(tester, 2);
-      final customers = find.byKey(const ValueKey('more_row_customers'));
-      if (customers.evaluate().isNotEmpty) {
-        await tester.tap(customers.first);
-        await _wait(tester, 3);
-        final name = find.text(_heroCustomer[locale] ?? '');
-        if (name.evaluate().isNotEmpty) {
-          await tester.tap(name.first);
-          await _waitImages(tester);
-          await _shot(binding, tester, '07_customer');
-          await _pop(tester);
-        } else {
-          print('⚠️ Customer not in the list: skipping 07_customer');
-        }
+    // 07 Customer: Clientes tab → the customer of the first order (the
+    // order header's name opens the customer picker instead).
+    if (await _openTab(tester, 'tab_customers')) {
+      await _wait(tester, 3);
+      final name = find.text(_heroCustomer[locale] ?? '');
+      if (name.evaluate().isNotEmpty) {
+        await tester.tap(name.first);
+        await _waitImages(tester);
+        await _shot(binding, tester, '07_customer');
         await _pop(tester);
+      } else {
+        print('⚠️ Customer not in the list: skipping 07_customer');
       }
-      await _pop(tester);
+      await _openTab(tester, 'tab_home');
     } else {
-      print('⚠️ Profile button not found: skipping 07_customer');
+      print('⚠️ Clientes tab not found: skipping 07_customer');
     }
 
     // 01 Nova OS filled by the assistant: "Falar" hears a fixed sentence

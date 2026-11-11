@@ -115,7 +115,7 @@ class GlassTabBar extends CupertinoTabBar {
   }
 
   /// With [action], the capsule fills the room left of it. Without it, a
-  /// short tab list (technician: Início and Agenda) sits centered instead of
+  /// short tab list (fewer than 3 tabs) sits centered instead of
   /// stretching from edge to edge.
   Widget _layout(Widget capsule) {
     final action = this.action;

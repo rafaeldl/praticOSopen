@@ -3970,11 +3970,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String customerOwedTrailing(String value) {
-    return 'Debe $value';
-  }
-
-  @override
   String askOrderForCustomer(String name) {
     return '¿Abrir una OS para $name?';
   }
@@ -4450,7 +4445,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String profileButtonA11y(String company) {
-    return '$company: clientes, catálogo, equipo y ajustes';
+    return '$company: catálogo, equipo y ajustes';
   }
 
   @override
@@ -7748,10 +7743,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get customersOrderRecent => 'Recientes';
+  String get customersOrderRecent => 'Más recientes';
 
   @override
-  String get customersOrderName => 'A–Z';
+  String get customersOrderName => 'Nombre (A–Z)';
+
+  @override
+  String get customersSortBy => 'Ordenar por';
 
   @override
   String customerShowAllDevices(int count, String devices) {

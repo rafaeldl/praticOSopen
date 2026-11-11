@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "compiledAt": "2026-11-11T12:00:00.000Z",
+  "compiledAt": "2026-11-11T13:48:12.143842Z",
   "compiledBy": "claude",
   "sources": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "15f35aa04783ae7ad6bad37d319cd6b7355e961e2154adc5f9163072fd3ed0f8",
+      "sha": "ce6882c1d4d10106fb3c9aab36395d26a4c2e56798dbbcec541bb1f9be67599f",
       "scope": "**/*"
     },
     {
@@ -35,27 +35,23 @@
       "check": {
         "type": "model",
         "question": {
-          "type": "choice",
-          "instructions": "Look only at identifiers newly declared on added lines (class, enum, field, variable, constant, method, parameter names) and string values written as enum/status constants or Firestore keys. Which best describes them?",
+          "type": "boolean",
+          "instructions": "Among the added lines, is there at least one newly declared identifier (class, enum, field, variable, method, parameter) or stored constant/Firestore key written in Portuguese?",
           "criteria": {
-            "none": "no new identifiers or constant values are declared",
-            "english": "every new identifier and constant value is English, e.g. total, pending, customerName",
-            "portuguese": "at least one is Portuguese, e.g. valorTotal, StatusOS, pendente, 'concluido' as a stored value"
-          },
-          "violating": [
-            "portuguese"
-          ]
+            "true": "double valorTotal; class StatusOS; static const pendente = 'pendente';",
+            "false": "double total; static const pending = 'pending'; Text('Pendente')"
+          }
         }
       },
-      "status": "active",
+      "status": "weak",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 8,
-        "median": 0.41500000000000004,
-        "min": 0,
-        "max": 0.7,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.45,
+        "min": 0.12,
+        "max": 0.57,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "weak"
       }
     },
     {
@@ -83,11 +79,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.13,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.26,
         "min": 0.13,
-        "max": 0.13,
+        "max": 0.39,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -112,11 +108,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 1,
-        "median": 0.08,
-        "min": 0.08,
-        "max": 0.08,
+        "median": 0.1,
+        "min": 0.1,
+        "max": 0.1,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -145,11 +141,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.07,
         "min": 0.05,
-        "max": 0.1,
+        "max": 0.12,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -178,10 +174,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.13,
-        "min": 0.11,
+        "min": 0.09,
         "max": 0.15,
         "fired": 0,
         "verdict": "decisive"
@@ -207,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -252,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -285,11 +281,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.06,
-        "min": 0.06,
-        "max": 0.06,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.115,
+        "min": 0.07,
+        "max": 0.16,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -331,11 +327,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.08,
-        "min": 0.08,
-        "max": 0.08,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.105,
+        "min": 0.09,
+        "max": 0.12,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -381,10 +377,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.11,
-        "min": 0.11,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.10500000000000001,
+        "min": 0.1,
         "max": 0.11,
         "fired": 0,
         "verdict": "skipped"
@@ -427,8 +423,8 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
         "median": 0.04,
         "min": 0.04,
         "max": 0.04,
@@ -460,10 +456,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.09,
-        "min": 0.09,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.07,
+        "min": 0.05,
         "max": 0.09,
         "fired": 0,
         "verdict": "skipped"
@@ -489,7 +485,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -518,7 +514,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -547,7 +543,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -577,7 +573,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 20,
         "median": 0.02,
         "min": 0.02,
@@ -607,11 +603,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 1,
-        "median": 0.09,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 2,
+        "median": 0.095,
         "min": 0.09,
-        "max": 0.09,
+        "max": 0.1,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -649,9 +645,9 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.01,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.02,
         "min": 0.01,
         "max": 0.02,
         "fired": 0,
@@ -678,8 +674,8 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.01,
         "min": 0.01,
         "max": 0.02,
@@ -819,7 +815,7 @@
     },
     {
       "id": "app-tab-order",
-      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" marinho (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
+      "text": "Abas sempre na ordem Início, Clientes, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" marinho (Nova OS) ao lado. O que era \"Mais\" (catálogo, equipe, ajustes) abre pelo botão do perfil, no topo da Início",
       "source": {
         "path": "CLAUDE.md",
         "line": 235
@@ -832,23 +828,14 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Agenda, Financeiro in that order, for example adding a Clientes or Mais tab or putting Agenda before Início?",
+          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Clientes, Agenda, Financeiro in that order, for example adding a Mais or Catálogo tab or putting Agenda before Clientes?",
           "criteria": {
-            "true": "tabs: [home, customers, agenda, financial, more]",
-            "false": "tabs: [home, agenda, financial] with a separate + button"
+            "true": "tabs: [home, agenda, customers, financial, more]",
+            "false": "tabs: [home, customers, agenda, financial] with a separate + button"
           }
         }
       },
-      "status": "active",
-      "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.055,
-        "min": 0.05,
-        "max": 0.08,
-        "fired": 0,
-        "verdict": "decisive"
-      }
+      "status": "active"
     },
     {
       "id": "picker-not-action-sheet",
@@ -874,11 +861,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.02,
         "min": 0.02,
-        "max": 0.03,
+        "max": 0.15,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -916,11 +903,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.07500000000000001,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.07,
         "min": 0.05,
-        "max": 0.11,
+        "max": 0.12,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -945,8 +932,8 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.03,
         "min": 0.02,
         "max": 0.03,
@@ -974,9 +961,9 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.02,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.03,
         "min": 0.02,
         "max": 0.03,
         "fired": 0,
@@ -1003,8 +990,8 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
         "median": 0.02,
         "min": 0.02,
         "max": 0.03,
@@ -1049,10 +1036,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.075,
-        "min": 0.06,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.08,
+        "min": 0.05,
         "max": 0.17,
         "fired": 0,
         "verdict": "decisive"
@@ -1082,11 +1069,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 1,
-        "median": 0.13,
-        "min": 0.13,
-        "max": 0.13,
+        "median": 0.14,
+        "min": 0.14,
+        "max": 0.14,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -1111,11 +1098,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
-        "hunks": 6,
-        "median": 0.060000000000000005,
+        "at": "2026-11-11T13:48:44.417Z",
+        "hunks": 7,
+        "median": 0.07,
         "min": 0.05,
-        "max": 0.19,
+        "max": 0.18,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -1284,27 +1271,14 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-11-11T13:14:48.218Z",
+        "at": "2026-11-11T13:48:44.417Z",
         "hunks": 8,
-        "median": 0.055,
+        "median": 0.07,
         "min": 0.04,
-        "max": 0.52,
+        "max": 0.51,
         "fired": 0,
         "verdict": "decisive"
       }
-    },
-    {
-      "id": "e2e-no-port-offset",
-      "text": "O `e2e/run.mjs` já limita a 2 execuções na máquina e escolhe as portas sozinho (não passar `E2E_PORT_OFFSET`).",
-      "source": {
-        "path": "CLAUDE.md",
-        "line": 587
-      },
-      "check": {
-        "type": "unenforceable",
-        "reason": "about how agents run E2E tests, not the code"
-      },
-      "status": "active"
     },
     {
       "id": "e2e-only-changed-specs",
@@ -1315,12 +1289,25 @@
       },
       "check": {
         "type": "unenforceable",
-        "reason": "about how agents run E2E tests, not the code"
+        "reason": "about how the agent runs tests, not the code"
       },
       "status": "active"
     },
     {
-      "id": "e2e-skip-build",
+      "id": "e2e-no-port-offset",
+      "text": "O `e2e/run.mjs` já limita a 2 execuções na máquina e escolhe as portas sozinho (não passar `E2E_PORT_OFFSET`).",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 587
+      },
+      "check": {
+        "type": "unenforceable",
+        "reason": "about how the agent runs tests, not the code"
+      },
+      "status": "active"
+    },
+    {
+      "id": "e2e-skip-build-when-current",
       "text": "`E2E_SKIP_BUILD=1` quando o `dist-e2e` já tem o código atual.",
       "source": {
         "path": "CLAUDE.md",
@@ -1328,7 +1315,7 @@
       },
       "check": {
         "type": "unenforceable",
-        "reason": "about how agents run E2E tests, not the code"
+        "reason": "about the process, not the code"
       },
       "status": "active"
     },
@@ -1341,7 +1328,7 @@
       },
       "check": {
         "type": "unenforceable",
-        "reason": "about how agents run E2E tests, not the code"
+        "reason": "about cleaning up processes, not the code"
       },
       "status": "active"
     }
