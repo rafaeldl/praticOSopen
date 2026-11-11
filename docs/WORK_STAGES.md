@@ -86,7 +86,7 @@ Situação mudada pelo app, bot ou MCP
 6. Folha impressa: data, nome da etapa e, na ordem da coluna, número, cliente, veículo, os serviços da etapa (pelas palavras; todos, se nenhum bater) e um quadrado para marcar. Nunca valores. Abre pelo "…" do cabeçalho da coluna e sai por um quadro escondido só com a folha (`src/lib/print-frame.ts`): imprimir a página inteira saía em branco no Safari.
 7. Modo TV: "Em andamento" vira uma coluna por etapa, na ordem do quadro.
 8. A OS parada continua com a marca na etapa; atrasada e parada aparecem no cartão como sempre.
-9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". "Mudar etapa" no "…" aparece com duas etapas ou mais. Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
+9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". Com duas etapas ou mais, tocar na linha da situação abre "Qual a situação?" com uma linha por etapa no lugar de "Em Andamento" ("Em Andamento · Pintura", "Em Andamento · Polimento"), e "Mudar etapa" também fica no "…". Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
 
 ## Etapas do serviço (web)
 
@@ -126,7 +126,7 @@ Desligar: apagar `workStages` (as OS mantêm `stage` até sair de em andamento, 
 | `test/models/work_stage_test.dart` | Leitura de `workStages`, etapa atual e próxima, save sem `stage` |
 | `test/mobx/order_store_stage_test.dart` | Mudança na hora, volta quando o servidor recusa, limpeza ao sair de em andamento |
 | `test/services/order_stage_api_service_test.dart` | `PUT` com etapa, token e empresa; recusa |
-| `test/screens/order/order_screen_v2_extras_test.dart` | Grupo "work stages": linha da situação, botão azul, "Mudar etapa", sem etapas igual |
+| `test/screens/order/order_screen_v2_extras_test.dart` | Grupo "work stages": linha da situação, botão azul, "Mudar etapa", etapas na lista de situações, sem etapas igual |
 | `firebase/webapp/e2e/work-stages.spec.ts` | Quadro com etapas: começar, Alt + seta, imprimir, Shift + seta, consultor |
 
 ## Limites conhecidos

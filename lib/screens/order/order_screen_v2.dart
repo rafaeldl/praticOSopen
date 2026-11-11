@@ -832,10 +832,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       await _alert(l10n.permissionDenied);
       return;
     }
+    // In progress with stages, "Em Andamento" opens into one row per stage
+    // ("Em Andamento · Pintura"), so the stage changes where the status does.
+    final stageRows = _canChangeStage(order, config);
+    final currentStage = WorkStage.of(order, config.workStages);
     final picked = await pickOne<String>(
       context,
       title: l10n.pickerStatusTitle,
-      selected: order.status,
+      selected: stageRows && currentStage != null
+          ? '$_stagePrefix${currentStage.id}'
+          : order.status,
       options: [
         // The current one stays in the list, with the ✓, so the person sees
         // where the OS is now.
@@ -846,7 +852,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           'done',
           'canceled',
         ])
-          if (key == order.status || statuses.contains(key))
+          if (key == 'progress' && stageRows)
+            for (final stage in config.workStages)
+              PickerItem<String>(
+                value: '$_stagePrefix${stage.id}',
+                title: '${config.getStatus(key)} · ${stage.name}',
+                leading: StatusDot(color: OrderStatusStyle.dotColor(key)),
+              )
+          else if (key == order.status || statuses.contains(key))
             PickerItem<String>(
               value: key,
               title: config.getStatus(key),
@@ -854,10 +867,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
       ],
     );
-    if (picked != null && picked != order.status && mounted) {
-      await _trySetStatus(picked);
+    if (picked == null || !mounted) return;
+    if (picked.startsWith(_stagePrefix)) {
+      final stageId = picked.substring(_stagePrefix.length);
+      if (stageId != currentStage?.id) await _moveToStage(stageId);
+      return;
     }
+    if (picked != order.status) await _trySetStatus(picked);
   }
+
+  /// Value of a stage row in the status picker (statuses never start so).
+  static const _stagePrefix = 'stage:';
 
   Future<void> _trySetStatus(String status) async {
     final order = _store.order;

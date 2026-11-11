@@ -26,6 +26,7 @@ import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/order_saved_elsewhere.dart';
@@ -1421,6 +1422,42 @@ void main() {
         find.descendant(of: blue(), matching: find.text('Marcar como pronta')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('tapping the status line lists the stages and moves to one', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final moved = <String>[];
+      store.writeStage = (_, _, stageId) async => moved.add(stageId);
+      final config = await _pump(
+        tester,
+        screen(store),
+        args: {'order': inStage('paint')},
+      );
+      config.setWorkStages(stages);
+      // The move goes to the server with the company id.
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.textContaining('Em Andamento · Pintura'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Qual a situação?'), findsWidgets);
+      final current = find.ancestor(
+        of: find.text('Em Andamento · Pintura'),
+        matching: find.byType(AppListRow),
+      );
+      expect(tester.widget<AppListRow>(current).selected, isTrue);
+      expect(find.text('Em Andamento · Polimento'), findsOneWidget);
+      expect(find.text('Em Andamento'), findsNothing);
+
+      await tester.tap(find.text('Em Andamento · Polimento'));
+      await tester.pumpAndSettle();
+
+      expect(moved, ['polish']);
+      expect(store.status, 'progress');
+      expect(find.textContaining('Em Andamento · Polimento'), findsOneWidget);
     });
 
     testWidgets('without stages nothing changes', (tester) async {
