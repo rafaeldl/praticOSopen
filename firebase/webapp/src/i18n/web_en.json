@@ -514,6 +514,7 @@
   "web.agenda.viewAs": "View by",
   "web.agenda.day": "Day",
   "web.agenda.week": "Week",
+  "web.agenda.list": "List",
   "web.agenda.previousDay": "Previous day",
   "web.agenda.nextDay": "Next day",
   "web.agenda.weekRange": "{from} to {to}",

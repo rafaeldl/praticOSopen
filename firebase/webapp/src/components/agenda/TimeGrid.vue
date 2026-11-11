@@ -274,8 +274,9 @@ function dropAllDay(day: string, event: DragEvent) {
         @dragend="end"
       >
         <strong><span class="num">{{ timeOf(visit.at) }}</span> <span class="who">{{ visit.item.order.customer?.name || t('web.orders.noCustomer') }}</span></strong>
-        <span class="tg-line"><span class="sr">{{ orderShort() }} </span><span class="num">{{ visit.item.order.number }}</span> · {{ lateText(visit.item.order, now) ?? statusText(visit.item.order.status) }}</span>
-        <span v-if="extraOf(visit.item)" :class="single ? 'tg-line sub' : 'sr'">{{ single ? '' : ', ' }}{{ extraOf(visit.item) }}</span>
+        <!-- One line under the name: a one-hour block holds two lines at any text size. -->
+        <span class="tg-line"><span class="sr">{{ orderShort() }} </span><span class="num">{{ visit.item.order.number }}</span> · {{ lateText(visit.item.order, now) ?? statusText(visit.item.order.status) }}<span v-if="single && extraOf(visit.item)" class="tg-extra"> · {{ extraOf(visit.item) }}</span></span>
+        <span v-if="!single && extraOf(visit.item)" class="sr">, {{ extraOf(visit.item) }}</span>
       </button>
     </div>
   </div>
