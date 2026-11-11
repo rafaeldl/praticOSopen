@@ -77,3 +77,23 @@ List<String> mostUsedItemKeys(List<Order> orders, {int limit = 5}) {
     });
   return keys.take(limit).toList();
 }
+
+/// Service names for one line of a list ("5× pintura, polimento"): the same
+/// service (case and spaces ignored) shows once, with how many times it is in
+/// the order, in the order it first appears. Same rule as the web app
+/// (`servicesSummary` in firebase/webapp/src/lib/orders/model.ts).
+String servicesSummary(Iterable<OrderService> services) {
+  final counts = <String, int>{};
+  final names = <String, String>{};
+  for (final s in services) {
+    final name = (s.service?.name ?? s.description ?? '').trim();
+    if (name.isEmpty) continue;
+    final key = name.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    names.putIfAbsent(key, () => name);
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return [
+    for (final key in names.keys)
+      counts[key]! > 1 ? '${counts[key]}× ${names[key]}' : names[key]!,
+  ].join(', ');
+}

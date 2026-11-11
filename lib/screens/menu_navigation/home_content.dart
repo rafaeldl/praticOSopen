@@ -3,6 +3,7 @@ import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/next_step_block.dart';
@@ -845,12 +846,8 @@ class _HomeContentState extends State<HomeContent> {
         parts.add(devices.length > 1 ? '$name +${devices.length - 1}' : name!);
       }
     }
-    final services = [
-      for (final s in order.services ?? const <OrderService>[])
-        if ((s.service?.name ?? s.description ?? '').trim().isNotEmpty)
-          (s.service?.name ?? s.description)!.trim(),
-    ];
-    if (services.isNotEmpty) parts.add(services.join(', '));
+    final services = servicesSummary(order.services ?? const []);
+    if (services.isNotEmpty) parts.add(services);
     return parts.isEmpty ? null : parts.join(' · ');
   }
 }

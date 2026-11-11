@@ -60,4 +60,35 @@ void main() {
       expect(mostUsedItemKeys(orders, limit: 1), ['service:oil']);
     });
   });
+
+  group('servicesSummary', () {
+    OrderService named(String? name, {String? description}) => OrderService()
+      ..service = (ServiceAggr()..name = name)
+      ..description = description;
+
+    test('the same service shows once, with how many times', () {
+      expect(
+        servicesSummary([
+          named('pintura'),
+          named('pintura'),
+          named('Pintura '),
+          named('polimento +higienização'),
+          named('pintura'),
+        ]),
+        '4× pintura, polimento +higienização',
+      );
+    });
+
+    test('different services keep their order; empty names are skipped', () {
+      expect(
+        servicesSummary([
+          named('Troca de óleo'),
+          named(null, description: 'Alinhamento'),
+          named('  '),
+        ]),
+        'Troca de óleo, Alinhamento',
+      );
+      expect(servicesSummary(const []), '');
+    });
+  });
 }

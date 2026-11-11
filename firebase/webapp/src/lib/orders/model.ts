@@ -644,12 +644,21 @@ export function deviceSummary(order: Order): string {
   return more.length ? `${name} +${more.length}` : name
 }
 
+/** Service names for one list line ("5× pintura, polimento"): the same service (case and
+ * spaces ignored) shows once, with how many times, in the order it first appears. Same rule
+ * as the app (servicesSummary in lib/utils/order_items.dart). */
 export function servicesSummary(order: Order): string {
-  return order.lines
-    .filter((line) => line.kind === 'service')
-    .map((line) => line.name)
-    .filter(Boolean)
-    .join(', ')
+  const seen = new Map<string, { name: string; count: number }>()
+  for (const line of order.lines) {
+    if (line.kind !== 'service') continue
+    const name = (line.name ?? '').trim()
+    if (!name) continue
+    const key = name.toLowerCase().replace(/\s+/g, ' ')
+    const entry = seen.get(key)
+    if (entry) entry.count += 1
+    else seen.set(key, { name, count: 1 })
+  }
+  return [...seen.values()].map(({ name, count }) => (count > 1 ? `${count}× ${name}` : name)).join(', ')
 }
 
 /** Lines grouped by device when the order has two or more (order.item.by-device). */
