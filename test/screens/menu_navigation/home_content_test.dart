@@ -7,6 +7,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
@@ -1125,5 +1126,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Bia'), findsOneWidget);
     });
+  });
+
+  testWidgets('the same service shows once, with how many times', (
+    tester,
+  ) async {
+    OrderService named(String name) =>
+        OrderService()..service = (ServiceAggr()..name = name);
+    final order = _order('Ana', 'progress')
+      ..services = [
+        named('pintura'),
+        named('pintura'),
+        named('polimento'),
+        named('Pintura'),
+      ];
+    await tester.pumpWidget(_app(_Host(orders: [order])));
+
+    expect(find.textContaining('3× pintura, polimento'), findsOneWidget);
   });
 }
