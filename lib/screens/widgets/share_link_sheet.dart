@@ -4,20 +4,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/share_token.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/pdf/order_pdf_file.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/services/share_link_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// "Mandar para o cliente": the order link, with one blue button to send it
-/// (WhatsApp when the customer has a phone). Validity, what the customer can
-/// do, a new link and turning it off live in the "…" menu.
+/// "Mandar para o cliente": the order PDF is the main way (the system share
+/// sheet with the PDF and a message carrying the link, so the customer can
+/// still approve). The link alone is the second way (WhatsApp when the
+/// customer has a phone). Who cannot see prices, in a company that charges,
+/// gets only the link. Validity, what the customer can do, a new link and
+/// turning it off live in the "…" menu.
 class ShareLinkSheet extends StatefulWidget {
   final Order order;
   final String? companyName;
@@ -26,12 +33,21 @@ class ShareLinkSheet extends StatefulWidget {
   /// Network and share calls; tests pass a fake.
   final ShareLinkService? service;
 
+  /// Whether the PDF is offered. Null checks the current user
+  /// ([canShareOrderPdf]); tests pass a value.
+  final bool? withPdf;
+
+  /// Draws the PDF. Defaults to [buildOrderPdf]; tests pass a fake.
+  final Future<OrderPdfFile> Function(BuildContext context)? buildPdf;
+
   const ShareLinkSheet({
     super.key,
     required this.order,
     this.companyName,
     this.statusContext,
     this.service,
+    this.withPdf,
+    this.buildPdf,
   });
 
   @override
@@ -72,6 +88,14 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
   Timer? _copiedTimer;
 
   static const _validityOptions = [7, 14, 30];
+
+  late final bool _withPdf =
+      widget.withPdf ??
+      canShareOrderPdf(
+        canViewPrices: AuthorizationService.instance.canViewPrices,
+        useFinancial: SegmentConfigProvider.instance.useFinancial,
+      );
+  bool _preparingPdf = false;
 
   @override
   void initState() {
@@ -170,12 +194,13 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     }
   }
 
-  String _message() => _service.buildShareMessage(
+  String _message({bool withPdf = false}) => _service.buildShareMessage(
     customerName: widget.order.customer?.name ?? '',
     orderNumber: widget.order.number ?? 0,
     companyName: widget.companyName,
     locale: context.l10n.localeName,
     statusContext: widget.statusContext,
+    withPdf: withPdf,
   );
 
   String? get _phone {
@@ -211,6 +236,48 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
           ? null
           : box.localToGlobal(Offset.zero) & box.size,
     );
+  }
+
+  /// "Mandar o PDF": draws the PDF, then the system share sheet with the
+  /// PDF and the message with the link.
+  Future<void> _sendPdf() async {
+    final url = _result?.url;
+    if (url == null || _preparingPdf) return;
+    final l10n = context.l10n;
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box == null || !box.hasSize
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    setState(() => _preparingPdf = true);
+    try {
+      final pdf = await (widget.buildPdf?.call(context) ??
+          buildOrderPdf(context, widget.order, SegmentConfigProvider.instance));
+      if (!mounted) return;
+      await _service.shareViaSheetWithPdf(
+        url: url,
+        bytes: pdf.bytes,
+        filename: pdf.filename,
+        message: _message(withPdf: true),
+        subject: '${l10n.orderShort} ${widget.order.number ?? ''}',
+        sharePositionOrigin: origin,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(l10n.errorOccurred),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.ok),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _preparingPdf = false);
+    }
   }
 
   Future<void> _copyLink() async {
@@ -509,6 +576,22 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
           style: AppTypography.callout.copyWith(color: secondary),
         ),
         const SizedBox(height: AppSpacing.lg),
+        if (_withPdf) ...[
+          PrimaryButton(
+            key: const Key('shareLinkPdf'),
+            label: _preparingPdf ? l10n.sharePreparingPdf : l10n.shareSendPdf,
+            icon: CupertinoIcons.doc_text_fill,
+            onPressed: _preparingPdf ? null : _sendPdf,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _SecondaryButton(
+            key: const Key('shareLinkOnly'),
+            label: hasPhone
+                ? l10n.shareSendLinkWhatsApp
+                : l10n.shareSendLinkOnly,
+            onPressed: hasPhone ? _sendViaWhatsApp : _shareLink,
+          ),
+        ] else ...[
         PrimaryButton(
           key: const Key('shareLinkPrimary'),
           label: hasPhone ? l10n.shareSendWhatsApp : l10n.shareSendLink,
@@ -524,6 +607,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
             label: l10n.shareSendOtherWay,
             onPressed: _shareLink,
           ),
+        ],
         ],
         const SizedBox(height: AppSpacing.xs),
         Center(

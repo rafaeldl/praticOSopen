@@ -33,6 +33,7 @@ import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/customer_statement_pdf.dart';
 import 'package:praticos/services/pdf/receipt_pdf.dart';
 import 'package:praticos/widgets/permission_widgets.dart'
     show AccessDeniedScreen;
@@ -75,6 +76,7 @@ void main() {
     double total = 1000,
     double paid = 0,
     List<PaymentTransaction> transactions = const [],
+    String? customerName = 'Ana Ribeiro',
   }) {
     final order = Order()
       ..id = 'o1'
@@ -82,9 +84,11 @@ void main() {
       ..status = status
       ..total = total
       ..paidAmount = paid
-      ..customer = (CustomerAggr()
-        ..id = 'c1'
-        ..name = 'Ana Ribeiro');
+      ..customer = customerName == null
+          ? null
+          : (CustomerAggr()
+              ..id = 'c1'
+              ..name = customerName);
     final store = OrderStore()
       ..order = order
       ..customer = order.customer
@@ -114,6 +118,7 @@ void main() {
     bool receiptUndone = false,
     bool Function(PaymentTransaction tx)? canOpenReceiptGroup,
     bool canDiscount = true,
+    List<CustomerStatementData>? sentStatements,
   }) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -145,6 +150,7 @@ void main() {
             openedReceipts?.add(id);
             return receiptUndone;
           },
+          sendStatement: (_, data) async => sentStatements?.add(data),
         ),
         routes: {
           '/order': (context) => CupertinoPageScaffold(
@@ -433,10 +439,60 @@ void main() {
     expect(find.text('Desfazer pagamentos'), findsOneWidget);
   });
 
+  testWidgets('"Mandar extrato" of this order while something is missing', (
+    tester,
+  ) async {
+    final sent = <CustomerStatementData>[];
+    await pumpScreen(
+      tester,
+      storeWith(total: 1000, paid: 400),
+      canDiscount: false,
+      sentStatements: sent,
+    );
+
+    await tester.tap(find.byKey(const Key('receiveMoreButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mandar extrato'));
+    await tester.pumpAndSettle();
+
+    expect(sent, hasLength(1));
+    expect(sent.single.customerName, 'Ana Ribeiro');
+    expect(sent.single.orders.single.number, 42);
+    expect(sent.single.orders.single.open, 600);
+  });
+
+  testWidgets('no "Mandar extrato" when everything was received', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      storeWith(
+        total: 1000,
+        paid: 1000,
+        transactions: [
+          PaymentTransaction(
+            id: '1728000000000',
+            type: PaymentTransactionType.payment,
+            amount: 1000,
+          ),
+        ],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('receiveMoreButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Desfazer pagamentos'), findsOneWidget);
+    expect(find.text('Mandar extrato'), findsNothing);
+  });
+
   testWidgets('no "…" when there is no discount nor payment to undo', (
     tester,
   ) async {
-    await pumpScreen(tester, storeWith(total: 1000), canDiscount: false);
+    await pumpScreen(
+      tester,
+      storeWith(total: 1000, customerName: null),
+      canDiscount: false,
+    );
     expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
     expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
   });

@@ -8810,6 +8810,30 @@ abstract class AppLocalizations {
   /// **'Copiar o link'**
   String get shareCopyLink;
 
+  /// No description provided for @shareSendPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar o PDF'**
+  String get shareSendPdf;
+
+  /// No description provided for @sharePreparingPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando o PDF…'**
+  String get sharePreparingPdf;
+
+  /// No description provided for @shareSendLinkWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar só o link no WhatsApp'**
+  String get shareSendLinkWhatsApp;
+
+  /// No description provided for @shareSendLinkOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar só o link'**
+  String get shareSendLinkOnly;
+
   /// No description provided for @shareLinkCopied.
   ///
   /// In pt, this message translates to:

@@ -5393,6 +5393,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get shareCopyLink => 'Copiar o link';
 
   @override
+  String get shareSendPdf => 'Mandar o PDF';
+
+  @override
+  String get sharePreparingPdf => 'Preparando o PDF…';
+
+  @override
+  String get shareSendLinkWhatsApp => 'Mandar só o link no WhatsApp';
+
+  @override
+  String get shareSendLinkOnly => 'Mandar só o link';
+
+  @override
   String get shareLinkCopied => 'Link copiado';
 
   @override

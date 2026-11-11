@@ -142,6 +142,8 @@ Com a conta Asaas conectada (piloto) e permissão `chargeOrder`, "Mandar cobran�
 
 No "…" de "Receber de {cliente}" (app e web), **Mandar extrato** manda ao cliente o que ele ainda deve, para conferir. Funciona sem Asaas e não cobra nada.
 
+No app ele também está no "…" do **Receber de uma OS** (`payment_management_screen.dart`), enquanto falta receber e a OS tem cliente, com só aquela OS. É o caminho de quem deve uma OS só: a ficha do cliente e o Financeiro levam direto para o Receber da OS, sem passar por "Receber de {cliente}". Depois de tudo recebido o item some e o que vale é o recibo ("Mandar recibo", no pagamento).
+
 - **Quais OS:** as marcadas na tela. A tela lista todas as OS não pagas do cliente, de qualquer mês, inclusive as em andamento; vindo de A receber, as concluídas começam marcadas e as em andamento podem ser marcadas. "Outras OS" do consultor vão só com número e quanto falta.
 - **Pergunta:** "Mandar com PDF" ou "Só o texto".
 - **Texto** (`buildStatementText`, `lib/services/pdf/customer_statement_pdf.dart`): "Olá, João! Estas são as OS em aberto com {empresa}:", uma linha por OS (número, dia, aparelho com placa/série ou 1º serviço, "em andamento" quando não concluída), "Falta R$ …" e o total em aberto.
