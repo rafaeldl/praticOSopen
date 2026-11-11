@@ -4,7 +4,7 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest, Order, Company, OrderForm, DeviceAggr } from '../../models/types';
+import { AuthenticatedRequest, Order, Company, OrderForm, FormItemNote, DeviceAggr } from '../../models/types';
 import { shareTokenAuth, requireSharePermission } from '../../middleware/share-token.middleware';
 import { getTenantCollection, db } from '../../services/firestore.service';
 import * as shareTokenService from '../../services/share-token.service';
@@ -145,6 +145,12 @@ export interface PublicFormItem {
   label: string;
   value: string | number | boolean | string[] | null;
   photos: string[];
+  /** Note of the question, written for the customer to read. */
+  note: string | null;
+  /** Notes of the marked options (multiple choice). */
+  optionNotes: Array<{ option: string; text: string }>;
+  /** Notes of the photos sent in `photos`. */
+  photoNotes: Array<{ url: string; text: string }>;
 }
 
 export interface PublicForm {
@@ -159,10 +165,35 @@ function publicAnswer(value: unknown): PublicFormItem['value'] {
   return null;
 }
 
+const noteText = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim() ? value.trim() : null;
+
 /**
- * Completed checklists, reduced to question, answer and photos.
+ * The notes of one question as the customer sees them: the question's text,
+ * the notes of the options marked in `value` and of the photos sent. Notes of
+ * unmarked options or removed photos, and the `ai` mark, never leave.
+ */
+function publicNotes(
+  note: FormItemNote | undefined,
+  value: PublicFormItem['value'],
+  photos: string[],
+): Pick<PublicFormItem, 'note' | 'optionNotes' | 'photoNotes'> {
+  const marked = Array.isArray(value) ? value : [];
+  const optionNotes = (Array.isArray(note?.options) ? note!.options : []).flatMap((o) => {
+    const text = noteText(o?.text);
+    return text && typeof o.option === 'string' && marked.includes(o.option) ? [{ option: o.option, text }] : [];
+  });
+  const photoNotes = (Array.isArray(note?.photos) ? note!.photos : []).flatMap((p) => {
+    const text = noteText(p?.text);
+    return text && typeof p.url === 'string' && photos.includes(p.url) ? [{ url: p.url, text }] : [];
+  });
+  return { note: noteText(note?.text), optionNotes, photoNotes };
+}
+
+/**
+ * Completed checklists, reduced to question, answer, photos and notes.
  * Template ids, item ids, status, dates and who filled them never leave.
- * Unanswered questions without photos are left out.
+ * Unanswered questions without photos or notes are left out.
  */
 export function toPublicForms(
   forms: OrderForm[],
@@ -177,8 +208,9 @@ export function toPublicForms(
         const value = publicAnswer(response?.value);
         const photos = (response?.photoUrls ?? []).filter((u) => typeof u === 'string' && u.length > 0);
         const answered = value !== null && value !== '' && !(Array.isArray(value) && value.length === 0);
-        if (!answered && photos.length === 0) return [];
-        return [{ label: item.label, value: answered ? value : null, photos }];
+        const notes = publicNotes(f.notes?.[item.id], value, photos);
+        if (!answered && photos.length === 0 && !notes.note) return [];
+        return [{ label: item.label, value: answered ? value : null, photos, ...notes }];
       });
       return { title: f.title, deviceId: keyOf(f.deviceId), items };
     })

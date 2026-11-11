@@ -19,7 +19,7 @@
 #   permission: PermissionType principal (quando há). note: condição que o papel não expressa.
 #   kind: action | screen | sheet | picker | flow | logic | component. logic e component não contam como capacidade de usuário.
 #   "Não copiar:" no fim de note marca defeito do app que a web não deve repetir.
-# Contagem: 691 linhas, 579 capacidades de usuário e 112 de lógica ou componente; 57 exceções propostas, nenhuma aprovada.
+# Contagem: 692 linhas, 579 capacidades de usuário e 113 de lógica ou componente; 58 exceções propostas, nenhuma aprovada.
 # Revisão de 2026-11-03: achados da arqueologia por fatia conferidos no código (arquivo:linha) antes de entrar.
 version: 1
 source_commit: e6644792
@@ -972,6 +972,23 @@ rows:
   web_exception: null
   e2e: firebase/webapp/e2e/analytics.spec.ts
   note: "Web registra screen_view (firebase_screen) com os nomes do app: abas /home, /customers, /agenda, /financial (TabRoutes) e as outras telas com os nomes de lib/routes.dart (/customer_list, /collaborator_list...); telas só do web usam o nome da rota. O endereço vai sem ids nem busca."
+- id: nav.tabs.back-to-root
+  screen: lib/screens/menu_navigation/tab_stack.dart
+  route: null
+  action: "Tocar numa aba volta à primeira tela dela; o \"+\" é amarelo só ali"
+  kind: logic
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: []
+  web_status: todo
+  web_exception: {status: proposed, reason: "No web cada item do menu já abre a página dele, sem pilha de telas por aba. A cor do botão segue a regra do web: \"Nova OS\" amarela só sem OS aberta no painel (OrdersView)."}
+  e2e: null
+  note: "App: cada aba guarda as telas abertas nela; tocar na aba fecha tudo e mostra a lista de OS, de clientes, a agenda ou o Financeiro. O \"+\" (Nova OS) fica marinho quando há outra tela aberta por cima."
 - id: nav.tabs.bar
   screen: lib/screens/menu_navigation/widgets/glass_tab_bar.dart
   route: null
@@ -3198,6 +3215,23 @@ rows:
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Só OS salva. Web: link 'Mandar para o cliente' no cabeçalho da OS, no menu '…' e tecla M, para todos os papéis."
+- id: order.share.pdf
+  screen: lib/screens/widgets/share_link_sheet.dart
+  route: null
+  action: "Mandar o PDF da OS com o link (principal em Mandar para o cliente)"
+  kind: action
+  roles: [owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: ["labels:all"]
+  i18n: [pt, en, es]
+  states: [loading, error]
+  feature_flags: ["planLimits:pdfWatermark"]
+  hardware: [share_sheet, pdf_generation]
+  data: ["api:POST /v1/app/orders/{id}/share", "companies/{id}", "companies/{id}/customers", "companies/{id}/orders/{id}/forms"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  note: "Botão amarelo Mandar o PDF quando canShareOrderPdf (viewPrices ou !useFinancial): compartilhar do sistema com o PDF da OS e a mensagem com o link, para o cliente ainda aprovar. O link sozinho vira o botão cinza (Mandar só o link no WhatsApp, ou Mandar só o link sem telefone). Sem PDF para o papel: folha antiga só com o link. Botão mostra Preparando o PDF… e erro em alerta."
 - id: order.share.copy-link
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -5567,6 +5601,24 @@ rows:
   web_exception: null
   permission: null
   note: "No … de Receber de {cliente}, com as OS marcadas. App: compartilhar do sistema com texto e PDF. Web: baixa o PDF e abre o WhatsApp do cliente com a mensagem (sem número, copia)."
+- id: pay.order.statement
+  screen: lib/screens/payment_management_screen.dart
+  route: null
+  action: "Mandar extrato de uma OS (Receber da OS)"
+  kind: action
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: ["useFinancial"]
+  hardware: [share_sheet]
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: null
+  note: "No … do Receber de uma OS, quando falta receber e a OS tem cliente. Mesmo fluxo de pay.customer.statement.share com só esta OS. Cliente com uma OS só em aberto cai aqui (não em Receber de {cliente}), por isso o extrato precisa estar nesta tela."
 - id: pay.customer.statement.share
   screen: lib/screens/payments/statement_share.dart
   route: null
@@ -12309,3 +12361,21 @@ rows:
   web_exception: null
   permission: null
   note: "Tela de escolher com as OS do cliente da nota primeiro. Desligar só em nota feita fora do PraticOS. Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: checklist.question.note
+  screen: lib/screens/forms/form_note_sheet.dart
+  route: null
+  action: "Escrever a observação da pergunta, das opções marcadas e das fotos"
+  kind: sheet
+  roles: [owner, admin, supervisor, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: null
+  data: ["companies/{id}/orders/{id}/forms"]
+  web_status: done
+  e2e: firebase/webapp/e2e/forms.spec.ts
+  web_exception: null
+  permission: fillForms
+  note: "Grava só notes.{itemId}, fora de responses (issues #685 e #689). Web: diálogo com a observação da pergunta, das opções marcadas e das fotos; Enter grava; editar texto da IA grava ai: false."

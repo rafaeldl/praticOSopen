@@ -2276,6 +2276,10 @@
   "shareSendLink": "Enviar el enlace",
   "shareSendOtherWay": "Enviar de otra forma",
   "shareCopyLink": "Copiar el enlace",
+  "shareSendPdf": "Enviar el PDF",
+  "sharePreparingPdf": "Preparando el PDF…",
+  "shareSendLinkWhatsApp": "Enviar solo el enlace por WhatsApp",
+  "shareSendLinkOnly": "Enviar solo el enlace",
   "shareLinkCopied": "Enlace copiado",
   "sharePreparing": "Preparando el enlace…",
   "shareError": "No se pudo crear el enlace.",
@@ -2985,5 +2989,16 @@
   "customerShowAllOrders": "Ver las {count} OS",
   "customerShowLess": "Mostrar menos",
   "customerSearchDevices": "Buscar por nombre o placa",
-  "customerSearchOrders": "Buscar por número de OS"
+  "customerSearchOrders": "Buscar por número de OS",
+  "filterLate": "Atrasadas",
+  "filterUnpaid": "Por cobrar",
+  "noLateOrders": "Nada atrasado.",
+  "noUnpaidOrders": "Nada por cobrar.",
+  "checklistNoteAdd": "+ Observación",
+  "checklistNote": "Observación",
+  "checklistNotePlaceholder": "Lo que viste y dónde",
+  "checklistNotePhoto": "Foto {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

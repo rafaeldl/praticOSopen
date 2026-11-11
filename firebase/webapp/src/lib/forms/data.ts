@@ -14,11 +14,14 @@ import {
   normalizeOrderForm,
   normalizeResponses,
   normalizeTemplate,
+  noteDoc,
+  noteWithoutPhoto,
   orderFormDoc,
   responseOf,
   statusAfter,
   type AnswerChange,
   type FormItem,
+  type FormItemNote,
   type FormStatus,
   type OrderForm,
   type Template,
@@ -243,6 +246,11 @@ export async function saveAnswer(orderId: string, formId: string, change: Answer
       const next: OrderForm = { ...form, responses, status }
       const now = nowIso()
       const data: Record<string, unknown> = { responses: responses.map((r) => ({ itemId: r.itemId, value: r.value ?? null, photoUrls: r.photoUrls })), updatedAt: now }
+      // A removed photo takes its note along (only `notes.{itemId}`; the other notes are never written here).
+      if (change.kind === 'removePhoto' && /^[\w-]+$/.test(change.itemId)) {
+        const note = noteWithoutPhoto(form.notes?.[change.itemId], change.url)
+        if (note !== undefined) data[`notes.${change.itemId}`] = note ?? firestore.deleteField()
+      }
       if (complete && status !== 'completed' && missingCount(next) === 0) {
         status = 'completed'
         data.completedAt = now
@@ -253,6 +261,28 @@ export async function saveAnswer(orderId: string, formId: string, change: Answer
       return { ...next, status, updatedAt: now }
     }),
   )
+}
+
+/**
+ * Saves the note of question [itemId] (null: removes it), like the app's
+ * FormsService.saveNote: only `notes.{itemId}` and `updatedAt`, never
+ * `responses`, so the answers stay as they are whoever saves them. In a
+ * transaction, so offline it fails and the screen says so. Resolves with the
+ * version written.
+ */
+export async function saveNote(orderId: string, formId: string, itemId: string, note: FormItemNote | null): Promise<string> {
+  const { db, firestore, collection } = await formsOf(orderId)
+  const ref = firestore.doc(collection, formId)
+  const now = nowIso()
+  await withTimeout(
+    firestore.runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(ref)
+      if (!snapshot.exists()) throw Object.assign(new Error('form removed'), { code: 'not-found' })
+      if (!acceptsAnswer(normalizeOrderForm(formId, snapshot.data()).status)) throw new FormCompleted()
+      transaction.update(ref, new firestore.FieldPath('notes', itemId), note ? noteDoc(note) : firestore.deleteField(), 'updatedAt', now)
+    }),
+  )
+  return now
 }
 
 /** Concluir / Reabrir (FormsService.updateStatus). */

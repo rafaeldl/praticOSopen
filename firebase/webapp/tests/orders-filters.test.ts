@@ -86,11 +86,8 @@ describe('filterQueries: one server query per filter', () => {
     const [late] = filterQueries('late', base, DAY) ?? []
     expect(late?.where).toEqual([['dueDate', '>', ''], ['dueDate', '<', DAY.today]])
     expect(late?.order).toEqual({ field: 'dueDate', dir: 'asc' })
-    const today = filterQueries('today', base, DAY) ?? []
-    expect(today.map((q) => q.where)).toEqual([
-      [['dueDate', '>=', DAY.today], ['dueDate', '<', DAY.tomorrow]],
-      [['scheduledDate', '>=', DAY.today], ['scheduledDate', '<', DAY.tomorrow]],
-    ])
+    // Para hoje left the list (the Agenda answers it), as in the app.
+    expect(filterQueries('today', base, DAY)).toBeNull()
     expect(filterQueries('quotes', base, DAY)?.[0]).toMatchObject({ statuses: ['quote'], order: { field: 'createdAt', dir: 'asc' } })
     expect(filterQueries('onHold', base, DAY)?.[0]).toMatchObject({
       statuses: ['approved', 'progress'],
@@ -107,7 +104,7 @@ describe('filterQueries: one server query per filter', () => {
 
   test('who sees only their own orders keeps createdBy in every query; Minhas is by assignee', () => {
     const own = { companyId: 'c1', createdBy: 'cons', uid: 'cons' }
-    for (const filter of ['open', 'late', 'today', 'quotes', 'onHold', 'unpaid', 'done', 'all']) {
+    for (const filter of ['open', 'late', 'quotes', 'onHold', 'unpaid', 'done', 'all']) {
       for (const query of filterQueries(filter, own, DAY) ?? []) expect(query.createdBy).toBe('cons')
     }
     expect(filterQueries('mine', own, DAY)?.[0]).toMatchObject({ createdBy: null, where: [['assignedTo.id', '==', 'cons']] })
@@ -144,16 +141,6 @@ describe('Firestore pages (who sees values)', () => {
     expect(wheres()).toContainEqual(['onHold.since', '>', ''])
     await loader.more()
     expect(calls.find((call) => call[0] === 'startAfter')?.slice(1)).toEqual([`2026-10-${FIRST_PAGE}`, `h${FIRST_PAGE - 1}`])
-  })
-
-  test('Para hoje: delivery and visit queries joined, the same order once', async () => {
-    pages = [
-      [{ id: 'a', status: 'approved', dueDate: '2026-11-05T09:00:00.000' }, { id: 'both', status: 'approved', dueDate: '2026-11-05T10:00:00.000' }],
-      [{ id: 'both', status: 'approved', scheduledDate: '2026-11-05T10:00:00.000' }, { id: 'b', status: 'approved', scheduledDate: '2026-11-05T14:00:00.000' }],
-    ]
-    const page = await createFilterLoader(admin, 'today', NOW).first()
-    expect(page.rows.map((row) => row.id)).toEqual(['a', 'both', 'b'])
-    expect(page.hasMore).toBe(false)
   })
 
   test('counts come from the server with the same filters: Em aberto with its late ones, Sem receber with what is left', async () => {
@@ -201,17 +188,11 @@ describe('Firestore pages (who sees values)', () => {
 })
 
 describe('API pages (who does not see values)', () => {
-  test('Atrasadas and Para hoje ask the API by date, with bounds that compare like the stored text', () => {
+  test('Atrasadas asks the API by date, with bounds that compare like the stored text', () => {
     const [late] = filterSources(supervisor, 'late', NOW)
     expect(late?.api).toMatchObject({ sort: 'dueDate', direction: 'asc', endDate: '2026-11-04T23:59:59.999Z', startDate: '1970-01-01T00:00:00.000Z' })
     // A delivery at midnight today (the app's "all day"), stored as wall text, is not late.
     expect('2026-11-05T00:00:00.000' > (late?.api.endDate ?? '')).toBe(true)
-    const today = filterSources(supervisor, 'today', NOW)
-    expect(today.map((source) => [source.api.sort, source.api.startDate, source.api.endDate])).toEqual([
-      ['dueDate', '2026-11-04T23:59:59.999Z', '2026-11-05T23:59:59.999Z'],
-      ['scheduledDate', '2026-11-04T23:59:59.999Z', '2026-11-05T23:59:59.999Z'],
-    ])
-    expect('2026-11-05T00:00:00.000' >= (today[0]?.api.startDate ?? '')).toBe(true)
     expect(filterSources(supervisor, 'quotes', NOW)[0]?.api).toEqual({ status: 'quote', sort: 'createdAt', direction: 'asc' })
     expect(filterSources(technician, 'mine', NOW)[0]?.api).toEqual({ status: 'quote,approved,progress', assignedTo: 'tech' })
   })

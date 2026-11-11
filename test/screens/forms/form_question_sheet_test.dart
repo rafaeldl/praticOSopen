@@ -586,4 +586,144 @@ void main() {
     expect(formItemsMissing(form), 2);
     expect(firstUnansweredIndex(form), 1);
   });
+
+  group('note', () {
+    setUp(() {
+      final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.physicalSize = const Size(800, 2000);
+      view.devicePixelRatio = 1;
+    });
+    tearDown(() {
+      final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+      view.resetPhysicalSize();
+      view.resetDevicePixelRatio();
+    });
+
+    OrderForm multiForm(Map<String, FormItemNote> notes) => OrderForm(
+      id: 'f1',
+      formDefinitionId: 'd1',
+      title: 'Entrada do veículo',
+      items: [
+        FormItemDefinition(
+          id: 'dano',
+          label: 'Onde tem dano?',
+          type: FormItemType.checklist,
+          options: ['Porta', 'Para-choque', 'Capô'],
+          optionsI18n: {
+            'en': ['Door', 'Bumper', 'Hood'],
+          },
+          allowPhotos: true,
+        ),
+      ],
+      responses: [
+        FormResponse(
+          itemId: 'dano',
+          value: ['Porta', 'Capô'],
+          photoUrls: ['https://x/1.jpg'],
+        ),
+      ],
+      notes: notes,
+    );
+
+    Widget sheet(OrderForm form, List<(String, FormItemNote)> saved) =>
+        _app(
+          FormQuestionSheet(
+            form: form,
+            localeCode: 'pt',
+            onAnswer: (_, _) {},
+            onEnd: () {},
+            onClose: () {},
+            onNote: (item, note) => saved.add((item.id, note)),
+          ),
+        );
+
+    testWidgets('"+ Observação" link when there is none', (tester) async {
+      await tester.pumpWidget(sheet(multiForm({}), []));
+      expect(find.text('+ Observação'), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('question_note_add'))).height,
+        greaterThanOrEqualTo(44),
+      );
+    });
+
+    testWidgets('without onNote the link is not there', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          FormQuestionSheet(
+            form: multiForm({}),
+            onAnswer: (_, _) {},
+            onEnd: () {},
+            onClose: () {},
+          ),
+        ),
+      );
+      expect(find.text('+ Observação'), findsNothing);
+    });
+
+    testWidgets(
+      'shows the question, marked option and photo notes; edited text loses ✦',
+      (tester) async {
+        final saved = <(String, FormItemNote)>[];
+        await tester.pumpWidget(
+          sheet(
+            multiForm({
+              'dano': FormItemNote(
+                text: 'Amassado na lateral',
+                ai: true,
+                options: [
+                  FormOptionNote(option: 'Porta', text: 'perto da maçaneta'),
+                  // Not marked: kept, not shown.
+                  FormOptionNote(option: 'Para-choque', text: 'risco'),
+                ],
+                photos: [
+                  FormPhotoNote(
+                    url: 'https://x/1.jpg',
+                    text: 'Risco no para-lama',
+                    ai: true,
+                  ),
+                ],
+              ),
+            }),
+            saved,
+          ),
+        );
+
+        expect(find.text('Observação'), findsOneWidget);
+        expect(find.text('Amassado na lateral'), findsOneWidget);
+        expect(find.text('Porta: perto da maçaneta'), findsOneWidget);
+        expect(find.text('Para-choque: risco'), findsNothing);
+        expect(find.text('Foto 1: Risco no para-lama'), findsOneWidget);
+        expect(find.text('+ Observação'), findsNothing);
+
+        await tester.tap(find.byKey(const ValueKey('question_note')));
+        await tester.pumpAndSettle();
+        // Question, the two marked options and the photo.
+        expect(find.byKey(const ValueKey('note_option_0')), findsOneWidget);
+        expect(find.byKey(const ValueKey('note_option_1')), findsOneWidget);
+        expect(find.byKey(const ValueKey('note_photo_0')), findsOneWidget);
+
+        await tester.enterText(
+          find.byKey(const ValueKey('note_text')),
+          'Amassado na porta traseira esquerda',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('note_option_1')),
+          'trinca',
+        );
+        await tester.tap(find.text('Pronto').last);
+        await tester.pumpAndSettle();
+
+        final (itemId, note) = saved.single;
+        expect(itemId, 'dano');
+        expect(note.text, 'Amassado na porta traseira esquerda');
+        expect(note.ai, isFalse);
+        // Option key = the saved value, not the translated text.
+        expect(note.optionText('Capô'), 'trinca');
+        expect(note.optionText('Porta'), 'perto da maçaneta');
+        expect(note.optionText('Para-choque'), 'risco');
+        // Untouched AI text keeps its mark.
+        expect(note.photos.single.ai, isTrue);
+      },
+    );
+  });
 }

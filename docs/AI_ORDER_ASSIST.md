@@ -66,7 +66,7 @@ Quanto demora para valer:
 | `scripts/ai-settings.ts` | `npm run ai`: liga/desliga por empresa ou para todas |
 | `src/services/ai/llm.client.ts` | Interface neutra (`LlmClient`, `LlmRequest` com JSON Schema) e `LlmRouter`, que escolhe o provedor por pedido |
 | `src/services/ai/gemini.client.ts` | `VertexGeminiClient` (Gemini no Vertex AI, credencial da conta de serviço; sem chave) e `toGeminiSchema` |
-| `src/services/ai/claude.client.ts` | `ClaudeClient` (Claude na API da Anthropic, `@anthropic-ai/sdk`, structured outputs, fallback do servidor) |
+| `src/services/ai/claude.client.ts` | `ClaudeClient` (Claude na API da Anthropic, `@anthropic-ai/sdk`, structured outputs; fallback do servidor só em Sonnet/Opus) |
 
 ### App
 
@@ -304,7 +304,7 @@ Prompt ajustado para os erros do Haiku (promessa com momento futuro, "dia 28", "
 | Inéditas (42) | 79/84 (94,0%) | 82/84 (97,6%) |
 | Promessa ou preço virando pagamento nas inéditas | 1 | 0 |
 
-Metas da spec: 0 promessa ou preço virando pagamento, 95% de acerto. Nas inéditas, só o Haiku bate. A falha do Sonnet foi uma passada de "quedó en deber 90 para el mes que viene", frase ambígua: pode ser dívida que ficou, sem pagamento antes. Os outros erros são seguros: nada foi proposto ou a pessoa digita o valor. A diferença entre os dois é de poucas chamadas, e preço e tempo de resposta não foram comparados. O padrão do servidor segue no Sonnet. As frases do bot ficam fora do repositório, porque vêm de conversas reais.
+Metas da spec: 0 promessa ou preço virando pagamento, 95% de acerto. Nas inéditas, só o Haiku bate. A falha do Sonnet foi uma passada de "quedó en deber 90 para el mes que viene", frase ambígua: pode ser dívida que ficou, sem pagamento antes. Os outros erros são seguros: nada foi proposto ou a pessoa digita o valor. A diferença entre os dois é de poucas chamadas, e preço e tempo de resposta não foram comparados. Desde 2026-11-11 o padrão do servidor é o Haiku (ver [Provedores](#provedores)). As frases do bot ficam fora do repositório, porque vêm de conversas reais.
 
 ```bash
 cd firebase/functions
@@ -360,7 +360,7 @@ Decidido pelo Rafael em 2026-11-11 (#701): **Gemini 3.8 Flash na região `global
 | `AI_FORM_PHOTO_PROVIDER` | `gemini`, `claude` ou `company` (segue o `provider` da empresa, como a OS) | `gemini` |
 | `AI_FORM_PHOTO_GEMINI_MODEL` | ex.: `gemini-2.5-flash` | `gemini-3.8-flash` |
 | `AI_FORM_PHOTO_VERTEX_LOCATION` | ex.: `southamerica-east1` | `global` |
-| `AI_FORM_PHOTO_GEMINI_THINKING` | `minimal`, `low`, `medium`, `high` ou `off` (o Gemini 2.5 recusa o campo) | `low` |
+| `AI_FORM_PHOTO_GEMINI_THINKING` | `minimal`, `low`, `medium`, `high` ou `off` (não manda o nível; o cliente do Gemini decide, e no 2.5, que recusa o campo, não manda nada) | `low` |
 
 **Privacidade:** o Gemini 3.8 não existe em São Paulo. Em `global`, o Google escolhe a região que processa a foto, que pode ser fora do Brasil ("Endpoints don't guarantee data residency", na [página de regiões](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations)). Segundo a [página de retenção](https://cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention), o Google não usa os dados para treinar modelos sem permissão, guarda em cache por no máximo 24 horas e pode registrar pedidos para detectar abuso. A política de privacidade (seção "Assistente de IA", em `firebase/hosting/src/_data/legal.json`) diz isso desde 2026-11-11. Para voltar a São Paulo: `AI_FORM_PHOTO_GEMINI_MODEL=gemini-2.5-flash`, `AI_FORM_PHOTO_VERTEX_LOCATION=southamerica-east1`, `AI_FORM_PHOTO_GEMINI_THINKING=off` e tirar a frase da política.
 
@@ -394,14 +394,47 @@ A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmR
 3. senão `AI_PROVIDER` no ambiente da Function;
 4. senão `gemini`.
 
-Se o provedor escolhido não lê alguma parte do pedido (o Claude não recebe áudio), o pedido vai para o provedor padrão. Para somar outro provedor: criar um `LlmProviderClient` (`generateJson` + `supportsMedia`), registrar no `LlmRouter` em `order-assist.deps.ts` e incluir o nome em `LLM_PROVIDERS`.
+Se o provedor escolhido não lê alguma parte do pedido (o Claude não recebe áudio), o pedido vai para um que lê: primeiro o padrão do ambiente (`AI_PROVIDER`), depois qualquer outro configurado. Com o Claude para todos, o áudio do app web vai para o Gemini. Para somar outro provedor: criar um `LlmProviderClient` (`generateJson` + `supportsMedia`), registrar no `LlmRouter` em `order-assist.deps.ts` e incluir o nome em `LLM_PROVIDERS`.
 
 | Provedor | Modelo padrão | Variáveis | Credencial | Onde roda |
 |---|---|---|---|---|
-| `gemini` | `gemini-2.5-flash` | `AI_GEMINI_MODEL`, `AI_VERTEX_LOCATION` | Conta de serviço (sem chave) | Vertex AI, São Paulo |
-| `claude` | `claude-sonnet-5-5` | `AI_CLAUDE_MODEL`, `AI_CLAUDE_EFFORT` (padrão `low`) | Secret `ANTHROPIC_API_KEY` | API da Anthropic (EUA) |
+| `gemini` | `gemini-3.8-flash` | `AI_GEMINI_MODEL`, `AI_VERTEX_LOCATION` (padrão `global`), `AI_GEMINI_THINKING` (padrão `low` no Gemini 3) | Conta de serviço (sem chave) | Vertex AI, `global` (pode sair do Brasil) |
+| `claude` | `claude-haiku-5-5` | `AI_CLAUDE_MODEL`, `AI_CLAUDE_EFFORT` (padrão `low`) | Secret `ANTHROPIC_API_KEY` | API da Anthropic (EUA) |
 
-O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`): se o modelo recusar, o servidor da Anthropic tenta outro modelo na mesma chamada. Recusa final, resposta cortada ou erro da API viram `AI_UNAVAILABLE` e a cota é devolvida.
+O Claude usa structured outputs (`output_config.format`) com o mesmo schema, pensamento adaptativo (o campo `thinking` não vai) e nenhum `temperature` (o Haiku 5.5 recusa). Com Sonnet 5.5, Opus ou Fable em `AI_CLAUDE_MODEL`, vai também `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`): se o modelo recusar, o servidor da Anthropic tenta outro modelo na mesma chamada. O Haiku não tem esse recurso, então não vai. Recusa final, resposta cortada ou erro da API viram `AI_UNAVAILABLE` e a cota é devolvida.
+
+### Haiku como padrão (2026-11-11)
+
+O texto e as fotos da OS passam ao Claude Haiku 5.5, e o áudio (só o app web manda) ao Gemini 3.8 Flash em `global`, com `thinkingLevel: low`. O Gemini 2.5 Flash, que respondia até aqui, passou da data de retirada do Google.
+
+Medição com os modelos reais, prompt e parser da OS. Frases: `ai-memory-eval.ts` (24 cenários × 2) e `ai-finance-eval.ts` (cases + 15 frases do bot × 2; inéditas `ai-finance-eval-final.json` × 2). Fotos: 11 fotos públicas do Wikimedia Commons (as mesmas do teste do checklist: carros batidos, retrovisor, celulares trincados, impressora, plaqueta de motor), só a foto, sem fala, 2 passadas. Custo em US$ por chamada, com o preço de lista de 2026-11 (Haiku US$ 0,10/0,50 por milhão de tokens; Gemini 2.5 Flash 0,30/2,50; Gemini 3.8 Flash 0,75/3,75 até 31/12/2026, o dobro depois):
+
+| | Haiku 5.5 | Gemini 2.5 Flash (SP, hoje) | Gemini 3.8 Flash (`global`, `low`) |
+|---|---|---|---|
+| Frases em sequência | 98/98 | 98/98 | 94/96 (2 sem resposta) |
+| Dinheiro (ajuste + bot) | 195/196 (1 resposta cortada) | não medido | não medido |
+| Dinheiro, inéditas | 130/130, nada virou pagamento | — | — |
+| Fotos sem erro, prompt antigo | 13/22 | 16/22 | 21/22 (1 sem resposta) |
+| Fotos sem erro, prompt com a regra do nome | 17/22 (+2 sem serviço sugerido) | — | 19/22 |
+| Dado inventado nas fotos, prompt antigo | 5 nomes descritivos ("Veículo com dano na lateral traseira"), 1 marca errada | 1 placa inventada, 1 nome "Meeting02" | 0 |
+| Dado inventado nas fotos, prompt novo | 3 nomes descritivos | — | 1 modelo errado, 1 nome descritivo |
+| Lado errado nas fotos (prompt antigo) | 4 | 1 | 0 |
+| Tempo, texto (mediana / p90) | 1,2 s / 2,0 s | 1,3 s / 2,0 s | 2,3 s / 3,1 s |
+| Tempo, foto (mediana / p90 / pior) | 2,2 s / 4,4 s / 6,5 s | 3,1 s / 6,7 s | 4,7 s / 12,4 s / 44 s |
+| Custo, texto | US$ 0,0003 | US$ 0,0010 | US$ 0,0018 |
+| Custo, foto | US$ 0,0006 | US$ 0,0021 | US$ 0,0039 |
+
+O Haiku escreve observações mais completas e não repete item. Para os nomes descritivos, o prompt ganhou uma regra (2026-11-11): da foto, o nome é marca e modelo reconhecidos; sem certeza, o veículo fica vazio e a descrição vai para as observações; lado só quando dá para saber. Ela baixou os nomes descritivos do Haiku de 5 para 3 e acabou com a marca errada, mas ele passou a sugerir menos serviço numa foto de amassado. Com a regra, as frases continuaram 98/98 e o dinheiro 97/98 (a falha é segura: nada proposto). O que sobra aparece como veículo novo com ✦ e só é cadastrado no ✓. A resposta cortada ("2 para-choque 850") não se repetiu em 100 chamadas da mesma frase. Ela vira `AI_UNAVAILABLE` e a cota volta. O Gemini 3.8 erra menos nas fotos, mas é o mais lento, e 3 de cerca de 120 chamadas não voltaram em 45 s.
+
+**Ligar** (depois do merge e do deploy da Function `api` terminar):
+
+```bash
+cd firebase/functions
+npm run ai -- show --project praticos
+npm run ai -- on --project praticos --all --provider claude --yes   # grava config/ai.defaultProvider = 'claude'
+```
+
+Até lá, depois do deploy, tudo vai ao Gemini 3.8 em `global`. Voltar ao Gemini: `npm run ai -- on --project praticos --all --provider gemini --yes`. Rodar `ai-memory-eval.ts` e `ai-finance-eval.ts` de novo ao mudar o prompt ou o modelo.
 
 ## Regras de Negócio
 
@@ -435,12 +468,12 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 ## Passos manuais (needs-human)
 
 - ~~Ativar a **Vertex AI API** (`aiplatform.googleapis.com`) no projeto `praticos`~~ feito em 2026-10-11. A conta de serviço de runtime (`…-compute@developer`) tem Editor, que cobre `aiplatform.user`. Não há chave/segredo para cadastrar.
-- Opcional: `AI_GEMINI_MODEL` / `AI_VERTEX_LOCATION` (padrão `gemini-2.5-flash` / `southamerica-east1`, São Paulo, para os dados ficarem no Brasil — LGPD) em `firebase/functions/.env` se quiser outro modelo/região.
+- Opcional: `AI_GEMINI_MODEL` / `AI_VERTEX_LOCATION` / `AI_GEMINI_THINKING` (padrão `gemini-3.8-flash` / `global` / `low`) em `firebase/functions/.env`. O Gemini 2.5 em São Paulo passou da data de retirada do Google e o 3.8 dá 404 lá; voltar a São Paulo exige mudar a política de privacidade.
 - Ligar por empresa ou para todas: `npm run ai` ([Ligar e desligar](#ligar-e-desligar)).
 - ~~**Claude:** cadastrar a chave antes do deploy (sem ela o deploy da Function `api` falha): `firebase functions:secrets:set ANTHROPIC_API_KEY --project praticos`~~ feito em 2026-10-14.
 - **Claude no emulador:** o emulador lê a chave de `firebase/functions/.secret.local` (no `.gitignore`; o repositório é público). Para copiar do Secret Manager sem mostrar a chave: `echo "ANTHROPIC_API_KEY=$(firebase functions:secrets:access ANTHROPIC_API_KEY --project praticos)" >> firebase/functions/.secret.local && chmod 600 firebase/functions/.secret.local`.
 - ~~Antes de abrir o Claude para todos: a política de privacidade precisa citar a Anthropic (dados processados fora do Brasil, LGPD art. 33).~~ feito em 2026-10-17 (seção "Assistente de IA" em `privacy.html`).
-- Antes de abrir para todos: política de privacidade (fotos/texto processados pelo Google Vertex AI) e, quando houver gravação de áudio, `NSMicrophoneUsageDescription`/`RECORD_AUDIO` e rótulos de privacidade das lojas.
+- ~~Política de privacidade com Anthropic (texto e fotos, EUA) e Google (áudio, fora do Brasil)~~ feito em 2026-11-11. Quando o app do celular gravar áudio: `NSMicrophoneUsageDescription`/`RECORD_AUDIO` e rótulos de privacidade das lojas.
 
 ## Testes
 

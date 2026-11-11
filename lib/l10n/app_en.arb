@@ -2276,6 +2276,10 @@
   "shareSendLink": "Send the link",
   "shareSendOtherWay": "Send another way",
   "shareCopyLink": "Copy the link",
+  "shareSendPdf": "Send the PDF",
+  "sharePreparingPdf": "Preparing the PDF…",
+  "shareSendLinkWhatsApp": "Send just the link on WhatsApp",
+  "shareSendLinkOnly": "Send just the link",
   "shareLinkCopied": "Link copied",
   "sharePreparing": "Getting the link ready…",
   "shareError": "Couldn't create the link.",
@@ -2997,5 +3001,16 @@
   "customerShowAllOrders": "See all {count} orders",
   "customerShowLess": "Show less",
   "customerSearchDevices": "Search by name or plate",
-  "customerSearchOrders": "Search by order number"
+  "customerSearchOrders": "Search by order number",
+  "filterLate": "Late",
+  "filterUnpaid": "To receive",
+  "noLateOrders": "Nothing late.",
+  "noUnpaidOrders": "Nothing to receive.",
+  "checklistNoteAdd": "+ Note",
+  "checklistNote": "Note",
+  "checklistNotePlaceholder": "What you saw and where",
+  "checklistNotePhoto": "Photo {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

@@ -175,11 +175,12 @@ OrderPermissions _permissions({
   bool edit = true,
   bool prices = true,
   bool receive = true,
+  List<String> statuses = const ['approved', 'progress', 'done'],
 }) => OrderPermissions(
   canViewPrices: () => prices,
   canReceivePayments: (_) => receive,
   canGiveDiscount: () => receive,
-  availableStatuses: (_) => const ['approved', 'progress', 'done'],
+  availableStatuses: (_) => statuses,
   canChangeStatus: (_, _) => true,
   canDelete: (_) => true,
   canEditMainFields: (_) => edit,
@@ -313,10 +314,16 @@ void main() {
     bool prices = true,
     bool receive = true,
     NfseController? nfse,
+    List<String> statuses = const ['approved', 'progress', 'done'],
   }) => OrderScreenV2(
     showAssistant: false,
     store: store,
-    permissions: _permissions(edit: edit, prices: prices, receive: receive),
+    permissions: _permissions(
+      edit: edit,
+      prices: prices,
+      receive: receive,
+      statuses: statuses,
+    ),
     actions: actions ?? FakeActions(),
     mostUsed: () async => const [],
     nfse: nfse,
@@ -1369,6 +1376,37 @@ void main() {
         args: {'order': _order()},
       );
       expect(find.byKey(const ValueKey('order_missing_phone_')), findsNothing);
+    });
+  });
+
+  group('status line', () {
+    Finder chevron() =>
+        find.byKey(const ValueKey('order_header_status_chevron'));
+
+    testWidgets('looks like a button and opens "Qual a situação?"', (
+      tester,
+    ) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': _order()});
+
+      expect(chevron(), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('order_header_status')));
+      await tester.pumpAndSettle();
+      expect(find.text('Qual a situação?'), findsWidgets);
+    });
+
+    testWidgets('who cannot change it sees a plain line', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), statuses: const []),
+        args: {'order': _order()},
+      );
+
+      expect(chevron(), findsNothing);
+      await tester.tap(
+        find.byKey(const ValueKey('order_header_status_button')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Qual a situação?'), findsNothing);
     });
   });
 

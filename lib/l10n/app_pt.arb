@@ -2637,6 +2637,10 @@
   "shareSendLink": "Mandar o link",
   "shareSendOtherWay": "Mandar de outro jeito",
   "shareCopyLink": "Copiar o link",
+  "shareSendPdf": "Mandar o PDF",
+  "sharePreparingPdf": "Preparando o PDF…",
+  "shareSendLinkWhatsApp": "Mandar só o link no WhatsApp",
+  "shareSendLinkOnly": "Mandar só o link",
   "shareLinkCopied": "Link copiado",
   "sharePreparing": "Preparando o link…",
   "shareError": "Não deu para criar o link.",
@@ -3419,5 +3423,16 @@
   "customerSearchDevices": "Buscar pelo nome ou placa",
   "customerSearchOrders": "Buscar pelo número da OS",
   "@customerShowAllDevices": {"placeholders": {"count": {"type": "int"}, "devices": {"type": "String"}}},
-  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}}
+  "@customerShowAllOrders": {"placeholders": {"count": {"type": "int"}}},
+  "filterLate": "Atrasadas",
+  "filterUnpaid": "Sem receber",
+  "noLateOrders": "Nada atrasado.",
+  "noUnpaidOrders": "Nada para receber.",
+  "checklistNoteAdd": "+ Observação",
+  "checklistNote": "Observação",
+  "checklistNotePlaceholder": "O que você viu e onde",
+  "checklistNotePhoto": "Foto {number}",
+  "checklistNoteLine": "{label}: {text}",
+  "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
 }

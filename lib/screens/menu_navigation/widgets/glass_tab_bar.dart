@@ -169,22 +169,62 @@ class GlassTabBar extends CupertinoTabBar {
   }
 }
 
-/// The navy "+" beside the tab capsule: starts a new order from any tab.
-/// Solid [AppColors.navyFill] with no glass, so it never reads as one more
-/// tab (the round glass slot next to the tabs is iOS's search tab).
+/// The "+" beside the tab capsule: starts a new order from any tab.
+///
+/// On a tab's first screen it is the screen's yellow action ([primary]):
+/// solid, with a hairline edge. With another screen open on the tab, which
+/// may have its own yellow button, it steps back to glass with a navy "+",
+/// like the top bar buttons, as the web's "Nova OS" while an order is open.
+/// The large "+" set apart from the capsule keeps it reading as an action,
+/// not one more tab.
 class NewOrderTabButton extends StatelessWidget {
   const NewOrderTabButton({
     super.key,
     required this.label,
     required this.onPressed,
+    this.primary = false,
   });
 
   /// Spoken name ("Nova OS").
   final String label;
   final VoidCallback onPressed;
 
+  /// Yellow ([AppColors.action]) when true, glass otherwise.
+  final bool primary;
+
   @override
   Widget build(BuildContext context) {
+    const size = GlassTabBar.capsuleHeight;
+    final Widget button = primary
+        ? Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: AppColors.action.resolveFrom(context),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.actionBorder.resolveFrom(context),
+              ),
+            ),
+            child: Icon(
+              CupertinoIcons.add,
+              size: 30,
+              color: AppColors.onAction.resolveFrom(context),
+            ),
+          )
+        : AppGlass(
+            elevated: true,
+            borderRadius: BorderRadius.circular(size / 2),
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Icon(
+                CupertinoIcons.add,
+                size: 30,
+                color: AppColors.text.resolveFrom(context),
+              ),
+            ),
+          );
     return Semantics(
       identifier: 'add_order_button',
       button: true,
@@ -193,19 +233,7 @@ class NewOrderTabButton extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onPressed,
-        child: Container(
-          width: GlassTabBar.capsuleHeight,
-          height: GlassTabBar.capsuleHeight,
-          decoration: BoxDecoration(
-            color: AppColors.navyFill.resolveFrom(context),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            CupertinoIcons.add,
-            size: 30,
-            color: AppColors.onNavyFill.resolveFrom(context),
-          ),
-        ),
+        child: button,
       ),
     );
   }

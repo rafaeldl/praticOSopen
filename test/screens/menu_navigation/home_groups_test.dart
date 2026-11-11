@@ -142,6 +142,30 @@ void main() {
       expect(HomeView.mine.queryField, 'open');
       expect(HomeView.open.isOpenList, isTrue);
       expect(HomeView.done.isOpenList, isFalse);
+      expect(HomeView.late.queryField, 'open');
+      expect(HomeView.late.isOpenList, isTrue);
+      expect(HomeView.unpaid.queryField, 'unpaid_done');
+      expect(HomeView.unpaid.isOpenList, isFalse);
+    });
+
+    test('overdue keeps the late ones, the most overdue first', () {
+      final fresh = order('quote', number: 1);
+      final lateNew = order('approved', due: DateTime(2026, 10, 10), number: 2);
+      final lateOld = order('progress', due: DateTime(2026, 10, 1), number: 3);
+      expect(
+        HomeRules.overdue([fresh, lateNew, lateOld], now).map((o) => o.number),
+        [3, 2],
+      );
+    });
+
+    test('unpaidDone keeps completed orders not received', () {
+      final owed = order('done', number: 1)..payment = 'unpaid';
+      final paid = order('done', number: 2)..payment = 'paid';
+      final quote = order('quote', number: 3)..payment = 'unpaid';
+      expect(
+        HomeRules.unpaidDone([owed, paid, quote]).map((o) => o.number),
+        [1],
+      );
     });
   });
 

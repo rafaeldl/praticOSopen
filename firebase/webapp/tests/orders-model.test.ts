@@ -101,7 +101,7 @@ describe('lateness and groups', () => {
 
   test('rowsFor never leaves out a row the server sent (the query is the filter)', () => {
     const rows = [order('a', { status: 'done' }), order('b', { dueDate: day(3) })]
-    for (const filter of ['open', 'late', 'today', 'quotes', 'onHold', 'unpaid', 'mine', 'done', 'all'] as const) {
+    for (const filter of ['open', 'late', 'quotes', 'onHold', 'unpaid', 'mine', 'done', 'all'] as const) {
       expect(rowsFor(filter, rows, NOW, 'u1')).toHaveLength(2)
     }
   })
@@ -113,7 +113,6 @@ describe('lateness and groups', () => {
     const paid = order('paid', { status: 'done', total: 100, paidAmount: 100 })
     expect(matchesFilter('late', late, NOW, null)).toBe(true)
     expect(matchesFilter('late', today, NOW, null)).toBe(false)
-    expect(matchesFilter('today', today, NOW, null)).toBe(true)
     expect(matchesFilter('unpaid', owed, NOW, null)).toBe(true)
     expect(matchesFilter('unpaid', paid, NOW, null)).toBe(false)
     expect(matchesFilter('quotes', order('q', { status: 'approved' }), NOW, null)).toBe(false)
@@ -140,8 +139,9 @@ describe('lateness and groups', () => {
     expect(summaryOf('unpaid', rowsFor('unpaid', rows, NOW, null), true, NOW)).toEqual({ kind: 'unpaid', count: 1, amount: 60 })
     const numbered = [order('a', { number: 31 }), order('b', { number: 3 }), order('c', { number: 13 })]
     expect(exactFirst(numbered, '3').map((r) => r.id)).toEqual(['b', 'a', 'c'])
-    expect(filtersFor('admin', true)).toContain('unpaid')
-    expect(filtersFor('supervisor', false)).not.toContain('unpaid')
+    // Same filters and order as the app's Início.
+    expect(filtersFor('admin', true)).toEqual(['open', 'late', 'quotes', 'onHold', 'unpaid', 'done', 'all'])
+    expect(filtersFor('supervisor', false)).toEqual(['open', 'late', 'quotes', 'onHold', 'done', 'all'])
   })
 
   test('all: by month of creation in arrival order', () => {

@@ -112,12 +112,32 @@ const completedForm = {
     { id: 'i2', label: 'Fuel', type: 'select', options: ['1/4', '1/2'], required: false, allowPhotos: false },
     { id: 'i3', label: 'Scratches', type: 'photo_only', required: false, allowPhotos: true },
     { id: 'i4', label: 'Notes', type: 'text', required: false, allowPhotos: false },
+    { id: 'i5', label: 'Damage', type: 'checklist', options: ['Door', 'Hood'], required: false, allowPhotos: true },
   ],
+  notes: {
+    i3: {
+      text: 'Dent on the rear left door',
+      ai: true,
+      photos: [
+        { url: 'https://storage.test/scratches.jpg', text: 'Scratch near the handle', ai: true },
+        { url: 'https://storage.test/removed.jpg', text: 'Removed photo note', ai: false },
+      ],
+    },
+    i4: { text: '   ', ai: false },
+    i5: {
+      options: [
+        { option: 'Door', text: 'Near the handle', ai: false },
+        { option: 'Hood', text: 'Unmarked option note', ai: false },
+      ],
+    },
+  },
+  aiFilled: ['i2'],
   responses: [
     { itemId: 'i1', value: true, photoUrls: [] },
     { itemId: 'i2', value: '1/2', photoUrls: [] },
     { itemId: 'i3', value: null, photoUrls: ['https://storage.test/scratches.jpg'] },
     { itemId: 'i4', value: '', photoUrls: [] },
+    { itemId: 'i5', value: ['Door'], photoUrls: [] },
   ],
 };
 
@@ -184,21 +204,42 @@ describe('GET /public/orders/:token — privacy', () => {
     expect(JSON.stringify(res.body)).not.toContain('devLegacy');
   });
 
-  it('sends only completed checklists, reduced to question, answer and photos', async () => {
+  it('sends only completed checklists, reduced to question, answer, photos and notes', async () => {
     const res = await request(buildApp()).get('/public/orders/tok1');
 
+    const empty = { note: null, optionNotes: [], photoNotes: [] };
     expect(res.body.data.order.forms).toEqual([
       {
         title: 'Intake inspection',
         deviceId: 'd1',
         items: [
-          { label: 'Tires ok?', value: true, photos: [] },
-          { label: 'Fuel', value: '1/2', photos: [] },
-          { label: 'Scratches', value: null, photos: ['https://storage.test/scratches.jpg'] },
+          { label: 'Tires ok?', value: true, photos: [], ...empty },
+          { label: 'Fuel', value: '1/2', photos: [], ...empty },
+          {
+            label: 'Scratches',
+            value: null,
+            photos: ['https://storage.test/scratches.jpg'],
+            note: 'Dent on the rear left door',
+            optionNotes: [],
+            photoNotes: [{ url: 'https://storage.test/scratches.jpg', text: 'Scratch near the handle' }],
+          },
+          {
+            label: 'Damage',
+            value: ['Door'],
+            photos: [],
+            note: null,
+            optionNotes: [{ option: 'Door', text: 'Near the handle' }],
+            photoNotes: [],
+          },
         ],
       },
     ]);
     const raw = JSON.stringify(res.body);
+    // Notes of removed photos and unmarked options, the AI mark and the
+    // AI-filled list never leave.
+    for (const leak of ['Removed photo note', 'Unmarked option note', '"ai"', 'aiFilled', 'removed.jpg']) {
+      expect(raw).not.toContain(leak);
+    }
     for (const leak of ['formInstance', 'formTemplate', 'Exit checklist', 'completedAt', '"i1"']) {
       expect(raw).not.toContain(leak);
     }
@@ -260,9 +301,26 @@ describe('buildPublicDevices / toPublicForms', () => {
     const forms = toPublicForms([
       {
         ...completedForm,
+        notes: undefined,
         responses: [{ itemId: 'i1', value: { internal: 'x' }, photoUrls: [] }],
       } as any,
     ], () => null);
     expect(forms).toEqual([]);
+  });
+
+  it('keeps a question with only a note, and ignores notes that are not text', () => {
+    const forms = toPublicForms([
+      {
+        ...completedForm,
+        responses: [],
+        notes: {
+          i1: { text: 'Spare tire missing' },
+          i2: { text: 42, options: 'x', photos: [{ url: 1, text: 'y' }] },
+        },
+      } as any,
+    ], () => null);
+    expect(forms[0].items).toEqual([
+      { label: 'Tires ok?', value: null, photos: [], note: 'Spare tire missing', optionNotes: [], photoNotes: [] },
+    ]);
   });
 });

@@ -168,6 +168,16 @@ faz GET em `https://praticos.app/api/orders/{token}`. Por isso `firebase/firebas
 `/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
 404 e a página cai na tela de erro.
 
+### 1b. "Mandar para o cliente": PDF primeiro (app)
+
+A folha `ShareLinkSheet` (`lib/screens/widgets/share_link_sheet.dart`) tem o PDF da OS como caminho principal:
+
+- **Mandar o PDF** (botão amarelo): gera o mesmo PDF de "Ver PDF" (`buildOrderPdf`, `lib/services/pdf/order_pdf_file.dart`) e abre o compartilhar do sistema com o arquivo e a mensagem com o link (`ShareLinkService.shareViaSheetWithPdf`, texto `buildShareMessage(withPdf: true)`: "Segue a sua OS #N em PDF. Pelo link você pode ver os detalhes, aprovar…"). O cliente recebe o arquivo e ainda aprova pelo link. Enquanto gera, o botão diz "Preparando o PDF…"; erro em alerta.
+- **Mandar só o link no WhatsApp** (cinza, com telefone) ou **Mandar só o link** (sem telefone): o envio antigo, só com o link.
+- Só aparece para quem pode ter o PDF (`canShareOrderPdf`: vê preços, ou a empresa desligou "Valores e cobrança"). Os outros veem a folha antiga, com o link como botão principal.
+- No WhatsApp a mensagem vai junto do arquivo quando a versão aceita; se só o arquivo for, o link fica no PDF (QR).
+- Web: ainda só com o link (`order.share.pdf` na matriz de paridade).
+
 ### 2b. Prévia: "Ver como o cliente vê" (#588)
 
 A equipe abre o próprio link do cliente com `?preview=1`, sem mandar nada a ninguém:

@@ -8810,6 +8810,30 @@ abstract class AppLocalizations {
   /// **'Copiar o link'**
   String get shareCopyLink;
 
+  /// No description provided for @shareSendPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar o PDF'**
+  String get shareSendPdf;
+
+  /// No description provided for @sharePreparingPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando o PDF…'**
+  String get sharePreparingPdf;
+
+  /// No description provided for @shareSendLinkWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar só o link no WhatsApp'**
+  String get shareSendLinkWhatsApp;
+
+  /// No description provided for @shareSendLinkOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar só o link'**
+  String get shareSendLinkOnly;
+
   /// No description provided for @shareLinkCopied.
   ///
   /// In pt, this message translates to:
@@ -12538,6 +12562,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Buscar pelo número da OS'**
   String get customerSearchOrders;
+
+  /// No description provided for @filterLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasadas'**
+  String get filterLate;
+
+  /// No description provided for @filterUnpaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem receber'**
+  String get filterUnpaid;
+
+  /// No description provided for @noLateOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada atrasado.'**
+  String get noLateOrders;
+
+  /// No description provided for @noUnpaidOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada para receber.'**
+  String get noUnpaidOrders;
+
+  /// No description provided for @checklistNoteAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Observação'**
+  String get checklistNoteAdd;
+
+  /// No description provided for @checklistNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Observação'**
+  String get checklistNote;
+
+  /// No description provided for @checklistNotePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você viu e onde'**
+  String get checklistNotePlaceholder;
+
+  /// No description provided for @checklistNotePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto {number}'**
+  String checklistNotePhoto(int number);
+
+  /// No description provided for @checklistNoteLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}: {text}'**
+  String checklistNoteLine(String label, String text);
 }
 
 class _AppLocalizationsDelegate

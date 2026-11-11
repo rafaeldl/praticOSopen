@@ -169,6 +169,12 @@ describe('prompt', () => {
     expect(text).toContain('S1: Pintura (Para-choque), value 300');
   });
 
+  it('keeps a photo description out of the device name', () => {
+    const prompt = buildSystemPrompt('pt');
+    expect(prompt).toContain('never a description of the damage or of a part');
+    expect(prompt).toContain('Not sure of the model: leave device null');
+  });
+
   it('asks for the description apart from the name', () => {
     expect(buildSystemPrompt('pt')).toContain('name "Pintura", description "Para-choque dianteiro"');
     const operation = (LLM_RESPONSE_SCHEMA.properties as any).operations.items.properties;

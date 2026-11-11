@@ -3876,6 +3876,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
     final action = _nextAction(config);
     final statusStyle = AppTypography.callout.copyWith(color: secondary);
+    final canPickStatus =
+        _permissions.availableStatuses(order).isNotEmpty ||
+        _canChangeStage(order, config);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -3975,57 +3978,92 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 ),
               ),
           const SizedBox(height: AppSpacing.sm),
+          // Looks like an iOS pop-up button (gray capsule and ⌃⌄) when it can
+          // be changed: people did not find out the plain line was tappable.
           _tappable(
             key: const ValueKey('order_header_status'),
-            onTap: _selectStatus,
+            onTap: canPickStatus ? _selectStatus : null,
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 minHeight: AppSizes.minTouchTarget,
               ),
-              child: Row(
-                children: [
-                  // The dot keeps the status color; "Atrasada" follows the
-                  // status and the stage, in bold red.
-                  StatusDot(color: OrderStatusStyle.dotColor(status), size: 10),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: config.getStatus(status),
-                        children: [
-                          if (_stageName(order, config) case final stage?)
-                            TextSpan(
-                              text: ' · ',
-                              children: [
-                                TextSpan(
-                                  text: stage,
-                                  style: TextStyle(
-                                    color: text,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          if (overdue)
-                            TextSpan(
-                              text: ' · ',
-                              children: [
-                                TextSpan(
-                                  text: l10n.orderOverdue,
-                                  style: TextStyle(
-                                    color: OrderStatusStyle.overdueColor
-                                        .resolveFrom(context),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Container(
+                  key: const ValueKey('order_header_status_button'),
+                  padding: canPickStatus
+                      ? const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        )
+                      : EdgeInsets.zero,
+                  decoration: canPickStatus
+                      ? BoxDecoration(
+                          color: AppColors.secondaryFill.resolveFrom(context),
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.minTouchTarget,
+                          ),
+                        )
+                      : null,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // The dot keeps the status color; "Atrasada" follows
+                      // the status and the stage, in bold red.
+                      StatusDot(
+                        color: OrderStatusStyle.dotColor(status),
+                        size: 10,
                       ),
-                      style: statusStyle,
-                    ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            text: config.getStatus(status),
+                            children: [
+                              if (_stageName(order, config) case final stage?)
+                                TextSpan(
+                                  text: ' · ',
+                                  children: [
+                                    TextSpan(
+                                      text: stage,
+                                      style: TextStyle(
+                                        color: text,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (overdue)
+                                TextSpan(
+                                  text: ' · ',
+                                  children: [
+                                    TextSpan(
+                                      text: l10n.orderOverdue,
+                                      style: TextStyle(
+                                        color: OrderStatusStyle.overdueColor
+                                            .resolveFrom(context),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          style: statusStyle,
+                        ),
+                      ),
+                      if (canPickStatus) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        Icon(
+                          CupertinoIcons.chevron_up_chevron_down,
+                          key: const ValueKey('order_header_status_chevron'),
+                          size: 16,
+                          color: AppColors.accentText.resolveFrom(context),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

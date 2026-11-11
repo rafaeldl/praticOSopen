@@ -2,6 +2,14 @@
 // app's and the web's answers together, and the editor's and plan's rules.
 import { describe, expect, test } from 'vitest'
 import {
+  isEmptyNote,
+  normalizeNotes,
+  noteDoc,
+  noteFields,
+  noteFromFields,
+  noteLines,
+  noteWithoutPhoto,
+  normalizeOrderForm as readOrderForm,
   activeCount,
   acceptsAnswer,
   activeLimit,
@@ -247,3 +255,113 @@ describe('listas e plano', () => {
     expect(formsAccess('admin', true, true, false)).toEqual({ manage: false, fill: false, reopen: false })
   })
 })
+
+describe('checklist notes (outside responses)', () => {
+  const raw = {
+    formDefinitionId: 't1',
+    title: 'Entrada',
+    status: 'in_progress',
+    items: [
+      { id: 'dano', label: 'Onde tem dano?', type: 'checklist', options: ['Porta', 'Capô'], optionsI18n: { en: ['Door', 'Hood'] } },
+      { id: 'km', label: 'Km', type: 'number' },
+    ],
+    responses: [
+      { itemId: 'dano', value: ['Porta'], photoUrls: ['https://x/1.jpg', 'https://x/2.jpg'] },
+      { itemId: 'km', value: 98000, photoUrls: [] },
+    ],
+    notes: {
+      dano: {
+        text: 'Amassado na lateral',
+        ai: true,
+        options: [
+          { option: 'Porta', text: 'perto da maçaneta', ai: false },
+          { option: 'Capô', text: 'não marcado', ai: false },
+        ],
+        photos: [{ url: 'https://x/2.jpg', text: 'Risco', ai: true }],
+      },
+      bad: 'not a note',
+    },
+    aiFilled: ['km'],
+  }
+  const words = { line: (label: string, text: string) => `${label}: ${text}`, photo: (n: number) => `Foto ${n}` }
+
+  test('reads notes and aiFilled; a bad entry is left out', () => {
+    const form = readOrderForm('f1', raw)
+    expect(Object.keys(form.notes ?? {})).toEqual(['dano'])
+    expect(form.notes?.dano?.ai).toBe(true)
+    expect(form.aiFilled).toEqual(['km'])
+    expect(readOrderForm('f1', { ...raw, notes: undefined, aiFilled: undefined }).notes).toEqual({})
+    expect(normalizeNotes([1, 2])).toEqual({})
+  })
+
+  test('lines: question, marked options in the person\'s language, photos by number', () => {
+    const form = readOrderForm('f1', raw)
+    expect(noteLines(form, form.items[0]!, 'en', words)).toEqual(['Amassado na lateral', 'Door: perto da maçaneta', 'Foto 2: Risco'])
+    expect(noteLines(form, form.items[1]!, 'pt', words)).toEqual([])
+  })
+
+  test('a removed photo takes its note; an empty note is deleted', () => {
+    const note = readOrderForm('f1', raw).notes?.dano
+    expect(noteWithoutPhoto(note, 'https://x/9.jpg')).toBeUndefined()
+    expect(noteWithoutPhoto(note, 'https://x/2.jpg')?.photos).toEqual([])
+    expect(noteWithoutPhoto({ text: null, ai: false, options: [], photos: [{ url: 'u', text: 'x', ai: false }] }, 'u')).toBeNull()
+  })
+
+  test('dialog fields: the question, each marked option and each photo, with what is written', () => {
+    const form = readOrderForm('f1', raw)
+    expect(noteFields(form, form.items[0]!)).toEqual({
+      text: 'Amassado na lateral',
+      options: [{ option: 'Porta', text: 'perto da maçaneta' }],
+      photos: [
+        { url: 'https://x/1.jpg', text: '' },
+        { url: 'https://x/2.jpg', text: 'Risco' },
+      ],
+    })
+    // Not a multiple choice: no option fields; no note: empty texts.
+    expect(noteFields(form, form.items[1]!)).toEqual({ text: '', options: [], photos: [] })
+  })
+
+  test('saved from the dialog: AI text kept stays ai, edited is the person\'s, unmarked option kept, blanks out', () => {
+    const form = readOrderForm('f1', raw)
+    const before = form.notes?.dano
+    const fields = noteFields(form, form.items[0]!)
+    // Untouched: same note (the AI's marks stay).
+    expect(noteFromFields(before, fields)).toEqual({
+      text: 'Amassado na lateral',
+      ai: true,
+      options: [
+        { option: 'Capô', text: 'não marcado', ai: false },
+        { option: 'Porta', text: 'perto da maçaneta', ai: false },
+      ],
+      photos: [{ url: 'https://x/2.jpg', text: 'Risco', ai: true }],
+    })
+    // Spaces around do not count as an edit.
+    expect(noteFromFields(before, { ...fields, text: '  Amassado na lateral ' })?.ai).toBe(true)
+    // Editing the AI's texts makes them the person's.
+    const edited = noteFromFields(before, {
+      text: 'Amassado na porta',
+      options: [{ option: 'Porta', text: 'perto da maçaneta' }],
+      photos: [
+        { url: 'https://x/1.jpg', text: ' Para-lama ' },
+        { url: 'https://x/2.jpg', text: 'Risco fundo' },
+      ],
+    })
+    expect(edited?.text).toBe('Amassado na porta')
+    expect(edited?.ai).toBe(false)
+    expect(edited?.photos).toEqual([
+      { url: 'https://x/1.jpg', text: 'Para-lama', ai: false },
+      { url: 'https://x/2.jpg', text: 'Risco fundo', ai: false },
+    ])
+    // A new note is the person's.
+    expect(noteFromFields(undefined, { text: 'Riscado', options: [], photos: [] })).toEqual({ text: 'Riscado', ai: false, options: [], photos: [] })
+  })
+
+  test('nothing written: null (removed); the JSON is FormItemNote.toJson', () => {
+    expect(noteFromFields(undefined, { text: '  ', options: [{ option: 'Porta', text: '' }], photos: [{ url: 'u', text: ' ' }] })).toBeNull()
+    expect(noteFromFields({ text: 'velho', ai: true, options: [], photos: [] }, { text: '', options: [], photos: [] })).toBeNull()
+    expect(isEmptyNote(undefined)).toBe(true)
+    expect(isEmptyNote({ text: null, ai: false, options: [{ option: 'a', text: 'x', ai: false }], photos: [] })).toBe(false)
+    expect(Object.keys(noteDoc({ text: null, ai: false, options: [], photos: [] }))).toEqual(['text', 'ai', 'options', 'photos'])
+  })
+})
+

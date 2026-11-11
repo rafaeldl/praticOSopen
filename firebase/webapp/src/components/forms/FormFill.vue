@@ -11,12 +11,18 @@
 // changes only that question (lib/forms/data.ts saveAnswer), so the app and
 // the web can answer at the same time. An answer that did not reach the
 // server stays on screen marked "não foi salvo", with "Tentar de novo".
+//
+// The note of a question ("+ Observação", or its lines to edit it) opens a
+// dialog like the app's sheet (form_note_sheet.dart): the question's text, one
+// per marked option of a multiple choice and one per photo. "Pronto" saves only
+// `notes.{itemId}` (lib/forms/data.ts saveNote); an AI text edited is the
+// person's (`ai: false`).
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, ImagePlus, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { locale, t } from '@/i18n'
-import { addPhotos, FormCompleted, removePhoto, saveAnswer, setFormStatus } from '@/lib/forms/data'
+import { addPhotos, FormCompleted, removePhoto, saveAnswer, saveNote, setFormStatus } from '@/lib/forms/data'
 import {
   answerText,
   applyChange,
@@ -26,6 +32,10 @@ import {
   isAnswered,
   labelOf,
   missingCount,
+  noteFields,
+  noteFromFields,
+  noteLines,
+  optionText,
   numberAnswer,
   optionsOf,
   PHOTO_TYPES,
@@ -36,7 +46,9 @@ import {
   titleOf,
   type AnswerChange,
   type FormItem,
+  type FormItemNote,
   type FormsAccess,
+  type NoteFields,
   type OrderForm,
 } from '@/lib/forms/model'
 import type { DeviceAggr } from '@/lib/orders/model'
@@ -76,13 +88,27 @@ const missingList = ref<FormItem[] | null>(null)
 /** A question of a completed checklist was clicked: says so and offers "Reabrir". */
 const doneNotice = ref(false)
 const layer = ref<InstanceType<typeof Layer> | null>(null)
+/** The note being written: the question and the dialog's fields. */
+const noteEdit = ref<{ item: FormItem; fields: NoteFields } | null>(null)
+const noteBusy = ref(false)
+const noteFailed = ref<string | null>(null)
+/** Notes written here that the live copy has not brought yet (null: removed). */
+const savedNotes = reactive<Record<string, { note: FormItemNote | null; liveAt: string | null | undefined }>>({})
 /** Closed on its own after completing: nothing more to announce. */
 let finished = false
 
 const view = computed<OrderForm>(() => {
   let responses = props.form.responses
   for (const entry of Object.values(pending)) if (!entry.completed) responses = applyChange(responses, entry.change)
-  return { ...props.form, responses, status: statusAfter(props.form.status, responses) }
+  let notes = props.form.notes
+  if (Object.keys(savedNotes).length) {
+    notes = { ...notes }
+    for (const [itemId, entry] of Object.entries(savedNotes)) {
+      if (entry.note) notes[itemId] = entry.note
+      else delete notes[itemId]
+    }
+  }
+  return { ...props.form, responses, notes, status: statusAfter(props.form.status, responses) }
 })
 const completed = computed(() => props.form.status === 'completed')
 // A newer live copy carries the answers already written.
@@ -90,6 +116,7 @@ watch(
   () => props.form.updatedAt,
   (live) => {
     for (const [itemId, entry] of Object.entries(pending)) if (entry.state === 'saved' && entry.liveAt !== live) delete pending[itemId]
+    for (const [itemId, entry] of Object.entries(savedNotes)) if (entry.liveAt !== live) delete savedNotes[itemId]
   },
 )
 const editable = computed(() => props.access.fill && !completed.value)
@@ -109,6 +136,10 @@ const status = computed(() => {
   return { dot: 'accent', text: t('checklistRemaining', { count: 0 }) }
 })
 const words = { yes: t('yes'), no: t('no'), photos: (count: number) => t('nPhotosCount', { count }) }
+const noteWords = {
+  line: (label: string, text: string) => t('checklistNoteLine', { label, text }),
+  photo: (number: number) => t('checklistNotePhoto', { number }),
+}
 const country = computed(() => session.company?.country)
 
 const choices = (item: FormItem): string[] => (item.type === 'boolean' ? [t('yes'), t('no')] : optionsOf(item, locale.value))
@@ -125,7 +156,8 @@ const textOf = (item: FormItem) => drafts[item.id] ?? String(responseOf(view.val
 function focusQuestion(index: number) {
   void nextTick(() => {
     const box = document.querySelector<HTMLElement>(`[data-q-index="${index}"]`)
-    const target = box?.querySelector<HTMLElement>('[tabindex="0"][role], input, button:not([disabled])')
+    // The answer, not the note's link (it comes before a question's photos).
+    const target = box?.querySelector<HTMLElement>('[tabindex="0"][role], input, button:not([disabled]):not(.fill-note):not(.fill-note-add)')
     ;(target ?? box)?.focus()
     box?.scrollIntoView({ block: 'nearest' })
   })
@@ -343,6 +375,38 @@ async function finish() {
   }
 }
 
+function openNote(item: FormItem) {
+  if (!editable.value) return
+  noteFailed.value = null
+  noteEdit.value = { item, fields: noteFields(view.value, item) }
+}
+
+async function saveNoteEdit() {
+  const editing = noteEdit.value
+  if (!editing || noteBusy.value) return
+  const itemId = editing.item.id
+  const before = view.value.notes?.[itemId]
+  const note = noteFromFields(before, editing.fields)
+  // Nothing written and nothing there before: nothing to save.
+  if (!note && !before) {
+    noteEdit.value = null
+    return
+  }
+  noteBusy.value = true
+  noteFailed.value = null
+  try {
+    const written = await saveNote(props.orderId, props.form.id, itemId, note)
+    // Shown until the live copy brings it (a transaction does not touch the local cache).
+    if (props.form.updatedAt !== written) savedNotes[itemId] = { note, liveAt: props.form.updatedAt }
+    noteEdit.value = null
+  } catch (error) {
+    console.warn('forms: note not saved', error)
+    noteFailed.value = error instanceof FormCompleted ? t('web.forms.completedElsewhere') : t('web.forms.noteSaveFailed')
+  } finally {
+    noteBusy.value = false
+  }
+}
+
 function reopenFromNotice() {
   doneNotice.value = false
   void reopen()
@@ -480,6 +544,32 @@ onMounted(() => {
                 <p v-if="invalid[item.id]" class="field-error" role="alert">{{ t('invalidFormat') }}</p>
               </template>
 
+              <!-- The note: what was seen and where. A click on it (or "+ Observação") edits it. -->
+              <button
+                v-if="editable && noteLines(view, item, locale, noteWords).length"
+                type="button"
+                class="link-plain fill-note"
+                :data-testid="`fill-note-${item.id}`"
+                @click="openNote(item)"
+              >
+                <span class="sub fill-note-label">{{ t('checklistNote') }}</span>
+                <span v-for="(line, at) in noteLines(view, item, locale, noteWords)" :key="at" class="fill-note-line">{{ line }}</span>
+              </button>
+              <div v-else-if="noteLines(view, item, locale, noteWords).length" class="fill-note" :data-testid="`fill-note-${item.id}`">
+                <p class="sub fill-note-label">{{ t('checklistNote') }}</p>
+                <p v-for="(line, at) in noteLines(view, item, locale, noteWords)" :key="at" class="fill-note-line">{{ line }}</p>
+              </div>
+              <button
+                v-else-if="editable"
+                type="button"
+                class="link fill-note-add"
+                :aria-label="`${t('checklistNoteAdd')}: ${labelOf(item, locale)}`"
+                :data-testid="`fill-note-add-${item.id}`"
+                @click="openNote(item)"
+              >
+                {{ t('checklistNoteAdd') }}
+              </button>
+
               <div v-if="(responseOf(view, item.id)?.photoUrls.length ?? 0) > 0 || (editable && (item.allowPhotos || item.type === 'photo_only'))" class="photos fill-photos">
                 <button
                   v-for="(url, at) in responseOf(view, item.id)?.photoUrls ?? []"
@@ -551,6 +641,39 @@ onMounted(() => {
       <div class="layer-foot">
         <button v-if="editable" type="button" class="btn btn--ghost link--danger" data-testid="photo-remove" @click="removing = { itemId: viewed.itemId, url: viewed.photos[viewed.index] as string }">{{ t('removePhoto') }}</button>
         <button type="button" class="btn" data-autofocus @click="close()">{{ t('close') }}</button>
+      </div>
+    </template>
+  </Layer>
+  <Layer v-if="noteEdit" kind="dialog" :label="t('checklistNote')" @close="noteEdit = null">
+    <template #default="{ close }">
+      <div class="layer-head"><h2 class="layer-title">{{ t('checklistNote') }}</h2></div>
+      <form class="layer-body fill-note-form" data-testid="note-dialog" @submit.prevent="saveNoteEdit">
+        <label class="field-label" for="fill-note-text">{{ labelOf(noteEdit.item, locale) }}</label>
+        <textarea
+          id="fill-note-text"
+          v-model="noteEdit.fields.text"
+          class="field"
+          rows="2"
+          :placeholder="t('checklistNotePlaceholder')"
+          data-autofocus
+          @keydown.enter.exact.prevent="saveNoteEdit"
+        ></textarea>
+        <template v-for="(entry, at) in noteEdit.fields.options" :key="`o-${entry.option}`">
+          <label class="field-label" :for="`fill-note-option-${at}`">{{ optionText(noteEdit.item, entry.option, locale) }}</label>
+          <textarea :id="`fill-note-option-${at}`" v-model="entry.text" class="field" rows="2" :placeholder="t('checklistNotePlaceholder')" @keydown.enter.exact.prevent="saveNoteEdit"></textarea>
+        </template>
+        <div v-for="(entry, at) in noteEdit.fields.photos" :key="`p-${entry.url}`" class="fill-note-photo">
+          <img class="photo" :src="entry.url" alt="" loading="lazy" />
+          <div>
+            <label class="field-label" :for="`fill-note-photo-${at}`">{{ t('checklistNotePhoto', { number: at + 1 }) }}</label>
+            <textarea :id="`fill-note-photo-${at}`" v-model="entry.text" class="field" rows="2" :placeholder="t('checklistNotePlaceholder')" @keydown.enter.exact.prevent="saveNoteEdit"></textarea>
+          </div>
+        </div>
+        <p v-if="noteFailed" class="field-error" role="alert">{{ noteFailed }}</p>
+      </form>
+      <div class="layer-foot">
+        <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
+        <button type="button" class="btn btn--primary" :disabled="noteBusy" data-testid="note-done" @click="saveNoteEdit">{{ noteBusy ? t('web.newOrder.saving') : t('checklistQuestionDone') }}</button>
       </div>
     </template>
   </Layer>

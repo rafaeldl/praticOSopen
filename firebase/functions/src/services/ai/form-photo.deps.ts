@@ -12,7 +12,8 @@
  * - AI_FORM_PHOTO_PROVIDER         gemini (default) | claude | company (= the company's provider)
  * - AI_FORM_PHOTO_GEMINI_MODEL     default gemini-3.8-flash
  * - AI_FORM_PHOTO_VERTEX_LOCATION  default global
- * - AI_FORM_PHOTO_GEMINI_THINKING  minimal | low (default) | medium | high | off
+ * - AI_FORM_PHOTO_GEMINI_THINKING  minimal | low (default) | medium | high | off (off = the
+ *   Gemini client's own rule: nothing on Gemini 2.5, which rejects the field)
  */
 
 import { getAiSettings, releaseAiRequest, reserveAiRequest } from './ai-quota.service';

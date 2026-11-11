@@ -53,8 +53,10 @@ class _Host extends StatefulWidget {
     this.maintenances = const [],
     this.onOpenMaintenance,
     this.initialView,
+    this.showPrices = true,
   });
 
+  final bool showPrices;
   final HomeView? initialView;
   final List<Device> maintenances;
   final ValueChanged<Device>? onOpenMaintenance;
@@ -80,8 +82,14 @@ class _HostState extends State<_Host> {
 
   /// What the store would load for each view.
   List<Order> get _orders => switch (view) {
-    HomeView.open || HomeView.mine || HomeView.quotes || HomeView.onHold =>
+    HomeView.open ||
+    HomeView.mine ||
+    HomeView.quotes ||
+    HomeView.onHold ||
+    HomeView.late =>
       widget.orders.where((o) => !HomeRules.isFinished(o)).toList(),
+    HomeView.unpaid =>
+      widget.orders.where((o) => o.payment == 'unpaid').toList(),
     HomeView.done => widget.orders.where((o) => o.status == 'done').toList(),
     HomeView.all => widget.orders,
   };
@@ -100,7 +108,7 @@ class _HostState extends State<_Host> {
       hasMore: false,
       loadFailed: widget.loadFailed,
       hasAnyOrders: widget.hasAnyOrders,
-      showPrices: true,
+      showPrices: widget.showPrices,
       showDevice: true,
       unreadCount: widget.unread,
       companyName: 'Oficina do Zé',
@@ -124,6 +132,14 @@ class _HostState extends State<_Host> {
       now: () => _now,
     );
   }
+}
+
+/// Taps a filter button, scrolling the line first: with seven filters the
+/// last ones start past the edge.
+Future<void> _tapFilter(WidgetTester tester, String label) async {
+  await tester.ensureVisible(find.text(label));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(label));
 }
 
 Widget _app(Widget home, {Brightness brightness = Brightness.light}) {
@@ -262,7 +278,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('Concluídas'));
+      await _tapFilter(tester, 'Concluídas');
       await tester.pumpAndSettle();
       expect(find.text('Manutenções chegando'), findsNothing);
     });
@@ -280,7 +296,8 @@ void main() {
     expect(find.text('Atrasada 4 dias'), findsOneWidget);
     // Only the overdue row gets color: one dot, no group headers.
     expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
-    expect(find.text('Atrasadas'), findsNothing);
+    // No "Atrasadas" section: only the filter button has the word.
+    expect(find.text('Atrasadas'), findsOneWidget);
     expect(find.text('Duda'), findsNothing);
     // Mail-style rows: value on the right, no photo.
     expect(find.byType(OrderListRow), findsNWidgets(3));
@@ -301,7 +318,7 @@ void main() {
     expect(find.textContaining('· visita $day'), findsNWidgets(2));
     expect(find.textContaining('entrega $due · visita $day'), findsOneWidget);
 
-    await tester.tap(find.text('Concluídas'));
+    await _tapFilter(tester, 'Concluídas');
     await tester.pumpAndSettle();
     expect(find.text('Caio'), findsOneWidget);
     expect(find.textContaining('visita'), findsNothing);
@@ -321,7 +338,7 @@ void main() {
     expect(quotes.center.dy, open.center.dy);
     expect(quotes.left, greaterThan(open.right));
 
-    await tester.tap(find.text('Concluídas'));
+    await _tapFilter(tester, 'Concluídas');
     await tester.pumpAndSettle();
     expect(reported, [HomeView.done]);
     expect(find.text('Duda'), findsOneWidget);
@@ -331,7 +348,7 @@ void main() {
   testWidgets('Concluídas: total stays on the right, only what is left to '
       'receive goes on the status line', (tester) async {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
-    await tester.tap(find.text('Concluídas'));
+    await _tapFilter(tester, 'Concluídas');
     await tester.pumpAndSettle();
 
     expect(find.textContaining('380,00'), findsOneWidget);
@@ -354,7 +371,7 @@ void main() {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
     await tester.ensureVisible(find.text('Todas'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Todas'));
+    await _tapFilter(tester, 'Todas');
     await tester.pumpAndSettle();
     expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(find.text('Elis'), findsOneWidget);
@@ -398,6 +415,90 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Quitéria'), findsOneWidget);
     expect(find.text('Aprígio'), findsNothing);
+  });
+
+  testWidgets('filters in the same order as the web, Sem receber only with '
+      'values', (tester) async {
+    await tester.pumpWidget(_app(_Host(orders: mixed)));
+    const order = [
+      'Em aberto',
+      'Atrasadas',
+      'Orçamentos',
+      'Paradas',
+      'Sem receber',
+      'Concluídas',
+      'Todas',
+    ];
+    final lefts = [for (final l in order) tester.getRect(find.text(l)).left];
+    expect(lefts, [...lefts]..sort());
+    expect(find.text('Para hoje'), findsNothing);
+
+    await tester.pumpWidget(_app(_Host(orders: mixed, showPrices: false)));
+    await tester.pumpAndSettle();
+    expect(find.text('Sem receber'), findsNothing);
+    expect(find.text('Atrasadas'), findsOneWidget);
+  });
+
+  testWidgets('the chosen filter is navy, like the site and the web', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_Host(orders: mixed)));
+    Color fill(String label) {
+      final box = tester.widget<Container>(
+        find
+            .ancestor(of: find.text(label), matching: find.byType(Container))
+            .first,
+      );
+      return (box.decoration as BoxDecoration).color!;
+    }
+
+    expect(fill('Em aberto').toARGB32(), 0xFF07294F);
+    expect(fill('Atrasadas').toARGB32(), isNot(0xFF07294F));
+  });
+
+  testWidgets('Atrasadas shows only the late ones, the most overdue first', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            _order('Recente', 'approved', number: 1, due: DateTime(2026, 10, 9)),
+            _order('Antiga', 'progress', number: 2, due: DateTime(2026, 9, 1)),
+            _order('Em dia', 'approved', number: 3, due: DateTime(2026, 12, 1)),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Atrasadas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Em dia'), findsNothing);
+    expect(find.text('2 atrasadas'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Antiga')).dy,
+      lessThan(tester.getTopLeft(find.text('Recente')).dy),
+    );
+  });
+
+  testWidgets('Sem receber shows only completed orders not received', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            _order('Devendo', 'done', number: 1, payment: 'unpaid'),
+            _order('Orçamento', 'quote', number: 2, payment: 'unpaid'),
+            _order('Pago', 'done', number: 3, payment: 'paid'),
+          ],
+        ),
+      ),
+    );
+    await _tapFilter(tester, 'Sem receber');
+    await tester.pumpAndSettle();
+    expect(find.text('Devendo'), findsOneWidget);
+    expect(find.text('Orçamento'), findsNothing);
+    expect(find.text('Pago'), findsNothing);
   });
 
   testWidgets('Orçamentos shows only quotes, the oldest first', (tester) async {
@@ -471,7 +572,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Paradas'));
+      await _tapFilter(tester, 'Paradas');
       await tester.pumpAndSettle();
 
       expect(find.text('2 paradas'), findsOneWidget);
@@ -509,7 +610,7 @@ void main() {
       );
       expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
 
-      await tester.tap(find.text('Todas'));
+      await _tapFilter(tester, 'Todas');
       await tester.pumpAndSettle();
       expect(
         find.text('Parada desde hoje · Esperando autorização'),
@@ -552,7 +653,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Concluídas'));
+      await _tapFilter(tester, 'Concluídas');
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('order_row_hold')), findsNothing);
     });
@@ -562,7 +663,7 @@ void main() {
         _app(_Host(orders: [_order('Ana', 'progress')])),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Paradas'));
+      await _tapFilter(tester, 'Paradas');
       await tester.pumpAndSettle();
       expect(find.text('Nenhum serviço parado.'), findsOneWidget);
     });
@@ -655,7 +756,15 @@ void main() {
   });
 
   group('filters in one line', () {
-    const labels = ['Em aberto', 'Orçamentos', 'Paradas', 'Concluídas', 'Todas'];
+    const labels = [
+      'Em aberto',
+      'Atrasadas',
+      'Orçamentos',
+      'Paradas',
+      'Sem receber',
+      'Concluídas',
+      'Todas',
+    ];
 
     Future<double> phone(WidgetTester tester, double width) async {
       tester.view.devicePixelRatio = 1;
@@ -766,7 +875,7 @@ void main() {
       await tester.pumpWidget(_app(_Host(orders: mixed)));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Orçamentos'));
+      await tester.tap(find.text('Atrasadas'));
       await tester.pumpAndSettle();
 
       expect(position(tester).pixels, 0);
@@ -791,7 +900,7 @@ void main() {
       expect(find.text('Manutenções chegando'), findsOneWidget);
 
       // "Concluídas" takes the section away; the line stays where it was.
-      await tester.tap(find.text('Concluídas'));
+      await _tapFilter(tester, 'Concluídas');
       await tester.pump();
       expect(find.text('Manutenções chegando'), findsNothing);
       expect(position(tester).pixels, offset);

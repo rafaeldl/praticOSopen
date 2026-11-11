@@ -198,7 +198,15 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
 
     // Aplicar filtros
     if (status != null) {
-      if (['paid', 'unpaid'].contains(status)) {
+      if (status == 'unpaid_done') {
+        // "Sem receber": completed and not received. With a customer there
+        // is no (customer, status, payment) index, so the screen keeps only
+        // the completed ones (HomeRules.unpaidDone).
+        query = query.where('payment', isEqualTo: 'unpaid');
+        if (customerId == null) {
+          query = query.where('status', isEqualTo: 'done');
+        }
+      } else if (['paid', 'unpaid'].contains(status)) {
         query = query.where('payment', isEqualTo: status);
       } else if (status == 'open') {
         // "Em aberto": everything not done/canceled. Uses the existing

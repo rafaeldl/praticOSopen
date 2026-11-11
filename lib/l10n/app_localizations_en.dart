@@ -5394,6 +5394,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareCopyLink => 'Copy the link';
 
   @override
+  String get shareSendPdf => 'Send the PDF';
+
+  @override
+  String get sharePreparingPdf => 'Preparing the PDF…';
+
+  @override
+  String get shareSendLinkWhatsApp => 'Send just the link on WhatsApp';
+
+  @override
+  String get shareSendLinkOnly => 'Send just the link';
+
+  @override
   String get shareLinkCopied => 'Link copied';
 
   @override
@@ -7754,4 +7766,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerSearchOrders => 'Search by order number';
+
+  @override
+  String get filterLate => 'Late';
+
+  @override
+  String get filterUnpaid => 'To receive';
+
+  @override
+  String get noLateOrders => 'Nothing late.';
+
+  @override
+  String get noUnpaidOrders => 'Nothing to receive.';
+
+  @override
+  String get checklistNoteAdd => '+ Note';
+
+  @override
+  String get checklistNote => 'Note';
+
+  @override
+  String get checklistNotePlaceholder => 'What you saw and where';
+
+  @override
+  String checklistNotePhoto(int number) {
+    return 'Photo $number';
+  }
+
+  @override
+  String checklistNoteLine(String label, String text) {
+    return '$label: $text';
+  }
 }

@@ -63,6 +63,12 @@ class PdfLocalizations {
   final String Function(int count) formatAttachedPhotosCount;
   final String Function(String title) formatFormLabel;
 
+  /// "Porta: amassado perto da maçaneta" (a note of an option or a photo).
+  final String Function(String label, String text) formatNoteLine;
+
+  /// "Foto 2" (label of a photo's note).
+  final String Function(int number) formatPhotoNumber;
+
   const PdfLocalizations({
     required this.newOrder,
     required this.notInformed,
@@ -115,6 +121,8 @@ class PdfLocalizations {
     required this.formatPhotosCount,
     required this.formatAttachedPhotosCount,
     required this.formatFormLabel,
+    required this.formatNoteLine,
+    required this.formatPhotoNumber,
   });
 
   /// Creates PdfLocalizations from Flutter BuildContext
@@ -173,6 +181,8 @@ class PdfLocalizations {
       formatPhotosCount: (count) => l10n.nPhotosCount(count),
       formatAttachedPhotosCount: (count) => l10n.attachedPhotosCount(count),
       formatFormLabel: (title) => l10n.formLabelWithTitle(title),
+      formatNoteLine: (label, text) => l10n.checklistNoteLine(label, text),
+      formatPhotoNumber: (number) => l10n.checklistNotePhoto(number),
     );
   }
 }

@@ -18,7 +18,13 @@ enum HomeView {
   quotes,
 
   /// Open orders marked "parada", the ones stopped longest first.
-  onHold;
+  onHold,
+
+  /// Open orders past their due date, the most overdue first.
+  late,
+
+  /// Completed orders not received yet, the most recent first.
+  unpaid;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
@@ -28,6 +34,8 @@ enum HomeView {
     HomeView.mine => 'open',
     HomeView.quotes => 'open',
     HomeView.onHold => 'open',
+    HomeView.late => 'open',
+    HomeView.unpaid => 'unpaid_done',
   };
 
   /// Views that load every open order (so counts are exact).
@@ -35,7 +43,8 @@ enum HomeView {
       this == HomeView.open ||
       this == HomeView.mine ||
       this == HomeView.quotes ||
-      this == HomeView.onHold;
+      this == HomeView.onHold ||
+      this == HomeView.late;
 }
 
 /// Urgency of an open order, in list order.
@@ -177,6 +186,19 @@ class HomeRules {
         ),
       );
   }
+
+  /// Orders past their due date, the most overdue first.
+  static List<Order> overdue(List<Order> orders, DateTime now) {
+    final items = orders.where((o) => isOverdue(o, now)).toList();
+    return items..sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
+  }
+
+  /// Completed orders not received yet ("Sem receber"), in the incoming
+  /// order. The query already asks for these; the check keeps a list read
+  /// with a customer filter (no status in that query) right.
+  static List<Order> unpaidDone(List<Order> orders) => orders
+      .where((o) => o.status == 'done' && o.payment == 'unpaid')
+      .toList();
 
   static const _accents = {
     'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',

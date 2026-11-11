@@ -117,29 +117,9 @@ function sourceReader(ctx: ListContext, source: Source): PageReader {
   }
 }
 
-/** Two sources read side by side (Para hoje: delivery today, visit today), the same order once. */
-function mergedReader(readers: PageReader[]): PageReader {
-  let open = readers.map(() => true)
-  const join = (pages: (ListPage | null)[]) => {
-    open = pages.map((page, index) => (page ? page.hasMore : open[index] as boolean))
-    const seen = new Set<string>()
-    const rows = pages.flatMap((page) => page?.rows ?? []).filter((row) => (seen.has(row.id) ? false : (seen.add(row.id), true)))
-    return { rows, hasMore: open.some(Boolean) }
-  }
-  return {
-    async first() {
-      return join(await Promise.all(readers.map((reader) => reader.first())))
-    },
-    async more() {
-      return join(await Promise.all(readers.map((reader, index) => (open[index] ? reader.more() : null))))
-    },
-  }
-}
-
 function makeLoader(ctx: ListContext, sources: Source[]) {
   const toOrder = (row: Record<string, unknown>) => normalizeOrder(String(row.id), row, ctx.showsMoney)
-  const readers = sources.map((source) => sourceReader(ctx, source))
-  const reader = readers.length === 1 ? (readers[0] as PageReader) : mergedReader(readers)
+  const reader = sourceReader(ctx, sources[0] as Source)
   const base: OrdersQuery = { companyId: ctx.companyId, createdBy: ctx.seesAll ? null : ctx.uid }
   return {
     query: (sources[0] as Source).firestore,
@@ -223,8 +203,6 @@ export function filterSources(ctx: ListContext, filter: ListFilter, now: Date): 
         return [{ status: OPEN_PARAM }]
       case 'late':
         return [{ status: OPEN_PARAM, sort: 'dueDate', direction: 'asc', startDate: '1970-01-01T00:00:00.000Z', endDate: lastBefore(day.today) }]
-      case 'today':
-        return (['dueDate', 'scheduledDate'] as const).map((sort) => ({ status: OPEN_PARAM, sort, direction: 'asc', startDate: lastBefore(day.today), endDate: lastBefore(day.tomorrow) }))
       case 'quotes':
         return [{ status: 'quote', sort: 'createdAt', direction: 'asc' }]
       case 'onHold':

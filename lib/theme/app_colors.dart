@@ -143,7 +143,7 @@ class AppColors {
   );
   static const onSecondaryFill = text;
 
-  /// Navy fill: the "+" (Nova OS) beside the tabs. Inverted (cream) in dark,
+  /// Navy fill: the chosen filter on Início (like the site and the web). Inverted (cream) in dark,
   /// where navy would vanish into the background.
   static const navyFill = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color(0xFF07294F),

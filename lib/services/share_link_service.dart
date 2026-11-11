@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/share_token.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/utils/customer_utils.dart';
@@ -168,6 +170,32 @@ class ShareLinkService {
     AnalyticsService.instance.logShare(method: 'sheet', contentType: 'order');
   }
 
+  /// The order PDF through the system share sheet, with the message and the
+  /// link as the text: the customer gets the file and can still approve
+  /// through the link.
+  Future<void> shareViaSheetWithPdf({
+    required String url,
+    required Uint8List bytes,
+    required String filename,
+    String? message,
+    String? subject,
+    Rect? sharePositionOrigin,
+  }) async {
+    final text = message != null ? '$message\n\n$url' : url;
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/$filename');
+    await file.writeAsBytes(bytes);
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        subject: subject,
+        files: [XFile(file.path, mimeType: 'application/pdf')],
+        sharePositionOrigin: sharePositionOrigin,
+      ),
+    );
+    AnalyticsService.instance.logShare(method: 'pdf', contentType: 'order');
+  }
+
   /// Share via WhatsApp
   Future<void> shareViaWhatsApp({
     required String url,
@@ -222,6 +250,7 @@ class ShareLinkService {
     String? companyName,
     String? locale,
     String? statusContext,
+    bool withPdf = false,
   }) {
     final loc = locale ?? 'pt';
     final company = companyName != null
@@ -230,6 +259,15 @@ class ShareLinkService {
 
     if (statusContext != null) {
       return _buildStatusMessage(loc, statusContext, customerName, orderNumber, company);
+    }
+
+    if (withPdf) {
+      if (loc.startsWith('en')) {
+        return 'Hi $customerName! Here is your service order #$orderNumber$company as a PDF. Through the link you can view details, approve quotes, and leave comments:';
+      } else if (loc.startsWith('es')) {
+        return 'Hola $customerName! Aquí está tu orden de servicio #$orderNumber$company en PDF. Por el enlace puedes ver detalles, aprobar presupuestos y dejar comentarios:';
+      }
+      return 'Olá $customerName! Segue a sua OS #$orderNumber$company em PDF. Pelo link você pode ver os detalhes, aprovar orçamentos e deixar comentários:';
     }
 
     if (loc.startsWith('en')) {
