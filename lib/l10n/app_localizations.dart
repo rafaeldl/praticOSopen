@@ -12482,14 +12482,20 @@ abstract class AppLocalizations {
   /// No description provided for @customersOrderRecent.
   ///
   /// In pt, this message translates to:
-  /// **'Recentes'**
+  /// **'Mais recentes'**
   String get customersOrderRecent;
 
   /// No description provided for @customersOrderName.
   ///
   /// In pt, this message translates to:
-  /// **'A–Z'**
+  /// **'Nome (A–Z)'**
   String get customersOrderName;
+
+  /// No description provided for @customersSortBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ordenar por'**
+  String get customersSortBy;
 
   /// No description provided for @customerShowAllDevices.
   ///

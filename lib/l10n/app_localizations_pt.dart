@@ -7728,10 +7728,13 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get customersOrderRecent => 'Recentes';
+  String get customersOrderRecent => 'Mais recentes';
 
   @override
-  String get customersOrderName => 'A–Z';
+  String get customersOrderName => 'Nome (A–Z)';
+
+  @override
+  String get customersSortBy => 'Ordenar por';
 
   @override
   String customerShowAllDevices(int count, String devices) {

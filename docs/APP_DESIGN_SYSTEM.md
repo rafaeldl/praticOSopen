@@ -24,7 +24,7 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 | `lib/screens/widgets/app_list_row.dart`, `section_label.dart`, `list_states.dart` | Componentes de lista (ver "Componentes de lista") |
 | `test/widgets/list_base_components_test.dart` | Chevron, quebra de texto e empilhamento em texto grande |
 | `lib/screens/widgets/glass_bar_button.dart` | `AppNavBar` (título grande + botões do topo), `GlassBarButton` ("+", "…", compartilhar), `GlassBackButton` |
-| `lib/screens/widgets/pull_down_menu.dart` | `showPullDownMenu`: menu "…" em vidro, com grupos (`PullDownGroup`) e ações com ícone (`PullDownItem`) |
+| `lib/screens/widgets/pull_down_menu.dart` | `showPullDownMenu`: menu "…" em vidro, com grupos (`PullDownGroup`) e ações com ícone (`PullDownItem`); `checked` põe o ✓ na opção atual (menu "Ordenar por" da aba Clientes) |
 | `lib/screens/widgets/picker_screen.dart` | `PickerScaffold<T>`, `pickOne`, `AppSearchField`: telas de escolher (ver "Telas de escolher") |
 | `lib/screens/order/new_order_form.dart` | Peças de cadastro em sheet: `NewOrderTopBar` (X e ✓), `FormCard`, `FormRow`, `FormPill`, `FormPhotos`; e as peças da IA: `AssistantBar` (Foto/Falar), `AssistantTranscript`, `AssistantNote` |
 | `lib/screens/widgets/form_sheet.dart` | `FormSheet` (cadastro novo em sheet grande: X e ✓, linha do que falta, pergunta antes de descartar), `FormSheetRoute` (trava o arrastar para baixo com algo preenchido), `FormFieldsCard` (cartão com campos de texto) e `FormMoreCard` ("Mais dados" que abre no cartão). Usado por Novo cliente, Novo veículo, Novo serviço/produto, Novo checklist e Convidar pessoa |
