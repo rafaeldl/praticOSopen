@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
-import StatusLabel from '@/components/StatusLabel.vue'
+import AgendaList from '@/components/agenda/AgendaList.vue'
 import MonthCalendar from '@/components/agenda/MonthCalendar.vue'
 import TimeGrid, { type ArrowKey } from '@/components/agenda/TimeGrid.vue'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
@@ -39,14 +39,13 @@ import {
   weekOf,
   type AgendaView,
   type Target,
-  type Visit,
 } from '@/lib/agenda/model'
-import { agendaLocale, dayLong, dayMonth, dayNumber, dayShort, targetText, timeOf, weekdayShort, zone } from '@/lib/agenda/text'
+import { agendaLocale, dayLong, dayMonth, dayNumber, targetText, weekdayShort, zone } from '@/lib/agenda/text'
 import '@/styles/agenda.css'
 import { onOrderEvent, orderChanged } from '@/lib/orders/bus'
 import { loadTeam, type Member } from '@/lib/orders/catalog'
 import { accessOf, canCreateOrders } from '@/lib/orders/model'
-import { lateText, orderShort, statusText } from '@/lib/orders/text'
+import { orderShort } from '@/lib/orders/text'
 import { orderOf } from '@/lib/orders/writes'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
@@ -76,7 +75,12 @@ const country = () => session.company?.country
 const companyZone = computed(() => zone())
 const todayDay = computed(() => today(companyZone.value, now.value))
 const day = computed(() => (isDay(route.query.d) ? route.query.d : todayDay.value))
-const view = computed<AgendaView>(() => (wide.value && route.query.view !== 'day' ? 'week' : 'day'))
+/** Big screen: Dia, Semana (the grid) or Lista (the week's visits one after another, agenda.list). */
+const mode = computed<'day' | 'week' | 'list'>(() => {
+  if (!wide.value) return 'day'
+  return route.query.view === 'day' ? 'day' : route.query.view === 'list' ? 'list' : 'week'
+})
+const view = computed<AgendaView>(() => (mode.value === 'day' ? 'day' : 'week'))
 const firstDay = computed(() => firstDayOfWeek(country(), agendaLocale()))
 const days = computed(() => visibleDays(view.value, day.value, firstDay.value))
 const grid = computed(() => monthGrid(day.value, firstDay.value))
@@ -106,7 +110,6 @@ const placed = computed(() => placeVisits(shown.value, (item) => item.stored, co
 const counts = computed(() => Object.fromEntries([...placed.value].map(([key, list]) => [key, list.length])))
 const visibleVisits = computed(() => days.value.flatMap((key) => placed.value.get(key) ?? []))
 const span = computed(() => hourSpan(visibleVisits.value))
-const dayVisits = computed(() => placed.value.get(day.value) ?? [])
 const strip = computed(() => weekOf(day.value, firstDay.value))
 
 const summary = computed(() => {
@@ -130,7 +133,7 @@ function setQuery(patch: Record<string, string | undefined>) {
 }
 
 const goTo = (next: string) => setQuery({ d: next === todayDay.value ? undefined : next })
-const setView = (next: AgendaView) => setQuery({ view: next === 'week' ? undefined : 'day' })
+const setView = (next: 'day' | 'week' | 'list') => setQuery({ view: next === 'week' ? undefined : next })
 const move = (direction: -1 | 1) => goTo(step(view.value, day.value, direction))
 
 async function load(quiet = false) {
@@ -323,15 +326,7 @@ async function pickWho(id: string) {
   setQuery({ who: id || undefined })
 }
 
-function lineOf(item: AgendaOrder): string {
-  const order = item.order
-  const devices = order.devices
-  const device = devices.length ? `${devices[0]?.name || devices[0]?.serial || ''}${devices.length > 1 ? ` +${devices.length - 1}` : ''}` : ''
-  return [device, order.assignedTo?.name ? t('agendaWithPerson', { name: order.assignedTo.name }) : ''].filter(Boolean).join(' · ')
-}
-
 const insidePanel = () => !!document.activeElement?.closest('.panel')
-const visitTime = (visit: Visit<AgendaOrder>) => (visit.allDay ? t('allDay') : timeOf(visit.at))
 
 let stopBus: (() => void) | undefined
 let reloadTimer: ReturnType<typeof setTimeout> | undefined
@@ -377,8 +372,9 @@ onBeforeUnmount(() => {
       <p class="page-sub page-answer" data-testid="agenda-summary">{{ state === 'ready' ? summary : '' }}</p>
     </div>
     <div v-if="wide" class="tabs" role="group" :aria-label="t('web.agenda.viewAs')">
-      <button type="button" :aria-pressed="view === 'day'" @click="setView('day')">{{ t('web.agenda.day') }}</button>
-      <button type="button" :aria-pressed="view === 'week'" @click="setView('week')">{{ t('web.agenda.week') }}</button>
+      <button type="button" :aria-pressed="mode === 'day'" @click="setView('day')">{{ t('web.agenda.day') }}</button>
+      <button type="button" :aria-pressed="mode === 'week'" @click="setView('week')">{{ t('web.agenda.week') }}</button>
+      <button type="button" :aria-pressed="mode === 'list'" @click="setView('list')">{{ t('web.agenda.list') }}</button>
     </div>
   </header>
 
@@ -426,12 +422,12 @@ onBeforeUnmount(() => {
           </nav>
           <LoadingState v-if="state === 'loading'" />
           <ErrorState v-else-if="state === 'failed'" :body="t('web.agenda.loadError')" :retry="() => load()" />
-          <EmptyState v-else-if="!wide && !visibleVisits.length" :title="emptyTitle" :body="t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue')" data-testid="agenda-empty" />
-          <p v-if="wide && state === 'ready' && (canCreate || !visibleVisits.length)" class="ag-hint" :data-testid="visibleVisits.length ? 'agenda-hint' : 'agenda-empty'">
+          <EmptyState v-else-if="(!wide || mode === 'list') && !visibleVisits.length" :title="emptyTitle" :body="t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue')" data-testid="agenda-empty" />
+          <p v-if="wide && mode !== 'list' && state === 'ready' && (canCreate || !visibleVisits.length)" class="ag-hint" :data-testid="visibleVisits.length ? 'agenda-hint' : 'agenda-empty'">
             <strong v-if="!visibleVisits.length">{{ emptyTitle }}.</strong>
             {{ canCreate ? t(timed ? 'web.agenda.clickHint' : 'web.agenda.clickHintDue') : t(timed ? 'web.agenda.emptyHint' : 'web.agenda.emptyHintDue') }}
           </p>
-          <div v-if="wide && state === 'ready'" class="ag-scroll">
+          <div v-if="wide && mode !== 'list' && state === 'ready'" class="ag-scroll">
             <TimeGrid
               :days="days"
               :visits="placed"
@@ -452,22 +448,15 @@ onBeforeUnmount(() => {
               @show-day="(next) => setQuery({ d: next === todayDay ? undefined : next, view: 'day' })"
             />
           </div>
-          <section v-else-if="!wide && state === 'ready' && visibleVisits.length" class="ag-list" aria-labelledby="ag-day-title">
-            <h2 id="ag-day-title" class="ag-day-title">{{ dayShort(day) }} <span class="sub">· {{ t('agendaDayCount', { count: dayVisits.length }) }}</span></h2>
-            <ul>
-              <li v-for="visit in dayVisits" :key="visit.item.order.id">
-                <button type="button" class="ag-row" :data-order="visit.item.order.id" @click="open(visit.item)">
-                  <span class="ag-row-top"><span class="who">{{ visit.item.order.customer?.name || t('web.orders.noCustomer') }}</span><span class="num">{{ visitTime(visit) }}</span></span>
-                  <StatusLabel
-                    :status="visit.item.order.status"
-                    :late-text="lateText(visit.item.order, now)"
-                    :text="statusText(visit.item.order.status)"
-                  > · {{ visit.item.order.number ?? '' }}</StatusLabel>
-                  <span v-if="lineOf(visit.item)" class="sub">{{ lineOf(visit.item) }}</span>
-                </button>
-              </li>
-            </ul>
-          </section>
+          <AgendaList
+            v-else-if="state === 'ready' && visibleVisits.length"
+            :days="days"
+            :visits="placed"
+            :today="todayDay"
+            :now="now"
+            :long="mode === 'list'"
+            @open="open"
+          />
         </div>
       </div>
     </div>

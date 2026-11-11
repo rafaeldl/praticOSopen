@@ -454,3 +454,49 @@ test.describe.serial('empresa B', () => {
     }
   })
 })
+
+test('lista da semana: dias com visita um depois do outro, na ordem, e abrir a OS (agenda.list)', async ({ page }) => {
+  const late = await makeOrder('admin', { scheduledDate: '2033-05-11T17:00:00.000Z', devices: [{ id: 'device-2', name: 'Veículo 2' }] })
+  const early = await makeOrder('admin', { scheduledDate: '2033-05-11T12:00:00.000Z' })
+  const other = await makeOrder('admin', { scheduledDate: '2033-05-13T00:00:00.000' })
+  await openAgenda(page, 'admin', 'd=2033-05-11')
+  await page.getByRole('group', { name: 'Ver por' }).getByRole('button', { name: 'Lista' }).click()
+  await expect(page).toHaveURL(/view=list/)
+  await expect(grid(page)).toHaveCount(0)
+  await expect(page.getByTestId('agenda-summary')).toContainText('3 marcados')
+  // Only the days that have visits, in order, with their visits by time.
+  await expect(page.locator('[data-list-day]')).toHaveCount(2)
+  await expect(page.getByRole('heading', { level: 2, name: /quarta-feira, 11 de maio.*2 marcados/ })).toBeVisible()
+  const rows = page.locator('.ag-list .ag-row')
+  await expect(rows).toHaveCount(3)
+  await expect(rows.nth(0)).toHaveAttribute('data-order', early.id)
+  await expect(rows.nth(0)).toContainText('09:00')
+  await expect(rows.nth(1)).toHaveAttribute('data-order', late.id)
+  await expect(rows.nth(1)).toContainText('Veículo 2')
+  await expect(rows.nth(2)).toHaveAttribute('data-order', other.id)
+  await expect(rows.nth(2)).toContainText('Dia todo')
+  await expectNoAxeViolations(page, 'agenda lista')
+  await page.getByRole('button', { name: 'Próxima semana' }).click()
+  await expect(page).toHaveURL(/view=list/)
+  await expect(page.getByTestId('agenda-empty')).toBeVisible()
+  await page.getByRole('button', { name: 'Semana anterior' }).click()
+  await rows.nth(1).click()
+  await expect(panel(page)).toBeVisible()
+  await expect(page).toHaveURL(new RegExp(`order=${late.id}`))
+})
+
+test('bloco do dia: nome, situação e veículo não ficam um por cima do outro (agenda.view)', async ({ page }) => {
+  const order = await makeOrder('admin', {
+    scheduledDate: '2033-06-14T16:40:00.000Z',
+    assignedTo: { id: 'e2e-technician', name: 'Tiago Tecnico' },
+    devices: [{ id: 'device-2', name: 'Veículo 2' }],
+  })
+  await openAgenda(page, 'admin', 'd=2033-06-14&view=day')
+  const lines = await block(page, order.id).evaluate((element) =>
+    [...element.children].filter((child) => !child.classList.contains('sr')).map((child) => child.getBoundingClientRect()).map((box) => ({ top: box.top, bottom: box.bottom, height: box.height })),
+  )
+  expect(lines.length).toBe(2)
+  for (const line of lines) expect(line.height).toBeGreaterThan(10)
+  expect(lines[1]!.top).toBeGreaterThanOrEqual(lines[0]!.bottom - 0.5)
+  await expect(block(page, order.id)).toContainText('Veículo 2 · com Tiago Tecnico')
+})

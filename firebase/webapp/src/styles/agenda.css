@@ -12,7 +12,7 @@
 
 /* Month */
 .cal-head { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.35rem; }
-.cal-title { flex: 1; font-size: 1rem; font-weight: 700; text-transform: capitalize; }
+.cal-title { flex: 1; font-size: 1rem; font-weight: 700; }
 .cal-grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .cal-grid th { font-size: 0.75rem; font-weight: 600; color: var(--color-muted); padding: 0.2rem 0; text-transform: capitalize; }
 .cal-grid abbr { text-decoration: none; }
@@ -25,6 +25,9 @@
 .cal-dot { width: 0.35rem; height: 0.35rem; border-radius: 50%; background: currentColor; }
 .cal-dot.is-empty { visibility: hidden; }
 
+/* Dates come lower case from Intl ("terça-feira, 11 de maio"): only the first letter goes up, never "De Maio". */
+.cal-title::first-letter, .ag-day-title::first-letter, .tg-day::first-letter, .tg-day-btn::first-letter { text-transform: uppercase; }
+
 /* Week strip (phone) */
 .ag-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--color-rule); }
 .ag-strip-day { min-height: 3.5rem; border: 0; border-radius: 8px; background: transparent; color: var(--color-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; }
@@ -34,11 +37,16 @@
 
 /* Day list (phone) */
 .ag-list { padding: 0 1rem 1.25rem; }
-.ag-day-title { font-size: 1rem; font-weight: 700; margin: 0.75rem 0 0.25rem; text-transform: capitalize; }
+.ag-day-title { font-size: 1rem; font-weight: 700; margin: 0.75rem 0 0.25rem; }
 .ag-list ul { list-style: none; margin: 0; padding: 0; }
 .ag-row { display: grid; gap: 0.2rem; width: 100%; min-height: 3.5rem; padding: 0.6rem 0; border: 0; border-bottom: 1px solid var(--color-rule); background: none; color: var(--color-ink); font: inherit; text-align: left; }
 .ag-row-top { display: flex; justify-content: space-between; gap: 0.5rem; font-weight: 600; }
 .ag-row .status { white-space: normal; }
+.ag-day-title.is-today { color: var(--color-accent); }
+/* Week list (big screen): a reading width, the day stays on top while its visits scroll. */
+.ag-list--long { max-width: 46rem; padding-top: 0.25rem; }
+.ag-list--long .ag-day-title { position: sticky; top: 0; z-index: 1; background: var(--color-paper); margin: 0; padding: 0.75rem 0 0.4rem; border-bottom: 1px solid var(--color-rule); }
+.ag-list--long section + section { margin-top: 0.75rem; }
 
 .ag-hint { margin: 0 0 0.6rem; color: var(--color-muted); font-size: 0.875rem; }
 .ag-hint strong { color: var(--color-ink); }
@@ -48,8 +56,8 @@
 .tg--single { grid-template-columns: 3.75rem minmax(0, 1fr); min-width: 0; }
 .tg-head { position: sticky; top: 0; z-index: 3; background: var(--color-paper); border-bottom: 1px solid var(--color-rule); padding: 0.4rem 0.5rem; display: flex; flex-direction: column; gap: 0.05rem; }
 .tg-head.is-today { box-shadow: inset 0 -3px 0 var(--color-accent); }
-.tg-day { font-size: 0.9375rem; font-weight: 700; text-transform: capitalize; }
-.tg-day-btn { border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: left; text-transform: inherit; cursor: pointer; min-height: 1.75rem; }
+.tg-day { font-size: 0.9375rem; font-weight: 700; }
+.tg-day-btn { border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; min-height: 1.75rem; }
 .tg-day-btn:hover { text-decoration: underline; }
 .tg-head.is-today .tg-day { color: var(--color-accent); }
 .tg-gutter { border-right: 1px solid var(--color-rule); }
@@ -64,12 +72,14 @@
 .tg-block.is-fixed { cursor: pointer; border-left-color: var(--color-neutral); }
 .tg-block.is-late { border-left-color: var(--color-danger); }
 .tg-block--allday { position: static; height: auto; min-height: 2.5rem; }
-.tg-block strong { font-weight: 700; display: block; overflow: hidden; text-overflow: clip; }
+.tg-block > * { flex: none; }
+.tg-block strong { font-weight: 700; display: block; overflow: hidden; white-space: nowrap; text-overflow: clip; }
 .tg-block:hover { background: var(--color-paper-2); }
 .tg-block:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 1px; z-index: 4; }
 .tg-block.is-pending { border-style: dashed; border-width: 2px; border-left-width: 4px; background: var(--color-selected); z-index: 4; }
-.tg-line { display: block; color: var(--color-muted); }
+.tg-line { display: block; color: var(--color-muted); overflow: hidden; white-space: nowrap; }
 .tg-block.is-late .tg-line:first-of-type { color: var(--color-danger-text); font-weight: 700; }
+.tg-block.is-late .tg-extra { color: var(--color-muted); font-weight: 400; }
 .tg-col.can-create, .tg-allday.can-create { cursor: pointer; }
 .tg-ghost { position: absolute; left: 2px; right: 2px; height: calc(var(--hour) / 2 - 2px); z-index: 1; pointer-events: none; display: flex; align-items: center; padding: 0 0.4rem; border: 1px dashed var(--color-accent); border-radius: 4px; background: var(--color-accent-soft, var(--color-selected)); color: var(--color-ink); font-family: var(--font-num); font-size: 0.8125rem; font-weight: 600; }
 .tg-ghost--day { top: 0; bottom: 0; height: auto; align-items: flex-start; padding-top: 0.3rem; }
