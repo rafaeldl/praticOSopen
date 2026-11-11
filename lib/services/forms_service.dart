@@ -291,6 +291,33 @@ class FormsService {
     }
   }
 
+  /// Marks the answer of [itemId] as the AI's ([filled]) or the person's
+  /// (`aiFilled`, spec 2026-11-10-checklist-ia-foto-design §5). Only that
+  /// list changes; offline the write is queued like [saveNote].
+  Future<void> markAiFilled(
+    String companyId,
+    String orderId,
+    String formId,
+    String itemId, {
+    required bool filled,
+  }) async {
+    final formRef = _getFormsCollection(companyId, orderId).doc(formId);
+    final write = formRef.update({
+      'aiFilled': filled
+          ? FieldValue.arrayUnion([itemId])
+          : FieldValue.arrayRemove([itemId]),
+    });
+    try {
+      await write.timeout(responseTransactionTimeout);
+    } on TimeoutException {
+      unawaited(
+        write.catchError((Object e) {
+          debugPrint('Queued checklist aiFilled failed: $e');
+        }),
+      );
+    }
+  }
+
   /// Atualiza o status do formulário (ex: Finalizar)
   Future<void> updateStatus(
       String companyId, String orderId, String formId, FormStatus status) async {

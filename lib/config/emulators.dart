@@ -11,9 +11,20 @@ class FirebaseEmulators {
     'FIREBASE_EMULATOR_HOST',
     defaultValue: '127.0.0.1',
   );
-  static const authPort = 9099;
-  static const firestorePort = 8080;
-  static const storagePort = 9199;
+  // Other ports (`--dart-define=FIREBASE_AUTH_EMULATOR_PORT=…`) when the
+  // defaults are taken by another run on the same machine.
+  static const authPort = int.fromEnvironment(
+    'FIREBASE_AUTH_EMULATOR_PORT',
+    defaultValue: 9099,
+  );
+  static const firestorePort = int.fromEnvironment(
+    'FIREBASE_FIRESTORE_EMULATOR_PORT',
+    defaultValue: 8080,
+  );
+  static const storagePort = int.fromEnvironment(
+    'FIREBASE_STORAGE_EMULATOR_PORT',
+    defaultValue: 9199,
+  );
 
   /// Points Auth, Firestore and Storage at the emulators. No-op unless [enabled].
   static Future<void> connect() async {

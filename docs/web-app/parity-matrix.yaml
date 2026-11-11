@@ -9965,6 +9965,24 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
+- id: checklist.question.ai-photo
+  screen: lib/screens/forms/checklist_ai_notice.dart
+  route: null
+  action: "A IA lê a foto da pergunta e preenche resposta e observação"
+  kind: action
+  roles: [owner, admin, supervisor, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, error, limit, offline]
+  feature_flags: [aiEnabled]
+  hardware: [camera, gallery]
+  data: ["api:POST /v1/app/ai/form-photo", "companies/{id}/orders/{id}/forms"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: fillForms
+  note: "Só preenche resposta e observação vazias (✦, aviso com Desfazer); onde a pessoa escreveu, oferece Acrescentar. Ver docs/formularios_dinamicos.md, \"A IA lê a foto\"."
 - id: checklist.question.nav
   screen: lib/screens/forms/form_question_sheet.dart
   route: null

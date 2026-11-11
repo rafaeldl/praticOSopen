@@ -117,6 +117,8 @@ much was used; these events say whether it worked.
 | `ai_assist_requested` | `input`: `text`, `photo`, `photo_text` | Request sent |
 | `ai_assist_result` | `result`: `filled`, `nothing`, `quota`, `error` | Answer applied or refused |
 | `ai_assist_undone` | | "Desfazer" |
+| `checklist_answered` | `type` (tipo da pergunta), `via`: `ai_photo` | The AI answered a checklist question from its photo |
+| `checklist_ai_undone` | `answer`, `note` (1 when undone) | "Desfazer" on what the AI filled in a checklist |
 | `ai_order_saved` | | New order saved with something the assistant filled |
 | `upgrade_modal_shown` | `trigger`: `ai_limit_100`, `courtesy_first`, `courtesy_last` | Limit note or courtesy banner shown |
 

@@ -12640,6 +12640,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{label}: {text}'**
   String checklistNoteLine(String label, String text);
+
+  /// No description provided for @checklistAiReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo a foto…'**
+  String get checklistAiReading;
+
+  /// No description provided for @checklistAiFilled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchi: {summary}'**
+  String checklistAiFilled(String summary);
+
+  /// No description provided for @checklistAiFilledMark.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchido pela IA'**
+  String get checklistAiFilledMark;
+
+  /// No description provided for @checklistAiSeenAlso.
+  ///
+  /// In pt, this message translates to:
+  /// **'A IA viu também: {text}'**
+  String checklistAiSeenAlso(String text);
+
+  /// No description provided for @checklistAiAppend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acrescentar'**
+  String get checklistAiAppend;
+
+  /// No description provided for @checklistAiDiffers.
+  ///
+  /// In pt, this message translates to:
+  /// **'A foto mostra: {answer}'**
+  String checklistAiDiffers(String answer);
+
+  /// No description provided for @checklistAiUseAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar'**
+  String get checklistAiUseAnswer;
+
+  /// No description provided for @checklistAiDark.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto escura, não deu para ler'**
+  String get checklistAiDark;
+
+  /// No description provided for @checklistAiBlurry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto tremida, não deu para ler'**
+  String get checklistAiBlurry;
+
+  /// No description provided for @checklistAiOffTarget.
+  ///
+  /// In pt, this message translates to:
+  /// **'A foto não mostra o que a pergunta pede'**
+  String get checklistAiOffTarget;
+
+  /// No description provided for @checklistAiRetake.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar de novo'**
+  String get checklistAiRetake;
+
+  /// No description provided for @checklistAiFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para ler a foto agora'**
+  String get checklistAiFailed;
+
+  /// No description provided for @checklistAiQuota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acabaram as leituras da IA deste mês'**
+  String get checklistAiQuota;
+
+  /// No description provided for @checklistAiNothing.
+  ///
+  /// In pt, this message translates to:
+  /// **'A IA não achou a resposta na foto'**
+  String get checklistAiNothing;
+
+  /// No description provided for @checklistAiView.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver'**
+  String get checklistAiView;
 }
 
 class _AppLocalizationsDelegate

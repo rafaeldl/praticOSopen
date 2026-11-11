@@ -73,6 +73,7 @@ Quanto demora para valer:
 | Arquivo | Papel |
 |---|---|
 | `lib/services/ai_order_assist_service.dart` | `AiOrderAssistClient`/`AiOrderAssistService` (HTTP): `isEnabled()` (status com cache de 5 min por empresa) e `assist()`; modelo `AiOrderDraft`, erros `AiAssistError` |
+| `lib/services/ai_form_photo_service.dart` | Foto do checklist: `AiFormPhotoService.read()` (`POST /v1/app/ai/form-photo`) e `planAiFormPhoto`, que preenche só o que está vazio (ver `docs/formularios_dinamicos.md`, "A IA lê a foto") |
 | `lib/screens/order/assistant/assistant_input_sheet.dart` | Sheet "Falar o que fazer": campo de texto (o microfone do teclado faz o ditado) + fotos; "Pronto" manda tudo junto |
 | `lib/screens/order/order_screen_v2.dart` | Botões Foto (vidro) e Falar (grafite) na Nova OS; aplica o rascunho e marca o que a IA preencheu; "Qual Juliene?" para cliente e veículo |
 | `lib/services/assistant_registration.dart` | `AssistantRegistration`: monta o cliente/veículo novo com id e grava só no ✓ |

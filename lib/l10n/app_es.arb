@@ -3004,5 +3004,20 @@
   "checklistNotePhoto": "Foto {number}",
   "checklistNoteLine": "{label}: {text}",
   "@checklistNotePhoto": {"placeholders": {"number": {"type": "int"}}},
-  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}}
+  "@checklistNoteLine": {"placeholders": {"label": {"type": "String"}, "text": {"type": "String"}}},
+  "checklistAiReading": "Leyendo la foto…",
+  "checklistAiFilled": "Completé: {summary}",
+  "checklistAiFilledMark": "Completado por la IA",
+  "checklistAiSeenAlso": "La IA también vio: {text}",
+  "checklistAiAppend": "Agregar",
+  "checklistAiDiffers": "La foto muestra: {answer}",
+  "checklistAiUseAnswer": "Cambiar",
+  "checklistAiDark": "Foto oscura, no se pudo leer",
+  "checklistAiBlurry": "Foto movida, no se pudo leer",
+  "checklistAiOffTarget": "La foto no muestra lo que pide la pregunta",
+  "checklistAiRetake": "Tomar otra",
+  "checklistAiFailed": "No se pudo leer la foto ahora",
+  "checklistAiQuota": "Se acabaron las lecturas de IA de este mes",
+  "checklistAiNothing": "La IA no encontró la respuesta en la foto",
+  "checklistAiView": "Ver"
 }

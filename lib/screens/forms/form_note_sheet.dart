@@ -3,6 +3,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/screens/forms/checklist_ai_notice.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -311,10 +312,18 @@ class _NoteField extends StatelessWidget {
 /// Under the answer of a question: the note's lines (tap to edit) or the
 /// "+ Observação" link when there is none.
 class FormNoteSummary extends StatelessWidget {
-  const FormNoteSummary({super.key, required this.lines, this.onEdit});
+  const FormNoteSummary({
+    super.key,
+    required this.lines,
+    this.onEdit,
+    this.ai = false,
+  });
 
   final List<String> lines;
   final VoidCallback? onEdit;
+
+  /// Some of the note is still the AI's: ✦ beside "Observação".
+  final bool ai;
 
   @override
   Widget build(BuildContext context) {
@@ -352,11 +361,24 @@ class FormNoteSummary extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                l10n.checklistNote,
-                style: AppTypography.label.copyWith(
-                  color: AppColors.textSecondary.resolveFrom(context),
-                ),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.checklistNote,
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.textSecondary.resolveFrom(context),
+                      ),
+                    ),
+                  ),
+                  if (ai) ...[
+                    const SizedBox(width: 6),
+                    const ChecklistAiMark(
+                      key: ValueKey('question_note_ai'),
+                      size: 14,
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 2),
               for (final line in lines)

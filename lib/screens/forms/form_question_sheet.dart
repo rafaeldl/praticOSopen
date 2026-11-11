@@ -5,6 +5,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/screens/forms/checklist_ai_notice.dart';
 import 'package:praticos/screens/forms/form_note_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
@@ -67,6 +68,10 @@ int? firstUnansweredIndex(OrderForm form) {
 ///   always in the same place.
 /// - "Pular por agora" on every question and "Voltar à anterior".
 ///
+/// - While the AI reads a photo of the question: "✦ Lendo a foto…"; what it
+///   filled has a ✦, and its notice ([aiNotice]) sits above the bottom bar,
+///   saying which question when it is about another one ("Ver").
+///
 /// Presentational: the screen that opens it ([FormFillScreen]) saves through
 /// [onAnswer]/[onAddPhoto] and rebuilds it with the updated [form]. After the
 /// last question it calls [onEnd]; "Fechar" calls [onClose].
@@ -83,6 +88,10 @@ class FormQuestionSheet extends StatefulWidget {
     this.onOpenPhoto,
     this.uploadingItemId,
     this.onNote,
+    this.aiReadingItemIds = const {},
+    this.aiNotice,
+    this.onAiNoticeAction,
+    this.onAiNoticeClose,
   });
 
   final OrderForm form;
@@ -105,6 +114,14 @@ class FormQuestionSheet extends StatefulWidget {
 
   /// Item whose photos are being uploaded.
   final String? uploadingItemId;
+
+  /// Questions whose photo the AI is reading.
+  final Set<String> aiReadingItemIds;
+
+  /// The notice of the AI's last reading, and its action and "X".
+  final ChecklistAiNotice? aiNotice;
+  final VoidCallback? onAiNoticeAction;
+  final VoidCallback? onAiNoticeClose;
 
   /// After the last question ("Próxima", an answer or "Pular por agora").
   final VoidCallback onEnd;
@@ -247,6 +264,7 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
     final missing = formItemsMissing(widget.form);
     final photos = response?.photoUrls ?? const <String>[];
     final uploading = widget.uploadingItemId == item.id;
+    final aiFilled = widget.form.aiFilled.contains(item.id);
     final photoButton =
         item.allowPhotos &&
         item.type != FormItemType.photoOnly &&
@@ -321,9 +339,33 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
                   ],
                   const SizedBox(height: AppSpacing.xl),
                   KeyedSubtree(
-                    key: ValueKey('answer_${item.id}'),
+                    // A new key when the AI fills it, so a text field shows
+                    // the AI's answer.
+                    key: ValueKey('answer_${item.id}_$aiFilled'),
                     child: _answer(context, item, response, uploading),
                   ),
+                  if (aiFilled && isFormItemAnswered(item, response)) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _textPad(
+                      Row(
+                        key: const ValueKey('question_ai_filled'),
+                        children: [
+                          const ChecklistAiMark(),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              l10n.checklistAiFilledMark,
+                              style: AppTypography.callout.copyWith(
+                                color: AppColors.textSecondary.resolveFrom(
+                                  context,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   if (photos.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.lg),
                     _PhotoStrip(
@@ -333,10 +375,18 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
                           : (i) => widget.onOpenPhoto!(item, i),
                     ),
                   ],
+                  if (widget.aiReadingItemIds.contains(item.id))
+                    _textPad(
+                      const Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.sm),
+                        child: ChecklistAiReading(),
+                      ),
+                    ),
                   _textPad(
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.md),
                       child: FormNoteSummary(
+                        ai: _noteHasAi(widget.form.noteOf(item.id)),
                         lines: formNoteLines(
                           l10n,
                           item,
@@ -353,10 +403,48 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
                 ],
               ),
             ),
+            if (widget.aiNotice case final notice?)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.blockMargin,
+                  AppSpacing.sm,
+                  AppSpacing.blockMargin,
+                  0,
+                ),
+                child: _aiNoticeView(notice, item),
+              ),
             _bottomBar(context, photoButton: photoButton, uploading: uploading),
           ],
         ),
       ),
+    );
+  }
+
+  /// Whether a text of [note] is still the AI's (✦ beside "Observação").
+  static bool _noteHasAi(FormItemNote? note) =>
+      note != null &&
+      ((note.ai && (note.text?.trim().isNotEmpty ?? false)) ||
+          note.options.any((o) => o.ai) ||
+          note.photos.any((p) => p.ai));
+
+  /// The notice on its own question acts there; on another one it says
+  /// which and offers "Ver".
+  Widget _aiNoticeView(ChecklistAiNotice notice, FormItemDefinition current) {
+    final index = _items.indexWhere((i) => i.id == notice.itemId);
+    final elsewhere = notice.itemId != current.id && index >= 0;
+    return ChecklistAiNoticeView(
+      notice: notice,
+      questionLabel: elsewhere
+          ? _items[index].getLocalizedLabel(widget.localeCode)
+          : null,
+      onView: elsewhere
+          ? () {
+              _flushDraft();
+              _goTo(index);
+            }
+          : null,
+      onAction: widget.onAiNoticeAction ?? () {},
+      onClose: widget.onAiNoticeClose ?? () {},
     );
   }
 
