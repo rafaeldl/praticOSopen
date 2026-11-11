@@ -313,6 +313,27 @@ Com ações opcionais no formato de resposta, o Claude pulava `payment` em "term
 
 Nenhuma empresa tem a chave ligada.
 
+## Foto do checklist (teste antes da rota)
+
+Spec: `docs/superpowers/specs/2026-11-10-checklist-ia-foto-design.md`. A rota `form-photo` ainda não existe (#687). O prompt, o formato de resposta e o parser da §7 ficam em `src/services/ai/form-photo.prompt.ts`. O parser descarta resposta fora das opções e qualquer resposta com `confident: false`, mas mantém a observação. `scripts/checklist-photo-eval.ts` manda cada foto com a pergunta e mede o acerto por tipo (km, combustível, número de série, dano, tela, visor), se a observação diz o lugar certo e quanto tempo leva. As fotos e as respostas certas ficam fora do repositório.
+
+```bash
+cd firebase/functions
+ANTHROPIC_API_KEY=... GCLOUD_PROJECT=praticos npm run ai:photo-eval -- --dir <pasta com cases.json> \
+  --gemini-model gemini-3.8-flash --gemini-location global --gemini-thinking low --runs 2
+```
+
+Primeira medição (2026-11-11, 40 perguntas em 36 fotos públicas do Wikimedia Commons, duas passadas). "Errada" é resposta dada com certeza e que estava errada; "sem resposta" é quando o modelo disse que não tinha certeza:
+
+| Modelo | Certas | Erradas | Sem resposta | Km certo | Observação com o lugar certo | Tempo (mediana) |
+|---|---|---|---|---|---|---|
+| Gemini 3.8 Flash (`global`, `thinkingLevel: low`) | 78/80 | 0 | 2 | 26/26 | 18/18 | 3,7 s |
+| Gemini 2.5 Flash (São Paulo) | 74/80 | 6 | 0 | 24/26 | 14/18 | 2,3 s |
+| Claude Sonnet 5.5 (`effort: low`) | 61/80 | 2 | 17 | 16/26 | 16/18 | 2,8 s |
+| Claude Haiku 5.5 (`effort: low`) | 62/80 | 0 | 18 | 20/26 | 15/18 | 2,0 s |
+
+O Gemini 2.5 leu um hodômetro com certeza e errou um dígito, e nas observações trocou esquerda e direita. Os dois Claude quase não erram, mas deixam sem resposta muito km e combustível que estão legíveis. O Gemini 3 pensa demais por padrão: o `VertexGeminiClient` aceita `thinkingLevel`, que só é enviado quando alguém o informa. Fotos públicas não são fotos de balcão, então a decisão da Fase 1 depende de repetir o teste com fotos reais.
+
 ## Provedores
 
 A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmRequest` (prompt, texto, fotos/áudio e o JSON Schema da resposta) e o `LlmRouter` entrega para o cliente certo:
