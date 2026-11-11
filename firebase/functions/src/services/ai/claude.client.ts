@@ -2,20 +2,25 @@
  * Claude on the Anthropic API (docs/AI_ORDER_ASSIST.md).
  *
  * - Key: Secret Manager secret `ANTHROPIC_API_KEY`, bound to the `api` function.
- * - AI_CLAUDE_MODEL  (default claude-sonnet-5-5)
+ * - AI_CLAUDE_MODEL  (default claude-haiku-5-5)
  * - AI_CLAUDE_EFFORT (default low: short extraction, latency matters more than depth)
  *
  * Structured outputs (`output_config.format`) keep the answer on the shared
- * schema. Server-side fallback (`fallbacks: 'default'`) re-runs a request the
- * model declines on another model inside the same call. Claude reads images,
- * not audio: the router sends audio requests to the default provider.
+ * schema. Thinking stays adaptive (not sent) and no `temperature`: Haiku 5.5
+ * and Sonnet 5.5 reject non-default sampling. Server-side fallback
+ * (`fallbacks: 'default'`) re-runs a request the model declines on another
+ * model inside the same call; Haiku has none, so it is only sent for the
+ * models that support it. Claude reads images, not audio: the router sends
+ * audio requests to a provider that hears (Gemini).
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { JsonSchema, LlmProviderClient, LlmRequest } from './llm.client';
 import { LlmUnavailableError } from './llm.client';
 
-const DEFAULT_MODEL = 'claude-sonnet-5-5';
+const DEFAULT_MODEL = 'claude-haiku-5-5';
+/** Models with server-side fallback on refusal (Haiku has none: the beta and `fallbacks` would fail). */
+const FALLBACK_MODELS = /^claude-(sonnet-5-5|opus-5|fable-5)/;
 const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 type Effort = (typeof EFFORTS)[number];
 const TIMEOUT_MS = 45_000;
@@ -66,8 +71,9 @@ export class ClaudeClient implements LlmProviderClient {
       response = await this.sdk().beta.messages.create({
         model: this.model,
         max_tokens: MAX_TOKENS,
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
+        ...(FALLBACK_MODELS.test(this.model)
+          ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const }
+          : {}),
         system: request.systemPrompt,
         output_config: {
           effort: this.effort,
