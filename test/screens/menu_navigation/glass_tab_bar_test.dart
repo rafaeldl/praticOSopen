@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/screens/menu_navigation/widgets/glass_tab_bar.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
+import 'package:praticos/theme/app_spacing.dart';
 
 final _items = [
   BottomNavigationBarItem(icon: Icon(CupertinoIcons.house), label: 'Início'),
@@ -188,6 +189,10 @@ void main() {
       action: NewOrderTabButton(label: 'Nova OS', onPressed: () {}),
     );
     expect(plusGlass, findsOneWidget);
+    // Touch target: same size as the yellow one, never under 44.
+    final glassSize = tester.getSize(find.byType(NewOrderTabButton));
+    expect(glassSize.height, GlassTabBar.capsuleHeight);
+    expect(glassSize.width, greaterThanOrEqualTo(AppSizes.minTouchTarget));
     expect(icon(), Color(AppColors.text.color.toARGB32()));
   });
 
