@@ -4429,8 +4429,8 @@ abstract class AppLocalizations {
   /// No description provided for @orderItemSearchPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar serviço ou peça'**
-  String get orderItemSearchPlaceholder;
+  /// **'Buscar serviço ou {product}'**
+  String orderItemSearchPlaceholder(String product);
 
   /// No description provided for @orderCreateItemError.
   ///
@@ -6730,6 +6730,12 @@ abstract class AppLocalizations {
   /// **'Falta receber {value}'**
   String customerOwesValue(String value);
 
+  /// Clientes list, right side: what the customer still owes
+  ///
+  /// In pt, this message translates to:
+  /// **'Deve {value}'**
+  String customerOwedTrailing(String value);
+
   /// No description provided for @askOrderForCustomer.
   ///
   /// In pt, this message translates to:
@@ -7411,8 +7417,8 @@ abstract class AppLocalizations {
   /// No description provided for @orderAddItemRow.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar serviço ou peça'**
-  String get orderAddItemRow;
+  /// **'Adicionar serviço ou {product}'**
+  String orderAddItemRow(String product);
 
   /// No description provided for @orderPickCustomerRow.
   ///
@@ -7711,8 +7717,8 @@ abstract class AppLocalizations {
   /// No description provided for @pickerNewItem.
   ///
   /// In pt, this message translates to:
-  /// **'Novo serviço ou peça'**
-  String get pickerNewItem;
+  /// **'Novo serviço ou {product}'**
+  String pickerNewItem(String product);
 
   /// No description provided for @pickerNewChecklist.
   ///
@@ -7735,8 +7741,8 @@ abstract class AppLocalizations {
   /// No description provided for @pickerNoItemWith.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum serviço ou peça com “{query}”. Cadastre e ele já entra na OS.'**
-  String pickerNoItemWith(String query);
+  /// **'Nenhum serviço ou {product} com “{query}”. Cadastre e ele já entra na OS.'**
+  String pickerNoItemWith(String product, String query);
 
   /// No description provided for @pickerNoMatch.
   ///
@@ -9314,6 +9320,54 @@ abstract class AppLocalizations {
   /// **'Emitida · nº {number}'**
   String nfseStatusIssuedNumber(String number);
 
+  /// No description provided for @nfseStatusIssuedAuto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida sozinha'**
+  String get nfseStatusIssuedAuto;
+
+  /// No description provided for @nfseStatusIssuedAutoNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida sozinha · nº {number}'**
+  String nfseStatusIssuedAutoNumber(String number);
+
+  /// No description provided for @nfseAutoMissingTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o CPF ou CNPJ do cliente'**
+  String get nfseAutoMissingTaxId;
+
+  /// No description provided for @nfseAutoCertificateExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certificado vencido'**
+  String get nfseAutoCertificateExpired;
+
+  /// No description provided for @nfseAutoEmitterNotReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta configurar o CNPJ da nota'**
+  String get nfseAutoEmitterNotReady;
+
+  /// No description provided for @nfseAutoDailyLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite de notas de hoje'**
+  String get nfseAutoDailyLimit;
+
+  /// No description provided for @nfseAutoNotIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não saiu sozinha'**
+  String get nfseAutoNotIssued;
+
+  /// No description provided for @nfseAutoErrorPickEmitter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o CNPJ padrão em Nota fiscal para as notas saírem sozinhas.'**
+  String get nfseAutoErrorPickEmitter;
+
   /// No description provided for @nfseStatusCanceling.
   ///
   /// In pt, this message translates to:
@@ -9368,6 +9422,12 @@ abstract class AppLocalizations {
   /// **'Para emitir, abra a OS e toque em “…”.'**
   String get nfseListEmptyHint;
 
+  /// No description provided for @nfseListEmptyHintDirect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para emitir, abra a OS e toque em “Nota fiscal”.'**
+  String get nfseListEmptyHintDirect;
+
   /// No description provided for @nfseListSearch.
   ///
   /// In pt, this message translates to:
@@ -9401,7 +9461,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseListOnlyServices.
   ///
   /// In pt, this message translates to:
-  /// **'Só os serviços entram na nota. As peças ficam de fora, por isso o total é diferente do Vendido.'**
+  /// **'Só os serviços entram na nota, por isso o total pode ser diferente do Vendido.'**
   String get nfseListOnlyServices;
 
   /// No description provided for @nfseListNoResults.
@@ -9451,6 +9511,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nota fiscal'**
   String get nfseRowTitle;
+
+  /// No description provided for @nfseCompanyRowNoCnpj.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta cadastrar o CNPJ'**
+  String get nfseCompanyRowNoCnpj;
+
+  /// No description provided for @nfseCompanyRowPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta terminar a configuração'**
+  String get nfseCompanyRowPending;
+
+  /// No description provided for @nfseCompanyRowReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronta para emitir'**
+  String get nfseCompanyRowReady;
 
   /// No description provided for @nfseIssueAction.
   ///
@@ -10435,6 +10513,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para salvar. Tente de novo.'**
   String get orderHoldSaveError;
+
+  /// No description provided for @orderStageMoveTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passar para {stage}'**
+  String orderStageMoveTo(String stage);
+
+  /// No description provided for @orderMenuChangeStage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar etapa'**
+  String get orderMenuChangeStage;
+
+  /// No description provided for @orderStagePickerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em que etapa está?'**
+  String get orderStagePickerTitle;
+
+  /// No description provided for @orderStageSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mudar a etapa. Confira a internet e tente de novo.'**
+  String get orderStageSaveError;
 
   /// No description provided for @orderHoldSheetTitle.
   ///
@@ -12084,6 +12186,120 @@ abstract class AppLocalizations {
   /// **'Você recebe um aviso sempre que outra pessoa emite ou cancela uma nota.'**
   String get nfseDirectManagerCanIssueHint;
 
+  /// No description provided for @nfseEmailRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail ao cliente'**
+  String get nfseEmailRow;
+
+  /// No description provided for @nfseEmailSentTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviada para {email} em {date}'**
+  String nfseEmailSentTo(String email, String date);
+
+  /// No description provided for @nfseEmailCancelSentTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso de cancelamento enviado para {email} em {date}'**
+  String nfseEmailCancelSentTo(String email, String date);
+
+  /// No description provided for @nfseEmailFailedTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mandar para {email} em {date}'**
+  String nfseEmailFailedTo(String email, String date);
+
+  /// No description provided for @nfseEmailSkippedNoEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi: o cliente não tem e-mail no cadastro'**
+  String get nfseEmailSkippedNoEmail;
+
+  /// No description provided for @nfseEmailSkippedTurnedOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi: o envio automático está desligado'**
+  String get nfseEmailSkippedTurnedOff;
+
+  /// No description provided for @nfseEmailNotSentYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não foi por e-mail'**
+  String get nfseEmailNotSentYet;
+
+  /// No description provided for @nfseEmailSendAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar de novo'**
+  String get nfseEmailSendAgain;
+
+  /// No description provided for @nfseEmailSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get nfseEmailSend;
+
+  /// No description provided for @nfseIssuingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitindo a nota… pode levar alguns segundos.'**
+  String get nfseIssuingProgress;
+
+  /// No description provided for @nfseCancelingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelando a nota…'**
+  String get nfseCancelingProgress;
+
+  /// No description provided for @nfseEmailSendingProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandando o e-mail…'**
+  String get nfseEmailSendingProgress;
+
+  /// No description provided for @nfseEmailSentToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota enviada para {email}'**
+  String nfseEmailSentToast(String email);
+
+  /// No description provided for @nfseEmailFailedToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mandar o e-mail. Tente de novo daqui a pouco.'**
+  String get nfseEmailFailedToast;
+
+  /// No description provided for @nfseEmailNoAddressToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente não tem e-mail. Coloque o e-mail no cadastro dele e envie de novo.'**
+  String get nfseEmailNoAddressToast;
+
+  /// No description provided for @nfseDirectEmailToCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar a nota por e-mail ao cliente'**
+  String get nfseDirectEmailToCustomer;
+
+  /// No description provided for @nfseDirectEmailToCustomerHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai sozinha ao emitir e ao cancelar, com o PDF e o XML. Desligue se você manda pelo WhatsApp.'**
+  String get nfseDirectEmailToCustomerHint;
+
+  /// No description provided for @nfseDirectIssueEmailGoesTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota vai por e-mail para {email}.'**
+  String nfseDirectIssueEmailGoesTo(String email);
+
+  /// No description provided for @nfseDirectIssueEmailOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota não vai por e-mail: o envio automático está desligado.'**
+  String get nfseDirectIssueEmailOff;
+
   /// Reading of a device at this visit (odometer, hour meter), label from the segment
   ///
   /// In pt, this message translates to:
@@ -12166,6 +12382,120 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Para mudar uma resposta, peça a quem gerencia a equipe para reabrir o checklist.'**
   String get checklistDoneAskReopenBody;
+
+  /// No description provided for @statementSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar extrato'**
+  String get statementSend;
+
+  /// No description provided for @statementSendTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar a {name} o que falta pagar'**
+  String statementSendTitle(String name);
+
+  /// No description provided for @statementSendMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai uma mensagem com as OS marcadas e quanto falta em cada uma. Quer mandar o PDF junto?'**
+  String get statementSendMessage;
+
+  /// No description provided for @statementWithPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar com PDF'**
+  String get statementWithPdf;
+
+  /// No description provided for @statementTextOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o texto'**
+  String get statementTextOnly;
+
+  /// No description provided for @statementTextHello.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Estas são as OS em aberto com {company}:'**
+  String statementTextHello(String name, String company);
+
+  /// No description provided for @statementTextHelloNoCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Estas são as OS em aberto:'**
+  String statementTextHelloNoCompany(String name);
+
+  /// No description provided for @statementOrderNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String statementOrderNumber(String number);
+
+  /// No description provided for @statementOpenLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta {amount}'**
+  String statementOpenLine(String amount);
+
+  /// No description provided for @statementInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'em andamento'**
+  String get statementInProgress;
+
+  /// No description provided for @statementTotalOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total em aberto: {amount}'**
+  String statementTotalOpen(String amount);
+
+  /// No description provided for @statementPdfTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Extrato'**
+  String get statementPdfTitle;
+
+  /// No description provided for @statementPdfSentence.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS em aberto de {name} em {date}.'**
+  String statementPdfSentence(String name, String date);
+
+  /// No description provided for @statementItemColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço ou peça'**
+  String get statementItemColumn;
+
+  /// No description provided for @statementOrderTotals.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total {total}  ·  Pago {paid}  ·  Falta {open}'**
+  String statementOrderTotals(String total, String paid, String open);
+
+  /// No description provided for @statementPdfTotalOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total em aberto'**
+  String get statementPdfTotalOpen;
+
+  /// No description provided for @statementFileName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Extrato-{date}'**
+  String statementFileName(String date);
+
+  /// No description provided for @customersOrderRecent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recentes'**
+  String get customersOrderRecent;
+
+  /// No description provided for @customersOrderName.
+  ///
+  /// In pt, this message translates to:
+  /// **'A–Z'**
+  String get customersOrderName;
 }
 
 class _AppLocalizationsDelegate

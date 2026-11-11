@@ -47,6 +47,7 @@
             "Com provedores de serviço (Firebase/Google) para processamento e armazenamento",
             "Com provedores de inteligência artificial (Google Vertex AI e Anthropic) quando você usa o assistente de IA",
             "Com o Sistema Nacional da NFS-e (Receita Federal e prefeituras), para emitir, cancelar e consultar as notas fiscais que você pedir",
+            "Com o Resend, provedor de e-mail, para mandar ao seu cliente a nota fiscal emitida ou cancelada (nome e e-mail do cliente e a nota em PDF e XML). Você pode desligar esse envio. O Resend fica nos Estados Unidos e a transferência internacional segue o art. 33 da LGPD",
             "Quando exigido por lei ou ordem judicial",
             "Para proteger nossos direitos legais"
           ]
@@ -166,6 +167,7 @@
             "With service providers (Firebase/Google) for processing and storage",
             "With artificial intelligence providers (Google Vertex AI and Anthropic) when you use the AI assistant",
             "With Brazil’s national NFS-e system (Federal Revenue and city halls), to issue, cancel and look up the invoices you ask for",
+            "With Resend, an email provider, to send your customer the invoice when it is issued or canceled (the customer’s name and email and the invoice as PDF and XML). You can turn this sending off. Resend is based in the United States",
             "When required by law or court order",
             "To protect our legal rights"
           ]
@@ -256,6 +258,7 @@
             "Con proveedores de servicios (Firebase/Google) para procesamiento y almacenamiento",
             "Con proveedores de inteligencia artificial (Google Vertex AI y Anthropic) cuando usas el asistente de IA",
             "Con el sistema nacional de NFS-e de Brasil (Receita Federal y municipalidades), para emitir, cancelar y consultar las facturas que pidas",
+            "Con Resend, proveedor de correo electrónico, para enviar a tu cliente la factura emitida o cancelada (nombre y correo del cliente y la factura en PDF y XML). Puedes apagar este envío. Resend está en Estados Unidos",
             "Cuando lo exija la ley u orden judicial",
             "Para proteger nuestros derechos legales"
           ]

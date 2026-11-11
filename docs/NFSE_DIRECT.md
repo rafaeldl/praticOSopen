@@ -6,6 +6,30 @@ Documento técnico da emissão de NFS-e direto no Sistema Nacional (Sefin/ADN). 
 
 Uma empresa tem um ou mais **emitentes fiscais** (`companies/{cid}/fiscalEmitters`), cada um com o seu certificado A1. O servidor guarda o certificado cifrado, monta e assina a DPS, envia ao governo e grava a nota em `companies/{cid}/invoices` com `provider: 'direct'`. A cobrança pelo Asaas não muda.
 
+## Quem tem a nota (plano pago)
+
+Decisão de 2026-11-08: a nota vem com os planos pagos (Starter, Pro, Business) e com a cortesia (`subscription.source: 'grace'`), só para empresa do Brasil (`country` `BR` ou vazio). O Free não tem nota. Vale o plano em vigor (`effectivePlan` de `services/plan-limits.service.ts`: plano da loja, plano pago antigo sem `source` e cortesia; vencido é Free). Não depende de `config/paidPlans.enabled`.
+
+O app, o web e as rotas continuam lendo só `settings/payments.nfseDirectEnabled`. Quem liga e desliga essa chave é `services/nfse/nfse-access.service.ts`, que grava junto a origem:
+
+| `nfseDirectSource` | Significado |
+|---|---|
+| `plan` | Ligada (ou desligada) pelo plano; segue o plano. |
+| `manual`, ou ausente com a chave ligada | Posta à mão (piloto, Rafsoft). Nunca é mexida. `manual` com a chave desligada bloqueia a empresa: o plano não liga. |
+
+Também grava `nfseDirectUpdatedAt`. Pontos que mantêm a chave:
+
+- **Gatilho `onCompanyWrittenNfseAccess`** (`companies/{cid}`, `index.ts`): quando mudam `country`, `subscription.plan`, `status`, `source` ou `expiresAt` (webhook do RevenueCat, cortesia, rotina de vencimento). As outras gravações da empresa (contadores, `updatedAt`) voltam sem ler nada.
+- **Rotina diária `scheduledExpireSubscriptions`** (04:30): depois de vencer os planos, `reconcileNfseAccess` passa pelas empresas em plano pago e pelas que têm a chave ligada, e acerta o que o gatilho perdeu.
+- **Carga inicial** (uma vez, depois do deploy), em `firebase/functions`:
+
+```bash
+npm run nfse:plan-access -- --project praticos --dry-run
+npm run nfse:plan-access -- --project praticos
+```
+
+O `--project` é obrigatório; no emulador usa o projeto dele. Desligar a nota de quem saiu do plano não apaga emitente, certificado nem notas: só fecha as rotas e esconde as telas, como antes.
+
 ## Dados (etapa #562)
 
 Ver a tabela da §7 da spec. Resumo das regras do Firestore:
@@ -28,6 +52,7 @@ Código: `firebase/functions/src/services/nfse/`.
 |---|---|
 | `certificate.ts` | Abre o .pfx na memória (`node-forge`, aceita PFX "legacy" RC2/3DES), acha o certificado do titular pela chave, confere validade, cadeia até uma raiz ICP-Brasil (`X509Certificate` do Node) e lê o CNPJ (otherName `2.16.76.1.3.3` ou o sufixo `:CNPJ` do CN) |
 | `icp-brasil-roots.ts` | Raízes v5, v10, v11 e v12 baixadas do ITI, com a impressão SHA-256 de cada uma. Raiz nova: acrescentar aqui |
+| `icp-brasil-intermediates.ts` | ACs intermediárias credenciadas (gerado, não editar à mão). Completa a cadeia quando o .pfx traz só o certificado do titular. Ver "ACs intermediárias" abaixo |
 | `envelope.ts` | DEK nova de 256 bits por certificado, AES-256-GCM, com dado adicional `praticos/nfse-cert/v1/{companyId}/{emitterId}` (cópia para outro documento não abre) |
 | `key-vault.ts` | Cloud KMS: chave `nfse-certs/emitter-{emitterId}` por emitente, criada com `destroyScheduledDuration` de 24 h; versão nova na troca; destruição da versão ao apagar |
 | `certificate-vault.service.ts` | `storeCertificate` (adicionar CNPJ ou trocar), `loadCertificate` (para uma chamada, sem cache), `deleteCertificate`, `purgeExpiredCertificates` (vencido há mais de 90 dias), `deleteCompanyCertificates` (exclusão de conta), `processPendingKeyDestructions` |
@@ -38,6 +63,26 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 - `POST /certificate` `{ pfxBase64, password, termsVersion }`: adiciona o CNPJ (cria o emitente com CNPJ e razão social do certificado; regime, cidade e serviço vêm das consultas da etapa #563 e da importação).
 - `PUT /:emitterId/certificate`: troca (o CNPJ tem de ser o do emitente).
 - `DELETE /:emitterId/certificate`: apaga de verdade.
+
+### ACs intermediárias
+
+Muitos A1 vêm só com o certificado do titular, sem as ACs do meio (ex.: e-CNPJ da AC VALID RFB v5). Sem elas a cadeia não chegava à raiz e o envio era recusado com `CERT_NOT_ICP_BRASIL`, mesmo com certificado válido.
+
+- `buildTrustedChain` monta o caminho do titular até uma raiz de `icp-brasil-roots.ts` usando primeiro os certificados do próprio .pfx e, no que faltar, as ACs fixadas em `icp-brasil-intermediates.ts`. Cada elo tem de ser assinado pelo seguinte, ser AC (`basicConstraints` CA) e estar na validade. O CNPJ continua conferido como antes.
+- Nada é buscado na internet na hora (sem AIA): um arquivo enviado nunca escolhe de onde baixar uma AC.
+- O cofre guarda o titular e as intermediárias do caminho (sem a raiz), e é isso que vai no mTLS.
+- Fonte: pacote do ITI com todas as ACs credenciadas, `https://acraiz.icpbrasil.gov.br/credenciadas/CertificadosAC-ICP-Brasil/ACcompactado.zip`. Versão atual baixada em 2026-11-06 (SHA-256 do zip no cabeçalho do arquivo gerado): 173 de 182 certificados ficaram (AC, na validade, ligando a uma raiz fixada).
+- Atualizar quando: um cliente com certificado válido for recusado com `CERT_NOT_ICP_BRASIL` (AC nova ou renovada), o ITI publicar raiz nova (acrescentar a raiz antes, em `icp-brasil-roots.ts`), ou uma vez por ano. Uma AC vencida já é recusada sozinha pela checagem de validade.
+- Como atualizar (em `firebase/functions`):
+
+```bash
+curl -sSLO https://acraiz.icpbrasil.gov.br/credenciadas/CertificadosAC-ICP-Brasil/ACcompactado.zip
+unzip -d /tmp/acs ACcompactado.zip
+npx ts-node scripts/nfse/update-icp-brasil-intermediates.ts /tmp/acs "$(shasum -a 256 ACcompactado.zip | cut -d' ' -f1)"
+npm test -- certificate
+```
+
+Revisar o diff (ACs novas e retiradas) antes de abrir o PR; mudança aqui é `risk:high`.
 
 ### Termo do certificado (issue #572)
 
@@ -62,7 +107,7 @@ Rota: `firebase/functions/src/routes/v1/nfse-certificate.routes.ts`, para montar
 8. Arquivo: o .pfx com contagem de iterações acima de 100 mil numa derivação, ou 400 mil somando todas, é recusado (`CERT_INVALID_FILE`) antes de qualquer conta. A checagem fica nas funções de derivação do `node-forge` (MAC, PBE do PKCS#12 e PBES2), então vale também para o que vem dentro de partes cifradas.
 9. Envios: no máximo 5 tentativas de enviar certificado por hora por pessoa e por empresa, contando senha errada e arquivo ruim (`TOO_MANY_ATTEMPTS`, 429). Contagem em `/nfseUploadLimits/{user-…|company-…}` (fechado nas regras).
 10. Uma troca por vez em cada emitente: enviar, trocar, apagar e a nova tentativa de destruição pegam uma trava com prazo de 3 min em `/nfseCertificateLocks/{emitter-…|taxid-…}` (fechado). Ocupado: `CERT_BUSY` (409). Depois de cada troca ou apagamento, toda versão viva da chave que não seja a do certificado atual é destruída (precisa de `cloudkms.cryptoKeyVersions.list` no `nfseKeyManager`).
-11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
+11. Abertura auditada: `loadCertificate` grava `open` com o motivo (`issue`, `autoIssue`, `cancel`, `reconcile`, `import`) e o id da nota antes de pedir a chave ao KMS. Sem auditoria, não abre.
 12. Exclusão de conta: o `accountApi` (outra conta de serviço) só apaga o material e põe o emitente na fila; quem destrói as versões é a `nfseDaily`. A fila guarda o emitente e, na hora de tentar, mantém só a versão do certificado que existir então. Depois de 2 tentativas sem sucesso a rotina loga `[nfse-alert] key destruction still pending`, que tem alerta no Cloud Monitoring.
 13. Emitir e cancelar: dono, admin e gerente; o dono pode tirar o gerente (`settings/nfse.managerCanIssue = false`, interruptor "Gerente pode emitir notas", só o dono muda). Quando outra pessoa emite ou cancela, o dono recebe aviso (sino + push, `type: nfse_invoice_by_team`).
 14. Teto diário por emitente: 60 notas por dia (São Paulo), contadas na reserva do número da DPS (`private/nfse/emitters/{id}.issuedOn/issuedToday`). Passou: `DAILY_LIMIT_REACHED` (429). Para um emitente que precise de mais, gravar `dailyIssueLimit` à mão no mesmo documento (máximo 1000).
@@ -197,7 +242,7 @@ O que vai no grupo: `cIndOp`, `indDest=0` (quem recebe o serviço é o tomador),
 
 ### Ainda não ligado
 
-`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática é a #571. A folha de emitir está em "Emitir a nota pela OS".
+`nfseApi` e `nfseDaily` estão em `src/nfse-api.ts`, exportadas pelo `index.ts` e rodando como `nfse-api@`. As rotas ficam fechadas enquanto `nfseDirectEnabled` estiver desligada na empresa. Depois do primeiro deploy, conferir no dia seguinte, nos logs, que a `nfseDaily` rodou (linha `[nfseDaily]`) e não parou por falta de permissão. O PDF (DANFSe) está na seção abaixo; a importação e a leitura diária do ADN estão em "Importação das notas" (#569); a emissão automática está em "Emitir nota sozinha" (#571). A folha de emitir está em "Emitir a nota pela OS".
 
 Testes: DPS dos dois regimes nos quatro leiautes (com e sem IBS/CBS) validada contra os XSD oficiais (`__tests__/fixtures/xsd/`, via `xmllint-wasm`), assinatura conferida, respostas do governo gravadas como fixtures. Nada vai ao governo nos testes.
 
@@ -228,6 +273,55 @@ Falha ao gerar nunca derruba a emissão nem o cancelamento: só registra no log,
 
 Testes (`__tests__/danfse.test.ts`): XML sintético validado contra o XSD oficial da NFS-e, cada campo lido, regras da v1.02, uma página só (inclusive com descrição enorme), marca d'água, "sem validade" e geração/guarda com Firestore e Storage falsos.
 
+## Nota por e-mail ao cliente (issue #611)
+
+O governo não manda e-mail para nota emitida pela API, e o Asaas (que mandava) saiu do caminho. Quem manda agora é o PraticOS, pela `nfseApi`.
+
+**Provedor:** [Resend](https://resend.com), por chamada direta à API (`POST https://api.resend.com/emails`). A extensão Trigger Email não serve: o PDF e o XML anexados não cabem num documento do Firestore (1 MB). O DNS de `praticos.app` está no Cloudflare, que só recebe e-mail (Email Routing); o envio do Cloudflare ainda é beta e só por Workers, por isso Resend.
+
+**Remetente:** `"Nome da empresa" <notas@praticos.app>`, com "responder para" o e-mail da empresa (`companies/{cid}.email`) ou, se a empresa não tiver, o do dono (`companies/{cid}.owner.email`). Sem nenhum válido, o e-mail sai sem "responder para". Assim a resposta do cliente vai para a empresa, não para o PraticOS.
+
+**Destinatário:** `invoiceEmail` do cliente que recebe a nota (o "Nota fiscal para", quando há), senão o e-mail do cadastro, senão o e-mail com que a nota saiu. Sem nenhum, não envia (`skipped`, motivo `noEmail`). A folha de emitir diz para onde vai ("A nota vai por e-mail para …") ou que não vai (envio desligado).
+
+**Quando:**
+
+| Evento | Conteúdo | Anexos |
+|---|---|---|
+| Nota emitida (`applyIssueResult`, inclusive pelo reconcile do `nfseDaily`) | número, valor, link da consulta pública (`https://www.nfse.gov.br/ConsultaPublica/?tpc=1&chave=…`) | PDF (DANFSe) e XML |
+| Nota cancelada (`cancelDirectInvoice`) | aviso de cancelamento | PDF com "CANCELADA" |
+| "Enviar de novo" (`POST /v1/app/nfse/direct/invoices/:id/email`, dono, admin e gerente) | o que serve para a nota agora (cancelada → aviso) | os mesmos |
+
+O texto é em português (a NFS-e só existe no Brasil). Assunto: "Nota fiscal nº 29 de Oficina Exemplo" e "… foi cancelada".
+
+**Resultado na nota:** `emailDelivery` em `companies/{cid}/invoices/{id}`:
+
+```json
+{ "status": "sent", "kind": "issued", "to": "cliente@exemplo.com", "at": "2026-11-05T13:00:00.000Z", "manual": false, "providerId": "…" }
+```
+
+`status`: `sent`, `failed` (com `errorCode`: `EMAIL_UNREACHABLE`, `EMAIL_REJECTED_<http>_<nome>`, `EMAIL_NOT_CONFIGURED`, `INVALID_EMAIL`, `PDF_NOT_AVAILABLE`) ou `skipped` (com `reason`: `noEmail`, `turnedOff`). As telas (app e web) mostram "Enviada para fulano@… em dd/mm/aaaa", "Não deu para mandar…" ou por que não foi, com "Enviar de novo".
+
+**Regras:**
+- Falha no envio nunca derruba a emissão nem o cancelamento: fica em `emailDelivery` e aparece na tela.
+- `settings/nfse.emailToCustomer = false` desliga o envio automático (quem manda pelo WhatsApp). "Enviar de novo" continua mandando. Dono e admin mudam pela tela da nota direta (`PUT /v1/app/nfse/setup/settings { emailToCustomer }`).
+- O envio automático usa `Idempotency-Key` `nfse-{cid}-{invoiceId}-{kind}`: repetir o mesmo evento não manda duas vezes. "Enviar de novo" usa uma chave nova a cada toque.
+- Log só com códigos e ids, nunca o endereço nem o conteúdo.
+
+**Código:** `firebase/functions/src/services/nfse/invoice-email.service.ts` (`sendInvoiceEmail`, `resendInvoiceEmail`, `notifyInvoiceEmail`, `sendWithResend`). `IssueDeps.sendEmail` liga o envio ao emitir e ao cancelar.
+
+**Chave:** segredo `RESEND_API_KEY` no Secret Manager, ligado só à `nfseApi` e ao `nfseDaily` (`secrets: [RESEND_API_KEY]`), que rodam como `nfse-api@`. Sem a chave o envio falha com `EMAIL_NOT_CONFIGURED` e nada sai. **O segredo tem que existir antes do deploy**: o Firebase recusa publicar função que aponta para segredo que não existe.
+
+**Configuração do provedor (feita à mão, uma vez):**
+1. Conta no Resend e domínio `praticos.app` em *Domains* (região `sa-east-1`).
+2. No Cloudflare (DNS de `praticos.app`), os registros que o Resend mostrar: TXT `resend._domainkey` (DKIM), MX e TXT de `send.praticos.app` (SPF do subdomínio de retorno). O SPF da raiz (Email Routing) não muda.
+3. DMARC: TXT `_dmarc.praticos.app` com `v=DMARC1; p=none; rua=mailto:dmarc@praticos.app` no começo (endereço do domínio, encaminhado pelo Email Routing); depois de umas semanas sem problema, `p=quarantine`.
+4. Chave de API só de envio, restrita ao domínio, no Secret Manager: `firebase functions:secrets:set RESEND_API_KEY`, e acesso só para `nfse-api@` (`roles/secretmanager.secretAccessor` no segredo).
+5. Testar com uma nota do Piloto antes de ligar para outra empresa: chega no Gmail, fora do spam, com "SPF: PASS, DKIM: PASS" em "Mostrar original".
+
+**Privacidade:** o Resend vira operador (recebe nome, e-mail do cliente e a nota). Está na política de privacidade do site (pt, en, es).
+
+**Testes:** `__tests__/invoice-email.service.test.ts` (envio falso: endereço e fallback, desligado, falha gravada, PDF que falhou, idempotência, conteúdo e cabeçalho escapados; `sendWithResend` com `fetch` falso e recusa sem chave antes de chamar a rede), `issue.service.test.ts` (envio ao emitir e ao cancelar, falha que não derruba), rotas (`/email`, `emailToCustomer`). App: `nfse_direct_issue_test.dart` e `nfse_direct_setup_test.dart`. Web: `tests/nfse-email.test.ts`.
+
 ## Telas de configuração (etapa #565)
 
 Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
@@ -237,7 +331,7 @@ Tudo atrás de `settings/payments.nfseDirectEnabled`. Só dono e admin.
 | App: `lib/screens/nfse/direct/nfse_direct_setup_screen.dart` | "Nota fiscal": frase no topo, "Seus CNPJs" (regime, certificado com ponto colorido, ✓ no padrão), "+" no topo e, sem CNPJ, o botão azul "Adicionar CNPJ"; "Emitir sozinha quando concluir a OS" abre a tela de escolher (Nunca / Para os clientes escolhidos / Para todas as OS) |
 | App: `certificate_upload_sheet.dart` | Sheet grande: arquivo .pfx/.p12 (Arquivos no iPhone), senha (escondida, nunca guardada no aparelho), link "Ler o termo" e interruptor "Li e aceito o termo do certificado". ✓ azul só com arquivo, senha e aceite; recusa do servidor em frase simples dentro do sheet |
 | App: `fiscal_emitter_screen.dart` e `fiscal_emitter_editors.dart` | Emitente: CNPJ, regime, "Notas este ano · este mês", teto do MEI (R$ 81 mil), linhas que abrem o editor (serviço, inscrição municipal, estilo da descrição, certificado). "…": Usar como padrão, Trocar certificado, Apagar certificado (vermelho, confirma; o emitente e as notas ficam) |
-| App: entrada | `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" quando só a flag direta está ligada; o "…" da lista de notas abre a tela direta |
+| App: entrada | Perfil → Sua empresa → "Nota fiscal" (`my_company_screen.dart`, dono e admin com a flag ligada), com ponto âmbar "Falta cadastrar o CNPJ" / "Falta terminar a configuração" ou verde "Pronta para emitir". Também: `NfseMonthRow` do Financeiro mostra "Nota fiscal · Configurar" antes do primeiro CNPJ, e a engrenagem no topo de Notas fiscais abre a configuração direto. A entrada por Sua empresa veio do Piloto 1: com notas importadas, o envio do certificado só era alcançável por um menu "…" da lista |
 | Web: `/web/invoices/direct` (`NfseDirectSetupView.vue`, `CertificateDrawer.vue`, `EmitterEditDrawer.vue`) | Lista e emitente lado a lado, arrastar o arquivo, mesmas rotas. `/invoices/setup` manda para cá com a flag ligada |
 
 Sem cidade gravada (antes da importação), o emitente diz "Ainda não conferimos se este CNPJ já pode emitir nota pelo governo." em vez de "Ainda não habilitado para emitir em" sem nome (`notEnabledInCityText` no app, `cityText` no web). O exemplo do "Estilo da descrição" usa dois serviços do catálogo da própria empresa (no web, os mais usados primeiro); com menos de dois, mostra "Serviço 1, Serviço 2" (`descriptionSamples` / `sampleServices`), nunca um exemplo de outro ramo.
@@ -312,6 +406,71 @@ O app web chama o ViaCEP do navegador: `https://viacep.com.br` entrou no `connec
 
 Fora desta etapa: limite de CNPJs por plano na folha ("Disponível no Pro"), compartilhar o PDF direto pelo web e a oferta da 3ª nota.
 
+## Emitir nota sozinha ao concluir a OS (issue #571)
+
+Quando a OS vira `done` numa empresa com `nfseDirectEnabled`, a nota sai sozinha conforme `settings/nfse.autoIssue` (lido por `directAutoIssueOf`) e o interruptor do cliente `autoIssueInvoice`:
+
+| `autoIssue` | Emite quando |
+|---|---|
+| `never` (padrão) | nunca |
+| `selectedCustomers` | o cliente tem `autoIssueInvoice: true` |
+| `allOrders` | o cliente não tem `autoIssueInvoice: false` |
+
+Os valores do Asaas (`manual`, `paid`, `completed`) contam como `never` aqui, e o motor do Asaas não age nos valores do direto. Como a chave é uma só, a mesma OS nunca recebe nota pelos dois. Só ao concluir (receber e aprovar ficam de fora) e uma vez por OS: OS que já teve nota (qualquer motor, qualquer situação) fica com a pessoa.
+
+### Como funciona
+
+```
+OS vira done → onOrderUpdatedAsaas (conta padrão, sem certificado)
+  → requestDirectAutoIssue: grava companies/{cid}/private/nfse/autoIssue/{orderId} (create; o id é a OS)
+      → nfseAutoIssue (onDocumentCreated, conta nfse-api@)
+          → processDirectAutoIssue: pega o pedido numa transação e chama issueDirectInvoice
+```
+
+| Arquivo | O quê |
+|---|---|
+| `services/nfse/auto-issue.service.ts` | `requestDirectAutoIssue` (gatilho), `processDirectAutoIssue` (nfse-api), `processPendingDirectAutoIssues` (rotina diária) |
+| `services/asaas/order-trigger.service.ts` | chama `requestDirectAutoIssue` quando `status` vira `done` (o gatilho único da OS) |
+| `nfse-api.ts` | `nfseAutoIssue`, gatilho no documento do pedido, com a conta `nfse-api@` |
+
+- **Mesma nota da folha**: `issueDirectInvoice` com só a OS: emitente da decisão 3 (o último usado para o cliente, senão o padrão, senão o único), descrição pela regra fixa, valor pela regra de hoje, destinatário pelo "Nota fiscal para". Autor `{ id: 'system', name: 'PraticOS' }` e `auto: true` na nota.
+- **Certificado**: abre com o motivo `autoIssue` na auditoria (`private/nfse/audit`), sem pessoa (`by: null`).
+- **Limite diário**: conta como qualquer nota (60 por dia por emitente).
+- **Idempotência**: o pedido é criado com `create()` (gatilho repetido ou OS concluída de novo acha o documento e não faz nada); o processamento pega o pedido numa transação (`pending` → `processing` → `done`) e confere de novo se a OS já tem nota; o registro de erro tem id fixo `auto-{orderId}`. Um pedido preso em `processing` há mais de 10 minutos volta na rotina diária.
+- **Nunca trava a OS**: o gatilho só grava o pedido; tudo que falha na emissão fica gravado, nada é relançado.
+
+### Quando não sai
+
+| Caso | O que fica na OS |
+|---|---|
+| Cliente sem CPF/CNPJ | `auto-{orderId}` em `error`, `errorCode: RECIPIENT_TAX_ID_REQUIRED`: "Nota fiscal · Falta o CPF ou CNPJ do cliente"; o botão abre a folha ("Corrigir e emitir") |
+| Certificado vencido / sem certificado / CNPJ sem configurar / sem CNPJ padrão com vários | `CERT_EXPIRED`, `CERT_NOT_FOUND`, `EMITTER_NOT_READY`, `EMITTER_NOT_FOUND` |
+| Limite do dia | `DAILY_LIMIT_REACHED` |
+| Cofre indisponível / erro inesperado | `KEY_VAULT_UNAVAILABLE` / `AUTO_ISSUE_FAILED` (este loga `console.error`, é o único que vira alerta) |
+| Governo fora (sem resposta) | a própria nota fica `creating` e a reconciliação termina depois |
+| Governo recusou | a própria nota fica `error` com a recusa em palavras simples (`refusal`) |
+| OS sem valor de serviço, sem cliente, orçamento/cancelada | nada (não há o que emitir) |
+
+Erros esperados só logam `console.warn` com o código; nunca alerta. Nos casos com `errorCode` nosso (não recusa do governo) e que não sejam falta de dado do cliente, o app e o web mostram **"Tentar novamente"** (botão azul na OS e na nota): emite na hora pela mesma rota da folha (`POST /v1/app/nfse/direct/invoices` com só `orderIds`), sem abrir a folha; se falhar de novo, o motivo aparece em aviso (app) ou no painel (web), nunca em alerta.
+
+### Na tela
+
+- Nota que saiu sozinha: "Emitida sozinha · nº 29" na linha "Nota fiscal" da OS, na lista e no detalhe (app: `nfseStatusText`; web: `invoiceStatusText`). Vale também para a nota automática do Asaas.
+- Nota que não saiu: o motivo curto na linha (`nfseAutoErrorShort` / `autoFailureShort`) e o completo no detalhe (`nfseAutoErrorReason` / `autoFailureReason`).
+
+### Ligar (passo manual)
+
+1. **Antes do primeiro deploy**: dar à conta `nfse-api@praticos.iam.gserviceaccount.com` o papel `roles/eventarc.eventReceiver` no projeto (gatilho do Firestore com conta própria). O deploy dá à conta o `run.invoker` da função.
+   ```bash
+   gcloud projects add-iam-policy-binding praticos --member=serviceAccount:nfse-api@praticos.iam.gserviceaccount.com --role=roles/eventarc.eventReceiver --condition=None
+   ```
+   Sem isso o pedido fica `pending` e só sai na rotina diária (6h30).
+2. Na empresa: "Nota fiscal" → "Emitir sozinha quando concluir a OS" → "Para os clientes escolhidos" (e ligar "Emitir nota sozinha" no cliente) ou "Para todas as OS".
+
+Testes: `services/nfse/__tests__/auto-issue.service.test.ts` (as três regras, idempotência, falhas), `services/asaas/__tests__/order-trigger.service.test.ts`, `__tests__/nfse-api-deploy.test.ts`; app em `test/screens/nfse/nfse_direct_issue_test.dart` e `test/screens/order/order_screen_v2_extras_test.dart`; web em `firebase/webapp/tests/nfse-auto-issue.test.ts`.
+
+Fora desta etapa: a oferta na 3ª nota manual do mesmo cliente e "Ligar para todos os clientes com CNPJ".
+
 ## Importação das notas (etapa #569)
 
 Ao enviar o certificado de um CNPJ novo, o app abre "Importar notas": o servidor lê no governo as notas que o CNPJ já emitiu e recebeu, monta uma proposta e só aplica no "Importar". Só dono e admin.
@@ -323,12 +482,16 @@ Código: `firebase/functions/src/services/nfse/adn-reader.ts`, `import-proposal.
 - `GET {adn}/contribuintes/DFe/{NSU}?cnpjConsulta={cnpj}&lote=true`, até 50 documentos por página (XML em GZip + Base64). A resposta não diz se a página começa no NSU pedido ou depois dele: o servidor pede a partir do último NSU guardado e descarta o que já tem (`nsu <= lastNsu`). Caixa vazia responde 404.
 - Cada chamada lê por até ~45 s (`READ_BUDGET_MS`) e guarda o ponto em `private/nfse/emitters/{id}.lastNsu`; o app chama `continue` até a proposta ficar pronta.
 - Erro na leitura: só falta de resposta do governo (timeout, rede, 5xx, `SefinUnavailableError`) vira `SEFIN_UNAVAILABLE` (503, tentar de novo). Qualquer outro erro vira `IMPORT_FAILED` (500) e vai ao log com nome, código e mensagem, sem sequências longas de dígitos (CPF/CNPJ, chaves). O que já foi lido fica.
+- Memória: a proposta lê OS, clientes e notas em páginas de 300 (`scanFields`) e só os campos que usa (`select`). Antes vinham todas as OS inteiras (fotos, histórico) de uma vez, e uma oficina com anos de uso passou dos 512 MiB depois de ler as notas (06/11). Medido no emulador com 1.000 documentos e 3.000 OS pesadas: +300 MiB antes, +41 MiB agora. O `nfseApi` roda com 1 GiB de margem.
+- Retomar depois de uma queda (estouro de memória, instância derrubada): o lote fica `reading`, o `lastNsu` só avança com a página inteira lida, e as notas já gravadas (`ext-{chave}`) e recebidas (pela chave) não são criadas de novo. Tentar de novo segue do mesmo lote e só monta a proposta se a caixa já foi toda lida.
 - Emitente recém-cadastrado ainda não tem regime: a nota importada leva no resumo do emitente o regime da própria nota (o Firestore recusa `undefined`).
 - **Emitidas** pelo CNPJ viram `invoices/ext-{chave}` com `source: 'external'`, `provider: 'direct'`, XML em `tenants/{cid}/invoices/{id}/nfse.xml`, `customer: null`, sem OS, e `external { regime, IM, cidade, código do serviço, alíquota... }` para a proposta. Nota que já existe (emitida pelo PraticOS, mesma chave) não é criada de novo.
 - **Eventos** e101101/e105102 cancelam a nota (status `canceled`, `canceledOutside: true`) e liberam a OS travada. Evento lido antes da nota fica em `private/nfse/emitters/{id}/canceledKeys/{chave}` até a nota chegar.
 - **Recebidas** (o CNPJ é o tomador): registro mínimo só no servidor, `private/nfse/emitters/{id}/received/{nsu}` (`accessKey`, `providerTaxId`, `providerName`, `value`, `date`, `status`), para a etapa posterior A (despesas).
 
 ### Proposta (`nfseImports/{batchId}`, `status: proposed`)
+
+Os clientes e a ligação às OS usam todas as notas lidas. Os dados do emitente (serviço mais usado, regime, estilo da descrição, série) vêm só das notas recentes (`recentNotas` + `proposeEmitter`): as dos 3 meses antes da nota mais nova (`RECENT_NOTA_DAYS`) ou, se forem menos de 10, as 10 mais novas (`RECENT_NOTA_MIN`). Assim um serviço que a empresa deixou de fazer não vira o padrão.
 
 | Parte | Regra |
 |---|---|

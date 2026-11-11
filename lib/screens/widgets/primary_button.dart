@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// The single filled button of a screen: `accent` / `onAccent`, 58 high,
-/// radius 16, `bodyStrong` label. One per screen.
+/// The single filled button of a screen: `action` / `onAction` (logo yellow,
+/// navy label) with the [AppColors.actionBorder] hairline, 58 high, radius 16,
+/// `bodyStrong` label. One per screen.
 ///
-/// With [floating] the button is glass tinted with the brand blue (design
-/// system rule 11) and is meant to float above the tab bar. It falls back to
-/// an opaque fill under "Increase Contrast".
+/// [floating] marks a button that floats over content (above the tab bar or
+/// at the bottom of a scroll view). It stays opaque: glass is for navigation.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,
@@ -30,7 +29,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onAccent = AppColors.onAccent.resolveFrom(context);
+    final onAction = AppColors.onAction.resolveFrom(context);
     final enabled = onPressed != null;
     final radius = BorderRadius.circular(AppRadii.button);
 
@@ -39,14 +38,14 @@ class PrimaryButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 22, color: onAccent),
+          Icon(icon, size: 22, color: onAction),
           const SizedBox(width: AppSpacing.sm),
         ],
         Flexible(
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: AppTypography.bodyStrong.copyWith(color: onAccent),
+            style: AppTypography.bodyStrong.copyWith(color: onAction),
           ),
         ),
       ],
@@ -62,20 +61,10 @@ class PrimaryButton extends StatelessWidget {
       ),
     );
 
-    final Widget filled = floating
-        ? AppGlass(
-            tint: AppColors.accent,
-            opacity: 0.88,
-            borderRadius: radius,
-            child: body,
-          )
-        : DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.accent.resolveFrom(context),
-              borderRadius: radius,
-            ),
-            child: body,
-          );
+    final Widget filled = DecoratedBox(
+      decoration: actionDecoration(context, radius),
+      child: body,
+    );
 
     return Semantics(
       button: true,
@@ -91,6 +80,46 @@ class PrimaryButton extends StatelessWidget {
           child: filled,
         ),
       ),
+    );
+  }
+
+  /// Fill and hairline of the main action, for buttons that cannot be a
+  /// [PrimaryButton] (round ✓, custom content).
+  static BoxDecoration actionDecoration(
+    BuildContext context,
+    BorderRadius? radius, {
+    BoxShape shape = BoxShape.rectangle,
+  }) => BoxDecoration(
+    color: AppColors.action.resolveFrom(context),
+    borderRadius: shape == BoxShape.circle ? null : radius,
+    shape: shape,
+    border: Border.all(
+      width: 1,
+      color: AppColors.actionBorder.resolveFrom(context),
+    ),
+  );
+}
+
+/// Hairline of the main action around a yellow `CupertinoButton` that cannot
+/// be a [PrimaryButton] (it has a loading state or a custom child).
+class ActionOutline extends StatelessWidget {
+  const ActionOutline({super.key, required this.child, this.radius});
+
+  final Widget child;
+  final BorderRadius? radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: radius ?? BorderRadius.circular(AppRadii.button),
+        border: Border.all(
+          width: 1,
+          color: AppColors.actionBorder.resolveFrom(context),
+        ),
+      ),
+      child: child,
     );
   }
 }

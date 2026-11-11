@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "PraticOS website built with Eleventy",
   "scripts": {
-    "build": "npx @11ty/eleventy",
+    "build": "npx @11ty/eleventy && node scripts/check-br-only.js",
     "dev": "npx @11ty/eleventy --serve",
-    "watch": "npx @11ty/eleventy --watch"
+    "watch": "npx @11ty/eleventy --watch",
+    "test": "node scripts/check-br-only.js"
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1"

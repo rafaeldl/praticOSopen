@@ -19,6 +19,7 @@ Especificação completa dos corpos e respostas: `docs/api-spec.yaml` (tag `App 
 | Tirar pagamento, zerar, marcar pago, comprovante | `services/order-finance.service.ts` |
 | Apagar OS | `services/order-delete.service.ts` |
 | OS parada | `services/order-hold.service.ts` |
+| Etapas da OS | `services/order-stage.service.ts` (`docs/WORK_STAGES.md`) |
 | Recibos | `services/customer-receipt.service.ts` |
 | O que sai do servidor | `services/order-projection.ts` |
 | Quem pode | `middleware/app-permission.middleware.ts` |
@@ -78,6 +79,7 @@ Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/
 | `DELETE /orders/:id/discounts` | financeiro | Tira todo o desconto, também o que não tem transação |
 | `POST /orders/:id/hold` | não consultor | `{reason, note?}`; só aprovada ou em andamento (`409 HOLD_NOT_ALLOWED`) |
 | `DELETE /orders/:id/hold` | não consultor | Em qualquer situação; sem marca, nada muda |
+| `PUT /orders/:id/stage` | não consultor; começar a aprovada pede a passagem para em andamento | `{stageId, rank?}`. Aprovada passa a em andamento no mesmo write; outra situação → `409 STAGE_NOT_ALLOWED`; etapa fora de `company.workStages` → `422 STAGE_UNKNOWN`. Sem `rank`, vai para o fim (hora do servidor). Mudar de etapa deixa comentário interno "Etapa: X"; reordenar, não |
 | `GET /customers/:id/receipts` | quem recebe | Financeiro vê todos; consultor, os que registrou |
 | `POST /customers/:id/receipts/:receiptId/cancel` | financeiro ou quem registrou | Desfaz: tira a parte de cada OS e marca `canceled`. Parte antiga sem id de transação (ou que não está mais na OS) → `409 RECEIPT_LEGACY_SHARE`, nada muda |
 | `PUT`/`DELETE /customers/:id/receipts/:receiptId/file` | financeiro ou quem registrou | Comprovante em todas as OS do recibo |

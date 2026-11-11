@@ -37,6 +37,7 @@ import {
   lateText,
   lineKindText,
   money,
+  shownMoney,
   orderShort,
   orderTitle,
   statusText,
@@ -61,7 +62,7 @@ import QuickCreate from './QuickCreate.vue'
 import Layer from '@/components/Layer.vue'
 import { loadCustomer, loadDevice, saveDevice, type CustomerDetail, type DeviceDetail } from '@/lib/customers/data'
 import { customerSummary, missingOnOrder, type Missing } from '@/lib/orders/quick-create'
-import { resolveLabel, segmentLabels } from '@/lib/segments'
+import { productWord, resolveLabel, segmentLabels } from '@/lib/segments'
 import * as maintenance from '@/lib/orders/maintenance-offer'
 import { askNotificationsOnce } from '@/lib/push'
 import { NOTIFY_NOTE_MS, shouldOfferStatusShare } from '@/lib/orders/notify'
@@ -169,7 +170,7 @@ const step = computed(() => {
   // Finished and paid: the nota is the next step, for who issues (order.nfse.next-step).
   if (!base && nfseOn.value && nfseLoaded.value && can('chargeOrder')) {
     const nota = nfseNextStep(order.value, nfseCurrent.value, nfseReady.value, money$.value?.remaining ?? 0)
-    if (nota) return { kind: 'nfse' as const, fix: nota === 'fix' }
+    if (nota) return { kind: 'nfse' as const, fix: nota === 'fix', retry: nota === 'retry' }
   }
   if (base?.kind !== 'status') return base
   const preferred = preferredStep(session.companyId, order.value.status, access.value.transitions)
@@ -259,8 +260,8 @@ const stepLabel = computed(() => {
   const value = step.value
   if (!value) return ''
   if (value.kind === 'resume') return t('orderHoldResume')
-  if (value.kind === 'receive') return t('orderNextStepReceive', { amount: money(value.amount) })
-  if (value.kind === 'nfse') return value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
+  if (value.kind === 'receive') return t('orderNextStepReceive', { amount: shownMoney(value.amount) })
+  if (value.kind === 'nfse') return value.retry ? t('tryAgain') : value.fix ? t('nfseFixAndIssue') : t('nfseIssueAction')
   return value.to === 'approved' ? t('orderActionApproveQuote') : value.to === 'progress' ? t('orderActionStartService') : t('web.order.markDone')
 })
 const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
@@ -312,7 +313,7 @@ watch(showCharge, (shown) => (linkOpen.value = shown ? null : false))
 
 async function removePayment(payment: Payment) {
   if (!order.value || !payment.id) return
-  await run(() => removeTransaction(order.value!.id, payment.id as string, payment.type), t('web.receive.removed', { amount: money(payment.amount) }))
+  await run(() => removeTransaction(order.value!.id, payment.id as string, payment.type), t('web.receive.removed', { amount: shownMoney(payment.amount) }))
 }
 
 async function undoAllPayments() {
@@ -495,8 +496,24 @@ async function runStep() {
   if (!value || !order.value) return
   if (value.kind === 'status') await setStatus(value.to)
   else if (value.kind === 'resume') await run(() => writes.resumeOrder(order.value!.id), t('web.order.resumed'))
+  else if (value.kind === 'nfse' && value.retry) await retryAutoNfse(order.value.id)
   else if (value.kind === 'nfse') issuing.value = true
   else dialog.value = { kind: 'receive' }
+}
+
+/** The automatic nota did not go out for a reason a new try may fix: one click issues it (issue #571). */
+async function retryAutoNfse(orderId: string) {
+  busy.value = true
+  // On demand, like the issue dialog: the order screen does not carry the nota code.
+  const [{ retryAutoIssue, directFailure }] = await Promise.all([import('@/lib/nfse/direct-issue'), loadTexts('finance')])
+  try {
+    const answer = await retryAutoIssue([orderId])
+    showToast(answer.status === 'creating' ? t('web.nfseDirect.waitingGov') : answer.number ? t('nfseStatusIssuedNumber', { number: answer.number }) : t('nfseStatusIssued'))
+  } catch (error) {
+    showToast(directFailure(error, locale.value).text)
+  } finally {
+    busy.value = false
+  }
 }
 
 async function hold(reason: HoldReason, note: string) {
@@ -530,7 +547,7 @@ async function receive(value: { amount: number; paymentMethod?: string; paidAt?:
       if (receiptFile) await dropUpload(receiptFile.storagePath)
       throw error
     }
-  }, t('web.order.received', { amount: money(value.amount) }))
+  }, t('web.order.received', { amount: shownMoney(value.amount) }))
   if (ok) dialog.value = null
 }
 
@@ -1150,7 +1167,7 @@ watch(
           <button v-for="item in missing" :key="item.kind + ('deviceId' in item ? item.deviceId : '')" type="button" class="link" :data-testid="`missing-${item.kind}`" @click="openMissing(item)">+ {{ missingText(item) }}</button>
         </p>
         <div class="od-state">
-          <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="lateText(order, now) ? undefined : statusText(order.status)" data-testid="order-status" />
+          <StatusLabel :status="order.status" :held="isHeld(order)" :late-text="lateText(order, now) ? t('orderOverdue') : null" :text="statusText(order.status)" data-testid="order-status" />
           <button v-if="phrase && phraseActs" type="button" class="od-sentence link-plain" :class="{ 'od-sentence--late': phrase.late }" @click="onPhrase">{{ phrase.text }}</button>
           <span v-else-if="phrase" class="od-sentence" :class="{ 'od-sentence--late': phrase.late }">{{ phrase.text }}</span>
         </div>
@@ -1189,7 +1206,7 @@ watch(
         <section v-if="showItems" class="od-sec od-sec--items" aria-labelledby="od-items-title">
           <h3 id="od-items-title">
             {{ t('orderServicesAndParts') }}
-            <button v-if="canAddItems" type="button" class="link" @click="openPicker('addItem')">{{ t('orderAddItemRow') }}</button>
+            <button v-if="canAddItems" type="button" class="link" @click="openPicker('addItem')">{{ t('orderAddItemRow', { product: productWord(t('orderItemKindPart')) }) }}</button>
           </h3>
           <template v-for="group in groups" :key="group.device?.id ?? 'general'">
             <h4 v-if="order.devices.length > 1" class="od-group">{{ group.device ? [group.device.name, group.device.serial].filter(Boolean).join(' - ') : t('generalNoDevice') }}</h4>
@@ -1200,7 +1217,7 @@ watch(
                   <span class="sub">{{ lineKindText(line.kind) }}<template v-if="line.kind === 'product'"> · {{ t('orderItemQuantityValue', { count: line.quantity ?? 1 }) }}</template></span>
                   <span v-if="line.description && line.description !== line.name" class="sub">{{ line.description }}</span>
                 </span>
-                <span v-if="showsMoney" class="num">{{ (line.kind === 'product' ? line.total : line.value) === null ? t('catalogNoPrice') : money(line.kind === 'product' ? line.total : line.value) }}</span>
+                <span v-if="showsMoney" class="num">{{ (line.kind === 'product' ? line.total : line.value) === null ? t('catalogNoPrice') : shownMoney(line.kind === 'product' ? line.total : line.value) }}</span>
                 <span v-else></span>
                 <button v-if="access.canEditMainFields && line.id" type="button" class="link" :aria-label="t('web.order.editLine', { name: line.name })" @click="dialog = { kind: 'item', line }">{{ t('web.order.change') }}</button>
                 <span v-else></span>
@@ -1213,11 +1230,11 @@ watch(
         <section v-if="showsMoney && money$" class="od-sec od-sec--money" aria-labelledby="od-money-title">
           <h3 id="od-money-title" class="sr">{{ t('orderTotalLabel') }}</h3>
           <dl class="receipt" data-testid="order-totals">
-            <div v-if="money$.discount"><dt>{{ t('subtotal') }}</dt><dd>{{ money(money$.subtotal) }}</dd></div>
-            <div v-if="money$.discount"><dt>{{ t('discount') }}</dt><dd>− {{ money(money$.discount) }}</dd></div>
-            <div class="is-total"><dt>{{ t('orderTotalLabel') }}</dt><dd>{{ money(money$.total) }}</dd></div>
-            <div v-if="money$.paid && moneyRowTone"><dt>{{ t('received') }}</dt><dd>{{ money(money$.paid) }}</dd></div>
-            <div v-if="moneyRowTone && money$.remaining > 0" class="is-rest"><dt>{{ t('financialToReceive') }}</dt><dd>{{ money(money$.remaining) }}</dd></div>
+            <div v-if="money$.discount"><dt>{{ t('subtotal') }}</dt><dd>{{ shownMoney(money$.subtotal) }}</dd></div>
+            <div v-if="money$.discount"><dt>{{ t('discount') }}</dt><dd>− {{ shownMoney(money$.discount) }}</dd></div>
+            <div class="is-total"><dt>{{ t('orderTotalLabel') }}</dt><dd>{{ shownMoney(money$.total) }}</dd></div>
+            <div v-if="money$.paid && moneyRowTone"><dt>{{ t('received') }}</dt><dd>{{ shownMoney(money$.paid) }}</dd></div>
+            <div v-if="moneyRowTone && money$.remaining > 0" class="is-rest"><dt>{{ t('financialToReceive') }}</dt><dd>{{ shownMoney(money$.remaining) }}</dd></div>
             <div v-else-if="moneyRowTone && money$.total > 0" class="is-paid"><dt>{{ t('orderFullyPaid') }}</dt><dd>✓</dd></div>
           </dl>
           <p v-if="money$.unpricedCount" class="sub">{{ t('orderUnpricedCount', { count: money$.unpricedCount }) }}</p>
@@ -1238,7 +1255,7 @@ watch(
           <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
-        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
+        <OrderNfse v-if="nfseOn && can('chargeOrder')" :key="`nfse-${order.id}`" :order="order" :ready="nfseReady" :direct="nfseDirect" :remaining="money$?.remaining ?? 0" @issue="issuing = true" @current="(value: NfseInvoice | null) => (nfseCurrent = value)" @loaded="(value: boolean) => (nfseLoaded = value)" />
         <OrderPhotos :order="order" />
         <OrderDocuments :order="order" :can-edit="true" />
         <OrderComments :order-id="order.id" />
@@ -1296,7 +1313,8 @@ watch(
     </div>
     <OrderAssistant v-if="order && access?.canEditMainFields" :order="order" :pending-checklists="orderForms.filter((form) => form.status !== 'completed').length"
       @hide="(ids: string[]) => (hiddenLines = [...hiddenLines, ...ids])"
-      @unhide="(ids: string[]) => (hiddenLines = hiddenLines.filter((id) => !ids.includes(id)))" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))" />
+      @unhide="(ids: string[]) => (hiddenLines = hiddenLines.filter((id) => !ids.includes(id)))" @added="(ids) => (aiLines = [...aiLines, ...ids])" @undone="(ids) => (aiLines = aiLines.filter((id) => !ids.includes(id)))"
+      @other-customer="openPicker('customer')" @other-device="openPicker('device')" />
   </section>
 
   <template v-if="order && access && dialog">
@@ -1384,7 +1402,7 @@ watch(
       @save="saveRequest"
       @close="dialog = null"
     />
-    <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
+    <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder', { product: productWord(t('orderItemKindPart')) })" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />
     <DevicePickerDialog v-else-if="dialog.kind === 'devicesFor'" :devices="order.devices" :sub="dialog.name" @pick="addOnPicked" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="currentCustomerId(order.customer, customers, session.company?.country) ?? undefined" @pick="pickCustomerItem" @close="dialog = null" />
     <ComboDialog
@@ -1398,7 +1416,7 @@ watch(
       @pick="pickDeviceItem"
       @close="dialog = null"
     />
-    <Layer v-else-if="dialog.kind === 'quick'" kind="sheet" :label="dialog.quick === 'item' ? t('web.quick.newItem') : t('web.quick.newDevice', { device: deviceLabel() })" @close="dialog = null">
+    <Layer v-else-if="dialog.kind === 'quick'" kind="sheet" :label="dialog.quick === 'item' ? t('web.quick.newItem', { product: productWord(t('orderItemKindPart')) }) : t('web.quick.newDevice', { device: deviceLabel() })" @close="dialog = null">
       <div class="layer-body">
         <QuickCreate :id="`od-quick-${dialog.quick}`" :kind="dialog.quick" :text="dialog.text" @saved="onQuickSaved" @more="onQuickMore" @cancel="dialog = null" />
       </div>

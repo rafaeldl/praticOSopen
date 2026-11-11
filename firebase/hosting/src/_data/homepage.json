@@ -60,6 +60,50 @@
         "total": "R$ 200,00",
         "done": "OS pronta para enviar",
         "again": "Ver de novo"
+      },
+      "stripWebApp": [
+        "Comece grátis",
+        "Celular e computador",
+        "Cliente aprova sem instalar nada"
+      ],
+      "stripNfse": "Nota fiscal de serviço",
+      "stage": {
+        "label": "Exemplo: a fala vira uma ordem de serviço",
+        "title": "Nova OS",
+        "client": "Juliana Costa",
+        "clientEmpty": "Escolher cliente",
+        "vehicle": "Onix",
+        "vehicleEmpty": "Escolher veículo",
+        "work": "O que vai ser feito",
+        "add": "+ Adicionar serviço ou peça",
+        "photos": "Fotos",
+        "photo": "Foto",
+        "talk": "Falar",
+        "listening": "Ouvindo…",
+        "line": "Onix da Juliana, troca de óleo e alinhamento",
+        "items": [
+          {
+            "name": "Troca de óleo",
+            "price": "R$ 80,00"
+          },
+          {
+            "name": "Alinhamento",
+            "price": "R$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "R$ 0,00",
+          "R$ 80,00",
+          "R$ 200,00"
+        ],
+        "filled": "Preenchi o que está marcado. Confira e salve.",
+        "undo": "Desfazer",
+        "due": "Fica pronto",
+        "request": "O que o cliente pediu",
+        "requestHint": "Ex.: barulho ao frear",
+        "more": "Mais opções",
+        "moreHint": "Situação, visita, responsável, local"
       }
     },
     "workflow": {
@@ -76,7 +120,29 @@
           ],
           "image": "ai-order.png",
           "alt": "Nova OS preenchida pelo assistente de IA, com cliente, veículo e serviços marcados",
-          "tab": "Falar"
+          "tab": "Falar",
+          "scene": {
+            "kind": "talk",
+            "label": "Correção falada: o alinhamento passa para R$ 100,00 e o total para R$ 180,00",
+            "title": "Nova OS",
+            "client": "Juliana Costa",
+            "vehicle": "Onix",
+            "work": "O que vai ser feito",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 100,00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 180,00",
+            "said": "“O alinhamento é 100”"
+          }
         },
         {
           "title": "Prove o serviço com fotos",
@@ -88,7 +154,34 @@
           ],
           "image": "checklist.png",
           "alt": "Checklist de entrada preenchido com fotos das avarias",
-          "tab": "Registrar"
+          "tab": "Registrar",
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos das avarias",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Para-choque dianteiro",
+                "a": "Riscado",
+                "photos": 2
+              },
+              {
+                "q": "Faróis",
+                "a": "OK"
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK"
+              },
+              {
+                "q": "Nível de combustível",
+                "a": "1/2"
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "title": "Orçamento aprovado pelo celular do cliente",
@@ -100,7 +193,30 @@
           ],
           "image": "order.png",
           "alt": "Tela de uma OS com o cliente, a situação, o botão do próximo passo, serviços e total",
-          "tab": "Aprovar"
+          "tab": "Aprovar",
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Juliana Costa",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Troca de óleo",
+                "price": "R$ 80,00"
+              },
+              {
+                "name": "Alinhamento",
+                "price": "R$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 180,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "title": "Nenhum atendimento esquecido",
@@ -112,7 +228,57 @@
           ],
           "image": "agenda.png",
           "alt": "Agenda da semana com um atendimento marcado",
-          "tab": "Agendar"
+          "tab": "Agendar",
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Juliana Costa",
+                "time": "09:00",
+                "status": "Aprovada · OS 186",
+                "kind": "approved",
+                "sub": "Onix · com Bruno"
+              },
+              {
+                "name": "Marcos Lima",
+                "time": "14:30",
+                "status": "Orçamento · OS 187",
+                "kind": "quote",
+                "sub": "Civic · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Juliana Costa às 09:00 · Onix",
+            "now": "agora"
+          }
         },
         {
           "title": "Receba o que é seu",
@@ -124,7 +290,33 @@
           ],
           "image": "financial.png",
           "alt": "Aba Financeiro com o total que falta receber e a lista de clientes",
-          "tab": "Receber"
+          "tab": "Receber",
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.730 de 3 clientes",
+            "nextSub": "Ana Ribeiro deve R$ 1.250 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Ana Ribeiro",
+                "amount": "R$ 1.250",
+                "sub": "OS 183 · desde 02/10"
+              },
+              {
+                "name": "Juliana Costa",
+                "amount": "R$ 300",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Lima",
+                "amount": "R$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "Recursos do app"
@@ -193,6 +385,177 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Oficina mecânica",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "Também no computador",
+      "lede": "No celular para quem está na rua, no computador para quem está no balcão. É a mesma conta, com as mesmas OS.",
+      "items": [
+        {
+          "title": "A mesma conta",
+          "text": "Entre com o mesmo login do celular. O que você muda no computador aparece no app, e o contrário também."
+        },
+        {
+          "title": "Sem instalar nada",
+          "text": "Abre no navegador do computador. Veja a OS ao lado da lista e mude o horário arrastando na agenda."
+        },
+        {
+          "title": "Imprimir e planilhas",
+          "text": "Imprima a OS, gere o PDF e traga seus clientes e serviços de uma planilha."
+        }
+      ],
+      "cta": "Entrar no sistema",
+      "guide": "Ver como usar no computador",
+      "scene": {
+        "label": "O quadro de OS no computador com a OS 186 arrastada para Concluída, e a mesma OS no celular já concluída",
+        "url": "praticos.app/web",
+        "nav": [
+          "Início",
+          "Agenda",
+          "Financeiro",
+          "Clientes",
+          "Notas fiscais",
+          "Catálogo"
+        ],
+        "title": "Início",
+        "summary": "12 em aberto · 2 atrasadas",
+        "newOrder": "Nova OS",
+        "views": [
+          "Lista",
+          "Quadro"
+        ],
+        "columns": [
+          {
+            "name": "Aprovada",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Bruno Lima",
+                "num": "184",
+                "sub": "Gol · QRT4E21",
+                "money": "R$ 310,00"
+              },
+              {
+                "who": "Carla Dias",
+                "num": "183",
+                "sub": "HB20 · RFA2B90",
+                "money": "R$ 450,00"
+              }
+            ]
+          },
+          {
+            "name": "Em andamento",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Juliana Costa",
+                "num": "186",
+                "sub": "Onix · BRA2E19",
+                "money": "R$ 200,00"
+              },
+              {
+                "who": "Paulo Nunes",
+                "num": "185",
+                "sub": "Fiat Uno · ABC1D23",
+                "money": "R$ 166,00"
+              }
+            ]
+          },
+          {
+            "name": "Concluída",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Ana Souza",
+                "num": "181",
+                "sub": "Corolla · PXT3C44",
+                "money": "R$ 520,00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Início",
+          "title": "OS #186",
+          "client": "Juliana Costa",
+          "device": "Onix · BRA2E19",
+          "from": "Em andamento",
+          "to": "Concluída",
+          "items": [
+            {
+              "name": "Troca de óleo",
+              "price": "R$ 80,00"
+            },
+            {
+              "name": "Alinhamento",
+              "price": "R$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "R$ 200,00"
+        }
+      }
+    },
+    "nfse": {
+      "title": "Nota fiscal de serviço direto da OS",
+      "lede": "Para empresa do Simples e para o MEI. O PraticOS emite pelo Emissor Nacional do governo: cliente, serviço e valor vêm da OS, sem digitar de novo.",
+      "items": [
+        {
+          "title": "Um toque na OS pronta",
+          "text": "Conclua o serviço e toque em “Emitir nota fiscal”. Se preferir, a nota sai sozinha quando você conclui a OS."
+        },
+        {
+          "title": "O cliente recebe por e-mail",
+          "text": "A nota vai com o PDF para o e-mail do cliente e fica guardada junto da OS."
+        },
+        {
+          "title": "Nota sem limite no plano pago",
+          "text": "Sem pagar por nota. Usa o certificado digital A1 da sua empresa, enviado uma vez."
+        }
+      ],
+      "cta": "Ver como funciona a nota",
+      "price": "Baixe grátis e assine pelo app quando for emitir. A nota está nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
+      "tab": {
+        "id": "nota-fiscal",
+        "tab": "Nota fiscal",
+        "title": "Nota fiscal direto da OS",
+        "text": "Para Simples e MEI, pelo Emissor Nacional. Cliente, serviço e valor vêm da OS.",
+        "facts": [
+          "Um toque em “Emitir nota fiscal” na OS pronta",
+          "O cliente recebe a nota e o PDF por e-mail",
+          "Sem pagar por nota no plano pago"
+        ],
+        "cta": {
+          "label": "Ver como funciona a nota",
+          "href": "funcionalidades/nota-fiscal.html",
+          "ga": "home_nfse_page"
+        },
+        "note": "Nos planos pagos, a partir de <span class=\"mono\">R$ 59,90</span> por mês.",
+        "scene": {
+          "kind": "invoice",
+          "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+          "back": "Início",
+          "title": "OS #186",
+          "client": "Juliana Costa",
+          "status": "Concluída",
+          "items": [
+            {
+              "name": "Troca de óleo",
+              "price": "R$ 80,00"
+            },
+            {
+              "name": "Alinhamento",
+              "price": "R$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "R$ 200,00",
+          "invoice": "Nota fiscal",
+          "invoiceStatus": "Emitida · nº 29",
+          "pdf": "PDF",
+          "email": "E-mail ao cliente",
+          "emailSent": "Enviada para juliana@email.com em 08/11"
+        }
+      }
     }
   },
   "en": {
@@ -256,6 +619,49 @@
         "total": "$200.00",
         "done": "Order ready to send",
         "again": "Play again"
+      },
+      "stripWebApp": [
+        "Start free",
+        "Phone and computer",
+        "Customers approve with nothing to install"
+      ],
+      "stage": {
+        "label": "Example: speech turns into a work order",
+        "title": "New WO",
+        "client": "Julia Carter",
+        "clientEmpty": "Choose customer",
+        "vehicle": "Civic",
+        "vehicleEmpty": "Choose vehicle",
+        "work": "What will be done",
+        "add": "+ Add service or part",
+        "photos": "Photos",
+        "photo": "Photo",
+        "talk": "Speak",
+        "listening": "Listening…",
+        "line": "Julia's Civic, oil change and alignment",
+        "items": [
+          {
+            "name": "Oil change",
+            "price": "$80.00"
+          },
+          {
+            "name": "Alignment",
+            "price": "$120.00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "$0.00",
+          "$80.00",
+          "$200.00"
+        ],
+        "filled": "I filled in what's marked. Check it and save.",
+        "undo": "Undo",
+        "due": "Ready by",
+        "request": "What the customer asked",
+        "requestHint": "E.g.: noise when braking",
+        "more": "More options",
+        "moreHint": "Status, visit, assignee, location"
       }
     },
     "workflow": {
@@ -272,7 +678,29 @@
           ],
           "image": "ai-order.png",
           "alt": "New work order filled in by the AI assistant, with customer, vehicle and services marked",
-          "tab": "Talk"
+          "tab": "Talk",
+          "scene": {
+            "kind": "talk",
+            "label": "Spoken correction: alignment becomes $100.00 and the total $180.00",
+            "title": "New WO",
+            "client": "Julia Carter",
+            "vehicle": "Civic",
+            "work": "What will be done",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$100.00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$180.00",
+            "said": "“Alignment is 100”"
+          }
         },
         {
           "title": "Show your work with photos",
@@ -284,7 +712,34 @@
           ],
           "image": "checklist.png",
           "alt": "Check-in checklist filled in with photos of the damage",
-          "tab": "Record"
+          "tab": "Record",
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos of the damage",
+            "back": "WO 186",
+            "title": "Check-in checklist",
+            "progress": "7 of 10 answered",
+            "items": [
+              {
+                "q": "Front bumper",
+                "a": "Scratched",
+                "photos": 2
+              },
+              {
+                "q": "Headlights",
+                "a": "OK"
+              },
+              {
+                "q": "Mirrors",
+                "a": "OK"
+              },
+              {
+                "q": "Fuel level",
+                "a": "1/2"
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "title": "Get quotes approved from the customer's phone",
@@ -296,7 +751,30 @@
           ],
           "image": "order.png",
           "alt": "A work order screen with the customer, status, next-step button, services and total",
-          "tab": "Approve"
+          "tab": "Approve",
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 186",
+            "client": "Julia Carter",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Oil change",
+                "price": "$80.00"
+              },
+              {
+                "name": "Alignment",
+                "price": "$100.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$180.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "title": "Never miss a job",
@@ -308,7 +786,57 @@
           ],
           "image": "agenda.png",
           "alt": "Weekly schedule with one appointment booked",
-          "tab": "Schedule"
+          "tab": "Schedule",
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Julia Carter",
+                "time": "9:00 AM",
+                "status": "Approved · WO 186",
+                "kind": "approved",
+                "sub": "Civic · with Ben"
+              },
+              {
+                "name": "Mark Lee",
+                "time": "2:30 PM",
+                "status": "Quote · WO 187",
+                "kind": "quote",
+                "sub": "Corolla · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Julia Carter at 9:00 AM · Civic",
+            "now": "now"
+          }
         },
         {
           "title": "Get paid what you're owed",
@@ -320,7 +848,33 @@
           ],
           "image": "financial.png",
           "alt": "Financial tab with the total left to collect and the list of customers",
-          "tab": "Collect"
+          "tab": "Collect",
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,730 to collect from 3 customers",
+            "nextSub": "Anna Reed owes $1,250 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Anna Reed",
+                "amount": "$1,250",
+                "sub": "WO 183 · since 10/02"
+              },
+              {
+                "name": "Julia Carter",
+                "amount": "$300",
+                "sub": "WO 186 · since 10/28"
+              },
+              {
+                "name": "Mark Lee",
+                "amount": "$180",
+                "sub": "WO 187 · since 11/05"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "App features"
@@ -389,6 +943,115 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Auto repair shop",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "Also on your computer",
+      "lede": "On the phone when you are out on a job, on the computer when you are at the counter. Same account, same work orders.",
+      "items": [
+        {
+          "title": "Same account",
+          "text": "Sign in with the same login you use on the phone. What you change on the computer shows up in the app, and the other way around."
+        },
+        {
+          "title": "Nothing to install",
+          "text": "It opens in the computer's browser. See the work order next to the list and move a visit by dragging it on the schedule."
+        },
+        {
+          "title": "Print and spreadsheets",
+          "text": "Print the work order, make the PDF and bring your customers and services in from a spreadsheet."
+        }
+      ],
+      "cta": "Sign in to the system",
+      "guide": "See how to use it on a computer",
+      "scene": {
+        "label": "The work order board on the computer with order 186 dragged to Completed, and the same order on the phone already completed",
+        "url": "praticos.app/web",
+        "nav": [
+          "Home",
+          "Schedule",
+          "Finance",
+          "Customers",
+          "Catalog",
+          "Team"
+        ],
+        "title": "Home",
+        "summary": "12 open · 2 late",
+        "newOrder": "New order",
+        "views": [
+          "List",
+          "Board"
+        ],
+        "columns": [
+          {
+            "name": "Approved",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Brian Lee",
+                "num": "184",
+                "sub": "Civic · 7KLM204",
+                "money": "$310.00"
+              },
+              {
+                "who": "Carla Diaz",
+                "num": "183",
+                "sub": "Corolla · 8TRS551",
+                "money": "$450.00"
+              }
+            ]
+          },
+          {
+            "name": "In progress",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Julia Carter",
+                "num": "186",
+                "sub": "Camry · 6ABC123",
+                "money": "$200.00"
+              },
+              {
+                "who": "Paul Newman",
+                "num": "185",
+                "sub": "F-150 · 9XYZ882",
+                "money": "$166.00"
+              }
+            ]
+          },
+          {
+            "name": "Completed",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Anna Scott",
+                "num": "181",
+                "sub": "Accord · 5DEF310",
+                "money": "$520.00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Home",
+          "title": "Order #186",
+          "client": "Julia Carter",
+          "device": "Camry · 6ABC123",
+          "from": "In progress",
+          "to": "Completed",
+          "items": [
+            {
+              "name": "Oil change",
+              "price": "$80.00"
+            },
+            {
+              "name": "Wheel alignment",
+              "price": "$120.00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "$200.00"
+        }
+      }
     }
   },
   "es": {
@@ -452,6 +1115,49 @@
         "total": "$ 200,00",
         "done": "Orden lista para enviar",
         "again": "Ver de nuevo"
+      },
+      "stripWebApp": [
+        "Empieza gratis",
+        "Celular y computadora",
+        "El cliente aprueba sin instalar nada"
+      ],
+      "stage": {
+        "label": "Ejemplo: lo que dices se convierte en una orden de servicio",
+        "title": "Nueva OS",
+        "client": "Julia Gómez",
+        "clientEmpty": "Elegir cliente",
+        "vehicle": "Corolla",
+        "vehicleEmpty": "Elegir vehículo",
+        "work": "Qué se va a hacer",
+        "add": "+ Agregar servicio o pieza",
+        "photos": "Fotos",
+        "photo": "Foto",
+        "talk": "Hablar",
+        "listening": "Escuchando…",
+        "line": "El Corolla de Julia, cambio de aceite y alineación",
+        "items": [
+          {
+            "name": "Cambio de aceite",
+            "price": "$ 80,00"
+          },
+          {
+            "name": "Alineación",
+            "price": "$ 120,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "totals": [
+          "$ 0,00",
+          "$ 80,00",
+          "$ 200,00"
+        ],
+        "filled": "Completé lo marcado. Revísalo y guarda.",
+        "undo": "Deshacer",
+        "due": "Listo el",
+        "request": "Lo que pidió el cliente",
+        "requestHint": "Ej.: ruido al frenar",
+        "more": "Más opciones",
+        "moreHint": "Estado, visita, responsable, lugar"
       }
     },
     "workflow": {
@@ -468,7 +1174,29 @@
           ],
           "image": "ai-order.png",
           "alt": "Nueva orden rellenada por el asistente de IA, con cliente, vehículo y servicios marcados",
-          "tab": "Hablar"
+          "tab": "Hablar",
+          "scene": {
+            "kind": "talk",
+            "label": "Corrección hablada: la alineación pasa a $ 100,00 y el total a $ 180,00",
+            "title": "Nueva OS",
+            "client": "Julia Gómez",
+            "vehicle": "Corolla",
+            "work": "Qué se va a hacer",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 100,00",
+                "changed": true
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 180,00",
+            "said": "“La alineación es 100”"
+          }
         },
         {
           "title": "Demuestra tu trabajo con fotos",
@@ -480,7 +1208,34 @@
           ],
           "image": "checklist.png",
           "alt": "Checklist de entrada rellenado con fotos de los daños",
-          "tab": "Registrar"
+          "tab": "Registrar",
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos de los daños",
+            "back": "OS 186",
+            "title": "Checklist de entrada",
+            "progress": "7 de 10 respondidas",
+            "items": [
+              {
+                "q": "Parachoques delantero",
+                "a": "Rayado",
+                "photos": 2
+              },
+              {
+                "q": "Faros",
+                "a": "OK"
+              },
+              {
+                "q": "Retrovisores",
+                "a": "OK"
+              },
+              {
+                "q": "Nivel de combustible",
+                "a": "1/2"
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "title": "Presupuesto aprobado desde el celular del cliente",
@@ -492,7 +1247,30 @@
           ],
           "image": "order.png",
           "alt": "Pantalla de una orden con el cliente, el estado, el botón del siguiente paso, servicios y total",
-          "tab": "Aprobar"
+          "tab": "Aprobar",
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 186",
+            "client": "Julia Gómez",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Cambio de aceite",
+                "price": "$ 80,00"
+              },
+              {
+                "name": "Alineación",
+                "price": "$ 100,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 180,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "title": "Ningún trabajo olvidado",
@@ -504,7 +1282,57 @@
           ],
           "image": "agenda.png",
           "alt": "Agenda de la semana con una visita marcada",
-          "tab": "Agendar"
+          "tab": "Agendar",
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Julia Gómez",
+                "time": "09:00",
+                "status": "Aprobada · OS 186",
+                "kind": "approved",
+                "sub": "Corolla · con Bruno"
+              },
+              {
+                "name": "Marcos Ruiz",
+                "time": "14:30",
+                "status": "Presupuesto · OS 187",
+                "kind": "quote",
+                "sub": "Civic · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Julia Gómez a las 09:00 · Corolla",
+            "now": "ahora"
+          }
         },
         {
           "title": "Cobra lo que es tuyo",
@@ -516,7 +1344,33 @@
           ],
           "image": "financial.png",
           "alt": "Pestaña Financiero con el total que falta cobrar y la lista de clientes",
-          "tab": "Cobrar"
+          "tab": "Cobrar",
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.730 de 3 clientes",
+            "nextSub": "Ana Ruiz debe $ 1.250 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Ana Ruiz",
+                "amount": "$ 1.250",
+                "sub": "OS 183 · desde 02/10"
+              },
+              {
+                "name": "Julia Gómez",
+                "amount": "$ 300",
+                "sub": "OS 186 · desde 28/10"
+              },
+              {
+                "name": "Marcos Ruiz",
+                "amount": "$ 180",
+                "sub": "OS 187 · desde 05/11"
+              }
+            ]
+          }
         }
       ],
       "tabsLabel": "Funciones de la app"
@@ -585,6 +1439,115 @@
       "name": "Manoel Vergilino dos Santos",
       "role": "Taller mecánico",
       "photo": "assets/images/site/manoel-vergilino.jpg"
+    },
+    "webApp": {
+      "title": "También en la computadora",
+      "lede": "En el celular cuando estás en la calle, en la computadora cuando estás en el mostrador. La misma cuenta, las mismas órdenes.",
+      "items": [
+        {
+          "title": "La misma cuenta",
+          "text": "Entra con el mismo usuario del celular. Lo que cambias en la computadora aparece en la app, y al revés también."
+        },
+        {
+          "title": "Sin instalar nada",
+          "text": "Se abre en el navegador de la computadora. Ve la orden al lado de la lista y cambia el horario arrastrando en la agenda."
+        },
+        {
+          "title": "Imprimir y planillas",
+          "text": "Imprime la orden, genera el PDF y trae tus clientes y servicios desde una planilla."
+        }
+      ],
+      "cta": "Entrar al sistema",
+      "guide": "Ver cómo usarlo en la computadora",
+      "scene": {
+        "label": "El tablero de órdenes en la computadora con la orden 186 arrastrada a Terminada, y la misma orden en el celular ya terminada",
+        "url": "praticos.app/web",
+        "nav": [
+          "Inicio",
+          "Agenda",
+          "Finanzas",
+          "Clientes",
+          "Catálogo",
+          "Equipo"
+        ],
+        "title": "Inicio",
+        "summary": "12 abiertas · 2 atrasadas",
+        "newOrder": "Nueva orden",
+        "views": [
+          "Lista",
+          "Tablero"
+        ],
+        "columns": [
+          {
+            "name": "Aprobada",
+            "tone": "accent",
+            "cards": [
+              {
+                "who": "Bruno Gómez",
+                "num": "184",
+                "sub": "Gol · AB123CD",
+                "money": "$ 310,00"
+              },
+              {
+                "who": "Carla Díaz",
+                "num": "183",
+                "sub": "Corolla · AC456EF",
+                "money": "$ 450,00"
+              }
+            ]
+          },
+          {
+            "name": "En curso",
+            "tone": "warning",
+            "cards": [
+              {
+                "who": "Julia Torres",
+                "num": "186",
+                "sub": "Onix · AD789GH",
+                "money": "$ 200,00"
+              },
+              {
+                "who": "Pablo Núñez",
+                "num": "185",
+                "sub": "Fiat Uno · AE321JK",
+                "money": "$ 166,00"
+              }
+            ]
+          },
+          {
+            "name": "Terminada",
+            "tone": "success",
+            "cards": [
+              {
+                "who": "Ana Ruiz",
+                "num": "181",
+                "sub": "Hilux · AF654LM",
+                "money": "$ 520,00"
+              }
+            ]
+          }
+        ],
+        "phone": {
+          "back": "Inicio",
+          "title": "Orden #186",
+          "client": "Julia Torres",
+          "device": "Onix · AD789GH",
+          "from": "En curso",
+          "to": "Terminada",
+          "items": [
+            {
+              "name": "Cambio de aceite",
+              "price": "$ 80,00"
+            },
+            {
+              "name": "Alineación",
+              "price": "$ 120,00"
+            }
+          ],
+          "totalLabel": "Total",
+          "total": "$ 200,00"
+        }
+      }
     }
   }
 }

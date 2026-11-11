@@ -1,6 +1,6 @@
 // Fatia 07: Configurações (rows by role), Sua conta (profile, photo, switch
 // company, invite code, sign out) and Plano (read only), against the Emulator Suite.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_B, COMPANY_G, USERS } from './fixtures.mjs'
 import { chooseCompany, login, type UserKey } from './helpers'
 import { readPath } from './settings-data'

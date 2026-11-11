@@ -14,10 +14,17 @@
 .fx-hero .lede { margin-top: var(--space-md); }
 .fx-hero .btn-row { margin-top: var(--space-lg); }
 .fx-hero__shot { width: min(100%, 17rem); justify-self: start; }
+/* The app scene (stage/): the phone hangs from the card's top edge, as in the home's tabs */
+.fx-hero__scene { width: min(100%, 400px); justify-self: center; margin: 0; }
+.fx-hero__stage { background: var(--color-paper-2); border-radius: var(--radius-card); overflow: hidden; }
+.fx-hero__scene .ss-phone { box-shadow: 0 12px 28px -14px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(0 0 0 / 0.04); }
+.fx-hero__scene figcaption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2xs) var(--space-sm); margin-top: var(--space-2xs); font-size: var(--text-xs); color: var(--color-muted); }
+.fx-hero__scene .stage-again { font: 700 0.95rem var(--font-body); color: var(--color-ink); background: none; border: 0; padding: var(--space-2xs) 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.fx-hero__scene .stage-again:hover { text-decoration-thickness: 2px; }
 @media (min-width: 60rem) {
   .fx-hero { padding-top: var(--space-3xl); }
   .fx-hero__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-xl); }
-  .fx-hero__shot { justify-self: end; }
+  .fx-hero__shot, .fx-hero__scene { justify-self: end; }
 }
 
 /* ---------- Notice: a calm ruled block, not an alert ---------- */
@@ -93,4 +100,21 @@
 .fx-faq__item dd { margin: 0; color: var(--color-muted); max-width: var(--measure); }
 @media (min-width: 52rem) {
   .fx-faq__item { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+}
+
+/* ---------- Service invoice page (nota-fiscal) ---------- */
+.fx-price { margin-top: var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.fx-facts { border-top: var(--rule-strong); padding-top: var(--space-sm); }
+.fx-facts ul { margin-top: var(--space-2xs); }
+.fx-facts li { padding-block: var(--space-sm); border-bottom: var(--rule); }
+.fx-facts h3 { font-size: var(--text-md); line-height: 1.25; letter-spacing: -0.01em; }
+.fx-facts p { margin-top: var(--space-3xs); color: var(--color-muted); }
+.fx-more { margin-top: var(--space-lg); color: var(--color-muted); }
+.fx-grid { display: grid; gap: 0 var(--space-xl); grid-template-columns: minmax(0, 1fr); border-top: var(--rule); }
+.fx-grid li { padding-block: var(--space-md); border-bottom: var(--rule); }
+.fx-grid h3 { font-size: var(--text-md); line-height: 1.25; }
+.fx-grid p { margin-top: var(--space-3xs); color: var(--color-muted); max-width: 52ch; }
+.nf-audience-note { margin-top: var(--space-md); color: var(--color-muted); max-width: 60ch; }
+@media (min-width: 52rem) {
+  .fx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

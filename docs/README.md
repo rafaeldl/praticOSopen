@@ -1,0 +1,48 @@
+# Documentação técnica
+
+Índice dos documentos em `docs/`. Ao criar um documento novo, acrescente uma linha aqui (e não no `CLAUDE.md`).
+
+- [`AUTO_VERSIONING.md`](AUTO_VERSIONING.md) - Versionamento automático e Conventional Commits
+- [`CI_BUDGET.md`](CI_BUDGET.md) - Orçamento do GitHub Actions, o que roda onde e hook de pre-push
+- [`STORE_LISTING.md`](STORE_LISTING.md) - Ficha das lojas: textos, prints (como gerar, dados demo), conta da revisão e envio sem publicar
+- [`APP_TRACKING_TRANSPARENCY.md`](APP_TRACKING_TRANSPARENCY.md) - Permissão de rastreamento no iOS (ATT) e exigências da App Review
+- [`I18N.md`](I18N.md) - Sistema de internacionalização completo
+- [`SEGMENT_CUSTOM_FIELDS.md`](SEGMENT_CUSTOM_FIELDS.md) - Campos customizados por segmento
+- [`SEGMENT_SOFTWARE_IT.md`](SEGMENT_SOFTWARE_IT.md) - Ramo Software e TI: nomes (Sistema, Licença), exemplos, termos, página do site atrás de `flags.softwareItPage` e como criar o ramo em produção
+- [`FIELD_VALIDATION_MASKS.md`](FIELD_VALIDATION_MASKS.md) - Máscaras e validações por segmento/país
+- [`IOS_CODE_SIGNING.md`](IOS_CODE_SIGNING.md) - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
+- [`DEVICE_NEXT_MAINTENANCE.md`](DEVICE_NEXT_MAINTENANCE.md) - Próxima manutenção por aparelho: pergunta ao concluir, Início, aviso diário
+- [`DEVICE_READING.md`](DEVICE_READING.md) - Leitura do equipamento por visita (quilometragem, horímetro): campo do ramo com `reading: true`, `Order.deviceReadings` e última leitura no equipamento
+- [`REMINDERS_AND_NOTICES.md`](REMINDERS_AND_NOTICES.md) - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
+- [`AI_ORDER_ASSIST.md`](AI_ORDER_ASSIST.md) - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
+- [`ONBOARDING.md`](ONBOARDING.md) - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
+- [`ORDER_ON_HOLD.md`](ORDER_ON_HOLD.md) - Marca de OS parada (motivo, dias parados, filtro Paradas)
+- [`WORK_STAGES.md`](WORK_STAGES.md) - Etapas dentro de "Em andamento" (Pintura, Polimento): `company.workStages`, `order.stage`, colunas, ordem e impressão no Quadro e no modo TV; no app, etapa na tela da OS e "Passar para X"
+- [`PDF_GENERATION.md`](PDF_GENERATION.md) - Geracao do PDF da OS (fotos, paginacao, download de imagens)
+- [`VALUES_AND_BILLING_TOGGLE.md`](VALUES_AND_BILLING_TOGGLE.md) - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
+- [`QUICK_REGISTER.md`](QUICK_REGISTER.md) - Cadastro rápido de dentro da OS: campos pedidos na hora (WhatsApp, placa/série, preço) e "+ WhatsApp"/"+ Placa" para completar pela OS
+- [`CUSTOMER_CONTACTS.md`](CUSTOMER_CONTACTS.md) - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato
+- [`CUSTOMER_LAST_ACTIVITY.md`](CUSTOMER_LAST_ACTIVITY.md) - Última movimentação do cliente (`lastActivityAt`): gatilhos no servidor, lista do web por Recentes, números da lista gravados no cliente (`openOrders`, `owed`, `openDueDates`) e scripts de preenchimento
+- [`SHARE_LINK.md`](SHARE_LINK.md) - Sistema de compartilhamento via magic link
+- [`DOMAIN.md`](DOMAIN.md) - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
+- [`ACCOUNT_DELETION.md`](ACCOUNT_DELETION.md) - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
+- [`ASAAS_INTEGRATION.md`](ASAAS_INTEGRATION.md) - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
+- [`NFSE_ASAAS.md`](NFSE_ASAAS.md) - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
+- [`NFSE_DIRECT.md`](NFSE_DIRECT.md) - NFS-e direta (Emissor Nacional): dados e regras, cofre do certificado com KMS por emitente (crypto-shredding), rotas e passo manual do KMS
+- [`NFSE_DIRECT_DISCOVERY.md`](NFSE_DIRECT_DISCOVERY.md) - Discovery da NFS-e direto no Emissor Nacional (sem Asaas): regras do certificado, spike em produção, APIs do governo, cliente piloto e direção do desenho (emitentes, importar notas ao subir o certificado)
+- [`WEB_APP.md`](WEB_APP.md) - App web em `firebase/webapp` (Vue + Vite em `/web`): arquitetura, como rodar com o emulador, como adicionar tela
+- [`APP_DESIGN_SYSTEM.md`](APP_DESIGN_SYSTEM.md) - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
+- [`UX_GUIDELINES.md`](UX_GUIDELINES.md) - Padrões visuais iOS/Cupertino
+- [`DESIGN_TOKENS.md`](DESIGN_TOKENS.md) - Tema Campo para site, web e app: cores da marca, camada do sistema, situações e contraste
+- [`WEB_APP_DESIGN.md`](WEB_APP_DESIGN.md) - Padrão do app web: tokens, mestre-detalhe, teclado
+- [`web-app/discovery-report.md`](web-app/discovery-report.md) - Descoberta do app web: uso real, arquitetura, matriz de paridade e roteiro
+- [`WEB_UX_GUIDELINES.md`](WEB_UX_GUIDELINES.md) - Padrões para site institucional
+- [`WEBSITE_STRUCTURE.md`](WEBSITE_STRUCTURE.md) - Estrutura completa do site Eleventy
+- [`SITE_STAGE_SCENES.md`](SITE_STAGE_SCENES.md) - Cenas do produto no site (skill Stageshow em `.claude/skills/stageshow`): pacote React em `firebase/hosting/stage`, build para `src/assets/stage`, prévia e gate
+- [`MULTI_TENANCY.md`](MULTI_TENANCY.md) - Detalhes da arquitetura multi-tenant
+- [`formularios_dinamicos.md`](formularios_dinamicos.md) - Especificação de checklists/vistorias
+- [`DEPLOYMENT.md`](DEPLOYMENT.md) - Guia completo de deploy
+- [`praticos-bot-central.md`](praticos-bot-central.md) - Bot WhatsApp: arquitetura e features
+- [`BOT_WORKSPACE_CONFIG.md`](BOT_WORKSPACE_CONFIG.md) - Configuração do workspace OpenClaw
+- [`GOOGLE_ADS_API.md`](GOOGLE_ADS_API.md) - Acesso ao Google Ads via Claude Code
+- [`ADS_CAMPAIGNS.md`](ADS_CAMPAIGNS.md) - Status de campanhas, pendências e progresso

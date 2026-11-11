@@ -10,7 +10,6 @@ import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
-import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -151,21 +150,9 @@ class _NfseListScreenState extends State<NfseListScreen> {
     _watch();
   }
 
-  Future<void> _showMenu() async {
-    final l10n = context.l10n;
-    final picked = await showPullDownMenu(
-      context,
-      groups: [
-        PullDownGroup([
-          PullDownItem(
-            value: 'setup',
-            label: l10n.nfseListSetup,
-            icon: CupertinoIcons.gear,
-          ),
-        ]),
-      ],
-    );
-    if (picked != 'setup' || !mounted) return;
+  /// Opens the nota setup straight away (one tap, no menu): the direct
+  /// one when the NFS-e direct is on, else the one through Asaas.
+  Future<void> _openSetup() async {
     await Navigator.of(context).push<void>(
       CupertinoPageRoute<void>(
         builder: (_) => _nfse.direct
@@ -249,10 +236,10 @@ class _NfseListScreenState extends State<NfseListScreen> {
             border: null,
             trailing: _canSetUp
                 ? GlassBarButton(
-                    key: const Key('nfseListMenu'),
-                    label: l10n.nfseListMenu,
-                    icon: CupertinoIcons.ellipsis,
-                    onPressed: _showMenu,
+                    key: const Key('nfseListSetup'),
+                    label: l10n.nfseListSetup,
+                    icon: CupertinoIcons.gear,
+                    onPressed: _openSetup,
                   )
                 : null,
           ),
@@ -309,7 +296,10 @@ class _NfseListScreenState extends State<NfseListScreen> {
           hasScrollBody: false,
           child: EmptyState(
             title: l10n.nfseListEmpty(monthName),
-            message: l10n.nfseListEmptyHint,
+            // The direct nota has its own "Nota fiscal" row on the order.
+            message: _nfse.direct
+                ? l10n.nfseListEmptyHintDirect
+                : l10n.nfseListEmptyHint,
           ),
         ),
       ];

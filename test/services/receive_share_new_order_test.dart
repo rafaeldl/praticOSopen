@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/services/receive_share_service.dart';
+import 'package:praticos/services/received_share.dart';
 
 void main() {
   group('newOrderIdAfter ("+" Nova OS in "Em qual OS?")', () {
@@ -32,6 +34,42 @@ void main() {
         ),
         throwsA(isA<TimeoutException>()),
       );
+    });
+  });
+
+  group('photosForNewOrder (#633)', () {
+    const a = ReceivedFile(path: '/tmp/a.heic', mimeType: 'image/heic');
+    const b = ReceivedFile(path: '/tmp/b.jpg', mimeType: 'image/jpeg');
+
+    test('each photo becomes a JPEG for the Nova OS, in order', () async {
+      final result = await photosForNewOrder(
+        [a, b],
+        compress: (path) async => Uint8List.fromList(path.codeUnits),
+      );
+      expect(result.photos.map((p) => String.fromCharCodes(p.bytes)), [
+        '/tmp/a.heic',
+        '/tmp/b.jpg',
+      ]);
+      expect(result.photos.every((p) => p.mimeType == 'image/jpeg'), isTrue);
+      expect(result.left, isEmpty);
+    });
+
+    test('a photo that cannot be read is left to be saved as before', () async {
+      final result = await photosForNewOrder(
+        [a, b],
+        compress: (path) async {
+          if (path == a.path) throw Exception('bad file');
+          return Uint8List.fromList([1]);
+        },
+      );
+      expect(result.photos, hasLength(1));
+      expect(result.left.map((f) => f.path), [a.path]);
+    });
+
+    test('null bytes also leave the file', () async {
+      final result = await photosForNewOrder([a], compress: (_) async => null);
+      expect(result.photos, isEmpty);
+      expect(result.left, [a]);
     });
   });
 }

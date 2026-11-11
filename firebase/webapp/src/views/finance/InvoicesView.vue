@@ -14,6 +14,7 @@ import PageHead from '@/components/PageHead.vue'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import ShareButtons from '@/components/ShareButtons.vue'
+import InvoiceEmailFact from '@/components/finance/InvoiceEmailFact.vue'
 import { locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { addDays, monthOf, shiftMonth } from '@/lib/finance/period'
@@ -21,9 +22,9 @@ import { monthName, monthYear, today } from '@/lib/finance/text'
 import { formatDate } from '@/lib/format'
 import { cancelInvoice, customerInvoices, monthInvoices, nfseSettings, type NfseSettings } from '@/lib/nfse/data'
 import { can } from '@/lib/session'
-import { DOT, invoiceStatusText } from '@/lib/nfse/text'
-import { SEARCH_FROM, byEmitter, canCancel, canFix, canReconcile, emittersOf, matches, monthList, orderNumbers, refusalMessage, type NfseInvoice } from '@/lib/nfse/model'
-import { CANCEL_REASONS, cancelDirect, cancelFailureText, directPdfPath, reconcileDirect, storageUrl, type CancelReason } from '@/lib/nfse/direct-issue'
+import { DOT, autoFailureReason, invoiceStatusText } from '@/lib/nfse/text'
+import { SEARCH_FROM, byEmitter, canCancel, canFix, canReconcile, canRetryAuto, emittersOf, isAutoDirectFailure, matches, monthList, orderNumbers, refusalMessage, type NfseInvoice } from '@/lib/nfse/model'
+import { CANCEL_REASONS, cancelDirect, cancelFailureText, directFailure, directPdfPath, reconcileDirect, retryAutoIssue, storageUrl, type CancelReason } from '@/lib/nfse/direct-issue'
 import { formatTaxId } from '@/lib/tax-id'
 import { country, money, orderShort } from '@/lib/orders/text'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -172,6 +173,7 @@ function reasonOf(invoice: NfseInvoice): string | null {
   if (invoice.status !== 'error' && invoice.status !== 'cancellationDenied') return null
   // NFS-e direct: the government's refusal in plain words, in the language on screen.
   if (invoice.refusal) return refusalMessage(invoice.refusal, locale.value)
+  if (isAutoDirectFailure(invoice)) return autoFailureReason(invoice.errorCode ?? '')
   const known = invoice.errorCode ? REASON[invoice.errorCode] : undefined
   return known ? t(known) : invoice.statusDescription
 }
@@ -194,12 +196,15 @@ function close() {
 
 const asking = ref<'cancel' | 'atCity' | 'reason' | null>(null)
 const working = ref(false)
+/** Canceling now: the panel says so while the government answers. */
+const canceling = ref(false)
 const fixing = ref<NfseInvoice | null>(null)
 
 async function cancel(onlyOnAsaas = false) {
   const invoice = opened.value
   if (!invoice || working.value) return
   working.value = true
+  canceling.value = true
   try {
     const answer = await cancelInvoice(invoice.id, onlyOnAsaas)
     asking.value = null
@@ -223,6 +228,7 @@ async function cancel(onlyOnAsaas = false) {
     )
   } finally {
     working.value = false
+    canceling.value = false
   }
 }
 
@@ -240,6 +246,7 @@ async function cancelWithReason(reason: string) {
   const invoice = opened.value
   if (!invoice || working.value) return
   working.value = true
+  canceling.value = true
   asking.value = null
   try {
     await cancelDirect(invoice.id, reason as CancelReason)
@@ -249,6 +256,24 @@ async function cancelWithReason(reason: string) {
   } catch (error) {
     panelNote.value = { id: invoice.id, text: cancelFailureText(error, locale.value) }
     await load()
+  } finally {
+    working.value = false
+    canceling.value = false
+  }
+}
+
+/** "Tentar novamente" of an automatic nota that did not go out (issue #571): the failure stays on the panel, never an alert. */
+async function retryAuto() {
+  const invoice = opened.value
+  if (!invoice || working.value) return
+  working.value = true
+  try {
+    const answer = await retryAutoIssue(invoice.orderIds)
+    panelNote.value = null
+    showToast(answer.status === 'creating' ? t('web.nfseDirect.waitingGov') : answer.number ? t('nfseStatusIssuedNumber', { number: answer.number }) : t('nfseStatusIssued'))
+    await load()
+  } catch (error) {
+    panelNote.value = { id: invoice.id, text: directFailure(error, locale.value).text }
   } finally {
     working.value = false
   }
@@ -405,10 +430,12 @@ async function fixed() {
           <span class="status" :class="{ 'status--late': opened.status === 'error' }">
             <span class="dot" :class="`dot--${DOT[opened.status]}`" aria-hidden="true"></span><span data-testid="nfse-status">{{ statusOf(opened) }}</span>
           </span>
-          <p>{{ headOf(opened) }}</p>
+          <p v-if="canceling" class="nfse-progress" role="status" data-testid="nfse-progress">{{ t('nfseCancelingProgress') }}</p>
+          <p v-else>{{ headOf(opened) }}</p>
           <p v-if="external(opened)" class="sub nfse-tag">{{ t('web.nfseDirect.external') }}</p>
           <div class="nfse-actions">
-            <button v-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
+            <button v-if="canRetryAuto(opened)" type="button" class="btn btn--primary" :disabled="working" data-testid="nfse-retry-auto" @click="retryAuto">{{ t('tryAgain') }}</button>
+            <button v-else-if="canFix(opened)" type="button" class="btn btn--primary" data-testid="nfse-fix" @click="fixing = opened">{{ t('nfseFixAndIssue') }}</button>
             <template v-if="opened.provider === 'direct'">
               <button v-if="canReconcile(opened)" type="button" class="btn btn--primary" :disabled="working" data-testid="nfse-reconcile" @click="reconcile">{{ t('web.nfseDirect.checkNow') }}</button>
               <button v-if="opened.accessKey && (opened.status === 'authorized' || opened.status === 'cancellationDenied' || opened.status === 'canceled')" type="button" class="btn btn--primary" data-testid="nfse-pdf" @click="openFile('pdf')">{{ t('nfseOpenPdf') }}</button>
@@ -435,6 +462,7 @@ async function fixed() {
           <div v-if="opened.number"><dt>{{ t('nfseNumberLabel') }}</dt><dd class="num">{{ opened.number }}</dd></div>
           <div v-if="opened.emitter"><dt>{{ t('web.nfseDirect.emitter') }}</dt><dd data-testid="nfse-emitter-line">{{ partyLine(opened.emitter) }}</dd></div>
           <div v-if="opened.recipient"><dt>{{ t('web.nfseDirect.recipient') }}</dt><dd data-testid="nfse-recipient-line">{{ partyLine(opened.recipient) }}</dd></div>
+          <InvoiceEmailFact :invoice="opened" />
           <div v-if="opened.accessKey"><dt>{{ t('web.nfseDirect.accessKey') }}</dt><dd class="num nfse-key" data-testid="nfse-key">{{ opened.accessKey }}</dd></div>
           <div v-if="opened.effectiveDate"><dt>{{ t('nfseDateLabel') }}</dt><dd>{{ formatDate(`${opened.effectiveDate}T12:00:00`, country()) }}</dd></div>
           <div v-if="opened.orders.length">
@@ -451,7 +479,7 @@ async function fixed() {
         <p v-if="opened.conflict" class="field-error" role="note">{{ t('nfseConflictNotice') }}</p>
         <p v-if="panelNote && panelNote.id === opened.id" class="field-error" role="alert" data-testid="nfse-panel-note">{{ panelNote.text }}</p>
         <div v-if="canCancel(opened)" class="nfse-danger">
-          <button type="button" class="link link--danger" :disabled="working" data-testid="nfse-cancel" @click="asking = opened.provider === 'direct' ? 'reason' : 'cancel'">{{ t('nfseCancelAction') }}</button>
+          <button type="button" class="link link--danger" :disabled="working" data-testid="nfse-cancel" @click="asking = opened.provider === 'direct' ? 'reason' : 'cancel'">{{ canceling ? t('nfseCancelingProgress') : t('nfseCancelAction') }}</button>
         </div>
       </aside>
     </div>
@@ -480,6 +508,7 @@ async function fixed() {
       :title="t('nfseCancelQuestion', { value: money(opened.value) })"
       :sub="t('web.nfseDirect.cancelWhy')"
       :choices="reasonChoices"
+      :close-label="t('nfseKeep')"
       @pick="cancelWithReason"
       @close="asking = null"
     />

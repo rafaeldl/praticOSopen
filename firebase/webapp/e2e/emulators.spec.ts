@@ -1,6 +1,6 @@
 // Proves the suite really runs: the app's API call and the claims trigger go
 // through the emulated Functions, not through mocks.
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'

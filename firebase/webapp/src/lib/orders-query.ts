@@ -188,6 +188,11 @@ export function nextOrdersPage(query: OrdersQuery, last: OrderRow, size: number)
   return run(query, size, last)
 }
 
+/** One page of `size` rows after `last` (or the first one), never reused: for screens other than the list. */
+export function ordersPage(query: OrdersQuery, size: number, last?: OrderRow): Promise<OrderRow[]> {
+  return run(query, size, last)
+}
+
 /**
  * Live copy of the first `size` rows: another person's change, a new order or
  * one that left the filter shows without reloading the list. Returns the stop.
@@ -197,12 +202,18 @@ export async function watchFirstRows(
   size: number,
   onRows: (rows: OrderRow[]) => void,
   onError: (error: unknown) => void,
+  /**
+   * Also the rows the SDK already has (fromCache). Needed when this is the only
+   * read: a query the cache can answer gets no second event when the server
+   * agrees, so skipping the cached one would leave the screen empty (Modo TV).
+   */
+  acceptCache = false,
 ): Promise<() => void> {
   const [db, firestore] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   return firestore.onSnapshot(
     buildQuery(firestore, db, query, size) as unknown as import('firebase/firestore').Query,
     (snapshot) => {
-      if (!snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot))
+      if (acceptCache || !snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot))
     },
     onError,
   )

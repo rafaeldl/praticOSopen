@@ -29,11 +29,6 @@
 .seg-gains__list .seg-gains__answer { position: relative; margin-top: 0; padding-left: 28px; color: var(--color-ink); font-weight: 500; }
 .seg-gains__answer::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
 
-/* ---------- Tabs without a screen ---------- */
-.panel--text { align-items: center; }
-.panel--text .panel__copy { padding-block: var(--space-xl); }
-ul.panel__facts { margin: var(--space-lg) 0; max-width: none; padding: var(--space-md) var(--space-lg); background: var(--color-card); border-radius: var(--radius-card); }
-
 /* ---------- FAQ ---------- */
 .seg-faq { padding-block: var(--space-3xl); }
 .seg-faq__list { margin-top: var(--space-lg); }
@@ -45,8 +40,6 @@ ul.panel__facts { margin: var(--space-lg) 0; max-width: none; padding: var(--spa
   .seg-order { position: relative; left: auto; bottom: auto; width: 100%; max-width: 25rem; margin: -84px auto 0; }
   .seg-gains, .seg-faq { padding-block: var(--space-2xl); }
   .seg-gains__list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
-  .panel--text .panel__copy { padding-block: var(--space-lg) 0; }
-  ul.panel__facts { margin-block: var(--space-md) var(--space-lg); padding: var(--space-sm); }
 }
 
 /* ---------- FAQ (details accordion) ---------- */

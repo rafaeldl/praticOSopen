@@ -2,7 +2,7 @@
 // many orders change, writes through the API and offers Undo when it can. The
 // assistant over several orders (order.ai.batch) proposes, lists and applies only
 // after the person confirms; the model is simulated, Asaas too.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeCustomer, makeOrder, readOrder, writeDoc } from './data'
 import { login, type UserKey } from './helpers'
 

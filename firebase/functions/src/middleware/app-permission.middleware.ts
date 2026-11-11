@@ -223,6 +223,15 @@ export function canChangeOrderHold(req: AuthenticatedRequest, order: Partial<Pic
   return canRemoveOrderHold(req, order);
 }
 
+/**
+ * Who moves an order between work stages and reorders a stage: same people as
+ * the "parada" mark (not the consultant). Starting an approved order also needs
+ * canChangeOrderStatus to `progress`.
+ */
+export function canChangeOrderStage(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
+  return canRemoveOrderHold(req, order);
+}
+
 /** Same body as requirePermission in auth.middleware (older apps read it). */
 export function forbidden(res: Response, message = 'Not allowed'): void {
   res.status(403).json({ success: false, error: { code: 'INSUFFICIENT_PERMISSIONS', message } });

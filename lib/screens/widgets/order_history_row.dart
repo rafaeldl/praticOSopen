@@ -60,18 +60,14 @@ class OrderHistoryRow extends StatelessWidget {
     final text = AppColors.text.resolveFrom(context);
     final secondary = AppColors.textSecondary.resolveFrom(context);
     final danger = AppColors.danger.resolveFrom(context);
-    final dot = late
-        ? OrderStatusStyle.overdueColor
-        : OrderStatusStyle.dotColor(order.status);
-    final statusText = late
-        ? l10n.orderOverdue
-        : (statusLabel?.call(order.status) ??
-            OrderStatusStyle.label(l10n, order.status));
+    // The dot keeps the status color; "Atrasada" follows the status.
+    final dot = OrderStatusStyle.dotColor(order.status);
+    final statusLabelText =
+        statusLabel?.call(order.status) ??
+        OrderStatusStyle.label(l10n, order.status);
+    final statusText = statusLabelText;
     final number = order.number == null ? '' : ' ${order.number}';
-    final title = [
-      '${l10n.orderShort}$number',
-      ?_firstService,
-    ].join(' · ');
+    final title = ['${l10n.orderShort}$number', ?_firstService].join(' · ');
     final value = !showPrices || order.total == null
         ? null
         : format.formatCurrency(order.total);
@@ -105,16 +101,34 @@ class OrderHistoryRow extends StatelessWidget {
                           StatusDot(color: dot),
                           const SizedBox(width: AppSpacing.sm),
                           Flexible(
-                            child: Text(
-                              [
-                                statusText,
-                                if (showDate && order.createdAt != null)
-                                  format.formatDate(order.createdAt),
-                                ?detail,
-                              ].join(' · '),
+                            child: Text.rich(
+                              TextSpan(
+                                text: statusText,
+                                children: [
+                                  if (late)
+                                    TextSpan(
+                                      text: ' · ',
+                                      children: [
+                                        TextSpan(
+                                          text: l10n.orderOverdue,
+                                          style: TextStyle(
+                                            color: danger,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  TextSpan(
+                                    text: [
+                                      if (showDate && order.createdAt != null)
+                                        format.formatDate(order.createdAt),
+                                      ?detail,
+                                    ].map((part) => ' · $part').join(),
+                                  ),
+                                ],
+                              ),
                               style: AppTypography.callout.copyWith(
-                                color: late ? danger : secondary,
-                                fontWeight: late ? FontWeight.w700 : null,
+                                color: secondary,
                               ),
                             ),
                           ),
@@ -134,7 +148,11 @@ class OrderHistoryRow extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(width: AppSpacing.sm),
-                Icon(CupertinoIcons.chevron_forward, size: 18, color: secondary),
+                Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 18,
+                  color: secondary,
+                ),
               ],
             ),
           ),

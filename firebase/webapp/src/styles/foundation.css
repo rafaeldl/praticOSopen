@@ -92,6 +92,8 @@ a.nav-item, a.more-row, .tabbar a, a.btn { text-decoration: none; }
 
 @media (prefers-contrast: more) {
   :root, :root[data-theme="dark"] { --color-muted: var(--color-ink); --color-rule: var(--color-ink); --color-control: var(--color-ink); }
+  :root { --color-faint: #5E636A; }
+  :root[data-theme="dark"] { --color-faint: oklch(78% 0.010 255); }
   .btn, .field, .chip { border-width: 2px; }
   .side, .nav-item { color: var(--color-on-navy); }
   .link { text-decoration-color: currentColor; }

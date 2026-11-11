@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Browser, type Page } from '@playwright/test'
+import { expect, test, type Browser, type Page } from './test'
 import { PASSWORD, USERS } from './fixtures.mjs'
 
 export type UserKey = keyof typeof USERS

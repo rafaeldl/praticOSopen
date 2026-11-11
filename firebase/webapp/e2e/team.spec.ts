@@ -1,7 +1,7 @@
 // Fatia 07, equipe: list, invites and role changes through the API, against the
 // Emulator Suite. Everything happens in the team company (fixtures COMPANY_T),
 // in order: the tests share its people and invites.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_T, TEAM_INVITES, USERS } from './fixtures.mjs'
 import { login } from './helpers'
 import { invitesOf, readPath } from './settings-data'
@@ -17,6 +17,18 @@ async function openTeam(page: Page, user: 'tAdmin' | 'tOwner' = 'tAdmin') {
   await expect(page.getByRole('heading', { level: 1, name: 'Equipe' })).toBeVisible()
   await expect(members(page)).toBeVisible()
 }
+
+test('Equipe: a rolagem ocupa a área toda e o texto fica na largura de leitura (sem faixa vazia com a barra no meio)', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await openTeam(page)
+  const box = await page.locator('.workspace').evaluate((workspace) => {
+    const pane = workspace.querySelector('.set-page') as HTMLElement
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+    return { workspace: workspace.clientWidth, pane: pane.offsetWidth, members: (pane.querySelector('[data-testid="team-members"]') as HTMLElement).offsetWidth / rem }
+  })
+  expect(box.pane).toBe(box.workspace)
+  expect(box.members).toBeLessThanOrEqual(50.5)
+})
 
 test('Equipe: resumo, convite esperando com os dias, vencido à mostra e você primeiro, sem abrir (team.list.load, team.view.list, team.member.self-row, team.invite-share.copy, team.invite-share.share)', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])

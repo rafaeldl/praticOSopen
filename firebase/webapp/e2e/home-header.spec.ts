@@ -4,7 +4,7 @@
 // so an order far from the loaded pages shows. Company paging (seed.mjs
 // seedPaging): order 900, of Zeca Antiguidades with the Fusca OLD1970, is the
 // oldest of 140, out of what the board loads.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoSideScroll, login, type UserKey } from './helpers'
 
 type Box = { x: number; y: number; width: number; height: number }
@@ -131,13 +131,13 @@ test('320 px, texto a 200%: cabeçalho e busca sem rolagem lateral nas duas vist
   await expectNoSideScroll(page, ['.board-wrap', '.board'])
 })
 
-test('busca no Quadro: número, cliente e veículo vêm do servidor, mesmo fora das páginas carregadas', async ({ page }) => {
+test('busca no Quadro: número, cliente e veículo vêm do servidor e só ficam os achados', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 })
   await openHome(page, 'pOwner', './?view=board')
   await expect(board(page)).toBeVisible()
-  // 900 is older than every page the board reads.
+  // The board reads every open order: 900, the oldest of all, is there too.
   await expect(card(page, 101)).toHaveCount(1)
-  await expect(card(page, 900)).toHaveCount(0)
+  await expect(card(page, 900)).toHaveCount(1)
 
   for (const text of ['Zeca', 'OLD1970', 'fusca', '900']) {
     await search(page).fill(text)
@@ -149,7 +149,7 @@ test('busca no Quadro: número, cliente e veículo vêm do servidor, mesmo fora 
   await search(page).fill('Ninguém Com Esse Nome')
   await expect(page.getByTestId('board-no-match')).toBeVisible()
   await search(page).fill('')
-  await expect(card(page, 900)).toHaveCount(0)
+  await expect(card(page, 900)).toHaveCount(1)
   await expect(card(page, 101)).toHaveCount(1)
 })
 

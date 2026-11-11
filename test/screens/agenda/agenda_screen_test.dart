@@ -265,12 +265,17 @@ void main() {
     expect(find.textContaining('De quem'), findsNothing);
   });
 
-  testWidgets('overdue order: danger status with the delay', (tester) async {
+  testWidgets('overdue order: status, then the delay in danger', (
+    tester,
+  ) async {
     final late = _order(20, 'Rui Costa', DateTime(2026, 10, 8, 11))
       ..dueDate = DateTime(2026, 10, 6);
     await _pump(tester, _store([late]));
 
-    expect(find.text('Atrasada 2 dias · OS 20'), findsOneWidget);
+    expect(
+      find.textContaining('· Atrasada 2 dias · OS 20', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   testWidgets('large text: week, month and rows lay out without overflow', (

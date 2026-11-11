@@ -2,16 +2,17 @@
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Menu, Plus, Search, Settings, User, UserPlus } from '@lucide/vue'
+import { Menu, Moon, Plus, Search, Settings, Sun, User, UserPlus } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
 import { loadOrderTexts, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { can, canAny, reloadCompany, selectCompany, session } from '@/lib/session'
+import { can, canAny, companyEntryName, reloadCompany, selectCompany, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
 import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { canOpen, router } from '@/router'
 import { ui } from '@/lib/ui'
+import { isDark, toggleTheme } from '@/lib/prefs'
 import { NAV } from '@/navigation'
 import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
@@ -129,7 +130,7 @@ onBeforeUnmount(() => {
         <div v-else class="company-pick">
           <label class="sr" for="company-pick">{{ t('web.nav.company') }}</label>
           <select id="company-pick" class="company-select" :value="session.companyId ?? ''" @change="onCompanyChange">
-            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ companyLabel(company.name) }}</option>
+            <option v-for="company in session.companies" :key="company.id" :value="company.id">{{ companyLabel(companyEntryName(company)) }}</option>
           </select>
         </div>
       </div>
@@ -149,6 +150,9 @@ onBeforeUnmount(() => {
         </RouterLink>
       </nav>
       <div class="side-foot">
+        <button type="button" class="nav-item" data-testid="theme-toggle" @click="toggleTheme">
+          <component :is="isDark() ? Sun : Moon" :size="18" aria-hidden="true" /><span>{{ t(isDark() ? 'web.theme.toLight' : 'web.theme.toDark') }}</span>
+        </button>
         <RouterLink
           class="nav-item"
           to="/settings"

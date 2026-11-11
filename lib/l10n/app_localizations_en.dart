@@ -2446,7 +2446,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderItemsSection => 'What will be done';
 
   @override
-  String get orderItemSearchPlaceholder => 'Search service or part';
+  String orderItemSearchPlaceholder(String product) {
+    return 'Search service or $product';
+  }
 
   @override
   String get orderCreateItemError => 'Could not create it. Try again.';
@@ -3963,6 +3965,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String customerOwedTrailing(String value) {
+    return 'Owes $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return 'Open a work order for $name?';
   }
@@ -4509,7 +4516,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The microphone is not allowed. Allow it in Settings or type the job.';
 
   @override
-  String get orderAddItemRow => 'Add service or part';
+  String orderAddItemRow(String product) {
+    return 'Add service or $product';
+  }
 
   @override
   String get orderPickCustomerRow => 'Choose customer';
@@ -4695,7 +4704,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get pickerNewItem => 'New service or part';
+  String pickerNewItem(String product) {
+    return 'New service or $product';
+  }
 
   @override
   String get pickerNewChecklist => 'New checklist';
@@ -4711,8 +4722,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String pickerNoItemWith(String query) {
-    return 'No service or part matching “$query”. Add it and it goes straight on the order.';
+  String pickerNoItemWith(String product, String query) {
+    return 'No service or $product matching “$query”. Add it and it goes straight on the order.';
   }
 
   @override
@@ -5683,6 +5694,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get nfseStatusIssuedAuto => 'Issued automatically';
+
+  @override
+  String nfseStatusIssuedAutoNumber(String number) {
+    return 'Issued automatically · no. $number';
+  }
+
+  @override
+  String get nfseAutoMissingTaxId => 'The customer\'s tax ID is missing';
+
+  @override
+  String get nfseAutoCertificateExpired => 'Certificate expired';
+
+  @override
+  String get nfseAutoEmitterNotReady => 'The invoice CNPJ needs setup';
+
+  @override
+  String get nfseAutoDailyLimit => 'Today\'s invoice limit';
+
+  @override
+  String get nfseAutoNotIssued => 'Not issued automatically';
+
+  @override
+  String get nfseAutoErrorPickEmitter =>
+      'Choose the default CNPJ in Invoice so invoices go out automatically.';
+
+  @override
   String get nfseStatusCanceling => 'Canceling';
 
   @override
@@ -5723,6 +5761,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseListEmptyHint => 'To issue one, open the order and tap “…”.';
 
   @override
+  String get nfseListEmptyHintDirect =>
+      'To issue one, open the order and tap “Service invoice”.';
+
+  @override
   String get nfseListSearch => 'Customer, invoice or order number';
 
   @override
@@ -5751,7 +5793,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseListOnlyServices =>
-      'Only services go on the invoice. Parts stay out, so the total differs from Sold.';
+      'Only services go on the invoice, so the total may differ from Sold.';
 
   @override
   String nfseListNoResults(String month) {
@@ -5778,6 +5820,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseRowTitle => 'Service invoice';
+
+  @override
+  String get nfseCompanyRowNoCnpj => 'Add your CNPJ to start';
+
+  @override
+  String get nfseCompanyRowPending => 'Setup not finished';
+
+  @override
+  String get nfseCompanyRowReady => 'Ready to issue';
 
   @override
   String get nfseIssueAction => 'Issue service invoice';
@@ -6394,6 +6445,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderHoldSaveError => 'Could not save. Try again.';
+
+  @override
+  String orderStageMoveTo(String stage) {
+    return 'Move to $stage';
+  }
+
+  @override
+  String get orderMenuChangeStage => 'Change stage';
+
+  @override
+  String get orderStagePickerTitle => 'Which stage is it in?';
+
+  @override
+  String get orderStageSaveError =>
+      'Could not change the stage. Check the connection and try again.';
 
   @override
   String get orderHoldSheetTitle => 'Why did it stop?';
@@ -7457,6 +7523,79 @@ class AppLocalizationsEn extends AppLocalizations {
       'You get a notice whenever someone else issues or cancels an invoice.';
 
   @override
+  String get nfseEmailRow => 'Email to the customer';
+
+  @override
+  String nfseEmailSentTo(String email, String date) {
+    return 'Sent to $email on $date';
+  }
+
+  @override
+  String nfseEmailCancelSentTo(String email, String date) {
+    return 'Cancellation notice sent to $email on $date';
+  }
+
+  @override
+  String nfseEmailFailedTo(String email, String date) {
+    return 'Could not send to $email on $date';
+  }
+
+  @override
+  String get nfseEmailSkippedNoEmail =>
+      'Not sent: the customer has no email on file';
+
+  @override
+  String get nfseEmailSkippedTurnedOff => 'Not sent: automatic sending is off';
+
+  @override
+  String get nfseEmailNotSentYet => 'Not sent by email yet';
+
+  @override
+  String get nfseEmailSendAgain => 'Send again';
+
+  @override
+  String get nfseEmailSend => 'Send';
+
+  @override
+  String get nfseIssuingProgress =>
+      'Issuing the invoice… it may take a few seconds.';
+
+  @override
+  String get nfseCancelingProgress => 'Canceling the invoice…';
+
+  @override
+  String get nfseEmailSendingProgress => 'Sending the e-mail…';
+
+  @override
+  String nfseEmailSentToast(String email) {
+    return 'Invoice sent to $email';
+  }
+
+  @override
+  String get nfseEmailFailedToast =>
+      'Could not send the email. Try again in a moment.';
+
+  @override
+  String get nfseEmailNoAddressToast =>
+      'The customer has no email. Add it to their record and send again.';
+
+  @override
+  String get nfseDirectEmailToCustomer => 'Email the invoice to the customer';
+
+  @override
+  String get nfseDirectEmailToCustomerHint =>
+      'Goes out on its own when issued or canceled, with the PDF and XML. Turn it off if you send it by WhatsApp.';
+
+  @override
+  String nfseDirectIssueEmailGoesTo(String email) {
+    return 'The invoice will be emailed to $email.';
+  }
+
+  @override
+  String get nfseDirectIssueEmailOff =>
+      'The invoice will not be emailed: automatic sending is off.';
+
+  @override
   String deviceReadingLine(String label, String value) {
     return '$label: $value';
   }
@@ -7516,4 +7655,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checklistDoneAskReopenBody =>
       'To change an answer, ask whoever manages the team to reopen the checklist.';
+
+  @override
+  String get statementSend => 'Send statement';
+
+  @override
+  String statementSendTitle(String name) {
+    return 'Send $name what is still owed';
+  }
+
+  @override
+  String get statementSendMessage =>
+      'A message goes with the checked orders and how much is owed on each. Send the PDF too?';
+
+  @override
+  String get statementWithPdf => 'Send with PDF';
+
+  @override
+  String get statementTextOnly => 'Text only';
+
+  @override
+  String statementTextHello(String name, String company) {
+    return 'Hi $name! These are your open orders with $company:';
+  }
+
+  @override
+  String statementTextHelloNoCompany(String name) {
+    return 'Hi $name! These are your open orders:';
+  }
+
+  @override
+  String statementOrderNumber(String number) {
+    return 'Order $number';
+  }
+
+  @override
+  String statementOpenLine(String amount) {
+    return 'Owed $amount';
+  }
+
+  @override
+  String get statementInProgress => 'in progress';
+
+  @override
+  String statementTotalOpen(String amount) {
+    return 'Total owed: $amount';
+  }
+
+  @override
+  String get statementPdfTitle => 'Statement';
+
+  @override
+  String statementPdfSentence(String name, String date) {
+    return 'Open orders of $name on $date.';
+  }
+
+  @override
+  String get statementItemColumn => 'Service or part';
+
+  @override
+  String statementOrderTotals(String total, String paid, String open) {
+    return 'Total $total  ·  Paid $paid  ·  Owed $open';
+  }
+
+  @override
+  String get statementPdfTotalOpen => 'Total owed';
+
+  @override
+  String statementFileName(String date) {
+    return 'Statement-$date';
+  }
+
+  @override
+  String get customersOrderRecent => 'Recent';
+
+  @override
+  String get customersOrderName => 'A–Z';
 }

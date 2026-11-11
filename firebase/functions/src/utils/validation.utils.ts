@@ -261,6 +261,12 @@ export const orderHoldSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+/** PUT /orders/:id/stage: the stage and, optionally, the place in its column (end when absent). */
+export const orderStageSchema = z.object({
+  stageId: z.string().min(1).max(64),
+  rank: z.number().finite().optional(),
+});
+
 /** GET /orders query string. */
 export const listOrdersQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),

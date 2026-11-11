@@ -1,8 +1,8 @@
 // Início: list, filters, rows, search, selection, board and live updates.
 // Seeded scenario orders (seed.mjs seedScenario) give the late, today, on hold,
 // owed and old quote rows; tests that write make their own orders (data.ts).
-import { expect, test, type Page } from '@playwright/test'
-import { makeOrder, updateOrderDoc } from './data'
+import { expect, test, type Page } from './test'
+import { makeOrder, readOrder, updateOrderDoc } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
 const table = (page: Page) => page.getByTestId('orders-table')
@@ -44,7 +44,7 @@ test.describe('lista por papel (home.list.load, home.view.default-technician)', 
 test('linha: atraso, visita, entrega, parada e valor (home.row.*)', async ({ page }) => {
   await openHome(page, 'admin')
   await expect(row(page, 501)).toContainText('Atrasada 3 dias')
-  await expect(row(page, 501).locator('.dot--danger')).toHaveCount(1)
+  await expect(row(page, 501).locator('.status-problem--late')).toHaveText('Atrasada 3 dias')
   // The plate after the device (P3 17 of the user tests of #515).
   await expect(row(page, 501)).toContainText('Veículo 3 · TST0003 · Serviço 2')
   // Wide screen: "Quando" is a column; the status column keeps only the status.
@@ -213,9 +213,91 @@ test('quadro como aba da lista: mover pelo botão e por Shift+seta', async ({ pa
   await page.getByRole('dialog', { name: 'Mover para onde?' }).getByRole('button', { name: 'Na oficina' }).click()
   const progress = board.getByRole('region', { name: /^Na oficina/ })
   await expect(progress.getByText(name)).toBeVisible()
-  await progress.locator(`#card-${order.id}`).focus()
-  await page.keyboard.press('Shift+ArrowRight')
-  await expect(board.getByRole('region', { name: /^Concluído/ }).getByText(name)).toBeVisible()
+  // The live list can show the card there before the write answers; the board
+  // focuses it only once the write is back with the new version. Moving before
+  // that sends the old version and the server refuses it.
+  await expect(progress.locator(`#card-${order.id}`)).toBeFocused()
+  // A live update can redraw the column between the focus and the key, and the
+  // key then goes nowhere. Focus and press again only while it is still there,
+  // so it never moves twice.
+  const done = board.getByRole('region', { name: /^Concluído/ }).getByText(name)
+  await expect(async () => {
+    if (await progress.getByText(name).count()) {
+      await progress.locator(`#card-${order.id}`).focus()
+      await page.keyboard.press('Shift+ArrowRight')
+    }
+    await expect(done).toBeVisible({ timeout: 4000 })
+  }).toPass({ timeout: 20000 })
+})
+
+test('quadro limpo: Concluído só da semana, orçamentos parados à parte e cancelados de uma vez', async ({ page }) => {
+  const tag = `Limpo ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const ago = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString()
+  const customer = (name: string) => ({ id: 'customer-1', name: `${tag} ${name}` })
+  await makeOrder('admin', { status: 'done', customer: customer('recente'), completedAt: ago(2) })
+  await makeOrder('admin', { status: 'quote', customer: customer('novo'), payment: null })
+  const stale = await makeOrder('admin', { status: 'quote', customer: customer('parado'), payment: null, createdAt: ago(200), updatedAt: ago(120) })
+  await openHome(page, 'admin', './?view=board')
+  const board = page.getByTestId('board')
+  const done = board.getByRole('region', { name: /^Concluído/ })
+  await expect(done.getByText(`${tag} recente`)).toBeVisible()
+  // The 7-day cut itself is in tests/board-clean.test.ts: the server re-stamps completedAt
+  // from its triggers (delivered at least once), so an aged order cannot be kept old here.
+  await expect(done.getByTestId('board-done-note')).toContainText('últimos 7 dias')
+
+  const quotes = board.getByRole('region', { name: /^Orçamento/ })
+  await expect(quotes.getByText(`${tag} novo`)).toBeVisible()
+  await expect(quotes.getByText(`${tag} parado`)).toHaveCount(0)
+  await quotes.getByTestId('board-stale-open').click()
+  const dialog = page.getByRole('dialog', { name: /^Cancelar \d+ orçamentos? parados?\?$/ })
+  await expect(dialog).toContainText(`${stale.number} · ${tag} parado`)
+  await expect(dialog).toContainText('parado há 4 meses')
+  await dialog.getByRole('button', { name: /^Cancelar (1|os \d+)$/ }).click()
+  await expect(page.locator('.toast')).toContainText(/orçamentos? cancelados?/)
+  await expect(quotes.getByTestId('board-stale-note')).toHaveCount(0)
+  await expect.poll(async () => (await readOrder(stale.id))?.status).toBe('canceled')
+
+  await done.getByTestId('board-done-all').click()
+  await expect(page).toHaveURL(/f=done/)
+  await expect(page).not.toHaveURL(/view=board/)
+})
+
+test('quadro ao vivo: mudança feita em outro aparelho move o cartão sem recarregar (#626)', async ({ page }) => {
+  const name = `Ao vivo ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name } })
+  await openHome(page, 'admin', './?view=board')
+  const board = page.getByTestId('board')
+  await expect(board.getByRole('region', { name: /^Aprovado/ }).getByText(name)).toBeVisible()
+  await updateOrderDoc(order.id, { status: 'progress' })
+  await expect(board.getByRole('region', { name: /^Na oficina/ }).getByText(name)).toBeVisible()
+})
+
+test('olho: esconde os valores no quadro e na lista, e lembra neste navegador (#625)', async ({ page }) => {
+  const name = `Olho ${Date.now()}-${Math.round(Math.random() * 1e4)}`
+  const order = await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name }, total: 4321 })
+  await openHome(page, 'admin', './?view=board')
+  const card = page.getByTestId('board').locator('li.card').filter({ hasText: name })
+  await expect(card).toContainText('4.321,00')
+  const eye = page.getByTestId('hide-values')
+  await expect(eye).toHaveAttribute('aria-pressed', 'false')
+  await eye.click()
+  await expect(eye).toHaveAttribute('aria-pressed', 'true')
+  await expect(card).toContainText('•••')
+  await expect(card).not.toContainText('4.321')
+  // Remembered in this browser: a reload (or the TV turned back on) stays hidden.
+  await page.reload()
+  await expect(card).toContainText('•••')
+  await page.getByRole('button', { name: 'Lista', exact: true }).click()
+  await expect(row(page, order.number)).toContainText('•••')
+  await expect(page.getByTestId('summary')).not.toContainText(/\d+,\d\d/)
+  await page.getByTestId('hide-values').click()
+  await expect(row(page, order.number)).toContainText('R$ 4.321,00')
+})
+
+test('olho: só para quem vê valores', async ({ page }) => {
+  await openHome(page, 'supervisor')
+  await expect(page.getByTestId('summary')).toBeVisible()
+  await expect(page.getByTestId('hide-values')).toHaveCount(0)
 })
 
 test('idiomas: filtros em inglês e espanhol, moeda continua do Brasil', async ({ page }) => {

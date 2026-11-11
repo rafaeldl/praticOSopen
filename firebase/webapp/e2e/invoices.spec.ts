@@ -3,7 +3,7 @@
 // answered here, as receive.spec does with charges, and the documents the
 // server would write are written by the test.
 import { randomUUID } from 'node:crypto'
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeOrder, writeDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
 
@@ -81,8 +81,11 @@ test('cancelar: confirmação com "Manter nota" no foco, servidor responde e a l
   const nota = await makeNota({ status: 'scheduled' })
   await openInvoices(page, 'manager', `invoices?invoice=${nota.id}`)
   let body: unknown = null
+  let answer!: () => void
+  const answered = new Promise<void>((resolve) => (answer = resolve))
   await page.route(`**/v1/app/nfse/invoices/${nota.id}/cancel`, async (route) => {
     body = route.request().postDataJSON()
+    await answered
     // What the server would write after Asaas accepted.
     await writeDoc(`invoices/${nota.id}`, { status: 'canceled' }, true)
     await ok(route, { id: nota.id, status: 'canceled' })
@@ -91,7 +94,11 @@ test('cancelar: confirmação com "Manter nota" no foco, servidor responde e a l
   const confirm = page.getByRole('dialog', { name: 'Cancelar a nota de R$ 90,00?' })
   await expect(confirm.getByRole('button', { name: 'Manter nota' })).toBeFocused()
   await confirm.getByRole('button', { name: 'Cancelar nota' }).click()
+  // While the server works the panel says so (the tap gets an answer at once).
+  await expect(panel(page).getByTestId('nfse-progress')).toHaveText('Cancelando a nota…')
+  answer()
   await expect(page.locator('.toast')).toContainText('Nota cancelada')
+  await expect(panel(page).getByTestId('nfse-progress')).toHaveCount(0)
   expect(body).toEqual({})
   await expect(panel(page).getByTestId('nfse-status')).toHaveText('Cancelada')
   await expect(panel(page).getByTestId('nfse-cancel')).toHaveCount(0)
@@ -128,10 +135,13 @@ test('corrigir e emitir: prévia do servidor, trava pelo motivo e recusa que abr
     await ok(route, preview(orderId, 8101))
   })
   const sent: Record<string, unknown>[] = []
+  let answer!: () => void
+  const answered = new Promise<void>((resolve) => (answer = resolve))
   await page.route('**/v1/app/nfse/invoices', async (route) => {
     const body = route.request().postDataJSON()
     sent.push(body)
     if (sent.length === 1) return refuse(route, 400, 'CUSTOMER_DATA_REQUIRED', 'CEP do cliente é inválido.')
+    await answered
     await writeDoc(`invoices/${nota.id}-2`, { status: 'scheduled', customer: { id: `c-${nota.id}`, name: nota.name }, value: 270, effectiveDate: today(), orderIds: [orderId], orders: [{ orderId, orderNumber: 8101, value: 270 }], createdAt: new Date().toISOString() })
     return ok(route, { id: `${nota.id}-2`, status: 'scheduled' }, 201)
   })
@@ -159,6 +169,8 @@ test('corrigir e emitir: prévia do servidor, trava pelo motivo e recusa que abr
   await sheet.getByLabel('Número').fill('10')
   await sheet.getByLabel('Bairro').fill('Centro')
   await sheet.getByTestId('nfse-send').click()
+  await expect(sheet.getByTestId('nfse-issuing')).toHaveText('Emitindo a nota… pode levar alguns segundos.')
+  answer()
   await expect(page.locator('.toast')).toContainText('Nota enviada para a prefeitura')
   await expect(sheet).toBeHidden()
   expect(sent[1]).toEqual({

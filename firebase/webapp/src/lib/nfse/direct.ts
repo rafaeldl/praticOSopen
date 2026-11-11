@@ -44,6 +44,8 @@ export interface Emitter {
 export interface DirectSettings {
   defaultEmitterId: string | null
   autoIssue: AutoIssue
+  /** The nota goes to the customer's e-mail on its own (default yes, issue #611). */
+  emailToCustomer: boolean
 }
 
 const text = (value: unknown) => (typeof value === 'string' ? value : null)
@@ -88,7 +90,7 @@ export function emitterOf(id: string, data: Record<string, unknown>): Emitter {
 
 export function settingsOf(data: Record<string, unknown> | undefined): DirectSettings {
   const auto = AUTO_ISSUE.find((value) => value === data?.autoIssue) ?? 'never'
-  return { defaultEmitterId: text(data?.defaultEmitterId), autoIssue: auto }
+  return { defaultEmitterId: text(data?.defaultEmitterId), autoIssue: auto, emailToCustomer: data?.emailToCustomer !== false }
 }
 
 export type CertificateState = 'valid' | 'expiring' | 'expired' | 'pending' | 'missing'
@@ -194,5 +196,5 @@ export const updateEmitter = (
   body: { municipalRegistration?: string | null; service?: Emitter['service']; descriptionStyle?: Emitter['descriptionStyle'] },
 ) => nfseApi<Record<string, unknown>>(`/v1/app/nfse/setup/emitters/${encodeURIComponent(emitterId)}`, { method: 'PATCH', body })
 
-export const updateDirectSettings = (body: { defaultEmitterId?: string; autoIssue?: AutoIssue }) =>
+export const updateDirectSettings = (body: { defaultEmitterId?: string; autoIssue?: AutoIssue; emailToCustomer?: boolean }) =>
   nfseApi<Record<string, unknown>>('/v1/app/nfse/setup/settings', { method: 'PUT', body })

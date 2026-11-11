@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web preview</title>
+<style>
+  body { margin: 0; background: #e8e3d8; font-family: system-ui, sans-serif; }
+  .band { max-width: 680px; margin: 0 auto; padding: 48px 16px 0; }
+  #example { overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="band"><div id="example" data-stage="web"><script type="application/json" id="copy"></script></div></div>
+<script type="module">
+  import data from '../../src/_data/homepage.json'
+  const lang = new URLSearchParams(location.search).get('lang') || 'pt'
+  document.getElementById('copy').textContent = JSON.stringify(data[lang].webApp.scene)
+  await import('../scenes/web/mount.tsx')
+</script>
+</body>
+</html>

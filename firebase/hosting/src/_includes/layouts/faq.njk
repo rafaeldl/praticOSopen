@@ -5,6 +5,7 @@ pageStyles: content
 ---
 {# Hallmark · genre: modern-minimal · macrostructure: Long Document · design-system: design.md #}
 {% set faqData = faq[langCode] | default(faq.pt) %}
+{# A group or item with `flag` shows only when site.flags[flag] is on; with `hideWhenFlag`, only while it is off. #}
 
 <header class="page-head">
     <div class="wrap">
@@ -18,26 +19,26 @@ pageStyles: content
         <nav class="toc" aria-labelledby="toc-label">
             <p class="label" id="toc-label">{{ faqData.tocLabel }}</p>
             <ol>
-                {% for group in faqData.groups %}
+                {% for group in faqData.groups %}{% if group | flagShown(site.flags) %}
                 <li><a href="#{{ group.id }}">{{ group.title }}</a></li>
-                {% endfor %}
+                {% endif %}{% endfor %}
             </ol>
         </nav>
 
         <div class="doc__body">
-            {% for group in faqData.groups %}
+            {% for group in faqData.groups %}{% if group | flagShown(site.flags) %}
             <section class="doc__section" aria-labelledby="{{ group.id }}">
                 <h2 id="{{ group.id }}">{{ group.title }}</h2>
                 <div class="qa-list">
-                    {% for item in group.items %}
+                    {% for item in group.items %}{% if item | flagShown(site.flags) %}
                     <details class="qa">
                         <summary>{{ item.question }}</summary>
                         <div class="qa__answer"><p>{{ item.answer | safe }}</p></div>
                     </details>
-                    {% endfor %}
+                    {% endif %}{% endfor %}
                 </div>
             </section>
-            {% endfor %}
+            {% endif %}{% endfor %}
         </div>
     </div>
 </div>
@@ -47,7 +48,8 @@ pageStyles: content
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {% for group in faqData.groups %}{% set outerLast = loop.last %}{% for item in group.items %}
+    {% set sep = joiner(",") %}
+    {% for group in faqData.groups %}{% if group | flagShown(site.flags) %}{% for item in group.items %}{% if item | flagShown(site.flags) %}{{ sep() }}
     {
       "@type": "Question",
       "name": {{ item.question | dump | safe }},
@@ -55,7 +57,7 @@ pageStyles: content
         "@type": "Answer",
         "text": {{ item.answer | striptags | dump | safe }}
       }
-    }{% if not (outerLast and loop.last) %},{% endif %}{% endfor %}{% endfor %}
+    }{% endif %}{% endfor %}{% endif %}{% endfor %}
   ]
 }
 </script>

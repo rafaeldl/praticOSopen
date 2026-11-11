@@ -1,7 +1,7 @@
 // Falar no assistente (order.ai.talk, .cancel-talk, .stop-fill, .speech-engine,
 // order.new.assistant-bar): Chromium's fake microphone records, the model is
 // simulated with page.route, and the test checks the audio went in the body.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeOrder } from './data'
 import { login } from './helpers'
 

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature preview</title>
+<style>
+  body { margin: 0; background: #f4f1ea; font-family: system-ui, sans-serif; }
+  .card { width: 400px; max-width: calc(100% - 32px); margin: 24px auto; background: #e8e3d8; border-radius: 10px; overflow: hidden; }
+</style>
+</head>
+<body>
+<!-- The feature page's hero card (layouts/feature.njk): the home's Falar scene, short screen. ?lang=pt|en|es -->
+<div class="card" id="example" data-stage="hero" data-short><script type="application/json" id="copy"></script></div>
+<script type="module">
+  import data from '../../src/_data/homepage.json'
+  const lang = new URLSearchParams(location.search).get('lang') || 'pt'
+  document.getElementById('copy').textContent = JSON.stringify(data[lang].hero.stage)
+  await import('../scenes/hero/mount.tsx')
+</script>
+</body>
+</html>

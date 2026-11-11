@@ -29,8 +29,9 @@ export const FIN_NFSE: Record<string, string> = {
 
 export const OP_SIMP_NAC: Record<string, string> = {
   '1': 'Não Optante',
-  '2': 'Optante - Microempreendedor Individual (MEI)',
-  '3': 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)',
+  // Short forms: the DANFSe field is narrow and the long names were cut off.
+  '2': 'Optante - MEI',
+  '3': 'Optante - ME/EPP',
 };
 
 export const REG_AP_TRIB_SN: Record<string, string> = {

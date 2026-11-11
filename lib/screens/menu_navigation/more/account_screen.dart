@@ -17,6 +17,20 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
 /// Company the user belongs to, for the switcher.
+
+/// Name of a company of the account's list. The copy in `users/{uid}.companies`
+/// is written when the person joins and never follows a rename, so the current
+/// company's own name wins (#612).
+String? companyEntryName(
+  String id,
+  String? savedName, {
+  String? currentId,
+  String? currentName,
+}) {
+  final own = id == currentId ? currentName?.trim() : null;
+  return own != null && own.isNotEmpty ? own : savedName;
+}
+
 class AccountCompany {
   const AccountCompany({required this.id, required this.name});
 
@@ -136,41 +150,45 @@ class AccountView extends StatelessWidget {
     return MorePage(
       title: l10n.yourAccount,
       children: [
-        MoreRows(rows: [
-          AppListRow(
-            key: const ValueKey('account_profile'),
-            leading: _avatar(context),
-            title: name,
-            subtitle: subtitleParts.isEmpty ? null : subtitleParts.join('\n'),
-            onTap: onEditProfile,
-          ),
-          if (companies.length > 1)
+        MoreRows(
+          rows: [
             AppListRow(
-              key: const ValueKey('account_switch_company'),
-              title: l10n.switchCompany,
-              onTap: () => _pickCompany(context),
+              key: const ValueKey('account_profile'),
+              leading: _avatar(context),
+              title: name,
+              subtitle: subtitleParts.isEmpty ? null : subtitleParts.join('\n'),
+              onTap: onEditProfile,
             ),
-          AppListRow(
-            key: const ValueKey('account_join_code'),
-            title: l10n.joinWithInviteCode,
-            onTap: onJoinWithCode,
-          ),
-        ]),
+            if (companies.length > 1)
+              AppListRow(
+                key: const ValueKey('account_switch_company'),
+                title: l10n.switchCompany,
+                onTap: () => _pickCompany(context),
+              ),
+            AppListRow(
+              key: const ValueKey('account_join_code'),
+              title: l10n.joinWithInviteCode,
+              onTap: onJoinWithCode,
+            ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.xl),
-        MoreRows(rows: [
-          _ActionRow(
-            key: const ValueKey('account_sign_out'),
-            label: l10n.logout,
-            color: accent,
-            onTap: () => _confirmSignOut(context),
-          ),
-          _ActionRow(
-            key: const ValueKey('account_delete'),
-            label: l10n.deleteMyAccount,
-            color: AppColors.danger.resolveFrom(context),
-            onTap: () => deletion.start(context),
-          ),
-        ]),
+        MoreRows(
+          rows: [
+            _ActionRow(
+              key: const ValueKey('account_sign_out'),
+              label: l10n.logout,
+              color: accent,
+              onTap: () => _confirmSignOut(context),
+            ),
+            _ActionRow(
+              key: const ValueKey('account_delete'),
+              label: l10n.deleteMyAccount,
+              color: AppColors.danger.resolveFrom(context),
+              onTap: () => deletion.start(context),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -234,12 +252,20 @@ class _AccountScreenState extends State<AccountScreen> {
     return Observer(
       builder: (_) {
         final user = _userStore.user?.value;
+        final current = authStore.companyAggr;
         final companies = [
           for (final role in user?.companies ?? const [])
             if (role.company?.id != null)
               AccountCompany(
                 id: role.company!.id!,
-                name: role.company!.name ?? context.l10n.companyNoName,
+                name:
+                    companyEntryName(
+                      role.company!.id!,
+                      role.company!.name,
+                      currentId: current?.id,
+                      currentName: current?.name,
+                    ) ??
+                    context.l10n.companyNoName,
               ),
         ];
         return AccountView(
@@ -248,8 +274,9 @@ class _AccountScreenState extends State<AccountScreen> {
           photoUrl: user?.photo ?? Global.currentUser?.photoURL,
           companyName: authStore.companyAggr?.name,
           currentCompanyId: authStore.companyAggr?.id,
-          roleLabel:
-              AuthorizationService.instance.getRoleLabelLocalized(context.l10n),
+          roleLabel: AuthorizationService.instance.getRoleLabelLocalized(
+            context.l10n,
+          ),
           companies: companies,
           deletion: AccountDeletionFlow(
             deleteAccount: authStore.deleteAccount,
@@ -271,7 +298,10 @@ class _AccountScreenState extends State<AccountScreen> {
             CupertinoPageRoute(
               builder: (_) => AcceptInviteScreen(
                 onInviteAccepted: () => Navigator.pushNamedAndRemoveUntil(
-                    context, '/', (route) => false),
+                  context,
+                  '/',
+                  (route) => false,
+                ),
                 onCancel: () => Navigator.pop(context),
               ),
             ),

@@ -345,6 +345,7 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
       missingHint: missing,
       dirty: _taxIdInput.isNotEmpty || _contactTyped,
       busy: _submitting,
+      busyText: context.l10n.nfseIssuingProgress,
       onSave: _submit,
       children: preview == null
           ? [

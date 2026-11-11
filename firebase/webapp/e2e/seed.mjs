@@ -6,6 +6,10 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
 import { COMPANIES, COMPANY_A, COMPANY_B, COMPANY_C, COMPANY_G, COMPANY_M, COMPANY_N, COMPANY_P, COMPANY_T, DEFAULT_ORDERS, INVITES, PASSWORD, PROJECT_ID, TEAM_INVITES, USERS } from './fixtures.mjs'
 
+// Paid plans get the direct nota from the server (onCompanyWrittenNfseAccess).
+// Companies whose tests use the Asaas nota or none keep it off by hand.
+const DIRECT_NOTA_OFF = { nfseDirectEnabled: false, nfseDirectSource: 'manual' }
+
 for (const name of ['FIRESTORE_EMULATOR_HOST', 'FIREBASE_AUTH_EMULATOR_HOST']) {
   if (!process.env[name]) {
     console.error(`${name} ausente: o seed só roda dentro de emulators:exec.`)
@@ -125,6 +129,7 @@ async function seedCompanies() {
       // Contratos on (fatia 07); company C keeps it off for contract.off.*.
       ...(id === COMPANY_A ? { useDeviceManagement: true, useContracts: true } : {}),
       ...(company.useFinancial === false ? { useFinancial: false } : {}),
+      ...(company.workStages ? { workStages: company.workStages } : {}),
       owner: aggr(company.owner),
       users: members.map((user) => ({ user: aggr(user), role: user.roles[id] })),
       // Next number after the seeded ones (1..E2E_ORDERS and the scenario 501..509), like a real counter.
@@ -207,8 +212,12 @@ async function seedCatalog() {
       batch.set(db.doc(`companies/${id}/settings/nfse`), { provider: 'direct', autoIssue: 'selectedCustomers' })
     }
     if (id === COMPANY_A) {
+      // The paid plan (seedForms) would turn the direct nota on through the
+      // onCompanyWrittenNfseAccess trigger and move the tests off the Asaas nota:
+      // off by hand ('manual'), the trigger leaves it alone (docs/NFSE_DIRECT.md).
       batch.set(db.doc(`companies/${id}/settings/payments`), {
         asaasEnabled: true, asaasConnected: true, asaasEnvironment: 'sandbox', nfseEnabled: true, nfseReady: true,
+        ...DIRECT_NOTA_OFF,
       })
     }
     await batch.commit()
@@ -546,7 +555,7 @@ async function seedSettings() {
     },
     { merge: true },
   )
-  await db.doc(`companies/${COMPANY_G}/settings/payments`).set({ asaasEnabled: true, asaasConnected: false })
+  await db.doc(`companies/${COMPANY_G}/settings/payments`).set({ asaasEnabled: true, asaasConnected: false, ...DIRECT_NOTA_OFF })
   for (const invite of Object.values(TEAM_INVITES)) {
     const created = new Date(Date.now() + (invite.days - 7) * 86400000).toISOString()
     await db.doc(`links/invites/tokens/${invite.token}`).set({

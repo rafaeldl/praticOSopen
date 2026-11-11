@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { PASSWORD, USERS } from './fixtures.mjs'
 import { chooseCompany, login, signOut } from './helpers'
 

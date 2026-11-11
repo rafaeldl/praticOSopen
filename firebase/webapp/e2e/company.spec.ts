@@ -1,7 +1,7 @@
 // Fatia 07, Sua empresa: data, logo, terms, segment and the switches of
 // company gamma (fixtures COMPANY_G), in order. Values and billing is switched
 // off and on here, so no other test reads money in this company.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { COMPANY_G } from './fixtures.mjs'
 import { login, newPersonPage } from './helpers'
 import { readPath, writePath } from './settings-data'
@@ -269,4 +269,49 @@ test('Valores e cobrança: desligar pergunta e some na hora para todos, sem reca
   await page.getByTestId('company-useFinancial').getByRole('switch').check()
   await expect(nav(page).getByRole('link', { name: 'Financeiro' })).toBeVisible()
   await expect.poll(async () => (await company())?.useFinancial).toBe(true)
+})
+
+test('Etapas do serviço: criar, ordenar, ver no Quadro e desligar (company.stages.edit)', async ({ page }) => {
+  await openCompany(page)
+  const row = page.getByTestId('company-stages')
+  await expect(row).toContainText('Desligado')
+  await row.click()
+  const form = page.getByTestId('stages-form')
+  await expect(form.getByTestId('stages-empty')).toBeVisible()
+  await expect(form.getByTestId('save-stages')).toBeDisabled()
+
+  // Two stages; a blank name is refused, then they swap places.
+  await form.getByTestId('stage-add').click()
+  await expect(form.getByTestId('stage-name-0')).toBeFocused()
+  await page.keyboard.type('Polimento')
+  await form.getByTestId('stage-add').click()
+  await form.getByTestId('save-stages').click()
+  await expect(form.getByRole('alert')).toHaveText('Dê um nome para cada etapa.')
+  await form.getByTestId('stage-name-1').fill('Pintura')
+  await form.getByTestId('stage-words-1').fill('Pintura, funilaria')
+  await form.getByRole('button', { name: 'Subir Pintura' }).click()
+  await expect(form.getByTestId('stage-name-0')).toHaveValue('Pintura')
+  await form.getByTestId('save-stages').click()
+  await expect(form).toHaveCount(0)
+  await expect(row).toContainText('Pintura → Polimento')
+  await expect
+    .poll(async () => (await company())?.workStages)
+    .toEqual([
+      { id: 'pintura', name: 'Pintura', keywords: ['pintura', 'funilaria'] },
+      { id: 'polimento', name: 'Polimento' },
+    ])
+
+  // The board splits Em andamento at once (session.company, no reload).
+  await page.goto('./?view=board')
+  await expect(page.getByTestId('board').getByRole('region')).toHaveText([/^Orçamento/, /^Aprovado/, /^Pintura/, /^Polimento/, /^Concluído/])
+
+  // Removing every stage turns them off; the ids of kept ones never change.
+  await page.goto('settings/company')
+  await row.click()
+  await form.getByTestId('stage-remove-0').click()
+  await form.getByTestId('stage-remove-0').click()
+  await form.getByTestId('save-stages').click()
+  await expect(page.locator('.toast')).toContainText('Etapas desligadas')
+  await expect(row).toContainText('Desligado')
+  await expect.poll(async () => (await company())?.workStages).toEqual([])
 })

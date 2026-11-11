@@ -130,8 +130,13 @@ void main() {
   group('Mandar cobrança', () {
     testWidgets('hidden without Asaas', (tester) async {
       await pump(tester);
-      expect(find.byKey(const Key('receiveCustomerMenu')), findsNothing);
       expect(find.text('Mandar cobrança'), findsNothing);
+      // The "…" only has "Mandar extrato" without a charge.
+      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
+      await tester.pumpAndSettle();
+      expect(find.text('Mandar extrato'), findsOneWidget);
+      expect(find.text('Copiar link'), findsNothing);
+      expect(find.text('Cancelar cobrança'), findsNothing);
     });
 
     testWidgets('creates one charge for the orders and shares it', (
@@ -149,8 +154,7 @@ void main() {
         },
       );
 
-      // On the screen, beside the blue button; no "…" until a charge exists.
-      expect(find.byKey(const Key('receiveCustomerMenu')), findsNothing);
+      // On the screen, beside the blue button, not in the "…".
       expect(find.byType(SecondaryButton), findsOneWidget);
       await tester.tap(find.text('Mandar cobrança'));
       await tester.pumpAndSettle();

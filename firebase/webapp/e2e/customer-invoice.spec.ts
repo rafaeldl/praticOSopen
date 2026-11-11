@@ -1,7 +1,7 @@
 // "Dados para nota" of the customer (customer.invoice-data.*, customer.detail.invoice-recipient,
 // docs/NFSE_DIRECT.md) in the company with the direct nota on. The Receita and ViaCEP
 // answers are simulated: nothing leaves the emulator.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCustomerInN, readCustomerInN } from './data'
 import { login } from './helpers'
 

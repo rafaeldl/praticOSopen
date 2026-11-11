@@ -267,6 +267,16 @@ class NfseDirectApiService {
     return NfseInvoice.fromJson(data ?? const {});
   }
 
+  /// "Enviar de novo": e-mails the nota (or the cancellation notice) to the
+  /// customer now. Resolves with the result saved on the nota.
+  Future<NfseEmailDelivery?> resendInvoiceEmail(String invoiceId) async {
+    final data = await _request(
+      'POST',
+      '/v1/app/nfse/direct/invoices/$invoiceId/email',
+    );
+    return NfseEmailDelivery.fromJson(data?['emailDelivery']);
+  }
+
   /// Makes the PDF (DANFSe) when needed; returns its Storage path.
   Future<String?> invoicePdfPath(String invoiceId) async {
     final data = await _request(
@@ -336,6 +346,13 @@ class NfseDirectApiService {
 
   Future<void> unlinkInvoice(String invoiceId) =>
       _request('POST', '/v1/app/nfse/links/invoices/$invoiceId/unlink');
+
+  /// Owner and admin: does the nota go to the customer's e-mail on its own.
+  Future<void> setEmailToCustomer(bool value) => _request(
+    'PUT',
+    '/v1/app/nfse/setup/settings',
+    {'emailToCustomer': value},
+  );
 
   /// Owner only (the server refuses others with FORBIDDEN).
   Future<void> setManagerCanIssue(bool value) => _request(

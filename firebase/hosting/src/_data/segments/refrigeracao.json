@@ -104,7 +104,30 @@
             "BTUs, voltagem, tipo de gás e data de instalação",
             "Com dia e hora, a OS entra na Agenda e o celular avisa antes",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Rocha",
+            "vehicle": "Split 12.000 BTUs",
+            "vehicleEmpty": "Escolher equipamento",
+            "deviceIcon": "ac",
+            "line": "Split 12 mil da Juliana, limpeza completa e recarga de gás, amanhã às 14h",
+            "items": [
+              {
+                "name": "Limpeza completa",
+                "price": "R$ 220,00"
+              },
+              {
+                "name": "Recarga de gás",
+                "price": "R$ 280,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 220,00",
+              "R$ 500,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -115,7 +138,38 @@
             "Instalação: evaporadora, condensadora, dreno, vácuo, pressão",
             "Preventiva, diagnóstico e recarga de gás",
             "Segurança do técnico (NR10/NR35) e comissionamento com tensão, corrente e ΔT"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Preventiva · split com fotos: Pressão de sucção, Baixa",
+            "back": "OS 429",
+            "title": "Preventiva · split",
+            "progress": "10 de 13 respondidas",
+            "items": [
+              {
+                "q": "Pressão de sucção",
+                "a": "Baixa",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Dreno",
+                "a": "Desobstruído",
+                "flag": false
+              },
+              {
+                "q": "Tensão",
+                "a": "220 V",
+                "flag": false
+              },
+              {
+                "q": "ΔT",
+                "a": "11 °C",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -126,7 +180,30 @@
             "Aprovação do cliente guardada para qualquer dúvida",
             "Você recebe uma notificação quando o cliente aprova",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 429",
+            "client": "Juliana Rocha",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Limpeza completa",
+                "price": "R$ 220,00"
+              },
+              {
+                "name": "Recarga de gás",
+                "price": "R$ 280,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 500,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -138,10 +215,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.130 de 3 clientes",
+            "nextSub": "Clínica Bem Viver deve R$ 380 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Clínica Bem Viver",
+                "amount": "R$ 380",
+                "sub": "OS 425 · desde 02/10"
+              },
+              {
+                "name": "Juliana Rocha",
+                "amount": "R$ 500",
+                "sub": "OS 429 · desde 28/10"
+              },
+              {
+                "name": "Rodrigo Alves",
+                "amount": "R$ 250",
+                "sub": "OS 430 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #429",
+        "client": "Juliana Rocha",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Limpeza completa",
+            "price": "R$ 220,00"
+          },
+          {
+            "name": "Recarga de gás",
+            "price": "R$ 280,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 500,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para juliana@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Antes de usar no seu dia a dia",
@@ -274,7 +400,30 @@
             "BTUs, voltage, refrigerant type and install date",
             "With a date and time, the order goes on the Schedule and your phone reminds you",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Rocha",
+            "vehicle": "12,000 BTU split",
+            "vehicleEmpty": "Choose unit",
+            "deviceIcon": "ac",
+            "line": "Juliana's 12,000 BTU split, full cleaning and refrigerant recharge, tomorrow at 2pm",
+            "items": [
+              {
+                "name": "Full cleaning",
+                "price": "$220.00"
+              },
+              {
+                "name": "Refrigerant recharge",
+                "price": "$280.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$220.00",
+              "$500.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -285,7 +434,38 @@
             "Install: indoor unit, outdoor unit, drain, vacuum, pressure",
             "Preventive maintenance, diagnosis and refrigerant recharge",
             "Technician safety and commissioning with voltage, amperage and ΔT"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Maintenance · split with photos: Suction pressure, Low",
+            "back": "WO 429",
+            "title": "Maintenance · split",
+            "progress": "10 of 13 answered",
+            "items": [
+              {
+                "q": "Suction pressure",
+                "a": "Low",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Drain",
+                "a": "Cleared",
+                "flag": false
+              },
+              {
+                "q": "Voltage",
+                "a": "220 V",
+                "flag": false
+              },
+              {
+                "q": "ΔT",
+                "a": "11 °C",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -296,7 +476,30 @@
             "Customer approval kept on hand in case of any doubt",
             "You get a notification when the customer approves",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 429",
+            "client": "Juliana Rocha",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Full cleaning",
+                "price": "$220.00"
+              },
+              {
+                "name": "Refrigerant recharge",
+                "price": "$280.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$500.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -308,8 +511,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing how much is still due and from which customers"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,130 to collect from 3 customers",
+            "nextSub": "Oakridge Dental owes $380 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Oakridge Dental",
+                "amount": "$380",
+                "sub": "WO 425 · since 10/02"
+              },
+              {
+                "name": "Juliana Rocha",
+                "amount": "$500",
+                "sub": "WO 429 · since 10/28"
+              },
+              {
+                "name": "Rodney Allen",
+                "amount": "$250",
+                "sub": "WO 430 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -444,7 +671,30 @@
             "BTU, voltaje, tipo de gas y fecha de instalación",
             "Con día y hora, la orden entra en la Agenda y el celular avisa antes",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Juliana Rocha",
+            "vehicle": "Split 12.000 BTU",
+            "vehicleEmpty": "Elegir equipo",
+            "deviceIcon": "ac",
+            "line": "Split de 12 mil de Juliana, limpieza completa y recarga de gas, mañana a las 14",
+            "items": [
+              {
+                "name": "Limpieza completa",
+                "price": "$ 220,00"
+              },
+              {
+                "name": "Recarga de gas",
+                "price": "$ 280,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 220,00",
+              "$ 500,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -455,7 +705,38 @@
             "Instalación: evaporadora, condensadora, drenaje, vacío, presión",
             "Mantenimiento preventivo, diagnóstico y recarga de gas",
             "Seguridad del técnico y puesta en marcha con voltaje, corriente y ΔT"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Mantenimiento · split con fotos: Presión de succión, Baja",
+            "back": "OS 429",
+            "title": "Mantenimiento · split",
+            "progress": "10 de 13 respondidas",
+            "items": [
+              {
+                "q": "Presión de succión",
+                "a": "Baja",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Drenaje",
+                "a": "Destapado",
+                "flag": false
+              },
+              {
+                "q": "Tensión",
+                "a": "220 V",
+                "flag": false
+              },
+              {
+                "q": "ΔT",
+                "a": "11 °C",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -466,7 +747,30 @@
             "Aprobación del cliente guardada ante cualquier duda",
             "Recibes una notificación cuando el cliente aprueba",
             "PDF de la orden para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 429",
+            "client": "Juliana Rocha",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Limpieza completa",
+                "price": "$ 220,00"
+              },
+              {
+                "name": "Recarga de gas",
+                "price": "$ 280,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 500,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -478,8 +782,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.130 de 3 clientes",
+            "nextSub": "Consultorio Santa Fe debe $ 380 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Consultorio Santa Fe",
+                "amount": "$ 380",
+                "sub": "OS 425 · desde 02/10"
+              },
+              {
+                "name": "Juliana Rocha",
+                "amount": "$ 500",
+                "sub": "OS 429 · desde 28/10"
+              },
+              {
+                "name": "Rodrigo Álvarez",
+                "amount": "$ 250",
+                "sub": "OS 430 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

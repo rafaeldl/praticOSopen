@@ -8,8 +8,14 @@ pageType: homepage
 {% include "components/hero.njk" %}
 {% include "components/workflow.njk" %}
 {% include "components/ai.njk" %}
+{% if site.flags.webApp %}{% include "components/web-app.njk" %}{% endif %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
 {% include "components/segments-index.njk" %}
 {% include "components/testimonial.njk" %}
 {% include "components/download.njk" %}
 <script src="{{ relPath }}js/home.js" defer></script>
+{# Product scenes (stage/): React, the kit and every scene's CSS in shared.*; one module per scene #}
+<link rel="stylesheet" href="{{ relPath }}assets/stage/shared.css">
+<script type="module" src="{{ relPath }}assets/stage/hero.js"></script>
+<script type="module" src="{{ relPath }}assets/stage/tabs.js"></script>
+{% if site.flags.webApp %}<script type="module" src="{{ relPath }}assets/stage/web.js"></script>{% endif %}

@@ -15,8 +15,27 @@
   --action-fg: var(--color-marker-ink);
   --action-edge: oklch(72% 0.15 85);
   --row-y: 0.8rem;
-  --ctl: 2.75rem; }
+  --ctl: 2.75rem;
+  /* System layer of "Campo" (docs/DESIGN_TOKENS.md): the work area is white, beige is only
+     support (search, Lista / Quadro, table head, hovered row), thin rules, a tertiary text.
+     Only here: tokens.css is shared with the site, which stays beige. */
+  --color-paper: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-paper-2: #F1EEE7;
+  --color-hover: #F7F5F0;
+  --color-rule: #E3E0DA;
+  --color-faint: #6B7178;
+  --color-grouped: #FFFFFF;
+  --color-tile: #FBFAF8; }
 :root[data-theme="dark"] { --color-warning-text: oklch(78% 0.13 70);
+  --color-paper: #0C1015;
+  --color-card: #1D2228;
+  --color-paper-2: #1D2228;
+  --color-hover: #151A20;
+  --color-rule: #2A3038;
+  --color-faint: #8A9099;
+  --color-grouped: #13181D;
+  --color-tile: #1D2228;
   --color-danger-text: oklch(74% 0.15 28);
   --color-control: oklch(58% 0.015 255);
   --color-selected: oklch(30% 0.05 250);
@@ -113,6 +132,10 @@ textarea.field { resize: vertical; min-height: 4.25rem; line-height: 1.45; }
 .combo-main small { color: var(--color-muted); font-size: 0.8125rem; }
 .status { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--color-muted); white-space: nowrap; }
 .status--late { color: var(--color-danger-text); font-weight: 700; }
+.status:has(.status-problem) { white-space: normal; }
+.status-problem { font-weight: 700; white-space: nowrap; }
+.status-problem--late { color: var(--color-danger-text); }
+.status-problem--held { color: var(--color-warning-text); }
 .dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; flex: none; }
 .dot--neutral { background: var(--color-neutral); }
 .dot--accent { background: var(--color-accent); }
@@ -134,20 +157,21 @@ textarea.field { resize: vertical; min-height: 4.25rem; line-height: 1.45; }
 .chip--danger:not([aria-pressed="true"]) { color: var(--color-danger-text); font-weight: 700; }
 /* Never shrinks under its width: with no room it goes to the next line (the hint stays whole). */
 .toolbar .search-mini { width: 11rem; max-width: 100%; flex: 0 0 auto; min-width: min(11rem, 100%); min-height: 2.1rem; }
+.toolbar .search-mini:not(:focus) { background: var(--color-paper-2); border-color: transparent; }
 .toolbar .select-mini { width: auto; min-height: 2.1rem; padding-block: 0; }
 .spacer { flex: 1; }
 @container list (min-width: 46rem) { .c-who { display: table-cell; } }
 @container list (min-width: 62rem) { .c-device { display: table-cell; } .grid td { vertical-align: middle; } }
-.workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 2px solid var(--color-ink); }
+.workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--color-rule); }
 .workspace.has-panel { grid-template-columns: minmax(0, 1fr) clamp(27rem, 40%, 42rem); }
 .list-pane { min-width: 0; min-height: 0; overflow: auto; container: list / inline-size; display: flex; flex-direction: column; }
 table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
-.grid th { position: sticky; top: 0; z-index: 2; background: var(--color-paper); text-align: left; font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--color-rule); white-space: nowrap; }
+.grid th { position: sticky; top: 0; z-index: 2; background: var(--color-paper-2); text-align: left; font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--color-rule); white-space: nowrap; }
 .grid th button { all: unset; cursor: pointer; display: inline-flex; gap: 0.2rem; align-items: center; }
 .grid th button:focus-visible { outline: 2px solid var(--color-focus); }
 .grid td { padding: var(--row-y) 0.6rem; border-bottom: 1px solid var(--color-rule); vertical-align: top; }
 .grid tbody tr { cursor: pointer; }
-.grid tbody tr:hover td { background: var(--color-paper-2); }
+.grid tbody tr:hover td { background: var(--color-hover); }
 .grid tbody tr.is-open td { background: var(--color-selected); }
 .grid tbody tr.is-open td:first-child { box-shadow: inset 3px 0 0 var(--color-accent); }
 .grid .c-check { width: 2.25rem; padding-inline: 0.7rem 0; padding-right: 0; }
@@ -173,6 +197,8 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
 .layer--drawer .layer-box { width: 36rem; height: 100%; }
 .layer-title { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; line-height: 1.2; }
 .layer-foot { display: flex; gap: 0.5rem; justify-content: flex-end; padding: 0.75rem 1.15rem; border-top: 1px solid var(--color-rule); }
+/* "Emitindo a nota…": what a slow action is doing, left of the buttons. */
+.layer-progress { margin: 0 auto 0 0; align-self: center; color: var(--color-muted); }
 .pal-input { border: 0; border-bottom: 1px solid var(--color-rule); padding: 0.85rem 1rem; font-size: 1.05rem; background: transparent; width: 100%; border-radius: 8px 8px 0 0; }
 .pal-input:focus { outline: none; }
 .pal-list { overflow: auto; padding: 0.35rem; }
@@ -311,5 +337,6 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
   .layer--palette .layer-box { width: 100%; height: 100%; max-height: none; border-radius: 0; }
   .layer-foot { flex-wrap: wrap; }
   .layer-foot .btn { flex: 1; }
+  .layer-progress { flex-basis: 100%; }
   .toast { left: 0.75rem; right: 0.75rem; bottom: calc(4.1rem + env(safe-area-inset-bottom)); transform: none; max-width: none; }
 }

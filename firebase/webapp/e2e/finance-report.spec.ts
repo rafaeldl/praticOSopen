@@ -1,7 +1,7 @@
 // Fatia 06: Financeiro > Relatório. Period, filters, rankings and the extras of a
 // large screen (CSV, XLSX, print), over the seeded March 2026 (seed.mjs seedFinance).
 import { readFileSync } from 'node:fs'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 const MARCH = 'finance/report?from=2026-03-01&to=2026-03-31'

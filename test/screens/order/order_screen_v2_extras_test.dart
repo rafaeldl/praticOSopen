@@ -17,7 +17,9 @@ import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/models/fiscal_emitter.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
@@ -779,7 +781,9 @@ void main() {
       expect(find.text('Fica pronto amanhã'), findsOneWidget);
     });
 
-    testWidgets('late: dot and status in danger, in bold', (tester) async {
+    testWidgets('late: status stays, "Atrasada" in bold danger after it', (
+      tester,
+    ) async {
       final now = DateTime.now();
       final due = DateTime(now.year, now.month, now.day - 1);
       await _pump(
@@ -788,11 +792,16 @@ void main() {
         args: {'order': _order(status: 'progress')..dueDate = due},
       );
       expect(find.text('Era para ficar pronto ontem'), findsOneWidget);
-      final status = tester.widget<Text>(find.textContaining('Atrasada'));
-      expect(status.style?.fontWeight, FontWeight.w700);
+      final late = _spanStyle(tester, 'Atrasada');
+      expect(late?.fontWeight, FontWeight.w700);
+      expect(
+        late?.color?.toARGB32(),
+        OrderStatusStyle.overdueColor.color.toARGB32(),
+      );
+      // The dot keeps the status color (in progress: amber dot).
       expect(
         tester.widget<StatusDot>(find.byType(StatusDot)).color,
-        OrderStatusStyle.overdueColor,
+        OrderStatusStyle.dotColor('progress'),
       );
     });
   });
@@ -1157,6 +1166,54 @@ void main() {
         );
       });
 
+      testWidgets(
+        'automatic direct nota stopped by the limit: row says why, blue "Tentar novamente"',
+        (tester) async {
+          final failed = NfseInvoice.fromJson({
+            'status': 'error',
+            'provider': 'direct',
+            'auto': true,
+            'errorCode': 'DAILY_LIMIT_REACHED',
+            'orderIds': ['o1'],
+            'value': 500,
+            'createdAt': DateTime.now().toIso8601String(),
+          }, id: 'auto-o1');
+          await _pump(
+            tester,
+            screen(OrderStore(), nfse: nfse(invoices: [failed])),
+            args: {'order': paid()},
+          );
+          expect(find.text('Limite de notas de hoje'), findsOneWidget);
+          expect(
+            find.descendant(
+              of: blue(),
+              matching: find.text('Tentar novamente'),
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets('issued by itself: "Emitida sozinha" on the row', (
+        tester,
+      ) async {
+        final issued = NfseInvoice.fromJson({
+          'status': 'authorized',
+          'provider': 'direct',
+          'auto': true,
+          'number': '29',
+          'orderIds': ['o1'],
+          'value': 500,
+          'createdAt': DateTime.now().toIso8601String(),
+        }, id: 'inv1');
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse(invoices: [issued])),
+          args: {'order': paid()},
+        );
+        expect(find.text('Emitida sozinha · nº 29'), findsOneWidget);
+      });
+
       testWidgets('canceled on purpose: no blue button', (tester) async {
         await _pump(
           tester,
@@ -1165,6 +1222,47 @@ void main() {
         );
         expect(blue(), findsNothing);
       });
+    });
+
+    group('NFS-e direct (#612)', () {
+      NfseController direct() => NfseController(
+        canIssue: true,
+        settingsStream: Stream.value(PaymentSettings(nfseDirectEnabled: true)),
+        invoicesOf: (_) => Stream.value(const []),
+        emittersStream: Stream.value([
+          FiscalEmitter(legalName: 'OFICINA')..id = 'e1',
+        ]),
+      );
+
+      testWidgets('approved order: the row offers "Emitir"', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: direct()),
+          args: {'order': _order(status: 'approved')..total = 500},
+        );
+        expect(find.byKey(const ValueKey('order_nfse_issue')), findsOneWidget);
+        expect(find.text('Não emitida'), findsNothing);
+      });
+
+      testWidgets('a quote still has no row', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: direct()),
+          args: {'order': _order()..total = 500},
+        );
+        expect(find.byKey(const ValueKey('order_nfse_issue')), findsNothing);
+      });
+    });
+
+    testWidgets('through Asaas, an approved order keeps it in the "…"', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse()),
+        args: {'order': _order(status: 'approved')..total = 500},
+      );
+      expect(find.byKey(const ValueKey('order_nfse_issue')), findsNothing);
     });
 
     testWidgets('the nota shows as a row and blocks a second one', (
@@ -1272,4 +1370,89 @@ void main() {
       expect(find.byKey(const ValueKey('order_missing_phone_')), findsNothing);
     });
   });
+
+  group('work stages (docs/WORK_STAGES.md)', () {
+    const stages = [
+      WorkStage('paint', 'Pintura'),
+      WorkStage('polish', 'Polimento'),
+    ];
+    Order inStage(String? stageId) =>
+        _order(status: 'progress')
+          ..stage = stageId == null ? null : (OrderStage()..id = stageId);
+    Finder blue() => find.byKey(const ValueKey('order_primary_button'));
+
+    testWidgets(
+      'the stage beside the status, the blue button goes to the next one',
+      (tester) async {
+        final config = await _pump(
+          tester,
+          screen(OrderStore()),
+          args: {'order': inStage(null)},
+        );
+        config.setWorkStages(stages);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Em Andamento · Pintura'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: blue(),
+            matching: find.text('Passar para Polimento'),
+          ),
+          findsOneWidget,
+        );
+        await _openMenu(tester);
+        expect(_menuLabels(tester), contains('Mudar etapa'));
+      },
+    );
+
+    testWidgets('on the last stage the blue button marks it ready', (
+      tester,
+    ) async {
+      final config = await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': inStage('polish')},
+      );
+      config.setWorkStages(stages);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Em Andamento · Polimento'), findsOneWidget);
+      expect(
+        find.descendant(of: blue(), matching: find.text('Marcar como pronta')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('without stages nothing changes', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': inStage('paint')},
+      );
+
+      expect(find.textContaining('Pintura'), findsNothing);
+      expect(
+        find.descendant(of: blue(), matching: find.text('Marcar como pronta')),
+        findsOneWidget,
+      );
+      await _openMenu(tester);
+      expect(_menuLabels(tester), isNot(contains('Mudar etapa')));
+    });
+  });
+}
+
+/// Style of the inline span whose text is [text] (status lines are rich text).
+TextStyle? _spanStyle(WidgetTester tester, String text) {
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    TextStyle? found;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text == text) {
+        found = span.style;
+        return false;
+      }
+      return true;
+    });
+    if (found != null) return found;
+  }
+  return null;
 }

@@ -37,13 +37,34 @@ final _pairs = <(String, CupertinoDynamicColor, CupertinoDynamicColor, double)>[
     AppColors.secondaryFill,
     4.5,
   ),
+  ('onNavyFill on navyFill', AppColors.onNavyFill, AppColors.navyFill, 4.5),
+  ('onAction on action', AppColors.onAction, AppColors.action, 4.5),
   (
-    'onAssistantFill on assistantFill',
-    AppColors.onAssistantFill,
-    AppColors.assistantFill,
+    'text on groupedBackground',
+    AppColors.text,
+    AppColors.groupedBackground,
     4.5,
   ),
-  ('onMarker on marker', AppColors.onMarker, AppColors.marker, 4.5),
+  (
+    'textSecondary on groupedBackground',
+    AppColors.textSecondary,
+    AppColors.groupedBackground,
+    4.5,
+  ),
+  (
+    'onAccentSoft on accentSoft (selected row)',
+    AppColors.onAccentSoft,
+    AppColors.accentSoft,
+    4.5,
+  ),
+  // Tertiary is supporting text only (service, note): large-text minimum.
+  (
+    'textTertiary on background',
+    AppColors.textTertiary,
+    AppColors.background,
+    3.0,
+  ),
+  ('textTertiary on surface', AppColors.textTertiary, AppColors.surface, 3.0),
   ('success on background', AppColors.success, AppColors.background, 4.5),
   ('success on surface', AppColors.success, AppColors.surface, 4.5),
   ('warning on background', AppColors.warning, AppColors.background, 4.5),
@@ -57,9 +78,10 @@ final _pairs = <(String, CupertinoDynamicColor, CupertinoDynamicColor, double)>[
   ('danger on background', AppColors.danger, AppColors.background, 4.5),
   ('danger on surface', AppColors.danger, AppColors.surface, 4.5),
   ('accent fill on surface', AppColors.accent, AppColors.surface, 3.0),
+  ('accent fill on background', AppColors.accent, AppColors.background, 3.0),
   (
-    'assistant fill on background',
-    AppColors.assistantFill,
+    'navy fill (+) on background',
+    AppColors.navyFill,
     AppColors.background,
     3.0,
   ),
@@ -120,6 +142,26 @@ void main() {
           bg.darkHighContrastColor,
         ),
         greaterThanOrEqualTo(7.0),
+      );
+    }
+  });
+
+  test('Campo theme brand values (docs/DESIGN_TOKENS.md)', () {
+    expect(AppColors.text.color.toARGB32(), 0xFF07294F);
+    expect(AppColors.accent.color.toARGB32(), 0xFF1467C2);
+    expect(AppColors.action.color.toARGB32(), 0xFFFFC921);
+    expect(AppColors.onAction.color.toARGB32(), 0xFF07294F);
+    expect(AppColors.background.color.toARGB32(), 0xFFFFFFFF);
+    expect(AppColors.background.darkColor.toARGB32(), 0xFF0C1015);
+    expect(AppColors.groupedBackground.color.toARGB32(), 0xFFF2F0EC);
+    expect(AppColors.textTertiary.highContrastColor.toARGB32(), 0xFF5E636A);
+  });
+
+  test('textTertiary sits between secondary and the background', () {
+    for (final bg in [AppColors.background, AppColors.surface]) {
+      expect(
+        _contrast(AppColors.textTertiary.color, bg.color),
+        lessThan(_contrast(AppColors.textSecondary.color, bg.color)),
       );
     }
   });

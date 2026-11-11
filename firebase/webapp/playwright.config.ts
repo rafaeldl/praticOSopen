@@ -9,12 +9,14 @@ export default defineConfig({
   // PRs that don't touch styles skip the dark-theme axe pass (E2E_SKIP_DARK_AXE
   // from webapp_check.yml); the light pass and dark-mode behavior tests still run.
   grepInvert: process.env.E2E_SKIP_DARK_AXE ? /axe.*(tema escuro|\(dark\))/ : undefined,
-  timeout: process.env.E2E_PERF ? 180_000 : 30_000,
-  // CI runs 3 workers next to the emulators on a shared runner: Firestore
-  // listeners there can take over 8 s, which failed random tests (#552).
-  expect: { timeout: process.env.CI ? 15_000 : 8_000 },
+  // A test makes several 15 s waits (expect below): 30 s cut slow-but-right runs.
+  timeout: process.env.E2E_PERF ? 180_000 : 60_000,
+  // 3 workers next to the emulators: Firestore listeners can take over 8 s,
+  // on the CI runner (#552) and on a busy laptop running the whole suite.
+  expect: { timeout: 15_000 },
   fullyParallel: !process.env.E2E_PERF,
-  workers: process.env.E2E_PERF ? 1 : 3,
+  // PW_WORKERS sets it; 2 by default on a dev machine shared with other runs, 3 on CI.
+  workers: process.env.E2E_PERF ? 1 : Number(process.env.PW_WORKERS) || (process.env.CI ? 3 : 2),
   retries: 0,
   forbidOnly: !!process.env.CI,
   reporter: [['list']],

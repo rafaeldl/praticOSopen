@@ -744,6 +744,55 @@ describe('OS parada', () => {
   });
 });
 
+// ─── Etapas ───────────────────────────────────────────────────────────────
+describe('etapas da OS', () => {
+  const STAGES = [{ id: 'paint', name: 'Pintura', keywords: ['pint'] }, { id: 'polish', name: 'Polimento' }];
+  const comments = () => list('companies/c1/orders/o1/comments').map((c) => c.data.text);
+
+  beforeEach(() => seedCompanies({ workStages: STAGES }));
+
+  it('aprovada entra na etapa e passa a em andamento; reordenar não comenta', async () => {
+    seedOrder('o1');
+    const res = await call('supervisor', 'put', `${O}/o1/stage`, { stageId: 'paint' });
+    expect(res.status).toBe(200);
+    expect(doc('o1')).toMatchObject({ status: 'progress', payment: 'unpaid', stage: { id: 'paint', rank: expect.any(Number), since: expect.any(String) } });
+    expect(res.body.data.order.stage.id).toBe('paint');
+    const since = doc('o1').stage.since;
+
+    expect((await call('supervisor', 'put', `${O}/o1/stage`, { stageId: 'paint', rank: 1.5 })).status).toBe(200);
+    expect(doc('o1').stage).toEqual({ id: 'paint', rank: 1.5, since });
+    expect(comments()).toEqual(['Etapa: Pintura']);
+
+    expect((await call('technician', 'put', `${O}/o1/stage`, { stageId: 'polish' })).status).toBe(403);
+    expect((await call('owner', 'put', `${O}/o1/stage`, { stageId: 'polish', rank: -3 })).status).toBe(200);
+    expect(doc('o1').stage).toMatchObject({ id: 'polish', rank: -3 });
+    expect(comments()).toEqual(['Etapa: Pintura', 'Etapa: Polimento']);
+  });
+
+  it('sair de em andamento tira a etapa', async () => {
+    seedOrder('o1', { status: 'progress', stage: { id: 'polish', rank: 1, since: T0 } });
+    const res = await call('owner', 'patch', `${O}/o1`, { status: 'done' });
+    expect(res.status).toBe(200);
+    expect(doc('o1').status).toBe('done');
+    expect(doc('o1')).not.toHaveProperty('stage');
+    expect(res.body.data.order).not.toHaveProperty('stage');
+  });
+
+  it('recusa etapa desconhecida, orçamento, consultor e empresa sem etapas', async () => {
+    seedOrder('o1');
+    seedOrder('q', { status: 'quote', payment: null });
+    seedOrder('mine', { createdBy: { id: 'cons1', name: 'Caio' } });
+    expect((await call('owner', 'put', `${O}/o1/stage`, { stageId: 'wash' })).status).toBe(422);
+    expect((await call('owner', 'put', `${O}/q/stage`, { stageId: 'paint' })).status).toBe(409);
+    expect((await call('consultant', 'put', `${O}/mine/stage`, { stageId: 'paint' })).status).toBe(403);
+    expect((await call('owner', 'put', `${O}/o1/stage`, {})).status).toBe(400);
+    seedCompanies();
+    expect((await call('owner', 'put', `${O}/o1/stage`, { stageId: 'paint' })).status).toBe(422);
+    expect(doc('o1').status).toBe('approved');
+    expect(doc('o1')).not.toHaveProperty('stage');
+  });
+});
+
 // ─── Recibos ──────────────────────────────────────────────────────────────
 describe('recibos do cliente', () => {
   const share = (receipt: string, i: number, amount: number) => ({
@@ -826,6 +875,7 @@ describe('outra empresa', () => {
     ['delete', `${O}/x/discounts`],
     ['post', `${O}/x/hold`, { reason: 'part' }],
     ['delete', `${O}/x/hold`],
+    ['put', `${O}/x/stage`, { stageId: 'paint' }],
     ['get', `${CU}/cust1/receipts`],
     ['post', `${CU}/cust1/receipts/r9/cancel`],
     ['put', `${CU}/cust1/receipts/r9/file`, { receiptFile: { url: storageUrl('tenants/c2/receipts/r9/a'), storagePath: 'tenants/c2/receipts/r9/a', contentType: 'image/png' } }],

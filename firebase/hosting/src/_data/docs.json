@@ -56,6 +56,12 @@
               "href": "financeiro.html"
             },
             {
+              "title": "Nota fiscal",
+              "description": "Emita a nota de serviço pelo Emissor Nacional direto da OS, com o certificado A1 da sua empresa.",
+              "href": "nota-fiscal.html",
+              "flag": "nfsePage"
+            },
+            {
               "title": "Cobrança com Asaas",
               "description": "Cobre o cliente da OS por Pix, boleto ou cartão parcelado pela sua conta Asaas. O cliente paga pelo link da OS e o pagamento entra sozinho.",
               "href": "cobranca-asaas.html"

@@ -102,7 +102,25 @@
             "Modalidade e número da licitação, número do contrato, prazo e base legal",
             "Secretaria responsável, localização e objeto da obra",
             "Nada é salvo sem você conferir"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Construtora Vale Verde",
+            "vehicle": "Rua das Acácias",
+            "vehicleEmpty": "Escolher obra",
+            "deviceIcon": "place",
+            "line": "Construtora Vale Verde, recapeamento da Rua das Acácias, medição da etapa de drenagem",
+            "items": [
+              {
+                "name": "Medição · drenagem",
+                "price": "R$ 192.000,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 192.000,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -113,7 +131,38 @@
             "Trabalhadores e equipamentos no local",
             "Cronograma no prazo, atrasado ou adiantado",
             "Seguro, certidões negativas e licença ambiental"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Vistoria de andamento com fotos: Cronograma, Atrasado 5 dias",
+            "back": "OS 27",
+            "title": "Vistoria de andamento",
+            "progress": "9 de 12 respondidas",
+            "items": [
+              {
+                "q": "Cronograma",
+                "a": "Atrasado 5 dias",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Trabalhadores no local",
+                "a": "14",
+                "flag": false
+              },
+              {
+                "q": "Equipamentos",
+                "a": "Conforme",
+                "flag": false
+              },
+              {
+                "q": "Licença ambiental",
+                "a": "Válida",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,8 +174,37 @@
             "Glosa registrada quando houver",
             "Valor contratado, total liberado e a liberar"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
+          "scene": {
+            "kind": "record",
+            "label": "Medição · drenagem com fotos: % executado, 45%",
+            "back": "OS 27",
+            "title": "Medição · drenagem",
+            "progress": "5 de 5 respondidas",
+            "items": [
+              {
+                "q": "% executado",
+                "a": "45%",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "% previsto",
+                "a": "50%",
+                "flag": false
+              },
+              {
+                "q": "Glosa",
+                "a": "Nenhuma",
+                "flag": false
+              },
+              {
+                "q": "Total liberado",
+                "a": "R$ 576.000,00",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -137,7 +215,36 @@
             "Recebimento provisório ou definitivo",
             "PDF do contrato com o histórico de medições",
             "Relatório do mês no Financeiro"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Contratos: as OS com a situação de cada uma",
+            "title": "Contratos",
+            "subtitle": "1 em andamento · 2 concluídos",
+            "rows": [
+              {
+                "name": "Pavimentação da Rua das Acácias",
+                "status": "Em andamento · Contrato 027/2026",
+                "kind": "progress",
+                "sub": "Construtora Vale Verde",
+                "right": "45%"
+              },
+              {
+                "name": "Reforma da UBS Centro",
+                "status": "Concluída · Recebimento definitivo",
+                "kind": "done",
+                "sub": "Construtora Horizonte",
+                "right": "100%"
+              },
+              {
+                "name": "Praça da Matriz",
+                "status": "Concluída · Recebimento provisório",
+                "kind": "done",
+                "sub": "Paisagismo Verde",
+                "right": "100%"
+              }
+            ]
+          }
         }
       ]
     },
@@ -270,7 +377,25 @@
             "Bid type and number, contract number, deadline and legal basis",
             "Responsible department, location and project scope",
             "Nothing is saved until you check it"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Greenvale Construction",
+            "vehicle": "Acacia Street",
+            "vehicleEmpty": "Choose project",
+            "deviceIcon": "place",
+            "line": "Greenvale Construction, repaving of Acacia Street, drainage milestone measurement",
+            "items": [
+              {
+                "name": "Measurement · drainage",
+                "price": "$192,000.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$192,000.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -281,7 +406,38 @@
             "Workers and equipment on site",
             "Schedule on time, late or ahead",
             "Insurance, tax clearance certificates and environmental permit"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Progress inspection with photos: Schedule, 5 days behind",
+            "back": "WO 27",
+            "title": "Progress inspection",
+            "progress": "9 of 12 answered",
+            "items": [
+              {
+                "q": "Schedule",
+                "a": "5 days behind",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Workers on site",
+                "a": "14",
+                "flag": false
+              },
+              {
+                "q": "Equipment",
+                "a": "As planned",
+                "flag": false
+              },
+              {
+                "q": "Environmental permit",
+                "a": "Valid",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -293,8 +449,37 @@
             "Deductions recorded when they apply",
             "Contract value, amount released and balance to release"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing how much is still due and from which customers"
+          "scene": {
+            "kind": "record",
+            "label": "Measurement · drainage with photos: % complete, 45%",
+            "back": "WO 27",
+            "title": "Measurement · drainage",
+            "progress": "5 of 5 answered",
+            "items": [
+              {
+                "q": "% complete",
+                "a": "45%",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "% planned",
+                "a": "50%",
+                "flag": false
+              },
+              {
+                "q": "Deduction",
+                "a": "None",
+                "flag": false
+              },
+              {
+                "q": "Released to date",
+                "a": "$576,000.00",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -305,7 +490,36 @@
             "Provisional or final acceptance",
             "Contract PDF with the measurement history",
             "Monthly report in Financial"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Contracts: orders with their status",
+            "title": "Contracts",
+            "subtitle": "1 in progress · 2 completed",
+            "rows": [
+              {
+                "name": "Repaving of Acacia Street",
+                "status": "In progress · Contract 027/2026",
+                "kind": "progress",
+                "sub": "Greenvale Construction",
+                "right": "45%"
+              },
+              {
+                "name": "Downtown clinic renovation",
+                "status": "Completed · Final acceptance",
+                "kind": "done",
+                "sub": "Horizon Builders",
+                "right": "100%"
+              },
+              {
+                "name": "Main Square",
+                "status": "Completed · Provisional acceptance",
+                "kind": "done",
+                "sub": "GreenScape Co.",
+                "right": "100%"
+              }
+            ]
+          }
         }
       ]
     },
@@ -438,7 +652,25 @@
             "Modalidad y número de licitación, número de contrato, plazo y base legal",
             "Secretaría responsable, ubicación y objeto de la obra",
             "Nada se guarda sin que lo revises"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Constructora Valle Verde",
+            "vehicle": "Calle Las Acacias",
+            "vehicleEmpty": "Elegir obra",
+            "deviceIcon": "place",
+            "line": "Constructora Valle Verde, pavimentación de la calle Las Acacias, medición de la etapa de drenaje",
+            "items": [
+              {
+                "name": "Medición · drenaje",
+                "price": "$ 192.000,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 192.000,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -449,7 +681,38 @@
             "Trabajadores y equipos en el lugar",
             "Cronograma en plazo, atrasado o adelantado",
             "Seguro, certificados de deuda y licencia ambiental"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Inspección de avance con fotos: Cronograma, 5 días de atraso",
+            "back": "OS 27",
+            "title": "Inspección de avance",
+            "progress": "9 de 12 respondidas",
+            "items": [
+              {
+                "q": "Cronograma",
+                "a": "5 días de atraso",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Trabajadores en obra",
+                "a": "14",
+                "flag": false
+              },
+              {
+                "q": "Equipos",
+                "a": "Conforme",
+                "flag": false
+              },
+              {
+                "q": "Licencia ambiental",
+                "a": "Vigente",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -461,8 +724,37 @@
             "Descuentos registrados cuando correspondan",
             "Monto contratado, total liberado y por liberar"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
+          "scene": {
+            "kind": "record",
+            "label": "Medición · drenaje con fotos: % ejecutado, 45%",
+            "back": "OS 27",
+            "title": "Medición · drenaje",
+            "progress": "5 de 5 respondidas",
+            "items": [
+              {
+                "q": "% ejecutado",
+                "a": "45%",
+                "flag": false,
+                "photos": 2
+              },
+              {
+                "q": "% previsto",
+                "a": "50%",
+                "flag": false
+              },
+              {
+                "q": "Glosa",
+                "a": "Ninguna",
+                "flag": false
+              },
+              {
+                "q": "Total liberado",
+                "a": "$ 576.000,00",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -473,7 +765,36 @@
             "Recepción provisoria o definitiva",
             "PDF del contrato con el historial de mediciones",
             "Informe del mes en Financiero"
-          ]
+          ],
+          "scene": {
+            "kind": "orders",
+            "label": "Contratos: órdenes con su estado",
+            "title": "Contratos",
+            "subtitle": "1 en curso · 2 concluidos",
+            "rows": [
+              {
+                "name": "Pavimentación de la calle Las Acacias",
+                "status": "En curso · Contrato 027/2026",
+                "kind": "progress",
+                "sub": "Constructora Valle Verde",
+                "right": "45%"
+              },
+              {
+                "name": "Refacción del centro de salud",
+                "status": "Concluida · Recepción definitiva",
+                "kind": "done",
+                "sub": "Constructora Horizonte",
+                "right": "100%"
+              },
+              {
+                "name": "Plaza Mayor",
+                "status": "Concluida · Recepción provisoria",
+                "kind": "done",
+                "sub": "Paisajismo Verde",
+                "right": "100%"
+              }
+            ]
+          }
         }
       ]
     },

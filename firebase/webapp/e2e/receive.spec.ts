@@ -2,7 +2,7 @@
 // API and the tests check what the server saved. WhatsApp is never opened (the
 // tests read the link) and Asaas is simulated: the charge routes are answered
 // here and the charge documents written as the server would.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import { expect, test, type Page, type Route } from './test'
 import { makeCustomer, makeOrder, queryDocs, readOrder, readShareToken, updateOrderDoc, writeDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
 

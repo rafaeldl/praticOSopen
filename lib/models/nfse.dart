@@ -166,6 +166,48 @@ class NfseRecipient {
   }
 }
 
+/// Last e-mail of a direct nota to the customer (`emailDelivery`, issue #611).
+class NfseEmailDelivery {
+  const NfseEmailDelivery({
+    required this.status,
+    this.canceled = false,
+    this.to,
+    this.at,
+    this.reason,
+    this.errorCode,
+  });
+
+  /// `sent`, `failed` or `skipped`.
+  final String status;
+
+  /// The cancellation notice (not the issued nota).
+  final bool canceled;
+  final String? to;
+  final DateTime? at;
+
+  /// Why it was skipped: `noEmail` or `turnedOff`.
+  final String? reason;
+  final String? errorCode;
+
+  bool get sent => status == 'sent';
+  bool get failed => status == 'failed';
+  bool get skipped => status == 'skipped';
+
+  static NfseEmailDelivery? fromJson(Object? value) {
+    final json = _map(value);
+    final status = _str(json?['status']);
+    if (json == null || status == null) return null;
+    return NfseEmailDelivery(
+      status: status,
+      canceled: json['kind'] == 'canceled',
+      to: _str(json['to']),
+      at: _date(json['at']),
+      reason: _str(json['reason']),
+      errorCode: _str(json['errorCode']),
+    );
+  }
+}
+
 /// Our request behind a direct nota (series and number of the DPS). The
 /// nota's own number ([NfseInvoice.number]) is the government's.
 class NfseDps {
@@ -234,6 +276,7 @@ class NfseInvoice {
     this.cancelReason,
     this.importBatchId,
     this.refusal,
+    this.emailDelivery,
   });
 
   final String id;
@@ -287,7 +330,32 @@ class NfseInvoice {
   /// Why the government refused a direct nota (or its cancellation).
   final NfseRefusal? refusal;
 
+  /// Last e-mail to the customer (direct notas).
+  final NfseEmailDelivery? emailDelivery;
+
   bool get isDirect => provider == NfseProvider.direct;
+
+  /// An automatic direct nota that did not go out for a reason a new try may
+  /// fix (daily limit, certificate renewed, service out): "Tentar novamente"
+  /// issues it again with one tap. Missing customer data, or a refusal of
+  /// the government, opens the issue sheet instead (issue #571).
+  bool get canRetryAuto =>
+      isDirect &&
+      auto &&
+      status == NfseStatus.error &&
+      errorCode != null &&
+      refusal == null &&
+      errorCode != 'RECIPIENT_TAX_ID_REQUIRED' &&
+      orderIds.isNotEmpty;
+
+  /// An automatic direct nota that the server could not issue, with our
+  /// reason in [errorCode] (not a refusal of the government).
+  bool get isAutoDirectFailure =>
+      isDirect &&
+      auto &&
+      status == NfseStatus.error &&
+      errorCode != null &&
+      refusal == null;
 
   /// Made outside PraticOS (portal or another system), read from the
   /// government: "Emitida fora do PraticOS".
@@ -341,6 +409,7 @@ class NfseInvoice {
       cancelReason: NfseCancelReason.parse(json['cancelReason']),
       importBatchId: _str(json['importBatchId']),
       refusal: NfseRefusal.fromJson(json['refusal']),
+      emailDelivery: NfseEmailDelivery.fromJson(json['emailDelivery']),
     );
   }
 
@@ -740,6 +809,7 @@ class NfseDirectPreview {
     this.missing = const [],
     this.meiWarning = NfseMeiWarning.none,
     this.invoicedOrders = const {},
+    this.emailToCustomer = true,
   });
 
   final double value;
@@ -765,6 +835,9 @@ class NfseDirectPreview {
 
   /// Orders that already have an active nota (orderId → invoiceId).
   final Map<String, String> invoicedOrders;
+
+  /// The nota goes to the customer's e-mail on its own (issue #611).
+  final bool emailToCustomer;
 
   factory NfseDirectPreview.fromJson(Map<String, dynamic> json) {
     final customer = _map(json['customer']) ?? const <String, dynamic>{};
@@ -800,6 +873,7 @@ class NfseDirectPreview {
         for (final e in invoiced.entries)
           if (e.value is String) e.key: e.value as String,
       },
+      emailToCustomer: json['emailToCustomer'] != false,
     );
   }
 }

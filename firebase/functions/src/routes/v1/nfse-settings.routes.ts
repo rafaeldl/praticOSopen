@@ -3,7 +3,7 @@
  * Mounted by the nfseApi at /v1/app/nfse/setup. Owner and admin only (spec decision 12).
  *
  *   PATCH /emitters/:emitterId   { municipalRegistration?, service?, descriptionStyle? }
- *   PUT   /settings              { defaultEmitterId?, autoIssue?, managerCanIssue? }
+ *   PUT   /settings              { defaultEmitterId?, autoIssue?, managerCanIssue?, emailToCustomer? }
  *
  * `managerCanIssue` (may the manager issue and cancel notas) is the owner's
  * call only (issue #560).
@@ -54,6 +54,7 @@ const settingsSchema = z
     defaultEmitterId: emitterIdSchema.optional(),
     autoIssue: z.enum(NFSE_DIRECT_AUTO_ISSUE as [string, ...string[]]).optional(),
     managerCanIssue: z.boolean().optional(),
+    emailToCustomer: z.boolean().optional(),
   })
   .strict();
 

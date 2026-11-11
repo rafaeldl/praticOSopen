@@ -6,6 +6,9 @@
 .grid tbody .group-row th { position: static; background: var(--color-paper-2); color: var(--color-ink); font-weight: 700; text-transform: none; padding: 0.45rem 0.6rem; }
 .grid tbody .group-row th::first-letter { text-transform: uppercase; }
 .row-detail, .row-hold { display: block; }
+.row-detail { color: var(--color-faint); }
+/* On the blue of an open or selected row the tertiary text drops under 4.5:1: secondary there. */
+.grid tbody tr.is-open .row-detail, .grid tbody tr.is-selected .row-detail { color: var(--color-muted); }
 .row-hold { color: var(--color-warning-text); font-weight: 600; }
 /* Wraps between words at 200% text; the amount itself never breaks (Intl puts a no-break space after R$). */
 .owed { display: block; font-size: 0.8125rem; color: var(--color-muted); font-weight: 400; white-space: normal; font-family: var(--font-body); }
@@ -136,6 +139,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .chosen .field-label { margin: 0; }
 .drawer-items { list-style: none; margin: 0.35rem 0 0; padding: 0; display: grid; gap: 2px; }
 .drawer-items li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 9rem) auto; gap: 0.5rem; align-items: center; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.25rem 0.3rem 0.25rem 0.6rem; }
+.drawer-items .line-desc { grid-column: 1 / -1; }
+.drawer-items .line-desc-add { grid-column: 1 / -1; justify-self: start; min-height: 2.75rem; font-size: 0.875rem; }
 .drawer-items .line-price .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .more-options summary { cursor: pointer; font-weight: 600; min-height: 2.75rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .more-body { display: grid; gap: 0.75rem; padding-top: 0.25rem; }
@@ -153,17 +158,23 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Board */
 .board-hint { padding: 0 1.25rem 0.5rem; }
-.board-wrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 2px solid var(--color-ink); }
+.board-wrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--color-rule); }
 .board-wrap.has-panel { grid-template-columns: minmax(0, 1fr) clamp(27rem, 40%, 42rem); }
-.board { min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(12rem, 1fr)); overflow-x: auto; }
+/* Grouped background (docs/DESIGN_TOKENS.md): white cards stand out on the warm grey. */
+.board { background: var(--color-grouped); min-height: 0; display: grid; grid-template-columns: repeat(var(--board-cols, 4), minmax(12rem, 1fr)); overflow-x: auto; }
 .col { min-height: 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--color-rule); }
 .col:last-child { border-right: 0; }
 .col.is-over { background: var(--color-selected); }
 .col-head { display: flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.75rem; font-weight: 700; font-size: 1rem; margin: 0; flex-wrap: wrap; }
 .col-head .num { margin-left: auto; color: var(--color-muted); }
+/* Work stages (docs/WORK_STAGES.md): print of the column, place in it and where a dragged card lands. */
+.col-head .col-more { margin: -0.4rem -0.4rem -0.4rem 0; }
+.card-place { display: inline-block; min-width: 1.4em; margin-right: 0.3rem; color: var(--color-muted); font-weight: 400; }
+.card.drop-before { box-shadow: 0 -3px 0 var(--color-focus); }
 .col-list { flex: 1; min-height: 0; overflow: auto; padding: 0 0.5rem 0.75rem; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
 .col > .muted { padding: 0 0.75rem; }
-.card { position: relative; background: var(--color-card); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.45rem 0.6rem; display: grid; gap: 0.1rem; }
+.col > .col-foot { margin: 0; padding: 0.5rem 0.75rem 0.75rem; border-top: 1px solid var(--color-rule); }
+.card { position: relative; background: var(--color-tile, var(--color-card)); border: 1px solid var(--color-rule); border-radius: 6px; padding: 0.45rem 0.6rem; display: grid; gap: 0.1rem; }
 .card:hover { border-color: var(--color-control); }
 .card.is-dragging { opacity: 0.45; }
 .card-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
@@ -188,6 +199,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
   .print-sheet table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
   .print-sheet th, .print-sheet td { border-bottom: 1px solid #999; padding: 0.3rem; text-align: left; }
   .print-total { margin-top: 0.75rem; font-weight: 700; text-align: right; }
+  .stage-sheet td { vertical-align: top; }
+  .stage-box { display: inline-block; width: 1.1rem; height: 1.1rem; border: 1.5px solid #000; }
 }
 
 @media (max-width: 68.75rem) {
@@ -296,7 +309,8 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .doc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .doc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: center; min-height: 2.75rem; }
 .doc-main { display: grid; min-width: 0; overflow-wrap: anywhere; }
-.od-nfse { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; min-height: 2.75rem; flex-wrap: wrap; }
+/* Outside a .od-sec, so it carries the same side margin and rule (#612). */
+.od-nfse { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; min-height: 2.75rem; flex-wrap: wrap; padding: 0 1rem; border-top: 1px solid var(--color-rule); }
 .od-nfse .status { display: inline-flex; align-items: center; gap: 0.35rem; }
 /* Falar in the assistant's bar (order.ai.talk): while it listens, the status and the two buttons fill the bar. */
 .assist-talk { flex: none; }
@@ -317,3 +331,4 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .quick-foot p { margin: 0; }
 .quick-btns { display: flex; gap: 0.5rem; margin-left: auto; }
 .od-missing { display: flex; gap: 0.9rem; flex-wrap: wrap; margin: 0.15rem 0 0; }
+.tv-open { display: inline-flex; align-items: center; gap: 0.35rem; }

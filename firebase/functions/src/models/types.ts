@@ -323,6 +323,8 @@ export interface Order {
   completedAt?: string;
   /** "Parada" mark, separate from `status`. Removed by order-hold.service when the status no longer allows it. */
   onHold?: OrderHold;
+  /** Work stage (company.workStages) while `progress`. Removed by order-stage.service when the status leaves it. */
+  stage?: OrderStage;
   /** Place of the service (fieldService) and its coordinates, when they came from the customer. */
   address?: string | null;
   latitude?: number | null;
@@ -335,6 +337,21 @@ export interface Order {
 export interface OrderHold {
   reason: 'part' | 'customer' | 'authorization' | 'other';
   note?: string;
+  since: string;
+}
+
+/** A step of the work inside `progress` (Pintura, Polimento), in `companies/{id}.workStages`. */
+export interface WorkStage {
+  id: string;
+  name: string;
+  /** Words of a service name that send the order to this stage ("pint", "polim"). */
+  keywords?: string[];
+}
+
+/** Where an in-progress order is: the stage, its place in that column and since when (UTC ISO). */
+export interface OrderStage {
+  id: string;
+  rank: number;
   since: string;
 }
 

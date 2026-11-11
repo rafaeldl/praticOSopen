@@ -30,6 +30,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/screens/order/order_missing_data.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
@@ -88,6 +89,7 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 /// The order screen (`/order`, see `OrderRoute`).
 ///
@@ -231,6 +233,19 @@ class _DraftUndo {
   bool customer = false;
   bool request = false;
   bool due = false;
+
+  /// What the field had before, when this draft wrote over the assistant's
+  /// own value (issue #631): "Desfazer" puts it back, with its ✦.
+  CustomerAggr? customerBefore;
+  Customer? newCustomerBefore;
+  String? requestBefore;
+  DateTime? dueBefore;
+
+  /// The assistant's vehicles this draft replaced ("não, a placa é…").
+  final List<DeviceAggr> replacedDevices = [];
+
+  /// What was said, taken out of the history by "Desfazer".
+  String? said;
   final List<String> devices = [];
   final List<Object> lines = [];
 
@@ -256,11 +271,20 @@ class _CustomerAsk {
 
 /// Vehicle the assistant heard but could not pick for sure.
 class _DeviceAsk {
-  const _DeviceAsk(this.name, this.serial, this.manufacturer, this.options);
+  const _DeviceAsk(
+    this.name,
+    this.serial,
+    this.manufacturer,
+    this.options, {
+    this.replaces,
+  });
   final String? name;
   final String? serial;
   final String? manufacturer;
   final List<AiDeviceHit> options;
+
+  /// The assistant's vehicle the pick takes the place of (a correction).
+  final String? replaces;
 
   String get label =>
       [name, serial].where((v) => v != null && v.isNotEmpty).join(' · ');
@@ -394,6 +418,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// Vehicles the assistant put in the order (by id).
   final Set<String> _markedDevices = {};
 
+  /// The last messages of this order, only in this screen's memory
+  /// (issue #631): sent with the next one, gone when the screen closes.
+  List<String> _history = const [];
+
   /// Customer heard but not sure ("Juliene"): the row asks which one.
   _CustomerAsk? _customerAsk;
 
@@ -432,6 +460,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// Opened from the first-use sheet: starts listening once the assistant is
   /// known to be on.
   bool _startTalking = false;
+
+  /// Opened with photos shared from another app: the assistant reads them
+  /// once it is known to be on, as after "Foto".
+  bool _readShared = false;
 
   /// What the last draft added, for "Desfazer".
   _DraftUndo? _undo;
@@ -501,7 +533,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _onSaved = args?['onSaved'] as void Function(Order)?;
       _opensAsContract = args?['repeat'] == true;
       _startTalking = args?['startTalking'] == true;
-      if (widget.showAssistant != null) _talkIfAsked();
+      final shared = (args?['photos'] as List?)?.cast<AiPhoto>() ?? const [];
+      if (shared.isNotEmpty) {
+        _photos.addAll(shared);
+        _readShared = true;
+      }
+      if (widget.showAssistant != null) {
+        _talkIfAsked();
+        _readSharedIfAsked();
+      }
       _startNew(order);
       if (args?['repeat'] == true) {
         // From Contratos: the order starts as a contract, with the
@@ -518,6 +558,19 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final on = await client.isEnabled();
     if (mounted && on != _assistantOn) setState(() => _assistantOn = on);
     _talkIfAsked();
+    _readSharedIfAsked();
+  }
+
+  /// Shared photos: read once, like the photos of "Foto" (up to
+  /// [kAiMaxPhotos]). With the assistant off they just stay in "Fotos".
+  void _readSharedIfAsked() {
+    if (!_readShared || !_assistantOn) return;
+    _readShared = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _photos.isNotEmpty) {
+        _runAssistant(photos: _photos.take(kAiMaxPhotos).toList());
+      }
+    });
   }
 
   void _talkIfAsked() {
@@ -986,6 +1039,45 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _store.hold != null && _permissions.canChangeHold(order);
 
   /// One tap opens the reasons and the reason saves it: two taps in all.
+  /// Name of the stage the order is in, while in progress with stages.
+  String? _stageName(Order order, SegmentConfigProvider config) {
+    _store.stage; // observed: the line changes as soon as the stage does
+    return WorkStage.of(order, config.workStages)?.name;
+  }
+
+  bool _canChangeStage(Order order, SegmentConfigProvider config) =>
+      order.id != null &&
+      _store.status == 'progress' &&
+      config.workStages.length > 1 &&
+      _permissions.canChangeHold(order);
+
+  Future<void> _pickStage() async {
+    final order = _store.order;
+    if (order == null) return;
+    final config = context.read<SegmentConfigProvider>();
+    if (!_canChangeStage(order, config)) return;
+    final current = WorkStage.of(order, config.workStages);
+    final picked = await pickOne<String>(
+      context,
+      title: context.l10n.orderStagePickerTitle,
+      selected: current?.id,
+      options: [
+        for (final stage in config.workStages)
+          PickerItem<String>(value: stage.id, title: stage.name),
+      ],
+    );
+    if (picked != null && picked != current?.id && mounted) {
+      await _moveToStage(picked);
+    }
+  }
+
+  Future<void> _moveToStage(String stageId) => _store.moveToStage(
+    stageId,
+    onFailed: () {
+      if (mounted) showAppToast(context, context.l10n.orderStageSaveError);
+    },
+  );
+
   Future<void> _markOnHold() async {
     final order = _store.order;
     if (order == null || !_canMarkOnHold(order)) return;
@@ -1060,6 +1152,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               label: l10n.orderMenuChangeStatus,
               icon: CupertinoIcons.arrow_right_arrow_left,
               submenu: true,
+            ),
+          if (_canChangeStage(order, config))
+            PullDownItem(
+              value: 'stage',
+              label: l10n.orderMenuChangeStage,
+              icon: CupertinoIcons.square_stack_3d_up,
             ),
           if (_canMarkOnHold(order))
             PullDownItem(
@@ -1184,6 +1282,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     switch (choice) {
       case 'status':
         await _selectStatus();
+      case 'stage':
+        await _pickStage();
       case 'hold':
         await _markOnHold();
       case 'resume':
@@ -1247,6 +1347,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (!_nfse.ready || !_canIssueNfse(order)) return null;
     final current = _nfse.current;
     if (current != null && current.status != NfseStatus.error) return null;
+    // The automatic nota did not go out for a reason a new try may fix:
+    // one tap issues it again (issue #571).
+    if (current != null && current.canRetryAuto) {
+      return (context.l10n.tryAgain, () => retryAutoNfse(context, current));
+    }
     return (
       current == null
           ? context.l10n.nfseIssueAction
@@ -1259,19 +1364,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     await issueNfse(context, _nfse, orderIds: [order.id!]);
   }
 
-  /// A finished order without a nota: "Não emitida" when the blue button
-  /// already offers it, else the "Emitir" link (the nota may come before the
-  /// money). Other statuses keep it in the "…".
+  /// An order without a nota: "Não emitida" when the blue button already
+  /// offers it (finished and paid), else the "Emitir" link (the nota may come
+  /// before the money). With the NFS-e direct it shows on any order that can
+  /// have a nota (approved too: some shops issue on every order and leave it
+  /// approved); otherwise only finished orders, the others keep it in the "…".
   Widget? _buildNfseIssueRow() {
     final order = _store.order;
+    final done = _store.status == 'done';
     if (order == null ||
-        _store.status != 'done' ||
+        (!done && !_nfse.direct) ||
         !_nfse.ready ||
         !_canIssueNfse(order)) {
       return null;
     }
     final l10n = context.l10n;
-    final issuedByButton = _store.remainingBalance <= 0;
+    final issuedByButton = done && _store.remainingBalance <= 0;
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
       child: ConstrainedBox(
@@ -1390,7 +1498,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (pick?.date != null && mounted) {
       _store.setDueDate(pick!.date!);
-      setState(() {});
+      // Picked by hand: no longer the assistant's to change.
+      setState(() => _marked.remove('due'));
     }
   }
 
@@ -1694,7 +1803,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     } else {
       _actions.uploadPhotos(_store, picked);
     }
-    if (_assistantOn) await _runAssistant(photos: picked);
+    if (_assistantOn) {
+      await _runAssistant(photos: picked.take(kAiMaxPhotos).toList());
+    }
   }
 
   Future<void> _onPhotoTapped(int index) async {
@@ -1786,15 +1897,19 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     AiOrderDraft? draft;
     ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})?
     sent;
+    var sentDevices = <String?>[];
     String? error;
     try {
       final client = widget.assistant ?? AiOrderAssistService();
       sent = _orderSnapshot();
+      sentDevices = [for (final d in _store.devices) d.id];
       draft = await client.assist(
         text: text,
         photos: photos,
         locale: l10n.localeName.split('_').first,
         order: sent.snapshot,
+        history: _history,
+        context: _assistContext(),
       );
     } on AiOrderAssistException catch (e) {
       quotaHit = e.error == AiAssistError.quotaExceeded;
@@ -1810,8 +1925,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       error = l10n.orderAssistantErrorUnavailable;
     }
     if (!mounted) return;
-    final filled = error == null && await _applyDraft(draft!, sent!);
+    final filled =
+        error == null && await _applyDraft(draft!, sent!, sentDevices);
     if (!mounted) return;
+    if (error == null) {
+      final said = (text?.trim().isNotEmpty ?? false)
+          ? text
+          : draft!.transcript;
+      _history = rememberAiMessage(_history, said);
+      if (filled) _undo?.said = said;
+    }
     final actions = error == null && !_isNew ? draft!.actions : null;
     if (error == null) {
       result = filled ? 'filled' : (actions != null ? 'actions' : 'nothing');
@@ -2029,16 +2152,27 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _pendingNfse = null;
       }
       if (undo.customer) {
-        runInAction(() {
-          _store.order!.customer = null;
-          _store.customer = null;
-        });
-        _marked.remove('customer');
+        final before = undo.customerBefore;
+        if (before != null) {
+          // It replaced the assistant's own customer: that one comes back.
+          _store.setCustomer(Customer.fromJson(before.toJson()));
+          _newCustomer = undo.newCustomerBefore;
+        } else {
+          runInAction(() {
+            _store.order!.customer = null;
+            _store.customer = null;
+          });
+          _marked.remove('customer');
+        }
       }
       for (final id in undo.devices) {
         _store.removeDevice(id);
         _markedDevices.remove(id);
         _newDevices.removeWhere((d) => d.id == id);
+      }
+      for (final device in undo.replacedDevices) {
+        _store.addDevice(Device.fromJson(device.toJson()));
+        _markedDevices.add(device.id!);
       }
       for (final before in undo.changed) {
         before.restore();
@@ -2061,24 +2195,31 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         final field = _isNew
             ? null
             : orderRequestField(context.read<SegmentConfigProvider>());
+        final before = undo.requestBefore;
         if (field != null) {
-          _setRequest(field, null);
+          _setRequest(field, before);
         } else {
-          _requestController.clear();
+          _requestController.text = before ?? '';
         }
-        _marked.remove('request');
+        if (before == null) _marked.remove('request');
       }
       if (undo.due) {
-        runInAction(() {
-          _store.order!.dueDate = null;
-          _store.dueDate = null;
-        });
-        if (!_isNew) _store.createItem();
-        _marked.remove('due');
+        final before = undo.dueBefore;
+        if (before != null) {
+          _store.setDueDate(before);
+        } else {
+          runInAction(() {
+            _store.order!.dueDate = null;
+            _store.dueDate = null;
+          });
+          if (!_isNew) _store.createItem();
+          _marked.remove('due');
+        }
       }
+      _history = forgetAiMessage(_history, undo.said);
       _customerAsk = undo.customerAsk;
       _deviceAsk = undo.deviceAsk;
-      if (undo.customer) _newCustomer = null;
+      if (undo.customer) _newCustomer = undo.newCustomerBefore;
     }
     _dismissNote();
   }
@@ -2411,6 +2552,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         unawaited(_registration.saveDevice(device));
       }
     }
+    // A correction of the assistant's vehicle: the pick takes its place.
+    final replaces = ask.replaces;
+    if (replaces != null && _markedDevices.remove(replaces)) {
+      _store.removeDevice(replaces);
+    }
     _store.addDevice(device);
     if (!_isNew) _store.createItem();
     setState(() => _deviceAsk = null);
@@ -2435,17 +2581,73 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _newDevices.clear();
   }
 
+  /// What the order has, sent with each message (issue #631): who filled each
+  /// field, so the assistant corrects only what it put. Never the customer's
+  /// name.
+  AiOrderContext _assistContext() {
+    final requestField = _isNew
+        ? null
+        : orderRequestField(context.read<SegmentConfigProvider>());
+    final request = _isNew
+        ? _requestController.text
+        : requestField == null
+        ? ''
+        : '${customFieldValue(_store.order?.customData, requestField) ?? ''}';
+    return AiOrderContext(
+      customerChosen: _store.customer != null,
+      customerFromAi: _store.customer != null && _marked.contains('customer'),
+      devices: [
+        for (final d in _store.devices)
+          (
+            name: d.name,
+            serial: d.serial,
+            fromAi: _markedDevices.contains(d.id),
+          ),
+      ],
+      request: request,
+      requestFromAi: _marked.contains('request'),
+      due: _store.order?.dueDate,
+      dueFromAi: _marked.contains('due'),
+      pending: [
+        if (_customerAsk != null) 'customer',
+        if (_deviceAsk != null) 'device',
+      ],
+    );
+  }
+
+  /// The assistant's vehicle this draft corrects: sent at that index, still in
+  /// the order and still with its ✦ (one the person chose is never replaced).
+  String? _replacedDevice(AiOrderDraft draft, List<String?> sentDevices) {
+    final index = draft.deviceReplaces;
+    if (index == null || index < 0 || index >= sentDevices.length) return null;
+    final id = sentDevices[index];
+    if (id == null || !_markedDevices.contains(id)) return null;
+    return _store.devices.any((d) => d.id == id) ? id : null;
+  }
+
+  /// Takes out the assistant's vehicle a correction replaces, for "Desfazer".
+  void _dropReplaced(String? id, _DraftUndo undo) {
+    if (id == null) return;
+    final index = _store.devices.indexWhere((d) => d.id == id);
+    if (index < 0) return;
+    undo.replacedDevices.add(_store.devices[index]);
+    _store.removeDevice(id);
+    _markedDevices.remove(id);
+  }
+
   /// Fills the order with the draft: the blank "Nova OS" without saving
-  /// (deferSave), a saved order right away. Never replaces a customer already
-  /// chosen, a request or a deadline already filled; adds devices and items,
-  /// and changes or takes out the lines the user named. Never receives or
-  /// cancels: money and status go through the card ([_offerActions]). Returns
-  /// false when the draft had nothing to use.
+  /// (deferSave), a saved order right away. Never replaces a customer chosen,
+  /// a request or a deadline filled by the person; what the assistant put
+  /// itself (still ✦) a new draft may correct (issue #631). Adds devices and
+  /// items, and changes or takes out the lines the user named. Never
+  /// receives or cancels: money and status go through the card
+  /// ([_offerActions]). Returns false when the draft had nothing to use.
   Future<bool> _applyDraft(
     AiOrderDraft draft,
     ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
-    sent,
-  ) async {
+    sent, [
+    List<String?> sentDevices = const [],
+  ]) async {
     var used = false;
     final undo = _DraftUndo(_customerAsk, _deviceAsk);
     if (draft.changes.isNotEmpty &&
@@ -2453,6 +2655,29 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       used = true;
     }
     if (!mounted) return false;
+    // The assistant's own customer may be corrected ("não, o cliente é…").
+    final aiCustomer = _store.customer != null && _marked.contains('customer');
+    final guessed = draft.customerGuess?.trim().toLowerCase() ?? '';
+    final heard =
+        draft.customer != null ||
+        (guessed.isNotEmpty &&
+            guessed != _store.customer?.name?.trim().toLowerCase());
+    // On a saved order only for a sure match: it is never left without one.
+    if (aiCustomer &&
+        heard &&
+        (_isNew || draft.customer != null) &&
+        draft.customer?.id != _store.customer?.id) {
+      undo
+        ..customer = true
+        ..customerBefore = _store.customer
+        ..newCustomerBefore = _newCustomer;
+      runInAction(() {
+        _store.order!.customer = null;
+        _store.customer = null;
+      });
+      _marked.remove('customer');
+      _newCustomer = null;
+    }
     if (_store.customer == null) {
       final guess = draft.customerGuess?.trim() ?? '';
       if (draft.customer != null) {
@@ -2490,11 +2715,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
     }
     final serial = draft.deviceGuessSerial?.trim() ?? '';
-    if (draft.device != null &&
-        _store.devices.any((e) => e.id == draft.device!.id)) {
+    final replaces = _replacedDevice(draft, sentDevices);
+    bool inOrder(bool Function(DeviceAggr) test) =>
+        _store.devices.any((e) => e.id != replaces && test(e));
+    if (draft.device != null && inOrder((e) => e.id == draft.device!.id)) {
       // Already in the order: nothing to add.
     } else if (draft.device != null) {
       final d = draft.device!;
+      _dropReplaced(replaces, undo);
       _addDraftDevice(
         Device()
           ..id = d.id
@@ -2507,7 +2735,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     } else if (_isNew &&
         _permissions.canRegisterDevices() &&
         (serial.isNotEmpty
-            ? !_store.devices.any((e) => e.serial?.toUpperCase() == serial)
+            ? !inOrder((e) => e.serial?.toUpperCase() == serial)
             : (draft.deviceGuessName?.trim().isNotEmpty ?? false) &&
                   draft.deviceOptions.isEmpty)) {
       // A plate that is not registered, or a model with nothing registered
@@ -2518,6 +2746,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         name: draft.deviceGuessName,
         manufacturer: draft.deviceGuessManufacturer,
       );
+      _dropReplaced(replaces, undo);
       _addDraftDevice(device, undo);
       _newDevices.add(device);
       used = true;
@@ -2527,6 +2756,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         serial.isEmpty ? null : serial,
         draft.deviceGuessManufacturer,
         draft.deviceOptions,
+        replaces: replaces,
       );
       if (ask.label.isNotEmpty) {
         _deviceAsk = ask;
@@ -2559,28 +2789,39 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
       used = true;
     }
-    // What the customer asked (defects, requests): only into a blank field.
+    // What the customer asked (defects, requests): into a blank field, or
+    // over the assistant's own text when the new message corrects it.
     final notes = draft.notes?.trim() ?? '';
     final requestField = _isNew
         ? null
         : orderRequestField(context.read<SegmentConfigProvider>());
-    if (notes.isNotEmpty && _isNew && _requestController.text.trim().isEmpty) {
+    final aiRequest = _marked.contains('request');
+    final currentRequest = _isNew
+        ? _requestController.text
+        : '${requestField == null ? '' : customFieldValue(_store.order?.customData, requestField) ?? ''}';
+    final requestOpen =
+        currentRequest.trim().isEmpty ||
+        (aiRequest && currentRequest.trim() != notes);
+    if (notes.isNotEmpty && _isNew && requestOpen) {
+      undo.requestBefore = aiRequest ? _requestController.text : null;
       _requestController.text = notes;
       _marked.add('request');
       undo.request = true;
       used = true;
-    } else if (notes.isNotEmpty &&
-        requestField != null &&
-        '${customFieldValue(_store.order?.customData, requestField) ?? ''}'
-            .trim()
-            .isEmpty) {
+    } else if (notes.isNotEmpty && requestField != null && requestOpen) {
+      undo.requestBefore = aiRequest ? currentRequest : null;
       _setRequest(requestField, notes);
       _marked.add('request');
       undo.request = true;
       used = true;
     }
-    // Deadline ("pronto sexta"): only when none was picked yet.
-    if (draft.dueDate != null && _store.order?.dueDate == null) {
+    // Deadline ("pronto sexta"): when none was picked yet, or over the
+    // assistant's own one ("o prazo é segunda").
+    final dueBefore = _store.order?.dueDate;
+    final aiDue = dueBefore != null && _marked.contains('due');
+    if (draft.dueDate != null &&
+        (dueBefore == null || (aiDue && dueBefore != draft.dueDate))) {
+      undo.dueBefore = dueBefore;
       _store.setDueDate(draft.dueDate!);
       _marked.add('due');
       undo.due = true;
@@ -2820,7 +3061,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         FormRow(
           key: const ValueKey('new_order_add_item'),
           icon: CupertinoIcons.add_circled,
-          title: l10n.orderAddItemRow,
+          title: l10n.orderAddItemRow(
+            context.read<SegmentConfigProvider>().productWord(
+              l10n.orderItemKindPart,
+            ),
+          ),
           accent: true,
           onTap: _addItem,
         ),
@@ -2860,6 +3105,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 : null,
             suffixMode: OverlayVisibilityMode.always,
             controller: _requestController,
+            // Typed by hand: no longer the assistant's to change.
+            onChanged: (_) {
+              if (_marked.remove('request')) setState(() {});
+            },
             placeholder: l10n.orderCustomerRequestPlaceholder(
               SegmentConfigService().exampleSegment,
             ),
@@ -3513,6 +3762,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       case 'approved':
         return to(l10n.orderActionStartService, 'progress');
       case 'progress':
+        // With stages, the next step is the next stage until the last one.
+        final next = WorkStage.next(order, config.workStages);
+        if (next != null &&
+            order.id != null &&
+            _permissions.canChangeHold(order)) {
+          return (
+            l10n.orderStageMoveTo(next.name),
+            () {
+              // The label changes at once: a second tap must not land on the
+              // next stage or on "Marcar como pronta".
+              if (_statusCooldown?.isActive ?? false) return;
+              _statusCooldown = Timer(kStatusTapCooldown, () {});
+              _moveToStage(next.id);
+            },
+          );
+        }
         return to(l10n.orderActionMarkReady, 'done');
       case 'done':
         final remaining = _store.remainingBalance;
@@ -3590,12 +3855,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       onPhrase = canEdit ? _pickDueDate : null;
     }
     final action = _nextAction(config);
-    final statusStyle = overdue
-        ? AppTypography.callout.copyWith(
-            color: OrderStatusStyle.overdueColor.resolveFrom(context),
-            fontWeight: FontWeight.w700,
-          )
-        : AppTypography.callout.copyWith(color: secondary);
+    final statusStyle = AppTypography.callout.copyWith(color: secondary);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -3704,18 +3964,44 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               ),
               child: Row(
                 children: [
-                  StatusDot(
-                    color: overdue
-                        ? OrderStatusStyle.overdueColor
-                        : OrderStatusStyle.dotColor(status),
-                    size: 10,
-                  ),
+                  // The dot keeps the status color; "Atrasada" follows the
+                  // status and the stage, in bold red.
+                  StatusDot(color: OrderStatusStyle.dotColor(status), size: 10),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
-                      overdue
-                          ? '${config.getStatus(status)} · ${l10n.orderOverdue}'
-                          : config.getStatus(status),
+                    child: Text.rich(
+                      TextSpan(
+                        text: config.getStatus(status),
+                        children: [
+                          if (_stageName(order, config) case final stage?)
+                            TextSpan(
+                              text: ' · ',
+                              children: [
+                                TextSpan(
+                                  text: stage,
+                                  style: TextStyle(
+                                    color: text,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (overdue)
+                            TextSpan(
+                              text: ' · ',
+                              children: [
+                                TextSpan(
+                                  text: l10n.orderOverdue,
+                                  style: TextStyle(
+                                    color: OrderStatusStyle.overdueColor
+                                        .resolveFrom(context),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
                       style: statusStyle,
                     ),
                   ),
@@ -3769,7 +4055,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         child: SizedBox(
           width: double.infinity,
           child: _link(
-            _store.devices.length < 2 ? label : '$label · ${_deviceName(device)}',
+            _store.devices.length < 2
+                ? label
+                : '$label · ${_deviceName(device)}',
             key: ValueKey('order_reading_add_$id'),
             icon: CupertinoIcons.add,
             onTap: () => _editReading(device, field, config),
@@ -3933,6 +4221,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (text == null || !mounted) return;
+    _marked.remove('request');
     _setRequest(field, text.isEmpty ? null : text);
   }
 
@@ -4049,12 +4338,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final product = products[i];
     final quantity = product.quantity ?? 1;
     final total = productLineTotal(product);
+    final part = context.read<SegmentConfigProvider>().productWord(
+      l10n.orderItemKindPart,
+    );
     return _itemRow(
       title: _productName(product),
       detail: _productDetail(product),
       kind: quantity > 1
-          ? '${l10n.orderItemKindPart} · ${l10n.orderItemQuantityValue('$quantity')}'
-          : l10n.orderItemKindPart,
+          ? '$part · ${l10n.orderItemQuantityValue('$quantity')}'
+          : part,
       value: money && total != null ? _format.formatCurrency(total) : null,
       noPrice: money && product.value == null,
       marked: _marked.contains(product),
@@ -4085,7 +4377,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ],
       if (canEdit)
         _link(
-          l10n.orderAddItemRow,
+          l10n.orderAddItemRow(
+            context.read<SegmentConfigProvider>().productWord(
+              l10n.orderItemKindPart,
+            ),
+          ),
           key: const ValueKey('order_add_item'),
           icon: CupertinoIcons.add,
           onTap: _addItem,
@@ -4644,21 +4940,23 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Widget _primaryButton(String label, VoidCallback? onPressed, {Key? key}) {
-    return CupertinoButton(
-      key: key,
-      padding: EdgeInsets.zero,
-      minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
-      color: AppColors.accent.resolveFrom(context),
-      disabledColor: AppColors.secondaryFill.resolveFrom(context),
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: AppTypography.bodyStrong.copyWith(
-          color: onPressed == null
-              ? AppColors.textSecondary.resolveFrom(context)
-              : AppColors.onAccent.resolveFrom(context),
+    return ActionOutline(
+      child: CupertinoButton(
+        key: key,
+        padding: EdgeInsets.zero,
+        minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+        color: AppColors.action.resolveFrom(context),
+        disabledColor: AppColors.secondaryFill.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyStrong.copyWith(
+            color: onPressed == null
+                ? AppColors.textSecondary.resolveFrom(context)
+                : AppColors.onAction.resolveFrom(context),
+          ),
         ),
       ),
     );

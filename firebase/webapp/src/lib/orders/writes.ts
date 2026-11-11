@@ -39,8 +39,8 @@ export interface NewOrderInput {
   clientOrderId?: string
   customerId: string
   deviceId?: string
-  services: { serviceId: string; value?: number | null }[]
-  products: { productId: string; quantity: number; value?: number | null }[]
+  services: { serviceId: string; value?: number | null; description?: string }[]
+  products: { productId: string; quantity: number; value?: number | null; description?: string }[]
   status?: OrderStatus
   dueDate?: string
   scheduledDate?: string
@@ -119,6 +119,11 @@ export function markOnHold(id: string, reason: HoldReason, note?: string) {
 
 export function resumeOrder(id: string) {
   return api<OrderResponse>(`${base(id)}/hold`, { method: 'DELETE' })
+}
+
+/** Puts the order in a work stage at `rank` (end of the column when absent); an approved one starts (docs/WORK_STAGES.md). */
+export function setStage(id: string, stageId: string, rank?: number) {
+  return api<OrderResponse>(`${base(id)}/stage`, { method: 'PUT', body: { stageId, ...(rank === undefined ? {} : { rank }) } })
 }
 
 // ---------------------------------------------------------------------------

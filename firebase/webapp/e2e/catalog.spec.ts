@@ -1,7 +1,7 @@
 // Fatia 05, catálogo (catalog.*), against the Emulator Suite. Company A is in
 // the automotive segment, which names products "Peças" and has one service
 // field ("Garantia"). Items a test changes are made by the test (Zeta …).
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeCatalogItem, makeOrder, readCatalogItem, updateCatalogItem, catalogNamed } from './data'
 import { login, signOut } from './helpers'
 

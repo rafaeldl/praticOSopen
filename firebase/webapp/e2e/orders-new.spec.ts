@@ -1,5 +1,5 @@
 // Nova OS (order.new.*, order.route.new): keyboard only, timed, per role.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { readComments, readOrder } from './data'
 import { chooseCompany, login, type UserKey } from './helpers'
 
@@ -32,9 +32,14 @@ test('Nova OS só com teclado: cliente, veículo, item e valor em menos de 45 s'
   const focused = () => page.evaluate(() => document.activeElement?.id ?? '')
   await expect.poll(focused).toMatch(/^no-(device|item)$/)
   if ((await focused()) === 'no-device') await page.keyboard.press('Enter')
+  // The vehicle may come in after the focus moved on, and choosing it focuses
+  // the item field again: wait for it, or that focus lands after the Tab below.
+  await expect(drawer(page)).toContainText('Veículo 3')
   await expect(item).toBeFocused()
   await page.keyboard.type('Serviço 2')
   await page.keyboard.press('Enter')
+  await expect(item).toHaveValue('')
+  await expect(item).toBeFocused()
   // Tab only after the line is on screen: on a slow runner the price field can
   // render after the key, and Tab then skips it.
   const price = page.getByRole('textbox', { name: 'Valor de Serviço 2' })
@@ -86,6 +91,26 @@ for (const user of ['owner', 'supervisor', 'consultant'] as const) {
     expect(await readComments(id)).toEqual([])
   })
 }
+
+test('Nova OS: descrição do item vai para a linha da OS (#632)', async ({ page }) => {
+  await home(page, 'owner')
+  await page.getByTestId('new-order').click()
+  await page.getByRole('combobox', { name: 'Cliente' }).fill('Cliente 01')
+  await expect(page.getByRole('option', { name: /^Cliente 01/ })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await expect(drawer(page).getByRole('button', { name: 'Trocar' }).first()).toBeVisible()
+  await page.getByRole('combobox', { name: 'O que vai ser feito?' }).fill('Serviço 1')
+  await expect(page.getByRole('option', { name: /^Serviço 1/ })).toBeVisible()
+  await page.keyboard.press('Enter')
+  await drawer(page).getByRole('button', { name: '+ Descrição' }).click()
+  await expect(drawer(page).getByLabel('Descrição de Serviço 1')).toBeFocused()
+  await drawer(page).getByLabel('Descrição de Serviço 1').fill('Lateral esquerda com friso azul')
+  await page.getByTestId('save-order').click()
+  await expect(page.locator('.toast')).toContainText(/OS \d+ criada/)
+  const id = await savedId(page)
+  await expect.poll(async () => ((await readOrder(id))?.services as { description?: string }[] | undefined)?.[0]?.description).toBe('Lateral esquerda com friso azul')
+  await expect(panel(page).getByTestId('order-line').first()).toContainText('Lateral esquerda com friso azul')
+})
 
 test('consultor só escolhe orçamento ou aprovada; nunca cancelada (order.new.status-pick)', async ({ page }) => {
   await home(page, 'consultant')

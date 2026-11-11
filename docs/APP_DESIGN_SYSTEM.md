@@ -6,6 +6,8 @@ Padrão visual do aplicativo PraticOS. Vale para toda tela nova ou redesenhada. 
 
 Ele complementa o `docs/UX_GUIDELINES.md` (widgets Cupertino, listas, formulários). Quando os dois divergirem em cor, tipografia ou estrutura de tela, vale este documento.
 
+**Tema Campo:** as cores da marca e o novo padrão do sistema (fundo, texto terciário, situação + problema) estão em `docs/DESIGN_TOKENS.md`, aprovados e ainda não aplicados no app. Ao aplicar, atualizar a seção "Cores" abaixo.
+
 Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — página "Telas do app" (todas as telas, ligadas pelo Play) e a prancha "Padrão do app".
 
 ## Arquitetura
@@ -28,28 +30,28 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 | `lib/screens/widgets/form_sheet.dart` | `FormSheet` (cadastro novo em sheet grande: X e ✓, linha do que falta, pergunta antes de descartar), `FormSheetRoute` (trava o arrastar para baixo com algo preenchido), `FormFieldsCard` (cartão com campos de texto) e `FormMoreCard` ("Mais dados" que abre no cartão). Usado por Novo cliente, Novo veículo, Novo serviço/produto, Novo checklist e Convidar pessoa |
 | `lib/screens/order/speech_listener.dart` | Microfone (`speech_to_text`) usado pela barra Falar |
 
-`lib/theme/app_theme.dart` (azul `#2563EB`) e o `primaryColor: CupertinoColors.activeBlue` de `lib/main.dart` são o padrão antigo. Telas migram para os tokens novos à medida que forem redesenhadas; a troca do `primaryColor` global entra junto com a primeira tela redesenhada (a OS).
+`lib/theme/app_theme.dart` (azul `#2563EB`) é o padrão antigo; telas migram para os tokens novos à medida que forem redesenhadas. O `primaryColor` global de `lib/main.dart` já é `AppColors.accent`.
 
 ## Regras
 
 1. **Uma pergunta por tela:** "o que eu faço agora?". A resposta aparece no topo, em uma frase.
-2. **Um botão azul por tela.** Só a ação principal é preenchida com `accent`. As demais usam `secondaryFill` ou viram link (`accentText`).
+2. **Um botão amarelo por tela.** Só a ação principal é preenchida, com `action` (amarelo do logo, texto marinho `onAction` e contorno fino `actionBorder`). As demais usam `secondaryFill` ou viram link (`accentText`). Azul é link, seleção e aba atual, nunca botão cheio.
 3. **Português do dia a dia.** "Falta receber R$ 166", "Próximo passo: começar o serviço". Nada de "saldo devedor", "etapa 2 de 4" ou siglas.
 4. **Mostrar só o que existe.** Recursos ocasionais (checklist, contrato, endereço, desconto, vários aparelhos) só aparecem na tela quando o registro tem. Para adicionar: menu "…"/"+" ou o assistente.
 5. **A IA faz e mostra o que fez.** Foto e Falar aplicam na hora, sem tela de confirmação. Cada campo que a IA mexeu ganha um ✦ azul (`FormRow.marked`) e aparece o aviso "Preenchi o que está marcado. Confira e salve. · Desfazer"; "Desfazer" volta tudo daquela fala/foto de uma vez. A IA só acrescenta (cliente, veículo, itens, relato, prazo) e não troca o que a pessoa já escolheu. **Nunca** recebe pagamento, cancela ou apaga sozinha. Erros aparecem nesse mesmo aviso, nunca em alerta. Ver "IA na tela".
 6. **Toque fácil.** Botão principal com 58 de altura (`AppSizes.primaryButtonHeight`); qualquer outro alvo com pelo menos 44.
-7. **Cor nunca sozinha.** Todo status tem texto junto. A cor fica no ponto; o texto do status é neutro (`textSecondary`), para não ser confundido com link. Nunca selo colorido (ver `UX_GUIDELINES.md`).
+7. **Cor nunca sozinha.** Todo status tem texto junto. A cor fica no ponto; o texto do status é neutro (`textSecondary`), para não ser confundido com link. Problema (atrasada, parada) vem em texto depois da situação, que nunca some. Nunca selo colorido (ver `UX_GUIDELINES.md`).
 8. **O texto cresce.** Todo texto acompanha o "Tamanho do texto" do iPhone (Dynamic Type). Nada de altura fixa para texto nem reticências em nome, título de linha ou valor: a linha quebra. Ver "Tipografia".
-9. **Cadastro novo abre por cima.** "Nova OS", "Novo cliente", "Novo veículo", "Novo serviço", "Novo checklist" e "Convidar pessoa" abrem como sheet (tamanho grande), como o Lembretes e o Calendário: "X" à esquerda e "✓" à direita no topo, em vidro. O "✓" fica cinza até dar para salvar e azul quando dá; quando ele está cinza, uma linha em `textSecondary` diz o que falta ("Escolha o cliente para salvar"). Com algo preenchido, o "X" pergunta antes de descartar e arrastar a sheet para baixo fica travado. O formulário usa cartões brancos sobre fundo cinza (`AppColors.groupedBackground`); só formulário de criar/editar usa cartões, telas de consulta continuam com lista plana. Ferramentas (Foto, Falar) ficam numa barra de vidro embaixo. O que é ocasional fica num cartão "Mais opções" que **abre ali mesmo**, mostrando os campos dentro do cartão (sem outra janela); fechado, ele resume o que está marcado. O "✓" salva e fecha; não há botão "Salvar" embaixo. A Nova OS é a referência. Os outros cadastros seguem o padrão pelo `FormSheet` (`lib/screens/widgets/form_sheet.dart`, aberto com `FormSheet.show`), com "Mais dados" aberto de início quando o registro já tem algum dos campos de lá:
-   - **Novo cliente**: ✓ azul com o nome; e-mail, CPF/CNPJ e endereço em "Mais dados".
-   - **Novo veículo**: ✓ azul com a placa/série; foto, marca, categoria e campos do ramo em "Mais dados".
-   - **Novo serviço/produto** (catálogo, `CatalogItemForm`): ✓ azul com o nome; nome e preço no 1º cartão, foto e campos do ramo em "Mais dados".
-   - **Novo checklist** (`FormTemplateFormScreen(asSheet: true)`): ✓ azul com o nome e pelo menos uma pergunta (a linha do que falta diz qual dos dois); cartão "Perguntas" com "Adicionar pergunta", tocar numa muda, deslizar tira; descrição em "Mais dados".
-   - **Convidar pessoa** (`InviteForm`, via `CollaboratorFormScreen`): ✓ azul com o e-mail ou o WhatsApp; nome, e-mail e WhatsApp no 1º cartão, o papel num cartão abaixo.
+9. **Cadastro novo abre por cima.** "Nova OS", "Novo cliente", "Novo veículo", "Novo serviço", "Novo checklist" e "Convidar pessoa" abrem como sheet (tamanho grande), como o Lembretes e o Calendário: "X" à esquerda e "✓" à direita no topo, em vidro. O "✓" fica cinza até dar para salvar e amarelo (`action`) quando dá; quando ele está cinza, uma linha em `textSecondary` diz o que falta ("Escolha o cliente para salvar"). Com algo preenchido, o "X" pergunta antes de descartar e arrastar a sheet para baixo fica travado. O formulário usa cartões brancos sobre fundo cinza (`AppColors.groupedBackground`); só formulário de criar/editar usa cartões, telas de consulta continuam com lista plana. Ferramentas (Foto, Falar) ficam numa barra de vidro embaixo. O que é ocasional fica num cartão "Mais opções" que **abre ali mesmo**, mostrando os campos dentro do cartão (sem outra janela); fechado, ele resume o que está marcado. O "✓" salva e fecha; não há botão "Salvar" embaixo. A Nova OS é a referência. Os outros cadastros seguem o padrão pelo `FormSheet` (`lib/screens/widgets/form_sheet.dart`, aberto com `FormSheet.show`), com "Mais dados" aberto de início quando o registro já tem algum dos campos de lá:
+   - **Novo cliente**: ✓ amarelo com o nome; e-mail, CPF/CNPJ e endereço em "Mais dados".
+   - **Novo veículo**: ✓ amarelo com a placa/série; foto, marca, categoria e campos do ramo em "Mais dados".
+   - **Novo serviço/produto** (catálogo, `CatalogItemForm`): ✓ amarelo com o nome; nome e preço no 1º cartão, foto e campos do ramo em "Mais dados".
+   - **Novo checklist** (`FormTemplateFormScreen(asSheet: true)`): ✓ amarelo com o nome e pelo menos uma pergunta (a linha do que falta diz qual dos dois); cartão "Perguntas" com "Adicionar pergunta", tocar numa muda, deslizar tira; descrição em "Mais dados".
+   - **Convidar pessoa** (`InviteForm`, via `CollaboratorFormScreen`): ✓ amarelo com o e-mail ou o WhatsApp; nome, e-mail e WhatsApp no 1º cartão, o papel num cartão abaixo.
 
    O `AppSheet` ficou só para sheet pequena com ação à direita (período, item da OS, papel); não tem mais botão grande embaixo. Telas de edição de algo que já existe (Sua conta, Dados da empresa) abrem empurradas, com "Voltar".
 10. **Componentes do iPhone quando existem.** Abas, interruptor (verde do sistema), escolha com ✓ à direita, menu "…" com o símbolo `ellipsis`, sheet com fechar à esquerda, botão "Continuar com Apple" nativo (`SignInWithAppleButton`, com logo e proporção da Apple). Não desenhar uma versão própria.
-11. **Vidro só na navegação (Liquid Glass).** Barra de abas, botões do topo (voltar, "…", sino), menus "…", sheets pequenas e o botão principal flutuante acima das abas usam vidro: fundo translúcido com desfoque e sombra leve. O botão principal flutuante é vidro tingido com o azul da marca. Os botões da barra Foto/Falar também são vidro (são controles). O conteúdo (listas, cartões, campos, fundo, o texto ouvido pela IA e o aviso "Preenchi… · Desfazer") fica **sempre opaco** ("Don't use Liquid Glass in the content layer", HIG `materials`). Com "Reduzir transparência" ligado no iPhone, o vidro vira fundo opaco (`surface`).
+11. **Vidro só na navegação (Liquid Glass).** Barra de abas, botões do topo (voltar, "…", sino), menus "…", sheets pequenas usam vidro: fundo translúcido com desfoque, **sem sombra** e com contorno fino (`glassEdge`). O botão principal flutuante acima das abas é amarelo opaco, como os outros. Os botões da barra Foto/Falar também são vidro (são controles). O conteúdo (listas, cartões, campos, fundo, o texto ouvido pela IA e o aviso "Preenchi… · Desfazer") fica **sempre opaco** ("Don't use Liquid Glass in the content layer", HIG `materials`). Com "Reduzir transparência" ligado no iPhone, o vidro vira fundo opaco (`surface`).
    - **Implementação no Flutter:** o Flutter ainda não tem o Liquid Glass nativo (issue flutter/flutter#170310 aberta, P3; o pacote oficial `cupertino_ui` 1.1.2 não tem vidro). Até lá, usar o `AppGlass` (`lib/theme/app_glass.dart`: `ClipRRect` + `BackdropFilter` com desfoque + preenchimento translúcido) só na barra de abas, na barra de topo e nas sheets pequenas, medindo o custo de desempenho. Ele vira fundo opaco (sem desfoque) quando "Aumentar contraste" está ligado (`MediaQuery.highContrastOf`), quando recebe `reduceTransparency: true` ou `enabled: false`. O Flutter não expõe "Reduzir transparência" no `MediaQuery`: ler `UIAccessibility.isReduceTransparencyEnabled` por um canal nativo e passar em `reduceTransparency`. Trocar pelo oficial quando o `cupertino_ui` trouxer o material. Barra de abas nativa via pacote de terceiros (ex.: `real_liquid_glass`) fica como teste isolado, risk:high.
 
 12. **Escolher é uma tela, não um menu.** Qualquer escolha numa lista (cliente, veículo, situação, responsável, checklist) abre a tela de escolher (`PickerScaffold`/`pickOne`), nunca um `CupertinoActionSheet`. Tocar no que já está na OS (o nome do cliente, o veículo) abre direto a tela de trocar, sem menu no meio. Ver "Telas de escolher".
@@ -74,28 +76,38 @@ Cada cor tem um papel só. Componentes usam o papel, nunca o hex.
 
 | Papel (`AppColors.`) | Claro | Escuro | Uso |
 |---|---|---|---|
-| `accent` / `onAccent` | `#116BB5` / branco | `#116BB5` / branco | O único botão preenchido da tela. Azul da marca (mesmo do site) |
-| `accentText` | `#116BB5` | `#67AAED` | Links e ações em texto ("Trocar", "Voltar") |
-| `accentSoft` / `onAccentSoft` | `#E0F1FF` / `#0B3D80` | `#142F4B` / branco | Bloco "próximo passo" (Início, Financeiro, Receber). A tela da OS não usa: lá o próximo passo é o botão azul |
-| `secondaryFill` / `onSecondaryFill` | `#F2F2F7` / texto | `#2C2C2E` / texto | Todas as outras ações |
-| `assistantFill` / `onAssistantFill` | `#1C1C1E` / branco | `#F2F2F7` / `#1C1C1E` | Legado: o "Falar" agora é vidro com ícone e texto em `accentText`. Não usar em tela nova |
-| `marker` / `onMarker` | `#FCF2A2` / `#1C1C1E` | igual | Legado (`AppListRow.marked`). O que a IA preencheu agora leva ✦ em `accent`. Não usar em tela nova |
-| `text` / `textSecondary` | `#1C1C1E` / `#6C6C70` | branco / `#AEAEB2` | Texto principal e de apoio |
-| `background` / `surface` | branco / branco | preto / `#1C1C1E` | Fundo da tela / blocos |
-| `separator` | `#EFEFF4` | `#38383A` | Linhas entre itens |
+| `action` / `onAction` | `#FFC921` / `#07294F` | igual | A ação principal da tela (botão de 58), o ✓ que salva e o "OK" do modo Selecionar. Sempre com `actionBorder` |
+| `actionBorder` | marinho a 28% | sem contorno | Contorno fino do amarelo, que no branco tem pouca borda (1,4:1) |
+| `accent` / `onAccent` | `#1467C2` / branco | `#2775C8` / branco | Azul da marca como preenchimento: círculo marcado, dia escolhido, contador. Nunca botão |
+| `accentText` | `#1467C2` | `#7DB6F2` | Links, "+ Adicionar", aba atual |
+| `accentSoft` / `onAccentSoft` | `#EAF2FB` / `#07294F` | `#16304A` / `#F1EEE8` | Fundo da linha selecionada e do que a IA acabou de preencher (`AppListRow.marked`) |
+| `navyFill` / `onNavyFill` | `#07294F` / branco | `#F1EEE8` / `#07294F` | O "+" (Nova OS) ao lado das abas |
+| `secondaryFill` / `onSecondaryFill` | `#F1EEE7` / texto | `#232931` / texto | Todas as outras ações; apoio (busca, "Lista / Quadro") |
+| `glassEdge` | marinho a 12% | branco a 12% | Contorno fino do vidro (abas, botões do topo, menus) |
+| `text` | `#07294F` | `#F1EEE8` | Texto principal (marinho) |
+| `textSecondary` | `#646A71` | `#B4BAC2` | Texto de apoio, rótulo de seção, situação |
+| `textTertiary` | `#8A8F96` | `#8A9099` | Só apoio: serviço, observação, valor embaixo do nome (3,3:1). Nunca o que a pessoa precisa ler para agir |
+| `background` / `surface` | branco / branco | `#0C1015` / `#1D2228` | Fundo da tela / cartões |
+| `groupedBackground` | `#F2F0EC` | `#13181D` | Cinza quente atrás dos cartões de formulário e sheet |
+| `separator` | `#E3E0DA` | `#2A3038` | Linhas finas entre itens |
 | `success` | `#1D7D3E` | `#65C67D` | Pago, concluído. Nunca em botão |
-| `warning` / `warningSoft` / `onWarningSoft` | `#974D00` / `#FFEBD2` / `#7A3B00` | `#ECA851` / `#3E290F` / `#ECA851` | Falta algo: valor, pagamento, foto |
-| `danger` | `#C93029` | `#F17264` | Ações destrutivas (cancelar OS, apagar) e problema (OS atrasada) |
+| `warning` | `#975800` | `#F0B45A` | Texto de aviso: "Parada", cifrão de falta receber |
+| `warningDot` | `#D98B09` | `#F0A93B` | Só a bolinha de "em andamento" (e das etapas) |
+| `warningSoft` / `onWarningSoft` | `#FFEBD2` / `#7A4600` | `#3E290F` / `#F0B45A` | Fundo de aviso |
+| `danger` | `#C93029` | `#FF7A6B` | Ações destrutivas (cancelar OS, apagar) e problema (OS atrasada) |
+| `brandNavy` / `brandYellow` | `#07294F` / `#FFC921` | igual | Fixos, para o login e faixas marinho |
 
-Por que o azul da marca e não o do iOS: é a cor da marca (a HIG aceita uma cor de destaque própria, usada com moderação). O contraste ajuda nos textos pequenos: `#007AFF` sobre branco dá 4,02:1, abaixo dos 4,5:1 que a HIG pede para texto até 17 pt (links), e o `#116BB5` dá 5,51:1. No botão principal (19 semibold), a HIG pede 3:1, então ali o contraste não é o motivo.
+Tema Campo (`docs/DESIGN_TOKENS.md`): o app usa a camada "sistema", com fundo branco, texto marinho, cinzas quentes, amarelo para a ação e azul para link e seleção. Fonte continua a do sistema; títulos em negrito (700), nunca 800.
 
-**Aumentar contraste:** a HIG pede, para cores próprias, uma variante clara, uma escura e uma bem mais contrastada para "Aumentar contraste". Cada token usa `CupertinoDynamicColor.withBrightnessAndContrast` (`highContrastColor` / `darkHighContrastColor`) e o `resolveFrom(context)` escolhe a variante sozinho. Nessas variantes o texto fica mais escuro no claro (`text` preto, `textSecondary` `#3A3A3C`, `accentText` `#0A4F8A`, `danger` `#A1201A`) e mais claro no escuro (`textSecondary` `#D1D1D6`, `accentText` `#9DCBF7`, `danger` `#FF9A8F`), e o `separator` fica mais visível. O teste mede as quatro variantes, exige que "Aumentar contraste" nunca diminua o contraste de um par e que `textSecondary` chegue a 7:1.
+`textSecondary` é `#646A71`, um pouco mais escuro que o `#6B7178` do protótipo, para passar 4,5:1 também sobre o `groupedBackground` (o rótulo de seção dos formulários). O `accent` do escuro é `#2775C8` (o `#1467C2` some sobre o cartão `#1D2228`). O `marker` amarelo-claro e o `assistantFill` grafite saíram.
+
+**Aumentar contraste:** a HIG pede, para cores próprias, uma variante clara, uma escura e uma bem mais contrastada para "Aumentar contraste". Cada token usa `CupertinoDynamicColor.withBrightnessAndContrast` (`highContrastColor` / `darkHighContrastColor`) e o `resolveFrom(context)` escolhe a variante sozinho. Nessas variantes o texto fica mais escuro no claro (`textSecondary` `#3A3F45`, `textTertiary` `#5E636A`, `accentText` `#0F4F96`, `danger` `#A1201A`) e mais claro no escuro (`textSecondary` `#D3D8DE`, `accentText` `#A9D0F7`, `danger` `#FF9A8F`), e o `separator` e o contorno do amarelo ficam mais visíveis. O teste (`test/theme/app_colors_contrast_test.dart`) mede as quatro variantes, exige que "Aumentar contraste" nunca diminua o contraste de um par e que `textSecondary` chegue a 7:1.
 
 **Interruptor:** usar o `CupertinoSwitch` com o verde padrão do sistema. `success` é para status, não para controle.
 
-Por que não um roxo para a IA: duas cores preenchidas disputam o papel de "ação principal" e confundem. A IA se identifica pelo lugar fixo (barra de baixo) e pelo ✦ azul no que ela preencheu.
+Por que não uma cor própria para a IA: duas cores preenchidas disputam o papel de "ação principal" e confundem. A IA se identifica pelo lugar fixo (barra de baixo) e pelo ✦ azul no que ela preencheu.
 
-Status de OS (cor no ponto, texto em `textSecondary`): `quote` cinza, `approved` azul (`accentText`), `progress` âmbar (`warning`), `done` verde (`success`), `canceled` cinza (o texto "Cancelada" diferencia). **Atrasada** não é status, é problema: ponto e texto em `danger`, texto em negrito ("Atrasada 2 dias").
+Status de OS (cor no ponto, texto em `textSecondary`): `quote` cinza, `approved` azul (`accentText`), `progress` e etapas âmbar (`warningDot`), `done` verde (`success`), `canceled` cinza (o texto "Cancelada" diferencia). **Atrasada** e **Parada** não são status, são problemas: vêm em texto depois da situação, em negrito ("● Pintura · **Atrasada 2 dias**" em `danger`, "● Aprovada · **Parada**" em `warning`), e o ponto continua com a cor da situação (`OrderStatusStyle`, `lib/theme/status_style.dart`).
 
 ## Tipografia
 
@@ -133,6 +145,8 @@ AppListRow(
   onTap: () => openOrder(order),
 )
 ```
+
+Quando o lado direito tem mais de uma informação (a lista de clientes: "Deve R$ 166,00" em cima da situação), use `trailingWidget` em vez de `trailing`. Ele segue a mesma regra: alinhado à direita e, com texto grande, embaixo do nome.
 
 ## Telas de escolher
 

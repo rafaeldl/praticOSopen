@@ -8,6 +8,8 @@
  * over the in-memory Firestore; verifyIdToken is faked (token = uid).
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import request from 'supertest';
 import express, { Express } from 'express';
 
@@ -16,7 +18,7 @@ jest.mock('../services/firestore.service', () => ({
   auth: { verifyIdToken: async (token: string) => ({ uid: token }) },
 }));
 
-import { read, resetFakeDb, seed } from './helpers/fake-firestore';
+import { FakeCollection, read, resetFakeDb, seed } from './helpers/fake-firestore';
 import { bearerAuth } from '../middleware/auth.middleware';
 import { resolveCompanyContext } from '../middleware/company.middleware';
 import inviteRoutes from '../routes/v1/invite.routes';
@@ -64,6 +66,32 @@ describe('GET /v1/app/invites', () => {
     expect(invites.map((invite) => invite.token).sort()).toEqual(['INV_A', 'INV_B']);
     expect(invites.find((invite) => invite.token === 'INV_A')).toMatchObject({ name: 'Paula', email: 'paula@x.test' });
     expect(invites.find((invite) => invite.token === 'INV_B')?.name).toBeUndefined();
+  });
+
+  it('lists newest first without orderBy, so the deployed company.id + status index is enough', async () => {
+    // Production has no company.id + status + createdAt index: the orderBy made
+    // Firestore answer FAILED_PRECONDITION and the web team screen said "Não deu
+    // certo". The in-memory Firestore never asks for an index, so guard both sides.
+    seed('links/invites/tokens/INV_NEW', {
+      token: 'INV_NEW', company: { id: 'c1', name: 'c1' }, role: 'technician', status: 'pending',
+      createdAt: '2026-11-05T12:00:00.000Z', invitedBy: { id: 'owner1', name: 'Owner' }, channel: 'app',
+    });
+    const queryProto = Object.getPrototypeOf(FakeCollection.prototype) as { orderBy: (...args: unknown[]) => unknown };
+    const orderBy = jest.spyOn(queryProto, 'orderBy');
+    try {
+      const res = await request(buildApp()).get('/v1/app/invites').set('Authorization', 'Bearer admin1').set('X-Company-ID', 'c1');
+      expect(res.status).toBe(200);
+      expect((res.body.data.invites as { token: string }[])[0].token).toBe('INV_NEW');
+      expect(orderBy).not.toHaveBeenCalled();
+    } finally {
+      orderBy.mockRestore();
+    }
+
+    const indexes = JSON.parse(readFileSync(join(__dirname, '../../../firestore.indexes.json'), 'utf8')).indexes as {
+      collectionGroup: string; queryScope: string; fields: { fieldPath: string }[];
+    }[];
+    const fields = (index: (typeof indexes)[number]) => index.fields.map((field) => field.fieldPath).filter((path) => path !== '__name__');
+    expect(indexes.some((index) => index.collectionGroup === 'tokens' && index.queryScope === 'COLLECTION' && fields(index).join() === 'company.id,status')).toBe(true);
   });
 
   it('refuses a technician', async () => {

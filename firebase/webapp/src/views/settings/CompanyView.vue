@@ -11,10 +11,12 @@ import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import CompanyDataForm from '@/components/settings/CompanyDataForm.vue'
+import StagesForm from '@/components/settings/StagesForm.vue'
 import TermsForm from '@/components/settings/TermsForm.vue'
 import { locale, t, type MessageKey } from '@/i18n'
 import { segmentFieldService, segmentLabels } from '@/lib/segments'
 import { featureOn } from '@/lib/company-features'
+import { stagesOf } from '@/lib/orders/stages'
 import { loadCompany, loadSegments, saveCompany, type CompanyDoc } from '@/lib/settings/data'
 import { defaultTerms, localName, type SegmentOption } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
@@ -28,7 +30,7 @@ const failed = ref(false)
 const segments = shallowRef<SegmentOption[] | null>(null)
 const segmentsFailed = ref(false)
 const saving = ref(false)
-const editing = ref<'data' | 'terms' | 'segment' | 'specialties' | null>(null)
+const editing = ref<'data' | 'terms' | 'segment' | 'specialties' | 'stages' | null>(null)
 const askingOff = ref(false)
 const pickedSegment = ref('')
 const askingSegment = ref(false)
@@ -41,6 +43,8 @@ const specialtyNames = computed(() => {
   return (segment.value?.subspecialties ?? []).filter((sub) => checked.includes(sub.id)).map((sub) => localName(sub, locale.value))
 })
 const sortedSegments = computed(() => [...(segments.value ?? [])].sort((a, b) => localName(a, locale.value).localeCompare(localName(b, locale.value), locale.value)))
+const stages = computed(() => stagesOf(company.value?.workStages))
+const stagesSummary = computed(() => (stages.value.length ? stages.value.map((stage) => stage.name).join(' → ') : t('web.stages.off')))
 const devicesPlural = computed(() => segmentLabels()['device._entity_plural'])
 
 /** As the app resolves them (auth.gate.feature-defaults): absent values fall back to the segment, then the app's default. */
@@ -239,6 +243,15 @@ onMounted(load)
                 </span>
               </button>
             </li>
+            <li>
+              <button type="button" class="set-row" data-testid="company-stages" @click="editing = 'stages'">
+                <span class="set-text">
+                  <span class="who">{{ t('web.stages.title') }}</span>
+                  <span class="sub">{{ t('web.stages.rowHint') }}</span>
+                </span>
+                <span class="set-end">{{ stagesSummary }}</span>
+              </button>
+            </li>
             <li v-for="item in switches" :key="item.feature">
               <label class="set-switch" :data-testid="`company-${item.feature}`">
                 <span class="set-text">
@@ -255,6 +268,7 @@ onMounted(load)
   </div>
 
   <CompanyDataForm v-if="editing === 'data' && company" :company="company" @saved="saved" @stale="refresh" @close="editing = null" />
+  <StagesForm v-if="editing === 'stages' && company" :stages="stages" @saved="(list, updatedAt) => saved({ workStages: list, updatedAt })" @close="editing = null" />
   <TermsForm
     v-if="editing === 'terms' && company"
     :terms="company.termsOfService ?? ''"

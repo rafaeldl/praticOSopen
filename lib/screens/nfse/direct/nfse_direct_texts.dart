@@ -89,6 +89,22 @@ String nfseDirectErrorText(AppLocalizations l10n, Object error) {
   }
 }
 
+/// Why an automatic direct nota did not go out, in full (the nota screen's
+/// "Motivo"): the same sentences as the sheet's errors (issue #571).
+String nfseAutoErrorReason(AppLocalizations l10n, String code) {
+  switch (code) {
+    case 'EMITTER_NOT_FOUND':
+      return l10n.nfseAutoErrorPickEmitter;
+    case 'SEFIN_UNAVAILABLE':
+    case 'KEY_VAULT_UNAVAILABLE':
+      return l10n.nfseDirectErrorUnavailable;
+    case 'AUTO_ISSUE_FAILED':
+      return l10n.nfseDirectErrorGeneric;
+    default:
+      return nfseDirectErrorText(l10n, NfseDirectApiException(code, ''));
+  }
+}
+
 /// The two services the "Estilo da descrição" sample joins: the company's
 /// own when it has two, else a neutral pair (never an example of another
 /// segment).

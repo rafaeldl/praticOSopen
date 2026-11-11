@@ -4,24 +4,59 @@
     "product": {
       "title": "Produto",
       "links": [
-        { "href": "#como-funciona", "label": "Como funciona" },
-        { "href": "funcionalidades/whatsapp-bot.html", "label": "Assistente no WhatsApp", "flag": "whatsappBot" },
-        { "href": "#baixar", "label": "Baixar o app" }
+        {
+          "href": "#como-funciona",
+          "label": "Como funciona"
+        },
+        {
+          "href": "funcionalidades/nota-fiscal.html",
+          "label": "Nota fiscal de serviço",
+          "flag": "nfsePage"
+        },
+        {
+          "href": "funcionalidades/whatsapp-bot.html",
+          "label": "Assistente no WhatsApp",
+          "flag": "whatsappBot"
+        },
+        {
+          "href": "#baixar",
+          "label": "Baixar o app"
+        },
+        {
+          "href": "/web",
+          "label": "Entrar no sistema",
+          "flag": "webApp"
+        }
       ]
     },
     "support": {
       "title": "Ajuda",
       "links": [
-        { "href": "docs/", "label": "Documentação" },
-        { "href": "faq.html", "label": "Perguntas frequentes" },
-        { "href": "support.html", "label": "Suporte" }
+        {
+          "href": "docs/",
+          "label": "Documentação"
+        },
+        {
+          "href": "faq.html",
+          "label": "Perguntas frequentes"
+        },
+        {
+          "href": "support.html",
+          "label": "Suporte"
+        }
       ]
     },
     "legal": {
       "title": "Empresa",
       "links": [
-        { "href": "privacy.html", "label": "Privacidade" },
-        { "href": "terms.html", "label": "Termos de uso" }
+        {
+          "href": "privacy.html",
+          "label": "Privacidade"
+        },
+        {
+          "href": "terms.html",
+          "label": "Termos de uso"
+        }
       ]
     },
     "segmentsLabel": "Segmentos",
@@ -33,24 +68,54 @@
     "product": {
       "title": "Product",
       "links": [
-        { "href": "#como-funciona", "label": "How it works" },
-        { "href": "funcionalidades/whatsapp-bot-en.html", "label": "WhatsApp assistant", "flag": "whatsappBot" },
-        { "href": "#baixar", "label": "Download the app" }
+        {
+          "href": "#como-funciona",
+          "label": "How it works"
+        },
+        {
+          "href": "funcionalidades/whatsapp-bot-en.html",
+          "label": "WhatsApp assistant",
+          "flag": "whatsappBot"
+        },
+        {
+          "href": "#baixar",
+          "label": "Download the app"
+        },
+        {
+          "href": "/web",
+          "label": "Sign in to the system",
+          "flag": "webApp"
+        }
       ]
     },
     "support": {
       "title": "Help",
       "links": [
-        { "href": "docs/index-en.html", "label": "Documentation" },
-        { "href": "faq-en.html", "label": "FAQ" },
-        { "href": "support-en.html", "label": "Support" }
+        {
+          "href": "docs/index-en.html",
+          "label": "Documentation"
+        },
+        {
+          "href": "faq-en.html",
+          "label": "FAQ"
+        },
+        {
+          "href": "support-en.html",
+          "label": "Support"
+        }
       ]
     },
     "legal": {
       "title": "Company",
       "links": [
-        { "href": "privacy-en.html", "label": "Privacy" },
-        { "href": "terms-en.html", "label": "Terms of use" }
+        {
+          "href": "privacy-en.html",
+          "label": "Privacy"
+        },
+        {
+          "href": "terms-en.html",
+          "label": "Terms of use"
+        }
       ]
     },
     "segmentsLabel": "Trades",
@@ -62,24 +127,54 @@
     "product": {
       "title": "Producto",
       "links": [
-        { "href": "#como-funciona", "label": "Cómo funciona" },
-        { "href": "funcionalidades/whatsapp-bot-es.html", "label": "Asistente en WhatsApp", "flag": "whatsappBot" },
-        { "href": "#baixar", "label": "Descargar la app" }
+        {
+          "href": "#como-funciona",
+          "label": "Cómo funciona"
+        },
+        {
+          "href": "funcionalidades/whatsapp-bot-es.html",
+          "label": "Asistente en WhatsApp",
+          "flag": "whatsappBot"
+        },
+        {
+          "href": "#baixar",
+          "label": "Descargar la app"
+        },
+        {
+          "href": "/web",
+          "label": "Entrar al sistema",
+          "flag": "webApp"
+        }
       ]
     },
     "support": {
       "title": "Ayuda",
       "links": [
-        { "href": "docs/index-es.html", "label": "Documentación" },
-        { "href": "faq-es.html", "label": "Preguntas frecuentes" },
-        { "href": "support-es.html", "label": "Soporte" }
+        {
+          "href": "docs/index-es.html",
+          "label": "Documentación"
+        },
+        {
+          "href": "faq-es.html",
+          "label": "Preguntas frecuentes"
+        },
+        {
+          "href": "support-es.html",
+          "label": "Soporte"
+        }
       ]
     },
     "legal": {
       "title": "Empresa",
       "links": [
-        { "href": "privacy-es.html", "label": "Privacidad" },
-        { "href": "terms-es.html", "label": "Términos de uso" }
+        {
+          "href": "privacy-es.html",
+          "label": "Privacidad"
+        },
+        {
+          "href": "terms-es.html",
+          "label": "Términos de uso"
+        }
       ]
     },
     "segmentsLabel": "Rubros",

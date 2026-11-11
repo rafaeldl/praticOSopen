@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { chooseCompany, login, type UserKey, signOut } from './helpers'
 
 // Same matrix as app-permissions.json, read by URL.

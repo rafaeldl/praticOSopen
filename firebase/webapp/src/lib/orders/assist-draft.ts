@@ -1,6 +1,7 @@
 // What the assistant's answer does to an order (POST /v1/app/ai/order-assist),
-// the app's _applyDraft (order_screen_v2.dart): it never replaces a customer
-// already chosen, a request already typed or a date already set; it never
+// new or saved, as the app's _applyDraft (order_screen_v2.dart): it never replaces a customer
+// chosen, a request typed or a date set by the person, only what the assistant itself put (✦,
+// issue #631); it never
 // receives, cancels or deletes on its own (money waits for the card). Pure.
 import { whatsappNumber } from '@/lib/phone'
 import type { DraftActions, NfseMoment } from './ai-actions'
@@ -28,7 +29,8 @@ export interface DraftItem {
 export interface AssistDraft {
   transcript?: string | null
   customer: { match: CustomerHit | null; guess: { name?: string; phone?: string } | null; alternatives: CustomerHit[] } | null
-  device: { match: DeviceHit | null; guess: { name?: string; serial?: string; manufacturer?: string } | null; alternatives: DeviceHit[] } | null
+  /** `replaces`: index in the context's devices of the vehicle from the assistant this one corrects. */
+  device: { match: DeviceHit | null; guess: { name?: string; serial?: string; manufacturer?: string } | null; alternatives: DeviceHit[]; replaces?: number } | null
   items: DraftItem[]
   changes: DraftChange[]
   notes: string | null
@@ -99,6 +101,100 @@ export function deviceStep(draft: AssistDraft, state: { devices: { id?: string |
   if (state.isNew && state.canRegister && (device.serial || (device.name && !options.length))) return { kind: 'new', device }
   const label = [d.guess.name?.trim(), device.serial].filter(Boolean).join(' · ')
   return label ? { kind: 'ask', label, device, options } : { kind: 'none' }
+}
+
+/**
+ * What an answer does to the header of an order already saved, as the app's
+ * _applyDraft on a saved order: a customer only when the order has none, a
+ * registered device it does not have yet, the request only into a blank
+ * field. Nothing new is registered on its own: an unknown plate or name
+ * becomes a row that asks ("Cadastrar … como novo" is one tap).
+ */
+export function savedOrderFill(
+  draft: AssistDraft,
+  state: {
+    hasCustomer: boolean
+    devices: { id?: string | null; serial?: string | null }[]
+    canRegisterCustomers: boolean
+    canRegisterDevices: boolean
+    /** The segment's "O que o cliente pediu" field exists. */
+    hasRequestField: boolean
+    request: string
+    /** The request is the one the assistant wrote, untouched: a new answer may rewrite it. */
+    requestFromAi?: boolean
+  },
+): { customer: CustomerStep; device: DeviceStep; request: string | null } {
+  const notes = draft.notes?.trim() ?? ''
+  const open = !state.request.trim() || (!!state.requestFromAi && notes !== state.request.trim())
+  return {
+    customer: customerStep(draft, { hasCustomer: state.hasCustomer, isNew: false, canRegister: state.canRegisterCustomers }),
+    device: deviceStep(draft, { devices: state.devices, isNew: false, canRegister: state.canRegisterDevices }),
+    request: notes && state.hasRequestField && open ? notes : null,
+  }
+}
+
+/**
+ * The vehicle a new answer corrects ("não, a placa é…"): its index in the
+ * devices sent in the context, only when the assistant put it (`fromAi`).
+ * The caller leaves it out of `devices` for deviceStep and swaps it.
+ */
+export function replacedDevice(draft: AssistDraft, sent: { fromAi: boolean }[]): number | null {
+  const index = draft.device?.replaces
+  return typeof index === 'number' && sent[index]?.fromAi ? index : null
+}
+
+/** POST /v1/app/ai/order-assist `context` (docs/AI_ORDER_ASSIST.md): never the customer's name. */
+export interface AssistContext {
+  customer: { chosen: boolean; fromAi: boolean }
+  devices?: { name?: string; serial?: string; fromAi: boolean }[]
+  request?: { text: string; fromAi: boolean }
+  due?: { date: string; fromAi: boolean }
+  pending?: ('customer' | 'device' | 'line')[]
+}
+
+export function assistContext(state: {
+  customer: { chosen: boolean; fromAi: boolean }
+  devices: { name?: string | null; serial?: string | null; fromAi: boolean }[]
+  request: { text: string; fromAi: boolean }
+  due: { date: string; fromAi: boolean }
+  pending: ('customer' | 'device' | 'line')[]
+}): AssistContext {
+  const devices = state.devices.slice(0, 10).map((d) => ({
+    ...(d.name?.trim() ? { name: d.name.trim().slice(0, 200) } : {}),
+    ...(d.serial?.trim() ? { serial: d.serial.trim().slice(0, 40) } : {}),
+    fromAi: d.fromAi,
+  }))
+  const request = state.request.text.trim()
+  const due = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?/.exec(state.due.date)?.[0]
+  return {
+    customer: state.customer,
+    ...(devices.length ? { devices } : {}),
+    ...(request ? { request: { text: request.slice(0, 2000), fromAi: state.request.fromAi } } : {}),
+    ...(due ? { due: { date: due, fromAi: state.due.fromAi } } : {}),
+    ...(state.pending.length ? { pending: state.pending } : {}),
+  }
+}
+
+/** A saved order's ISO date as the local "YYYY-MM-DDTHH:MM" the screen shows. */
+export function localMinute(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+/** The last 3 messages of this order, only in the screen's memory (up to 500 characters each). */
+export const HISTORY_SIZE = 3
+export function remember(history: readonly string[], said: string | null | undefined): string[] {
+  const text = said?.trim().slice(0, 500) ?? ''
+  return text ? [...history, text].slice(-HISTORY_SIZE) : [...history]
+}
+/** Desfazer: that message never happened. */
+export function forget(history: readonly string[], said: string | null | undefined): string[] {
+  const text = said?.trim().slice(0, 500) ?? ''
+  const at = text ? history.lastIndexOf(text) : -1
+  return at < 0 ? [...history] : [...history.slice(0, at), ...history.slice(at + 1)]
 }
 
 /**

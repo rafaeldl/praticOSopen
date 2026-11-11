@@ -34,6 +34,9 @@ jest.mock('../../../services/firestore.service', () => ({
 
 jest.mock('../../../services/share-token.service', () => ({}));
 jest.mock('../../../services/notification.service', () => ({}));
+jest.mock('../../../services/forms.service', () => ({
+  listOrderForms: jest.fn().mockResolvedValue([]),
+}));
 jest.mock('../../../services/comment.service', () => ({
   getCustomerVisibleComments: jest.fn().mockResolvedValue([]),
 }));

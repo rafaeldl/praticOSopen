@@ -11,16 +11,17 @@ They belong to the app and still load the legacy `style.css` — do not touch.
 
 The site shows the people it serves. Warm paper, navy ink and navy bands, solid
 yellow actions, big type, and photos of people at work. The product moment is a
-spoken request turning into a work order. No gradients, no orbs, no glass, no
-icon-tile card grids, no fake device frames.
+spoken request turning into a work order, shown as a product scene (below).
+No gradients, no orbs, no icon-tile card grids. Device frames and glass only
+inside a product scene.
 
 ## Genre
 modern-minimal (custom theme "Campo")
 
 ## Macrostructure family
-- **Home**: Photographic — headline beside trade photos with the spoken-order
-  card over them, then feature tabs with real screens, the AI list, the moving
-  trades reels and the closing band.
+- **Home**: Product hero — headline beside the app on an iPhone writing a work
+  order from speech (Stageshow scene), then feature tabs with app screens drawn
+  as stills (Stageshow), the AI list, the moving trades reels and the closing band.
 - **Segments and feature pages**: Narrative Workflow — the life of a work order
   in numbered stages. Segments may swap stage content for their trade and add a
   problem → solution split (Split Studio rows).
@@ -30,6 +31,8 @@ modern-minimal (custom theme "Campo")
   60–65ch measure, sticky "Nesta página" index on wide screens, no hero art.
 
 ## Theme
+Brand colors (navy, action yellow, brand blue, status colors) are shared with the web app and the phone app: see `docs/DESIGN_TOKENS.md`. The paper background, Outfit and the rules are site-only.
+
 Tokens live in `src/css/tokens.css`. Light is the default; dark follows the OS
 or the saved toggle (`html[data-theme="dark"]`).
 
@@ -69,7 +72,7 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 
 ## Motion
 - Easings `--ease-out` / `--ease-in` / `--ease-in-out`; 160–240 ms.
-- No scroll reveals. Hover/focus/press, plus one pass of the home demo card with a manual replay. The card rests complete, and reduced motion skips the pass.
+- No scroll reveals. Hover/focus/press, plus one pass of the home hero scene with a manual replay ("Ver de novo"). The scene rests on its payoff, and reduced motion shows only that frame.
 - The home trades reels move slowly and continuously. Rows can be dragged with the mouse or swiped, and a click or tap opens the trade's page. They pause on hover and through a visible toggle, keyboard focus stops them, and reduced motion leaves still rows that can be dragged and swiped. Nothing else loops.
 
 ## Microinteractions stance
@@ -94,8 +97,19 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 - Feature flags in `site.json`: `flags.whatsappBot` (assistant pages/sections,
   currently **off** — bot is shut down), `flags.whatsappContact` (float button),
   `flags.softwareItPage` (the Software e TI page claims the automatic service
-  invoice; **off** until it ships). A `segments.json` link with `"flag"` shows
-  only when that flag is on (`enabledLinks` filter).
+  invoice; **off** until it ships), `flags.webApp` (the "Entrar" link to `/web`
+  in the bar, menu and footer, the home's "Também no computador" band and the
+  help article "Usar no computador"; turn it on together with opening
+  `config/webApp` to everyone) and `flags.nfsePage` (the service invoice page
+  `funcionalidades/nota-fiscal.html`, its help article, the FAQ section and the
+  priced "Quanto custa?"; both pages are not even built while it is off). A
+  `segments.json` link, footer/nav link, FAQ group or item with `"flag"` shows
+  only when that flag is on (`enabledLinks` / `flagShown` filters); a FAQ entry
+  with `"hideWhenFlag"` shows only while it is off.
+- The service invoice (NFS-e) is Brazil-only: it lives only in the `pt` blocks
+  and pt pages, with a PT-only `langSwitch`. `npm run build` ends with
+  `scripts/check-br-only.js`, which fails if "nota fiscal", "NFS-e" or "Emissor
+  Nacional" shows up on an `-en`/`-es` page (legal texts excepted).
 - pt-BR, en, es always updated together.
 
 ## Per-page allowances
@@ -122,6 +136,20 @@ The header, final band and footer are navy in both themes, as in the prototype.
 The bar keeps links, language and theme controls. The final band uses two plain
 buttons, not store cards. The WhatsApp float is icon only, so it never covers text.
 
+## Product scenes (Stageshow)
+
+Faux product UI built with the Stageshow skill (`.claude/skills/stageshow`) in
+`stage/`, built into `src/assets/stage/` (see `docs/SITE_STAGE_SCENES.md`).
+The skill's own rules apply inside a scene (framing, restraint, motion, the
+`film.mjs --gate`); this file still governs the page around it.
+
+- The scene draws the app as it is: its screens, its colors
+  (`lib/theme/app_colors.dart`), its strings from `lib/l10n`. It only shows what
+  the app does.
+- The phone comes from the kit, runs off an edge of the stage and is never a
+  whole device floating on the band.
+- Both widths pass the gate (the shown width and 390) before merging.
+
 ## Segment pages
 
 Segment pages use the same language as the home: navy photo hero, yellow words in
@@ -132,8 +160,8 @@ Avoid "campo", "cadastro" and "configurar".
 
 ## Segment page screens
 
-The app screenshots in `assets/screenshots/` come from a car-repair demo account
-(Onix, oil change, vehicle check-in). Only the `automotivo` page may show them,
-plus the neutral `financial.png`, which is the one screen other trades share.
-Stages without `image` render as text. Add a screen to another trade only when
-it was captured with that trade's data.
+App screens on the site are drawn with the Stageshow kit (`stage/`, see
+`docs/SITE_STAGE_SCENES.md`), not screenshots. Each trade page feeds the home's
+scenes with its own example (`scene` on each stage in `_data/segments/<slug>.json`):
+show only what the trade does, with the customer, device and services its copy
+already names.

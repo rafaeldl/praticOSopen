@@ -8,6 +8,8 @@ A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** 
 
 **Status: construído.** Este documento descreve o que está no ar. A referência visual foi o protótipo da branch `claude/web-app-prototype-bb3bbf`; onde a proposta antiga deste documento e o protótipo divergiam, venceu o protótipo.
 
+**Camada "sistema" do tema Campo (08/11/2026):** `docs/DESIGN_TOKENS.md` define o que web e app dividem. O web já aplica a parte dele: fundo branco (escuro `#0C1015`), bege só como apoio, linhas finas no lugar da régua marinho, texto terciário e situação junto do atraso. Os tokens de superfície são sobrescritos em `app.css`, nunca em `tokens.css` (o site importa o mesmo arquivo e continua bege).
+
 ### O que mudou desde a proposta
 
 | Proposta (out/2026) | Construído |
@@ -29,7 +31,7 @@ A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** 
 | Português do dia a dia, sem sigla | Papel, marinho e amarelo | Tabelas com seleção e ações em lote |
 | Mostrar só o que o registro tem | Réguas em vez de cartões e sombras | Atalhos e paleta (`⌘K`) |
 | Status: ponto + texto, nunca selo | Sem gradiente, sem vidro | URLs compartilháveis e várias abas |
-| Atrasada em vermelho, com texto em negrito | Sucesso silencioso, sem confete | Arrastar, sempre com alternativa |
+| Atrasada ao lado da situação, em vermelho e negrito | Sucesso silencioso, sem confete | Arrastar, sempre com alternativa |
 
 ## Regras
 
@@ -49,27 +51,32 @@ A ideia em uma frase: **o tema Campo do site, em forma de ferramenta de mesa.** 
 
 ## Tokens
 
-Fonte única: `firebase/hosting/src/css/tokens.css`, importado por `src/main.ts` (sem cópia à mão). O web acrescenta só o que a ferramenta precisa, em `src/styles/app.css`:
+Fonte única: `firebase/hosting/src/css/tokens.css`, importado por `src/main.ts` (sem cópia à mão). O web sobrescreve só as superfícies e acrescenta o que a ferramenta precisa, em `src/styles/app.css`:
 
 | Papel | Token | Uso no web |
 |---|---|---|
-| Fundo | `--color-paper` | Fundo da página e da lista |
-| Superfície | `--color-card` | Painel da OS, gavetas, diálogos, campos |
-| Preenchimento secundário | `--color-paper-2` | Hover, botões secundários, faixa "sem conexão" |
+| Fundo | `--color-paper` (sobrescrito: branco, escuro `#0C1015`) | Fundo da página e da lista |
+| Superfície | `--color-card` (sobrescrito: branco, escuro `#1D2228`) | Painel da OS, gavetas, diálogos, campos |
+| Preenchimento de apoio | `--color-paper-2` (sobrescrito: `#F1EEE7`, escuro `#1D2228`) | O bege do sistema, só apoio: busca, "Lista / Quadro", cabeçalho da tabela, botões secundários, faixa "sem conexão" |
+| Fundo agrupado | `--color-grouped` (só web: branco no claro, `#13181D` no escuro) | Fundo do quadro e da TV. Os cartões ali usam `--color-tile` (`#FBFAF8`, escuro `#1D2228`), um branco menos forte, com contorno `--color-rule`. Em teste: no claro já foi `#ECE9E3` (cartões mais destacados) |
+| Linha com o mouse | `--color-hover` (só web: `#F7F5F0`, escuro `#151A20`) | Linha da tabela com o mouse em cima |
 | Texto | `--color-ink` | Marinho no claro, quase branco no escuro |
 | Texto secundário | `--color-muted` | Subtítulos, rótulos, situação |
-| Régua | `--color-rule` | Separadores (decorativa). A régua forte (`--color-ink`, 2 px) separa o cabeçalho da lista |
+| Texto terciário | `--color-faint` (só web: `#6B7178`, escuro `#8A9099`) | Só apoio: a linha de baixo da OS na lista (veículo · placa · serviço). No claro usa `#6B7178` e não o `#8A8F96` do protótipo, porque o teste axe do web exige 4,5:1 (4,9:1 no branco, 4,5:1 na linha com o mouse). Na linha aberta ou marcada (azul) vira `--color-muted`. Com "Aumentar contraste", `#5E636A` |
+| Linha | `--color-rule` (sobrescrito: `#E3E0DA`, escuro `#2A3038`) | Separadores, inclusive entre os filtros e a lista. Sem régua marinho no sistema |
 | Barra lateral | `--color-navy`, `--color-on-navy` | Navegação; continua marinho no escuro (um pouco mais escuro) |
 | Ação principal | `--action-bg` = `--color-marker` | Botão amarelo, texto `--color-marker-ink` |
 | Link e seleção | `--color-accent`, `--color-selected` | Links, foco (`--color-focus`), linha aberta |
 | Sucesso | `--color-success` | Ponto de concluída |
-| Aviso (texto) | `--color-warning-text` (só web) | Em andamento, "Parada". `--color-warning` só no ponto |
-| Erro (texto) | `--color-danger-text` (só web) | Atrasada, erro de campo |
+| Aviso (texto) | `--color-warning-text` (só web) | "Parada", em negrito. `--color-warning` só no ponto |
+| Erro (texto) | `--color-danger-text` (só web) | "Atrasada 2 dias", em negrito; erro de campo |
+
+**Situação (`StatusLabel`):** a bolinha sempre tem a cor da situação e o problema vem em texto ao lado, sem tirar a situação: "● Pintura · **Atrasada 2 dias**" (vermelho) e "● Aprovada · **Parada**" (âmbar escuro). Atraso vence parada. Em andamento com etapas mostra o nome da etapa (`stageNameOf` em `lib/orders/stages.ts`).
 | Borda de campo | `--color-control` (só web) | Campos e botões: 3:1 contra o fundo (WCAG 1.4.11) |
 
 Os tokens só do web existem porque o site foi desenhado para títulos: `--color-warning` e `--color-danger` como texto pequeno não passam de 4,5:1, e `--color-rule` como borda de campo fica abaixo de 3:1. Cada um tem valor próprio para o escuro (`:root[data-theme="dark"]`).
 
-Tema: claro por padrão; escuro pelo sistema ou pela escolha em Configurações › Neste navegador (`data-theme`). Com `prefers-contrast: more`, texto secundário e réguas viram `--color-ink` e as bordas engrossam. Com `forced-colors`, pontos, aba atual e seleção ganham contorno do sistema.
+Tema: claro por padrão; escuro pelo sistema ou pela escolha em Configurações › Neste navegador (`data-theme`). O botão "Modo escuro" / "Modo claro" no pé da barra lateral troca na hora o que está na tela e guarda a escolha neste navegador (`toggleTheme` em `lib/prefs.ts`); "Igual ao sistema" volta pelas Configurações. Com `prefers-contrast: more`, texto secundário e réguas viram `--color-ink`, o terciário escurece e as bordas engrossam. Com `forced-colors`, pontos, aba atual e seleção ganham contorno do sistema.
 
 ## Tipografia
 
@@ -117,7 +124,7 @@ Cantos de 6 px, sem pílula (exceto as iniciais da empresa). Sombra só em camad
 │ Equipe       │                                │                          │
 │ Configurações│                                │                          │
 └──────────────┴───────────────────────────────┴──────────────────────────┘
-  barra lateral       lista (régua forte no topo)      painel ao lado
+  barra lateral       lista (linha fina no topo)       painel ao lado
 ```
 
 - **Barra lateral marinho, 14 rem.** Logo, iniciais e nome da empresa (troca de empresa ali), campo "Buscar" com `⌘K`, e o menu na ordem das abas do app: Início, Agenda, Financeiro; depois Clientes, Notas fiscais, Catálogo e Equipe, cada um só para quem pode abrir. Configurações no pé. Abaixo de 48 rem vira trilho de ícones (3,5 rem) com nome acessível.
@@ -130,7 +137,7 @@ Cantos de 6 px, sem pílula (exceto as iniciais da empresa). Sombra só em camad
 Sem imagens: o que se vê em cada tela, na tela grande.
 
 - **Entrada (`/login`).** Faixa marinho à esquerda com o logo e "Sua oficina inteira, em uma tela grande."; à direita, "Entrar no PraticOS", "Use a mesma conta do celular", e três botões: Continuar com Google, Continuar com Apple (preto) e "Já tenho conta com e-mail", que abre e-mail, senha e "Esqueceu a senha?". Quem não está na lista de acesso vê "O PraticOS no computador ainda não foi liberado para você".
-- **Início, lista.** Título "Início" com o resumo em uma frase e o botão amarelo "Nova OS". Abas Lista | Quadro, filtros (Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas, Todas; o técnico tem Minhas) com contagem, busca. Régua marinho de 2 px e a tabela: nº, cliente, aparelho e placa, situação (ponto + texto), Quando (visita ou entrega, vermelho se atrasada) e valor com "falta receber". Acima da lista, quando há, "Manutenções chegando". Linha aberta em `--color-selected`.
+- **Início, lista.** Título "Início" com o resumo em uma frase e o botão amarelo "Nova OS". Abas Lista | Quadro, filtros (Em aberto, Atrasadas, Para hoje, Sem receber, Orçamentos, Paradas, Concluídas, Todas; o técnico tem Minhas) com contagem, busca. Linha fina e a tabela (cabeçalho em bege): nº, cliente com aparelho e placa embaixo em cinza terciário, situação (ponto + texto, com "Atrasada" ou "Parada" ao lado), Quando (visita ou entrega, vermelho se atrasada) e valor com "falta receber". Acima da lista, quando há, "Manutenções chegando". Linha aberta em `--color-selected`.
 - **Início, quadro.** Uma coluna por situação, cartões com nº, cliente, aparelho e valor. Dica no topo: arrastar, botão "…" ou `Shift` + seta. Só aparecem destinos que o papel aceita.
 - **Lote.** Marcar linhas troca os filtros por "N selecionadas" e as ações: Mudar situação, Responsável, Mandar cobrança, Pedir ao assistente, Receber de {cliente} (mesmo cliente), PDF e Imprimir. Cada mudança abre uma confirmação com a lista de → para; o aviso depois tem "Desfazer".
 - **OS no painel.** Título pequeno "OS 186", cliente grande, aparelho, situação com uma frase ("fica pronta hoje, 17:00", "atrasada 2 dias", "Falta receber R$ 166") e o botão amarelo do próximo passo (Aprovar, Começar, Concluir serviço, Retomar, Receber). Depois: serviços e peças por aparelho com o total como recibo, fotos (colar ou arrastar), checklists, contrato, comentários e Detalhes. Menu "…" com o raro, destrutivas no fim. Barra "Peça ao assistente" no pé.

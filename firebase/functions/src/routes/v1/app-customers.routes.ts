@@ -113,7 +113,7 @@ const importSchema = z.object({
 router.get('/', route('Failed to list customers', async (req, res, companyId) => {
   if (!(await can(req, res, 'viewCustomers'))) return forbidden(res, "Permission 'viewCustomers' is required");
   const scope = await orderScopeOf(req, res);
-  // "Falta receber" per customer only for who reads the Financeiro: its query reads every order of the company with money open.
+  // "Falta receber" per customer (`owed`, kept on the customer) only for who reads the Financeiro: it sums every order of the company.
   const withOwed = scope.all && (await can(req, res, 'viewFinancialReports'));
   const company = (await db.collection('companies').doc(companyId).get()).data();
   const requested = typeof req.query.zone === 'string' ? req.query.zone.slice(0, 64) : null;

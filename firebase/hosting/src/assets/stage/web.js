@@ -1,0 +1,1 @@
+import{c,j as r,W as s}from"./shared.js";for(const t of document.querySelectorAll('[data-stage="web"]')){const e=t.querySelector('script[type="application/json"]');if(!e?.textContent)continue;const n=JSON.parse(e.textContent),o=document.createElement("div");t.append(o),c.createRoot(o).render(r.jsx(s,{copy:n}))}

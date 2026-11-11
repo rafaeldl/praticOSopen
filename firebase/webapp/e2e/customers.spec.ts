@@ -1,7 +1,7 @@
 // Fatia 03, clientes (customer.*), against the Emulator Suite. Each test makes
 // its own customers and orders (data.ts), so the tests run in parallel.
-import { expect, test, type Page } from '@playwright/test'
-import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc } from './data'
+import { expect, test, type Page } from './test'
+import { makeCustomer, makeDevice, makeLateOrderInB, makeOrder, readDoc, updateCustomerDoc, waitForOpenOrders } from './data'
 import { chooseCompany, login, signOut } from './helpers'
 
 const list = (page: Page) => page.getByTestId('customers-table')
@@ -18,6 +18,12 @@ test('lista: total, grupos por inicial sem acento e "#" no fim (customer.list.vi
   const digit = await makeCustomer({ name: `9 Irmãos ${Date.now()}` })
   await openCustomers(page, 'admin')
   await expect(page.getByTestId('customers-summary')).toHaveText(/\d+ clientes/)
+  // "Recentes" is the default: one list, no letters and no date column (the order says it).
+  const order = page.getByTestId('customers-order')
+  await expect(order.getByRole('button', { name: 'Recentes' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(list(page).getByRole('columnheader', { name: 'Última movimentação' })).toHaveCount(0)
+  await expect(list(page).locator('.group-row')).toHaveCount(0)
+  await order.getByRole('button', { name: 'A–Z' }).click()
   const groups = list(page).locator('.group-row th')
   await expect(groups.first()).toHaveText('A')
   await expect(groups.last()).toHaveText('#')
@@ -29,6 +35,7 @@ test('selos: atrasada vence aberta (customer.list.badges)', async ({ page }) => 
   // Company B: a late order in A would change the order list's "1 atrasada".
   const late = await makeCustomer({}, 'company-beta')
   await makeLateOrderInB(late)
+  await waitForOpenOrders(late.id, 1, 'company-beta')
   await login(page, 'owner', `customers?q=${encodeURIComponent(late.name)}`)
   await chooseCompany(page, 'Beta Repairs')
   await expect(row(page, late.name)).toContainText('1 atrasada')
@@ -38,6 +45,7 @@ test('selos: consultor e técnico contam só as OS que leem (customer.list.badge
   const mine = await makeCustomer()
   await makeOrder('consultant', { customer: { id: mine.id, name: mine.name }, status: 'approved' })
   await makeOrder('admin', { customer: { id: mine.id, name: mine.name }, status: 'progress' })
+  await waitForOpenOrders(mine.id, 2)
 
   await openCustomers(page, 'admin', `?q=${encodeURIComponent(mine.name)}`)
   await expect(row(page, mine.name)).toContainText('2 em aberto')
@@ -212,6 +220,31 @@ test('aparelhos e OS do cliente; abrir o aparelho (customer.detail.devices, cust
   await panel(page).getByTestId('customer-devices').getByRole('button', { name: device.name }).click()
   await expect(page).toHaveURL(new RegExp(`devices\\?device=${device.id}`))
   await expect(page.getByTestId('device-detail').getByRole('heading', { name: device.name })).toBeVisible()
+})
+
+test('5 veículos e 5 OS, o mais recente em cima; "Ver todos" abre o resto e busca pela placa (customer.detail.devices, customer.detail.orders)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const devices = []
+  for (let i = 0; i < 12; i++) devices.push(await makeDevice({ name: `Gol ${String(i).padStart(2, '0')} ${customer.id}` }))
+  // Uma OS por veículo, um dia depois da outra: o último veículo tem a OS mais nova.
+  for (const [i, device] of devices.entries()) {
+    const createdAt = new Date(Date.UTC(2026, 9, 1 + i, 12)).toISOString()
+    await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, createdAt, devices: [{ id: device.id, name: device.name, serial: device.serial }], deviceIds: [device.id] })
+  }
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  const list = panel(page).getByTestId('customer-devices')
+  await expect(list.locator('li')).toHaveCount(5)
+  await expect(list.locator('li').first()).toContainText(devices[11]!.name)
+  await expect(panel(page).getByTestId('customer-orders').locator('li')).toHaveCount(5)
+  await expect(panel(page).getByTestId('customer-devices-search')).toHaveCount(0)
+
+  await panel(page).getByTestId('customer-devices-more').click()
+  await expect(list.locator('li')).toHaveCount(12)
+  await panel(page).getByTestId('customer-devices-search').fill(devices[3]!.serial)
+  await expect(list.locator('li')).toHaveCount(1)
+  await expect(list).toContainText(devices[3]!.name)
+  await panel(page).getByTestId('customer-devices-more').click()
+  await expect(list.locator('li')).toHaveCount(5)
 })
 
 test('editar pelo menu, CPF/CNPJ validado e campo do segmento gravado (customer.detail.edit, customer.form.tax-id, customer.form.custom-fields)', async ({ page }) => {

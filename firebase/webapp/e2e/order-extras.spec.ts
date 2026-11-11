@@ -2,7 +2,7 @@
 // the place (order.address.edit, order.address.remove, order.sheet.address), the
 // device of a line with 2 or more devices (order.item-form.device) and the
 // segment's own fields (order.custom-fields.view), per role where it changes.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { makeOrder, readOrder } from './data'
 import { expectNoAxeViolations, login, setTheme, type UserKey } from './helpers'
 

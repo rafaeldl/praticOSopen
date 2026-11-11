@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/models/work_stage.dart';
 import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -449,6 +450,9 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useDeviceManagement: useDeviceManagement,
         useContracts: useContracts,
         useFinancial: useFinancial,
+      );
+      segmentProvider.setWorkStages(
+        WorkStage.listFrom(companyData?['workStages']),
       );
 
       // Wire push taps before initialize(), which replays the tap that

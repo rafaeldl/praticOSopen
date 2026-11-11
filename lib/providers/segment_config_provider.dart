@@ -1,6 +1,7 @@
 import 'package:praticos/utils/device_reading.dart';
 import 'package:flutter/cupertino.dart';
 import '../models/custom_field.dart';
+import '../models/work_stage.dart';
 import '../services/segment_config_service.dart';
 
 /// Provider que gerencia labels dinâmicos e campos customizados
@@ -64,6 +65,16 @@ class SegmentConfigProvider extends ChangeNotifier {
 
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _service.defaultTermsOfService;
+
+  /// Stages inside "Em andamento" (`company.workStages`); empty when the
+  /// company has none, which keeps every screen as before.
+  List<WorkStage> get workStages => _workStages;
+  List<WorkStage> _workStages = const [];
+
+  void setWorkStages(List<WorkStage> stages) {
+    _workStages = List.unmodifiable(stages);
+    notifyListeners();
+  }
 
   /// Updates the resolved `useFinancial` value and notifies listeners.
   void setUseFinancial(bool value) {
@@ -211,6 +222,9 @@ class SegmentConfigProvider extends ChangeNotifier {
   String get serviceOrder => _service.serviceOrder;
   String get serviceOrderPlural => _service.serviceOrderPlural;
 
+  /// See [SegmentConfigService.productWord].
+  String productWord(String fallback) => _service.productWord(fallback);
+
   /// Obtém label de status customizado
   ///
   /// Mapeia chaves técnicas para labels customizados:
@@ -240,8 +254,7 @@ class SegmentConfigProvider extends ChangeNotifier {
   Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
     String namespace, {
     Set<String>? exclude,
-  }) =>
-      _service.fieldsGroupedBySectionLocalized(namespace, exclude: exclude);
+  }) => _service.fieldsGroupedBySectionLocalized(namespace, exclude: exclude);
 
   // ════════════════════════════════════════════════════════════
   // FIELD VALIDATION & MASKS

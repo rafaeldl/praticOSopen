@@ -46,29 +46,46 @@ export interface CustomerCounts {
 /** Open and late orders per customer id; customers with none are absent. */
 export function countsByCustomer(orders: SummaryOrder[], now: Date, zone: string): Map<string, CustomerCounts> {
   const result = new Map<string, CustomerCounts>();
-  for (const order of orders) {
-    const id = order.customer?.id;
-    if (!id || !isOpenStatus(order.status)) continue;
-    const counts = result.get(id) ?? { open: 0, late: 0 };
-    counts.open++;
-    if (isLate(order, now, zone)) counts.late++;
-    result.set(id, counts);
-  }
+  for (const order of orders) countOrder(result, order, now, zone);
   return result;
+}
+
+/** Adds one order to [countsByCustomer]'s map: the lists read page by page and keep only the counts. */
+export function countOrder(result: Map<string, CustomerCounts>, order: SummaryOrder, now: Date, zone: string): void {
+  const id = order.customer?.id;
+  if (!id || !isOpenStatus(order.status)) return;
+  const counts = result.get(id) ?? { open: 0, late: 0 };
+  counts.open++;
+  if (isLate(order, now, zone)) counts.late++;
+  result.set(id, counts);
 }
 
 /** [customerOwed] per customer id; customers that owe nothing are absent. */
 export function owedByCustomer(orders: SummaryOrder[]): Map<string, number> {
-  const groups = new Map<string, SummaryOrder[]>();
-  for (const order of orders) {
+  const tally = new OwedTally();
+  for (const order of orders) tally.add(order);
+  return tally.result();
+}
+
+/**
+ * [owedByCustomer] one order at a time, without keeping the orders: the same
+ * sum as [customerOwed] (receivable orders only, in the order they come, then
+ * rounded to cents), so the list and the customer screen say the same.
+ */
+export class OwedTally {
+  private sums = new Map<string, number>();
+  add(order: SummaryOrder): void {
     const id = order.customer?.id;
-    if (!id) continue;
-    groups.set(id, [...(groups.get(id) ?? []), order]);
+    if (!id) return;
+    const sum = this.sums.get(id) ?? 0;
+    this.sums.set(id, isReceivable(asFinance(order)) ? sum + openAmount(asFinance(order)) : sum);
   }
-  const result = new Map<string, number>();
-  for (const [id, list] of groups) {
-    const owed = customerOwed(list);
-    if (owed > 0) result.set(id, owed);
+  result(): Map<string, number> {
+    const result = new Map<string, number>();
+    for (const [id, sum] of this.sums) {
+      const owed = Math.round(sum * 100) / 100;
+      if (owed > 0) result.set(id, owed);
+    }
+    return result;
   }
-  return result;
 }

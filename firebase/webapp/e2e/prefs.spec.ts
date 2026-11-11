@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 import { login } from './helpers'
 
 test('troca idioma e o texto muda na hora, e fica depois de recarregar', async ({ page }) => {

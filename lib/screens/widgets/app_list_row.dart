@@ -21,6 +21,7 @@ class AppListRow extends StatelessWidget {
     this.subtitle,
     this.subtitleWidget,
     this.trailing,
+    this.trailingWidget,
     this.leading,
     this.onTap,
     this.showChevron,
@@ -41,6 +42,11 @@ class AppListRow extends StatelessWidget {
 
   /// Value shown at the end of the row (e.g. a formatted amount or status).
   final String? trailing;
+
+  /// Value at the end of the row built by the caller (e.g. an amount over a
+  /// status). Wins over [trailing]; goes under the title at accessibility
+  /// text sizes like it ([kAppListRowStackScale]).
+  final Widget? trailingWidget;
   final Widget? leading;
   final VoidCallback? onTap;
 
@@ -49,9 +55,8 @@ class AppListRow extends StatelessWidget {
   final TextStyle? titleStyle;
   final TextStyle? trailingStyle;
 
-  /// Highlighter (marca-texto): the assistant filled this row. Yellow
-  /// [AppColors.marker] background with [AppColors.onMarker] text, in both
-  /// modes.
+  /// The assistant filled this row: [AppColors.accentSoft] background (the
+  /// blue of the ✦ mark), text unchanged.
   final bool marked;
 
   /// The current choice of a picker: blue check mark at the end of the row,
@@ -68,29 +73,29 @@ class AppListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onMarker = AppColors.onMarker.resolveFrom(context);
-    final textColor = marked ? onMarker : AppColors.text.resolveFrom(context);
-    final secondary = marked
-        ? onMarker.withValues(alpha: 0.75)
-        : AppColors.textSecondary.resolveFrom(context);
-    final stacked = MediaQuery.textScalerOf(context).scale(100) / 100 >=
+    final textColor = marked
+        ? AppColors.onAccentSoft.resolveFrom(context)
+        : AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(100) / 100 >=
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
 
-    final titleText = Text(
-      title,
-      style: (titleStyle ?? AppTypography.body).copyWith(color: textColor),
-    );
-    final valueText = trailing == null
-        ? null
-        : Text(
-            trailing!,
-            textAlign: stacked ? TextAlign.start : TextAlign.end,
-            style: (trailingStyle ?? AppTypography.body).copyWith(
-              color: valueBesideTitle ? textColor : secondary,
-              fontFeatures: AppTypography.tabular,
-            ),
-          );
+    final style = (titleStyle ?? AppTypography.body).copyWith(color: textColor);
+    final titleText = Text(title, style: style);
+    final valueText =
+        trailingWidget ??
+        (trailing == null
+            ? null
+            : Text(
+                trailing!,
+                textAlign: stacked ? TextAlign.start : TextAlign.end,
+                style: (trailingStyle ?? AppTypography.body).copyWith(
+                  color: valueBesideTitle ? textColor : secondary,
+                  fontFeatures: AppTypography.tabular,
+                ),
+              ));
     final beside = valueBesideTitle && !stacked && valueText != null;
 
     final main = Column(
@@ -109,10 +114,7 @@ class AppListRow extends StatelessWidget {
         else
           titleText,
         if (subtitleWidget != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: subtitleWidget,
-          )
+          Padding(padding: const EdgeInsets.only(top: 2), child: subtitleWidget)
         else if (subtitle != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -163,11 +165,7 @@ class AppListRow extends StatelessWidget {
             ],
             if (chevron) ...[
               const SizedBox(width: AppSpacing.sm),
-              Icon(
-                CupertinoIcons.chevron_forward,
-                size: 18,
-                color: secondary,
-              ),
+              Icon(CupertinoIcons.chevron_forward, size: 18, color: secondary),
             ],
           ],
         ),
@@ -175,7 +173,10 @@ class AppListRow extends StatelessWidget {
     );
 
     final content = marked
-        ? ColoredBox(color: AppColors.marker.resolveFrom(context), child: row)
+        ? ColoredBox(
+            color: AppColors.accentSoft.resolveFrom(context),
+            child: row,
+          )
         : row;
 
     if (onTap == null) {

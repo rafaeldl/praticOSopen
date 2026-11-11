@@ -38,7 +38,7 @@ import { api, can, session } from '@/lib/session'
 import { formatPhone } from '@/lib/phone'
 import { isMac } from '@/lib/shortcuts'
 import { featureOn } from '@/lib/company-features'
-import { segmentFieldService } from '@/lib/segments'
+import { productWord, segmentFieldService } from '@/lib/segments'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 
@@ -49,6 +49,8 @@ interface Line {
   quantity: number
   /** Outside the catalog ("+ Usar «texto» nesta OS"): added after the order exists, by POST /items without catalogId. */
   free?: boolean
+  /** What only this line has ("Lateral esquerda"); undefined until "+ Descrição". Not on free lines: their name is the description. */
+  description?: string
 }
 
 // The full forms behind "Mais dados" and the order's "+ WhatsApp" / "+ Placa" (order.quick.*), with the cadastros' texts.
@@ -69,6 +71,8 @@ const mostUsed = shallowRef<string[]>([])
 const customer = ref<Customer | null>(null)
 const device = ref<Device | null>(null)
 const lines = ref<Line[]>([])
+/** The description inputs, to focus the one "+ Descrição" just opened. */
+const describeRefs: Record<string, HTMLInputElement | null> = {}
 const due = ref('')
 const request = ref('')
 const status = ref<OrderStatus>('quote')
@@ -409,13 +413,14 @@ async function save() {
     }
     // Own price only when it differs from the catalog (and only who may edit prices).
     const own = (line: Line) => (editPrices && line.value !== line.item.value ? { value: line.value } : {})
+    const described = (line: Line) => (line.description?.trim() ? { description: line.description.trim() } : {})
     const catalogLines = lines.value.filter((l) => !l.free)
     const created = await writes.createOrder({
       clientOrderId,
       customerId: customer.value.id,
       ...(device.value ? { deviceId: device.value.id } : {}),
-      services: catalogLines.filter((l) => l.item.kind === 'service').map((l) => ({ serviceId: l.item.id, ...own(l) })),
-      products: catalogLines.filter((l) => l.item.kind === 'product').map((l) => ({ productId: l.item.id, quantity: l.quantity, ...own(l) })),
+      services: catalogLines.filter((l) => l.item.kind === 'service').map((l) => ({ serviceId: l.item.id, ...own(l), ...described(l) })),
+      products: catalogLines.filter((l) => l.item.kind === 'product').map((l) => ({ productId: l.item.id, quantity: l.quantity, ...own(l), ...described(l) })),
       status: status.value,
       ...(due.value ? { dueDate: isoOrUndefined(due.value) } : {}),
       ...(visit.value ? { scheduledDate: isoOrUndefined(visit.value) } : {}),
@@ -536,7 +541,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
         </div>
         <div class="step">
           <QuickCreate v-if="quick?.kind === 'item'" id="no-quick-item" kind="item" :text="quick.text" @saved="onQuickSaved" @cancel="onQuickCancel" />
-          <Combobox v-else id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder')" :groups="itemGroups" :loading="loading" @pick="pickItem" />
+          <Combobox v-else id="no-item" ref="itemRef" :label="t('pickerItemTitle')" :placeholder="t('orderItemSearchPlaceholder', { product: productWord(t('orderItemKindPart')) })" :groups="itemGroups" :loading="loading" @pick="pickItem" />
           <ul v-if="lines.length" class="drawer-items" :aria-label="t('orderItemsSection')">
             <li v-for="line in lines" :key="line.key">
               <span><span v-if="marked.has(line.key)" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ line.item.name }} <small class="sub">{{ lineKindText(line.item.kind) }}</small></span>
@@ -544,16 +549,19 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
               <span v-else-if="showsMoney" class="num">{{ line.value === null ? t('catalogNoPrice') : money(line.value) }}</span>
               <span v-else></span>
               <button type="button" class="icon-btn" :aria-label="t('web.newOrder.removeLine', { name: line.item.name })" @click="lines = lines.filter((l) => l !== line)"><Trash2 :size="15" aria-hidden="true" /></button>
+              <!-- After the price in the Tab order: the keyboard path stays item → price → save. -->
+              <button v-if="!line.free && line.description === undefined" type="button" class="link line-desc-add" @click="line.description = ''; $nextTick(() => describeRefs[line.key]?.focus())">{{ t('web.newOrder.addDescription') }}</button>
+              <input v-if="!line.free && line.description !== undefined" :ref="(el) => (describeRefs[line.key] = el as HTMLInputElement | null)" v-model="line.description" class="field line-desc" maxlength="500" :aria-label="t('web.newOrder.descriptionOf', { name: line.item.name })" :placeholder="t('orderItemDescriptionHint')" data-testid="new-order-line-description" />
             </li>
           </ul>
         </div>
         <div class="step">
           <label class="field-label" for="no-due"><span v-if="marked.has('due')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('web.newOrder.due') }}</label>
-          <input id="no-due" v-model="due" class="field" type="datetime-local" :data-empty="!due || undefined" />
+          <input id="no-due" v-model="due" class="field" type="datetime-local" :data-empty="!due || undefined" @input="marked.delete('due')" />
         </div>
         <div class="step">
           <label class="field-label" for="no-request"><span v-if="marked.has('request')" class="ai" :title="t('orderAssistantMarked')">✦ </span>{{ t('orderCustomerRequestTitle') }}</label>
-          <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
+          <textarea id="no-request" v-model="request" class="field" rows="2" maxlength="2000" @input="marked.delete('request')" :placeholder="t('orderCustomerRequestPlaceholder', { segment: session.company?.segment ?? 'other' })"></textarea>
         </div>
         <NewOrderPhotos v-if="can('attachPhotos')" v-model="photos" />
         <NewOrderCustomFields v-if="customFields.length" :values="customValues" :tried="customTried" />

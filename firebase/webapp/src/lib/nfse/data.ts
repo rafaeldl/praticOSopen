@@ -4,6 +4,7 @@
 import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
+import { ordersPage, type OrderRow } from '@/lib/orders-query'
 import { invoiceOf, queryUntil, querySince, type Contact, type FiscalInfo, type MunicipalService, type NfseInvoice, type NfseSetup, type Preview, type ServiceSettings } from './model'
 
 export interface NfseSettings {
@@ -120,16 +121,28 @@ export const saveFiscalInfo = (body: Required<Pick<FiscalInfo, 'email'>> & { sim
 export const municipalServices = (q: string) => api<MunicipalService[]>(`/v1/app/nfse/setup/municipal-services?q=${encodeURIComponent(q.slice(0, 100))}`)
 export const saveService = (body: ServiceSettings) => api<NfseSetup>('/v1/app/nfse/setup/service', { method: 'PUT', body })
 
+/** Orders read per page for "várias OS": a customer can have thousands, the nota takes the recent ones. */
+export const NFSE_ORDERS_PAGE = 50
+
+export interface NfseOrdersPage {
+  orders: { id: string; number?: number; createdAt?: string | null; order: Order }[]
+  /** Cursor for the next page (the last raw row read). */
+  last: OrderRow | null
+  /** The page came full: there may be older orders. */
+  hasMore: boolean
+}
+
 /**
- * The customer's orders with their lines, for "várias OS" (nfse.orders.pick):
- * eligibility is the services' value, as the app (B7). Read by who issues
- * (chargeOrder: owner, admin, manager), who see values.
+ * The customer's orders with their lines, for "várias OS" (nfse.orders.pick),
+ * newest first, one page at a time (pass the previous page's `last` for the
+ * next): eligibility is the services' value, as the app (B7). Read by who
+ * issues (chargeOrder: owner, admin, manager), who see values.
  */
-export async function customerOrdersForNfse(customerId: string): Promise<{ id: string; number?: number; createdAt?: string | null; order: Order }[]> {
-  const [db, { collection, getDocs, limit, query, where }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-  const snap = await getDocs(query(collection(db, 'companies', session.companyId as string, 'orders'), where('customer.id', '==', customerId), limit(500)))
-  return snap.docs.map((d) => {
-    const order = normalizeOrder(d.id, d.data(), true)
-    return { id: d.id, number: order.number, createdAt: order.createdAt, order }
+export async function customerOrdersForNfse(customerId: string, after?: OrderRow | null, size = NFSE_ORDERS_PAGE): Promise<NfseOrdersPage> {
+  const rows = await ordersPage({ companyId: session.companyId as string, createdBy: null, where: [['customer.id', '==', customerId]] }, size, after ?? undefined)
+  const orders = rows.map((row) => {
+    const order = normalizeOrder(row.id, row, true)
+    return { id: row.id, number: order.number, createdAt: order.createdAt, order }
   })
+  return { orders, last: rows.at(-1) ?? null, hasMore: rows.length === size }
 }

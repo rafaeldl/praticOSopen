@@ -103,7 +103,30 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o depósito é 200”",
             "Cliente, endereço e serviço numa OS só"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Restaurante do Paulo",
+            "vehicle": "Rua Augusta, 410",
+            "vehicleEmpty": "Escolher local",
+            "deviceIcon": "place",
+            "line": "restaurante do Paulo, dedetização da cozinha e do depósito",
+            "items": [
+              {
+                "name": "Dedetização da cozinha",
+                "price": "R$ 280,00"
+              },
+              {
+                "name": "Dedetização do depósito",
+                "price": "R$ 160,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 280,00",
+              "R$ 440,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,57 @@
             "A semana inteira à vista, com o horário de cada visita",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda da semana com o lembrete do próximo atendimento",
+            "title": "Agenda",
+            "month": "Novembro de 2026",
+            "days": [
+              "S",
+              "T",
+              "Q",
+              "Q",
+              "S",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Terça-feira, 10 de novembro · 2 marcados",
+            "rows": [
+              {
+                "name": "Restaurante do Paulo",
+                "time": "09:00",
+                "status": "Aprovada · OS 394",
+                "kind": "approved",
+                "sub": "Rua Augusta, 410 · com Bruno"
+              },
+              {
+                "name": "Padaria Pão Quente",
+                "time": "14:30",
+                "status": "Orçamento · OS 395",
+                "kind": "quote",
+                "sub": "Av. Brasil, 1200 · com Bruno"
+              }
+            ],
+            "notifyTitle": "Lembrete de agendamento",
+            "notifyBody": "Restaurante do Paulo às 09:00 · Rua Augusta, 410",
+            "now": "agora"
+          }
         },
         {
           "number": "03",
@@ -125,7 +198,38 @@
             "Monte do seu jeito, com os itens que você precisa",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as visitas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Registro da aplicação com fotos: Praga alvo, Baratas",
+            "back": "OS 394",
+            "title": "Registro da aplicação",
+            "progress": "6 de 8 respondidas",
+            "items": [
+              {
+                "q": "Praga alvo",
+                "a": "Baratas",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Produto",
+                "a": "Gel inseticida",
+                "flag": false
+              },
+              {
+                "q": "Lote",
+                "a": "L-2408",
+                "flag": false
+              },
+              {
+                "q": "Áreas tratadas",
+                "a": "Cozinha e depósito",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "04",
@@ -136,7 +240,30 @@
             "O sim do cliente fica guardado",
             "PDF com o checklist preenchido e as fotos",
             "Cliente acompanha o andamento sem ligar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 394",
+            "client": "Restaurante do Paulo",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Dedetização da cozinha",
+                "price": "R$ 280,00"
+              },
+              {
+                "name": "Dedetização do depósito",
+                "price": "R$ 200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 480,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -148,10 +275,59 @@
             "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.200 de 3 clientes",
+            "nextSub": "Restaurante Sabor da Vila deve R$ 480 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Restaurante Sabor da Vila",
+                "amount": "R$ 480",
+                "sub": "OS 390 · desde 02/10"
+              },
+              {
+                "name": "Restaurante do Paulo",
+                "amount": "R$ 480",
+                "sub": "OS 394 · desde 28/10"
+              },
+              {
+                "name": "Padaria Pão Quente",
+                "amount": "R$ 240",
+                "sub": "OS 395 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #394",
+        "client": "Restaurante do Paulo",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Dedetização da cozinha",
+            "price": "R$ 280,00"
+          },
+          {
+            "name": "Dedetização do depósito",
+            "price": "R$ 200,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 480,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para paulo@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Perguntas de quem tem dedetizadora",
@@ -283,7 +459,30 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the storeroom is 200”",
             "Client, address and service on one work order"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Paulo's Restaurant",
+            "vehicle": "410 Augusta St",
+            "vehicleEmpty": "Choose location",
+            "deviceIcon": "place",
+            "line": "Paulo's restaurant, kitchen and storeroom treatment",
+            "items": [
+              {
+                "name": "Kitchen treatment",
+                "price": "$280.00"
+              },
+              {
+                "name": "Storeroom treatment",
+                "price": "$160.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$280.00",
+              "$440.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +493,57 @@
             "The whole week in view, with every visit's time",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Week schedule with the reminder for the next visit",
+            "title": "Schedule",
+            "month": "November 2026",
+            "days": [
+              "M",
+              "T",
+              "W",
+              "T",
+              "F",
+              "S",
+              "S"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Tuesday, November 10 · 2 scheduled",
+            "rows": [
+              {
+                "name": "Paulo's Restaurant",
+                "time": "9:00 AM",
+                "status": "Approved · WO 394",
+                "kind": "approved",
+                "sub": "410 Augusta St · with Ben"
+              },
+              {
+                "name": "Sunrise Bakery",
+                "time": "2:30 PM",
+                "status": "Quote · WO 395",
+                "kind": "quote",
+                "sub": "1200 Main St · with Ben"
+              }
+            ],
+            "notifyTitle": "Appointment reminder",
+            "notifyBody": "Paulo's Restaurant at 9:00 AM · 410 Augusta St",
+            "now": "now"
+          }
         },
         {
           "number": "03",
@@ -305,7 +554,38 @@
             "Build it your way, with the items you need",
             "Photos on every checklist item",
             "One template for every visit"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Treatment record with photos: Target pest, Cockroaches",
+            "back": "WO 394",
+            "title": "Treatment record",
+            "progress": "6 of 8 answered",
+            "items": [
+              {
+                "q": "Target pest",
+                "a": "Cockroaches",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Product",
+                "a": "Insecticide gel",
+                "flag": false
+              },
+              {
+                "q": "Batch",
+                "a": "L-2408",
+                "flag": false
+              },
+              {
+                "q": "Treated areas",
+                "a": "Kitchen and storeroom",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "04",
@@ -316,7 +596,30 @@
             "The client's yes is kept on file",
             "PDF with the completed checklist and photos",
             "Clients follow progress without calling"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 394",
+            "client": "Paulo's Restaurant",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Kitchen treatment",
+                "price": "$280.00"
+              },
+              {
+                "name": "Storeroom treatment",
+                "price": "$200.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$480.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "05",
@@ -328,8 +631,32 @@
             "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "financial.png",
-          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,200 to collect from 3 customers",
+            "nextSub": "Village Kitchen Diner owes $480 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Village Kitchen Diner",
+                "amount": "$480",
+                "sub": "WO 390 · since 10/02"
+              },
+              {
+                "name": "Paulo's Restaurant",
+                "amount": "$480",
+                "sub": "WO 394 · since 10/28"
+              },
+              {
+                "name": "Sunrise Bakery",
+                "amount": "$240",
+                "sub": "WO 395 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +790,30 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “el depósito es 200”",
             "Cliente, dirección y servicio en una sola orden"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Restaurante de Paulo",
+            "vehicle": "Calle Augusta 410",
+            "vehicleEmpty": "Elegir lugar",
+            "deviceIcon": "place",
+            "line": "restaurante de Paulo, fumigación de la cocina y el depósito",
+            "items": [
+              {
+                "name": "Fumigación de la cocina",
+                "price": "$ 280,00"
+              },
+              {
+                "name": "Fumigación del depósito",
+                "price": "$ 160,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 280,00",
+              "$ 440,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +824,57 @@
             "Toda la semana a la vista, con el horario de cada visita",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
-          ]
+          ],
+          "scene": {
+            "kind": "schedule",
+            "label": "Agenda de la semana con el recordatorio de la próxima visita",
+            "title": "Agenda",
+            "month": "Noviembre de 2026",
+            "days": [
+              "L",
+              "M",
+              "M",
+              "J",
+              "V",
+              "S",
+              "D"
+            ],
+            "dates": [
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "pick": 1,
+            "dots": [
+              0,
+              1,
+              3
+            ],
+            "dayLine": "Martes, 10 de noviembre · 2 agendados",
+            "rows": [
+              {
+                "name": "Restaurante de Paulo",
+                "time": "09:00",
+                "status": "Aprobada · OS 394",
+                "kind": "approved",
+                "sub": "Calle Augusta 410 · con Bruno"
+              },
+              {
+                "name": "Panadería El Trigo",
+                "time": "14:30",
+                "status": "Presupuesto · OS 395",
+                "kind": "quote",
+                "sub": "Av. Brasil 1200 · con Bruno"
+              }
+            ],
+            "notifyTitle": "Recordatorio de cita",
+            "notifyBody": "Restaurante de Paulo a las 09:00 · Calle Augusta 410",
+            "now": "ahora"
+          }
         },
         {
           "number": "03",
@@ -485,7 +885,38 @@
             "Ármalo a tu manera, con los ítems que necesitas",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las visitas"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Registro de aplicación con fotos: Plaga, Cucarachas",
+            "back": "OS 394",
+            "title": "Registro de aplicación",
+            "progress": "6 de 8 respondidas",
+            "items": [
+              {
+                "q": "Plaga",
+                "a": "Cucarachas",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Producto",
+                "a": "Gel insecticida",
+                "flag": false
+              },
+              {
+                "q": "Lote",
+                "a": "L-2408",
+                "flag": false
+              },
+              {
+                "q": "Áreas tratadas",
+                "a": "Cocina y depósito",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "04",
@@ -496,7 +927,30 @@
             "El sí del cliente queda guardado",
             "PDF con el checklist completado y las fotos",
             "El cliente sigue el avance sin llamar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 394",
+            "client": "Restaurante de Paulo",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Fumigación de la cocina",
+                "price": "$ 280,00"
+              },
+              {
+                "name": "Fumigación del depósito",
+                "price": "$ 200,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 480,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "05",
@@ -508,8 +962,32 @@
             "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.200 de 3 clientes",
+            "nextSub": "Restaurante Sabor del Barrio debe $ 480 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Restaurante Sabor del Barrio",
+                "amount": "$ 480",
+                "sub": "OS 390 · desde 02/10"
+              },
+              {
+                "name": "Restaurante de Paulo",
+                "amount": "$ 480",
+                "sub": "OS 394 · desde 28/10"
+              },
+              {
+                "name": "Panadería El Trigo",
+                "amount": "$ 240",
+                "sub": "OS 395 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

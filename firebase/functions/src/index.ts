@@ -46,6 +46,12 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     await countNewOrderPhotos(context.params.companyId, undefined, data).catch((error) =>
       console.error('Could not count the photos of the new order', error),
     );
+    await touchCustomerOfOrder(context.params.companyId, data, context.timestamp).catch((error) =>
+      console.error('Could not stamp the customer activity of the new order', error),
+    );
+    await recountCustomersOfOrder(context.params.companyId, undefined, data).catch((error) =>
+      console.error('Could not recount the customer of the new order', error),
+    );
     if (!data || data.number) return;
 
     const companyId = context.params.companyId;
@@ -161,11 +167,33 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
     await countNewOrderPhotos(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
       console.error('Could not count the new photos of the order', error),
     );
+    await touchCustomerOfOrder(companyId, event.data?.after.data(), event.time).catch((error) =>
+      console.error('Could not stamp the customer activity of the order', error),
+    );
+    await recountCustomersOfOrder(companyId, event.data?.before.data(), event.data?.after.data()).catch((error) =>
+      console.error('Could not recount the customers of the order', error),
+    );
     await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
   }
 );
 
 import { cleanupDeletedOrder } from './services/order-cleanup.service';
+import { touchCustomerOfOrder, touchCustomerOnWrite } from './services/customer-activity.service';
+import { recountCustomersOfOrder } from './services/customer-aggregates.service';
+
+/**
+ * [V2] Customer activity (services/customer-activity.service.ts): created or
+ * edited stamps `lastActivityAt`, which orders the customer list by the most
+ * recent. The order triggers above stamp it too. A write of only the date
+ * stops here, so this does not loop.
+ */
+export const onCustomerWrittenActivity = onDocumentWritten(
+  { document: 'companies/{companyId}/customers/{customerId}', region: 'southamerica-east1' },
+  async (event) => {
+    const { companyId, customerId } = event.params;
+    await touchCustomerOnWrite(companyId, customerId, event.data?.before.data(), event.data?.after.data(), event.time);
+  }
+);
 
 /**
  * [V2] Plan usage counters kept by the server (services/usage-counter.service.ts):
@@ -213,6 +241,9 @@ export const onOrderDeletedCleanup = onDocumentDeleted(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
+    await recountCustomersOfOrder(companyId, event.data?.data(), undefined).catch((error) =>
+      console.error('Could not recount the customer of the deleted order', error),
+    );
     await cleanupDeletedOrder(companyId, orderId);
   }
 );
@@ -225,6 +256,7 @@ import { expireSubscriptions, resetMonthlyUsage } from './services/subscription.
 import { sendCourtesyNotices } from './services/courtesy-notice.service';
 import { sendMaintenanceNotices } from './services/maintenance-notice.service';
 import { fetchSubscriber } from './services/revenuecat.client';
+import { handleCompanyWrittenNfseAccess, reconcileNfseAccess } from './services/nfse/nfse-access.service';
 
 /**
  * Scheduled function to reset monthly usage counters for subscriptions.
@@ -271,6 +303,28 @@ export const scheduledExpireSubscriptions = onSchedule(
       fetchSubscriber: (companyId) => fetchSubscriber(companyId, apiKey),
     });
     console.log(`[Scheduled] Subscription expiry completed. ${expired} companies moved to Free.`);
+    // Backstop of onCompanyWrittenNfseAccess: the nota follows the plan
+    // (docs/NFSE_DIRECT.md, "Quem tem a nota").
+    await reconcileNfseAccess(new Date()).catch((error) =>
+      console.error('[Scheduled] NFS-e access reconcile failed', error),
+    );
+  }
+);
+
+/**
+ * The NFS-e direct comes with the paid plans and the courtesy
+ * (services/nfse/nfse-access.service.ts): when a company's plan or country
+ * changes, settings/payments.nfseDirectEnabled is turned on or off. A key set
+ * by hand is never touched. Other writes of the company return at once.
+ */
+export const onCompanyWrittenNfseAccess = onDocumentWritten(
+  { document: 'companies/{companyId}', region: 'southamerica-east1' },
+  async (event) => {
+    await handleCompanyWrittenNfseAccess(
+      event.params.companyId,
+      event.data?.before.data(),
+      event.data?.after.data(),
+    );
   }
 );
 
@@ -736,7 +790,9 @@ app.use(globalErrorHandler);
 export const api = onRequest(
   {
     region: 'southamerica-east1',
-    memory: '256MiB',
+    // Slack only: lists of big companies read in pages with select() (app-directory, app-finance).
+    // At 256MiB the Clientes list of a company with ~3.000 open orders went past it and took the instance down.
+    memory: '512MiB',
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
@@ -785,4 +841,4 @@ export const accountApi = onRequest(
 
 // NFS-e direta: the only functions that open the A1 certificates, with their
 // own service account (nfse-api@, docs/NFSE_DIRECT.md "Cloud KMS").
-export { nfseApi, nfseDaily } from './nfse-api';
+export { nfseApi, nfseAutoIssue, nfseDaily } from './nfse-api';

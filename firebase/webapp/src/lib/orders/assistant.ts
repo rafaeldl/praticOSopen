@@ -4,7 +4,7 @@
 import { locale } from '@/i18n'
 import { api, session } from '@/lib/session'
 import type { Order } from './model'
-import { normalizeDraft, type AssistDraft } from './assist-draft'
+import { normalizeDraft, type AssistContext, type AssistDraft } from './assist-draft'
 
 export interface AssistStatus {
   enabled: boolean
@@ -43,6 +43,9 @@ export async function requestAssist(input: {
   /** What was said on Falar (talk.ts): webm, ogg or mp4 in base64, at most 3 MB. */
   audio?: { mimeType: string; data: string }
   lines: AssistLine[]
+  /** The last messages of this order (remember), oldest first. */
+  history?: string[]
+  context?: AssistContext
 }): Promise<AssistDraft> {
   cached = null
   const line = (l: AssistLine) => ({
@@ -61,11 +64,19 @@ export async function requestAssist(input: {
       ...(input.audio ? { audio: input.audio } : {}),
       locale: locale.value,
       ...(services.length || products.length ? { order: { services, products } } : {}),
+      ...(input.history?.length ? { history: input.history.slice(-3).map((text) => text.slice(0, 500)) } : {}),
+      ...(input.context ? { context: input.context } : {}),
     },
   })
   return normalizeDraft(raw)
 }
 
-export async function askAssistant(text: string, order: Order, photos?: { mimeType: string; data: string }[], audio?: { mimeType: string; data: string }): Promise<AssistDraft> {
-  return requestAssist({ text, photos, audio, lines: order.lines.map((l) => ({ kind: l.kind, name: l.name, description: l.description, value: l.value, quantity: l.quantity })) })
+export async function askAssistant(
+  text: string,
+  order: Order,
+  photos?: { mimeType: string; data: string }[],
+  audio?: { mimeType: string; data: string },
+  memory: { history?: string[]; context?: AssistContext } = {},
+): Promise<AssistDraft> {
+  return requestAssist({ text, photos, audio, ...memory, lines: order.lines.map((l) => ({ kind: l.kind, name: l.name, description: l.description, value: l.value, quantity: l.quantity })) })
 }

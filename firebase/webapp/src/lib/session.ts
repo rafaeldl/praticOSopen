@@ -27,6 +27,8 @@ export interface CompanyProfile {
   useDeviceManagement?: boolean
   /** Contratos on (company.settings.contracts). */
   useContracts?: boolean
+  /** Work stages inside `progress` (lib/orders/stages.ts), as stored. */
+  workStages?: unknown
 }
 
 export interface SessionState {
@@ -72,6 +74,16 @@ export const session = reactive<SessionState>({
 
 interface UserCompanyEntry {
   company?: { id?: unknown; name?: unknown }
+}
+
+/**
+ * Name of a company of the list. The `companies` copy in the user document is
+ * written when the person joins and never follows a rename, so the current
+ * company's own document wins (#612: "Rafael Laurindo" after it became "Rafsoft").
+ */
+export function companyEntryName(entry: CompanyEntry, current: { name?: string | null } | null = session.company, currentId: string | null = session.companyId): string {
+  const own = entry.id === currentId ? current?.name?.trim() : ''
+  return own || entry.name
 }
 
 /** Companies confirmed by the claim, in the order of the user document. */

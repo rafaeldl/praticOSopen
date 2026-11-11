@@ -24,6 +24,7 @@ import {
   issueDirect,
   lookupPostalCode,
   meiWarningText,
+  emailLine,
   previewDirect,
   problemText,
   recipientInput,
@@ -125,6 +126,7 @@ const recipientLine = computed(() => {
   return `${name} · ${kind} ${formatTaxId(r.taxId)}`
 })
 const meiText = computed(() => (preview.value ? meiWarningText(preview.value.meiWarning) : null))
+const mailText = computed(() => (preview.value ? emailLine(preview.value, asking.value) : null))
 const discounted = computed(() => preview.value?.orders.some((o) => o.discount > 0) ?? false)
 
 const emitterChoices = computed(() =>
@@ -344,6 +346,8 @@ const mark = () => (touched.value = true)
             <textarea id="dx-text" v-model="description" class="field" rows="4" maxlength="2000" aria-describedby="dx-info"></textarea>
             <p id="dx-info" class="sub dx-small" data-testid="nfse-info">{{ preview.complementaryInfo }}</p>
 
+            <p v-if="mailText" class="sub dx-small" data-testid="nfse-email-line">{{ mailText }}</p>
+
             <p v-if="meiText" class="dx-warning" role="note" data-testid="nfse-mei">{{ meiText }}</p>
 
             <div v-if="failure" class="field-error" role="alert" data-testid="nfse-refusal">
@@ -358,6 +362,7 @@ const mark = () => (touched.value = true)
           </template>
         </div>
         <div class="layer-foot">
+          <p v-if="busy" class="layer-progress" role="status" data-testid="nfse-issuing">{{ t('nfseIssuingProgress') }}</p>
           <button type="button" class="btn" @click="close()">{{ t('cancel') }}</button>
           <button type="submit" class="btn btn--primary" :disabled="state !== 'ready' || !!blocker || busy" data-testid="nfse-send">{{ t('web.nfse.issue') }}</button>
         </div>

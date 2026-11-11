@@ -26,6 +26,7 @@ let calls: HttpRequest[];
 let answer: (req: HttpRequest) => HttpResponse | Promise<HttpResponse>;
 let saved: Record<string, string>;
 let pdfRefreshed: string[];
+let emailed: string[];
 let deps: Partial<IssueDeps>;
 
 const json = (status: number, body: unknown): HttpResponse => ({ status, body: JSON.stringify(body) });
@@ -79,6 +80,7 @@ beforeEach(() => {
   calls = [];
   saved = {};
   pdfRefreshed = [];
+  emailed = [];
   answer = () => issuedAnswer(1);
   deps = {
     now: () => now,
@@ -93,6 +95,10 @@ beforeEach(() => {
     },
     refreshPdf: async (_companyId, invoiceId) => {
       pdfRefreshed.push(invoiceId);
+    },
+    sendEmail: async (_companyId, invoiceId, kind) => {
+      emailed.push(`${kind}:${invoiceId}`);
+      return { status: 'sent', kind, to: 'nota@example.com', at: now.toISOString(), manual: false };
     },
   };
   jest.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -308,6 +314,33 @@ describe('previewDirectInvoice', () => {
   });
 });
 
+describe('e-mail to the customer (issue #611)', () => {
+  it('a failed e-mail never fails the issue nor the cancellation', async () => {
+    deps.sendEmail = async () => {
+      throw new Error('provider down');
+    };
+    const invoice = await issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps);
+    expect(invoice.status).toBe('authorized');
+    expect(invoice.emailDelivery).toBeUndefined();
+    answer = () => json(201, { eventoXmlGZipB64: gzipBase64('<evento/>') });
+    expect((await cancelDirectInvoice('c1', invoice.id, 'issueError', USER, deps)).status).toBe('canceled');
+  });
+
+  it('the issued nota carries the delivery; a refused one sends nothing', async () => {
+    const invoice = await issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps);
+    expect(invoice.emailDelivery).toMatchObject({ status: 'sent', kind: 'issued' });
+    answer = () => json(400, { erros: [{ Codigo: 'E0312', Descricao: 'Recusada' }] });
+    await codeOf(issueDirectInvoice('c1', { orderIds: ['o2'] }, USER, {}, deps));
+    expect(emailed).toEqual([`issued:${invoice.id}`]);
+  });
+
+  it('the preview says whether the nota goes by e-mail', async () => {
+    expect((await previewDirectInvoice('c1', { orderIds: ['o1'] }, deps)).emailToCustomer).toBe(true);
+    seed('companies/c1/settings/nfse', { emailToCustomer: false });
+    expect((await previewDirectInvoice('c1', { orderIds: ['o1'] }, deps)).emailToCustomer).toBe(false);
+  });
+});
+
 describe('cancelDirectInvoice', () => {
   it('registers e101101, cancels, frees the order and the year total', async () => {
     const invoice = await issueDirectInvoice('c1', { orderIds: ['o1'] }, USER, {}, deps);
@@ -316,6 +349,9 @@ describe('cancelDirectInvoice', () => {
     expect(canceled.status).toBe('canceled');
     // PDF made again, now with the "CANCELADA" watermark.
     expect(pdfRefreshed).toEqual([invoice.id, invoice.id]);
+    // The customer gets the nota and then the notice (issue #611).
+    expect(emailed).toEqual([`issued:${invoice.id}`, `canceled:${invoice.id}`]);
+    expect(canceled.emailDelivery).toMatchObject({ status: 'sent', kind: 'canceled' });
     expect(read(`companies/c1/invoices/${invoice.id}`)).toMatchObject({ status: 'canceled', cancelReason: 'issueError' });
     expect(read('companies/c1/private/nfse/orders/o1')).toBeUndefined();
     expect((read('companies/c1/fiscalEmitters/e1')!.totals as { yearValue: number }).yearValue).toBe(0);

@@ -103,7 +103,30 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “a limpeza é 150”",
             "Ou tire foto da etiqueta ou do pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Moura",
+            "vehicle": "Notebook Dell",
+            "vehicleEmpty": "Escolher equipamento",
+            "deviceIcon": "laptop",
+            "line": "Notebook Dell do Ricardo, lento e esquentando, limpeza interna e troca de pasta térmica",
+            "items": [
+              {
+                "name": "Limpeza interna",
+                "price": "R$ 120,00"
+              },
+              {
+                "name": "Troca de pasta térmica",
+                "price": "R$ 80,00"
+              }
+            ],
+            "totals": [
+              "R$ 0,00",
+              "R$ 120,00",
+              "R$ 200,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -114,7 +137,38 @@
             "Liga? Tela funciona? Avarias e acessórios",
             "Senha de acesso dentro da OS, longe do post-it",
             "Processador, memória e armazenamento anotados"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada com fotos: Carcaça, Trinca na tampa",
+            "back": "OS 741",
+            "title": "Checklist de entrada",
+            "progress": "6 de 9 respondidas",
+            "items": [
+              {
+                "q": "Carcaça",
+                "a": "Trinca na tampa",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Liga",
+                "a": "Sim",
+                "flag": false
+              },
+              {
+                "q": "Tela",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Carregador",
+                "a": "Deixado",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "03",
@@ -125,7 +179,30 @@
             "Aprovação do cliente guardada para qualquer dúvida",
             "Seus termos de garantia e retirada antes da aprovação",
             "PDF da OS para imprimir ou enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "O cliente abre a OS no celular e aprova o orçamento",
+            "url": "praticos.app",
+            "title": "OS 741",
+            "client": "Ricardo Moura",
+            "status": "Orçamento",
+            "line": "Aguardando sua aprovação",
+            "items": [
+              {
+                "name": "Limpeza interna",
+                "price": "R$ 150,00"
+              },
+              {
+                "name": "Troca de pasta térmica",
+                "price": "R$ 80,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "R$ 230,00",
+            "button": "Aprovar orçamento",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -136,7 +213,38 @@
             "Backup, sistema, drivers e dados restaurados",
             "Temperatura antes e depois da limpeza",
             "Ache qualquer equipamento pelo número de série"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Limpeza interna com fotos: Temperatura antes, 92 °C",
+            "back": "OS 741",
+            "title": "Limpeza interna",
+            "progress": "8 de 10 respondidas",
+            "items": [
+              {
+                "q": "Temperatura antes",
+                "a": "92 °C",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Temperatura depois",
+                "a": "61 °C",
+                "flag": false
+              },
+              {
+                "q": "Pasta térmica",
+                "a": "Trocada",
+                "flag": false
+              },
+              {
+                "q": "Backup",
+                "a": "Feito",
+                "flag": false
+              }
+            ],
+            "add": "Tirar foto"
+          }
         },
         {
           "number": "05",
@@ -148,10 +256,59 @@
             "Quem deve há mais tempo aparece primeiro",
             "Relatório do mês com o que entrou"
           ],
-          "image": "financial.png",
-          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
+          "scene": {
+            "kind": "receive",
+            "label": "Financeiro mostra quanto falta receber e de quem",
+            "title": "Financeiro",
+            "next": "Falta receber R$ 1.000 de 3 clientes",
+            "nextSub": "Fernanda Costa deve R$ 590 desde 02/10",
+            "button": "Mandar cobrança",
+            "section": "Falta receber",
+            "rows": [
+              {
+                "name": "Fernanda Costa",
+                "amount": "R$ 590",
+                "sub": "OS 737 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Moura",
+                "amount": "R$ 230",
+                "sub": "OS 741 · desde 28/10"
+              },
+              {
+                "name": "Thiago Reis",
+                "amount": "R$ 180",
+                "sub": "OS 742 · desde 05/11"
+              }
+            ]
+          }
         }
-      ]
+      ],
+      "invoice": {
+        "kind": "invoice",
+        "label": "OS concluída com a nota fiscal emitida e enviada para o e-mail do cliente",
+        "back": "Início",
+        "title": "OS #741",
+        "client": "Ricardo Moura",
+        "status": "Concluída",
+        "items": [
+          {
+            "name": "Limpeza interna",
+            "price": "R$ 150,00"
+          },
+          {
+            "name": "Troca de pasta térmica",
+            "price": "R$ 80,00"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 230,00",
+        "invoice": "Nota fiscal",
+        "invoiceStatus": "Emitida · nº 29",
+        "pdf": "PDF",
+        "email": "E-mail ao cliente",
+        "emailSent": "Enviada para ricardo@email.com em 08/11"
+      }
     },
     "faq": {
       "title": "Antes de usar na sua assistência",
@@ -283,7 +440,30 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the cleaning is 150”",
             "Or take a photo of the label or the written request"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Moura",
+            "vehicle": "Dell laptop",
+            "vehicleEmpty": "Choose machine",
+            "deviceIcon": "laptop",
+            "line": "Ricardo’s Dell laptop, slow and overheating, internal cleaning and thermal paste",
+            "items": [
+              {
+                "name": "Internal cleaning",
+                "price": "$120.00"
+              },
+              {
+                "name": "Thermal paste replacement",
+                "price": "$80.00"
+              }
+            ],
+            "totals": [
+              "$0.00",
+              "$120.00",
+              "$200.00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -294,7 +474,38 @@
             "Powers on? Screen works? Damage and accessories",
             "Login password inside the order, not on a sticky note",
             "Processor, memory and storage noted down"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Check-in checklist with photos: Case, Cracked lid",
+            "back": "WO 741",
+            "title": "Check-in checklist",
+            "progress": "6 of 9 answered",
+            "items": [
+              {
+                "q": "Case",
+                "a": "Cracked lid",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Powers on",
+                "a": "Yes",
+                "flag": false
+              },
+              {
+                "q": "Screen",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Charger",
+                "a": "Left",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "03",
@@ -305,7 +516,30 @@
             "Customer approval kept on hand in case of any doubt",
             "Your warranty and pickup terms before approval",
             "Work order PDF to print or send"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "The customer opens the order on their phone and approves the quote",
+            "url": "praticos.app",
+            "title": "WO 741",
+            "client": "Ricardo Moura",
+            "status": "Quote",
+            "line": "Waiting for your approval",
+            "items": [
+              {
+                "name": "Internal cleaning",
+                "price": "$150.00"
+              },
+              {
+                "name": "Thermal paste replacement",
+                "price": "$80.00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$230.00",
+            "button": "Approve quote",
+            "comment": "Comment"
+          }
         },
         {
           "number": "04",
@@ -316,7 +550,38 @@
             "Backup, OS, drivers and data restored",
             "Temperature before and after cleaning",
             "Find any machine by serial number"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Internal cleaning with photos: Temperature before, 92 °C",
+            "back": "WO 741",
+            "title": "Internal cleaning",
+            "progress": "8 of 10 answered",
+            "items": [
+              {
+                "q": "Temperature before",
+                "a": "92 °C",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Temperature after",
+                "a": "61 °C",
+                "flag": false
+              },
+              {
+                "q": "Thermal paste",
+                "a": "Replaced",
+                "flag": false
+              },
+              {
+                "q": "Backup",
+                "a": "Done",
+                "flag": false
+              }
+            ],
+            "add": "Take photo"
+          }
         },
         {
           "number": "05",
@@ -328,8 +593,32 @@
             "Whoever has owed the longest shows up first",
             "Monthly report of what came in"
           ],
-          "image": "financial.png",
-          "alt": "Financial with how much is left to collect and the button to send a payment request"
+          "scene": {
+            "kind": "receive",
+            "label": "Financial shows how much is left to collect and from whom",
+            "title": "Financial",
+            "next": "$1,000 to collect from 3 customers",
+            "nextSub": "Jennifer Collins owes $590 since 10/02",
+            "button": "Send payment request",
+            "section": "To collect",
+            "rows": [
+              {
+                "name": "Jennifer Collins",
+                "amount": "$590",
+                "sub": "WO 737 · since 10/02"
+              },
+              {
+                "name": "Ricardo Moura",
+                "amount": "$230",
+                "sub": "WO 741 · since 10/28"
+              },
+              {
+                "name": "Tyler Reese",
+                "amount": "$180",
+                "sub": "WO 742 · since 11/05"
+              }
+            ]
+          }
         }
       ]
     },
@@ -463,7 +752,30 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “la limpieza es 150”",
             "O saca una foto de la etiqueta o del pedido anotado"
-          ]
+          ],
+          "scene": {
+            "kind": "talk",
+            "client": "Ricardo Mora",
+            "vehicle": "Notebook Dell",
+            "vehicleEmpty": "Elegir equipo",
+            "deviceIcon": "laptop",
+            "line": "Notebook Dell de Ricardo, lenta y calentando, limpieza interna y cambio de pasta térmica",
+            "items": [
+              {
+                "name": "Limpieza interna",
+                "price": "$ 120,00"
+              },
+              {
+                "name": "Cambio de pasta térmica",
+                "price": "$ 80,00"
+              }
+            ],
+            "totals": [
+              "$ 0,00",
+              "$ 120,00",
+              "$ 200,00"
+            ]
+          }
         },
         {
           "number": "02",
@@ -474,7 +786,38 @@
             "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
             "Contraseña dentro de la orden, no en un papelito",
             "Procesador, memoria y almacenamiento anotados"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Checklist de entrada con fotos: Carcasa, Tapa rajada",
+            "back": "OS 741",
+            "title": "Checklist de entrada",
+            "progress": "6 de 9 respondidas",
+            "items": [
+              {
+                "q": "Carcasa",
+                "a": "Tapa rajada",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Enciende",
+                "a": "Sí",
+                "flag": false
+              },
+              {
+                "q": "Pantalla",
+                "a": "OK",
+                "flag": false
+              },
+              {
+                "q": "Cargador",
+                "a": "Dejado",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "03",
@@ -485,7 +828,30 @@
             "Aprobación del cliente guardada ante cualquier duda",
             "Tus términos de garantía y retiro antes de aprobar",
             "PDF de la OS para imprimir o enviar"
-          ]
+          ],
+          "scene": {
+            "kind": "approve",
+            "label": "El cliente abre la orden en el celular y aprueba el presupuesto",
+            "url": "praticos.app",
+            "title": "OS 741",
+            "client": "Ricardo Mora",
+            "status": "Presupuesto",
+            "line": "Esperando tu aprobación",
+            "items": [
+              {
+                "name": "Limpieza interna",
+                "price": "$ 150,00"
+              },
+              {
+                "name": "Cambio de pasta térmica",
+                "price": "$ 80,00"
+              }
+            ],
+            "totalLabel": "Total",
+            "total": "$ 230,00",
+            "button": "Aprobar presupuesto",
+            "comment": "Comentar"
+          }
         },
         {
           "number": "04",
@@ -496,7 +862,38 @@
             "Backup, sistema, drivers y datos restaurados",
             "Temperatura antes y después de la limpieza",
             "Encuentra cualquier equipo por número de serie"
-          ]
+          ],
+          "scene": {
+            "kind": "record",
+            "label": "Limpieza interna con fotos: Temperatura antes, 92 °C",
+            "back": "OS 741",
+            "title": "Limpieza interna",
+            "progress": "8 de 10 respondidas",
+            "items": [
+              {
+                "q": "Temperatura antes",
+                "a": "92 °C",
+                "flag": true,
+                "photos": 2
+              },
+              {
+                "q": "Temperatura después",
+                "a": "61 °C",
+                "flag": false
+              },
+              {
+                "q": "Pasta térmica",
+                "a": "Cambiada",
+                "flag": false
+              },
+              {
+                "q": "Backup",
+                "a": "Hecho",
+                "flag": false
+              }
+            ],
+            "add": "Tomar foto"
+          }
         },
         {
           "number": "05",
@@ -508,8 +905,32 @@
             "Quien debe hace más tiempo aparece primero",
             "Informe del mes con lo que entró"
           ],
-          "image": "financial.png",
-          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
+          "scene": {
+            "kind": "receive",
+            "label": "Financiero muestra cuánto falta cobrar y a quién",
+            "title": "Financiero",
+            "next": "Falta cobrar $ 1.000 de 3 clientes",
+            "nextSub": "Fernanda Costa debe $ 590 desde 02/10",
+            "button": "Enviar cobro",
+            "section": "Falta cobrar",
+            "rows": [
+              {
+                "name": "Fernanda Costa",
+                "amount": "$ 590",
+                "sub": "OS 737 · desde 02/10"
+              },
+              {
+                "name": "Ricardo Mora",
+                "amount": "$ 230",
+                "sub": "OS 741 · desde 28/10"
+              },
+              {
+                "name": "Tiago Reyes",
+                "amount": "$ 180",
+                "sub": "OS 742 · desde 05/11"
+              }
+            ]
+          }
         }
       ]
     },

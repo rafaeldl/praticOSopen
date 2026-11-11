@@ -20,6 +20,11 @@ module.exports = function(eleventyConfig) {
     return obj;
   });
 
+  // Shallow merge of two objects ({{ a | merge(b) }}): b's keys win
+  eleventyConfig.addFilter("merge", function(a, b) {
+    return Object.assign({}, a, b);
+  });
+
   // Custom filter to get relative path prefix based on depth
   eleventyConfig.addFilter("relPath", function(url) {
     const depth = (url.match(/\//g) || []).length - 1;
@@ -74,6 +79,15 @@ module.exports = function(eleventyConfig) {
   // Segment links behind a flag (segments.json "flag") show only when site.flags turns it on
   eleventyConfig.addFilter("enabledLinks", function(links, flags) {
     return (links || []).filter((link) => !link.flag || (flags && flags[link.flag]));
+  });
+
+  // An entry with `flag` shows only when that flag is on; with `hideWhenFlag`, only while it is off
+  eleventyConfig.addFilter("flagShown", function(entry, flags) {
+    const on = (name) => Boolean(flags && flags[name]);
+    if (!entry) return false;
+    if (entry.flag && !on(entry.flag)) return false;
+    if (entry.hideWhenFlag && on(entry.hideWhenFlag)) return false;
+    return true;
   });
 
   // Format a date as YYYY-MM-DD for sitemap <lastmod>

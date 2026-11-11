@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 // The audit is split in four tests per theme (screens, open order, order lists, components):
@@ -102,6 +102,8 @@ async function auditComponents(page: Page, theme: Theme) {
 
 for (const [theme, name] of [['light', 'claro'], ['dark', 'escuro']] as const) {
   test(`axe: 0 violações no tema ${name}: telas`, async ({ page }) => {
+    // Many screens and axe runs; the first test of a shard starts cold (~23 s on master).
+    test.setTimeout(60_000)
     await auditScreens(page, theme)
   })
 
@@ -110,6 +112,7 @@ for (const [theme, name] of [['light', 'claro'], ['dark', 'escuro']] as const) {
   })
 
   test(`axe: 0 violações no tema ${name}: lista, quadro e Nova OS`, async ({ page }) => {
+    test.setTimeout(60_000)
     await auditOrderLists(page, theme)
   })
 

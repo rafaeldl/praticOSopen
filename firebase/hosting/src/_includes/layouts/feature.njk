@@ -46,11 +46,18 @@ pageType: feature
             <figcaption>{{ data.hero.demoCaption }}</figcaption>
         </figure>
         {% else %}
-        <figure class="shot fx-hero__shot">
-            <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/ai-order.png" alt="{{ data.hero.shotAlt }}" width="820" height="1240" decoding="async">
-            <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/ai-order.png" alt="{{ data.hero.shotAlt }}" width="820" height="1240" decoding="async" loading="lazy">
-            <figcaption>{{ data.hero.shotCaption }}</figcaption>
+        {# The app filling an order from what was said: the home's Falar scene (stage/scenes/hero,
+           short screen), on a card like the home's tab panels #}
+        {% set home = homepage[langCode] | default(homepage.pt) %}
+        <figure class="fx-hero__scene" data-stage-wrap>
+            <div class="fx-hero__stage" data-stage="hero" data-short role="img" aria-label="{{ data.hero.shotAlt }}"><script type="application/json">{{ home.hero.stage | dump | safe }}</script></div>
+            <figcaption>
+                <span>{{ data.hero.shotCaption }}</span>
+                <button class="stage-again" type="button" data-stage-replay hidden>{{ home.hero.demo.again }}</button>
+            </figcaption>
         </figure>
+        <link rel="stylesheet" href="{{ relPath }}assets/stage/shared.css">
+        <script type="module" src="{{ relPath }}assets/stage/hero.js"></script>
         {% endif %}
     </div>
 </section>

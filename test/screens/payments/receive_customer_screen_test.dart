@@ -12,6 +12,7 @@ import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/customer_statement_pdf.dart';
 import 'package:praticos/utils/financial_summary.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 
@@ -67,6 +68,7 @@ void main() {
     List<Object?>? openedOrders,
     Future<Order?> Function(String id)? reloadOrder,
     Future<PickedReceiptFile?> Function(BuildContext context)? pickReceipt,
+    List<CustomerStatementData>? statements,
   }) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
@@ -108,6 +110,9 @@ void main() {
                         canAttachReceipt: true,
                         reloadOrder: reloadOrder ?? (_) async => null,
                         pickReceipt: pickReceipt,
+                        sendStatement: statements == null
+                            ? null
+                            : (_, data) async => statements.add(data),
                       ),
                     ),
                   );
@@ -269,6 +274,62 @@ void main() {
     expect(request.allocations.map((a) => a.orderId), ['b', 'c']);
     expect(request.allocations.map((a) => a.amount), [500, 100]);
     await tester.pumpAndSettle(const Duration(seconds: 5));
+  });
+
+  group('Mandar extrato', () {
+    Future<void> sendFromMenu(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Mandar extrato'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('in the "…", with the checked orders and what each owes', (
+      tester,
+    ) async {
+      final statements = <CustomerStatementData>[];
+      await pump(tester, statements: statements);
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
+      await tester.pump();
+
+      await sendFromMenu(tester);
+
+      final data = statements.single;
+      expect(data.customerName, 'João');
+      expect([for (final o in data.orders) o.number], [190, 201]);
+      expect([for (final o in data.orders) o.open], [500, 300]);
+      expect(data.totalOpen, 800);
+    });
+
+    testWidgets('an order still being done goes when checked', (tester) async {
+      final statements = <CustomerStatementData>[];
+      final running = _order('r', 300, 200)..status = 'progress';
+      final done = _order('d', 299, 100)..status = 'done';
+      await pump(tester, orders: [done, running], statements: statements);
+
+      await sendFromMenu(tester);
+
+      final orders = statements.single.orders;
+      expect([for (final o in orders) o.number], [299, 300]);
+      expect([for (final o in orders) o.completed], [true, false]);
+    });
+
+    testWidgets('nothing checked: says so and sends nothing', (tester) async {
+      final statements = <CustomerStatementData>[];
+      await pump(
+        tester,
+        orders: [_order('a', 1, 100), _order('b', 2, 50)],
+        statements: statements,
+      );
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
+      await tester.pump();
+
+      await sendFromMenu(tester);
+
+      expect(statements, isEmpty);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+    });
   });
 
   testWidgets('nothing checked: buttons off with a hint', (tester) async {

@@ -13,7 +13,7 @@ import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import DeleteAccount from '@/components/settings/DeleteAccount.vue'
 import ProfileForm from '@/components/settings/ProfileForm.vue'
 import { t } from '@/i18n'
-import { selectCompany, session, signOutEverywhere } from '@/lib/session'
+import { companyEntryName, selectCompany, session, signOutEverywhere } from '@/lib/session'
 import { loadProfile, type Profile } from '@/lib/settings/data'
 import { displayRole, ROLE_LABEL } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
@@ -117,7 +117,7 @@ onMounted(load)
             <li v-for="item in session.companies" :key="item.id">
               <label class="check-row">
                 <input v-model="switchTo" type="radio" name="acc-company" :value="item.id" />
-                <span>{{ item.name || t('companyNoName') }} <span class="sub">· {{ roleText(item.role) }}</span></span>
+                <span>{{ companyEntryName(item) || t('companyNoName') }} <span class="sub">· {{ roleText(item.role) }}</span></span>
                 <span v-if="item.id === session.companyId" class="sub"><Check :size="16" aria-hidden="true" /><span class="sr">{{ t('web.account.current') }}</span></span>
               </label>
             </li>

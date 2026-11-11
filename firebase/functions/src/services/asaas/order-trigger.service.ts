@@ -17,10 +17,13 @@
  * - the order became paid (`payment` → 'paid', unless only the total changed
  *   or a discount closed it: no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
  *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
+ * - `status` became `done` → `requestDirectAutoIssue` (NFS-e direct only: it
+ *   just writes the request, the nfse-api issues it; services/nfse/auto-issue.service.ts);
  * - `status` entered or left `done` (every company) → `syncCompletedAt`;
  * - order marked "parada" in a status that no longer allows it (every company:
  *   bot, API, MCP and old app versions change the status without knowing the
  *   mark) → `clearOrderHold`;
+ * - order with a work stage outside `progress` → `clearOrderStage`;
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -39,7 +42,9 @@ import {
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
 import { syncCompletedAt } from '../order-completion.service';
+import { requestDirectAutoIssue } from '../nfse/auto-issue.service';
 import { clearOrderHold, holdNoLongerApplies } from '../order-hold.service';
+import { clearOrderStage, stageNoLongerApplies } from '../order-stage.service';
 
 export type OrderUpdateSnapshot = OrderPaymentState & {
   status?: string;
@@ -49,6 +54,7 @@ export type OrderUpdateSnapshot = OrderPaymentState & {
   lastPaymentAt?: string;
   completedAt?: string;
   onHold?: unknown;
+  stage?: unknown;
 };
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
@@ -96,12 +102,16 @@ export async function handleOrderUpdatedAsaas(
   }
   if (after.status === 'done' && before?.status !== 'done') {
     tasks.push(autoIssueInvoice(companyId, orderId, 'completed'));
+    tasks.push(requestDirectAutoIssue(companyId, orderId).then(() => undefined));
   }
   if ((after.status === 'done') !== (before?.status === 'done')) {
     tasks.push(syncCompletedAt(companyId, orderId, before, after, eventTime));
   }
   if (holdNoLongerApplies(after)) {
     tasks.push(clearOrderHold(companyId, orderId));
+  }
+  if (stageNoLongerApplies(after)) {
+    tasks.push(clearOrderStage(companyId, orderId));
   }
   if (tasks.length === 0) return;
 

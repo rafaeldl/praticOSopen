@@ -46,6 +46,31 @@ export interface NfseInvoice {
   cancelReason: string | null
   /** The government's refusal in plain words (direct only). */
   refusal: DirectRefusal | null
+  /** Last e-mail of the nota to the customer (direct only, issue #611). */
+  emailDelivery: EmailDelivery | null
+}
+
+/** `emailDelivery` of a direct nota: sent, failed or skipped (no e-mail, or the automatic send is off). */
+export interface EmailDelivery {
+  status: 'sent' | 'failed' | 'skipped'
+  canceled: boolean
+  to: string | null
+  at: number | null
+  reason: 'noEmail' | 'turnedOff' | null
+}
+
+export function emailDeliveryOf(value: unknown): EmailDelivery | null {
+  if (!value || typeof value !== 'object') return null
+  const d = value as Record<string, unknown>
+  const status = (['sent', 'failed', 'skipped'] as const).find((s) => s === d.status)
+  if (!status) return null
+  return {
+    status,
+    canceled: d.kind === 'canceled',
+    to: str(d.to),
+    at: millis(d.at),
+    reason: d.reason === 'noEmail' || d.reason === 'turnedOff' ? d.reason : null,
+  }
 }
 
 export type RefusalGroup = 'customerData' | 'emitterSetup' | 'certificate' | 'other'
@@ -142,6 +167,7 @@ export function invoiceOf(id: string, data: Record<string, unknown>): NfseInvoic
     pdfPath: str(data.pdfPath),
     cancelReason: str(data.cancelReason),
     refusal: refusalOf(data.refusal),
+    emailDelivery: emailDeliveryOf(data.emailDelivery),
   }
 }
 
@@ -201,6 +227,18 @@ export const byEmitter = (invoice: NfseInvoice, emitterId: string | null): boole
 
 /** "Corrigir e emitir": a refused nota of ours, with its orders. */
 export const canFix = (invoice: NfseInvoice): boolean => invoice.status === 'error' && !invoice.conflict && invoice.orderIds.length > 0
+
+/** An automatic direct nota that the server could not issue, with our reason in `errorCode` (not a refusal of the government). */
+export const isAutoDirectFailure = (invoice: NfseInvoice): boolean =>
+  invoice.provider === 'direct' && invoice.auto && invoice.status === 'error' && !!invoice.errorCode && !invoice.refusal
+
+/**
+ * An automatic direct nota that did not go out for a reason a new try may fix
+ * (daily limit, certificate renewed, service out): "Tentar novamente" issues it
+ * again with one click. Missing customer data opens the issue dialog instead (issue #571).
+ */
+export const canRetryAuto = (invoice: NfseInvoice): boolean =>
+  isAutoDirectFailure(invoice) && invoice.errorCode !== 'RECIPIENT_TAX_ID_REQUIRED' && !invoice.conflict && invoice.orderIds.length > 0
 
 export const orderNumbers = (invoice: NfseInvoice): string =>
   invoice.orders.map((o) => o.orderNumber).filter((n): n is number => n !== null).join(', ')
@@ -396,11 +434,24 @@ export const canHaveNfse = (order: NfseOrderLike): boolean => order.status !== '
  * "Corrigir e emitir" after a refused nota. Nothing with an active nota, after
  * one canceled on purpose, or before the setup is done.
  */
-export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, remaining: number, now = Date.now()): 'issue' | 'fix' | null {
+export function nfseNextStep(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, remaining: number, now = Date.now()): 'issue' | 'fix' | 'retry' | null {
   if (!ready || order.status !== 'done' || remaining > 0 || !canHaveNfse(order)) return null
   if (!current) return 'issue'
   if (isActive(current, now)) return null
+  if (canRetryAuto(current)) return 'retry'
   return current.status === 'error' ? 'fix' : null
+}
+
+/**
+ * The "Nota fiscal" row of an order without an active nota (order.nfse.issue-row):
+ * "Não emitida" when the blue step offers it (finished and paid), else "Emitir".
+ * With the NFS-e direct on any order that can have a nota (approved too: some
+ * shops issue on every order and leave it approved); otherwise finished only.
+ */
+export function nfseIssueRow(order: NfseOrderLike, current: NfseInvoice | null, ready: boolean, direct: boolean, remaining: number, now = Date.now()): 'issue' | 'notIssued' | null {
+  if (!ready || !canHaveNfse(order) || (current && isActive(current, now))) return null
+  if (order.status === 'done') return remaining <= 0 ? 'notIssued' : 'issue'
+  return direct ? 'issue' : null
 }
 
 /** Orders that may go in a nota now: can have one and no active nota (nfse.orders.pick). */

@@ -3426,11 +3426,11 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Web: linha \"Nota fiscal\" com a situação ao vivo (invoices com orderIds array-contains), abre a nota em Notas fiscais no mês dela."
+  note: "Web: linha \"Nota fiscal\" com a situação ao vivo (invoices com orderIds array-contains), abre a nota em Notas fiscais no mês dela. Nota direta automática (#571): \"Emitida sozinha\" quando saiu sozinha, e o motivo curto (\"Falta o CPF ou CNPJ do cliente\", \"Limite de notas de hoje\") quando não saiu (invoiceStatusText / nfseStatusText; tests/nfse-auto-issue.test.ts)."
 - id: order.nfse.issue-row
   screen: lib/screens/order/order_screen_v2.dart
   route: null
-  action: "Emitir pela linha \"Não emitida\""
+  action: "Emitir pela linha \"Não emitida\" (com a nota direta, também na OS aprovada)"
   kind: action
   roles: [owner, admin, manager]
   segments: all
@@ -3444,6 +3444,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
+  note: "App e web: na OS concluída, \"Não emitida\" quando o botão azul oferece, senão \"Emitir\". Com a NFS-e direta a linha \"Emitir\" aparece em qualquer OS que pode ter nota, aprovada também (#612; nfseIssueRow em lib/nfse/model.ts)."
 - id: order.delete
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3954,7 +3955,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul. Web: só para quem tem chargeOrder; o botão fica desligado enquanto grava (busy)."
+  note: "OS concluída com saldo zero e nota pronta. Corrigir e emitir quando a última nota deu erro; some com nota ativa ou cancelada de propósito. Segundo toque logo depois da troca de situação é ignorado. Concluída com saldo e papel sem direito de receber: nenhum botão azul. Web: só para quem tem chargeOrder; o botão fica desligado enquanto grava (busy). Nota direta automática que não saiu por motivo que uma nova tentativa resolve (limite, certificado, serviço fora): \"Tentar novamente\" emite na hora sem a folha (#571, canRetryAuto); falta de dado do cliente segue em Corrigir e emitir."
 - id: order.ai.money-card
   screen: lib/screens/order/assistant/ai_actions_sheet.dart
   route: null
@@ -5547,7 +5548,42 @@ rows:
   e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "No …, que só aparece com cobrança aberta e some durante uma operação. Alerta Cancelar o link de R$ X? com ação padrão Manter link de R$ X. Sucesso e erro aparecem em aviso (toast)."
+  note: "No … (o item só aparece com cobrança aberta; o … some durante uma operação). Alerta Cancelar o link de R$ X? com ação padrão Manter link de R$ X. Sucesso e erro aparecem em aviso (toast)."
+- id: pay.customer.statement
+  screen: lib/screens/payments/receive_customer_screen.dart
+  route: null
+  action: "Mandar extrato (OS não pagas, texto e PDF opcional)"
+  kind: action
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: ["useFinancial"]
+  hardware: [share_sheet]
+  data: ["companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/tests/statement.test.ts
+  web_exception: null
+  permission: null
+  note: "No … de Receber de {cliente}, com as OS marcadas. App: compartilhar do sistema com texto e PDF. Web: baixa o PDF e abre o WhatsApp do cliente com a mensagem (sem número, copia)."
+- id: pay.customer.statement.share
+  screen: lib/screens/payments/statement_share.dart
+  route: null
+  action: "Perguntar se vai o PDF, montar o extrato e compartilhar"
+  kind: flow
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [loading, error]
+  feature_flags: ["useFinancial"]
+  hardware: [share_sheet, pdf_generation]
+  data: ["companies/{id}", "companies/{id}/orders"]
+  web_status: done
+  e2e: firebase/webapp/tests/statement.test.ts
+  web_exception: null
+  note: "App: folha de ações Mandar com PDF / Só o texto; spinner num alerta enquanto o PDF é feito; erro em alerta curto, como o recibo. Web: StatementDialog com os mesmos dois botões."
 - id: pay.customer.open-order
   screen: lib/screens/payments/receive_customer_screen.dart
   route: "/order"
@@ -6200,7 +6236,7 @@ rows:
   e2e: firebase/webapp/e2e/nfse-more.spec.ts
   web_exception: null
   permission: manageCompany
-  note: "Web: link \"Configurar nota fiscal\" em Notas fiscais para quem tem manageCompany; tela em /invoices/setup."
+  note: "App: botão de engrenagem no topo de Notas fiscais abre a configuração direto (antes ficava dentro de um menu …). Web: link \"Configurar nota fiscal\" em Notas fiscais para quem tem manageCompany; tela em /invoices/setup."
 - id: nfse.list.rules
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: "/nfse_list"
@@ -6579,6 +6615,24 @@ rows:
   web_exception: null
   permission: chargeOrder
   note: "Prefeitura que não deixa cancelar por API. Web: CANCEL_NOT_SUPPORTED abre Cancele no site da prefeitura e Já cancelei na prefeitura manda onlyOnAsaas."
+- id: nfse.invoice.email
+  screen: lib/screens/nfse/nfse_invoice_screen.dart
+  route: null
+  action: "Ver para onde foi o e-mail da nota e enviar de novo"
+  kind: action
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving, error]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["companies/{id}/invoices", "api:POST /v1/app/nfse/direct/invoices/{id}/email"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: chargeOrder
+  note: "Só nota direta com XML (emitida, cancelamento negado ou cancelada). Linha E-mail ao cliente: Enviada para fulano em dd/mm, aviso de cancelamento enviado, Não deu para mandar (falha fica na nota, nunca derruba a emissão) ou por que não foi (sem e-mail, envio automático desligado). Enviar de novo manda agora, mesmo com o envio automático desligado. Web: InvoiceEmailFact.vue no painel da nota (issue #611)."
 - id: nfse.setup.view
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -7732,7 +7786,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewDevices
-  note: "Lista vem das OS do cliente (distinctVehicles), não de devices: aparelho sem OS não aparece. Subtítulo 'série · N OS'. Parcial para consultor e técnico."
+  note: "Lista vem das OS do cliente (distinctVehicles), não de devices: aparelho sem OS não aparece. Subtítulo 'série · N OS'. Parcial para consultor e técnico. Web: o aparelho da OS mais recente em cima (não por nome); 5 por vez com 'Ver todos os N' que abre no lugar, e busca (nome ou placa) com a lista aberta e mais de 10."
 - id: customer.detail.add-device
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/device_form"
@@ -7768,7 +7822,7 @@ rows:
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewCustomers
-  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite."
+  note: "Todas as OS, da mais nova para a mais velha; valores com viewPrices; abre a OS com o nome do cliente no voltar. Consultor e técnico só as próprias. Web: usa os nomes de situação do segmento. As 500 mais recentes por createdAt; acima disso a tela avisa que gastou e falta receber contam só elas (ordersTruncated). Não copiar: o app não usa os nomes de situação do segmento aqui (a tela do aparelho usa) e não tem limite. Web: 5 por vez com 'Ver todas as N OS' que abre no lugar, e busca pelo número com a lista aberta e mais de 10."
 - id: customer.detail.receipts
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null
@@ -10720,6 +10774,24 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Desligar pede confirmação; nega permissões financeiras a todos. Web: some na hora também quando a mudança vem do app ou de outra aba (companies/{id} escutado ao vivo)."
+- id: company.settings.nfse
+  screen: lib/screens/menu_navigation/more/my_company_screen.dart
+  route: null
+  action: "Abrir a configuração da nota fiscal (NFS-e direta) por Sua empresa"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["settings/payments", "companies/{id}/fiscalEmitters"]
+  web_status: todo
+  e2e: null
+  web_exception: {status: proposed, reason: "Na web, Notas fiscais fica sempre no menu lateral e o link Configurar nota fiscal aparece no topo da lista; no app, Notas fiscais só aparece no Financeiro, por isso a entrada fica também em Sua empresa."}
+  permission: manageCompany
+  note: "Linha Nota fiscal com ponto âmbar (Falta cadastrar o CNPJ / Falta terminar a configuração) ou verde (Pronta para emitir); abre NfseDirectSetupScreen. Entrada que não depende de já ter notas (achado do Piloto 1: o envio do certificado só era alcançável pelo … da lista)."
 - id: company.settings.scheduling
   screen: lib/screens/menu_navigation/more/my_company_screen.dart
   route: null
@@ -12075,6 +12147,24 @@ rows:
   web_exception: null
   permission: manageCompany
   note: "Tela de escolher (pickOne). Atrás de settings/payments.nfseDirectEnabled (desligada)."
+- id: nfse.direct.email-to-customer
+  screen: lib/screens/nfse/direct/nfse_direct_setup_screen.dart
+  route: null
+  action: "Ligar ou desligar o envio da nota por e-mail ao cliente"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [saving]
+  feature_flags: ["useFinancial", "nfseDirectEnabled"]
+  hardware: null
+  data: ["settings/nfse", "api:PUT /v1/app/nfse/setup/settings"]
+  web_status: in_progress
+  e2e: null
+  web_exception: null
+  permission: manageCompany
+  note: "settings/nfse.emailToCustomer (ligado por padrão). Desligado, a nota não vai sozinha ao emitir nem ao cancelar e a folha de emitir avisa; quem manda pelo WhatsApp desliga. Web: caixa embaixo de Emitir sozinha (issue #611)."
 - id: nfse.direct.add-certificate
   screen: lib/screens/nfse/direct/certificate_upload_sheet.dart
   route: null

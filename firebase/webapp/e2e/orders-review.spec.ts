@@ -1,6 +1,6 @@
 // Fixes from the red team (revisao-pr515) and the simulated users (usuarios-pr515).
 // Each test names the item it covers.
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { addCommentDoc, countOrders, makeOrder, readComments, readOrder, updateCustomerDoc, updateOrderDoc, writeOrderFieldsRaw } from './data'
 import { login, setTheme, signOut } from './helpers'
 
@@ -418,8 +418,10 @@ test.describe('Início (usuários)', () => {
     await expect(table(page)).toBeVisible()
     await page.locator('.main').evaluate((main) => main.scrollTo(0, (document.querySelector('.toolbar') as HTMLElement).getBoundingClientRect().bottom))
     const rowsInView = await table(page).locator('tbody tr[data-order]').evaluateAll((rows) => rows.filter((r) => {
+      // Rows that start on screen: with the status and its problem ("Aprovado · Atrasada 3 dias",
+      // docs/DESIGN_TOKENS.md) a late row takes one more line, so the second one shows only its top.
       const box = r.getBoundingClientRect()
-      return box.top >= 0 && box.bottom <= window.innerHeight
+      return box.top >= 0 && box.top < window.innerHeight
     }).length)
     expect(rowsInView).toBeGreaterThanOrEqual(2)
   })
