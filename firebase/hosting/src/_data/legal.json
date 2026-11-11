@@ -4,7 +4,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidade",
       "subtitle": "Saiba como coletamos, usamos e protegemos seus dados",
-      "lastUpdated": "Última atualização: Novembro de 2026",
+      "lastUpdated": "Última atualização: 11 de novembro de 2026",
       "sections": [
         {
           "title": "Introdução",
@@ -55,8 +55,8 @@
         {
           "title": "Assistente de IA",
           "paragraphs": [
-            "Quando você toca em Falar ou Foto na ordem de serviço, o texto do que você disse, as fotos que escolheu e os nomes do seu catálogo e dos seus clientes são enviados a um provedor de inteligência artificial para montar a ordem de serviço. O áudio vira texto pelo reconhecimento de voz do próprio celular (da Apple ou do Google, conforme o aparelho); o PraticOS não grava nem envia o áudio.",
-            "Os provedores são o Google (Vertex AI, com processamento no Brasil) e a Anthropic (Claude, com processamento nos Estados Unidos). Eles usam esses dados só para responder ao pedido e não os usam para treinar modelos. A transferência internacional segue o art. 33 da LGPD.",
+            "Quando você toca em Falar ou Foto na ordem de serviço, o texto do que você disse, as fotos que escolheu e os nomes do seu catálogo e dos seus clientes são enviados a um provedor de inteligência artificial para montar a ordem de serviço. O áudio vira texto pelo reconhecimento de voz do próprio celular (da Apple ou do Google, conforme o aparelho); no celular, o PraticOS não grava nem envia o áudio. No navegador (praticos.app), a gravação da sua voz é enviada para virar texto e não fica guardada.",
+            "Na ordem de serviço, o texto e as fotos vão para a Anthropic (Claude), com processamento nos Estados Unidos. A gravação da sua voz, quando o app manda o áudio, vai para o Google (Vertex AI), que também responde ao texto e às fotos quando a Anthropic não está disponível. O Google pode processar esses dados fora do Brasil, em qualquer país onde tenha servidores. Os dois usam esses dados só para responder ao pedido e não os usam para treinar modelos. A transferência internacional segue o art. 33 da LGPD.",
             "O assistente só age quando você toca em Falar ou Foto, e tudo o que ele preenche fica marcado para você conferir antes de salvar."
           ]
         },
@@ -124,7 +124,7 @@
       "title": "Privacy",
       "titleHighlight": "Policy",
       "subtitle": "Learn how we collect, use, and protect your data",
-      "lastUpdated": "Last updated: November 2026",
+      "lastUpdated": "Last updated: November 11, 2026",
       "sections": [
         {
           "title": "Introduction",
@@ -175,8 +175,8 @@
         {
           "title": "AI Assistant",
           "paragraphs": [
-            "When you tap Speak or Photo on a work order, the text of what you said, the photos you picked, and the names in your catalog and customer list are sent to an artificial intelligence provider to build the work order. The audio is turned into text by your phone's own speech recognition (Apple's or Google's, depending on the device); PraticOS does not record or send the audio.",
-            "The providers are Google (Vertex AI, processed in Brazil) and Anthropic (Claude, processed in the United States). They use this data only to answer the request and do not use it to train models.",
+            "When you tap Speak or Photo on a work order, the text of what you said, the photos you picked, and the names in your catalog and customer list are sent to an artificial intelligence provider to build the work order. The audio is turned into text by your phone's own speech recognition (Apple's or Google's, depending on the device); on the phone, PraticOS does not record or send the audio. In the browser (praticos.app), the recording of your voice is sent to be turned into text and is not stored.",
+            "For work orders, the text and photos go to Anthropic (Claude), processed in the United States. A recording of your voice, when the app sends the audio, goes to Google (Vertex AI), which also answers the text and photos when Anthropic is unavailable. Google may process this data outside Brazil, in any country where it has servers. Both use this data only to answer the request and do not use it to train models.",
             "The assistant only acts when you tap Speak or Photo, and everything it fills in is marked so you can check it before saving."
           ]
         },
@@ -215,7 +215,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidad",
       "subtitle": "Conozca cómo recopilamos, usamos y protegemos sus datos",
-      "lastUpdated": "Última actualización: Noviembre de 2026",
+      "lastUpdated": "Última actualización: 11 de noviembre de 2026",
       "sections": [
         {
           "title": "Introducción",
@@ -266,8 +266,8 @@
         {
           "title": "Asistente de IA",
           "paragraphs": [
-            "Cuando tocas Hablar o Foto en una orden de servicio, el texto de lo que dijiste, las fotos que elegiste y los nombres de tu catálogo y de tus clientes se envían a un proveedor de inteligencia artificial para armar la orden. El audio se convierte en texto con el reconocimiento de voz del propio teléfono (de Apple o de Google, según el dispositivo); PraticOS no graba ni envía el audio.",
-            "Los proveedores son Google (Vertex AI, con procesamiento en Brasil) y Anthropic (Claude, con procesamiento en Estados Unidos). Usan estos datos solo para responder la solicitud y no los usan para entrenar modelos.",
+            "Cuando tocas Hablar o Foto en una orden de servicio, el texto de lo que dijiste, las fotos que elegiste y los nombres de tu catálogo y de tus clientes se envían a un proveedor de inteligencia artificial para armar la orden. El audio se convierte en texto con el reconocimiento de voz del propio teléfono (de Apple o de Google, según el dispositivo); en el teléfono, PraticOS no graba ni envía el audio. En el navegador (praticos.app), la grabación de tu voz se envía para convertirla en texto y no se guarda.",
+            "En la orden de servicio, el texto y las fotos van a Anthropic (Claude), con procesamiento en Estados Unidos. La grabación de tu voz, cuando la app envía el audio, va a Google (Vertex AI), que también responde al texto y a las fotos cuando Anthropic no está disponible. Google puede procesar estos datos fuera de Brasil, en cualquier país donde tenga servidores. Ambos usan estos datos solo para responder la solicitud y no los usan para entrenar modelos.",
             "El asistente solo actúa cuando tocas Hablar o Foto, y todo lo que completa queda marcado para que lo revises antes de guardar."
           ]
         },

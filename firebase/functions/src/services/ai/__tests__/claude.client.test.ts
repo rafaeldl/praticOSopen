@@ -39,6 +39,7 @@ describe('ClaudeClient', () => {
     expect(body.model).toBe('claude-sonnet-5-5');
     expect(body.system).toBe('system');
     expect(body.fallbacks).toBe('default');
+    expect(body.betas).toEqual(['server-side-fallback-2026-07-01']);
     expect(body.output_config).toEqual({
       effort: 'low',
       format: { type: 'json_schema', schema: request.responseSchema },
@@ -59,6 +60,19 @@ describe('ClaudeClient', () => {
     expect(body.fallbacks).toBeUndefined();
     expect(body.betas).toBeUndefined();
     expect(onUsage).toHaveBeenCalledWith({ inputTokens: 4400, outputTokens: 130, model: 'claude-sonnet-5-5' });
+  });
+
+  it('defaults to Haiku without server-side fallback (Haiku has none)', async () => {
+    create.mockResolvedValue(answer('{"items":[]}'));
+    await new ClaudeClient(() => 'sk-test').generateJson(request);
+
+    const body = create.mock.calls[0][0];
+    expect(body.model).toBe('claude-haiku-5-5');
+    expect(body).not.toHaveProperty('fallbacks');
+    expect(body).not.toHaveProperty('betas');
+    expect(body).not.toHaveProperty('temperature');
+    expect(body).not.toHaveProperty('thinking');
+    expect(body.output_config.effort).toBe('low');
   });
 
   it('reads images only', () => {

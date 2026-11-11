@@ -5,22 +5,32 @@
  * `roles/aiplatform.user` (see docs/AI_ORDER_ASSIST.md).
  *
  * Model and region come from environment variables:
- * - AI_GEMINI_MODEL    (default gemini-2.5-flash)
- * - AI_VERTEX_LOCATION (default southamerica-east1, São Paulo — dados ficam no Brasil)
+ * - AI_GEMINI_MODEL    (default gemini-3.8-flash; 2.5 is past its retirement date)
+ * - AI_VERTEX_LOCATION (default global: Gemini 3.8 answers 404 in São Paulo, so
+ *   the data leaves Brazil — see the privacy policy)
+ * - AI_GEMINI_THINKING (minimal | low | medium | high; default low on Gemini 3)
  *
- * `thinkingLevel` is only sent when given: Gemini 3 models think a lot by
- * default (slow), Gemini 2.5 rejects the field.
+ * `thinkingLevel` is only sent for Gemini 3 or when set: Gemini 3 models think
+ * a lot by default (slow), Gemini 2.5 rejects the field.
  */
 
 import * as admin from 'firebase-admin';
 import type { JsonSchema, LlmProviderClient, LlmRequest } from './llm.client';
 import { LlmUnavailableError } from './llm.client';
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
-const DEFAULT_LOCATION = 'southamerica-east1';
+const DEFAULT_MODEL = 'gemini-3.8-flash';
+const DEFAULT_LOCATION = 'global';
 const TIMEOUT_MS = 45_000;
 
-export type GeminiThinkingLevel = 'minimal' | 'low' | 'medium' | 'high';
+const THINKING_LEVELS = ['minimal', 'low', 'medium', 'high'] as const;
+export type GeminiThinkingLevel = (typeof THINKING_LEVELS)[number];
+
+/** AI_GEMINI_THINKING when valid, else `low` on Gemini 3 and nothing on older models. */
+export function thinkingFromEnv(model: string, env: NodeJS.ProcessEnv = process.env): GeminiThinkingLevel | undefined {
+  const value = env.AI_GEMINI_THINKING;
+  if ((THINKING_LEVELS as readonly string[]).includes(value ?? '')) return value as GeminiThinkingLevel;
+  return model.startsWith('gemini-3') ? 'low' : undefined;
+}
 
 function projectId(): string | undefined {
   return process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || admin.app().options.projectId;
@@ -53,7 +63,7 @@ export class VertexGeminiClient implements LlmProviderClient {
   constructor(
     private readonly model = process.env.AI_GEMINI_MODEL || DEFAULT_MODEL,
     private readonly location = process.env.AI_VERTEX_LOCATION || DEFAULT_LOCATION,
-    private readonly thinkingLevel?: GeminiThinkingLevel,
+    private readonly thinkingLevel: GeminiThinkingLevel | undefined = thinkingFromEnv(model),
   ) {}
 
   supportsMedia(mimeType: string): boolean {

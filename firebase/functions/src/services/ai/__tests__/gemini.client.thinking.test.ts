@@ -3,7 +3,7 @@ jest.mock('firebase-admin', () => ({
   credential: { applicationDefault: () => ({ getAccessToken: async () => ({ access_token: 'token' }) }) },
 }));
 
-import { VertexGeminiClient } from '../gemini.client';
+import { VertexGeminiClient, thinkingFromEnv } from '../gemini.client';
 
 const request = { systemPrompt: 's', userText: 'u', media: [], responseSchema: { type: 'object' } };
 
@@ -32,6 +32,32 @@ describe('VertexGeminiClient thinkingLevel', () => {
     const fetchMock = mockFetch();
     await new VertexGeminiClient('gemini-2.5-flash', 'southamerica-east1').generateJson(request);
     expect(sentConfig(fetchMock)).not.toHaveProperty('thinkingConfig');
+  });
+
+  it('defaults to Gemini 3.8 Flash in global with thinkingLevel low', async () => {
+    const saved = { ...process.env };
+    delete process.env.AI_GEMINI_MODEL;
+    delete process.env.AI_VERTEX_LOCATION;
+    delete process.env.AI_GEMINI_THINKING;
+    try {
+      const fetchMock = mockFetch();
+      await new VertexGeminiClient().generateJson(request);
+      expect(fetchMock.mock.calls[0][0]).toBe(
+        'https://aiplatform.googleapis.com/v1/projects/demo/locations/global/publishers/google/models/gemini-3.8-flash:generateContent',
+      );
+      expect(sentConfig(fetchMock).thinkingConfig).toEqual({ thinkingLevel: 'low' });
+    } finally {
+      process.env = saved;
+    }
+  });
+});
+
+describe('thinkingFromEnv', () => {
+  it('uses AI_GEMINI_THINKING, else low on Gemini 3 and nothing on 2.5', () => {
+    expect(thinkingFromEnv('gemini-3.8-flash', {})).toBe('low');
+    expect(thinkingFromEnv('gemini-3.8-flash', { AI_GEMINI_THINKING: 'medium' })).toBe('medium');
+    expect(thinkingFromEnv('gemini-3.8-flash', { AI_GEMINI_THINKING: 'lots' })).toBe('low');
+    expect(thinkingFromEnv('gemini-2.5-flash', {})).toBeUndefined();
   });
 });
 

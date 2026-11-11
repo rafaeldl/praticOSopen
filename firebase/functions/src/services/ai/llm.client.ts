@@ -4,13 +4,14 @@
  * Callers build one [LlmRequest] (system prompt, user text, photos/audio and a
  * standard JSON Schema for the answer) and get back the raw JSON text. Each
  * provider adapts the request to its own API:
- * - `gemini` → [VertexGeminiClient] (gemini.client.ts), Vertex AI in São Paulo
- * - `claude` → [ClaudeClient] (claude.client.ts), Anthropic API
+ * - `gemini` → [VertexGeminiClient] (gemini.client.ts), Vertex AI (Gemini 3.8, global)
+ * - `claude` → [ClaudeClient] (claude.client.ts), Anthropic API (Haiku 5.5)
  *
  * [LlmRouter] picks the provider per request: `request.provider` (from
- * `companies/{cid}/settings/ai.provider`), else `AI_PROVIDER`, else `gemini`.
- * A provider that can't read a part (Claude has no audio input) hands the
- * request to the default provider instead of failing.
+ * `companies/{cid}/settings/ai.provider` or `config/ai.defaultProvider`), else
+ * `AI_PROVIDER`, else `gemini`. A provider that can't read a part (Claude has
+ * no audio input) hands the request to one that can: the default provider
+ * first, then any other configured one.
  *
  * Tests inject a fake [LlmClient]; the real clients never run in unit tests.
  */
@@ -84,10 +85,12 @@ export class LlmRouter implements LlmClient {
   /** Provider that will answer [request] (exposed for tests and logs). */
   resolve(request: LlmRequest): LlmProvider {
     const wanted = request.provider ?? this.fallback;
-    const client = this.clients[wanted]?.();
-    if (!client) return this.fallback;
-    const readsAll = request.media.every((m) => client.supportsMedia(m.mimeType));
-    return readsAll ? wanted : this.fallback;
+    const order = [wanted, this.fallback, ...LLM_PROVIDERS.filter((p) => p !== wanted && p !== this.fallback)];
+    const reader = order.find((provider) => {
+      const client = this.clients[provider]?.();
+      return client && request.media.every((m) => client.supportsMedia(m.mimeType));
+    });
+    return reader ?? this.fallback;
   }
 
   async generateJson(request: LlmRequest): Promise<string> {
