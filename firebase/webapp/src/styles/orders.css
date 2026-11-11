@@ -71,6 +71,10 @@ button.od-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .od-device-line { color: var(--color-muted); }
 .od-device-btn { border: 0; background: none; padding: 0; min-height: 1.75rem; font: inherit; color: inherit; text-align: left; text-decoration: underline dotted; text-underline-offset: 0.2em; cursor: pointer; overflow-wrap: anywhere; }
 .od-state { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: baseline; margin-top: 0.3rem; }
+.od-status-btn { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.35rem 0.85rem; border: 1px solid var(--color-rule-strong); border-radius: 999px; background: var(--color-card); color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.od-status-btn:hover { border-color: var(--color-accent); }
+.od-status-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.od-status-chevron { flex: none; color: var(--color-accent); }
 .od-sentence { font-weight: 600; }
 .od-sentence--late { color: var(--color-danger-text); }
 .link-plain { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklch, currentColor 35%, transparent); text-underline-offset: 2px; cursor: pointer; text-align: left; }

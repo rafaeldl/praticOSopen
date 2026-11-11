@@ -80,3 +80,20 @@ test('consultor vê as etapas, mas não move nem ordena', async ({ page }) => {
   await expect(card).toHaveAttribute('draggable', 'false')
   await expect(card.getByRole('button', { name: /^Mover/ })).toHaveCount(0)
 })
+
+test('na OS, clicar na situação mostra as etapas e passa para outra', async ({ page }) => {
+  const name = unique('Situação')
+  const order = await makeOrder('sOwner', { status: 'progress', stage: { id: 'paint', rank: 1, since: new Date().toISOString() }, customer: { id: 'customer-s5', name } }, COMPANY_S)
+  await login(page, 'sOwner', `orders?order=${order.id}`)
+  const panel = page.getByRole('complementary', { name: 'OS aberta' })
+  const button = panel.getByTestId('order-status-button')
+  await expect(button).toHaveText(/ · Pintura$/)
+
+  await button.click()
+  const picker = page.getByRole('dialog', { name: 'Qual a situação?' })
+  await expect(picker.getByRole('button', { name: / · Polimento$/ })).toBeVisible()
+  await picker.getByRole('button', { name: / · Polimento$/ }).click()
+
+  await expect(button).toHaveText(/ · Polimento$/)
+  await expect.poll(async () => ((await readOrder(order.id, COMPANY_S))?.stage as { id: string }).id).toBe('polish')
+})

@@ -87,6 +87,7 @@ Situação mudada pelo app, bot ou MCP
 7. Modo TV: "Em andamento" vira uma coluna por etapa, na ordem do quadro.
 8. A OS parada continua com a marca na etapa; atrasada e parada aparecem no cartão como sempre.
 9. No app, a linha da situação fica "Em Andamento · Pintura". O botão azul em andamento leva à próxima etapa; na última, volta a ser "Marcar como pronta". Com duas etapas ou mais, tocar na linha da situação abre "Qual a situação?" com uma linha por etapa no lugar de "Em Andamento" ("Em Andamento · Pintura", "Em Andamento · Polimento"), e "Mudar etapa" também fica no "…". Quem vê os botões segue a mesma permissão da OS parada. "Começar serviço" continua só mudando a situação: a OS cai na primeira etapa.
+10. Na OS do web, a situação também aparece como "Em andamento · Pintura" e é um botão (contorno e ⌃⌄, como no app, onde a linha é uma cápsula cinza com ⌃⌄): clicar abre "Qual a situação?" com as mesmas linhas por etapa. Quem não pode mudar nada vê só a linha, sem cara de botão.
 
 ## Etapas do serviço (web)
 
