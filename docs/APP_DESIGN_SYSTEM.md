@@ -146,7 +146,7 @@ AppListRow(
 )
 ```
 
-Quando o lado direito tem mais de uma informação (a lista de clientes: "Deve R$ 166,00" em cima da situação), use `trailingWidget` em vez de `trailing`. Ele segue a mesma regra: alinhado à direita e, com texto grande, embaixo do nome.
+Quando o lado direito tem mais de uma informação (a lista de clientes: o valor a receber em cima da situação), use `trailingWidget` em vez de `trailing`. Ele segue a mesma regra: alinhado à direita e, com texto grande, embaixo do nome.
 
 ## Telas de escolher
 

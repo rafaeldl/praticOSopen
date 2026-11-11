@@ -377,11 +377,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       children: [
         if (owed > 0)
           Text(
-            l10n.customerOwedTrailing(
-              (FormatService()..setLocale(l10n.localeName)).formatCurrency(
-                owed,
-              ),
-            ),
+            (FormatService()..setLocale(l10n.localeName)).formatCurrency(owed),
             textAlign: align,
             style: AppTypography.callout.copyWith(
               color: AppColors.text.resolveFrom(context),
@@ -398,7 +394,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                 child: Text(
                   late
                       ? l10n.lateOrdersCount(summary!.late)
-                      : l10n.openOrdersCount(open),
+                      : l10n.orderCountShort(open),
                   textAlign: align,
                   style: AppTypography.callout.copyWith(
                     color: late ? danger : secondary,

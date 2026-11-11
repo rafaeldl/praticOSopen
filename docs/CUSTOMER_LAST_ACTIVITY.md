@@ -38,8 +38,8 @@ Conta como movimentação:
   Recentes / A–Z. A ordem vem de `sortByRecent` e `customerLastActivity` em
   `lib/utils/customer_utils.dart`, com a mesma regra do web para quem ainda não
   tem a data. A linha não mostra a data: à esquerda o nome e o telefone; à
-  direita o que está pendente, o Falta receber ("Deve R$ 166,00", só para quem
-  lê o Financeiro) em cima da situação (ponto e "2 OS em aberto", ou "1 OS
+  direita o que está pendente, o Falta receber (só o valor, "R$ 166,00", para quem
+  lê o Financeiro) em cima da situação (ponto e "2 OS" em aberto, ou "1 OS
   atrasada" em vermelho e negrito). Cliente sem nada pendente fica sem nada à
   direita. Com texto grande, o lado direito desce para baixo do nome
   (`AppListRow.trailingWidget`).

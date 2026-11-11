@@ -1704,7 +1704,7 @@ void main() {
         direct: true,
       );
       expect(find.textContaining('1 OS atrasada'), findsOneWidget);
-      expect(find.textContaining('2 OS em aberto'), findsOneWidget);
+      expect(find.text('2 OS'), findsOneWidget);
       expect(find.byType(StatusDot), findsNWidgets(2));
       expect(directory.openReads, 0);
     });
@@ -1726,7 +1726,7 @@ void main() {
         ),
         direct: true,
       );
-      expect(find.textContaining('1 OS em aberto'), findsOneWidget);
+      expect(find.text('1 OS'), findsOneWidget);
       expect(find.textContaining('5 OS'), findsNothing);
       expect(directory.openReads, 1);
     });
@@ -1749,8 +1749,8 @@ void main() {
       );
       // Phone under the name; what is pending on the right, owed first.
       expect(find.text('(11) 90000-0001'), findsOneWidget);
-      final owed = find.text('Deve ${FormatService().formatCurrency(166)}');
-      final open = find.text('2 OS em aberto');
+      final owed = find.text(FormatService().formatCurrency(166));
+      final open = find.text('2 OS');
       expect(owed, findsOneWidget);
       expect(open, findsOneWidget);
       expect(
@@ -1758,8 +1758,11 @@ void main() {
         greaterThan(tester.getTopLeft(find.text('Ana Ribeiro')).dx),
       );
       expect(tester.getTopLeft(owed).dy, lessThan(tester.getTopLeft(open).dy));
+      // Just the amount and the count: no "Deve", no "em aberto".
+      expect(find.textContaining('Deve'), findsNothing);
+      expect(find.textContaining('em aberto'), findsNothing);
       // Nothing pending, nothing on the right.
-      expect(find.textContaining('Deve '), findsOneWidget);
+      expect(find.textContaining('R\$'), findsOneWidget);
     });
 
     testWidgets('hides what is owed from who does not read the Financeiro', (
@@ -1781,7 +1784,8 @@ void main() {
         ),
         direct: true,
       );
-      expect(find.textContaining('Deve '), findsNothing);
+      expect(find.textContaining('R\$'), findsNothing);
+      expect(find.text('1 OS'), findsOneWidget);
     });
 
     testWidgets('shows the phone formatted for the country', (tester) async {
