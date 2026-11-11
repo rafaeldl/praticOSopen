@@ -2609,6 +2609,8 @@
   "checklistQuestionDone": "Pronto",
   "checklistSkipForNow": "Pular por agora",
   "checklistPreviousQuestion": "Voltar à anterior",
+  "checklistPreviousShort": "Anterior",
+  "checklistSkipShort": "Pular",
   "checklistQuestionRequired": "Obrigatória",
   "checklistPickFromGallery": "Escolher da galeria",
   "checklistTextPlaceholder": "Escreva aqui",

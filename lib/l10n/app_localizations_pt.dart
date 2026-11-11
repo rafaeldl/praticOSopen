@@ -5315,6 +5315,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get checklistPreviousQuestion => 'Voltar à anterior';
 
   @override
+  String get checklistPreviousShort => 'Anterior';
+
+  @override
+  String get checklistSkipShort => 'Pular';
+
+  @override
   String get checklistQuestionRequired => 'Obrigatória';
 
   @override
