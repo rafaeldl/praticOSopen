@@ -22,6 +22,22 @@ export function brDay(offset = 0): string {
   return date.toISOString()
 }
 
+/**
+ * The next order number from `base` (700000 in company A, 800000 in B), unique
+ * across workers and runs: a counter in the emulator, read and bumped in one
+ * transaction. Random numbers collided (R3 of receive.spec saw one test's
+ * order with another's number).
+ */
+async function nextNumber(base: number): Promise<number> {
+  const ref = db().doc(`e2eCounters/order-${base}`)
+  const n = await db().runTransaction(async (tx) => {
+    const next = ((await tx.get(ref)).data()?.next as number | undefined) ?? 0
+    tx.set(ref, { next: next + 1 })
+    return next
+  })
+  return base + (n % 99999)
+}
+
 export interface TestOrder {
   id: string
   number: number
@@ -30,7 +46,7 @@ export interface TestOrder {
 /** A fresh order (company A unless another is given). Number is unique, so the row is easy to find. */
 export async function makeOrder(author: UserKey, data: Record<string, unknown> = {}, company: string = COMPANY_A): Promise<TestOrder> {
   const id = `t-${randomUUID().slice(0, 8)}`
-  const number = 700000 + Math.floor(Math.random() * 99999)
+  const number = await nextNumber(700000)
   const now = new Date().toISOString()
   const services = (data.services as unknown[]) ?? [{ service: { id: 'service-1', name: 'Serviço 1', value: 50 }, value: 50 }]
   await db()
@@ -119,7 +135,7 @@ export async function makeLateOrderInB(customer: { id: string; name: string }): 
   await db()
     .doc(`companies/${COMPANY_B}/orders/t-${randomUUID().slice(0, 8)}`)
     .set({
-      number: 800000 + Math.floor(Math.random() * 99999),
+      number: await nextNumber(800000),
       status: 'approved',
       company: { id: COMPANY_B, name: COMPANIES[COMPANY_B].name },
       customer,
@@ -141,7 +157,7 @@ export async function updateCompanyB(fields: Record<string, unknown>): Promise<v
 /** An order in company B (United States), for the country format tests. */
 export async function makeOrderInB(data: Record<string, unknown>): Promise<TestOrder> {
   const id = `t-${randomUUID().slice(0, 8)}`
-  const number = 800000 + Math.floor(Math.random() * 99999)
+  const number = await nextNumber(800000)
   const now = new Date().toISOString()
   await db()
     .doc(`companies/${COMPANY_B}/orders/${id}`)

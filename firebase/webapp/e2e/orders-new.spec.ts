@@ -27,19 +27,18 @@ test('Nova OS só com teclado: cliente, veículo, item e valor em menos de 45 s'
   await expect(page.getByRole('combobox', { name: 'Cliente' })).toBeFocused()
   await page.keyboard.type('Cliente 03')
   await page.keyboard.press('Enter')
-  // The customer's only vehicle comes in by itself; otherwise Enter takes the suggestion.
+  // The customer's only vehicle comes in by itself and the cursor goes on to the
+  // item. No Enter on the vehicle here: it raced that move, landed on the item
+  // field and added the most used item, so Tab then reached that line's price.
   const item = page.getByRole('combobox', { name: 'O que vai ser feito?' })
-  const focused = () => page.evaluate(() => document.activeElement?.id ?? '')
-  await expect.poll(focused).toMatch(/^no-(device|item)$/)
-  if ((await focused()) === 'no-device') await page.keyboard.press('Enter')
-  // The vehicle may come in after the focus moved on, and choosing it focuses
-  // the item field again: wait for it, or that focus lands after the Tab below.
+  await expect(drawer(page).getByRole('button', { name: 'Trocar' })).toHaveCount(2)
   await expect(drawer(page)).toContainText('Veículo 3')
   await expect(item).toBeFocused()
   await page.keyboard.type('Serviço 2')
   await page.keyboard.press('Enter')
   await expect(item).toHaveValue('')
   await expect(item).toBeFocused()
+  await expect(drawer(page).getByRole('list', { name: 'O que vai ser feito' }).getByRole('listitem')).toHaveCount(1)
   // Tab only after the line is on screen: on a slow runner the price field can
   // render after the key, and Tab then skips it.
   const price = page.getByRole('textbox', { name: 'Valor de Serviço 2' })
