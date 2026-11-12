@@ -7,6 +7,7 @@ import { FORMAT_COUNTRIES } from '@/lib/format'
 import type { AppRole, Permission } from '@/lib/permissions'
 import { hasCountryZone } from '@/lib/zone'
 import { whatsappUrl } from '@/lib/share'
+import { dateOf, effectiveLimits, effectivePlan, type PlanId, type SubscriptionLimits } from '@/lib/plan-limits'
 
 // ── Roles ────────────────────────────────────────────────────────────────
 
@@ -230,25 +231,12 @@ export function permissionCell(role: AppRole, permission: Permission, useFinanci
 
 // ── Plan ─────────────────────────────────────────────────────────────────
 
-export type PlanId = 'free' | 'starter' | 'pro' | 'business'
-const PLANS: readonly PlanId[] = ['free', 'starter', 'pro', 'business']
+export type { PlanId }
 
 /** Product names: brand names, not translated (SubscriptionPlanName). */
 export const PLAN_NAME: Record<PlanId, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' }
 
-interface Limits {
-  photosPerMonth: number
-  formTemplates: number
-  users: number
-}
-
-/** Same values as SubscriptionLimits.defaults (app) and PLAN_LIMITS (server). Never decided here. */
-const DEFAULT_LIMITS: Record<PlanId, Limits> = {
-  free: { photosPerMonth: 30, formTemplates: 1, users: 1 },
-  starter: { photosPerMonth: 200, formTemplates: 3, users: 3 },
-  pro: { photosPerMonth: 500, formTemplates: 10, users: 5 },
-  business: { photosPerMonth: -1, formTemplates: -1, users: -1 },
-}
+type Limits = SubscriptionLimits
 
 export type PeriodState = 'free' | 'courtesy' | 'renewsOn' | 'endsOn' | 'paymentIssue'
 
@@ -263,24 +251,11 @@ export interface PlanSummary {
 const record = (value: unknown): Record<string, unknown> => (value && typeof value === 'object' ? (value as Record<string, unknown>) : {})
 const num = (value: unknown, fallback: number) => (typeof value === 'number' && Number.isFinite(value) ? value : fallback)
 
-function dateOf(value: unknown): Date | null {
-  if (!value) return null
-  if (typeof value === 'string') {
-    const date = new Date(value)
-    return Number.isNaN(date.getTime()) ? null : date
-  }
-  const stamp = value as { toDate?: () => Date; seconds?: number }
-  if (typeof stamp.toDate === 'function') return stamp.toDate()
-  if (typeof stamp.seconds === 'number') return new Date(stamp.seconds * 1000)
-  return null
-}
-
 /** companies/{id}.subscription read like Subscription (app): plan in force, period, limits and usage. */
 export function planSummary(subscription: unknown, now: Date): PlanSummary {
   const sub = record(subscription)
-  const stored = (PLANS as readonly string[]).includes(sub.plan as string) ? (sub.plan as PlanId) : 'free'
   const expiresAt = dateOf(sub.expiresAt)
-  const plan: PlanId = !expiresAt || expiresAt > now ? stored : 'free'
+  const plan = effectivePlan(subscription, now)
   let state: PeriodState
   if (plan === 'free') state = 'free'
   else if (sub.source === 'grace') state = 'courtesy'
@@ -288,16 +263,7 @@ export function planSummary(subscription: unknown, now: Date): PlanSummary {
   else if (sub.status === 'cancelled') state = 'endsOn'
   else if (sub.status === 'expired') state = 'free'
   else state = sub.source === 'store' ? 'renewsOn' : 'endsOn'
-  const storedLimits = record(sub.limits)
-  const base = DEFAULT_LIMITS[plan]
-  const limits: Limits =
-    plan !== stored || !sub.limits
-      ? base
-      : {
-          photosPerMonth: num(storedLimits.photosPerMonth, base.photosPerMonth),
-          formTemplates: num(storedLimits.formTemplates, base.formTemplates),
-          users: num(storedLimits.users ?? storedLimits.collaborators, base.users),
-        }
+  const limits = effectiveLimits(subscription, now)
   const usage = record(sub.usage)
   return {
     plan,

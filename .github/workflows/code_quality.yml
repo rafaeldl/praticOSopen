@@ -8,6 +8,9 @@ on:
       - 'test/**'
       # Casos de contrato: test/contract/contract_cases_test.dart lê estes JSON
       - 'docs/web-app/contract-cases/**'
+      # Tabela única dos planos (#722): cada lado compara com ela
+      - 'docs/plans/**'
+      - 'scripts/plan-table.mjs'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - '.github/workflows/code_quality.yml'

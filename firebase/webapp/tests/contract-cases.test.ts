@@ -1,4 +1,4 @@
-// Runs docs/web-app/contract-cases/ against src/lib/rules/order-rules.ts.
+// Runs docs/web-app/contract-cases/ against src/lib/rules/order-rules.ts and src/lib/plan-limits.ts.
 // A case with `correct` documents an app bug: the web follows `correct`.
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -15,6 +15,7 @@ import {
 } from '../src/lib/rules/order-rules'
 import { periodOf } from '../src/lib/finance/period'
 import { isOpen } from '../src/lib/orders/model'
+import { checkPlanLimit, shouldShowPdfWatermark } from '../src/lib/plan-limits'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,5 +108,30 @@ describe('customer-summary (Início do web)', () => {
         .map(([id, v]) => [id, { open: v.open, late: v.late }]),
     )
     expect(got).toEqual(expected)
+  })
+})
+
+// Same cases as the app (test/contract/plan_limits_cases_test.dart) and the server
+// (plan-limits.cases.test.ts): the web reads the subscription with src/lib/plan-limits.ts.
+describe('plan-limits', () => {
+  const DAY_MS = 24 * 60 * 60 * 1000
+  const doc = JSON.parse(readFileSync(resolve(dir, 'plan-limits.json'), 'utf8'))
+
+  test('runs in web', () => expect(doc.runsIn).toContain('web'))
+
+  test.each(cases('plan-limits.json'))('$id', (c) => {
+    const { given } = c
+    const want = { ...(c.correct ?? c.expect), ...c.divergesIn?.web }
+    const now = new Date()
+    const subscription =
+      given.subscription === null || given.expiresInDays === undefined
+        ? given.subscription
+        : { ...given.subscription, expiresAt: new Date(now.getTime() + given.expiresInDays * DAY_MS).toISOString() }
+    if (given.kind === 'watermark') {
+      expect({ watermark: shouldShowPdfWatermark(subscription, given.paidPlansEnabled, now) }).toEqual(want)
+      return
+    }
+    const result = checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, enforced: given.paidPlansEnabled, now })
+    expect(result).toEqual(want)
   })
 })

@@ -14,33 +14,27 @@ import type {
   SubscriptionUsage,
 } from '../models/types';
 import type { RcSubscriber } from './revenuecat.client';
+import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION, type PlanRow } from './plan-table.generated';
 
-export const PLAN_LIMITS: Record<SubscriptionPlan, SubscriptionLimits> = {
-  free: {
-    photosPerMonth: 30,
-    formTemplates: 1,
-    users: 1,
-    pdfWatermark: true,
-  },
-  starter: {
-    photosPerMonth: 200,
-    formTemplates: 3,
-    users: 3,
-    pdfWatermark: false,
-  },
-  pro: {
-    photosPerMonth: 500,
-    formTemplates: 10,
-    users: 5,
-    pdfWatermark: false,
-  },
-  business: {
-    photosPerMonth: -1, // unlimited
-    formTemplates: -1,
-    users: -1,
-    pdfWatermark: false,
-  },
-};
+/** The plan table in force (docs/plans/plans.json), by plan. */
+export function currentPlanRows(): Readonly<Record<SubscriptionPlan, PlanRow>> {
+  return PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION];
+}
+
+/** The limits a subscription stores, from a row of the table. */
+export function limitsOfRow(row: PlanRow): SubscriptionLimits {
+  return {
+    photosPerMonth: row.photosPerMonth,
+    formTemplates: row.formTemplates,
+    users: row.users,
+    pdfWatermark: row.pdfWatermark,
+  };
+}
+
+/** Default limits per plan, from the current table. -1 = unlimited. */
+export const PLAN_LIMITS: Record<SubscriptionPlan, SubscriptionLimits> = Object.fromEntries(
+  PLAN_IDS.map((plan) => [plan, limitsOfRow(currentPlanRows()[plan])]),
+) as Record<SubscriptionPlan, SubscriptionLimits>;
 
 /** RevenueCat product id → plan; fallback when an entitlement id is not a plan name. */
 export const PRODUCT_TO_PLAN: Record<string, SubscriptionPlan> = {

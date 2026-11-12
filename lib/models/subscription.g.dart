@@ -22,14 +22,6 @@ Map<String, dynamic> _$SubscriptionUsageToJson(SubscriptionUsage instance) =>
       'usageResetAt': _dateToJson(instance.usageResetAt),
     };
 
-SubscriptionLimits _$SubscriptionLimitsFromJson(Map<String, dynamic> json) =>
-    SubscriptionLimits(
-      photosPerMonth: (json['photosPerMonth'] as num?)?.toInt() ?? 30,
-      formTemplates: (json['formTemplates'] as num?)?.toInt() ?? 1,
-      users: (json['users'] as num?)?.toInt() ?? 1,
-      pdfWatermark: json['pdfWatermark'] as bool? ?? true,
-    );
-
 Map<String, dynamic> _$SubscriptionLimitsToJson(SubscriptionLimits instance) =>
     <String, dynamic>{
       'photosPerMonth': instance.photosPerMonth,

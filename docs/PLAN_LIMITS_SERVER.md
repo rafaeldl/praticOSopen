@@ -10,8 +10,20 @@ Nenhum valor, preço ou plano mudou, e a compra pela web continua desligada. As 
 
 - `firebase/functions/src/services/plan-limits.service.ts`: a conta (`checkPlanLimit`, `effectivePlan`, `effectiveLimits`, `shouldShowPdfWatermark`), a contagem de uso e a chave global.
 - `firebase/functions/src/middleware/plan-limit.middleware.ts`: `requirePlanCapacity(recurso)`, depois das checagens de permissão.
-- Valores: `PLAN_LIMITS` em `subscription-plans.ts` (iguais a `SubscriptionLimits.defaults`).
-- Casos compartilhados: `docs/web-app/contract-cases/plan-limits.json`, rodando no Dart (`test/contract/plan_limits_cases_test.dart`, `FeatureGateService` real) e em Functions (`plan-limits.cases.test.ts`).
+- Valores: só em [`docs/plans/plans.json`](plans/plans.json) (#722). Ver "Tabela única" abaixo.
+- Casos compartilhados: `docs/web-app/contract-cases/plan-limits.json`, rodando no Dart (`test/contract/plan_limits_cases_test.dart`, `FeatureGateService` real), em Functions (`plan-limits.cases.test.ts`) e na web (`firebase/webapp/tests/contract-cases.test.ts`, `src/lib/plan-limits.ts`).
+
+### Tabela única
+
+`docs/plans/plans.json` tem todas as versões da tabela (`versions`) e a que vale hoje (`currentVersion`). Cada plano tem `ordersPerMonth`, `users`, `photosPerMonth`, `formTemplates`, `ownChecklists`, `nfseCnpjs`, `pdfWatermark`, `aiPerMonth`, `aiPerDay` e `features`; -1 é sem limite.
+
+Para mudar um número: editar o JSON e rodar `node scripts/plan-table.mjs`, que gera:
+
+- `firebase/functions/src/services/plan-table.generated.ts` (servidor: `PLAN_LIMITS`, `AI_REQUESTS_PER_MONTH`, nota fiscal por plano);
+- `lib/models/plan_table.dart` (app: `SubscriptionLimits.defaults`, `kAiRequestsPerMonth`);
+- a web gera a sua cópia em `npm run gen` (`src/generated/plan-table.ts`, fora do git).
+
+Os dois arquivos gerados ficam no git porque o deploy das Functions e o build do app não leem `docs/`. Um teste em cada lado compara com o JSON e falha se alguém esquecer de gerar (`plan-table.test.ts` nas Functions e na web, `test/models/plan_table_test.dart` no app); `node scripts/plan-table.mjs --check` faz a mesma conferência.
 
 Firestore lido:
 

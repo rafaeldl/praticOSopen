@@ -49,14 +49,14 @@ need_npm_ci() {
   [ -d "$1/node_modules" ] || (cd "$1" && npm ci --no-audit --no-fund)
 }
 
-if touches '^(lib/|test/|pubspec\.(yaml|lock)$|\.fvmrc$|docs/web-app/contract-cases/)'; then
+if touches '^(lib/|test/|pubspec\.(yaml|lock)$|\.fvmrc$|docs/web-app/contract-cases/|docs/plans/|scripts/plan-table\.mjs$)'; then
   flutter=(flutter)
   command -v fvm >/dev/null && flutter=(fvm flutter)
   step "flutter analyze" bash -c "cd '$ROOT' && ${flutter[*]} analyze"
   step "flutter test" bash -c "cd '$ROOT' && ${flutter[*]} test"
 fi
 
-if touches '^(firebase/functions/|docs/web-app/contract-cases/)'; then
+if touches '^(firebase/functions/|docs/web-app/contract-cases/|docs/plans/|scripts/plan-table\.mjs$)'; then
   fn="$ROOT/firebase/functions"
   step "functions npm ci" need_npm_ci "$fn"
   step "functions lint" bash -c "cd '$fn' && npm run lint"
@@ -69,7 +69,7 @@ if touches '^(firebase/functions/|docs/web-app/contract-cases/)'; then
   rm -rf "$tmp_home"
 fi
 
-if touches '^(firebase/webapp/|docs/web-app/contract-cases/|lib/l10n/.*\.arb$)'; then
+if touches '^(firebase/webapp/|docs/web-app/contract-cases/|lib/l10n/.*\.arb$|docs/plans/|scripts/plan-table\.mjs$)'; then
   wa="$ROOT/firebase/webapp"
   step "webapp npm ci" need_npm_ci "$wa"
   step "webapp typecheck" bash -c "cd '$wa' && npm run typecheck"

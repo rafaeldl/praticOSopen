@@ -3,7 +3,7 @@
 // lib/models/order_form.dart (answers of an order, /companies/{cid}/orders/{oid}/forms).
 // Firestore and Storage are in data.ts.
 
-import { WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
+import { effectiveLimits, WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
 
 export const ITEM_TYPES = ['boolean', 'select', 'checklist', 'text', 'number', 'photo_only'] as const
 export type ItemType = (typeof ITEM_TYPES)[number]
@@ -525,20 +525,12 @@ export const hasPhotoQuestion = (template: Template) => template.items.some((ite
 
 // ── Plan limit (FeatureGateService.canCreateFormTemplate) ──
 
-const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 3, pro: 10, business: -1 }
-
 /**
  * Active checklists the plan allows: the stored limits (or the plan's) while
  * the plan is in force, Free's after it expires. -1 is no limit.
  */
 export function planLimit(subscription: unknown, now: Date): number {
-  const sub = isRecord(subscription) ? subscription : {}
-  const plan = typeof sub.plan === 'string' && sub.plan in PLAN_LIMITS ? sub.plan : 'free'
-  const expires = typeof sub.expiresAt === 'string' ? new Date(sub.expiresAt) : when(sub.expiresAt) ? new Date(when(sub.expiresAt) as string) : null
-  const inForce = !expires || Number.isNaN(expires.getTime()) || expires > now ? plan : 'free'
-  if (inForce !== plan) return PLAN_LIMITS[inForce] as number
-  const stored = isRecord(sub.limits) ? sub.limits.formTemplates : undefined
-  return typeof stored === 'number' ? stored : (PLAN_LIMITS[plan] as number)
+  return effectiveLimits(subscription, now).formTemplates
 }
 
 // No plan limit in the browser, as the app (lib/plan-limits.ts).

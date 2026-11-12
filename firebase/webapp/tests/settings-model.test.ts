@@ -133,7 +133,7 @@ describe('plan', () => {
     const plan = planSummary(undefined, NOW)
     expect(plan.plan).toBe('free')
     expect(plan.state).toBe('free')
-    expect(plan.limits).toEqual({ photosPerMonth: 30, formTemplates: 1, users: 1 })
+    expect(plan.limits).toEqual({ photosPerMonth: 30, formTemplates: 1, users: 1, pdfWatermark: true })
     expect(plan.usage).toEqual({ users: 1, photos: 0, checklists: 0 })
   })
 
@@ -146,8 +146,9 @@ describe('plan', () => {
     const expired = planSummary({ plan: 'pro', expiresAt: '2026-10-01T00:00:00Z', limits: { users: 50 } }, NOW)
     expect(expired.plan).toBe('free')
     expect(expired.limits.users).toBe(1)
+    // Like the app (SubscriptionLimits.fromJson, plan-limits.json): a field missing in the stored limits is Free's.
     expect(planSummary({ plan: 'starter', limits: { collaborators: 4 }, usage: { usersActive: 3, photosThisMonth: 12, formTemplatesActive: 2 } }, NOW)).toMatchObject({
-      limits: { users: 4, photosPerMonth: 200, formTemplates: 3 },
+      limits: { users: 4, photosPerMonth: 30, formTemplates: 1 },
       usage: { users: 3, photos: 12, checklists: 2 },
     })
   })

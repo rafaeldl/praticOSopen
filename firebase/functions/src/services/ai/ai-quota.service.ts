@@ -22,14 +22,13 @@
 import { db, FieldValue } from '../firestore.service';
 import type { SubscriptionPlan } from '../../models/types';
 import { isLlmProvider, type LlmProvider } from './llm.client';
+import { PLAN_IDS } from '../plan-table.generated';
+import { currentPlanRows } from '../subscription-plans';
 
-/** Requests per month by plan (decided 2026-10-09). -1 = unlimited. */
-export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = {
-  free: 10,
-  starter: 150,
-  pro: 400,
-  business: 1000,
-};
+/** Requests per month by plan (docs/plans/plans.json). -1 = unlimited. */
+export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = Object.fromEntries(
+  PLAN_IDS.map((plan) => [plan, currentPlanRows()[plan].aiPerMonth]),
+) as Record<SubscriptionPlan, number>;
 
 export interface AiSettings {
   enabled: boolean;
