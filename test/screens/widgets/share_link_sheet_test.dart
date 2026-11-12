@@ -17,6 +17,7 @@ class _FakeService extends ShareLinkService {
   _FakeService() : super.forTesting();
 
   final generated = <List<String>>[];
+  bool failLink = false;
   final generatedDays = <int>[];
   final whatsapp = <String>[];
   final sheets = <String>[];
@@ -31,6 +32,7 @@ class _FakeService extends ShareLinkService {
     List<String> permissions = const ['view', 'approve', 'comment'],
     int expiresInDays = 7,
   }) async {
+    if (failLink) throw ShareLinkException('Order not found');
     generated.add(permissions);
     generatedDays.add(expiresInDays);
     return ShareLinkResult()
@@ -63,14 +65,14 @@ class _FakeService extends ShareLinkService {
 
   @override
   Future<void> shareViaSheetWithPdf({
-    required String url,
+    String? url,
     required Uint8List bytes,
     required String filename,
     String? message,
     String? subject,
     Rect? sharePositionOrigin,
   }) async {
-    pdfs.add('$filename $url');
+    pdfs.add(url == null ? filename : '$filename $url');
     pdfMessages.add(message);
   }
 
@@ -290,6 +292,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(service.sheets, ['https://praticos.app/q/tok1']);
       expect(service.pdfs, isEmpty);
+    });
+
+    testWidgets('the link fails: the PDF still goes, without the link', (
+      tester,
+    ) async {
+      final service = _FakeService()..failLink = true;
+      await _pump(tester, _order(), service, withPdf: true);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Não deu para criar o link.'), findsOneWidget);
+      expect(find.text('Tentar novamente'), findsOneWidget);
+
+      await tester.tap(find.text('Mandar o PDF'));
+      await tester.pumpAndSettle();
+      expect(service.pdfs, ['OS-183.pdf']);
+      expect(service.pdfMessages.single, 'Olá Ana! Segue a sua OS #183 em PDF.');
+    });
+
+    testWidgets('without the PDF a failed link only offers to try again', (
+      tester,
+    ) async {
+      final service = _FakeService()..failLink = true;
+      await _pump(tester, _order(), service);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tentar novamente'), findsOneWidget);
+      expect(find.text('Mandar o PDF'), findsNothing);
     });
 
     testWidgets('a PDF that fails shows an alert and sends nothing', (
