@@ -77,6 +77,9 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; line-height: 1; padding
   background: transparent; color: var(--color-on-navy-2); text-align: left; width: 100%; font-weight: 500; }
 .nav-item:hover { background: var(--color-navy-2); color: var(--color-on-navy); }
 .nav-item[aria-current="page"] { background: var(--color-on-navy); color: var(--color-navy); font-weight: 700; }
+/* Dark: a paper-white pill shouts on the dark band; use a lighter navy with the brand-blue bar instead (same as other selections) */
+:root[data-theme="dark"] { --side-current-bg: oklch(38% 0.10 255); }
+:root[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--side-current-bg); color: var(--color-on-navy); box-shadow: inset 3px 0 0 var(--color-accent); }
 .nav-item span { white-space: nowrap; }
 .nav-item .count { margin-left: auto; font-family: var(--font-num); font-size: 0.8125rem; font-weight: 500; }
 .side-foot { margin-top: auto; display: grid; gap: 0.35rem; }
