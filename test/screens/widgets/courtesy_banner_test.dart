@@ -68,7 +68,7 @@ void main() {
     expect(
       find.text(
         'Acaba em 10 dias. Neste mês você usou o assistente 87 vezes; '
-        'no Free são 10. O plano Starter cobre o seu uso.',
+        'no Free são 50. O plano Starter cobre o seu uso.',
       ),
       findsOneWidget,
     );

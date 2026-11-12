@@ -20,6 +20,11 @@ jest.mock('../../services/order.service');
 jest.mock('../../services/share-token.service');
 jest.mock('../../services/comment.service');
 jest.mock('../../services/photo-upload.service');
+// The paid-plans switch lives in Firestore (config/paidPlans); here it is off.
+jest.mock('../../services/plan-limits.service', () => ({
+  ...jest.requireActual('../../services/plan-limits.service'),
+  isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+}));
 
 import { registerWriteTools } from '../tools/write';
 import {
