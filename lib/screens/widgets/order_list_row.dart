@@ -13,7 +13,7 @@ class OrderListRow extends StatelessWidget {
   const OrderListRow({
     super.key,
     required this.customerName,
-    required this.statusText,
+    this.statusText,
     this.statusColor,
     this.valueText,
     this.detailText,
@@ -32,8 +32,9 @@ class OrderListRow extends StatelessWidget {
   /// Second line: device and services.
   final String? detailText;
 
-  /// Status or stage ("Pintura", "Pronto para retirada"), in grey.
-  final String statusText;
+  /// Status or stage ("Pintura", "Pronto para retirada"), in grey. No
+  /// status line when null and there is no [statusExtra] nor [problemText].
+  final String? statusText;
 
   /// Dot before the status; none when null.
   final Color? statusColor;
@@ -82,10 +83,10 @@ class OrderListRow extends StatelessWidget {
                 ),
               ),
             ),
-          TextSpan(text: statusText),
+          if (statusText != null) TextSpan(text: statusText),
           if (statusExtra != null)
             TextSpan(
-              text: ' · ',
+              text: statusText == null ? '' : ' · ',
               children: [
                 TextSpan(
                   text: statusExtra,
@@ -151,31 +152,35 @@ class OrderListRow extends StatelessWidget {
                 style: AppTypography.callout.copyWith(color: text),
               ),
             ],
-            const SizedBox(height: 2),
-            if (problemText == null)
-              status
-            else
-              // Status on the left, problem on the right; with large text the
-              // problem drops below the status instead of squeezing it.
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  spacing: AppSpacing.sm,
-                  children: [
-                    status,
-                    Text(
-                      problemText!,
-                      key: const Key('order_row_problem'),
-                      style: statusStyle.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: problemColor ?? text,
+            if (statusText != null ||
+                statusExtra != null ||
+                problemText != null) ...[
+              const SizedBox(height: 2),
+              if (problemText == null)
+                status
+              else
+                // Status on the left, problem on the right; with large text the
+                // problem drops below the status instead of squeezing it.
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: AppSpacing.sm,
+                    children: [
+                      status,
+                      Text(
+                        problemText!,
+                        key: const Key('order_row_problem'),
+                        style: statusStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: problemColor ?? text,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+            ],
           ],
         ),
       ),

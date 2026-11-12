@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/permission.dart';
@@ -1711,11 +1710,11 @@ void main() {
       expect(find.text('B'), findsOneWidget);
       // Late order shows as text next to the dot.
       expect(find.textContaining('1 OS atrasada'), findsOneWidget);
-      // The dot sits after the name, so names stay aligned.
+      // The dot sits under the name, so names stay aligned.
       final name = find.textContaining('Ana Ribeiro');
       expect(
-        tester.getTopLeft(find.byType(StatusDot)).dx,
-        greaterThan(tester.getTopLeft(name).dx),
+        tester.getTopLeft(find.byKey(const Key('order_row_status_dot'))).dy,
+        greaterThan(tester.getBottomLeft(name).dy - 1),
       );
       expect(
         tester.getTopLeft(name).dx,
@@ -1757,8 +1756,8 @@ void main() {
         direct: true,
       );
       expect(find.textContaining('1 OS atrasada'), findsOneWidget);
-      expect(find.text('2 OS'), findsOneWidget);
-      expect(find.byType(StatusDot), findsNWidgets(2));
+      expect(find.textContaining('2 OS abertas'), findsOneWidget);
+      expect(find.byKey(const Key('order_row_status_dot')), findsNWidgets(2));
       expect(directory.openReads, 0);
     });
 
@@ -1779,7 +1778,7 @@ void main() {
         ),
         direct: true,
       );
-      expect(find.text('1 OS'), findsOneWidget);
+      expect(find.textContaining('1 OS aberta'), findsOneWidget);
       expect(find.textContaining('5 OS'), findsNothing);
       expect(directory.openReads, 1);
     });
@@ -1800,18 +1799,20 @@ void main() {
         ),
         direct: true,
       );
-      // Phone under the name; what is pending on the right, owed first.
+      // What is owed on the right of the name, like the order total on
+      // Início; phone under the name, then the open orders.
       expect(find.text('(11) 90000-0001'), findsOneWidget);
       final owed = find.text(FormatService().formatCurrency(166));
-      final open = find.text('2 OS');
       expect(owed, findsOneWidget);
-      expect(open, findsOneWidget);
       expect(
         tester.getTopLeft(owed).dx,
-        greaterThan(tester.getTopLeft(find.text('Ana Ribeiro')).dx),
+        greaterThan(tester.getTopRight(find.text('Ana Ribeiro')).dx),
       );
-      expect(tester.getTopLeft(owed).dy, lessThan(tester.getTopLeft(open).dy));
-      // Just the amount and the count: no "Deve", no "em aberto".
+      expect(
+        tester.getTopLeft(find.text('(11) 90000-0001')).dy,
+        lessThan(tester.getTopLeft(find.textContaining('2 OS abertas')).dy),
+      );
+      // No "Deve", no "em aberto".
       expect(find.textContaining('Deve'), findsNothing);
       expect(find.textContaining('em aberto'), findsNothing);
       // Nothing pending, nothing on the right.
@@ -1838,7 +1839,7 @@ void main() {
         direct: true,
       );
       expect(find.textContaining('R\$'), findsNothing);
-      expect(find.text('1 OS'), findsOneWidget);
+      expect(find.textContaining('1 OS aberta'), findsOneWidget);
     });
 
     testWidgets('shows the phone formatted for the country', (tester) async {
