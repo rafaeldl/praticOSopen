@@ -16,7 +16,7 @@ O dono aprovou uma tabela nova no épico #721. Os valores abaixo **ainda não es
 | Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
 | CNPJs na nota | — | 1 | 2 | sem limite |
 | Fotos | sem limite | sem limite | sem limite | sem limite |
-| IA (teto interno) | 10/mês | 1.000/mês, 200/dia | 3.000/mês, 200/dia | 6.000/mês |
+| IA (teto interno, o cliente não vê) | 50/mês, 20/dia | 1.000/mês, 200/dia | 3.000/mês, 200/dia | 6.000/mês |
 | PDF sem a marca PraticOS | — | ✓ | ✓ | ✓ |
 | Checklists | só os do ramo | próprios | próprios | próprios |
 
@@ -24,6 +24,7 @@ Regras novas que mudam a conta deste documento:
 
 - O plano é o maior entre OS por mês, pessoas e CNPJs.
 - Limite suave: aviso ao chegar perto e ao passar, um mês de folga, conta a média; nunca trava uma OS já aberta. Hoje a conta é dura (`uso + o que entra <= limite`, 402).
+- IA incluída em todos os planos, inclusive no Grátis (decisão de 12/11, comentário na #729): sem contador na tela; o teto é interno e os termos falam em uso justo.
 - Fotos deixam de ter limite; o contador `photosThisMonth` passa a servir só para custo.
 - Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar ficam em todos os planos.
 

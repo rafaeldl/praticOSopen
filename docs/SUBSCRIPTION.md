@@ -29,14 +29,15 @@ The owner approved a new table on 2026-11-12. It is being rolled out by #722-#72
 | People | 1 | 2 | 5 | 20, then +R$ 15 each |
 | CNPJs on the service invoice (BR) | — | 1 | 2 | unlimited |
 | Photos | unlimited | unlimited | unlimited | unlimited |
-| AI (internal ceiling) | 10/month | 1,000/month, 200/day | 3,000/month, 200/day | 6,000/month |
+| AI | included | included | included | included |
+| AI internal ceiling (never shown to the customer) | 50/month, 20/day | 1,000/month, 200/day | 3,000/month, 200/day | 6,000/month |
 | PDF without the PraticOS brand | — | ✓ | ✓ | ✓ |
 | Checklists | the trade's only | own | own | own |
 
 Features (each plan includes the previous one):
 
-- **Free:** work orders, customers, catalog, schedule, quote by WhatsApp and link, approval by link, basic finances, data import, phone and computer.
-- **Starter:** service invoice, PDF and receipt with only the company's brand, own checklists, AI included, billing and next-charge reminder.
+- **Free:** work orders, customers, catalog, schedule, quote by WhatsApp and link, approval by link, basic finances, data import, phone and computer, AI included (fair use).
+- **Starter:** service invoice, PDF and receipt with only the company's brand, own checklists, billing and next-charge reminder.
 - **Pro:** team roles and permissions, assignee and schedule per person, job stages, TV Mode, contracts, AI in finances, spreadsheet report.
 - **Business:** bulk actions, ChatGPT/Claude (MCP) and API.
 
@@ -46,6 +47,7 @@ Rules:
 - Soft limit: warn when close and when over, one month of slack, monthly average counts; an open work order never locks.
 - The everyday basics stay in every plan: open a work order, send it to the customer, approval by link, schedule and import.
 - A new company starts on Free, with no Pro trial.
+- AI is included in every plan (approved 2026-11-12, comment on #729). The customer never sees an AI counter; the ceilings above are internal, and the terms speak of fair use, never "unlimited". Measured use is about 2.5 per work order, so 50/month covers Free's 10 work orders.
 - 7-day guarantee: whoever subscribes and gives up within 7 days gets the money back (see "7-day guarantee and refunds").
 - Current subscribers and the courtesy keep what they have.
 - App, web and server show and enforce the same thing, from a single table (#722).

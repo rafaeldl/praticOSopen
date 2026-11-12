@@ -35,6 +35,7 @@
           "Agenda dos serviços",
           "Orçamento pelo WhatsApp e por link",
           "O cliente aprova pelo link",
+          "IA para preencher a OS falando ou por foto",
           "Financeiro: o que entrou e o que falta receber",
           "Importar seus clientes e serviços",
           "No celular e no computador"
@@ -66,7 +67,6 @@
           "Nota fiscal de serviço direto da OS",
           "PDF e recibo só com a marca da sua empresa",
           "Checklists do seu jeito",
-          "IA para preencher a OS falando ou por foto",
           "Cobrança do cliente e aviso da próxima cobrança"
         ],
         "cta": "Assinar pelo app"
@@ -153,8 +153,8 @@
           "text": "Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar dados estão em todos os planos, inclusive no grátis."
         },
         {
-          "title": "Fotos sem limite",
-          "text": "Tire quantas fotos o serviço pedir, em qualquer plano."
+          "title": "Fotos e IA em todos os planos",
+          "text": "Tire quantas fotos o serviço pedir e preencha a OS falando ou por foto, em qualquer plano, inclusive no grátis."
         }
       ]
     },
@@ -197,6 +197,15 @@
             "Sem limite",
             "Sem limite",
             "Sem limite"
+          ]
+        },
+        {
+          "label": "IA",
+          "values": [
+            "Incluída",
+            "Incluída",
+            "Incluída",
+            "Incluída"
           ]
         },
         {
@@ -292,6 +301,7 @@
           "Job schedule",
           "Quotes by WhatsApp and by link",
           "Customers approve by link",
+          "AI that fills in the work order from your voice or a photo",
           "Finances: what came in and what is still due",
           "Import your customers and services",
           "On your phone and computer"
@@ -321,7 +331,6 @@
         "features": [
           "PDF and receipt with only your company's brand",
           "Checklists your way",
-          "AI that fills in the work order from your voice or a photo",
           "Customer billing and next-payment reminders"
         ],
         "cta": "Subscribe in the app"
@@ -406,8 +415,8 @@
           "text": "Opening work orders, sending them to the customer, approval by link, the schedule and importing data are in every plan, free included."
         },
         {
-          "title": "Unlimited photos",
-          "text": "Take as many photos as the job needs, on any plan."
+          "title": "Photos and AI in every plan",
+          "text": "Take as many photos as the job needs and fill in the work order by voice or photo, on any plan, free included."
         }
       ]
     },
@@ -441,6 +450,15 @@
             "Unlimited",
             "Unlimited",
             "Unlimited"
+          ]
+        },
+        {
+          "label": "AI",
+          "values": [
+            "Included",
+            "Included",
+            "Included",
+            "Included"
           ]
         },
         {
@@ -536,6 +554,7 @@
           "Agenda de los trabajos",
           "Presupuesto por WhatsApp y por enlace",
           "El cliente aprueba por enlace",
+          "IA que llena la orden hablando o con una foto",
           "Finanzas: lo que entró y lo que falta cobrar",
           "Importar tus clientes y servicios",
           "En el celular y en la computadora"
@@ -565,7 +584,6 @@
         "features": [
           "PDF y recibo solo con la marca de tu empresa",
           "Checklists a tu manera",
-          "IA que llena la orden hablando o con una foto",
           "Cobro al cliente y aviso del próximo cobro"
         ],
         "cta": "Suscribirse en la app"
@@ -650,8 +668,8 @@
           "text": "Abrir órdenes, enviarlas al cliente, aprobación por enlace, agenda e importar datos están en todos los planes, también en el gratis."
         },
         {
-          "title": "Fotos sin límite",
-          "text": "Saca todas las fotos que pida el trabajo, en cualquier plan."
+          "title": "Fotos e IA en todos los planes",
+          "text": "Saca todas las fotos que pida el trabajo y llena la orden hablando o con una foto, en cualquier plan, también en el gratis."
         }
       ]
     },
@@ -685,6 +703,15 @@
             "Sin límite",
             "Sin límite",
             "Sin límite"
+          ]
+        },
+        {
+          "label": "IA",
+          "values": [
+            "Incluida",
+            "Incluida",
+            "Incluida",
+            "Incluida"
           ]
         },
         {

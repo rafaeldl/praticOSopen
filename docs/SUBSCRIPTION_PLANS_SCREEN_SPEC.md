@@ -21,11 +21,12 @@ A tela de planos (app e web, #725) mostra esta tabela, cada plano no formato "tu
 | CNPJs na nota | — | 1 | 2 | sem limite |
 | Fotos | sem limite | sem limite | sem limite | sem limite |
 | PDF sem a marca PraticOS | — | sim | sim | sim |
+| IA | incluida | incluida | incluida | incluida |
 | Checklists | so os do ramo | proprios | proprios | proprios |
 
 Recursos (cada um inclui o anterior):
-- **Gratis:** OS, clientes, catalogo, agenda, orcamento pelo WhatsApp e link, aprovacao pelo link, financeiro basico, importar dados, celular e computador.
-- **Starter:** nota fiscal, PDF e recibo so com a marca da empresa, checklists proprios, IA incluida, cobranca e proxima cobranca.
+- **Gratis:** OS, clientes, catalogo, agenda, orcamento pelo WhatsApp e link, aprovacao pelo link, financeiro basico, importar dados, celular e computador, IA incluida (sem contador na tela).
+- **Starter:** nota fiscal, PDF e recibo so com a marca da empresa, checklists proprios, cobranca e proxima cobranca.
 - **Pro:** perfis e permissoes da equipe, responsavel e agenda por pessoa, etapas da oficina, Modo TV, contratos, IA no financeiro, relatorio em planilha.
 - **Business:** acoes em lote, ChatGPT/Claude (MCP) e API.
 
