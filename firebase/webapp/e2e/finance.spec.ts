@@ -246,6 +246,11 @@ for (const [width, height] of [
     await login(page, 'admin', MARCH)
     await expect(page.getByTestId('fin-list')).toBeVisible()
     await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
+    // Big amounts, as on a shared CI emulator: the column must not grow with them.
+    await page.evaluate(() => {
+      const walker = document.createTreeWalker(document.querySelector('.list-pane')!, NodeFilter.SHOW_TEXT)
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) node.textContent = node.textContent!.replace(/R\$\s?[\d.,]+/g, 'R$ 10.654,00')
+    })
     await expectNoSideScroll(page)
   })
 }

@@ -1,6 +1,6 @@
 /* Financeiro, relatório e notas fiscais. Loaded with the screens that use it. */
 .finance { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-.fin { padding: 0 1.25rem 2rem; display: grid; gap: 1.25rem; align-content: start; }
+.fin { padding: 0 1.25rem 2rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; align-content: start; }
 /* Old numbers while new ones come: a line on top, never faded text (contrast stays). */
 .fin[aria-busy="true"] { cursor: progress; box-shadow: inset 0 2px 0 var(--color-accent); }
 
