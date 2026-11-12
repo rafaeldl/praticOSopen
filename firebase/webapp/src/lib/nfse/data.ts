@@ -146,3 +146,10 @@ export async function customerOrdersForNfse(customerId: string, after?: OrderRow
   })
   return { orders, last: rows.at(-1) ?? null, hasMore: rows.length === size }
 }
+
+/** CNPJs set up for the nota (fiscalEmitters: owner, admin and manager read it), for the Plan screen (#725). */
+export async function countEmitters(): Promise<number> {
+  const [db, { collection, getCount }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
+  const snap = await getCount(collection(db, 'companies', session.companyId as string, 'fiscalEmitters'))
+  return snap.data().count
+}

@@ -7938,4 +7938,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planFeatureApi => 'API with a key';
+
+  @override
+  String get planUsageOrders => 'Orders this month';
+
+  @override
+  String get planUsageCnpjs => 'Tax IDs on invoices';
+
+  @override
+  String planNoticeOrdersNear(String used, String limit) {
+    return 'You have opened $used of $limit orders this month.';
+  }
+
+  @override
+  String planNoticeOrdersAtLimit(String limit) {
+    return 'You have opened the $limit orders of the month. You can keep opening this month; if you go over again next month, new orders wait until you change plans.';
+  }
+
+  @override
+  String planNoticeOrdersGrace(String limit) {
+    return 'This month went over $limit orders and nothing was blocked. If you go over again next month, new orders wait until you change plans.';
+  }
+
+  @override
+  String planNoticeOrdersBlocked(String limit) {
+    return 'Over $limit orders again. Open orders work as usual; a new one waits until you change plans.';
+  }
+
+  @override
+  String planNoticeOrdersContactUs(String limit) {
+    return 'You went over $limit orders this month. Talk to us to adjust your plan.';
+  }
+
+  @override
+  String planNoticePeopleContactUs(String limit) {
+    return 'Your team went over $limit people. Talk to us to adjust your plan.';
+  }
+
+  @override
+  String planNextTitle(String plan) {
+    return 'What $plan adds';
+  }
 }

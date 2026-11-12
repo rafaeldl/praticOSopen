@@ -60,6 +60,7 @@ const _covered = {
   'payment-transactions.json',
   'phone.json',
   'plan-features.json', // plan_features_cases_test.dart
+  'plan-overview.json', // plan_overview_cases_test.dart
   'plan-limits.json', // plan_limits_cases_test.dart
   'receipts.json',
   'round-money.json',

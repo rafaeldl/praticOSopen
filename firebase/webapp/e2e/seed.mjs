@@ -550,9 +550,22 @@ async function seedSettings() {
     {
       useScheduling: true,
       phone: '(11) 3333-4444',
-      // Starter in force: the team at the limit (members are recounted by the server), photos near it.
-      // Table version 1 (200 photos, 3 checklists, 3 people on Starter): the Plano screen's levels and limit block. The new table's rows come with #725.
-      subscription: { plan: 'starter', status: 'active', source: 'store', tableVersion: '1', expiresAt: future, usage: { usersActive: 4, photosThisMonth: 170, formTemplatesActive: 1 } },
+      // Starter in force (table of 2026-11, #725): 45 of 50 orders this month (near the limit, the notice) and
+      // the team at or over its 2 people (the server recounts it). ordersMonth is this month in São Paulo, like the server's counter.
+      subscription: {
+        plan: 'starter',
+        status: 'active',
+        source: 'store',
+        expiresAt: future,
+        usage: {
+          usersActive: 2,
+          photosThisMonth: 170,
+          formTemplatesActive: 1,
+          ordersMonth: new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 7),
+          ordersThisMonth: 45,
+          ordersLastMonth: 12,
+        },
+      },
     },
     { merge: true },
   )

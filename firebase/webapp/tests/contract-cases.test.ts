@@ -15,7 +15,8 @@ import {
 } from '../src/lib/rules/order-rules'
 import { periodOf } from '../src/lib/finance/period'
 import { isOpen } from '../src/lib/orders/model'
-import { checkPlanLimit, planInForce, shouldShowPdfWatermark } from '../src/lib/plan-limits'
+import { checkPlanLimit, orderMonthKey, planInForce, shouldShowPdfWatermark } from '../src/lib/plan-limits'
+import { planOverview } from '../src/lib/plan-overview'
 import { checkPlanFeature, featureForRole } from '../src/lib/plan-features'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
@@ -165,5 +166,30 @@ describe('plan-features', () => {
         : { ...given.subscription, expiresAt: new Date(now.getTime() + given.expiresInDays * DAY_MS).toISOString() }
     const result: Record<string, unknown> = { ...checkPlanFeature({ subscription, feature: given.feature, enforced: given.paidPlansEnabled, now }) }
     expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
+  })
+})
+
+// Same cases as the app (test/contract/plan_overview_cases_test.dart): the Plan screen (#725).
+describe('plan-overview', () => {
+  const DAY_MS = 24 * 60 * 60 * 1000
+  const doc = JSON.parse(readFileSync(resolve(dir, 'plan-overview.json'), 'utf8'))
+
+  test('runs in web', () => expect(doc.runsIn).toContain('web'))
+
+  test.each(cases('plan-overview.json'))('$id', (c) => {
+    const { given } = c
+    const now = new Date()
+    const subscription = {
+      ...given.subscription,
+      ...(given.expiresInDays === undefined ? {} : { expiresAt: new Date(now.getTime() + given.expiresInDays * DAY_MS).toISOString() }),
+      usage: { ordersMonth: orderMonthKey(now), ordersThisMonth: given.orders.thisMonth, ordersLastMonth: given.orders.lastMonth },
+    }
+    const got = planOverview({ subscription, people: given.people, cnpjs: given.cnpjs, enforced: given.paidPlansEnabled, now })
+    expect({
+      plan: got.plan,
+      rows: got.rows,
+      notice: got.notice === null ? null : { kind: got.notice, resource: got.notice.startsWith('orders') ? 'orders' : 'people' },
+      next: got.next,
+    }).toEqual(c.expect)
   })
 })

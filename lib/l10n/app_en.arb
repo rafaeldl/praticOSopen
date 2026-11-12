@@ -3054,5 +3054,14 @@
   "planFeatureSpreadsheetExport": "Spreadsheet report",
   "planFeatureBulkActions": "Bulk actions",
   "planFeatureMcp": "ChatGPT and Claude",
-  "planFeatureApi": "API with a key"
+  "planFeatureApi": "API with a key",
+  "planUsageOrders": "Orders this month",
+  "planUsageCnpjs": "Tax IDs on invoices",
+  "planNoticeOrdersNear": "You have opened {used} of {limit} orders this month.",
+  "planNoticeOrdersAtLimit": "You have opened the {limit} orders of the month. You can keep opening this month; if you go over again next month, new orders wait until you change plans.",
+  "planNoticeOrdersGrace": "This month went over {limit} orders and nothing was blocked. If you go over again next month, new orders wait until you change plans.",
+  "planNoticeOrdersBlocked": "Over {limit} orders again. Open orders work as usual; a new one waits until you change plans.",
+  "planNoticeOrdersContactUs": "You went over {limit} orders this month. Talk to us to adjust your plan.",
+  "planNoticePeopleContactUs": "Your team went over {limit} people. Talk to us to adjust your plan.",
+  "planNextTitle": "What {plan} adds"
 }

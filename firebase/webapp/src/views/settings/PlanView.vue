@@ -1,30 +1,32 @@
 <script setup lang="ts">
-// Plano (plan.view, plan.header-status, plan.usage-levels, plan.ai-usage,
-// plan.open-limit): the plan in force and what the company uses, read only.
-// Buying, prices and limits are the owner's decision: nothing to buy here.
-// Usage comes from the counters the server keeps (subscription.usage), the
-// assistant from GET /v1/app/ai/status. Team and checklists open only for who
-// manages them.
+// Plano (#725; plan.view, plan.header-status, plan.usage-levels, plan.open-limit):
+// the same as the app (plan_screen.dart), from the same rule
+// (src/lib/plan-overview.ts, docs/web-app/contract-cases/plan-overview.json):
+// orders this month, people and CNPJs against the plan, one notice (80%, 100%,
+// the month of grace, orders waiting, talk to us) and what the next plan adds.
+// No assistant counter. Buying is in the phone app for now (#664): the screen
+// says where.
 import { computed, onMounted, ref, shallowRef } from 'vue'
 import { ChevronRight } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { t, type MessageKey } from '@/i18n'
 import { formatDate, formatNumber } from '@/lib/format'
+import { countEmitters } from '@/lib/nfse/data'
+import { PLAN_FEATURE_NAME } from '@/lib/plan-features'
+import { loadLimitsSwitch } from '@/lib/plan-limits'
+import { planOverview, type OverviewResource, type OverviewRow, type PlanOverview } from '@/lib/plan-overview'
 import { can, session } from '@/lib/session'
-import { loadAiStatus, loadCompany, type AiStatus } from '@/lib/settings/data'
-import { PLAN_NAME, planSummary, usageLevel, type PlanSummary, type UsageLevel } from '@/lib/settings/model'
+import { loadCompany } from '@/lib/settings/data'
+import { PLAN_NAME, planSummary, type PlanSummary } from '@/lib/settings/model'
 import '@/styles/settings.css'
 
-type Resource = 'ai' | 'team' | 'photos' | 'checklists'
-
 const summary = shallowRef<PlanSummary | null>(null)
+const overview = shallowRef<PlanOverview | null>(null)
 const failed = ref(false)
-const ai = shallowRef<AiStatus | null>(null)
-const aiFailed = ref(false)
 
 const country = computed(() => session.company?.country)
-// Who cannot change the plan is told who can (plan.non-admin-note), as the app with paid plans.
+// Who cannot change the plan is told who can (plan.non-admin-note), as the app.
 const isAdmin = computed(() => session.role === 'owner' || session.role === 'admin')
 const count = (value: number) => formatNumber(value, country.value)
 
@@ -40,74 +42,73 @@ const header = computed(() => {
   return t('planHeaderValidUntil', { plan: name, date })
 })
 
-interface Row {
-  resource: Resource
-  title: MessageKey
-  used: number
-  limit: number
-  level: UsageLevel
-  to?: string
-}
+const TITLE: Record<OverviewResource, MessageKey> = { orders: 'planUsageOrders', people: 'planUsageTeam', cnpjs: 'planUsageCnpjs' }
 
-const rows = computed<Row[]>(() => {
-  const plan = summary.value
-  if (!plan) return []
-  const list: Row[] = []
-  const usage = ai.value?.enabled ? ai.value.usage : undefined
-  if (usage) list.push({ resource: 'ai', title: 'planUsageAi', used: usage.used, limit: usage.limit, level: usageLevel(usage.used, usage.limit) })
-  list.push({ resource: 'team', title: 'planUsageTeam', used: plan.usage.users, limit: plan.limits.users, level: usageLevel(plan.usage.users, plan.limits.users), to: can('manageUsers') ? '/team' : undefined })
-  list.push({ resource: 'photos', title: 'planUsagePhotos', used: plan.usage.photos, limit: plan.limits.photosPerMonth, level: usageLevel(plan.usage.photos, plan.limits.photosPerMonth) })
-  list.push({
-    resource: 'checklists',
-    title: 'planUsageChecklists',
-    used: plan.usage.checklists,
-    limit: plan.limits.formTemplates,
-    level: usageLevel(plan.usage.checklists, plan.limits.formTemplates),
-    to: can('manageForms') ? '/checklists' : undefined,
-  })
-  return list
+const rowOf = (resource: OverviewResource) => overview.value?.rows.find((row) => row.resource === resource)
+
+const notice = computed(() => {
+  const kind = overview.value?.notice
+  if (!kind) return null
+  const orders = rowOf('orders')!
+  const people = rowOf('people')!
+  const limit = count(kind.startsWith('orders') ? orders.limit : people.limit)
+  switch (kind) {
+    case 'ordersNear':
+      return t('planNoticeOrdersNear', { used: count(orders.used), limit })
+    case 'ordersAtLimit':
+      return t('planNoticeOrdersAtLimit', { limit })
+    case 'ordersGrace':
+      return t('planNoticeOrdersGrace', { limit })
+    case 'ordersBlocked':
+      return t('planNoticeOrdersBlocked', { limit })
+    case 'ordersContactUs':
+      return t('planNoticeOrdersContactUs', { limit })
+    case 'peopleAtLimit':
+      return t('planLimitTeam', { used: count(people.used), limit })
+    case 'peopleContactUs':
+      return t('planNoticePeopleContactUs', { limit })
+  }
+  return null
 })
 
-const reached = computed(() => rows.value.find((row) => row.level === 'atLimit') ?? null)
+const reached = computed(() => {
+  const kind = overview.value?.notice
+  return !!kind && kind !== 'ordersNear'
+})
 
-const LIMIT_TEXT: Record<Resource, MessageKey> = { ai: 'planLimitAi', team: 'planLimitTeam', photos: 'planLimitPhotos', checklists: 'planLimitChecklists' }
-
-function levelText(row: Row): string {
-  if (row.level === 'atLimit') return row.resource === 'team' ? t('planUsageAtLimitInvites') : t('planUsageAtLimit')
+function levelText(row: OverviewRow): string {
+  if (row.level === 'atLimit' || row.level === 'over') return row.resource === 'people' ? t('planUsageAtLimitInvites') : t('planUsageAtLimit')
   if (row.level === 'near') return t('planUsageNearLimit')
   if (row.level === 'unlimited') return t('planUsageUnlimited')
   return ''
 }
 
-const valueText = (row: Row) => (row.level === 'unlimited' ? count(row.used) : t('planUsageOf', { used: count(row.used), limit: count(row.limit) }))
+const valueText = (row: OverviewRow) => (row.level === 'unlimited' ? count(row.used) : t('planUsageOf', { used: count(row.used), limit: count(row.limit) }))
+const linkOf = (row: OverviewRow) => (row.resource === 'people' && can('manageUsers') ? '/team' : undefined)
 
 async function load() {
   failed.value = false
   summary.value = null
+  overview.value = null
   try {
-    const company = await loadCompany()
-    summary.value = planSummary(company.subscription, new Date())
+    const [company, enforced, cnpjs] = await Promise.all([
+      loadCompany(),
+      loadLimitsSwitch(),
+      // Only who reads fiscalEmitters (owner, admin, manager) sees the CNPJs; a failure hides the row.
+      countEmitters().catch(() => null),
+    ])
+    const now = new Date()
+    const plan = planSummary(company.subscription, now)
+    const result = planOverview({ subscription: company.subscription, people: plan.usage.users, cnpjs: cnpjs ?? 0, enforced, now })
+    summary.value = plan
+    overview.value = cnpjs === null ? { ...result, rows: result.rows.filter((row) => row.resource !== 'cnpjs') } : result
   } catch (error) {
     console.error('plan: load failed', error)
     failed.value = true
   }
 }
 
-async function loadAi() {
-  aiFailed.value = false
-  try {
-    ai.value = await loadAiStatus()
-  } catch (error) {
-    // The app hides the row on a failure; here it says so.
-    console.warn('plan: assistant status failed', error)
-    aiFailed.value = true
-  }
-}
-
-onMounted(() => {
-  void load()
-  void loadAi()
-})
+onMounted(() => void load())
 </script>
 
 <template>
@@ -119,36 +120,43 @@ onMounted(() => {
   </header>
   <div class="workspace">
     <div class="list-pane set-page">
-      <LoadingState v-if="!summary && !failed" />
+      <LoadingState v-if="!overview && !failed" />
       <ErrorState v-else-if="failed" :retry="load" />
-      <template v-else-if="summary">
-        <div v-if="reached" class="set-block set-block--danger" data-testid="plan-limit">
+      <template v-else-if="overview">
+        <div v-if="notice" class="set-block" :class="{ 'set-block--danger': reached }" data-testid="plan-limit" :data-notice="overview.notice">
           <p class="set-h">{{ t('planLimitLabel') }}</p>
-          <p>{{ t(LIMIT_TEXT[reached.resource], { used: count(reached.used), limit: count(reached.limit) }) }}</p>
+          <p>{{ notice }}</p>
         </div>
         <section aria-labelledby="plan-usage" class="set-section">
           <h2 id="plan-usage" class="set-h">{{ t('planUsageSection') }}</h2>
           <ul class="set-list" data-testid="plan-usage">
-            <li v-for="row in rows" :key="row.resource" :data-usage="row.resource">
-              <component :is="row.to ? 'RouterLink' : 'div'" :to="row.to" class="set-row">
+            <li v-for="row in overview.rows" :key="row.resource" :data-usage="row.resource">
+              <component :is="linkOf(row) ? 'RouterLink' : 'div'" :to="linkOf(row)" class="set-row">
                 <span class="set-text">
-                  <span class="who">{{ t(row.title) }}</span>
-                  <span v-if="levelText(row)" class="sub set-level" :class="{ 'set-level--limit': row.level === 'atLimit' }">
-                    <span v-if="row.level === 'atLimit' || row.level === 'near'" class="dot" :class="row.level === 'atLimit' ? 'dot--danger' : 'dot--warning'" aria-hidden="true"></span>
+                  <span class="who">{{ t(TITLE[row.resource]) }}</span>
+                  <span v-if="levelText(row)" class="sub set-level" :class="{ 'set-level--limit': row.level === 'atLimit' || row.level === 'over' }">
+                    <span v-if="row.level !== 'unlimited' && row.level !== 'ok'" class="dot" :class="row.level === 'near' ? 'dot--warning' : 'dot--danger'" aria-hidden="true"></span>
                     {{ levelText(row) }}
                   </span>
                 </span>
                 <span class="set-end num">{{ valueText(row) }}</span>
-                <ChevronRight v-if="row.to" :size="18" aria-hidden="true" />
+                <ChevronRight v-if="linkOf(row)" :size="18" aria-hidden="true" />
               </component>
             </li>
           </ul>
-          <p v-if="aiFailed" class="sub" role="status" data-testid="plan-ai-failed">
-            {{ t('web.plan.aiFailed') }} <button type="button" class="link" @click="loadAi">{{ t('web.tryAgain') }}</button>
-          </p>
         </section>
-        <p class="role-note">{{ t('web.plan.readOnly') }}</p>
-        <p v-if="!isAdmin" class="role-note" data-testid="plan-ask-admin">{{ t('askAdminToChangePlan') }}</p>
+        <section v-if="overview.next && overview.next.features.length" aria-labelledby="plan-next" class="set-section" data-testid="plan-next">
+          <h2 id="plan-next" class="set-h">{{ t('planNextTitle', { plan: PLAN_NAME[overview.next.plan] }) }}</h2>
+          <ul class="set-list">
+            <li v-for="feature in overview.next.features" :key="feature" :data-feature="feature">
+              <div class="set-row">
+                <span class="set-text"><span class="who">{{ t(PLAN_FEATURE_NAME[feature]) }}</span></span>
+              </div>
+            </li>
+          </ul>
+        </section>
+        <p v-if="isAdmin" class="role-note" data-testid="plan-where">{{ t('web.plan.readOnly') }}</p>
+        <p v-else class="role-note" data-testid="plan-ask-admin">{{ t('askAdminToChangePlan') }}</p>
       </template>
     </div>
   </div>
