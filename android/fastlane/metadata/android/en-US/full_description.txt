@@ -40,9 +40,9 @@ YOUR WAY
 • Sign in with Google or email
 
 PLANS
-Start for free. When your work grows, pick a plan. Each plan has everything in the one before, plus:
-• Free, for getting started: up to 10 work orders a month, quotes over WhatsApp, approval by link, schedule, financial and 10 AI uses a month.
-• Starter, for those who work alone and issue invoices: up to 50 work orders a month and 2 people, service invoices (NFS-e, Brazil), PDF and receipt with only your brand, your own checklists, AI included and payment requests to customers.
+Start for free, with AI included in every plan. When your work grows, pick a plan. Each plan has everything in the one before, plus:
+• Free, for getting started: up to 10 work orders a month, quotes over WhatsApp, approval by link, schedule and financial.
+• Starter, for those who work alone and issue invoices: up to 50 work orders a month and 2 people, service invoices (NFS-e, Brazil), PDF and receipt with only your brand, your own checklists and payment requests to customers.
 • Pro, for a small team: up to 150 work orders a month and 5 people, what each person can see and do, a schedule for each person, job stages, a TV board, contracts, AI in the financial tab and spreadsheet reports.
 • Business, for companies: up to 500 work orders a month and 20 people, actions on many work orders at once, connection to ChatGPT and Claude, and an API.
 Went over the limit one month? You get a heads-up first, and no open work order is ever locked.

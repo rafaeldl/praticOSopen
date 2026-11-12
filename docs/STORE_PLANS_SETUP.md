@@ -28,6 +28,9 @@ fluxo de `docs/STORE_LISTING.md`.
 | `praticos_business_annual` | R$ 2.490 por ano | `business` |
 
 O anual sai pelo preço de 10 meses. Não existe teste grátis em nenhum plano.
+A IA é incluída em todos os planos, inclusive no Grátis: nos textos das
+lojas e do paywall ela não é diferencial de plano pago e nunca aparece com
+número de uso.
 O servidor já reconhece os seis IDs (`PRODUCT_TO_PLAN` em
 `firebase/functions/src/services/subscription-plans.ts`), mas o caminho
 principal é o entitlement, então cada produto precisa estar ligado ao
@@ -168,7 +171,7 @@ mesmos textos.
 
 | Plano | Nome | Benefícios |
 |---|---|---|
-| Starter | PraticOS Starter | Nota fiscal de serviço · PDF e recibo só com a sua marca · IA incluída e checklists do seu jeito · Até 50 OS por mês e 2 pessoas |
+| Starter | PraticOS Starter | Nota fiscal de serviço · PDF e recibo só com a sua marca · Checklists do seu jeito · Até 50 OS por mês e 2 pessoas |
 | Pro | PraticOS Pro | Tudo do Starter · Até 150 OS por mês e 5 pessoas · Agenda e permissões de cada pessoa · Etapas, painel na TV e contratos |
 | Business | PraticOS Business | Tudo do Pro · Até 500 OS por mês e 20 pessoas · Ações em várias OS de uma vez · Conexão com ChatGPT, Claude e API |
 
@@ -179,7 +182,7 @@ equipe pequena", Business "Para empresa".
 
 | Plano | Nome | Benefícios |
 |---|---|---|
-| Starter | PraticOS Starter | Service invoices (Brazil) · PDF and receipt with only your brand · AI included and your own checklists · Up to 50 orders a month and 2 people |
+| Starter | PraticOS Starter | Service invoices (Brazil) · PDF and receipt with only your brand · Your own checklists · Up to 50 orders a month and 2 people |
 | Pro | PraticOS Pro | Everything in Starter · Up to 150 orders a month and 5 people · Schedule and roles for each person · Job stages, TV board and contracts |
 | Business | PraticOS Business | Everything in Pro · Up to 500 orders a month, 20 people · Actions on many orders at once · ChatGPT, Claude connection and API |
 
@@ -190,7 +193,7 @@ small team", Business "For companies".
 
 | Plano | Nome | Benefícios |
 |---|---|---|
-| Starter | PraticOS Starter | Factura de servicio (Brasil) · PDF y recibo solo con tu marca · IA incluida y tus propios checklists · Hasta 50 órdenes al mes y 2 personas |
+| Starter | PraticOS Starter | Factura de servicio (Brasil) · PDF y recibo solo con tu marca · Tus propios checklists · Hasta 50 órdenes al mes y 2 personas |
 | Pro | PraticOS Pro | Todo lo del Starter · Hasta 150 órdenes al mes y 5 personas · Agenda y permisos de cada persona · Etapas, panel en la TV y contratos |
 | Business | PraticOS Business | Todo lo del Pro · Hasta 500 órdenes al mes, 20 personas · Acciones en varias órdenes a la vez · Conexión con ChatGPT, Claude y API |
 
@@ -233,13 +236,13 @@ nunca digitado. Textos em pt, en e es:
 **Português**
 
 - Título: `Escolha o plano do seu trabalho`
+- Subtítulo: `A IA vem incluída em todos os planos.`
 - Chave: `Mensal` / `Anual (pague 10 meses)`
 - Starter, "Para quem trabalha sozinho e emite nota":
   - Até 50 OS por mês e 2 pessoas
   - Nota fiscal de serviço
   - PDF e recibo só com a sua marca
   - Checklists do seu jeito
-  - IA incluída
   - Cobrança ao cliente
 - Pro, "Para equipe pequena". Tudo do Starter, mais:
   - Até 150 OS por mês e 5 pessoas
@@ -260,13 +263,13 @@ nunca digitado. Textos em pt, en e es:
 **English**
 
 - Title: `Pick the plan for your work`
+- Subtitle: `AI is included in every plan.`
 - Toggle: `Monthly` / `Yearly (pay for 10 months)`
 - Starter, "For those who work alone and issue invoices":
   - Up to 50 work orders a month and 2 people
   - Service invoices (Brazil)
   - PDF and receipt with only your brand
   - Your own checklists
-  - AI included
   - Payment requests to customers
 - Pro, "For a small team". Everything in Starter, plus:
   - Up to 150 work orders a month and 5 people
@@ -285,13 +288,13 @@ nunca digitado. Textos em pt, en e es:
 **Español**
 
 - Título: `Elige el plan para tu trabajo`
+- Subtítulo: `La IA viene incluida en todos los planes.`
 - Selector: `Mensual` / `Anual (pagas 10 meses)`
 - Starter, "Para quien trabaja solo y emite factura":
   - Hasta 50 órdenes al mes y 2 personas
   - Factura de servicio (Brasil)
   - PDF y recibo solo con tu marca
   - Tus propios checklists
-  - IA incluida
   - Cobros al cliente
 - Pro, "Para un equipo pequeño". Todo lo del Starter, y además:
   - Hasta 150 órdenes al mes y 5 personas

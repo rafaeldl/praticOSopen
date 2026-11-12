@@ -4,7 +4,7 @@ Thank you for your review.
 
 All paid plans in PraticOS are sold only through In-App Purchase. PraticOS is a freemium app:
 
-- The Free plan has up to 10 work orders a month, 1 person on the account and 10 AI assistant uses a month. It does not unlock any content sold outside the app.
+- The Free plan has up to 10 work orders a month, 1 person on the account and the AI assistant, which is included in every plan. It does not unlock any content sold outside the app.
 - The paid plans (Starter, Pro and Business) raise those limits and add features. They are auto-renewable subscriptions in the subscription group "PraticOS", each one monthly or yearly. The yearly subscriptions are attached to this version for review.
 - The app has no links or calls to action for purchases outside the app.
 
