@@ -73,8 +73,18 @@
           },
           {
             "question": "Quanto custa?",
-            "answer": "Comece grátis. Planos pagos a partir de R$ 59,90 por mês, com nota fiscal sem limite e sem custo por nota. A assinatura é feita no app.",
-            "flag": "nfsePage"
+            "answer": "Comece grátis. Planos pagos a partir de R$ 59,90 por mês, com nota fiscal sem custo por nota. A assinatura é feita no app.",
+            "flag": "nfsePage",
+            "hideWhenFlag": "pricingPage"
+          },
+          {
+            "question": "Quanto custa?",
+            "answer": "Comece grátis, com 10 OS por mês. Os planos pagos vão de R$ 59,90 a R$ 249 por mês e crescem junto com o seu negócio. Veja <a href=\"precos.html\">o que vem em cada plano</a>.",
+            "flag": "pricingPage"
+          },
+          {
+            "question": "Assinei e desisti. Recebo o dinheiro de volta?",
+            "answer": "Recebe, se pedir em até 7 dias da assinatura. Assinou no Android ou na web? Peça pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Assinou no iPhone? A cobrança é da Apple, e o pedido é feito a ela, em <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Os detalhes estão nos <a href=\"terms.html\">termos de uso</a>."
           }
         ]
       },
@@ -89,7 +99,13 @@
           },
           {
             "question": "Qual plano emite nota?",
-            "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. A nota não tem limite nem custo por nota. O plano grátis não emite."
+            "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês, sem custo por nota. O plano grátis não emite.",
+            "hideWhenFlag": "pricingPage"
+          },
+          {
+            "question": "Qual plano emite nota?",
+            "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês, sem custo por nota. O Starter emite para 1 CNPJ, o Pro para 2 e o Business para quantos você tiver. O plano grátis não emite. Veja <a href=\"precos.html\">os preços</a>.",
+            "flag": "pricingPage"
           },
           {
             "question": "Sou do Simples. Serve para mim?",
@@ -194,7 +210,17 @@
         "items": [
           {
             "question": "How much does it cost?",
-            "answer": "Start free. Paid plans available in the app."
+            "answer": "Start free. Paid plans available in the app.",
+            "hideWhenFlag": "pricingPage"
+          },
+          {
+            "question": "How much does it cost?",
+            "answer": "Start free, with 10 work orders a month. Paid plans grow with your business. See <a href=\"precos-en.html\">what comes with each plan</a>.",
+            "flag": "pricingPage"
+          },
+          {
+            "question": "I subscribed and changed my mind. Can I get my money back?",
+            "answer": "Yes, if you ask within 7 days of subscribing. Subscribed on Android or on the web? Ask by email at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Subscribed on iPhone? Apple charges the subscription, so ask Apple at <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. The details are in the <a href=\"terms-en.html\">terms of use</a>."
           }
         ]
       },
@@ -279,7 +305,17 @@
         "items": [
           {
             "question": "¿Cuánto cuesta?",
-            "answer": "Empieza gratis. Planes pagos disponibles en la app."
+            "answer": "Empieza gratis. Planes pagos disponibles en la app.",
+            "hideWhenFlag": "pricingPage"
+          },
+          {
+            "question": "¿Cuánto cuesta?",
+            "answer": "Empieza gratis, con 10 órdenes por mes. Los planes pagos crecen junto con tu negocio. Mira <a href=\"precos-es.html\">lo que trae cada plan</a>.",
+            "flag": "pricingPage"
+          },
+          {
+            "question": "Me suscribí y me arrepentí. ¿Me devuelven el dinero?",
+            "answer": "Sí, si lo pides dentro de los 7 días de la suscripción. ¿Te suscribiste en Android o en la web? Pídelo por correo a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. ¿Te suscribiste en iPhone? El cobro lo hace Apple, y el pedido se hace a Apple, en <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Los detalles están en los <a href=\"terms-es.html\">términos de uso</a>."
           }
         ]
       },

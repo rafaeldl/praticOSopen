@@ -9,8 +9,8 @@
       "factsLabel": "O que vem junto",
       "facts": [
         {
-          "title": "Nota sem limite no plano pago",
-          "text": "Sem pagar por nota, quantas você precisar."
+          "title": "Sem custo por nota no plano pago",
+          "text": "A nota vem com o plano. Não se paga nada a mais por nota emitida."
         },
         {
           "title": "Com o certificado da sua empresa",
@@ -82,7 +82,7 @@
       "items": [
         {
           "question": "Qual plano emite nota?",
-          "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. A nota não tem limite nem custo por nota. O plano grátis não emite."
+          "answer": "Todos os planos pagos, a partir do Starter, de R$ 59,90 por mês. Sem custo por nota. O plano grátis não emite."
         },
         {
           "question": "Minha empresa não é do Simples nem MEI. Dá para emitir?",

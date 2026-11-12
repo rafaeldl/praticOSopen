@@ -1,0 +1,747 @@
+{
+  "pt": {
+    "hero": {
+      "title": "Comece grátis. Pague quando o trabalho crescer.",
+      "lede": "Cada plano acompanha uma fase do seu negócio. Quando a equipe ou o movimento aumentar, você troca de plano pelo app.",
+      "guarantee": "Desistiu em 7 dias? <span class=\"mark\">Devolvemos o dinheiro.</span>"
+    },
+    "billing": {
+      "legend": "Cobrança",
+      "monthly": "Mensal",
+      "annual": "Anual",
+      "annualHint": "paga 10 meses, usa 12"
+    },
+    "plans": [
+      {
+        "id": "free",
+        "name": "Grátis",
+        "who": "Para quem está começando",
+        "monthly": {
+          "price": "R$ 0",
+          "period": "para sempre"
+        },
+        "annual": {
+          "price": "R$ 0",
+          "period": "para sempre"
+        },
+        "limits": [
+          "10 OS por mês",
+          "1 pessoa",
+          "Fotos sem limite"
+        ],
+        "includes": "Inclui",
+        "features": [
+          "Ordens de serviço, clientes e catálogo",
+          "Agenda dos serviços",
+          "Orçamento pelo WhatsApp e por link",
+          "O cliente aprova pelo link",
+          "Financeiro: o que entrou e o que falta receber",
+          "Importar seus clientes e serviços",
+          "No celular e no computador"
+        ],
+        "cta": "Baixar grátis",
+        "primary": true
+      },
+      {
+        "id": "starter",
+        "name": "Starter",
+        "who": "Para quem trabalha por conta própria",
+        "monthly": {
+          "price": "R$ 59,90",
+          "period": "por mês"
+        },
+        "annual": {
+          "price": "R$ 599",
+          "period": "por ano",
+          "note": "equivale a R$ 49,92 por mês"
+        },
+        "limits": [
+          "50 OS por mês",
+          "Até 2 pessoas",
+          "Nota fiscal para 1 CNPJ",
+          "Fotos sem limite"
+        ],
+        "includes": "Tudo do Grátis, mais",
+        "features": [
+          "Nota fiscal de serviço direto da OS",
+          "PDF e recibo só com a marca da sua empresa",
+          "Checklists do seu jeito",
+          "IA para preencher a OS falando ou por foto",
+          "Cobrança do cliente e aviso da próxima cobrança"
+        ],
+        "cta": "Assinar pelo app"
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "who": "Para a equipe pequena",
+        "monthly": {
+          "price": "R$ 119",
+          "period": "por mês"
+        },
+        "annual": {
+          "price": "R$ 1.190",
+          "period": "por ano",
+          "note": "equivale a R$ 99,17 por mês"
+        },
+        "limits": [
+          "150 OS por mês",
+          "Até 5 pessoas",
+          "Nota fiscal para 2 CNPJs",
+          "Fotos sem limite"
+        ],
+        "includes": "Tudo do Starter, mais",
+        "features": [
+          "Perfis e permissões para cada pessoa da equipe",
+          "Responsável e agenda de cada pessoa",
+          "Etapas do serviço, do recebimento à entrega",
+          "Modo TV para acompanhar os serviços na parede",
+          "Contratos de manutenção",
+          "IA também no financeiro",
+          "Relatórios em planilha"
+        ],
+        "cta": "Assinar pelo app"
+      },
+      {
+        "id": "business",
+        "name": "Business",
+        "who": "Para a empresa que cresceu",
+        "monthly": {
+          "price": "R$ 249",
+          "period": "por mês"
+        },
+        "annual": {
+          "price": "R$ 2.490",
+          "period": "por ano",
+          "note": "equivale a R$ 207,50 por mês"
+        },
+        "limits": [
+          "500 OS por mês, depois R$ 99 a cada 100",
+          "20 pessoas, depois R$ 15 por pessoa",
+          "Nota fiscal para quantos CNPJs tiver",
+          "Fotos sem limite"
+        ],
+        "includes": "Tudo do Pro, mais",
+        "features": [
+          "Mudar várias OS de uma vez",
+          "Conectar ao ChatGPT e ao Claude",
+          "API para ligar o PraticOS aos seus sistemas"
+        ],
+        "cta": "Assinar pelo app"
+      }
+    ],
+    "note": "Preços em reais, por empresa, não por pessoa. Na App Store e no Google Play, o valor aparece na tela de compra antes de você confirmar.",
+    "guarantee": {
+      "title": "Garantia de 7 dias",
+      "text": "Assinou e viu que não era para você? Peça em até 7 dias da assinatura e o valor volta inteiro, sem precisar explicar. No iPhone, quem devolve é a Apple, e mostramos o caminho.",
+      "link": "Ver como pedir nos termos de uso"
+    },
+    "rules": {
+      "title": "Como os limites funcionam",
+      "lede": "Sem surpresa no meio do serviço.",
+      "items": [
+        {
+          "title": "Vale o que você usa mais",
+          "text": "O plano certo é o que cobre as OS do mês, as pessoas da equipe e os CNPJs da nota."
+        },
+        {
+          "title": "Aviso antes, nunca trava",
+          "text": "Avisamos quando estiver perto do limite e quando passar. Você tem um mês de folga, contamos a média dos meses, e nenhuma OS aberta trava."
+        },
+        {
+          "title": "O dia a dia está em todos",
+          "text": "Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar dados estão em todos os planos, inclusive no grátis."
+        },
+        {
+          "title": "Fotos sem limite",
+          "text": "Tire quantas fotos o serviço pedir, em qualquer plano."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Compare os planos",
+      "caption": "Limites de cada plano",
+      "rowLabel": "Recurso",
+      "rows": [
+        {
+          "label": "OS por mês",
+          "values": [
+            "10",
+            "50",
+            "150",
+            "500*"
+          ]
+        },
+        {
+          "label": "Pessoas",
+          "values": [
+            "1",
+            "2",
+            "5",
+            "20*"
+          ]
+        },
+        {
+          "label": "CNPJs na nota fiscal",
+          "values": [
+            "—",
+            "1",
+            "2",
+            "Sem limite"
+          ]
+        },
+        {
+          "label": "Fotos",
+          "values": [
+            "Sem limite",
+            "Sem limite",
+            "Sem limite",
+            "Sem limite"
+          ]
+        },
+        {
+          "label": "PDF sem a marca PraticOS",
+          "values": [
+            "—",
+            "Sim",
+            "Sim",
+            "Sim"
+          ]
+        },
+        {
+          "label": "Checklists",
+          "values": [
+            "Os do seu ramo",
+            "Do seu jeito",
+            "Do seu jeito",
+            "Do seu jeito"
+          ]
+        }
+      ],
+      "footnote": "* No Business, depois de 500 OS no mês, R$ 99 a cada 100; depois de 20 pessoas, R$ 15 por pessoa."
+    },
+    "contact": {
+      "title": "Mais de 20 pessoas ou de 500 OS por mês?",
+      "text": "Fale com a gente e montamos o plano da sua empresa.",
+      "cta": "Falar com a gente",
+      "subject": "Plano para a minha empresa"
+    },
+    "faq": {
+      "title": "Perguntas sobre os planos",
+      "items": [
+        {
+          "q": "Preciso de cartão para começar?",
+          "a": "Não. O plano grátis não pede cartão e não tem prazo para acabar."
+        },
+        {
+          "q": "Onde eu assino?",
+          "a": "No app, na tela Plano, que abre pelo botão do perfil no topo do Início. No iPhone, a cobrança é feita pela App Store; no Android, pelo Google Play."
+        },
+        {
+          "q": "O preço é por pessoa?",
+          "a": "Não, é por empresa. A equipe toda usa o mesmo plano, até o número de pessoas dele."
+        },
+        {
+          "q": "Posso trocar de plano depois?",
+          "a": "Pode, quando quiser, pela mesma tela Plano. Se a equipe crescer, é só subir de plano."
+        },
+        {
+          "q": "Como funciona o plano anual?",
+          "a": "Você paga 10 meses e usa 12. A cobrança é uma vez por ano."
+        },
+        {
+          "q": "E se eu desistir?",
+          "a": "Peça em até 7 dias da assinatura e devolvemos o dinheiro. No iPhone, o pedido é feito à Apple, em <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Depois disso, você pode cancelar quando quiser e usa até o fim do período pago."
+        }
+      ]
+    }
+  },
+  "en": {
+    "hero": {
+      "title": "Start free. Pay when the work grows.",
+      "lede": "Each plan fits a stage of your business. When your team or workload grows, you switch plans in the app.",
+      "guarantee": "Changed your mind within 7 days? <span class=\"mark\">We refund you.</span>"
+    },
+    "billing": {
+      "legend": "Billing",
+      "monthly": "Monthly",
+      "annual": "Yearly",
+      "annualHint": "pay 10 months, use 12"
+    },
+    "plans": [
+      {
+        "id": "free",
+        "name": "Free",
+        "who": "For getting started",
+        "monthly": {
+          "price": "R$ 0",
+          "period": "forever"
+        },
+        "annual": {
+          "price": "R$ 0",
+          "period": "forever"
+        },
+        "limits": [
+          "10 work orders a month",
+          "1 person",
+          "Unlimited photos"
+        ],
+        "includes": "Includes",
+        "features": [
+          "Work orders, customers and catalog",
+          "Job schedule",
+          "Quotes by WhatsApp and by link",
+          "Customers approve by link",
+          "Finances: what came in and what is still due",
+          "Import your customers and services",
+          "On your phone and computer"
+        ],
+        "cta": "Download free",
+        "primary": true
+      },
+      {
+        "id": "starter",
+        "name": "Starter",
+        "who": "For people who work on their own",
+        "monthly": {
+          "price": "R$ 59.90",
+          "period": "a month"
+        },
+        "annual": {
+          "price": "R$ 599",
+          "period": "a year",
+          "note": "about R$ 49.92 a month"
+        },
+        "limits": [
+          "50 work orders a month",
+          "Up to 2 people",
+          "Unlimited photos"
+        ],
+        "includes": "Everything in Free, plus",
+        "features": [
+          "PDF and receipt with only your company's brand",
+          "Checklists your way",
+          "AI that fills in the work order from your voice or a photo",
+          "Customer billing and next-payment reminders"
+        ],
+        "cta": "Subscribe in the app"
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "who": "For a small team",
+        "monthly": {
+          "price": "R$ 119",
+          "period": "a month"
+        },
+        "annual": {
+          "price": "R$ 1,190",
+          "period": "a year",
+          "note": "about R$ 99.17 a month"
+        },
+        "limits": [
+          "150 work orders a month",
+          "Up to 5 people",
+          "Unlimited photos"
+        ],
+        "includes": "Everything in Starter, plus",
+        "features": [
+          "Roles and permissions for each team member",
+          "Assignee and schedule for each person",
+          "Job stages, from drop-off to delivery",
+          "TV Mode to follow jobs on a wall screen",
+          "Maintenance contracts",
+          "AI in finances too",
+          "Spreadsheet reports"
+        ],
+        "cta": "Subscribe in the app"
+      },
+      {
+        "id": "business",
+        "name": "Business",
+        "who": "For a growing company",
+        "monthly": {
+          "price": "R$ 249",
+          "period": "a month"
+        },
+        "annual": {
+          "price": "R$ 2,490",
+          "period": "a year",
+          "note": "about R$ 207.50 a month"
+        },
+        "limits": [
+          "500 work orders a month, then R$ 99 per extra 100",
+          "20 people, then R$ 15 per person",
+          "Unlimited photos"
+        ],
+        "includes": "Everything in Pro, plus",
+        "features": [
+          "Update many work orders at once",
+          "Connect to ChatGPT and Claude",
+          "API to connect PraticOS to your systems"
+        ],
+        "cta": "Subscribe in the app"
+      }
+    ],
+    "note": "Prices in Brazilian reais (R$), per company, not per person. Outside Brazil, the App Store and Google Play show the price in your currency before you confirm.",
+    "guarantee": {
+      "title": "7-day guarantee",
+      "text": "Subscribed and found it is not for you? Ask within 7 days of subscribing and you get the full amount back, no questions asked. On iPhone, Apple handles the refund, and we show you how.",
+      "link": "See how to ask in the terms of use"
+    },
+    "rules": {
+      "title": "How limits work",
+      "lede": "No surprises in the middle of a job.",
+      "items": [
+        {
+          "title": "Your biggest number decides",
+          "text": "The right plan is the one that covers your work orders for the month and the people on your team."
+        },
+        {
+          "title": "A heads-up, never a lockout",
+          "text": "We let you know when you get close to the limit and when you pass it. You get a month of slack, we look at the monthly average, and no open work order ever locks."
+        },
+        {
+          "title": "Everyday work is in every plan",
+          "text": "Opening work orders, sending them to the customer, approval by link, the schedule and importing data are in every plan, free included."
+        },
+        {
+          "title": "Unlimited photos",
+          "text": "Take as many photos as the job needs, on any plan."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Compare plans",
+      "caption": "Limits for each plan",
+      "rowLabel": "Feature",
+      "rows": [
+        {
+          "label": "Work orders a month",
+          "values": [
+            "10",
+            "50",
+            "150",
+            "500*"
+          ]
+        },
+        {
+          "label": "People",
+          "values": [
+            "1",
+            "2",
+            "5",
+            "20*"
+          ]
+        },
+        {
+          "label": "Photos",
+          "values": [
+            "Unlimited",
+            "Unlimited",
+            "Unlimited",
+            "Unlimited"
+          ]
+        },
+        {
+          "label": "PDF without the PraticOS brand",
+          "values": [
+            "—",
+            "Yes",
+            "Yes",
+            "Yes"
+          ]
+        },
+        {
+          "label": "Checklists",
+          "values": [
+            "Your trade's",
+            "Your own",
+            "Your own",
+            "Your own"
+          ]
+        }
+      ],
+      "footnote": "* On Business, after 500 work orders in a month, R$ 99 per extra 100; after 20 people, R$ 15 per person."
+    },
+    "contact": {
+      "title": "More than 20 people or 500 work orders a month?",
+      "text": "Talk to us and we will put together a plan for your company.",
+      "cta": "Talk to us",
+      "subject": "A plan for my company"
+    },
+    "faq": {
+      "title": "Questions about plans",
+      "items": [
+        {
+          "q": "Do I need a card to start?",
+          "a": "No. The free plan asks for no card and never runs out."
+        },
+        {
+          "q": "Where do I subscribe?",
+          "a": "In the app, on the Plan screen, opened from the profile button at the top of Home. On iPhone, the App Store charges you; on Android, Google Play does."
+        },
+        {
+          "q": "Is the price per person?",
+          "a": "No, it is per company. The whole team shares the same plan, up to its number of people."
+        },
+        {
+          "q": "Can I change plans later?",
+          "a": "Yes, whenever you want, on the same Plan screen. If your team grows, just move up a plan."
+        },
+        {
+          "q": "How does the yearly plan work?",
+          "a": "You pay for 10 months and use 12. You are billed once a year."
+        },
+        {
+          "q": "What if I change my mind?",
+          "a": "Ask within 7 days of subscribing and we refund you. On iPhone, you ask Apple, at <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. After that, you can cancel at any time and keep using it until the end of the paid period."
+        }
+      ]
+    }
+  },
+  "es": {
+    "hero": {
+      "title": "Empieza gratis. Paga cuando el trabajo crezca.",
+      "lede": "Cada plan acompaña una etapa de tu negocio. Cuando crezcan el equipo o el trabajo, cambias de plan en la app.",
+      "guarantee": "¿Te arrepentiste en 7 días? <span class=\"mark\">Te devolvemos el dinero.</span>"
+    },
+    "billing": {
+      "legend": "Cobro",
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "annualHint": "pagas 10 meses, usas 12"
+    },
+    "plans": [
+      {
+        "id": "free",
+        "name": "Gratis",
+        "who": "Para quien está empezando",
+        "monthly": {
+          "price": "R$ 0",
+          "period": "para siempre"
+        },
+        "annual": {
+          "price": "R$ 0",
+          "period": "para siempre"
+        },
+        "limits": [
+          "10 órdenes por mes",
+          "1 persona",
+          "Fotos sin límite"
+        ],
+        "includes": "Incluye",
+        "features": [
+          "Órdenes de servicio, clientes y catálogo",
+          "Agenda de los trabajos",
+          "Presupuesto por WhatsApp y por enlace",
+          "El cliente aprueba por enlace",
+          "Finanzas: lo que entró y lo que falta cobrar",
+          "Importar tus clientes y servicios",
+          "En el celular y en la computadora"
+        ],
+        "cta": "Descargar gratis",
+        "primary": true
+      },
+      {
+        "id": "starter",
+        "name": "Starter",
+        "who": "Para quien trabaja por su cuenta",
+        "monthly": {
+          "price": "R$ 59,90",
+          "period": "por mes"
+        },
+        "annual": {
+          "price": "R$ 599",
+          "period": "por año",
+          "note": "equivale a R$ 49,92 por mes"
+        },
+        "limits": [
+          "50 órdenes por mes",
+          "Hasta 2 personas",
+          "Fotos sin límite"
+        ],
+        "includes": "Todo lo del Gratis, más",
+        "features": [
+          "PDF y recibo solo con la marca de tu empresa",
+          "Checklists a tu manera",
+          "IA que llena la orden hablando o con una foto",
+          "Cobro al cliente y aviso del próximo cobro"
+        ],
+        "cta": "Suscribirse en la app"
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "who": "Para un equipo pequeño",
+        "monthly": {
+          "price": "R$ 119",
+          "period": "por mes"
+        },
+        "annual": {
+          "price": "R$ 1.190",
+          "period": "por año",
+          "note": "equivale a R$ 99,17 por mes"
+        },
+        "limits": [
+          "150 órdenes por mes",
+          "Hasta 5 personas",
+          "Fotos sin límite"
+        ],
+        "includes": "Todo lo del Starter, más",
+        "features": [
+          "Perfiles y permisos para cada persona del equipo",
+          "Responsable y agenda de cada persona",
+          "Etapas del trabajo, de la recepción a la entrega",
+          "Modo TV para seguir los trabajos en la pared",
+          "Contratos de mantenimiento",
+          "IA también en las finanzas",
+          "Informes en planilla"
+        ],
+        "cta": "Suscribirse en la app"
+      },
+      {
+        "id": "business",
+        "name": "Business",
+        "who": "Para la empresa que creció",
+        "monthly": {
+          "price": "R$ 249",
+          "period": "por mes"
+        },
+        "annual": {
+          "price": "R$ 2.490",
+          "period": "por año",
+          "note": "equivale a R$ 207,50 por mes"
+        },
+        "limits": [
+          "500 órdenes por mes, después R$ 99 cada 100",
+          "20 personas, después R$ 15 por persona",
+          "Fotos sin límite"
+        ],
+        "includes": "Todo lo del Pro, más",
+        "features": [
+          "Cambiar varias órdenes a la vez",
+          "Conectar con ChatGPT y Claude",
+          "API para conectar PraticOS con tus sistemas"
+        ],
+        "cta": "Suscribirse en la app"
+      }
+    ],
+    "note": "Precios en reales (R$), por empresa, no por persona. Fuera de Brasil, la App Store y Google Play muestran el precio en tu moneda antes de confirmar.",
+    "guarantee": {
+      "title": "Garantía de 7 días",
+      "text": "¿Te suscribiste y viste que no era para ti? Pídelo dentro de los 7 días de la suscripción y te devolvemos todo, sin explicaciones. En iPhone, quien devuelve es Apple, y te mostramos cómo.",
+      "link": "Ver cómo pedirlo en los términos de uso"
+    },
+    "rules": {
+      "title": "Cómo funcionan los límites",
+      "lede": "Sin sorpresas en medio del trabajo.",
+      "items": [
+        {
+          "title": "Vale lo que más usas",
+          "text": "El plan correcto es el que cubre las órdenes del mes y las personas del equipo."
+        },
+        {
+          "title": "Aviso antes, nunca bloquea",
+          "text": "Te avisamos cuando estés cerca del límite y cuando lo pases. Tienes un mes de margen, miramos el promedio de los meses, y ninguna orden abierta se bloquea."
+        },
+        {
+          "title": "El día a día está en todos",
+          "text": "Abrir órdenes, enviarlas al cliente, aprobación por enlace, agenda e importar datos están en todos los planes, también en el gratis."
+        },
+        {
+          "title": "Fotos sin límite",
+          "text": "Saca todas las fotos que pida el trabajo, en cualquier plan."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Compara los planes",
+      "caption": "Límites de cada plan",
+      "rowLabel": "Recurso",
+      "rows": [
+        {
+          "label": "Órdenes por mes",
+          "values": [
+            "10",
+            "50",
+            "150",
+            "500*"
+          ]
+        },
+        {
+          "label": "Personas",
+          "values": [
+            "1",
+            "2",
+            "5",
+            "20*"
+          ]
+        },
+        {
+          "label": "Fotos",
+          "values": [
+            "Sin límite",
+            "Sin límite",
+            "Sin límite",
+            "Sin límite"
+          ]
+        },
+        {
+          "label": "PDF sin la marca PraticOS",
+          "values": [
+            "—",
+            "Sí",
+            "Sí",
+            "Sí"
+          ]
+        },
+        {
+          "label": "Checklists",
+          "values": [
+            "Los de tu rubro",
+            "A tu manera",
+            "A tu manera",
+            "A tu manera"
+          ]
+        }
+      ],
+      "footnote": "* En Business, después de 500 órdenes en el mes, R$ 99 cada 100; después de 20 personas, R$ 15 por persona."
+    },
+    "contact": {
+      "title": "¿Más de 20 personas o de 500 órdenes por mes?",
+      "text": "Escríbenos y armamos el plan de tu empresa.",
+      "cta": "Hablar con nosotros",
+      "subject": "Un plan para mi empresa"
+    },
+    "faq": {
+      "title": "Preguntas sobre los planes",
+      "items": [
+        {
+          "q": "¿Necesito tarjeta para empezar?",
+          "a": "No. El plan gratis no pide tarjeta y no vence."
+        },
+        {
+          "q": "¿Dónde me suscribo?",
+          "a": "En la app, en la pantalla Plan, que se abre con el botón del perfil arriba en Inicio. En iPhone, el cobro lo hace la App Store; en Android, Google Play."
+        },
+        {
+          "q": "¿El precio es por persona?",
+          "a": "No, es por empresa. Todo el equipo usa el mismo plan, hasta su número de personas."
+        },
+        {
+          "q": "¿Puedo cambiar de plan después?",
+          "a": "Sí, cuando quieras, en la misma pantalla Plan. Si el equipo crece, solo subes de plan."
+        },
+        {
+          "q": "¿Cómo funciona el plan anual?",
+          "a": "Pagas 10 meses y usas 12. El cobro es una vez al año."
+        },
+        {
+          "q": "¿Y si me arrepiento?",
+          "a": "Pídelo dentro de los 7 días de la suscripción y te devolvemos el dinero. En iPhone, el pedido se hace a Apple, en <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Después, puedes cancelar cuando quieras y lo usas hasta el final del período pagado."
+        }
+      ]
+    }
+  }
+}

@@ -6,6 +6,29 @@ Os limites do plano (fotos por mês, modelos de checklist ativos, pessoas na emp
 
 Nenhum valor, preço ou plano mudou, e a compra pela web continua desligada. As regras do Firestore não mudaram: o app segue gravando direto, sem bloqueio do servidor.
 
+## Tabela nova (aprovada em 12/11/2026)
+
+O dono aprovou uma tabela nova no épico #721. Os valores abaixo **ainda não estão no código**: entram com #722 (uma tabela só para servidor, app e web) e #723 (limites novos no servidor). Até lá, vale o `PLAN_LIMITS` atual.
+
+| | Grátis | Starter | Pro | Business |
+|---|---|---|---|---|
+| OS por mês | 10 | 50 | 150 | 500 incluídas, depois +R$ 99 a cada 100 |
+| Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
+| CNPJs na nota | — | 1 | 2 | sem limite |
+| Fotos | sem limite | sem limite | sem limite | sem limite |
+| IA (teto interno) | 10/mês | 1.000/mês, 200/dia | 3.000/mês, 200/dia | 6.000/mês |
+| PDF sem a marca PraticOS | — | ✓ | ✓ | ✓ |
+| Checklists | só os do ramo | próprios | próprios | próprios |
+
+Regras novas que mudam a conta deste documento:
+
+- O plano é o maior entre OS por mês, pessoas e CNPJs.
+- Limite suave: aviso ao chegar perto e ao passar, um mês de folga, conta a média; nunca trava uma OS já aberta. Hoje a conta é dura (`uso + o que entra <= limite`, 402).
+- Fotos deixam de ter limite; o contador `photosThisMonth` passa a servir só para custo.
+- Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar ficam em todos os planos.
+
+A tabela completa, com preços e recursos de cada plano, está em [`SUBSCRIPTION.md`](SUBSCRIPTION.md#approved-table-2026-11-12-epic-721).
+
 ## Arquitetura
 
 - `firebase/functions/src/services/plan-limits.service.ts`: a conta (`checkPlanLimit`, `effectivePlan`, `effectiveLimits`, `shouldShowPdfWatermark`), a contagem de uso e a chave global.

@@ -357,7 +357,8 @@
       },
       "contactLead": "Ficou com dúvida?",
       "contactWhatsapp": "Fale com a gente no WhatsApp",
-      "contactFaq": "Perguntas frequentes"
+      "contactFaq": "Perguntas frequentes",
+      "pricesLink": "Ver os preços"
     },
     "ai": {
       "title": "IA para quem está com a mão na massa",
@@ -508,8 +509,8 @@
           "text": "A nota vai com o PDF para o e-mail do cliente e fica guardada junto da OS."
         },
         {
-          "title": "Nota sem limite no plano pago",
-          "text": "Sem pagar por nota. Usa o certificado digital A1 da sua empresa, enviado uma vez."
+          "title": "Sem custo por nota no plano pago",
+          "text": "A nota está em todos os planos pagos. Usa o certificado digital A1 da sua empresa, enviado uma vez."
         }
       ],
       "cta": "Ver como funciona a nota",
@@ -915,7 +916,8 @@
       },
       "contactLead": "Questions?",
       "contactWhatsapp": "Talk to us on WhatsApp",
-      "contactFaq": "FAQ"
+      "contactFaq": "FAQ",
+      "pricesLink": "See pricing"
     },
     "ai": {
       "title": "AI for people with their hands full",
@@ -1411,7 +1413,8 @@
       },
       "contactLead": "¿Dudas?",
       "contactWhatsapp": "Escríbenos por WhatsApp",
-      "contactFaq": "Preguntas frecuentes"
+      "contactFaq": "Preguntas frecuentes",
+      "pricesLink": "Ver los precios"
     },
     "ai": {
       "title": "IA para quien tiene las manos ocupadas",

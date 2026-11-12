@@ -25,8 +25,10 @@ modern-minimal (custom theme "Campo")
 - **Segments and feature pages**: Narrative Workflow — the life of a work order
   in numbered stages. Segments may swap stage content for their trade and add a
   problem → solution split (Split Studio rows).
-- **Pricing**: plan sheet (one ruled table, three columns) + tabular spec sheet
-  for the comparison + conversational FAQ.
+- **Pricing** (`precos*.html`, behind `flags.pricingPage`): plan sheet (one
+  ruled table, one column per plan, "everything in the previous plan, plus"),
+  monthly/yearly switch, 7-day guarantee band, limits rules, tabular spec sheet
+  for the comparison, "talk to us" row + conversational FAQ.
 - **Content pages** (docs, FAQ, support, legal): Long Document — single column,
   60–65ch measure, sticky "Nesta página" index on wide screens, no hero art.
 
@@ -102,7 +104,11 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
   help article "Usar no computador"; turn it on together with opening
   `config/webApp` to everyone) and `flags.nfsePage` (the service invoice page
   `funcionalidades/nota-fiscal.html`, its help article, the FAQ section and the
-  priced "Quanto custa?"; both pages are not even built while it is off). A
+  priced "Quanto custa?"; both pages are not even built while it is off) and
+  `flags.pricingPage` (the pricing page `precos.html`/`-en`/`-es`, its links in
+  the bar, menu, footer and final band, and the FAQ answers with the new plan
+  numbers; **off** until the new plan limits are in the app on both stores,
+  epic #721; the pages are not built while it is off). A
   `segments.json` link, footer/nav link, FAQ group or item with `"flag"` shows
   only when that flag is on (`enabledLinks` / `flagShown` filters); a FAQ entry
   with `"hideWhenFlag"` shows only while it is off.
