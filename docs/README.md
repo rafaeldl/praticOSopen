@@ -5,6 +5,7 @@
 - [`AUTO_VERSIONING.md`](AUTO_VERSIONING.md) - Versionamento automático e Conventional Commits
 - [`CI_BUDGET.md`](CI_BUDGET.md) - Orçamento do GitHub Actions, o que roda onde e hook de pre-push
 - [`STORE_LISTING.md`](STORE_LISTING.md) - Ficha das lojas: textos, prints (como gerar, dados demo), conta da revisão e envio sem publicar
+- [`STORE_PLANS_SETUP.md`](STORE_PLANS_SETUP.md) - Planos novos nas lojas e na RevenueCat: produtos anuais, preços, nomes, benefícios e paywall, com os textos prontos
 - [`APP_TRACKING_TRANSPARENCY.md`](APP_TRACKING_TRANSPARENCY.md) - Permissão de rastreamento no iOS (ATT) e exigências da App Review
 - [`I18N.md`](I18N.md) - Sistema de internacionalização completo
 - [`SEGMENT_CUSTOM_FIELDS.md`](SEGMENT_CUSTOM_FIELDS.md) - Campos customizados por segmento

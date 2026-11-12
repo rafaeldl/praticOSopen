@@ -2,13 +2,13 @@ Hello,
 
 Thank you for your review.
 
-We have implemented In-App Purchase for all paid plans. PraticOS is now a freemium app:
+All paid plans in PraticOS are sold only through In-App Purchase. PraticOS is a freemium app:
 
-- Company registration is free and gives access to the Free plan only. It does not unlock any content sold outside the app.
-- The paid plans (Starter, Pro and Business) are auto-renewable monthly subscriptions sold in the app through In-App Purchase. The subscriptions are attached to this version for review.
-- Paid plans are not sold anywhere else. Our website shows no prices, and the app has no links or calls to action for external purchases.
+- The Free plan has up to 10 work orders a month, 1 person on the account and 10 AI assistant uses a month. It does not unlock any content sold outside the app.
+- The paid plans (Starter, Pro and Business) raise those limits and add features. They are auto-renewable subscriptions in the subscription group "PraticOS", each one monthly or yearly. The yearly subscriptions are attached to this version for review.
+- The app has no links or calls to action for purchases outside the app.
 
-To see the paywall, sign in with the demo account, open the "Mais" (More) tab and tap "Ver planos" (View plans) in the "Assinatura" (Subscription) section. The App Review notes have the full steps.
+To see the paywall, sign in with the demo account, tap the profile button at the top of the "Início" (Home) tab, then "Plano" (Plan) and "Ver planos" (View plans). The App Review notes have the full steps.
 
 Best regards,
 PraticOS team

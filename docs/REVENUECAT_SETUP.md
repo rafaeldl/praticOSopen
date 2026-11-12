@@ -70,9 +70,14 @@ test_rHipMRrqwezbhAuzyWKGLEqwfhP
 ### Produtos de Assinatura (Producao)
 | Product ID | Nome | Preco | Entitlement |
 |------------|------|-------|-------------|
-| `praticos_starter_monthly` | Starter | R$ 59/mes | `starter` |
+| `praticos_starter_monthly` | Starter | R$ 59,90/mes | `starter` |
+| `praticos_starter_annual` | Starter | R$ 599/ano | `starter` |
 | `praticos_pro_monthly` | Pro | R$ 119/mes | `pro` |
+| `praticos_pro_annual` | Pro | R$ 1.190/ano | `pro` |
 | `praticos_business_monthly` | Business | R$ 249/mes | `business` |
+| `praticos_business_annual` | Business | R$ 2.490/ano | `business` |
+
+Os anuais e o passo a passo dos consoles estao em `docs/STORE_PLANS_SETUP.md`.
 
 ### Produtos de Assinatura (Teste)
 | Product ID | Tipo | Entitlement |
