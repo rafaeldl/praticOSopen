@@ -4171,7 +4171,7 @@ abstract class AppLocalizations {
   /// No description provided for @openOrdersCount.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}'**
+  /// **'{count, plural, =1{1 OS aberta} other{{count} OS abertas}}'**
   String openOrdersCount(int count);
 
   /// No description provided for @lateOrdersCount.

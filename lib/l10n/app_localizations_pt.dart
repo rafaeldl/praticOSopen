@@ -2248,8 +2248,8 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count OS em aberto',
-      one: '1 OS em aberto',
+      other: '$count OS abertas',
+      one: '1 OS aberta',
     );
     return '$_temp0';
   }

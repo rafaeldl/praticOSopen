@@ -993,6 +993,8 @@
       }
     }
   },
+  "openOrdersCount": "{count, plural, =1{1 open order} other{{count} open orders}}",
+  "@openOrdersCount": {"placeholders": {"count": {"type": "int"}}},
   "lateOrdersCount": "{count, plural, =1{1 late order} other{{count} late orders}}",
   "@lateOrdersCount": {
     "placeholders": {

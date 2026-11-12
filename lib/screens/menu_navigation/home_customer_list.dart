@@ -6,12 +6,10 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/plate_lookup.dart';
@@ -20,6 +18,7 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/screens/widgets/order_list_row.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -338,87 +337,84 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               '${SegmentConfigProvider.instance.serialValue(hit.device.serial)} · ${hit.device.name ?? ''}',
         ),
     ];
+    // Rows split by a thin line, like the orders on Início.
+    Iterable<Widget> rows(Iterable<Customer> list) sync* {
+      var first = true;
+      for (final customer in list) {
+        if (!first) yield const _RowDivider();
+        first = false;
+        yield _row(customer);
+      }
+    }
+
     if (recent) {
-      children.addAll(matches.map(_row));
+      children.addAll(rows(matches));
     } else {
       for (final entry in groupByInitial(matches).entries) {
         children.add(SectionLabel(entry.key));
-        children.addAll(entry.value.map(_row));
+        children.addAll(rows(entry.value));
       }
     }
     return [SliverList(delegate: SliverChildListDelegate(children))];
   }
 
-  /// Name with the phone (or the plate found) under it; on the right what
-  /// needs doing: what the customer owes over the open or late orders.
-  /// Nothing pending, nothing on the right.
+  /// Same row as the orders on Início (OrderListRow): name in bold, the
+  /// phone or the plate found, then the open orders with their dot and what
+  /// the customer owes in bold ("falta R\$ 200"), the late ones in red on
+  /// the right.
   Widget _row(Customer customer, {String? plate}) {
+    final l10n = context.l10n;
     final phone = (customer.phone?.isNotEmpty ?? false)
         ? formatPhone(customer.phone)
         : null;
-    final subtitle = [?plate, ?phone].join(' · ');
-    return AppListRow(
-      title: customer.name ?? '',
-      subtitle: subtitle.isEmpty ? null : subtitle,
-      trailingWidget: _pending(customer),
-      onTap: () => _open(customer),
-    );
-  }
-
-  Widget? _pending(Customer customer) {
-    final l10n = context.l10n;
     final summary =
         _openOrders?[customer.id] ??
         (_openOrders == null
             ? customerOpenSummary(customer, DateTime.now())
             : null);
-    final late = (summary?.late ?? 0) > 0;
+    final late = summary?.late ?? 0;
     final open = summary?.open ?? 0;
     final owed = _showOwed ? customer.owed ?? 0 : 0;
-    if (!late && open == 0 && owed <= 0) return null;
+    final detail = [?plate, ?phone].join(' · ');
+    final money = (FormatService()..setLocale(l10n.localeName)).formatCurrency(
+      owed,
+    );
+    return Semantics(
+      identifier: 'customer_row_${customer.id}',
+      button: true,
+      child: OrderListRow(
+        key: ValueKey('customer_row_${customer.id}'),
+        customerName: customer.name ?? '',
+        detailText: detail.isEmpty ? null : detail,
+        statusText: open > 0 ? l10n.openOrdersCount(open) : null,
+        statusColor: open > 0 ? AppColors.warningDot : null,
+        // Like the payment on an order row: "● 2 OS abertas · falta R$ 200",
+        // in one piece (non-breaking spaces).
+        statusExtra: owed <= 0
+            ? null
+            : (open > 0
+                      ? l10n.remainingShort(money)
+                      : l10n.customerOwesValue(money))
+                  .replaceAll(' ', '\u00A0'),
+        problemText: late > 0 ? l10n.lateOrdersCount(late) : null,
+        problemColor: OrderStatusStyle.overdueColor.resolveFrom(context),
+        onTap: () => _open(customer),
+      ),
+    );
+  }
+}
 
-    final stacked =
-        MediaQuery.textScalerOf(context).scale(100) / 100 >=
-        kAppListRowStackScale;
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    final danger = OrderStatusStyle.overdueColor.resolveFrom(context);
-    final align = stacked ? TextAlign.start : TextAlign.end;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: stacked
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.end,
-      children: [
-        if (owed > 0)
-          Text(
-            (FormatService()..setLocale(l10n.localeName)).formatCurrency(owed),
-            textAlign: align,
-            style: AppTypography.callout.copyWith(
-              color: AppColors.text.resolveFrom(context),
-              fontFeatures: AppTypography.tabular,
-            ),
-          ),
-        if (late || open > 0)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StatusDot(color: late ? danger : AppColors.warningDot),
-              const SizedBox(width: AppSpacing.xs),
-              Flexible(
-                child: Text(
-                  late
-                      ? l10n.lateOrdersCount(summary!.late)
-                      : l10n.orderCountShort(open),
-                  textAlign: align,
-                  style: AppTypography.callout.copyWith(
-                    color: late ? danger : secondary,
-                    fontWeight: late ? FontWeight.w600 : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-      ],
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: OrderListRow.leadingInset),
+      child: Container(
+        height: 0.5,
+        color: AppColors.separator.resolveFrom(context),
+      ),
     );
   }
 }
