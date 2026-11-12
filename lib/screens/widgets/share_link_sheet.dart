@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/share_token.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -194,13 +195,15 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     }
   }
 
-  String _message({bool withPdf = false}) => _service.buildShareMessage(
+  String _message({bool withPdf = false, bool withLink = true}) =>
+      _service.buildShareMessage(
     customerName: widget.order.customer?.name ?? '',
     orderNumber: widget.order.number ?? 0,
     companyName: widget.companyName,
     locale: context.l10n.localeName,
     statusContext: widget.statusContext,
     withPdf: withPdf,
+    withLink: withLink,
   );
 
   String? get _phone {
@@ -239,10 +242,11 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
   }
 
   /// "Mandar o PDF": draws the PDF, then the system share sheet with the
-  /// PDF and the message with the link.
+  /// PDF and the message with the link. When the link could not be created
+  /// the PDF still goes, with the message without the link.
   Future<void> _sendPdf() async {
-    final url = _result?.url;
-    if (url == null || _preparingPdf) return;
+    final url = _failed ? null : _result?.url;
+    if (_preparingPdf) return;
     final l10n = context.l10n;
     final box = context.findRenderObject() as RenderBox?;
     final origin = box == null || !box.hasSize
@@ -257,7 +261,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         url: url,
         bytes: pdf.bytes,
         filename: pdf.filename,
-        message: _message(withPdf: true),
+        message: _message(withPdf: true, withLink: url != null),
         subject: '${l10n.orderShort} ${widget.order.number ?? ''}',
         sharePositionOrigin: origin,
       );
@@ -514,6 +518,13 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     );
   }
 
+  Widget _pdfButton(AppLocalizations l10n) => PrimaryButton(
+    key: const Key('shareLinkPdf'),
+    label: _preparingPdf ? l10n.sharePreparingPdf : l10n.shareSendPdf,
+    icon: CupertinoIcons.doc_text_fill,
+    onPressed: _preparingPdf ? null : _sendPdf,
+  );
+
   Widget _body(BuildContext context) {
     final l10n = context.l10n;
     final secondary = AppColors.textSecondary.resolveFrom(context);
@@ -545,6 +556,11 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
               ),
             ),
             TextLink(label: l10n.tryAgain, onPressed: _loadOrGenerateLink),
+            // The PDF does not need the link: it still goes without it.
+            if (_withPdf) ...[
+              const SizedBox(height: AppSpacing.md),
+              _pdfButton(l10n),
+            ],
           ],
         ),
       );
@@ -577,12 +593,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         ),
         const SizedBox(height: AppSpacing.lg),
         if (_withPdf) ...[
-          PrimaryButton(
-            key: const Key('shareLinkPdf'),
-            label: _preparingPdf ? l10n.sharePreparingPdf : l10n.shareSendPdf,
-            icon: CupertinoIcons.doc_text_fill,
-            onPressed: _preparingPdf ? null : _sendPdf,
-          ),
+          _pdfButton(l10n),
           const SizedBox(height: AppSpacing.sm),
           _SecondaryButton(
             key: const Key('shareLinkOnly'),
