@@ -89,8 +89,8 @@
           "ownChecklists": false,
           "nfseCnpjs": 0,
           "pdfWatermark": true,
-          "aiPerMonth": 10,
-          "aiPerDay": -1,
+          "aiPerMonth": 50,
+          "aiPerDay": 20,
           "overageAllowed": false,
           "features": [
             "orders",

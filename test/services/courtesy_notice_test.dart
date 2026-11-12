@@ -63,11 +63,11 @@ void main() {
         );
 
     test('is null while Free covers the use', () {
-      expect(recommendedPlan(usage(orders: 10, photos: 900), 10, now: now), isNull);
+      expect(recommendedPlan(usage(orders: 10, photos: 900), 50, now: now), isNull);
     });
 
     test('picks the smallest plan that covers every resource', () {
-      expect(recommendedPlan(usage(), 11, now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(), 51, now: now), SubscriptionPlan.starter);
       expect(recommendedPlan(usage(users: 2), 0, now: now), SubscriptionPlan.starter);
       expect(recommendedPlan(usage(forms: 1), 0, now: now), SubscriptionPlan.starter);
       expect(recommendedPlan(usage(orders: 11), 0, now: now), SubscriptionPlan.starter);

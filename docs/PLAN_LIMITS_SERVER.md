@@ -50,7 +50,7 @@ Iguais ao app, provadas pelos casos:
 - **Business** (`overageAllowed`): acima de 500 OS ou de 20 pessoas não trava; a resposta diz `contactUs` (cobrança do excedente manual por enquanto).
 - **Fotos**: sem limite em todos os planos (`photosPerMonth = -1`); `requirePlanCapacity('photo')` deixa de barrar.
 - **Checklists**: `formTemplate` conta só os próprios ativos. Cópia de um pronto do ramo não conta: tem `sourceTemplateId` ("Usar", no app e no web) ou o mesmo id do pronto (cópias do primeiro acesso). Grátis não cria checklist próprio (limite 0); Starter em diante sem limite.
-- **IA**: teto do mês e do dia do plano em vigor (`effectivePlan`, então plano vencido é Free) em `reserveAiRequest`. Starter e Pro param em 200 por dia; o dia é UTC, guardado em `aiUsage/{mês}.day/dayCount`. Recusa com `AI_QUOTA_EXCEEDED` e `period: 'month' | 'day'`. O `monthlyLimit` de piloto desliga o teto do dia.
+- **IA**: teto do mês e do dia do plano em vigor (`effectivePlan`, então plano vencido é Free) em `reserveAiRequest`. Grátis para em 20 por dia, Starter e Pro em 200; o cliente não vê contador de IA; o dia é UTC, guardado em `aiUsage/{mês}.day/dayCount`. Recusa com `AI_QUOTA_EXCEEDED` e `period: 'month' | 'day'`. O `monthlyLimit` de piloto desliga o teto do dia.
 - **Marca d'água no PDF**: só com a chave ligada e `pdfWatermark` do plano em vigor.
 - **Nota fiscal (NFS-e direta)**: vem com o plano em vigor que tenha `nfseCnpjs` diferente de 0 (hoje: qualquer pago), no Brasil, sem depender da chave. O servidor liga e desliga `settings/payments.nfseDirectEnabled` pelo plano (ver "Quem tem a nota" em [`NFSE_DIRECT.md`](NFSE_DIRECT.md)). O número de CNPJs ainda não é aplicado.
 

@@ -13,7 +13,7 @@
  * - companies/{cid}/aiUsage/{YYYY-MM}  { count, limit, day, dayCount, updatedAt }
  *   One counter per calendar month (UTC). A new month is a new document, so
  *   no reset job is needed. `day` (YYYY-MM-DD, UTC) and `dayCount` keep the
- *   day's requests for the daily ceiling (aiPerDay, Starter and Pro); a new
+ *   day's requests for the daily ceiling (aiPerDay: Free, Starter and Pro); a new
  *   day starts again at 0. Also without client rules (Admin SDK only).
  *
  * The ceilings come from the plan table (docs/plans/plans.json): aiPerMonth
