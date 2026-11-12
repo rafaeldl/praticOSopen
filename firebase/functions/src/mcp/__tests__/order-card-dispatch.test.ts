@@ -23,6 +23,11 @@
  * `_meta` on `CallToolResultSchema`), not extra client-side speculation.
  */
 
+// The paid-plans switch lives in Firestore (config/paidPlans); here it is off.
+jest.mock('../../services/plan-limits.service', () => ({
+  ...jest.requireActual('../../services/plan-limits.service'),
+  isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../../services/customer.service');
 jest.mock('../../services/device.service');
 jest.mock('../../services/catalog.service');
