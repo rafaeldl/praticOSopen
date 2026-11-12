@@ -4,6 +4,11 @@
 // API (the server's SHARE_BASE_URL, never built here: defect 5). Changing what
 // the customer can do or the validity makes a new link and turns the old one off
 // (defect 4). Nothing is sent by itself: WhatsApp opens with the text, the person sends.
+// With pdf (order.share.pdf, the app's canShareOrderPdf), "Mandar o PDF" is the
+// main button: the PDF is downloaded to attach and WhatsApp opens with the
+// message and the link, so the customer can still approve. The link alone is
+// the second button. When the link cannot be made the PDF still goes, with the
+// message without the link.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -18,13 +23,16 @@ import { whatsappNumber } from '@/lib/phone'
 import { createShareToken, listShareTokens, revokeShareToken } from '@/lib/receive/data'
 import { messageKind, permissionKind, PERMISSIONS_OF, pickToken, previewUrl, validityDays, whatsappLink, type PermissionKind, type ShareToken } from '@/lib/receive/model'
 import { session } from '@/lib/session'
-import { canShareSheet, copyText, onShare, openWhatsapp, shareSheet } from '@/lib/share'
+import { canShareSheet, copyText, downloadFile, onShare, openWhatsapp, shareSheet } from '@/lib/share'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import '@/styles/receive.css'
 
-/** send (key W): opens WhatsApp as soon as the link is ready; the sheet stays only when it cannot. */
-const props = defineProps<{ order: Order; send?: boolean }>()
+/**
+ * send (key W): opens WhatsApp with the link as soon as it is ready; the sheet stays only when it cannot.
+ * pdf: this person may send the order's PDF (viewPrices, or the company does not use the financial part).
+ */
+const props = defineProps<{ order: Order; send?: boolean; pdf?: boolean }>()
 // linked: the server saved the link in the order, so its version moved (the next save must send the new one).
 const emit = defineEmits<{ close: []; pickCustomer: []; linked: [] }>()
 
@@ -33,6 +41,7 @@ const state = ref<State>(props.order.customer?.id || props.order.customer?.name 
 const token = shallowRef<ShareToken | null>(null)
 const phone = ref(props.order.customer?.phone ?? '')
 const busy = ref(false)
+const preparingPdf = ref(false)
 const copied = ref(false)
 const confirmRevoke = ref(false)
 const text = ref('')
@@ -57,8 +66,12 @@ const who = computed(() => {
 })
 const until = computed(() => (token.value ? t('shareValidUntil', { date: formatDate(token.value.expiresAt, country()) }) : ''))
 
-/** The words that go with the link: by the order's situation, what the link allows, the segment's name for an order and the language. */
-const message = computed(() => {
+/**
+ * The words that go with the link: by the order's situation, what the link
+ * allows, the segment's name for an order and the language. With the PDF they
+ * say it goes along; without a link, only the PDF.
+ */
+function messageOf(withPdf: boolean, withLink: boolean): string {
   const order = `${orderShort()} ${props.order.number ?? ''}`.trim()
   const greeting = name.value ? t('web.share.msgHello', { name: name.value }) : t('web.share.msgHelloNoName')
   const situation = {
@@ -75,8 +88,14 @@ const message = computed(() => {
     view: t('web.share.msgDoView'),
   }[kind.value]
   const company = session.company?.name ? `\n${session.company.name}` : ''
-  return `${greeting} ${situation} ${action}\n${token.value?.url ?? ''}${company}`
-})
+  const pdf = withPdf ? ` ${t('web.share.msgPdf')}` : ''
+  if (!withLink || !token.value) return `${greeting} ${situation}${pdf}${company}`
+  return `${greeting} ${situation}${pdf} ${action}\n${token.value.url}${company}`
+}
+/** What the box shows: with the PDF when it is the main way. */
+const message = computed(() => messageOf(!!props.pdf, true))
+/** The link alone (second button, key W): the person's words, or the default without the PDF. */
+const linkText = computed(() => (edited.value ? text.value : messageOf(false, true)))
 watch(message, (value) => {
   if (!edited.value) text.value = value
 }, { immediate: true })
@@ -175,6 +194,36 @@ async function shareOther() {
   if ((await shareSheet({ title: orderTitle(props.order), text: text.value }, CONTEXT)) === 'failed') showToast(t('web.share.sheetFailed'))
 }
 
+/**
+ * "Mandar o PDF" (order.share.pdf): the PDF goes to Downloads to be attached
+ * and WhatsApp opens with the message and the link; without the customer's
+ * WhatsApp the message is copied. Without a link (it failed), the message goes
+ * without it. Sent, the sheet closes (like the statement).
+ */
+async function sendPdf() {
+  if (preparingPdf.value) return
+  preparingPdf.value = true
+  try {
+    const { ordersPdf } = await import('@/lib/pdf/load')
+    const pdf = await ordersPdf([props.order.id])
+    const withLink = state.value === 'ready' && !!token.value
+    const words = edited.value && withLink ? text.value : messageOf(true, withLink)
+    downloadFile(new File([pdf.blob], pdf.fileName, { type: 'application/pdf' }), pdf.fileName)
+    let said: string
+    if (wa.value && openWhatsapp(wa.value, words, CONTEXT)) said = t('web.share.pdfAttach')
+    else if (await copyText(words, CONTEXT)) said = t('web.statement.pdfAndCopied')
+    else said = t('web.share.copyFailed')
+    showToast(said)
+    announce(said)
+    emit('close')
+  } catch (error) {
+    console.warn('share: pdf not sent', error)
+    showToast(t('web.pdf.error'))
+  } finally {
+    preparingPdf.value = false
+  }
+}
+
 function sentByWhatsApp() {
   onShare('whatsapp', CONTEXT)
   announce(t('web.share.whatsappOpened'))
@@ -191,7 +240,7 @@ function ready() {
   const inField = focused instanceof HTMLElement && focused.matches('input, textarea, select')
   if (!inField) sendButton.value?.focus()
   if (!props.send || !wa.value || !token.value) return
-  if (!openWhatsapp(wa.value, text.value, CONTEXT)) return
+  if (!openWhatsapp(wa.value, linkText.value, CONTEXT)) return
   announce(t('web.share.whatsappOpened'))
   emit('close')
 }
@@ -252,20 +301,36 @@ onBeforeUnmount(() => (copied.value = false))
       <div v-if="state === 'ready' && token" class="layer-foot share-foot">
         <button v-if="canShare" type="button" class="btn" data-testid="share-other" @click="shareOther">{{ t('shareSendOtherWay') }}</button>
         <button type="button" class="btn" data-testid="share-copy" @click="copy(token.url, t('shareLinkCopied'))">{{ copied ? t('web.share.copied') : t('shareCopyLink') }}</button>
-        <a
-          v-if="wa"
-          class="btn btn--primary"
-          :href="whatsappLink(wa, text)"
-          target="_blank"
-          rel="noopener noreferrer"
-          ref="sendButton"
-          data-testid="share-whatsapp"
-          @click="sentByWhatsApp"
-        >{{ t('shareSendWhatsApp') }}</a>
-        <button v-else ref="sendButton" type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
+        <template v-if="pdf">
+          <a
+            v-if="wa"
+            class="btn"
+            :href="whatsappLink(wa, linkText)"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="share-whatsapp"
+            @click="sentByWhatsApp"
+          >{{ t('shareSendLinkWhatsApp') }}</a>
+          <button v-else type="button" class="btn" data-testid="share-copy-text" @click="copy(linkText, t('web.share.textCopied'))">{{ t('shareSendLinkOnly') }}</button>
+          <button ref="sendButton" type="button" class="btn btn--primary" :disabled="preparingPdf" :aria-busy="preparingPdf" data-testid="share-pdf" @click="sendPdf">{{ preparingPdf ? t('sharePreparingPdf') : t('shareSendPdf') }}</button>
+        </template>
+        <template v-else>
+          <a
+            v-if="wa"
+            class="btn btn--primary"
+            :href="whatsappLink(wa, linkText)"
+            target="_blank"
+            rel="noopener noreferrer"
+            ref="sendButton"
+            data-testid="share-whatsapp"
+            @click="sentByWhatsApp"
+          >{{ t('shareSendWhatsApp') }}</a>
+          <button v-else ref="sendButton" type="button" class="btn btn--primary" data-testid="share-copy-text" @click="copy(text, t('web.share.textCopied'))">{{ t('web.share.copyText') }}</button>
+        </template>
       </div>
       <div v-else class="layer-foot">
         <button type="button" class="btn" @click="close()">{{ t('close') }}</button>
+        <button v-if="pdf && state === 'failed'" type="button" class="btn btn--primary" :disabled="preparingPdf" :aria-busy="preparingPdf" data-testid="share-pdf" @click="sendPdf">{{ preparingPdf ? t('sharePreparingPdf') : t('shareSendPdf') }}</button>
       </div>
     </template>
   </Layer>

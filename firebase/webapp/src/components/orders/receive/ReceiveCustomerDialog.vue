@@ -27,7 +27,9 @@ import '@/styles/receive.css'
 
 // startCharge: opened by the Financeiro's "Próxima cobrança" (pay.customer.start-charge): the charge
 // sheet opens by itself, only once it is known that the customer has no open link.
-const props = defineProps<{ customerId: string; customerName: string; checked?: string[]; startCharge?: boolean }>()
+// inProgress: orders not done yet (the customer screen's "Em andamento"): they say so under the number,
+// and with it given, checked is taken as it is, even empty (they start unchecked, for the statement).
+const props = defineProps<{ customerId: string; customerName: string; checked?: string[]; inProgress?: string[]; startCharge?: boolean }>()
 const emit = defineEmits<{ close: []; done: [] }>()
 const router = useRouter()
 
@@ -96,7 +98,7 @@ async function load() {
   state.value = 'loading'
   try {
     orders.value = await openOrders(props.customerId)
-    const start = props.checked?.length ? props.checked : own.value.map((o) => o.id)
+    const start = props.inProgress ? (props.checked ?? []) : props.checked?.length ? props.checked : own.value.map((o) => o.id)
     picked.value = orders.value.filter((o) => start.includes(o.id) && (financial || o.own)).map((o) => o.id)
     amount.value = owed.value
     state.value = 'ready'
@@ -330,6 +332,7 @@ const preview = computed(() => {
                   <span class="sub"> · {{ order.createdAt ? formatDate(order.createdAt, country()) : '' }}</span>
                   <span v-if="rowText(order)" class="sub pick-split"> · {{ rowText(order) }}</span>
                   <span v-if="linkText(order.id)" class="sub" data-testid="order-link"> · {{ linkText(order.id) }}</span>
+                  <span v-else-if="inProgress?.includes(order.id)" class="sub" data-testid="order-in-progress"> · {{ t('financialInProgress') }}</span>
                 </label>
                 <span class="num">{{ money(order.open) }}</span>
                 <button type="button" class="link" :aria-label="t('receiveCustomerOpenOrder', { number: order.number ?? '' })" @click="openOrder(order.id)">{{ t('web.receive.open') }}</button>

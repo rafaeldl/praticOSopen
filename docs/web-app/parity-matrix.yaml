@@ -3228,10 +3228,10 @@ rows:
   feature_flags: ["planLimits:pdfWatermark"]
   hardware: [share_sheet, pdf_generation]
   data: ["api:POST /v1/app/orders/{id}/share", "companies/{id}", "companies/{id}/customers", "companies/{id}/orders/{id}/forms"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Botão amarelo Mandar o PDF quando canShareOrderPdf (viewPrices ou !useFinancial): compartilhar do sistema com o PDF da OS e a mensagem com o link, para o cliente ainda aprovar. O link sozinho vira o botão cinza (Mandar só o link no WhatsApp, ou Mandar só o link sem telefone). Sem PDF para o papel: folha antiga só com o link. Botão mostra Preparando o PDF… e erro em alerta."
+  note: "Botão amarelo Mandar o PDF quando canShareOrderPdf (viewPrices ou !useFinancial): compartilhar do sistema com o PDF da OS e a mensagem com o link, para o cliente ainda aprovar. O link sozinho vira o botão cinza (Mandar só o link no WhatsApp, ou Mandar só o link sem telefone). Sem PDF para o papel: folha antiga só com o link. Botão mostra Preparando o PDF… e erro em alerta. Web: Mandar o PDF é o botão principal (e o foco do M): baixa o PDF e abre o WhatsApp do cliente com a mensagem e o link (sem número, copia). Sem link, vai a mensagem sem ele."
 - id: order.share.copy-link
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -5614,11 +5614,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [share_sheet]
   data: ["companies/{id}/orders"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: null
-  note: "No … do Receber de uma OS, quando falta receber e a OS tem cliente. Mesmo fluxo de pay.customer.statement.share com só esta OS. Cliente com uma OS só em aberto cai aqui (não em Receber de {cliente}), por isso o extrato precisa estar nesta tela."
+  note: "No … do Receber de uma OS, quando falta receber e a OS tem cliente. Mesmo fluxo de pay.customer.statement.share com só esta OS. Cliente com uma OS só em aberto cai aqui (não em Receber de {cliente}), por isso o extrato precisa estar nesta tela. Web: no … da OS, que é onde o web recebe; mesmo StatementDialog do extrato de várias OS."
 - id: pay.customer.statement.share
   screen: lib/screens/payments/statement_share.dart
   route: null
@@ -7763,11 +7763,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
-  e2e: null
+  web_status: done
+  e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
   permission: viewPrices
-  note: "Em andamento = OS aprovadas ou em andamento sem nada pago (customerInProgress), embaixo do Falta receber. Sem nada a receber, o link Receber vem nessa linha. Receber de {cliente} abre com as que ele já deve marcadas e as em andamento desmarcadas, com 'Em andamento' embaixo, para incluir no extrato."
+  note: "Em andamento = OS aprovadas ou em andamento sem nada pago (customerInProgress), embaixo do Falta receber. Sem nada a receber, o link Receber vem nessa linha. Receber de {cliente} abre com as que ele já deve marcadas e as em andamento desmarcadas, com 'Em andamento' embaixo, para incluir no extrato. Web: calculado das OS que a ficha já lê (as mesmas do Falta receber)."
 - id: customer.detail.view
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"

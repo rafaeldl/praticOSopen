@@ -204,6 +204,42 @@ test('Nova OS para o cliente leva só o cliente; gerente não vê (customer.deta
   await expect(drawer.getByRole('combobox', { name: /Veículo/ })).toBeVisible()
 })
 
+test('Em andamento: OS aprovadas sem nada pago aparecem na ficha e entram desmarcadas no Receber (customer.detail.in-progress)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const ref = { id: customer.id, name: customer.name }
+  const a = await makeOrder('admin', { customer: ref, status: 'approved', total: 80, paidAmount: 0, payment: 'unpaid' })
+  const b = await makeOrder('admin', { customer: ref, status: 'progress', total: 120, paidAmount: 0, payment: 'unpaid' })
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  const detail = panel(page)
+  await expect(detail.getByTestId('customer-in-progress')).toContainText('Em andamento R$ 200,00')
+  await expect(detail.getByText('Falta receber')).toHaveCount(0)
+  // Nothing owed: the Receber link comes on the Em andamento line.
+  await detail.getByTestId('customer-in-progress').getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  await expect(drawer.getByTestId('receive-order')).toHaveCount(2)
+  for (const order of [a, b]) {
+    const row = drawer.getByTestId('receive-order').filter({ hasText: `OS ${order.number}` })
+    await expect(row.getByRole('checkbox')).not.toBeChecked()
+    await expect(row.getByTestId('order-in-progress')).toHaveText('· Em andamento')
+  }
+})
+
+test('Em andamento junto com Falta receber: o link fica no Falta receber e a concluída vem marcada (customer.detail.in-progress)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const ref = { id: customer.id, name: customer.name }
+  const owed = await makeOrder('admin', { customer: ref, status: 'done', total: 100, paidAmount: 0, payment: 'unpaid' })
+  const running = await makeOrder('admin', { customer: ref, status: 'approved', total: 80, paidAmount: 0, payment: 'unpaid' })
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  const detail = panel(page)
+  await expect(detail.getByTestId('customer-money')).toContainText('Falta receber R$ 100,00')
+  await expect(detail.getByTestId('customer-in-progress')).toContainText('Em andamento R$ 80,00')
+  await expect(detail.getByTestId('customer-receive')).toHaveCount(1)
+  await detail.getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  await expect(drawer.getByTestId('receive-order').filter({ hasText: `OS ${owed.number}` }).getByRole('checkbox')).toBeChecked()
+  await expect(drawer.getByTestId('receive-order').filter({ hasText: `OS ${running.number}` }).getByRole('checkbox')).not.toBeChecked()
+})
+
 test('Receber: uma OS abre ela; consultor só recebe nas que criou (customer.detail.receive)', async ({ page }) => {
   const customer = await makeCustomer()
   const owed = await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, status: 'done', total: 120, paidAmount: 0 })

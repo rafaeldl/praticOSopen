@@ -24,7 +24,7 @@ async function send(withPdf: boolean) {
   busy.value = true
   try {
     const load = await import('@/lib/pdf/load')
-    const [orders, detail] = await Promise.all([load.statementOrders(props.orders), loadCustomer(props.customerId).catch(() => null)])
+    const [orders, detail] = await Promise.all([load.statementOrders(props.orders), (props.customerId ? loadCustomer(props.customerId) : Promise.reject(new Error('no customer'))).catch(() => null)])
     const text = statementText(orders, load.statementTexts(), props.customerName || t('customerWithoutName'))
     if (withPdf) {
       const pdf = await load.statementPdf(orders, props.customerName)

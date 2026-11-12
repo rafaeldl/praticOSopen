@@ -277,8 +277,8 @@ for (let run = 1; run <= RUNS; run++) {
       s.start()
       await s.press('m')
       const sheet = dialog(page, 'Mandar para o cliente')
-      // The focus is already on "Mandar pelo WhatsApp".
-      await expect(sheet.getByTestId('share-whatsapp')).toBeFocused()
+      // The focus is already on "Mandar o PDF" (PDF downloaded, WhatsApp with the message and the link).
+      await expect(sheet.getByTestId('share-pdf')).toBeFocused()
       const popup = context.waitForEvent('page')
       await s.press('Enter')
       await popup

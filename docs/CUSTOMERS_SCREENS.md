@@ -19,7 +19,7 @@ aba Clientes, tela do cliente, seletor "Quem é o cliente?" e formulário em she
 - "Total gasto" = soma do `total` das OS concluídas (`status == 'done'`).
 - "Falta receber" = o A receber do Financeiro (`customerOwed`, `FinancialSummary.owesNow`): OS concluídas com saldo e OS em andamento já com parte paga. Só aparece com `viewPrices` e quando há saldo, com o link "Receber".
 - "Em andamento" = OS aprovadas ou em andamento sem nada pago (`customerInProgress`), que ainda não são dívida. Aparece embaixo do "Falta receber"; quando não há nada a receber, o link "Receber" vem nela, para dar para mandar o extrato.
-- "Receber" abre "Receber de {cliente}" com as OS que ele já deve marcadas e as em andamento desmarcadas; com uma OS só, abre o Receber dela. O "…" dessas telas tem "Mandar extrato".
+- "Receber" abre "Receber de {cliente}" com as OS que ele já deve marcadas e as em andamento desmarcadas; com uma OS só, abre o Receber dela. O "…" dessas telas tem "Mandar extrato". No web é igual (`CustomerDetail.vue`): o "Em andamento" sai das OS que a ficha já lê, e `ReceiveCustomerDialog` recebe as marcadas e as em andamento (`checked`, `inProgress`).
 - "Usados por último" = clientes distintos das últimas 50 OS (sem campo novo).
 - Apagar cliente não apaga as OS.
 
