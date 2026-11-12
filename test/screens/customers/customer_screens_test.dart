@@ -1106,8 +1106,13 @@ void main() {
       expect(find.text('Carro 12'), findsNothing);
     });
 
-    testWidgets('vehicles show plate and order count, then the add row, '
-        'then "Últimas OS" with the order title', (tester) async {
+    testWidgets('"Últimas OS" with the order title comes first, then the '
+        'vehicles with plate and order count, then the add row', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final gol = aggr('d1', 'VW Gol 2018')..serial = 'ABC1D23';
       final svc = OrderService()..service = (ServiceAggr()..name = 'Revisão');
       await pumpDetail(
@@ -1130,9 +1135,13 @@ void main() {
       expect(find.text('OS 3 · Revisão'), findsOneWidget);
       expect(find.text('OS 2'), findsOneWidget);
       expect(find.textContaining('#'), findsNothing);
-      final add = tester.getTopLeft(find.textContaining('Cadastrar outro'));
       final latest = tester.getTopLeft(find.text('Últimas OS'));
-      expect(add.dy, lessThan(latest.dy));
+      final lastOrder = tester.getTopLeft(find.text('OS 2'));
+      final vehicle = tester.getTopLeft(find.textContaining('ABC1D23'));
+      final add = tester.getTopLeft(find.textContaining('Cadastrar outro'));
+      expect(latest.dy, lessThan(lastOrder.dy));
+      expect(lastOrder.dy, lessThan(vehicle.dy));
+      expect(vehicle.dy, lessThan(add.dy));
     });
 
     testWidgets('"Recebimentos" lists the active receipts and opens one', (

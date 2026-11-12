@@ -661,6 +661,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
 
     return [
+      if (orders.isNotEmpty) ...[
+        SectionLabel(l10n.latestOrders),
+        if (orderList.searchable)
+          _searchField(
+            key: const Key('customerOrdersSearch'),
+            placeholder: l10n.customerSearchOrders,
+            keyboardType: TextInputType.number,
+            onChanged: (q) => setState(() => _orderQuery = q),
+          ),
+        for (final o in orderList.shown) _orderRow(o),
+        if (orderList.canOpen)
+          _toggleLink(
+            key: const Key('customerOrdersMore'),
+            label: _ordersOpen
+                ? l10n.customerShowLess
+                : l10n.customerShowAllOrders(orders.length),
+            onPressed: () => setState(() {
+              _ordersOpen = !_ordersOpen;
+              _orderQuery = '';
+            }),
+          ),
+      ],
       SectionLabel(l10n.devicesOfCustomer(config.devicePlural, name)),
       if (vehicleList.searchable)
         _searchField(
@@ -690,28 +712,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         ),
       ?_invoiceRecipientRow(),
       ?_nfseRow(),
-      if (orders.isNotEmpty) ...[
-        SectionLabel(l10n.latestOrders),
-        if (orderList.searchable)
-          _searchField(
-            key: const Key('customerOrdersSearch'),
-            placeholder: l10n.customerSearchOrders,
-            keyboardType: TextInputType.number,
-            onChanged: (q) => setState(() => _orderQuery = q),
-          ),
-        for (final o in orderList.shown) _orderRow(o),
-        if (orderList.canOpen)
-          _toggleLink(
-            key: const Key('customerOrdersMore'),
-            label: _ordersOpen
-                ? l10n.customerShowLess
-                : l10n.customerShowAllOrders(orders.length),
-            onPressed: () => setState(() {
-              _ordersOpen = !_ordersOpen;
-              _orderQuery = '';
-            }),
-          ),
-      ],
       if (_receipts != null && _canSeeReceipts) _receiptsSection(),
     ];
   }
