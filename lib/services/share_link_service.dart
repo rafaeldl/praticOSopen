@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/share_token.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/api_headers.dart';
 import 'package:praticos/utils/customer_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,21 +15,34 @@ import 'package:url_launcher/url_launcher.dart';
 class ShareLinkService {
   static final ShareLinkService _instance = ShareLinkService._internal();
   static ShareLinkService get instance => _instance;
-  ShareLinkService._internal();
+  ShareLinkService._internal()
+      : _headers = appApiHeaders,
+        _client = null;
 
   /// Lets tests replace the network and share calls.
   @visibleForTesting
-  ShareLinkService.forTesting();
+  ShareLinkService.forTesting({
+    Future<Map<String, String>> Function()? headers,
+    http.Client? client,
+  })  : _headers = headers ?? appApiHeaders,
+        _client = client;
+
+  /// Auth and `X-Company-Id` headers. Without the company the server falls
+  /// back to the user's first company, and an order of any other company
+  /// answers "Order not found".
+  final Future<Map<String, String>> Function() _headers;
+  final http.Client? _client;
 
   // API base URL - always uses production Cloud Functions
   static const String _baseUrl =
       'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
-  /// Get Firebase Auth token for API requests
-  Future<String?> _getAuthToken() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
-    return await user.getIdToken();
+  Future<Map<String, String>> _authHeaders() async {
+    try {
+      return await _headers();
+    } on AppApiUnauthenticatedException {
+      throw ShareLinkException('User not authenticated');
+    }
   }
 
   /// Generate a share link for an order
@@ -39,17 +52,11 @@ class ShareLinkService {
     List<String> permissions = const ['view', 'approve', 'comment'],
     int expiresInDays = 7,
   }) async {
-    final token = await _getAuthToken();
-    if (token == null) {
-      throw ShareLinkException('User not authenticated');
-    }
+    final headers = await _authHeaders();
 
-    final response = await http.post(
+    final response = await (_client?.post ?? http.post)(
       Uri.parse('$_baseUrl/v1/app/orders/$orderId/share'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: json.encode({
         'permissions': permissions,
         'expiresInDays': expiresInDays,
@@ -89,17 +96,11 @@ class ShareLinkService {
 
   /// Get all share tokens for an order
   Future<List<ShareToken>> getShareTokens(String orderId) async {
-    final token = await _getAuthToken();
-    if (token == null) {
-      throw ShareLinkException('User not authenticated');
-    }
+    final headers = await _authHeaders();
 
-    final response = await http.get(
+    final response = await (_client?.get ?? http.get)(
       Uri.parse('$_baseUrl/v1/app/orders/$orderId/share'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -122,17 +123,11 @@ class ShareLinkService {
 
   /// Revoke a share token
   Future<void> revokeShareToken(String orderId, String shareToken) async {
-    final token = await _getAuthToken();
-    if (token == null) {
-      throw ShareLinkException('User not authenticated');
-    }
+    final headers = await _authHeaders();
 
-    final response = await http.delete(
+    final response = await (_client?.delete ?? http.delete)(
       Uri.parse('$_baseUrl/v1/app/orders/$orderId/share/$shareToken'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -174,20 +169,23 @@ class ShareLinkService {
   /// link as the text: the customer gets the file and can still approve
   /// through the link.
   Future<void> shareViaSheetWithPdf({
-    required String url,
+    String? url,
     required Uint8List bytes,
     required String filename,
     String? message,
     String? subject,
     Rect? sharePositionOrigin,
   }) async {
-    final text = message != null ? '$message\n\n$url' : url;
+    final text = [
+      if (message != null) message,
+      if (url != null) url,
+    ].join('\n\n');
     final directory = await getTemporaryDirectory();
     final file = File('${directory.path}/$filename');
     await file.writeAsBytes(bytes);
     await SharePlus.instance.share(
       ShareParams(
-        text: text,
+        text: text.isEmpty ? null : text,
         subject: subject,
         files: [XFile(file.path, mimeType: 'application/pdf')],
         sharePositionOrigin: sharePositionOrigin,
@@ -251,6 +249,7 @@ class ShareLinkService {
     String? locale,
     String? statusContext,
     bool withPdf = false,
+    bool withLink = true,
   }) {
     final loc = locale ?? 'pt';
     final company = companyName != null
@@ -259,6 +258,15 @@ class ShareLinkService {
 
     if (statusContext != null) {
       return _buildStatusMessage(loc, statusContext, customerName, orderNumber, company);
+    }
+
+    if (withPdf && !withLink) {
+      if (loc.startsWith('en')) {
+        return 'Hi $customerName! Here is your service order #$orderNumber$company as a PDF.';
+      } else if (loc.startsWith('es')) {
+        return 'Hola $customerName! Aquí está tu orden de servicio #$orderNumber$company en PDF.';
+      }
+      return 'Olá $customerName! Segue a sua OS #$orderNumber$company em PDF.';
     }
 
     if (withPdf) {
