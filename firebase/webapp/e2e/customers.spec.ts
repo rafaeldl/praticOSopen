@@ -240,13 +240,29 @@ test('Em andamento junto com Falta receber: o link fica no Falta receber e a con
   await expect(drawer.getByTestId('receive-order').filter({ hasText: `OS ${running.number}` }).getByRole('checkbox')).not.toBeChecked()
 })
 
-test('Receber: uma OS abre ela; consultor só recebe nas que criou (customer.detail.receive)', async ({ page }) => {
+test('Receber com uma OS concluída abre o recebimento com ela marcada (customer.detail.receive)', async ({ page }) => {
   const customer = await makeCustomer()
   const owed = await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, status: 'done', total: 120, paidAmount: 0 })
   await openCustomers(page, 'admin', `?customer=${customer.id}`)
   await panel(page).getByTestId('customer-receive').click()
-  await expect(page).toHaveURL(new RegExp(`order=${owed.id}`))
-  await expect(page.getByTestId('order-detail')).toBeVisible()
+  const drawer = page.getByTestId('receive-customer')
+  await expect(drawer.getByTestId('receive-order').filter({ hasText: `OS ${owed.number}` }).getByRole('checkbox')).toBeChecked()
+  await expect(page).not.toHaveURL(/order=/)
+})
+
+test('Receber com uma OS em andamento abre o recebimento, não a OS (customer.detail.receive)', async ({ page }) => {
+  const customer = await makeCustomer()
+  const running = await makeOrder('admin', { customer: { id: customer.id, name: customer.name }, status: 'progress', total: 2000, paidAmount: 0, payment: 'unpaid' })
+  await openCustomers(page, 'admin', `?customer=${customer.id}`)
+  const detail = panel(page)
+  await expect(detail.getByTestId('customer-in-progress')).toContainText('Em andamento R$ 2.000,00')
+  await detail.getByTestId('customer-in-progress').getByTestId('customer-receive').click()
+  const drawer = page.getByTestId('receive-customer')
+  const row = drawer.getByTestId('receive-order').filter({ hasText: `OS ${running.number}` })
+  await expect(row.getByRole('checkbox')).toBeChecked()
+  await expect(row.getByTestId('order-in-progress')).toHaveText('· Em andamento')
+  await expect(drawer.getByTestId('receive-total')).toContainText('R$ 2.000,00')
+  await expect(page).not.toHaveURL(/order=/)
 })
 
 test('aparelhos e OS do cliente; abrir o aparelho (customer.detail.devices, customer.detail.orders)', async ({ page }) => {

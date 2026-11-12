@@ -7856,7 +7856,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/customers.spec.ts
   web_exception: null
-  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro. Web: com uma OS abre ela; com várias abre Início em “Sem receber” buscando o cliente, até a tela “Receber de Ana” (fatia 04)."
+  note: "Link '· Receber' ao lado de 'falta receber'. Financeiro recebe em todas; consultor só nas que criou e com viewPrices; supervisor e técnico nunca (canReceiveOnOrder). Com uma OS vai direto a /payment_management dela; com várias abre /receive_customer, mais antiga primeiro. Web: sempre abre “Receber de Ana”, com uma OS ou várias, concluída ou em andamento; com uma OS só ela vem marcada."
 - id: customer.detail.devices
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/device_detail"
