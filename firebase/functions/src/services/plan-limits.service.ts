@@ -68,11 +68,12 @@ const intOr = (value: unknown, fallback: number): number =>
 
 /** SubscriptionLimits.fromJson: each missing field takes the Free default; `collaborators` is the old `users`. */
 function storedLimits(json: Json): SubscriptionLimits {
+  const free = PLAN_LIMITS.free;
   return {
-    photosPerMonth: intOr(json.photosPerMonth, 30),
-    formTemplates: intOr(json.formTemplates, 1),
-    users: intOr(json.users ?? json.collaborators, 1),
-    pdfWatermark: typeof json.pdfWatermark === 'boolean' ? json.pdfWatermark : true,
+    photosPerMonth: intOr(json.photosPerMonth, free.photosPerMonth),
+    formTemplates: intOr(json.formTemplates, free.formTemplates),
+    users: intOr(json.users ?? json.collaborators, free.users),
+    pdfWatermark: typeof json.pdfWatermark === 'boolean' ? json.pdfWatermark : free.pdfWatermark,
   };
 }
 

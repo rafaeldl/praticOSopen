@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:json_annotation/json_annotation.dart';
 
+import 'plan_table.dart';
+
+export 'plan_table.dart' show PlanRow, kPlanTables, kPlanTableCurrentVersion;
+
 part 'subscription.g.dart';
 
 /// Plans available in PraticOS.
@@ -31,12 +35,13 @@ extension SubscriptionPlanName on SubscriptionPlan {
   }
 }
 
-/// Assistant requests per month by plan (same values as the server).
-const Map<SubscriptionPlan, int> kAiRequestsPerMonth = {
-  SubscriptionPlan.free: 10,
-  SubscriptionPlan.starter: 150,
-  SubscriptionPlan.pro: 400,
-  SubscriptionPlan.business: 1000,
+/// The current plan table row (docs/plans/plans.json) for [plan].
+PlanRow currentPlanRow(SubscriptionPlan plan) =>
+    kPlanTables[kPlanTableCurrentVersion]![plan]!;
+
+/// Assistant requests per month by plan (docs/plans/plans.json, same as the server).
+final Map<SubscriptionPlan, int> kAiRequestsPerMonth = {
+  for (final plan in SubscriptionPlan.values) plan: currentPlanRow(plan).aiPerMonth,
 };
 
 /// Subscription status. Only the server (RevenueCat webhook) writes it.
@@ -137,7 +142,7 @@ class SubscriptionUsage {
 }
 
 /// Plan limits. -1 means unlimited.
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class SubscriptionLimits {
   /// Photos per month.
   final int photosPerMonth;
@@ -152,52 +157,42 @@ class SubscriptionLimits {
   final bool pdfWatermark;
 
   const SubscriptionLimits({
-    this.photosPerMonth = 30,
-    this.formTemplates = 1,
-    this.users = 1,
-    this.pdfWatermark = true,
+    required this.photosPerMonth,
+    required this.formTemplates,
+    required this.users,
+    required this.pdfWatermark,
   });
 
-  /// Reads `users` and falls back to the legacy client key `collaborators`.
-  factory SubscriptionLimits.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionLimitsFromJson(<String, dynamic>{
-        ...json,
-        'users': json['users'] ?? json['collaborators'],
-      });
+  /// The limits a subscription stores, from a row of the plan table.
+  factory SubscriptionLimits.ofRow(PlanRow row) => SubscriptionLimits(
+        photosPerMonth: row.photosPerMonth,
+        formTemplates: row.formTemplates,
+        users: row.users,
+        pdfWatermark: row.pdfWatermark,
+      );
+
+  /// A missing field takes the Free default; reads `users` and falls back to
+  /// the legacy client key `collaborators`.
+  factory SubscriptionLimits.fromJson(Map<String, dynamic> json) {
+    final free = forPlan(SubscriptionPlan.free);
+    int intOr(Object? value, int fallback) => value is num ? value.toInt() : fallback;
+    final watermark = json['pdfWatermark'];
+    return SubscriptionLimits(
+      photosPerMonth: intOr(json['photosPerMonth'], free.photosPerMonth),
+      formTemplates: intOr(json['formTemplates'], free.formTemplates),
+      users: intOr(json['users'] ?? json['collaborators'], free.users),
+      pdfWatermark: watermark is bool ? watermark : free.pdfWatermark,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$SubscriptionLimitsToJson(this);
 
-  /// Default limits per plan (same values as the server).
-  static const Map<SubscriptionPlan, SubscriptionLimits> defaults = {
-    SubscriptionPlan.free: SubscriptionLimits(
-      photosPerMonth: 30,
-      formTemplates: 1,
-      users: 1,
-      pdfWatermark: true,
-    ),
-    SubscriptionPlan.starter: SubscriptionLimits(
-      photosPerMonth: 200,
-      formTemplates: 3,
-      users: 3,
-      pdfWatermark: false,
-    ),
-    SubscriptionPlan.pro: SubscriptionLimits(
-      photosPerMonth: 500,
-      formTemplates: 10,
-      users: 5,
-      pdfWatermark: false,
-    ),
-    SubscriptionPlan.business: SubscriptionLimits(
-      photosPerMonth: -1,
-      formTemplates: -1,
-      users: -1,
-      pdfWatermark: false,
-    ),
+  /// Default limits per plan, from the current plan table (same as the server).
+  static final Map<SubscriptionPlan, SubscriptionLimits> defaults = {
+    for (final plan in SubscriptionPlan.values) plan: SubscriptionLimits.ofRow(currentPlanRow(plan)),
   };
 
-  static SubscriptionLimits forPlan(SubscriptionPlan plan) {
-    return defaults[plan] ?? const SubscriptionLimits();
-  }
+  static SubscriptionLimits forPlan(SubscriptionPlan plan) => defaults[plan]!;
 }
 
 /// `companies/{companyId}.subscription`. Written by the server; the app only

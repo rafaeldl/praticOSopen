@@ -9,6 +9,9 @@ on:
       - 'firebase/functions/src/routes/v1/web-access.routes.ts'
       - 'firebase/hosting/src/css/tokens.css'
       - 'docs/web-app/contract-cases/**'
+      # Tabela única dos planos (#722): cada lado compara com ela
+      - 'docs/plans/**'
+      - 'scripts/plan-table.mjs'
       - 'lib/l10n/*.arb'
       - 'firebase/functions/src/__tests__/rbac/app-permissions.json'
       - '.github/workflows/webapp_check.yml'

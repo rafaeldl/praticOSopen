@@ -1,9 +1,10 @@
-// npm run gen: permissions and messages from their single sources.
+// npm run gen: permissions, messages and the plan table (docs/plans/plans.json) from their single sources.
 // Output goes to src/generated/ (ignored by git, see docs/WEB_APP.md).
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { LOCALES, compileAll, keysModule, mergeWeb, messagesOf, permissionsModule, usedKeys } from './gen-lib.mjs'
+import { loadPlanTable, renderTs as planTableModule } from '../../../scripts/plan-table.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const webapp = resolve(here, '..')
@@ -79,6 +80,7 @@ for (const locale of LOCALES) {
     writeFileSync(resolve(out, `i18n/${locale}-${name}.json`), JSON.stringify(pickFeature(merged[locale], name)))
   }
 }
+writeFileSync(resolve(out, 'plan-table.ts'), planTableModule(loadPlanTable(repo)))
 writeFileSync(resolve(out, 'message-keys.ts'), keysModule(Object.keys(merged[LOCALES[0]])))
 writeFileSync(
   resolve(out, 'permissions.ts'),

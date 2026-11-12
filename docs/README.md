@@ -15,6 +15,7 @@
 - [`DEVICE_READING.md`](DEVICE_READING.md) - Leitura do equipamento por visita (quilometragem, horímetro): campo do ramo com `reading: true`, `Order.deviceReadings` e última leitura no equipamento
 - [`REMINDERS_AND_NOTICES.md`](REMINDERS_AND_NOTICES.md) - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
 - [`AI_ORDER_ASSIST.md`](AI_ORDER_ASSIST.md) - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
+- [`PLAN_LIMITS_SERVER.md`](PLAN_LIMITS_SERVER.md) - Limites dos planos: tabela única (`docs/plans/plans.json`, gerador e testes em cada lado), conta do servidor, chaves e casos de contrato
 - [`ONBOARDING.md`](ONBOARDING.md) - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
 - [`ORDER_ON_HOLD.md`](ORDER_ON_HOLD.md) - Marca de OS parada (motivo, dias parados, filtro Paradas)
 - [`WORK_STAGES.md`](WORK_STAGES.md) - Etapas dentro de "Em andamento" (Pintura, Polimento): `company.workStages`, `order.stage`, colunas, ordem e impressão no Quadro e no modo TV; no app, etapa na tela da OS e "Passar para X"

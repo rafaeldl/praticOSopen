@@ -4,11 +4,13 @@
   "rule": "Limite do plano: permitido se o limite é -1 (ilimitado) ou uso + o que entra <= limite. Limites desligados (paidPlansEnabled falso no app, config/paidPlans.enabled falso no servidor) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free com os limites padrão do Free; o status não conta. Enquanto o plano vale, os limites gravados ganham do padrão, e campo faltando nos limites gravados vira o padrão do Free; `collaborators` é o nome antigo de `users`.",
   "runsIn": [
     "dart",
-    "functions"
+    "functions",
+    "web"
   ],
   "sourceOfTruth": [
     "lib/services/feature_gate_service.dart FeatureGateService (_check, shouldShowPdfWatermark)",
-    "lib/models/subscription.dart Subscription.effectivePlan, effectiveLimits, SubscriptionLimits.fromJson"
+    "lib/models/subscription.dart Subscription.effectivePlan, effectiveLimits, SubscriptionLimits.fromJson",
+    "docs/plans/plans.json (números de cada plano)"
   ],
   "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos.",
   "cases": [

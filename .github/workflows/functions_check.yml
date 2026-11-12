@@ -6,6 +6,9 @@ on:
     paths:
       # Casos de contrato: src/__tests__/contract-cases.test.ts lê estes JSON
       - 'docs/web-app/contract-cases/**'
+      # Tabela única dos planos (#722): cada lado compara com ela
+      - 'docs/plans/**'
+      - 'scripts/plan-table.mjs'
       - 'firebase/firestore.rules'
       - 'firebase/storage.rules'
       - 'firebase/firebase.test.json'

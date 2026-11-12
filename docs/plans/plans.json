@@ -1,0 +1,72 @@
+{
+  "about": "Tabela única dos planos (#722). Servidor, app e web leem daqui: depois de mudar, rodar `node scripts/plan-table.mjs` (gera firebase/functions/src/services/plan-table.generated.ts e lib/models/plan_table.dart; a web gera em npm run gen). Os testes de cada lado comparam com este arquivo. -1 é sem limite.",
+  "fields": {
+    "ordersPerMonth": "OS criadas no mês",
+    "users": "Pessoas na empresa (membros mais convites que valem)",
+    "photosPerMonth": "Fotos de OS no mês",
+    "formTemplates": "Checklists ativos da empresa",
+    "ownChecklists": "Pode criar checklist próprio (falso: só os do ramo)",
+    "nfseCnpjs": "CNPJs que emitem nota (0: sem nota)",
+    "pdfWatermark": "PDF com a marca PraticOS",
+    "aiPerMonth": "Pedidos ao assistente por mês",
+    "aiPerDay": "Pedidos ao assistente por dia",
+    "features": "Recursos do plano (#724)"
+  },
+  "plans": ["free", "starter", "pro", "business"],
+  "currentVersion": "1",
+  "versions": {
+    "1": {
+      "approvedOn": "2026-10-09",
+      "plans": {
+        "free": {
+          "ordersPerMonth": -1,
+          "users": 1,
+          "photosPerMonth": 30,
+          "formTemplates": 1,
+          "ownChecklists": true,
+          "nfseCnpjs": 0,
+          "pdfWatermark": true,
+          "aiPerMonth": 10,
+          "aiPerDay": -1,
+          "features": []
+        },
+        "starter": {
+          "ordersPerMonth": -1,
+          "users": 3,
+          "photosPerMonth": 200,
+          "formTemplates": 3,
+          "ownChecklists": true,
+          "nfseCnpjs": -1,
+          "pdfWatermark": false,
+          "aiPerMonth": 150,
+          "aiPerDay": -1,
+          "features": []
+        },
+        "pro": {
+          "ordersPerMonth": -1,
+          "users": 5,
+          "photosPerMonth": 500,
+          "formTemplates": 10,
+          "ownChecklists": true,
+          "nfseCnpjs": -1,
+          "pdfWatermark": false,
+          "aiPerMonth": 400,
+          "aiPerDay": -1,
+          "features": []
+        },
+        "business": {
+          "ordersPerMonth": -1,
+          "users": -1,
+          "photosPerMonth": -1,
+          "formTemplates": -1,
+          "ownChecklists": true,
+          "nfseCnpjs": -1,
+          "pdfWatermark": false,
+          "aiPerMonth": 1000,
+          "aiPerDay": -1,
+          "features": []
+        }
+      }
+    }
+  }
+}
