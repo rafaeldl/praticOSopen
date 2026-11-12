@@ -43,6 +43,7 @@ vi.mock('../src/lib/nfse/data', () => ({
 
 import DirectIssueDialog from '../src/components/finance/DirectIssueDialog.vue'
 import InvoicesView from '../src/views/finance/InvoicesView.vue'
+import LoadingState from '../src/components/LoadingState.vue'
 import {
   addressComplete,
   cancelFailureText,
@@ -410,6 +411,9 @@ describe('InvoicesView com nota direta', () => {
   async function view(path: string) {
     const router = await withRouter(path)
     const wrapper = mount(InvoicesView, { global: { plugins: [router] }, attachTo: document.body })
+    // The list loads through several awaits (settings, invoices, i18n
+    // chunks): a fixed number of ticks was not always enough on a slow CI.
+    await vi.waitFor(() => expect(wrapper.findComponent(LoadingState).exists()).toBe(false), { timeout: 5000 })
     await flush()
     return { wrapper, router }
   }
@@ -470,8 +474,8 @@ describe('InvoicesView com nota direta', () => {
     expect(wrapper.get('[data-testid="nfse-progress"]').text()).toBe('Cancelando a nota…')
     expect(wrapper.get('[data-testid="nfse-cancel"]').text()).toBe('Cancelando a nota…')
     answer({ status: 'canceled' })
-    await flush()
-    expect(wrapper.find('[data-testid="nfse-progress"]').exists()).toBe(false)
+    // The progress goes away after the list is read again.
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nfse-progress"]').exists()).toBe(false), { timeout: 5000 })
     wrapper.unmount()
   })
 
