@@ -108,7 +108,7 @@ export interface TemplateInput {
  * New template: FormDefinition.toJson, with every key the app writes. `id` is
  * new unless given (a ready-made one copied keeps nothing of the segment's id).
  */
-export async function createTemplate(input: TemplateInput & { isActive?: boolean }): Promise<string> {
+export async function createTemplate(input: TemplateInput & { isActive?: boolean; sourceTemplateId?: string }): Promise<string> {
   const [db, { collection, doc }] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   const ref = doc(collection(db, 'companies', companyId(), 'forms'))
   const now = nowIso()
@@ -127,6 +127,7 @@ export async function createTemplate(input: TemplateInput & { isActive?: boolean
       items: input.items.map(itemDoc),
       titleI18n: input.titleI18n ?? null,
       descriptionI18n: input.descriptionI18n ?? null,
+      ...(input.sourceTemplateId ? { sourceTemplateId: input.sourceTemplateId } : {}),
     })
   })
   return ref.id
@@ -182,9 +183,9 @@ export async function deleteTemplate(id: string): Promise<void> {
   })
 }
 
-/** "Usar" a ready-made one: title, description, questions and its isActive, with a new id (like the app). */
+/** "Usar" a ready-made one: title, description, questions and its isActive, with a new id and `sourceTemplateId` (like the app): not one of the company's own. */
 export function importReady(ready: Template): Promise<string> {
-  return createTemplate({ title: ready.title, description: ready.description, items: ready.items, isActive: ready.isActive })
+  return createTemplate({ title: ready.title, description: ready.description, items: ready.items, isActive: ready.isActive, sourceTemplateId: ready.id })
 }
 
 // ── Checklists of an order ──

@@ -18,6 +18,11 @@ class FormDefinition extends BaseAuditCompany {
   /// i18n translations for description
   Map<String, String>? descriptionI18n;
 
+  /// Id of the segment's ready-made checklist this one was copied from
+  /// ("Usar"). A copy does not count as the company's own checklist (plan
+  /// limit); copies of the first access keep the segment's id instead.
+  String? sourceTemplateId;
+
   FormDefinition({
     String? id,
     required this.title,
@@ -26,6 +31,7 @@ class FormDefinition extends BaseAuditCompany {
     this.items = const [],
     this.titleI18n,
     this.descriptionI18n,
+    this.sourceTemplateId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {

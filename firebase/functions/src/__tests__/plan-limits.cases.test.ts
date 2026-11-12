@@ -37,10 +37,13 @@ describe('plan-limits', () => {
         resource: given.resource as PlanResource,
         usage: given.usage,
         adding: given.adding,
+        lastMonthUsage: given.lastMonthUsage,
         enforced: given.paidPlansEnabled,
         now,
       });
-      expect({ allowed: result.allowed, limit: result.limit, plan: result.plan }).toEqual(want(c));
+      const expected = want(c);
+      const got: Record<string, unknown> = { ...result };
+      expect(Object.fromEntries(Object.keys(expected).map((key) => [key, got[key]]))).toEqual(expected);
     });
   }
 });

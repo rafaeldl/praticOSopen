@@ -3730,6 +3730,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String orderAssistantErrorQuotaDay(String limit) {
+    return 'Você já usou os $limit pedidos do assistente de hoje. Amanhã volta; dá para continuar preenchendo à mão.';
+  }
+
+  @override
   String get orderAssistantErrorUnavailable =>
       'Não deu para ler agora. Tente de novo ou preencha à mão.';
 

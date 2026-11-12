@@ -24,6 +24,7 @@ FormDefinition _$FormDefinitionFromJson(Map<String, dynamic> json) =>
         ),
         descriptionI18n: (json['descriptionI18n'] as Map<String, dynamic>?)
             ?.map((k, e) => MapEntry(k, e as String)),
+        sourceTemplateId: json['sourceTemplateId'] as String?,
         createdAt: json['createdAt'] == null
             ? null
             : DateTime.parse(json['createdAt'] as String),
@@ -55,6 +56,7 @@ Map<String, dynamic> _$FormDefinitionToJson(FormDefinition instance) =>
       'items': instance.items.map((e) => e.toJson()).toList(),
       'titleI18n': instance.titleI18n,
       'descriptionI18n': instance.descriptionI18n,
+      'sourceTemplateId': instance.sourceTemplateId,
     };
 
 FormItemDefinition _$FormItemDefinitionFromJson(Map<String, dynamic> json) =>

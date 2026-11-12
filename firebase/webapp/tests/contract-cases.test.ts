@@ -131,7 +131,7 @@ describe('plan-limits', () => {
       expect({ watermark: shouldShowPdfWatermark(subscription, given.paidPlansEnabled, now) }).toEqual(want)
       return
     }
-    const result = checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, enforced: given.paidPlansEnabled, now })
-    expect(result).toEqual(want)
+    const result: Record<string, unknown> = { ...checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, lastMonthUsage: given.lastMonthUsage, enforced: given.paidPlansEnabled, now }) }
+    expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
   })
 })

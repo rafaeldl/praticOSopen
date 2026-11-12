@@ -19,6 +19,7 @@ import { resolveCompanyContext } from '../../../middleware/company.middleware';
 import ordersRoutes from '../orders.routes';
 import customerPaymentsRoutes from '../customer-payments.routes';
 import * as chargeService from '../../../services/asaas/charge.service';
+import { orderMonthKey, resetPaidPlansCache } from '../../../services/plan-limits.service';
 
 let cancelOpenCharges: jest.SpyInstance;
 
@@ -1289,5 +1290,42 @@ describe('união do técnico: mesma ordem da Firestore', () => {
       }
       expect([size, ids]).toEqual([size, expected]);
     }
+  });
+});
+
+// ─── OS por mês (#723) ───────────────────────────────────────────────────
+
+describe('POST /orders: OS do mês (limite suave)', () => {
+  const thisMonth = () => orderMonthKey(new Date());
+  beforeEach(() => {
+    resetPaidPlansCache();
+    seed('companies/c1/customers/cust1', { name: 'João' });
+  });
+  afterAll(() => resetPaidPlansCache());
+
+  it('Free no segundo mês acima do limite: 402 PLAN_LIMIT, o mesmo corpo do app e da web', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seedCompanies({ subscription: { plan: 'free', usage: { ordersMonth: thisMonth(), ordersThisMonth: 10, ordersLastMonth: 12 } } });
+    const res = await call('admin', 'post', O, { customerId: 'cust1' });
+    expect(res.status).toBe(402);
+    expect(res.body.error).toMatchObject({ code: 'PLAN_LIMIT', resource: 'order', limit: 10, usage: 10, plan: 'free' });
+    expect(list('companies/c1/orders')).toHaveLength(0);
+  });
+
+  it('primeiro mês acima do limite: cria (mês de folga)', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seedCompanies({ subscription: { plan: 'free', usage: { ordersMonth: thisMonth(), ordersThisMonth: 10, ordersLastMonth: 2 } } });
+    expect((await call('admin', 'post', O, { customerId: 'cust1' })).status).toBe(201);
+  });
+
+  it('chave desligada: cria sem contar', async () => {
+    seedCompanies({ subscription: { plan: 'free', usage: { ordersMonth: thisMonth(), ordersThisMonth: 50, ordersLastMonth: 50 } } });
+    expect((await call('admin', 'post', O, { customerId: 'cust1' })).status).toBe(201);
+  });
+
+  it('um pedido inválido continua 400, antes do limite', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seedCompanies({ subscription: { plan: 'free', usage: { ordersMonth: thisMonth(), ordersThisMonth: 10, ordersLastMonth: 12 } } });
+    expect((await call('admin', 'post', O, {})).status).toBe(400);
   });
 });

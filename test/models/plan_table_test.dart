@@ -32,6 +32,7 @@ void main() {
     test('${plan.name}: limits and AI come from the table', () {
       final row = (current[plan.name] as Map).cast<String, dynamic>();
       expect(SubscriptionLimits.forPlan(plan).toJson(), {
+        'ordersPerMonth': row['ordersPerMonth'],
         'photosPerMonth': row['photosPerMonth'],
         'formTemplates': row['formTemplates'],
         'users': row['users'],
@@ -41,12 +42,34 @@ void main() {
     });
   }
 
-  test('a stored limit missing a field takes the Free default', () {
-    final free = SubscriptionLimits.forPlan(SubscriptionPlan.free);
-    final limits = SubscriptionLimits.fromJson({'photosPerMonth': 999});
-    expect(limits.photosPerMonth, 999);
-    expect(limits.formTemplates, free.formTemplates);
-    expect(limits.users, free.users);
-    expect(limits.pdfWatermark, free.pdfWatermark);
+  test('stored limits meet the table: the more generous number wins, a missing one is the table\'s', () {
+    final now = DateTime.utc(2026, 11, 20);
+    final starter = Subscription.fromJson({
+      'plan': 'starter',
+      'limits': {'users': 3, 'photosPerMonth': 200},
+    });
+    final limits = starter.effectiveLimits(now);
+    final row = currentPlanRow(SubscriptionPlan.starter);
+    expect(limits.users, 3); // stored 3 > table 2: kept
+    expect(limits.photosPerMonth, -1); // table has no limit: wins
+    expect(limits.ordersPerMonth, row.ordersPerMonth); // missing: the table's
+  });
+
+  test('tableVersion picks the version of the table; unknown is the current one', () {
+    final now = DateTime.utc(2026, 11, 20);
+    final v1 = Subscription.fromJson({'plan': 'starter', 'tableVersion': '1'});
+    expect(v1.effectiveLimits(now).ordersPerMonth, kPlanTables['1']![SubscriptionPlan.starter]!.ordersPerMonth);
+    final unknown = Subscription.fromJson({'plan': 'starter', 'tableVersion': '99'});
+    expect(unknown.effectiveTableVersion, kPlanTableCurrentVersion);
+  });
+
+  test('orders of the month turn by themselves (São Paulo calendar)', () {
+    final usage = SubscriptionUsage(ordersMonth: '2026-11', ordersThisMonth: 12, ordersLastMonth: 4);
+    expect(orderMonthKey(DateTime.utc(2026, 12, 1, 2, 59)), '2026-11');
+    expect(orderMonthKey(DateTime.utc(2026, 12, 1, 3)), '2026-12');
+    expect(previousMonthKey('2027-01'), '2026-12');
+    expect(usage.ordersAt(DateTime.utc(2026, 11, 20)), (thisMonth: 12, lastMonth: 4));
+    expect(usage.ordersAt(DateTime.utc(2026, 12, 5)), (thisMonth: 0, lastMonth: 12));
+    expect(usage.ordersAt(DateTime.utc(2027, 1, 5)), (thisMonth: 0, lastMonth: 0));
   });
 }

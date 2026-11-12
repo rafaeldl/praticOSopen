@@ -82,6 +82,16 @@ describe('syncCompanySubscription', () => {
     expect(fake.read('companies/c1')?.name).toBe('Company c1');
   });
 
+  it('a renewal of the same plan keeps the stored limits (a stricter table takes nothing away)', async () => {
+    const old = { ordersPerMonth: -1, photosPerMonth: 200, formTemplates: 3, users: 3, pdfWatermark: false };
+    seedCompany('c1', { plan: 'starter', status: 'active', source: 'store', limits: old, usage: USAGE });
+    const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('starter'));
+
+    await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+    expect(subscriptionOf('c1')).toMatchObject({ plan: 'starter', limits: old });
+  });
+
   it('keeps the plan as cancelled until expiresAt', async () => {
     seedCompany('c1', { plan: 'starter', status: 'active', source: 'store', usage: USAGE });
     const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('starter', { unsubscribe_detected_at: PAST }));

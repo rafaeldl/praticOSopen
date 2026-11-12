@@ -23,6 +23,21 @@ int activeFormTemplateCount({required int all, required int inactive}) {
   return active < 0 ? 0 : active;
 }
 
+/// Whether [form] is a copy of one of the segment's ready-made checklists:
+/// it has `sourceTemplateId` ("Usar") or the same id as one of [readyIds]
+/// (copies of the first access). Same rule as the server's countFormTemplates.
+bool isReadyCopy(String id, Map<String, dynamic> form, Set<String> readyIds) {
+  final source = form['sourceTemplateId'];
+  return (source is String && source.isNotEmpty) || readyIds.contains(id);
+}
+
+/// Own active checklists (the plan limit counts only these): active
+/// (`isActive != false`) and not a copy of the segment's.
+int ownActiveFormTemplateCount(Map<String, Map<String, dynamic>> forms, Set<String> readyIds) =>
+    forms.entries
+        .where((entry) => entry.value['isActive'] != false && !isReadyCopy(entry.key, entry.value, readyIds))
+        .length;
+
 abstract class _FormTemplateStore with Store {
   final FormTemplateRepositoryV2 repository = FormTemplateRepositoryV2();
   final SegmentFormTemplateRepository segmentRepository = SegmentFormTemplateRepository();
@@ -156,8 +171,8 @@ abstract class _FormTemplateStore with Store {
     await _companyLoaded;
     if (companyId == null) return;
 
-    // Se estiver ativando, verifica limite
-    if (!template.isActive) {
+    // Se estiver ativando um checklist próprio, verifica limite (cópia do ramo não conta)
+    if (!template.isActive && !_isReadyCopy(template)) {
       final sub = subscription ?? Global.subscription;
       final gateResult = FeatureGateService.canCreateFormTemplate(sub);
       if (!gateResult.isAllowed) {
@@ -175,22 +190,15 @@ abstract class _FormTemplateStore with Store {
 
   /// Importa um formulário global (do segmento) para a empresa.
   ///
-  /// Verifica limite de formulários antes de importar. Se limite atingido,
-  /// lança [FeatureGateLimitException].
-  ///
-  /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
+  /// A cópia guarda o id do pronto (`sourceTemplateId`) e não conta no limite
+  /// de checklists próprios, então não verifica o plano. [subscription] fica
+  /// por compatibilidade.
   @action
   Future<void> importGlobalTemplate(FormDefinition globalTemplate, {Subscription? subscription}) async {
     await _companyLoaded;
     if (companyId == null) return;
 
-    // Verifica limite de formulários
-    final sub = subscription ?? Global.subscription;
-    final gateResult = FeatureGateService.canCreateFormTemplate(sub);
-    if (!gateResult.isAllowed) {
-      throw FeatureGateLimitException(gateResult);
-    }
-
+    // Usar um pronto do ramo não passa pelo limite: só checklist próprio conta.
     isImporting = true;
 
     try {
@@ -201,6 +209,7 @@ abstract class _FormTemplateStore with Store {
         description: globalTemplate.description,
         isActive: globalTemplate.isActive,
         items: List.from(globalTemplate.items), // Cria uma cópia dos itens
+        sourceTemplateId: globalTemplate.id,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -212,6 +221,12 @@ abstract class _FormTemplateStore with Store {
     } finally {
       isImporting = false;
     }
+  }
+
+  /// A copy of one of the segment's ready-made checklists (not the company's own).
+  bool _isReadyCopy(FormDefinition template) {
+    final readyIds = globalTemplateList?.value?.map((ready) => ready.id).whereType<String>().toSet() ?? const <String>{};
+    return isReadyCopy(template.id ?? '', {'sourceTemplateId': template.sourceTemplateId}, readyIds);
   }
 
   /// Atualiza o contador de formulários ativos no Firestore e local.
@@ -226,22 +241,19 @@ abstract class _FormTemplateStore with Store {
     if (!AuthorizationService.instance.canWriteUsageCounters) return;
 
     try {
-      // Active = isActive != false, like the server trigger: a template
-      // without the field counts. A Firestore "!=" query skips documents
-      // without the field, so count all and take out the inactive ones.
-      final templates = FirebaseFirestore.instance
+      // Own active checklists, like the server (countFormTemplates): active
+      // (isActive != false) and not a copy of the segment's ready-made ones.
+      final forms = await FirebaseFirestore.instance
           .collection('companies')
           .doc(companyId)
-          .collection(TenantFormTemplateRepository.collectionName);
-      final all = await templates.count().get();
-      final inactive = await templates
-          .where('isActive', isEqualTo: false)
-          .count()
+          .collection(TenantFormTemplateRepository.collectionName)
           .get();
-
-      final activeCount = activeFormTemplateCount(
-        all: all.count ?? 0,
-        inactive: inactive.count ?? 0,
+      final readyIds = segmentId == null
+          ? <String>{}
+          : (await segmentRepository.collectionFor(segmentId!).get()).docs.map((doc) => doc.id).toSet();
+      final activeCount = ownActiveFormTemplateCount(
+        {for (final doc in forms.docs) doc.id: doc.data()},
+        readyIds,
       );
 
       // Atualiza no Firestore

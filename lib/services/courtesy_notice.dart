@@ -34,11 +34,13 @@ class CourtesyNotice {
 
 /// Smallest paid plan that covers what the company uses this month, or null
 /// when Free already does.
-SubscriptionPlan? recommendedPlan(SubscriptionUsage usage, int aiUsed) {
+SubscriptionPlan? recommendedPlan(SubscriptionUsage usage, int aiUsed, {DateTime? now}) {
   bool fits(int used, int limit) => limit == -1 || used <= limit;
+  final orders = usage.ordersAt(now ?? DateTime.now()).thisMonth;
   bool covers(SubscriptionPlan plan) {
     final limits = SubscriptionLimits.forPlan(plan);
-    return fits(usage.usersActive, limits.users) &&
+    return fits(orders, limits.ordersPerMonth) &&
+        fits(usage.usersActive, limits.users) &&
         fits(usage.photosThisMonth, limits.photosPerMonth) &&
         fits(usage.formTemplatesActive, limits.formTemplates) &&
         fits(aiUsed, kAiRequestsPerMonth[plan] ?? 0);

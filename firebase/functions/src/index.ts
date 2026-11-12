@@ -13,7 +13,7 @@ import { onDocumentDeleted, onDocumentUpdated, onDocumentWritten } from 'firebas
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import { buildRolesClaim } from './services/membership.service';
-import { countNewOrderPhotos, recountFormTemplates, recountUsers } from './services/usage-counter.service';
+import { countNewOrder, countNewOrderPhotos, recountFormTemplates, recountUsers } from './services/usage-counter.service';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
@@ -45,6 +45,9 @@ export const firestoreUpdateTenantOSNumber = functionsV1
     );
     await countNewOrderPhotos(context.params.companyId, undefined, data).catch((error) =>
       console.error('Could not count the photos of the new order', error),
+    );
+    await countNewOrder(context.params.companyId, data, new Date(context.timestamp)).catch((error) =>
+      console.error('Could not count the new order', error),
     );
     await touchCustomerOfOrder(context.params.companyId, data, context.timestamp).catch((error) =>
       console.error('Could not stamp the customer activity of the new order', error),

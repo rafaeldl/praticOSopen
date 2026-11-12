@@ -158,18 +158,23 @@ export interface SyncDeps {
 
 export type SyncResult = 'updated' | 'grace_kept' | 'company_not_found';
 
-/** Dotted-path update with the plan fields only; never touches subscription.usage. */
+/** Dotted-path update with the plan fields only; never touches subscription.usage. Limits only on a plan change. */
 export function buildPlanUpdate(
   companyId: string,
   subscriber: RcSubscriber,
   state: ResolvedSubscriptionState,
   now: Date,
+  current?: Subscription,
 ): FieldUpdates {
   const nowIso = now.toISOString();
+  // Limits are written only when the plan changes: a renewal of the same plan
+  // keeps what was stored, so a stricter table never takes anything away
+  // from a subscriber (effectiveLimits takes the more generous number).
+  const samePlan = current?.plan === state.plan && current?.limits !== undefined;
   return {
     'subscription.plan': state.plan,
     'subscription.status': state.status,
-    'subscription.limits': getPlanLimits(state.plan),
+    ...(samePlan ? {} : { 'subscription.limits': getPlanLimits(state.plan) }),
     'subscription.expiresAt': state.expiresAt,
     'subscription.store': state.store,
     'subscription.source': 'store',
@@ -199,7 +204,7 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
     return 'grace_kept';
   }
 
-  await ref.update(buildPlanUpdate(companyId, subscriber, state, now));
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
 }

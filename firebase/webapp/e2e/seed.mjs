@@ -551,7 +551,8 @@ async function seedSettings() {
       useScheduling: true,
       phone: '(11) 3333-4444',
       // Starter in force: the team at the limit (members are recounted by the server), photos near it.
-      subscription: { plan: 'starter', status: 'active', source: 'store', expiresAt: future, usage: { usersActive: 4, photosThisMonth: 170, formTemplatesActive: 1 } },
+      // Table version 1 (200 photos, 3 checklists, 3 people on Starter): the Plano screen's levels and limit block. The new table's rows come with #725.
+      subscription: { plan: 'starter', status: 'active', source: 'store', tableVersion: '1', expiresAt: future, usage: { usersActive: 4, photosThisMonth: 170, formTemplatesActive: 1 } },
     },
     { merge: true },
   )

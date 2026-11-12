@@ -9,9 +9,12 @@ import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:provider/provider.dart';
 
+// Table version 1 (200 photos, 3 checklists, 3 people on Starter): the
+// screen's rows and limit block. The rows of the new table come with #725.
 Subscription _starter({int users = 1, int photos = 10, int forms = 1}) =>
     Subscription(
       plan: SubscriptionPlan.starter,
+      tableVersion: '1',
       source: SubscriptionSource.store,
       expiresAt: DateTime.now().add(const Duration(days: 30)),
       usage: SubscriptionUsage(

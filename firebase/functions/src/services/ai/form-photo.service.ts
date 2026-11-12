@@ -74,7 +74,7 @@ export interface FormPhotoDeps {
   llm: LlmClient;
   getSettings(companyId: string): Promise<AiSettings | null>;
   reserve(companyId: string, settings: AiSettings | null): Promise<QuotaReservation>;
-  release(companyId: string, monthKey: string): Promise<void>;
+  release(companyId: string, monthKey: string, dayKey?: string): Promise<void>;
   /**
    * Provider for this route only (AI_FORM_PHOTO_PROVIDER). Wins over the
    * company's `provider`; unset = the company's, like the order.
@@ -96,9 +96,10 @@ export async function runFormPhoto(
 
   const reservation = await deps.reserve(companyId, settings);
   if (!reservation.ok) {
-    throw new OrderAssistError('AI_QUOTA_EXCEEDED', 'Monthly AI limit reached', {
+    throw new OrderAssistError('AI_QUOTA_EXCEEDED', reservation.period === 'day' ? 'Daily AI limit reached' : 'Monthly AI limit reached', {
       used: reservation.used,
       limit: reservation.limit,
+      period: reservation.period,
     });
   }
 
@@ -121,7 +122,7 @@ export async function runFormPhoto(
     result = parseFormPhotoResult(raw, question);
   } catch (error) {
     try {
-      await deps.release(companyId, reservation.monthKey);
+      await deps.release(companyId, reservation.monthKey, reservation.dayKey);
     } catch {
       // Best effort: a failed release only costs the user one request.
     }

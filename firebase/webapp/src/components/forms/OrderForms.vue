@@ -15,7 +15,8 @@ import TemplatePicker from './TemplatePicker.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { addOrderForm, deleteOrderForm, loadReadyTemplates, loadSubscription, watchOrderForms, watchTemplates } from '@/lib/forms/data'
-import { activeCount, activeLimit, answeredCount, completedStatus, fitsOneMore, formsAccess, titleOf, WEB_PLAN_LIMITS_ENFORCED, type OrderForm, type Template } from '@/lib/forms/model'
+import { activeCount, activeLimit, answeredCount, completedStatus, fitsOneMore, formsAccess, ownActiveCount, titleOf, type OrderForm, type Template } from '@/lib/forms/model'
+import { loadLimitsSwitch } from '@/lib/plan-limits'
 import { declinedCount, offerDone, offerWaiting, rememberDecline, shouldOffer } from '@/lib/forms/offer'
 import { orderRoleOf, type Order } from '@/lib/orders/model'
 import { deviceLabel } from '@/lib/orders/text'
@@ -62,7 +63,8 @@ const deviceChoices = computed<Choice[]>(() => [
   ...props.order.devices.filter((device) => device.id).map((device) => ({ id: device.id as string, label: device.name ?? '', sub: device.serial ?? undefined })),
   { id: '__none', label: t('generalNoDevice') },
 ])
-const active = computed(() => activeCount(templates.value ?? []))
+// Own checklists only: copies of the segment's ready-made ones do not count (#723).
+const active = computed(() => ownActiveCount(templates.value ?? [], ready.value))
 const limit = computed(() => (planKnown.value ? activeLimit(subscription.value, new Date()) : -1))
 
 async function listen() {
@@ -150,11 +152,12 @@ async function add(template: Template, deviceId: string | null) {
 /** "Novo checklist" in the picker: created, then chosen for this order (the app only reloads the list). */
 function create(deviceId: string | null) {
   step.value = { kind: 'create', deviceId }
-  // Only where plan limits apply (not in the browser, like the app); read meanwhile, never assumed Free.
-  if (WEB_PLAN_LIMITS_ENFORCED && !planKnown.value) {
-    void loadSubscription()
-      .then((value) => {
-        subscription.value = value
+  // Only with the switch on (config/paidPlans); read meanwhile, never assumed Free.
+  if (!planKnown.value) {
+    void loadLimitsSwitch()
+      .then(async (on) => {
+        if (!on) return
+        subscription.value = await loadSubscription()
         planKnown.value = true
       })
       .catch((error) => console.warn('forms: plan not read', error))

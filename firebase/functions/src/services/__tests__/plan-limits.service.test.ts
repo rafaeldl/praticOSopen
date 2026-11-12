@@ -28,6 +28,10 @@ import {
   countFormTemplates,
   countPhotosThisMonth,
   monthStart,
+  orderMonthKey,
+  ordersUsage,
+  previousMonthKey,
+  resetPaidPlansCache,
 } from '../plan-limits.service';
 import appInviteRoutes from '../../routes/v1/invite.routes';
 
@@ -36,6 +40,7 @@ const FREE = { name: 'Clima', subscription: { plan: 'free', status: 'active', us
 
 beforeEach(() => {
   resetFakeDb();
+  resetPaidPlansCache();
   mockFiles.length = 0;
   mockGetFiles.mockClear();
 });
@@ -51,13 +56,33 @@ describe('usage counted on the server', () => {
     expect(await countCollaborators('c1', NOW)).toBe(3);
   });
 
-  it('form templates: active ones in forms/, a missing isActive counts as active', async () => {
+  it('form templates: own active ones in forms/, a missing isActive counts as active', async () => {
     seed('companies/c1/forms/f1', { title: 'A', isActive: true });
     seed('companies/c1/forms/f2', { title: 'B' });
     seed('companies/c1/forms/f3', { title: 'C', isActive: false });
-    // The app's counter reads formTemplates/, which is not where templates live.
+    // The old app counter read formTemplates/, which is not where templates live.
     seed('companies/c1/formTemplates/x', { isActive: true });
     expect(await countFormTemplates('c1')).toBe(2);
+  });
+
+  it('form templates: copies of the segment ready-made ones do not count', async () => {
+    seed('companies/c1', { segment: { id: 'hvac' } });
+    seed('segments/hvac/forms/ready1', { title: 'Vistoria' });
+    seed('companies/c1/forms/ready1', { title: 'Vistoria' }); // first access: same id
+    seed('companies/c1/forms/r2', { title: 'Entrega', sourceTemplateId: 'ready2' }); // "Usar"
+    seed('companies/c1/forms/own', { title: 'Meu checklist' });
+    expect(await countFormTemplates('c1')).toBe(1);
+  });
+
+  it('orders: the month turns by itself; São Paulo calendar', () => {
+    expect(orderMonthKey(new Date('2026-12-01T02:59:00.000Z'))).toBe('2026-11');
+    expect(orderMonthKey(new Date('2026-12-01T03:00:00.000Z'))).toBe('2026-12');
+    expect(previousMonthKey('2027-01')).toBe('2026-12');
+    const usage = { ordersMonth: '2026-11', ordersThisMonth: 12, ordersLastMonth: 4 };
+    expect(ordersUsage(usage, NOW)).toEqual({ thisMonth: 12, lastMonth: 4 });
+    expect(ordersUsage(usage, new Date('2026-12-05T12:00:00Z'))).toEqual({ thisMonth: 0, lastMonth: 12 });
+    expect(ordersUsage(usage, new Date('2027-01-05T12:00:00Z'))).toEqual({ thisMonth: 0, lastMonth: 0 });
+    expect(ordersUsage(undefined, NOW)).toEqual({ thisMonth: 0, lastMonth: 0 });
   });
 
   it('photos: subscription.usage.photosThisMonth kept by the order triggers; Storage is never listed', async () => {
@@ -96,17 +121,31 @@ describe('checkCompanyPlanLimit', () => {
     expect(check).toMatchObject({ allowed: false, limit: 1, usage: 1, plan: 'free' });
   });
 
-  it('on, photos: at the counter limit is refused, without listing Storage', async () => {
+  it('on, photos: no limit on any plan, without listing Storage', async () => {
     seed('config/paidPlans', { enabled: true });
-    seed('companies/c1', { subscription: { plan: 'free', usage: { photosThisMonth: 30 } } });
-    expect(await checkCompanyPlanLimit('c1', 'photo', 1, NOW)).toMatchObject({ allowed: false, limit: 30, usage: 30 });
+    seed('companies/c1', { subscription: { plan: 'free', usage: { photosThisMonth: 3000 } } });
+    expect(await checkCompanyPlanLimit('c1', 'photo', 1, NOW)).toMatchObject({ allowed: true, limit: -1 });
     expect(mockGetFiles).not.toHaveBeenCalled();
+  });
+
+  it('on, orders: Free at 10 the first month over gets the month of grace, the next one is refused', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seed('companies/c1', { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 10, ordersLastMonth: 3 } } });
+    expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: true, grace: true, limit: 10, usage: 10, level: 'over' });
+    seed('companies/c1', { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 10, ordersLastMonth: 14 } } });
+    expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: false, grace: false, limit: 10 });
+  });
+
+  it('on, orders: Business past 500 is not blocked, it says to talk to us', async () => {
+    seed('config/paidPlans', { enabled: true });
+    seed('companies/c1', { subscription: { plan: 'business', usage: { ordersMonth: '2026-11', ordersThisMonth: 600, ordersLastMonth: 700 } } });
+    expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: true, contactUs: true, limit: 500 });
   });
 
   it('on, unlimited plan: allowed without counting', async () => {
     seed('config/paidPlans', { enabled: true });
     seed('companies/c1', { subscription: { plan: 'business' } });
-    expect(await checkCompanyPlanLimit('c1', 'photo', 3, NOW)).toMatchObject({ allowed: true, limit: -1, adding: 3 });
+    expect(await checkCompanyPlanLimit('c1', 'formTemplate', 3, NOW)).toMatchObject({ allowed: true, limit: -1, adding: 3 });
     expect(mockGetFiles).not.toHaveBeenCalled();
   });
 });
@@ -114,7 +153,6 @@ describe('checkCompanyPlanLimit', () => {
 describe('routes return PLAN_LIMIT', () => {
   let server: Server;
   beforeAll((done) => {
-    process.env.PLAN_LIMITS_ENABLED = 'true';
     const app = express();
     app.use(express.json());
     app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -129,12 +167,10 @@ describe('routes return PLAN_LIMIT', () => {
     server = app.listen(0, '127.0.0.1', done);
   });
   afterAll((done) => {
-    delete process.env.PLAN_LIMITS_ENABLED;
     server.close(done);
   });
 
   beforeEach(() => {
-    process.env.PLAN_LIMITS_ENABLED = 'true';
     seed('config/paidPlans', { enabled: true });
     seed('companies/c1', FREE);
     seed('companies/c1/memberships/owner1', { role: 'owner' });
@@ -152,8 +188,9 @@ describe('routes return PLAN_LIMIT', () => {
     expect(res.status).toBe(201);
   });
 
-  it('deploy switch off (PLAN_LIMITS_ENABLED unset): at the limit still goes through', async () => {
-    delete process.env.PLAN_LIMITS_ENABLED;
+  it('switch off (config/paidPlans): at the limit still goes through', async () => {
+    seed('config/paidPlans', { enabled: false });
+    resetPaidPlansCache();
     const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
     expect(res.status).toBe(201);
   });

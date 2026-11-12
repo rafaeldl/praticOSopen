@@ -1968,9 +1968,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (quotaHit) result = 'quota';
       error = switch (e.error) {
         AiAssistError.disabled => l10n.orderAssistantErrorDisabled,
-        AiAssistError.quotaExceeded => l10n.orderAssistantErrorQuota(
-          '${e.limit ?? ''}'.trim(),
-        ),
+        AiAssistError.quotaExceeded => e.period == 'day'
+            ? l10n.orderAssistantErrorQuotaDay('${e.limit ?? ''}'.trim())
+            : l10n.orderAssistantErrorQuota('${e.limit ?? ''}'.trim()),
         _ => l10n.orderAssistantErrorUnavailable,
       };
     } catch (_) {

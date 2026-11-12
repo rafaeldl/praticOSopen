@@ -92,7 +92,8 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..contract = json['contract'] == null
       ? null
       : OrderContract.fromJson(json['contract'] as Map<String, dynamic>)
-  ..isContract = json['isContract'] as bool?;
+  ..isContract = json['isContract'] as bool?
+  ..isSample = json['isSample'] as bool?;
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -130,6 +131,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'deviceReadings': instance.deviceReadings,
   'contract': instance.contract?.toJson(),
   'isContract': instance.isContract,
+  'isSample': instance.isSample,
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()

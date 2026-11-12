@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/subscription_service.dart';
 
 part 'subscription_store.g.dart';
@@ -18,6 +19,12 @@ Stream<Map<String, dynamic>?> _firestoreCompanyDoc(String companyId) =>
         .doc(companyId)
         .snapshots()
         .map((snapshot) => snapshot.data());
+
+/// Reads the one switch of the plan limits, `config/paidPlans.enabled`.
+Future<bool> _firestoreLimitsSwitch() async {
+  final snapshot = await FirebaseFirestore.instance.collection('config').doc('paidPlans').get();
+  return snapshot.data()?['enabled'] == true;
+}
 
 class SubscriptionStore = _SubscriptionStore with _$SubscriptionStore;
 
@@ -34,6 +41,9 @@ abstract class _SubscriptionStore with Store {
   /// Links the RevenueCat customer to the company. No-op without SDK key.
   Future<void> Function(String companyId) identify =
       SubscriptionService.instance.initialize;
+
+  /// Reads `config/paidPlans.enabled`. Tests replace it.
+  Future<bool> Function() readLimitsSwitch = _firestoreLimitsSwitch;
 
   /// Resets the RevenueCat customer. No-op when the SDK is not configured.
   Future<void> Function() resetIdentity = SubscriptionService.instance.logout;
@@ -73,6 +83,14 @@ abstract class _SubscriptionStore with Store {
       onError: (Object e) => debugPrint('SubscriptionStore: listener error: $e'),
     );
     await old?.cancel();
+
+    try {
+      FeatureGateService.limitsSwitchOn = await readLimitsSwitch();
+    } catch (e) {
+      // Not read: the limits stay off (the server still decides on its writes).
+      FeatureGateService.limitsSwitchOn = false;
+      debugPrint('SubscriptionStore: plan limits switch not read: $e');
+    }
 
     try {
       await identify(id);

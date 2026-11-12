@@ -3,12 +3,13 @@
  * Storage), so routes that mount it work without credentials.
  */
 
-import { planLimitsDeployed, requirePlanCapacity, type PlanLimitDeps } from '../plan-limit.middleware';
+import { requirePlanCapacity, type PlanLimitDeps } from '../plan-limit.middleware';
 
 jest.mock('../../services/plan-limits.service', () => ({
   checkCompanyPlanLimit: jest.fn(() => {
     throw new Error('must not be called while the switch is off');
   }),
+  isPaidPlansEnabled: jest.fn(async () => false),
   planLimitError: jest.requireActual('../../services/plan-limits.service').planLimitError,
 }));
 
@@ -19,13 +20,19 @@ function run(deps: PlanLimitDeps, adding?: () => number) {
   return requirePlanCapacity('photo', adding, deps)(req, res, next).then(() => ({ res, next }));
 }
 
-const full = { allowed: false, resource: 'photo' as const, limit: 30, usage: 30, adding: 1, plan: 'free' as const };
+const full = {
+  allowed: false,
+  resource: 'photo' as const,
+  limit: 30,
+  usage: 30,
+  adding: 1,
+  plan: 'free' as const,
+  level: 'over' as const,
+  grace: false,
+  contactUs: false,
+};
 
 describe('requirePlanCapacity', () => {
-  afterEach(() => {
-    delete process.env.PLAN_LIMITS_ENABLED;
-  });
-
   it('switch off: next() without counting or reading', async () => {
     const check = jest.fn();
     const adding = jest.fn(() => 1);
@@ -36,7 +43,7 @@ describe('requirePlanCapacity', () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it('default deps with PLAN_LIMITS_ENABLED unset: next() and the service is never called', async () => {
+  it('default deps with config/paidPlans off: next() and nothing is counted', async () => {
     const req: any = { userContext: { companyId: 'c1' } };
     const next = jest.fn();
     await requirePlanCapacity('collaborator')(req, {} as any, next);
@@ -55,9 +62,4 @@ describe('requirePlanCapacity', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it('PLAN_LIMITS_ENABLED must be exactly "true"', () => {
-    expect(planLimitsDeployed({})).toBe(false);
-    expect(planLimitsDeployed({ PLAN_LIMITS_ENABLED: '1' })).toBe(false);
-    expect(planLimitsDeployed({ PLAN_LIMITS_ENABLED: 'true' })).toBe(true);
-  });
 });

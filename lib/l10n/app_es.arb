@@ -1764,6 +1764,7 @@
   "orderAssistantDeviceGuess": "“{device}” no está registrado",
   "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu cuenta.",
   "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
+  "orderAssistantErrorQuotaDay": "Ya usaste las {limit} solicitudes del asistente de hoy. Mañana vuelve; puedes seguir completando a mano.",
   "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
   "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
   "reportPreviousPeriod": "Período anterior",

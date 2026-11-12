@@ -2018,6 +2018,14 @@
       }
     }
   },
+  "orderAssistantErrorQuotaDay": "Você já usou os {limit} pedidos do assistente de hoje. Amanhã volta; dá para continuar preenchendo à mão.",
+  "@orderAssistantErrorQuotaDay": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
   "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
   "reportPreviousPeriod": "Período anterior",

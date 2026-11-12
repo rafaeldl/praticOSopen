@@ -19,7 +19,7 @@ export const OUTPUTS = {
 
 const PLANS = ['free', 'starter', 'pro', 'business']
 const INT_FIELDS = ['ordersPerMonth', 'users', 'photosPerMonth', 'formTemplates', 'nfseCnpjs', 'aiPerMonth', 'aiPerDay']
-const BOOL_FIELDS = ['ownChecklists', 'pdfWatermark']
+const BOOL_FIELDS = ['ownChecklists', 'pdfWatermark', 'overageAllowed']
 const FIELDS = [...INT_FIELDS, ...BOOL_FIELDS, 'features']
 
 export function loadPlanTable(repo = REPO) {
@@ -51,6 +51,12 @@ export function validate(table) {
       if (row.ownChecklists !== (row.formTemplates !== 0)) problems.push(`${at}: ownChecklists must be false exactly when formTemplates is 0`)
     }
     for (const plan of Object.keys(entry.plans ?? {})) if (!PLANS.includes(plan)) problems.push(`versions.${version}.plans.${plan} is not a plan`)
+    // Each plan has what the one before it has.
+    for (let i = 1; i < PLANS.length; i++) {
+      const before = entry.plans?.[PLANS[i - 1]]?.features ?? []
+      const missing = before.filter((f) => !(entry.plans?.[PLANS[i]]?.features ?? []).includes(f))
+      if (missing.length) problems.push(`versions.${version}.plans.${PLANS[i]}.features lacks ${missing.join(', ')} from ${PLANS[i - 1]}`)
+    }
   }
   return problems
 }

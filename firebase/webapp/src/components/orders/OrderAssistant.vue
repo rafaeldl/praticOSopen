@@ -110,6 +110,7 @@ function ownToast(message: string, undo?: () => void) {
 
 function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED' && error.details?.period === 'day') return t('orderAssistantErrorQuotaDay', { limit: error.details.limit as number })
   if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota', { limit: monthLimit.value })
   return t('orderAssistantErrorUnavailable')
 }
