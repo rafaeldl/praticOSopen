@@ -3968,6 +3968,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String customerInProgressValue(String value) {
+    return 'Em andamento $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return 'Abrir uma OS para $name?';
   }

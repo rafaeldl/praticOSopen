@@ -1875,6 +1875,7 @@
   "companySettingSaveError": "Couldn't save. Check your connection and try again.",
   "customerSpentValue": "spent {value}",
   "customerOwesValue": "Owes {value}",
+  "customerInProgressValue": "In progress {value}",
   "askOrderForCustomer": "Open a work order for {name}?",
   "askOrderForDevice": "Open a work order for this {device}?",
   "addAnotherDevice": "Add another {device}",

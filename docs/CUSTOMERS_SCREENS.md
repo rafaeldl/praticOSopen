@@ -17,7 +17,9 @@ aba Clientes, tela do cliente, seletor "Quem é o cliente?" e formulário em she
 - Buscar pela placa no seletor escolhe o cliente e o veículo. O dono do veículo é o cliente da OS mais recente que o contém (o `Device` não guarda cliente).
 - Cliente com um único veículo (nas OS dele) tem o veículo escolhido junto, a não ser que a OS já tenha veículo.
 - "Total gasto" = soma do `total` das OS concluídas (`status == 'done'`).
-- "Falta receber" = soma de `total - paidAmount` das OS do cliente que não são orçamento, canceladas nem pagas (qualquer mês); só aparece com `viewPrices` e quando há saldo. "Mandar extrato em PDF" não existe ainda (não há gerador de extrato).
+- "Falta receber" = o A receber do Financeiro (`customerOwed`, `FinancialSummary.owesNow`): OS concluídas com saldo e OS em andamento já com parte paga. Só aparece com `viewPrices` e quando há saldo, com o link "Receber".
+- "Em andamento" = OS aprovadas ou em andamento sem nada pago (`customerInProgress`), que ainda não são dívida. Aparece embaixo do "Falta receber"; quando não há nada a receber, o link "Receber" vem nela, para dar para mandar o extrato.
+- "Receber" abre "Receber de {cliente}" com as OS que ele já deve marcadas e as em andamento desmarcadas; com uma OS só, abre o Receber dela. O "…" dessas telas tem "Mandar extrato".
 - "Usados por último" = clientes distintos das últimas 50 OS (sem campo novo).
 - Apagar cliente não apaga as OS.
 

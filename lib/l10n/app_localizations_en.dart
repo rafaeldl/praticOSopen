@@ -3971,6 +3971,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String customerInProgressValue(String value) {
+    return 'In progress $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return 'Open a work order for $name?';
   }

@@ -6742,6 +6742,12 @@ abstract class AppLocalizations {
   /// **'Falta receber {value}'**
   String customerOwesValue(String value);
 
+  /// No description provided for @customerInProgressValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em andamento {value}'**
+  String customerInProgressValue(String value);
+
   /// No description provided for @askOrderForCustomer.
   ///
   /// In pt, this message translates to:

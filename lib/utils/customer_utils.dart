@@ -185,6 +185,14 @@ double customerOwed(Iterable<Order?> orders) => orders
     .where(FinancialSummary.owesNow)
     .fold<double>(0, (sum, o) => sum + FinancialSummary.openAmount(o));
 
+/// Approved or running orders with nothing received yet ("Em andamento" of
+/// the Financeiro): not owed yet, but the customer can already get them in
+/// the statement.
+double customerInProgress(Iterable<Order?> orders) => orders
+    .whereType<Order>()
+    .where((o) => FinancialSummary.isInProgress(o) && !FinancialSummary.owesNow(o))
+    .fold<double>(0, (sum, o) => sum + FinancialSummary.openAmount(o));
+
 /// [customerOwed] per customer id, for the Clientes list. Customers that owe
 /// nothing are absent.
 Map<String, double> owedByCustomerOf(Iterable<Order?> orders) {

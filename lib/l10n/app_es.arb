@@ -1875,6 +1875,7 @@
   "companySettingSaveError": "No se pudo guardar. Revisa la conexión e intenta de nuevo.",
   "customerSpentValue": "gastó {value}",
   "customerOwesValue": "Falta cobrar {value}",
+  "customerInProgressValue": "En curso {value}",
   "askOrderForCustomer": "¿Abrir una OS para {name}?",
   "askOrderForDevice": "¿Abrir una OS para este {device}?",
   "addAnotherDevice": "Agregar otro {device}",
