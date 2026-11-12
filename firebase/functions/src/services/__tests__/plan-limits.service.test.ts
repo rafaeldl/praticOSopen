@@ -138,7 +138,7 @@ describe('checkCompanyPlanLimit', () => {
 
   it('on, orders: Business past 500 is not blocked, it says to talk to us', async () => {
     seed('config/paidPlans', { enabled: true });
-    seed('companies/c1', { subscription: { plan: 'business', usage: { ordersMonth: '2026-11', ordersThisMonth: 600, ordersLastMonth: 700 } } });
+    seed('companies/c1', { subscription: { plan: 'business', tableVersion: '2', usage: { ordersMonth: '2026-11', ordersThisMonth: 600, ordersLastMonth: 700 } } });
     expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: true, contactUs: true, limit: 500 });
   });
 

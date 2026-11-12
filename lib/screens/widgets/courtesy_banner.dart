@@ -3,7 +3,6 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/widgets/next_step_block.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
-import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/courtesy_notice.dart';
 import 'package:praticos/services/paywall_launcher.dart';
@@ -11,15 +10,14 @@ import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Início, in the last days of the Pro courtesy: when it ends, what the
-/// company used against Free, and the paywall. Only for whoever can buy.
+/// Início, in the last days of the Pro courtesy: when it ends, the work
+/// orders of the month against Free, and the paywall. Only for whoever can buy.
 /// "Agora não" hides it until the last days ([CourtesyNotice.dismissKey]).
 class CourtesyBanner extends StatefulWidget {
   const CourtesyBanner({
     super.key,
     required this.subscription,
     required this.companyId,
-    this.loadAiStatus,
     this.onViewPlans,
   });
 
@@ -27,9 +25,6 @@ class CourtesyBanner extends StatefulWidget {
 
   /// Kept with "Agora não": a device can hold several companies.
   final String? companyId;
-
-  /// Assistant use of the month; defaults to the server (tests inject).
-  final Future<AiStatus> Function()? loadAiStatus;
 
   /// Defaults to the paywall (tests inject).
   final VoidCallback? onViewPlans;
@@ -49,9 +44,8 @@ class _CourtesyBannerState extends State<CourtesyBanner> {
 
   /// Stays hidden until the saved "Agora não" has been read.
   bool _hidden = true;
-  int _aiUsed = 0;
 
-  /// The app can stay open for days: the count follows when it comes back.
+  /// The app can stay open for days: the date follows when it comes back.
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onResume: _refresh,
   );
@@ -106,13 +100,8 @@ class _CourtesyBannerState extends State<CourtesyBanner> {
       if (mounted) setState(() {});
       return;
     }
-    final ai = await (widget.loadAiStatus ??
-        () => AiOrderAssistService().status())();
     if (!mounted || !identical(notice, _notice)) return;
-    setState(() {
-      _hidden = false;
-      _aiUsed = ai.used ?? 0;
-    });
+    setState(() => _hidden = false);
     AnalyticsService.logAiEvent('upgrade_modal_shown', {
       'trigger': notice.isLast ? 'courtesy_last' : 'courtesy_first',
     });
@@ -127,13 +116,16 @@ class _CourtesyBannerState extends State<CourtesyBanner> {
 
   String _text(BuildContext context, CourtesyNotice notice) {
     final l10n = context.l10n;
-    final plan = recommendedPlan(widget.subscription.usage, _aiUsed);
+    final now = DateTime.now();
+    final usage = widget.subscription.usage;
+    final plan = recommendedPlan(usage, now: now);
+    final orders = usage.ordersAt(now).thisMonth;
     return [
       l10n.courtesyBannerEnds(notice.daysLeft),
-      if (_aiUsed > 0)
-        l10n.courtesyBannerAiUse(
-          _aiUsed,
-          kAiRequestsPerMonth[SubscriptionPlan.free] ?? 0,
+      if (orders > 0)
+        l10n.courtesyBannerOrdersUse(
+          orders,
+          currentPlanRow(SubscriptionPlan.free).ordersPerMonth,
         )
       else
         l10n.courtesyBannerToFree,

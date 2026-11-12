@@ -147,7 +147,7 @@ describe('plan', () => {
     expect(expired.plan).toBe('free')
     expect(expired.limits.users).toBe(1)
     // Like the app and the server (plan-limits.json): the more generous of stored and table; a missing field is the table's.
-    expect(planSummary({ plan: 'starter', limits: { collaborators: 4 }, usage: { usersActive: 3, photosThisMonth: 12, formTemplatesActive: 2 } }, NOW)).toMatchObject({
+    expect(planSummary({ plan: 'starter', tableVersion: '2', limits: { collaborators: 4 }, usage: { usersActive: 3, photosThisMonth: 12, formTemplatesActive: 2 } }, NOW)).toMatchObject({
       limits: { users: 4, photosPerMonth: -1, formTemplates: -1, ordersPerMonth: 50 },
       usage: { users: 3, photos: 12, checklists: 2 },
     })

@@ -1,6 +1,8 @@
 /**
  * End of the launch courtesy (docs/SUBSCRIPTION.md): a daily job tells owners
- * and admins 15 and 3 days before `expiresAt`, with what the company used.
+ * and admins 15 and 3 days before `expiresAt`, with the work orders of the
+ * month against Free. The assistant is not mentioned: its ceilings are
+ * internal and the customer never sees a counter (#726).
  * The push does not open anything: the banner on Início carries the paywall.
  *
  * companies/{cid}/settings/courtesyNotice { expiresAt, days } records the last
@@ -9,9 +11,9 @@
  */
 
 import { getRootCollection } from './firestore.service';
-import { AI_REQUESTS_PER_MONTH, getAiUsage } from './ai/ai-quota.service';
 import { notifyCourtesyEnding } from './notification.service';
-import { CourtesyNoticeRecord, dueCourtesyNotice } from './subscription-plans';
+import { CourtesyNoticeRecord, dueCourtesyNotice, planRow } from './subscription-plans';
+import { ordersUsage } from './plan-limits.service';
 import type { Subscription } from '../models/types';
 
 export interface CourtesyMessage {
@@ -30,15 +32,15 @@ export function companyLanguage(country: string | undefined): 'pt' | 'es' | 'en'
 }
 
 /** Text of the push, in the company's language. */
-export function courtesyMessage(days: number, aiUsed: number, country: string | undefined): CourtesyMessage {
-  const free = AI_REQUESTS_PER_MONTH.free;
+export function courtesyMessage(days: number, orders: number, country: string | undefined): CourtesyMessage {
+  const free = planRow('free').ordersPerMonth;
   const language = companyLanguage(country);
   if (language === 'pt') {
     return {
       days,
       title: `Sua cortesia do Pro acaba em ${days === 1 ? '1 dia' : `${days} dias`}`,
-      body: aiUsed > 0
-        ? `Você usou o assistente ${aiUsed === 1 ? '1 vez' : `${aiUsed} vezes`} neste mês. No Free são ${free}. Escolha seu plano no app.`
+      body: orders > 0
+        ? `Neste mês você abriu ${orders} OS. No Free são ${free} por mês. Escolha seu plano no app.`
         : 'Depois disso, o app volta para o plano Free. Escolha seu plano no app.',
     };
   }
@@ -46,16 +48,16 @@ export function courtesyMessage(days: number, aiUsed: number, country: string | 
     return {
       days,
       title: `Tu cortesía Pro termina en ${days === 1 ? '1 día' : `${days} días`}`,
-      body: aiUsed > 0
-        ? `Usaste el asistente ${aiUsed === 1 ? '1 vez' : `${aiUsed} veces`} este mes. El plan Free incluye ${free}. Elige un plan en la app.`
+      body: orders > 0
+        ? `Abriste ${orders === 1 ? '1 orden' : `${orders} órdenes`} este mes. El plan Free incluye ${free} por mes. Elige un plan en la app.`
         : 'Después, la app vuelve al plan Free. Elige un plan en la app.',
     };
   }
   return {
     days,
     title: `Your Pro courtesy ends in ${days === 1 ? '1 day' : `${days} days`}`,
-    body: aiUsed > 0
-      ? `You used the assistant ${aiUsed === 1 ? 'once' : `${aiUsed} times`} this month. Free includes ${free}. Choose a plan in the app.`
+    body: orders > 0
+      ? `You opened ${orders === 1 ? '1 work order' : `${orders} work orders`} this month. Free includes ${free} a month. Choose a plan in the app.`
       : 'After that the app goes back to Free. Choose a plan in the app.',
   };
 }
@@ -63,12 +65,10 @@ export function courtesyMessage(days: number, aiUsed: number, country: string | 
 const CONCURRENCY = 5;
 
 export interface CourtesyNoticeDeps {
-  aiUsed: (companyId: string) => Promise<number>;
   notify: (companyId: string, message: CourtesyMessage) => Promise<void>;
 }
 
 const defaultDeps: CourtesyNoticeDeps = {
-  aiUsed: async (companyId) => (await getAiUsage(companyId, null)).used,
   notify: notifyCourtesyEnding,
 };
 
@@ -94,8 +94,8 @@ export async function sendCourtesyNotices(
         const last = (await record.get()).data() as CourtesyNoticeRecord | undefined;
         const notice = dueCourtesyNotice(subscription, now, last);
         if (notice === null) continue;
-        const aiUsed = await deps.aiUsed(doc.id);
-        await deps.notify(doc.id, courtesyMessage(notice.daysLeft, aiUsed, doc.get('country') as string | undefined));
+        const orders = ordersUsage(subscription?.usage, now).thisMonth;
+        await deps.notify(doc.id, courtesyMessage(notice.daysLeft, orders, doc.get('country') as string | undefined));
         await record.set({ expiresAt: subscription!.expiresAt as string, days: notice.step });
         sent++;
       } catch (error) {

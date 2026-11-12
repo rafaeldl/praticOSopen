@@ -2954,8 +2954,8 @@
       "days": { "type": "int" }
     }
   },
-  "courtesyBannerAiUse": "{used, plural, =1{Neste mês você usou o assistente 1 vez; no Free são {free}.} other{Neste mês você usou o assistente {used} vezes; no Free são {free}.}}",
-  "@courtesyBannerAiUse": {
+  "courtesyBannerOrdersUse": "{used, plural, =1{Neste mês você abriu 1 OS; no Free são {free} por mês.} other{Neste mês você abriu {used} OS; no Free são {free} por mês.}}",
+  "@courtesyBannerOrdersUse": {
     "placeholders": {
       "used": { "type": "int" },
       "free": { "type": "int" }

@@ -133,7 +133,7 @@ describe('ai quota', () => {
   });
 
   it('daily ceiling: Starter and Pro stop at 200 a day, the next day starts again', async () => {
-    fake.seed('companies/c1', { subscription: { plan: 'pro' } });
+    fake.seed('companies/c1', { subscription: { plan: 'pro', tableVersion: '2' } });
     fake.seed('companies/c1/aiUsage/2026-10', { count: 500, day: '2026-10-11', dayCount: 200 });
     await expect(reserveAiRequest('c1', ON, NOW)).resolves.toEqual({
       ok: false, used: 200, limit: 200, monthKey: '2026-10', dayKey: '2026-10-11', period: 'day',
@@ -155,6 +155,12 @@ describe('ai quota', () => {
     fake.seed('companies/c1/aiUsage/2026-10', { count: 20, day: '2026-10-11', dayCount: 20 });
     await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: false, used: 20, limit: 20, period: 'day' });
     await expect(reserveAiRequest('c1', ON, new Date('2026-10-12T09:00:00Z'))).resolves.toMatchObject({ ok: true });
+  });
+
+  it('a subscriber from before the new table keeps no daily ceiling and gets the larger month (#726)', async () => {
+    fake.seed('companies/c1', { subscription: { plan: 'starter', source: 'store' } });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 500, day: '2026-10-11', dayCount: 300 });
+    await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: true, used: 501, limit: 1000 });
   });
 
   it('an expired plan is Free (effectivePlan), not the stored one', async () => {

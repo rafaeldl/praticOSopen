@@ -14,26 +14,39 @@ import type {
   SubscriptionUsage,
 } from '../models/types';
 import type { RcSubscriber } from './revenuecat.client';
-import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION, type PlanRow } from './plan-table.generated';
+import {
+  PLAN_IDS,
+  PLAN_TABLES_IN_FORCE,
+  PLAN_TABLE_CURRENT_VERSION,
+  PLAN_TABLE_LEGACY_VERSION,
+  type PlanRow,
+} from './plan-table.generated';
 
 /** The plan table in force (docs/plans/plans.json), by plan. */
 export function currentPlanRows(): Readonly<Record<SubscriptionPlan, PlanRow>> {
-  return PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION];
+  return PLAN_TABLES_IN_FORCE[PLAN_TABLE_CURRENT_VERSION];
 }
 
 /**
- * Version of the table a subscription follows: its `tableVersion` when it is
- * one of the table's versions, else the current one. Extension point for the
- * current subscribers (#726): nothing writes `tableVersion` yet.
+ * Version of the table a subscription follows (#726): its `tableVersion` when
+ * it is one of the table's versions; else, for a paid plan bought before the
+ * current table (no `tableVersion`, not the courtesy), the legacy version;
+ * else the current one (also for a version this code does not know). The
+ * webhook writes `tableVersion` on every plan change.
  */
-export function tableVersionOf(subscription: { tableVersion?: unknown } | null | undefined): string {
+export function tableVersionOf(
+  subscription: { tableVersion?: unknown; plan?: unknown; source?: unknown } | null | undefined,
+): string {
   const version = subscription?.tableVersion;
-  return typeof version === 'string' && version in PLAN_TABLES ? version : PLAN_TABLE_CURRENT_VERSION;
+  if (typeof version === 'string') return version in PLAN_TABLES_IN_FORCE ? version : PLAN_TABLE_CURRENT_VERSION;
+  const plan = subscription?.plan;
+  const paid = typeof plan === 'string' && plan !== 'free' && (PLAN_IDS as readonly string[]).includes(plan);
+  return paid && subscription?.source !== 'grace' ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION;
 }
 
 /** Row of a plan in a version of the table (the current one by default). */
 export function planRow(plan: SubscriptionPlan, version: string = PLAN_TABLE_CURRENT_VERSION): PlanRow {
-  return (PLAN_TABLES[version] ?? currentPlanRows())[plan] ?? currentPlanRows().free;
+  return (PLAN_TABLES_IN_FORCE[version] ?? currentPlanRows())[plan] ?? currentPlanRows().free;
 }
 
 /** The limits a subscription stores, from a row of the table. */
@@ -218,6 +231,7 @@ export function buildGraceSubscription(
     store: null,
     expiresAt: expiresAt.toISOString(),
     limits: getPlanLimits(GRACE_PLAN),
+    tableVersion: PLAN_TABLE_CURRENT_VERSION,
     usage: existing?.usage ?? defaultUsage(),
   };
 }

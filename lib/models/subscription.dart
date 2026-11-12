@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'plan_table.dart';
 
-export 'plan_table.dart' show PlanRow, kPlanTables, kPlanTableCurrentVersion;
+export 'plan_table.dart' show PlanRow, kPlanTables, kPlanTablesInForce, kPlanTableCurrentVersion, kPlanTableLegacyVersion;
 
 part 'subscription.g.dart';
 
@@ -341,11 +341,17 @@ class Subscription {
   bool hasStoreSubscription(DateTime now) =>
       source == SubscriptionSource.store && effectivePlan(now) != SubscriptionPlan.free;
 
-  /// Version of the plan table in force: [tableVersion] when the table has
-  /// it, else the current one.
+  /// Version of the plan table in force (#726): [tableVersion] when the table
+  /// has it; else, for a paid plan bought before the current table (no
+  /// [tableVersion], not the courtesy), the legacy version; else the current
+  /// one (also for a version this code does not know).
   String get effectiveTableVersion {
     final version = tableVersion;
-    return version != null && kPlanTables.containsKey(version) ? version : kPlanTableCurrentVersion;
+    if (version != null) {
+      return kPlanTablesInForce.containsKey(version) ? version : kPlanTableCurrentVersion;
+    }
+    final paid = plan != SubscriptionPlan.free;
+    return paid && source != SubscriptionSource.grace ? kPlanTableLegacyVersion : kPlanTableCurrentVersion;
   }
 
   /// Row of the plan table in force at [now] (Free of the current table once
@@ -353,7 +359,7 @@ class Subscription {
   PlanRow planRowAt(DateTime now) {
     final current = effectivePlan(now);
     if (current != plan) return currentPlanRow(current);
-    return kPlanTables[effectiveTableVersion]![current]!;
+    return kPlanTablesInForce[effectiveTableVersion]![current]!;
   }
 
   /// Limits in force at [now]: while the plan is in force, the row of its

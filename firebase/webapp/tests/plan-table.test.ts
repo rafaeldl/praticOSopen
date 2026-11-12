@@ -6,8 +6,8 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, test } from 'vitest'
-import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION } from '../src/generated/plan-table'
-import { loadLimitsSwitch, orderMonthKey, ordersUsage, planLimits, planLimitsEnforced, previousMonthKey, resetLimitsSwitch } from '../src/lib/plan-limits'
+import { PLAN_IDS, PLAN_TABLES, PLAN_TABLES_IN_FORCE, PLAN_TABLE_CURRENT_VERSION, PLAN_TABLE_LEGACY_VERSION } from '../src/generated/plan-table'
+import { loadLimitsSwitch, orderMonthKey, tableVersionOf, ordersUsage, planLimits, planLimitsEnforced, previousMonthKey, resetLimitsSwitch } from '../src/lib/plan-limits'
 import { planSummary } from '../src/lib/settings/model'
 import { planLimit } from '../src/lib/forms/model'
 
@@ -21,14 +21,45 @@ describe('plan table', () => {
     expect(PLAN_IDS).toEqual(table.plans)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(PLAN_TABLES).toEqual(Object.fromEntries(Object.entries<any>(table.versions).map(([v, entry]) => [v, entry.plans])))
+    expect(PLAN_TABLE_LEGACY_VERSION).toBe(table.legacyVersion)
+  })
+
+  test('an older version is in force as the more generous of it and the current one (#726)', () => {
+    const more = (a: number, b: number) => (a === -1 || b === -1 ? -1 : Math.max(a, b))
+    expect(PLAN_TABLES_IN_FORCE[table.currentVersion]).toEqual(current)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const [version, entry] of Object.entries<any>(table.versions)) {
+      if (version === table.currentVersion) continue
+      for (const plan of PLAN_IDS) {
+        const old = entry.plans[plan]
+        const now = current[plan]
+        const row = PLAN_TABLES_IN_FORCE[version]![plan]
+        for (const field of ['ordersPerMonth', 'users', 'photosPerMonth', 'formTemplates', 'nfseCnpjs', 'aiPerMonth', 'aiPerDay'] as const) {
+          expect([plan, field, row[field]]).toEqual([plan, field, more(old[field], now[field])])
+        }
+        expect(row.ownChecklists).toBe(old.ownChecklists || now.ownChecklists)
+        expect(row.overageAllowed).toBe(old.overageAllowed || now.overageAllowed)
+        expect(row.pdfWatermark).toBe(old.pdfWatermark && now.pdfWatermark)
+        expect([...row.features].sort()).toEqual([...new Set([...old.features, ...now.features])].sort())
+      }
+    }
+  })
+
+  test('a paid subscription without tableVersion keeps its old table; courtesy and Free follow the new one (#726)', () => {
+    expect(tableVersionOf({ plan: 'starter', source: 'store' })).toBe('1')
+    expect(tableVersionOf({ plan: 'pro', source: 'grace' })).toBe('2')
+    expect(tableVersionOf({ plan: 'free' })).toBe('2')
+    expect(tableVersionOf({ plan: 'starter', tableVersion: '2' })).toBe('2')
+    expect(tableVersionOf({ plan: 'starter', tableVersion: '99' })).toBe('2')
+    expect(planSummary({ plan: 'starter', source: 'store' }, NOW).limits).toMatchObject({ users: 3, ordersPerMonth: -1, photosPerMonth: -1, formTemplates: -1 })
   })
 
   test.each(PLAN_IDS)('%s: Plano, Equipe and checklists read the table', (plan) => {
     const row = current[plan]
     const limits = { ordersPerMonth: row.ordersPerMonth, photosPerMonth: row.photosPerMonth, formTemplates: row.formTemplates, users: row.users, pdfWatermark: row.pdfWatermark }
     expect(planLimits(plan)).toEqual(limits)
-    expect(planSummary({ plan }, NOW).limits).toEqual(limits)
-    expect(planLimit({ plan }, NOW)).toBe(row.formTemplates)
+    expect(planSummary({ plan, tableVersion: table.currentVersion }, NOW).limits).toEqual(limits)
+    expect(planLimit({ plan, tableVersion: table.currentVersion }, NOW)).toBe(row.formTemplates)
   })
 })
 

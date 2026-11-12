@@ -195,7 +195,7 @@ void main() {
   group('effectiveLimits', () {
     test('keeps a stored limit more generous than the table', () {
       const stored = SubscriptionLimits(ordersPerMonth: 80, photosPerMonth: 50, formTemplates: 2, users: 3, pdfWatermark: false);
-      final sub = Subscription(plan: SubscriptionPlan.starter, limits: stored);
+      final sub = Subscription(plan: SubscriptionPlan.starter, limits: stored, tableVersion: '2');
       expect(sub.effectiveLimits(now).ordersPerMonth, 80);
       expect(sub.effectiveLimits(now).users, 3);
       // The table is more generous here (no limit): it wins.
@@ -203,7 +203,7 @@ void main() {
     });
 
     test('falls back to the plan defaults', () {
-      final sub = Subscription(plan: SubscriptionPlan.pro);
+      final sub = Subscription(plan: SubscriptionPlan.pro, tableVersion: '2');
       expect(sub.effectiveLimits(now).ordersPerMonth, 150);
       expect(sub.effectiveLimits(now).users, 5);
     });

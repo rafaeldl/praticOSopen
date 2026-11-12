@@ -6310,12 +6310,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String courtesyBannerAiUse(int used, int free) {
+  String courtesyBannerOrdersUse(int used, int free) {
     String _temp0 = intl.Intl.pluralLogic(
       used,
       locale: localeName,
-      other: 'Neste mês você usou o assistente $used vezes; no Free são $free.',
-      one: 'Neste mês você usou o assistente 1 vez; no Free são $free.',
+      other: 'Neste mês você abriu $used OS; no Free são $free por mês.',
+      one: 'Neste mês você abriu 1 OS; no Free são $free por mês.',
     );
     return '$_temp0';
   }

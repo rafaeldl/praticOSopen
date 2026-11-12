@@ -5,6 +5,8 @@ import {
   getPlanLimits,
   isGraceActive,
   resolveSubscriptionState,
+  tableVersionOf,
+  planRow,
 } from '../subscription-plans';
 import type { RcEntitlement, RcSubscriber, RcSubscription } from '../revenuecat.client';
 import type { Subscription } from '../../models/types';
@@ -217,6 +219,7 @@ describe('buildGraceSubscription', () => {
       store: null,
       expiresAt: '2026-12-06T12:00:00.000Z',
       limits: PLAN_LIMITS.pro,
+      tableVersion: '2',
       usage: { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1 },
     });
   });
@@ -286,5 +289,37 @@ describe('buildGraceSubscription', () => {
     };
 
     expect(buildGraceSubscription(legacy, EXPIRES, NOW)).toMatchObject({ plan: 'pro', source: 'grace' });
+  });
+});
+
+describe('tableVersionOf (#726)', () => {
+  it('a paid subscription without tableVersion was bought before the current table', () => {
+    expect(tableVersionOf({ plan: 'starter', source: 'store' })).toBe('1');
+    expect(tableVersionOf({ plan: 'pro' })).toBe('1');
+    expect(tableVersionOf({ plan: 'business', source: 'store' })).toBe('1');
+  });
+
+  it('courtesy, Free and no subscription follow the current table', () => {
+    expect(tableVersionOf({ plan: 'pro', source: 'grace' })).toBe('2');
+    expect(tableVersionOf({ plan: 'free' })).toBe('2');
+    expect(tableVersionOf({ plan: 'enterprise' })).toBe('2');
+    expect(tableVersionOf(undefined)).toBe('2');
+  });
+
+  it('a written version wins; an unknown one is the current', () => {
+    expect(tableVersionOf({ plan: 'starter', tableVersion: '2' })).toBe('2');
+    expect(tableVersionOf({ plan: 'free', tableVersion: '1' })).toBe('1');
+    expect(tableVersionOf({ plan: 'starter', tableVersion: '99' })).toBe('2');
+  });
+
+  it('the old Starter keeps 3 people and gets everything the new one has', () => {
+    const row = planRow('starter', tableVersionOf({ plan: 'starter', source: 'store' }));
+    expect(row.users).toBe(3);
+    expect(row.ordersPerMonth).toBe(-1);
+    expect(row.photosPerMonth).toBe(-1);
+    expect(row.formTemplates).toBe(-1);
+    expect(row.aiPerMonth).toBe(1000);
+    expect(row.aiPerDay).toBe(-1);
+    expect(row.features).toEqual(expect.arrayContaining([...planRow('starter').features]));
   });
 });
