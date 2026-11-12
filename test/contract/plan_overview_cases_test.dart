@@ -36,7 +36,7 @@ void main() {
       final got = planOverview(
         sub,
         people: given['people'] as int,
-        cnpjs: given['cnpjs'] as int,
+        taxIds: given['taxIds'] as int,
         now: now,
         enforced: given['paidPlansEnabled'] as bool,
       );

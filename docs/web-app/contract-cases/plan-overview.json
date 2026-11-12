@@ -11,7 +11,7 @@
     "lib/services/plan_overview.dart planOverview",
     "firebase/webapp/src/lib/plan-overview.ts planOverview"
   ],
-  "fields": "`orders` são as OS deste mês e do anterior (o runner grava subscription.usage.ordersMonth com o mês de agora). `people` e `cnpjs` são contados pela tela (membros mais convites que valem; emissores em companies/{id}/fiscalEmitters). `expiresInDays` grava subscription.expiresAt a tantos dias de agora.",
+  "fields": "`orders` são as OS deste mês e do anterior (o runner grava subscription.usage.ordersMonth com o mês de agora). `people` e `taxIds` são contados pela tela (membros mais convites que valem; emissores em companies/{id}/fiscalEmitters). `expiresInDays` grava subscription.expiresAt a tantos dias de agora.",
   "cases": [
     {
       "id": "free-new-company-sees-no-limit",
@@ -25,7 +25,7 @@
           "lastMonth": 0
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -68,7 +68,7 @@
           "lastMonth": 0
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -114,7 +114,7 @@
           "lastMonth": 2
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -160,7 +160,7 @@
           "lastMonth": 4
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -206,7 +206,7 @@
           "lastMonth": 13
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -252,7 +252,7 @@
           "lastMonth": 13
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -298,7 +298,7 @@
           "lastMonth": 0
         },
         "people": 2,
-        "cnpjs": 1,
+        "taxIds": 1,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -317,7 +317,7 @@
             "level": "atLimit"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 1,
             "limit": 1,
             "level": "atLimit"
@@ -353,7 +353,7 @@
           "lastMonth": 0
         },
         "people": 2,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -372,7 +372,7 @@
             "level": "atLimit"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 0,
             "limit": 1,
             "level": "ok"
@@ -397,7 +397,7 @@
       }
     },
     {
-      "id": "pro-cnpjs-row",
+      "id": "pro-taxIds-row",
       "given": {
         "subscription": {
           "plan": "pro",
@@ -408,7 +408,7 @@
           "lastMonth": 10
         },
         "people": 3,
-        "cnpjs": 1,
+        "taxIds": 1,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -427,7 +427,7 @@
             "level": "ok"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 1,
             "limit": 2,
             "level": "ok"
@@ -456,7 +456,7 @@
           "lastMonth": 480
         },
         "people": 21,
-        "cnpjs": 3,
+        "taxIds": 3,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -475,7 +475,7 @@
             "level": "over"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 3,
             "limit": -1,
             "level": "unlimited"
@@ -500,7 +500,7 @@
           "lastMonth": 0
         },
         "people": 21,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -519,7 +519,7 @@
             "level": "over"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 0,
             "limit": -1,
             "level": "unlimited"
@@ -544,7 +544,7 @@
           "lastMonth": 30
         },
         "people": 1,
-        "cnpjs": 0,
+        "taxIds": 0,
         "paidPlansEnabled": false
       },
       "expect": {
@@ -587,7 +587,7 @@
           "lastMonth": 0
         },
         "people": 1,
-        "cnpjs": 1,
+        "taxIds": 1,
         "paidPlansEnabled": true,
         "expiresInDays": -1
       },
@@ -632,7 +632,7 @@
           "lastMonth": 70
         },
         "people": 2,
-        "cnpjs": 1,
+        "taxIds": 1,
         "paidPlansEnabled": true
       },
       "expect": {
@@ -651,7 +651,7 @@
             "level": "ok"
           },
           {
-            "resource": "cnpjs",
+            "resource": "taxIds",
             "used": 1,
             "limit": -1,
             "level": "unlimited"

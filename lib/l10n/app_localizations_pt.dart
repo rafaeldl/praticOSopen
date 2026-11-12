@@ -7948,7 +7948,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get planUsageOrders => 'OS este mês';
 
   @override
-  String get planUsageCnpjs => 'CNPJs na nota fiscal';
+  String get planUsageTaxIds => 'CNPJs na nota fiscal';
 
   @override
   String planNoticeOrdersNear(String used, String limit) {

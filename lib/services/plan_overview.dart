@@ -3,7 +3,7 @@ import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 
 /// Rows of the Plan screen (#725).
-enum PlanOverviewResource { orders, people, cnpjs }
+enum PlanOverviewResource { orders, people, taxIds }
 
 /// Where a row stands: -1 limit is unlimited; near from 80%.
 enum PlanOverviewLevel { unlimited, ok, near, atLimit, over }
@@ -59,12 +59,12 @@ PlanOverviewLevel _level(int used, int limit) {
   return used >= limit * 0.8 ? PlanOverviewLevel.near : PlanOverviewLevel.ok;
 }
 
-/// [people] are members plus pending invites; [cnpjs] the company's fiscal
+/// [people] are members plus pending invites; [taxIds] the company's fiscal
 /// emitters. [enforced] is the one switch (FeatureGateService.planLimitsEnforced).
 PlanOverview planOverview(
   Subscription? subscription, {
   required int people,
-  required int cnpjs,
+  required int taxIds,
   required DateTime now,
   bool? enforced,
 }) {
@@ -78,13 +78,13 @@ PlanOverview planOverview(
 
   final ordersLimit = limit(limits.ordersPerMonth);
   final peopleLimit = limit(limits.users);
-  final cnpjsLimit = limit(row.nfseCnpjs);
+  final taxIdsLimit = limit(row.nfseCnpjs);
   final peopleLevel = peopleLimit == 1 ? PlanOverviewLevel.ok : _level(people, peopleLimit);
   final rows = [
     PlanOverviewRow(PlanOverviewResource.orders, orders.thisMonth, ordersLimit, _level(orders.thisMonth, ordersLimit)),
     PlanOverviewRow(PlanOverviewResource.people, people, peopleLimit, peopleLevel),
     if (row.nfseCnpjs != 0)
-      PlanOverviewRow(PlanOverviewResource.cnpjs, cnpjs, cnpjsLimit, _level(cnpjs, cnpjsLimit)),
+      PlanOverviewRow(PlanOverviewResource.taxIds, taxIds, taxIdsLimit, _level(taxIds, taxIdsLimit)),
   ];
 
   PlanOverviewNotice? notice;

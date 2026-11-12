@@ -33,7 +33,7 @@ Future<void> _pump(
   Subscription subscription, {
   VoidCallback? onOpenTeam,
   bool canManage = true,
-  int cnpjs = 0,
+  int taxIds = 0,
 }) async {
   tester.view.physicalSize = const Size(1170, 4000);
   tester.view.devicePixelRatio = 3;
@@ -48,7 +48,7 @@ Future<void> _pump(
         supportedLocales: AppLocalizations.supportedLocales,
         home: PlanScreen(
           onOpenTeam: onOpenTeam,
-          loadCnpjs: () async => cnpjs,
+          loadTaxIds: () async => taxIds,
           hasPermission: (_) => canManage,
         ),
       ),
@@ -112,7 +112,7 @@ void main() {
   });
 
   testWidgets('Business over: talk to us, no paywall in the notice', (tester) async {
-    await _pump(tester, _sub(SubscriptionPlan.business, orders: 510, users: 3), cnpjs: 2);
+    await _pump(tester, _sub(SubscriptionPlan.business, orders: 510, users: 3), taxIds: 2);
     expect(find.text('Você passou de 500 OS este mês. Fale com a gente para ajustar o plano.'), findsOneWidget);
     expect(find.text('O que o Business dá a mais'), findsNothing);
     expect(find.text('CNPJs na nota fiscal'), findsOneWidget);
@@ -120,7 +120,7 @@ void main() {
   });
 
   testWidgets('Pro: CNPJs of the nota and what Business adds', (tester) async {
-    await _pump(tester, _sub(SubscriptionPlan.pro, orders: 20, users: 3), cnpjs: 1);
+    await _pump(tester, _sub(SubscriptionPlan.pro, orders: 20, users: 3), taxIds: 1);
     expect(find.text('20 de 150'), findsOneWidget);
     expect(find.text('3 de 5'), findsOneWidget);
     expect(find.text('1 de 2'), findsOneWidget);
@@ -176,7 +176,7 @@ void main() {
               child: const Text('open'),
               onPressed: () => Navigator.of(context).push(
                 CupertinoPageRoute(
-                  builder: (_) => PlanScreen(hasPermission: (_) => true, loadCnpjs: () async => 0),
+                  builder: (_) => PlanScreen(hasPermission: (_) => true, loadTaxIds: () async => 0),
                 ),
               ),
             ),

@@ -8,7 +8,7 @@ import { PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION } from '@/generated/plan-table'
 import { currentPlanRows, effectiveLimits, effectivePlan, ordersUsage, PLAN_IDS, storedPlan, tableVersionOf, type PlanId, type PlanRow } from './plan-limits'
 import { isPlanFeature, type PlanFeature } from './plan-features'
 
-export type OverviewResource = 'orders' | 'people' | 'cnpjs'
+export type OverviewResource = 'orders' | 'people' | 'taxIds'
 export type OverviewLevel = 'unlimited' | 'ok' | 'near' | 'atLimit' | 'over'
 export type OverviewNotice =
   | 'ordersNear'
@@ -48,9 +48,9 @@ function rowInForce(subscription: unknown, now: Date): PlanRow {
   return (PLAN_TABLES[version] ?? PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION])![plan] as PlanRow
 }
 
-/** `people` are members plus invites that still work; `cnpjs` the fiscal emitters; `enforced` the switch config/paidPlans. */
-export function planOverview(input: { subscription: unknown; people: number; cnpjs: number; enforced: boolean; now: Date }): PlanOverview {
-  const { subscription, people, cnpjs, enforced: on, now } = input
+/** `people` are members plus invites that still work; `taxIds` the fiscal emitters; `enforced` the switch config/paidPlans. */
+export function planOverview(input: { subscription: unknown; people: number; taxIds: number; enforced: boolean; now: Date }): PlanOverview {
+  const { subscription, people, taxIds, enforced: on, now } = input
   const plan = effectivePlan(subscription, now)
   const limits = effectiveLimits(subscription, now)
   const row = rowInForce(subscription, now)
@@ -60,13 +60,13 @@ export function planOverview(input: { subscription: unknown; people: number; cnp
 
   const ordersLimit = limit(limits.ordersPerMonth)
   const peopleLimit = limit(limits.users)
-  const cnpjsLimit = limit(row.nfseCnpjs)
+  const taxIdsLimit = limit(row.nfseCnpjs)
   const peopleLevel: OverviewLevel = peopleLimit === 1 ? 'ok' : levelOf(people, peopleLimit)
   const rows: OverviewRow[] = [
     { resource: 'orders', used: orders.thisMonth, limit: ordersLimit, level: levelOf(orders.thisMonth, ordersLimit) },
     { resource: 'people', used: people, limit: peopleLimit, level: peopleLevel },
   ]
-  if (row.nfseCnpjs !== 0) rows.push({ resource: 'cnpjs', used: cnpjs, limit: cnpjsLimit, level: levelOf(cnpjs, cnpjsLimit) })
+  if (row.nfseCnpjs !== 0) rows.push({ resource: 'taxIds', used: taxIds, limit: taxIdsLimit, level: levelOf(taxIds, taxIdsLimit) })
 
   let notice: OverviewNotice | null = null
   if (on) {

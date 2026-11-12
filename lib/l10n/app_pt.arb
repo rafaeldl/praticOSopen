@@ -3484,7 +3484,7 @@
   "planFeatureMcp": "ChatGPT e Claude",
   "planFeatureApi": "API com chave",
   "planUsageOrders": "OS este mês",
-  "planUsageCnpjs": "CNPJs na nota fiscal",
+  "planUsageTaxIds": "CNPJs na nota fiscal",
   "planNoticeOrdersNear": "Você já abriu {used} de {limit} OS este mês.",
   "@planNoticeOrdersNear": {"placeholders": {"used": {"type": "String"}, "limit": {"type": "String"}}},
   "planNoticeOrdersAtLimit": "Você abriu as {limit} OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.",

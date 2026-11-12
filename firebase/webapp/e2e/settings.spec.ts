@@ -151,7 +151,7 @@ test.describe('Plano', () => {
     // Members are recounted by the server (usersActive), above the 2 of Starter.
     await expect(usage.locator('[data-usage="people"]')).toContainText(/\d+ de 2/)
     await expect(usage.locator('[data-usage="people"]')).toContainText('No limite · conta o convite')
-    await expect(usage.locator('[data-usage="cnpjs"]')).toContainText('0 de 1')
+    await expect(usage.locator('[data-usage="taxIds"]')).toContainText('0 de 1')
     await expect(usage.locator('[data-usage="ai"]')).toHaveCount(0)
     await expect(page.getByTestId('plan-limit')).toHaveAttribute('data-notice', 'ordersNear')
     await expect(page.getByTestId('plan-limit')).toContainText('Você já abriu 45 de 50 OS este mês.')

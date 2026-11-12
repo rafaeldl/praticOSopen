@@ -25,7 +25,7 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// Fiscal emitters of the current company (the CNPJs on the nota).
-Future<int> _countCnpjs() async {
+Future<int> _countTaxIds() async {
   final id = Global.companyAggr?.id;
   if (id == null) return 0;
   final snap = await FirebaseFirestore.instance
@@ -47,7 +47,7 @@ class PlanScreen extends StatefulWidget {
   const PlanScreen({
     super.key,
     this.onOpenTeam,
-    this.loadCnpjs,
+    this.loadTaxIds,
     this.hasPermission,
   });
 
@@ -59,7 +59,7 @@ class PlanScreen extends StatefulWidget {
   final VoidCallback? onOpenTeam;
 
   /// CNPJs set up for the nota; defaults to Firestore (tests inject).
-  final Future<int> Function()? loadCnpjs;
+  final Future<int> Function()? loadTaxIds;
 
   @override
   State<PlanScreen> createState() => _PlanScreenState();
@@ -72,15 +72,15 @@ class _PlanScreenState extends State<PlanScreen> {
       );
 
   /// Null until read (or when it could not be read): the row stays hidden.
-  int? _cnpjs;
+  int? _taxIds;
 
   @override
   void initState() {
     super.initState();
-    (widget.loadCnpjs ?? _countCnpjs)().then((emitters) {
-      if (mounted) setState(() => _cnpjs = emitters);
+    (widget.loadTaxIds ?? _countTaxIds)().then((emitters) {
+      if (mounted) setState(() => _taxIds = emitters);
     }).catchError((Object error) {
-      debugPrint('PlanScreen: CNPJs not read: $error');
+      debugPrint('PlanScreen: tax IDs not read: $error');
     });
   }
 
@@ -145,7 +145,7 @@ class _PlanScreenState extends State<PlanScreen> {
     final overview = planOverview(
       subscription,
       people: subscription.usage.usersActive,
-      cnpjs: _cnpjs ?? 0,
+      taxIds: _taxIds ?? 0,
       now: now,
       enforced: FeatureGateService.planLimitsEnforced,
     );
@@ -154,7 +154,7 @@ class _PlanScreenState extends State<PlanScreen> {
         notice == PlanOverviewNotice.peopleContactUs;
     final rows = [
       for (final row in overview.rows)
-        if (row.resource != PlanOverviewResource.cnpjs || _cnpjs != null) row,
+        if (row.resource != PlanOverviewResource.taxIds || _taxIds != null) row,
     ];
     final next = overview.next;
     void openPaywall() => PaywallLauncher.showPaywall(context);
@@ -199,7 +199,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 title: switch (row.resource) {
                   PlanOverviewResource.orders => l10n.planUsageOrders,
                   PlanOverviewResource.people => l10n.planUsageTeam,
-                  PlanOverviewResource.cnpjs => l10n.planUsageCnpjs,
+                  PlanOverviewResource.taxIds => l10n.planUsageTaxIds,
                 },
                 value: row.level == PlanOverviewLevel.unlimited
                     ? _count(row.used)

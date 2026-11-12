@@ -42,7 +42,7 @@ const header = computed(() => {
   return t('planHeaderValidUntil', { plan: name, date })
 })
 
-const TITLE: Record<OverviewResource, MessageKey> = { orders: 'planUsageOrders', people: 'planUsageTeam', cnpjs: 'planUsageCnpjs' }
+const TITLE: Record<OverviewResource, MessageKey> = { orders: 'planUsageOrders', people: 'planUsageTeam', taxIds: 'planUsageTaxIds' }
 
 const rowOf = (resource: OverviewResource) => overview.value?.rows.find((row) => row.resource === resource)
 
@@ -91,7 +91,7 @@ async function load() {
   summary.value = null
   overview.value = null
   try {
-    const [company, enforced, cnpjs] = await Promise.all([
+    const [company, enforced, taxIds] = await Promise.all([
       loadCompany(),
       loadLimitsSwitch(),
       // Only who reads fiscalEmitters (owner, admin, manager) sees the CNPJs; a failure hides the row.
@@ -99,9 +99,9 @@ async function load() {
     ])
     const now = new Date()
     const plan = planSummary(company.subscription, now)
-    const result = planOverview({ subscription: company.subscription, people: plan.usage.users, cnpjs: cnpjs ?? 0, enforced, now })
+    const result = planOverview({ subscription: company.subscription, people: plan.usage.users, taxIds: taxIds ?? 0, enforced, now })
     summary.value = plan
-    overview.value = cnpjs === null ? { ...result, rows: result.rows.filter((row) => row.resource !== 'cnpjs') } : result
+    overview.value = taxIds === null ? { ...result, rows: result.rows.filter((row) => row.resource !== 'taxIds') } : result
   } catch (error) {
     console.error('plan: load failed', error)
     failed.value = true

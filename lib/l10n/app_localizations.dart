@@ -12863,11 +12863,11 @@ abstract class AppLocalizations {
   /// **'OS este mês'**
   String get planUsageOrders;
 
-  /// No description provided for @planUsageCnpjs.
+  /// No description provided for @planUsageTaxIds.
   ///
   /// In pt, this message translates to:
   /// **'CNPJs na nota fiscal'**
-  String get planUsageCnpjs;
+  String get planUsageTaxIds;
 
   /// No description provided for @planNoticeOrdersNear.
   ///

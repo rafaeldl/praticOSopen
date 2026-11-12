@@ -7943,7 +7943,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planUsageOrders => 'Orders this month';
 
   @override
-  String get planUsageCnpjs => 'Tax IDs on invoices';
+  String get planUsageTaxIds => 'Tax IDs on invoices';
 
   @override
   String planNoticeOrdersNear(String used, String limit) {
