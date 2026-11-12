@@ -72,3 +72,15 @@ test('Colunas: tira o Orçamento da TV, a escolha fica e a última coluna não s
   await page.getByTestId('tv-show-quote').check()
   await expect(page.getByTestId('tv-col-quote')).toBeVisible()
 })
+
+test('navegador que não segura a ligação ao vivo (Safari, TV da oficina): lê as OS mesmo assim', async ({ page }) => {
+  test.setTimeout(60_000)
+  const name = unique('TV sem ao vivo')
+  await makeOrder('admin', { status: 'approved', customer: { id: 'customer-1', name } })
+  // The live channel hangs with no answer and no error, as seen on Safari.
+  await page.route('**/google.firestore.v1.Firestore/Listen/**', () => {})
+  await login(page, 'admin', 'tv')
+  // The first paint comes from a page, like the list: well before the 15 s wait for the live link.
+  await expect(page.getByTestId('tv-col-approved').getByText(name)).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByTestId('tv')).not.toContainText('R$')
+})
