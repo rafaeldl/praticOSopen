@@ -2,7 +2,7 @@
 // values, live. Each column is its own query (the newest TV_LIMIT of that
 // status), so old orders piling up in one status never push the others out.
 // Concluído is only what was done today (completedAt, written by the server).
-import { watchFirstRows, type OrdersQuery } from '@/lib/orders-query'
+import { ordersPage, watchFirstRows, type OrdersQuery } from '@/lib/orders-query'
 import { currentZone, fromWall, wallParts } from '@/lib/zone'
 import { createListLoader, type ListContext } from './data'
 import { isHeld, lateness, normalizeOrder, type Order, type OrderStatus } from './model'
@@ -12,6 +12,13 @@ export const TV_COLUMNS: OrderStatus[] = ['quote', 'approved', 'progress', 'done
 export const TV_LIMIT = 50
 /** Who reads the API (no Firestore) asks again this often. */
 export const TV_API_REFRESH_MS = 2 * 60_000
+/**
+ * The live link has this long to bring server data to every column. Some TV
+ * browsers never hold it open (no error, no data): then the TV reads pages,
+ * like the list does, every TV_POLL_MS. Longer than the SDK's own 10 s offline wait.
+ */
+export const TV_LIVE_WAIT_MS = 15_000
+export const TV_POLL_MS = 60_000
 
 export type TvColumns = Record<OrderStatus, Order[]>
 
@@ -67,26 +74,9 @@ export function watchTv(
   onColumn: (status: OrderStatus, orders: Order[]) => void,
   onError: (error: unknown) => void,
 ): { stop: () => void; refresh: () => Promise<void> } {
-  const stops: (() => void)[] = []
-  let stopped = false
-  const open = TV_COLUMNS.filter((status) => status !== 'done')
+  if (ctx.showsMoney) return watchFirestore(ctx, dayStart, onColumn, onError)
 
-  if (ctx.showsMoney) {
-    const toOrder = (row: Record<string, unknown>) => normalizeOrder(String(row.id), row, false)
-    const listen = (query: OrdersQuery, status: OrderStatus) =>
-      watchFirstRows(query, TV_LIMIT, (rows) => onColumn(status, rows.map(toOrder)), onError, true).then((stop) => (stopped ? stop() : stops.push(stop)))
-    const base = { companyId: ctx.companyId, createdBy: ctx.seesAll ? null : ctx.uid }
-    for (const status of open) void listen({ ...base, statuses: [status] }, status).catch(onError)
-    // Single-field range: no composite index. The TV route asks for viewAllOrders, so no createdBy here.
-    void listen({ ...base, createdBy: null, where: [['completedAt', '>=', dayStart]], order: { field: 'completedAt', dir: 'desc' } }, 'done').catch(onError)
-    return {
-      stop: () => {
-        stopped = true
-        stops.splice(0).forEach((stop) => stop())
-      },
-      refresh: () => Promise.resolve(),
-    }
-  }
+  let stopped = false
 
   const refresh = async () => {
     try {
@@ -108,5 +98,86 @@ export function watchTv(
       clearInterval(timer)
     },
     refresh,
+  }
+}
+
+/** One Firestore query per column: the newest TV_LIMIT of each open status, and the done of today. */
+export function tvQueries(ctx: ListContext, dayStart: string): [OrderStatus, OrdersQuery][] {
+  const base = { companyId: ctx.companyId, createdBy: ctx.seesAll ? null : ctx.uid }
+  return [
+    ...TV_COLUMNS.filter((status) => status !== 'done').map((status): [OrderStatus, OrdersQuery] => [status, { ...base, statuses: [status] }]),
+    // Single-field range: no composite index. The TV route asks for viewAllOrders, so no createdBy here.
+    ['done', { ...base, createdBy: null, where: [['completedAt', '>=', dayStart]], order: { field: 'completedAt', dir: 'desc' } }],
+  ]
+}
+
+/**
+ * Who reads Firestore: live listeners, and pages every TV_POLL_MS when the live
+ * link brings no server data within TV_LIVE_WAIT_MS or fails (TV browsers).
+ */
+function watchFirestore(
+  ctx: ListContext,
+  dayStart: string,
+  onColumn: (status: OrderStatus, orders: Order[]) => void,
+  onError: (error: unknown) => void,
+): { stop: () => void; refresh: () => Promise<void> } {
+  const toOrder = (row: Record<string, unknown>) => normalizeOrder(String(row.id), row, false)
+  const queries = tvQueries(ctx, dayStart)
+  const stops: (() => void)[] = []
+  const synced = new Set<OrderStatus>()
+  let stopped = false
+  let polling = false
+  let timer: ReturnType<typeof setInterval> | undefined
+  let wait: ReturnType<typeof setTimeout> | undefined
+
+  const stopLive = () => stops.splice(0).forEach((stop) => stop())
+
+  const poll = async () => {
+    try {
+      const pages = await Promise.all(queries.map(async ([status, query]) => [status, await ordersPage(query, TV_LIMIT)] as const))
+      if (!stopped) pages.forEach(([status, rows]) => onColumn(status, rows.map(toOrder)))
+    } catch (error) {
+      if (!stopped) onError(error)
+    }
+  }
+
+  const fallBack = (reason: unknown) => {
+    if (stopped || polling) return
+    polling = true
+    console.warn('tv: live link without server data, reading pages instead', reason)
+    clearTimeout(wait)
+    stopLive()
+    void poll()
+    timer = setInterval(() => void poll(), TV_POLL_MS)
+  }
+
+  for (const [status, query] of queries) {
+    void watchFirstRows(
+      query,
+      TV_LIMIT,
+      (rows, fromCache) => {
+        if (polling) return
+        if (!fromCache) synced.add(status)
+        onColumn(status, rows.map(toOrder))
+      },
+      fallBack,
+      true,
+    ).then(
+      (stop) => (stopped || polling ? stop() : stops.push(stop)),
+      fallBack,
+    )
+  }
+  wait = setTimeout(() => {
+    if (synced.size < queries.length) fallBack('timeout')
+  }, TV_LIVE_WAIT_MS)
+
+  return {
+    stop: () => {
+      stopped = true
+      clearTimeout(wait)
+      clearInterval(timer)
+      stopLive()
+    },
+    refresh: () => (polling ? poll() : Promise.resolve()),
   }
 }

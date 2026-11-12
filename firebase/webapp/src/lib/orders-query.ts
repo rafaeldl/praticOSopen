@@ -194,7 +194,7 @@ export function ordersPage(query: OrdersQuery, size: number, last?: OrderRow): P
 export async function watchFirstRows(
   query: OrdersQuery,
   size: number,
-  onRows: (rows: OrderRow[]) => void,
+  onRows: (rows: OrderRow[], fromCache: boolean) => void,
   onError: (error: unknown) => void,
   /**
    * Also the rows the SDK already has (fromCache). Needed when this is the only
@@ -206,8 +206,11 @@ export async function watchFirstRows(
   const [db, firestore] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   return firestore.onSnapshot(
     buildQuery(firestore, db, query, size) as unknown as import('firebase/firestore').Query,
+    // With the cache accepted, the switch to server data is an event too (fromCache false),
+    // so the caller knows the live link works (Modo TV falls back to pages when it does not).
+    { includeMetadataChanges: acceptCache },
     (snapshot) => {
-      if (acceptCache || !snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot))
+      if (acceptCache || !snapshot.metadata.fromCache) onRows(toRows(snapshot as unknown as Snapshot), snapshot.metadata.fromCache)
     },
     onError,
   )
