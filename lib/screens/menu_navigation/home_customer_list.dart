@@ -358,10 +358,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     return [SliverList(delegate: SliverChildListDelegate(children))];
   }
 
-  /// Same row as the orders on Início (OrderListRow): name in bold, the
-  /// phone or the plate found, then the open orders with their dot and what
-  /// the customer owes in bold ("falta R\$ 200"), the late ones in red on
-  /// the right.
+  /// Same row as the orders on Início (OrderListRow): name in bold with what
+  /// the customer owes on the right, the phone or the plate found, then the
+  /// open orders with their dot and the late ones in red on the right.
   Widget _row(Customer customer, {String? plate}) {
     final l10n = context.l10n;
     final phone = (customer.phone?.isNotEmpty ?? false)
@@ -388,14 +387,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         detailText: detail.isEmpty ? null : detail,
         statusText: open > 0 ? l10n.openOrdersCount(open) : null,
         statusColor: open > 0 ? AppColors.warningDot : null,
-        // Like the payment on an order row: "● 2 OS abertas · falta R$ 200",
-        // in one piece (non-breaking spaces).
-        statusExtra: owed <= 0
-            ? null
-            : (open > 0
-                      ? l10n.remainingShort(money)
-                      : l10n.customerOwesValue(money))
-                  .replaceAll(' ', '\u00A0'),
+        // What the customer owes on the right, where the order total sits
+        // on Início.
+        valueText: owed > 0 ? money : null,
         problemText: late > 0 ? l10n.lateOrdersCount(late) : null,
         problemColor: OrderStatusStyle.overdueColor.resolveFrom(context),
         onTap: () => _open(customer),

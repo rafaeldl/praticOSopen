@@ -1790,15 +1790,14 @@ void main() {
         ),
         direct: true,
       );
-      // Phone under the name, then the open orders with what is owed, like
-      // the payment on an order row ("● 2 OS abertas · falta R$ 166,00").
+      // What is owed on the right of the name, like the order total on
+      // Início; phone under the name, then the open orders.
       expect(find.text('(11) 90000-0001'), findsOneWidget);
-      final money = FormatService()
-          .formatCurrency(166)
-          .replaceAll(' ', '\u00A0');
+      final owed = find.text(FormatService().formatCurrency(166));
+      expect(owed, findsOneWidget);
       expect(
-        find.textContaining('2 OS abertas · falta\u00A0$money'),
-        findsOneWidget,
+        tester.getTopLeft(owed).dx,
+        greaterThan(tester.getTopRight(find.text('Ana Ribeiro')).dx),
       );
       expect(
         tester.getTopLeft(find.text('(11) 90000-0001')).dy,
