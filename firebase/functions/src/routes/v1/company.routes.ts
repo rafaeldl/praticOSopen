@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { AuthenticatedRequest, RoleType } from '../../models/types';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { requirePermission } from '../../middleware/auth.middleware';
+import { requirePlanFeature } from '../../middleware/plan-limit.middleware';
+import { featureForRole } from '../../services/plan-features.service';
 import * as companyService from '../../services/company.service';
 import { validateInput } from '../../utils/validation.utils';
 
@@ -176,6 +178,7 @@ router.get('/members', async (req: AuthenticatedRequest, res: Response) => {
 router.patch(
   '/members/:userId',
   requirePermission('manage:members'),
+  requirePlanFeature((req) => featureForRole(req.body?.role)),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const companyId = req.auth?.companyId;

@@ -7,7 +7,7 @@ import { FORMAT_COUNTRIES } from '@/lib/format'
 import type { AppRole, Permission } from '@/lib/permissions'
 import { hasCountryZone } from '@/lib/zone'
 import { whatsappUrl } from '@/lib/share'
-import { checkPlanLimit, dateOf, effectiveLimits, effectivePlan, type PlanId, type SubscriptionLimits } from '@/lib/plan-limits'
+import { PLAN_NAME, checkPlanLimit, dateOf, effectiveLimits, effectivePlan, type PlanId, type SubscriptionLimits } from '@/lib/plan-limits'
 
 // ── Roles ────────────────────────────────────────────────────────────────
 
@@ -234,7 +234,7 @@ export function permissionCell(role: AppRole, permission: Permission, useFinanci
 export type { PlanId }
 
 /** Product names: brand names, not translated (SubscriptionPlanName). */
-export const PLAN_NAME: Record<PlanId, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' }
+export { PLAN_NAME }
 
 type Limits = SubscriptionLimits
 

@@ -1,4 +1,9 @@
 import request from 'supertest';
+
+jest.mock('../../../services/firestore.service', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('../../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
+);
 import express, { Request, Response, NextFunction } from 'express';
 
 jest.mock('../../../services/asaas/connection.service');
@@ -89,5 +94,27 @@ describe('asaas-connection.routes', () => {
     const res = await request(buildApp('admin')).get('/settings');
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual(CONNECTED);
+  });
+});
+
+describe('asaas-connection by plan (#724)', () => {
+  beforeEach(() => jest.clearAllMocks());
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fake = require('../../../services/firestore.service').__fake;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { resetPaidPlansCache } = require('../../../services/plan-limits.service');
+  afterEach(() => {
+    fake.reset();
+    resetPaidPlansCache();
+  });
+
+  it('switch on, Free: 402 PLAN_FEATURE (charges)', async () => {
+    resetPaidPlansCache();
+    fake.seed('config/paidPlans', { enabled: true });
+    fake.seed('companies/comp1', { subscription: { plan: 'free' } });
+    const res = await request(buildApp('owner')).post('/connect').send({ apiKey: 'k' });
+    expect(res.status).toBe(402);
+    expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'charges', requiredPlan: 'starter' });
+    expect(mockService.connectAsaas).not.toHaveBeenCalled();
   });
 });

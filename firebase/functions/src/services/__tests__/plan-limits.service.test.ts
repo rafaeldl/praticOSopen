@@ -184,8 +184,15 @@ describe('routes return PLAN_LIMIT', () => {
 
   it('invite with room in the plan goes through', async () => {
     seed('companies/c1', { subscription: { plan: 'starter' } });
-    const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
+    const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'admin' });
     expect(res.status).toBe(201);
+  });
+
+  it('invite with room but a Pro role on Starter: 402 PLAN_FEATURE (#724)', async () => {
+    seed('companies/c1', { subscription: { plan: 'starter' } });
+    const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
+    expect(res.status).toBe(402);
+    expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'teamRoles', requiredPlan: 'pro' });
   });
 
   it('switch off (config/paidPlans): at the limit still goes through', async () => {

@@ -18,6 +18,7 @@ import { loadCustomer } from '@/lib/customers/data'
 import { session } from '@/lib/session'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import ChargeDialog from './ChargeDialog.vue'
 import '@/styles/receive.css'
 
@@ -120,6 +121,11 @@ async function cancel() {
   }
 }
 
+/** A new link: Starter (#724); the link already made stays. */
+function openNew() {
+  if (ensurePlanFeature('charges')) dialog.value = 'new'
+}
+
 async function copy() {
   try {
     await navigator.clipboard.writeText(open.value?.invoiceUrl ?? '')
@@ -152,7 +158,7 @@ async function copy() {
         <strong>{{ t('chargeOrderChanged') }}</strong>
         <p>{{ t('chargeNowMissing', { remaining: formatMoney(remaining, BR), value: formatMoney(open.value, BR) }) }}</p>
         <div class="row-actions">
-          <button type="button" class="btn btn--small btn--primary" @click="dialog = 'new'">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
+          <button type="button" class="btn btn--small btn--primary" @click="openNew">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
           <button type="button" class="link" @click="keep">{{ t('chargeKeepLink', { value: formatMoney(open.value, BR) }) }}</button>
         </div>
       </div>
@@ -165,9 +171,9 @@ async function copy() {
     <div v-else-if="canceledPlan && canCharge" class="charge-warn" role="status">
       <strong>{{ t('chargeInstallmentsCanceled') }}</strong>
       <p>{{ t('chargeSendNewLink', { value: formatMoney(remaining, BR) }) }}</p>
-      <button type="button" class="btn btn--small btn--primary" @click="dialog = 'new'">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
+      <button type="button" class="btn btn--small btn--primary" @click="openNew">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
     </div>
-    <button v-else-if="canCharge && remaining > 0" type="button" class="btn btn--small" data-testid="charge-new" @click="dialog = 'new'">{{ t('chargeSend') }}</button>
+    <button v-else-if="canCharge && remaining > 0" type="button" class="btn btn--small" data-testid="charge-new" @click="openNew">{{ t('chargeSend') }}</button>
     <ChargeDialog
       v-if="dialog === 'new'"
       :order-id="order.id"

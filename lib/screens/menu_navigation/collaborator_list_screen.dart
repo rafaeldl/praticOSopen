@@ -17,6 +17,7 @@ import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
 
 /// What the member screen ([showMemberPicker]) returned.
 sealed class MemberChoice {
@@ -262,6 +263,9 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     switch (choice) {
       case MemberRoleChoice(:final role):
         if (role == membership.role) return;
+        // Roles beyond admin are Pro (#724); a member keeps the one they have.
+        final needs = FeatureGateService.featureForRole(role.name);
+        if (needs != null && !ensurePlanFeature(context, needs)) return;
         try {
           await _collaboratorStore.updateCollaboratorRole(
             membership.userId!,

@@ -11,6 +11,7 @@ import { showToast } from '@/lib/toast'
 import { registerShortcut, shortcutLabel } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { canOpen, router } from '@/router'
+import { planNotice, watchPlanSwitch } from '@/lib/plan-feature-gate'
 import { ui } from '@/lib/ui'
 import { isDark, toggleTheme } from '@/lib/prefs'
 import { NAV } from '@/navigation'
@@ -24,6 +25,7 @@ import { needsConsent, startAnalytics } from '@/lib/analytics'
 const CommandPalette = defineAsyncComponent(() => import('@/components/CommandPalette.vue'))
 const ShortcutsDialog = defineAsyncComponent(() => import('@/components/ShortcutsDialog.vue'))
 const ConfirmDialog = defineAsyncComponent(() => import('@/components/orders/ConfirmDialog.vue'))
+const PlanFeatureDialog = defineAsyncComponent(() => import('@/components/PlanFeatureDialog.vue'))
 const Layer = defineAsyncComponent(() => import('@/components/Layer.vue'))
 // Statistics: the notice and the client come after the first screen, never on the way to it.
 const AnalyticsConsent = defineAsyncComponent(() => import('@/components/AnalyticsConsent.vue'))
@@ -103,6 +105,8 @@ const allowNotifications = () => void acceptOffer().catch((error) => console.war
 const afterFirstScreen = ref(false)
 let analyticsTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
+  // The plan switch (config/paidPlans), once per page: the gates of lib/plan-feature-gate.ts read it.
+  void watchPlanSwitch()
   analyticsTimer = setTimeout(() => {
     afterFirstScreen.value = true
     void startAnalytics()
@@ -226,5 +230,6 @@ onBeforeUnmount(() => {
     @confirm="allowNotifications"
     @close="declineOffer"
   />
+  <PlanFeatureDialog v-if="planNotice.open" />
   <AnalyticsConsent v-if="afterFirstScreen && needsConsent()" />
 </template>

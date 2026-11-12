@@ -17,6 +17,7 @@ import { addDays, asaasUrl, initialChargeValue, installmentValue, localDay, toCe
 import { session } from '@/lib/session'
 import { formatTaxId, isValidTaxId, normalizeTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature, handlePlanFeatureError } from '@/lib/plan-feature-gate'
 import { announce } from '@/lib/ui'
 import '@/styles/receive.css'
 
@@ -77,6 +78,8 @@ const options = computed(() => Array.from({ length: 11 }, (_, i) => i + 2).map((
 
 async function save() {
   if (!ready.value) return
+  // Charges are Starter (#724): the server says the same (402 PLAN_FEATURE).
+  if (!ensurePlanFeature('charges')) return
   saving.value = true
   maybeCreated.value = false
   const customerTaxId = needsTaxId.value ? normalizeTaxId(taxId.value) : undefined
@@ -97,6 +100,7 @@ async function save() {
   } catch (error) {
     // A network error may hide a charge already made: stay open, the card shows it when it lands (defect 48).
     if (error instanceof ApiError && error.code === 'NETWORK') maybeCreated.value = true
+    if (handlePlanFeatureError(error)) return
     showToast(t(chargeErrorKey(error)))
   } finally {
     saving.value = false

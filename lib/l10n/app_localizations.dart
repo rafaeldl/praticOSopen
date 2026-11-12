@@ -12742,6 +12742,114 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver'**
   String get checklistAiView;
+
+  /// No description provided for @planFeatureTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recurso do plano {plan}'**
+  String planFeatureTitle(String plan);
+
+  /// No description provided for @planFeatureBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para usar, mude para o plano {plan}. O que você já tem continua.'**
+  String planFeatureBody(String plan);
+
+  /// No description provided for @planFeatureAskOwner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ao dono da empresa para mudar para o plano {plan}.'**
+  String planFeatureAskOwner(String plan);
+
+  /// No description provided for @planFeatureBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano {plan}'**
+  String planFeatureBadge(String plan);
+
+  /// No description provided for @planFeatureNfse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota fiscal'**
+  String get planFeatureNfse;
+
+  /// No description provided for @planFeatureBrandedPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF sem a marca PraticOS'**
+  String get planFeatureBrandedPdf;
+
+  /// No description provided for @planFeatureOwnChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists próprios'**
+  String get planFeatureOwnChecklists;
+
+  /// No description provided for @planFeatureCharges.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança e lembrete de pagamento'**
+  String get planFeatureCharges;
+
+  /// No description provided for @planFeatureTeamRoles.
+  ///
+  /// In pt, this message translates to:
+  /// **'Técnico, gerente e outros perfis'**
+  String get planFeatureTeamRoles;
+
+  /// No description provided for @planFeaturePerPersonAgenda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda e responsável por pessoa'**
+  String get planFeaturePerPersonAgenda;
+
+  /// No description provided for @planFeatureWorkStages.
+  ///
+  /// In pt, this message translates to:
+  /// **'Etapas do serviço'**
+  String get planFeatureWorkStages;
+
+  /// No description provided for @planFeatureTvMode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo TV'**
+  String get planFeatureTvMode;
+
+  /// No description provided for @planFeatureContracts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contratos'**
+  String get planFeatureContracts;
+
+  /// No description provided for @planFeatureAiFinance.
+  ///
+  /// In pt, this message translates to:
+  /// **'IA no financeiro'**
+  String get planFeatureAiFinance;
+
+  /// No description provided for @planFeatureSpreadsheetExport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório em planilha'**
+  String get planFeatureSpreadsheetExport;
+
+  /// No description provided for @planFeatureBulkActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações em lote'**
+  String get planFeatureBulkActions;
+
+  /// No description provided for @planFeatureMcp.
+  ///
+  /// In pt, this message translates to:
+  /// **'ChatGPT e Claude'**
+  String get planFeatureMcp;
+
+  /// No description provided for @planFeatureApi.
+  ///
+  /// In pt, this message translates to:
+  /// **'API com chave'**
+  String get planFeatureApi;
 }
 
 class _AppLocalizationsDelegate

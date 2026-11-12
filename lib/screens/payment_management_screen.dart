@@ -51,6 +51,8 @@ import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/widgets/permission_widgets.dart'
     show AccessDeniedScreen;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// `/payment_management` route: the order's Receber, or "access denied"
 /// when the person cannot receive on that order
@@ -680,6 +682,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Future<void> _openCreateCharge(double remaining) async {
     final order = _store?.order;
     if (order?.id == null) return;
+    // Charges are Starter (#724).
+    if (!ensurePlanFeature(context, PlanFeature.charges)) return;
 
     await FormSheet.show<OrderCharge>(
       context,

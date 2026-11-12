@@ -286,3 +286,27 @@ describe('team API: failures after the commit', () => {
     );
   });
 });
+
+describe('/v1/app/team roles by plan (#724)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { resetPaidPlansCache } = require('../services/plan-limits.service');
+  let app: Express;
+  beforeEach(() => {
+    seedTenants();
+    resetPaidPlansCache();
+    app = buildApp();
+  });
+  afterEach(() => resetPaidPlansCache());
+
+  it('switch on, Free: manager is Pro (402 PLAN_FEATURE); admin is in every plan', async () => {
+    seed('config/paidPlans', { enabled: true });
+    const res = await patch(app, UID.owner, TARGET, 'manager');
+    expect(res.status).toBe(402);
+    expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'teamRoles', plan: 'free', requiredPlan: 'pro' });
+    expect((await patch(app, UID.owner, TARGET, 'admin')).status).toBe(200);
+  });
+
+  it('switch off: any role, as before', async () => {
+    expect((await patch(app, UID.owner, TARGET, 'manager')).status).toBe(200);
+  });
+});

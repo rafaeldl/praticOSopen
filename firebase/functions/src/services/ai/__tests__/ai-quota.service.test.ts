@@ -48,6 +48,14 @@ describe('ai quota', () => {
     await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: true, monthlyLimit: 20 });
   });
 
+  it('getAiSettings: finance actions only on a plan with aiFinance (#724)', async () => {
+    fake.seed('companies/c1/settings/ai', { enabled: true, financeActions: true });
+    await expect(getAiSettings('c1', async () => false)).resolves.toMatchObject({ enabled: true, financeActions: false });
+    await expect(getAiSettings('c1', async () => true)).resolves.toMatchObject({ financeActions: true });
+    // Default check: switch off (no config/paidPlans), nothing changes.
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ financeActions: true });
+  });
+
   it('getAiSettings: config/ai turns it on for every company, company fields win', async () => {
     fake.seed('config/ai', { enabledForAll: true, defaultProvider: 'claude' });
     await expect(getAiSettings('c1')).resolves.toEqual({ enabled: true, monthlyLimit: undefined, provider: 'claude', financeActions: false });

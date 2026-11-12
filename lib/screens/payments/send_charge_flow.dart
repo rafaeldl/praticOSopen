@@ -15,6 +15,8 @@ import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// What "Mandar cobrança" does for one order.
 enum SendChargeAction {
@@ -191,6 +193,8 @@ class SendChargeFlow {
     Order order,
     double remainingBalance,
   ) {
+    // Charges are Starter (#724).
+    if (!ensurePlanFeature(context, PlanFeature.charges)) return Future.value(null);
     return FormSheet.show<OrderCharge>(
       context,
       (_) =>

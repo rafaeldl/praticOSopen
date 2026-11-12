@@ -78,3 +78,7 @@ button.set-row { width: 100%; background: none; border: 0; font: inherit; text-a
 .picker-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 60vh; overflow: auto; }
 .picker-list .check-row { min-height: 2.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; }
 .picker-list .check-row:hover { background: var(--color-paper-2); }
+/* Roles the plan does not have (#724): readable, not selectable. */
+.role-opt.is-locked { cursor: default; background: var(--color-paper-2); }
+.role-plan-notice { margin-top: 0.75rem; }
+.role-plan-notice .plan-notice-title { font-size: 1rem; }

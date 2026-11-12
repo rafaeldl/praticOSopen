@@ -11,6 +11,47 @@ enum FeatureType {
   collaborator,
 }
 
+/// Features that depend on the plan (#724), with the keys of `features` in
+/// docs/plans/plans.json. The basics (what Free has) and the assistant never
+/// depend on it.
+enum PlanFeature {
+  nfse,
+  brandedPdf,
+  ownChecklists,
+  charges,
+  teamRoles,
+  perPersonAgenda,
+  workStages,
+  tvMode,
+  contracts,
+  aiFinance,
+  spreadsheetExport,
+  bulkActions,
+  mcp,
+  api,
+}
+
+/// Whether the plan in force has a feature, and the plan that has it.
+class PlanFeatureResult {
+  final bool isAllowed;
+
+  /// Key of the feature in the plan table.
+  final String feature;
+
+  /// Plan in force (Free once expiresAt has passed).
+  final SubscriptionPlan currentPlan;
+
+  /// First plan of the current table with the feature: the one to move to.
+  final SubscriptionPlan? requiredPlan;
+
+  const PlanFeatureResult({
+    required this.isAllowed,
+    required this.feature,
+    required this.currentPlan,
+    required this.requiredPlan,
+  });
+}
+
 /// Resultado da verificação de limite de feature.
 class FeatureGateResult {
   /// Se a feature está permitida.
@@ -268,4 +309,68 @@ class FeatureGateService {
     final sub = subscription ?? Subscription();
     return sub.effectiveLimits(DateTime.now()).pdfWatermark;
   }
+
+  // ==========================================================================
+  // Features of the plan (#724). The same rule as the server
+  // (plan-features.service.ts) and the web (src/lib/plan-features.ts); shared
+  // cases in docs/web-app/contract-cases/plan-features.json.
+  // ==========================================================================
+
+  /// In every plan whatever the table says: the assistant only has ceilings.
+  static const _neverGated = {'ai'};
+
+  /// Roles that need [PlanFeature.teamRoles] (Pro); owner and admin are in
+  /// every plan.
+  static const teamRolesFeatureRoles = {'manager', 'supervisor', 'consultant', 'technician'};
+
+  /// First plan of the current table with [feature], or null.
+  static SubscriptionPlan? requiredPlanFor(String feature) {
+    if (_neverGated.contains(feature)) return SubscriptionPlan.free;
+    for (final plan in SubscriptionPlan.values) {
+      if (currentPlanRow(plan).features.contains(feature)) return plan;
+    }
+    return null;
+  }
+
+  /// The feature a role needs, or null (owner, admin, or not a role).
+  static PlanFeature? featureForRole(String? role) =>
+      teamRolesFeatureRoles.contains(role) ? PlanFeature.teamRoles : null;
+
+  /// Whether the plan in force has [feature] (a key of the table). Allowed
+  /// with limits off ([enforced], default [planLimitsEnforced]), for the
+  /// basics and the assistant, for a key no plan lists, and on a table
+  /// version that lists no feature at all (version 1). Only guards creating
+  /// or turning on something new: what the company has keeps working.
+  static PlanFeatureResult checkFeatureKey(
+    Subscription? subscription,
+    String feature, {
+    DateTime? now,
+    bool? enforced,
+  }) {
+    final sub = subscription ?? Subscription();
+    final at = now ?? DateTime.now();
+    final plan = sub.effectivePlan(at);
+    final required = requiredPlanFor(feature);
+    PlanFeatureResult result(bool allowed) => PlanFeatureResult(
+          isAllowed: allowed,
+          feature: feature,
+          currentPlan: plan,
+          requiredPlan: required,
+        );
+    if (!(enforced ?? planLimitsEnforced) || _neverGated.contains(feature) || required == null) {
+      return result(true);
+    }
+    final PlanRow row = sub.planRowAt(at);
+    if (row.features.isEmpty) return result(true);
+    return result(row.features.contains(feature));
+  }
+
+  /// [checkFeatureKey] for a [PlanFeature].
+  static PlanFeatureResult checkFeature(
+    Subscription? subscription,
+    PlanFeature feature, {
+    DateTime? now,
+    bool? enforced,
+  }) =>
+      checkFeatureKey(subscription, feature.name, now: now, enforced: enforced);
 }

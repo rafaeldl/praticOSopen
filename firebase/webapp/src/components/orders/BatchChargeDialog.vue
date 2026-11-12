@@ -20,6 +20,7 @@ import { addDays, asaasUrl, chargeOf, fromCents, isOpenCharge, localDay, openCha
 import { session } from '@/lib/session'
 import { isValidTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature, handlePlanFeatureError } from '@/lib/plan-feature-gate'
 import { announce } from '@/lib/ui'
 import '@/styles/receive.css'
 
@@ -104,6 +105,8 @@ onMounted(async () => {
 async function create() {
   // One run only: a second click while it runs does nothing (B1).
   if (state.value !== 'plan' || !due.value || due.value < today) return
+  // Charges are Starter (#724).
+  if (!ensurePlanFeature('charges')) return
   state.value = 'saving'
   const list: Made[] = []
   const errors: { name: string; why: string }[] = []
@@ -117,6 +120,10 @@ async function create() {
       list.push({ group, id: String(response.id ?? ''), url: asaasUrl(response.invoiceUrl) ?? null })
     } catch (error) {
       console.warn('batch charge: not created', group.customerId, error)
+      if (handlePlanFeatureError(error)) {
+        state.value = 'plan'
+        return
+      }
       errors.push({ name: `${group.name} · ${ordersText(group.orders)}`, why: t(chargeErrorKey(error)) })
     }
   }
