@@ -2131,6 +2131,8 @@
   "@customerSpentValue": {"placeholders": {"value": {"type": "String"}}},
   "customerOwesValue": "Falta receber {value}",
   "@customerOwesValue": {"placeholders": {"value": {"type": "String"}}},
+  "customerInProgressValue": "Em andamento {value}",
+  "@customerInProgressValue": {"placeholders": {"value": {"type": "String"}}},
   "askOrderForCustomer": "Abrir uma OS para {name}?",
   "@askOrderForCustomer": {"placeholders": {"name": {"type": "String"}}},
   "askOrderForDevice": "Abrir uma OS para este {device}?",

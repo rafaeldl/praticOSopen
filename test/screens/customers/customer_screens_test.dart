@@ -1127,6 +1127,16 @@ void main() {
       expect(find.textContaining('ABC1D23 · 2 OS'), findsOneWidget);
       expect(find.textContaining('Cadastrar outro'), findsOneWidget);
       expect(find.text('Últimas OS'), findsOneWidget);
+      // The running order with nothing received is "Em andamento".
+      expect(
+        find.text('Em andamento ${FormatService().formatCurrency(999)}'),
+        findsOneWidget,
+      );
+      await tester.scrollUntilVisible(
+        find.text('OS 2'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('OS 3 · Revisão'), findsOneWidget);
       expect(find.text('OS 2'), findsOneWidget);
       expect(find.textContaining('#'), findsNothing);
@@ -1287,7 +1297,7 @@ void main() {
           ),
           showPrices: true,
           canReceiveOn: (_) => true,
-          onReceive: (_, open) => received.add(open),
+          onReceive: (_, open, _) => received.add(open),
         ),
         direct: true,
       );
@@ -1299,6 +1309,85 @@ void main() {
       await tester.tap(find.byKey(const Key('customerReceive')));
       await tester.pump();
       expect(received.single.map((o) => o.number), [5, 7]);
+    });
+
+    testWidgets('only approved and running orders: "Em andamento" with '
+        '"Receber", which opens with them unchecked', (tester) async {
+      final received = <(List<Order>, Set<String>)>[];
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          can: (_) => true,
+          customer: ana,
+          directory: FakeDirectory(
+            orders: {
+              'c1': [
+                order(5, 'approved', 300)..createdAt = DateTime(2026, 10, 1),
+                order(6, 'progress', 500)..createdAt = DateTime(2026, 10, 2),
+                order(7, 'quote', 90)..createdAt = DateTime(2026, 10, 3),
+              ],
+            },
+          ),
+          showPrices: true,
+          canReceiveOn: (_) => true,
+          onReceive: (_, open, checked) => received.add((open, checked)),
+        ),
+        direct: true,
+      );
+
+      expect(find.textContaining('Falta receber'), findsNothing);
+      expect(
+        find.text('Em andamento ${FormatService().formatCurrency(800)}'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('customerReceive')));
+      await tester.pump();
+      expect(received.single.$1.map((o) => o.number), [5, 6]);
+      expect(received.single.$2, isEmpty);
+    });
+
+    testWidgets('owed and running: one "Receber", owed ones start checked', (
+      tester,
+    ) async {
+      final received = <(List<Order>, Set<String>)>[];
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          can: (_) => true,
+          customer: ana,
+          directory: FakeDirectory(
+            orders: {
+              'c1': [
+                order(5, 'done', 100)..createdAt = DateTime(2026, 10, 1),
+                order(6, 'approved', 300)..createdAt = DateTime(2026, 10, 2),
+                order(7, 'progress', 200)
+                  ..createdAt = DateTime(2026, 10, 3)
+                  ..paidAmount = 50,
+              ],
+            },
+          ),
+          showPrices: true,
+          canReceiveOn: (_) => true,
+          onReceive: (_, open, checked) => received.add((open, checked)),
+        ),
+        direct: true,
+      );
+
+      expect(
+        find.text('Falta receber ${FormatService().formatCurrency(250)}'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Em andamento ${FormatService().formatCurrency(300)}'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('customerReceive')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('customerReceive')));
+      await tester.pump();
+      expect(received.single.$1.map((o) => o.number), [5, 6, 7]);
+      expect(received.single.$2, {'o5', 'o7'});
     });
 
     // The real rule for a consultant whose uid is 'me'.
@@ -1327,7 +1416,7 @@ void main() {
           ),
           showPrices: true,
           canReceiveOn: consultantReceives,
-          onReceive: (_, open) => received.add(open),
+          onReceive: (_, open, _) => received.add(open),
         ),
         direct: true,
       );
@@ -1361,7 +1450,7 @@ void main() {
           ),
           showPrices: true,
           canReceiveOn: consultantReceives,
-          onReceive: (_, open) => received.add(open),
+          onReceive: (_, open, _) => received.add(open),
         ),
         direct: true,
       );

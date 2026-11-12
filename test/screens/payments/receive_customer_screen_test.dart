@@ -537,6 +537,39 @@ void main() {
     expect(amount.data, brl(FinancialSummary.openAmount(orders.last)));
   });
 
+  testWidgets('an order not completed says "Em andamento" and can start '
+      'unchecked, for the statement', (tester) async {
+    final orders = [
+      _order('a', 182, 450)..status = 'done',
+      _order('b', 190, 600)..status = 'approved',
+    ];
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ReceiveCustomerScreen(
+          orders: orders,
+          checkedOrderIds: {'a'},
+          customerName: 'Maria',
+          service: _FakeService(),
+          canAttachReceipt: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final line = tester.widget<Text>(
+      find.byKey(const Key('receiveCustomerLine_b')),
+    );
+    expect(line.data, 'Em andamento');
+    expect(find.byKey(const Key('receiveCustomerLine_a')), findsNothing);
+    final unchecked = tester.widget<Icon>(
+      find.byKey(const Key('receiveCustomerCheck_b')),
+    );
+    expect(unchecked.icon, CupertinoIcons.circle);
+  });
+
   testWidgets('orders already paid are left out of the sentence', (
     tester,
   ) async {

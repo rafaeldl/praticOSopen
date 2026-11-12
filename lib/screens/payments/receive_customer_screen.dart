@@ -1041,10 +1041,12 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
         ? l10n.receiveCustomerPickRow(number)
         : l10n.receiveCustomerOrderRow(number, description);
     final open = format.formatCurrency(OpenBalance.ofOrder(order).open);
-    // A single-order link is the one thing a row says beyond its amount.
+    // Beyond its amount a row says only a single-order link or, for an
+    // order not completed yet, "Em andamento" (why it starts unchecked).
     final charge = _orderCharges[id];
+    final running = own && order.status != null && order.status != 'done';
     final String? line = charge == null
-        ? null
+        ? (running ? l10n.financialInProgress : null)
         : charge.status == ChargeStatus.overdue
         ? l10n.chargeExpiredOn(format.formatDayMonthOrDate(charge.dueDateValue))
         : l10n.chargeWaitingPayment;

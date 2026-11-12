@@ -3976,6 +3976,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String customerInProgressValue(String value) {
+    return 'En curso $value';
+  }
+
+  @override
   String askOrderForCustomer(String name) {
     return '¿Abrir una OS para $name?';
   }

@@ -7750,6 +7750,24 @@ rows:
   e2e: firebase/webapp/e2e/order-close.spec.ts
   web_exception: null
   note: "Só quando a OS ainda não tem aparelho. Espera até 3 s sem indicador; se demorar ou falhar, escolhe só o cliente. Aparelhos = os das OS do cliente. Web: a Nova OS escolhe o único aparelho se o campo está vazio e focado; vindo da tela do cliente não escolhe (regra do app)."
+- id: customer.detail.in-progress
+  screen: lib/screens/customers/customer_detail_screen.dart
+  route: "/customer_detail"
+  action: "Ver \"Em andamento\" e mandar extrato com OS aprovadas"
+  kind: action
+  roles: [owner, admin, manager, consultant]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders"]
+  web_status: todo
+  e2e: null
+  web_exception: null
+  permission: viewPrices
+  note: "Em andamento = OS aprovadas ou em andamento sem nada pago (customerInProgress), embaixo do Falta receber. Sem nada a receber, o link Receber vem nessa linha. Receber de {cliente} abre com as que ele já deve marcadas e as em andamento desmarcadas, com 'Em andamento' embaixo, para incluir no extrato."
 - id: customer.detail.view
   screen: lib/screens/customers/customer_detail_screen.dart
   route: "/customer_detail"

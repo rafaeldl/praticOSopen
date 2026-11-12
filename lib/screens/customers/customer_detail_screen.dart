@@ -94,7 +94,12 @@ class CustomerDetailScreen extends StatefulWidget {
   /// "Receber" next to "Falta receber R$ X", with the customer's open
   /// orders the person can receive on (oldest first). Defaults to the order's Receber (one order) or
   /// [ReceiveCustomerScreen] (several). Test seam.
-  final void Function(BuildContext context, List<Order> openOrders)? onReceive;
+  final void Function(
+    BuildContext context,
+    List<Order> openOrders,
+    Set<String> checkedOrderIds,
+  )?
+  onReceive;
 
   /// Active receipts of the customer. Defaults to
   /// [TenantReceiptRepository.watchActiveOfCustomer]. Test seam.
@@ -252,9 +257,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   Future<void> _receive(List<Order> orders) async {
     final open = _receivable(orders);
     if (open.isEmpty) return;
+    // What is owed now starts checked; approved and running orders with
+    // nothing received start unchecked, one tap away for the statement.
+    final checked = {
+      for (final o in open)
+        if (FinancialSummary.owesNow(o)) o.id!,
+    };
     final receive = widget.onReceive;
     if (receive != null) {
-      receive(context, open);
+      receive(context, open, checked);
       return;
     }
     if (open.length == 1) {
@@ -268,6 +279,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     await ReceiveCustomerScreen.open(
       context,
       orders: open,
+      checkedOrderIds: checked,
       customer: _customer?.toAggr(),
       customerName: _customer?.name,
     );
@@ -526,9 +538,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ].join(' · '),
     ].where((line) => line.isNotEmpty).toList();
     final owes = _showPrices && owed > 0;
+    final inProgress = orders == null ? 0.0 : customerInProgress(orders);
+    final running = _showPrices && inProgress > 0;
 
     return [
-      if (infoLines.isNotEmpty || owes)
+      if (infoLines.isNotEmpty || owes || running)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -545,7 +559,24 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     line,
                     style: AppTypography.callout.copyWith(color: secondary),
                   ),
-                if (owes) _owedLine(format.formatCurrency(owed), orders!),
+                if (owes)
+                  _moneyLine(
+                    context.l10n.customerOwesValue(format.formatCurrency(owed)),
+                    orders!,
+                    key: const Key('customerOwes'),
+                    withReceive: true,
+                  ),
+                // Not owed yet: the "Receber" link goes here only when
+                // nothing is owed, so the statement is still one tap away.
+                if (running)
+                  _moneyLine(
+                    context.l10n.customerInProgressValue(
+                      format.formatCurrency(inProgress),
+                    ),
+                    orders!,
+                    key: const Key('customerInProgress'),
+                    withReceive: !owes,
+                  ),
               ],
             ),
           ),
@@ -606,21 +637,27 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     ];
   }
 
-  /// "Falta receber R$ 1.250 · Receber" (the link opens the payment).
-  Widget _owedLine(String owed, List<Order> orders) {
+  /// "Falta receber R$ 1.250 · Receber" or "Em andamento R$ 800 · Receber"
+  /// (the link opens the payment, where "…" sends the statement).
+  Widget _moneyLine(
+    String text,
+    List<Order> orders, {
+    required Key key,
+    required bool withReceive,
+  }) {
     final secondary = AppColors.textSecondary.resolveFrom(context);
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
-          context.l10n.customerOwesValue(owed),
-          key: const Key('customerOwes'),
+          text,
+          key: key,
           style: AppTypography.callout.copyWith(
             color: secondary,
             fontFeatures: AppTypography.tabular,
           ),
         ),
-        if (_receivable(orders).isNotEmpty) ...[
+        if (withReceive && _receivable(orders).isNotEmpty) ...[
           Text(' · ', style: AppTypography.callout.copyWith(color: secondary)),
           CupertinoButton(
             key: const Key('customerReceive'),
