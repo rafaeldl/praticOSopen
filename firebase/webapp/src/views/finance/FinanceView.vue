@@ -21,7 +21,7 @@ import { monthName, monthYear, today } from '@/lib/finance/text'
 import { formatDayMonth } from '@/lib/format'
 import { monthInvoices, nfseSettings } from '@/lib/nfse/data'
 import { monthList } from '@/lib/nfse/model'
-import { country, money, orderShort } from '@/lib/orders/text'
+import { country, money, orderShort, ordersShort } from '@/lib/orders/text'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
@@ -186,7 +186,9 @@ const reportLink = computed(() => {
 
 <template>
   <div class="finance" data-testid="finance-summary">
-    <PageHead :title="state === 'ready' ? title : t('financial')" :sub="t('web.fin.sub')">
+    <PageHead :title="t('financial')" :answer="state === 'ready' ? title : ''" />
+    <div class="toolbar">
+      <FinanceTabs />
       <div class="fin-month" role="group" :aria-label="t('web.fin.month')">
         <button type="button" class="icon-btn" :aria-label="t('financialPreviousMonth')" data-testid="fin-prev" @click="step(-1)">
           <ChevronLeft :size="18" aria-hidden="true" />
@@ -205,14 +207,14 @@ const reportLink = computed(() => {
           <ChevronRight :size="18" aria-hidden="true" />
         </button>
       </div>
-    </PageHead>
-    <FinanceTabs />
+    </div>
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :body="failure" :retry="load" />
     <div v-else-if="summary" class="workspace fin-work" :class="{ 'has-panel': !!panel.value.value }">
     <div class="list-pane">
     <div class="fin" :aria-busy="busy ? 'true' : 'false'">
       <p v-if="summary.truncated" class="list-note" role="note">{{ t('web.fin.truncated') }}</p>
+      <p class="sub fin-note">{{ t('web.fin.sub') }}</p>
       <div class="fin-cards">
         <section class="fin-group" :aria-labelledby="'fin-g-month'">
           <h2 id="fin-g-month">{{ t('web.fin.inMonth', { month: name }) }}</h2>
@@ -223,7 +225,7 @@ const reportLink = computed(() => {
             </button>
             <button type="button" class="fin-card" :aria-pressed="list === 'sold'" data-testid="fin-card-sold" @click="go({ list: 'sold' })">
               <span>{{ t('financialSold') }}</span><b class="num">{{ money(summary.sold.total) }}</b>
-              <small>{{ t('web.fin.orders', { count: summary.sold.orders.length, order: orderShort() }) }}</small>
+              <small>{{ t('web.fin.orders', { count: summary.sold.orders.length, order: ordersShort(summary.sold.orders.length) }) }}</small>
             </button>
           </div>
         </section>
@@ -236,7 +238,7 @@ const reportLink = computed(() => {
             </button>
             <button type="button" class="fin-card" :aria-pressed="list === 'progress'" data-testid="fin-card-progress" @click="go({ list: 'progress' })">
               <span>{{ t('financialInProgress') }}</span><b class="num">{{ money(summary.progress.total) }}</b>
-              <small>{{ t('web.fin.orders', { count: summary.progress.orders.length, order: orderShort() }) }}</small>
+              <small>{{ t('web.fin.orders', { count: summary.progress.orders.length, order: ordersShort(summary.progress.orders.length) }) }}</small>
             </button>
           </div>
         </section>
@@ -246,8 +248,8 @@ const reportLink = computed(() => {
 
       <div class="fin-links">
         <RouterLink class="btn" :to="reportLink" data-testid="fin-report">{{ t('web.fin.seeReport') }}</RouterLink>
-        <RouterLink class="btn btn--ghost" :to="{ path: '/finance/report', query: { pick: '1' } }" data-testid="fin-other-period">{{ t('financialOtherPeriod') }}</RouterLink>
-        <RouterLink v-if="notas" class="fin-nfse" :to="{ path: '/invoices', query: isCurrent ? {} : { month } }" data-testid="fin-nfse-row">
+        <RouterLink class="btn" :to="{ path: '/finance/report', query: { pick: '1' } }" data-testid="fin-other-period">{{ t('financialOtherPeriod') }}</RouterLink>
+        <RouterLink v-if="notas" class="btn" :to="{ path: '/invoices', query: isCurrent ? {} : { month } }" data-testid="fin-nfse-row">
           <span>{{ t('nfseListTitle') }} · <span class="num">{{ notas.issued }}</span></span>
           <span v-if="notas.attention" class="fin-nfse-alert">{{ t('nfseListAttentionCount', { count: notas.attention }) }}</span>
         </RouterLink>
@@ -267,7 +269,7 @@ const reportLink = computed(() => {
                 >
                   <span>
                     <span class="who">{{ debtor.customer?.name || t('web.fin.noCustomer') }}</span>
-                    <span class="sub"> · {{ t('web.fin.orders', { count: debtor.orders.length, order: orderShort() }) }}<template v-if="debtor.since"> · {{ t('financialSince', { date: formatDayMonth(debtor.since, country()) }) }}</template></span>
+                    <span class="sub"> · {{ t('web.fin.orders', { count: debtor.orders.length, order: ordersShort(debtor.orders.length) }) }}<template v-if="debtor.since"> · {{ t('financialSince', { date: formatDayMonth(debtor.since, country()) }) }}</template></span>
                   </span>
                   <span class="num">{{ money(debtor.amount) }}</span>
                 </RouterLink>
@@ -292,8 +294,8 @@ const reportLink = computed(() => {
             <li v-for="line in lines" :key="line.key">
               <button type="button" class="fin-row" data-testid="fin-row" @click="openOrder(line.row)">
                 <span>
-                  <span class="who">{{ customerName(line.row) }}</span>
-                  <span class="sub num"> {{ t('web.fin.orderNumber', { order: orderShort(), number: line.row.number ?? '' }) }}</span>
+                  <!-- The space between name and number stays outside the spans: inside a nowrap span it vanished ("DejairOS 12789"). -->
+                  <span class="who">{{ customerName(line.row) }}</span> <span class="sub num">{{ t('web.fin.orderNumber', { order: orderShort(), number: line.row.number ?? '' }) }}</span>
                   <span v-if="line.sub" class="sub"> · {{ line.sub }}</span>
                   <StatusLabel v-if="list === 'progress' && line.row.status" class="fin-row-status" :status="line.row.status" />
                 </span>

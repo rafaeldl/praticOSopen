@@ -359,7 +359,7 @@ test('Financeiro > Receber: por cliente, marcar OS de um cliente e receber junto
   const b = await done(customer, 10)
   await login(page, 'manager', 'finance/receive')
   const view = page.getByTestId('finance-receive')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('para receber de')
+  await expect(page.getByTestId('page-answer')).toContainText('para receber de')
   await view.getByLabel(`Marcar tudo de ${customer.name}`).check()
   await expect(view.getByRole('region')).toContainText('2 OS marcadas: R$ 100,00')
   await view.getByTestId('finance-receive-picked').click()

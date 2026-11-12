@@ -5,7 +5,8 @@ import { expect, test, type Page } from './test'
 import { expectNoAxeViolations, expectNoSideScroll, login, setTheme } from './helpers'
 
 const MARCH = 'finance/report?from=2026-03-01&to=2026-03-31'
-const h1 = (page: Page) => page.getByRole('heading', { level: 1 })
+/** The answer under the short title "Financeiro". */
+const h1 = (page: Page) => page.getByTestId('page-answer')
 
 async function openReport(page: Page, path = MARCH) {
   await login(page, 'admin', path)

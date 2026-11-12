@@ -13,7 +13,7 @@ import { formatMoney } from '@/lib/format'
 import { askAssistant, assistStatus, type DraftItem } from '@/lib/orders/assistant'
 import { orderChanged } from '@/lib/orders/bus'
 import type { Order } from '@/lib/orders/model'
-import { orderShort } from '@/lib/orders/text'
+import { orderShort, ordersShort } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { ordersForPrint } from '@/lib/receive/data'
 import { can, session } from '@/lib/session'
@@ -33,7 +33,7 @@ const limit = ref(0)
 const state = ref<'ask' | 'reading' | 'plan' | 'saving'>('ask')
 const note = ref('')
 const plan = shallowRef<{ order: Order; items: DraftItem[] }[]>([])
-const title = computed(() => t('web.ai.batchTitle', { count: props.orders.length, order: orderShort() }))
+const title = computed(() => t('web.ai.batchTitle', { count: props.orders.length, order: ordersShort(props.orders.length) }))
 const tooMany = computed(() => props.orders.length > MAX_AI_BATCH)
 const short = computed(() => left.value !== null && left.value < props.orders.length)
 const ready = computed(() => state.value === 'ask' && !!text.value.trim() && !tooMany.value && !short.value)
@@ -183,7 +183,7 @@ const itemText = (item: DraftItem) =>
         <button type="button" class="btn" data-autofocus @click="close()">{{ t('web.batch.notNow') }}</button>
         <button v-if="state === 'ask' || state === 'reading'" type="button" class="btn btn--primary" :disabled="!ready" @click="prepare">{{ t('web.ai.batchPrepare') }}</button>
         <button v-else type="button" class="btn btn--primary" :disabled="state === 'saving' || !withItems.length" @click="apply">
-          {{ t('web.ai.batchApply', { count: withItems.length, order: orderShort() }) }}
+          {{ t('web.ai.batchApply', { count: withItems.length, order: ordersShort(withItems.length) }) }}
         </button>
       </div>
     </template>

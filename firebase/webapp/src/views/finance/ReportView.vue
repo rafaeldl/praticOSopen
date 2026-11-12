@@ -253,7 +253,27 @@ function exportXlsx() {
 
 <template>
   <div class="finance report" :class="{ 'is-printing': printing }" data-testid="finance-report">
-    <PageHead :title="state === 'ready' ? title : t('financialReport')" :sub="chosenCustomer ? t('web.report.onlyCustomer', { name: customerName(chosenCustomer) }) : undefined">
+    <PageHead
+      :title="t('financial')"
+      :answer="state === 'ready' ? title : ''"
+      :sub="chosenCustomer ? t('web.report.onlyCustomer', { name: customerName(chosenCustomer) }) : undefined"
+    >
+      <div class="report-actions no-print">
+        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-csv" @click="exportCsv">{{ t('web.report.csv') }}</button>
+        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-xlsx" @click="exportXlsx">{{ t('web.report.xlsx') }}</button>
+        <button type="button" class="btn" :disabled="state !== 'ready' || !report?.count" data-testid="report-print" @click="print">{{ t('web.report.print') }}</button>
+      </div>
+    </PageHead>
+    <div class="toolbar report-tools no-print">
+      <FinanceTabs />
+      <label class="sr" for="report-kind">{{ t('period') }}</label>
+      <select id="report-kind" class="field select-mini" :value="kind" data-testid="report-kind" @change="onKind">
+        <option value="day">{{ t('today') }}</option>
+        <option value="week">{{ t('reportThisWeek') }}</option>
+        <option value="month">{{ t('reportThisMonth') }}</option>
+        <option value="year">{{ t('reportThisYear') }}</option>
+        <option value="custom">{{ t('reportPickDates') }}</option>
+      </select>
       <div class="fin-month no-print" role="group" :aria-label="t('period')">
         <template v-if="kind !== 'custom'">
           <button type="button" class="icon-btn" :aria-label="t('reportPreviousPeriod')" data-testid="report-prev" @click="step(-1)">
@@ -278,21 +298,6 @@ function exportXlsx() {
           <span aria-live="polite">{{ label }}</span>
         </button>
       </div>
-    </PageHead>
-    <FinanceTabs class="no-print" />
-    <div class="toolbar report-tools no-print">
-      <label class="sr" for="report-kind">{{ t('period') }}</label>
-      <select id="report-kind" class="field select-mini" :value="kind" data-testid="report-kind" @change="onKind">
-        <option value="day">{{ t('today') }}</option>
-        <option value="week">{{ t('reportThisWeek') }}</option>
-        <option value="month">{{ t('reportThisMonth') }}</option>
-        <option value="year">{{ t('reportThisYear') }}</option>
-        <option value="custom">{{ t('reportPickDates') }}</option>
-      </select>
-      <span class="spacer"></span>
-      <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-csv" @click="exportCsv">{{ t('web.report.csv') }}</button>
-      <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-xlsx" @click="exportXlsx">{{ t('web.report.xlsx') }}</button>
-      <button type="button" class="btn" :disabled="state !== 'ready' || !report?.count" data-testid="report-print" @click="print">{{ t('web.report.print') }}</button>
     </div>
     <p class="print-only report-print-head">{{ title }}</p>
 

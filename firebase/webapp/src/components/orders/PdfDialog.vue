@@ -10,7 +10,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import Layer from '@/components/Layer.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import { t } from '@/i18n'
-import { orderShort } from '@/lib/orders/text'
+import { orderShort, ordersShort } from '@/lib/orders/text'
 import { canShareFiles, downloadFile, shareSheet } from '@/lib/share'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
@@ -25,7 +25,7 @@ const sheet = computed(() => !!result.value && canShareFiles([result.value.file]
 const title = computed(() =>
   props.ids.length === 1
     ? t('web.pdf.titleOne', { order: orderShort(), number: props.numbers[0] ?? '' })
-    : t('web.pdf.titleMany', { count: props.ids.length, order: orderShort() }),
+    : t('web.pdf.titleMany', { count: props.ids.length, order: ordersShort(props.ids.length) }),
 )
 
 async function make() {

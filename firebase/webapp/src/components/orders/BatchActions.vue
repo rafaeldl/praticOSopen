@@ -8,7 +8,7 @@ import { t } from '@/i18n'
 import { orderChanged } from '@/lib/orders/bus'
 import { loadTeam, type Member } from '@/lib/orders/catalog'
 import { accessOf, remainingOnRow, type Order, type OrderStatus } from '@/lib/orders/model'
-import { orderShort, statusText } from '@/lib/orders/text'
+import { orderShort, ordersShort, statusText } from '@/lib/orders/text'
 import * as writes from '@/lib/orders/writes'
 import { assistStatus } from '@/lib/orders/assistant'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
@@ -139,7 +139,7 @@ async function askStatus(status: OrderStatus) {
     }
   }
   pending.value = {
-    title: t('web.batch.statusTitle', { count: changes.length, order: orderShort(), status: statusText(status) }),
+    title: t('web.batch.statusTitle', { count: changes.length, order: ordersShort(changes.length), status: statusText(status) }),
     changes: changes.map((order) => ({ order, text: `${statusText(order.status)} → ${statusText(status)}` })),
     note: [same ? t('web.batch.alreadySo', { count: same }) : '', pendingForms ? t('web.batch.pendingForms', { count: pendingForms }) : ''].filter(Boolean).join(' '),
     apply: (order) => writes.patchOrder(order.id, { status }, order.version),
@@ -156,8 +156,8 @@ function askAssignee(id: string) {
   const same = props.orders.length - changes.length
   pending.value = {
     title: member
-      ? t('web.batch.assigneeTitle', { name: member.name, count: changes.length, order: orderShort() })
-      : t('web.batch.assigneeNoneTitle', { count: changes.length, order: orderShort() }),
+      ? t('web.batch.assigneeTitle', { name: member.name, count: changes.length, order: ordersShort(changes.length) })
+      : t('web.batch.assigneeNoneTitle', { count: changes.length, order: ordersShort(changes.length) }),
     changes: changes.map((order) => ({ order, text: `${order.assignedTo?.name ?? t('web.batch.nobody')} → ${member?.name ?? t('web.batch.nobody')}` })),
     note: same ? t('web.batch.alreadySo', { count: same }) : '',
     apply: (order) => writes.patchOrder(order.id, { assignedTo: target }, order.version),
@@ -257,7 +257,7 @@ async function openAssignee() {
     :title="pending.title"
     :lines="pending.changes.map((change) => ({ id: change.order.id, text: line(change.order), right: change.text }))"
     :note="pending.note"
-    :confirm="t('web.batch.confirm', { count: pending.changes.length, order: orderShort() })"
+    :confirm="t('web.batch.confirm', { count: pending.changes.length, order: ordersShort(pending.changes.length) })"
     :disabled="busy"
     @confirm="confirmPending"
     @close="pending = null"

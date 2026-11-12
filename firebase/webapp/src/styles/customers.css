@@ -1,10 +1,6 @@
 /* Customers, devices and the spreadsheet import (fatia 03). Loaded with their
    screens, out of the first download. Reuses the list and panel of orders.css. */
 
-/* Clientes | Veículos: two links in the look of the list's tabs. */
-.dir-tabs a { display: inline-flex; align-items: center; padding: 0 0.7rem; min-height: 1.95rem; border-radius: 4px; color: var(--color-muted); font-weight: 600; text-decoration: none; }
-.dir-tabs a[aria-current="page"] { background: var(--color-card); color: var(--color-ink); box-shadow: 0 0 0 1px var(--color-rule); }
-.dir-tabs a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
 .list-note { padding: 0 0 0.5rem; }
 .plate-hits { list-style: none; margin: 0 0 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); display: grid; gap: 0.15rem; }
 .plate-hits .row-btn { min-height: 2rem; }
