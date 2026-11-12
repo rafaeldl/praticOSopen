@@ -13,8 +13,9 @@ export const TV_LIMIT = 50
 /** Who reads the API (no Firestore) asks again this often. */
 export const TV_API_REFRESH_MS = 2 * 60_000
 /**
- * The live link has this long to bring server data to every column. Some TV
- * browsers never hold it open (no error, no data): then the TV reads pages,
+ * The live link has this long to bring server data to every column. Safari (seen
+ * in one company) and some TV browsers can leave it hanging with no error and
+ * no data: then the TV reads pages,
  * like the list does, every TV_POLL_MS. Longer than the SDK's own 10 s offline wait.
  */
 export const TV_LIVE_WAIT_MS = 15_000
@@ -112,8 +113,9 @@ export function tvQueries(ctx: ListContext, dayStart: string): [OrderStatus, Ord
 }
 
 /**
- * Who reads Firestore: live listeners, and pages every TV_POLL_MS when the live
- * link brings no server data within TV_LIVE_WAIT_MS or fails (TV browsers).
+ * Who reads Firestore: a page per column at once, then live listeners; pages
+ * every TV_POLL_MS when the live link brings no server data within
+ * TV_LIVE_WAIT_MS or fails (Safari, TV browsers).
  */
 function watchFirestore(
   ctx: ListContext,
@@ -151,12 +153,29 @@ function watchFirestore(
     timer = setInterval(() => void poll(), TV_POLL_MS)
   }
 
+  // First paint from a page, like the list and the board: it never waits for the
+  // live link, which Safari can leave hanging (no data, no error).
+  const paged = new Set<OrderStatus>()
+  for (const [status, query] of queries) {
+    ordersPage(query, TV_LIMIT).then(
+      (rows) => {
+        if (stopped || polling || synced.has(status)) return
+        paged.add(status)
+        onColumn(status, rows.map(toOrder))
+      },
+      // The live link or the fallback still answers; the fallback shows the error.
+      (error) => console.warn('tv: first page failed', error),
+    )
+  }
+
   for (const [status, query] of queries) {
     void watchFirstRows(
       query,
       TV_LIMIT,
       (rows, fromCache) => {
         if (polling) return
+        // The cache never replaces what the server already gave (the page).
+        if (fromCache && paged.has(status)) return
         if (!fromCache) synced.add(status)
         onColumn(status, rows.map(toOrder))
       },
