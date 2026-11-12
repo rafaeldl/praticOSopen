@@ -474,6 +474,7 @@
   "web.share.photoText": "Foto da {order} {number}: {url}",
   "web.share.nfseText": "Segue a nota fiscal {number}:",
   "web.share.nfseTextNoNumber": "Segue a nota fiscal:",
+  "web.share.msgPdf": "Segue o PDF.",
   "web.share.pdfAttach": "PDF baixado. Anexe na conversa do WhatsApp.",
   "web.statement.pdfAndCopied": "PDF baixado e mensagem copiada. Cole a mensagem e anexe o PDF na conversa.",
   "web.share.download": "Baixar",

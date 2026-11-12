@@ -474,6 +474,7 @@
   "web.share.photoText": "Photo of {order} {number}: {url}",
   "web.share.nfseText": "Here is the invoice {number}:",
   "web.share.nfseTextNoNumber": "Here is the invoice:",
+  "web.share.msgPdf": "Here is the PDF.",
   "web.share.pdfAttach": "PDF downloaded. Attach it in the WhatsApp chat.",
   "web.statement.pdfAndCopied": "PDF downloaded and message copied. Paste the message and attach the PDF in the chat.",
   "web.share.download": "Download",

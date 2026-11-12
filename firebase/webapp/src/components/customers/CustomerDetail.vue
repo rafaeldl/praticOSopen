@@ -14,7 +14,7 @@ import ChoiceDialog, { type Choice } from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { loadTexts, locale, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
-import { deleteCustomer, loadCustomer, type CustomerDetail } from '@/lib/customers/data'
+import { deleteCustomer, loadCustomer, type CustomerDetail, type OrderSummary } from '@/lib/customers/data'
 import { deviceMatches, firstName, mapsUrl, orderNumberMatches, shortList, type CustomerRow } from '@/lib/customers/model'
 import { formatDate, fromIsoDay } from '@/lib/format'
 import { canCreateOrders } from '@/lib/orders/model'
@@ -68,6 +68,23 @@ const map = computed(() => (customer.value ? mapsUrl(customer.value.address, cus
 const owed = computed(() => detail.value?.owed ?? 0)
 const spent = computed(() => detail.value?.spent ?? 0)
 const receivable = computed(() => detail.value?.receivable ?? [])
+const summaries = computed(() => new Map((detail.value?.orders ?? []).map((o) => [o.id, o])))
+/** Owed now (the Financeiro's A receber): done with a balance, or something already received. Unknown: counted as owed. */
+const owesNow = (o: OrderSummary | undefined) => !o || o.status === 'done' || (o.paidAmount ?? 0) > 0
+/**
+ * "Em andamento R$ X" (customer.detail.in-progress): approved or running orders
+ * with nothing received yet, the app's customerInProgress. Not owed yet, but
+ * they can go in the statement.
+ */
+const inProgress = computed(() => {
+  const cents = (detail.value?.orders ?? [])
+    .filter((o) => (o.status === 'approved' || o.status === 'progress') && o.payment !== 'paid' && !((o.paidAmount ?? 0) > 0))
+    .reduce((sum, o) => sum + Math.max(Math.round((o.total ?? 0) * 100), 0), 0)
+  return cents / 100
+})
+/** Receber de {cliente} starts with what is owed checked and the running ones unchecked, "Em andamento" under them. */
+const checkedNow = computed(() => receivable.value.filter((id) => owesNow(summaries.value.get(id))))
+const runningIds = computed(() => receivable.value.filter((id) => (summaries.value.get(id)?.status ?? 'done') !== 'done'))
 const menuChoices = computed<Choice[]>(() =>
   canManage
     ? [
@@ -231,10 +248,15 @@ onMounted(() => {
     <div v-else-if="customer && detail" class="od-scroll" tabindex="-1" data-od-focus>
       <header class="od-head">
         <h2 class="od-h"><span class="od-name">{{ customer.name || t('customerWithoutName') }}</span></h2>
-        <div v-if="owed > 0 || spent > 0" class="od-state" data-testid="customer-money">
+        <div v-if="owed > 0 || inProgress > 0 || spent > 0" class="od-state" data-testid="customer-money">
           <span v-if="owed > 0" class="od-sentence">
             {{ t('customerOwesValue', { value: money(owed) }) }}
             <template v-if="receivable.length"> · <button type="button" class="link" data-testid="customer-receive" @click="receive">{{ t('web.customers.receive') }}</button></template>
+          </span>
+          <!-- Not owed yet: the Receber link comes here only when nothing is owed, so the statement is still one click away. -->
+          <span v-if="inProgress > 0" class="od-sentence" data-testid="customer-in-progress">
+            {{ t('customerInProgressValue', { value: money(inProgress) }) }}
+            <template v-if="!(owed > 0) && receivable.length"> · <button type="button" class="link" data-testid="customer-receive" @click="receive">{{ t('web.customers.receive') }}</button></template>
           </span>
           <span v-if="spent > 0" class="muted">{{ t('customerSpentValue', { value: money(spent) }) }}</span>
           <button v-if="canReceipts" type="button" class="link" data-testid="customer-receipts" @click="dialog = 'receipts'">{{ t('receiptsSection') }}</button>
@@ -361,7 +383,7 @@ onMounted(() => {
       @close="dialog = null"
     />
     <DeviceForm v-else-if="dialog === 'device'" :devices="[]" @saved="onDeviceSaved" @close="dialog = null" />
-    <ReceiveCustomerDialog v-else-if="dialog === 'receive' && customer" :customer-id="customer.id" :customer-name="customer.name" :checked="receivable" @done="onReceived" @close="dialog = null" />
+    <ReceiveCustomerDialog v-else-if="dialog === 'receive' && customer" :customer-id="customer.id" :customer-name="customer.name" :checked="checkedNow" :in-progress="runningIds" @done="onReceived" @close="dialog = null" />
     <ReceiptsDialog v-else-if="dialog === 'receipts' && customer" :customer-id="customer.id" :customer-name="customer.name" @changed="load" @close="dialog = null" />
   </section>
 </template>

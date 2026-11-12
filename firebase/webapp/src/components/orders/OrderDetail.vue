@@ -104,6 +104,7 @@ const DeviceForm = defineAsyncComponent(() => Promise.all([import('@/components/
 const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
 // Checklists, after the order shows (their texts are in the orders chunk).
 const PdfDialog = defineAsyncComponent(() => import('./PdfDialog.vue'))
+const StatementDialog = defineAsyncComponent(() => import('./receive/StatementDialog.vue'))
 const OrderForms = defineAsyncComponent(() => import('@/components/forms/OrderForms.vue'))
 // Contract of the order (repeats, next order, created ones), after the order shows.
 const OrderContract = defineAsyncComponent(() => import('@/components/contracts/OrderContract.vue'))
@@ -140,6 +141,7 @@ type Dialog =
   | { kind: 'device'; current?: { id: string; name: string } }
   | { kind: 'keepDevices'; customer: Customer }
   | { kind: 'share'; send?: boolean }
+  | { kind: 'statement' }
   | { kind: 'pendingForms'; count: number; first: string }
   | { kind: 'devicesFor'; name: string; add: (deviceId: string | null) => Promise<unknown> }
   | { kind: 'quick'; quick: 'device' | 'item'; text: string }
@@ -1038,6 +1040,8 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
   list.push({ id: 'share', label: t('shareTitle') })
+  // pay.order.statement: what this order still owes, for the customer who owes only it (the app's _canSendStatement).
+  if (canStatement.value) list.push({ id: 'statement', label: t('statementSend') })
   // order.quick.complete: the customer's and the devices' data in a form over the order, without leaving it;
   // "Abrir …" still goes to the record's own screen (order.customer.open / order.device.open).
   if (o.customer?.id && can('manageCustomers')) list.push({ id: 'editCustomer', label: t('web.quick.customerData') })
@@ -1069,6 +1073,7 @@ function onMenu(id: string) {
   else if (id === 'pdf') pdfOpen.value = true
   else if (id === 'invoice') issuing.value = true
   else if (id === 'share') dialog.value = { kind: 'share' }
+  else if (id === 'statement') dialog.value = { kind: 'statement' }
   else if (id === 'openCustomer' && order.value?.customer?.id) void goTo('/customers', { customer: order.value.customer.id })
   else if (id === 'editCustomer') void editCustomer()
   else if (id.startsWith('editDevice:')) void editDevice(id.slice('editDevice:'.length))
@@ -1106,6 +1111,16 @@ const phraseActs = computed(() => {
   return (o.status === 'done' && access.value.canReceive) || (!!o.dueDate && access.value.canEditMainFields && o.status !== 'done')
 })
 
+/** "Mandar extrato" (pay.order.statement): who receives on it, while something is owed and the order has a named customer. */
+const canStatement = computed(() => {
+  const o = order.value
+  return !!o && !!access.value?.canReceive && !!moneyRowTone.value && (money$.value?.remaining ?? 0) > 0.005 && !!o.customer?.name?.trim()
+})
+/** The order as the statement reads it: one order, what it still owes. */
+const statementOrders = computed(() => {
+  const o = order.value
+  return o ? [{ id: o.id, number: o.number ?? null, open: money$.value?.remaining ?? 0, createdAt: o.createdAt ?? null, own: true }] : []
+})
 const canReceiveNow = computed(() => !!access.value?.canReceive && (money$.value?.remaining ?? 0) > 0)
 /** The menu's rule for "Adicionar desconto" (order.menu.view). */
 const canDiscountNow = computed(() => {
@@ -1419,7 +1434,8 @@ watch(
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :method="suggestedMethod(order, session.companyId)" :remaining="money$.remaining" :total="money$.total" :busy="busy" :can-attach="can('attachPhotos')" :created-at="order.createdAt" :link-note="linkOpen === true ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
-    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" :send="!!dialog.send" @pick-customer="openPicker('customer')" @linked="watcher?.reread()" @close="dialog = null" />
+    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" :send="!!dialog.send" :pdf="canPrint" @pick-customer="openPicker('customer')" @linked="watcher?.reread()" @close="dialog = null" />
+    <StatementDialog v-else-if="dialog.kind === 'statement'" :customer-id="order.customer?.id ?? ''" :customer-name="order.customer?.name?.trim() ?? ''" :orders="statementOrders" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :devices="order.devices" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
     <TextDialog

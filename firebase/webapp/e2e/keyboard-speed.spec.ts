@@ -129,19 +129,19 @@ test('P faz o próximo passo; depois de ir de Aprovado a Concluído, P já suger
   await expect.poll(async () => (await readOrder(third.id))?.status).toBe('done')
 })
 
-test('M abre com o foco em Mandar pelo WhatsApp; W abre o WhatsApp direto', async ({ page, context }) => {
+test('M abre com o foco em Mandar o PDF; W abre o WhatsApp direto com o link', async ({ page, context }) => {
   await context.route('https://wa.me/**', (route) => route.fulfill({ body: 'wa' }))
   const order = await makeOrder('admin', { status: 'done' })
   await openOrder(page, order.id)
   await page.keyboard.press('m')
   const sheet = dialog(page, 'Mandar para o cliente')
-  await expect(sheet.getByTestId('share-whatsapp')).toBeFocused()
-  await expectNoAxeViolations(page, 'mandar com foco no WhatsApp')
+  await expect(sheet.getByTestId('share-pdf')).toBeFocused()
+  await expectNoAxeViolations(page, 'mandar com foco no PDF')
+  // Enter sends the PDF: downloaded, WhatsApp opens and the sheet closes.
   let popup = context.waitForEvent('page')
   await page.keyboard.press('Enter')
   await (await popup).close()
   await page.bringToFront()
-  await page.keyboard.press('Escape')
   await expect(sheet).toHaveCount(0)
 
   popup = context.waitForEvent('page')

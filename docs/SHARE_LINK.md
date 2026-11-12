@@ -176,7 +176,7 @@ A folha `ShareLinkSheet` (`lib/screens/widgets/share_link_sheet.dart`) tem o PDF
 - **Mandar só o link no WhatsApp** (cinza, com telefone) ou **Mandar só o link** (sem telefone): o envio antigo, só com o link.
 - Só aparece para quem pode ter o PDF (`canShareOrderPdf`: vê preços, ou a empresa desligou "Valores e cobrança"). Os outros veem a folha antiga, com o link como botão principal.
 - No WhatsApp a mensagem vai junto do arquivo quando a versão aceita; se só o arquivo for, o link fica no PDF (QR).
-- Web: ainda só com o link (`order.share.pdf` na matriz de paridade).
+- Web (`ShareDialog.vue`, prop `pdf` com a mesma regra do app): **Mandar o PDF** é o botão principal e o foco do atalho M. Baixa o PDF para anexar e abre o WhatsApp do cliente com a mensagem e o link (sem WhatsApp no cadastro, copia a mensagem). O link sozinho fica no botão cinza e no atalho W. Se o link não sai, o PDF vai com a mensagem sem link.
 
 ### 2b. Prévia: "Ver como o cliente vê" (#588)
 
