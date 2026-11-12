@@ -48,7 +48,7 @@ const preview = (orderId: string, number: number, over: Record<string, unknown> 
 
 test('lista do mês: frase com o que saiu, o que precisa de atenção no topo e o rodapé de serviços (nfse.list.view, nfse.list.attention, nfse.list.rules)', async ({ page }) => {
   await openInvoices(page)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Em ${monthName()} saiu 1 nota, de R$ 270,00.`)
+  await expect(page.getByTestId('page-answer')).toHaveText(`Em ${monthName()} saiu 1 nota, de R$ 270,00.`)
   await expect(page.getByText(/Só os serviços entram na nota/)).toBeVisible()
   const attention = page.getByTestId('nfse-attention')
   await expect(attention.getByRole('heading')).toHaveText('Precisa de atenção')

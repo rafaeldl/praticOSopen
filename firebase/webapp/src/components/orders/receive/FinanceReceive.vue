@@ -108,16 +108,18 @@ function openOrder(id: string) {
 
 <template>
   <div class="finance" data-testid="finance-receive">
-    <PageHead :title="title" :sub="orders.length ? t('web.finance.receiveSub') : undefined" />
-    <FinanceTabs />
+    <PageHead :title="t('financial')" :answer="state === 'ready' ? title : ''" :sub="orders.length ? t('web.finance.receiveSub') : undefined" />
+    <div class="toolbar">
+      <FinanceTabs />
+    </div>
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :retry="load" />
     <EmptyState v-else-if="!orders.length" :title="t('receiveAllDone')" :body="t('web.finance.emptyBody')">
       <button type="button" class="btn" @click="router.push('/')">{{ t('web.finance.seeOrders') }}</button>
     </EmptyState>
     <template v-else>
-      <div class="toolbar">
-        <div v-if="picked.length" class="batchbar" role="region" :aria-label="t('web.batch.label')">
+      <div v-if="picked.length" class="toolbar">
+        <div class="batchbar" role="region" :aria-label="t('web.batch.label')">
           <strong>{{ t('web.finance.picked', { count: picked.length, amount: money(pickedTotal) }) }}</strong>
           <button v-if="oneCustomer" type="button" class="btn btn--primary" data-testid="finance-receive-picked" @click="receive">{{ t('web.batch.receive', { name: oneCustomer.name ?? '' }) }}</button>
           <span v-else class="sub" role="status">{{ t('web.finance.oneCustomer') }}</span>

@@ -23,7 +23,9 @@ test('março de 2026: recebido pela data do pagamento, vendido sem orçamento, �
   const summary = page.waitForResponse((response) => /\/v1\/app\/finance\/summary\?month=2026-03/.test(response.url()))
   await openFinance(page, 'admin')
   expect((await summary).status()).toBe(200)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Em março entraram R$ 380,00')
+  // Short title like Início and Clientes; the sentence answers under it.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Financeiro')
+  await expect(page.getByTestId('page-answer')).toHaveText('Em março entraram R$ 380,00')
   // Received: 300 paid in March and 80 of a February order paid in March.
   await expect(page.getByTestId('fin-card-received')).toContainText('R$ 380,00')
   await expect(page.getByTestId('fin-card-received')).toContainText('2 OS com pagamento')
@@ -54,7 +56,7 @@ test('mês: o seguinte para no mês atual e o rótulo volta para hoje; resposta 
   await expect(page.getByTestId('fin-month')).toHaveText(currentMonthYear())
   // A slow answer for a month already left is dropped.
   await page.goto(MARCH)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Em março entraram R$ 380,00')
+  await expect(page.getByTestId('page-answer')).toHaveText('Em março entraram R$ 380,00')
   let release: () => void = () => undefined
   await page.route('**/v1/app/finance/summary?month=2026-02*', async (route) => {
     await new Promise<void>((resolve) => (release = resolve))
@@ -66,7 +68,7 @@ test('mês: o seguinte para no mês atual e o rótulo volta para hoje; resposta 
   await expect(page).toHaveURL(/month=2026-03/)
   release()
   await page.waitForTimeout(500)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Em março entraram R$ 380,00')
+  await expect(page.getByTestId('page-answer')).toHaveText('Em março entraram R$ 380,00')
   // Arrows change the month too, outside fields.
   await page.getByRole('heading', { level: 1 }).click()
   await page.keyboard.press('ArrowLeft')
@@ -139,7 +141,7 @@ test('relatório e outro período pelo Resumo (fin.tab.report, fin.tab.other-per
   await openFinance(page, 'admin')
   await page.getByTestId('fin-report').click()
   await expect(page).toHaveURL(/finance\/report\?from=2026-03-01&to=2026-03-31/)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Faturou R$ 350,00 de 01/03/2026 a 31/03/2026')
+  await expect(page.getByTestId('page-answer')).toHaveText('Faturou R$ 350,00 de 01/03/2026 a 31/03/2026')
   await page.goto(MARCH)
   await page.getByTestId('fin-other-period').click()
   const dialog = page.getByRole('dialog', { name: 'Que período?' })
@@ -148,12 +150,12 @@ test('relatório e outro período pelo Resumo (fin.tab.report, fin.tab.other-per
   await dialog.getByLabel('Termina').fill('2026-03-31')
   await dialog.getByTestId('period-apply').click()
   await expect(page).toHaveURL(/from=2026-03-31&to=2026-03-31/)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Faturou R$ 50,00 em 31/03/2026')
+  await expect(page.getByTestId('page-answer')).toHaveText('Faturou R$ 50,00 em 31/03/2026')
 })
 
 test('gerente vê os números', async ({ page }) => {
   await openFinance(page, 'manager')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Em março entraram R$ 380,00')
+  await expect(page.getByTestId('page-answer')).toHaveText('Em março entraram R$ 380,00')
 })
 
 for (const user of ['supervisor', 'consultant', 'technician'] as const) {
@@ -192,12 +194,12 @@ test('erro e tentar de novo; carregando antes da resposta', async ({ page }) => 
   fail = false
   await page.getByRole('button', { name: 'Tentar de novo' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Carregando' })).toBeVisible()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Em março entraram R$ 380,00')
+  await expect(page.getByTestId('page-answer')).toHaveText('Em março entraram R$ 380,00')
 })
 
 test('vazio do mês: nada entrou e o texto da lista (fin.list.view)', async ({ page }) => {
   await openFinance(page, 'admin', 'finance?month=2020-01')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nada entrou em janeiro')
+  await expect(page.getByTestId('page-answer')).toHaveText('Nada entrou em janeiro')
   await expect(page.getByTestId('fin-empty')).toHaveText('Nenhum pagamento em janeiro.')
   await page.getByTestId('fin-card-sold').click()
   await expect(page.getByTestId('fin-empty')).toHaveText('Nenhuma OS em janeiro.')
@@ -259,7 +261,7 @@ for (const [language, received, sold, words] of [
     await expect(page.getByTestId('fin-card-received')).toContainText(received)
     await expect(page.getByTestId('fin-card-sold')).toContainText(sold)
     // Money and dates follow the company's country (Brazil), words the language.
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(words)
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('R$ 380,00')
+    await expect(page.getByTestId('page-answer')).toContainText(words)
+    await expect(page.getByTestId('page-answer')).toContainText('R$ 380,00')
   })
 }

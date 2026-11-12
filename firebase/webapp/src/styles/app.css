@@ -86,6 +86,8 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; line-height: 1; padding
 .page-title { font-family: var(--font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.12; letter-spacing: -0.015em; text-wrap: balance; }
 .page-title:focus { outline: none; }
 .page-sub { color: var(--color-muted); margin-top: 0.2rem; }
+/* The screen's answer under its short title (Início, Clientes, Financeiro, Notas fiscais). */
+.page-answer { font-size: 1.125rem; font-weight: 600; color: var(--color-ink); min-height: 1.5em; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: var(--ctl); padding: 0 0.85rem;
   border-radius: 6px; border: 1px solid var(--color-control); background: var(--color-card); color: var(--color-ink); font-weight: 600; white-space: nowrap; }
 .btn:hover { background: var(--color-paper-2); }
@@ -148,6 +150,11 @@ textarea.field { resize: vertical; min-height: 4.25rem; line-height: 1.45; }
 .tabs { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-paper-2); }
 .tabs button { border: 0; background: transparent; padding: 0 0.7rem; min-height: 1.95rem; border-radius: 4px; color: var(--color-muted); font-weight: 600; }
 .tabs button[aria-pressed="true"], .tabs button[aria-selected="true"] { background: var(--color-card); color: var(--color-ink); box-shadow: 0 0 0 1px var(--color-rule); }
+/* Tabs that are links (Clientes | Veículos, Resumo | Receber | Relatório): same look as the buttons. */
+.tabs a { display: inline-flex; align-items: center; padding: 0 0.7rem; min-height: 1.95rem; border-radius: 4px; color: var(--color-muted); font-weight: 600; text-decoration: none; }
+.tabs a:hover { color: var(--color-ink); }
+.tabs a[aria-current="page"] { background: var(--color-card); color: var(--color-ink); box-shadow: 0 0 0 1px var(--color-rule); }
+.tabs a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
 .toolbar { display: flex; align-items: center; gap: 0.5rem; padding: 0 1.25rem 0.6rem; flex-wrap: wrap; }
 .chips { display: flex; gap: 0.15rem; flex-wrap: wrap; align-items: center; }
 .chip { display: inline-flex; gap: 0.35rem; align-items: baseline; border: 0; background: transparent; padding: 0.3rem 0.5rem; border-radius: 5px; color: var(--color-muted); font-weight: 500; }
@@ -261,11 +268,12 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
 }
 .tabs { max-width: 100%; flex-wrap: wrap; }
 .tabs button { min-width: 0; }
+/* Tab links keep their width: with no room they go to the next line instead of spilling out (200% text). */
 .page-head { flex-wrap: wrap; }
 .toast-x { margin-left: -0.25rem; color: inherit; }
 @media (pointer: coarse) {
   kbd { display: none !important; }
-  .btn, .chip, .tabs button, .nav-item, .side-search, .search-mini, .select-mini { min-height: 2.75rem; }
+  .btn, .chip, .tabs button, .tabs a, .nav-item, .side-search, .search-mini, .select-mini { min-height: 2.75rem; }
   .field { min-height: 2.75rem; }
   .icon-btn { min-width: 2.75rem; min-height: 2.75rem; }
   .link { display: inline-flex; align-items: center; min-height: 2.75rem; }
@@ -311,7 +319,7 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
   .page-head > .btn { flex: 1; }
   .page-title { font-size: 1.35rem; }
   .tabs { display: flex; width: 100%; }
-  .tabs button { flex: 1; min-height: 2.75rem; }
+  .tabs button, .tabs a { flex: 1; min-height: 2.75rem; justify-content: center; }
   .toolbar { flex-wrap: wrap; padding-block: 0 0.5rem; }
   .toolbar .spacer { display: none; }
   .chips { flex-wrap: nowrap; overflow-x: auto; width: calc(100% + 2rem); margin-inline: -1rem; padding-inline: 1rem; scrollbar-width: none; }

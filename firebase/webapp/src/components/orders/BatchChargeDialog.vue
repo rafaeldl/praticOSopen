@@ -13,7 +13,7 @@ import { firestoreLite } from '@/lib/firebase'
 import { loadCustomer } from '@/lib/customers/data'
 import { formatDate, formatMoney } from '@/lib/format'
 import type { Order } from '@/lib/orders/model'
-import { orderShort } from '@/lib/orders/text'
+import { orderShort, ordersShort } from '@/lib/orders/text'
 import { whatsappNumber } from '@/lib/phone'
 import { cancelCustomerCharge, cancelOrderCharge, chargeErrorKey, createCustomerCharge, createOrderCharge, customerCharges } from '@/lib/receive/data'
 import { addDays, asaasUrl, chargeOf, fromCents, isOpenCharge, localDay, openChargeOf, receivableOf, toCents, whatsappLink } from '@/lib/receive/model'
@@ -51,7 +51,7 @@ const asking = ref(false)
 const undoing = ref(false)
 
 const count = computed(() => groups.value.reduce((sum, group) => sum + group.orders.length, 0))
-const title = computed(() => (count.value ? t('web.batchCharge.title', { count: count.value, order: orderShort() }) : t('chargeLinkTitle')))
+const title = computed(() => (count.value ? t('web.batchCharge.title', { count: count.value, order: ordersShort(count.value) }) : t('chargeLinkTitle')))
 const ordersText = (orders: Order[]) => `${orderShort()} ${orders.map((o) => o.number ?? '').join(', ')}`
 
 async function hasOpenLink(orderId: string): Promise<boolean> {

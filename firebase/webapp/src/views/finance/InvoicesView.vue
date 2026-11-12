@@ -6,7 +6,7 @@
 // app's D23 spins forever).
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ChevronLeft, ChevronRight, X } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, Settings, X } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -324,9 +324,11 @@ async function fixed() {
 
 <template>
   <div class="finance invoices" data-testid="invoices">
-    <PageHead :title="title" :sub="state === 'ready' ? t('nfseListOnlyServices') : undefined">
-      <RouterLink v-if="can('manageCompany') && !customerId && state !== 'off'" class="link" to="/invoices/setup" data-testid="nfse-setup-link">{{ t('nfseListSetup') }}</RouterLink>
-      <div v-if="state === 'ready'" class="fin-month" role="group" :aria-label="t('web.fin.month')">
+    <PageHead :title="t('nfseListTitle')" :answer="state === 'ready' ? title : ''">
+      <RouterLink v-if="can('manageCompany') && !customerId && state !== 'off'" class="btn" to="/invoices/setup" data-testid="nfse-setup-link"><Settings :size="15" aria-hidden="true" />{{ t('nfseListSetup') }}</RouterLink>
+    </PageHead>
+    <div v-if="state === 'ready'" class="toolbar">
+      <div class="fin-month" role="group" :aria-label="t('web.fin.month')">
         <button type="button" class="icon-btn" :aria-label="t('financialPreviousMonth')" data-testid="nfse-prev" @click="step(-1)">
           <ChevronLeft :size="18" aria-hidden="true" />
         </button>
@@ -337,40 +339,39 @@ async function fixed() {
           <ChevronRight :size="18" aria-hidden="true" />
         </button>
       </div>
-    </PageHead>
-
+      <span class="spacer"></span>
+      <template v-if="emitters.length">
+        <label class="sr" for="nfse-emitter">{{ t('web.nfseDirect.emitterFilter') }}</label>
+        <select
+          id="nfse-emitter"
+          class="field search-mini"
+          :value="activeEmitter ?? ''"
+          data-testid="nfse-emitter-filter"
+          @change="go({ emitter: ($event.target as HTMLSelectElement).value || undefined })"
+        >
+          <option value="">{{ t('web.nfseDirect.allEmitters') }}</option>
+          <option v-for="e in emitters" :key="e.id" :value="e.id">{{ e.legalName }}</option>
+        </select>
+      </template>
+      <template v-if="searchable">
+      <label class="sr" for="nfse-search">{{ t('nfseListSearch') }}</label>
+      <input
+        id="nfse-search"
+        class="field search-mini nfse-search"
+        type="search"
+        :placeholder="t('nfseListSearch')"
+        :value="query"
+        data-testid="nfse-search"
+        @input="go({ q: ($event.target as HTMLInputElement).value || undefined })"
+      />
+      </template>
+    </div>
+    <p v-if="state === 'ready'" class="sub list-note nfse-note">{{ t('nfseListOnlyServices') }}</p>
     <LoadingState v-if="state === 'loading'" />
     <ErrorState v-else-if="state === 'failed'" :body="failure" :retry="load" />
     <EmptyState v-else-if="state === 'off'" :title="t('nfseErrorNotEnabled')" :body="t('web.nfse.offBody')" data-testid="nfse-off" />
     <div v-else class="workspace" :class="{ 'has-panel': opened }">
       <div class="list-pane">
-        <div v-if="searchable || emitters.length" class="toolbar">
-          <template v-if="emitters.length">
-            <label class="sr" for="nfse-emitter">{{ t('web.nfseDirect.emitterFilter') }}</label>
-            <select
-              id="nfse-emitter"
-              class="field search-mini"
-              :value="activeEmitter ?? ''"
-              data-testid="nfse-emitter-filter"
-              @change="go({ emitter: ($event.target as HTMLSelectElement).value || undefined })"
-            >
-              <option value="">{{ t('web.nfseDirect.allEmitters') }}</option>
-              <option v-for="e in emitters" :key="e.id" :value="e.id">{{ e.legalName }}</option>
-            </select>
-          </template>
-          <template v-if="searchable">
-          <label class="sr" for="nfse-search">{{ t('nfseListSearch') }}</label>
-          <input
-            id="nfse-search"
-            class="field search-mini nfse-search"
-            type="search"
-            :placeholder="t('nfseListSearch')"
-            :value="query"
-            data-testid="nfse-search"
-            @input="go({ q: ($event.target as HTMLInputElement).value || undefined })"
-          />
-          </template>
-        </div>
         <section v-if="attention.length" class="nfse-attention" aria-labelledby="nfse-att" data-testid="nfse-attention">
           <h2 id="nfse-att">{{ t('nfseListAttention') }}</h2>
           <ul class="fin-rows">

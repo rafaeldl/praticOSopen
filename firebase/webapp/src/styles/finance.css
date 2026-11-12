@@ -4,11 +4,6 @@
 /* Old numbers while new ones come: a line on top, never faded text (contrast stays). */
 .fin[aria-busy="true"] { cursor: progress; box-shadow: inset 0 2px 0 var(--color-accent); }
 
-.fin-nav { display: flex; gap: 0.25rem; padding: 0 1.25rem 0.75rem; flex-wrap: wrap; }
-.fin-nav-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; color: var(--color-muted); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; }
-.fin-nav-link:hover { color: var(--color-ink); }
-.fin-nav-link[aria-current="page"] { color: var(--color-ink); border-bottom-color: var(--color-ink); }
-
 .fin-month { display: flex; align-items: center; gap: 0.15rem; flex-wrap: wrap; }
 .fin-month-label { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.25rem; border: 0; background: transparent; color: var(--color-ink); font-weight: 600; padding: 0 0.4rem; border-radius: 6px; }
 .fin-month-label:not(:disabled):hover { background: var(--color-paper-2); text-decoration: underline; text-underline-offset: 3px; }
@@ -20,7 +15,8 @@
 .fin-group > div { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
 .fin-card { display: grid; gap: 0.15rem; justify-items: start; text-align: left; padding: 0.75rem 0.85rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); color: var(--color-ink); min-height: 2.75rem; }
 .fin-card:hover { background: var(--color-paper-2); }
-.fin-card[aria-pressed="true"] { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); }
+/* The card whose list is below: chosen, in the blue of selection (never a dark frame). */
+.fin-card[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); background: var(--color-selected); }
 .fin-card span { font-weight: 600; color: var(--color-muted); }
 .fin-card b { font-size: 1.25rem; overflow-wrap: anywhere; }
 .fin-card small { color: var(--color-muted); font-size: 0.8125rem; }
@@ -28,8 +24,8 @@
 
 .fin-links { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 .fin-links a.btn { text-decoration: none; }
-.fin-nfse { display: inline-flex; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; min-height: 2.25rem; padding: 0 0.5rem; color: var(--color-accent); font-weight: 600; }
 .fin-nfse-alert { color: var(--color-danger-text); font-weight: 700; }
+.fin-note { margin: -0.5rem 0 0; }
 
 .fin-rows { list-style: none; padding: 0; margin: 0; }
 .fin-row { display: flex; justify-content: space-between; gap: 0.25rem 1rem; width: 100%; padding: 0.55rem 0.25rem; min-height: 2.75rem; border: 0; border-bottom: 1px solid var(--color-rule); background: transparent; color: var(--color-ink); text-align: left; text-decoration: none; align-items: baseline; flex-wrap: wrap; }
@@ -75,7 +71,11 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
 .period-fields { min-width: min(100%, 22rem); }
 
 /* Notas fiscais */
-.invoices .list-pane .toolbar { padding: 0.5rem 1.25rem; }
+.nfse-note { margin: 0; padding: 0 1.25rem 0.5rem; }
+@media (max-width: 48rem) { .nfse-note { padding-inline: 1rem; } }
+.report-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; min-width: 0; max-width: 100%; }
+/* At 200% on a phone the long labels wrap inside the button instead of spilling out. */
+.report-actions .btn { max-width: 100%; }
 .nfse-search { width: min(100%, 20rem) !important; }
 .nfse-attention { padding: 0.5rem 1.25rem 0.75rem; border-bottom: 2px solid var(--color-danger-text); }
 .nfse-attention h2 { color: var(--color-danger-text); font-weight: 700; }
@@ -112,7 +112,6 @@ button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
 }
 @media (max-width: 48rem) {
   .fin { padding-inline: 1rem; }
-  .fin-nav { padding-inline: 1rem; }
   .fin-row { min-height: 2.75rem; }
 }
 
@@ -179,3 +178,4 @@ button.nfse-step:hover { background: var(--color-paper-2); }
 .cert-drop.is-over { border-color: var(--color-accent); background: var(--color-paper-2); }
 .cert-drop.has-file { border-style: solid; }
 .cert-file { font-weight: 600; }
+@media (max-width: 40rem) { .report-actions { justify-content: flex-start; } }

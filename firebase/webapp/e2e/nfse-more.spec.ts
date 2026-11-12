@@ -278,7 +278,7 @@ test('cliente: notas emitidas abrem "Notas de X"; uma nota com várias OS escolh
 
   await nfse.getByTestId('customer-nfse-list').click()
   await expect(page).toHaveURL(new RegExp(`invoices\\?customer=${customer.id}`))
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Notas de ${customer.name}`)
+  await expect(page.getByTestId('page-answer')).toHaveText(`Notas de ${customer.name}`)
   await expect(page.getByTestId('nfse-table')).toContainText('777')
   await expect(page.getByTestId('nfse-setup-link')).toHaveCount(0)
 })

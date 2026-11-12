@@ -2,7 +2,6 @@
    (docs/prototypes/web-app/src/app.css), with its REVISAO-UX fixes. */
 
 /* List */
-.page-answer { font-size: 1.125rem; font-weight: 600; color: var(--color-ink); min-height: 1.5em; }
 .grid tbody .group-row th { position: static; background: var(--color-paper-2); color: var(--color-ink); font-weight: 700; text-transform: none; padding: 0.45rem 0.6rem; }
 .grid tbody .group-row th::first-letter { text-transform: uppercase; }
 .row-detail, .row-hold { display: block; }

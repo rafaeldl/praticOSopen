@@ -29,6 +29,12 @@ export const deviceLabel = () => resolveLabel('device._entity', segmentLabels(),
 export function orderShort(): string {
   return segmentLabels()['service_order._entity'] ?? t('orderShort')
 }
+/** The order's word for a count: "1 OS", "3 OS"; with a segment word, "1 Ordem de Serviço", "3 Ordens de Serviço".
+ * Zero keeps the singular ("Nenhuma Ordem de Serviço"). */
+export function ordersShort(count: number): string {
+  if (count <= 1) return orderShort()
+  return segmentLabels()['service_order._entity_plural'] ?? orderShort()
+}
 export const orderName = () => resolveLabel('service_order._entity', segmentLabels(), tr)
 /** "OS 186" (order.detail.title). */
 export const orderTitle = (order: Pick<Order, 'number'>) => t('orderNumberTitle', { order: orderShort(), number: order.number ?? '' })

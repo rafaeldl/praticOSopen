@@ -18,7 +18,7 @@ import { deleteCustomer, loadCustomer, type CustomerDetail, type OrderSummary } 
 import { deviceMatches, firstName, mapsUrl, orderNumberMatches, shortList, type CustomerRow } from '@/lib/customers/model'
 import { formatDate, fromIsoDay } from '@/lib/format'
 import { canCreateOrders } from '@/lib/orders/model'
-import { money, orderShort } from '@/lib/orders/text'
+import { money, orderShort, ordersShort } from '@/lib/orders/text'
 import { dialable, formatPhone, whatsappNumber } from '@/lib/phone'
 import { fieldTitle, groupBySection, namespaceFields, readCustom, type FormField } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
@@ -321,7 +321,7 @@ onMounted(() => {
         <ul v-if="devices.shown.length" class="dir-list" data-testid="customer-devices">
           <li v-for="device in devices.shown" :key="device.id">
             <button type="button" class="row-btn" @click="openDevice(device.id)">{{ device.name || label('device._entity') }}</button>
-            <span class="sub"><template v-if="device.serial"><span class="num">{{ device.serial }}</span> · </template>{{ t('web.customers.orderCount', { count: device.count, order: orderShort() }) }}</span>
+            <span class="sub"><template v-if="device.serial"><span class="num">{{ device.serial }}</span> · </template>{{ t('web.customers.orderCount', { count: device.count, order: ordersShort(device.count) }) }}</span>
           </li>
         </ul>
         <p v-else-if="deviceQuery.trim() && devices.searchable" class="muted">{{ t('web.customers.noMatchList', { query: deviceQuery.trim() }) }}</p>
@@ -355,7 +355,7 @@ onMounted(() => {
         <p v-else-if="orderQuery.trim() && orders.searchable" class="muted">{{ t('web.customers.noMatchList', { query: orderQuery.trim() }) }}</p>
         <p v-else class="muted">{{ t('web.customers.noOrders') }}</p>
         <button v-if="orders.canOpen" type="button" class="link dir-more" data-testid="customer-orders-more" :aria-expanded="ordersOpen" @click="toggleOrders">
-          {{ ordersOpen ? t('web.customers.showLess') : t('web.customers.showAllOrders', { count: detail.orders.length, order: orderShort() }) }}
+          {{ ordersOpen ? t('web.customers.showLess') : t('web.customers.showAllOrders', { count: detail.orders.length, order: ordersShort(detail.orders.length) }) }}
         </button>
         <p v-if="detail.ordersTruncated" class="sub" data-testid="orders-truncated">{{ t('web.customers.ordersTruncated', { count: detail.orders.length }) }}</p>
       </section>
