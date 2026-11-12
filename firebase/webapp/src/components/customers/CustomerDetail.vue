@@ -82,8 +82,11 @@ const inProgress = computed(() => {
     .reduce((sum, o) => sum + Math.max(Math.round((o.total ?? 0) * 100), 0), 0)
   return cents / 100
 })
-/** Receber de {cliente} starts with what is owed checked and the running ones unchecked, "Em andamento" under them. */
-const checkedNow = computed(() => receivable.value.filter((id) => owesNow(summaries.value.get(id))))
+/**
+ * Receber de {cliente} starts with what is owed checked and the running ones unchecked, "Em andamento" under them.
+ * A single order comes checked even when running: receiving in advance is common.
+ */
+const checkedNow = computed(() => (receivable.value.length === 1 ? [...receivable.value] : receivable.value.filter((id) => owesNow(summaries.value.get(id)))))
 const runningIds = computed(() => receivable.value.filter((id) => (summaries.value.get(id)?.status ?? 'done') !== 'done'))
 const menuChoices = computed<Choice[]>(() =>
   canManage
@@ -136,11 +139,9 @@ function newOrder() {
   ui.newOrder = true
 }
 
-/** One order: straight to it; several: one receipt over them (customer.detail.receive, pay.customer.view). */
+/** Always Receber de {cliente}, one order or several, done or running (customer.detail.receive, pay.customer.view). */
 function receive() {
-  const ids = receivable.value
-  if (ids.length === 1) void router.push({ path: '/', query: { order: ids[0] } })
-  else if (customer.value) dialog.value = 'receive'
+  if (customer.value && receivable.value.length) dialog.value = 'receive'
 }
 
 async function onReceived() {
