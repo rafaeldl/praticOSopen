@@ -165,7 +165,7 @@ const itemText = (item: DraftItem) =>
           <label class="field-label" for="ai-batch-text">{{ t('web.ai.batchAsk') }}</label>
           <textarea id="ai-batch-text" v-model="text" class="field" rows="3" :placeholder="t('web.ai.batchPlaceholder')" :disabled="state === 'reading'"></textarea>
           <p v-if="tooMany" class="sub" role="status">{{ t('web.ai.batchTooMany', { max: MAX_AI_BATCH, order: orderShort() }) }}</p>
-          <p v-else-if="left !== null && short" class="sub" role="status">{{ t('web.ai.batchQuota', { count: left, order: orderShort() }) }}</p>
+          <p v-else-if="left !== null && short" class="sub" role="status">{{ t('web.ai.batchQuota', { count: left, order: ordersShort(2) }) }}</p>
           <p v-else-if="left !== null" class="sub">{{ t('web.ai.batchUses', { count: orders.length, left }) }}</p>
           <p v-if="state === 'reading'" role="status">{{ t('web.ai.batchReading') }}</p>
         </template>
