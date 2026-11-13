@@ -28,6 +28,7 @@
 - [`SHARE_LINK.md`](SHARE_LINK.md) - Sistema de compartilhamento via magic link
 - [`DOMAIN.md`](DOMAIN.md) - Domínio praticos.app: o que redireciona dos domínios antigos, onde e o que não pode redirecionar
 - [`ACCOUNT_DELETION.md`](ACCOUNT_DELETION.md) - Exclusão de conta no servidor (`DELETE /v1/app/account` na função `accountApi`): regras de posse, idempotência, erros e limitações
+- [`WEB_CHECKOUT.md`](WEB_CHECKOUT.md) - Assinar plano pela web (Asaas da Rafsoft cobra, RevenueCat libera por promocional; chave `config/webCheckout`, compra dupla, garantia de 7 dias, passos do dono)
 - [`ASAAS_INTEGRATION.md`](ASAAS_INTEGRATION.md) - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - [`NFSE_ASAAS.md`](NFSE_ASAAS.md) - Nota fiscal de serviço pelo Asaas (flag `nfseEnabled`, regra do valor, uma nota por OS ou com várias OS, webhook `INVOICE_*`, checklist para ligar)
 - [`NFSE_DIRECT.md`](NFSE_DIRECT.md) - NFS-e direta (Emissor Nacional): dados e regras, cofre do certificado com KMS por emitente (crypto-shredding), rotas e passo manual do KMS

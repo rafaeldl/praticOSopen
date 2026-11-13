@@ -23,8 +23,8 @@ The owner approved a new table on 2026-11-12. It is being rolled out by #722-#72
 | | Free | Starter | Pro | Business |
 |---|---|---|---|---|
 | For | Getting started | Solo worker | Small team | Company |
-| Monthly | R$ 0 | R$ 59,90 | R$ 119 | R$ 249 |
-| Yearly (pays 10 months) | — | R$ 599 | R$ 1.190 | R$ 2.490 |
+| Monthly | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
+| Yearly (pays 10 months) | — | R$ 599 | R$ 1.199 | R$ 2.499 |
 | Work orders per month | 10 | 50 | 150 | 500 included, then +R$ 99 per 100 |
 | People | 1 | 2 | 5 | 20, then +R$ 15 each |
 | CNPJs on the service invoice (BR) | — | 1 | 2 | unlimited |

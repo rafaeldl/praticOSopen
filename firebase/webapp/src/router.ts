@@ -204,6 +204,13 @@ export const routes: RouteRecordRaw[] = [
     component: withSettingsTexts(() => import('@/views/settings/PlanView.vue')),
     meta: { access: ANY_MEMBER, title: 'planTitle' },
   },
+  // Buying the plan on the web (docs/WEB_CHECKOUT.md): owner and admin, as the API. Off unless config/webCheckout.enabled.
+  {
+    path: '/settings/plan/subscribe',
+    name: 'planSubscribe',
+    component: withSettingsTexts(() => import('@/views/settings/SubscribeView.vue')),
+    meta: { access: { kind: 'member', anyOf: ['manageUsers'] }, title: 'web.billing.title' },
+  },
   // Asaas and MCP connections: owner and admin, the same guard the API keeps.
   {
     path: '/settings/integrations',

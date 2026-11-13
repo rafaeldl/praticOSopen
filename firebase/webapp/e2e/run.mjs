@@ -23,6 +23,10 @@
 //                       every closed browser's listen channel: with 1g a CI shard stopped
 //                       answering after ~230 tests); no limit on CI (a runner of its own).
 //   E2E_SERVE_TTL       minutes `serve` (npm run emulators) stays up (default 30, 0 = no limit)
+//   E2E_BILLING_SANDBOX 1 = the web checkout talks to the real Asaas SANDBOX and RevenueCat
+//                       (e2e/billing-sandbox.spec.ts, docs/WEB_CHECKOUT.md). Keys come from
+//                       ~/.praticos-sandbox.env into this process's env only (the emulator and
+//                       Playwright inherit it); never written to a file nor printed.
 //
 // Everything it starts runs in one process group (e2e/group.mjs). Ctrl+C, SIGTERM, SIGHUP,
 // the parent process dying or this one being killed take the whole group down and remove
@@ -35,6 +39,7 @@ import { closeSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, 
 import { constants, homedir, tmpdir } from 'node:os'
 import { createServer } from 'node:net'
 import { join, resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
 
 const webapp = resolve(import.meta.dirname, '..')
 const functionsDir = resolve(webapp, '../functions')
@@ -293,6 +298,30 @@ if (offset) {
   generated.push(resolve(webapp, config), envLocal)
   process.env.PW_PORT = String(4183 + offset)
   process.env.E2E_FIRESTORE_PORT = String(port('firestore'))
+  process.env.E2E_API_BASE = `http://127.0.0.1:${port('functions')}/demo-praticos/southamerica-east1/api`
+}
+
+const billingSandbox = process.env.E2E_BILLING_SANDBOX === '1'
+if (billingSandbox) {
+  const file = join(homedir(), '.praticos-sandbox.env')
+  if (!existsSync(file)) {
+    console.error(`E2E_BILLING_SANDBOX=1 sem ${file} (docs/WEB_CHECKOUT.md).`)
+    process.exit(1)
+  }
+  const values = {}
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const match = /^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/.exec(line)
+    if (match) values[match[1]] = match[2].replace(/^['"]|['"]$/g, '')
+  }
+  const asaas = values.ASAAS_BILLING_API_KEY ?? ''
+  const rc = values.REVENUECAT_SECRET_API_KEY ?? values.REVENUECAT_SECRET_KEY ?? ''
+  if (!asaas.startsWith('$aact_hmlg') || !rc.startsWith('sk_')) {
+    console.error('E2E_BILLING_SANDBOX=1 pede ASAAS_BILLING_API_KEY de sandbox ($aact_hmlg) e a chave sk_ do RevenueCat.')
+    process.exit(1)
+  }
+  process.env.ASAAS_BILLING_API_KEY = asaas
+  process.env.REVENUECAT_SECRET_API_KEY = rc
+  process.env.ASAAS_BILLING_WEBHOOK_TOKEN = randomUUID()
 }
 
 // dist-e2e has the emulator ports baked in: it is reused only when built for this offset.
@@ -318,7 +347,8 @@ if (usesFunctions && !existsSync(secretFile)) {
       MARK,
       `ASAAS_CREDENTIALS_KEY=${Buffer.alloc(32).toString('base64')}`,
       'REVENUECAT_WEBHOOK_AUTH=fake',
-      'REVENUECAT_SECRET_API_KEY=fake',
+      // In the sandbox run the real key comes from the env (this file would override it).
+      ...(billingSandbox ? [] : ['REVENUECAT_SECRET_API_KEY=fake']),
       'SSR_API_SECRET=fake',
       'ANTHROPIC_API_KEY=fake',
       '',

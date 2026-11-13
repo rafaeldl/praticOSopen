@@ -10,6 +10,7 @@ import { computed, onMounted, ref, shallowRef } from 'vue'
 import { ChevronRight } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
+import WebBillingEntry from '@/components/settings/WebBillingEntry.vue'
 import { t, type MessageKey } from '@/i18n'
 import { formatDate, formatNumber } from '@/lib/format'
 import { countEmitters } from '@/lib/nfse/data'
@@ -24,6 +25,8 @@ import '@/styles/settings.css'
 const summary = shallowRef<PlanSummary | null>(null)
 const overview = shallowRef<PlanOverview | null>(null)
 const failed = ref(false)
+// Web checkout (docs/WEB_CHECKOUT.md): only owner/admin, only with config/webCheckout on.
+const billingShown = ref(false)
 
 const country = computed(() => session.company?.country)
 // Who cannot change the plan is told who can (plan.non-admin-note), as the app.
@@ -155,7 +158,8 @@ onMounted(() => void load())
             </li>
           </ul>
         </section>
-        <p v-if="isAdmin" class="role-note" data-testid="plan-where">{{ t('web.plan.readOnly') }}</p>
+        <WebBillingEntry v-if="isAdmin" @shown="(entry) => (billingShown = entry !== 'hidden')" />
+        <p v-if="isAdmin && !billingShown" class="role-note" data-testid="plan-where">{{ t('web.plan.readOnly') }}</p>
         <p v-else class="role-note" data-testid="plan-ask-admin">{{ t('askAdminToChangePlan') }}</p>
       </template>
     </div>

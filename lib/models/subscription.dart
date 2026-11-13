@@ -82,12 +82,18 @@ enum SubscriptionPeriodState {
   paymentIssue,
 }
 
-/// Store that bills the subscription.
+/// Store that bills the subscription. Same values as `SubscriptionStore` in
+/// firebase/functions/src/models/types.ts.
 enum BillingStore {
   @JsonValue('app_store')
   appStore,
   @JsonValue('play_store')
   playStore,
+
+  /// Bought on the web (Asaas), docs/WEB_CHECKOUT.md. The app never offers a
+  /// purchase to these companies and never mentions the website.
+  @JsonValue('web')
+  web,
 }
 
 /// Firestore paths of the usage counters. The app writes only these fields
@@ -340,6 +346,11 @@ class Subscription {
   /// True when the plan is paid through a store subscription still in force.
   bool hasStoreSubscription(DateTime now) =>
       source == SubscriptionSource.store && effectivePlan(now) != SubscriptionPlan.free;
+
+  /// True when the plan in force was bought on the web: the app shows only
+  /// the active plan, with no purchase, restore or "manage" (docs/WEB_CHECKOUT.md).
+  bool hasWebSubscription(DateTime now) =>
+      hasStoreSubscription(now) && store == BillingStore.web;
 
   /// Version of the plan table in force (#726): [tableVersion] when the table
   /// has it; else, for a paid plan bought before the current table (no

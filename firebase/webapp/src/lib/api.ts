@@ -72,6 +72,12 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   IMPORT_UNDO_EXPIRED: 'nfseImportErrorUndoExpired',
   // Plan (#724): screens show PlanFeatureNotice from `details` (lib/plan-features.ts planFeatureRefusal).
   PLAN_FEATURE: 'web.error.planFeature',
+  // Web checkout (docs/WEB_CHECKOUT.md).
+  STORE_SUBSCRIPTION_ACTIVE: 'web.error.storeSubscription',
+  WEB_SUBSCRIPTION_ACTIVE: 'web.error.webSubscription',
+  OUTSIDE_BRAZIL: 'web.error.outsideBrazil',
+  REFUND_NOT_ALLOWED: 'web.error.refundExpired',
+  WEB_CHECKOUT_DISABLED: 'web.error.checkoutClosed',
 }
 
 /** The sentence for a code the server sends, when there is one of its own (tests). */
