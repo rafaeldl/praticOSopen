@@ -2963,6 +2963,14 @@
       "plan": { "type": "String" }
     }
   },
+  "freeLimitsBannerLabel": "Plano Free muda",
+  "freeLimitsBannerText": "A partir de {date}, o plano Free tem {orders} OS por mês. Se você abre mais, escolha um plano.",
+  "@freeLimitsBannerText": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "orders": {"type": "int"}
+    }
+  },
   "courtesyBannerLater": "Agora não",
   "deviceSaveNeedsAny": "Preencha {first} ou {second} para salvar.",
   "@deviceSaveNeedsAny": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},

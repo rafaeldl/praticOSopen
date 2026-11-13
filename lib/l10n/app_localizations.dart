@@ -10340,6 +10340,18 @@ abstract class AppLocalizations {
   /// **'O plano {plan} cobre o seu uso.'**
   String courtesyBannerPlan(String plan);
 
+  /// No description provided for @freeLimitsBannerLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano Free muda'**
+  String get freeLimitsBannerLabel;
+
+  /// No description provided for @freeLimitsBannerText.
+  ///
+  /// In pt, this message translates to:
+  /// **'A partir de {date}, o plano Free tem {orders} OS por mês. Se você abre mais, escolha um plano.'**
+  String freeLimitsBannerText(String date, int orders);
+
   /// No description provided for @courtesyBannerLater.
   ///
   /// In pt, this message translates to:

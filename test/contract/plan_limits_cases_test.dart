@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/paid_plans_config.dart';
 
 const _file = 'docs/web-app/contract-cases/plan-limits.json';
 const _lang = 'dart';
@@ -58,7 +59,10 @@ FeatureGateResult _check(Subscription? sub, Map<String, dynamic> given, DateTime
 void main() {
   final doc = _cast(jsonDecode(File(_file).readAsStringSync()));
 
-  tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+  tearDown(() {
+    FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+    FeatureGateService.paidPlansConfig = PaidPlansConfig.off;
+  });
 
   test('runs in dart', () => expect(doc['runsIn'], contains(_lang)));
 
@@ -71,6 +75,10 @@ void main() {
       final given = _cast(c['given']);
       FeatureGateService.debugPlanLimitsEnforcedOverride = given['paidPlansEnabled'] as bool;
       final sub = _subscription(given);
+      final startDays = given['limitsStartInDays'] as int?;
+      FeatureGateService.paidPlansConfig = startDays == null
+          ? PaidPlansConfig.off
+          : PaidPlansConfig(limitsStartAt: DateTime.now().toUtc().add(Duration(days: startDays)));
       if (given['kind'] == 'watermark') {
         expect({'watermark': FeatureGateService.shouldShowPdfWatermark(sub)}, want);
         return;

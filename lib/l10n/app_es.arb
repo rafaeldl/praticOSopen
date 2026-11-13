@@ -2589,6 +2589,8 @@
       "plan": { "type": "String" }
     }
   },
+  "freeLimitsBannerLabel": "El plan Free cambia",
+  "freeLimitsBannerText": "Desde el {date}, el plan Free incluye {orders} órdenes por mes. Si abres más, elige un plan.",
   "courtesyBannerLater": "Ahora no",
   "deviceSaveNeedsAny": "Completa {first} o {second} para guardar.",
   "@deviceSaveNeedsAny": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},

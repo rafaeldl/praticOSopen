@@ -24,6 +24,7 @@ import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 import 'package:praticos/screens/devices/maintenance_actions.dart';
 import 'package:praticos/screens/order/assistant/ai_intro.dart';
+import 'package:praticos/screens/widgets/free_limits_banner.dart';
 import 'package:praticos/screens/widgets/courtesy_banner.dart';
 import 'package:praticos/screens/widgets/whatsapp_setup_banner.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -282,7 +283,7 @@ class _HomeState extends State<Home> {
           rootNavigator: true,
         ).pushNamed('/notifications'),
         leading: _buildWhatsAppNavButton(context),
-        banner: _buildCourtesyBanner() ?? _buildWhatsAppBanner(),
+        banner: _buildCourtesyBanner() ?? _buildFreeLimitsBanner() ?? _buildWhatsAppBanner(),
         maintenances: _maintenances,
         onOpenMaintenance: _openMaintenance,
       ),
@@ -356,6 +357,19 @@ class _HomeState extends State<Home> {
     return CourtesyBanner(
       key: ValueKey('courtesy_$companyId'),
       subscription: subscription!,
+      companyId: companyId,
+    );
+  }
+
+  /// Before the limits start for the Free companies (see [FreeLimitsBanner]).
+  Widget? _buildFreeLimitsBanner() {
+    final subscription = context.read<SubscriptionStore>().subscription;
+    final notice = FreeLimitsBanner.noticeFor(subscription, DateTime.now());
+    if (notice == null) return null;
+    final companyId = Global.companyAggr?.id;
+    return FreeLimitsBanner(
+      key: ValueKey('free_limits_${companyId}_${notice.dismissKey}'),
+      notice: notice,
       companyId: companyId,
     );
   }
