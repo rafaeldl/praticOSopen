@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generatedFrom": "docs/plans/plans.json v2",
-  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (#726): `tableVersion` gravado (desconhecido vale a atual); sem ele, plano pago fora da cortesia é assinante de antes da tabela atual e segue `legacyVersion`; cortesia e Free seguem a atual. Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite. Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
+  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (#726): `tableVersion` gravado (desconhecido vale a atual); sem ele, plano pago (também a cortesia, que mantém o Pro antigo) é de antes da tabela atual e segue `legacyVersion`; Free segue a atual. Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo (recursos: a versão sem lista, todos liberados, continua sem lista) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
   "runsIn": [
     "dart",
     "functions",
@@ -14,7 +14,7 @@
     "firebase/functions/src/services/plan-limits.service.ts checkPlanLimit",
     "firebase/webapp/src/lib/plan-limits.ts checkPlanLimit"
   ],
-  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `lastMonthUsage` é o de OS do mês anterior (só `order`). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos. `expect` traz allowed, limit e plan, e às vezes level, grace e contactUs; o que não aparece não é conferido.",
+  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `lastMonthUsage` é o de OS do mês anterior (só `order`). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos. `expect` traz allowed, limit e plan, e às vezes level, grace e contactUs; o que não aparece não é conferido. `kind: planInForce` confere o plano em vigor, a versão da tabela e a linha (`planInForce` nos três lados): `expect` traz plan, version e campos da linha.",
   "cases": [
     {
       "id": "free-photos-have-no-limit",
@@ -577,7 +577,7 @@
       }
     },
     {
-      "id": "courtesy-running-gets-the-new-pro-orders",
+      "id": "courtesy-running-keeps-old-pro-orders",
       "given": {
         "kind": "check",
         "subscription": {
@@ -593,13 +593,13 @@
         },
         "paidPlansEnabled": true,
         "resource": "order",
-        "usage": 149,
+        "usage": 400,
         "adding": 1,
         "expiresInDays": 30
       },
       "expect": {
         "allowed": true,
-        "limit": 150,
+        "limit": -1,
         "plan": "pro"
       }
     },
@@ -1137,6 +1137,118 @@
       },
       "expect": {
         "watermark": false
+      }
+    },
+    {
+      "id": "in-force-paid-own-version",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "version": "2",
+        "nfseCnpjs": 1,
+        "aiPerDay": 200,
+        "ordersPerMonth": 50
+      }
+    },
+    {
+      "id": "in-force-keeps-old-version",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "pro",
+        "version": "1"
+      }
+    },
+    {
+      "id": "in-force-expired-is-free-of-current",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "1"
+        },
+        "expiresInDays": -1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "version": "2",
+        "ordersPerMonth": 10,
+        "nfseCnpjs": 0
+      }
+    },
+    {
+      "id": "in-force-unknown-version-is-current",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "99"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "business",
+        "version": "2",
+        "nfseCnpjs": -1
+      }
+    },
+    {
+      "id": "in-force-courtesy-keeps-old-pro",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace"
+        },
+        "expiresInDays": 20,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "pro",
+        "version": "1",
+        "features": [],
+        "ordersPerMonth": -1
+      }
+    },
+    {
+      "id": "in-force-old-starter-keeps-every-feature",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "version": "1",
+        "features": [],
+        "users": 3
       }
     }
   ]

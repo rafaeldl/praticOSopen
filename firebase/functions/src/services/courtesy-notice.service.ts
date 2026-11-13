@@ -1,7 +1,8 @@
 /**
  * End of the launch courtesy (docs/SUBSCRIPTION.md): a daily job tells owners
- * and admins 15 and 3 days before `expiresAt`, with the work orders of the
- * month against Free. The assistant is not mentioned: its ceilings are
+ * and admins 15 and 3 days before `expiresAt`; with the plan limits on
+ * (config/paidPlans), also the work orders of the month against Free. With
+ * them off Free has no order limit, so no number is said. The assistant is not mentioned: its ceilings are
  * internal and the customer never sees a counter (#726).
  * The push does not open anything: the banner on Início carries the paywall.
  *
@@ -13,7 +14,7 @@
 import { getRootCollection } from './firestore.service';
 import { notifyCourtesyEnding } from './notification.service';
 import { CourtesyNoticeRecord, dueCourtesyNotice, planRow } from './subscription-plans';
-import { ordersUsage } from './plan-limits.service';
+import { isPaidPlansEnabled, ordersUsage } from './plan-limits.service';
 import type { Subscription } from '../models/types';
 
 export interface CourtesyMessage {
@@ -31,7 +32,11 @@ export function companyLanguage(country: string | undefined): 'pt' | 'es' | 'en'
   return SPANISH.includes(country) ? 'es' : 'en';
 }
 
-/** Text of the push, in the company's language. */
+/**
+ * Text of the push, in the company's language. `orders` is the work orders
+ * of the month; 0 (or limits off, see sendCourtesyNotices) says only that
+ * the app goes back to Free.
+ */
 export function courtesyMessage(days: number, orders: number, country: string | undefined): CourtesyMessage {
   const free = planRow('free').ordersPerMonth;
   const language = companyLanguage(country);
@@ -83,6 +88,8 @@ export async function sendCourtesyNotices(
     return dueCourtesyNotice(subscription, now) === null ? [] : [{ doc, subscription }];
   });
 
+  // Free only has an order limit with the switch on: off, no number is said.
+  const limitsOn = due.length > 0 && (await isPaidPlansEnabled());
   let sent = 0;
   let errors = 0;
   let next = 0;
@@ -94,7 +101,7 @@ export async function sendCourtesyNotices(
         const last = (await record.get()).data() as CourtesyNoticeRecord | undefined;
         const notice = dueCourtesyNotice(subscription, now, last);
         if (notice === null) continue;
-        const orders = ordersUsage(subscription?.usage, now).thisMonth;
+        const orders = limitsOn ? ordersUsage(subscription?.usage, now).thisMonth : 0;
         await deps.notify(doc.id, courtesyMessage(notice.daysLeft, orders, doc.get('country') as string | undefined));
         await record.set({ expiresAt: subscription!.expiresAt as string, days: notice.step });
         sent++;

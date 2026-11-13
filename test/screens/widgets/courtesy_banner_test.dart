@@ -4,6 +4,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/widgets/courtesy_banner.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,6 +51,7 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     SubscriptionService.debugPaidPlansEnabledOverride = true;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = true;
     PaywallLauncher.roleResolver = () => 'owner';
     events.clear();
     AnalyticsService.debugAiEventSink = (name, parameters) =>
@@ -58,6 +60,7 @@ void main() {
 
   tearDown(() {
     SubscriptionService.debugPaidPlansEnabledOverride = null;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = null;
     AnalyticsService.debugAiEventSink = null;
   });
 
@@ -74,6 +77,17 @@ void main() {
     );
     expect(find.textContaining('assistente'), findsNothing);
     expect(events['upgrade_modal_shown']?['trigger'], 'courtesy_first');
+  });
+
+  testWidgets('limits off: Free has no order limit, so no number nor plan', (
+    tester,
+  ) async {
+    FeatureGateService.debugPlanLimitsEnforcedOverride = false;
+    await _pump(tester, _grace(orders: 23));
+    expect(
+      find.text('Acaba em 10 dias. Depois disso, o app volta para o plano Free.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('without work orders this month it just says what happens', (tester) async {

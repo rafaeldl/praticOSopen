@@ -29,7 +29,6 @@ const emit = defineEmits<{ close: []; done: [] }>()
 
 const text = ref('')
 const left = ref<number | null>(null)
-const limit = ref(0)
 const state = ref<'ask' | 'reading' | 'plan' | 'saving'>('ask')
 const note = ref('')
 const plan = shallowRef<{ order: Order; items: DraftItem[] }[]>([])
@@ -44,7 +43,6 @@ onMounted(async () => {
   try {
     const status = await assistStatus()
     if (status.usage && status.usage.limit > 0) {
-      limit.value = status.usage.limit
       left.value = Math.max(0, status.usage.limit - status.usage.used)
     }
   } catch {
@@ -54,8 +52,8 @@ onMounted(async () => {
 
 function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
-  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED' && error.details?.period === 'day') return t('orderAssistantErrorQuotaDay', { limit: error.details.limit as number })
-  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota', { limit: limit.value })
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED' && error.details?.period === 'day') return t('orderAssistantErrorQuotaDay')
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota')
   return t('orderAssistantErrorUnavailable')
 }
 

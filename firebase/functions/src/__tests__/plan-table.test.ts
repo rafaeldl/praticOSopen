@@ -46,7 +46,9 @@ describe('plan table', () => {
         expect(row.ownChecklists).toBe(old.ownChecklists || now.ownChecklists);
         expect(row.overageAllowed).toBe(old.overageAllowed || now.overageAllowed);
         expect(row.pdfWatermark).toBe(old.pdfWatermark && now.pdfWatermark);
-        expect([...row.features].sort()).toEqual([...new Set([...old.features, ...now.features])].sort());
+        // A version without a feature list allowed every feature: it keeps none (no gate).
+        const features = old.features.length === 0 ? [] : [...new Set([...old.features, ...now.features])];
+        expect([...row.features].sort()).toEqual(features.sort());
       }
     }
   });

@@ -182,7 +182,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: true,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp'],
+      features: [],
     ),
     SubscriptionPlan.starter: PlanRow(
       ordersPerMonth: -1,
@@ -195,7 +195,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges'],
+      features: [],
     ),
     SubscriptionPlan.pro: PlanRow(
       ordersPerMonth: -1,
@@ -208,7 +208,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
+      features: [],
     ),
     SubscriptionPlan.business: PlanRow(
       ordersPerMonth: -1,
@@ -221,7 +221,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: true,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
+      features: [],
     ),
   },
   '2': {

@@ -5,6 +5,7 @@ import 'package:praticos/screens/widgets/next_step_block.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/courtesy_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -118,8 +119,11 @@ class _CourtesyBannerState extends State<CourtesyBanner> {
     final l10n = context.l10n;
     final now = DateTime.now();
     final usage = widget.subscription.usage;
-    final plan = recommendedPlan(usage, now: now);
-    final orders = usage.ordersAt(now).thisMonth;
+    // Free only has an order limit with the plan limits on: off, no number
+    // and no plan to suggest.
+    final limitsOn = FeatureGateService.planLimitsEnforced;
+    final plan = limitsOn ? recommendedPlan(usage, now: now) : null;
+    final orders = limitsOn ? usage.ordersAt(now).thisMonth : 0;
     return [
       l10n.courtesyBannerEnds(notice.daysLeft),
       if (orders > 0)

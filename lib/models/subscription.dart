@@ -343,23 +343,30 @@ class Subscription {
 
   /// Version of the plan table in force (#726): [tableVersion] when the table
   /// has it; else, for a paid plan bought before the current table (no
-  /// [tableVersion], not the courtesy), the legacy version; else the current
-  /// one (also for a version this code does not know).
+  /// [tableVersion]; the courtesy too, which keeps the old Pro), the legacy
+  /// version; else the current one (also for a version this code does not
+  /// know).
   String get effectiveTableVersion {
     final version = tableVersion;
     if (version != null) {
       return kPlanTablesInForce.containsKey(version) ? version : kPlanTableCurrentVersion;
     }
     final paid = plan != SubscriptionPlan.free;
-    return paid && source != SubscriptionSource.grace ? kPlanTableLegacyVersion : kPlanTableCurrentVersion;
+    return paid ? kPlanTableLegacyVersion : kPlanTableCurrentVersion;
   }
 
   /// Row of the plan table in force at [now] (Free of the current table once
   /// the plan expires).
-  PlanRow planRowAt(DateTime now) {
+  PlanRow planRowAt(DateTime now) => planInForce(now).row;
+
+  /// The plan in force at [now], the version of the table it follows and
+  /// its row: the same answer as `planInForce` on the server and the web.
+  /// While the plan is in force, [effectiveTableVersion]; after it expires,
+  /// Free of the current table. Limits, features and AI ceilings read it.
+  ({SubscriptionPlan plan, String version, PlanRow row}) planInForce(DateTime now) {
     final current = effectivePlan(now);
-    if (current != plan) return currentPlanRow(current);
-    return kPlanTablesInForce[effectiveTableVersion]![current]!;
+    final version = current == plan ? effectiveTableVersion : kPlanTableCurrentVersion;
+    return (plan: current, version: version, row: kPlanTablesInForce[version]![current]!);
   }
 
   /// Limits in force at [now]: while the plan is in force, the row of its

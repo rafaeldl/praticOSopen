@@ -231,17 +231,7 @@ export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanI
       "ownChecklists": true,
       "pdfWatermark": true,
       "overageAllowed": false,
-      "features": [
-        "orders",
-        "customers",
-        "catalog",
-        "agenda",
-        "quoteShare",
-        "linkApproval",
-        "financeBasic",
-        "dataImport",
-        "webApp"
-      ]
+      "features": []
     },
     "starter": {
       "ordersPerMonth": -1,
@@ -254,22 +244,7 @@ export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanI
       "ownChecklists": true,
       "pdfWatermark": false,
       "overageAllowed": false,
-      "features": [
-        "orders",
-        "customers",
-        "catalog",
-        "agenda",
-        "quoteShare",
-        "linkApproval",
-        "financeBasic",
-        "dataImport",
-        "webApp",
-        "nfse",
-        "brandedPdf",
-        "ownChecklists",
-        "ai",
-        "charges"
-      ]
+      "features": []
     },
     "pro": {
       "ordersPerMonth": -1,
@@ -282,29 +257,7 @@ export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanI
       "ownChecklists": true,
       "pdfWatermark": false,
       "overageAllowed": false,
-      "features": [
-        "orders",
-        "customers",
-        "catalog",
-        "agenda",
-        "quoteShare",
-        "linkApproval",
-        "financeBasic",
-        "dataImport",
-        "webApp",
-        "nfse",
-        "brandedPdf",
-        "ownChecklists",
-        "ai",
-        "charges",
-        "teamRoles",
-        "perPersonAgenda",
-        "workStages",
-        "tvMode",
-        "contracts",
-        "aiFinance",
-        "spreadsheetExport"
-      ]
+      "features": []
     },
     "business": {
       "ordersPerMonth": -1,
@@ -317,32 +270,7 @@ export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanI
       "ownChecklists": true,
       "pdfWatermark": false,
       "overageAllowed": true,
-      "features": [
-        "orders",
-        "customers",
-        "catalog",
-        "agenda",
-        "quoteShare",
-        "linkApproval",
-        "financeBasic",
-        "dataImport",
-        "webApp",
-        "nfse",
-        "brandedPdf",
-        "ownChecklists",
-        "ai",
-        "charges",
-        "teamRoles",
-        "perPersonAgenda",
-        "workStages",
-        "tvMode",
-        "contracts",
-        "aiFinance",
-        "spreadsheetExport",
-        "bulkActions",
-        "mcp",
-        "api"
-      ]
+      "features": []
     }
   },
   "2": {

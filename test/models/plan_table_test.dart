@@ -85,12 +85,17 @@ void main() {
         expect(row.ownChecklists, old.ownChecklists || now.ownChecklists);
         expect(row.overageAllowed, old.overageAllowed || now.overageAllowed);
         expect(row.pdfWatermark, old.pdfWatermark && now.pdfWatermark);
-        expect(row.features.toSet(), {...old.features, ...now.features});
+        // A version without a feature list allowed every feature: it keeps
+        // none (no gate).
+        expect(
+          row.features.toSet(),
+          old.features.isEmpty ? <String>{} : {...old.features, ...now.features},
+        );
       }
     }
   });
 
-  test('a paid subscription without tableVersion keeps its old table; courtesy and Free follow the new one (#726)', () {
+  test('a paid subscription without tableVersion, the courtesy too, keeps its old table; Free follows the new one (#726)', () {
     final now = DateTime.utc(2026, 11, 20);
     final old = Subscription.fromJson({'plan': 'starter', 'source': 'store'});
     expect(old.effectiveTableVersion, kPlanTableLegacyVersion);
@@ -100,7 +105,9 @@ void main() {
     final bought = Subscription.fromJson({'plan': 'starter', 'source': 'store', 'tableVersion': '2'});
     expect(bought.effectiveLimits(now).users, 2);
     final courtesy = Subscription.fromJson({'plan': 'pro', 'source': 'grace', 'expiresAt': '2026-12-07T12:00:00.000Z'});
-    expect(courtesy.effectiveTableVersion, kPlanTableCurrentVersion);
+    expect(courtesy.effectiveTableVersion, kPlanTableLegacyVersion);
+    expect(courtesy.effectiveLimits(now).ordersPerMonth, -1);
+    expect(courtesy.planInForce(now).row.features, isEmpty);
     expect(Subscription.fromJson({'plan': 'free'}).effectiveTableVersion, kPlanTableCurrentVersion);
   });
 

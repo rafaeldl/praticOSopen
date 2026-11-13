@@ -209,7 +209,7 @@ describe('isGraceActive', () => {
 describe('buildGraceSubscription', () => {
   const EXPIRES = new Date('2026-12-06T12:00:00.000Z');
 
-  it('grants Pro until expiresAt to a company without subscription', () => {
+  it('grants the old Pro until expiresAt to a company without subscription', () => {
     const grace = buildGraceSubscription(undefined, EXPIRES);
 
     expect(grace).toMatchObject({
@@ -218,8 +218,9 @@ describe('buildGraceSubscription', () => {
       source: 'grace',
       store: null,
       expiresAt: '2026-12-06T12:00:00.000Z',
-      limits: PLAN_LIMITS.pro,
-      tableVersion: '2',
+      // Old Pro (owner's decision, #726): no order limit, 5 people, every feature.
+      limits: { ordersPerMonth: -1, photosPerMonth: -1, formTemplates: -1, users: 5, pdfWatermark: false },
+      tableVersion: '1',
       usage: { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1 },
     });
   });
@@ -299,8 +300,11 @@ describe('tableVersionOf (#726)', () => {
     expect(tableVersionOf({ plan: 'business', source: 'store' })).toBe('1');
   });
 
-  it('courtesy, Free and no subscription follow the current table', () => {
-    expect(tableVersionOf({ plan: 'pro', source: 'grace' })).toBe('2');
+  it('the courtesy keeps the old Pro (owner, #726)', () => {
+    expect(tableVersionOf({ plan: 'pro', source: 'grace' })).toBe('1');
+  });
+
+  it('Free and no subscription follow the current table', () => {
     expect(tableVersionOf({ plan: 'free' })).toBe('2');
     expect(tableVersionOf({ plan: 'enterprise' })).toBe('2');
     expect(tableVersionOf(undefined)).toBe('2');
@@ -312,7 +316,7 @@ describe('tableVersionOf (#726)', () => {
     expect(tableVersionOf({ plan: 'starter', tableVersion: '99' })).toBe('2');
   });
 
-  it('the old Starter keeps 3 people and gets everything the new one has', () => {
+  it('the old Starter keeps 3 people and every feature, and gets the new numbers', () => {
     const row = planRow('starter', tableVersionOf({ plan: 'starter', source: 'store' }));
     expect(row.users).toBe(3);
     expect(row.ordersPerMonth).toBe(-1);
@@ -320,6 +324,7 @@ describe('tableVersionOf (#726)', () => {
     expect(row.formTemplates).toBe(-1);
     expect(row.aiPerMonth).toBe(1000);
     expect(row.aiPerDay).toBe(-1);
-    expect(row.features).toEqual(expect.arrayContaining([...planRow('starter').features]));
+    // Table 1 listed no feature (every one allowed): it keeps no list.
+    expect(row.features).toEqual([]);
   });
 });

@@ -13,7 +13,7 @@
 
 import { db, getRootCollection, getTenantCollection } from './firestore.service';
 import { PLAN_LIMITS, limitsOfRow, planRow, tableVersionOf } from './subscription-plans';
-import { PLAN_IDS } from './plan-table.generated';
+import { PLAN_IDS, PLAN_TABLE_CURRENT_VERSION, type PlanRow } from './plan-table.generated';
 import { instantOfWall, wallClockOf } from './contract-generation';
 import type { SubscriptionLimits, SubscriptionPlan } from '../models/types';
 
@@ -96,15 +96,34 @@ function mergeStored(row: SubscriptionLimits, json: Json): SubscriptionLimits {
   };
 }
 
+/** The plan in force, the version of the table it follows and its row. */
+export interface PlanInForce {
+  plan: SubscriptionPlan;
+  version: string;
+  row: PlanRow;
+}
+
+/**
+ * Subscription.planInForce, the one answer to "what does this company have
+ * now" for server, app and web: the plan while expiresAt is null or in the
+ * future, with its table version (tableVersionOf); after it expires, Free of
+ * the current table. Limits, features and AI ceilings all read this row.
+ */
+export function planInForce(subscription: Json | null | undefined, now: Date): PlanInForce {
+  const plan = effectivePlan(subscription, now);
+  const version = plan === storedPlan(subscription) ? tableVersionOf(subscription) : PLAN_TABLE_CURRENT_VERSION;
+  return { plan, version, row: planRow(plan, version) };
+}
+
 /**
  * Subscription.effectiveLimits: while the plan is in force, the row of its
  * table version merged with the stored limits; after it expires, Free of the
  * current table.
  */
 export function effectiveLimits(subscription: Json | null | undefined, now: Date): SubscriptionLimits {
-  const current = effectivePlan(subscription, now);
-  if (current !== storedPlan(subscription)) return { ...PLAN_LIMITS[current] };
-  const row = limitsOfRow(planRow(current, tableVersionOf(subscription)));
+  const { plan, row: planRowInForce } = planInForce(subscription, now);
+  if (plan !== storedPlan(subscription)) return { ...PLAN_LIMITS[plan] };
+  const row = limitsOfRow(planRowInForce);
   const limits = subscription?.limits;
   if (limits && typeof limits === 'object' && !Array.isArray(limits)) return mergeStored(row, limits as Json);
   return row;
@@ -113,9 +132,7 @@ export function effectiveLimits(subscription: Json | null | undefined, now: Date
 /** Over the limit does not block: the plan's `overageAllowed` (Business), for orders and people. */
 function overageAllowed(subscription: Json | null | undefined, now: Date, resource: PlanResource): boolean {
   if (resource !== 'order' && resource !== 'collaborator') return false;
-  const plan = effectivePlan(subscription, now);
-  const version = plan === storedPlan(subscription) ? tableVersionOf(subscription) : undefined;
-  return planRow(plan, version).overageAllowed;
+  return planInForce(subscription, now).row.overageAllowed;
 }
 
 function limitOf(limits: SubscriptionLimits, resource: PlanResource): number {
@@ -293,6 +310,56 @@ export async function countUsage(companyId: string, resource: PlanResource, now:
     case 'collaborator':
       return countCollaborators(companyId, now);
   }
+}
+
+/**
+ * CNPJs that issue notas: fiscal emitters whose certificate was not deleted
+ * (companies/{id}/fiscalEmitters, the NFS-e direct emitters).
+ */
+export async function countNfseCnpjs(companyId: string): Promise<number> {
+  const emitters = await getTenantCollection(companyId, 'fiscalEmitters').get();
+  return emitters.docs.filter((doc) => doc.get('certificate.status') !== 'deleted').length;
+}
+
+/** The answer of checkNfseCnpjLimit: a new CNPJ fits in the plan's `nfseCnpjs`. */
+export interface NfseCnpjCheck {
+  allowed: boolean;
+  /** -1 = unlimited (also when limits are off); 0 = no nota on this plan. */
+  limit: number;
+  usage: number;
+  plan: SubscriptionPlan;
+}
+
+/**
+ * Whether the company can add one more CNPJ to the nota (#723): the plan in
+ * force's `nfseCnpjs` (1 Starter, 2 Pro). Only with the switch on; replacing
+ * the certificate of a CNPJ already there never asks.
+ */
+export async function checkNfseCnpjLimit(companyId: string, now: Date = new Date()): Promise<NfseCnpjCheck> {
+  const enforced = await isPaidPlansEnabled();
+  const company = enforced ? await getRootCollection('companies').doc(companyId).get() : null;
+  const subscription = (company?.exists ? company.get('subscription') : null) as Json | null;
+  const { plan, row } = planInForce(subscription, now);
+  const limit = enforced ? row.nfseCnpjs : -1;
+  if (limit === -1) return { allowed: true, limit, usage: 0, plan };
+  const usage = await countNfseCnpjs(companyId);
+  return { allowed: usage + 1 <= limit, limit, usage, plan };
+}
+
+/** Body of the 402 for a CNPJ over the plan, the same shape as planLimitError. */
+export function nfseCnpjLimitError(check: NfseCnpjCheck) {
+  return {
+    success: false as const,
+    error: {
+      code: 'PLAN_LIMIT' as const,
+      message: `Plan limit reached for nfseCnpj (${check.usage}/${check.limit})`,
+      resource: 'nfseCnpj' as const,
+      limit: check.limit,
+      usage: check.usage,
+      adding: 1,
+      plan: check.plan,
+    },
+  };
 }
 
 const SWITCH_TTL_MS = 60_000;

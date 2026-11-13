@@ -79,7 +79,9 @@ const moreGenerous = (a, b) => (a === -1 || b === -1 ? -1 : Math.max(a, b))
  * table is in force as the more generous of it and the current one, field by
  * field. Numbers: the larger (-1, no limit, wins); pdfWatermark only when
  * both have it; ownChecklists and overageAllowed when either has it;
- * features: both lists. The current version is in force as it is.
+ * features: an old version that lists none had every feature (the table
+ * before #724), so it keeps no list (no gate); else both lists. The current
+ * version is in force as it is.
  */
 export function mergeRows(old, current) {
   const row = {}
@@ -87,7 +89,7 @@ export function mergeRows(old, current) {
   row.ownChecklists = old.ownChecklists || current.ownChecklists
   row.pdfWatermark = old.pdfWatermark && current.pdfWatermark
   row.overageAllowed = old.overageAllowed || current.overageAllowed
-  row.features = [...new Set([...current.features, ...old.features])]
+  row.features = old.features.length === 0 ? [] : [...new Set([...current.features, ...old.features])]
   return Object.fromEntries(FIELDS.map((field) => [field, row[field]]))
 }
 

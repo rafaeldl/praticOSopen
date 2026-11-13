@@ -8,6 +8,7 @@ import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
 import { courtesyMessage, sendCourtesyNotices } from '../courtesy-notice.service';
 import { dueCourtesyNotice, PLAN_LIMITS } from '../subscription-plans';
+import { resetPaidPlansCache } from '../plan-limits.service';
 import type { Subscription } from '../../models/types';
 
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
@@ -92,7 +93,10 @@ describe('courtesyMessage', () => {
 });
 
 describe('sendCourtesyNotices', () => {
-  beforeEach(() => fake.reset());
+  beforeEach(() => {
+    fake.reset();
+    resetPaidPlansCache();
+  });
 
   it('leaves the subscription map alone', async () => {
     fake.seed('companies/c1', { subscription: grace() });
@@ -115,14 +119,27 @@ describe('sendCourtesyNotices', () => {
     expect(notify).toHaveBeenCalledTimes(1);
   });
 
-  it('quotes the work orders the server counted this month', async () => {
+  it('limits on: quotes the work orders the server counted this month', async () => {
     const usage = { ...grace().usage, ordersMonth: '2026-11', ordersThisMonth: 23 };
+    fake.seed('config/paidPlans', { enabled: true });
     fake.seed('companies/c1', { country: 'BR', subscription: grace({ usage }) });
     const notify = jest.fn().mockResolvedValue(undefined);
 
     await sendCourtesyNotices(daysBefore(15), { notify });
 
     expect(notify.mock.calls[0][1].body).toContain('abriu 23 OS');
+  });
+
+  it('limits off: Free has no order limit, so no number is said', async () => {
+    const usage = { ...grace().usage, ordersMonth: '2026-11', ordersThisMonth: 23 };
+    fake.seed('companies/c1', { country: 'BR', subscription: grace({ usage }) });
+    const notify = jest.fn().mockResolvedValue(undefined);
+
+    await sendCourtesyNotices(daysBefore(15), { notify });
+
+    const body = notify.mock.calls[0][1].body as string;
+    expect(body).toBe('Depois disso, o app volta para o plano Free. Escolha seu plano no app.');
+    expect(body).not.toMatch(/\d/);
   });
 
   it('quotes the days really left and records the step', async () => {
