@@ -23,7 +23,7 @@ O dono aprovou uma tabela nova no épico #721. Os valores abaixo **ainda não es
 Regras novas que mudam a conta deste documento:
 
 - O plano é o maior entre OS por mês, pessoas e CNPJs.
-- Limite suave: aviso ao chegar perto e ao passar, um mês de folga, conta a média; nunca trava uma OS já aberta. Hoje a conta é dura (`uso + o que entra <= limite`, 402).
+- Limite suave: aviso ao chegar perto e ao passar, o primeiro mês acima do limite ainda cria OS, e a OS nova só espera a troca de plano quando o mês anterior também passou; nunca trava uma OS já aberta. Hoje a conta é dura (`uso + o que entra <= limite`, 402).
 - IA incluída em todos os planos, inclusive no Grátis (decisão de 12/11, comentário na #729): sem contador na tela; o teto é interno e os termos falam em uso justo.
 - Fotos deixam de ter limite; o contador `photosThisMonth` passa a servir só para custo.
 - Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar ficam em todos os planos.

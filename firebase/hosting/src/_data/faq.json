@@ -84,7 +84,8 @@
           },
           {
             "question": "Assinei e desisti. Recebo o dinheiro de volta?",
-            "answer": "Recebe, se pedir em até 7 dias da assinatura. Assinou no Android ou na web? Peça pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Assinou no iPhone? A cobrança é da Apple, e o pedido é feito a ela, em <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Os detalhes estão nos <a href=\"terms.html\">termos de uso</a>."
+            "answer": "Recebe, se pedir em até 7 dias da assinatura. Assinou no Android ou na web? Peça pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Assinou no iPhone? A cobrança é da Apple, o pedido é feito a ela, que decide a devolução, em <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Os detalhes estão nos <a href=\"terms.html\">termos de uso</a>.",
+            "flag": "pricingPage"
           }
         ]
       },
@@ -220,7 +221,8 @@
           },
           {
             "question": "I subscribed and changed my mind. Can I get my money back?",
-            "answer": "Yes, if you ask within 7 days of subscribing. Subscribed on Android or on the web? Ask by email at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Subscribed on iPhone? Apple charges the subscription, so ask Apple at <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. The details are in the <a href=\"terms-en.html\">terms of use</a>."
+            "answer": "Yes, if you ask within 7 days of subscribing. Subscribed on Android or on the web? Ask by email at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Subscribed on iPhone? Apple charges the subscription, so ask Apple, which decides on the refund, at <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. The details are in the <a href=\"terms-en.html\">terms of use</a>.",
+            "flag": "pricingPage"
           }
         ]
       },
@@ -315,7 +317,8 @@
           },
           {
             "question": "Me suscribí y me arrepentí. ¿Me devuelven el dinero?",
-            "answer": "Sí, si lo pides dentro de los 7 días de la suscripción. ¿Te suscribiste en Android o en la web? Pídelo por correo a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. ¿Te suscribiste en iPhone? El cobro lo hace Apple, y el pedido se hace a Apple, en <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Los detalles están en los <a href=\"terms-es.html\">términos de uso</a>."
+            "answer": "Sí, si lo pides dentro de los 7 días de la suscripción. ¿Te suscribiste en Android o en la web? Pídelo por correo a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. ¿Te suscribiste en iPhone? El cobro lo hace Apple, el pedido se hace a Apple, que decide la devolución, en <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>. Los detalles están en los <a href=\"terms-es.html\">términos de uso</a>.",
+            "flag": "pricingPage"
           }
         ]
       },

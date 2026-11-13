@@ -8,7 +8,7 @@
 
 ## Overview
 
-PraticOS is freemium. Registering a company gives the Free plan. Starter, Pro and Business are auto-renewable monthly subscriptions sold **only inside the app**: App Store In-App Purchase on iOS and Google Play Billing on Android, both through RevenueCat. The web sells nothing.
+PraticOS is freemium. Registering a company gives the Free plan. Starter, Pro and Business are auto-renewable monthly subscriptions (yearly too, once #727 creates it) sold **only inside the app**: App Store In-App Purchase on iOS and Google Play Billing on Android, both through RevenueCat. The web sells nothing.
 
 In the app, prices and periods come from the stores and are shown by the RevenueCat paywall; the app never hardcodes them. The approved list prices (below) appear only in these docs and on the site's pricing page, behind `flags.pricingPage`. A yearly option (pays 10 months) is part of the approved table and still has to be created in the stores (#727).
 
@@ -44,11 +44,11 @@ Features (each plan includes the previous one):
 Rules:
 
 - The plan is the highest of work orders per month, people and CNPJs.
-- Soft limit: warn when close and when over, one month of slack, monthly average counts; an open work order never locks.
+- Soft limit: warn when close and when over, the first month over still creates work orders, and a new one waits for a plan change only when the month before was also over; an open work order never locks.
 - The everyday basics stay in every plan: open a work order, send it to the customer, approval by link, schedule and import.
 - A new company starts on Free, with no Pro trial.
 - AI is included in every plan (approved 2026-11-12, comment on #729). The customer never sees an AI counter; the ceilings above are internal, and the terms speak of fair use, never "unlimited". Measured use is about 2.5 per work order, so 50/month covers Free's 10 work orders.
-- 7-day guarantee: whoever subscribes and gives up within 7 days gets the money back (see "7-day guarantee and refunds").
+- 7-day guarantee: whoever subscribes and gives up within 7 days can ask for the money back. On the web and Google Play we refund; on the App Store Apple decides (see "7-day guarantee and refunds"). The terms clause and the FAQ answer show only with `flags.pricingPage`, like the pricing page.
 - Current subscribers and the courtesy keep what they have.
 - App, web and server show and enforce the same thing, from a single table (#722).
 
@@ -63,13 +63,6 @@ Rules:
 
 Defaults live in `SubscriptionLimits.defaults` (`lib/models/subscription.dart`) and match the server. Replace this table when #722/#723 ship.
 
----------|------|---------|-----|----------|
-| Photos/month | 30 | 200 | 500 | Unlimited (-1) |
-| Form templates (active) | 1 | 3 | 10 | Unlimited (-1) |
-| Users (members + pending invites) | 1 | 3 | 5 | Unlimited (-1) |
-| PDF watermark | Yes | No | No | No |
-
-Defaults live in `SubscriptionLimits.defaults` (`lib/models/subscription.dart`) and match the server.
 
 ---
 
