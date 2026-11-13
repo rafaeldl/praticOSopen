@@ -172,7 +172,16 @@ export function refundEligible(record: WebBillingRecord | null | undefined, now:
 // Checkout guard: never charge twice
 // ============================================================================
 
-export type CheckoutBlock = 'STORE_SUBSCRIPTION_ACTIVE' | 'WEB_SUBSCRIPTION_ACTIVE' | null;
+export type CheckoutBlock = 'STORE_SUBSCRIPTION_ACTIVE' | 'WEB_SUBSCRIPTION_ACTIVE' | 'OUTSIDE_BRAZIL' | null;
+
+/**
+ * The web sells only to companies in Brazil: Asaas charges in reais and needs
+ * a CPF/CNPJ. A company with no country is Brazilian (the app's default).
+ * Companies abroad subscribe in the app (App Store / Google Play).
+ */
+export function sellsOnWeb(country: string | null | undefined): boolean {
+  return !country || country.trim().toUpperCase() === 'BR';
+}
 
 function inForce(subscription: Subscription | undefined, now: Date): boolean {
   if (!subscription || subscription.plan === 'free' || subscription.status === 'expired') return false;
@@ -185,12 +194,15 @@ function inForce(subscription: Subscription | undefined, now: Date): boolean {
  * Why the company cannot buy on the web now, or null:
  * - a store subscription (App Store / Google Play) is in force: "use the app";
  * - a web subscription is already active (renewing): change it by cancelling first.
+ * - the company is outside Brazil: subscribe in the app (checked last, so a
+ *   web subscriber who changed country still sees and manages the subscription).
  * A cancelled web plan still running, the launch courtesy and Free may buy.
  */
 export function checkoutBlock(
   subscription: Subscription | undefined,
   record: WebBillingRecord | null | undefined,
   now: Date,
+  country?: string | null,
 ): CheckoutBlock {
   if (
     inForce(subscription, now) &&
@@ -200,6 +212,7 @@ export function checkoutBlock(
     return 'STORE_SUBSCRIPTION_ACTIVE';
   }
   if (record?.status === 'active') return 'WEB_SUBSCRIPTION_ACTIVE';
+  if (!sellsOnWeb(country)) return 'OUTSIDE_BRAZIL';
   return null;
 }
 

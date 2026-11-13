@@ -18,6 +18,8 @@ import { PLAN_NAME } from '@/lib/settings/model'
 import { isValidTaxId, normalizeTaxId } from '@/lib/tax-id'
 import { showToast as toast } from '@/lib/toast'
 import {
+  APP_STORE_URL,
+  PLAY_STORE_URL,
   canBuy,
   cancelBilling,
   loadBilling,
@@ -170,6 +172,10 @@ onMounted(load)
       <ErrorState v-else-if="failed" :retry="load" />
       <template v-else-if="view">
         <p v-if="view.block === 'STORE_SUBSCRIPTION_ACTIVE'" class="set-block" data-testid="billing-store">{{ t('web.billing.storeNote') }}</p>
+        <div v-else-if="view.enabled && view.block === 'OUTSIDE_BRAZIL'" class="set-block" data-testid="billing-app">
+          <p>{{ t('web.billing.appNote') }}</p>
+          <p><a :href="APP_STORE_URL" target="_blank" rel="noopener">App Store</a> · <a :href="PLAY_STORE_URL" target="_blank" rel="noopener">Google Play</a></p>
+        </div>
         <p v-else-if="!view.enabled && !sub" class="set-block" data-testid="billing-closed">{{ t('web.billing.closed') }}</p>
 
         <section v-if="sub && sub.status !== 'refunded'" class="set-section" aria-labelledby="billing-current" data-testid="billing-current">

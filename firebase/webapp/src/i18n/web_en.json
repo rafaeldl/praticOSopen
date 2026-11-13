@@ -988,6 +988,7 @@
   "web.billing.choosePlan": "Subscribe to a plan",
   "web.billing.yourSubscription": "Your subscription",
   "web.billing.storeNote": "You subscribe through the App Store or Google Play. To change plans, use the app.",
+  "web.billing.appNote": "Outside Brazil, you subscribe in the PraticOS phone app. Download the app and subscribe there.",
   "web.billing.closed": "Web subscriptions are not open yet.",
   "web.billing.cycleQuestion": "How do you want to pay?",
   "web.billing.monthly": "Monthly",
@@ -1036,6 +1037,7 @@
   "web.billing.refundedToast": "Done. Your money is on its way back.",
   "web.error.storeSubscription": "You already subscribe through the App Store or Google Play. To change plans, use the app.",
   "web.error.webSubscription": "You already have an active subscription. To change plans, cancel the current one first.",
+  "web.error.outsideBrazil": "Subscribing on the web is only for companies in Brazil. Subscribe in the PraticOS phone app.",
   "web.error.refundExpired": "The 7-day guarantee is over. You can cancel, and the plan lasts until the end of the paid period.",
   "web.error.checkoutClosed": "Web subscriptions are not open yet."
 }

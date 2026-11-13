@@ -54,6 +54,20 @@ test('quem assina na loja: "use o app", sem botão de compra', async ({ page }) 
   await expect(page.getByTestId('billing-form')).toHaveCount(0)
 })
 
+test('empresa fora do Brasil: assina pelo app, sem formulário nem compra', async ({ page }) => {
+  await billing(page, { enabled: true, offer: OFFER, block: 'OUTSIDE_BRAZIL', subscription: null })
+  await login(page, 'gOwner', 'settings/plan')
+  await expect(page.getByTestId('plan-billing-app')).toContainText('Fora do Brasil, a assinatura é feita pelo app do PraticOS no celular.')
+  await expect(page.getByTestId('plan-billing-app').getByRole('link', { name: 'App Store' })).toHaveAttribute('href', /apps\.apple\.com/)
+  await expect(page.getByTestId('plan-billing-app').getByRole('link', { name: 'Google Play' })).toHaveAttribute('href', /play\.google\.com/)
+  await expect(page.getByTestId('plan-billing-buy')).toHaveCount(0)
+  await expect(page.getByTestId('plan-where')).toHaveCount(0)
+  await shot(page, 'plano-fora-do-brasil')
+  await page.goto('settings/plan/subscribe')
+  await expect(page.getByTestId('billing-app')).toBeVisible()
+  await expect(page.getByTestId('billing-form')).toHaveCount(0)
+})
+
 test('assinar: plano, anual com Pix, garantia de 7 dias e ida para a página do Asaas', async ({ page }) => {
   await billing(page, { enabled: true, offer: OFFER, block: null, subscription: null })
   let sent: Record<string, unknown> | null = null

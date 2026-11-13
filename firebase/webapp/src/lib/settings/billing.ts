@@ -7,7 +7,11 @@ export type WebPlan = 'starter' | 'pro' | 'business'
 export type WebCycle = 'monthly' | 'yearly'
 export type WebBillingType = 'CREDIT_CARD' | 'PIX' | 'BOLETO'
 export type WebBillingStatus = 'pending' | 'active' | 'cancelled' | 'refunded'
-export type CheckoutBlock = 'STORE_SUBSCRIPTION_ACTIVE' | 'WEB_SUBSCRIPTION_ACTIVE' | null
+export type CheckoutBlock = 'STORE_SUBSCRIPTION_ACTIVE' | 'WEB_SUBSCRIPTION_ACTIVE' | 'OUTSIDE_BRAZIL' | null
+
+// Companies outside Brazil subscribe in the app (the web charges only in reais, with CPF/CNPJ).
+export const APP_STORE_URL = 'https://apps.apple.com/app/praticos/id1534604555'
+export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos'
 
 export interface WebOffer {
   plans: { plan: WebPlan; prices: Partial<Record<WebCycle, number>> }[]
@@ -57,16 +61,18 @@ export const cancelBilling = (refund: boolean) =>
  * - hidden: switch off, or the person cannot buy;
  * - store: subscribed in the App Store / Google Play, change it in the app;
  * - subscription: a web subscription to see (pay, cancel, refund);
+ * - app: company outside Brazil, subscribe in the app (App Store / Google Play);
  * - buy: may choose a plan.
  */
-export type BillingEntry = 'hidden' | 'store' | 'subscription' | 'buy'
+export type BillingEntry = 'hidden' | 'store' | 'subscription' | 'app' | 'buy'
 
 export function billingEntry(view: WebBillingView | null): BillingEntry {
   if (!view) return 'hidden'
   if (view.block === 'STORE_SUBSCRIPTION_ACTIVE') return 'store'
   const sub = view.subscription
   if (sub && sub.status !== 'refunded') return 'subscription'
-  return view.enabled ? 'buy' : 'hidden'
+  if (!view.enabled) return 'hidden'
+  return view.block === 'OUTSIDE_BRAZIL' ? 'app' : 'buy'
 }
 
 /** Whether the plan form shows: on, no store subscription and no renewing web one. */

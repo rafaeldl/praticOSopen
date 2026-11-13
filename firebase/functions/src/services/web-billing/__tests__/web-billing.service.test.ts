@@ -127,6 +127,14 @@ describe('startCheckout', () => {
     });
   });
 
+  it('never charges a company outside Brazil (it subscribes in the app)', async () => {
+    fake.seed('companies/c1', { name: 'Shop', country: 'US' });
+    expect((await billingOverview('c1', NOW)).block).toBe('OUTSIDE_BRAZIL');
+    const d = deps();
+    await expect(startCheckout('c1', 'u1', INPUT, d)).rejects.toMatchObject({ code: 'OUTSIDE_BRAZIL', status: 409 });
+    expect(d.asaas.createCustomer).not.toHaveBeenCalled();
+  });
+
   it('never charges a store subscriber', async () => {
     seedCompany({ plan: 'starter', status: 'active', source: 'store', store: 'app_store', expiresAt: '2026-12-01T00:00:00Z', limits: LIMITS, usage: USAGE });
     const d = deps();

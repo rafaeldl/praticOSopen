@@ -988,6 +988,7 @@
   "web.billing.choosePlan": "Assinar um plano",
   "web.billing.yourSubscription": "Sua assinatura",
   "web.billing.storeNote": "Você assina pela App Store ou pelo Google Play. Para mudar de plano, use o app.",
+  "web.billing.appNote": "Fora do Brasil, a assinatura é feita pelo app do PraticOS no celular. Baixe o app e assine por lá.",
   "web.billing.closed": "A assinatura pela web ainda não está aberta.",
   "web.billing.cycleQuestion": "Como prefere pagar?",
   "web.billing.monthly": "Todo mês",
@@ -1036,6 +1037,7 @@
   "web.billing.refundedToast": "Pronto. O dinheiro vai voltar para você.",
   "web.error.storeSubscription": "Você já assina pela App Store ou pelo Google Play. Para mudar de plano, use o app.",
   "web.error.webSubscription": "Você já tem uma assinatura ativa. Para trocar de plano, cancele a atual primeiro.",
+  "web.error.outsideBrazil": "A assinatura pela web é só para empresas no Brasil. Assine pelo app do PraticOS no celular.",
   "web.error.refundExpired": "Os 7 dias da garantia já passaram. Você pode cancelar, e o plano vale até o fim do período pago.",
   "web.error.checkoutClosed": "A assinatura pela web ainda não está aberta."
 }

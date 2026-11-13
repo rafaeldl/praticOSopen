@@ -120,6 +120,24 @@ describe('checkoutBlock', () => {
     expect(checkoutBlock(web, { ...RECORD, status: 'cancelled' }, NOW)).toBeNull();
     expect(checkoutBlock(undefined, { ...RECORD, status: 'pending' }, NOW)).toBeNull();
   });
+
+  it('sends companies outside Brazil to the app; no country counts as Brazil', () => {
+    expect(checkoutBlock(undefined, null, NOW, 'US')).toBe('OUTSIDE_BRAZIL');
+    expect(checkoutBlock(undefined, null, NOW, 'pt')).toBe('OUTSIDE_BRAZIL');
+    expect(checkoutBlock(undefined, null, NOW, 'BR')).toBeNull();
+    expect(checkoutBlock(undefined, null, NOW, 'br')).toBeNull();
+    expect(checkoutBlock(undefined, null, NOW, null)).toBeNull();
+    expect(checkoutBlock(undefined, null, NOW, '')).toBeNull();
+  });
+
+  it('a store or renewing web subscriber abroad keeps the block that lets them manage it', () => {
+    expect(checkoutBlock(sub({ source: 'store', store: 'app_store', expiresAt: '2026-12-01T00:00:00Z' }), null, NOW, 'US')).toBe(
+      'STORE_SUBSCRIPTION_ACTIVE',
+    );
+    expect(checkoutBlock(sub({ source: 'store', store: 'web', expiresAt: '2026-12-18T03:00:00Z' }), RECORD, NOW, 'US')).toBe(
+      'WEB_SUBSCRIPTION_ACTIVE',
+    );
+  });
 });
 
 describe('refundEligible (7-day guarantee)', () => {

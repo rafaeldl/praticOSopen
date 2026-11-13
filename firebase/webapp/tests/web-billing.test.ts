@@ -51,6 +51,12 @@ describe('billingEntry', () => {
     expect(billingEntry(view({ subscription: { ...SUB, status: 'refunded' } }))).toBe('buy')
   })
 
+  test('outside Brazil: subscribe in the app, only while the switch is on', () => {
+    expect(billingEntry(view({ block: 'OUTSIDE_BRAZIL' }))).toBe('app')
+    expect(billingEntry(view({ enabled: false, offer: null, block: 'OUTSIDE_BRAZIL' }))).toBe('hidden')
+    expect(canBuy(view({ block: 'OUTSIDE_BRAZIL' }))).toBe(false)
+  })
+
   test('buy when on and free to buy', () => {
     expect(billingEntry(view({}))).toBe('buy')
   })
@@ -88,6 +94,7 @@ describe('checkout form', () => {
   test('server codes have their own sentences', () => {
     expect(codeMessageKey('STORE_SUBSCRIPTION_ACTIVE')).toBe('web.error.storeSubscription')
     expect(codeMessageKey('WEB_SUBSCRIPTION_ACTIVE')).toBe('web.error.webSubscription')
+    expect(codeMessageKey('OUTSIDE_BRAZIL')).toBe('web.error.outsideBrazil')
     expect(codeMessageKey('REFUND_NOT_ALLOWED')).toBe('web.error.refundExpired')
     expect(codeMessageKey('WEB_CHECKOUT_DISABLED')).toBe('web.error.checkoutClosed')
   })

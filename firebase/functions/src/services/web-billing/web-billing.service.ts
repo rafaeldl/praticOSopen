@@ -76,10 +76,13 @@ export async function readWebCheckoutConfig(): Promise<WebCheckoutConfig> {
   return parseWebCheckoutConfig(snapshot.exists ? (snapshot.data() as Record<string, unknown>) : null);
 }
 
-async function readCompanySubscription(companyId: string): Promise<Subscription | undefined> {
+async function readCompany(companyId: string): Promise<{ subscription: Subscription | undefined; country: string | null }> {
   const snapshot = await db.collection('companies').doc(companyId).get();
   if (!snapshot.exists) throw new WebBillingError('NOT_FOUND', 404, 'Company not found');
-  return snapshot.get('subscription') as Subscription | undefined;
+  return {
+    subscription: snapshot.get('subscription') as Subscription | undefined,
+    country: (snapshot.get('country') as string | undefined) ?? null,
+  };
 }
 
 // ============================================================================
@@ -107,15 +110,15 @@ export interface WebBillingView {
 
 /** What the web shows: the offer (only when on), the guard and the company's web subscription. */
 export async function billingOverview(companyId: string, now: Date = new Date()): Promise<WebBillingView> {
-  const [config, subscription, record] = await Promise.all([
+  const [config, { subscription, country }, record] = await Promise.all([
     readWebCheckoutConfig(),
-    readCompanySubscription(companyId),
+    readCompany(companyId),
     readWebBilling(companyId),
   ]);
   return {
     enabled: config.enabled,
     offer: config.enabled ? webOffer(config) : null,
-    block: checkoutBlock(subscription, record, now),
+    block: checkoutBlock(subscription, record, now, country),
     subscription: record
       ? {
           status: record.status,
@@ -176,8 +179,9 @@ export async function startCheckout(
   const taxId = normalizeTaxId(input.taxId);
   if (!isValidTaxId(taxId)) throw new WebBillingError('VALIDATION_ERROR', 400, 'Invalid CPF/CNPJ');
 
-  const [subscription, record] = await Promise.all([readCompanySubscription(companyId), readWebBilling(companyId)]);
-  const block = checkoutBlock(subscription, record, now);
+  const [{ subscription, country }, record] = await Promise.all([readCompany(companyId), readWebBilling(companyId)]);
+  const block = checkoutBlock(subscription, record, now, country);
+  if (block === 'OUTSIDE_BRAZIL') throw new WebBillingError(block, 409, 'Web checkout is only for companies in Brazil');
   if (block) throw new WebBillingError(block, 409, 'The company already has a subscription');
 
   if (
