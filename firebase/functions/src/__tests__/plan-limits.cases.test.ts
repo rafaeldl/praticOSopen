@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { checkPlanLimit, shouldShowPdfWatermark, type PlanResource } from '../services/plan-limits.service';
+import { checkPlanLimit, planInForce, shouldShowPdfWatermark, type PlanResource } from '../services/plan-limits.service';
 
 const LANG = 'functions';
 const doc = JSON.parse(readFileSync(path.join(__dirname, '../../../../docs/web-app/contract-cases/plan-limits.json'), 'utf8'));
@@ -30,6 +30,12 @@ describe('plan-limits', () => {
       const subscription = subscriptionOf(given, now);
       if (given.kind === 'watermark') {
         expect({ watermark: shouldShowPdfWatermark(subscription, given.paidPlansEnabled, now) }).toEqual(want(c));
+        return;
+      }
+      if (given.kind === 'planInForce') {
+        const { plan, version, row } = planInForce(subscription, now);
+        const got: Record<string, unknown> = { plan, version, ...row };
+        expect(Object.fromEntries(Object.keys(want(c)).map((key) => [key, got[key]]))).toEqual(want(c));
         return;
       }
       const result = checkPlanLimit({

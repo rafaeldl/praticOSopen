@@ -2010,22 +2010,8 @@
     }
   },
   "orderAssistantErrorDisabled": "O assistente ainda não está liberado para a sua conta.",
-  "orderAssistantErrorQuota": "Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.",
-  "@orderAssistantErrorQuota": {
-    "placeholders": {
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAssistantErrorQuotaDay": "Você já usou os {limit} pedidos do assistente de hoje. Amanhã volta; dá para continuar preenchendo à mão.",
-  "@orderAssistantErrorQuotaDay": {
-    "placeholders": {
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
+  "orderAssistantErrorQuota": "O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.",
+  "orderAssistantErrorQuotaDay": "O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.",
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
   "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
   "reportPreviousPeriod": "Período anterior",

@@ -108,6 +108,25 @@ export function effectivePlan(subscription: unknown, now: Date): PlanId {
   return !expires || expires.getTime() > now.getTime() ? storedPlan(subscription) : 'free'
 }
 
+/** The plan in force, the version of the table it follows and its row. */
+export interface PlanInForce {
+  plan: PlanId
+  version: string
+  row: PlanRow
+}
+
+/**
+ * Subscription.planInForce, the same answer on server, app and web to "what
+ * does this company have now": the plan while expiresAt is null or in the
+ * future, with its table version (tableVersionOf); after it expires, Free of
+ * the current table. Limits, features and AI ceilings read this row.
+ */
+export function planInForce(subscription: unknown, now: Date): PlanInForce {
+  const plan = effectivePlan(subscription, now)
+  const version = plan === storedPlan(subscription) ? tableVersionOf(subscription) : PLAN_TABLE_CURRENT_VERSION
+  return { plan, version, row: rowOf(plan, version) }
+}
+
 /**
  * Stored limits over the table's: each number takes the more generous of the
  * two (a subscriber never loses), a missing field is the table's; no
@@ -126,9 +145,9 @@ function mergeStored(row: SubscriptionLimits, json: Json): SubscriptionLimits {
 
 /** Subscription.effectiveLimits: the row of its table version merged with the stored limits while the plan is in force; Free of the current table after it expires. */
 export function effectiveLimits(subscription: unknown, now: Date): SubscriptionLimits {
-  const current = effectivePlan(subscription, now)
-  if (current !== storedPlan(subscription)) return planLimits(current)
-  const row = limitsOfRow(rowOf(current, tableVersionOf(subscription)))
+  const { plan, row: inForce } = planInForce(subscription, now)
+  if (plan !== storedPlan(subscription)) return planLimits(plan)
+  const row = limitsOfRow(inForce)
   const limits = record(subscription).limits
   return limits && typeof limits === 'object' && !Array.isArray(limits) ? mergeStored(row, limits as Json) : row
 }
@@ -136,8 +155,7 @@ export function effectiveLimits(subscription: unknown, now: Date): SubscriptionL
 /** Passing orders or people does not block: the plan's `overageAllowed` (Business). */
 function overageAllowed(subscription: unknown, now: Date, resource: PlanResource): boolean {
   if (resource !== 'order' && resource !== 'collaborator') return false
-  const plan = effectivePlan(subscription, now)
-  return rowOf(plan, plan === storedPlan(subscription) ? tableVersionOf(subscription) : PLAN_TABLE_CURRENT_VERSION).overageAllowed
+  return planInForce(subscription, now).row.overageAllowed
 }
 
 const limitOf = (limits: SubscriptionLimits, resource: PlanResource): number =>

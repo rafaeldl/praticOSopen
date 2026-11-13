@@ -350,10 +350,16 @@ class Subscription {
 
   /// Row of the plan table in force at [now] (Free of the current table once
   /// the plan expires).
-  PlanRow planRowAt(DateTime now) {
+  PlanRow planRowAt(DateTime now) => planInForce(now).row;
+
+  /// The plan in force at [now], the version of the table it follows and
+  /// its row: the same answer as `planInForce` on the server and the web.
+  /// While the plan is in force, [effectiveTableVersion]; after it expires,
+  /// Free of the current table. Limits, features and AI ceilings read it.
+  ({SubscriptionPlan plan, String version, PlanRow row}) planInForce(DateTime now) {
     final current = effectivePlan(now);
-    if (current != plan) return currentPlanRow(current);
-    return kPlanTables[effectiveTableVersion]![current]!;
+    final version = current == plan ? effectiveTableVersion : kPlanTableCurrentVersion;
+    return (plan: current, version: version, row: kPlanTables[version]![current]!);
   }
 
   /// Limits in force at [now]: while the plan is in force, the row of its

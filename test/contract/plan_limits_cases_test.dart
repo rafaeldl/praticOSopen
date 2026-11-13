@@ -75,6 +75,16 @@ void main() {
         expect({'watermark': FeatureGateService.shouldShowPdfWatermark(sub)}, want);
         return;
       }
+      if (given['kind'] == 'planInForce') {
+        final inForce = (sub ?? Subscription()).planInForce(DateTime.now());
+        final got = <String, Object?>{
+          'plan': inForce.plan.name,
+          'version': inForce.version,
+          ...inForce.row.toJson(),
+        };
+        expect({for (final key in want.keys) key: got[key]}, want);
+        return;
+      }
       final result = _check(sub, given, DateTime.now());
       final got = <String, Object?>{
         'allowed': result.isAllowed,

@@ -44,15 +44,16 @@ Iguais ao app, provadas pelos casos:
 - **Uma chave só** (#723): `config/paidPlans.enabled == true` no Firestore, desligada por padrão. O servidor, o app e o web leem o mesmo documento (as regras deixam qualquer pessoa logada ler; ninguém grava pelo cliente). Desligada, todo limite vale -1. O `PLAN_LIMITS_ENABLED` do ambiente das Functions e o `WEB_PLAN_LIMITS_ENFORCED` do web saíram. O app ainda precisa de uma build que venda (`SubscriptionService.paidPlansEnabled`, regra 3.1.1 da Apple): sem loja não há limite no app, mesmo com a chave ligada. O servidor guarda a chave por um minuto.
 - **Plano ausente** (sem `subscription`, só `usage`, ou plano desconhecido) é Free.
 - **Vencido** (`expiresAt` no passado, cortesia ou loja) é Free da tabela atual, mesmo com limites do Pro gravados. O `status` não conta: Pro com `status: expired` e sem data continua Pro.
+- **Plano em vigor** (`planInForce`, igual nos três lados: `plan-limits.service.ts`, `firebase/webapp/src/lib/plan-limits.ts` e `Subscription.planInForce` no app): o plano enquanto `expiresAt` não passou, a versão da tabela dele e a linha; vencido, Free da tabela atual. Limites, recursos e tetos de IA leem essa linha. Casos `kind: planInForce` no contrato.
 - **Versão da tabela**: a assinatura segue `subscription.tableVersion` quando a tabela tem essa versão; sem ele (ou desconhecido) vale a atual. Ninguém grava `tableVersion` ainda: é o ponto de extensão do #726 (assinantes atuais e cortesia).
 - **Limites gravados**: cada número fica com o mais generoso entre o gravado e a tabela (assinante nunca perde, e uma tabela melhor chega a ele); campo faltando é o da tabela; sem marca d'água ganha. `collaborators` é o nome antigo de `users`. O webhook do RevenueCat só regrava `limits` quando o plano muda: renovar o mesmo plano mantém o que estava gravado.
-- **OS por mês** (limite suave): aviso a 80% e a 100% (`level`). No primeiro mês acima do limite ainda cria (`grace`); só trava quando o mês anterior também passou do limite. Nunca trava uma OS já aberta (editar, concluir, receber, mandar).
+- **OS por mês** (limite suave): aviso a 80% e a 100% (`level`). No primeiro mês acima do limite ainda cria (`grace`); só trava quando o mês anterior também passou do limite. A folga olha só o mês anterior (não uma média de meses): um mês dentro do limite devolve a folga. Nunca trava uma OS já aberta (editar, concluir, receber, mandar).
 - **Business** (`overageAllowed`): acima de 500 OS ou de 20 pessoas não trava; a resposta diz `contactUs` (cobrança do excedente manual por enquanto).
 - **Fotos**: sem limite em todos os planos (`photosPerMonth = -1`); `requirePlanCapacity('photo')` deixa de barrar.
 - **Checklists**: `formTemplate` conta só os próprios ativos. Cópia de um pronto do ramo não conta: tem `sourceTemplateId` ("Usar", no app e no web) ou o mesmo id do pronto (cópias do primeiro acesso). Grátis não cria checklist próprio (limite 0); Starter em diante sem limite.
 - **IA**: teto do mês e do dia do plano em vigor (`effectivePlan`, então plano vencido é Free) em `reserveAiRequest`. Grátis para em 20 por dia, Starter e Pro em 200; o cliente não vê contador de IA; o dia é UTC, guardado em `aiUsage/{mês}.day/dayCount`. Recusa com `AI_QUOTA_EXCEEDED` e `period: 'month' | 'day'`. O `monthlyLimit` de piloto desliga o teto do dia.
 - **Marca d'água no PDF**: só com a chave ligada e `pdfWatermark` do plano em vigor.
-- **Nota fiscal (NFS-e direta)**: vem com o plano em vigor que tenha `nfseCnpjs` diferente de 0 (hoje: qualquer pago), no Brasil, sem depender da chave. O servidor liga e desliga `settings/payments.nfseDirectEnabled` pelo plano (ver "Quem tem a nota" em [`NFSE_DIRECT.md`](NFSE_DIRECT.md)). O número de CNPJs ainda não é aplicado.
+- **Nota fiscal (NFS-e direta)**: vem com o plano em vigor que tenha `nfseCnpjs` diferente de 0 (hoje: qualquer pago), no Brasil, sem depender da chave. O servidor liga e desliga `settings/payments.nfseDirectEnabled` pelo plano (ver "Quem tem a nota" em [`NFSE_DIRECT.md`](NFSE_DIRECT.md)). Com a chave ligada, o número de CNPJs (`nfseCnpjs`: 1 no Starter, 2 no Pro) vale ao cadastrar um CNPJ novo (`POST /v1/app/nfse/emitters/certificate`, 402 `PLAN_LIMIT` com `resource: 'nfseCnpj'`); conta os emissores com certificado não apagado. Trocar o certificado de um CNPJ que já está lá nunca pergunta.
 
 ### Uso contado no servidor
 
@@ -74,8 +75,9 @@ Com plano ilimitado no recurso, ou chave desligada, nada é contado.
 | `POST /v1/app/invites` (app e web) | `collaborator` |
 | `POST /bot/invite/create` | `collaborator` |
 | `POST /bot/orders/:number/photos` e `/photos/upload` | `photo` (sem limite hoje) |
+| `POST /v1/app/nfse/emitters/certificate` (CNPJ novo) | `nfseCnpj` |
 
-O app cria OS, checklists e fotos direto no Firestore: ali quem confere é o próprio app (`FeatureGateService.canCreateOrder`, `canCreateFormTemplate`), com a mesma conta. A tela que avisa e pede plano é o #725.
+O app cria OS, checklists e fotos direto no Firestore: ali quem confere é o próprio app, com a mesma conta. O "✓" da Nova OS chama `FeatureGateService.canCreateOrder` e, acima do limite sem folga, mostra o aviso e não grava (a OS continua na tela); checklists passam por `canCreateFormTemplate`. As regras do Firestore não conferem o plano. A tela que avisa e pede plano é o #725.
 
 Resposta no limite, HTTP 402, igual para app e web:
 
