@@ -5,6 +5,7 @@ import {
   decideBillingAction,
   invoiceSettingsFor,
   parseWebCheckoutConfig,
+  webCheckoutOnFor,
   webInvoiceDescription,
   subscriptionInvoiceDecision,
   periodEndOf,
@@ -75,6 +76,7 @@ describe('config and offer', () => {
     const config = parseWebCheckoutConfig(null);
     expect(config).toEqual({
       enabled: false,
+      companyIds: [],
       yearlyEnabled: false,
       billingTypes: { monthly: ['CREDIT_CARD'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
       invoice: null,
@@ -295,5 +297,19 @@ describe('applyWebOrigin', () => {
     expect(storeOverlapsWeb(store, RECORD)).toBe(true);
     expect(storeOverlapsWeb(store, { ...RECORD, status: 'cancelled' })).toBe(false);
     expect(storeOverlapsWeb(state, RECORD)).toBe(false);
+  });
+});
+
+describe('webCheckoutOnFor', () => {
+  it('is off by default and on for everyone with the master switch', () => {
+    expect(webCheckoutOnFor(parseWebCheckoutConfig(null), 'c1')).toBe(false);
+    expect(webCheckoutOnFor(parseWebCheckoutConfig({ enabled: true }), 'c1')).toBe(true);
+  });
+
+  it('turns on only for listed companies while the master switch is off', () => {
+    const config = parseWebCheckoutConfig({ enabled: false, companyIds: [' c1 ', 'c1', 42, 'a/b'] });
+    expect(config.companyIds).toEqual(['c1']);
+    expect(webCheckoutOnFor(config, 'c1')).toBe(true);
+    expect(webCheckoutOnFor(config, 'c2')).toBe(false);
   });
 });

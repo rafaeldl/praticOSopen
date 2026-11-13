@@ -46,6 +46,8 @@ export const DEFAULT_BILLING_TYPES: Readonly<Record<WebCycle, readonly WebBillin
 export interface WebCheckoutConfig {
   /** Master switch. Off until Apple approves the iPhone version (docs/WEB_CHECKOUT.md). */
   enabled: boolean;
+  /** Companies that can buy while the master switch is off (owner's own test). */
+  companyIds: string[];
   /** Yearly only after the yearly products exist in the App Store and Google Play (parity). */
   yearlyEnabled: boolean;
   /** Payment methods offered per cycle. */
@@ -159,12 +161,20 @@ export function parseWebCheckoutConfig(data: Record<string, unknown> | null | un
   };
   return {
     enabled: data?.enabled === true,
+    companyIds: Array.isArray(data?.companyIds)
+      ? [...new Set((data?.companyIds as unknown[]).filter((id): id is string => typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id.trim())).map((id) => id.trim()))]
+      : [],
     yearlyEnabled: data?.yearlyEnabled === true,
     billingTypes: { monthly: pick('monthly'), yearly: pick('yearly') },
     invoice: parseInvoiceConfig(data?.invoice),
     invoiceSource: data?.invoiceSource === 'praticos' ? 'praticos' : 'asaas',
     invoiceIssuer: parseInvoiceIssuer(data),
   };
+}
+
+/** Whether this company can buy on the web: everyone with the master switch, or a listed company. */
+export function webCheckoutOnFor(config: WebCheckoutConfig, companyId: string): boolean {
+  return config.enabled || config.companyIds.includes(companyId);
 }
 
 /** What the web sells right now: prices per plan and the cycles/methods on offer. */
