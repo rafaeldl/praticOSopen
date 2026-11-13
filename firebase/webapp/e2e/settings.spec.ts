@@ -135,14 +135,15 @@ test.describe('Plano', () => {
     await login(page, 'gManager', 'settings/plan')
     await expect(page.getByTestId('plan-header')).toHaveText(/^Starter · renova em \d{2}\/\d{2}\/\d{4}$/)
     const usage = page.getByTestId('plan-usage')
-    // The assistant first, at the limit; the team at the limit counts invites; photos near it.
+    // The assistant first, at the limit; the team at the limit counts invites. A Starter
+    // bought on table 1 keeps its 3 people and gets the new table's photos and checklists (#726).
     await expect(usage.locator('li').first()).toHaveAttribute('data-usage', 'ai')
     await expect(usage.locator('[data-usage="ai"]')).toContainText('400 de 400')
     await expect(usage.locator('[data-usage="ai"]')).toContainText('No limite')
     await expect(usage.locator('[data-usage="team"]')).toContainText('No limite · conta o convite')
-    await expect(usage.locator('[data-usage="photos"]')).toContainText('170 de 200')
-    await expect(usage.locator('[data-usage="photos"]')).toContainText('Quase no limite')
-    await expect(usage.locator('[data-usage="checklists"]')).toContainText('1 de 3')
+    await expect(usage.locator('[data-usage="photos"]')).toContainText('170')
+    await expect(usage.locator('[data-usage="photos"]')).toContainText('Sem limite')
+    await expect(usage.locator('[data-usage="checklists"]')).toContainText('Sem limite')
     await expect(page.getByTestId('plan-limit')).toContainText('Você usou 400 de 400 pedidos do assistente neste mês.')
     // Nothing to buy and no row opens for a manager, who is told to ask (plan.non-admin-note).
     await expect(page.getByRole('button', { name: /plano/i })).toHaveCount(0)

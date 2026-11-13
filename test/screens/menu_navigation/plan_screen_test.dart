@@ -9,8 +9,9 @@ import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:provider/provider.dart';
 
-// Table version 1 (200 photos, 3 checklists, 3 people on Starter): the
-// screen's rows and limit block. The rows of the new table come with #725.
+// A Starter bought on table 1: 3 people, and since #726 the more generous of
+// tables 1 and 2 (photos and checklists without limit). The rows of the new
+// table come with #725.
 Subscription _starter({int users = 1, int photos = 10, int forms = 1}) =>
     Subscription(
       plan: SubscriptionPlan.starter,
@@ -91,9 +92,9 @@ void main() {
     final photos = tester.getTopLeft(find.text('Fotos este mês')).dy;
     final forms = tester.getTopLeft(find.text('Checklists')).dy;
     expect(team < photos && photos < forms, isTrue);
-    expect(find.text('2 de 3'), findsNWidgets(2));
-    expect(find.text('180 de 200'), findsOneWidget);
-    expect(find.text('Quase no limite'), findsOneWidget);
+    expect(find.text('2 de 3'), findsOneWidget);
+    expect(find.text('180'), findsOneWidget);
+    expect(find.text('Sem limite'), findsNWidgets(2));
     // No limit reached: no block, "Ver planos" is a link.
     expect(find.byKey(const ValueKey('plan_limit_block')), findsNothing);
     expect(find.text('Ver planos'), findsOneWidget);

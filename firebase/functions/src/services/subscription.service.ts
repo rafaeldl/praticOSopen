@@ -21,6 +21,7 @@ import {
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
+import { PLAN_TABLE_CURRENT_VERSION } from './plan-table.generated';
 
 export {
   PLAN_LIMITS,
@@ -167,14 +168,18 @@ export function buildPlanUpdate(
   current?: Subscription,
 ): FieldUpdates {
   const nowIso = now.toISOString();
-  // Limits are written only when the plan changes: a renewal of the same plan
-  // keeps what was stored, so a stricter table never takes anything away
-  // from a subscriber (effectiveLimits takes the more generous number).
-  const samePlan = current?.plan === state.plan && current?.limits !== undefined;
+  // Limits and the table version are written only when the plan changes (or
+  // the courtesy turns into a purchase): a renewal of the same plan keeps what
+  // was stored, so a subscriber stays on the table it bought (#726) and a
+  // stricter table never takes anything away (effectiveLimits takes the more
+  // generous number).
+  const samePlan = current?.plan === state.plan && current?.limits !== undefined && current?.source !== 'grace';
   return {
     'subscription.plan': state.plan,
     'subscription.status': state.status,
-    ...(samePlan ? {} : { 'subscription.limits': getPlanLimits(state.plan) }),
+    ...(samePlan
+      ? {}
+      : { 'subscription.limits': getPlanLimits(state.plan), 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
     'subscription.expiresAt': state.expiresAt,
     'subscription.store': state.store,
     'subscription.source': 'store',

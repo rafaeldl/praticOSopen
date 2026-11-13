@@ -10316,11 +10316,11 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{Acaba em 1 dia.} other{Acaba em {days} dias.}}'**
   String courtesyBannerEnds(int days);
 
-  /// No description provided for @courtesyBannerAiUse.
+  /// No description provided for @courtesyBannerOrdersUse.
   ///
   /// In pt, this message translates to:
-  /// **'{used, plural, =1{Neste mês você usou o assistente 1 vez; no Free são {free}.} other{Neste mês você usou o assistente {used} vezes; no Free são {free}.}}'**
-  String courtesyBannerAiUse(int used, int free);
+  /// **'{used, plural, =1{Neste mês você abriu 1 OS; no Free são {free} por mês.} other{Neste mês você abriu {used} OS; no Free são {free} por mês.}}'**
+  String courtesyBannerOrdersUse(int used, int free);
 
   /// No description provided for @courtesyBannerToFree.
   ///

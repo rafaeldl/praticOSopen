@@ -1,5 +1,5 @@
 {
-  "about": "Tabela única dos planos (#722). Servidor, app e web leem daqui: depois de mudar, rodar `node scripts/plan-table.mjs` (gera firebase/functions/src/services/plan-table.generated.ts e lib/models/plan_table.dart; a web gera em npm run gen). Os testes de cada lado comparam com este arquivo. -1 é sem limite. Uma versão nova não apaga a anterior: a assinatura com `tableVersion` gravado segue a sua versão (#726); sem ele vale `currentVersion`.",
+  "about": "Tabela única dos planos (#722). Servidor, app e web leem daqui: depois de mudar, rodar `node scripts/plan-table.mjs` (gera firebase/functions/src/services/plan-table.generated.ts e lib/models/plan_table.dart; a web gera em npm run gen). Os testes de cada lado comparam com este arquivo. -1 é sem limite. Uma versão nova não apaga a anterior: a assinatura com `tableVersion` gravado segue a sua versão; assinatura paga sem ele (comprada antes da tabela atual) segue `legacyVersion`; cortesia e Grátis seguem `currentVersion` (#726). Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo: quem já assina nunca perde nada.",
   "fields": {
     "ordersPerMonth": "OS criadas no mês",
     "users": "Pessoas na empresa (membros mais convites que valem)",
@@ -20,6 +20,7 @@
     "business"
   ],
   "currentVersion": "2",
+  "legacyVersion": "1",
   "versions": {
     "1": {
       "approvedOn": "2026-10-09",

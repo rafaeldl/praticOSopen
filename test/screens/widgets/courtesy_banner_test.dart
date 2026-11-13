@@ -3,23 +3,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/widgets/courtesy_banner.dart';
-import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Subscription _grace({int days = 10, int users = 1}) => Subscription(
+Subscription _grace({int days = 10, int users = 1, int orders = 0}) => Subscription(
   plan: SubscriptionPlan.pro,
   source: SubscriptionSource.grace,
   expiresAt: DateTime.now().add(Duration(days: days, minutes: -1)),
-  usage: SubscriptionUsage(usersActive: users),
+  usage: SubscriptionUsage(
+    usersActive: users,
+    ordersMonth: orderMonthKey(DateTime.now()),
+    ordersThisMonth: orders,
+  ),
 );
 
 Future<void> _pump(
   WidgetTester tester,
   Subscription subscription, {
-  int aiUsed = 0,
   VoidCallback? onViewPlans,
   String companyId = 'c1',
 }) async {
@@ -33,8 +36,6 @@ Future<void> _pump(
           child: CourtesyBanner(
             subscription: subscription,
             companyId: companyId,
-            loadAiStatus: () async =>
-                AiStatus(enabled: true, used: aiUsed, limit: 400),
             onViewPlans: onViewPlans,
           ),
         ),
@@ -50,6 +51,7 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     SubscriptionService.debugPaidPlansEnabledOverride = true;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = true;
     PaywallLauncher.roleResolver = () => 'owner';
     events.clear();
     AnalyticsService.debugAiEventSink = (name, parameters) =>
@@ -58,24 +60,37 @@ void main() {
 
   tearDown(() {
     SubscriptionService.debugPaidPlansEnabledOverride = null;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = null;
     AnalyticsService.debugAiEventSink = null;
   });
 
-  testWidgets('shows the real use against Free and the plan that covers it', (
+  testWidgets('shows the work orders of the month against Free and the plan that covers them', (
     tester,
   ) async {
-    await _pump(tester, _grace(), aiUsed: 87);
+    await _pump(tester, _grace(orders: 23));
     expect(
       find.text(
-        'Acaba em 10 dias. Neste mês você usou o assistente 87 vezes; '
-        'no Free são 50. O plano Starter cobre o seu uso.',
+        'Acaba em 10 dias. Neste mês você abriu 23 OS; '
+        'no Free são 10 por mês. O plano Starter cobre o seu uso.',
       ),
       findsOneWidget,
     );
+    expect(find.textContaining('assistente'), findsNothing);
     expect(events['upgrade_modal_shown']?['trigger'], 'courtesy_first');
   });
 
-  testWidgets('without assistant use it just says what happens', (tester) async {
+  testWidgets('limits off: Free has no order limit, so no number nor plan', (
+    tester,
+  ) async {
+    FeatureGateService.debugPlanLimitsEnforcedOverride = false;
+    await _pump(tester, _grace(orders: 23));
+    expect(
+      find.text('Acaba em 10 dias. Depois disso, o app volta para o plano Free.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('without work orders this month it just says what happens', (tester) async {
     await _pump(tester, _grace(days: 3));
     expect(
       find.text('Acaba em 3 dias. Depois disso, o app volta para o plano Free.'),
@@ -124,10 +139,10 @@ void main() {
     expect(find.textContaining('Acaba em 5 dias.'), findsOneWidget);
   });
 
-  testWidgets('one use reads in the singular', (tester) async {
-    await _pump(tester, _grace(), aiUsed: 1);
+  testWidgets('one work order reads in the singular', (tester) async {
+    await _pump(tester, _grace(orders: 1));
     expect(
-      find.textContaining('Neste mês você usou o assistente 1 vez;'),
+      find.textContaining('Neste mês você abriu 1 OS;'),
       findsOneWidget,
     );
   });

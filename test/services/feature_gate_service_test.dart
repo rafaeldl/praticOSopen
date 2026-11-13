@@ -54,7 +54,7 @@ void main() {
 
     test('canCreateOrder: Business past 500 is not blocked, it says to talk to us', () {
       final result = FeatureGateService.canCreateOrder(
-        Subscription(plan: SubscriptionPlan.business, usage: orders(600, lastMonth: 600)),
+        Subscription(plan: SubscriptionPlan.business, tableVersion: '2', usage: orders(600, lastMonth: 600)),
         now: now,
       );
 

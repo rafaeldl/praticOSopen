@@ -63,19 +63,21 @@ void main() {
         );
 
     test('is null while Free covers the use', () {
-      expect(recommendedPlan(usage(orders: 10, photos: 900), 50, now: now), isNull);
+      expect(recommendedPlan(usage(orders: 10, photos: 900), now: now), isNull);
+    });
+
+    test('the assistant never decides the plan: its ceilings are internal', () {
+      expect(recommendedPlan(usage(orders: 3), now: now), isNull);
     });
 
     test('picks the smallest plan that covers every resource', () {
-      expect(recommendedPlan(usage(), 51, now: now), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(users: 2), 0, now: now), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(forms: 1), 0, now: now), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(orders: 11), 0, now: now), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(), 1001, now: now), SubscriptionPlan.pro);
-      expect(recommendedPlan(usage(users: 3), 0, now: now), SubscriptionPlan.pro);
-      expect(recommendedPlan(usage(orders: 51), 0, now: now), SubscriptionPlan.pro);
-      expect(recommendedPlan(usage(orders: 151), 0, now: now), SubscriptionPlan.business);
-      expect(recommendedPlan(usage(users: 6), 0, now: now), SubscriptionPlan.business);
+      expect(recommendedPlan(usage(users: 2), now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(forms: 1), now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(orders: 11), now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(users: 3), now: now), SubscriptionPlan.pro);
+      expect(recommendedPlan(usage(orders: 51), now: now), SubscriptionPlan.pro);
+      expect(recommendedPlan(usage(orders: 151), now: now), SubscriptionPlan.business);
+      expect(recommendedPlan(usage(users: 6), now: now), SubscriptionPlan.business);
     });
   });
 }

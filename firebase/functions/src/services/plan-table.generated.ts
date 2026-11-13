@@ -23,7 +23,14 @@ export interface PlanRow {
 /** Version of the table new companies and plan changes get. */
 export const PLAN_TABLE_CURRENT_VERSION = "2";
 
-/** Every version of the table, by version, then by plan. */
+/**
+ * Version a paid subscription without `tableVersion` follows: it was bought
+ * before the current table (#726). Courtesy (source 'grace') and Free follow
+ * the current one.
+ */
+export const PLAN_TABLE_LEGACY_VERSION = "1";
+
+/** Every version of the table as approved, by version, then by plan. */
 export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = {
   "1": {
     "free": {
@@ -76,6 +83,193 @@ export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRo
       "ownChecklists": true,
       "pdfWatermark": false,
       "overageAllowed": false,
+      "features": []
+    }
+  },
+  "2": {
+    "free": {
+      "ordersPerMonth": 10,
+      "users": 1,
+      "photosPerMonth": -1,
+      "formTemplates": 0,
+      "nfseCnpjs": 0,
+      "aiPerMonth": 50,
+      "aiPerDay": 20,
+      "ownChecklists": false,
+      "pdfWatermark": true,
+      "overageAllowed": false,
+      "features": [
+        "orders",
+        "customers",
+        "catalog",
+        "agenda",
+        "quoteShare",
+        "linkApproval",
+        "financeBasic",
+        "dataImport",
+        "webApp"
+      ]
+    },
+    "starter": {
+      "ordersPerMonth": 50,
+      "users": 2,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": 1,
+      "aiPerMonth": 1000,
+      "aiPerDay": 200,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": false,
+      "features": [
+        "orders",
+        "customers",
+        "catalog",
+        "agenda",
+        "quoteShare",
+        "linkApproval",
+        "financeBasic",
+        "dataImport",
+        "webApp",
+        "nfse",
+        "brandedPdf",
+        "ownChecklists",
+        "ai",
+        "charges"
+      ]
+    },
+    "pro": {
+      "ordersPerMonth": 150,
+      "users": 5,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": 2,
+      "aiPerMonth": 3000,
+      "aiPerDay": 200,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": false,
+      "features": [
+        "orders",
+        "customers",
+        "catalog",
+        "agenda",
+        "quoteShare",
+        "linkApproval",
+        "financeBasic",
+        "dataImport",
+        "webApp",
+        "nfse",
+        "brandedPdf",
+        "ownChecklists",
+        "ai",
+        "charges",
+        "teamRoles",
+        "perPersonAgenda",
+        "workStages",
+        "tvMode",
+        "contracts",
+        "aiFinance",
+        "spreadsheetExport"
+      ]
+    },
+    "business": {
+      "ordersPerMonth": 500,
+      "users": 20,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": -1,
+      "aiPerMonth": 6000,
+      "aiPerDay": -1,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": true,
+      "features": [
+        "orders",
+        "customers",
+        "catalog",
+        "agenda",
+        "quoteShare",
+        "linkApproval",
+        "financeBasic",
+        "dataImport",
+        "webApp",
+        "nfse",
+        "brandedPdf",
+        "ownChecklists",
+        "ai",
+        "charges",
+        "teamRoles",
+        "perPersonAgenda",
+        "workStages",
+        "tvMode",
+        "contracts",
+        "aiFinance",
+        "spreadsheetExport",
+        "bulkActions",
+        "mcp",
+        "api"
+      ]
+    }
+  }
+};
+
+/**
+ * What the code applies, by version: an older version is the more generous of
+ * it and the current one, field by field (mergeRows in scripts/plan-table.mjs).
+ */
+export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = {
+  "1": {
+    "free": {
+      "ordersPerMonth": -1,
+      "users": 1,
+      "photosPerMonth": -1,
+      "formTemplates": 1,
+      "nfseCnpjs": 0,
+      "aiPerMonth": 50,
+      "aiPerDay": -1,
+      "ownChecklists": true,
+      "pdfWatermark": true,
+      "overageAllowed": false,
+      "features": []
+    },
+    "starter": {
+      "ordersPerMonth": -1,
+      "users": 3,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": -1,
+      "aiPerMonth": 1000,
+      "aiPerDay": -1,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": false,
+      "features": []
+    },
+    "pro": {
+      "ordersPerMonth": -1,
+      "users": 5,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": -1,
+      "aiPerMonth": 3000,
+      "aiPerDay": -1,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": false,
+      "features": []
+    },
+    "business": {
+      "ordersPerMonth": -1,
+      "users": -1,
+      "photosPerMonth": -1,
+      "formTemplates": -1,
+      "nfseCnpjs": -1,
+      "aiPerMonth": 6000,
+      "aiPerDay": -1,
+      "ownChecklists": true,
+      "pdfWatermark": false,
+      "overageAllowed": true,
       "features": []
     }
   },

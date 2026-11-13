@@ -4,7 +4,14 @@
  * the plan table (docs/plans/plans.json, generated into src/generated/plan-table.ts).
  * Shared cases: docs/web-app/contract-cases/plan-limits.json (tests/contract-cases.test.ts).
  */
-import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION, type PlanId, type PlanRow } from '@/generated/plan-table'
+import {
+  PLAN_IDS,
+  PLAN_TABLES_IN_FORCE,
+  PLAN_TABLE_CURRENT_VERSION,
+  PLAN_TABLE_LEGACY_VERSION,
+  type PlanId,
+  type PlanRow,
+} from '@/generated/plan-table'
 
 export type { PlanId, PlanRow }
 export { PLAN_IDS }
@@ -55,7 +62,7 @@ export interface SubscriptionLimits {
 export type PlanResource = 'order' | 'photo' | 'formTemplate' | 'collaborator'
 
 /** The current table, by plan. */
-export const currentPlanRows = (): Readonly<Record<PlanId, PlanRow>> => PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION] as Readonly<Record<PlanId, PlanRow>>
+export const currentPlanRows = (): Readonly<Record<PlanId, PlanRow>> => PLAN_TABLES_IN_FORCE[PLAN_TABLE_CURRENT_VERSION] as Readonly<Record<PlanId, PlanRow>>
 
 const limitsOfRow = (row: PlanRow): SubscriptionLimits => ({
   ordersPerMonth: row.ordersPerMonth,
@@ -68,13 +75,21 @@ const limitsOfRow = (row: PlanRow): SubscriptionLimits => ({
 /** Default limits of a plan (SubscriptionLimits.forPlan). */
 export const planLimits = (plan: PlanId): SubscriptionLimits => limitsOfRow(currentPlanRows()[plan])
 
-/** Version of the table a subscription follows: its `tableVersion` when the table has it, else the current one (#726). */
+/**
+ * Version of the table a subscription follows (#726): its `tableVersion` when
+ * the table has it; else, for a paid plan bought before the current table (no
+ * `tableVersion`; the courtesy too, which keeps the old Pro), the legacy
+ * version; else the current one
+ * (also for a version this code does not know).
+ */
 export function tableVersionOf(subscription: unknown): string {
-  const version = (subscription && typeof subscription === 'object' ? (subscription as Record<string, unknown>) : {}).tableVersion
-  return typeof version === 'string' && version in PLAN_TABLES ? version : PLAN_TABLE_CURRENT_VERSION
+  const sub = subscription && typeof subscription === 'object' ? (subscription as Record<string, unknown>) : {}
+  if (typeof sub.tableVersion === 'string') return sub.tableVersion in PLAN_TABLES_IN_FORCE ? sub.tableVersion : PLAN_TABLE_CURRENT_VERSION
+  const paid = typeof sub.plan === 'string' && sub.plan !== 'free' && (PLAN_IDS as readonly string[]).includes(sub.plan)
+  return paid ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION
 }
 
-const rowOf = (plan: PlanId, version: string): PlanRow => (PLAN_TABLES[version] ?? currentPlanRows())[plan] as PlanRow
+const rowOf = (plan: PlanId, version: string): PlanRow => (PLAN_TABLES_IN_FORCE[version] ?? currentPlanRows())[plan] as PlanRow
 
 /** The more generous of two limits (-1 is no limit). */
 export const moreGenerous = (a: number, b: number): number => (a === -1 || b === -1 ? -1 : Math.max(a, b))

@@ -75,6 +75,7 @@ describe('syncCompanySubscription', () => {
       store: 'app_store',
       expiresAt: FUTURE,
       limits: PLAN_LIMITS.pro,
+      tableVersion: '2',
       rcSubscriberId: 'c1',
       updatedAt: NOW.toISOString(),
       usage: USAGE,
@@ -90,6 +91,32 @@ describe('syncCompanySubscription', () => {
     await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
 
     expect(subscriptionOf('c1')).toMatchObject({ plan: 'starter', limits: old });
+    // No tableVersion written: the subscriber stays on the table it bought (#726).
+    expect(subscriptionOf('c1')?.tableVersion).toBeUndefined();
+  });
+
+  it('a plan change moves the subscriber to the current table (#726)', async () => {
+    const old = { ordersPerMonth: -1, photosPerMonth: 200, formTemplates: 3, users: 3, pdfWatermark: false };
+    seedCompany('c1', { plan: 'starter', status: 'active', source: 'store', limits: old, usage: USAGE });
+    const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('pro'));
+
+    await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+    expect(subscriptionOf('c1')).toMatchObject({ plan: 'pro', limits: PLAN_LIMITS.pro, tableVersion: '2' });
+  });
+
+  it('buying the same plan as the courtesy moves to the current table (#726)', async () => {
+    seedCompany('c1', GRACE);
+    const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber(GRACE.plan as 'pro'));
+
+    await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+    expect(subscriptionOf('c1')).toMatchObject({
+      plan: GRACE.plan,
+      source: 'store',
+      limits: PLAN_LIMITS[GRACE.plan as 'pro'],
+      tableVersion: '2',
+    });
   });
 
   it('keeps the plan as cancelled until expiresAt', async () => {
@@ -123,6 +150,7 @@ describe('syncCompanySubscription', () => {
       store: null,
       expiresAt: null,
       limits: PLAN_LIMITS.free,
+      tableVersion: '2',
       rcSubscriberId: 'c1',
       updatedAt: NOW.toISOString(),
       usage: USAGE,

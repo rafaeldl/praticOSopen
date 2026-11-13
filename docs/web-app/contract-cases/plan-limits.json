@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generatedFrom": "docs/plans/plans.json v2",
-  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (`tableVersion`, senão a atual) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
+  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (#726): `tableVersion` gravado (desconhecido vale a atual); sem ele, plano pago (também a cortesia, que mantém o Pro antigo) é de antes da tabela atual e segue `legacyVersion`; Free segue a atual. Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo (recursos: a versão sem lista, todos liberados, continua sem lista) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
   "runsIn": [
     "dart",
     "functions",
@@ -59,7 +59,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "business"
+          "plan": "business",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "photo",
@@ -96,7 +97,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "formTemplate",
@@ -133,7 +135,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -152,7 +155,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -171,7 +175,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "pro"
+          "plan": "pro",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -189,7 +194,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "pro"
+          "plan": "pro",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -207,7 +213,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "business"
+          "plan": "business",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -354,7 +361,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -373,7 +381,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -392,7 +401,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "pro"
+          "plan": "pro",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -411,7 +421,8 @@
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "business"
+          "plan": "business",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -566,7 +577,7 @@
       }
     },
     {
-      "id": "courtesy-running-gets-the-new-pro-orders",
+      "id": "courtesy-running-keeps-old-pro-orders",
       "given": {
         "kind": "check",
         "subscription": {
@@ -582,13 +593,13 @@
         },
         "paidPlansEnabled": true,
         "resource": "order",
-        "usage": 149,
+        "usage": 400,
         "adding": 1,
         "expiresInDays": 30
       },
       "expect": {
         "allowed": true,
-        "limit": 150,
+        "limit": -1,
         "plan": "pro"
       }
     },
@@ -626,7 +637,8 @@
         "subscription": {
           "plan": "starter",
           "status": "active",
-          "source": "store"
+          "source": "store",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "formTemplate",
@@ -646,7 +658,8 @@
         "kind": "check",
         "subscription": {
           "plan": "pro",
-          "status": "expired"
+          "status": "expired",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -670,7 +683,8 @@
             "formTemplates": 3,
             "users": 3,
             "pdfWatermark": false
-          }
+          },
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -694,7 +708,8 @@
             "formTemplates": 3,
             "users": 3,
             "pdfWatermark": false
-          }
+          },
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "photo",
@@ -715,7 +730,8 @@
           "plan": "starter",
           "limits": {
             "ordersPerMonth": 80
-          }
+          },
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -736,7 +752,8 @@
           "plan": "pro",
           "limits": {
             "photosPerMonth": 500
-          }
+          },
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "order",
@@ -759,7 +776,8 @@
             "photosPerMonth": 200,
             "formTemplates": 3,
             "collaborators": 4
-          }
+          },
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
@@ -870,7 +888,8 @@
       "given": {
         "kind": "watermark",
         "subscription": {
-          "plan": "starter"
+          "plan": "starter",
+          "tableVersion": "2"
         },
         "paidPlansEnabled": true
       },
@@ -922,6 +941,202 @@
       },
       "expect": {
         "watermark": true
+      }
+    },
+    {
+      "id": "current-subscriber-starter-keeps-three-people",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "current-subscriber-starter-third-person-is-the-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 3,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "current-subscriber-starter-orders-have-no-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 400,
+        "adding": 1,
+        "lastMonthUsage": 400
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "current-subscriber-starter-gets-the-new-photos",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "photo",
+        "usage": 900,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "current-subscriber-starter-gets-the-new-checklists",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "resource": "formTemplate",
+        "usage": 10,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "current-subscriber-without-source-is-a-subscriber",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 400,
+        "adding": 1,
+        "lastMonthUsage": 400
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "new-purchase-starter-follows-the-new-table",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 2,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "subscriber-on-table-1-keeps-the-old-people",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "free-without-version-follows-the-new-table",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 9,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "current-subscriber-watermark-stays-off",
+      "given": {
+        "kind": "watermark",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "watermark": false
       }
     },
     {
@@ -997,6 +1212,43 @@
         "plan": "business",
         "version": "2",
         "nfseCnpjs": -1
+      }
+    },
+    {
+      "id": "in-force-courtesy-keeps-old-pro",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace"
+        },
+        "expiresInDays": 20,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "pro",
+        "version": "1",
+        "features": [],
+        "ordersPerMonth": -1
+      }
+    },
+    {
+      "id": "in-force-old-starter-keeps-every-feature",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "version": "1",
+        "features": [],
+        "users": 3
       }
     }
   ]
