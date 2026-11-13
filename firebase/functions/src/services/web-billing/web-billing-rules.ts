@@ -9,6 +9,7 @@
 import type { Subscription, SubscriptionPlan, SubscriptionStatus, SubscriptionStore } from '../../models/types';
 import type { AsaasSubscriptionInvoiceSettingsInput } from '../../models/asaas.types';
 import type { RcSubscriber } from '../revenuecat.client';
+import { isValidTaxId } from '../../utils/tax-id.utils';
 import type { ResolvedSubscriptionState } from '../subscription-plans';
 
 export type WebPlan = Exclude<SubscriptionPlan, 'free'>;
@@ -196,6 +197,8 @@ export type WebBillingStatus = 'pending' | 'active' | 'cancelled' | 'refunded';
 
 export interface WebBillingPayment {
   status: 'paid' | 'refunded';
+  /** PraticOS nota of this payment: asked of the issuer, or none (subscriber outside Brazil). Absent: Asaas issues. */
+  invoice?: 'requested' | 'abroad';
   value: number;
   dueDate: string;
   paidAt?: string;
@@ -292,6 +295,20 @@ export type CheckoutBlock = 'STORE_SUBSCRIPTION_ACTIVE' | 'WEB_SUBSCRIPTION_ACTI
  */
 export function sellsOnWeb(country: string | null | undefined): boolean {
   return !country || country.trim().toUpperCase() === 'BR';
+}
+
+/**
+ * Whether the PraticOS nota of a paid subscription charge goes out (owner's
+ * rule, 2026-11-13): only for subscribers in Brazil, with a Brazilian CPF or
+ * CNPJ. Outside Brazil (company country, or no valid CPF/CNPJ): the payment
+ * is recorded without a nota, no error and no retry.
+ */
+export function subscriptionInvoiceDecision(
+  country: string | null | undefined,
+  recipient: { taxId?: string | null } | null | undefined,
+): 'issue' | 'abroad' {
+  if (!sellsOnWeb(country)) return 'abroad';
+  return recipient?.taxId && isValidTaxId(recipient.taxId) ? 'issue' : 'abroad';
 }
 
 function inForce(subscription: Subscription | undefined, now: Date): boolean {

@@ -473,6 +473,36 @@ describe('nota of the subscription by PraticOS (config/webCheckout.invoiceSource
     expect(d.grant).toHaveBeenCalledTimes(2);
   });
 
+  it('paid by a subscriber in Brazil: the payment records the nota as requested', async () => {
+    seedCompany();
+    seedRecord(praticosRecord);
+    await handleBillingEvent(confirmed, deps());
+    expect(recordOf()!.payments!.pay_1).toMatchObject({ status: 'paid', invoice: 'requested' });
+  });
+
+  it('subscriber outside Brazil: payment recorded without a nota, no error, no retry', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    fake.seed('companies/c1', { name: 'Shop', country: 'PT' });
+    seedRecord(praticosRecord);
+    const d = deps();
+    await expect(handleBillingEvent(confirmed, d)).resolves.toBe('done');
+    expect(fake.read(REQUEST)).toBeUndefined();
+    expect(recordOf()).toMatchObject({ status: 'active', payments: { pay_1: { status: 'paid', invoice: 'abroad' } } });
+    expect(d.grant).toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+    // The renewal does the same; a refund has no nota to cancel.
+    await handleBillingEvent({ ...confirmed, id: 'evt_r', event: 'PAYMENT_REFUNDED' }, d);
+    expect(fake.read(REQUEST)).toBeUndefined();
+  });
+
+  it('a recipient without a Brazilian CPF/CNPJ counts as outside Brazil', async () => {
+    seedCompany();
+    seedRecord({ ...praticosRecord, invoiceRecipient: { name: 'Foreign Ltd', taxId: '123456789', email: null } });
+    await expect(handleBillingEvent(confirmed, deps())).resolves.toBe('done');
+    expect(fake.read(REQUEST)).toBeUndefined();
+    expect(recordOf()!.payments!.pay_1).toMatchObject({ invoice: 'abroad' });
+  });
+
   it('a subscription sold with Asaas notas stays on Asaas after the key changes', async () => {
     fake.seed('config/webCheckout', PRATICOS);
     seedCompany();

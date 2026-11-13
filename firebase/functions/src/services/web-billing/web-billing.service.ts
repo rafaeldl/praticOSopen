@@ -27,6 +27,7 @@ import {
   refundEligible,
   saoPauloDate,
   subscriptionIdOf,
+  subscriptionInvoiceDecision,
   webInvoiceDescription,
   webOffer,
   type BillingWebhookEvent,
@@ -417,10 +418,15 @@ async function requestSubscriptionInvoice(
   now: Date,
 ): Promise<void> {
   if (record.invoiceSource !== 'praticos' || !record.invoiceIssuer?.companyId) return;
-  if (!record.invoiceRecipient?.taxId) {
-    console.error('[WebBilling] PraticOS nota without recipient: issue it by hand', { companyId, paymentId: action.paymentId });
+  const ref = webBillingRef(companyId);
+  const country = ((await db.collection('companies').doc(companyId).get()).get('country') as string | undefined) ?? null;
+  if (!record.invoiceRecipient || subscriptionInvoiceDecision(country, record.invoiceRecipient) === 'abroad') {
+    // Outside Brazil: no nota for now. The payment is recorded as such; no error, no retry.
+    await ref.update({ [`payments.${action.paymentId}.invoice`]: 'abroad' });
+    console.log('[WebBilling] subscriber outside Brazil: payment without nota', { companyId, paymentId: action.paymentId });
     return;
   }
+  await ref.update({ [`payments.${action.paymentId}.invoice`]: 'requested' });
   await requestChargeInvoice(
     record.invoiceIssuer.companyId,
     {

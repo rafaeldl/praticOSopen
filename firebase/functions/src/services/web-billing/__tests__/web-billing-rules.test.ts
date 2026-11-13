@@ -6,6 +6,7 @@ import {
   invoiceSettingsFor,
   parseWebCheckoutConfig,
   webInvoiceDescription,
+  subscriptionInvoiceDecision,
   periodEndOf,
   refundEligible,
   saoPauloDate,
@@ -88,6 +89,14 @@ describe('config and offer', () => {
     expect(config.invoiceSource).toBe('praticos');
     expect(config.invoiceIssuer).toEqual({ companyId: 'co1', emitterId: 'e1' });
     expect(parseWebCheckoutConfig({ invoiceIssuerCompanyId: 'a/b' }).invoiceIssuer).toBeNull();
+  });
+
+  it('PraticOS nota only for subscribers in Brazil with a Brazilian CPF/CNPJ', () => {
+    expect(subscriptionInvoiceDecision('BR', { taxId: '11222333000181' })).toBe('issue');
+    expect(subscriptionInvoiceDecision(null, { taxId: '11.222.333/0001-81' })).toBe('issue');
+    expect(subscriptionInvoiceDecision('US', { taxId: '11222333000181' })).toBe('abroad');
+    expect(subscriptionInvoiceDecision('BR', { taxId: '123456789' })).toBe('abroad');
+    expect(subscriptionInvoiceDecision('BR', null)).toBe('abroad');
   });
 
   it('describes the nota of a charge by plan, cycle and due date', () => {
