@@ -23,6 +23,8 @@ Future<String?> defaultIdTokenProvider() async {
 ///
 /// Sends `X-Company-Id` (the selected company, or [companyId]) so users that
 /// belong to several companies don't fall back to the first one on the server.
+/// Sends `X-App-Version` ("1.109.0") so the server can tell app versions
+/// apart; versions up to 1.109 never sent it (see docs/APP_MINIMUM_VERSION.md).
 Future<Map<String, String>> appApiHeaders({
   String? companyId,
   Future<String?> Function()? tokenProvider,
@@ -38,6 +40,8 @@ Future<Map<String, String>> appApiHeaders({
     'Content-Type': 'application/json',
     if (resolvedCompanyId != null && resolvedCompanyId.isNotEmpty)
       'X-Company-Id': resolvedCompanyId,
+    if (Global.versionName != null && Global.versionName!.isNotEmpty)
+      'X-App-Version': Global.versionName!,
   };
 }
 

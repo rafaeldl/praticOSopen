@@ -15,6 +15,7 @@
 - [`DEVICE_READING.md`](DEVICE_READING.md) - Leitura do equipamento por visita (quilometragem, horímetro): campo do ramo com `reading: true`, `Order.deviceReadings` e última leitura no equipamento
 - [`REMINDERS_AND_NOTICES.md`](REMINDERS_AND_NOTICES.md) - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
 - [`AI_ORDER_ASSIST.md`](AI_ORDER_ASSIST.md) - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
+- [`APP_MINIMUM_VERSION.md`](APP_MINIMUM_VERSION.md) - Versão mínima e recomendada do app (`config/appVersion`): tela de atualizar, como subir e o que fazer com a 1.56
 - [`PLAN_LIMITS_SERVER.md`](PLAN_LIMITS_SERVER.md) - Limites dos planos: tabela única (`docs/plans/plans.json`, gerador e testes em cada lado), conta do servidor, chaves e casos de contrato
 - [`PLAN_FEATURES.md`](PLAN_FEATURES.md) - Recursos de cada plano (#724): a mesma checagem no servidor, no app e na web, o 402 `PLAN_FEATURE` e o aviso "Recurso do plano X"
 - [`ONBOARDING.md`](ONBOARDING.md) - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)

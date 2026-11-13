@@ -458,6 +458,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Versão mínima e recomendada do app (docs/APP_MINIMUM_VERSION.md). O app
+    // lê antes do login também (tela de atualizar), então a leitura é aberta;
+    // só tem números de versão. Quem grava é o console ou o Admin SDK.
+    match /config/appVersion {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     // NFS-E DIRETA (Emissor Nacional) — spec 2026-11-05-nfse-direta-design §6
     // Certificado A1 cifrado (envelope com Cloud KMS, uma chave por emitente)

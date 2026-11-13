@@ -11,5 +11,9 @@ class Global {
   static Subscription? subscription;
 
   static late String version;
+
+  /// Installed version without the build number ("1.109.0"). Sent to the
+  /// API in `X-App-Version`.
+  static String? versionName;
   static OrderStore orderStore = OrderStore();
 }

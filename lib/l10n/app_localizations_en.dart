@@ -591,6 +591,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tryAgain => 'Try again';
 
   @override
+  String get appUpdateRequiredTitle => 'Update the app to continue';
+
+  @override
+  String get appUpdateRequiredMessage =>
+      'This version of PraticOS is out of date. Get the new one from the store: it\'s free and your data stays saved.';
+
+  @override
+  String get appUpdateButton => 'Update';
+
+  @override
+  String get appUpdateRecommendedTitle =>
+      'A new version of PraticOS is available';
+
+  @override
+  String get appUpdateRecommendedMessage =>
+      'Update from the store to get the latest features and fixes.';
+
+  @override
+  String get appUpdateNotNow => 'Not now';
+
+  @override
   String get noInternetConnection => 'No internet connection';
 
   @override

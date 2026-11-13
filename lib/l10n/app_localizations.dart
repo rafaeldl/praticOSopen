@@ -1240,6 +1240,42 @@ abstract class AppLocalizations {
   /// **'Tentar novamente'**
   String get tryAgain;
 
+  /// No description provided for @appUpdateRequiredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualize o app para continuar'**
+  String get appUpdateRequiredTitle;
+
+  /// No description provided for @appUpdateRequiredMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta versão do PraticOS ficou antiga. Baixe a nova na loja: é grátis e seus dados continuam salvos.'**
+  String get appUpdateRequiredMessage;
+
+  /// No description provided for @appUpdateButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualizar'**
+  String get appUpdateButton;
+
+  /// No description provided for @appUpdateRecommendedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem versão nova do PraticOS'**
+  String get appUpdateRecommendedTitle;
+
+  /// No description provided for @appUpdateRecommendedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualize na loja para ter as novidades e correções.'**
+  String get appUpdateRecommendedMessage;
+
+  /// No description provided for @appUpdateNotNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get appUpdateNotNow;
+
   /// No description provided for @noInternetConnection.
   ///
   /// In pt, this message translates to:
