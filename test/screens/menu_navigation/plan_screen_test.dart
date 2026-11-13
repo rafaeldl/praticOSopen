@@ -4,35 +4,42 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/menu_navigation/more/plan_screen.dart';
-import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:provider/provider.dart';
 
-// A Starter bought on table 1: 3 people, and since #726 the more generous of
-// tables 1 and 2 (photos and checklists without limit). The rows of the new
-// table come with #725.
-Subscription _starter({int users = 1, int photos = 10, int forms = 1}) =>
-    Subscription(
-      plan: SubscriptionPlan.starter,
-      tableVersion: '1',
-      source: SubscriptionSource.store,
-      expiresAt: DateTime.now().add(const Duration(days: 30)),
-      usage: SubscriptionUsage(
-        usersActive: users,
-        photosThisMonth: photos,
-        formTemplatesActive: forms,
-      ),
-    );
+/// A plan of the current table (2026-11) with this month's orders.
+Subscription _sub(
+  SubscriptionPlan plan, {
+  int orders = 0,
+  int lastMonth = 0,
+  int users = 1,
+}) {
+  final now = DateTime.now();
+  return Subscription(
+    plan: plan,
+    source: plan == SubscriptionPlan.free ? null : SubscriptionSource.store,
+    expiresAt: plan == SubscriptionPlan.free ? null : now.add(const Duration(days: 30)),
+    // Bought on the current table (#734: a paid plan without it is the old one).
+    tableVersion: plan == SubscriptionPlan.free ? null : '2',
+    usage: SubscriptionUsage(usersActive: users)
+      ..ordersMonth = orderMonthKey(now)
+      ..ordersThisMonth = orders
+      ..ordersLastMonth = lastMonth,
+  );
+}
 
 Future<void> _pump(
   WidgetTester tester,
   Subscription subscription, {
   VoidCallback? onOpenTeam,
-  VoidCallback? onOpenChecklists,
-  AiStatus ai = AiStatus.off,
   bool canManage = true,
+  int taxIds = 0,
 }) async {
+  tester.view.physicalSize = const Size(1170, 4000);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
   final store = SubscriptionStore()..latest = subscription;
   await tester.pumpWidget(
     Provider<SubscriptionStore>.value(
@@ -43,8 +50,7 @@ Future<void> _pump(
         supportedLocales: AppLocalizations.supportedLocales,
         home: PlanScreen(
           onOpenTeam: onOpenTeam,
-          onOpenChecklists: onOpenChecklists,
-          loadAiStatus: () async => ai,
+          loadTaxIds: () async => taxIds,
           hasPermission: (_) => canManage,
         ),
       ),
@@ -56,119 +62,127 @@ Future<void> _pump(
 void main() {
   setUp(() {
     SubscriptionService.debugPaidPlansEnabledOverride = true;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = true;
     PaywallLauncher.roleResolver = () => 'owner';
   });
   tearDown(() {
     SubscriptionService.debugPaidPlansEnabledOverride = null;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = null;
   });
 
-  test('usage level: near from 80%, at limit when full, -1 is unlimited', () {
-    expect(
-      const PlanUsage(PlanResource.photos, 180, 200).level,
-      PlanUsageLevel.near,
-    );
-    expect(
-      const PlanUsage(PlanResource.team, 3, 3).level,
-      PlanUsageLevel.atLimit,
-    );
-    expect(
-      const PlanUsage(PlanResource.photos, 10, 200).level,
-      PlanUsageLevel.ok,
-    );
-    expect(
-      const PlanUsage(PlanResource.photos, 900, -1).level,
-      PlanUsageLevel.unlimited,
-    );
+  testWidgets('new company on Free: orders and people, no limit notice, what Starter adds', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 1));
+
+    expect(find.text('Free'), findsOneWidget);
+    expect(find.text('OS este mês'), findsOneWidget);
+    expect(find.text('1 de 10'), findsOneWidget);
+    expect(find.text('Pessoas na equipe'), findsOneWidget);
+    expect(find.text('1 de 1'), findsOneWidget);
+    // The owner alone is not a limit (#725): no red "No limite".
+    expect(find.text('No limite · conta o convite'), findsNothing);
+    expect(find.byKey(const ValueKey('plan_notice_peopleAtLimit')), findsNothing);
+    // Free has no nota: no CNPJ row. No assistant counter.
+    expect(find.text('CNPJs na nota fiscal'), findsNothing);
+    expect(find.textContaining('assistente'), findsNothing);
+    expect(find.text('O que o Starter dá a mais'), findsOneWidget);
+    for (final name in ['Nota fiscal', 'PDF sem a marca PraticOS', 'Checklists próprios', 'Cobrança e lembrete de pagamento', 'Pedir avaliação ao cliente']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+    expect(find.byKey(const ValueKey('plan_paywall')), findsOneWidget);
   });
 
-  testWidgets('shows plan, renewal and what is in use, in prototype order', (
-    tester,
-  ) async {
-    await _pump(tester, _starter(users: 2, photos: 180, forms: 2));
-
-    expect(find.textContaining('Starter · renova em'), findsOneWidget);
-    expect(find.text('O que você está usando'), findsOneWidget);
-    final team = tester.getTopLeft(find.text('Pessoas na equipe')).dy;
-    final photos = tester.getTopLeft(find.text('Fotos este mês')).dy;
-    final forms = tester.getTopLeft(find.text('Checklists')).dy;
-    expect(team < photos && photos < forms, isTrue);
-    expect(find.text('2 de 3'), findsOneWidget);
-    expect(find.text('180'), findsOneWidget);
-    expect(find.text('Sem limite'), findsNWidgets(2));
-    // No limit reached: no block, "Ver planos" is a link.
-    expect(find.byKey(const ValueKey('plan_limit_block')), findsNothing);
+  testWidgets('80% of the orders: notice with "Ver planos"', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 8));
+    expect(find.byKey(const ValueKey('plan_notice_ordersNear')), findsOneWidget);
+    expect(find.text('Você já abriu 8 de 10 OS este mês.'), findsOneWidget);
+    expect(find.text('Quase no limite'), findsOneWidget);
     expect(find.text('Ver planos'), findsOneWidget);
-    expect(find.text('Gerenciar assinatura'), findsOneWidget);
-    expect(find.text('Restaurar compras'), findsOneWidget);
   });
 
-  testWidgets('a full team shows the limit block with "Ver planos"', (
-    tester,
-  ) async {
-    await _pump(tester, _starter(users: 3));
-
-    expect(find.text('Limite do plano'), findsOneWidget);
+  testWidgets('over in the first month: the month of grace', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 12, lastMonth: 3));
     expect(
-      find.text(
-        'A equipe já tem 3 de 3 pessoas. Para chamar mais alguém, '
-        'mude de plano.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('No limite · conta o convite'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('plan_limit_block')),
-        matching: find.text('Ver planos'),
-      ),
+      find.text('Este mês passou de 10 OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.'),
       findsOneWidget,
     );
   });
 
-  testWidgets('team and checklists rows open their screens', (tester) async {
-    var team = 0;
-    var forms = 0;
-    await _pump(
-      tester,
-      _starter(),
-      onOpenTeam: () => team++,
-      onOpenChecklists: () => forms++,
-    );
-
-    await tester.tap(find.text('Pessoas na equipe'));
-    await tester.tap(find.text('Checklists'));
-    expect(team, 1);
-    expect(forms, 1);
+  testWidgets('over again: the new order waits', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 11, lastMonth: 14));
+    expect(find.byKey(const ValueKey('plan_notice_ordersBlocked')), findsOneWidget);
+    expect(find.text('Passou de 10 OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.'), findsOneWidget);
   });
 
-  testWidgets('without the permission the rows open nothing', (tester) async {
+  testWidgets('Business over: says it went over what is included, no paywall in the notice', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.business, orders: 510, users: 3), taxIds: 2);
+    expect(find.text('Este mês já passou das 500 OS incluídas no Business.'), findsOneWidget);
+    expect(find.text('O que o Business dá a mais'), findsNothing);
+    expect(find.text('CNPJs na nota fiscal'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('Pro: CNPJs of the nota and what Business adds', (tester) async {
+    await _pump(tester, _sub(SubscriptionPlan.pro, orders: 20, users: 3), taxIds: 1);
+    expect(find.text('20 de 150'), findsOneWidget);
+    expect(find.text('3 de 5'), findsOneWidget);
+    expect(find.text('1 de 2'), findsOneWidget);
+    expect(find.text('O que o Business dá a mais'), findsOneWidget);
+    expect(find.text('Ações em lote'), findsOneWidget);
+    expect(find.text('ChatGPT e Claude'), findsOneWidget);
+    expect(find.byKey(const ValueKey('plan_notice_ordersNear')), findsNothing);
+  });
+
+  testWidgets('a Starter bought on table 1 keeps its 3 people and orders without limit (#726)', (tester) async {
+    final now = DateTime.now();
+    final old = Subscription(
+      plan: SubscriptionPlan.starter,
+      source: SubscriptionSource.store,
+      expiresAt: now.add(const Duration(days: 30)),
+      usage: SubscriptionUsage(usersActive: 2)
+        ..ordersMonth = orderMonthKey(now)
+        ..ordersThisMonth = 80
+        ..ordersLastMonth = 70,
+    );
+    await _pump(tester, old, taxIds: 1);
+    expect(find.text('2 de 3'), findsOneWidget);
+    expect(find.text('80'), findsOneWidget);
+    expect(find.byKey(const ValueKey('plan_notice_ordersBlocked')), findsNothing);
+    expect(find.byKey(const ValueKey('plan_notice_peopleAtLimit')), findsNothing);
+  });
+
+  testWidgets('a full Starter team says so; the row opens Equipe', (tester) async {
     var opened = 0;
-    await _pump(
-      tester,
-      _starter(),
-      onOpenTeam: () => opened++,
-      onOpenChecklists: () => opened++,
-      canManage: false,
-    );
-    await tester.tap(find.text('Pessoas na equipe'));
-    await tester.tap(find.text('Checklists'));
+    await _pump(tester, _sub(SubscriptionPlan.starter, users: 2), onOpenTeam: () => opened++);
+    expect(find.text('A equipe já tem 2 de 2 pessoas. Para chamar mais alguém, mude de plano.'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('plan_usage_people')));
+    expect(opened, 1);
+  });
+
+  testWidgets('without the permission the people row opens nothing', (tester) async {
+    var opened = 0;
+    await _pump(tester, _sub(SubscriptionPlan.starter), onOpenTeam: () => opened++, canManage: false);
+    await tester.tap(find.byKey(const ValueKey('plan_usage_people')));
     expect(opened, 0);
   });
 
   testWidgets('a technician is told to ask the administrator', (tester) async {
     PaywallLauncher.roleResolver = () => 'technician';
-    await _pump(tester, _starter(users: 3));
-
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 9));
     expect(find.text('Ver planos'), findsNothing);
     expect(find.text('Gerenciar assinatura'), findsNothing);
-    expect(
-      find.text('Peça ao administrador da conta para mudar de plano.'),
-      findsOneWidget,
-    );
+    expect(find.text('Peça ao administrador da conta para mudar de plano.'), findsOneWidget);
+  });
+
+  testWidgets('switch off: the use without limits and no notice', (tester) async {
+    FeatureGateService.debugPlanLimitsEnforcedOverride = false;
+    await _pump(tester, _sub(SubscriptionPlan.free, orders: 30));
+    expect(find.text('30'), findsOneWidget);
+    expect(find.text('Sem limite'), findsWidgets);
+    expect(find.byKey(const ValueKey('plan_notice_ordersBlocked')), findsNothing);
   });
 
   testWidgets('back button reads the screen below', (tester) async {
-    final store = SubscriptionStore()..latest = _starter();
+    final store = SubscriptionStore()..latest = _sub(SubscriptionPlan.starter);
     await tester.pumpWidget(
       Provider<SubscriptionStore>.value(
         value: store,
@@ -182,7 +196,7 @@ void main() {
               child: const Text('open'),
               onPressed: () => Navigator.of(context).push(
                 CupertinoPageRoute(
-                  builder: (_) => PlanScreen(hasPermission: (_) => true),
+                  builder: (_) => PlanScreen(hasPermission: (_) => true, loadTaxIds: () async => 0),
                 ),
               ),
             ),
@@ -193,39 +207,5 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text('Oficina do Zé'), findsOneWidget);
-  });
-
-  group('assistant', () {
-    testWidgets('shows the month use first when it is on', (tester) async {
-      await _pump(
-        tester,
-        _starter(),
-        ai: const AiStatus(enabled: true, used: 87, limit: 150),
-      );
-      expect(find.byKey(const ValueKey('plan_usage_ai')), findsOneWidget);
-      expect(find.text('Assistente este mês'), findsOneWidget);
-      expect(find.text('87 de 150'), findsOneWidget);
-    });
-
-    testWidgets('hides the row when it is off', (tester) async {
-      await _pump(tester, _starter());
-      expect(find.byKey(const ValueKey('plan_usage_ai')), findsNothing);
-    });
-
-    testWidgets('at the limit it says so and offers the plans', (tester) async {
-      await _pump(
-        tester,
-        _starter(),
-        ai: const AiStatus(enabled: true, used: 150, limit: 150),
-      );
-      expect(find.byKey(const ValueKey('plan_limit_block')), findsOneWidget);
-      expect(
-        find.text(
-          'Você usou 150 de 150 pedidos do assistente neste mês. '
-          'Para continuar agora, veja os planos.',
-        ),
-        findsOneWidget,
-      );
-    });
   });
 }

@@ -3482,5 +3482,21 @@
   "planFeatureSpreadsheetExport": "Relatório em planilha",
   "planFeatureBulkActions": "Ações em lote",
   "planFeatureMcp": "ChatGPT e Claude",
-  "planFeatureApi": "API com chave"
+  "planFeatureApi": "API com chave",
+  "planUsageOrders": "OS este mês",
+  "planUsageTaxIds": "CNPJs na nota fiscal",
+  "planNoticeOrdersNear": "Você já abriu {used} de {limit} OS este mês.",
+  "@planNoticeOrdersNear": {"placeholders": {"used": {"type": "String"}, "limit": {"type": "String"}}},
+  "planNoticeOrdersAtLimit": "Você abriu as {limit} OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.",
+  "@planNoticeOrdersAtLimit": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersGrace": "Este mês passou de {limit} OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.",
+  "@planNoticeOrdersGrace": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersBlocked": "Passou de {limit} OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.",
+  "@planNoticeOrdersBlocked": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersContactUs": "Este mês já passou das {limit} OS incluídas no Business.",
+  "@planNoticeOrdersContactUs": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticePeopleContactUs": "A equipe já passou das {limit} pessoas incluídas no Business.",
+  "@planNoticePeopleContactUs": {"placeholders": {"limit": {"type": "String"}}},
+  "planNextTitle": "O que o {plan} dá a mais",
+  "@planNextTitle": {"placeholders": {"plan": {"type": "String"}}}
 }

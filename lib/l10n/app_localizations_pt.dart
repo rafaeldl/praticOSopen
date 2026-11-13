@@ -7943,4 +7943,45 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get planFeatureApi => 'API com chave';
+
+  @override
+  String get planUsageOrders => 'OS este mês';
+
+  @override
+  String get planUsageTaxIds => 'CNPJs na nota fiscal';
+
+  @override
+  String planNoticeOrdersNear(String used, String limit) {
+    return 'Você já abriu $used de $limit OS este mês.';
+  }
+
+  @override
+  String planNoticeOrdersAtLimit(String limit) {
+    return 'Você abriu as $limit OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersGrace(String limit) {
+    return 'Este mês passou de $limit OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersBlocked(String limit) {
+    return 'Passou de $limit OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersContactUs(String limit) {
+    return 'Este mês já passou das $limit OS incluídas no Business.';
+  }
+
+  @override
+  String planNoticePeopleContactUs(String limit) {
+    return 'A equipe já passou das $limit pessoas incluídas no Business.';
+  }
+
+  @override
+  String planNextTitle(String plan) {
+    return 'O que o $plan dá a mais';
+  }
 }

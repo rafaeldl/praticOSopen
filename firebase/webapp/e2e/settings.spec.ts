@@ -127,53 +127,58 @@ test('Entrar com código: confere o código, pergunta e entra na empresa nova (a
 })
 
 test.describe('Plano', () => {
-  const aiStatus = (page: Page, body: unknown, status = 200) =>
-    page.route('**/v1/app/ai/status', (route) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) }))
+  /** The one switch of the limits (config/paidPlans) on for this page only: other specs keep it off. */
+  const paidPlansOn = (page: Page) =>
+    page.route('**/documents:batchGet**', async (route) => {
+      const name = /"(projects\/[^"]+\/documents\/config\/paidPlans)"/.exec(route.request().postData() ?? '')?.[1]
+      if (!name) return route.fallback()
+      const now = new Date().toISOString()
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify([{ found: { name, fields: { enabled: { booleanValue: true } }, createTime: now, updateTime: now }, readTime: now }]),
+      })
+    })
 
-  test('Plano só para ler: situação, uso com os níveis e o bloco do limite, sem compra (plan.view, plan.header-status, plan.usage-levels, plan.ai-usage)', async ({ page }) => {
-    await aiStatus(page, { success: true, data: { enabled: true, usage: { used: 400, limit: 400 } } })
+  test('Plano igual ao app: OS do mês, pessoas, CNPJs, aviso de 80% e o que o próximo plano dá, sem contador de IA (plan.view, plan.header-status, plan.usage-levels, #725)', async ({ page }) => {
+    await paidPlansOn(page)
     await login(page, 'gManager', 'settings/plan')
     await expect(page.getByTestId('plan-header')).toHaveText(/^Starter · renova em \d{2}\/\d{2}\/\d{4}$/)
     const usage = page.getByTestId('plan-usage')
-    // The assistant first, at the limit; the team at the limit counts invites. A Starter
-    // bought on table 1 keeps its 3 people and gets the new table's photos and checklists (#726).
-    await expect(usage.locator('li').first()).toHaveAttribute('data-usage', 'ai')
-    await expect(usage.locator('[data-usage="ai"]')).toContainText('400 de 400')
-    await expect(usage.locator('[data-usage="ai"]')).toContainText('No limite')
-    await expect(usage.locator('[data-usage="team"]')).toContainText('No limite · conta o convite')
-    await expect(usage.locator('[data-usage="photos"]')).toContainText('170')
-    await expect(usage.locator('[data-usage="photos"]')).toContainText('Sem limite')
-    await expect(usage.locator('[data-usage="checklists"]')).toContainText('Sem limite')
-    await expect(page.getByTestId('plan-limit')).toContainText('Você usou 400 de 400 pedidos do assistente neste mês.')
+    await expect(usage.locator('li').first()).toHaveAttribute('data-usage', 'orders')
+    await expect(usage.locator('[data-usage="orders"]')).toContainText('OS este mês')
+    await expect(usage.locator('[data-usage="orders"]')).toContainText('45 de 50')
+    await expect(usage.locator('[data-usage="orders"]')).toContainText('Quase no limite')
+    // Members are recounted by the server (usersActive), above the 2 of Starter.
+    await expect(usage.locator('[data-usage="people"]')).toContainText(/\d+ de 2/)
+    await expect(usage.locator('[data-usage="people"]')).toContainText('No limite · conta o convite')
+    await expect(usage.locator('[data-usage="taxIds"]')).toContainText('0 de 1')
+    await expect(usage.locator('[data-usage="ai"]')).toHaveCount(0)
+    await expect(page.getByTestId('plan-limit')).toHaveAttribute('data-notice', 'ordersNear')
+    await expect(page.getByTestId('plan-limit')).toContainText('Você já abriu 45 de 50 OS este mês.')
+    const next = page.getByTestId('plan-next')
+    await expect(next).toContainText('O que o Pro dá a mais')
+    await expect(next.locator('[data-feature="contracts"]')).toHaveText('Contratos')
+    await expect(next.locator('[data-feature="workStages"]')).toHaveText('Etapas do serviço')
     // Nothing to buy and no row opens for a manager, who is told to ask (plan.non-admin-note).
     await expect(page.getByRole('button', { name: /plano/i })).toHaveCount(0)
     await expect(page.getByTestId('plan-ask-admin')).toHaveText('Peça ao administrador da conta para mudar de plano.')
     await expect(usage.getByRole('link')).toHaveCount(0)
   })
 
-  test('Plano: dono abre Equipe e Checklists pelas linhas; assistente desligado some; erro do assistente avisa (plan.open-limit, plan.ai-usage)', async ({ page }) => {
-    await aiStatus(page, { success: true, data: { enabled: false } })
+  test('Plano: dono abre Equipe pela linha de pessoas e lê onde mudar de plano (plan.open-limit)', async ({ page }) => {
     await login(page, 'gOwner', 'settings/plan')
     const usage = page.getByTestId('plan-usage')
-    await expect(usage.locator('[data-usage="team"]')).toBeVisible()
-    await expect(usage.locator('[data-usage="ai"]')).toHaveCount(0)
-    await usage.locator('[data-usage="team"]').getByRole('link').click()
+    await expect(page.getByTestId('plan-where')).toHaveText('Para mudar de plano, use o app PraticOS no celular, na tela Plano.')
+    await usage.locator('[data-usage="people"]').getByRole('link').click()
     await expect(page.getByRole('heading', { level: 1, name: 'Equipe' })).toBeVisible()
-    await page.goBack()
-    await usage.locator('[data-usage="checklists"]').getByRole('link').click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Checklists' })).toBeVisible()
-    await page.unroute('**/v1/app/ai/status')
-    await aiStatus(page, { success: false, error: { code: 'INTERNAL_ERROR' } }, 500)
-    await page.goto('settings/plan')
-    await expect(page.getByTestId('plan-ai-failed')).toContainText('Não deu para ler o uso do assistente.')
-    await expect(page.getByTestId('plan-usage').locator('[data-usage="team"]')).toBeVisible()
   })
 
   test('Plano sem limite mostra só os números; erro de leitura com "Tentar de novo" (plan.view)', async ({ page }) => {
     await login(page, 'technician', 'settings/plan')
-    // Company A is on Business: no limit, numbers only.
+    // Company A is on Business.
     await expect(page.getByTestId('plan-header')).toHaveText('Business')
-    await expect(page.getByTestId('plan-usage').locator('[data-usage="photos"]')).toContainText('Sem limite')
+    // Switch off (config/paidPlans): no limit, numbers only.
+    await expect(page.getByTestId('plan-usage').locator('[data-usage="orders"]')).toContainText('Sem limite')
     await page.route('**/documents:batchGet**', (route) => route.abort())
     await page.getByRole('link', { name: 'Configurações' }).first().click()
     await page.getByTestId('settings-plan').click()

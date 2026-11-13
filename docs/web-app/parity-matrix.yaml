@@ -11102,11 +11102,11 @@ rows:
   states: []
   feature_flags: ["paidPlansEnabled"]
   hardware: null
-  data: ["companies/{id}", "api:GET /v1/app/ai/status"]
+  data: ["companies/{id}", "companies/{id}/fiscalEmitters", "config/paidPlans"]
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Com paidPlansEnabled=false mostra só a frase do plano; a seção de uso some. O bloco de limite mostra só o primeiro recurso que bateu (IA, equipe, fotos do mês, checklists). Web: só leitura, com o uso sempre à mostra; sem compra, preço nem Ver planos."
+  note: "#725: app e web mostram o mesmo pela mesma regra (planOverview, contract-cases/plan-overview.json): OS este mês, pessoas e CNPJs da nota (só com nota no plano) contra o plano, um aviso só (80%, 100%, mês de folga, OS nova esperando, Business passou do incluído) e o que o próximo plano dá a mais. Sem contador de IA. Chave config/paidPlans desligada: números sem limite e sem aviso. Com paidPlansEnabled=false no app, a seção de uso some. Web: sem compra; diz que muda de plano no app (até #664)."
 - id: plan.ai-usage
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11116,14 +11116,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: [limit]
+  states: []
   feature_flags: ["aiEnabled"]
   hardware: null
-  data: ["api:GET /v1/app/ai/status"]
+  data: []
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Primeira linha de uso, só com planos pagos e o assistente ligado. No limite mostra o bloco com Ver planos. Status fica em cache 5 min por empresa. Não copiar: erro ou demora viram assistente desligado e a linha some calada; web mostra que não deu para carregar. Web: erro do assistente aparece com Tentar de novo."
+  note: "Saiu no #725: a IA vem em todos os planos, sem contador para o cliente. Nem app nem web mostram a linha; o teto só aparece no aviso do próprio assistente."
 - id: plan.open-limit
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11140,7 +11140,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Linhas de uso de equipe e checklists abrem Equipe e Checklists; IA e fotos do mês não abrem nada. Não copiar: app não confere papel antes de abrir; web só liga a linha para manageUsers e manageForms."
+  note: "#725: a linha de pessoas abre Equipe só com manageUsers (app e web); OS do mês e CNPJs não abrem nada."
 - id: plan.paywall
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11213,13 +11213,13 @@ rows:
   segment_variation: []
   i18n: [pt, en, es]
   states: [limit]
-  feature_flags: ["paidPlansEnabled", "aiEnabled"]
+  feature_flags: ["paidPlansEnabled"]
   hardware: null
-  data: ["companies/{id}", "api:GET /v1/app/ai/status"]
+  data: ["companies/{id}"]
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Quase no limite a partir de 80% (âmbar); no limite em vermelho e negrito. -1 é ilimitado e mostra só o número usado."
+  note: "Quase no limite a partir de 80% (âmbar); no limite ou acima em vermelho e negrito. -1 é ilimitado e mostra só o número usado. Pessoas com limite 1 nunca avisam (empresa nova no Free)."
 - id: plan.header-status
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null

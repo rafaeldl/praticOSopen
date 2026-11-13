@@ -12856,6 +12856,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'API com chave'**
   String get planFeatureApi;
+
+  /// No description provided for @planUsageOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS este mês'**
+  String get planUsageOrders;
+
+  /// No description provided for @planUsageTaxIds.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJs na nota fiscal'**
+  String get planUsageTaxIds;
+
+  /// No description provided for @planNoticeOrdersNear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já abriu {used} de {limit} OS este mês.'**
+  String planNoticeOrdersNear(String used, String limit);
+
+  /// No description provided for @planNoticeOrdersAtLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você abriu as {limit} OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.'**
+  String planNoticeOrdersAtLimit(String limit);
+
+  /// No description provided for @planNoticeOrdersGrace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês passou de {limit} OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.'**
+  String planNoticeOrdersGrace(String limit);
+
+  /// No description provided for @planNoticeOrdersBlocked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passou de {limit} OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.'**
+  String planNoticeOrdersBlocked(String limit);
+
+  /// No description provided for @planNoticeOrdersContactUs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês já passou das {limit} OS incluídas no Business.'**
+  String planNoticeOrdersContactUs(String limit);
+
+  /// No description provided for @planNoticePeopleContactUs.
+  ///
+  /// In pt, this message translates to:
+  /// **'A equipe já passou das {limit} pessoas incluídas no Business.'**
+  String planNoticePeopleContactUs(String limit);
+
+  /// No description provided for @planNextTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o {plan} dá a mais'**
+  String planNextTitle(String plan);
 }
 
 class _AppLocalizationsDelegate

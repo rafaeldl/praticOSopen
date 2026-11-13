@@ -246,7 +246,7 @@ export interface PlanSummary {
   expiresAt: Date | null
   usage: { users: number; photos: number; checklists: number }
   limits: Limits
-  /** Passing people does not block (Business): talk to us. */
+  /** Passing people does not block (Business): only says it went over what is included. */
   overageAllowed: boolean
 }
 

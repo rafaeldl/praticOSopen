@@ -74,7 +74,7 @@ class FeatureGateResult {
   /// the first month).
   final bool grace;
 
-  /// Over the limit on a plan that never blocks (Business): talk to us.
+  /// Over the limit on a plan that never blocks (Business): only says it went over what is included (no outside purchase in the app, 3.1.1).
   final bool contactUs;
 
   /// Units being added by this check.
