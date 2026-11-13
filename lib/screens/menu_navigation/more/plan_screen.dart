@@ -155,7 +155,10 @@ class _PlanScreenState extends State<PlanScreen> {
     final now = DateTime.now();
     final plan = subscription.effectivePlan(now);
     final paid = SubscriptionService.paidPlansEnabled;
-    final canPurchase = paid && PaywallLauncher.currentUserCanPurchase;
+    // Bought on the web: only the active plan, no purchase (docs/WEB_CHECKOUT.md).
+    final fromWeb = subscription.hasWebSubscription(now);
+    final canPurchase =
+        paid && PaywallLauncher.currentUserCanPurchase && !fromWeb;
     final issue =
         subscription.periodState(now) == SubscriptionPeriodState.paymentIssue;
     final usages = PlanUsage.of(subscription, now, ai: _ai);
@@ -259,7 +262,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ],
             ),
           ),
-        if (paid && !canPurchase)
+        if (paid && !canPurchase && !fromWeb)
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.pageMargin,

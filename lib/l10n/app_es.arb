@@ -851,6 +851,7 @@
   "askAdminToChangePlanTitle": "Habla con el administrador",
   "askAdminToChangePlan": "Pide al administrador de la cuenta que cambie el plan.",
   "subscriptionUnavailable": "Las suscripciones no están disponibles ahora. Inténtalo de nuevo más tarde.",
+  "planActiveMessage": "Su plan {plan} está activo.",
   "restorePurchasesNothingFound": "No se encontró ninguna suscripción activa en esta cuenta de la tienda.",
   "planLimitUpgradeHint": "Suscríbete a un plan para aumentar este límite.",
   "deleteAccountStoreSubscriptionWarning": "Eliminar la cuenta no cancela la suscripción de App Store o Google Play. Cancélala antes en los ajustes de la tienda para que no se te cobre de nuevo.",

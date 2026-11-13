@@ -554,7 +554,8 @@ export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'business';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'expired';
 /** 'store' = state read from RevenueCat; 'grace' = launch grace period (script). */
 export type SubscriptionSource = 'store' | 'grace';
-export type SubscriptionStore = 'app_store' | 'play_store';
+/** 'web': bought on praticos.app/web through Asaas (docs/WEB_CHECKOUT.md); same as `store` in lib/models/subscription.dart. */
+export type SubscriptionStore = 'app_store' | 'play_store' | 'web';
 
 export interface SubscriptionLimits {
   photosPerMonth: number;      // -1 = unlimited

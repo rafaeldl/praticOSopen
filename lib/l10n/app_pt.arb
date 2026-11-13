@@ -886,6 +886,15 @@
   "askAdminToChangePlanTitle": "Fale com o administrador",
   "askAdminToChangePlan": "Peça ao administrador da conta para mudar de plano.",
   "subscriptionUnavailable": "As assinaturas não estão disponíveis agora. Tente novamente mais tarde.",
+  "planActiveMessage": "Seu plano {plan} está ativo.",
+  "@planActiveMessage": {
+    "description": "Shown instead of the paywall when the plan was bought outside the app stores. Never mentions where.",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
   "restorePurchasesNothingFound": "Nenhuma assinatura ativa foi encontrada nesta conta da loja.",
   "planLimitUpgradeHint": "Assine um plano para aumentar este limite.",
   "deleteAccountStoreSubscriptionWarning": "Excluir a conta não cancela a assinatura da App Store ou do Google Play. Cancele antes nos ajustes da loja para não ser cobrado de novo.",

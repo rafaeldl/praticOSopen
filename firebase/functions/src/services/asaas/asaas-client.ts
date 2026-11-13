@@ -20,6 +20,8 @@ import {
   AsaasMunicipalService,
   AsaasSaveFiscalInfoInput,
   AsaasPayment,
+  AsaasCreateSubscriptionInput,
+  AsaasSubscription,
   AsaasWallet,
   AsaasWebhook,
 } from '../../models/asaas.types';
@@ -141,6 +143,42 @@ export class AsaasClient {
       `/installments/${encodeURIComponent(installmentId)}/payments?limit=100`,
     );
     return list.data ?? [];
+  }
+
+  // --------------------------------------------------------------------------
+  // Subscriptions (web checkout of PraticOS plans, docs/WEB_CHECKOUT.md)
+  // --------------------------------------------------------------------------
+
+  /** POST /subscriptions without card data: the customer pays on the invoice page. */
+  createSubscription(input: AsaasCreateSubscriptionInput): Promise<AsaasSubscription> {
+    return this.request<AsaasSubscription>('POST', '/subscriptions', input);
+  }
+
+  getSubscription(id: string): Promise<AsaasSubscription> {
+    return this.request<AsaasSubscription>('GET', `/subscriptions/${encodeURIComponent(id)}`);
+  }
+
+  /** Charges already generated for a subscription, newest first as Asaas lists them. */
+  async listSubscriptionPayments(id: string): Promise<AsaasPayment[]> {
+    const list = await this.request<AsaasList<AsaasPayment>>(
+      'GET',
+      `/subscriptions/${encodeURIComponent(id)}/payments?limit=100`,
+    );
+    return list.data ?? [];
+  }
+
+  /** DELETE /subscriptions/{id}: no new charges; pending and overdue ones are removed, paid ones stay. */
+  async deleteSubscription(id: string): Promise<void> {
+    await this.request<unknown>('DELETE', `/subscriptions/${encodeURIComponent(id)}`);
+  }
+
+  /** POST /payments/{id}/refund without a value: full refund (card or Pix, confirmed or received). */
+  refundPayment(id: string, description?: string): Promise<AsaasPayment> {
+    return this.request<AsaasPayment>(
+      'POST',
+      `/payments/${encodeURIComponent(id)}/refund`,
+      description ? { description } : {},
+    );
   }
 
   // --------------------------------------------------------------------------

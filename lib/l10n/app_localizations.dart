@@ -3706,6 +3706,12 @@ abstract class AppLocalizations {
   /// **'As assinaturas não estão disponíveis agora. Tente novamente mais tarde.'**
   String get subscriptionUnavailable;
 
+  /// Shown instead of the paywall when the plan was bought outside the app stores. Never mentions where.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu plano {plan} está ativo.'**
+  String planActiveMessage(String plan);
+
   /// No description provided for @restorePurchasesNothingFound.
   ///
   /// In pt, this message translates to:

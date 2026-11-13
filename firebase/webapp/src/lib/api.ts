@@ -70,6 +70,11 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   SEFIN_UNAVAILABLE: 'nfseDirectErrorGovUnavailable',
   IMPORT_NOT_FOUND: 'nfseDirectErrorNotFound',
   IMPORT_UNDO_EXPIRED: 'nfseImportErrorUndoExpired',
+  // Web checkout (docs/WEB_CHECKOUT.md).
+  STORE_SUBSCRIPTION_ACTIVE: 'web.error.storeSubscription',
+  WEB_SUBSCRIPTION_ACTIVE: 'web.error.webSubscription',
+  REFUND_NOT_ALLOWED: 'web.error.refundExpired',
+  WEB_CHECKOUT_DISABLED: 'web.error.checkoutClosed',
 }
 
 /** The sentence for a code the server sends, when there is one of its own (tests). */

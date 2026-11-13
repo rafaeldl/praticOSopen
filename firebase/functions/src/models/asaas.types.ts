@@ -265,7 +265,35 @@ export interface AsaasPayment {
   externalReference?: string | null;
   installment?: string | null;
   installmentNumber?: number | null;
+  /** Subscription that generated the charge, when there is one. */
+  subscription?: string | null;
   /** GET /payments/{id} of a removed payment. */
+  deleted?: boolean;
+}
+
+export type AsaasSubscriptionCycle = 'MONTHLY' | 'YEARLY';
+
+export interface AsaasCreateSubscriptionInput {
+  customer: string;
+  billingType: AsaasBillingType;
+  value: number;
+  /** First charge, YYYY-MM-DD. */
+  nextDueDate: string;
+  cycle: AsaasSubscriptionCycle;
+  description: string;
+  externalReference: string;
+}
+
+export interface AsaasSubscription {
+  id: string;
+  customer: string;
+  billingType: AsaasBillingType;
+  value: number;
+  nextDueDate: string;
+  cycle: string;
+  /** ACTIVE | INACTIVE | EXPIRED */
+  status: string;
+  externalReference?: string | null;
   deleted?: boolean;
 }
 

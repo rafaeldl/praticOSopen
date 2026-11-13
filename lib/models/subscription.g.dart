@@ -101,4 +101,5 @@ const _$SubscriptionSourceEnumMap = {
 const _$BillingStoreEnumMap = {
   BillingStore.appStore: 'app_store',
   BillingStore.playStore: 'play_store',
+  BillingStore.web: 'web',
 };

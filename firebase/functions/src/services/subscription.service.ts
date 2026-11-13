@@ -21,6 +21,7 @@ import {
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
+import { webOriginFor } from './web-billing/web-origin';
 
 export {
   PLAN_LIMITS,
@@ -192,7 +193,8 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
   if (!snapshot.exists) return 'company_not_found';
 
   const subscriber = await deps.fetchSubscriber(companyId);
-  const state = resolveSubscriptionState(subscriber, now);
+  // Web checkout (docs/WEB_CHECKOUT.md): promotional backed by a web record → store 'web'.
+  const state = await webOriginFor(companyId, subscriber, resolveSubscriptionState(subscriber, now), now);
   const current = snapshot.get('subscription') as Subscription | undefined;
   if (state.plan === 'free' && isGraceActive(current, now)) {
     console.log(`[Subscription] Grace period kept for company ${companyId}`);
@@ -238,7 +240,7 @@ export async function expireSubscriptions(
       const doc = due[next++];
       try {
         const subscriber = await deps.fetchSubscriber(doc.id);
-        const state = resolveSubscriptionState(subscriber, now);
+        const state = await webOriginFor(doc.id, subscriber, resolveSubscriptionState(subscriber, now), now);
         await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
         if (state.plan === 'free') expired++;
       } catch (error) {

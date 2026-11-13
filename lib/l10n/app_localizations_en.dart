@@ -1970,6 +1970,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Subscriptions are not available right now. Please try again later.';
 
   @override
+  String planActiveMessage(String plan) {
+    return 'Your $plan plan is active.';
+  }
+
+  @override
   String get restorePurchasesNothingFound =>
       'No active subscription was found for this store account.';
 
