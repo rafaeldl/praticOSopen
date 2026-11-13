@@ -31,7 +31,7 @@ async function switchTo(on: boolean) {
 }
 
 function companyOn(plan: string | null) {
-  mocked.company = plan === null ? {} : { subscription: { plan, status: 'active' } }
+  mocked.company = plan === null ? {} : { subscription: { plan, status: 'active', tableVersion: '2' } }
 }
 
 beforeAll(() => setLocale('pt'))

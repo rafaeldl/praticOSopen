@@ -50,9 +50,10 @@ IA tem só os tetos de uso.
 1. Chave desligada: tudo liberado.
 2. Plano ausente ou desconhecido é Free; plano com `expiresAt` vencido é Free
    da tabela atual.
-3. Enquanto o plano vale, a linha vem da versão da tabela da assinatura
-   (`tableVersion`, #726). Uma versão sem nenhum recurso listado (a 1) não
-   trava nada.
+3. A linha é a do plano em vigor (`planInForce`, a mesma dos limites, nos três
+   lados): `tableVersion` gravado; sem ele, plano pago (assinante de antes da
+   tabela atual e cortesia) segue a versão antiga (#726). A versão 1 não lista
+   recursos, então o assinante atual e a cortesia mantêm tudo.
 4. `requiredPlan` é o primeiro plano da tabela atual com o recurso: o plano
    para onde mudar.
 5. Só trava criar ou ligar algo novo. O que a empresa já tem (contratos,

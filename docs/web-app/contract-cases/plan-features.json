@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "docs/plans/plans.json v2",
-  "rule": "Recurso do plano (#724), com a lista `features` de docs/plans/plans.json. Chave desligada (config/paidPlans.enabled falso; no app também sem loja na build): tudo liberado. Plano ausente ou desconhecido é Free; plano com expiresAt vencido é Free da tabela atual. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (`tableVersion`, senão a atual); uma versão sem nenhum recurso listado (a 1) não trava recurso nenhum. O básico (o que o Free tem) e a IA nunca travam (IA tem só os tetos de uso). Recurso desconhecido não trava. `requiredPlan` é o primeiro plano da tabela atual que tem o recurso (o plano para onde mudar); null se nenhum tem. Papel: dono e admin existem em todo plano; técnico, gerente, consultor e supervisor pedem `teamRoles`; outro valor não é papel (a validação responde). Nunca tira o que a empresa já tem: a checagem vale só para criar ou ligar algo novo.",
+  "rule": "Recurso do plano (#724), com a lista `features` de docs/plans/plans.json. Chave desligada (config/paidPlans.enabled falso; no app também sem loja na build): tudo liberado. Plano ausente ou desconhecido é Free; plano com expiresAt vencido é Free da tabela atual. A linha é a do plano em vigor (`planInForce`, a mesma dos limites, #726): `tableVersion` gravado; sem ele, plano pago (assinante de antes da tabela atual e cortesia, que mantém o Pro antigo) segue a versão antiga; Free segue a atual. Uma versão sem nenhum recurso listado (a 1) não trava recurso nenhum: o assinante atual e a cortesia mantêm tudo. O básico (o que o Free tem) e a IA nunca travam (IA tem só os tetos de uso). Recurso desconhecido não trava. `requiredPlan` é o primeiro plano da tabela atual que tem o recurso (o plano para onde mudar); null se nenhum tem. Papel: dono e admin existem em todo plano; técnico, gerente, consultor e supervisor pedem `teamRoles`; outro valor não é papel (a validação responde). Nunca tira o que a empresa já tem: a checagem vale só para criar ou ligar algo novo.",
   "runsIn": [
     "dart",
     "functions",
@@ -475,6 +475,220 @@
         "allowed": false,
         "plan": "free",
         "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-teamRoles",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "teamRoles",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-workStages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-bulkActions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "old-starter-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-keeps-teamRoles",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "teamRoles",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-workStages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-bulkActions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-without-version-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
       }
     },
     {

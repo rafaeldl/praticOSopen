@@ -10,9 +10,8 @@
  * something new; what a company already has keeps working.
  */
 import type { MessageKey } from '@/generated/message-keys'
-import { PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION } from '@/generated/plan-table'
 import { ApiError } from './api'
-import { currentPlanRows, effectivePlan, storedPlan, tableVersionOf, PLAN_IDS, type PlanId } from './plan-limits'
+import { currentPlanRows, planInForce, PLAN_IDS, type PlanId } from './plan-limits'
 
 /** Features that depend on the plan. The basics (what Free has) and the assistant never do. */
 export type PlanFeature =
@@ -79,13 +78,11 @@ export function requiredPlanFor(feature: string): PlanId | null {
  * table version that lists no feature at all (version 1, before #724).
  */
 export function checkPlanFeature(input: { subscription: unknown; feature: string; enforced: boolean; now: Date }): PlanFeatureCheck {
-  const plan = effectivePlan(input.subscription, input.now)
+  // The same row as the limits on server, app and web (planInForce, #726).
+  const { plan, row } = planInForce(input.subscription, input.now)
   const requiredPlan = requiredPlanFor(input.feature)
   const result = (allowed: boolean): PlanFeatureCheck => ({ allowed, feature: input.feature, plan, requiredPlan })
   if (!input.enforced || NEVER_GATED.has(input.feature) || requiredPlan === null) return result(true)
-  // The subscription's own version while its plan is in force; Free of the current table after it expires.
-  const version = plan === storedPlan(input.subscription) ? tableVersionOf(input.subscription) : PLAN_TABLE_CURRENT_VERSION
-  const row = (PLAN_TABLES[version] ?? currentPlanRows())[plan]
   if (row.features.length === 0) return result(true)
   return result(row.features.includes(input.feature))
 }

@@ -33,7 +33,7 @@ describe('plan features', () => {
   it('switch on: the plan of the company decides', async () => {
     fake.seed('config/paidPlans', { enabled: true });
     fake.seed('companies/free', { subscription: { plan: 'free' } });
-    fake.seed('companies/pro', { subscription: { plan: 'pro', status: 'active' } });
+    fake.seed('companies/pro', { subscription: { plan: 'pro', status: 'active', tableVersion: '2' } });
     fake.seed('companies/none', { name: 'Sem assinatura' });
     await expect(checkCompanyPlanFeature('free', 'contracts')).resolves.toMatchObject({ allowed: false, plan: 'free', requiredPlan: 'pro' });
     await expect(checkCompanyPlanFeature('none', 'charges')).resolves.toMatchObject({ allowed: false, requiredPlan: 'starter' });

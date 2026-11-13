@@ -13,8 +13,8 @@
 
 import { getRootCollection } from './firestore.service';
 import { PLAN_IDS, type PlanId } from './plan-table.generated';
-import { currentPlanRows, planRow, tableVersionOf } from './subscription-plans';
-import { effectivePlan, isPaidPlansEnabled } from './plan-limits.service';
+import { currentPlanRows } from './subscription-plans';
+import { isPaidPlansEnabled, planInForce } from './plan-limits.service';
 
 /** Features that depend on the plan. The basics (what Free has) and the assistant never do. */
 export type PlanFeature =
@@ -66,14 +66,11 @@ export function checkPlanFeature(input: {
   enforced: boolean;
   now: Date;
 }): PlanFeatureCheck {
-  const plan = effectivePlan(input.subscription, input.now);
+  // The same row as the limits on server, app and web (planInForce, #726).
+  const { plan, row } = planInForce(input.subscription, input.now);
   const requiredPlan = requiredPlanFor(input.feature);
   const result = (allowed: boolean): PlanFeatureCheck => ({ allowed, feature: input.feature, plan, requiredPlan });
   if (!input.enforced || NEVER_GATED.has(input.feature) || requiredPlan === null) return result(true);
-  // The subscription's own version while its plan is in force; Free of the current table after it expires.
-  const stored = input.subscription?.plan;
-  const version = plan === stored ? tableVersionOf(input.subscription) : undefined;
-  const row = planRow(plan, version);
   if (row.features.length === 0) return result(true);
   return result(row.features.includes(input.feature));
 }

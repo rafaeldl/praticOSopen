@@ -350,7 +350,9 @@ class FeatureGateService {
   }) {
     final sub = subscription ?? Subscription();
     final at = now ?? DateTime.now();
-    final plan = sub.effectivePlan(at);
+    // The same row as the limits on server, app and web (planInForce, #726).
+    final inForce = sub.planInForce(at);
+    final plan = inForce.plan;
     final required = requiredPlanFor(feature);
     PlanFeatureResult result(bool allowed) => PlanFeatureResult(
           isAllowed: allowed,
@@ -361,7 +363,7 @@ class FeatureGateService {
     if (!(enforced ?? planLimitsEnforced) || _neverGated.contains(feature) || required == null) {
       return result(true);
     }
-    final PlanRow row = sub.planRowAt(at);
+    final PlanRow row = inForce.row;
     if (row.features.isEmpty) return result(true);
     return result(row.features.contains(feature));
   }

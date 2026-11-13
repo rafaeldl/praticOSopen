@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 /// Pumps a button that runs [ensurePlanFeature] for [feature] on [plan].
 Future<List<bool>> _pump(WidgetTester tester, SubscriptionPlan plan, PlanFeature feature) async {
   final results = <bool>[];
-  final store = SubscriptionStore()..latest = Subscription(plan: plan);
+  final store = SubscriptionStore()..latest = Subscription(plan: plan, tableVersion: '2');
   await tester.pumpWidget(
     Provider<SubscriptionStore>.value(
       value: store,

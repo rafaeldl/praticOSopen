@@ -189,7 +189,7 @@ describe('routes return PLAN_LIMIT', () => {
   });
 
   it('invite with room but a Pro role on Starter: 402 PLAN_FEATURE (#724)', async () => {
-    seed('companies/c1', { subscription: { plan: 'starter' } });
+    seed('companies/c1', { subscription: { plan: 'starter', tableVersion: '2' } });
     const res = await request(server).post('/invites').send({ email: 'x@example.com', role: 'technician' });
     expect(res.status).toBe(402);
     expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'teamRoles', requiredPlan: 'pro' });
