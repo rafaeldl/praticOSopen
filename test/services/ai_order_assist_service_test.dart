@@ -140,6 +140,16 @@ void main() {
       });
       expect(quota.error, AiAssistError.quotaExceeded);
       expect(quota.limit, 10);
+      expect(quota.period, isNull);
+      final daily = errorOf(429, {
+        'success': false,
+        'error': {
+          'code': 'AI_QUOTA_EXCEEDED',
+          'details': {'used': 200, 'limit': 200, 'period': 'day'},
+        },
+      });
+      expect(daily.period, 'day');
+      expect(daily.limit, 200);
       expect(
         errorOf(503, {
           'success': false,

@@ -52,24 +52,30 @@ void main() {
   });
 
   group('recommendedPlan', () {
-    SubscriptionUsage usage({int users = 1, int photos = 0, int forms = 0}) =>
+    final now = DateTime.utc(2026, 11, 20);
+    SubscriptionUsage usage({int users = 1, int photos = 0, int forms = 0, int orders = 0}) =>
         SubscriptionUsage(
           usersActive: users,
           photosThisMonth: photos,
           formTemplatesActive: forms,
+          ordersMonth: '2026-11',
+          ordersThisMonth: orders,
         );
 
     test('is null while Free covers the use', () {
-      expect(recommendedPlan(usage(), 10), isNull);
+      expect(recommendedPlan(usage(orders: 10, photos: 900), 50, now: now), isNull);
     });
 
     test('picks the smallest plan that covers every resource', () {
-      expect(recommendedPlan(usage(), 11), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(users: 2), 0), SubscriptionPlan.starter);
-      expect(recommendedPlan(usage(), 151), SubscriptionPlan.pro);
-      expect(recommendedPlan(usage(users: 5), 0), SubscriptionPlan.pro);
-      expect(recommendedPlan(usage(photos: 501), 0), SubscriptionPlan.business);
-      expect(recommendedPlan(usage(users: 6), 0), SubscriptionPlan.business);
+      expect(recommendedPlan(usage(), 51, now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(users: 2), 0, now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(forms: 1), 0, now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(orders: 11), 0, now: now), SubscriptionPlan.starter);
+      expect(recommendedPlan(usage(), 1001, now: now), SubscriptionPlan.pro);
+      expect(recommendedPlan(usage(users: 3), 0, now: now), SubscriptionPlan.pro);
+      expect(recommendedPlan(usage(orders: 51), 0, now: now), SubscriptionPlan.pro);
+      expect(recommendedPlan(usage(orders: 151), 0, now: now), SubscriptionPlan.business);
+      expect(recommendedPlan(usage(users: 6), 0, now: now), SubscriptionPlan.business);
     });
   });
 }

@@ -1,19 +1,25 @@
 {
-  "about": "Tabela única dos planos (#722). Servidor, app e web leem daqui: depois de mudar, rodar `node scripts/plan-table.mjs` (gera firebase/functions/src/services/plan-table.generated.ts e lib/models/plan_table.dart; a web gera em npm run gen). Os testes de cada lado comparam com este arquivo. -1 é sem limite.",
+  "about": "Tabela única dos planos (#722). Servidor, app e web leem daqui: depois de mudar, rodar `node scripts/plan-table.mjs` (gera firebase/functions/src/services/plan-table.generated.ts e lib/models/plan_table.dart; a web gera em npm run gen). Os testes de cada lado comparam com este arquivo. -1 é sem limite. Uma versão nova não apaga a anterior: a assinatura com `tableVersion` gravado segue a sua versão (#726); sem ele vale `currentVersion`.",
   "fields": {
     "ordersPerMonth": "OS criadas no mês",
     "users": "Pessoas na empresa (membros mais convites que valem)",
     "photosPerMonth": "Fotos de OS no mês",
-    "formTemplates": "Checklists ativos da empresa",
+    "formTemplates": "Checklists próprios ativos (os copiados do ramo não contam)",
     "ownChecklists": "Pode criar checklist próprio (falso: só os do ramo)",
     "nfseCnpjs": "CNPJs que emitem nota (0: sem nota)",
     "pdfWatermark": "PDF com a marca PraticOS",
     "aiPerMonth": "Pedidos ao assistente por mês",
     "aiPerDay": "Pedidos ao assistente por dia",
-    "features": "Recursos do plano (#724)"
+    "features": "Recursos do plano, cada plano inclui os do anterior (#724 aplica)",
+    "overageAllowed": "Passar de OS por mês e de pessoas não trava: só avisa para falar com a gente (Business)"
   },
-  "plans": ["free", "starter", "pro", "business"],
-  "currentVersion": "1",
+  "plans": [
+    "free",
+    "starter",
+    "pro",
+    "business"
+  ],
+  "currentVersion": "2",
   "versions": {
     "1": {
       "approvedOn": "2026-10-09",
@@ -28,7 +34,8 @@
           "pdfWatermark": true,
           "aiPerMonth": 10,
           "aiPerDay": -1,
-          "features": []
+          "features": [],
+          "overageAllowed": false
         },
         "starter": {
           "ordersPerMonth": -1,
@@ -40,7 +47,8 @@
           "pdfWatermark": false,
           "aiPerMonth": 150,
           "aiPerDay": -1,
-          "features": []
+          "features": [],
+          "overageAllowed": false
         },
         "pro": {
           "ordersPerMonth": -1,
@@ -52,7 +60,8 @@
           "pdfWatermark": false,
           "aiPerMonth": 400,
           "aiPerDay": -1,
-          "features": []
+          "features": [],
+          "overageAllowed": false
         },
         "business": {
           "ordersPerMonth": -1,
@@ -64,7 +73,137 @@
           "pdfWatermark": false,
           "aiPerMonth": 1000,
           "aiPerDay": -1,
-          "features": []
+          "features": [],
+          "overageAllowed": false
+        }
+      }
+    },
+    "2": {
+      "approvedOn": "2026-11-12",
+      "plans": {
+        "free": {
+          "ordersPerMonth": 10,
+          "users": 1,
+          "photosPerMonth": -1,
+          "formTemplates": 0,
+          "ownChecklists": false,
+          "nfseCnpjs": 0,
+          "pdfWatermark": true,
+          "aiPerMonth": 50,
+          "aiPerDay": 20,
+          "overageAllowed": false,
+          "features": [
+            "orders",
+            "customers",
+            "catalog",
+            "agenda",
+            "quoteShare",
+            "linkApproval",
+            "financeBasic",
+            "dataImport",
+            "webApp"
+          ]
+        },
+        "starter": {
+          "ordersPerMonth": 50,
+          "users": 2,
+          "photosPerMonth": -1,
+          "formTemplates": -1,
+          "ownChecklists": true,
+          "nfseCnpjs": 1,
+          "pdfWatermark": false,
+          "aiPerMonth": 1000,
+          "aiPerDay": 200,
+          "overageAllowed": false,
+          "features": [
+            "orders",
+            "customers",
+            "catalog",
+            "agenda",
+            "quoteShare",
+            "linkApproval",
+            "financeBasic",
+            "dataImport",
+            "webApp",
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "ai",
+            "charges"
+          ]
+        },
+        "pro": {
+          "ordersPerMonth": 150,
+          "users": 5,
+          "photosPerMonth": -1,
+          "formTemplates": -1,
+          "ownChecklists": true,
+          "nfseCnpjs": 2,
+          "pdfWatermark": false,
+          "aiPerMonth": 3000,
+          "aiPerDay": 200,
+          "overageAllowed": false,
+          "features": [
+            "orders",
+            "customers",
+            "catalog",
+            "agenda",
+            "quoteShare",
+            "linkApproval",
+            "financeBasic",
+            "dataImport",
+            "webApp",
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "ai",
+            "charges",
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        },
+        "business": {
+          "ordersPerMonth": 500,
+          "users": 20,
+          "photosPerMonth": -1,
+          "formTemplates": -1,
+          "ownChecklists": true,
+          "nfseCnpjs": -1,
+          "pdfWatermark": false,
+          "aiPerMonth": 6000,
+          "aiPerDay": -1,
+          "overageAllowed": true,
+          "features": [
+            "orders",
+            "customers",
+            "catalog",
+            "agenda",
+            "quoteShare",
+            "linkApproval",
+            "financeBasic",
+            "dataImport",
+            "webApp",
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "ai",
+            "charges",
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport",
+            "bulkActions",
+            "mcp",
+            "api"
+          ]
         }
       }
     }

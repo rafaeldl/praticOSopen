@@ -61,7 +61,6 @@ const reading = ref<'' | 'text' | 'photos' | 'speech'>('')
 const listening = ref(false)
 const note = ref('')
 const usesLeft = ref<number | null>(null)
-const monthLimit = ref(0)
 const canPhoto = computed(() => can('attachPhotos'))
 const editPrices = can('viewPrices') && can('editPrices')
 const input = ref<HTMLInputElement | null>(null)
@@ -79,7 +78,6 @@ onMounted(async () => {
     const status = await assistStatus()
     enabled.value = status.enabled
     usesLeft.value = usesLeftOf(status.usage)
-    monthLimit.value = Math.max(0, status.usage?.limit ?? 0)
   } catch {
     enabled.value = false
   }
@@ -97,7 +95,8 @@ onMounted(async () => {
 
 function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
-  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota', { limit: monthLimit.value })
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED' && error.details?.period === 'day') return t('orderAssistantErrorQuotaDay')
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota')
   return t('orderAssistantErrorUnavailable')
 }
 
@@ -152,7 +151,6 @@ async function run(files: File[] = [], audio?: { mimeType: string; data: string 
     })
     const draft = await requestAssist({ text: value, photos, audio, history, context, lines: f.lines.map((l) => ({ kind: l.item.kind, name: l.item.name, description: l.description ?? null, value: l.value, quantity: l.quantity })) })
     usesLeft.value = usesLeftOf(draft.usage)
-    monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const said = value || draft.transcript?.trim() || ''
     const undo: Undo = {
       customer: f.customer,

@@ -91,7 +91,7 @@ describe('runFormPhoto', () => {
     for (const raw of [new LlmUnavailableError('HTTP 503'), 'not json']) {
       const deps = fakeDeps(raw);
       await expect(runFormPhoto('c1', km, deps)).rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
-      expect(deps.release).toHaveBeenCalledWith('c1', '2026-11');
+      expect(deps.release).toHaveBeenCalledWith('c1', '2026-11', undefined);
     }
   });
 

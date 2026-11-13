@@ -15,7 +15,7 @@ import {
 } from '../src/lib/rules/order-rules'
 import { periodOf } from '../src/lib/finance/period'
 import { isOpen } from '../src/lib/orders/model'
-import { checkPlanLimit, shouldShowPdfWatermark } from '../src/lib/plan-limits'
+import { checkPlanLimit, planInForce, shouldShowPdfWatermark } from '../src/lib/plan-limits'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,7 +131,13 @@ describe('plan-limits', () => {
       expect({ watermark: shouldShowPdfWatermark(subscription, given.paidPlansEnabled, now) }).toEqual(want)
       return
     }
-    const result = checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, enforced: given.paidPlansEnabled, now })
-    expect(result).toEqual(want)
+    if (given.kind === 'planInForce') {
+      const { plan, version, row } = planInForce(subscription, now)
+      const got: Record<string, unknown> = { plan, version, ...row }
+      expect(Object.fromEntries(Object.keys(want).map((key) => [key, got[key]]))).toEqual(want)
+      return
+    }
+    const result: Record<string, unknown> = { ...checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, lastMonthUsage: given.lastMonthUsage, enforced: given.paidPlansEnabled, now }) }
+    expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
   })
 })

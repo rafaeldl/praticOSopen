@@ -1,21 +1,23 @@
 {
-  "version": 1,
-  "generatedFrom": "e05d6414",
-  "rule": "Limite do plano: permitido se o limite é -1 (ilimitado) ou uso + o que entra <= limite. Limites desligados (paidPlansEnabled falso no app, config/paidPlans.enabled falso no servidor) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free com os limites padrão do Free; o status não conta. Enquanto o plano vale, os limites gravados ganham do padrão, e campo faltando nos limites gravados vira o padrão do Free; `collaborators` é o nome antigo de `users`.",
+  "version": 2,
+  "generatedFrom": "docs/plans/plans.json v2",
+  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (`tableVersion`, senão a atual) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
   "runsIn": [
     "dart",
     "functions",
     "web"
   ],
   "sourceOfTruth": [
-    "lib/services/feature_gate_service.dart FeatureGateService (_check, shouldShowPdfWatermark)",
-    "lib/models/subscription.dart Subscription.effectivePlan, effectiveLimits, SubscriptionLimits.fromJson",
-    "docs/plans/plans.json (números de cada plano)"
+    "docs/plans/plans.json (números de cada plano e versão)",
+    "lib/services/feature_gate_service.dart FeatureGateService (_check, canCreateOrder, shouldShowPdfWatermark)",
+    "lib/models/subscription.dart Subscription.effectivePlan, effectiveLimits, ordersUsage",
+    "firebase/functions/src/services/plan-limits.service.ts checkPlanLimit",
+    "firebase/webapp/src/lib/plan-limits.ts checkPlanLimit"
   ],
-  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos.",
+  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `lastMonthUsage` é o de OS do mês anterior (só `order`). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos. `expect` traz allowed, limit e plan, e às vezes level, grace e contactUs; o que não aparece não é conferido. `kind: planInForce` confere o plano em vigor, a versão da tabela e a linha (`planInForce` nos três lados): `expect` traz plan, version e campos da linha.",
   "cases": [
     {
-      "id": "free-photo-under-the-limit",
+      "id": "free-photos-have-no-limit",
       "given": {
         "kind": "check",
         "subscription": {
@@ -24,36 +26,17 @@
         },
         "paidPlansEnabled": true,
         "resource": "photo",
-        "usage": 29,
+        "usage": 500,
         "adding": 1
       },
       "expect": {
         "allowed": true,
-        "limit": 30,
+        "limit": -1,
         "plan": "free"
       }
     },
     {
-      "id": "free-photo-at-the-limit",
-      "given": {
-        "kind": "check",
-        "subscription": {
-          "plan": "free",
-          "status": "active"
-        },
-        "paidPlansEnabled": true,
-        "resource": "photo",
-        "usage": 30,
-        "adding": 1
-      },
-      "expect": {
-        "allowed": false,
-        "limit": 30,
-        "plan": "free"
-      }
-    },
-    {
-      "id": "free-photos-batch-that-fits",
+      "id": "free-photos-batch-has-no-limit",
       "given": {
         "kind": "check",
         "subscription": {
@@ -63,35 +46,34 @@
         "paidPlansEnabled": true,
         "resource": "photo",
         "usage": 25,
-        "adding": 5
+        "adding": 40
       },
       "expect": {
         "allowed": true,
-        "limit": 30,
+        "limit": -1,
         "plan": "free"
       }
     },
     {
-      "id": "free-photos-batch-one-too-many",
+      "id": "business-photos-have-no-limit",
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "free",
-          "status": "active"
+          "plan": "business"
         },
         "paidPlansEnabled": true,
         "resource": "photo",
-        "usage": 25,
-        "adding": 6
+        "usage": 100000,
+        "adding": 1
       },
       "expect": {
-        "allowed": false,
-        "limit": 30,
-        "plan": "free"
+        "allowed": true,
+        "limit": -1,
+        "plan": "business"
       }
     },
     {
-      "id": "free-first-form-template",
+      "id": "free-own-checklist-needs-starter",
       "given": {
         "kind": "check",
         "subscription": {
@@ -104,28 +86,27 @@
         "adding": 1
       },
       "expect": {
-        "allowed": true,
-        "limit": 1,
+        "allowed": false,
+        "limit": 0,
         "plan": "free"
       }
     },
     {
-      "id": "free-second-form-template",
+      "id": "starter-own-checklists-have-no-limit",
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "free",
-          "status": "active"
+          "plan": "starter"
         },
         "paidPlansEnabled": true,
         "resource": "formTemplate",
-        "usage": 1,
+        "usage": 40,
         "adding": 1
       },
       "expect": {
-        "allowed": false,
-        "limit": 1,
-        "plan": "free"
+        "allowed": true,
+        "limit": -1,
+        "plan": "starter"
       }
     },
     {
@@ -148,6 +129,25 @@
       }
     },
     {
+      "id": "starter-second-person",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 1,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 2,
+        "plan": "starter",
+        "level": "atLimit"
+      }
+    },
+    {
       "id": "starter-third-person",
       "given": {
         "kind": "check",
@@ -160,85 +160,276 @@
         "adding": 1
       },
       "expect": {
-        "allowed": true,
-        "limit": 3,
-        "plan": "starter"
+        "allowed": false,
+        "limit": 2,
+        "plan": "starter",
+        "contactUs": false
       }
     },
     {
-      "id": "starter-fourth-person",
+      "id": "pro-fifth-person",
       "given": {
         "kind": "check",
         "subscription": {
-          "plan": "starter"
+          "plan": "pro"
         },
         "paidPlansEnabled": true,
         "resource": "collaborator",
-        "usage": 3,
+        "usage": 4,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 5,
+        "plan": "pro"
+      }
+    },
+    {
+      "id": "pro-sixth-person",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 5,
         "adding": 1
       },
       "expect": {
         "allowed": false,
-        "limit": 3,
-        "plan": "starter"
-      }
-    },
-    {
-      "id": "pro-photo-499",
-      "given": {
-        "kind": "check",
-        "subscription": {
-          "plan": "pro"
-        },
-        "paidPlansEnabled": true,
-        "resource": "photo",
-        "usage": 499,
-        "adding": 1
-      },
-      "expect": {
-        "allowed": true,
-        "limit": 500,
+        "limit": 5,
         "plan": "pro"
       }
     },
     {
-      "id": "pro-tenth-form-template",
-      "given": {
-        "kind": "check",
-        "subscription": {
-          "plan": "pro"
-        },
-        "paidPlansEnabled": true,
-        "resource": "formTemplate",
-        "usage": 9,
-        "adding": 1
-      },
-      "expect": {
-        "allowed": true,
-        "limit": 10,
-        "plan": "pro"
-      }
-    },
-    {
-      "id": "business-is-unlimited",
+      "id": "business-past-20-people-talks-to-us",
       "given": {
         "kind": "check",
         "subscription": {
           "plan": "business"
         },
         "paidPlansEnabled": true,
-        "resource": "photo",
-        "usage": 100000,
+        "resource": "collaborator",
+        "usage": 20,
         "adding": 1
       },
       "expect": {
         "allowed": true,
-        "limit": -1,
-        "plan": "business"
+        "limit": 20,
+        "plan": "business",
+        "level": "over",
+        "contactUs": true
       }
     },
     {
-      "id": "limits-off-without-paid-plans",
+      "id": "free-orders-under-80-percent",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 6,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "level": "ok",
+        "grace": false
+      }
+    },
+    {
+      "id": "free-orders-warn-at-80-percent",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 7,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "level": "near"
+      }
+    },
+    {
+      "id": "free-orders-tenth-warns-at-100",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 9,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "level": "atLimit",
+        "grace": false
+      }
+    },
+    {
+      "id": "free-orders-first-month-over-has-grace",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 10,
+        "adding": 1,
+        "lastMonthUsage": 4
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "level": "over",
+        "grace": true
+      }
+    },
+    {
+      "id": "free-orders-last-month-at-the-limit-still-grace",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 15,
+        "adding": 1,
+        "lastMonthUsage": 10
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "grace": true
+      }
+    },
+    {
+      "id": "free-orders-second-month-over-asks-for-a-plan",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 10,
+        "adding": 1,
+        "lastMonthUsage": 11
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 10,
+        "plan": "free",
+        "level": "over",
+        "grace": false
+      }
+    },
+    {
+      "id": "starter-fiftieth-order",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 49,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 50,
+        "plan": "starter",
+        "level": "atLimit"
+      }
+    },
+    {
+      "id": "starter-orders-second-month-over",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 50,
+        "adding": 1,
+        "lastMonthUsage": 60
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 50,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "pro-orders-150",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 120,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 150,
+        "plan": "pro",
+        "level": "near"
+      }
+    },
+    {
+      "id": "business-past-500-orders-talks-to-us",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "business"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 500,
+        "adding": 1,
+        "lastMonthUsage": 900
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 500,
+        "plan": "business",
+        "level": "over",
+        "grace": false,
+        "contactUs": true
+      }
+    },
+    {
+      "id": "limits-off-without-the-switch",
       "given": {
         "kind": "check",
         "subscription": {
@@ -246,14 +437,16 @@
           "status": "active"
         },
         "paidPlansEnabled": false,
-        "resource": "photo",
+        "resource": "order",
         "usage": 500,
-        "adding": 1
+        "adding": 1,
+        "lastMonthUsage": 500
       },
       "expect": {
         "allowed": true,
         "limit": -1,
-        "plan": "free"
+        "plan": "free",
+        "level": "unlimited"
       }
     },
     {
@@ -281,29 +474,29 @@
         "kind": "check",
         "subscription": null,
         "paidPlansEnabled": true,
-        "resource": "formTemplate",
+        "resource": "order",
         "usage": 0,
         "adding": 1
       },
       "expect": {
         "allowed": true,
-        "limit": 1,
+        "limit": 10,
         "plan": "free"
       }
     },
     {
-      "id": "no-subscription-photos-batch-over-free",
+      "id": "no-subscription-cannot-create-own-checklist",
       "given": {
         "kind": "check",
         "subscription": null,
         "paidPlansEnabled": true,
-        "resource": "photo",
+        "resource": "formTemplate",
         "usage": 0,
-        "adding": 31
+        "adding": 1
       },
       "expect": {
         "allowed": false,
-        "limit": 30,
+        "limit": 0,
         "plan": "free"
       }
     },
@@ -317,13 +510,13 @@
           }
         },
         "paidPlansEnabled": true,
-        "resource": "photo",
-        "usage": 3,
+        "resource": "collaborator",
+        "usage": 1,
         "adding": 1
       },
       "expect": {
-        "allowed": true,
-        "limit": 30,
+        "allowed": false,
+        "limit": 1,
         "plan": "free"
       }
     },
@@ -373,6 +566,33 @@
       }
     },
     {
+      "id": "courtesy-running-gets-the-new-pro-orders",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "limits": {
+            "photosPerMonth": 500,
+            "formTemplates": 10,
+            "users": 5,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 149,
+        "adding": 1,
+        "expiresInDays": 30
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 150,
+        "plan": "pro"
+      }
+    },
+    {
       "id": "courtesy-ended-falls-to-free",
       "given": {
         "kind": "check",
@@ -410,13 +630,13 @@
         },
         "paidPlansEnabled": true,
         "resource": "formTemplate",
-        "usage": 1,
+        "usage": 0,
         "adding": 1,
         "expiresInDays": -1
       },
       "expect": {
         "allowed": false,
-        "limit": 1,
+        "limit": 0,
         "plan": "free"
       }
     },
@@ -429,24 +649,48 @@
           "status": "expired"
         },
         "paidPlansEnabled": true,
-        "resource": "photo",
-        "usage": 400,
+        "resource": "order",
+        "usage": 100,
         "adding": 1
       },
       "expect": {
         "allowed": true,
-        "limit": 500,
+        "limit": 150,
         "plan": "pro"
       }
     },
     {
-      "id": "stored-limits-win-over-the-plan",
+      "id": "stored-limit-more-generous-is-kept",
       "given": {
         "kind": "check",
         "subscription": {
           "plan": "starter",
           "limits": {
-            "photosPerMonth": 1000,
+            "photosPerMonth": 200,
+            "formTemplates": 3,
+            "users": 3,
+            "pdfWatermark": false
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "stored-limit-stricter-than-the-table-gives-way",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "limits": {
+            "photosPerMonth": 200,
             "formTemplates": 3,
             "users": 3,
             "pdfWatermark": false
@@ -454,17 +698,38 @@
         },
         "paidPlansEnabled": true,
         "resource": "photo",
-        "usage": 900,
+        "usage": 300,
         "adding": 1
       },
       "expect": {
         "allowed": true,
-        "limit": 1000,
+        "limit": -1,
         "plan": "starter"
       }
     },
     {
-      "id": "partial-stored-limits-fill-with-free-defaults",
+      "id": "stored-limit-deal-above-the-table",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "limits": {
+            "ordersPerMonth": 80
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 70,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 80,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "partial-stored-limits-fill-with-the-plan",
       "given": {
         "kind": "check",
         "subscription": {
@@ -474,13 +739,13 @@
           }
         },
         "paidPlansEnabled": true,
-        "resource": "formTemplate",
-        "usage": 1,
+        "resource": "order",
+        "usage": 140,
         "adding": 1
       },
       "expect": {
-        "allowed": false,
-        "limit": 1,
+        "allowed": true,
+        "limit": 150,
         "plan": "pro"
       }
     },
@@ -508,6 +773,85 @@
       }
     },
     {
+      "id": "table-version-1-keeps-orders-without-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 400,
+        "adding": 1,
+        "lastMonthUsage": 400
+      },
+      "expect": {
+        "allowed": true,
+        "limit": -1,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "table-version-1-keeps-three-people-on-starter",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 3,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "unknown-table-version-is-the-current",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "tableVersion": "99"
+        },
+        "paidPlansEnabled": true,
+        "resource": "collaborator",
+        "usage": 2,
+        "adding": 1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 2,
+        "plan": "starter"
+      }
+    },
+    {
+      "id": "expired-plan-of-version-1-falls-to-the-current-free",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "starter",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 10,
+        "adding": 1,
+        "lastMonthUsage": 12,
+        "expiresInDays": -1
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 10,
+        "plan": "free"
+      }
+    },
+    {
       "id": "watermark-on-free",
       "given": {
         "kind": "watermark",
@@ -522,11 +866,11 @@
       }
     },
     {
-      "id": "watermark-off-on-pro",
+      "id": "watermark-off-on-starter",
       "given": {
         "kind": "watermark",
         "subscription": {
-          "plan": "pro"
+          "plan": "starter"
         },
         "paidPlansEnabled": true
       },
@@ -535,7 +879,7 @@
       }
     },
     {
-      "id": "watermark-off-without-paid-plans",
+      "id": "watermark-off-without-the-switch",
       "given": {
         "kind": "watermark",
         "subscription": {
@@ -578,6 +922,81 @@
       },
       "expect": {
         "watermark": true
+      }
+    },
+    {
+      "id": "in-force-paid-own-version",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "version": "2",
+        "nfseCnpjs": 1,
+        "aiPerDay": 200,
+        "ordersPerMonth": 50
+      }
+    },
+    {
+      "id": "in-force-keeps-old-version",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "pro",
+        "version": "1"
+      }
+    },
+    {
+      "id": "in-force-expired-is-free-of-current",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "1"
+        },
+        "expiresInDays": -1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "version": "2",
+        "ordersPerMonth": 10,
+        "nfseCnpjs": 0
+      }
+    },
+    {
+      "id": "in-force-unknown-version-is-current",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "source": "store",
+          "tableVersion": "99"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "business",
+        "version": "2",
+        "nfseCnpjs": -1
       }
     }
   ]

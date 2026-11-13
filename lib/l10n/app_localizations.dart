@@ -6349,8 +6349,14 @@ abstract class AppLocalizations {
   /// No description provided for @orderAssistantErrorQuota.
   ///
   /// In pt, this message translates to:
-  /// **'Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.'**
-  String orderAssistantErrorQuota(String limit);
+  /// **'O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.'**
+  String get orderAssistantErrorQuota;
+
+  /// No description provided for @orderAssistantErrorQuotaDay.
+  ///
+  /// In pt, this message translates to:
+  /// **'O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.'**
+  String get orderAssistantErrorQuotaDay;
 
   /// No description provided for @orderAssistantErrorUnavailable.
   ///

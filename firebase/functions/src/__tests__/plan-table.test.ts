@@ -27,6 +27,7 @@ describe('plan table', () => {
   it.each(PLAN_IDS)('%s: stored limits come from the table', (plan) => {
     const row = current[plan];
     expect(PLAN_LIMITS[plan]).toEqual({
+      ordersPerMonth: row.ordersPerMonth,
       photosPerMonth: row.photosPerMonth,
       formTemplates: row.formTemplates,
       users: row.users,

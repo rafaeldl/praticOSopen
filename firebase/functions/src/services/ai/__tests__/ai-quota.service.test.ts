@@ -33,10 +33,10 @@ describe('ai quota', () => {
   });
 
   it('limit comes from the plan, missing/unknown plan is free, settings override', () => {
-    expect(resolveAiLimit('pro', null)).toBe(400);
+    expect(resolveAiLimit('pro', null)).toBe(3000);
     expect(resolveAiLimit(undefined, null)).toBe(AI_REQUESTS_PER_MONTH.free);
-    expect(resolveAiLimit('gold', ON)).toBe(10);
-    expect(resolveAiLimit('free', { enabled: true, monthlyLimit: 50 })).toBe(50);
+    expect(resolveAiLimit('gold', ON)).toBe(50);
+    expect(resolveAiLimit('free', { enabled: true, monthlyLimit: 70 })).toBe(70);
     expect(resolveAiLimit('free', { enabled: true, monthlyLimit: -1 })).toBe(-1);
   });
 
@@ -86,9 +86,9 @@ describe('ai quota', () => {
 
   it('getAiUsage reads the month without counting', async () => {
     fake.seed('companies/c1', { subscription: { plan: 'pro' } });
-    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 0, limit: 400 });
+    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 0, limit: 3000 });
     fake.seed('companies/c1/aiUsage/2026-10', { count: 7 });
-    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 7, limit: 400 });
+    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 7, limit: 3000 });
     expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(7);
   });
 
@@ -96,22 +96,22 @@ describe('ai quota', () => {
     fake.seed('companies/c1', { subscription: { plan: 'starter' } });
     const first = await reserveAiRequest('c1', ON, NOW);
     const second = await reserveAiRequest('c1', ON, NOW);
-    expect(first).toEqual({ ok: true, used: 1, limit: 150, monthKey: '2026-10' });
+    expect(first).toEqual({ ok: true, used: 1, limit: 1000, monthKey: '2026-10', dayKey: '2026-10-11' });
     expect(second.used).toBe(2);
-    expect(fake.read('companies/c1/aiUsage/2026-10')).toMatchObject({ count: 2, limit: 150 });
+    expect(fake.read('companies/c1/aiUsage/2026-10')).toMatchObject({ count: 2, limit: 1000, day: '2026-10-11', dayCount: 2 });
   });
 
   it('refuses at the limit without counting', async () => {
     fake.seed('companies/c1', {});
-    fake.seed('companies/c1/aiUsage/2026-10', { count: 10 });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 50 });
     const result = await reserveAiRequest('c1', ON, NOW);
-    expect(result).toEqual({ ok: false, used: 10, limit: 10, monthKey: '2026-10' });
-    expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(10);
+    expect(result).toEqual({ ok: false, used: 50, limit: 50, monthKey: '2026-10', dayKey: '2026-10-11', period: 'month' });
+    expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(50);
   });
 
   it('a new month starts from zero', async () => {
     fake.seed('companies/c1', {});
-    fake.seed('companies/c1/aiUsage/2026-10', { count: 10 });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 50 });
     const result = await reserveAiRequest('c1', ON, new Date('2026-11-01T00:00:01Z'));
     expect(result).toMatchObject({ ok: true, used: 1, monthKey: '2026-11' });
   });
@@ -126,10 +126,50 @@ describe('ai quota', () => {
   it('companies have separate counters (tenant isolation)', async () => {
     fake.seed('companies/c1', {});
     fake.seed('companies/c2', {});
-    fake.seed('companies/c1/aiUsage/2026-10', { count: 10 });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 50 });
     await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: false });
     await expect(reserveAiRequest('c2', ON, NOW)).resolves.toMatchObject({ ok: true, used: 1 });
-    expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(10);
+    expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(50);
+  });
+
+  it('daily ceiling: Starter and Pro stop at 200 a day, the next day starts again', async () => {
+    fake.seed('companies/c1', { subscription: { plan: 'pro' } });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 500, day: '2026-10-11', dayCount: 200 });
+    await expect(reserveAiRequest('c1', ON, NOW)).resolves.toEqual({
+      ok: false, used: 200, limit: 200, monthKey: '2026-10', dayKey: '2026-10-11', period: 'day',
+    });
+    await expect(reserveAiRequest('c1', ON, new Date('2026-10-12T09:00:00Z'))).resolves.toMatchObject({ ok: true, used: 501 });
+    expect(fake.read('companies/c1/aiUsage/2026-10')).toMatchObject({ day: '2026-10-12', dayCount: 1 });
+  });
+
+  it('daily ceiling: Business has none; a pilot override turns it off', async () => {
+    fake.seed('companies/c1', { subscription: { plan: 'business' } });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 500, day: '2026-10-11', dayCount: 900 });
+    await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: true });
+    fake.seed('companies/c1', { subscription: { plan: 'starter' } });
+    await expect(reserveAiRequest('c1', { enabled: true, monthlyLimit: 5000 }, NOW)).resolves.toMatchObject({ ok: true });
+  });
+
+  it('daily ceiling: Free stops at 20 a day, under the 50 a month', async () => {
+    fake.seed('companies/c1', {});
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 20, day: '2026-10-11', dayCount: 20 });
+    await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: false, used: 20, limit: 20, period: 'day' });
+    await expect(reserveAiRequest('c1', ON, new Date('2026-10-12T09:00:00Z'))).resolves.toMatchObject({ ok: true });
+  });
+
+  it('an expired plan is Free (effectivePlan), not the stored one', async () => {
+    fake.seed('companies/c1', { subscription: { plan: 'pro', expiresAt: '2026-10-01T00:00:00.000Z' } });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 50 });
+    await expect(reserveAiRequest('c1', ON, NOW)).resolves.toMatchObject({ ok: false, limit: 50, period: 'month' });
+    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 50, limit: 50 });
+  });
+
+  it('release gives back the day too', async () => {
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 3, day: '2026-10-11', dayCount: 2 });
+    await releaseAiRequest('c1', '2026-10', '2026-10-11');
+    expect(fake.read('companies/c1/aiUsage/2026-10')).toMatchObject({ count: 2, dayCount: 1 });
+    await releaseAiRequest('c1', '2026-10', '2026-10-10');
+    expect(fake.read('companies/c1/aiUsage/2026-10')).toMatchObject({ count: 1, dayCount: 1 });
   });
 
   it('release gives one back and never goes below zero', async () => {

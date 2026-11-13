@@ -10,9 +10,14 @@
  * Both are written only by admins/scripts (Admin SDK, `npm run ai`). The
  * Firestore rules have no match for them, so app users can neither read nor
  * write them.
- * - companies/{cid}/aiUsage/{YYYY-MM}  { count, limit, updatedAt }
+ * - companies/{cid}/aiUsage/{YYYY-MM}  { count, limit, day, dayCount, updatedAt }
  *   One counter per calendar month (UTC). A new month is a new document, so
- *   no reset job is needed. Also without client rules (Admin SDK only).
+ *   no reset job is needed. `day` (YYYY-MM-DD, UTC) and `dayCount` keep the
+ *   day's requests for the daily ceiling (aiPerDay: Free, Starter and Pro); a new
+ *   day starts again at 0. Also without client rules (Admin SDK only).
+ *
+ * The ceilings come from the plan table (docs/plans/plans.json): aiPerMonth
+ * and aiPerDay of the plan in force (effectivePlan: an expired plan is Free).
  *
  * Every call to the model counts, applied or not (spec 2026-10-09 §4.2). A call
  * that fails before the model answers (our error, model unavailable) is
@@ -23,7 +28,8 @@ import { db, FieldValue } from '../firestore.service';
 import type { SubscriptionPlan } from '../../models/types';
 import { isLlmProvider, type LlmProvider } from './llm.client';
 import { PLAN_IDS } from '../plan-table.generated';
-import { currentPlanRows } from '../subscription-plans';
+import { currentPlanRows, planRow, tableVersionOf } from '../subscription-plans';
+import { effectivePlan } from '../plan-limits.service';
 
 /** Requests per month by plan (docs/plans/plans.json). -1 = unlimited. */
 export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = Object.fromEntries(
@@ -41,26 +47,49 @@ export interface AiSettings {
 }
 
 export type QuotaReservation =
-  | { ok: true; used: number; limit: number; monthKey: string }
-  | { ok: false; used: number; limit: number; monthKey: string };
+  | { ok: true; used: number; limit: number; monthKey: string; dayKey: string }
+  | {
+      ok: false;
+      used: number;
+      limit: number;
+      monthKey: string;
+      dayKey: string;
+      /** Which ceiling was reached; on 'day', used and limit are the day's. */
+      period: 'month' | 'day';
+    };
 
 /** Calendar month key in UTC, e.g. "2026-10". */
 export function monthKey(now: Date = new Date()): string {
   return now.toISOString().slice(0, 7);
 }
 
-function isPlan(value: unknown): value is SubscriptionPlan {
-  return typeof value === 'string' && value in AI_REQUESTS_PER_MONTH;
+/** Calendar day key in UTC, e.g. "2026-10-09". */
+export function dayKey(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 10);
 }
 
 function validLimit(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= -1;
 }
 
-/** Limit for the company: pilot override, else its plan (missing plan = free). */
-export function resolveAiLimit(plan: unknown, settings: AiSettings | null): number {
+type Json = Record<string, unknown>;
+
+/** companies/{id}.subscription, or just a plan name. */
+const subscriptionOf = (value: unknown): Json | null =>
+  typeof value === 'string' ? { plan: value } : value && typeof value === 'object' ? (value as Json) : null;
+
+/** Monthly limit for the company: pilot override, else the plan in force (missing plan = free). */
+export function resolveAiLimit(subscription: unknown, settings: AiSettings | null, now: Date = new Date()): number {
   if (settings && validLimit(settings.monthlyLimit)) return settings.monthlyLimit;
-  return AI_REQUESTS_PER_MONTH[isPlan(plan) ? plan : 'free'];
+  const sub = subscriptionOf(subscription);
+  return planRow(effectivePlan(sub, now), tableVersionOf(sub)).aiPerMonth;
+}
+
+/** Daily limit: the plan's aiPerDay; none while a pilot override sets the month. */
+export function resolveAiDailyLimit(subscription: unknown, settings: AiSettings | null, now: Date = new Date()): number {
+  if (settings && validLimit(settings.monthlyLimit)) return -1;
+  const sub = subscriptionOf(subscription);
+  return planRow(effectivePlan(sub, now), tableVersionOf(sub)).aiPerDay;
 }
 
 /**
@@ -120,11 +149,9 @@ export async function getAiUsage(
 ): Promise<{ used: number; limit: number }> {
   const companyRef = db.collection('companies').doc(companyId);
   const [companySnap, usageSnap] = await Promise.all([companyRef.get(), usageRef(companyId, monthKey(now)).get()]);
-  const plan = (companySnap.data() as Record<string, unknown> | undefined)?.subscription as
-    | { plan?: unknown }
-    | undefined;
-  const used = Number((usageSnap.data() as Record<string, unknown> | undefined)?.count ?? 0) || 0;
-  return { used, limit: resolveAiLimit(plan?.plan, settings) };
+  const subscription = (companySnap.data() as Json | undefined)?.subscription;
+  const used = Number((usageSnap.data() as Json | undefined)?.count ?? 0) || 0;
+  return { used, limit: resolveAiLimit(subscription, settings, now) };
 }
 
 function usageRef(companyId: string, key: string) {
@@ -132,8 +159,9 @@ function usageRef(companyId: string, key: string) {
 }
 
 /**
- * Counts one request for the company in this month, atomically. Refuses (and
- * counts nothing) when the month's limit is already reached.
+ * Counts one request for the company in this month and day, atomically.
+ * Refuses (and counts nothing) when the month's or the day's ceiling is
+ * already reached.
  */
 export async function reserveAiRequest(
   companyId: string,
@@ -141,30 +169,43 @@ export async function reserveAiRequest(
   now: Date = new Date(),
 ): Promise<QuotaReservation> {
   const key = monthKey(now);
+  const today = dayKey(now);
   const companyRef = db.collection('companies').doc(companyId);
   const ref = usageRef(companyId, key);
   return db.runTransaction(async (tx: FirebaseFirestore.Transaction) => {
     const [companySnap, usageSnap] = await Promise.all([tx.get(companyRef), tx.get(ref)]);
-    const plan = (companySnap.data() as Record<string, unknown> | undefined)?.subscription as
-      | { plan?: unknown }
-      | undefined;
-    const limit = resolveAiLimit(plan?.plan, settings);
-    const current = Number((usageSnap.data() as Record<string, unknown> | undefined)?.count ?? 0) || 0;
+    const subscription = (companySnap.data() as Json | undefined)?.subscription;
+    const limit = resolveAiLimit(subscription, settings, now);
+    const dailyLimit = resolveAiDailyLimit(subscription, settings, now);
+    const usage = (usageSnap.data() as Json | undefined) ?? {};
+    const current = Number(usage.count ?? 0) || 0;
+    const todayCount = usage.day === today ? Number(usage.dayCount ?? 0) || 0 : 0;
     if (limit !== -1 && current >= limit) {
-      return { ok: false, used: current, limit, monthKey: key } as QuotaReservation;
+      return { ok: false, used: current, limit, monthKey: key, dayKey: today, period: 'month' } as QuotaReservation;
     }
-    tx.set(ref, { count: current + 1, limit, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-    return { ok: true, used: current + 1, limit, monthKey: key } as QuotaReservation;
+    if (dailyLimit !== -1 && todayCount >= dailyLimit) {
+      return { ok: false, used: todayCount, limit: dailyLimit, monthKey: key, dayKey: today, period: 'day' } as QuotaReservation;
+    }
+    tx.set(
+      ref,
+      { count: current + 1, limit, day: today, dayCount: todayCount + 1, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true },
+    );
+    return { ok: true, used: current + 1, limit, monthKey: key, dayKey: today } as QuotaReservation;
   });
 }
 
 /** Gives back a reserved request (the model never answered). Never below 0. */
-export async function releaseAiRequest(companyId: string, key: string): Promise<void> {
+export async function releaseAiRequest(companyId: string, key: string, day?: string): Promise<void> {
   const ref = usageRef(companyId, key);
   await db.runTransaction(async (tx: FirebaseFirestore.Transaction) => {
     const snap = await tx.get(ref);
-    const current = Number((snap.data() as Record<string, unknown> | undefined)?.count ?? 0) || 0;
+    const usage = (snap.data() as Json | undefined) ?? {};
+    const current = Number(usage.count ?? 0) || 0;
     if (current <= 0) return;
-    tx.set(ref, { count: current - 1, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    const update: Json = { count: current - 1, updatedAt: FieldValue.serverTimestamp() };
+    const dayCount = Number(usage.dayCount ?? 0) || 0;
+    if (day && usage.day === day && dayCount > 0) update.dayCount = dayCount - 1;
+    tx.set(ref, update, { merge: true });
   });
 }

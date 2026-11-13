@@ -30,12 +30,27 @@ void main() {
       }
       ..resetIdentity = () async {
         resets++;
-      };
+      }
+      ..readLimitsSwitch = () async => false;
   });
 
   tearDown(() {
     Global.subscription = null;
     FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+    FeatureGateService.limitsSwitchOn = false;
+  });
+
+  test('bindCompany reads the one switch of the plan limits (config/paidPlans)', () async {
+    store.readLimitsSwitch = () async => true;
+    await store.bindCompany('c1');
+    expect(FeatureGateService.limitsSwitchOn, isTrue);
+  });
+
+  test('a switch that cannot be read leaves the limits off', () async {
+    FeatureGateService.limitsSwitchOn = true;
+    store.readLimitsSwitch = () async => throw StateError('offline');
+    await store.bindCompany('c2');
+    expect(FeatureGateService.limitsSwitchOn, isFalse);
   });
 
   test('bindCompany identifies the company and follows its document', () async {

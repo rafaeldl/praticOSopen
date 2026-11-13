@@ -3,6 +3,11 @@ import { buildApp } from './helpers';
 
 // ---- Mocks ----------------------------------------------------------------
 
+// The paid-plans switch lives in Firestore (config/paidPlans); here it is off.
+jest.mock('../../../services/plan-limits.service', () => ({
+  ...jest.requireActual('../../../services/plan-limits.service'),
+  isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../../../services/order.service');
 jest.mock('../../../services/photo-upload.service');
 jest.mock('../../../middleware/auth.middleware', () => ({

@@ -3728,9 +3728,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'The assistant is not available for your account yet.';
 
   @override
-  String orderAssistantErrorQuota(String limit) {
-    return 'You have used this month\'s $limit assistant requests. You can keep filling it in by hand.';
-  }
+  String get orderAssistantErrorQuota =>
+      'The assistant reached this month\'s limit. You can keep filling it in by hand.';
+
+  @override
+  String get orderAssistantErrorQuotaDay =>
+      'The assistant reached today\'s limit. It\'s back tomorrow; you can keep filling it in by hand.';
 
   @override
   String get orderAssistantErrorUnavailable =>

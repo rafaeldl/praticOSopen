@@ -28,4 +28,16 @@ void main() {
       contains('.collection(TenantFormTemplateRepository.collectionName)'),
     );
   });
+
+  test('own checklists: copies of the segment do not count (same rule as the server)', () {
+    final forms = {
+      'ready1': <String, dynamic>{'title': 'Vistoria'}, // first access: same id as the segment's
+      'r2': <String, dynamic>{'title': 'Entrega', 'sourceTemplateId': 'ready2'}, // "Usar"
+      'own1': <String, dynamic>{'title': 'Meu'},
+      'own2': <String, dynamic>{'title': 'Parado', 'isActive': false},
+    };
+    expect(ownActiveFormTemplateCount(forms, {'ready1', 'ready2'}), 1);
+    expect(isReadyCopy('own1', forms['own1']!, {'ready1'}), isFalse);
+    expect(isReadyCopy('r2', forms['r2']!, const {}), isTrue);
+  });
 }

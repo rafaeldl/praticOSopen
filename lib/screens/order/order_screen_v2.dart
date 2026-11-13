@@ -1968,9 +1968,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (quotaHit) result = 'quota';
       error = switch (e.error) {
         AiAssistError.disabled => l10n.orderAssistantErrorDisabled,
-        AiAssistError.quotaExceeded => l10n.orderAssistantErrorQuota(
-          '${e.limit ?? ''}'.trim(),
-        ),
+        AiAssistError.quotaExceeded => e.period == 'day'
+            ? l10n.orderAssistantErrorQuotaDay
+            : l10n.orderAssistantErrorQuota,
         _ => l10n.orderAssistantErrorUnavailable,
       };
     } catch (_) {
@@ -3323,6 +3323,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// order has its id.
   void _saveAndClose() {
     if (_store.customer == null) return;
+    // Orders per month (soft limit, same rule as the server; only with the
+    // plan switch on). The order stays open on screen to save later.
+    final gate = FeatureGateService.canCreateOrder(Global.subscription);
+    if (!gate.isAllowed) {
+      showFeatureLimitDialog(context, gate);
+      return;
+    }
     HapticFeedback.mediumImpact();
     var request = _requestController.text.trim();
     final requestField = orderRequestField(

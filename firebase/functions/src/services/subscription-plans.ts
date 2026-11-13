@@ -21,9 +21,25 @@ export function currentPlanRows(): Readonly<Record<SubscriptionPlan, PlanRow>> {
   return PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION];
 }
 
+/**
+ * Version of the table a subscription follows: its `tableVersion` when it is
+ * one of the table's versions, else the current one. Extension point for the
+ * current subscribers (#726): nothing writes `tableVersion` yet.
+ */
+export function tableVersionOf(subscription: { tableVersion?: unknown } | null | undefined): string {
+  const version = subscription?.tableVersion;
+  return typeof version === 'string' && version in PLAN_TABLES ? version : PLAN_TABLE_CURRENT_VERSION;
+}
+
+/** Row of a plan in a version of the table (the current one by default). */
+export function planRow(plan: SubscriptionPlan, version: string = PLAN_TABLE_CURRENT_VERSION): PlanRow {
+  return (PLAN_TABLES[version] ?? currentPlanRows())[plan] ?? currentPlanRows().free;
+}
+
 /** The limits a subscription stores, from a row of the table. */
 export function limitsOfRow(row: PlanRow): SubscriptionLimits {
   return {
+    ordersPerMonth: row.ordersPerMonth,
     photosPerMonth: row.photosPerMonth,
     formTemplates: row.formTemplates,
     users: row.users,

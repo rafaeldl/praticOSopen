@@ -8,79 +8,79 @@ void main() {
     setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = true);
     tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
 
-    test('canAddPhoto allows photo when within limit (Free)', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(photosThisMonth: 10),
-      );
+    final now = DateTime.utc(2026, 11, 20, 15);
+    SubscriptionUsage orders(int thisMonth, {int lastMonth = 0}) =>
+        SubscriptionUsage(ordersMonth: '2026-11', ordersThisMonth: thisMonth, ordersLastMonth: lastMonth);
 
-      final result = FeatureGateService.canAddPhoto(subscription);
+    test('canCreateOrder allows within the month (Free 10)', () {
+      final result = FeatureGateService.canCreateOrder(Subscription(usage: orders(5)), now: now);
 
       expect(result.isAllowed, isTrue);
-      expect(result.currentUsage, 10);
-      expect(result.limit, 30);
-      expect(result.isAtLimit, isFalse);
-      expect(result.isNearLimit, isFalse);
+      expect(result.currentUsage, 5);
+      expect(result.limit, 10);
+      expect(result.level, 'ok');
+      expect(result.grace, isFalse);
     });
 
-    test('canAddPhoto denies photo when at limit (Free)', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(photosThisMonth: 30),
-      );
+    test('canCreateOrder warns at 80% and at 100%', () {
+      expect(FeatureGateService.canCreateOrder(Subscription(usage: orders(7)), now: now).level, 'near');
+      expect(FeatureGateService.canCreateOrder(Subscription(usage: orders(9)), now: now).level, 'atLimit');
+    });
 
-      final result = FeatureGateService.canAddPhoto(subscription);
+    test('canCreateOrder: the first month over has a month of grace', () {
+      final result = FeatureGateService.canCreateOrder(Subscription(usage: orders(10, lastMonth: 3)), now: now);
+
+      expect(result.isAllowed, isTrue);
+      expect(result.grace, isTrue);
+      expect(result.level, 'over');
+    });
+
+    test('canCreateOrder: over again the month after asks for a plan', () {
+      final result = FeatureGateService.canCreateOrder(Subscription(usage: orders(10, lastMonth: 11)), now: now);
 
       expect(result.isAllowed, isFalse);
-      expect(result.isAtLimit, isTrue);
-      expect(result.message, contains('Limite de fotos atingido (30/30)'));
+      expect(result.suggestedUpgrade, SubscriptionPlan.starter);
     });
 
-    test('canAddPhoto identifies near limit (Free, 80%)', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(photosThisMonth: 24), // 24/30 = 80%
+    test('canCreateOrder: a new month starts from zero', () {
+      final result = FeatureGateService.canCreateOrder(
+        Subscription(usage: orders(10, lastMonth: 11)),
+        now: DateTime.utc(2026, 12, 2),
       );
 
-      final result = FeatureGateService.canAddPhoto(subscription);
-
-      expect(result.isNearLimit, isTrue);
-      expect(result.isAtLimit, isFalse);
+      expect(result.currentUsage, 0);
+      expect(result.isAllowed, isTrue);
     });
 
-    test('canAddPhoto suggests upgrade when near limit', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(photosThisMonth: 25),
+    test('canCreateOrder: Business past 500 is not blocked, it says to talk to us', () {
+      final result = FeatureGateService.canCreateOrder(
+        Subscription(plan: SubscriptionPlan.business, usage: orders(600, lastMonth: 600)),
+        now: now,
       );
 
-      final result = FeatureGateService.canAddPhoto(subscription);
-
-      expect(result.suggestedUpgrade, equals(SubscriptionPlan.starter));
+      expect(result.isAllowed, isTrue);
+      expect(result.contactUs, isTrue);
     });
 
-    test('canAddPhoto is unlimited for Business plan', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.business,
-        usage: SubscriptionUsage(photosThisMonth: 1000),
+    test('photos have no limit on any plan', () {
+      final result = FeatureGateService.canAddPhotos(
+        Subscription(usage: SubscriptionUsage(photosThisMonth: 5000)),
+        100,
       );
-
-      final result = FeatureGateService.canAddPhoto(subscription);
 
       expect(result.isAllowed, isTrue);
       expect(result.isUnlimited, isTrue);
-      expect(result.limit, -1);
     });
 
-    test('canAddPhotos checks for multiple photos', () {
-      final subscription = Subscription(
-        plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(photosThisMonth: 28),
+    test('Free cannot create its own checklist; Starter can', () {
+      expect(FeatureGateService.canCreateFormTemplate(Subscription()).isAllowed, isFalse);
+      expect(FeatureGateService.canCreateFormTemplate(Subscription()).suggestedUpgrade, SubscriptionPlan.starter);
+      expect(
+        FeatureGateService.canCreateFormTemplate(
+          Subscription(plan: SubscriptionPlan.starter, usage: SubscriptionUsage(formTemplatesActive: 30)),
+        ).isAllowed,
+        isTrue,
       );
-
-      // Pode adicionar 2, mas nao 3
-      expect(FeatureGateService.canAddPhotos(subscription, 2).isAllowed, isTrue);
-      expect(FeatureGateService.canAddPhotos(subscription, 3).isAllowed, isFalse);
     });
 
     test('canAddCollaborator checks collaborator limit (Free)', () {
@@ -151,13 +151,13 @@ void main() {
       final sub = Subscription(
         plan: SubscriptionPlan.business,
         expiresAt: DateTime.now().subtract(const Duration(days: 1)),
-        usage: SubscriptionUsage(photosThisMonth: 30),
+        usage: SubscriptionUsage(usersActive: 1),
       );
 
-      final result = FeatureGateService.canAddPhoto(sub);
+      final result = FeatureGateService.canAddCollaborator(sub);
 
       expect(result.isAllowed, isFalse);
-      expect(result.limit, 30);
+      expect(result.limit, 1);
       expect(result.currentPlan, SubscriptionPlan.free);
     });
 
@@ -166,29 +166,32 @@ void main() {
         plan: SubscriptionPlan.pro,
         source: SubscriptionSource.grace,
         expiresAt: DateTime.now().add(const Duration(days: 30)),
-        usage: SubscriptionUsage(photosThisMonth: 100),
+        usage: SubscriptionUsage(usersActive: 4),
       );
 
-      final result = FeatureGateService.canAddPhoto(sub);
+      final result = FeatureGateService.canAddCollaborator(sub);
 
       expect(result.isAllowed, isTrue);
-      expect(result.limit, 500);
+      expect(result.limit, 5);
     });
 
-    test('uses the limits stored by the server', () {
+    test('a stored limit more generous than the table is kept (a subscriber never loses)', () {
       final sub = Subscription(
         plan: SubscriptionPlan.starter,
         limits: const SubscriptionLimits(
-          photosPerMonth: 50,
+          ordersPerMonth: 50,
+          photosPerMonth: 200,
           formTemplates: 3,
           users: 3,
           pdfWatermark: false,
         ),
-        usage: SubscriptionUsage(photosThisMonth: 50),
+        usage: SubscriptionUsage(usersActive: 2, photosThisMonth: 500),
       );
 
-      expect(FeatureGateService.canAddPhoto(sub).isAllowed, isFalse);
-      expect(FeatureGateService.canAddPhoto(sub).limit, 50);
+      expect(FeatureGateService.canAddCollaborator(sub).limit, 3);
+      expect(FeatureGateService.canAddCollaborator(sub).isAllowed, isTrue);
+      // The table has no photo limit: the stored 200 gives way.
+      expect(FeatureGateService.canAddPhoto(sub).limit, -1);
     });
 
     test('form templates and users read the server usage keys', () {
@@ -210,20 +213,29 @@ void main() {
     });
   });
 
-  group('FeatureGateService.planLimitsEnforced follows paidPlansEnabled', () {
+  group('FeatureGateService.planLimitsEnforced: the switch and a build that sells', () {
     tearDown(() {
       SubscriptionService.debugPaidPlansEnabledOverride = null;
       FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+      FeatureGateService.limitsSwitchOn = false;
     });
 
-    test('limits apply when paid plans are enabled', () {
+    test('limits apply with config/paidPlans on and paid plans enabled', () {
       SubscriptionService.debugPaidPlansEnabledOverride = true;
+      FeatureGateService.limitsSwitchOn = true;
 
       expect(FeatureGateService.planLimitsEnforced, isTrue);
-      final result = FeatureGateService.canAddPhoto(
-        Subscription(usage: SubscriptionUsage(photosThisMonth: 30)),
+      final result = FeatureGateService.canAddCollaborator(
+        Subscription(usage: SubscriptionUsage(usersActive: 1)),
       );
       expect(result.isAllowed, isFalse);
+    });
+
+    test('the switch off turns every limit off, even in a build that sells', () {
+      SubscriptionService.debugPaidPlansEnabledOverride = true;
+      FeatureGateService.limitsSwitchOn = false;
+
+      expect(FeatureGateService.planLimitsEnforced, isFalse);
     });
 
     test('everything is unlimited when paid plans are disabled', () {

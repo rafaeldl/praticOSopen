@@ -291,7 +291,7 @@ describe('runOrderAssist', () => {
     const d = deps();
     d.llm.generateJson.mockRejectedValue(new LlmUnavailableError('HTTP 500'));
     await expect(runOrderAssist('c1', { text: 'x' }, d)).rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
-    expect(d.release).toHaveBeenCalledWith('c1', '2026-10');
+    expect(d.release).toHaveBeenCalledWith('c1', '2026-10', undefined);
   });
 
   it('model answering non-JSON → AI_UNAVAILABLE and released', async () => {

@@ -63,7 +63,7 @@ describe('dueCourtesyNotice', () => {
 describe('courtesyMessage', () => {
   it('quotes the real use against the Free limit', () => {
     expect(courtesyMessage(15, 87, 'BR').body).toContain('87 vezes');
-    expect(courtesyMessage(15, 87, 'BR').body).toContain('No Free são 10');
+    expect(courtesyMessage(15, 87, 'BR').body).toContain('No Free são 50');
   });
 
   it('does not mention the assistant when it was not used', () => {

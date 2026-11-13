@@ -13,6 +13,9 @@ class SegmentFormTemplateRepository {
     return _db.collection('segments').doc(segmentId).collection('forms');
   }
 
+  /// `/segments/{segmentId}/forms` (ids of the ready-made checklists).
+  CollectionReference<Map<String, dynamic>> collectionFor(String segmentId) => _getCollection(segmentId);
+
   /// Converte Timestamps do Firestore para ISO8601 strings para o fromJson.
   Map<String, dynamic> _convertTimestamps(Map<String, dynamic> data) {
     final converted = Map<String, dynamic>.from(data);

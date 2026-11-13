@@ -3725,9 +3725,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'O assistente ainda não está liberado para a sua conta.';
 
   @override
-  String orderAssistantErrorQuota(String limit) {
-    return 'Você já usou os $limit pedidos do assistente deste mês. Dá para continuar preenchendo à mão.';
-  }
+  String get orderAssistantErrorQuota =>
+      'O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.';
+
+  @override
+  String get orderAssistantErrorQuotaDay =>
+      'O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.';
 
   @override
   String get orderAssistantErrorUnavailable =>

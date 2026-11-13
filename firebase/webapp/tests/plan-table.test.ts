@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION } from '../src/generated/plan-table'
-import { planLimits } from '../src/lib/plan-limits'
+import { loadLimitsSwitch, orderMonthKey, ordersUsage, planLimits, planLimitsEnforced, previousMonthKey, resetLimitsSwitch } from '../src/lib/plan-limits'
 import { planSummary } from '../src/lib/settings/model'
 import { planLimit } from '../src/lib/forms/model'
 
@@ -25,9 +25,33 @@ describe('plan table', () => {
 
   test.each(PLAN_IDS)('%s: Plano, Equipe and checklists read the table', (plan) => {
     const row = current[plan]
-    const limits = { photosPerMonth: row.photosPerMonth, formTemplates: row.formTemplates, users: row.users, pdfWatermark: row.pdfWatermark }
+    const limits = { ordersPerMonth: row.ordersPerMonth, photosPerMonth: row.photosPerMonth, formTemplates: row.formTemplates, users: row.users, pdfWatermark: row.pdfWatermark }
     expect(planLimits(plan)).toEqual(limits)
     expect(planSummary({ plan }, NOW).limits).toEqual(limits)
     expect(planLimit({ plan }, NOW)).toBe(row.formTemplates)
+  })
+})
+
+describe('the switch (config/paidPlans)', () => {
+  test('read once; off when it cannot be read', async () => {
+    resetLimitsSwitch()
+    expect(planLimitsEnforced()).toBe(false)
+    expect(await loadLimitsSwitch(async () => true)).toBe(true)
+    expect(planLimitsEnforced()).toBe(true)
+    expect(await loadLimitsSwitch(async () => false)).toBe(true) // same answer for the page
+    resetLimitsSwitch()
+    expect(await loadLimitsSwitch(async () => { throw new Error('offline') })).toBe(false)
+    resetLimitsSwitch()
+  })
+})
+
+describe('orders of the month', () => {
+  test('turn by themselves, São Paulo calendar', () => {
+    const usage = { ordersMonth: '2026-11', ordersThisMonth: 12, ordersLastMonth: 4 }
+    expect(orderMonthKey(new Date('2026-12-01T02:59:00Z'))).toBe('2026-11')
+    expect(previousMonthKey('2027-01')).toBe('2026-12')
+    expect(ordersUsage(usage, NOW)).toEqual({ thisMonth: 12, lastMonth: 4 })
+    expect(ordersUsage(usage, new Date('2026-12-05T12:00:00Z'))).toEqual({ thisMonth: 0, lastMonth: 12 })
+    expect(ordersUsage(usage, new Date('2027-01-05T12:00:00Z'))).toEqual({ thisMonth: 0, lastMonth: 0 })
   })
 })
