@@ -406,3 +406,40 @@ export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanI
     }
   }
 };
+
+/** What one Business pack adds (#737). */
+export interface PlanExtra {
+  readonly users?: number;
+  readonly ordersPerMonth?: number;
+}
+
+/**
+ * Business packs, by RevenueCat entitlement id (the store product is
+ * `praticos_` + the id). They add only to an active Business.
+ */
+export const PLAN_EXTRAS: Readonly<Record<string, PlanExtra>> = {
+  "extra_users_5": {
+    "users": 5
+  },
+  "extra_users_10": {
+    "users": 10
+  },
+  "extra_users_20": {
+    "users": 20
+  },
+  "extra_users_40": {
+    "users": 40
+  },
+  "extra_orders_100": {
+    "ordersPerMonth": 100
+  },
+  "extra_orders_200": {
+    "ordersPerMonth": 200
+  },
+  "extra_orders_500": {
+    "ordersPerMonth": 500
+  },
+  "extra_orders_1000": {
+    "ordersPerMonth": 1000
+  }
+};

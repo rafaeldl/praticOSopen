@@ -10,14 +10,17 @@ import {
   getDocument,
   updateDocument,
 } from './firestore.service';
-import { Subscription } from '../models/types';
+import type { Subscription, SubscriptionLimits } from '../models/types';
 import {
+  NO_EXTRAS,
   PAID_PLANS_BY_RANK,
   PLAN_LIMITS,
+  addExtras,
   getNextMonthReset,
   getPlanLimits,
   isGraceActive,
   resolveSubscriptionState,
+  sameExtras,
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
@@ -174,12 +177,21 @@ export function buildPlanUpdate(
   // stricter table never takes anything away (effectiveLimits takes the more
   // generous number).
   const samePlan = current?.plan === state.plan && current?.limits !== undefined && current?.source !== 'grace';
+  // Business packs (#737) are summed into the stored limits, so app, web and
+  // server read them with no extra rule. On a plan change the limits start
+  // from the table; on the same plan the old packs are taken out and the new
+  // ones added, keeping whatever else was stored.
+  const extrasChanged = !sameExtras(current?.extras, state.extras);
+  let limits: SubscriptionLimits | undefined;
+  if (!samePlan) limits = addExtras(getPlanLimits(state.plan), state.extras);
+  else if (extrasChanged) limits = addExtras(addExtras(current!.limits, current!.extras ?? NO_EXTRAS, -1), state.extras);
+  const hasExtras = state.extras.users > 0 || state.extras.ordersPerMonth > 0;
   return {
     'subscription.plan': state.plan,
     'subscription.status': state.status,
-    ...(samePlan
-      ? {}
-      : { 'subscription.limits': getPlanLimits(state.plan), 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
+    ...(samePlan ? {} : { 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
+    ...(limits ? { 'subscription.limits': limits } : {}),
+    ...(hasExtras || current?.extras !== undefined ? { 'subscription.extras': { ...state.extras } } : {}),
     'subscription.expiresAt': state.expiresAt,
     'subscription.store': state.store,
     'subscription.source': 'store',

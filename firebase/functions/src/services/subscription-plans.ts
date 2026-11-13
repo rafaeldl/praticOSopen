@@ -7,6 +7,7 @@
 
 import type {
   Subscription,
+  SubscriptionExtras,
   SubscriptionLimits,
   SubscriptionPlan,
   SubscriptionStatus,
@@ -15,6 +16,7 @@ import type {
 } from '../models/types';
 import type { RcSubscriber } from './revenuecat.client';
 import {
+  PLAN_EXTRAS,
   PLAN_IDS,
   PLAN_TABLES_IN_FORCE,
   PLAN_TABLE_CURRENT_VERSION,
@@ -87,6 +89,41 @@ export interface ResolvedSubscriptionState {
   status: SubscriptionStatus;
   expiresAt: string | null;
   store: SubscriptionStore | null;
+  /** Business packs in force; zero unless the plan is Business (#737). */
+  extras: SubscriptionExtras;
+}
+
+export const NO_EXTRAS: SubscriptionExtras = Object.freeze({ users: 0, ordersPerMonth: 0 });
+
+/** Store product prefix of the Business packs: `praticos_extra_users_5` → `extra_users_5`. */
+const EXTRA_PRODUCT_PREFIX = 'praticos_';
+
+/** The pack an entitlement is, by its id or, as a fallback, its product id. */
+function extraOf(entitlementId: string, productId: string): string | undefined {
+  if (entitlementId in PLAN_EXTRAS) return entitlementId;
+  // Play reports subscriptions as `productId:basePlanId`.
+  const product = productId.split(':')[0];
+  const id = product.startsWith(EXTRA_PRODUCT_PREFIX) ? product.slice(EXTRA_PRODUCT_PREFIX.length) : product;
+  return id in PLAN_EXTRAS ? id : undefined;
+}
+
+/**
+ * Adds packs to limits. A field with no limit (-1) stays -1. Negative extras
+ * take them out again (used to swap the packs of a stored subscription).
+ */
+export function addExtras(limits: SubscriptionLimits, extras: SubscriptionExtras, sign: 1 | -1 = 1): SubscriptionLimits {
+  const add = (limit: number, extra: number) => (limit === -1 ? -1 : Math.max(0, limit + sign * extra));
+  return {
+    ...limits,
+    users: add(limits.users, extras.users),
+    ordersPerMonth: add(limits.ordersPerMonth, extras.ordersPerMonth),
+  };
+}
+
+export function sameExtras(a: SubscriptionExtras | undefined, b: SubscriptionExtras | undefined): boolean {
+  const x = a ?? NO_EXTRAS;
+  const y = b ?? NO_EXTRAS;
+  return x.users === y.users && x.ordersPerMonth === y.ordersPerMonth;
 }
 
 export function getPlanLimits(plan: SubscriptionPlan): SubscriptionLimits {
@@ -122,9 +159,7 @@ function planOf(entitlementId: string, productId: string): SubscriptionPlan | un
  *   expired when no entitlement is active.
  */
 export function resolveSubscriptionState(subscriber: RcSubscriber, now: Date): ResolvedSubscriptionState {
-  const candidates = Object.entries(subscriber.entitlements ?? {}).flatMap(([id, entitlement]) => {
-    const plan = planOf(id, entitlement.product_identifier);
-    if (!plan || plan === 'free') return [];
+  const active = Object.entries(subscriber.entitlements ?? {}).flatMap(([id, entitlement]) => {
     const subscription = subscriber.subscriptions?.[entitlement.product_identifier];
     let expiresAt = entitlement.expires_date;
     const graceEnd = subscription?.grace_period_expires_date;
@@ -132,12 +167,29 @@ export function resolveSubscriptionState(subscriber: RcSubscriber, now: Date): R
       expiresAt = graceEnd;
     }
     if (expiresAt !== null && !isAfter(expiresAt, now)) return [];
-    return [{ plan, expiresAt, subscription, entitlement }];
+    return [{ id, expiresAt, subscription, entitlement }];
+  });
+  const candidates = active.flatMap((item) => {
+    const plan = planOf(item.id, item.entitlement.product_identifier);
+    return plan && plan !== 'free' ? [{ ...item, plan }] : [];
   });
   candidates.sort((a, b) => PAID_PLANS_BY_RANK.indexOf(a.plan) - PAID_PLANS_BY_RANK.indexOf(b.plan));
 
   const best = candidates[0];
-  if (!best) return { plan: 'free', status: 'expired', expiresAt: null, store: null };
+  if (!best) return { plan: 'free', status: 'expired', expiresAt: null, store: null, extras: { ...NO_EXTRAS } };
+
+  // Packs count only on Business. Within a field the largest active pack wins:
+  // the packs of a field are steps of one ladder (one store group), so two at
+  // once only happen while one replaces the other.
+  const extras: SubscriptionExtras = { ...NO_EXTRAS };
+  if (best.plan === 'business') {
+    for (const item of active) {
+      const pack = extraOf(item.id, item.entitlement.product_identifier);
+      if (!pack) continue;
+      extras.users = Math.max(extras.users, PLAN_EXTRAS[pack].users ?? 0);
+      extras.ordersPerMonth = Math.max(extras.ordersPerMonth, PLAN_EXTRAS[pack].ordersPerMonth ?? 0);
+    }
+  }
 
   const status: SubscriptionStatus = best.subscription?.billing_issues_detected_at
     ? 'past_due'
@@ -149,6 +201,7 @@ export function resolveSubscriptionState(subscriber: RcSubscriber, now: Date): R
     status,
     expiresAt: best.expiresAt,
     store: toStore(best.subscription?.store ?? best.entitlement.store),
+    extras,
   };
 }
 

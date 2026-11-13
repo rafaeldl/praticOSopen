@@ -4,6 +4,7 @@ import {
   getNextMonthReset,
   getPlanLimits,
   isGraceActive,
+  addExtras,
   resolveSubscriptionState,
   tableVersionOf,
   planRow,
@@ -39,6 +40,62 @@ function subscriber(
   return { entitlements, subscriptions };
 }
 
+describe('Business packs (#737)', () => {
+  const business = { business: entitlement('praticos_business_monthly') };
+  const businessSub = { praticos_business_monthly: storeSub() };
+
+  it('adds the active packs to Business, by entitlement id', () => {
+    const s = subscriber(
+      { ...business, extra_users_5: entitlement('praticos_extra_users_5'), extra_orders_100: entitlement('praticos_extra_orders_100') },
+      businessSub,
+    );
+    expect(resolveSubscriptionState(s, NOW)).toMatchObject({ plan: 'business', extras: { users: 5, ordersPerMonth: 100 } });
+  });
+
+  it('finds a pack by its product id, also on Play (product:basePlan)', () => {
+    const s = subscriber({ ...business, other: entitlement('praticos_extra_users_10:monthly') }, businessSub);
+    expect(resolveSubscriptionState(s, NOW).extras).toEqual({ users: 10, ordersPerMonth: 0 });
+  });
+
+  it('takes the largest pack of a ladder while one replaces another', () => {
+    const s = subscriber(
+      { ...business, extra_users_5: entitlement('praticos_extra_users_5'), extra_users_20: entitlement('praticos_extra_users_20') },
+      businessSub,
+    );
+    expect(resolveSubscriptionState(s, NOW).extras.users).toBe(20);
+  });
+
+  it('ignores expired packs', () => {
+    const s = subscriber({ ...business, extra_users_5: entitlement('praticos_extra_users_5', PAST) }, businessSub);
+    expect(resolveSubscriptionState(s, NOW).extras).toEqual({ users: 0, ordersPerMonth: 0 });
+  });
+
+  it('a pack without Business adds nothing and is not a plan', () => {
+    const pro = subscriber(
+      { pro: entitlement('praticos_pro_monthly'), extra_users_5: entitlement('praticos_extra_users_5') },
+      { praticos_pro_monthly: storeSub() },
+    );
+    expect(resolveSubscriptionState(pro, NOW)).toMatchObject({ plan: 'pro', extras: { users: 0, ordersPerMonth: 0 } });
+    const alone = subscriber({ extra_users_5: entitlement('praticos_extra_users_5') });
+    expect(resolveSubscriptionState(alone, NOW)).toMatchObject({ plan: 'free', status: 'expired' });
+  });
+
+  it('a promotional pack (web, contract) counts like a store one', () => {
+    const s = subscriber({ ...business, extra_orders_500: { ...entitlement('rc_promo_extra_orders_500_monthly'), store: 'promotional' } }, businessSub);
+    expect(resolveSubscriptionState(s, NOW).extras.ordersPerMonth).toBe(500);
+  });
+
+  it('addExtras keeps no limit as no limit and can take packs out', () => {
+    const limits = { ...PLAN_LIMITS.business };
+    expect(addExtras(limits, { users: 5, ordersPerMonth: 100 })).toMatchObject({
+      users: limits.users + 5,
+      ordersPerMonth: limits.ordersPerMonth + 100,
+    });
+    expect(addExtras({ ...limits, users: -1 }, { users: 5, ordersPerMonth: 0 }).users).toBe(-1);
+    expect(addExtras(addExtras(limits, { users: 5, ordersPerMonth: 100 }), { users: 5, ordersPerMonth: 100 }, -1)).toEqual(limits);
+  });
+});
+
 describe('resolveSubscriptionState', () => {
   it('is free/expired without entitlements', () => {
     expect(resolveSubscriptionState(subscriber({}), NOW)).toEqual({
@@ -46,6 +103,7 @@ describe('resolveSubscriptionState', () => {
       status: 'expired',
       expiresAt: null,
       store: null,
+      extras: { users: 0, ordersPerMonth: 0 },
     });
   });
 
@@ -57,6 +115,7 @@ describe('resolveSubscriptionState', () => {
       status: 'active',
       expiresAt: FUTURE,
       store: 'app_store',
+      extras: { users: 0, ordersPerMonth: 0 },
     });
   });
 
@@ -131,6 +190,7 @@ describe('resolveSubscriptionState', () => {
       status: 'past_due',
       expiresAt: FUTURE,
       store: 'app_store',
+      extras: { users: 0, ordersPerMonth: 0 },
     });
   });
 

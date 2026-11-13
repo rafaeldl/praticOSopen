@@ -120,6 +120,34 @@ left. When a request is refused for the limit, the note offers "Ver planos" and 
 
 `source` is `store` (paid through a store) or `grace` (60 days of Pro granted to existing companies at launch).
 
+### Business packs (`extras`, #737)
+
+People over the 20 included in Business and orders over the 500 a month are
+sold as packs (proposal and store plan in #737). Only the server part exists;
+no store product, paywall or screen sells them yet.
+
+- The packs live in `docs/plans/plans.json` → `extras`, keyed by RevenueCat
+  entitlement id (`extra_users_5`, `extra_orders_100`, …). The store product is
+  `praticos_` + the id. Generated into `PLAN_EXTRAS`
+  (`plan-table.generated.ts`, Functions and web).
+- `resolveSubscriptionState` returns `extras: { users, ordersPerMonth }` from
+  the active pack entitlements (by id, or by product id as fallback, also
+  `product:basePlan` on Play). Only with Business in force; a pack without
+  Business adds nothing and never becomes a plan. Within a field the largest
+  active pack wins (the packs are steps of one ladder).
+- `buildPlanUpdate` writes the sum into `subscription.limits` (users and
+  ordersPerMonth; -1 stays -1) and the packs into `subscription.extras`. On a
+  plan change the limits start from the table; on the same plan the old packs
+  are taken out and the new ones added, keeping anything else stored. Leaving
+  Business stores `extras` as zero. Companies that never had packs get no
+  `extras` field.
+- App and web need no change to honor packs: they read `limits` through
+  `effectiveLimits` (the more generous of stored and table).
+- A promotional entitlement with a pack id (web checkout #664, direct
+  contract) counts like a store purchase.
+- Never mention buying outside the app in the iOS app (3.1.1): the Business
+  notice over the limit only says it went over what is included.
+
 ### Client rules
 
 - `Subscription.fromJson` reads the server schema. Unknown `status` becomes `active`, unknown `plan` becomes `free`. Legacy client keys are read as fallback: `usage.formTemplates` → `formTemplatesActive`, `usage.collaborators` → `usersActive`, `limits.collaborators` → `users`.

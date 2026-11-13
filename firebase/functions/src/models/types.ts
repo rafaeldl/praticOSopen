@@ -577,6 +577,12 @@ export interface SubscriptionUsage {
   ordersLastMonth?: number;
 }
 
+/** Business packs in force (#737): what they add to the plan. Already summed into `limits`. */
+export interface SubscriptionExtras {
+  users: number;
+  ordersPerMonth: number;
+}
+
 export interface Subscription {
   plan: SubscriptionPlan;
   status: SubscriptionStatus;
@@ -591,6 +597,8 @@ export interface Subscription {
   usage: SubscriptionUsage;
   /** Version of docs/plans/plans.json this subscription follows; missing = the current one (#726). */
   tableVersion?: string;
+  /** Business packs bought (#737); missing = none. `limits` already has them added. */
+  extras?: SubscriptionExtras;
 }
 
 // ============================================================================

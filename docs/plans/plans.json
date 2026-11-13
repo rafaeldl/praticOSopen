@@ -211,5 +211,32 @@
         }
       }
     }
+  },
+  "extrasAbout": "Pacotes que somam ao Business (#737). Chave = id do entitlement na RevenueCat; o produto nas lojas é `praticos_` + a chave. Só valem com o Business ativo; o servidor soma ao gravar subscription.limits. Também servem ao entitlement promocional (web, contrato direto). Preços ficam nas lojas: +R$ 15 por pessoa, +R$ 99 a cada 100 OS.",
+  "extras": {
+    "extra_users_5": {
+      "users": 5
+    },
+    "extra_users_10": {
+      "users": 10
+    },
+    "extra_users_20": {
+      "users": 20
+    },
+    "extra_users_40": {
+      "users": 40
+    },
+    "extra_orders_100": {
+      "ordersPerMonth": 100
+    },
+    "extra_orders_200": {
+      "ordersPerMonth": 200
+    },
+    "extra_orders_500": {
+      "ordersPerMonth": 500
+    },
+    "extra_orders_1000": {
+      "ordersPerMonth": 1000
+    }
   }
 }

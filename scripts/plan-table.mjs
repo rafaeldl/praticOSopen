@@ -59,6 +59,23 @@ export function validate(table) {
       if (missing.length) problems.push(`versions.${version}.plans.${PLANS[i]}.features lacks ${missing.join(', ')} from ${PLANS[i - 1]}`)
     }
   }
+  problems.push(...validateExtras(table.extras))
+  return problems
+}
+
+/** Business packs (#737): `extras` maps an entitlement id to what it adds. */
+export const EXTRA_FIELDS = ['users', 'ordersPerMonth']
+
+function validateExtras(extras) {
+  if (extras === undefined) return []
+  if (typeof extras !== 'object' || extras === null || Array.isArray(extras)) return ['extras must be an object']
+  const problems = []
+  for (const [id, pack] of Object.entries(extras)) {
+    if (!/^extra_[a-z0-9_]+$/.test(id)) problems.push(`extras.${id}: the id must start with extra_`)
+    const fields = Object.keys(pack ?? {})
+    if (fields.length !== 1 || !EXTRA_FIELDS.includes(fields[0])) problems.push(`extras.${id} must add exactly one of ${EXTRA_FIELDS.join(', ')}`)
+    else if (!Number.isInteger(pack[fields[0]]) || pack[fields[0]] <= 0) problems.push(`extras.${id}.${fields[0]} must be a positive integer`)
+  }
   return problems
 }
 
@@ -144,6 +161,17 @@ export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRo
  * it and the current one, field by field (mergeRows in scripts/plan-table.mjs).
  */
 export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = ${JSON.stringify(inForceRowsOf(table), null, 2)};
+
+/** What one Business pack adds (#737). */
+export interface PlanExtra {
+${EXTRA_FIELDS.map((f) => `  readonly ${f}?: number;`).join('\n')}
+}
+
+/**
+ * Business packs, by RevenueCat entitlement id (the store product is
+ * \`praticos_\` + the id). They add only to an active Business.
+ */
+export const PLAN_EXTRAS: Readonly<Record<string, PlanExtra>> = ${JSON.stringify(table.extras ?? {}, null, 2)};
 `
 }
 

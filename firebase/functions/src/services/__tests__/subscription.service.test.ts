@@ -54,6 +54,76 @@ function subscriptionOf(id: string) {
 describe('syncCompanySubscription', () => {
   beforeEach(() => fake.reset());
 
+  describe('Business packs (#737)', () => {
+    const pack = (id: string) => ({ expires_date: FUTURE, product_identifier: `praticos_${id}`, store: 'app_store' as const });
+    function businessWith(...packs: string[]): RcSubscriber {
+      const base = activeSubscriber('business');
+      return { ...base, entitlements: { ...base.entitlements, ...Object.fromEntries(packs.map((id) => [id, pack(id)])) } };
+    }
+    const base = PLAN_LIMITS.business;
+
+    it('a new Business with packs stores the sum and the packs', async () => {
+      seedCompany('c1', { plan: 'free', status: 'expired', limits: PLAN_LIMITS.free, usage: USAGE });
+      const fetchSubscriber = jest.fn().mockResolvedValue(businessWith('extra_users_5', 'extra_orders_100'));
+
+      await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+      expect(subscriptionOf('c1')).toMatchObject({
+        plan: 'business',
+        limits: { ...base, users: base.users + 5, ordersPerMonth: base.ordersPerMonth + 100 },
+        extras: { users: 5, ordersPerMonth: 100 },
+      });
+    });
+
+    it('swapping a pack on the same plan keeps the rest of what was stored', async () => {
+      const stored = { ...base, users: base.users + 5, photosPerMonth: 999 };
+      seedCompany('c1', { plan: 'business', status: 'active', source: 'store', limits: stored, extras: { users: 5, ordersPerMonth: 0 }, usage: USAGE });
+      const fetchSubscriber = jest.fn().mockResolvedValue(businessWith('extra_users_20'));
+
+      await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+      expect(subscriptionOf('c1')).toMatchObject({
+        limits: { ...stored, users: base.users + 20 },
+        extras: { users: 20, ordersPerMonth: 0 },
+      });
+    });
+
+    it('a cancelled pack goes back to what the plan includes', async () => {
+      seedCompany('c1', {
+        plan: 'business', status: 'active', source: 'store',
+        limits: { ...base, ordersPerMonth: base.ordersPerMonth + 100 }, extras: { users: 0, ordersPerMonth: 100 }, usage: USAGE,
+      });
+      const fetchSubscriber = jest.fn().mockResolvedValue(businessWith());
+
+      await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+      expect(subscriptionOf('c1')).toMatchObject({ limits: base, extras: { users: 0, ordersPerMonth: 0 } });
+    });
+
+    it('leaving Business drops the packs', async () => {
+      seedCompany('c1', {
+        plan: 'business', status: 'active', source: 'store',
+        limits: { ...base, users: base.users + 5 }, extras: { users: 5, ordersPerMonth: 0 }, usage: USAGE,
+      });
+      const pro = activeSubscriber('pro');
+      pro.entitlements = { ...pro.entitlements, extra_users_5: pack('extra_users_5') };
+      const fetchSubscriber = jest.fn().mockResolvedValue(pro);
+
+      await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+      expect(subscriptionOf('c1')).toMatchObject({ plan: 'pro', limits: PLAN_LIMITS.pro, extras: { users: 0, ordersPerMonth: 0 } });
+    });
+
+    it('a plan without packs never gets an extras field', async () => {
+      seedCompany('c1', { plan: 'free', status: 'expired', limits: PLAN_LIMITS.free, usage: USAGE });
+      const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('business'));
+
+      await syncCompanySubscription('c1', { fetchSubscriber, now: NOW });
+
+      expect(subscriptionOf('c1')).not.toHaveProperty('extras');
+    });
+  });
+
   it('returns company_not_found without calling RevenueCat', async () => {
     const fetchSubscriber = jest.fn();
 
