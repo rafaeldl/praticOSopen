@@ -242,7 +242,14 @@ export interface WebBillingRecord {
   /** When 'praticos': the issuing company (and emitter) chosen at checkout. */
   invoiceIssuer?: WebInvoiceIssuer | null;
   /** Recipient (tomador) of the notas, as typed at checkout. */
-  invoiceRecipient?: { name: string; taxId: string; email: string | null } | null;
+  invoiceRecipient?: {
+    name: string;
+    taxId: string;
+    email: string | null;
+    /** Kept to fill the form again on the next checkout. */
+    postalCode?: string | null;
+    addressNumber?: string | null;
+  } | null;
   createdAt: string;
   createdBy: string;
   /** First confirmed payment: starts the 7-day guarantee. */
