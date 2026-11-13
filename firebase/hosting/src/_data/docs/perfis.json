@@ -533,7 +533,7 @@
         "faq": [
           {
             "question": "Preciso de plano pago para usar sozinho?",
-            "answer": "Não. Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
+            "answer": "Não. Pode começar grátis, sozinho. O plano grátis tem limites por mês, e os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
           },
           {
             "question": "O técnico vê os preços?",
@@ -1093,7 +1093,7 @@
         "faq": [
           {
             "question": "Do I need a paid plan to use it on my own?",
-            "answer": "No. You can start free, with no limit on orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock the team."
+            "answer": "No. You can start free, on your own. The free plan has monthly limits, and paid plans, subscribed in the app, raise those limits and unlock the team."
           },
           {
             "question": "Does the technician see prices?",
@@ -1653,7 +1653,7 @@
         "faq": [
           {
             "question": "¿Necesito un plan pago para usarlo solo?",
-            "answer": "No. Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA y un modelo de checklist. Los planes pagos, suscritos en la app, amplían esos límites y habilitan el equipo."
+            "answer": "No. Puedes empezar gratis, solo. El plan gratis tiene límites por mes, y los planes pagos, suscritos en la app, amplían esos límites y habilitan el equipo."
           },
           {
             "question": "¿El técnico ve los precios?",

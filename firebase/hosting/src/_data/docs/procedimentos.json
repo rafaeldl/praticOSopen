@@ -170,7 +170,7 @@
         ],
         "infoCard": {
           "title": "Fotos ficam guardadas na sua conta",
-          "content": "As fotos vão para o armazenamento do PraticOS. Quem abrir a OS em outro celular vê as mesmas fotos. O plano grátis tem limite mensal de fotos e um modelo de checklist; os planos pagos, assinados no app, aumentam esses limites."
+          "content": "As fotos vão para o armazenamento do PraticOS. Quem abrir a OS em outro celular vê as mesmas fotos. O que cada plano inclui aparece na tela Plano, no app."
         }
       },
       {
@@ -462,7 +462,7 @@
         ],
         "infoCard": {
           "title": "Photos are kept in your account",
-          "content": "Photos go to PraticOS storage. Anyone who opens the order on another phone sees the same photos. The free plan has a monthly photo limit and one checklist template; paid plans, bought in the app, raise those limits."
+          "content": "Photos go to PraticOS storage. Anyone who opens the order on another phone sees the same photos. The Plan screen in the app shows what each plan includes."
         }
       },
       {
@@ -754,7 +754,7 @@
         ],
         "infoCard": {
           "title": "Las fotos quedan guardadas en tu cuenta",
-          "content": "Las fotos van al almacenamiento de PraticOS. Quien abra la OS en otro celular ve las mismas fotos. El plan gratis tiene un límite mensual de fotos y una plantilla de checklist; los planes pagos, contratados en la app, amplían esos límites."
+          "content": "Las fotos van al almacenamiento de PraticOS. Quien abra la OS en otro celular ve las mismas fotos. La pantalla Plan, en la app, muestra lo que incluye cada plan."
         }
       },
       {
