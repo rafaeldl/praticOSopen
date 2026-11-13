@@ -18,6 +18,7 @@ import { isOpen } from '../src/lib/orders/model'
 import { checkPlanLimit, orderMonthKey, planInForce, shouldShowPdfWatermark } from '../src/lib/plan-limits'
 import { planOverview } from '../src/lib/plan-overview'
 import { checkPlanFeature, featureForRole } from '../src/lib/plan-features'
+import { freeLimitsNoticeDue, lastMonthCounts, paidPlansOnFor, parsePaidPlansConfig } from '../src/lib/paid-plans-config'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,7 +140,7 @@ describe('plan-limits', () => {
       expect(Object.fromEntries(Object.keys(want).map((key) => [key, got[key]]))).toEqual(want)
       return
     }
-    const result: Record<string, unknown> = { ...checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, lastMonthUsage: given.lastMonthUsage, enforced: given.paidPlansEnabled, now }) }
+    const result: Record<string, unknown> = { ...checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, lastMonthUsage: given.lastMonthUsage, enforced: given.paidPlansEnabled, now, limitsStartAt: given.limitsStartInDays === undefined ? null : new Date(now.getTime() + given.limitsStartInDays * DAY_MS) }) }
     expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
   })
 })
@@ -191,5 +192,30 @@ describe('plan-overview', () => {
       notice: got.notice === null ? null : { kind: got.notice, resource: got.notice.startsWith('orders') ? 'orders' : 'people' },
       next: got.next,
     }).toEqual(c.expect)
+  })
+})
+
+// config/paidPlans (decision of 2026-11-13): the same cases as the app
+// (paid_plans_config_cases_test.dart) and the server (paid-plans-config.cases.test.ts).
+describe('paid-plans-config', () => {
+  const doc = JSON.parse(readFileSync(resolve(dir, 'paid-plans-config.json'), 'utf8'))
+
+  test('runs in web', () => expect(doc.runsIn).toContain('web'))
+
+  test.each(cases('paid-plans-config.json'))('$id', (c) => {
+    const { given } = c
+    const want = { ...(c.correct ?? c.expect), ...c.divergesIn?.web }
+    const config = parsePaidPlansConfig(given.config)
+    if (given.kind === 'switch') {
+      expect({ on: paidPlansOnFor(config, given.companyId) }).toEqual(want)
+      return
+    }
+    const now = new Date(given.now)
+    if (given.kind === 'notice') {
+      const notice = freeLimitsNoticeDue(config, given.isFree, now)
+      expect(notice ? { due: true, daysLeft: notice.daysLeft } : { due: false }).toEqual(want)
+      return
+    }
+    expect({ counts: lastMonthCounts(config.limitsStartAt, now) }).toEqual(want)
   })
 })

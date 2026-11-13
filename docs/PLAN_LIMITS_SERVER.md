@@ -30,6 +30,18 @@ Regras novas que mudam a conta deste documento:
 
 A tabela completa, com preços e recursos de cada plano, está em [`SUBSCRIPTION.md`](SUBSCRIPTION.md#approved-table-2026-11-12-epic-721).
 
+## Empresas grátis que já existem (decisão de 13/11)
+
+O Grátis novo tem 10 OS por mês; hoje o Grátis não tem limite de OS. Para não pegar ninguém de surpresa:
+
+- **Data em config**: `config/paidPlans.limitsStartAt` (texto ISO, ex. `"2026-12-15T03:00:00Z"` para meia-noite de Brasília, ou Timestamp). Sem a data nada é avisado. Nunca fica fixa no código.
+- **Aviso nos 15 dias antes** (`freeLimitsNoticeDue`), só para quem tem o Free em vigor:
+  - app: bloco na Início (`FreeLimitsBanner`), para dono e admin, numa build que vende; "Agora não" esconde até a data mudar;
+  - web: bloco na Início (`FreeLimitsNotice.vue`), para dono e admin;
+  - push e e-mail: função `freeLimitsNotices` (diária, 10h de Brasília, `free-limits-notice.service.ts`). Roda como `nfse-api@` porque só essa conta lê a chave do Resend (`RESEND_API_KEY`). Manda uma vez por data para as empresas no Free com OS no mês ou no mês anterior: push para dono e admin, e-mail para o dono (`owner.email` ou `users/{id}.email`), de `avisos@praticos.app`, respondendo para o suporte. Guarda o que saiu em `companies/{id}/settings/freeLimitsNotice { startsAt, push, email }`; o canal que falhou tenta de novo no dia seguinte, o outro não repete. Sem a data, a função lê um documento e para.
+- **Um mês de folga** (reaproveita a folga do #723): do dia `limitsStartAt` até um mês depois, o mês anterior não conta (`lastMonthCounts`), então quem já passava do limite ainda cria OS no primeiro mês. Depois disso vale a regra normal.
+- **Como ligar**: (1) gravar `limitsStartAt`; os avisos começam 15 dias antes. (2) No dia, ligar `enabled`. Enquanto `enabled` estiver desligada, o Free continua sem limite, mesmo depois da data.
+
 ## Arquitetura
 
 - `firebase/functions/src/services/plan-limits.service.ts`: a conta (`checkPlanLimit`, `effectivePlan`, `effectiveLimits`, `shouldShowPdfWatermark`), a contagem de uso e a chave global.
@@ -52,7 +64,7 @@ Os dois arquivos gerados ficam no git porque o deploy das Functions e o build do
 Firestore lido:
 
 ```
-config/paidPlans                       enabled (chave global, padrão desligado)
+config/paidPlans                       enabled (chave global, padrão desligado), companyIds, limitsStartAt
 companies/{id}.subscription            plan, expiresAt, limits
 companies/{id}/memberships/*           pessoas
 links/invites/tokens/*                 convites pendentes (company.id, status, expiresAt)
@@ -65,6 +77,7 @@ companies/{id}.subscription.usage     photosThisMonth (contador dos gatilhos da 
 Iguais ao app, provadas pelos casos:
 
 - Permitido se o limite é -1 (ilimitado) ou `uso + o que entra <= limite`.
+- **Chave por empresa** (decisão de 13/11): `config/paidPlans.companyIds` (lista de ids) liga limites e recursos só para essas empresas enquanto `enabled` está desligada. Serve para a conta de demonstração da revisão da Apple. O id fica só no Firestore, nunca no código (o repositório é público). A regra é a mesma nos três lados (`paidPlansOnFor`: servidor `paid-plans-config.ts`, app `lib/services/paid_plans_config.dart`, web `src/lib/paid-plans-config.ts`), com casos em `docs/web-app/contract-cases/paid-plans-config.json`. O que a compra grava (`tableVersionForPlanChange`) segue só `enabled`.
 - **Uma chave só** (#723): `config/paidPlans.enabled == true` no Firestore, desligada por padrão. O servidor, o app e o web leem o mesmo documento (as regras deixam qualquer pessoa logada ler; ninguém grava pelo cliente). Desligada, todo limite vale -1. O `PLAN_LIMITS_ENABLED` do ambiente das Functions e o `WEB_PLAN_LIMITS_ENFORCED` do web saíram. O app ainda precisa de uma build que venda (`SubscriptionService.paidPlansEnabled`, regra 3.1.1 da Apple): sem loja não há limite no app, mesmo com a chave ligada. O servidor guarda a chave por um minuto.
 - **Plano ausente** (sem `subscription`, só `usage`, ou plano desconhecido) é Free.
 - **Vencido** (`expiresAt` no passado, cortesia ou loja) é Free da tabela atual, mesmo com limites do Pro gravados. O `status` não conta: Pro com `status: expired` e sem data continua Pro.

@@ -76,6 +76,15 @@ describe('the switch (config/paidPlans)', () => {
     expect(await loadLimitsSwitch(async () => { throw new Error('offline') })).toBe(false)
     resetLimitsSwitch()
   })
+
+  test('companyIds turns the limits on for the company of the session only (demo account)', async () => {
+    const config = { enabled: false, companyIds: ['demo'], limitsStartAt: null }
+    resetLimitsSwitch()
+    expect(await loadLimitsSwitch(async () => config, 'demo')).toBe(true)
+    resetLimitsSwitch()
+    expect(await loadLimitsSwitch(async () => config, 'c1')).toBe(false)
+    resetLimitsSwitch()
+  })
 })
 
 describe('orders of the month', () => {

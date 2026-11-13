@@ -9,6 +9,7 @@ import { PLAN_NAME } from '@/lib/plan-limits'
 import { useRoute, useRouter } from 'vue-router'
 import { Bell, Eye, EyeOff, Tv } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
+import FreeLimitsNotice from '@/components/FreeLimitsNotice.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
@@ -569,6 +570,8 @@ const columns = 5 + (showsMoney ? 1 : 0)
     </button>
     </div>
   </header>
+
+  <FreeLimitsNotice :country="country()" />
 
   <div class="toolbar home-bar" :class="{ 'board-bar': board }">
     <p v-if="board" class="board-hint sub">{{ t(workStages().length ? 'web.board.hintStages' : 'web.board.hint') }}</p>
