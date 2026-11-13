@@ -1,71 +1,56 @@
 # Precificação PraticOS
 
-**Data:** 2026-11-05
-**Status:** Aprovado, ainda não implementado. Substitui a tabela de 2026-01-25 (fotos e usuário extra).
-**Cobrança:** App Store e Google Play (assinatura mensal ou anual). Preços mantidos.
+**Data:** 2026-11-13
+**Status:** Aprovado (épico #721). Código na master desde 13/11/2026, atrás de `config/paidPlans.enabled` desligada. Substitui a tabela de 2026-11-05.
+**Cobrança:** App Store e Google Play (mensal ou anual); pela web com Asaas (#664), atrás de `config/webCheckout.enabled`.
+**Fonte única dos números:** `docs/plans/plans.json`. Este arquivo explica o porquê; se divergir, vale o JSON.
 
 ---
 
 ## Planos
 
-| | Free | Starter | Pro | Business |
+Cada plano é uma fase do negócio. O plano exigido é o maior entre OS por mês, pessoas e CNPJs da nota.
+
+| | Grátis | Starter | Pro | Business |
 |---|---|---|---|---|
-| **Para quem** | Testar ou fazer bico | Autônomo que vive do serviço | Oficina ou assistência organizada | Equipe grande |
-| **Preço por mês** | R$ 0 | R$ 59,90 | R$ 119 | R$ 249 |
-| **Anual (paga 10 meses)** | - | R$ 599 | R$ 1.190 | R$ 2.490 |
-| **OS** | 10 por mês | incluída | incluída | incluída |
+| **Para quem** | Está começando | Autônomo | Equipe pequena | Empresa |
+| **Preço por mês** | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
+| **Anual (paga 10 meses)** | - | R$ 599 | R$ 1.199 | R$ 2.499 |
+| **OS por mês** | 10 | 50 | 150 | 500 |
 | **Pessoas** | 1 | 2 | 5 | 20 |
+| **CNPJs na nota** | - | 1 | 2 | sem limite |
 | **Fotos** | sem limite | sem limite | sem limite | sem limite |
-| **IA na OS** | 10 usos por mês | incluída | incluída | incluída |
-| **PDF sem marca** | não | sim | sim | sim |
-| **Checklists prontos do ramo** | sim | sim | sim | sim |
-| **Checklists próprios** | não | sim | sim | sim |
-| **Nota fiscal de serviço** | não | 1 CNPJ | até 2 CNPJs | CNPJs sem limite |
-| **IA financeira** | não | não | sim | sim |
-| **Contratos recorrentes** | não | não | sim | sim |
-| **App no computador** | sim | sim | sim | sim |
-| **Conectar ao ChatGPT e Claude** | não | não | não | sim |
-| **API** | não | não | não | sim |
+| **IA** | incluída | incluída | incluída | incluída |
 
-Acima de 20 pessoas: **sob consulta**, em torno de R$ 30 por pessoa. Por enquanto é só uma frase na página ("Mais de 20 pessoas? Fale com a gente"); nada é construído antes de aparecer um cliente assim.
+Acima de 20 pessoas ou de 500 OS por mês: "Fale com a gente" (proposta de pacotes extras na #737).
 
-**Em todos os planos:** OS e orçamento, clientes, aparelhos, catálogo, agenda, financeiro e link para o cliente.
+**Recursos, "tudo do plano anterior, mais":**
 
-**Quadro "tudo do plano anterior, mais":**
+- **Grátis:** OS, clientes, catálogo, agenda, financeiro, orçamento pelo WhatsApp e link, aprovação pelo link, checklists do ramo, IA, celular e computador. PDF com a marca PraticOS.
+- **Starter:** nota fiscal (1 CNPJ), PDF só com a sua marca, checklists próprios, cobrança e lembrete, pedir avaliação.
+- **Pro:** perfis e permissões, agenda e responsável por pessoa, etapas, Modo TV, contratos, IA no financeiro, relatório em planilha, 2 CNPJs.
+- **Business:** ações em lote, ChatGPT/Claude e API, CNPJs sem limite.
 
-- **Free:** 10 OS por mês, 1 pessoa, fotos sem limite, 10 usos de IA, app no computador, checklists do ramo.
-- **Starter = Free +** OS incluídas, 2 pessoas, IA incluída, PDF sem marca, checklists próprios, nota fiscal por 1 CNPJ.
-- **Pro = Starter +** 5 pessoas, nota por até 2 CNPJs, IA financeira, contratos recorrentes.
-- **Business = Pro +** 20 pessoas, CNPJs sem limite, conexão com ChatGPT e Claude, API.
+Nunca bloquear o básico: abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar dados ficam em todos os planos.
 
 ---
 
 ## Regras
 
-### OS
-- Limite visível só no Free: 10 OS por mês. Aviso na 8ª e 3 OS de folga depois da 10ª, para não travar no meio do serviço. OS antigas seguem editáveis.
-- Nos pagos, a OS é "incluída", com uso justo nos termos (nunca "ilimitado"). Teto interno contra abuso: **500 / 2.000 / 5.000 OS por mês** (Starter / Pro / Business). No teto, a pessoa fala com o suporte, sem perder o que fez.
+### OS e pessoas
+- Limite suave: aviso a 80% e 100%, um mês de folga (olha o mês anterior), nunca trava OS aberta.
 
 ### IA
-- Free: 10 usos por mês, como amostra.
-- Pagos: incluída, sem contador visível. Teto interno: **1.000 / 3.000 / 6.000 usos por mês**, com 200 por dia no Starter e no Pro (Business sem teto diário). No teto, a IA pausa sem cobrar e o resto do app segue normal.
-- Custo medido em 02/11/2026: cerca de R$ 0,03 por OS no Gemini 2.5 Flash (2,5 usos por OS) e cerca de R$ 0,004 no Claude Haiku 5.5 (estimativa pelo preço oficial). Haiku será o padrão no futuro; áudio segue no Gemini.
-- Crédito de IA comprado pela loja não pode expirar na Apple (3.1.1), por isso não há pacote de IA avulso.
+- Incluída em todos os planos, sem contador para o cliente; uso justo nos termos.
+- Teto interno contra abuso: **50 / 1.000 / 3.000 / 6.000 usos por mês**; por dia, 20 no Grátis e 200 no Starter e no Pro. No teto, a IA pausa sem cobrar.
+- Custo estimado: ~R$ 0,004 por uso no Haiku (padrão).
 
-### Nota fiscal (NFS-e direta, Emissor Nacional)
-- Notas ilimitadas; o limite é por **CNPJ emissor** (certificado A1 de cada um). Regras na issue #574.
-- Free: "Emitir nota" abre a tela do plano. Starter: o segundo CNPJ pede o Pro. Pro: o terceiro pede o Business.
-- Quem baixa de plano mantém os emitentes, mas só emite pelo padrão. O piloto é liberado por chave, sem depender do plano.
-- Esta regra substitui a decisão 13 de `docs/superpowers/specs/2026-11-05-nfse-direta-design.md` (Pro com CNPJs ilimitados).
-
-### Fora da tabela por enquanto
-- **Asaas:** sem nota pelo Asaas e sem cobrança por Pix, boleto ou cartão.
-- **Usuário extra:** sai da tabela. Compra por assento nas lojas ainda não abriu de vez, e a terceira pessoa já leva ao Pro.
-- **Várias empresas numa assinatura:** cada empresa tem a própria assinatura.
+### Nota fiscal (NFS-e direta)
+- Notas ilimitadas; o limite é por CNPJ emissor (issue #574).
 
 ### Transição
-- Empresa nova começa com 30 dias de Pro.
-- Quem já assina mantém o que tem.
+- Empresa nova nasce no Grátis, sem teste. No lugar, garantia de 7 dias com dinheiro de volta (na App Store o reembolso é decisão da Apple).
+- Quem já assina e a cortesia (até 07/12/2026) mantêm o que têm (tabela versão 1). Até a chave ligar, compra e troca de plano também gravam a versão 1.
 
 ---
 
@@ -73,6 +58,11 @@ Acima de 20 pessoas: **sob consulta**, em torno de R$ 30 por pessoa. Por enquant
 
 | De → Para | Gatilho |
 |---|---|
+| Grátis → Starter | 11ª OS no mês, nota fiscal, PDF com a sua marca, checklists próprios |
+| Starter → Pro | 51ª OS, terceira pessoa, segundo CNPJ, perfis, etapas, contratos |
+| Pro → Business | 151ª OS, sexta pessoa, terceiro CNPJ, ações em lote, ChatGPT/Claude, API |
+
+---|---|
 | Free → Starter | Passar de 10 OS no mês, IA sem limite de amostra, PDF sem marca, nota fiscal |
 | Starter → Pro | Terceira pessoa, segundo CNPJ, IA financeira, contratos |
 | Pro → Business | Sexta pessoa, terceiro CNPJ, ChatGPT e Claude, API |
@@ -115,8 +105,8 @@ Acima de 20 pessoas: **sob consulta**, em torno de R$ 30 por pessoa. Por enquant
 | ID | Plano | Preço |
 |---|---|---|
 | `praticos_starter_monthly` / `praticos_starter_annual` | Starter | R$ 59,90 / R$ 599 |
-| `praticos_pro_monthly` / `praticos_pro_annual` | Pro | R$ 119 / R$ 1.190 |
-| `praticos_business_monthly` / `praticos_business_annual` | Business | R$ 249 / R$ 2.490 |
+| `praticos_pro_monthly` / `praticos_pro_annual` | Pro | R$ 119,90 / R$ 1.199 |
+| `praticos_business_monthly` / `praticos_business_annual` | Business | R$ 249,90 / R$ 2.499 |
 
 O servidor já reconhece os IDs anuais; falta conferir se os produtos anuais existem no App Store Connect e no Google Play. Comissão das lojas: 15% no Small Business Program.
 

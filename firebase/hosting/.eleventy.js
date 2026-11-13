@@ -90,6 +90,14 @@ module.exports = function(eleventyConfig) {
     return true;
   });
 
+  // Legal sections: drop the ones whose `flag` is off, then renumber "N. Title" in order
+  eleventyConfig.addFilter("legalSections", function(sections, flags) {
+    const shown = (sections || []).filter((s) => !s.flag || (flags && flags[s.flag]));
+    return shown.map((s, i) => /^\d+\.\s/.test(s.title || '')
+      ? { ...s, title: s.title.replace(/^\d+\./, `${i + 1}.`) }
+      : s);
+  });
+
   // Format a date as YYYY-MM-DD for sitemap <lastmod>
   eleventyConfig.addFilter("dateToISO", function(date) {
     return date.toISOString().split('T')[0];

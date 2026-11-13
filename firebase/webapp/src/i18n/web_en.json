@@ -367,7 +367,7 @@
   "web.ai.batchAsk": "What to do on these orders?",
   "web.ai.batchPlaceholder": "E.g.: add a check-up to all",
   "web.ai.batchTooMany": "Pick up to {max} {order} at a time.",
-  "web.ai.batchQuota": "{count, plural, =0{No assistant requests left this month.} =1{1 assistant request left this month: pick 1 {order}.} other{# assistant requests left this month: pick up to # {order}.}}",
+  "web.ai.batchQuota": "{count, plural, =0{The assistant reached this month's limit.} other{The assistant is close to this month's limit: pick fewer {order}.}}",
   "web.ai.batchUses": "Uses {count} of the {left} requests left this month.",
   "web.ai.batchReading": "Reading each order…",
   "web.ai.batchPrepare": "Prepare",

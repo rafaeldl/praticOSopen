@@ -6,6 +6,30 @@ Os limites do plano (fotos por mês, modelos de checklist ativos, pessoas na emp
 
 Nenhum valor, preço ou plano mudou, e a compra pela web continua desligada. As regras do Firestore não mudaram: o app segue gravando direto, sem bloqueio do servidor.
 
+## Tabela nova (aprovada em 12/11/2026)
+
+O dono aprovou uma tabela nova no épico #721. Os valores abaixo **ainda não estão no código**: entram com #722 (uma tabela só para servidor, app e web) e #723 (limites novos no servidor). Até lá, vale o `PLAN_LIMITS` atual.
+
+| | Grátis | Starter | Pro | Business |
+|---|---|---|---|---|
+| OS por mês | 10 | 50 | 150 | 500 incluídas, depois +R$ 99 a cada 100 |
+| Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
+| CNPJs na nota | — | 1 | 2 | sem limite |
+| Fotos | sem limite | sem limite | sem limite | sem limite |
+| IA (teto interno, o cliente não vê) | 50/mês, 20/dia | 1.000/mês, 200/dia | 3.000/mês, 200/dia | 6.000/mês |
+| PDF sem a marca PraticOS | — | ✓ | ✓ | ✓ |
+| Checklists | só os do ramo | próprios | próprios | próprios |
+
+Regras novas que mudam a conta deste documento:
+
+- O plano é o maior entre OS por mês, pessoas e CNPJs.
+- Limite suave: aviso ao chegar perto e ao passar, o primeiro mês acima do limite ainda cria OS, e a OS nova só espera a troca de plano quando o mês anterior também passou; nunca trava uma OS já aberta. Hoje a conta é dura (`uso + o que entra <= limite`, 402).
+- IA incluída em todos os planos, inclusive no Grátis (decisão de 12/11, comentário na #729): sem contador na tela; o teto é interno e os termos falam em uso justo.
+- Fotos deixam de ter limite; o contador `photosThisMonth` passa a servir só para custo.
+- Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar ficam em todos os planos.
+
+A tabela completa, com preços e recursos de cada plano, está em [`SUBSCRIPTION.md`](SUBSCRIPTION.md#approved-table-2026-11-12-epic-721).
+
 ## Arquitetura
 
 - `firebase/functions/src/services/plan-limits.service.ts`: a conta (`checkPlanLimit`, `effectivePlan`, `effectiveLimits`, `shouldShowPdfWatermark`), a contagem de uso e a chave global.
@@ -45,7 +69,7 @@ Iguais ao app, provadas pelos casos:
 - **Plano ausente** (sem `subscription`, só `usage`, ou plano desconhecido) é Free.
 - **Vencido** (`expiresAt` no passado, cortesia ou loja) é Free da tabela atual, mesmo com limites do Pro gravados. O `status` não conta: Pro com `status: expired` e sem data continua Pro.
 - **Plano em vigor** (`planInForce`, igual nos três lados: `plan-limits.service.ts`, `firebase/webapp/src/lib/plan-limits.ts` e `Subscription.planInForce` no app): o plano enquanto `expiresAt` não passou, a versão da tabela dele e a linha da tabela em vigor; vencido, Free da tabela atual. Limites, recursos e tetos de IA leem essa linha. Casos `kind: planInForce` no contrato.
-- **Versão da tabela** (#726): a assinatura segue `subscription.tableVersion` gravado (versão desconhecida vale a atual). Sem ele, plano pago foi comprado ou dado antes da tabela atual e segue `legacyVersion` (a 1); isso vale também para a cortesia (`source: 'grace'`), que mantém o Pro antigo até acabar (decisão do dono). Free e empresa sem assinatura seguem a atual. O webhook grava a versão atual quando o plano muda ou quando a cortesia vira compra; renovar o mesmo plano não mexe. Cortesia nova nasce com a versão 1.
+- **Versão da tabela** (#726): a assinatura segue `subscription.tableVersion` gravado (versão desconhecida vale a atual). Sem ele, plano pago foi comprado ou dado antes da tabela atual e segue `legacyVersion` (a 1); isso vale também para a cortesia (`source: 'grace'`), que mantém o Pro antigo até acabar (decisão do dono). Free e empresa sem assinatura seguem a atual. O webhook e a expiração diária gravam a versão atual quando o plano muda ou quando a cortesia vira compra, mas só com `config/paidPlans.enabled` ligada; desligada, gravam a versão 1 (`tableVersionForPlanChange`), porque o app das lojas aplica os limites gravados e nada pode mudar antes de ligar. Renovar o mesmo plano não mexe. Cortesia nova nasce com a versão 1.
 - **Versão antiga vale como o mais generoso** entre ela e a atual, campo a campo (números: o maior, -1 ganha; marca d'água só se as duas têm; checklists próprios e `overageAllowed` se qualquer uma tem). Recursos: a tabela 1 não lista nenhum, o que quer dizer todos liberados, e continua sem lista; assim quem já assina não perde recurso nenhum. O gerador (`scripts/plan-table.mjs`, `mergeRows`) grava isso em `PLAN_TABLES_IN_FORCE` / `kPlanTablesInForce`, que é o que servidor, app e web leem; `PLAN_TABLES` fica com a tabela como aprovada. Exemplo: Starter da tabela 1 mantém 3 pessoas, OS sem limite, todos os recursos e IA sem teto diário, e ganha fotos e checklists sem limite e os 1.000 pedidos de IA da tabela 2.
 - **Limites gravados**: cada número fica com o mais generoso entre o gravado e a tabela (assinante nunca perde, e uma tabela melhor chega a ele); campo faltando é o da tabela; sem marca d'água ganha. `collaborators` é o nome antigo de `users`. O webhook do RevenueCat só regrava `limits` quando o plano muda: renovar o mesmo plano mantém o que estava gravado.
 - **Fim da cortesia** (push `courtesy-notice.service.ts` e aviso na Início do app): com a chave ligada, diz as OS abertas no mês contra as 10 do Free e o menor plano que cobre o uso (pessoas, OS, checklists próprios). Com a chave desligada o Free não tem limite de OS, então só diz que volta ao Free, sem número nem plano sugerido. Nunca fala de IA: os tetos de IA são internos e o cliente não vê contador.

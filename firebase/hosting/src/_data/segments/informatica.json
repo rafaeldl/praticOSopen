@@ -316,7 +316,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
+          "answer": "Pode começar grátis e usar no dia a dia. Quando a equipe ou o movimento crescer, os planos pagos estão no app, e o que cada um inclui aparece na tela Plano."
         },
         {
           "question": "Serve para redes e servidores?",
@@ -628,7 +628,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
+          "answer": "You can start free and use it day to day. When your team or workload grows, paid plans are in the app, and the Plan screen shows what each one includes."
         },
         {
           "question": "Does it work for networks and servers?",
@@ -940,7 +940,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
+          "answer": "Puedes empezar gratis y usarlo en el día a día. Cuando tu equipo o tu movimiento crezcan, los planes pagos están en la app, y la pantalla Plan muestra lo que incluye cada uno."
         },
         {
           "question": "¿Sirve para redes y servidores?",

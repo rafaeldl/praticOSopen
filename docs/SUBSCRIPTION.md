@@ -8,13 +8,51 @@
 
 ## Overview
 
-PraticOS is freemium. Registering a company gives the Free plan. Starter, Pro and Business are auto-renewable monthly subscriptions sold **only inside the app**: App Store In-App Purchase on iOS and Google Play Billing on Android, both through RevenueCat. The web sells nothing.
+PraticOS is freemium. Registering a company gives the Free plan. Starter, Pro and Business are auto-renewable monthly subscriptions (yearly too, once #727 creates it) sold **only inside the app**: App Store In-App Purchase on iOS and Google Play Billing on Android, both through RevenueCat. The web sells nothing.
 
-Prices and periods come from the stores and are shown by the RevenueCat paywall. They are never hardcoded in the app, the website or these docs.
+In the app, prices and periods come from the stores and are shown by the RevenueCat paywall; the app never hardcodes them. The approved list prices (below) appear only in these docs and on the site's pricing page, behind `flags.pricingPage`. A yearly option (pays 10 months) is part of the approved table and still has to be created in the stores (#727).
 
 ---
 
 ## Plans & Limits
+
+### Approved table (2026-11-12, epic #721)
+
+The owner approved a new table on 2026-11-12. It is being rolled out by #722-#727; until then the code still enforces the **current values** below. The site's pricing page shows this table, behind `flags.pricingPage` (see "Website" below).
+
+| | Free | Starter | Pro | Business |
+|---|---|---|---|---|
+| For | Getting started | Solo worker | Small team | Company |
+| Monthly | R$ 0 | R$ 59,90 | R$ 119 | R$ 249 |
+| Yearly (pays 10 months) | — | R$ 599 | R$ 1.190 | R$ 2.490 |
+| Work orders per month | 10 | 50 | 150 | 500 included, then +R$ 99 per 100 |
+| People | 1 | 2 | 5 | 20, then +R$ 15 each |
+| CNPJs on the service invoice (BR) | — | 1 | 2 | unlimited |
+| Photos | unlimited | unlimited | unlimited | unlimited |
+| AI | included | included | included | included |
+| AI internal ceiling (never shown to the customer) | 50/month, 20/day | 1,000/month, 200/day | 3,000/month, 200/day | 6,000/month |
+| PDF without the PraticOS brand | — | ✓ | ✓ | ✓ |
+| Checklists | the trade's only | own | own | own |
+
+Features (each plan includes the previous one):
+
+- **Free:** work orders, customers, catalog, schedule, quote by WhatsApp and link, approval by link, basic finances, data import, phone and computer, AI included (fair use).
+- **Starter:** service invoice, PDF and receipt with only the company's brand, own checklists, billing and next-charge reminder.
+- **Pro:** team roles and permissions, assignee and schedule per person, job stages, TV Mode, contracts, AI in finances, spreadsheet report.
+- **Business:** bulk actions, ChatGPT/Claude (MCP) and API.
+
+Rules:
+
+- The plan is the highest of work orders per month, people and CNPJs.
+- Soft limit: warn when close and when over, the first month over still creates work orders, and a new one waits for a plan change only when the month before was also over; an open work order never locks.
+- The everyday basics stay in every plan: open a work order, send it to the customer, approval by link, schedule and import.
+- A new company starts on Free, with no Pro trial.
+- AI is included in every plan (approved 2026-11-12, comment on #729). The customer never sees an AI counter; the ceilings above are internal, and the terms speak of fair use, never "unlimited". Measured use is about 2.5 per work order, so 50/month covers Free's 10 work orders.
+- 7-day guarantee: whoever subscribes and gives up within 7 days can ask for the money back. On the web and Google Play we refund; on the App Store Apple decides (see "7-day guarantee and refunds"). The terms clause and the FAQ answer show only with `flags.pricingPage`, like the pricing page.
+- Current subscribers and the courtesy keep what they have.
+- App, web and server show and enforce the same thing, from a single table (#722).
+
+### Current values in code
 
 | Feature | Free | Starter | Pro | Business |
 |---------|------|---------|-----|----------|
@@ -23,7 +61,8 @@ Prices and periods come from the stores and are shown by the RevenueCat paywall.
 | Users (members + pending invites) | 1 | 3 | 5 | Unlimited (-1) |
 | PDF watermark | Yes | No | No | No |
 
-Defaults live in `SubscriptionLimits.defaults` (`lib/models/subscription.dart`) and match the server.
+Defaults live in `SubscriptionLimits.defaults` (`lib/models/subscription.dart`) and match the server. Replace this table when #722/#723 ship.
+
 
 ---
 
@@ -240,8 +279,40 @@ Rules:
 - Registration is free and gives the Free plan. The Free limits are lifted only by the IAP subscription.
 - The App Review notes (`ios/fastlane/Deliverfile` and `ios/fastlane/metadata/review_information/notes.txt`) say the app is freemium, plans are sold through IAP, and the paywall is at More > Subscription > View plans with the demo account. Keep both files identical and true. The demo account must be owner/admin of its company.
 - Resolution Center reply for the IAP submission: `ios/fastlane/app_review_reply_iap.txt`.
-- **The website shows no prices.** It says "Start free. Paid plans available in the app." (pt/en/es) and never shows prices, plan limits or upgrade CTAs. `/pricing*.html` keeps redirecting to the home page (`firebase/firebase.json`).
+- **Website.** While `flags.pricingPage` (`firebase/hosting/src/_data/site.json`) is off, the site shows no prices table: it says "Start free. Paid plans available in the app." (pt/en/es). The pricing page (`precos.html`, `precos-en.html`, `precos-es.html`, data in `_data/pricing.json`) is built only with the flag on. Turn it on only after the new limits are in the app on both stores. The page has no purchase link: every button goes to the app download, and subscribing stays inside the app. The old `/pricing*.html` URLs keep redirecting to the home page (`firebase/firebase.json`).
 - Before each submission: the three subscriptions are attached to the version, each with its review screenshot.
+
+---
+
+## 7-day guarantee and refunds
+
+Rule (#728): whoever subscribes to a paid plan and gives up within 7 days of subscribing gets the full amount back, no reason needed. It is also the Brazilian consumer right of withdrawal (CDC art. 49) for purchases made online. The customer-facing text is in the terms of use (`firebase/hosting/src/_data/legal.json`, section "Planos pagos e garantia de 7 dias", pt/en/es) and in the FAQ ("Assinei e desisti...").
+
+After the 7 days there is no partial refund: cancelling keeps the plan until the end of the paid period and stops the renewal.
+
+### How to refund, by store
+
+The `appUserID` in RevenueCat is the **company id**. Ask the customer for the account email, find the company in Firestore (`companies/{id}`), and check `subscription.store` and the purchase date (RevenueCat customer page, "Transactions").
+
+**Google Play (we refund):**
+
+1. Open the customer in the RevenueCat dashboard (search by the company id).
+2. Check the first purchase is at most 7 days old.
+3. In the transaction, choose **Refund**. For Google Play subscriptions RevenueCat refunds and revokes access. The alternative is the Play Console: Order management, search the order id (`GPA.…`), **Refund**, with the option to remove the entitlement.
+4. RevenueCat sends the webhook; `revenuecatWebhook` reads the subscriber again and, with no active entitlement, writes `plan: free`. Check `companies/{id}.subscription.plan` after a minute.
+5. Answer the customer: the money goes back to the payment method of their Google account, in Google's timing.
+
+**App Store (Apple decides):**
+
+1. We cannot refund an App Store purchase. Reply with the path: [reportaproblem.apple.com](https://reportaproblem.apple.com), sign in with the Apple ID, choose "Request a refund", pick the PraticOS subscription and the reason.
+2. If Apple approves, RevenueCat receives the refund (`CANCELLATION` with reason `CUSTOMER_SUPPORT`) and the webhook moves the company to Free on its own.
+3. If Apple refuses, there is nothing else we can do in the store. Write down the case; do not pay the customer outside the store (App Review 3.1.1).
+
+**Web (our own billing, #664):**
+
+Not live yet. When the web purchase ships: refund in the payment provider (full amount, same payment method), cancel the renewal and move the company to Free in the same step. Add the exact steps here with #664.
+
+In every case nothing is deleted: the company keeps its work orders, customers and photos on Free.
 
 ---
 

@@ -17,14 +17,26 @@ import {
   PLAN_LIMITS,
   addExtras,
   getNextMonthReset,
-  getPlanLimits,
   isGraceActive,
+  limitsOfRow,
+  planRow,
   resolveSubscriptionState,
   sameExtras,
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
-import { PLAN_TABLE_CURRENT_VERSION } from './plan-table.generated';
+import { PLAN_TABLE_CURRENT_VERSION, PLAN_TABLE_LEGACY_VERSION } from './plan-table.generated';
+import { isPaidPlansEnabled } from './plan-limits.service';
+
+/**
+ * Table a plan change is written with: the current one only once the plan
+ * switch (`config/paidPlans.enabled`) is on. Until then a purchase keeps the
+ * legacy table, so nothing changes for customers (the store app reads the
+ * stored limits) before the switch is turned on.
+ */
+export async function tableVersionForPlanChange(): Promise<string> {
+  return (await isPaidPlansEnabled()) ? PLAN_TABLE_CURRENT_VERSION : PLAN_TABLE_LEGACY_VERSION;
+}
 
 export {
   PLAN_LIMITS,
@@ -169,6 +181,7 @@ export function buildPlanUpdate(
   state: ResolvedSubscriptionState,
   now: Date,
   current?: Subscription,
+  tableVersion: string = PLAN_TABLE_CURRENT_VERSION,
 ): FieldUpdates {
   const nowIso = now.toISOString();
   // Limits and the table version are written only when the plan changes (or
@@ -183,13 +196,13 @@ export function buildPlanUpdate(
   // ones added, keeping whatever else was stored.
   const extrasChanged = !sameExtras(current?.extras, state.extras);
   let limits: SubscriptionLimits | undefined;
-  if (!samePlan) limits = addExtras(getPlanLimits(state.plan), state.extras);
+  if (!samePlan) limits = addExtras(limitsOfRow(planRow(state.plan, tableVersion)), state.extras);
   else if (extrasChanged) limits = addExtras(addExtras(current!.limits, current!.extras ?? NO_EXTRAS, -1), state.extras);
   const hasExtras = state.extras.users > 0 || state.extras.ordersPerMonth > 0;
   return {
     'subscription.plan': state.plan,
     'subscription.status': state.status,
-    ...(samePlan ? {} : { 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
+    ...(samePlan ? {} : { 'subscription.tableVersion': tableVersion }),
     ...(limits ? { 'subscription.limits': limits } : {}),
     ...(hasExtras || current?.extras !== undefined ? { 'subscription.extras': { ...state.extras } } : {}),
     'subscription.expiresAt': state.expiresAt,
@@ -221,7 +234,7 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
     return 'grace_kept';
   }
 
-  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current));
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current, await tableVersionForPlanChange()));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
 }
@@ -251,6 +264,7 @@ export async function expireSubscriptions(
     return typeof expiresAt === 'string' && Date.parse(expiresAt) <= now.getTime();
   });
 
+  const tableVersion = due.length > 0 ? await tableVersionForPlanChange() : PLAN_TABLE_CURRENT_VERSION;
   let expired = 0;
   let errors = 0;
   const failedIds: string[] = [];
@@ -261,7 +275,7 @@ export async function expireSubscriptions(
       try {
         const subscriber = await deps.fetchSubscriber(doc.id);
         const state = resolveSubscriptionState(subscriber, now);
-        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
+        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now, undefined, tableVersion));
         if (state.plan === 'free') expired++;
       } catch (error) {
         errors++;

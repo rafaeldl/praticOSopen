@@ -10,25 +10,28 @@ layout: layouts/base.njk
     <div class="wrap">
         <h1>{{ legalData.title }} {{ legalData.titleHighlight }}</h1>
         <p class="lede">{{ legalData.subtitle }}</p>
-        <p class="page-head__meta">{{ legalData.lastUpdated }}</p>
+        {% set lastUpdated = legalData.lastUpdated %}{% if legalData.lastUpdatedFlagged and (legalData.lastUpdatedFlagged | flagShown(site.flags)) %}{% set lastUpdated = legalData.lastUpdatedFlagged.text %}{% endif %}
+        <p class="page-head__meta">{{ lastUpdated }}</p>
     </div>
 </header>
 
+{# Sections with `flag` show only when site.flags turns it on; numbered titles are renumbered in order #}
+{% set shownSections = legalData.sections | legalSections(site.flags) %}
 <div class="doc">
     <div class="wrap doc__grid">
         <nav class="toc" aria-labelledby="toc-label">
             <p class="label" id="toc-label">{{ tocLabel }}</p>
             <ol>
-                {% for section in legalData.sections %}
-                <li><a href="#{{ section.title | slugify }}">{{ section.title }}</a></li>
+                {% for section in shownSections %}{% set title = section.title %}
+                <li><a href="#{{ title | slugify }}">{{ title }}</a></li>
                 {% endfor %}
             </ol>
         </nav>
 
         <article class="doc__body">
-            {% for section in legalData.sections %}
-            <section class="doc__section" aria-labelledby="{{ section.title | slugify }}">
-                <h2 id="{{ section.title | slugify }}">{{ section.title }}</h2>
+            {% for section in shownSections %}{% set title = section.title %}
+            <section class="doc__section" aria-labelledby="{{ title | slugify }}">
+                <h2 id="{{ title | slugify }}">{{ title }}</h2>
                 {% for para in section.paragraphs %}
                 <p>{{ para | safe }}</p>
                 {% endfor %}

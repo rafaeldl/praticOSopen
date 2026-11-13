@@ -10,6 +10,8 @@ Uma empresa tem um ou mais **emitentes fiscais** (`companies/{cid}/fiscalEmitter
 
 Decisão de 2026-11-08: a nota vem com os planos pagos (Starter, Pro, Business) e com a cortesia (`subscription.source: 'grace'`), só para empresa do Brasil (`country` `BR` ou vazio). O Free não tem nota. Vale o plano em vigor (`effectivePlan` de `services/plan-limits.service.ts`: plano da loja, plano pago antigo sem `source` e cortesia; vencido é Free). Não depende de `config/paidPlans.enabled`.
 
+Tabela nova (12/11/2026, épico #721, ainda não no código): a nota continua nos planos pagos e passa a ter limite de **CNPJs emitentes** por plano: Starter 1, Pro 2, Business sem limite. Não há custo por nota; o volume segue o limite de OS por mês do plano (50, 150 e 500). O limite de emitentes entra com #723/#724 em `fiscalEmitters`.
+
 O app, o web e as rotas continuam lendo só `settings/payments.nfseDirectEnabled`. Quem liga e desliga essa chave é `services/nfse/nfse-access.service.ts`, que grava junto a origem:
 
 | `nfseDirectSource` | Significado |

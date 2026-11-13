@@ -7,7 +7,7 @@
         "intro": "O PraticOS emite a nota fiscal de serviço pelo Emissor Nacional do governo, direto da OS. Cliente, serviço e valor vêm da OS, e a nota fica guardada junto dela. Desde 1º de novembro de 2026, empresa do Simples emite a nota de serviço por esse emissor.",
         "infoCard": {
           "title": "Nos planos pagos",
-          "content": "A nota está em todos os planos pagos, a partir do Starter, sem limite e sem custo por nota. Veja <a href=\"../funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>. Quem prepara e emite é o dono ou o administrador. O gerente também pode emitir e cancelar."
+          "content": "A nota está em todos os planos pagos, a partir do Starter, sem custo por nota. Veja <a href=\"../funcionalidades/nota-fiscal.html\">como funciona a nota fiscal</a>. Quem prepara e emite é o dono ou o administrador. O gerente também pode emitir e cancelar."
         }
       },
       {
