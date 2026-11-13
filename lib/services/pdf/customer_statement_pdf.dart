@@ -17,10 +17,18 @@ class StatementItem {
     required this.name,
     required this.quantity,
     required this.value,
+    this.description,
   });
 
   final String name;
+
+  /// The note typed on the item ("para-choque dianteiro"), when it adds to
+  /// [name].
+  final String? description;
   final int quantity;
+
+  /// "Pintura - para-choque dianteiro", like the order PDF.
+  String get label => description == null ? name : '$name - $description';
 
   /// Line total (quantity × unit value).
   final double value;
@@ -50,6 +58,7 @@ class StatementOrder {
             (s.value ?? 0) > 0)
           StatementItem(
             name: (s.service?.name ?? s.description ?? '').trim(),
+            description: _itemNote(s.service?.name, s.description),
             quantity: 1,
             value: s.value ?? 0,
           ),
@@ -58,6 +67,7 @@ class StatementOrder {
             (p.total ?? p.value ?? 0) > 0)
           StatementItem(
             name: (p.product?.name ?? p.description ?? '').trim(),
+            description: _itemNote(p.product?.name, p.description),
             quantity: p.quantity ?? 1,
             value: p.total ?? (p.value ?? 0) * (p.quantity ?? 1),
           ),
@@ -91,6 +101,14 @@ class StatementOrder {
   final double total;
   final double paid;
   final double open;
+}
+
+/// The item's note when it has a catalog name and the note says something
+/// else (without a catalog name the note already is the name).
+String? _itemNote(String? name, String? description) {
+  final n = name?.trim() ?? '';
+  final d = description?.trim() ?? '';
+  return n.isEmpty || d.isEmpty || d == n ? null : d;
 }
 
 /// Devices of [order] with name and serial ("Fiat Uno · ABC-1234"), or its
@@ -254,7 +272,7 @@ CustomerStatementContent buildStatementPdfContent(
           rows: [
             for (final item in order.items)
               [
-                item.name,
+                item.label,
                 '${item.quantity}',
                 format.formatCurrency(item.value),
               ],

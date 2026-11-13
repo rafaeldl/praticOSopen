@@ -5,7 +5,7 @@
 // and the total owed. Pure: texts come resolved, so vitest covers it.
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFPage, type RGB } from 'pdf-lib'
 import { pdfSafe, wrap, type PdfCompany } from './order-pdf'
-import { statementTotal, type StatementOrder } from '@/lib/receive/statement'
+import { statementItemLabel, statementTotal, type StatementOrder } from '@/lib/receive/statement'
 
 export interface StatementPdfTexts {
   title: string
@@ -140,7 +140,7 @@ export async function buildStatementPdf(orders: readonly StatementOrder[], compa
     y += 4
     if (order.items.length) {
       row([texts.itemColumn, texts.quantityColumn, texts.valueColumn], true, C.bgLighter)
-      for (const item of order.items) row([item.name, String(item.quantity), texts.money(item.value)])
+      for (const item of order.items) row([statementItemLabel(item), String(item.quantity), texts.money(item.value)])
     }
     y += 4
     if (order.discount > 0) {
