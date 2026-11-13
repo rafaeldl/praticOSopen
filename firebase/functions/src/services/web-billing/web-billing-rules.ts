@@ -48,6 +48,8 @@ export interface WebCheckoutConfig {
   enabled: boolean;
   /** Companies that can buy while the master switch is off (owner's own test). */
   companyIds: string[];
+  /** Page the Asaas invoice sends the customer back to after paying; null = no return. */
+  returnUrl: string | null;
   /** Yearly only after the yearly products exist in the App Store and Google Play (parity). */
   yearlyEnabled: boolean;
   /** Payment methods offered per cycle. */
@@ -153,6 +155,12 @@ export function invoiceSettingsFor(invoice: WebInvoiceConfig): AsaasSubscription
   });
 }
 
+function parseReturnUrl(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const url = raw.trim();
+  return /^https:\/\/[^\s]+$/.test(url) && url.length <= 255 ? url : null;
+}
+
 export function parseWebCheckoutConfig(data: Record<string, unknown> | null | undefined): WebCheckoutConfig {
   const pick = (cycle: WebCycle): WebBillingType[] => {
     const raw = (data?.billingTypes as Record<string, unknown> | undefined)?.[cycle];
@@ -165,6 +173,7 @@ export function parseWebCheckoutConfig(data: Record<string, unknown> | null | un
       ? [...new Set((data?.companyIds as unknown[]).filter((id): id is string => typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id.trim())).map((id) => id.trim()))]
       : [],
     yearlyEnabled: data?.yearlyEnabled === true,
+    returnUrl: parseReturnUrl(data?.returnUrl),
     billingTypes: { monthly: pick('monthly'), yearly: pick('yearly') },
     invoice: parseInvoiceConfig(data?.invoice),
     invoiceSource: data?.invoiceSource === 'praticos' ? 'praticos' : 'asaas',
@@ -233,7 +242,14 @@ export interface WebBillingRecord {
   /** When 'praticos': the issuing company (and emitter) chosen at checkout. */
   invoiceIssuer?: WebInvoiceIssuer | null;
   /** Recipient (tomador) of the notas, as typed at checkout. */
-  invoiceRecipient?: { name: string; taxId: string; email: string | null } | null;
+  invoiceRecipient?: {
+    name: string;
+    taxId: string;
+    email: string | null;
+    /** Kept to fill the form again on the next checkout. */
+    postalCode?: string | null;
+    addressNumber?: string | null;
+  } | null;
   createdAt: string;
   createdBy: string;
   /** First confirmed payment: starts the 7-day guarantee. */

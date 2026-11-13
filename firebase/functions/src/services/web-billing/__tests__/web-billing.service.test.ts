@@ -86,7 +86,7 @@ describe('billingOverview', () => {
   it('no offer while the switch is off', async () => {
     fake.seed('config/webCheckout', { enabled: false });
     seedCompany();
-    await expect(billingOverview('c1', NOW)).resolves.toEqual({ enabled: false, offer: null, block: null, subscription: null });
+    await expect(billingOverview('c1', NOW)).resolves.toEqual({ enabled: false, offer: null, block: null, subscription: null, billingInfo: null });
   });
 
   it('a store subscriber sees the block, a web subscriber the subscription', async () => {
@@ -108,6 +108,20 @@ describe('billingOverview', () => {
       checkoutUrl: null,
       refundEligible: true,
     });
+  });
+
+  it('returns the billing data typed at the last checkout to fill the form again', async () => {
+    seedCompany();
+    seedRecord({ status: 'refunded', invoiceRecipient: { name: 'Oficina', taxId: '11222333000181', email: 'x@example.com', postalCode: '01001000', addressNumber: '12' } });
+    expect((await billingOverview('c1', NOW)).billingInfo).toEqual({
+      name: 'Oficina', taxId: '11222333000181', email: 'x@example.com', postalCode: '01001000', addressNumber: '12',
+    });
+  });
+
+  it('checkout keeps the CEP and number for the next time', async () => {
+    seedCompany();
+    await startCheckout('c1', 'u1', INPUT, deps());
+    expect((await billingOverview('c1', NOW)).billingInfo).toMatchObject({ postalCode: INPUT.postalCode.replace(/\D/g, ''), addressNumber: INPUT.addressNumber.trim() });
   });
 });
 
@@ -211,6 +225,16 @@ describe('startCheckout', () => {
     const d = deps();
     await startCheckout('c1', 'u1', { ...INPUT, plan: 'business', cycle: 'yearly', billingType: 'PIX' }, d);
     expect(d.asaas.createSubscription).toHaveBeenCalledWith(expect.objectContaining({ value: 2499, cycle: 'YEARLY', billingType: 'PIX' }));
+  });
+
+  it('sends the customer back to the web after paying when returnUrl is set', async () => {
+    fake.seed('config/webCheckout', { enabled: true, returnUrl: 'https://praticos.app/web/settings/plan?paid=1' });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscription).toHaveBeenCalledWith(
+      expect.objectContaining({ callback: { successUrl: 'https://praticos.app/web/settings/plan?paid=1', autoRedirect: true } }),
+    );
   });
 
   it('reuses a pending checkout with the same choice, replaces a different one', async () => {

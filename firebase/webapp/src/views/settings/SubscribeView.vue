@@ -116,6 +116,14 @@ async function load() {
       plan.value = billing.subscription.plan
       cycle.value = billing.offer?.cycles.includes(billing.subscription.cycle) ? billing.subscription.cycle : 'monthly'
     }
+    const last = billing.billingInfo
+    if (last) {
+      if (!name.value) name.value = last.name
+      if (!taxId.value) taxId.value = last.taxId
+      if (!email.value) email.value = last.email ?? ''
+      if (!postalCode.value) postalCode.value = last.postalCode ?? ''
+      if (!addressNumber.value) addressNumber.value = last.addressNumber ?? ''
+    }
     if (company && !name.value) name.value = company.name ?? ''
     if (company && !email.value) email.value = company.email ?? ''
   } catch (error) {

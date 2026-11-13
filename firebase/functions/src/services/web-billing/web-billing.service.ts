@@ -122,6 +122,8 @@ export interface WebBillingView {
   offer: ReturnType<typeof webOffer> | null;
   /** Why buying is not possible now, or null. */
   block: ReturnType<typeof checkoutBlock>;
+  /** Billing data typed at the last checkout, to fill the form again. */
+  billingInfo: { name: string; taxId: string; email: string | null; postalCode: string | null; addressNumber: string | null } | null;
   subscription: {
     status: WebBillingRecord['status'];
     plan: WebPlan;
@@ -148,6 +150,15 @@ export async function billingOverview(companyId: string, now: Date = new Date())
     enabled: on,
     offer: on ? webOffer(config) : null,
     block: checkoutBlock(subscription, record, now, country),
+    billingInfo: record?.invoiceRecipient
+      ? {
+          name: record.invoiceRecipient.name,
+          taxId: record.invoiceRecipient.taxId,
+          email: record.invoiceRecipient.email ?? null,
+          postalCode: record.invoiceRecipient.postalCode ?? null,
+          addressNumber: record.invoiceRecipient.addressNumber ?? null,
+        }
+      : null,
     subscription: record
       ? {
           status: record.status,
@@ -264,6 +275,7 @@ export async function startCheckout(
       cycle: input.cycle === 'yearly' ? 'YEARLY' : 'MONTHLY',
       description: `PraticOS ${PLAN_LABEL[input.plan]} (${CYCLE_LABEL[input.cycle]})`,
       externalReference: companyId,
+      ...(config.returnUrl ? { callback: { successUrl: config.returnUrl, autoRedirect: true } } : {}),
     });
     const payments = await deps.asaas.listSubscriptionPayments(created.id);
     const first = payments.find((payment) => payment.invoiceUrl);
@@ -307,7 +319,7 @@ export async function startCheckout(
       invoiceSettings,
       invoiceSource: issuer ? 'praticos' : 'asaas',
       invoiceIssuer: issuer,
-      invoiceRecipient: { name: input.name.trim(), taxId, email: input.email.trim() || null },
+      invoiceRecipient: { name: input.name.trim(), taxId, email: input.email.trim() || null, postalCode, addressNumber },
       createdAt: nowIso,
       createdBy: userId,
       updatedAt: nowIso,

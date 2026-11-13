@@ -37,6 +37,14 @@ export interface WebBillingView {
   offer: WebOffer | null
   block: CheckoutBlock
   subscription: WebSubscription | null
+  /** Billing data typed at the last checkout (older servers omit it). */
+  billingInfo?: {
+    name: string
+    taxId: string
+    email: string | null
+    postalCode: string | null
+    addressNumber: string | null
+  } | null
 }
 
 export interface CheckoutBody {
