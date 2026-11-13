@@ -132,6 +132,24 @@ void main() {
     expect(find.byKey(const ValueKey('plan_notice_ordersNear')), findsNothing);
   });
 
+  testWidgets('a Starter bought on table 1 keeps its 3 people and orders without limit (#726)', (tester) async {
+    final now = DateTime.now();
+    final old = Subscription(
+      plan: SubscriptionPlan.starter,
+      source: SubscriptionSource.store,
+      expiresAt: now.add(const Duration(days: 30)),
+      usage: SubscriptionUsage(usersActive: 2)
+        ..ordersMonth = orderMonthKey(now)
+        ..ordersThisMonth = 80
+        ..ordersLastMonth = 70,
+    );
+    await _pump(tester, old, taxIds: 1);
+    expect(find.text('2 de 3'), findsOneWidget);
+    expect(find.text('80'), findsOneWidget);
+    expect(find.byKey(const ValueKey('plan_notice_ordersBlocked')), findsNothing);
+    expect(find.byKey(const ValueKey('plan_notice_peopleAtLimit')), findsNothing);
+  });
+
   testWidgets('a full Starter team says so; the row opens Equipe', (tester) async {
     var opened = 0;
     await _pump(tester, _sub(SubscriptionPlan.starter, users: 2), onOpenTeam: () => opened++);

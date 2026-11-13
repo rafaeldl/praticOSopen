@@ -685,6 +685,62 @@
           ]
         }
       }
+    },
+    {
+      "id": "old-starter-keeps-3-people",
+      "given": {
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "orders": {
+          "thisMonth": 80,
+          "lastMonth": 70
+        },
+        "people": 3,
+        "taxIds": 1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 80,
+            "limit": -1,
+            "level": "unlimited"
+          },
+          {
+            "resource": "people",
+            "used": 3,
+            "limit": 3,
+            "level": "atLimit"
+          },
+          {
+            "resource": "taxIds",
+            "used": 1,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": {
+          "kind": "peopleAtLimit",
+          "resource": "people"
+        },
+        "next": {
+          "plan": "pro",
+          "features": [
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        }
+      }
     }
   ]
 }
