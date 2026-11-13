@@ -44,7 +44,7 @@ function seed(status: string) {
     plan: 'pro',
     cycle: 'monthly',
     billingType: 'CREDIT_CARD',
-    value: 119,
+    value: 119.9,
     environment: 'sandbox',
     asaasCustomerId: 'cus_1',
     asaasSubscriptionId: 'sub_1',

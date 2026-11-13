@@ -109,10 +109,10 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
     await shot(page, 'sandbox-2-fatura-asaas')
 
     const pending = await record()
-    expect(pending).toMatchObject({ status: 'pending', plan: 'pro', cycle: 'monthly', billingType: 'PIX', environment: 'sandbox', value: 119 })
+    expect(pending).toMatchObject({ status: 'pending', plan: 'pro', cycle: 'monthly', billingType: 'PIX', environment: 'sandbox', value: 119.9 })
     const subscriptionId = pending.asaasSubscriptionId as string
     const subscription = await asaas('GET', `/subscriptions/${subscriptionId}`)
-    expect(subscription).toMatchObject({ value: 119, cycle: 'MONTHLY', billingType: 'PIX', externalReference: COMPANY_W })
+    expect(subscription).toMatchObject({ value: 119.9, cycle: 'MONTHLY', billingType: 'PIX', externalReference: COMPANY_W })
 
     // 2. Pay in the sandbox; the webhook grants Pro (promotional) and the sync writes store 'web'.
     const [first] = (await asaas('GET', `/subscriptions/${subscriptionId}/payments`)).data

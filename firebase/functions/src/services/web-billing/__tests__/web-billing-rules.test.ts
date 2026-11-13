@@ -24,7 +24,7 @@ const RECORD: WebBillingRecord = {
   plan: 'pro',
   cycle: 'monthly',
   billingType: 'CREDIT_CARD',
-  value: 119,
+  value: 119.9,
   environment: 'sandbox',
   asaasCustomerId: 'cus_1',
   asaasSubscriptionId: 'sub_1',
@@ -86,12 +86,12 @@ describe('config and offer', () => {
   it('yearly is offered only when yearlyEnabled (store parity)', () => {
     const monthlyOnly = webOffer(parseWebCheckoutConfig({ enabled: true }));
     expect(monthlyOnly.cycles).toEqual(['monthly']);
-    expect(monthlyOnly.plans.find((p) => p.plan === 'pro')?.prices).toEqual({ monthly: 119 });
+    expect(monthlyOnly.plans.find((p) => p.plan === 'pro')?.prices).toEqual({ monthly: 119.9 });
     const both = webOffer(parseWebCheckoutConfig({ enabled: true, yearlyEnabled: true }));
     expect(both.plans.map((p) => p.prices)).toEqual([
       { monthly: 59.9, yearly: 599 },
-      { monthly: 119, yearly: 1190 },
-      { monthly: 249, yearly: 2490 },
+      { monthly: 119.9, yearly: 1199 },
+      { monthly: 249.9, yearly: 2499 },
     ]);
     expect(both.guaranteeDays).toBe(7);
   });
@@ -157,7 +157,7 @@ describe('decideBillingAction', () => {
   const paid = (event: string, extra: Record<string, unknown> = {}) => ({
     id: 'evt_1',
     event,
-    payment: { id: 'pay_1', subscription: 'sub_1', value: 119, dueDate: '2026-11-13', ...extra },
+    payment: { id: 'pay_1', subscription: 'sub_1', value: 119.9, dueDate: '2026-11-13', ...extra },
   });
 
   it('confirmed and received grant until next due date + grace', () => {
@@ -168,7 +168,7 @@ describe('decideBillingAction', () => {
         dueDate: '2026-11-13',
         nextDueDate: '2026-12-13',
         endMs: Date.parse('2026-12-19T03:00:00.000Z'),
-        value: 119,
+        value: 119.9,
       });
     }
   });
@@ -179,7 +179,7 @@ describe('decideBillingAction', () => {
   });
 
   it('never grants a refunded payment again', () => {
-    const record = { ...RECORD, payments: { pay_1: { status: 'refunded' as const, value: 119, dueDate: '2026-11-13' } } };
+    const record = { ...RECORD, payments: { pay_1: { status: 'refunded' as const, value: 119.9, dueDate: '2026-11-13' } } };
     expect(decideBillingAction(paid('PAYMENT_RECEIVED'), record).kind).toBe('none');
     expect(decideBillingAction(paid('PAYMENT_RECEIVED'), { ...RECORD, status: 'refunded' }).kind).toBe('none');
   });

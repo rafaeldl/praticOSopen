@@ -61,7 +61,7 @@ function seedRecord(partial: Partial<WebBillingRecord> = {}) {
     plan: 'pro',
     cycle: 'monthly',
     billingType: 'CREDIT_CARD',
-    value: 119,
+    value: 119.9,
     environment: 'sandbox',
     asaasCustomerId: 'cus_1',
     asaasSubscriptionId: 'sub_1',
@@ -98,7 +98,7 @@ describe('billingOverview', () => {
       plan: 'pro',
       cycle: 'monthly',
       billingType: 'CREDIT_CARD',
-      value: 119,
+      value: 119.9,
       paidUntil: '2026-12-18T03:00:00.000Z',
       nextDueDate: '2026-12-12',
       checkoutUrl: null,
@@ -152,7 +152,7 @@ describe('startCheckout', () => {
     expect(d.asaas.createSubscription).toHaveBeenCalledWith({
       customer: 'cus_1',
       billingType: 'CREDIT_CARD',
-      value: 119,
+      value: 119.9,
       nextDueDate: '2026-11-13',
       cycle: 'MONTHLY',
       description: 'PraticOS Pro (mensal)',
@@ -167,7 +167,7 @@ describe('startCheckout', () => {
     seedCompany();
     const d = deps();
     await startCheckout('c1', 'u1', { ...INPUT, plan: 'business', cycle: 'yearly', billingType: 'PIX' }, d);
-    expect(d.asaas.createSubscription).toHaveBeenCalledWith(expect.objectContaining({ value: 2490, cycle: 'YEARLY', billingType: 'PIX' }));
+    expect(d.asaas.createSubscription).toHaveBeenCalledWith(expect.objectContaining({ value: 2499, cycle: 'YEARLY', billingType: 'PIX' }));
   });
 
   it('reuses a pending checkout with the same choice, replaces a different one', async () => {
@@ -194,7 +194,7 @@ describe('startCheckout', () => {
 });
 
 describe('handleBillingEvent', () => {
-  const confirmed = { id: 'evt_1', event: 'PAYMENT_CONFIRMED', payment: { id: 'pay_1', subscription: 'sub_1', value: 119, dueDate: '2026-11-13' } };
+  const confirmed = { id: 'evt_1', event: 'PAYMENT_CONFIRMED', payment: { id: 'pay_1', subscription: 'sub_1', value: 119.9, dueDate: '2026-11-13' } };
 
   it('first payment: active, guarantee starts, plan granted until next due + 5 days, synced', async () => {
     seedCompany();
@@ -208,7 +208,7 @@ describe('handleBillingEvent', () => {
       firstPaidAt: NOW.toISOString(),
       paidUntil: '2026-12-19T03:00:00.000Z',
       nextDueDate: '2026-12-13',
-      payments: { pay_1: { status: 'paid', value: 119, dueDate: '2026-11-13' } },
+      payments: { pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-13' } },
     });
   });
 
@@ -240,7 +240,7 @@ describe('handleBillingEvent', () => {
 
   it('refund revokes now and stops the recurrence', async () => {
     seedCompany();
-    seedRecord({ firstPaidAt: '2026-11-12T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119, dueDate: '2026-11-13' } } });
+    seedRecord({ firstPaidAt: '2026-11-12T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-13' } } });
     const d = deps();
     await handleBillingEvent({ ...confirmed, id: 'evt_r', event: 'PAYMENT_REFUNDED' }, d);
     expect(d.revoke).toHaveBeenCalledWith('c1', 'pro');
@@ -287,7 +287,7 @@ describe('cancelWebSubscription', () => {
 
   it('refund within 7 days: money back, plan revoked now', async () => {
     seedCompany();
-    seedRecord({ firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119, dueDate: '2026-11-10' } } });
+    seedRecord({ firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-10' } } });
     const d = deps();
     await expect(cancelWebSubscription('c1', { refund: true }, d)).resolves.toEqual({ status: 'refunded' });
     expect(d.asaas.refundPayment).toHaveBeenCalledWith('pay_1', expect.any(String));
@@ -300,8 +300,8 @@ describe('cancelWebSubscription', () => {
     seedRecord({
       firstPaidAt: '2026-11-10T00:00:00Z',
       payments: {
-        pay_1: { status: 'paid', value: 119, dueDate: '2026-11-10' },
-        pay_2: { status: 'paid', value: 119, dueDate: '2026-12-10' },
+        pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-10' },
+        pay_2: { status: 'paid', value: 119.9, dueDate: '2026-12-10' },
       },
     });
     const failing = deps({
@@ -323,7 +323,7 @@ describe('cancelWebSubscription', () => {
 
   it('refund of a charge Asaas no longer has (404) goes on', async () => {
     seedCompany();
-    seedRecord({ firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119, dueDate: '2026-11-10' } } });
+    seedRecord({ firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-10' } } });
     const d = deps({ refundPayment: jest.fn().mockRejectedValue(Object.assign(new Error('gone'), { status: 404 })) });
     await expect(cancelWebSubscription('c1', { refund: true }, d)).resolves.toEqual({ status: 'refunded' });
     expect(recordOf()).toMatchObject({ status: 'refunded', payments: { pay_1: { status: 'refunded' } } });
@@ -331,7 +331,7 @@ describe('cancelWebSubscription', () => {
 
   it('refund also right after a plain cancel, while the 7 days last', async () => {
     seedCompany();
-    seedRecord({ status: 'cancelled', firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119, dueDate: '2026-11-10' } } });
+    seedRecord({ status: 'cancelled', firstPaidAt: '2026-11-10T00:00:00Z', payments: { pay_1: { status: 'paid', value: 119.9, dueDate: '2026-11-10' } } });
     const d = deps();
     await expect(cancelWebSubscription('c1', { refund: true }, d)).resolves.toEqual({ status: 'refunded' });
     expect(d.asaas.deleteSubscription).not.toHaveBeenCalled();

@@ -24,8 +24,8 @@ export const WEB_BILLING_TYPES: readonly WebBillingType[] = ['CREDIT_CARD', 'PIX
  */
 export const WEB_PRICES: Readonly<Record<WebPlan, Record<WebCycle, number>>> = {
   starter: { monthly: 59.9, yearly: 599 },
-  pro: { monthly: 119, yearly: 1190 },
-  business: { monthly: 249, yearly: 2490 },
+  pro: { monthly: 119.9, yearly: 1199 },
+  business: { monthly: 249.9, yearly: 2499 },
 };
 
 /** Days the plan stays on after the paid period, so a late renewal does not drop it. */

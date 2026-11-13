@@ -17,7 +17,7 @@ import {
 import { codeMessageKey } from '../src/lib/api'
 
 const OFFER = {
-  plans: [{ plan: 'pro' as const, prices: { monthly: 119 } }],
+  plans: [{ plan: 'pro' as const, prices: { monthly: 119.9 } }],
   cycles: ['monthly' as const],
   billingTypes: { monthly: ['CREDIT_CARD' as const] },
   guaranteeDays: 7,
@@ -28,7 +28,7 @@ const SUB = {
   plan: 'pro' as const,
   cycle: 'monthly' as const,
   billingType: 'CREDIT_CARD' as const,
-  value: 119,
+  value: 119.9,
   paidUntil: '2026-12-19T03:00:00.000Z',
   nextDueDate: '2026-12-13',
   checkoutUrl: null,
@@ -78,8 +78,8 @@ describe('checkout form', () => {
 
   test('yearly price per month, in cents', () => {
     expect(monthlyEquivalent(599)).toBe(49.92)
-    expect(monthlyEquivalent(1190)).toBe(99.17)
-    expect(monthlyEquivalent(2490)).toBe(207.5)
+    expect(monthlyEquivalent(1199)).toBe(99.92)
+    expect(monthlyEquivalent(2499)).toBe(208.25)
   })
 
   test('calls the billing API', async () => {

@@ -13,8 +13,8 @@ const shot = async (page: Page, name: string) => {
 const OFFER = {
   plans: [
     { plan: 'starter', prices: { monthly: 59.9, yearly: 599 } },
-    { plan: 'pro', prices: { monthly: 119, yearly: 1190 } },
-    { plan: 'business', prices: { monthly: 249, yearly: 2490 } },
+    { plan: 'pro', prices: { monthly: 119.9, yearly: 1199 } },
+    { plan: 'business', prices: { monthly: 249.9, yearly: 2499 } },
   ],
   cycles: ['monthly', 'yearly'],
   billingTypes: { monthly: ['CREDIT_CARD'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
@@ -25,7 +25,7 @@ const ACTIVE = {
   plan: 'pro',
   cycle: 'monthly',
   billingType: 'CREDIT_CARD',
-  value: 119,
+  value: 119.9,
   paidUntil: '2026-12-19T03:00:00.000Z',
   nextDueDate: '2026-12-13',
   checkoutUrl: null,
@@ -83,14 +83,14 @@ test('assinar: plano, anual com Pix, garantia de 7 dias e ida para a página do 
   await page.getByTestId('plan-billing-buy').click()
   await expect(page.getByRole('heading', { level: 1, name: 'Assinar plano' })).toBeVisible()
   await expect(page.getByTestId('billing-guarantee')).toContainText('Garantia de 7 dias')
-  await expect(page.getByTestId('billing-plan-pro')).toContainText('R$ 119,00 por mês')
+  await expect(page.getByTestId('billing-plan-pro')).toContainText('R$ 119,90 por mês')
   // Monthly: card only.
   await expect(page.getByTestId('billing-method-CREDIT_CARD')).toBeVisible()
   await expect(page.getByTestId('billing-method-PIX')).toHaveCount(0)
   await shot(page, '1-assinar-mensal')
 
   await page.getByTestId('billing-cycle-yearly').check()
-  await expect(page.getByTestId('billing-plan-business')).toContainText('R$ 2.490,00 por ano')
+  await expect(page.getByTestId('billing-plan-business')).toContainText('R$ 2.499,00 por ano')
   await page.getByTestId('billing-plan-business').click()
   await page.getByTestId('billing-method-PIX').click()
 
@@ -127,7 +127,7 @@ test('assinatura web ativa: próxima cobrança, cancelar e dinheiro de volta na 
 
   await login(page, 'gOwner', 'settings/plan')
   await page.getByTestId('plan-billing-subscription').click()
-  await expect(page.getByTestId('billing-current')).toContainText('Plano Pro ativo. Próxima cobrança de R$ 119,00 em 13/12/2026.')
+  await expect(page.getByTestId('billing-current')).toContainText('Plano Pro ativo. Próxima cobrança de R$ 119,90 em 13/12/2026.')
   await expect(page.getByTestId('billing-form')).toHaveCount(0)
   await shot(page, '3-assinatura-ativa')
 
