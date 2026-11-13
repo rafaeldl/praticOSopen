@@ -43,6 +43,8 @@ import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -526,6 +528,36 @@ void main() {
       expect(store.deferSave, isFalse);
       // Back on the page under the sheet.
       expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('over the orders of the month, ✓ shows the limit and saves '
+        'nothing', (tester) async {
+      // Free, 10 a month: last month went over, so no grace this month.
+      final now = DateTime.now();
+      Global.subscription = Subscription(
+        usage: SubscriptionUsage(
+          ordersMonth: orderMonthKey(now),
+          ordersThisMonth: 10,
+          ordersLastMonth: 12,
+        ),
+      );
+      FeatureGateService.debugPlanLimitsEnforcedOverride = true;
+      addTearDown(() {
+        Global.subscription = null;
+        FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+      });
+      final store = OrderStore();
+      await _pump(tester, screen(store), hosted: true);
+      await tester.tap(find.byKey(const ValueKey('new_order_pick_customer')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('pick ABC1D23'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(save());
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(store.deferSave, isTrue);
+      expect(find.text('abrir'), findsNothing);
     });
 
     testWidgets('X closes at once when nothing was filled', (tester) async {
@@ -1792,8 +1824,10 @@ void main() {
       await tester.pumpAndSettle();
 
       const message =
-          'Você já usou os 10 pedidos do assistente deste mês. '
+          'O assistente chegou ao limite deste mês. '
           'Dá para continuar preenchendo à mão.';
+      // No number: the customer never sees an AI counter.
+      expect(find.textContaining('10'), findsNothing);
       expect(find.text(message), findsOneWidget);
       expect(find.byType(CupertinoAlertDialog), findsNothing);
       expect(store.services, isEmpty);

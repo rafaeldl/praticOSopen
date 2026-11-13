@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { AuthenticatedRequest, RoleType } from '../../models/types';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { requirePermission } from '../../middleware/auth.middleware';
+import { requirePlanFeature } from '../../middleware/plan-limit.middleware';
+import { featureForRole } from '../../services/plan-features.service';
 import * as teamService from '../../services/team.service';
 import { validateInput } from '../../utils/validation.utils';
 
@@ -44,6 +46,8 @@ function sendError(res: Response, error: unknown, fallback: string) {
 router.patch(
   '/members/:userId',
   requirePermission('manage:members'),
+  // Roles beyond admin are Pro (#724); a member keeps the role they already have.
+  requirePlanFeature((req) => featureForRole(req.body?.role)),
   async (req: AuthenticatedRequest, res: Response) => {
     const companyId = req.auth?.companyId;
     if (!companyId) {

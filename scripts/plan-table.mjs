@@ -1,0 +1,237 @@
+#!/usr/bin/env node
+// The plan table (docs/plans/plans.json) turned into code for each side (#722):
+//   node scripts/plan-table.mjs          writes the Functions and app files
+//   node scripts/plan-table.mjs --check  fails when they are out of date
+// The web generates its own copy in `npm run gen` (firebase/webapp/scripts/gen.mjs),
+// with renderTs from here. Each side also has a test that compares its
+// constants with the JSON, so a hand edit or a forgotten run fails the PR.
+import { readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const here = dirname(fileURLToPath(import.meta.url))
+export const REPO = resolve(here, '..')
+export const SOURCE = 'docs/plans/plans.json'
+export const OUTPUTS = {
+  functions: 'firebase/functions/src/services/plan-table.generated.ts',
+  dart: 'lib/models/plan_table.dart',
+}
+
+const PLANS = ['free', 'starter', 'pro', 'business']
+const INT_FIELDS = ['ordersPerMonth', 'users', 'photosPerMonth', 'formTemplates', 'nfseCnpjs', 'aiPerMonth', 'aiPerDay']
+const BOOL_FIELDS = ['ownChecklists', 'pdfWatermark', 'overageAllowed']
+const FIELDS = [...INT_FIELDS, ...BOOL_FIELDS, 'features']
+
+export function loadPlanTable(repo = REPO) {
+  const table = JSON.parse(readFileSync(resolve(repo, SOURCE), 'utf8'))
+  const problems = validate(table)
+  if (problems.length) throw new Error(`${SOURCE}:\n- ${problems.join('\n- ')}`)
+  return table
+}
+
+/** Every version has every plan with every field, and nothing else. */
+export function validate(table) {
+  const problems = []
+  if (JSON.stringify(table.plans) !== JSON.stringify(PLANS)) problems.push(`plans must be ${PLANS.join(', ')}`)
+  if (!table.versions?.[table.currentVersion]) problems.push(`currentVersion ${table.currentVersion} is not in versions`)
+  if (!table.versions?.[table.legacyVersion]) problems.push(`legacyVersion ${table.legacyVersion} is not in versions`)
+  for (const [version, entry] of Object.entries(table.versions ?? {})) {
+    for (const plan of PLANS) {
+      const row = entry.plans?.[plan]
+      const at = `versions.${version}.plans.${plan}`
+      if (!row) {
+        problems.push(`${at} is missing`)
+        continue
+      }
+      for (const field of INT_FIELDS) {
+        if (!Number.isInteger(row[field]) || row[field] < -1) problems.push(`${at}.${field} must be an integer >= -1`)
+      }
+      for (const field of BOOL_FIELDS) if (typeof row[field] !== 'boolean') problems.push(`${at}.${field} must be true or false`)
+      if (!Array.isArray(row.features) || row.features.some((f) => typeof f !== 'string')) problems.push(`${at}.features must be a list of names`)
+      for (const field of Object.keys(row)) if (!FIELDS.includes(field)) problems.push(`${at}.${field} is not a known field`)
+      if (row.ownChecklists !== (row.formTemplates !== 0)) problems.push(`${at}: ownChecklists must be false exactly when formTemplates is 0`)
+    }
+    for (const plan of Object.keys(entry.plans ?? {})) if (!PLANS.includes(plan)) problems.push(`versions.${version}.plans.${plan} is not a plan`)
+    // Each plan has what the one before it has.
+    for (let i = 1; i < PLANS.length; i++) {
+      const before = entry.plans?.[PLANS[i - 1]]?.features ?? []
+      const missing = before.filter((f) => !(entry.plans?.[PLANS[i]]?.features ?? []).includes(f))
+      if (missing.length) problems.push(`versions.${version}.plans.${PLANS[i]}.features lacks ${missing.join(', ')} from ${PLANS[i - 1]}`)
+    }
+  }
+  return problems
+}
+
+/** Only the rows: what the code reads. */
+export function rowsOf(table) {
+  return Object.fromEntries(
+    Object.entries(table.versions).map(([version, entry]) => [
+      version,
+      Object.fromEntries(PLANS.map((plan) => [plan, Object.fromEntries(FIELDS.map((field) => [field, entry.plans[plan][field]]))])),
+    ]),
+  )
+}
+
+const moreGenerous = (a, b) => (a === -1 || b === -1 ? -1 : Math.max(a, b))
+
+/**
+ * A subscription never loses what it bought (#726): an older version of the
+ * table is in force as the more generous of it and the current one, field by
+ * field. Numbers: the larger (-1, no limit, wins); pdfWatermark only when
+ * both have it; ownChecklists and overageAllowed when either has it;
+ * features: an old version that lists none had every feature (the table
+ * before #724), so it keeps no list (no gate); else both lists. The current
+ * version is in force as it is.
+ */
+export function mergeRows(old, current) {
+  const row = {}
+  for (const field of INT_FIELDS) row[field] = moreGenerous(old[field], current[field])
+  row.ownChecklists = old.ownChecklists || current.ownChecklists
+  row.pdfWatermark = old.pdfWatermark && current.pdfWatermark
+  row.overageAllowed = old.overageAllowed || current.overageAllowed
+  row.features = old.features.length === 0 ? [] : [...new Set([...current.features, ...old.features])]
+  return Object.fromEntries(FIELDS.map((field) => [field, row[field]]))
+}
+
+/** The rows the code applies, by version: older versions merged with the current one. */
+export function inForceRowsOf(table) {
+  const rows = rowsOf(table)
+  const current = rows[table.currentVersion]
+  return Object.fromEntries(
+    Object.entries(rows).map(([version, plans]) => [
+      version,
+      version === table.currentVersion
+        ? plans
+        : Object.fromEntries(PLANS.map((plan) => [plan, mergeRows(plans[plan], current[plan])])),
+    ]),
+  )
+}
+
+const HEADER = `GENERATED by scripts/plan-table.mjs from ${SOURCE}. Do not edit: change the JSON and run \`node scripts/plan-table.mjs\`.`
+
+/** TypeScript module (Functions and web). */
+export function renderTs(table) {
+  const rows = JSON.stringify(rowsOf(table), null, 2)
+  return `// ${HEADER}
+/* eslint-disable */
+
+export type PlanId = 'free' | 'starter' | 'pro' | 'business';
+
+export const PLAN_IDS: readonly PlanId[] = ${JSON.stringify(PLANS).replaceAll(',', ', ')};
+
+/** One plan in one version of the table. -1 is no limit. */
+export interface PlanRow {
+${INT_FIELDS.map((f) => `  readonly ${f}: number;`).join('\n')}
+${BOOL_FIELDS.map((f) => `  readonly ${f}: boolean;`).join('\n')}
+  readonly features: readonly string[];
+}
+
+/** Version of the table new companies and plan changes get. */
+export const PLAN_TABLE_CURRENT_VERSION = ${JSON.stringify(table.currentVersion)};
+
+/**
+ * Version a paid subscription without \`tableVersion\` follows: it was bought
+ * before the current table (#726). Courtesy (source 'grace') and Free follow
+ * the current one.
+ */
+export const PLAN_TABLE_LEGACY_VERSION = ${JSON.stringify(table.legacyVersion)};
+
+/** Every version of the table as approved, by version, then by plan. */
+export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = ${rows};
+
+/**
+ * What the code applies, by version: an older version is the more generous of
+ * it and the current one, field by field (mergeRows in scripts/plan-table.mjs).
+ */
+export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = ${JSON.stringify(inForceRowsOf(table), null, 2)};
+`
+}
+
+const dartValue = (value) => (Array.isArray(value) ? `[${value.map((v) => `'${v}'`).join(', ')}]` : String(value))
+
+/** Dart library (app). */
+function dartTables(rows) {
+  return Object.entries(rows)
+    .map(
+      ([version, plans]) => `  '${version}': {
+${PLANS.map(
+  (plan) => `    SubscriptionPlan.${plan}: PlanRow(
+${FIELDS.map((f) => `      ${f}: ${dartValue(plans[plan][f])},`).join('\n')}
+    ),`,
+).join('\n')}
+  },`,
+    )
+    .join('\n')
+}
+
+/** Dart library (app). */
+export function renderDart(table) {
+  const versions = dartTables(rowsOf(table))
+  const inForce = dartTables(inForceRowsOf(table))
+  return `// ${HEADER}
+// ignore_for_file: type=lint
+
+import 'subscription.dart' show SubscriptionPlan;
+
+/// One plan in one version of the table. -1 is no limit.
+class PlanRow {
+${INT_FIELDS.map((f) => `  final int ${f};`).join('\n')}
+${BOOL_FIELDS.map((f) => `  final bool ${f};`).join('\n')}
+  final List<String> features;
+
+  const PlanRow({
+${FIELDS.map((f) => `    required this.${f},`).join('\n')}
+  });
+
+  Map<String, Object> toJson() => {
+${FIELDS.map((f) => `        '${f}': ${f},`).join('\n')}
+      };
+}
+
+/// Version of the table new companies and plan changes get.
+const kPlanTableCurrentVersion = '${table.currentVersion}';
+
+/// Version a paid subscription without \`tableVersion\` follows: it was
+/// bought before the current table (#726). Courtesy and Free follow the
+/// current one.
+const kPlanTableLegacyVersion = '${table.legacyVersion}';
+
+/// Every version of the table as approved, by version, then by plan.
+const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
+${versions}
+};
+
+/// What the code applies, by version: an older version is the more generous
+/// of it and the current one, field by field (mergeRows in
+/// scripts/plan-table.mjs).
+const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
+${inForce}
+};
+`
+}
+
+function main() {
+  const check = process.argv.includes('--check')
+  const table = loadPlanTable()
+  const files = { [OUTPUTS.functions]: renderTs(table), [OUTPUTS.dart]: renderDart(table) }
+  const stale = []
+  for (const [path, content] of Object.entries(files)) {
+    const full = resolve(REPO, path)
+    let current = null
+    try {
+      current = readFileSync(full, 'utf8')
+    } catch {}
+    if (current === content) continue
+    if (check) stale.push(path)
+    else {
+      writeFileSync(full, content)
+      console.log(`wrote ${path}`)
+    }
+  }
+  if (stale.length) {
+    console.error(`out of date, run node scripts/plan-table.mjs:\n- ${stale.join('\n- ')}`)
+    process.exit(1)
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()

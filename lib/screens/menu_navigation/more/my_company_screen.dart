@@ -21,6 +21,8 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/field_diff.dart';
 import 'package:praticos/utils/firestore_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// Company switches of "Como você trabalha" besides "Valores e cobrança",
 /// keyed by their `Company` field.
@@ -613,6 +615,10 @@ class _MyCompanySettingsState extends State<MyCompanySettings> {
   Future<void> _changeFeature(CompanyFeature feature, bool value) async {
     final companyId = widget.companyId;
     if (companyId == null || _saving) return;
+    // Turning contracts on is Pro (#724); turning them off never is.
+    if (feature == CompanyFeature.useContracts && value && !ensurePlanFeature(context, PlanFeature.contracts)) {
+      return;
+    }
     final provider = context.read<SegmentConfigProvider>();
     final previous = _features(provider);
     setState(() => _saving = true);

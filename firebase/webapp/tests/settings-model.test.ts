@@ -32,7 +32,7 @@ import {
   validityDays,
   type InviteInput,
 } from '../src/lib/settings/model'
-import { WEB_PLAN_LIMITS_ENFORCED } from '../src/lib/forms/model'
+import { planLimitsEnforced } from '../src/lib/forms/model'
 
 const NOW = new Date('2026-11-03T12:00:00Z')
 const input = (fields: Partial<InviteInput>): InviteInput => ({ name: '', email: '', phone: '', role: 'technician', ...fields })
@@ -133,7 +133,7 @@ describe('plan', () => {
     const plan = planSummary(undefined, NOW)
     expect(plan.plan).toBe('free')
     expect(plan.state).toBe('free')
-    expect(plan.limits).toEqual({ photosPerMonth: 30, formTemplates: 1, users: 1 })
+    expect(plan.limits).toEqual({ ordersPerMonth: 10, photosPerMonth: -1, formTemplates: 0, users: 1, pdfWatermark: true })
     expect(plan.usage).toEqual({ users: 1, photos: 0, checklists: 0 })
   })
 
@@ -146,8 +146,9 @@ describe('plan', () => {
     const expired = planSummary({ plan: 'pro', expiresAt: '2026-10-01T00:00:00Z', limits: { users: 50 } }, NOW)
     expect(expired.plan).toBe('free')
     expect(expired.limits.users).toBe(1)
-    expect(planSummary({ plan: 'starter', limits: { collaborators: 4 }, usage: { usersActive: 3, photosThisMonth: 12, formTemplatesActive: 2 } }, NOW)).toMatchObject({
-      limits: { users: 4, photosPerMonth: 200, formTemplates: 3 },
+    // Like the app and the server (plan-limits.json): the more generous of stored and table; a missing field is the table's.
+    expect(planSummary({ plan: 'starter', tableVersion: '2', limits: { collaborators: 4 }, usage: { usersActive: 3, photosThisMonth: 12, formTemplatesActive: 2 } }, NOW)).toMatchObject({
+      limits: { users: 4, photosPerMonth: -1, formTemplates: -1, ordersPerMonth: 50 },
       usage: { users: 3, photos: 12, checklists: 2 },
     })
   })
@@ -210,7 +211,9 @@ describe('review #528', () => {
     expect(seatLimit(plan, true)).toBe(1)
     expect(roomForPerson(plan, true)).toBe(false)
     expect(roomForPerson(planSummary({ plan: 'pro', usage: { usersActive: 4 } }, NOW), true)).toBe(true)
-    expect(WEB_PLAN_LIMITS_ENFORCED).toBe(false)
+    // Business past 20 people is not blocked (only a notice).
+    expect(roomForPerson(planSummary({ plan: 'business', usage: { usersActive: 25 } }, NOW), true)).toBe(true)
+    expect(planLimitsEnforced()).toBe(false)
   })
 
   test('B1: only the fields that changed are written', () => {

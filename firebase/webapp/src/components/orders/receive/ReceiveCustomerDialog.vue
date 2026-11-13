@@ -20,6 +20,7 @@ import { cancelCustomerCharge, customerCharges, listReceipts, openOrders, paymen
 import { allocate, allocationSummary, chargeOf, localDay, openChargeOf, owedOf, paidAtFor, toCents, whatsappLink, type Charge, type OpenOrder } from '@/lib/receive/model'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import { announce } from '@/lib/ui'
 import ChargeDialog from './ChargeDialog.vue'
 import StatementDialog from './StatementDialog.vue'
@@ -156,6 +157,8 @@ watch([chargesReady, state], () => {
 
 /** Mandar cobrança over orders that have their own link asks first: the new one cancels those in Asaas. */
 function newCharge() {
+  // Charges are Starter (#724).
+  if (!ensurePlanFeature('charges')) return
   dialog.value = chosen.value.some((o) => singleLinks.value.has(o.id)) ? 'replace' : 'charge'
 }
 /** Closed first: the confirmation takes its history entry out, then the charge opens. */

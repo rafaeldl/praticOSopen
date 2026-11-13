@@ -91,6 +91,10 @@ class Order extends BaseAuditCompany {
   /// Denormalized for Firestore queries (Firestore can't query nested nulls)
   bool? isContract;
 
+  /// Sample order of the first access (bootstrap): the server leaves it out
+  /// of the orders of the month (plan limit). Null on every other order.
+  bool? isSample;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 

@@ -6349,8 +6349,14 @@ abstract class AppLocalizations {
   /// No description provided for @orderAssistantErrorQuota.
   ///
   /// In pt, this message translates to:
-  /// **'Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.'**
-  String orderAssistantErrorQuota(String limit);
+  /// **'O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.'**
+  String get orderAssistantErrorQuota;
+
+  /// No description provided for @orderAssistantErrorQuotaDay.
+  ///
+  /// In pt, this message translates to:
+  /// **'O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.'**
+  String get orderAssistantErrorQuotaDay;
 
   /// No description provided for @orderAssistantErrorUnavailable.
   ///
@@ -10310,11 +10316,11 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{Acaba em 1 dia.} other{Acaba em {days} dias.}}'**
   String courtesyBannerEnds(int days);
 
-  /// No description provided for @courtesyBannerAiUse.
+  /// No description provided for @courtesyBannerOrdersUse.
   ///
   /// In pt, this message translates to:
-  /// **'{used, plural, =1{Neste mês você usou o assistente 1 vez; no Free são {free}.} other{Neste mês você usou o assistente {used} vezes; no Free são {free}.}}'**
-  String courtesyBannerAiUse(int used, int free);
+  /// **'{used, plural, =1{Neste mês você abriu 1 OS; no Free são {free} por mês.} other{Neste mês você abriu {used} OS; no Free são {free} por mês.}}'**
+  String courtesyBannerOrdersUse(int used, int free);
 
   /// No description provided for @courtesyBannerToFree.
   ///
@@ -12736,6 +12742,174 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver'**
   String get checklistAiView;
+
+  /// No description provided for @planFeatureTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recurso do plano {plan}'**
+  String planFeatureTitle(String plan);
+
+  /// No description provided for @planFeatureBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para usar, mude para o plano {plan}. O que você já tem continua.'**
+  String planFeatureBody(String plan);
+
+  /// No description provided for @planFeatureAskOwner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ao dono da empresa para mudar para o plano {plan}.'**
+  String planFeatureAskOwner(String plan);
+
+  /// No description provided for @planFeatureBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano {plan}'**
+  String planFeatureBadge(String plan);
+
+  /// No description provided for @planFeatureNfse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota fiscal'**
+  String get planFeatureNfse;
+
+  /// No description provided for @planFeatureBrandedPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF sem a marca PraticOS'**
+  String get planFeatureBrandedPdf;
+
+  /// No description provided for @planFeatureOwnChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists próprios'**
+  String get planFeatureOwnChecklists;
+
+  /// No description provided for @planFeatureCharges.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança e lembrete de pagamento'**
+  String get planFeatureCharges;
+
+  /// No description provided for @planFeatureReviewRequest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedir avaliação ao cliente'**
+  String get planFeatureReviewRequest;
+
+  /// No description provided for @planFeatureTeamRoles.
+  ///
+  /// In pt, this message translates to:
+  /// **'Técnico, gerente e outros perfis'**
+  String get planFeatureTeamRoles;
+
+  /// No description provided for @planFeaturePerPersonAgenda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda e responsável por pessoa'**
+  String get planFeaturePerPersonAgenda;
+
+  /// No description provided for @planFeatureWorkStages.
+  ///
+  /// In pt, this message translates to:
+  /// **'Etapas do serviço'**
+  String get planFeatureWorkStages;
+
+  /// No description provided for @planFeatureTvMode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo TV'**
+  String get planFeatureTvMode;
+
+  /// No description provided for @planFeatureContracts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contratos'**
+  String get planFeatureContracts;
+
+  /// No description provided for @planFeatureAiFinance.
+  ///
+  /// In pt, this message translates to:
+  /// **'IA no financeiro'**
+  String get planFeatureAiFinance;
+
+  /// No description provided for @planFeatureSpreadsheetExport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório em planilha'**
+  String get planFeatureSpreadsheetExport;
+
+  /// No description provided for @planFeatureBulkActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações em lote'**
+  String get planFeatureBulkActions;
+
+  /// No description provided for @planFeatureMcp.
+  ///
+  /// In pt, this message translates to:
+  /// **'ChatGPT e Claude'**
+  String get planFeatureMcp;
+
+  /// No description provided for @planFeatureApi.
+  ///
+  /// In pt, this message translates to:
+  /// **'API com chave'**
+  String get planFeatureApi;
+
+  /// No description provided for @planUsageOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS este mês'**
+  String get planUsageOrders;
+
+  /// No description provided for @planUsageTaxIds.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNPJs na nota fiscal'**
+  String get planUsageTaxIds;
+
+  /// No description provided for @planNoticeOrdersNear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já abriu {used} de {limit} OS este mês.'**
+  String planNoticeOrdersNear(String used, String limit);
+
+  /// No description provided for @planNoticeOrdersAtLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você abriu as {limit} OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.'**
+  String planNoticeOrdersAtLimit(String limit);
+
+  /// No description provided for @planNoticeOrdersGrace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês passou de {limit} OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.'**
+  String planNoticeOrdersGrace(String limit);
+
+  /// No description provided for @planNoticeOrdersBlocked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passou de {limit} OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.'**
+  String planNoticeOrdersBlocked(String limit);
+
+  /// No description provided for @planNoticeOrdersContactUs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês já passou das {limit} OS incluídas no Business.'**
+  String planNoticeOrdersContactUs(String limit);
+
+  /// No description provided for @planNoticePeopleContactUs.
+  ///
+  /// In pt, this message translates to:
+  /// **'A equipe já passou das {limit} pessoas incluídas no Business.'**
+  String planNoticePeopleContactUs(String limit);
+
+  /// No description provided for @planNextTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o {plan} dá a mais'**
+  String planNextTitle(String plan);
 }
 
 class _AppLocalizationsDelegate

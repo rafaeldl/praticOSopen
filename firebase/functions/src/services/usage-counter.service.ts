@@ -2,8 +2,9 @@
  * Plan usage counters kept by the server (`subscription.usage` on the company
  * document), so the limits don't depend on what the app writes.
  *
- * - formTemplatesActive: active checklist templates in `forms` (`isActive
- *   != false`: a template without the field is active, as in FormDefinition).
+ * - formTemplatesActive: own active checklist templates in `forms` (`isActive
+ *   != false`: a template without the field is active, as in FormDefinition;
+ *   copies of the segment's ready-made ones don't count, countFormTemplates).
  *   Recounted on writes to `companies/{cid}/forms/{id}`, only while
  *   `config/usageCounters.serverOnly` is on (the app writes it otherwise).
  * - usersActive: memberships plus pending, not expired invites, the same sum
@@ -14,11 +15,16 @@
  *   flag off the app still increments it (admin only), and counting here too
  *   would count those photos twice.
  *
+ * - ordersThisMonth / ordersMonth / ordersLastMonth: orders created this
+ *   month (São Paulo), counted on every order creation (countNewOrder), sample
+ *   orders left out. No flag: the app never wrote them.
+ *
  * The flag also makes firestore.rules refuse client writes to `usage`
  * (usageUpdateAllowed). With it off only usersActive is recounted, and it
  * gives the same number the app writes.
  */
 import { db, runTransaction } from './firestore.service';
+import { countFormTemplates, isSampleOrder, orderMonthKey, ordersUsage } from './plan-limits.service';
 
 export const USAGE_FLAG_PATH = 'config/usageCounters';
 
@@ -46,8 +52,7 @@ async function setCounter(companyId: string, field: 'formTemplatesActive' | 'use
  */
 export async function recountFormTemplates(companyId: string): Promise<number | null> {
   if (!(await usageCountersServerOnly())) return null;
-  const forms = await companyRef(companyId).collection('forms').get();
-  const active = forms.docs.filter((doc) => doc.data()?.isActive !== false).length;
+  const active = await countFormTemplates(companyId);
   await setCounter(companyId, 'formTemplatesActive', active);
   return active;
 }
@@ -112,4 +117,31 @@ export async function countNewOrderPhotos(
     tx.update(ref, { 'subscription.usage.photosThisMonth': current + added });
   });
   return added;
+}
+
+/**
+ * Counts a new order in `subscription.usage.ordersThisMonth` (#723), always:
+ * the app never wrote this counter, so there is no flag. The month is turned
+ * here (ordersMonth, ordersLastMonth, São Paulo calendar), so no reset job is
+ * needed. Sample orders of the first access (`isSample`) don't count.
+ * Returns whether it counted.
+ */
+export async function countNewOrder(
+  companyId: string,
+  order: Record<string, unknown> | undefined,
+  now: Date = new Date(),
+): Promise<boolean> {
+  if (!order || isSampleOrder(order)) return false;
+  const ref = companyRef(companyId);
+  return runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return false;
+    const { thisMonth, lastMonth } = ordersUsage(snap.data()?.subscription?.usage, now);
+    tx.update(ref, {
+      'subscription.usage.ordersThisMonth': thisMonth + 1,
+      'subscription.usage.ordersMonth': orderMonthKey(now),
+      'subscription.usage.ordersLastMonth': lastMonth,
+    });
+    return true;
+  });
 }

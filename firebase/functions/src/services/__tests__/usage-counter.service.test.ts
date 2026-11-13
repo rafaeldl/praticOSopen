@@ -1,7 +1,7 @@
 jest.mock('../firestore.service', () => jest.requireActual('../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 
 import { read, resetFakeDb, seed } from '../../__tests__/helpers/fake-firestore';
-import { countNewOrderPhotos, newPhotoCount, recountFormTemplates, recountUsers } from '../usage-counter.service';
+import { countNewOrder, countNewOrderPhotos, newPhotoCount, recountFormTemplates, recountUsers } from '../usage-counter.service';
 
 const C1 = 'companies/c1';
 const usage = () => (read(C1)?.subscription as { usage?: Record<string, number> } | undefined)?.usage;
@@ -70,5 +70,43 @@ describe('usage-counter.service (contadores do plano pelo servidor)', () => {
     const after = { photos: [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }] };
     expect(await countNewOrderPhotos('c1', before, after)).toBe(2);
     expect(usage()?.photosThisMonth).toBe(4);
+  });
+
+  describe('OS do mês (countNewOrder)', () => {
+    const NOV = new Date('2026-11-20T15:00:00.000Z');
+
+    it('conta cada OS nova, sem flag, e grava o mês (São Paulo)', async () => {
+      expect(await countNewOrder('c1', { status: 'quote' }, NOV)).toBe(true);
+      expect(await countNewOrder('c1', { status: 'quote' }, NOV)).toBe(true);
+      expect(usage()).toMatchObject({ ordersThisMonth: 2, ordersMonth: '2026-11', ordersLastMonth: 0 });
+    });
+
+    it('OS de exemplo do primeiro acesso não contam', async () => {
+      expect(await countNewOrder('c1', { status: 'quote', isSample: true }, NOV)).toBe(false);
+      expect(usage()?.ordersThisMonth).toBeUndefined();
+    });
+
+    it('na virada do mês o mês que acabou vira o anterior e o novo começa do 1', async () => {
+      seed(C1, { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 14, ordersLastMonth: 2 } } });
+      await countNewOrder('c1', { status: 'quote' }, new Date('2026-12-01T03:00:00.000Z'));
+      expect(usage()).toMatchObject({ ordersThisMonth: 1, ordersMonth: '2026-12', ordersLastMonth: 14 });
+    });
+
+    it('meia-noite em São Paulo ainda é o mês de antes até as 03:00 UTC', async () => {
+      seed(C1, { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 3 } } });
+      await countNewOrder('c1', { status: 'quote' }, new Date('2026-12-01T02:59:00.000Z'));
+      expect(usage()).toMatchObject({ ordersThisMonth: 4, ordersMonth: '2026-11' });
+    });
+
+    it('sem contar nada há mais de um mês, começa do zero', async () => {
+      seed(C1, { subscription: { plan: 'free', usage: { ordersMonth: '2026-08', ordersThisMonth: 30, ordersLastMonth: 30 } } });
+      await countNewOrder('c1', { status: 'quote' }, NOV);
+      expect(usage()).toMatchObject({ ordersThisMonth: 1, ordersMonth: '2026-11', ordersLastMonth: 0 });
+    });
+
+    it('empresa que não existe não ganha documento', async () => {
+      expect(await countNewOrder('nope', { status: 'quote' }, NOV)).toBe(false);
+      expect(read('companies/nope')).toBeUndefined();
+    });
   });
 });

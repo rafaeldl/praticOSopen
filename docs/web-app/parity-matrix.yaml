@@ -9457,7 +9457,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458). Web: não grava contador (o servidor reconta em onFormTemplateWrittenUsage). O limite segue o app: só vale onde o app aplica (FeatureGateService.planLimitsEnforced = paidPlansEnabled, falso no navegador), então no web não trava (WEB_PLAN_LIMITS_ENFORCED). A regra do número (ativos isActive != false na lista, plano de companies/{id}.subscription, vencido vale Free) fica pronta em activeLimit; enquanto o plano não for lido, nada é bloqueado."
+  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458). Web: não grava contador (o servidor reconta em onFormTemplateWrittenUsage). O limite segue a chave única config/paidPlans.enabled (#723), lida pelo servidor, pelo app e pelo web (planLimitsEnforced em lib/plan-limits.ts); conta só checklist próprio (cópia do pronto do ramo não conta). A regra do número (ativos isActive != false na lista, plano de companies/{id}.subscription, vencido vale Free) fica pronta em activeLimit; enquanto o plano não for lido, nada é bloqueado."
 - id: checklist.view.list
   screen: lib/screens/forms/checklists_view.dart
   route: null
@@ -10089,7 +10089,7 @@ rows:
   e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Confere o limite antes de abrir o formulário. Erro do servidor vira inviteGenericError; fechar a folha de compartilhar volta para a lista. Prazo de 7 dias na folha é fixo no cliente; na web, vir da API. Ver team.counter.seats. Web: não confere o limite, porque o app não aplica limite de plano no navegador (WEB_PLAN_LIMITS_ENFORCED, a mesma regra dos checklists); a Equipe mostra a contagem de vagas do servidor. O servidor também não confere: limite no servidor é decisão do dono."
+  note: "Confere o limite antes de abrir o formulário. Erro do servidor vira inviteGenericError; fechar a folha de compartilhar volta para a lista. Prazo de 7 dias na folha é fixo no cliente; na web, vir da API. Ver team.counter.seats. Web: confere o limite só com a chave config/paidPlans ligada (#723, a mesma regra dos checklists); a Equipe mostra a contagem de vagas do servidor. Business acima de 20 pessoas não trava."
 - id: team.invite.expired
   screen: lib/screens/menu_navigation/collaborator_list_screen.dart
   route: "/collaborator_list"
@@ -10160,7 +10160,7 @@ rows:
   e2e: firebase/webapp/e2e/team.spec.ts
   web_exception: null
   permission: manageUsers
-  note: "Convite pendente ocupa vaga. Limite conferido antes de abrir o formulário e de novo no store. Não copiar: aceitar ou vencer convite não recalcula o contador. Na web: contar no servidor. Web: o web não grava o contador; o servidor reconta usersActive (membros mais convites que valem) a cada mudança de vínculo ou convite, e a Equipe mostra a contagem sem bloquear (WEB_PLAN_LIMITS_ENFORCED)."
+  note: "Convite pendente ocupa vaga. Limite conferido antes de abrir o formulário e de novo no store. Não copiar: aceitar ou vencer convite não recalcula o contador. Na web: contar no servidor. Web: o web não grava o contador; o servidor reconta usersActive (membros mais convites que valem) a cada mudança de vínculo ou convite, e a Equipe só bloqueia com a chave config/paidPlans ligada (#723)."
 - id: team.view.list
   screen: lib/screens/menu_navigation/team_view.dart
   route: null
@@ -11102,11 +11102,11 @@ rows:
   states: []
   feature_flags: ["paidPlansEnabled"]
   hardware: null
-  data: ["companies/{id}", "api:GET /v1/app/ai/status"]
+  data: ["companies/{id}", "companies/{id}/fiscalEmitters", "config/paidPlans"]
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Com paidPlansEnabled=false mostra só a frase do plano; a seção de uso some. O bloco de limite mostra só o primeiro recurso que bateu (IA, equipe, fotos do mês, checklists). Web: só leitura, com o uso sempre à mostra; sem compra, preço nem Ver planos."
+  note: "#725: app e web mostram o mesmo pela mesma regra (planOverview, contract-cases/plan-overview.json): OS este mês, pessoas e CNPJs da nota (só com nota no plano) contra o plano, um aviso só (80%, 100%, mês de folga, OS nova esperando, Business passou do incluído) e o que o próximo plano dá a mais. Sem contador de IA. Chave config/paidPlans desligada: números sem limite e sem aviso. Com paidPlansEnabled=false no app, a seção de uso some. Web: sem compra; diz que muda de plano no app (até #664)."
 - id: plan.ai-usage
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11116,14 +11116,14 @@ rows:
   segments: all
   segment_variation: []
   i18n: [pt, en, es]
-  states: [limit]
+  states: []
   feature_flags: ["aiEnabled"]
   hardware: null
-  data: ["api:GET /v1/app/ai/status"]
+  data: []
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Primeira linha de uso, só com planos pagos e o assistente ligado. No limite mostra o bloco com Ver planos. Status fica em cache 5 min por empresa. Não copiar: erro ou demora viram assistente desligado e a linha some calada; web mostra que não deu para carregar. Web: erro do assistente aparece com Tentar de novo."
+  note: "Saiu no #725: a IA vem em todos os planos, sem contador para o cliente. Nem app nem web mostram a linha; o teto só aparece no aviso do próprio assistente."
 - id: plan.open-limit
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11140,7 +11140,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Linhas de uso de equipe e checklists abrem Equipe e Checklists; IA e fotos do mês não abrem nada. Não copiar: app não confere papel antes de abrir; web só liga a linha para manageUsers e manageForms."
+  note: "#725: a linha de pessoas abre Equipe só com manageUsers (app e web); OS do mês e CNPJs não abrem nada."
 - id: plan.paywall
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null
@@ -11213,13 +11213,13 @@ rows:
   segment_variation: []
   i18n: [pt, en, es]
   states: [limit]
-  feature_flags: ["paidPlansEnabled", "aiEnabled"]
+  feature_flags: ["paidPlansEnabled"]
   hardware: null
-  data: ["companies/{id}", "api:GET /v1/app/ai/status"]
+  data: ["companies/{id}"]
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "Quase no limite a partir de 80% (âmbar); no limite em vermelho e negrito. -1 é ilimitado e mostra só o número usado."
+  note: "Quase no limite a partir de 80% (âmbar); no limite ou acima em vermelho e negrito. -1 é ilimitado e mostra só o número usado. Pessoas com limite 1 nunca avisam (empresa nova no Free)."
 - id: plan.header-status
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null

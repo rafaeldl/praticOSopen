@@ -14,6 +14,8 @@ import 'package:praticos/screens/menu_navigation/more/more_view.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/account_deletion_api_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:provider/provider.dart';
 
@@ -1002,6 +1004,38 @@ void main() {
         await tester.pump();
         expect(submitted.single.role, RolesType.supervisor);
         expect(submitted.single.phone, '11 99999-9999');
+      },
+    );
+
+    testWidgets(
+      'plan without other roles (#724): starts as admin, a Pro role shows the notice',
+      (tester) async {
+        FeatureGateService.debugPlanLimitsEnforcedOverride = true;
+        addTearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+        PaywallLauncher.roleResolver = () => 'owner';
+        tallScreen(tester);
+        // No SubscriptionStore here: the Free plan.
+        final submitted = await pumpForm(tester);
+        expect(find.text(pt.roleAdmin), findsOneWidget);
+
+        await tester.tap(find.byKey(const ValueKey('invite_role')));
+        await tester.pumpAndSettle();
+        expect(find.textContaining(pt.planFeatureBadge('Pro')), findsWidgets);
+        await tester.tap(find.byKey(const ValueKey('role_supervisor')));
+        await tester.pumpAndSettle();
+        expect(find.byType(PickerScaffold<RolesType>), findsNothing);
+        expect(find.text(pt.planFeatureTitle('Pro')), findsOneWidget);
+        await tester.tap(find.text(pt.notNow));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
+          '11 99999-9999',
+        );
+        await tester.pump();
+        await tester.tap(save);
+        await tester.pump();
+        expect(submitted.single.role, RolesType.admin);
       },
     );
   });

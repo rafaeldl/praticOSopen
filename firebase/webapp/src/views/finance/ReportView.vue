@@ -22,6 +22,8 @@ import { segmentLabels } from '@/lib/segments'
 import { LAYER_PARAM, useRoutePanel, withoutParam } from '@/lib/route-layer'
 import { registerShortcut } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature, usePlanFeature } from '@/lib/plan-feature-gate'
+import { PLAN_NAME } from '@/lib/plan-limits'
 import '@/styles/finance.css'
 
 const PeriodDialog = defineAsyncComponent(() => import('@/components/finance/PeriodDialog.vue'))
@@ -236,16 +238,19 @@ function sheets(r: FinanceReport) {
   ]
 }
 
+// Plan (#724): the report as a spreadsheet (CSV or Excel) is Pro; printing is in every plan.
+const spreadsheet = usePlanFeature('spreadsheetExport')
+
 function exportCsv() {
   const r = report.value
-  if (!r) return
+  if (!r || !ensurePlanFeature('spreadsheetExport')) return
   const decimal = new Intl.NumberFormat(countryFormat(country()).locale).formatToParts(1.5).find((part) => part.type === 'decimal')?.value === ',' ? ',' : '.'
   download(`${fileBase.value}.csv`, toCsv(orderSheet(r), decimal), CSV_TYPE)
   showToast(t('web.report.exported'))
 }
 function exportXlsx() {
   const r = report.value
-  if (!r) return
+  if (!r || !ensurePlanFeature('spreadsheetExport')) return
   download(`${fileBase.value}.xlsx`, toXlsx(sheets(r)) as BlobPart, XLSX_TYPE)
   showToast(t('web.report.exported'))
 }
@@ -259,8 +264,8 @@ function exportXlsx() {
       :sub="chosenCustomer ? t('web.report.onlyCustomer', { name: customerName(chosenCustomer) }) : undefined"
     >
       <div class="report-actions no-print">
-        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-csv" @click="exportCsv">{{ t('web.report.csv') }}</button>
-        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-xlsx" @click="exportXlsx">{{ t('web.report.xlsx') }}</button>
+        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-csv" @click="exportCsv">{{ t('web.report.csv') }}<span v-if="!spreadsheet.allowed" class="plan-badge">· {{ t('planFeatureBadge', { plan: PLAN_NAME[spreadsheet.requiredPlan ?? 'pro'] }) }}</span></button>
+        <button type="button" class="btn" :disabled="state !== 'ready'" data-testid="report-xlsx" @click="exportXlsx">{{ t('web.report.xlsx') }}<span v-if="!spreadsheet.allowed" class="plan-badge">· {{ t('planFeatureBadge', { plan: PLAN_NAME[spreadsheet.requiredPlan ?? 'pro'] }) }}</span></button>
         <button type="button" class="btn" :disabled="state !== 'ready' || !report?.count" data-testid="report-print" @click="print">{{ t('web.report.print') }}</button>
       </div>
     </PageHead>

@@ -2,36 +2,38 @@
  * Plan limit before a write (docs/PLAN_LIMITS_SERVER.md). Mount after the
  * permission checks.
  *
- * Two switches, both off by default:
- * - `PLAN_LIMITS_ENABLED=true` in the functions env (deploy). Off, the
- *   middleware passes untouched and reads nothing: no Firestore, no Storage.
- * - `config/paidPlans.enabled == true` (runtime). Read only when the env
- *   switch is on; off, every limit is -1.
- * At the limit: 402 { error: { code: 'PLAN_LIMIT', resource, limit, usage, adding, plan } }.
+ * One switch, off by default: `config/paidPlans.enabled == true` (Firestore,
+ * the same document the app and the web read). Off, the middleware passes
+ * without counting anything; with it off the only read is that document
+ * (cached a minute per instance).
+ * At the limit: 402 { error: { code: 'PLAN_LIMIT', resource, limit, usage, adding, plan } },
+ * the same body for the app and the web.
  */
 
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../models/types';
 import {
   checkCompanyPlanLimit,
+  isPaidPlansEnabled,
   planLimitError,
   type PlanLimitCheck,
   type PlanResource,
 } from '../services/plan-limits.service';
+import {
+  checkCompanyPlanFeature,
+  planFeatureError,
+  type PlanFeature,
+  type PlanFeatureCheck,
+} from '../services/plan-features.service';
 
 export interface PlanLimitDeps {
-  /** Deploy switch. False: the request goes on without any read. */
-  enabled: () => boolean;
+  /** The switch. False: the request goes on without counting. */
+  enabled: () => boolean | Promise<boolean>;
   check: (companyId: string, resource: PlanResource, adding: number) => Promise<PlanLimitCheck>;
 }
 
-/** `PLAN_LIMITS_ENABLED=true` in the functions env. */
-export function planLimitsDeployed(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.PLAN_LIMITS_ENABLED === 'true';
-}
-
 export const defaultPlanLimitDeps: PlanLimitDeps = {
-  enabled: () => planLimitsDeployed(),
+  enabled: () => isPaidPlansEnabled(),
   check: (companyId, resource, adding) => checkCompanyPlanLimit(companyId, resource, adding),
 };
 
@@ -45,8 +47,8 @@ export function requirePlanCapacity(
   deps: PlanLimitDeps = defaultPlanLimitDeps,
 ) {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    if (!deps.enabled()) return next();
     try {
+      if (!(await deps.enabled())) return next();
       const companyId = req.userContext?.companyId ?? req.auth?.companyId;
       const count = await adding(req);
       if (!companyId || count <= 0) return next();
@@ -61,4 +63,78 @@ export function requirePlanCapacity(
       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal error' } });
     }
   };
+}
+
+/**
+ * The same check inside a route, after its own validation (a bad request
+ * stays a 400, not a 402). Sends the 402 and returns false when it does not fit.
+ */
+export async function ensurePlanCapacity(
+  res: Response,
+  companyId: string,
+  resource: PlanResource,
+  adding = 1,
+  deps: PlanLimitDeps = defaultPlanLimitDeps,
+): Promise<boolean> {
+  if (!(await deps.enabled())) return true;
+  const check = await deps.check(companyId, resource, adding);
+  if (check.allowed) return true;
+  res.status(402).json(planLimitError(check));
+  return false;
+}
+
+// ============================================================================
+// Features of the plan (#724): 402 PLAN_FEATURE, same switch
+// ============================================================================
+
+export interface PlanFeatureDeps {
+  check: (companyId: string, feature: PlanFeature) => Promise<PlanFeatureCheck>;
+}
+
+export const defaultPlanFeatureDeps: PlanFeatureDeps = {
+  check: (companyId, feature) => checkCompanyPlanFeature(companyId, feature),
+};
+
+/**
+ * Feature of the plan before a write that creates or turns on something new.
+ * [feature] may depend on the request (null: nothing to check, e.g. an invite
+ * as admin). With the switch off the check allows everything.
+ * Not in the plan: 402 { error: { code: 'PLAN_FEATURE', feature, plan, requiredPlan } }.
+ */
+export function requirePlanFeature(
+  feature: PlanFeature | ((req: AuthenticatedRequest) => PlanFeature | null),
+  deps: PlanFeatureDeps = defaultPlanFeatureDeps,
+) {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const wanted = typeof feature === 'function' ? feature(req) : feature;
+      const companyId = req.userContext?.companyId ?? req.auth?.companyId;
+      if (!wanted || !companyId) return next();
+      const check = await deps.check(companyId, wanted);
+      if (!check.allowed) {
+        res.status(402).json(planFeatureError(check));
+        return;
+      }
+      next();
+    } catch (error) {
+      console.error('Plan feature check error:', error instanceof Error ? error.message : 'unknown');
+      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal error' } });
+    }
+  };
+}
+
+/**
+ * The same feature check inside a route, after its own checks. Sends the 402
+ * and returns false when the plan does not have [feature].
+ */
+export async function ensurePlanFeature(
+  res: Response,
+  companyId: string,
+  feature: PlanFeature,
+  deps: PlanFeatureDeps = defaultPlanFeatureDeps,
+): Promise<boolean> {
+  const check = await deps.check(companyId, feature);
+  if (check.allowed) return true;
+  res.status(402).json(planFeatureError(check));
+  return false;
 }

@@ -15,6 +15,7 @@ import { ApiError } from '@/lib/api'
 import { applyMask, fieldMasks, segmentField } from '@/lib/segment-fields'
 import { session } from '@/lib/session'
 import { cancelInvite, createInvite } from '@/lib/settings/data'
+import { handlePlanFeatureError } from '@/lib/plan-feature-gate'
 import { findDuplicateInvite, inviteBody, inviteProblems, isExpired, ROLE_DESCRIPTION, type AssignableRole, type InviteInput, type TeamInvite } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
 import '@/styles/orders.css'
@@ -85,6 +86,7 @@ async function create(replacing: TeamInvite | null) {
     emit('created', { token: created.token, expiresAt: created.expiresAt, createdAt: new Date().toISOString(), name: body.name, email: body.email, phone: body.phone, role: body.role })
   } catch (error) {
     console.error('team: invite failed', error)
+    if (handlePlanFeatureError(error)) return
     failed.value = errorText(error)
   } finally {
     saving.value = false

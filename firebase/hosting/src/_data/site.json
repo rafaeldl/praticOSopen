@@ -27,7 +27,8 @@
     "whatsappContact": false,
     "webApp": true,
     "softwareItPage": false,
-    "nfsePage": true
+    "nfsePage": true,
+    "pricingPage": false
   },
   "webAppUrl": "/web"
 }

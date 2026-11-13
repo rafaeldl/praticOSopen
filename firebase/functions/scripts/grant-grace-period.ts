@@ -131,6 +131,7 @@ export function planGrace(existing: unknown, expiresAt: Date, now: Date): GraceP
       'subscription.store': grace.store ?? null,
       'subscription.expiresAt': grace.expiresAt,
       'subscription.limits': grace.limits,
+      'subscription.tableVersion': grace.tableVersion,
       'subscription.updatedAt': nowIso,
       updatedAt: nowIso,
       ...(current.usage ? {} : { 'subscription.usage': grace.usage }),

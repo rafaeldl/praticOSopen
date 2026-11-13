@@ -348,3 +348,9 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; }
   .layer-progress { flex-basis: 100%; }
   .toast { left: 0.75rem; right: 0.75rem; bottom: calc(4.1rem + env(safe-area-inset-bottom)); transform: none; max-width: none; }
 }
+
+/* Plan notice (#724, PlanFeatureNotice.vue): opaque, the link to the Plan screen in blue. */
+.plan-notice { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; max-width: 32rem; }
+.plan-notice-title { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; }
+.plan-notice p { color: var(--color-muted); }
+.plan-badge { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }

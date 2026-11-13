@@ -1,4 +1,9 @@
 import request from 'supertest';
+
+jest.mock('../../../services/firestore.service', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('../../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
+);
 import express, { Request, Response, NextFunction } from 'express';
 
 jest.mock('../../../services/integration-token.service');
@@ -71,5 +76,27 @@ describe('integrations.routes', () => {
     expect(res.body.success).toBe(false);
     expect(res.body.error.code).toBe('INTERNAL_ERROR');
     expect(res.body.error.message).toBe('Failed to create token');
+  });
+});
+
+describe('integrations by plan (#724)', () => {
+  beforeEach(() => jest.clearAllMocks());
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fake = require('../../../services/firestore.service').__fake;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { resetPaidPlansCache } = require('../../../services/plan-limits.service');
+  afterEach(() => {
+    fake.reset();
+    resetPaidPlansCache();
+  });
+
+  it('switch on, Free: 402 PLAN_FEATURE (mcp)', async () => {
+    resetPaidPlansCache();
+    fake.seed('config/paidPlans', { enabled: true });
+    fake.seed('companies/comp1', { subscription: { plan: 'free' } });
+    const res = await request(buildApp('owner')).post('/tokens').send({ name: 'Meu ChatGPT' });
+    expect(res.status).toBe(402);
+    expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'mcp', requiredPlan: 'business' });
+    expect(mockService.createIntegrationToken).not.toHaveBeenCalled();
   });
 });

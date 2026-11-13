@@ -683,6 +683,8 @@ export interface CreateOrderInput {
   dueDate?: string;
   scheduledDate?: string;
   status?: OrderStatus;
+  /** Sample order of the first access (bootstrap): left out of the orders of the month. Never from a route. */
+  isSample?: boolean;
 }
 
 function sanitizeDevice(device: DeviceAggr): DeviceAggr {
@@ -781,6 +783,7 @@ export async function createOrder(
     createdAt: now,
     updatedAt: now,
     updatedBy: createdBy,
+    ...(input.isSample === true ? { isSample: true } : {}),
   };
 
   if (input.clientOrderId) {

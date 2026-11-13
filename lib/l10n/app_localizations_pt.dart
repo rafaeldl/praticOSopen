@@ -3725,9 +3725,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'O assistente ainda não está liberado para a sua conta.';
 
   @override
-  String orderAssistantErrorQuota(String limit) {
-    return 'Você já usou os $limit pedidos do assistente deste mês. Dá para continuar preenchendo à mão.';
-  }
+  String get orderAssistantErrorQuota =>
+      'O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.';
+
+  @override
+  String get orderAssistantErrorQuotaDay =>
+      'O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.';
 
   @override
   String get orderAssistantErrorUnavailable =>
@@ -6305,12 +6308,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String courtesyBannerAiUse(int used, int free) {
+  String courtesyBannerOrdersUse(int used, int free) {
     String _temp0 = intl.Intl.pluralLogic(
       used,
       locale: localeName,
-      other: 'Neste mês você usou o assistente $used vezes; no Free são $free.',
-      one: 'Neste mês você usou o assistente 1 vez; no Free são $free.',
+      other: 'Neste mês você abriu $used OS; no Free são $free por mês.',
+      one: 'Neste mês você abriu 1 OS; no Free são $free por mês.',
     );
     return '$_temp0';
   }
@@ -7875,4 +7878,110 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get checklistAiView => 'Ver';
+
+  @override
+  String planFeatureTitle(String plan) {
+    return 'Recurso do plano $plan';
+  }
+
+  @override
+  String planFeatureBody(String plan) {
+    return 'Para usar, mude para o plano $plan. O que você já tem continua.';
+  }
+
+  @override
+  String planFeatureAskOwner(String plan) {
+    return 'Peça ao dono da empresa para mudar para o plano $plan.';
+  }
+
+  @override
+  String planFeatureBadge(String plan) {
+    return 'Plano $plan';
+  }
+
+  @override
+  String get planFeatureNfse => 'Nota fiscal';
+
+  @override
+  String get planFeatureBrandedPdf => 'PDF sem a marca PraticOS';
+
+  @override
+  String get planFeatureOwnChecklists => 'Checklists próprios';
+
+  @override
+  String get planFeatureCharges => 'Cobrança e lembrete de pagamento';
+
+  @override
+  String get planFeatureReviewRequest => 'Pedir avaliação ao cliente';
+
+  @override
+  String get planFeatureTeamRoles => 'Técnico, gerente e outros perfis';
+
+  @override
+  String get planFeaturePerPersonAgenda => 'Agenda e responsável por pessoa';
+
+  @override
+  String get planFeatureWorkStages => 'Etapas do serviço';
+
+  @override
+  String get planFeatureTvMode => 'Modo TV';
+
+  @override
+  String get planFeatureContracts => 'Contratos';
+
+  @override
+  String get planFeatureAiFinance => 'IA no financeiro';
+
+  @override
+  String get planFeatureSpreadsheetExport => 'Relatório em planilha';
+
+  @override
+  String get planFeatureBulkActions => 'Ações em lote';
+
+  @override
+  String get planFeatureMcp => 'ChatGPT e Claude';
+
+  @override
+  String get planFeatureApi => 'API com chave';
+
+  @override
+  String get planUsageOrders => 'OS este mês';
+
+  @override
+  String get planUsageTaxIds => 'CNPJs na nota fiscal';
+
+  @override
+  String planNoticeOrdersNear(String used, String limit) {
+    return 'Você já abriu $used de $limit OS este mês.';
+  }
+
+  @override
+  String planNoticeOrdersAtLimit(String limit) {
+    return 'Você abriu as $limit OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersGrace(String limit) {
+    return 'Este mês passou de $limit OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersBlocked(String limit) {
+    return 'Passou de $limit OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.';
+  }
+
+  @override
+  String planNoticeOrdersContactUs(String limit) {
+    return 'Este mês já passou das $limit OS incluídas no Business.';
+  }
+
+  @override
+  String planNoticePeopleContactUs(String limit) {
+    return 'A equipe já passou das $limit pessoas incluídas no Business.';
+  }
+
+  @override
+  String planNextTitle(String plan) {
+    return 'O que o $plan dá a mais';
+  }
 }

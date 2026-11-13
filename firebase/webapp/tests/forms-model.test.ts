@@ -16,7 +16,9 @@ import {
   pickerGroups,
   PHOTO_TYPES,
   splitPhotos,
-  WEB_PLAN_LIMITS_ENFORCED,
+  isReadyCopy,
+  ownActiveCount,
+  planLimitsEnforced,
   answerText,
   applyChange,
   canFinishAnyway,
@@ -203,26 +205,39 @@ describe('listas e plano', () => {
     expect(templateMatches(template, 'xyz', 'pt')).toBe(false)
   })
 
-  test('limite do plano: Free 1; limites gravados valem; plano vencido volta ao Free; Business sem limite', () => {
+  test('limite do plano: Free sem checklist próprio; gravado mais generoso vale; vencido volta ao Free; pagos sem limite', () => {
     const now = new Date('2026-11-03T12:00:00Z')
-    expect(planLimit(null, now)).toBe(1)
-    expect(planLimit({ plan: 'pro' }, now)).toBe(10)
-    expect(planLimit({ plan: 'starter', limits: { formTemplates: 5 } }, now)).toBe(5)
-    expect(planLimit({ plan: 'pro', expiresAt: '2026-10-01T00:00:00Z' }, now)).toBe(1)
+    expect(planLimit(null, now)).toBe(0)
+    expect(planLimit({ plan: 'pro' }, now)).toBe(-1)
+    expect(planLimit({ plan: 'free', limits: { formTemplates: 1 } }, now)).toBe(1)
+    expect(planLimit({ plan: 'pro', expiresAt: '2026-10-01T00:00:00Z' }, now)).toBe(0)
     expect(planLimit({ plan: 'business' }, now)).toBe(-1)
     expect(fitsOneMore(1, 1)).toBe(false)
     expect(fitsOneMore(0, 1)).toBe(true)
     expect(fitsOneMore(50, -1)).toBe(true)
   })
 
-  test('como o app no navegador: limite de plano não vale (paidPlansEnabled é false em kIsWeb); Free não trava', () => {
+  test('chave desligada (config/paidPlans): limite de plano não vale; Free não trava', () => {
     const now = new Date('2026-11-03T12:00:00Z')
-    expect(WEB_PLAN_LIMITS_ENFORCED).toBe(false)
+    expect(planLimitsEnforced()).toBe(false)
     expect(activeLimit(null, now)).toBe(-1)
     expect(activeLimit({ plan: 'free' }, now)).toBe(-1)
-    // Where the app enforces, the same numbers.
-    expect(activeLimit(null, now, true)).toBe(1)
-    expect(activeLimit({ plan: 'pro' }, now, true)).toBe(10)
+    // With the switch on, the same numbers as the app and the server.
+    expect(activeLimit(null, now, true)).toBe(0)
+    expect(activeLimit({ plan: 'starter' }, now, true)).toBe(-1)
+  })
+
+  test('checklists próprios: cópias do pronto do ramo não contam (mesma regra do servidor)', () => {
+    const ready = [normalizeTemplate('ready1', { title: 'Vistoria' })]
+    const company = [
+      normalizeTemplate('ready1', { title: 'Vistoria' }), // primeiro acesso: mesmo id
+      normalizeTemplate('r2', { title: 'Entrega', sourceTemplateId: 'ready2' }), // "Usar"
+      normalizeTemplate('own', { title: 'Meu' }),
+      normalizeTemplate('off', { title: 'Parado', isActive: false }),
+    ]
+    expect(ownActiveCount(company, ready)).toBe(1)
+    expect(isReadyCopy(company[1]!, null)).toBe(true)
+    expect(isReadyCopy(company[2]!, ready)).toBe(false)
   })
 
   test('checklist concluído não aceita resposta (B1)', () => {

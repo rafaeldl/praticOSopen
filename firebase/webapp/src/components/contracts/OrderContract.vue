@@ -16,6 +16,7 @@ import type { Order } from '@/lib/orders/model'
 import { orderShort, statusText } from '@/lib/orders/text'
 import type { OrderStatus } from '@/lib/orders/model'
 import { session } from '@/lib/session'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import '@/styles/contracts.css'
 
 const props = defineProps<{ order: Order; canEdit: boolean }>()
@@ -83,7 +84,7 @@ watch(() => props.order.version, () => void load())
     </p>
     <template v-else-if="canEnable">
       <p class="sub">{{ t('contractsRowHint') }}</p>
-      <button type="button" class="btn" data-testid="order-contract-enable" @click="editing = true">{{ t('web.contracts.repeatThis', { order: orderShort() }) }}</button>
+      <button type="button" class="btn" data-testid="order-contract-enable" @click="ensurePlanFeature('contracts') && (editing = true)">{{ t('web.contracts.repeatThis', { order: orderShort() }) }}</button>
     </template>
     <ContractEditor v-if="editing && data" :order="data" @saved="editing = false; load()" @close="editing = false" />
   </section>

@@ -1,6 +1,11 @@
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
+// The paid-plans switch lives in Firestore (config/paidPlans); here it is off.
+jest.mock('../../../services/plan-limits.service', () => ({
+  ...jest.requireActual('../../../services/plan-limits.service'),
+  isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../../../services/invite.service');
 jest.mock('../../../services/channel-link.service');
 

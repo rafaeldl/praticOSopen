@@ -62,7 +62,7 @@ Quanto demora para valer:
 | `src/services/ai/order-assist.service.ts` | Validação (zod), prompt, parse da resposta, casamento com catálogo, orquestração (`runOrderAssist`) com dependências injetáveis |
 | `src/services/ai/order-assist.deps.ts` | Dependências de produção (Firestore da empresa, cota, Vertex AI); carrega até 2.000 clientes e veículos (só nome, telefone, placa, marca) para comparar na memória |
 | `src/services/ai/fuzzy-match.ts` | Busca por semelhança sem IA: `matchCustomer` e `matchDevice` (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)) |
-| `src/services/ai/ai-quota.service.ts` | Chave geral (`config/ai`) + chave da empresa (`settings/ai`) → `resolveAiSettings`; cota mensal (`aiUsage/{YYYY-MM}`) e `getAiUsage` |
+| `src/services/ai/ai-quota.service.ts` | Chave geral (`config/ai`) + chave da empresa (`settings/ai`) → `resolveAiSettings`; cota do mês e do dia do plano em vigor (`aiUsage/{YYYY-MM}` com `day`/`dayCount`; tetos em `docs/plans/plans.json`, #723) e `getAiUsage` |
 | `scripts/ai-settings.ts` | `npm run ai`: liga/desliga por empresa ou para todas |
 | `src/services/ai/llm.client.ts` | Interface neutra (`LlmClient`, `LlmRequest` com JSON Schema) e `LlmRouter`, que escolhe o provedor por pedido |
 | `src/services/ai/gemini.client.ts` | `VertexGeminiClient` (Gemini no Vertex AI, credencial da conta de serviço; sem chave) e `toGeminiSchema` |
@@ -99,7 +99,7 @@ Nova OS em branco (ou já com fotos compartilhadas de outro app, ver docs/RECEIV
 POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio?, locale, order?{services[], products[]},
                               history?[até 3 falas], context?{customer, devices, request, due, pending}}
   1. ligada? (settings/ai.enabled, senão config/ai.enabledForAll) senão 403 AI_DISABLED
-  2. cota: transação em aiUsage/{mês}; no limite → 429 AI_QUOTA_EXCEEDED {used, limit}
+  2. cota: transação em aiUsage/{mês}; no teto do mês ou do dia (Starter e Pro: 200/dia) → 429 AI_QUOTA_EXCEEDED {used, limit, period}
   3. catálogo da empresa (até 300 serviços e 300 produtos, nome + preço)
   4. Modelo (Gemini ou Claude, ver "Provedores"; resposta presa ao JSON Schema) — falhou → devolve a cota, 503 AI_UNAVAILABLE
   5. operações add → casa com o catálogo (items); update/remove → confere a linha (changes);

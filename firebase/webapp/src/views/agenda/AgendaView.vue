@@ -51,6 +51,7 @@ import { useRoutePanel } from '@/lib/route-layer'
 import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { registerShortcut } from '@/lib/shortcuts'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import { announce, ui } from '@/lib/ui'
 
 const OrderDetail = defineAsyncComponent(() => Promise.all([import('@/components/orders/OrderDetail.vue'), loadOrderTexts()]).then(([m]) => m))
@@ -308,6 +309,11 @@ const whoChoices = computed(() => [
   ...team.value.map((member) => ({ id: member.id, label: member.name || t('noName'), current: member.id === who.value })),
 ])
 
+/** "De quem": the schedule per person is Pro (#724); a filter already in the URL stays. */
+function openWho() {
+  if (ensurePlanFeature('perPersonAgenda')) picking.value = true
+}
+
 /** The picker's layer takes its entry out of the URL as it closes: change the query after that. */
 async function pickWho(id: string) {
   picking.value = false
@@ -386,7 +392,7 @@ onBeforeUnmount(() => {
     </div>
     <span class="spacer"></span>
     <button v-if="!wide" type="button" class="btn btn--ghost" @click="showMonth = !showMonth">{{ showMonth ? t('agendaShowWeek') : t('agendaShowMonth') }}</button>
-    <button v-if="canFilter" type="button" class="btn" data-testid="agenda-who" @click="picking = true">
+    <button v-if="canFilter" type="button" class="btn" data-testid="agenda-who" @click="openWho">
       {{ who ? t('agendaWhose', { name: whoName }) : t('agendaWhose', { name: t('allTeam') }) }}
     </button>
   </div>

@@ -128,6 +128,8 @@ class FeatureGateWarning extends StatelessWidget {
 
   String _getFeatureName(FeatureType type, dynamic l10n) {
     switch (type) {
+      case FeatureType.order:
+        return l10n.orders;
       case FeatureType.photo:
         return l10n.photos;
       case FeatureType.formTemplate:

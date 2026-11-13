@@ -3,7 +3,7 @@
 // lib/models/order_form.dart (answers of an order, /companies/{cid}/orders/{oid}/forms).
 // Firestore and Storage are in data.ts.
 
-import { WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
+import { effectiveLimits, planLimitsEnforced } from '@/lib/plan-limits'
 
 export const ITEM_TYPES = ['boolean', 'select', 'checklist', 'text', 'number', 'photo_only'] as const
 export type ItemType = (typeof ITEM_TYPES)[number]
@@ -31,6 +31,8 @@ export interface Template {
   descriptionI18n?: Record<string, string> | null
   createdAt?: string | null
   updatedAt?: string | null
+  /** Id of the segment's ready-made checklist it was copied from ("Usar"): not one of the company's own. */
+  sourceTemplateId?: string | null
 }
 
 export type FormStatus = 'pending' | 'in_progress' | 'completed'
@@ -129,6 +131,7 @@ export function normalizeTemplate(id: string, raw: Raw): Template {
     descriptionI18n: isRecord(raw.descriptionI18n) ? (raw.descriptionI18n as Record<string, string>) : null,
     createdAt: when(raw.createdAt),
     updatedAt: when(raw.updatedAt),
+    sourceTemplateId: stringOr(raw.sourceTemplateId),
   }
 }
 
@@ -499,6 +502,14 @@ export function templateMatches(template: Template, query: string, locale: strin
 /** Active templates, `isActive != false` (what the app shows and the server counts). */
 export const activeCount = (templates: Template[]) => templates.filter((template) => template.isActive).length
 
+/** A copy of one of the segment's ready-made checklists: `sourceTemplateId`, or the segment's id (first access). Same rule as the server. */
+export const isReadyCopy = (template: Template, ready: Template[] | null) =>
+  !!template.sourceTemplateId || (ready ?? []).some((one) => one.id === template.id)
+
+/** Own active checklists: the plan limit counts only these (#723). */
+export const ownActiveCount = (templates: Template[], ready: Template[] | null) =>
+  templates.filter((template) => template.isActive && !isReadyCopy(template, ready)).length
+
 /**
  * Ready-made ones of the segment not yet in the company: the first access copies
  * them with the segment's id, "Usar" with a new id and the same title.
@@ -525,27 +536,19 @@ export const hasPhotoQuestion = (template: Template) => template.items.some((ite
 
 // ── Plan limit (FeatureGateService.canCreateFormTemplate) ──
 
-const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 3, pro: 10, business: -1 }
-
 /**
  * Active checklists the plan allows: the stored limits (or the plan's) while
  * the plan is in force, Free's after it expires. -1 is no limit.
  */
 export function planLimit(subscription: unknown, now: Date): number {
-  const sub = isRecord(subscription) ? subscription : {}
-  const plan = typeof sub.plan === 'string' && sub.plan in PLAN_LIMITS ? sub.plan : 'free'
-  const expires = typeof sub.expiresAt === 'string' ? new Date(sub.expiresAt) : when(sub.expiresAt) ? new Date(when(sub.expiresAt) as string) : null
-  const inForce = !expires || Number.isNaN(expires.getTime()) || expires > now ? plan : 'free'
-  if (inForce !== plan) return PLAN_LIMITS[inForce] as number
-  const stored = isRecord(sub.limits) ? sub.limits.formTemplates : undefined
-  return typeof stored === 'number' ? stored : (PLAN_LIMITS[plan] as number)
+  return effectiveLimits(subscription, now).formTemplates
 }
 
-// No plan limit in the browser, as the app (lib/plan-limits.ts).
-export { WEB_PLAN_LIMITS_ENFORCED }
+// The one switch (config/paidPlans), read by lib/plan-limits.ts.
+export { planLimitsEnforced }
 
-/** Active checklists allowed here: -1 (no limit) unless plan limits are enforced. */
-export function activeLimit(subscription: unknown, now: Date, enforced = WEB_PLAN_LIMITS_ENFORCED): number {
+/** Own active checklists allowed here: -1 (no limit) unless plan limits are enforced. */
+export function activeLimit(subscription: unknown, now: Date, enforced = planLimitsEnforced()): number {
   return enforced ? planLimit(subscription, now) : -1
 }
 

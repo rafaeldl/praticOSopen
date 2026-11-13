@@ -10,7 +10,8 @@ import { getUserAggr } from '../../middleware/company.middleware';
 import { requirePermission, hasPermission } from '../../middleware/auth.middleware';
 import * as inviteService from '../../services/invite.service';
 import { validateInput } from '../../utils/validation.utils';
-import { requirePlanCapacity } from '../../middleware/plan-limit.middleware';
+import { requirePlanCapacity, requirePlanFeature } from '../../middleware/plan-limit.middleware';
+import { featureForRole } from '../../services/plan-features.service';
 
 const router: Router = Router();
 
@@ -32,6 +33,8 @@ router.post(
   '/',
   requirePermission('manage:members'),
   requirePlanCapacity('collaborator'),
+  // Technician, manager, consultant and supervisor are Pro (#724).
+  requirePlanFeature((req) => featureForRole(req.body?.role)),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const companyId = req.auth?.companyId;

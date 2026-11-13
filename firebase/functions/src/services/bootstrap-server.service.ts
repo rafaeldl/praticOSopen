@@ -690,6 +690,7 @@ export async function createSampleOrders(params: {
         status,
         dueDate,
         scheduledDate: status === 'done' ? undefined : dueDate,
+        isSample: true,
       },
       userAggr,
       companyAggr,

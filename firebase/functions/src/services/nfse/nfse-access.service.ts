@@ -13,7 +13,7 @@
 
 import { db, getRootCollection } from '../firestore.service';
 import { effectivePlan } from '../plan-limits.service';
-import { PAID_PLANS_BY_RANK } from '../subscription-plans';
+import { currentPlanRows, PAID_PLANS_BY_RANK } from '../subscription-plans';
 
 type Json = Record<string, unknown>;
 
@@ -25,11 +25,11 @@ export function isBrazilianCompany(country: unknown): boolean {
   return typeof country === 'string' && country.trim().toUpperCase() === 'BR';
 }
 
-/** The plan in force gives the nota: Brazil and not Free (store, old paid plan or courtesy). */
+/** The plan in force gives the nota (nfseCnpjs not 0 in the table): Brazil and a paid plan or the courtesy. */
 export function planGivesNfse(company: Json | null | undefined, now: Date): boolean {
   if (!company) return false;
   if (!isBrazilianCompany(company.country)) return false;
-  return effectivePlan(company.subscription as Json | undefined, now) !== 'free';
+  return currentPlanRows()[effectivePlan(company.subscription as Json | undefined, now)].nfseCnpjs !== 0;
 }
 
 /** The key was set by hand: on without the 'plan' source, or with the 'manual' source. */

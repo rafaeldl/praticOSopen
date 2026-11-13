@@ -584,6 +584,7 @@ class BootstrapService {
           ..value = service.value;
 
         final order = models.Order()
+          ..isSample = true
           ..customer = customer.toAggr()
           ..device = device.toAggr()
           ..services = [orderService]

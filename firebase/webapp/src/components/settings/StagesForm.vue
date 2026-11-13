@@ -5,9 +5,13 @@
 // list turns stages off and the board goes back to one column per status.
 // Ids of existing stages are kept, so orders stay where they are; an order in a
 // removed stage shows in the first one.
+// Plan (#724): adding a stage needs `workStages` (Pro); the stages a company
+// already has stay, can be renamed, moved and removed.
 import { computed, nextTick, ref } from 'vue'
 import { ArrowDown, ArrowUp, Check, Plus, Trash2, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
+import PlanFeatureNotice from '@/components/PlanFeatureNotice.vue'
+import { usePlanFeature } from '@/lib/plan-feature-gate'
 import { t } from '@/i18n'
 import { draftsOf, stagesFromDrafts, type StageDraft, type WorkStage } from '@/lib/orders/stages'
 import { saveCompany } from '@/lib/settings/data'
@@ -26,6 +30,7 @@ const failed = ref('')
 const problemAt = ref<number | null>(null)
 let allowClose = false
 const dirty = computed(() => JSON.stringify(drafts.value) !== initial)
+const workStages = usePlanFeature('workStages')
 
 function guard(): boolean {
   if (allowClose || !dirty.value || saving.value) return true
@@ -33,6 +38,7 @@ function guard(): boolean {
 }
 
 async function add() {
+  if (!workStages.value.allowed) return
   drafts.value.push({ name: '', keywords: '' })
   await nextTick()
   document.getElementById(`st-name-${drafts.value.length - 1}`)?.focus()
@@ -113,9 +119,10 @@ async function save() {
             </div>
           </li>
         </ol>
-        <p>
+        <p v-if="workStages.allowed">
           <button type="button" class="btn" data-testid="stage-add" @click="add"><Plus :size="16" aria-hidden="true" />{{ t('web.stages.add') }}</button>
         </p>
+        <PlanFeatureNotice v-else feature="workStages" :required-plan="workStages.requiredPlan" heading-level="h2" />
         <p class="hint">{{ t('web.stages.removeHint') }}</p>
       </div>
       <div class="drawer-foot">

@@ -4,6 +4,7 @@ import { buildApp } from './helpers';
 // ---- Mocks ----------------------------------------------------------------
 
 jest.mock('../../../services/order.service');
+jest.mock('../../../middleware/plan-limit.middleware', () => ({ ensurePlanCapacity: jest.fn(async () => true) }));
 jest.mock('../../../services/customer.service');
 jest.mock('../../../services/device.service');
 jest.mock('../../../services/catalog.service');

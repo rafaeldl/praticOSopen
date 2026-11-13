@@ -4,6 +4,7 @@
  * account, the only one allowed to use the KMS keys). Owner and admin only.
  *
  *   POST   /certificate               add a CNPJ: { pfxBase64, password, termsVersion }
+ *                                      (402 PLAN_LIMIT past the plan's CNPJs, switch on)
  *   PUT    /:emitterId/certificate    replace the certificate (same body)
  *   DELETE /:emitterId/certificate    delete it for good (crypto-shredding)
  *
@@ -21,6 +22,7 @@ import {
   type CertificateActor,
 } from '../../services/nfse/certificate-vault.service';
 import { NfseServiceError, toNfseHttpError } from '../../services/nfse/errors';
+import { checkNfseCnpjLimit, nfseCnpjLimitError } from '../../services/plan-limits.service';
 
 const router: Router = Router();
 
@@ -77,6 +79,12 @@ router.post('/certificate', async (req: AuthenticatedRequest, res: Response) => 
   try {
     await ensureAllowed(req);
     const body = parseUpload(req);
+    // A new CNPJ must fit in the plan (1 Starter, 2 Pro; only with the switch on).
+    const cnpjs = await checkNfseCnpjLimit(req.userContext!.companyId);
+    if (!cnpjs.allowed) {
+      res.status(402).json(nfseCnpjLimitError(cnpjs));
+      return;
+    }
     const data = await storeCertificate({
       companyId: req.userContext!.companyId,
       pfx: body.pfx,

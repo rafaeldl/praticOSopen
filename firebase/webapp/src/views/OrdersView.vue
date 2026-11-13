@@ -4,6 +4,8 @@
 // who does not (lib/orders/data.ts). The detail, the board and the batch
 // pickers load on demand so the first paint stays inside the budget.
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { showPlanFeatureNotice, usePlanFeature } from '@/lib/plan-feature-gate'
+import { PLAN_NAME } from '@/lib/plan-limits'
 import { useRoute, useRouter } from 'vue-router'
 import { Bell, Eye, EyeOff, Tv } from '@lucide/vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -89,6 +91,7 @@ let compare: RowCompare<Order> = compareRows
 const unread = ref(0)
 let stopSearch: (() => void) | undefined
 const selected = ref<string[]>([])
+const tvMode = usePlanFeature('tvMode')
 const searchEl = ref<HTMLInputElement | null>(null)
 const sentinel = ref<HTMLElement | null>(null)
 let loader: ListLoader | null = null
@@ -570,9 +573,13 @@ const columns = 5 + (showsMoney ? 1 : 0)
   <div class="toolbar home-bar" :class="{ 'board-bar': board }">
     <p v-if="board" class="board-hint sub">{{ t(workStages().length ? 'web.board.hintStages' : 'web.board.hint') }}</p>
     <!-- Modo TV (#627): the same board alone, big and live, for a screen in the shop. -->
-    <RouterLink v-if="board && can('viewAllOrders')" class="btn btn--ghost tv-open hide-phone" to="/tv" data-testid="open-tv">
+    <!-- Plan (#724): without tvMode (Pro) the button opens the plan notice instead. -->
+    <RouterLink v-if="board && can('viewAllOrders') && tvMode.allowed" class="btn btn--ghost tv-open hide-phone" to="/tv" data-testid="open-tv">
       <Tv :size="18" aria-hidden="true" /> {{ t('web.tv.open') }}
     </RouterLink>
+    <button v-else-if="board && can('viewAllOrders')" type="button" class="btn btn--ghost tv-open hide-phone" data-testid="open-tv" @click="showPlanFeatureNotice('tvMode', tvMode.requiredPlan)">
+      <Tv :size="18" aria-hidden="true" /> {{ t('web.tv.open') }} <span class="plan-badge">{{ t('planFeatureBadge', { plan: PLAN_NAME[tvMode.requiredPlan ?? 'pro'] }) }}</span>
+    </button>
     <BatchActions v-else-if="selected.length" :orders="selectedOrders" @done="selected = []" />
     <template v-if="board || !selected.length">
       <template v-if="!board">
