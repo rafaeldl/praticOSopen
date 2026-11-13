@@ -2595,6 +2595,8 @@
       "plan": { "type": "String" }
     }
   },
+  "freeLimitsBannerLabel": "Free plan changes",
+  "freeLimitsBannerText": "From {date}, the Free plan includes {orders} work orders a month. If you open more, choose a plan.",
   "courtesyBannerLater": "Not now",
   "deviceSaveNeedsAny": "Fill in {first} or {second} to save.",
   "@deviceSaveNeedsAny": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
@@ -3051,7 +3053,6 @@
   "planFeatureBrandedPdf": "PDF without the PraticOS brand",
   "planFeatureOwnChecklists": "Your own checklists",
   "planFeatureCharges": "Payment requests and reminders",
-  "planFeatureReviewRequest": "Ask the customer for a review",
   "planFeatureTeamRoles": "Technician, manager and other roles",
   "planFeaturePerPersonAgenda": "Schedule and assignee per person",
   "planFeatureWorkStages": "Work stages",

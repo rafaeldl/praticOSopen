@@ -25,8 +25,8 @@ The owner approved a new table on 2026-11-12. It is being rolled out by #722-#72
 | For | Getting started | Solo worker | Small team | Company |
 | Monthly | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
 | Yearly (pays 10 months) | — | R$ 599 | R$ 1.199 | R$ 2.499 |
-| Work orders per month | 10 | 50 | 150 | 500 included, then +R$ 99 per 100 |
-| People | 1 | 2 | 5 | 20, then +R$ 15 each |
+| Work orders per month | 10 | 50 | 150 | 500 included; more: talk to us (no price yet, 2026-11-13) |
+| People | 1 | 2 | 5 | 20; more: talk to us |
 | CNPJs on the service invoice (BR) | — | 1 | 2 | unlimited |
 | Photos | unlimited | unlimited | unlimited | unlimited |
 | AI | included | included | included | included |
@@ -49,8 +49,9 @@ Rules:
 - A new company starts on Free, with no Pro trial.
 - AI is included in every plan (approved 2026-11-12, comment on #729). The customer never sees an AI counter; the ceilings above are internal, and the terms speak of fair use, never "unlimited". Measured use is about 2.5 per work order, so 50/month covers Free's 10 work orders.
 - 7-day guarantee: whoever subscribes and gives up within 7 days can ask for the money back. On the web and Google Play we refund; on the App Store Apple decides (see "7-day guarantee and refunds"). The terms clause and the FAQ answer show only with `flags.pricingPage`, like the pricing page.
-- Current subscribers and the courtesy keep what they have.
+- Current subscribers and the courtesy keep what they have while they stay on the same plan (renewals included). Switching plan, up or down, moves the subscriber to the new table (owner's decision of 2026-11-13): the store webhook and the web checkout both go through `buildPlanUpdate` (`subscription.service.ts`), which writes the new plan's limits and `tableVersion` of the current table. Covered by `subscription.service.test.ts` ("an old subscriber (table 1) who switches plan goes to the new table").
 - App, web and server show and enforce the same thing, from a single table (#722).
+- Launch decisions of 2026-11-13: Business extras (more people, more work orders) are postponed; the site says "Need more? Talk to us", with no price and no store product (#737 stays open, PR #739 closed). "Ask for a review" is not a plan feature (the public review link stays for everyone). `config/paidPlans.companyIds` turns the plans on for listed companies only (the App Review demo account). Existing Free companies get a notice 15 days before `config/paidPlans.limitsStartAt` (app, web, push and e-mail) and a month of grace from that date. Details in [`PLAN_LIMITS_SERVER.md`](PLAN_LIMITS_SERVER.md).
 
 ### Current values in code
 
@@ -249,7 +250,7 @@ Rules:
 
 - Every paid plan is sold through In-App Purchase on iOS and Google Play Billing on Android. Never add another way to pay for a plan (website, link, email, WhatsApp).
 - Registration is free and gives the Free plan. The Free limits are lifted only by the IAP subscription.
-- The App Review notes (`ios/fastlane/Deliverfile` and `ios/fastlane/metadata/review_information/notes.txt`) say the app is freemium, plans are sold through IAP, and the paywall is at More > Subscription > View plans with the demo account. Keep both files identical and true. The demo account must be owner/admin of its company.
+- The App Review notes (`ios/fastlane/Deliverfile` and `ios/fastlane/metadata/review_information/notes.txt`) say the app is freemium, plans are sold through IAP, and the paywall is at More > Subscription > View plans with the demo account. Keep both files identical and true. The demo account must be owner/admin of its company. While `config/paidPlans.enabled` is off, put the demo company's id in `config/paidPlans.companyIds` so the reviewer sees limits and features (the id stays in Firestore, never in this public repo).
 - Resolution Center reply for the IAP submission: `ios/fastlane/app_review_reply_iap.txt`.
 - **Website.** While `flags.pricingPage` (`firebase/hosting/src/_data/site.json`) is off, the site shows no prices table: it says "Start free. Paid plans available in the app." (pt/en/es). The pricing page (`precos.html`, `precos-en.html`, `precos-es.html`, data in `_data/pricing.json`) is built only with the flag on. Turn it on only after the new limits are in the app on both stores. The page has no purchase link: every button goes to the app download, and subscribing stays inside the app. The old `/pricing*.html` URLs keep redirecting to the home page (`firebase/firebase.json`).
 - Before each submission: the three subscriptions are attached to the version, each with its review screenshot.

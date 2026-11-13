@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:praticos/services/paid_plans_config.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/subscription_service.dart';
 
@@ -19,7 +20,6 @@ enum PlanFeature {
   brandedPdf,
   ownChecklists,
   charges,
-  reviewRequest,
   teamRoles,
   perPersonAgenda,
   workStages,
@@ -211,10 +211,14 @@ class FeatureGateService {
   @visibleForTesting
   static bool? debugPlanLimitsEnforcedOverride;
 
-  /// The one switch of the plan limits, `config/paidPlans.enabled`
-  /// (Firestore), the same document the server and the web read.
+  /// The one switch of the plan limits for the current company:
+  /// `config/paidPlans` (`enabled`, or the company in `companyIds`), the same
+  /// document and rule as the server and the web ([PaidPlansConfig.onFor]).
   /// SubscriptionStore reads it; off until read.
   static bool limitsSwitchOn = false;
+
+  /// `config/paidPlans` as last read (limitsStartAt: notice and month of grace).
+  static PaidPlansConfig paidPlansConfig = PaidPlansConfig.off;
 
   /// Whether subscription plan limits apply: the switch is on and this build
   /// can sell plans ([SubscriptionService.paidPlansEnabled]): limits only
@@ -264,7 +268,7 @@ class FeatureGateService {
     final grace = !fits &&
         !contactUs &&
         type == FeatureType.order &&
-        sub.usage.ordersAt(now).lastMonth <= limit;
+        (!paidPlansConfig.lastMonthCounts(now) || sub.usage.ordersAt(now).lastMonth <= limit);
 
     return FeatureGateResult(
       isAllowed: fits || contactUs || grace,

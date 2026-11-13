@@ -116,8 +116,9 @@
           "note": "equivale a R$ 208,25 por mês"
         },
         "limits": [
-          "500 OS por mês, depois R$ 99 a cada 100",
-          "20 pessoas, depois R$ 15 por pessoa",
+          "500 OS por mês",
+          "20 pessoas",
+          "Precisa de mais? Fale com a gente",
           "Nota fiscal para quantos CNPJs tiver",
           "Fotos sem limite"
         ],
@@ -169,7 +170,7 @@
             "10",
             "50",
             "150",
-            "500*"
+            "500"
           ]
         },
         {
@@ -178,7 +179,7 @@
             "1",
             "2",
             "5",
-            "20*"
+            "20"
           ]
         },
         {
@@ -227,7 +228,7 @@
           ]
         }
       ],
-      "footnote": "* No Business, depois de 500 OS no mês, R$ 99 a cada 100; depois de 20 pessoas, R$ 15 por pessoa."
+      "footnote": "Precisa de mais de 500 OS por mês ou de 20 pessoas? Fale com a gente."
     },
     "contact": {
       "title": "Mais de 20 pessoas ou de 500 OS por mês?",
@@ -379,8 +380,9 @@
           "note": "about R$ 208.25 a month"
         },
         "limits": [
-          "500 work orders a month, then R$ 99 per extra 100",
-          "20 people, then R$ 15 per person",
+          "500 work orders a month",
+          "20 people",
+          "Need more? Talk to us",
           "Unlimited photos"
         ],
         "includes": "Everything in Pro, plus",
@@ -431,7 +433,7 @@
             "10",
             "50",
             "150",
-            "500*"
+            "500"
           ]
         },
         {
@@ -440,7 +442,7 @@
             "1",
             "2",
             "5",
-            "20*"
+            "20"
           ]
         },
         {
@@ -480,7 +482,7 @@
           ]
         }
       ],
-      "footnote": "* On Business, after 500 work orders in a month, R$ 99 per extra 100; after 20 people, R$ 15 per person."
+      "footnote": "Need more than 500 work orders a month or 20 people? Talk to us."
     },
     "contact": {
       "title": "More than 20 people or 500 work orders a month?",
@@ -632,8 +634,9 @@
           "note": "equivale a R$ 208,25 por mes"
         },
         "limits": [
-          "500 órdenes por mes, después R$ 99 cada 100",
-          "20 personas, después R$ 15 por persona",
+          "500 órdenes por mes",
+          "20 personas",
+          "¿Necesitas más? Habla con nosotros",
           "Fotos sin límite"
         ],
         "includes": "Todo lo del Pro, más",
@@ -684,7 +687,7 @@
             "10",
             "50",
             "150",
-            "500*"
+            "500"
           ]
         },
         {
@@ -693,7 +696,7 @@
             "1",
             "2",
             "5",
-            "20*"
+            "20"
           ]
         },
         {
@@ -733,7 +736,7 @@
           ]
         }
       ],
-      "footnote": "* En Business, después de 500 órdenes en el mes, R$ 99 cada 100; después de 20 personas, R$ 15 por persona."
+      "footnote": "¿Necesitas más de 500 órdenes por mes o 20 personas? Habla con nosotros."
     },
     "contact": {
       "title": "¿Más de 20 personas o de 500 órdenes por mes?",

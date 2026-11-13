@@ -11,7 +11,7 @@
     "lib/services/plan_overview.dart planOverview",
     "firebase/webapp/src/lib/plan-overview.ts planOverview"
   ],
-  "fields": "`orders` são as OS deste mês e do anterior (o runner grava subscription.usage.ordersMonth com o mês de agora). `people` e `taxIds` são contados pela tela (membros mais convites que valem; emissores em companies/{id}/fiscalEmitters). `expiresInDays` grava subscription.expiresAt a tantos dias de agora.",
+  "fields": "`orders` são as OS deste mês e do anterior (o runner grava subscription.usage.ordersMonth com o mês de agora). `people` e `taxIds` são contados pela tela (membros mais convites que valem; emissores em companies/{id}/fiscalEmitters). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `limitsStartInDays` grava config/paidPlans.limitsStartAt a tantos dias de agora: no mês a partir dela o mês anterior não trava (folga do primeiro mês).",
   "cases": [
     {
       "id": "free-new-company-sees-no-limit",
@@ -51,8 +51,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -98,8 +97,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -145,8 +143,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -192,8 +189,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -239,8 +235,54 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-over-in-the-first-month-of-the-limits-has-grace",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 11,
+          "lastMonth": 13
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true,
+        "limitsStartInDays": -10
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 11,
+            "limit": 10,
+            "level": "over"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersGrace",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges"
           ]
         }
       }
@@ -286,8 +328,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -581,8 +622,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }
@@ -627,8 +667,7 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         }
       }

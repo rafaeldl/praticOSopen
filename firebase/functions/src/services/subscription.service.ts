@@ -24,16 +24,17 @@ import {
 import type { RcSubscriber } from './revenuecat.client';
 import { PLAN_TABLE_CURRENT_VERSION, PLAN_TABLE_LEGACY_VERSION } from './plan-table.generated';
 import { webOriginFor } from './web-billing/web-origin';
-import { isPaidPlansEnabled } from './plan-limits.service';
+import { isPaidPlansEnabledFor } from './plan-limits.service';
 
 /**
- * Table a plan change is written with: the current one only once the plan
- * switch (`config/paidPlans.enabled`) is on. Until then a purchase keeps the
- * legacy table, so nothing changes for customers (the store app reads the
- * stored limits) before the switch is turned on.
+ * Table a plan change of [companyId] is written with: the current one once
+ * the plans are on for the company (`config/paidPlans`: `enabled`, or the
+ * company in `companyIds`, like the App Review demo account). Until then a
+ * purchase keeps the legacy table, so nothing changes for customers (the
+ * store app reads the stored limits) before the switch is turned on.
  */
-export async function tableVersionForPlanChange(): Promise<string> {
-  return (await isPaidPlansEnabled()) ? PLAN_TABLE_CURRENT_VERSION : PLAN_TABLE_LEGACY_VERSION;
+export async function tableVersionForPlanChange(companyId: string): Promise<string> {
+  return (await isPaidPlansEnabledFor(companyId)) ? PLAN_TABLE_CURRENT_VERSION : PLAN_TABLE_LEGACY_VERSION;
 }
 
 export {
@@ -227,7 +228,7 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
     return 'grace_kept';
   }
 
-  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current, await tableVersionForPlanChange()));
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current, await tableVersionForPlanChange(companyId)));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
 }
@@ -257,7 +258,6 @@ export async function expireSubscriptions(
     return typeof expiresAt === 'string' && Date.parse(expiresAt) <= now.getTime();
   });
 
-  const tableVersion = due.length > 0 ? await tableVersionForPlanChange() : PLAN_TABLE_CURRENT_VERSION;
   let expired = 0;
   let errors = 0;
   const failedIds: string[] = [];
@@ -268,7 +268,7 @@ export async function expireSubscriptions(
       try {
         const subscriber = await deps.fetchSubscriber(doc.id);
         const state = await webOriginFor(doc.id, subscriber, resolveSubscriptionState(subscriber, now), now);
-        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now, undefined, tableVersion));
+        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now, undefined, await tableVersionForPlanChange(doc.id)));
         if (state.plan === 'free') expired++;
       } catch (error) {
         errors++;

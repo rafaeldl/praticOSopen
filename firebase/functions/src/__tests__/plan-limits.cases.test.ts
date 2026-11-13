@@ -46,6 +46,7 @@ describe('plan-limits', () => {
         lastMonthUsage: given.lastMonthUsage,
         enforced: given.paidPlansEnabled,
         now,
+        limitsStartAt: given.limitsStartInDays === undefined ? null : new Date(now.getTime() + given.limitsStartInDays * DAY_MS),
       });
       const expected = want(c);
       const got: Record<string, unknown> = { ...result };

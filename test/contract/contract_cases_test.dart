@@ -56,6 +56,7 @@ const _covered = {
   'order-receive.json',
   'order-totals.json',
   'overdue.json',
+  'paid-plans-config.json', // paid_plans_config_cases_test.dart
   'payment-status.json',
   'payment-transactions.json',
   'phone.json',

@@ -14,7 +14,7 @@
 import { getRootCollection } from './firestore.service';
 import { notifyCourtesyEnding } from './notification.service';
 import { CourtesyNoticeRecord, dueCourtesyNotice, planRow } from './subscription-plans';
-import { isPaidPlansEnabled, ordersUsage } from './plan-limits.service';
+import { isPaidPlansEnabledFor, ordersUsage } from './plan-limits.service';
 import type { Subscription } from '../models/types';
 
 export interface CourtesyMessage {
@@ -88,8 +88,6 @@ export async function sendCourtesyNotices(
     return dueCourtesyNotice(subscription, now) === null ? [] : [{ doc, subscription }];
   });
 
-  // Free only has an order limit with the switch on: off, no number is said.
-  const limitsOn = due.length > 0 && (await isPaidPlansEnabled());
   let sent = 0;
   let errors = 0;
   let next = 0;
@@ -101,7 +99,8 @@ export async function sendCourtesyNotices(
         const last = (await record.get()).data() as CourtesyNoticeRecord | undefined;
         const notice = dueCourtesyNotice(subscription, now, last);
         if (notice === null) continue;
-        const orders = limitsOn ? ordersUsage(subscription?.usage, now).thisMonth : 0;
+        // Free only has an order limit with the switch on for the company: off, no number is said.
+        const orders = (await isPaidPlansEnabledFor(doc.id)) ? ordersUsage(subscription?.usage, now).thisMonth : 0;
         await deps.notify(doc.id, courtesyMessage(notice.daysLeft, orders, doc.get('country') as string | undefined));
         await record.set({ expiresAt: subscription!.expiresAt as string, days: notice.step });
         sent++;

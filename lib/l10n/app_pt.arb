@@ -2969,6 +2969,14 @@
       "plan": { "type": "String" }
     }
   },
+  "freeLimitsBannerLabel": "Plano Free muda",
+  "freeLimitsBannerText": "A partir de {date}, o plano Free tem {orders} OS por mês. Se você abre mais, escolha um plano.",
+  "@freeLimitsBannerText": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "orders": {"type": "int"}
+    }
+  },
   "courtesyBannerLater": "Agora não",
   "deviceSaveNeedsAny": "Preencha {first} ou {second} para salvar.",
   "@deviceSaveNeedsAny": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
@@ -3487,7 +3495,6 @@
   "planFeatureBrandedPdf": "PDF sem a marca PraticOS",
   "planFeatureOwnChecklists": "Checklists próprios",
   "planFeatureCharges": "Cobrança e lembrete de pagamento",
-  "planFeatureReviewRequest": "Pedir avaliação ao cliente",
   "planFeatureTeamRoles": "Técnico, gerente e outros perfis",
   "planFeaturePerPersonAgenda": "Agenda e responsável por pessoa",
   "planFeatureWorkStages": "Etapas do serviço",

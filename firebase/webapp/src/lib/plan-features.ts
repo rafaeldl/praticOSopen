@@ -19,7 +19,6 @@ export type PlanFeature =
   | 'brandedPdf'
   | 'ownChecklists'
   | 'charges'
-  | 'reviewRequest'
   | 'teamRoles'
   | 'perPersonAgenda'
   | 'workStages'
@@ -37,7 +36,6 @@ export const PLAN_FEATURE_NAME: Record<PlanFeature, MessageKey> = {
   brandedPdf: 'planFeatureBrandedPdf',
   ownChecklists: 'planFeatureOwnChecklists',
   charges: 'planFeatureCharges',
-  reviewRequest: 'planFeatureReviewRequest',
   teamRoles: 'planFeatureTeamRoles',
   perPersonAgenda: 'planFeaturePerPersonAgenda',
   workStages: 'planFeatureWorkStages',

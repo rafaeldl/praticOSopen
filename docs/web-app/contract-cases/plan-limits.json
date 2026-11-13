@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generatedFrom": "docs/plans/plans.json v2",
-  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (#726): `tableVersion` gravado (desconhecido vale a atual); sem ele, plano pago (também a cortesia, que mantém o Pro antigo) é de antes da tabela atual e segue `legacyVersion`; Free segue a atual. Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo (recursos: a versão sem lista, todos liberados, continua sem lista) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam).",
+  "rule": "Limite do plano, com os números de docs/plans/plans.json: permitido se o limite é -1 (sem limite) ou uso + o que entra <= limite. Limites desligados (config/paidPlans.enabled falso, a chave única; no app também sem loja na build) valem -1. Plano ausente ou desconhecido é Free. Plano com expiresAt vencido (cortesia ou loja) é Free da tabela atual; o status não conta. Enquanto o plano vale, a linha vem da versão da tabela da assinatura (#726): `tableVersion` gravado (desconhecido vale a atual); sem ele, plano pago (também a cortesia, que mantém o Pro antigo) é de antes da tabela atual e segue `legacyVersion`; Free segue a atual. Uma versão antiga vale como o mais generoso entre ela e a atual, campo a campo (recursos: a versão sem lista, todos liberados, continua sem lista) e cada número gravado em `limits` fica com o mais generoso entre ele e a tabela (assinante nunca perde; campo faltando é o da tabela); sem marca d'água ganha; `collaborators` é o nome antigo de `users`. OS por mês é limite suave: no primeiro mês acima do limite ainda cria (`grace`), e só trava quando o mês anterior também passou do limite (olha só o mês anterior, não uma média). Business (`overageAllowed`) nunca trava OS nem pessoas: passa e avisa (`contactUs`). `level` diz onde fica o uso depois do que entra: ok, near (80%), atLimit (100%), over. `formTemplate` conta só os checklists próprios ativos (os copiados do ramo não contam). No mês que começa em `config/paidPlans.limitsStartAt` o mês anterior não conta: quem já passava do limite quando os limites começaram ganha um mês de folga (decisão de 13/11; regra em paid-plans-config.json). O Free segue sempre a tabela atual, ignorando `tableVersion` e `limits` gravados (o Free antigo não tem nada a preservar; decisão de 13/11).",
   "runsIn": [
     "dart",
     "functions",
@@ -14,7 +14,7 @@
     "firebase/functions/src/services/plan-limits.service.ts checkPlanLimit",
     "firebase/webapp/src/lib/plan-limits.ts checkPlanLimit"
   ],
-  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `lastMonthUsage` é o de OS do mês anterior (só `order`). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos. `expect` traz allowed, limit e plan, e às vezes level, grace e contactUs; o que não aparece não é conferido. `kind: planInForce` confere o plano em vigor, a versão da tabela e a linha (`planInForce` nos três lados): `expect` traz plan, version e campos da linha.",
+  "fields": "`usage` é o uso já contado (no app vem de subscription.usage; no servidor é contado na hora). `lastMonthUsage` é o de OS do mês anterior (só `order`). `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `adding` maior que 1 só existe para fotos. `expect` traz allowed, limit e plan, e às vezes level, grace e contactUs; o que não aparece não é conferido. `kind: planInForce` confere o plano em vigor, a versão da tabela e a linha (`planInForce` nos três lados): `expect` traz plan, version e campos da linha. `limitsStartInDays` grava config/paidPlans.limitsStartAt a tantos dias de agora (negativo: já começou).",
   "cases": [
     {
       "id": "free-photos-have-no-limit",
@@ -1249,6 +1249,96 @@
         "version": "1",
         "features": [],
         "users": 3
+      }
+    },
+    {
+      "id": "free-already-over-when-limits-start-keeps-a-month-of-grace",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 12,
+        "adding": 1,
+        "lastMonthUsage": 30,
+        "limitsStartInDays": -10
+      },
+      "expect": {
+        "allowed": true,
+        "limit": 10,
+        "plan": "free",
+        "level": "over",
+        "grace": true
+      }
+    },
+    {
+      "id": "free-over-two-months-after-limits-start-waits-for-a-plan",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 12,
+        "adding": 1,
+        "lastMonthUsage": 30,
+        "limitsStartInDays": -40
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 10,
+        "plan": "free",
+        "level": "over",
+        "grace": false
+      }
+    },
+    {
+      "id": "free-written-with-old-table-gets-the-new-free-limit",
+      "given": {
+        "kind": "check",
+        "subscription": {
+          "plan": "free",
+          "status": "expired",
+          "tableVersion": "1",
+          "limits": {
+            "ordersPerMonth": -1,
+            "photosPerMonth": 30,
+            "formTemplates": 1,
+            "users": 1,
+            "pdfWatermark": true
+          }
+        },
+        "paidPlansEnabled": true,
+        "resource": "order",
+        "usage": 10,
+        "adding": 1,
+        "lastMonthUsage": 12
+      },
+      "expect": {
+        "allowed": false,
+        "limit": 10,
+        "plan": "free"
+      }
+    },
+    {
+      "id": "free-follows-the-current-table-even-with-version-1",
+      "given": {
+        "kind": "planInForce",
+        "subscription": {
+          "plan": "free",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "version": "2",
+        "ordersPerMonth": 10
       }
     }
   ]

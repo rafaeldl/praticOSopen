@@ -6354,6 +6354,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get freeLimitsBannerLabel => 'Free plan changes';
+
+  @override
+  String freeLimitsBannerText(String date, int orders) {
+    return 'From $date, the Free plan includes $orders work orders a month. If you open more, choose a plan.';
+  }
+
+  @override
   String get courtesyBannerLater => 'Not now';
 
   @override
@@ -7931,9 +7939,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planFeatureCharges => 'Payment requests and reminders';
-
-  @override
-  String get planFeatureReviewRequest => 'Ask the customer for a review';
 
   @override
   String get planFeatureTeamRoles => 'Technician, manager and other roles';

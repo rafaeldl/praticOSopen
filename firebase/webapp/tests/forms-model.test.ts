@@ -205,11 +205,12 @@ describe('listas e plano', () => {
     expect(templateMatches(template, 'xyz', 'pt')).toBe(false)
   })
 
-  test('limite do plano: Free sem checklist próprio; gravado mais generoso vale; vencido volta ao Free; pagos sem limite', () => {
+  test('limite do plano: Free sem checklist próprio, mesmo com limite gravado; vencido volta ao Free; pagos sem limite', () => {
     const now = new Date('2026-11-03T12:00:00Z')
     expect(planLimit(null, now)).toBe(0)
     expect(planLimit({ plan: 'pro' }, now)).toBe(-1)
-    expect(planLimit({ plan: 'free', limits: { formTemplates: 1 } }, now)).toBe(1)
+    // Free always follows the current table: stored limits never widen it (decision of 2026-11-13).
+    expect(planLimit({ plan: 'free', limits: { formTemplates: 1 } }, now)).toBe(0)
     expect(planLimit({ plan: 'pro', expiresAt: '2026-10-01T00:00:00Z' }, now)).toBe(0)
     expect(planLimit({ plan: 'business' }, now)).toBe(-1)
     expect(fitsOneMore(1, 1)).toBe(false)

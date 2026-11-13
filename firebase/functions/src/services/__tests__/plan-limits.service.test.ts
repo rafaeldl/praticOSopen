@@ -136,6 +136,21 @@ describe('checkCompanyPlanLimit', () => {
     expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: false, grace: false, limit: 10 });
   });
 
+  it('enabled off, company in companyIds (demo account): limits apply to it only', async () => {
+    seed('config/paidPlans', { enabled: false, companyIds: ['demo'] });
+    const over = { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 10, ordersLastMonth: 14 } } };
+    seed('companies/demo', over);
+    seed('companies/c1', over);
+    expect(await checkCompanyPlanLimit('demo', 'order', 1, NOW)).toMatchObject({ allowed: false, limit: 10 });
+    expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: true, limit: -1 });
+  });
+
+  it('on, orders: a Free company already over when the limits start keeps a month of grace (limitsStartAt)', async () => {
+    seed('config/paidPlans', { enabled: true, limitsStartAt: '2026-11-05T03:00:00.000Z' });
+    seed('companies/c1', { subscription: { plan: 'free', usage: { ordersMonth: '2026-11', ordersThisMonth: 10, ordersLastMonth: 40 } } });
+    expect(await checkCompanyPlanLimit('c1', 'order', 1, NOW)).toMatchObject({ allowed: true, grace: true, limit: 10 });
+  });
+
   it('on, orders: Business past 500 is not blocked, it says to talk to us', async () => {
     seed('config/paidPlans', { enabled: true });
     seed('companies/c1', { subscription: { plan: 'business', tableVersion: '2', usage: { ordersMonth: '2026-11', ordersThisMonth: 600, ordersLastMonth: 700 } } });

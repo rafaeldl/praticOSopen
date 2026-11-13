@@ -7,6 +7,7 @@ import { buildApp } from './helpers';
 jest.mock('../../../services/plan-limits.service', () => ({
   ...jest.requireActual('../../../services/plan-limits.service'),
   isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+  isPaidPlansEnabledFor: jest.fn().mockResolvedValue(false),
 }));
 jest.mock('../../../services/order.service');
 jest.mock('../../../services/photo-upload.service');

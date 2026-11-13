@@ -9,7 +9,7 @@ jest.mock('../../services/plan-limits.service', () => ({
   checkCompanyPlanLimit: jest.fn(() => {
     throw new Error('must not be called while the switch is off');
   }),
-  isPaidPlansEnabled: jest.fn(async () => false),
+  isPaidPlansEnabledFor: jest.fn(async () => false),
   planLimitError: jest.requireActual('../../services/plan-limits.service').planLimitError,
 }));
 
@@ -33,6 +33,12 @@ const full = {
 };
 
 describe('requirePlanCapacity', () => {
+  it('the switch is asked for the company of the request (config/paidPlans.companyIds)', async () => {
+    const enabled = jest.fn(() => false);
+    await run({ enabled, check: jest.fn() });
+    expect(enabled).toHaveBeenCalledWith('c1');
+  });
+
   it('switch off: next() without counting or reading', async () => {
     const check = jest.fn();
     const adding = jest.fn(() => 1);

@@ -358,12 +358,14 @@ class Subscription {
   /// version; else the current one (also for a version this code does not
   /// know).
   String get effectiveTableVersion {
+    // Free always follows the current table (decision of 2026-11-13): the
+    // old Free has nothing to keep.
+    if (plan == SubscriptionPlan.free) return kPlanTableCurrentVersion;
     final version = tableVersion;
     if (version != null) {
       return kPlanTablesInForce.containsKey(version) ? version : kPlanTableCurrentVersion;
     }
-    final paid = plan != SubscriptionPlan.free;
-    return paid ? kPlanTableLegacyVersion : kPlanTableCurrentVersion;
+    return kPlanTableLegacyVersion;
   }
 
   /// Row of the plan table in force at [now] (Free of the current table once
@@ -385,7 +387,9 @@ class Subscription {
   /// expires, Free of the current table.
   SubscriptionLimits effectiveLimits(DateTime now) {
     final current = effectivePlan(now);
-    if (current != plan) return SubscriptionLimits.forPlan(current);
+    // Free is always the current table's row: stored limits (e.g. -1 from the
+    // old table) never widen it (decision of 2026-11-13).
+    if (current != plan || current == SubscriptionPlan.free) return SubscriptionLimits.forPlan(current);
     final row = SubscriptionLimits.ofRow(planRowAt(now));
     final stored = _storedLimits ?? limits?.toJson();
     return stored == null ? row : SubscriptionLimits.mergedOver(row, stored);

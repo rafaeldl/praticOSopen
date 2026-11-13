@@ -13,6 +13,8 @@ import {
   type PlanRow,
 } from '@/generated/plan-table'
 
+import { lastMonthCounts, paidPlansOnFor, parsePaidPlansConfig, type PaidPlansConfig } from './paid-plans-config'
+
 export type { PlanId, PlanRow }
 export { PLAN_IDS }
 
@@ -20,37 +22,59 @@ export { PLAN_IDS }
 export const PLAN_NAME: Record<PlanId, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' }
 
 /**
- * The one switch of the plan limits, `config/paidPlans.enabled` (Firestore),
- * the same document the server and the app read (#723). Off until read, and
- * off when it cannot be read: the server still decides on its own writes.
+ * The one switch of the plan limits, `config/paidPlans` (Firestore), the same
+ * document and rule as the server and the app: `enabled` for everyone, or the
+ * company in `companyIds` (paid-plans-config.ts). Off until read, and off when
+ * it cannot be read: the server still decides on its own writes.
  */
-let switchOn = false
+let config: PaidPlansConfig = parsePaidPlansConfig(undefined)
 let switchLoad: Promise<boolean> | null = null
+/** The company of the session; set when the document is read from Firestore. */
+let companyOf: () => string | null = () => null
 
-async function readSwitch(): Promise<boolean> {
-  const [{ firestoreLite }, { doc, getDoc }] = await Promise.all([import('@/lib/firebase'), import('firebase/firestore/lite')])
+async function readSwitch(): Promise<PaidPlansConfig> {
+  const [{ firestoreLite }, { doc, getDoc }, { session }] = await Promise.all([
+    import('@/lib/firebase'),
+    import('firebase/firestore/lite'),
+    import('@/lib/session'),
+  ])
+  companyOf = () => session.companyId
   const snapshot = await getDoc(doc(await firestoreLite(), 'config', 'paidPlans'))
-  return (snapshot.data() as Record<string, unknown> | undefined)?.enabled === true
+  return parsePaidPlansConfig(snapshot.data() as Record<string, unknown> | undefined)
 }
 
-/** Reads the switch once per page load; later calls get the same answer. */
-export function loadLimitsSwitch(read: () => Promise<boolean> = readSwitch): Promise<boolean> {
+/**
+ * Reads the document once per page load; later calls get the same answer.
+ * Tests pass a reader (a boolean is `enabled` for everyone) and the company.
+ */
+export function loadLimitsSwitch(
+  read: () => Promise<PaidPlansConfig | boolean> = readSwitch,
+  companyId?: string | null,
+): Promise<boolean> {
+  if (companyId !== undefined) companyOf = () => companyId
   switchLoad ??= read()
     .catch((error) => {
       console.warn('plan: limits switch not read', error)
       return false
     })
-    .then((value) => (switchOn = value))
+    .then((value) => {
+      config = typeof value === 'boolean' ? { ...parsePaidPlansConfig(undefined), enabled: value } : value
+      return planLimitsEnforced()
+    })
   return switchLoad
 }
 
-/** Whether plan limits apply here (the switch, once read). */
-export const planLimitsEnforced = (): boolean => switchOn
+/** Whether plan limits apply here (the switch, once read, for the company of the session). */
+export const planLimitsEnforced = (): boolean => paidPlansOnFor(config, companyOf())
+
+/** `config/paidPlans` as read (limitsStartAt: notice to Free and month of grace). */
+export const paidPlansConfig = (): PaidPlansConfig => config
 
 /** Tests: forget the switch. */
 export function resetLimitsSwitch(): void {
-  switchOn = false
+  config = parsePaidPlansConfig(undefined)
   switchLoad = null
+  companyOf = () => null
 }
 
 /** What companies/{id}.subscription stores as limits. -1 is no limit. */
@@ -87,9 +111,11 @@ export const planLimits = (plan: PlanId): SubscriptionLimits => limitsOfRow(curr
  */
 export function tableVersionOf(subscription: unknown): string {
   const sub = subscription && typeof subscription === 'object' ? (subscription as Record<string, unknown>) : {}
-  if (typeof sub.tableVersion === 'string') return sub.tableVersion in PLAN_TABLES_IN_FORCE ? sub.tableVersion : PLAN_TABLE_CURRENT_VERSION
   const paid = typeof sub.plan === 'string' && sub.plan !== 'free' && (PLAN_IDS as readonly string[]).includes(sub.plan)
-  return paid ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION
+  // Free always follows the current table (decision of 2026-11-13).
+  if (!paid) return PLAN_TABLE_CURRENT_VERSION
+  if (typeof sub.tableVersion === 'string') return sub.tableVersion in PLAN_TABLES_IN_FORCE ? sub.tableVersion : PLAN_TABLE_CURRENT_VERSION
+  return PLAN_TABLE_LEGACY_VERSION
 }
 
 const rowOf = (plan: PlanId, version: string): PlanRow => (PLAN_TABLES_IN_FORCE[version] ?? currentPlanRows())[plan] as PlanRow
@@ -164,7 +190,8 @@ function mergeStored(row: SubscriptionLimits, json: Json): SubscriptionLimits {
 /** Subscription.effectiveLimits: the row of its table version merged with the stored limits while the plan is in force; Free of the current table after it expires. */
 export function effectiveLimits(subscription: unknown, now: Date): SubscriptionLimits {
   const { plan, row: inForce } = planInForce(subscription, now)
-  if (plan !== storedPlan(subscription)) return planLimits(plan)
+  // Free is always the current table's row: stored limits never widen it (decision of 2026-11-13).
+  if (plan !== storedPlan(subscription) || plan === 'free') return planLimits(plan)
   const row = limitsOfRow(inForce)
   const limits = record(subscription).limits
   return limits && typeof limits === 'object' && !Array.isArray(limits) ? mergeStored(row, limits as Json) : row
@@ -215,13 +242,16 @@ export function checkPlanLimit(input: {
   lastMonthUsage?: number
   enforced: boolean
   now: Date
+  /** config/paidPlans.limitsStartAt: in the month from it the month before does not take the grace away. */
+  limitsStartAt?: Date | null
 }): PlanLimitCheck {
   const adding = input.adding ?? 1
   const limit = input.enforced ? limitOf(effectiveLimits(input.subscription, input.now), input.resource) : -1
   const total = input.usage + adding
   const fits = limit === -1 || total <= limit
   const contactUs = !fits && overageAllowed(input.subscription, input.now, input.resource)
-  const grace = !fits && !contactUs && input.resource === 'order' && (input.lastMonthUsage ?? 0) <= limit
+  const grace = !fits && !contactUs && input.resource === 'order' &&
+    (!lastMonthCounts(input.limitsStartAt ?? null, input.now) || (input.lastMonthUsage ?? 0) <= limit)
   return { allowed: fits || contactUs || grace, limit, plan: effectivePlan(input.subscription, input.now), level: usageLevelOf(total, limit), grace, contactUs }
 }
 

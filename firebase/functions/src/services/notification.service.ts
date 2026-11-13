@@ -313,6 +313,31 @@ export async function notifyCourtesyEnding(
 }
 
 /**
+ * Tell the owner and admins of a Free company that the plan limits start on
+ * `config/paidPlans.limitsStartAt` (free-limits-notice.service.ts). Throws
+ * when it could not reach them, so the daily job retries the company.
+ */
+export async function notifyFreeLimitsStarting(
+  companyId: string,
+  message: { title: string; body: string; startsAt: string },
+): Promise<void> {
+  const recipients = await getPaymentNotificationRecipients(companyId, ['owner', 'admin']);
+  if (recipients.length === 0) return;
+  const delivery = await sendNotification(
+    recipients,
+    {
+      title: message.title,
+      body: message.body,
+      data: { type: 'free_limits_notice', startsAt: message.startsAt, companyId },
+    },
+    companyId,
+  );
+  if (delivery.pushFailed || delivery.saved === 0) {
+    throw new Error('free limits notice not delivered');
+  }
+}
+
+/**
  * Tell the owner and admins that a fiscal emitter's certificate is about to
  * expire (NFS-e direct, 30 and 7 days before). The bell counts as delivered;
  * throws only when it failed for everyone, so the daily job tries again.

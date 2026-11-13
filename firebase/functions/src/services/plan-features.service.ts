@@ -14,7 +14,7 @@
 import { getRootCollection } from './firestore.service';
 import { PLAN_IDS, type PlanId } from './plan-table.generated';
 import { currentPlanRows } from './subscription-plans';
-import { isPaidPlansEnabled, planInForce } from './plan-limits.service';
+import { isPaidPlansEnabledFor, planInForce } from './plan-limits.service';
 
 /** Features that depend on the plan. The basics (what Free has) and the assistant never do. */
 export type PlanFeature =
@@ -22,7 +22,6 @@ export type PlanFeature =
   | 'brandedPdf'
   | 'ownChecklists'
   | 'charges'
-  | 'reviewRequest'
   | 'teamRoles'
   | 'perPersonAgenda'
   | 'workStages'
@@ -89,7 +88,7 @@ export async function checkCompanyPlanFeature(
   feature: PlanFeature,
   now: Date = new Date(),
 ): Promise<PlanFeatureCheck> {
-  const enforced = await isPaidPlansEnabled();
+  const enforced = await isPaidPlansEnabledFor(companyId);
   if (!enforced) return checkPlanFeature({ subscription: null, feature, enforced, now });
   const company = await getRootCollection('companies').doc(companyId).get();
   const subscription = (company.exists ? company.get('subscription') : null) as Json | null;

@@ -85,9 +85,11 @@ void main() {
     expect(find.text('CNPJs na nota fiscal'), findsNothing);
     expect(find.textContaining('assistente'), findsNothing);
     expect(find.text('O que o Starter dá a mais'), findsOneWidget);
-    for (final name in ['Nota fiscal', 'PDF sem a marca PraticOS', 'Checklists próprios', 'Cobrança e lembrete de pagamento', 'Pedir avaliação ao cliente']) {
+    for (final name in ['Nota fiscal', 'PDF sem a marca PraticOS', 'Checklists próprios', 'Cobrança e lembrete de pagamento']) {
       expect(find.text(name), findsOneWidget, reason: name);
     }
+    // Asking for a review is not a plan feature (decision of 2026-11-13): the link is for everyone.
+    expect(find.textContaining('avaliação'), findsNothing);
     expect(find.byKey(const ValueKey('plan_paywall')), findsOneWidget);
   });
 

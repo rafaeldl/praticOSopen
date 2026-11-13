@@ -30,6 +30,7 @@ import { processDirectAutoIssue, processPendingDirectAutoIssues } from './servic
 import { processChargeInvoice, processPendingChargeInvoices } from './services/nfse/charge-invoice.service';
 import { RESEND_API_KEY } from './services/nfse/invoice-email.service';
 import { syncCompanyMailboxes } from './services/nfse/import.service';
+import { sendFreeLimitsNotices } from './services/free-limits-notice.service';
 import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
 
@@ -119,6 +120,28 @@ export const nfseDaily = onSchedule(
   async () => {
     const result = await runNfseDaily();
     console.log(`[nfseDaily] ${JSON.stringify(result)}`);
+  },
+);
+
+/**
+ * Notice to the Free companies that already exist, in the 15 days before
+ * `config/paidPlans.limitsStartAt` (free-limits-notice.service.ts): push and
+ * e-mail. Runs here because the e-mail key (RESEND_API_KEY) is only read by
+ * the nfse-api account. Without the date it reads one document and stops.
+ */
+export const freeLimitsNotices = onSchedule(
+  {
+    schedule: '0 10 * * *',
+    timeZone: 'America/Sao_Paulo',
+    region: 'southamerica-east1',
+    serviceAccount: NFSE_SERVICE_ACCOUNT,
+    secrets: [RESEND_API_KEY],
+    memory: '512MiB',
+    timeoutSeconds: 540,
+  },
+  async () => {
+    const result = await sendFreeLimitsNotices(new Date());
+    console.log(`[freeLimitsNotices] ${JSON.stringify(result)}`);
   },
 );
 

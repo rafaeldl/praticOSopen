@@ -830,4 +830,4 @@ export const accountApi = onRequest(
 
 // NFS-e direta: the only functions that open the A1 certificates, with their
 // own service account (nfse-api@, docs/NFSE_DIRECT.md "Cloud KMS").
-export { nfseApi, nfseAutoIssue, nfseChargeInvoice, nfseDaily } from './nfse-api';
+export { nfseApi, nfseAutoIssue, nfseChargeInvoice, nfseDaily, freeLimitsNotices } from './nfse-api';

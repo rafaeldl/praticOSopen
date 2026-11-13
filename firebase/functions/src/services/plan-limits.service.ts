@@ -16,6 +16,9 @@ import { PLAN_LIMITS, limitsOfRow, planRow, tableVersionOf } from './subscriptio
 import { PLAN_IDS, PLAN_TABLE_CURRENT_VERSION, type PlanRow } from './plan-table.generated';
 import { instantOfWall, wallClockOf } from './contract-generation';
 import type { SubscriptionLimits, SubscriptionPlan } from '../models/types';
+import { lastMonthCounts, paidPlansOnFor, parsePaidPlansConfig, type PaidPlansConfig } from './paid-plans-config';
+
+export { type PaidPlansConfig } from './paid-plans-config';
 
 export type PlanResource = 'order' | 'photo' | 'formTemplate' | 'collaborator';
 
@@ -122,7 +125,9 @@ export function planInForce(subscription: Json | null | undefined, now: Date): P
  */
 export function effectiveLimits(subscription: Json | null | undefined, now: Date): SubscriptionLimits {
   const { plan, row: planRowInForce } = planInForce(subscription, now);
-  if (plan !== storedPlan(subscription)) return { ...PLAN_LIMITS[plan] };
+  // Free is always the current table's row: stored limits (e.g. -1 written by
+  // the old table) never widen it (decision of 2026-11-13).
+  if (plan !== storedPlan(subscription) || plan === 'free') return { ...PLAN_LIMITS[plan] };
   const row = limitsOfRow(planRowInForce);
   const limits = subscription?.limits;
   if (limits && typeof limits === 'object' && !Array.isArray(limits)) return mergeStored(row, limits as Json);
@@ -165,9 +170,15 @@ export interface CheckInput {
   adding?: number;
   /** Orders only: the month before (the month of grace is gone when it was over the limit). */
   lastMonthUsage?: number;
-  /** config/paidPlans.enabled (the one switch). */
+  /** config/paidPlans for this company (paidPlansOnFor). */
   enforced: boolean;
   now: Date;
+  /**
+   * config/paidPlans.limitsStartAt: in the first month from it the month
+   * before does not count, so a company already over the limit when the
+   * limits start keeps a month of grace (lastMonthCounts).
+   */
+  limitsStartAt?: Date | null;
 }
 
 /**
@@ -182,7 +193,8 @@ export function checkPlanLimit(input: CheckInput): PlanLimitCheck {
   const total = input.usage + adding;
   const fits = limit === -1 || total <= limit;
   const contactUs = !fits && overageAllowed(input.subscription, input.now, input.resource);
-  const grace = !fits && !contactUs && input.resource === 'order' && (input.lastMonthUsage ?? 0) <= limit;
+  const grace = !fits && !contactUs && input.resource === 'order' &&
+    (!lastMonthCounts(input.limitsStartAt ?? null, input.now) || (input.lastMonthUsage ?? 0) <= limit);
   return {
     allowed: fits || contactUs || grace,
     resource: input.resource,
@@ -336,7 +348,7 @@ export interface NfseCnpjCheck {
  * the certificate of a CNPJ already there never asks.
  */
 export async function checkNfseCnpjLimit(companyId: string, now: Date = new Date()): Promise<NfseCnpjCheck> {
-  const enforced = await isPaidPlansEnabled();
+  const enforced = await isPaidPlansEnabledFor(companyId);
   const company = enforced ? await getRootCollection('companies').doc(companyId).get() : null;
   const subscription = (company?.exists ? company.get('subscription') : null) as Json | null;
   const { plan, row } = planInForce(subscription, now);
@@ -363,7 +375,7 @@ export function nfseCnpjLimitError(check: NfseCnpjCheck) {
 }
 
 const SWITCH_TTL_MS = 60_000;
-let switchCache: { value: boolean; at: number } | undefined;
+let switchCache: { value: PaidPlansConfig; at: number } | undefined;
 
 /** Clears the cached switch (tests). */
 export function resetPaidPlansCache(): void {
@@ -371,15 +383,33 @@ export function resetPaidPlansCache(): void {
 }
 
 /**
- * The one switch of the plan limits: `config/paidPlans.enabled == true`. The
- * app and the web read the same document. Cached a minute per instance.
+ * `config/paidPlans` (docs/PLAN_LIMITS_SERVER.md, "Chave"): `enabled` for
+ * everyone, `companyIds` for some companies only (the demo account of the
+ * App Review), `limitsStartAt` the day the limits start for the Free
+ * companies that already exist (notice and month of grace). The app and the
+ * web read the same document with the same rule (paid-plans-config.json).
+ * Cached a minute per instance.
  */
-export async function isPaidPlansEnabled(now = Date.now()): Promise<boolean> {
+export async function getPaidPlansConfig(now = Date.now()): Promise<PaidPlansConfig> {
   if (switchCache && now - switchCache.at < SWITCH_TTL_MS) return switchCache.value;
   const snap = await db.collection('config').doc('paidPlans').get();
-  const value = snap.exists && snap.get('enabled') === true;
+  const value = parsePaidPlansConfig(snap.exists ? (snap.data() as Json) : undefined);
   switchCache = { value, at: now };
   return value;
+}
+
+/**
+ * The switch for everyone: `config/paidPlans.enabled == true`. Decides what a
+ * plan change writes (tableVersionForPlanChange); limits and features of a
+ * company read [isPaidPlansEnabledFor].
+ */
+export async function isPaidPlansEnabled(now = Date.now()): Promise<boolean> {
+  return (await getPaidPlansConfig(now)).enabled;
+}
+
+/** The switch for one company: on for everyone, or the company is in `companyIds`. */
+export async function isPaidPlansEnabledFor(companyId: string | null | undefined, now = Date.now()): Promise<boolean> {
+  return paidPlansOnFor(await getPaidPlansConfig(now), companyId);
 }
 
 /**
@@ -392,14 +422,15 @@ export async function checkCompanyPlanLimit(
   adding = 1,
   now: Date = new Date(),
 ): Promise<PlanLimitCheck> {
-  const enforced = await isPaidPlansEnabled();
+  const config = await getPaidPlansConfig();
+  const enforced = paidPlansOnFor(config, companyId);
   const company = enforced ? await getRootCollection('companies').doc(companyId).get() : null;
   const subscription = (company?.exists ? company.get('subscription') : null) as Json | null;
   const unlimited = checkPlanLimit({ subscription, resource, usage: 0, adding: 0, enforced, now });
   if (unlimited.limit === -1) return { ...unlimited, adding };
   if (resource === 'order') {
     const { thisMonth, lastMonth } = ordersUsage(subscription?.usage, now);
-    return checkPlanLimit({ subscription, resource, usage: thisMonth, lastMonthUsage: lastMonth, adding, enforced, now });
+    return checkPlanLimit({ subscription, resource, usage: thisMonth, lastMonthUsage: lastMonth, adding, enforced, now, limitsStartAt: config.limitsStartAt });
   }
   const usage = await countUsage(companyId, resource, now);
   return checkPlanLimit({ subscription, resource, usage, adding, enforced, now });

@@ -1,6 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/paid_plans_config.dart';
 
 /// Rows of the Plan screen (#725).
 enum PlanOverviewResource { orders, people, taxIds }
@@ -60,16 +61,21 @@ PlanOverviewLevel _level(int used, int limit) {
 }
 
 /// [people] are members plus pending invites; [taxIds] the company's fiscal
-/// emitters. [enforced] is the one switch (FeatureGateService.planLimitsEnforced).
+/// emitters. [enforced] is the one switch (FeatureGateService.planLimitsEnforced);
+/// [config] defaults to FeatureGateService.paidPlansConfig (limitsStartAt).
 PlanOverview planOverview(
   Subscription? subscription, {
   required int people,
   required int taxIds,
   required DateTime now,
   bool? enforced,
+  PaidPlansConfig? config,
 }) {
   final sub = subscription ?? Subscription();
   final on = enforced ?? FeatureGateService.planLimitsEnforced;
+  // In the month from config/paidPlans.limitsStartAt the month before does
+  // not take the grace away (FeatureGateService._check, lastMonthCounts).
+  final lastMonthCounts = (config ?? FeatureGateService.paidPlansConfig).lastMonthCounts(now);
   final plan = sub.effectivePlan(now);
   final limits = sub.effectiveLimits(now);
   final row = sub.planRowAt(now);
@@ -93,7 +99,7 @@ PlanOverview planOverview(
     final overage = row.overageAllowed;
     if (level == PlanOverviewLevel.over && overage) {
       notice = PlanOverviewNotice.ordersContactUs;
-    } else if ((level == PlanOverviewLevel.over || level == PlanOverviewLevel.atLimit) && orders.lastMonth > ordersLimit) {
+    } else if ((level == PlanOverviewLevel.over || level == PlanOverviewLevel.atLimit) && lastMonthCounts && orders.lastMonth > ordersLimit) {
       notice = PlanOverviewNotice.ordersBlocked;
     } else if (level == PlanOverviewLevel.over) {
       notice = PlanOverviewNotice.ordersGrace;

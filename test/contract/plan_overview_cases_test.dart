@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/services/paid_plans_config.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/plan_overview.dart';
 
@@ -39,6 +40,9 @@ void main() {
         taxIds: given['taxIds'] as int,
         now: now,
         enforced: given['paidPlansEnabled'] as bool,
+        config: given['limitsStartInDays'] == null
+            ? PaidPlansConfig.off
+            : PaidPlansConfig(limitsStartAt: now.toUtc().add(Duration(days: given['limitsStartInDays'] as int))),
       );
       expect({
         'plan': got.plan.name,

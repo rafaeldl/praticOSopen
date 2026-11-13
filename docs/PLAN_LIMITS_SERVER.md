@@ -12,8 +12,8 @@ O dono aprovou uma tabela nova no épico #721. Os valores abaixo **ainda não es
 
 | | Grátis | Starter | Pro | Business |
 |---|---|---|---|---|
-| OS por mês | 10 | 50 | 150 | 500 incluídas, depois +R$ 99 a cada 100 |
-| Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
+| OS por mês | 10 | 50 | 150 | 500; precisa de mais: fale com a gente (sem preço, decisão de 13/11) |
+| Pessoas | 1 | 2 | 5 | 20; precisa de mais: fale com a gente |
 | CNPJs na nota | — | 1 | 2 | sem limite |
 | Fotos | sem limite | sem limite | sem limite | sem limite |
 | IA (teto interno, o cliente não vê) | 50/mês, 20/dia | 1.000/mês, 200/dia | 3.000/mês, 200/dia | 6.000/mês |
@@ -29,6 +29,19 @@ Regras novas que mudam a conta deste documento:
 - Abrir OS, mandar ao cliente, aprovação pelo link, agenda e importar ficam em todos os planos.
 
 A tabela completa, com preços e recursos de cada plano, está em [`SUBSCRIPTION.md`](SUBSCRIPTION.md#approved-table-2026-11-12-epic-721).
+
+## Empresas grátis que já existem (decisão de 13/11)
+
+O Grátis novo tem 10 OS por mês; hoje o Grátis não tem limite de OS. Para não pegar ninguém de surpresa:
+
+- **Data em config**: `config/paidPlans.limitsStartAt`, sempre como Timestamp do Firestore ou texto ISO **com fuso** (`"2026-12-15T03:00:00Z"` é meia-noite de Brasília). Texto sem `Z`/fuso o app lê como hora local do celular e o servidor como UTC: não usar. Sem a data nada é avisado. Nunca fica fixa no código.
+- **Aviso nos 15 dias antes** (`freeLimitsNoticeDue`), só para quem tem o Free em vigor:
+  - app: bloco na Início (`FreeLimitsBanner`), para dono e admin, numa build que vende; "Agora não" esconde até a data mudar;
+  - web: bloco na Início (`FreeLimitsNotice.vue`), para dono e admin;
+  - push e e-mail: função `freeLimitsNotices` (diária, 10h de Brasília, `free-limits-notice.service.ts`). Roda como `nfse-api@` porque só essa conta lê a chave do Resend (`RESEND_API_KEY`). Manda uma vez por data para as empresas no Free com OS no mês ou no mês anterior: push para dono e admin, e-mail para o dono (`owner.email` ou `users/{id}.email`), de `avisos@praticos.app`, respondendo para o suporte. Guarda o que saiu em `companies/{id}/settings/freeLimitsNotice { startsAt, push, email }`; o canal que falhou tenta de novo no dia seguinte, o outro não repete. Sem a data, a função lê um documento e para.
+- **O Free segue sempre a tabela atual**: `tableVersion` e `limits` gravados num Free são ignorados (servidor `tableVersionOf`/`effectiveLimits`, app `Subscription.effectiveTableVersion`/`effectiveLimits`, web `plan-limits.ts`). Uma empresa que caiu para o Free com a chave desligada grava a versão 1 e limites sem teto de OS, mas o Free antigo não tem nada a preservar: ao ligar a chave ela recebe as 10 OS do Free novo, como o aviso diz. Casos em `plan-limits.json`.
+- **Um mês de folga** (reaproveita a folga do #723): do dia `limitsStartAt` até um mês depois, o mês anterior não conta (`lastMonthCounts`), então quem já passava do limite ainda cria OS no primeiro mês. A tela Plano (app e web, `planOverview`) segue a mesma conta: no primeiro mês mostra a folga, não o bloqueio. Depois disso vale a regra normal.
+- **Como ligar**: (1) gravar `limitsStartAt`; os avisos começam 15 dias antes. (2) No dia, ligar `enabled`. Enquanto `enabled` estiver desligada, o Free continua sem limite, mesmo depois da data.
 
 ## Arquitetura
 
@@ -52,7 +65,7 @@ Os dois arquivos gerados ficam no git porque o deploy das Functions e o build do
 Firestore lido:
 
 ```
-config/paidPlans                       enabled (chave global, padrão desligado)
+config/paidPlans                       enabled (chave global, padrão desligado), companyIds, limitsStartAt
 companies/{id}.subscription            plan, expiresAt, limits
 companies/{id}/memberships/*           pessoas
 links/invites/tokens/*                 convites pendentes (company.id, status, expiresAt)
@@ -65,16 +78,17 @@ companies/{id}.subscription.usage     photosThisMonth (contador dos gatilhos da 
 Iguais ao app, provadas pelos casos:
 
 - Permitido se o limite é -1 (ilimitado) ou `uso + o que entra <= limite`.
+- **Chave por empresa** (decisão de 13/11): `config/paidPlans.companyIds` (lista de ids) liga limites e recursos só para essas empresas enquanto `enabled` está desligada. Serve para a conta de demonstração da revisão da Apple. O id fica só no Firestore, nunca no código (o repositório é público). A regra é a mesma nos três lados (`paidPlansOnFor`: servidor `paid-plans-config.ts`, app `lib/services/paid_plans_config.dart`, web `src/lib/paid-plans-config.ts`), com casos em `docs/web-app/contract-cases/paid-plans-config.json`. O que a compra grava (`tableVersionForPlanChange`) segue a mesma regra por empresa: a compra do revisor na conta de demonstração grava a tabela nova.
 - **Uma chave só** (#723): `config/paidPlans.enabled == true` no Firestore, desligada por padrão. O servidor, o app e o web leem o mesmo documento (as regras deixam qualquer pessoa logada ler; ninguém grava pelo cliente). Desligada, todo limite vale -1. O `PLAN_LIMITS_ENABLED` do ambiente das Functions e o `WEB_PLAN_LIMITS_ENFORCED` do web saíram. O app ainda precisa de uma build que venda (`SubscriptionService.paidPlansEnabled`, regra 3.1.1 da Apple): sem loja não há limite no app, mesmo com a chave ligada. O servidor guarda a chave por um minuto.
 - **Plano ausente** (sem `subscription`, só `usage`, ou plano desconhecido) é Free.
 - **Vencido** (`expiresAt` no passado, cortesia ou loja) é Free da tabela atual, mesmo com limites do Pro gravados. O `status` não conta: Pro com `status: expired` e sem data continua Pro.
 - **Plano em vigor** (`planInForce`, igual nos três lados: `plan-limits.service.ts`, `firebase/webapp/src/lib/plan-limits.ts` e `Subscription.planInForce` no app): o plano enquanto `expiresAt` não passou, a versão da tabela dele e a linha da tabela em vigor; vencido, Free da tabela atual. Limites, recursos e tetos de IA leem essa linha. Casos `kind: planInForce` no contrato.
-- **Versão da tabela** (#726): a assinatura segue `subscription.tableVersion` gravado (versão desconhecida vale a atual). Sem ele, plano pago foi comprado ou dado antes da tabela atual e segue `legacyVersion` (a 1); isso vale também para a cortesia (`source: 'grace'`), que mantém o Pro antigo até acabar (decisão do dono). Free e empresa sem assinatura seguem a atual. O webhook e a expiração diária gravam a versão atual quando o plano muda ou quando a cortesia vira compra, mas só com `config/paidPlans.enabled` ligada; desligada, gravam a versão 1 (`tableVersionForPlanChange`), porque o app das lojas aplica os limites gravados e nada pode mudar antes de ligar. Renovar o mesmo plano não mexe. Cortesia nova nasce com a versão 1.
+- **Versão da tabela** (#726): a assinatura segue `subscription.tableVersion` gravado (versão desconhecida vale a atual). Sem ele, plano pago foi comprado ou dado antes da tabela atual e segue `legacyVersion` (a 1); isso vale também para a cortesia (`source: 'grace'`), que mantém o Pro antigo até acabar (decisão do dono). Free e empresa sem assinatura seguem a atual. O webhook e a expiração diária gravam a versão atual quando o plano muda ou quando a cortesia vira compra, mas só com `config/paidPlans.enabled` ligada; desligada, gravam a versão 1 (`tableVersionForPlanChange`), porque o app das lojas aplica os limites gravados e nada pode mudar antes de ligar. Renovar o mesmo plano não mexe. Cortesia nova nasce com a versão 1. **Assinante antigo que troca de plano** (subir ou descer, pela loja ou pela compra na web, que passa pelo mesmo `syncCompanySubscription`) vai para a tabela nova: grava os limites do plano novo e `tableVersion` atual, e deixa de valer o "mais generoso" da tabela 1 (decisão do dono de 13/11; teste em `subscription.service.test.ts`).
 - **Versão antiga vale como o mais generoso** entre ela e a atual, campo a campo (números: o maior, -1 ganha; marca d'água só se as duas têm; checklists próprios e `overageAllowed` se qualquer uma tem). Recursos: a tabela 1 não lista nenhum, o que quer dizer todos liberados, e continua sem lista; assim quem já assina não perde recurso nenhum. O gerador (`scripts/plan-table.mjs`, `mergeRows`) grava isso em `PLAN_TABLES_IN_FORCE` / `kPlanTablesInForce`, que é o que servidor, app e web leem; `PLAN_TABLES` fica com a tabela como aprovada. Exemplo: Starter da tabela 1 mantém 3 pessoas, OS sem limite, todos os recursos e IA sem teto diário, e ganha fotos e checklists sem limite e os 1.000 pedidos de IA da tabela 2.
 - **Limites gravados**: cada número fica com o mais generoso entre o gravado e a tabela (assinante nunca perde, e uma tabela melhor chega a ele); campo faltando é o da tabela; sem marca d'água ganha. `collaborators` é o nome antigo de `users`. O webhook do RevenueCat só regrava `limits` quando o plano muda: renovar o mesmo plano mantém o que estava gravado.
 - **Fim da cortesia** (push `courtesy-notice.service.ts` e aviso na Início do app): com a chave ligada, diz as OS abertas no mês contra as 10 do Free e o menor plano que cobre o uso (pessoas, OS, checklists próprios). Com a chave desligada o Free não tem limite de OS, então só diz que volta ao Free, sem número nem plano sugerido. Nunca fala de IA: os tetos de IA são internos e o cliente não vê contador.
 - **OS por mês** (limite suave): aviso a 80% e a 100% (`level`). No primeiro mês acima do limite ainda cria (`grace`); só trava quando o mês anterior também passou do limite. A folga olha só o mês anterior (não uma média de meses): um mês dentro do limite devolve a folga. Nunca trava uma OS já aberta (editar, concluir, receber, mandar).
-- **Business** (`overageAllowed`): acima de 500 OS ou de 20 pessoas não trava; a resposta diz `contactUs` (cobrança do excedente manual por enquanto).
+- **Business** (`overageAllowed`): acima de 500 OS ou de 20 pessoas não trava; a resposta diz `contactUs` (sem preço de excedente: decisão de 13/11 adiou os extras até a primeira empresa Business chegar a 80% do limite; ver #737).
 - **Fotos**: sem limite em todos os planos (`photosPerMonth = -1`); `requirePlanCapacity('photo')` deixa de barrar.
 - **Checklists**: `formTemplate` conta só os próprios ativos. Cópia de um pronto do ramo não conta: tem `sourceTemplateId` ("Usar", no app e no web) ou o mesmo id do pronto (cópias do primeiro acesso). Grátis não cria checklist próprio (limite 0); Starter em diante sem limite.
 - **IA**: teto do mês e do dia do plano em vigor (`effectivePlan`, então plano vencido é Free) em `reserveAiRequest`. Grátis para em 20 por dia, Starter e Pro em 200; o cliente não vê contador de IA; o dia é UTC, guardado em `aiUsage/{mês}.day/dayCount`. Recusa com `AI_QUOTA_EXCEEDED` e `period: 'month' | 'day'`. O `monthlyLimit` de piloto desliga o teto do dia.

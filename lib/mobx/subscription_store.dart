@@ -6,6 +6,7 @@ import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/paid_plans_config.dart';
 import 'package:praticos/services/subscription_service.dart';
 
 part 'subscription_store.g.dart';
@@ -20,10 +21,10 @@ Stream<Map<String, dynamic>?> _firestoreCompanyDoc(String companyId) =>
         .snapshots()
         .map((snapshot) => snapshot.data());
 
-/// Reads the one switch of the plan limits, `config/paidPlans.enabled`.
-Future<bool> _firestoreLimitsSwitch() async {
+/// Reads the one switch of the plan limits, `config/paidPlans`.
+Future<PaidPlansConfig> _firestorePaidPlansConfig() async {
   final snapshot = await FirebaseFirestore.instance.collection('config').doc('paidPlans').get();
-  return snapshot.data()?['enabled'] == true;
+  return PaidPlansConfig.fromJson(snapshot.data());
 }
 
 class SubscriptionStore = _SubscriptionStore with _$SubscriptionStore;
@@ -42,8 +43,8 @@ abstract class _SubscriptionStore with Store {
   Future<void> Function(String companyId) identify =
       SubscriptionService.instance.initialize;
 
-  /// Reads `config/paidPlans.enabled`. Tests replace it.
-  Future<bool> Function() readLimitsSwitch = _firestoreLimitsSwitch;
+  /// Reads `config/paidPlans`. Tests replace it.
+  Future<PaidPlansConfig> Function() readPaidPlansConfig = _firestorePaidPlansConfig;
 
   /// Resets the RevenueCat customer. No-op when the SDK is not configured.
   Future<void> Function() resetIdentity = SubscriptionService.instance.logout;
@@ -85,10 +86,18 @@ abstract class _SubscriptionStore with Store {
     await old?.cancel();
 
     try {
-      FeatureGateService.limitsSwitchOn = await readLimitsSwitch();
+      final config = await readPaidPlansConfig();
+      // Another company was bound meanwhile: its own read decides the switch.
+      if (companyId == id) {
+        FeatureGateService.paidPlansConfig = config;
+        FeatureGateService.limitsSwitchOn = config.onFor(id);
+      }
     } catch (e) {
       // Not read: the limits stay off (the server still decides on its writes).
-      FeatureGateService.limitsSwitchOn = false;
+      if (companyId == id) {
+        FeatureGateService.paidPlansConfig = PaidPlansConfig.off;
+        FeatureGateService.limitsSwitchOn = false;
+      }
       debugPrint('SubscriptionStore: plan limits switch not read: $e');
     }
 

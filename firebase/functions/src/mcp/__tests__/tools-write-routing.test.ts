@@ -24,6 +24,7 @@ jest.mock('../../services/photo-upload.service');
 jest.mock('../../services/plan-limits.service', () => ({
   ...jest.requireActual('../../services/plan-limits.service'),
   isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+  isPaidPlansEnabledFor: jest.fn().mockResolvedValue(false),
 }));
 
 import { registerWriteTools } from '../tools/write';

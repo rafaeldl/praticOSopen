@@ -2,7 +2,7 @@
  * Plan limit before a write (docs/PLAN_LIMITS_SERVER.md). Mount after the
  * permission checks.
  *
- * One switch, off by default: `config/paidPlans.enabled == true` (Firestore,
+ * One switch, off by default: `config/paidPlans` (`enabled` or the company in `companyIds`, Firestore,
  * the same document the app and the web read). Off, the middleware passes
  * without counting anything; with it off the only read is that document
  * (cached a minute per instance).
@@ -14,7 +14,7 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../models/types';
 import {
   checkCompanyPlanLimit,
-  isPaidPlansEnabled,
+  isPaidPlansEnabledFor,
   planLimitError,
   type PlanLimitCheck,
   type PlanResource,
@@ -27,13 +27,13 @@ import {
 } from '../services/plan-features.service';
 
 export interface PlanLimitDeps {
-  /** The switch. False: the request goes on without counting. */
-  enabled: () => boolean | Promise<boolean>;
+  /** The switch for the company (config/paidPlans). False: the request goes on without counting. */
+  enabled: (companyId: string) => boolean | Promise<boolean>;
   check: (companyId: string, resource: PlanResource, adding: number) => Promise<PlanLimitCheck>;
 }
 
 export const defaultPlanLimitDeps: PlanLimitDeps = {
-  enabled: () => isPaidPlansEnabled(),
+  enabled: (companyId) => isPaidPlansEnabledFor(companyId),
   check: (companyId, resource, adding) => checkCompanyPlanLimit(companyId, resource, adding),
 };
 
@@ -48,10 +48,10 @@ export function requirePlanCapacity(
 ) {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      if (!(await deps.enabled())) return next();
       const companyId = req.userContext?.companyId ?? req.auth?.companyId;
+      if (!companyId || !(await deps.enabled(companyId))) return next();
       const count = await adding(req);
-      if (!companyId || count <= 0) return next();
+      if (count <= 0) return next();
       const check = await deps.check(companyId, resource, count);
       if (!check.allowed) {
         res.status(402).json(planLimitError(check));
@@ -76,7 +76,7 @@ export async function ensurePlanCapacity(
   adding = 1,
   deps: PlanLimitDeps = defaultPlanLimitDeps,
 ): Promise<boolean> {
-  if (!(await deps.enabled())) return true;
+  if (!(await deps.enabled(companyId))) return true;
   const check = await deps.check(companyId, resource, adding);
   if (check.allowed) return true;
   res.status(402).json(planLimitError(check));
