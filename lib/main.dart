@@ -34,6 +34,7 @@ import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 import 'package:praticos/services/receive_share_service.dart';
+import 'package:praticos/widgets/app_version_gate.dart';
 
 LocaleStore _localeStore = LocaleStore();
 AuthStore _authStore = AuthStore();
@@ -48,6 +49,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
   Global.version = "${info.version} (${info.buildNumber})";
+  Global.versionName = info.version;
   await Firebase.initializeApp();
   await FirebaseEmulators.connect();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
@@ -158,7 +160,12 @@ class MyApp extends StatelessWidget {
             final brightness = Theme.of(context).brightness;
             return CupertinoTheme(
               data: appCupertinoTheme(brightness),
-              child: AppDefaultTextStyle(child: child!),
+              child: AppDefaultTextStyle(
+                child: AppVersionGate(
+                  navigatorKey: NotificationTapHandler.navigatorKey,
+                  child: child!,
+                ),
+              ),
             );
           },
           home: Observer(

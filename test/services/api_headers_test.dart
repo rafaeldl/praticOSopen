@@ -45,6 +45,21 @@ void main() {
       expect(headers.containsKey('X-Company-Id'), isFalse);
     });
 
+    test('envia X-App-Version quando a versão é conhecida', () async {
+      Global.versionName = '1.110.0';
+      addTearDown(() => Global.versionName = null);
+
+      final headers = await appApiHeaders(tokenProvider: () async => 'tok');
+
+      expect(headers['X-App-Version'], '1.110.0');
+    });
+
+    test('sem versão conhecida não envia X-App-Version', () async {
+      final headers = await appApiHeaders(tokenProvider: () async => 'tok');
+
+      expect(headers.containsKey('X-App-Version'), isFalse);
+    });
+
     test('sem token lança AppApiUnauthenticatedException', () async {
       expect(
         () => appApiHeaders(tokenProvider: () async => null),

@@ -937,6 +937,21 @@ rows:
   data: []
   web_status: todo
   web_exception: {status: proposed, reason: "Só iOS."}
+- id: app.update.required
+  screen: lib/screens/update_required_screen.dart
+  route: null
+  action: "Bloquear o app abaixo da versão mínima e abrir a loja (config/appVersion)"
+  kind: screen
+  roles: [anonymous, signed_in_no_company, owner, admin, supervisor, manager, consultant, technician]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: []
+  hardware: [external_browser]
+  data: ["config/appVersion"]
+  web_status: todo
+  web_exception: {status: proposed, reason: "Só no app da loja: o web sempre carrega a versão publicada, não tem versão antiga instalada."}
 - id: nav.tabs.routing
   screen: lib/screens/menu_navigation/app_tabs.dart
   route: null

@@ -394,6 +394,16 @@ describeEmulator('firestore.rules', () => {
       });
     });
 
+    describe('app version gate (config/appVersion)', () => {
+      it('anyone reads it, even signed out; nobody writes it', async () => {
+        await env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'config/appVersion'), { iosMinimum: '' }));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), 'config/appVersion')));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(admin(), 'config/appVersion')));
+        await rut.assertFails(fs.setDoc(fs.doc(admin(), 'config/appVersion'), { iosMinimum: '9.0.0' }));
+        await rut.assertFails(fs.setDoc(fs.doc(env.unauthenticatedContext().firestore(), 'config/appVersion'), { iosMinimum: '9.0.0' }));
+      });
+    });
+
     describe('usage-only subscription (map without plan, created by dotted usage updates)', () => {
       const USAGE_ONLY = { usage: { formTemplates: 1, photosThisMonth: 2 } };
 
