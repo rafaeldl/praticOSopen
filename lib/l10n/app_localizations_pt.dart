@@ -1966,6 +1966,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'As assinaturas não estão disponíveis agora. Tente novamente mais tarde.';
 
   @override
+  String planActiveMessage(String plan) {
+    return 'Seu plano $plan está ativo.';
+  }
+
+  @override
   String get restorePurchasesNothingFound =>
       'Nenhuma assinatura ativa foi encontrada nesta conta da loja.';
 

@@ -265,7 +265,62 @@ export interface AsaasPayment {
   externalReference?: string | null;
   installment?: string | null;
   installmentNumber?: number | null;
+  /** Subscription that generated the charge, when there is one. */
+  subscription?: string | null;
   /** GET /payments/{id} of a removed payment. */
+  deleted?: boolean;
+}
+
+export type AsaasSubscriptionCycle = 'MONTHLY' | 'YEARLY';
+
+export interface AsaasCreateSubscriptionInput {
+  customer: string;
+  billingType: AsaasBillingType;
+  value: number;
+  /** First charge, YYYY-MM-DD. */
+  nextDueDate: string;
+  cycle: AsaasSubscriptionCycle;
+  description: string;
+  externalReference: string;
+}
+
+/**
+ * POST /subscriptions/{id}/invoiceSettings: the NFS-e Asaas issues for each
+ * charge of the subscription. Without it no invoice is issued (it is per
+ * subscription, not an account switch).
+ */
+export interface AsaasSubscriptionInvoiceSettingsInput {
+  municipalServiceId?: string;
+  municipalServiceCode?: string;
+  municipalServiceName?: string;
+  effectiveDatePeriod: 'ON_PAYMENT_CONFIRMATION';
+  receivedOnly: boolean;
+  deductions: number;
+  updatePayment: boolean;
+  observations?: string;
+  taxes: {
+    retainIss: boolean;
+    iss: number;
+    pis: number;
+    cofins: number;
+    csll: number;
+    inss: number;
+    ir: number;
+    federalServiceTaxCode?: string;
+    nbsCode?: string;
+  };
+}
+
+export interface AsaasSubscription {
+  id: string;
+  customer: string;
+  billingType: AsaasBillingType;
+  value: number;
+  nextDueDate: string;
+  cycle: string;
+  /** ACTIVE | INACTIVE | EXPIRED */
+  status: string;
+  externalReference?: string | null;
   deleted?: boolean;
 }
 

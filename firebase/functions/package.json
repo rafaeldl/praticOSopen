@@ -16,6 +16,7 @@
     "lint:fix": "eslint src/ --fix",
     "setup-test": "npx ts-node scripts/setup-test-data.ts",
     "e2e:asaas": "ts-node scripts/asaas-sandbox-e2e.ts",
+    "e2e:web-checkout": "ts-node scripts/web-checkout-sandbox-e2e.ts",
     "asaas:pilot": "ts-node scripts/enable-asaas-pilot.ts",
     "ai": "ts-node scripts/ai-settings.ts",
     "ai:photo-eval": "ts-node scripts/checklist-photo-eval.ts",

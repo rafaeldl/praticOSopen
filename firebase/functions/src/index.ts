@@ -149,6 +149,15 @@ const revenuecatWebhookAuth = defineSecret('REVENUECAT_WEBHOOK_AUTH');
 const revenuecatSecretApiKey = defineSecret('REVENUECAT_SECRET_API_KEY');
 
 /**
+* Web checkout of the plans (docs/WEB_CHECKOUT.md), Rafsoft's own Asaas account:
+* - ASAAS_BILLING_API_KEY: API key of that account ($aact_hmlg_ sandbox / $aact_prod_);
+* - ASAAS_BILLING_WEBHOOK_TOKEN: token of its webhook (/webhooks/asaas-billing).
+* Both must exist before deploy (firebase functions:secrets:set ...).
+*/
+const asaasBillingApiKey = defineSecret('ASAAS_BILLING_API_KEY');
+const asaasBillingWebhookToken = defineSecret('ASAAS_BILLING_WEBHOOK_TOKEN');
+
+/**
  * [Asaas] Single trigger for order updates (never add a second
  * onDocumentUpdated on this path). The app writes orders directly to
  * Firestore, so this runs as a trigger instead of inside an API route:
@@ -519,6 +528,7 @@ import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import contractsRoutes from './routes/v1/contracts.routes';
 import onboardingRoutes from './routes/v1/onboarding.routes';
+import billingRoutes from './routes/v1/billing.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -533,6 +543,7 @@ import userLinkRoutes from './routes/user/link.routes';
 // Routes - Webhooks (no authentication - signature-based)
 import revenuecatWebhookRoutes from './routes/webhooks/revenuecat.routes';
 import asaasWebhookRoutes from './routes/webhooks/asaas.routes';
+import asaasBillingWebhookRoutes from './routes/webhooks/asaas-billing.routes';
 
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
@@ -705,6 +716,8 @@ app.use('/public/orders', ...publicOrdersLimiters, publicOrdersRoutes);
 
 // Webhook Routes (signature-based authentication)
 app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
+// Before /webhooks/asaas: Express matches '/webhooks/asaas' only on a path segment, but keep the order explicit.
+app.use('/webhooks/asaas-billing', asaasBillingWebhookRoutes);
 app.use('/webhooks/asaas', asaasWebhookRoutes);
 
 // API Core v1 Routes
@@ -743,6 +756,8 @@ app.use('/v1/app/team', ...appBearer, teamRoutes);
 app.use('/v1/app/contracts', ...appBearer, contractsRoutes);
 // First access on the web: the segment's checklists and samples after the browser creates the company (docs/WEB_API.md)
 app.use('/v1/app/onboarding', ...appBearer, onboardingRoutes);
+// Plans bought on the web (Asaas of Rafsoft → RevenueCat promotional), off unless config/webCheckout.enabled (docs/WEB_CHECKOUT.md)
+app.use('/v1/app/billing', ...appBearer, billingRoutes);
 // Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
 app.use('/v1/app/web-access', createWebAccessRouter({
   verifyIdToken: (token) => adminAuth.verifyIdToken(token),
@@ -799,7 +814,15 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
-    secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey, anthropicApiKey],
+    secrets: [
+      ssrApiSecret,
+      asaasCredentialsKey,
+      revenuecatWebhookAuth,
+      revenuecatSecretApiKey,
+      anthropicApiKey,
+      asaasBillingApiKey,
+      asaasBillingWebhookToken,
+    ],
   },
   app
 );

@@ -13,6 +13,7 @@ import {
   releaseAiRequest,
   reserveAiRequest,
   resetAiGlobalCache,
+  resolveAiDailyLimit,
   resolveAiLimit,
   resolveAiSettings,
 } from '../ai-quota.service';
@@ -38,6 +39,15 @@ describe('ai quota', () => {
     expect(resolveAiLimit('gold', ON)).toBe(50);
     expect(resolveAiLimit('free', { enabled: true, monthlyLimit: 70 })).toBe(70);
     expect(resolveAiLimit('free', { enabled: true, monthlyLimit: -1 })).toBe(-1);
+  });
+
+  it('an expired legacy plan or courtesy gets the current Free (50/month, 20/day)', () => {
+    const expiredCourtesy = { plan: 'pro', source: 'grace', expiresAt: '2026-10-01T00:00:00Z' };
+    const expiredLegacy = { plan: 'starter', source: 'store', expiresAt: '2026-10-01T00:00:00Z' };
+    for (const sub of [expiredCourtesy, expiredLegacy]) {
+      expect(resolveAiLimit(sub, null, NOW)).toBe(50);
+      expect(resolveAiDailyLimit(sub, null, NOW)).toBe(20);
+    }
   });
 
   it('getAiSettings: no company doc and no global switch → off; only enabled === true turns it on', async () => {

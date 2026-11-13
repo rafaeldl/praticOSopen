@@ -14,8 +14,8 @@ A tela de planos (app e web, #725) mostra esta tabela, cada plano no formato "tu
 | | Gratis | Starter | Pro | Business |
 |---|---|---|---|---|
 | Para quem | Comecando | Autonomo | Equipe pequena | Empresa |
-| Mensal | R$ 0 | R$ 59,90 | R$ 119 | R$ 249 |
-| Anual (paga 10 meses) | — | R$ 599 | R$ 1.190 | R$ 2.490 |
+| Mensal | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
+| Anual (paga 10 meses) | — | R$ 599 | R$ 1.199 | R$ 2.499 |
 | OS por mes | 10 | 50 | 150 | 500, depois +R$ 99 a cada 100 |
 | Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
 | CNPJs na nota | — | 1 | 2 | sem limite |

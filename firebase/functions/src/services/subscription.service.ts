@@ -15,13 +15,26 @@ import {
   PAID_PLANS_BY_RANK,
   PLAN_LIMITS,
   getNextMonthReset,
-  getPlanLimits,
   isGraceActive,
+  limitsOfRow,
+  planRow,
   resolveSubscriptionState,
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
-import { PLAN_TABLE_CURRENT_VERSION } from './plan-table.generated';
+import { PLAN_TABLE_CURRENT_VERSION, PLAN_TABLE_LEGACY_VERSION } from './plan-table.generated';
+import { webOriginFor } from './web-billing/web-origin';
+import { isPaidPlansEnabled } from './plan-limits.service';
+
+/**
+ * Table a plan change is written with: the current one only once the plan
+ * switch (`config/paidPlans.enabled`) is on. Until then a purchase keeps the
+ * legacy table, so nothing changes for customers (the store app reads the
+ * stored limits) before the switch is turned on.
+ */
+export async function tableVersionForPlanChange(): Promise<string> {
+  return (await isPaidPlansEnabled()) ? PLAN_TABLE_CURRENT_VERSION : PLAN_TABLE_LEGACY_VERSION;
+}
 
 export {
   PLAN_LIMITS,
@@ -166,6 +179,7 @@ export function buildPlanUpdate(
   state: ResolvedSubscriptionState,
   now: Date,
   current?: Subscription,
+  tableVersion: string = PLAN_TABLE_CURRENT_VERSION,
 ): FieldUpdates {
   const nowIso = now.toISOString();
   // Limits and the table version are written only when the plan changes (or
@@ -179,7 +193,10 @@ export function buildPlanUpdate(
     'subscription.status': state.status,
     ...(samePlan
       ? {}
-      : { 'subscription.limits': getPlanLimits(state.plan), 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
+      : {
+          'subscription.limits': limitsOfRow(planRow(state.plan, tableVersion)),
+          'subscription.tableVersion': tableVersion,
+        }),
     'subscription.expiresAt': state.expiresAt,
     'subscription.store': state.store,
     'subscription.source': 'store',
@@ -202,14 +219,15 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
   if (!snapshot.exists) return 'company_not_found';
 
   const subscriber = await deps.fetchSubscriber(companyId);
-  const state = resolveSubscriptionState(subscriber, now);
+  // Web checkout (docs/WEB_CHECKOUT.md): promotional backed by a web record → store 'web'.
+  const state = await webOriginFor(companyId, subscriber, resolveSubscriptionState(subscriber, now), now);
   const current = snapshot.get('subscription') as Subscription | undefined;
   if (state.plan === 'free' && isGraceActive(current, now)) {
     console.log(`[Subscription] Grace period kept for company ${companyId}`);
     return 'grace_kept';
   }
 
-  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current));
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current, await tableVersionForPlanChange()));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
 }
@@ -239,6 +257,7 @@ export async function expireSubscriptions(
     return typeof expiresAt === 'string' && Date.parse(expiresAt) <= now.getTime();
   });
 
+  const tableVersion = due.length > 0 ? await tableVersionForPlanChange() : PLAN_TABLE_CURRENT_VERSION;
   let expired = 0;
   let errors = 0;
   const failedIds: string[] = [];
@@ -248,8 +267,8 @@ export async function expireSubscriptions(
       const doc = due[next++];
       try {
         const subscriber = await deps.fetchSubscriber(doc.id);
-        const state = resolveSubscriptionState(subscriber, now);
-        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
+        const state = await webOriginFor(doc.id, subscriber, resolveSubscriptionState(subscriber, now), now);
+        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now, undefined, tableVersion));
         if (state.plan === 'free') expired++;
       } catch (error) {
         errors++;

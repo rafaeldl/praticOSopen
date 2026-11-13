@@ -76,13 +76,13 @@
         "name": "Pro",
         "who": "Para a equipe pequena",
         "monthly": {
-          "price": "R$ 119",
+          "price": "R$ 119,90",
           "period": "por mês"
         },
         "annual": {
-          "price": "R$ 1.190",
+          "price": "R$ 1.199",
           "period": "por ano",
-          "note": "equivale a R$ 99,17 por mês"
+          "note": "equivale a R$ 99,92 por mês"
         },
         "limits": [
           "150 OS por mês",
@@ -107,13 +107,13 @@
         "name": "Business",
         "who": "Para a empresa que cresceu",
         "monthly": {
-          "price": "R$ 249",
+          "price": "R$ 249,90",
           "period": "por mês"
         },
         "annual": {
-          "price": "R$ 2.490",
+          "price": "R$ 2.499",
           "period": "por ano",
-          "note": "equivale a R$ 207,50 por mês"
+          "note": "equivale a R$ 208,25 por mês"
         },
         "limits": [
           "500 OS por mês, depois R$ 99 a cada 100",
@@ -340,13 +340,13 @@
         "name": "Pro",
         "who": "For a small team",
         "monthly": {
-          "price": "R$ 119",
+          "price": "R$ 119.90",
           "period": "a month"
         },
         "annual": {
-          "price": "R$ 1,190",
+          "price": "R$ 1,199",
           "period": "a year",
-          "note": "about R$ 99.17 a month"
+          "note": "about R$ 99.92 a month"
         },
         "limits": [
           "150 work orders a month",
@@ -370,13 +370,13 @@
         "name": "Business",
         "who": "For a growing company",
         "monthly": {
-          "price": "R$ 249",
+          "price": "R$ 249.90",
           "period": "a month"
         },
         "annual": {
-          "price": "R$ 2,490",
+          "price": "R$ 2,499",
           "period": "a year",
-          "note": "about R$ 207.50 a month"
+          "note": "about R$ 208.25 a month"
         },
         "limits": [
           "500 work orders a month, then R$ 99 per extra 100",
@@ -593,13 +593,13 @@
         "name": "Pro",
         "who": "Para un equipo pequeño",
         "monthly": {
-          "price": "R$ 119",
+          "price": "R$ 119,90",
           "period": "por mes"
         },
         "annual": {
-          "price": "R$ 1.190",
+          "price": "R$ 1.199",
           "period": "por año",
-          "note": "equivale a R$ 99,17 por mes"
+          "note": "equivale a R$ 99,92 por mes"
         },
         "limits": [
           "150 órdenes por mes",
@@ -623,13 +623,13 @@
         "name": "Business",
         "who": "Para la empresa que creció",
         "monthly": {
-          "price": "R$ 249",
+          "price": "R$ 249,90",
           "period": "por mes"
         },
         "annual": {
-          "price": "R$ 2.490",
+          "price": "R$ 2.499",
           "period": "por año",
-          "note": "equivale a R$ 207,50 por mes"
+          "note": "equivale a R$ 208,25 por mes"
         },
         "limits": [
           "500 órdenes por mes, después R$ 99 cada 100",

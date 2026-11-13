@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/subscription_service.dart';
@@ -19,6 +21,17 @@ class PaywallLauncher {
   static String? _currentRole() =>
       AuthorizationService.instance.currentUserRole?.name;
 
+  /// Subscription of the current company. Tests replace it to avoid Firebase.
+  @visibleForTesting
+  static Subscription? Function() subscriptionResolver = _currentSubscription;
+
+  static Subscription? _currentSubscription() => Global.subscription;
+
+  /// Plan bought on the web (docs/WEB_CHECKOUT.md): the app offers no purchase
+  /// and never points to the website (App Store 3.1.1/3.1.3).
+  static bool get currentPlanIsFromWeb =>
+      subscriptionResolver()?.hasWebSubscription(DateTime.now()) ?? false;
+
   /// Whether [role] may buy or manage the company plan.
   static bool canPurchase(String? role) => role == 'owner' || role == 'admin';
 
@@ -31,6 +44,7 @@ class PaywallLauncher {
 
   /// Opens the RevenueCat paywall (offering `default`).
   static Future<void> showPaywall(BuildContext context) async {
+    if (currentPlanIsFromWeb) return _showPlanActive(context);
     if (!currentUserCanPurchase) return showAskAdmin(context);
     if (!_sdkReady) return _showUnavailable(context);
 
@@ -100,6 +114,15 @@ class PaywallLauncher {
   }
 
   /// "Ask your company admin to change the plan."
+  /// Only the active plan, without saying where it was bought.
+  static Future<void> _showPlanActive(BuildContext context) => _showMessage(
+        context,
+        title: context.l10n.subscription,
+        message: context.l10n.planActiveMessage(
+          subscriptionResolver()?.plan.displayName ?? '',
+        ),
+      );
+
   static Future<void> showAskAdmin(BuildContext context) => _showMessage(
         context,
         title: context.l10n.askAdminToChangePlanTitle,
