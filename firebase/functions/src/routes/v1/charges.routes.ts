@@ -7,6 +7,7 @@ import { Router, Response } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireAppPermission } from '../../middleware/app-permission.middleware';
+import { requirePlanFeature } from '../../middleware/plan-limit.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { validateInput } from '../../utils/validation.utils';
 import { cancelOrderCharge, createOrderCharge } from '../../services/asaas/charge.service';
@@ -48,6 +49,8 @@ function notFound(res: Response, code: 'ORDER_NOT_FOUND' | 'CHARGE_NOT_FOUND'): 
 router.post(
   '/:orderId/charges',
   requireAppPermission('chargeOrder'),
+  // Charges are Starter (#724); cancelling one already made never is.
+  requirePlanFeature('charges'),
   async (req: AuthenticatedRequest, res: Response) => {
     const orderId = param(req.params.orderId);
     if (!isValidId(orderId)) {

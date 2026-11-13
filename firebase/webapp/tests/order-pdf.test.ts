@@ -90,6 +90,17 @@ const PNG = Uint8Array.from(
 )
 
 describe('buildOrdersPdf', () => {
+  // #724: the mark exactly when the app draws it (shouldShowPdfWatermark decides; load.ts passes it).
+  it('watermark: "PraticOS" on every page of the order, only when asked', async () => {
+    const marks = (bytes: Uint8Array) => pdfText(bytes).split('\n').filter((line) => line === 'PraticOS').length
+    const many = part(true, { services: Array.from({ length: 60 }, (_, i) => ({ service: { name: `Serviço ${i}` }, value: 10 })) })
+    const bytes = await buildOrdersPdf([many], company, texts, { showValues: true, watermark: true })
+    expect(marks(bytes)).toBe(pdfPageCount(bytes))
+    expect(pdfPageCount(bytes)).toBeGreaterThan(1)
+    expect(marks(await buildOrdersPdf([many], company, texts, { showValues: true }))).toBe(0)
+    expect(marks(await buildOrdersPdf([many], company, texts, { showValues: true, watermark: false }))).toBe(0)
+  })
+
   it('draws the order like the app: header, customer, items, summary, terms and signatures', async () => {
     const text = pdfText(await buildOrdersPdf([part(true)], company, texts, { showValues: true }))
     for (const expected of ['Oficina Alfa', 'Av. Brasil, 1', '#186', 'CONCLUÍDA', 'Técnico: Tiago', 'Criada: 01/10/2026', 'Concluída: 02/10/2026', 'Ana Souza', '(11) 98888-7777 · ana@exemplo.test', 'Rua das Flores, 10', 'Fiat Uno', 'ABC1D23', 'Alinhamento - dianteiro', 'Óleo 5W30', 'R$ 150,00', 'R$ 120,00', '- R$ 20,00', 'R$ 250,00', 'Pago', 'R$ 100,00', 'Garantia de 90 dias.', 'Responsável', 'Página 1 de 1']) {

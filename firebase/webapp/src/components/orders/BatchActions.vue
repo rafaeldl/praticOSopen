@@ -19,6 +19,8 @@ import { firestoreLite } from '@/lib/firebase'
 import OrderPrint from './OrderPrint.vue'
 import '@/styles/receive.css'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature, showPlanFeatureNotice, usePlanFeature } from '@/lib/plan-feature-gate'
+import { PLAN_NAME } from '@/lib/plan-limits'
 import { announce } from '@/lib/ui'
 import ChoiceDialog from './ChoiceDialog.vue'
 import BatchConfirm from './BatchConfirm.vue'
@@ -31,6 +33,8 @@ const props = defineProps<{ orders: Order[] }>()
 const emit = defineEmits<{ done: [] }>()
 type Dialog = 'status' | 'assignee' | 'receive' | 'pdf' | 'charge' | 'ai' | null
 const dialog = ref<Dialog>(null)
+// Actions over several orders are Business (#724): without it the bar says so and opens the plan notice.
+const bulk = usePlanFeature('bulkActions')
 const printing = shallowRef<Order[]>([])
 const busy = ref(false)
 const team = shallowRef<Member[]>([])
@@ -227,13 +231,19 @@ async function openAssignee() {
 <template>
   <div class="batchbar" role="region" :aria-label="t('web.batch.label')">
     <strong>{{ t('web.orders.selected', { count: orders.length }) }}</strong>
+    <template v-if="!bulk.allowed">
+      <button type="button" class="link" data-testid="batch-plan" @click="showPlanFeatureNotice('bulkActions', bulk.requiredPlan)">{{ t('planFeatureBulkActions') }}</button>
+      <span class="plan-badge">{{ t('planFeatureBadge', { plan: PLAN_NAME[bulk.requiredPlan ?? 'business'] }) }}</span>
+    </template>
+    <template v-else>
     <button v-if="statuses.length" type="button" class="btn btn--primary" :disabled="busy" @click="dialog = 'status'">{{ t('orderMenuChangeStatus') }}</button>
     <button v-if="canAssign" type="button" class="btn" :disabled="busy" @click="openAssignee">{{ t('orderAddResponsible') }}</button>
-    <button v-if="canCharge" type="button" class="btn" :disabled="busy" data-testid="batch-charge" @click="dialog = 'charge'">{{ t('chargeLinkTitle') }}</button>
+    <button v-if="canCharge" type="button" class="btn" :disabled="busy" data-testid="batch-charge" @click="ensurePlanFeature('charges') && (dialog = 'charge')">{{ t('chargeLinkTitle') }}</button>
     <button v-if="canAsk" type="button" class="btn" :disabled="busy" data-testid="batch-ai" @click="dialog = 'ai'"><span class="ai" aria-hidden="true">✦</span> {{ t('web.ai.batchButton') }}</button>
     <button v-if="receivable" type="button" class="btn wide-only" :disabled="busy" data-testid="batch-receive" @click="dialog = 'receive'">{{ t('web.batch.receive', { name: receivable.name }) }}</button>
     <button v-if="canPrint" type="button" class="btn" :disabled="busy" data-testid="batch-pdf" @click="dialog = 'pdf'">{{ t('web.batch.pdf') }}</button>
     <button v-if="canPrint" type="button" class="btn wide-only" :disabled="busy" data-testid="batch-print" @click="printAll">{{ t('web.batch.print') }}</button>
+    </template>
     <button type="button" class="btn btn--ghost" :disabled="busy" @click="emit('done')">{{ t('clear') }} <kbd>Esc</kbd></button>
   </div>
   <ChoiceDialog

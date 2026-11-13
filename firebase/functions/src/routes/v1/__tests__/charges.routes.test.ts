@@ -10,6 +10,10 @@ jest.mock('../../../services/firestore.service', () =>
 import * as chargeService from '../../../services/asaas/charge.service';
 import { AsaasServiceError } from '../../../services/asaas/errors';
 import router from '../charges.routes';
+import * as firestoreService from '../../../services/firestore.service';
+import { resetPaidPlansCache } from '../../../services/plan-limits.service';
+
+const fake = (firestoreService as unknown as { __fake: { seed(path: string, data: unknown): void; reset(): void } }).__fake;
 
 const mockService = chargeService as jest.Mocked<typeof chargeService>;
 
@@ -147,5 +151,31 @@ describe('charges.routes', () => {
     const res = await request(buildApp('manager')).delete('/o_1-A/charges/ch_1-B');
     expect(res.status).toBe(200);
     expect(mockService.cancelOrderCharge).toHaveBeenCalledWith('comp1', 'o_1-A', 'ch_1-B');
+  });
+
+  describe('by plan (#724)', () => {
+    afterEach(() => {
+      fake.reset();
+      resetPaidPlansCache();
+    });
+
+    it('switch on, Free: 402 PLAN_FEATURE (charges are Starter), nothing is created', async () => {
+      resetPaidPlansCache();
+      fake.seed('config/paidPlans', { enabled: true });
+      fake.seed('companies/comp1', { subscription: { plan: 'free' } });
+      const res = await request(buildApp('admin')).post('/o1/charges').send({ value: 100, mode: 'single' });
+      expect(res.status).toBe(402);
+      expect(res.body.error).toMatchObject({ code: 'PLAN_FEATURE', feature: 'charges', requiredPlan: 'starter' });
+      expect(mockService.createOrderCharge).not.toHaveBeenCalled();
+    });
+
+    it('switch on, Starter: creates', async () => {
+      resetPaidPlansCache();
+      fake.seed('config/paidPlans', { enabled: true });
+      fake.seed('companies/comp1', { subscription: { plan: 'starter', status: 'active' } });
+      mockService.createOrderCharge.mockResolvedValue(CHARGE);
+      const res = await request(buildApp('admin')).post('/o1/charges').send({ value: 100, mode: 'single' });
+      expect(res.status).toBe(201);
+    });
   });
 });

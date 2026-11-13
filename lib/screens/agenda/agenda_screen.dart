@@ -24,6 +24,8 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// Agenda tab: the week (or month) on top, the orders of the selected day
 /// below, as a flat list like Início.
@@ -221,6 +223,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   Future<void> _pickTechnician(BuildContext context) async {
+    // The schedule per person is Pro (#724).
+    if (!ensurePlanFeature(context, PlanFeature.perPersonAgenda)) return;
     final l10n = context.l10n;
     final picked = await pickOne<String>(
       context,

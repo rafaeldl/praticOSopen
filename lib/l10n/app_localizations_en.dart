@@ -7873,4 +7873,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checklistAiView => 'View';
+
+  @override
+  String planFeatureTitle(String plan) {
+    return 'Part of the $plan plan';
+  }
+
+  @override
+  String planFeatureBody(String plan) {
+    return 'To use it, move to the $plan plan. What you already have stays.';
+  }
+
+  @override
+  String planFeatureAskOwner(String plan) {
+    return 'Ask the business owner to move to the $plan plan.';
+  }
+
+  @override
+  String planFeatureBadge(String plan) {
+    return '$plan plan';
+  }
+
+  @override
+  String get planFeatureNfse => 'Service invoices (NFS-e)';
+
+  @override
+  String get planFeatureBrandedPdf => 'PDF without the PraticOS brand';
+
+  @override
+  String get planFeatureOwnChecklists => 'Your own checklists';
+
+  @override
+  String get planFeatureCharges => 'Payment requests and reminders';
+
+  @override
+  String get planFeatureReviewRequest => 'Ask the customer for a review';
+
+  @override
+  String get planFeatureTeamRoles => 'Technician, manager and other roles';
+
+  @override
+  String get planFeaturePerPersonAgenda => 'Schedule and assignee per person';
+
+  @override
+  String get planFeatureWorkStages => 'Work stages';
+
+  @override
+  String get planFeatureTvMode => 'TV mode';
+
+  @override
+  String get planFeatureContracts => 'Contracts';
+
+  @override
+  String get planFeatureAiFinance => 'AI for payments';
+
+  @override
+  String get planFeatureSpreadsheetExport => 'Spreadsheet report';
+
+  @override
+  String get planFeatureBulkActions => 'Bulk actions';
+
+  @override
+  String get planFeatureMcp => 'ChatGPT and Claude';
+
+  @override
+  String get planFeatureApi => 'API with a key';
 }

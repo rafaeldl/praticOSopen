@@ -5,6 +5,7 @@ import {
   listIntegrationTokens,
   revokeIntegrationToken,
 } from '../../services/integration-token.service';
+import { ensurePlanFeature } from '../../middleware/plan-limit.middleware';
 
 const router: Router = Router();
 
@@ -43,6 +44,8 @@ router.get('/tokens', async (req: AuthenticatedRequest, res: Response) => {
 router.post('/tokens', async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!ensureManager(req, res)) return;
+    // ChatGPT and Claude are Business (#724); a connection already made keeps working.
+    if (!(await ensurePlanFeature(res, req.userContext!.companyId, 'mcp'))) return;
 
     const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
     if (!name) {

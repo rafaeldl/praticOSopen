@@ -16,6 +16,7 @@ import {
 import { periodOf } from '../src/lib/finance/period'
 import { isOpen } from '../src/lib/orders/model'
 import { checkPlanLimit, planInForce, shouldShowPdfWatermark } from '../src/lib/plan-limits'
+import { checkPlanFeature, featureForRole } from '../src/lib/plan-features'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,6 +139,31 @@ describe('plan-limits', () => {
       return
     }
     const result: Record<string, unknown> = { ...checkPlanLimit({ subscription, resource: given.resource, usage: given.usage, adding: given.adding, lastMonthUsage: given.lastMonthUsage, enforced: given.paidPlansEnabled, now }) }
+    expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
+  })
+})
+
+// Features of each plan (#724): the same cases as the app (plan_features_cases_test.dart)
+// and the server (plan-features.service.test.ts), over src/lib/plan-features.ts.
+describe('plan-features', () => {
+  const DAY_MS = 24 * 60 * 60 * 1000
+  const doc = JSON.parse(readFileSync(resolve(dir, 'plan-features.json'), 'utf8'))
+
+  test('runs in web', () => expect(doc.runsIn).toContain('web'))
+
+  test.each(cases('plan-features.json'))('$id', (c) => {
+    const { given } = c
+    const want = { ...(c.correct ?? c.expect), ...c.divergesIn?.web }
+    if (given.kind === 'role') {
+      expect({ feature: featureForRole(given.role) }).toEqual(want)
+      return
+    }
+    const now = new Date()
+    const subscription =
+      given.subscription === null || given.expiresInDays === undefined
+        ? given.subscription
+        : { ...given.subscription, expiresAt: new Date(now.getTime() + given.expiresInDays * DAY_MS).toISOString() }
+    const result: Record<string, unknown> = { ...checkPlanFeature({ subscription, feature: given.feature, enforced: given.paidPlansEnabled, now }) }
     expect(Object.fromEntries(Object.keys(want).map((key) => [key, result[key]]))).toEqual(want)
   })
 })

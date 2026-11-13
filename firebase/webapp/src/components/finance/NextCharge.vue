@@ -20,6 +20,7 @@ import { customerCharges, ordersForPrint, paymentSettings } from '@/lib/receive/
 import { chargeOf, isOpenCharge } from '@/lib/receive/model'
 import { can, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import { errorMessageKey } from '@/lib/api'
 
 const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
@@ -110,6 +111,8 @@ const failed = (error: unknown) => showToast(t(errorMessageKey(error)))
 async function sendOrder(row: FinanceRow, asaas = false) {
   order.value = row
   if (asaas && row.status !== 'quote' && row.status !== 'canceled' && row.open > 0) {
+    // A new Asaas charge is Starter (#724), as the app's SendChargeFlow.
+    if (!ensurePlanFeature('charges')) return
     step.value = 'charge'
     return
   }

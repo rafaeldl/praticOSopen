@@ -464,7 +464,7 @@ async function seedForms() {
   batch.set(db.doc('segments/automotive/forms/seg-final'), final)
   batch.set(db.doc('segments/automotive/forms/seg-import'), importable)
   batch.set(db.doc(`companies/${COMPANY_A}/forms/seg-entrada`), { id: 'seg-entrada', ...entrada, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, ...audit(USERS.owner, 90000) })
-  batch.set(db.doc(`companies/${COMPANY_A}`), { subscription: { plan: 'business', status: 'active' } }, { merge: true })
+  batch.set(db.doc(`companies/${COMPANY_A}`), { subscription: { plan: 'business', status: 'active', tableVersion: '2' } }, { merge: true })
   const companyB = { id: COMPANY_B, name: COMPANIES[COMPANY_B].name }
   batch.set(db.doc(`companies/${COMPANY_B}/forms/b-active`), { id: 'b-active', title: 'Intake', description: null, isActive: true, items: [q('screen', 'Screen ok?', 'boolean')], company: companyB, ...audit(USERS.owner, 90000) })
   batch.set(db.doc(`companies/${COMPANY_B}/forms/b-off`), { id: 'b-off', title: 'Old check', description: null, isActive: false, items: [q('x', 'Anything?', 'text')], company: companyB, ...audit(USERS.owner, 90000) })

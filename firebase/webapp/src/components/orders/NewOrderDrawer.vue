@@ -40,6 +40,8 @@ import { isMac } from '@/lib/shortcuts'
 import { featureOn } from '@/lib/company-features'
 import { productWord, segmentFieldService } from '@/lib/segments'
 import { showToast } from '@/lib/toast'
+import { usePlanFeature } from '@/lib/plan-feature-gate'
+import { PLAN_NAME } from '@/lib/plan-limits'
 import { announce, ui } from '@/lib/ui'
 
 interface Line {
@@ -78,6 +80,8 @@ const request = ref('')
 const status = ref<OrderStatus>('quote')
 const visit = ref('')
 const assignee = ref('')
+// Plan (#724): the responsible per person is Pro; a seed from the Agenda's "De quem" stays.
+const perPerson = usePlanFeature('perPersonAgenda')
 /** The place of the order (order.new.more-options): only for companies that go to the customer, like the order's own Local. */
 const address = ref('')
 // Absent on the company: the segment's default, like the order's own Local (auth.gate.feature-defaults).
@@ -588,10 +592,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
             </div>
             <div v-if="team.length">
               <label class="field-label" for="no-assignee">{{ t('orderAddResponsible') }}</label>
-              <select id="no-assignee" v-model="assignee" class="field">
+              <select id="no-assignee" v-model="assignee" class="field" :disabled="!perPerson.allowed && !assignee" aria-describedby="no-assignee-plan">
                 <option value="">{{ t('web.order.nobody') }}</option>
                 <option v-for="member in team" :key="member.id" :value="member.id">{{ member.name }}</option>
               </select>
+              <p v-if="!perPerson.allowed" id="no-assignee-plan" class="plan-badge">{{ t('planFeatureBadge', { plan: PLAN_NAME[perPerson.requiredPlan ?? 'pro'] }) }} · {{ t('planFeaturePerPersonAgenda') }}</p>
             </div>
           </div>
         </details>

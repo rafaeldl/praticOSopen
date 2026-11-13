@@ -8,7 +8,7 @@
 // without a browser. pdf-lib is loaded with this module, never before someone
 // asks for a PDF. Helvetica draws only WinAnsi; what is outside it is simplified
 // goes out in Roboto (assets/fonts, as the app), loaded only when needed.
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFPage, type RGB } from 'pdf-lib'
+import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFImage, type PDFPage, type RGB } from 'pdf-lib'
 import qrcode from 'qrcode-generator'
 import type { OrderForm } from '@/lib/forms/model'
 import type { Order, OrderLine, OrderStatus } from '@/lib/orders/model'
@@ -97,6 +97,12 @@ export interface PdfOptions {
   showValues: boolean
   /** Loads fontkit and Roboto (assets/fonts, the app's fallback); called only when some text needs it. */
   fallbackFont?: () => Promise<{ fontkit: unknown; bytes: Uint8Array }>
+  /**
+   * The "PraticOS" mark across the order's pages (#724), exactly when the app
+   * draws it: FeatureGateService.shouldShowPdfWatermark, on the web
+   * shouldShowPdfWatermark of lib/plan-limits.ts (off while the plan switch is off).
+   */
+  watermark?: boolean
 }
 
 // PdfStyles of the app.
@@ -215,6 +221,7 @@ interface Ctx {
   images: Map<PdfImage, PDFImage | null>
   /** Roboto, only when some text needs it (B4). */
   fallback: PDFFont | null
+  watermark: boolean
 }
 
 /** The font and text to draw: Helvetica as the app, Roboto for what Helvetica lacks. */
@@ -708,6 +715,20 @@ function drawForm(ctx: Ctx, part: PdfOrderPart, entry: PdfOrderPart['forms'][num
   return flow.pages
 }
 
+/** The app's PdfMainOsBuilder.buildWatermark: "PraticOS" bold 72, grey at 6%, turned 45° down, centred on the page. */
+export const WATERMARK = { text: 'PraticOS', size: 72, opacity: 0.06, angle: -45 }
+
+function drawWatermark(ctx: Ctx, page: PDFPage) {
+  const width = ctx.bold.widthOfTextAtSize(WATERMARK.text, WATERMARK.size)
+  const height = ctx.bold.heightAtSize(WATERMARK.size, { descender: false })
+  const rad = (WATERMARK.angle * Math.PI) / 180
+  // The text turns around its start: move the start so its middle lands on the page's middle.
+  const [cx, cy] = [width / 2, height / 2]
+  const x = W / 2 - (cx * Math.cos(rad) - cy * Math.sin(rad))
+  const y = H / 2 - (cx * Math.sin(rad) + cy * Math.cos(rad))
+  page.drawText(WATERMARK.text, { x, y, size: WATERMARK.size, font: ctx.bold, color: hex(0x9e9e9e), opacity: WATERMARK.opacity, rotate: degrees(WATERMARK.angle) })
+}
+
 function drawOrder(ctx: Ctx, part: PdfOrderPart) {
   const number = part.order.number !== undefined ? String(part.order.number) : ctx.texts.newOrder
   const pages: PDFPage[] = []
@@ -724,6 +745,8 @@ function drawOrder(ctx: Ctx, part: PdfOrderPart) {
   drawTermsAndSignatures(ctx, flow, part)
   pages.push(...flow.pages)
   flow.pages.forEach((page, i) => drawFooter(ctx, page, `${ctx.texts.generatedBy} · ${ctx.texts.site}`, ctx.texts.pageOf(i + 1, flow.pages.length)))
+  // Over the content, on the order's pages only (the app's buildForeground of the main MultiPage).
+  if (ctx.watermark) flow.pages.forEach((page) => drawWatermark(ctx, page))
   for (const entry of part.forms) drawForm(ctx, part, entry)
 }
 
@@ -765,7 +788,7 @@ export async function buildOrdersPdf(parts: PdfOrderPart[], company: PdfCompany,
   for (const image of all) if (!images.has(image)) images.set(image, await embed(doc, image))
   const logo = company.logo ? await embed(doc, company.logo) : null
   const fallback = await fallbackFor(doc, parts, company, options)
-  const ctx: Ctx = { doc, font, bold, texts, show: options.showValues, company, logo, images, fallback }
+  const ctx: Ctx = { doc, font, bold, texts, show: options.showValues, company, logo, images, fallback, watermark: options.watermark === true }
   for (const part of parts) drawOrder(ctx, part)
   // Plain objects (no object streams): simpler files that any reader opens.
   return doc.save({ useObjectStreams: false })

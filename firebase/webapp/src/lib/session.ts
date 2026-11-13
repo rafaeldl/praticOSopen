@@ -29,6 +29,8 @@ export interface CompanyProfile {
   useContracts?: boolean
   /** Work stages inside `progress` (lib/orders/stages.ts), as stored. */
   workStages?: unknown
+  /** The plan (lib/plan-limits.ts reads it); the gates of lib/plan-feature-gate.ts. */
+  subscription?: unknown
 }
 
 export interface SessionState {

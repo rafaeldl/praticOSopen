@@ -135,7 +135,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest'],
     ),
     SubscriptionPlan.pro: PlanRow(
       ordersPerMonth: 150,
@@ -148,7 +148,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
     ),
     SubscriptionPlan.business: PlanRow(
       ordersPerMonth: 500,
@@ -161,7 +161,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: true,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
     ),
   },
 };
@@ -249,7 +249,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest'],
     ),
     SubscriptionPlan.pro: PlanRow(
       ordersPerMonth: 150,
@@ -262,7 +262,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: false,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
     ),
     SubscriptionPlan.business: PlanRow(
       ordersPerMonth: 500,
@@ -275,7 +275,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
       ownChecklists: true,
       pdfWatermark: false,
       overageAllowed: true,
-      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
     ),
   },
 };

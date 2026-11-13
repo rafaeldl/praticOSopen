@@ -7894,4 +7894,69 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get checklistAiView => 'Ver';
+
+  @override
+  String planFeatureTitle(String plan) {
+    return 'Función del plan $plan';
+  }
+
+  @override
+  String planFeatureBody(String plan) {
+    return 'Para usarlo, cambia al plan $plan. Lo que ya tienes se mantiene.';
+  }
+
+  @override
+  String planFeatureAskOwner(String plan) {
+    return 'Pide al dueño de la empresa que cambie al plan $plan.';
+  }
+
+  @override
+  String planFeatureBadge(String plan) {
+    return 'Plan $plan';
+  }
+
+  @override
+  String get planFeatureNfse => 'Factura de servicio (NFS-e)';
+
+  @override
+  String get planFeatureBrandedPdf => 'PDF sin la marca PraticOS';
+
+  @override
+  String get planFeatureOwnChecklists => 'Checklists propios';
+
+  @override
+  String get planFeatureCharges => 'Cobro y recordatorio de pago';
+
+  @override
+  String get planFeatureReviewRequest => 'Pedir una valoración al cliente';
+
+  @override
+  String get planFeatureTeamRoles => 'Técnico, gerente y otros perfiles';
+
+  @override
+  String get planFeaturePerPersonAgenda => 'Agenda y responsable por persona';
+
+  @override
+  String get planFeatureWorkStages => 'Etapas del servicio';
+
+  @override
+  String get planFeatureTvMode => 'Modo TV';
+
+  @override
+  String get planFeatureContracts => 'Contratos';
+
+  @override
+  String get planFeatureAiFinance => 'IA en finanzas';
+
+  @override
+  String get planFeatureSpreadsheetExport => 'Informe en hoja de cálculo';
+
+  @override
+  String get planFeatureBulkActions => 'Acciones en lote';
+
+  @override
+  String get planFeatureMcp => 'ChatGPT y Claude';
+
+  @override
+  String get planFeatureApi => 'API con clave';
 }

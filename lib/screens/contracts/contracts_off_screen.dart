@@ -9,6 +9,8 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// Writes `useContracts` on the company document.
 typedef ContractsSwitchWriter = Future<void> Function(String companyId);
@@ -46,6 +48,8 @@ class _ContractsOffScreenState extends State<ContractsOffScreen> {
   Future<void> _turnOn() async {
     final companyId = widget.companyId;
     if (companyId == null || _saving) return;
+    // Contracts are Pro (#724).
+    if (!ensurePlanFeature(context, PlanFeature.contracts)) return;
     final l10n = context.l10n;
     final provider = context.read<SegmentConfigProvider>();
     setState(() => _saving = true);

@@ -1,0 +1,833 @@
+{
+  "version": 1,
+  "generatedFrom": "docs/plans/plans.json v2",
+  "rule": "Recurso do plano (#724), com a lista `features` de docs/plans/plans.json. Chave desligada (config/paidPlans.enabled falso; no app também sem loja na build): tudo liberado. Plano ausente ou desconhecido é Free; plano com expiresAt vencido é Free da tabela atual. A linha é a do plano em vigor (`planInForce`, a mesma dos limites, #726): `tableVersion` gravado; sem ele, plano pago (assinante de antes da tabela atual e cortesia, que mantém o Pro antigo) segue a versão antiga; Free segue a atual. Uma versão sem nenhum recurso listado (a 1) não trava recurso nenhum: o assinante atual e a cortesia mantêm tudo. O básico (o que o Free tem) e a IA nunca travam (IA tem só os tetos de uso). Recurso desconhecido não trava. `requiredPlan` é o primeiro plano da tabela atual que tem o recurso (o plano para onde mudar); null se nenhum tem. Papel: dono e admin existem em todo plano; técnico, gerente, consultor e supervisor pedem `teamRoles`; outro valor não é papel (a validação responde). Nunca tira o que a empresa já tem: a checagem vale só para criar ou ligar algo novo.",
+  "runsIn": [
+    "dart",
+    "functions",
+    "web"
+  ],
+  "sourceOfTruth": [
+    "docs/plans/plans.json (features de cada plano)",
+    "lib/services/feature_gate_service.dart FeatureGateService.checkFeature, featureForRole",
+    "firebase/functions/src/services/plan-features.service.ts checkPlanFeature, featureForRole",
+    "firebase/webapp/src/lib/plan-features.ts checkPlanFeature, featureForRole"
+  ],
+  "fields": "`kind` feature: `expect` traz allowed, plan e requiredPlan. `expiresInDays` grava subscription.expiresAt a tantos dias de agora. `kind` role: `expect.feature` é o recurso que o papel pede (null: nenhum).",
+  "cases": [
+    {
+      "id": "switch-off-free-gets-work-stages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": false,
+        "feature": "workStages"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "free",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "free-no-charges",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "charges"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "free-no-review-request",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "reviewRequest"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "free-no-own-checklists",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "ownChecklists"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "free-no-nfse",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "nfse"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "no-subscription-is-free",
+      "given": {
+        "kind": "feature",
+        "subscription": null,
+        "paidPlansEnabled": true,
+        "feature": "teamRoles"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "starter-has-charges",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "charges"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "starter-has-review-request",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "reviewRequest"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "starter-has-branded-pdf",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "brandedPdf"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "starter"
+      }
+    },
+    {
+      "id": "starter-no-team-roles",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "teamRoles"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "starter-no-work-stages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "starter-no-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-has-work-stages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-has-tv-mode",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "tvMode"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-has-ai-finance",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "aiFinance"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-has-spreadsheet",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "spreadsheetExport"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-has-per-person-agenda",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "perPersonAgenda"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-no-bulk-actions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "pro-no-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp"
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "business-has-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "business",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "business-has-api",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "api"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "business",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "business-has-bulk-actions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "business",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "expired-pro-is-free",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": -1
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "pro-in-force-keeps-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": 10
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "table-v1-has-no-feature-gates",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "expired-v1-falls-to-current-free",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages",
+        "expiresInDays": -1
+      },
+      "expect": {
+        "allowed": false,
+        "plan": "free",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-teamRoles",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "teamRoles",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-workStages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "old-starter-keeps-bulkActions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "old-starter-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "starter",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-keeps-teamRoles",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "teamRoles",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-workStages",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "workStages",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-contracts",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "contracts",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "pro"
+      }
+    },
+    {
+      "id": "courtesy-keeps-bulkActions",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "bulkActions",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace",
+          "tableVersion": "1"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "courtesy-without-version-keeps-mcp",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "source": "grace"
+        },
+        "paidPlansEnabled": true,
+        "feature": "mcp",
+        "expiresInDays": 20
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "pro",
+        "requiredPlan": "business"
+      }
+    },
+    {
+      "id": "basics-never-gated",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "agenda"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "free",
+        "requiredPlan": "free"
+      }
+    },
+    {
+      "id": "link-approval-never-gated",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "linkApproval"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "free",
+        "requiredPlan": "free"
+      }
+    },
+    {
+      "id": "ai-is-for-every-plan",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "ai"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "free",
+        "requiredPlan": "free"
+      }
+    },
+    {
+      "id": "unknown-feature-is-not-gated",
+      "given": {
+        "kind": "feature",
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "paidPlansEnabled": true,
+        "feature": "somethingNew"
+      },
+      "expect": {
+        "allowed": true,
+        "plan": "free",
+        "requiredPlan": null
+      }
+    },
+    {
+      "id": "role-technician-needs-team-roles",
+      "given": {
+        "kind": "role",
+        "role": "technician"
+      },
+      "expect": {
+        "feature": "teamRoles"
+      }
+    },
+    {
+      "id": "role-manager-needs-team-roles",
+      "given": {
+        "kind": "role",
+        "role": "manager"
+      },
+      "expect": {
+        "feature": "teamRoles"
+      }
+    },
+    {
+      "id": "role-consultant-needs-team-roles",
+      "given": {
+        "kind": "role",
+        "role": "consultant"
+      },
+      "expect": {
+        "feature": "teamRoles"
+      }
+    },
+    {
+      "id": "role-supervisor-needs-team-roles",
+      "given": {
+        "kind": "role",
+        "role": "supervisor"
+      },
+      "expect": {
+        "feature": "teamRoles"
+      }
+    },
+    {
+      "id": "role-admin-is-in-every-plan",
+      "given": {
+        "kind": "role",
+        "role": "admin"
+      },
+      "expect": {
+        "feature": null
+      }
+    },
+    {
+      "id": "role-owner-is-in-every-plan",
+      "given": {
+        "kind": "role",
+        "role": "owner"
+      },
+      "expect": {
+        "feature": null
+      }
+    },
+    {
+      "id": "role-unknown-is-left-to-validation",
+      "given": {
+        "kind": "role",
+        "role": "boss"
+      },
+      "expect": {
+        "feature": null
+      }
+    }
+  ]
+}

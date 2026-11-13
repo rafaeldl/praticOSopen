@@ -19,6 +19,12 @@ import {
   type PlanLimitCheck,
   type PlanResource,
 } from '../services/plan-limits.service';
+import {
+  checkCompanyPlanFeature,
+  planFeatureError,
+  type PlanFeature,
+  type PlanFeatureCheck,
+} from '../services/plan-features.service';
 
 export interface PlanLimitDeps {
   /** The switch. False: the request goes on without counting. */
@@ -74,5 +80,61 @@ export async function ensurePlanCapacity(
   const check = await deps.check(companyId, resource, adding);
   if (check.allowed) return true;
   res.status(402).json(planLimitError(check));
+  return false;
+}
+
+// ============================================================================
+// Features of the plan (#724): 402 PLAN_FEATURE, same switch
+// ============================================================================
+
+export interface PlanFeatureDeps {
+  check: (companyId: string, feature: PlanFeature) => Promise<PlanFeatureCheck>;
+}
+
+export const defaultPlanFeatureDeps: PlanFeatureDeps = {
+  check: (companyId, feature) => checkCompanyPlanFeature(companyId, feature),
+};
+
+/**
+ * Feature of the plan before a write that creates or turns on something new.
+ * [feature] may depend on the request (null: nothing to check, e.g. an invite
+ * as admin). With the switch off the check allows everything.
+ * Not in the plan: 402 { error: { code: 'PLAN_FEATURE', feature, plan, requiredPlan } }.
+ */
+export function requirePlanFeature(
+  feature: PlanFeature | ((req: AuthenticatedRequest) => PlanFeature | null),
+  deps: PlanFeatureDeps = defaultPlanFeatureDeps,
+) {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const wanted = typeof feature === 'function' ? feature(req) : feature;
+      const companyId = req.userContext?.companyId ?? req.auth?.companyId;
+      if (!wanted || !companyId) return next();
+      const check = await deps.check(companyId, wanted);
+      if (!check.allowed) {
+        res.status(402).json(planFeatureError(check));
+        return;
+      }
+      next();
+    } catch (error) {
+      console.error('Plan feature check error:', error instanceof Error ? error.message : 'unknown');
+      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal error' } });
+    }
+  };
+}
+
+/**
+ * The same feature check inside a route, after its own checks. Sends the 402
+ * and returns false when the plan does not have [feature].
+ */
+export async function ensurePlanFeature(
+  res: Response,
+  companyId: string,
+  feature: PlanFeature,
+  deps: PlanFeatureDeps = defaultPlanFeatureDeps,
+): Promise<boolean> {
+  const check = await deps.check(companyId, feature);
+  if (check.allowed) return true;
+  res.status(402).json(planFeatureError(check));
   return false;
 }

@@ -16,6 +16,9 @@ import {
 export type { PlanId, PlanRow }
 export { PLAN_IDS }
 
+/** Name of each plan, the same in every language (the app's SubscriptionPlan.displayName). */
+export const PLAN_NAME: Record<PlanId, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' }
+
 /**
  * The one switch of the plan limits, `config/paidPlans.enabled` (Firestore),
  * the same document the server and the app read (#723). Off until read, and

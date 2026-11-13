@@ -30,6 +30,7 @@ import { isLlmProvider, type LlmProvider } from './llm.client';
 import { PLAN_IDS } from '../plan-table.generated';
 import { currentPlanRows, planRow, tableVersionOf } from '../subscription-plans';
 import { effectivePlan } from '../plan-limits.service';
+import { checkCompanyPlanFeature, type PlanFeature } from '../plan-features.service';
 
 /** Requests per month by plan (docs/plans/plans.json). -1 = unlimited. */
 export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = Object.fromEntries(
@@ -132,13 +133,22 @@ async function getGlobalAiConfig(now = Date.now()): Promise<Record<string, unkno
   return globalCache.data;
 }
 
-export async function getAiSettings(companyId: string): Promise<AiSettings> {
+export async function getAiSettings(
+  companyId: string,
+  planHasFeature: (companyId: string, feature: PlanFeature) => Promise<boolean> = async (id, feature) =>
+    (await checkCompanyPlanFeature(id, feature)).allowed,
+): Promise<AiSettings> {
   const [snap, global] = await Promise.all([
     db.collection('companies').doc(companyId).collection('settings').doc('ai').get(),
     getGlobalAiConfig(),
   ]);
   const company = snap.exists ? (snap.data() as Record<string, unknown>) : undefined;
-  return resolveAiSettings(company, global);
+  const settings = resolveAiSettings(company, global);
+  // Payments, discounts and status changes by the assistant are Pro (#724).
+  if (settings.financeActions && !(await planHasFeature(companyId, 'aiFinance'))) {
+    return { ...settings, financeActions: false };
+  }
+  return settings;
 }
 
 /** This month's use and limit, without counting anything (status for the app). */
