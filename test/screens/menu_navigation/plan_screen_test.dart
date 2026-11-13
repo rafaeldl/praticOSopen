@@ -21,6 +21,8 @@ Subscription _sub(
     plan: plan,
     source: plan == SubscriptionPlan.free ? null : SubscriptionSource.store,
     expiresAt: plan == SubscriptionPlan.free ? null : now.add(const Duration(days: 30)),
+    // Bought on the current table (#734: a paid plan without it is the old one).
+    tableVersion: plan == SubscriptionPlan.free ? null : '2',
     usage: SubscriptionUsage(usersActive: users)
       ..ordersMonth = orderMonthKey(now)
       ..ordersThisMonth = orders
@@ -83,7 +85,7 @@ void main() {
     expect(find.text('CNPJs na nota fiscal'), findsNothing);
     expect(find.textContaining('assistente'), findsNothing);
     expect(find.text('O que o Starter dá a mais'), findsOneWidget);
-    for (final name in ['Nota fiscal', 'PDF sem a marca PraticOS', 'Checklists próprios', 'Cobrança e lembrete de pagamento']) {
+    for (final name in ['Nota fiscal', 'PDF sem a marca PraticOS', 'Checklists próprios', 'Cobrança e lembrete de pagamento', 'Pedir avaliação ao cliente']) {
       expect(find.text(name), findsOneWidget, reason: name);
     }
     expect(find.byKey(const ValueKey('plan_paywall')), findsOneWidget);

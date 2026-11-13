@@ -556,6 +556,7 @@ async function seedSettings() {
         plan: 'starter',
         status: 'active',
         source: 'store',
+        tableVersion: '2',
         expiresAt: future,
         usage: {
           usersActive: 2,

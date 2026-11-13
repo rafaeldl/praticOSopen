@@ -51,7 +51,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -97,7 +98,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -143,7 +145,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -189,7 +192,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -235,7 +239,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -281,7 +286,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -291,7 +297,8 @@
       "given": {
         "subscription": {
           "plan": "starter",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 5,
@@ -346,7 +353,8 @@
       "given": {
         "subscription": {
           "plan": "starter",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 45,
@@ -401,7 +409,8 @@
       "given": {
         "subscription": {
           "plan": "pro",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 20,
@@ -449,7 +458,8 @@
       "given": {
         "subscription": {
           "plan": "business",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 520,
@@ -493,7 +503,8 @@
       "given": {
         "subscription": {
           "plan": "business",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 100,
@@ -570,7 +581,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
@@ -580,7 +592,8 @@
       "given": {
         "subscription": {
           "plan": "pro",
-          "status": "active"
+          "status": "active",
+          "tableVersion": "2"
         },
         "orders": {
           "thisMonth": 3,
@@ -614,7 +627,8 @@
             "nfse",
             "brandedPdf",
             "ownChecklists",
-            "charges"
+            "charges",
+            "reviewRequest"
           ]
         }
       }
