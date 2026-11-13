@@ -11,7 +11,11 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/plan_overview.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
@@ -20,74 +24,42 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// Resource counted against the plan limits.
-enum PlanResource { ai, team, photos, checklists }
-
-/// How close one resource is to its limit.
-enum PlanUsageLevel { unlimited, ok, near, atLimit }
-
-/// Usage of one [resource]: [used] of [limit] (-1 = unlimited).
-class PlanUsage {
-  const PlanUsage(this.resource, this.used, this.limit);
-
-  final PlanResource resource;
-  final int used;
-  final int limit;
-
-  /// "Quase no limite" from 80% on.
-  PlanUsageLevel get level {
-    if (limit < 0) return PlanUsageLevel.unlimited;
-    if (used >= limit) return PlanUsageLevel.atLimit;
-    if (limit > 0 && used / limit >= 0.8) return PlanUsageLevel.near;
-    return PlanUsageLevel.ok;
-  }
-
-  /// Usage of the resources, in the prototype order. The assistant comes
-  /// first, when [ai] says it is on: it is what the month's limit is about.
-  static List<PlanUsage> of(
-    Subscription subscription,
-    DateTime now, {
-    AiStatus? ai,
-  }) {
-    final limits = subscription.effectiveLimits(now);
-    final usage = subscription.usage;
-    final aiUsed = ai?.used;
-    final aiLimit = ai?.limit;
-    return [
-      if (ai?.enabled == true && aiUsed != null && aiLimit != null)
-        PlanUsage(PlanResource.ai, aiUsed, aiLimit),
-      PlanUsage(PlanResource.team, usage.usersActive, limits.users),
-      PlanUsage(PlanResource.photos, usage.photosThisMonth, limits.photosPerMonth),
-      PlanUsage(
-          PlanResource.checklists, usage.formTemplatesActive, limits.formTemplates),
-    ];
-  }
+/// Fiscal emitters of the current company (the CNPJs on the nota).
+Future<int> _countTaxIds() async {
+  final id = Global.companyAggr?.id;
+  if (id == null) return 0;
+  final snap = await FirebaseFirestore.instance
+      .collection('companies')
+      .doc(id)
+      .collection('fiscalEmitters')
+      .count()
+      .get();
+  return snap.count ?? 0;
 }
 
-/// "Plano": current plan and its period, what the company is using against
-/// the limits, and the paywall, Customer Center and restore purchases
-/// (owner/admin only, and only when the build has paid plans). When a limit
-/// is reached, a block says so and holds the only blue button ("Ver planos").
+/// "Plano" (#725): current plan and its period, orders this month, people
+/// and CNPJs against the plan, one notice (80%, 100%, the month of grace,
+/// orders waiting, talk to us) and what the next plan adds. The web shows
+/// the same (PlanView.vue), from the same rule (planOverview,
+/// docs/web-app/contract-cases/plan-overview.json). No assistant counter.
+/// Paywall, Customer Center and restore for owner/admin with paid plans.
 class PlanScreen extends StatefulWidget {
   const PlanScreen({
     super.key,
     this.onOpenTeam,
-    this.onOpenChecklists,
-    this.loadAiStatus,
+    this.loadTaxIds,
     this.hasPermission,
   });
 
-  /// Permission check for the usage rows: Equipe opens only with
-  /// `manageUsers`, Checklists only with `manageForms` (the routes don't
-  /// check). Defaults to the current user.
+  /// Permission check for the people row: opens Equipe only with
+  /// `manageUsers`. Defaults to the current user.
   final bool Function(PermissionType permission)? hasPermission;
 
-  /// Destinations of the usage rows (defaults: Equipe and Checklists routes).
+  /// Destination of the people row (default: the Equipe route).
   final VoidCallback? onOpenTeam;
-  final VoidCallback? onOpenChecklists;
 
-  /// Assistant use of the month; defaults to the server (tests inject).
-  final Future<AiStatus> Function()? loadAiStatus;
+  /// CNPJs set up for the nota; defaults to Firestore (tests inject).
+  final Future<int> Function()? loadTaxIds;
 
   @override
   State<PlanScreen> createState() => _PlanScreenState();
@@ -99,13 +71,16 @@ class _PlanScreenState extends State<PlanScreen> {
         permission,
       );
 
-  AiStatus? _ai;
+  /// Null until read (or when it could not be read): the row stays hidden.
+  int? _taxIds;
 
   @override
   void initState() {
     super.initState();
-    (widget.loadAiStatus ?? () => AiOrderAssistService().status())().then((ai) {
-      if (mounted) setState(() => _ai = ai);
+    (widget.loadTaxIds ?? _countTaxIds)().then((emitters) {
+      if (mounted) setState(() => _taxIds = emitters);
+    }).catchError((Object error) {
+      debugPrint('PlanScreen: tax IDs not read: $error');
     });
   }
 
@@ -135,15 +110,25 @@ class _PlanScreenState extends State<PlanScreen> {
   String _count(int value) =>
       FormatService().formatDecimal(value, decimalDigits: 0);
 
-  String _limitSentence(BuildContext context, PlanUsage usage) {
+  String _noticeText(BuildContext context, PlanOverview overview) {
     final l10n = context.l10n;
-    final used = _count(usage.used);
-    final limit = _count(usage.limit);
-    return switch (usage.resource) {
-      PlanResource.ai => l10n.planLimitAi(used, limit),
-      PlanResource.team => l10n.planLimitTeam(used, limit),
-      PlanResource.photos => l10n.planLimitPhotos(used, limit),
-      PlanResource.checklists => l10n.planLimitChecklists(used, limit),
+    final orders = overview.row(PlanOverviewResource.orders)!;
+    final people = overview.row(PlanOverviewResource.people)!;
+    return switch (overview.notice!) {
+      PlanOverviewNotice.ordersNear =>
+        l10n.planNoticeOrdersNear(_count(orders.used), _count(orders.limit)),
+      PlanOverviewNotice.ordersAtLimit =>
+        l10n.planNoticeOrdersAtLimit(_count(orders.limit)),
+      PlanOverviewNotice.ordersGrace =>
+        l10n.planNoticeOrdersGrace(_count(orders.limit)),
+      PlanOverviewNotice.ordersBlocked =>
+        l10n.planNoticeOrdersBlocked(_count(orders.limit)),
+      PlanOverviewNotice.ordersContactUs =>
+        l10n.planNoticeOrdersContactUs(_count(orders.limit)),
+      PlanOverviewNotice.peopleAtLimit =>
+        l10n.planLimitTeam(_count(people.used), _count(people.limit)),
+      PlanOverviewNotice.peopleContactUs =>
+        l10n.planNoticePeopleContactUs(_count(people.limit)),
     };
   }
 
@@ -153,7 +138,6 @@ class _PlanScreenState extends State<PlanScreen> {
     final subscription =
         context.watch<SubscriptionStore>().subscription ?? Subscription();
     final now = DateTime.now();
-    final plan = subscription.effectivePlan(now);
     final paid = SubscriptionService.paidPlansEnabled;
     // Bought on the web: only the active plan, no purchase (docs/WEB_CHECKOUT.md).
     final fromWeb = subscription.hasWebSubscription(now);
@@ -161,12 +145,21 @@ class _PlanScreenState extends State<PlanScreen> {
         paid && PaywallLauncher.currentUserCanPurchase && !fromWeb;
     final issue =
         subscription.periodState(now) == SubscriptionPeriodState.paymentIssue;
-    final usages = PlanUsage.of(subscription, now, ai: _ai);
-    final reached = paid
-        ? usages.where((u) => u.level == PlanUsageLevel.atLimit).firstOrNull
-        : null;
-    // Prototype: "Ver planos" also for whoever already pays.
-    final paywallLabel = l10n.viewPlans;
+    final overview = planOverview(
+      subscription,
+      people: subscription.usage.usersActive,
+      taxIds: _taxIds ?? 0,
+      now: now,
+      enforced: FeatureGateService.planLimitsEnforced,
+    );
+    final notice = paid ? overview.notice : null;
+    final contactUs = notice == PlanOverviewNotice.ordersContactUs ||
+        notice == PlanOverviewNotice.peopleContactUs;
+    final rows = [
+      for (final row in overview.rows)
+        if (row.resource != PlanOverviewResource.taxIds || _taxIds != null) row,
+    ];
+    final next = overview.next;
     void openPaywall() => PaywallLauncher.showPaywall(context);
 
     return MorePage(
@@ -177,7 +170,7 @@ class _PlanScreenState extends State<PlanScreen> {
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.blockMargin, 0, AppSpacing.pageMargin, AppSpacing.lg),
           child: Text(
-            _header(context, subscription, plan, now),
+            _header(context, subscription, overview.plan, now),
             key: const ValueKey('plan_current'),
             style: AppTypography.callout.copyWith(
               color: (issue ? AppColors.danger : AppColors.textSecondary)
@@ -186,15 +179,15 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
         ),
-        if (reached != null)
+        if (notice != null)
           NextStepBlock(
-            key: const ValueKey('plan_limit_block'),
+            key: ValueKey('plan_notice_${notice.name}'),
             label: l10n.planLimitLabel,
-            text: _limitSentence(context, reached),
-            button: canPurchase
+            text: _noticeText(context, overview),
+            button: canPurchase && !contactUs
                 ? PrimaryButton(
                     key: const ValueKey('plan_paywall'),
-                    label: paywallLabel,
+                    label: l10n.viewPlans,
                     onPressed: openPaywall,
                   )
                 : null,
@@ -202,39 +195,39 @@ class _PlanScreenState extends State<PlanScreen> {
         if (paid) ...[
           SectionLabel(l10n.planUsageSection),
           MoreRows(rows: [
-            for (final usage in usages)
+            for (final row in rows)
               _UsageRow(
-                key: ValueKey('plan_usage_${usage.resource.name}'),
-                usage: usage,
-                title: switch (usage.resource) {
-                  PlanResource.ai => l10n.planUsageAi,
-                  PlanResource.team => l10n.planUsageTeam,
-                  PlanResource.photos => l10n.planUsagePhotos,
-                  PlanResource.checklists => l10n.planUsageChecklists,
+                key: ValueKey('plan_usage_${row.resource.name}'),
+                row: row,
+                title: switch (row.resource) {
+                  PlanOverviewResource.orders => l10n.planUsageOrders,
+                  PlanOverviewResource.people => l10n.planUsageTeam,
+                  PlanOverviewResource.taxIds => l10n.planUsageTaxIds,
                 },
-                value: usage.level == PlanUsageLevel.unlimited
-                    ? _count(usage.used)
-                    : l10n.planUsageOf(_count(usage.used), _count(usage.limit)),
-                onTap: switch (usage.resource) {
-                  PlanResource.ai => null,
-                  PlanResource.team => !_can(PermissionType.manageUsers)
-                      ? null
-                      : widget.onOpenTeam ??
-                            () => Navigator.pushNamed(
-                              context,
-                              '/collaborator_list',
-                            ),
-                  PlanResource.photos => null,
-                  PlanResource.checklists => !_can(PermissionType.manageForms)
-                      ? null
-                      : widget.onOpenChecklists ??
-                            () => Navigator.pushNamed(
-                              context,
-                              '/form_template_list',
-                            ),
-                },
+                value: row.level == PlanOverviewLevel.unlimited
+                    ? _count(row.used)
+                    : l10n.planUsageOf(_count(row.used), _count(row.limit)),
+                onTap: row.resource == PlanOverviewResource.people &&
+                        _can(PermissionType.manageUsers)
+                    ? widget.onOpenTeam ??
+                        () => Navigator.pushNamed(context, '/collaborator_list')
+                    : null,
               ),
           ]),
+          if (next != null && next.features.isNotEmpty) ...[
+            SectionLabel(l10n.planNextTitle(next.plan.displayName)),
+            MoreRows(
+              key: const ValueKey('plan_next'),
+              rows: [
+                for (final feature in next.features)
+                  AppListRow(
+                    key: ValueKey('plan_next_${feature.name}'),
+                    title: planFeatureName(l10n, feature),
+                    titleStyle: AppTypography.body,
+                  ),
+              ],
+            ),
+          ],
         ],
         if (canPurchase)
           Padding(
@@ -243,10 +236,10 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (reached == null)
+                if (notice == null || contactUs)
                   TextLink(
                     key: const ValueKey('plan_paywall'),
-                    label: paywallLabel,
+                    label: l10n.viewPlans,
                     onPressed: openPaywall,
                   ),
                 TextLink(
@@ -282,18 +275,18 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 }
 
-/// "Pessoas na equipe · 3 de 3" with the level under it: red dot and text at
-/// the limit, amber dot near it.
+/// "OS este mês · 8 de 10" with the level under it: red dot and text at or
+/// over the limit, amber dot near it.
 class _UsageRow extends StatelessWidget {
   const _UsageRow({
     super.key,
-    required this.usage,
+    required this.row,
     required this.title,
     required this.value,
     this.onTap,
   });
 
-  final PlanUsage usage;
+  final PlanOverviewRow row;
   final String title;
   final String value;
   final VoidCallback? onTap;
@@ -301,16 +294,17 @@ class _UsageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final level = usage.level;
+    final level = row.level;
     final status = switch (level) {
-      PlanUsageLevel.atLimit => usage.resource == PlanResource.team
-          ? l10n.planUsageAtLimitInvites
-          : l10n.planUsageAtLimit,
-      PlanUsageLevel.near => l10n.planUsageNearLimit,
-      PlanUsageLevel.unlimited => l10n.planUsageUnlimited,
-      PlanUsageLevel.ok => null,
+      PlanOverviewLevel.atLimit || PlanOverviewLevel.over =>
+        row.resource == PlanOverviewResource.people
+            ? l10n.planUsageAtLimitInvites
+            : l10n.planUsageAtLimit,
+      PlanOverviewLevel.near => l10n.planUsageNearLimit,
+      PlanOverviewLevel.unlimited => l10n.planUsageUnlimited,
+      PlanOverviewLevel.ok => null,
     };
-    if (status == null || level == PlanUsageLevel.unlimited) {
+    if (status == null || level == PlanOverviewLevel.unlimited) {
       return AppListRow(
         title: title,
         subtitle: status,
@@ -319,7 +313,7 @@ class _UsageRow extends StatelessWidget {
         onTap: onTap,
       );
     }
-    final atLimit = level == PlanUsageLevel.atLimit;
+    final atLimit = level != PlanOverviewLevel.near;
     final color = (atLimit ? AppColors.danger : AppColors.warning);
     return AppListRow(
       title: title,

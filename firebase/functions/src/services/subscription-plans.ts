@@ -14,16 +14,46 @@ import type {
   SubscriptionUsage,
 } from '../models/types';
 import type { RcSubscriber } from './revenuecat.client';
-import { PLAN_IDS, PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION, type PlanRow } from './plan-table.generated';
+import {
+  PLAN_IDS,
+  PLAN_TABLES_IN_FORCE,
+  PLAN_TABLE_CURRENT_VERSION,
+  PLAN_TABLE_LEGACY_VERSION,
+  type PlanRow,
+} from './plan-table.generated';
 
 /** The plan table in force (docs/plans/plans.json), by plan. */
 export function currentPlanRows(): Readonly<Record<SubscriptionPlan, PlanRow>> {
-  return PLAN_TABLES[PLAN_TABLE_CURRENT_VERSION];
+  return PLAN_TABLES_IN_FORCE[PLAN_TABLE_CURRENT_VERSION];
+}
+
+/**
+ * Version of the table a subscription follows (#726): its `tableVersion` when
+ * it is one of the table's versions; else, for a paid plan bought before the
+ * current table (no `tableVersion`; the courtesy too, which keeps the old
+ * Pro), the legacy version;
+ * else the current one (also for a version this code does not know). The
+ * webhook writes `tableVersion` on every plan change.
+ */
+export function tableVersionOf(
+  subscription: { tableVersion?: unknown; plan?: unknown; source?: unknown } | null | undefined,
+): string {
+  const version = subscription?.tableVersion;
+  if (typeof version === 'string') return version in PLAN_TABLES_IN_FORCE ? version : PLAN_TABLE_CURRENT_VERSION;
+  const plan = subscription?.plan;
+  const paid = typeof plan === 'string' && plan !== 'free' && (PLAN_IDS as readonly string[]).includes(plan);
+  return paid ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION;
+}
+
+/** Row of a plan in a version of the table (the current one by default). */
+export function planRow(plan: SubscriptionPlan, version: string = PLAN_TABLE_CURRENT_VERSION): PlanRow {
+  return (PLAN_TABLES_IN_FORCE[version] ?? currentPlanRows())[plan] ?? currentPlanRows().free;
 }
 
 /** The limits a subscription stores, from a row of the table. */
 export function limitsOfRow(row: PlanRow): SubscriptionLimits {
   return {
+    ordersPerMonth: row.ordersPerMonth,
     photosPerMonth: row.photosPerMonth,
     formTemplates: row.formTemplates,
     users: row.users,
@@ -201,7 +231,9 @@ export function buildGraceSubscription(
     source: 'grace',
     store: null,
     expiresAt: expiresAt.toISOString(),
-    limits: getPlanLimits(GRACE_PLAN),
+    // The courtesy keeps the old Pro until it ends (owner's decision, #726).
+    limits: limitsOfRow(planRow(GRACE_PLAN, PLAN_TABLE_LEGACY_VERSION)),
+    tableVersion: PLAN_TABLE_LEGACY_VERSION,
     usage: existing?.usage ?? defaultUsage(),
   };
 }

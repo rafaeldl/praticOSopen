@@ -15,6 +15,7 @@
             {% if site.flags.whatsappContact %}<a href="https://wa.me/{{ site.whatsapp.number }}?text={{ waMsg | urlencode }}" target="_blank" rel="noopener" data-ga="generate_lead" data-ga-detail="cta_whatsapp_contact">{{ dl.contactWhatsapp }}</a>{% endif %}
             <a href="mailto:{{ site.email }}" data-ga="generate_lead" data-ga-detail="email_link">{{ site.email }}</a>
             <a href="{{ relPath }}{{ faqHref }}">{{ dl.contactFaq }}</a>
+            {% if site.flags.pricingPage and dl.pricesLink and pageType != 'pricing' %}<a href="{{ relPath }}{{ {pt: 'precos.html', en: 'precos-en.html', es: 'precos-es.html'}[langCode] | default('precos.html') | prettyUrl }}" data-ga="select_content" data-ga-detail="download_prices">{{ dl.pricesLink }}</a>{% endif %}
         </p>
     </div>
 </section>

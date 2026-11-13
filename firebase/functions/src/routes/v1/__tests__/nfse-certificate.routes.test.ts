@@ -12,6 +12,7 @@ jest.mock('../../../services/nfse/certificate-vault.service', () => ({
 import { resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import * as vault from '../../../services/nfse/certificate-vault.service';
 import { NfseServiceError } from '../../../services/nfse/errors';
+import { resetPaidPlansCache } from '../../../services/plan-limits.service';
 import router from '../nfse-certificate.routes';
 
 const mockVault = vault as jest.Mocked<typeof vault>;
@@ -37,6 +38,7 @@ describe('nfse-certificate.routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetFakeDb();
+    resetPaidPlansCache();
     seed('companies/c1/settings/payments', { nfseDirectEnabled: true });
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -109,6 +111,41 @@ describe('nfse-certificate.routes', () => {
     const missing = await request(buildApp('owner')).delete('/e1/certificate');
     expect(missing.status).toBe(404);
     expect(missing.body.error.code).toBe('CERT_NOT_FOUND');
+  });
+
+  describe('CNPJs of the nota by plan (#723)', () => {
+    const starter = { plan: 'starter', status: 'active', source: 'store', tableVersion: '2' };
+
+    it('switch on: Starter with one CNPJ cannot add another (402 PLAN_LIMIT)', async () => {
+      seed('config/paidPlans', { enabled: true });
+      seed('companies/c1', { subscription: starter });
+      seed('companies/c1/fiscalEmitters/e1', { taxId: '1', certificate: { status: 'active' } });
+      const res = await request(buildApp('owner')).post('/certificate').send(BODY);
+      expect(res.status).toBe(402);
+      expect(res.body.error).toMatchObject({ code: 'PLAN_LIMIT', resource: 'nfseCnpj', limit: 1, usage: 1, plan: 'starter' });
+      expect(mockVault.storeCertificate).not.toHaveBeenCalled();
+    });
+
+    it('a deleted certificate frees its CNPJ; Pro fits two', async () => {
+      mockVault.storeCertificate.mockResolvedValue(RESULT);
+      seed('config/paidPlans', { enabled: true });
+      seed('companies/c1', { subscription: starter });
+      seed('companies/c1/fiscalEmitters/e1', { taxId: '1', certificate: { status: 'deleted' } });
+      expect((await request(buildApp('owner')).post('/certificate').send(BODY)).status).toBe(201);
+      seed('companies/c1', { subscription: { ...starter, plan: 'pro' } });
+      seed('companies/c1/fiscalEmitters/e1', { taxId: '1', certificate: { status: 'active' } });
+      expect((await request(buildApp('owner')).post('/certificate').send(BODY)).status).toBe(201);
+    });
+
+    it('replacing a certificate never asks; switch off has no limit', async () => {
+      mockVault.storeCertificate.mockResolvedValue(RESULT);
+      seed('companies/c1', { subscription: starter });
+      seed('companies/c1/fiscalEmitters/e1', { taxId: '1', certificate: { status: 'active' } });
+      expect((await request(buildApp('owner')).post('/certificate').send(BODY)).status).toBe(201);
+      seed('config/paidPlans', { enabled: true });
+      resetPaidPlansCache();
+      expect((await request(buildApp('owner')).put('/e1/certificate').send(BODY)).status).toBe(200);
+    });
   });
 
   it('refuses a malformed emitter id', async () => {

@@ -25,6 +25,8 @@ import {
   type PaymentSettings,
 } from '@/lib/settings/data'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature, handlePlanFeatureError, usePlanFeature } from '@/lib/plan-feature-gate'
+import { PLAN_NAME } from '@/lib/plan-limits'
 import { announce } from '@/lib/ui'
 import '@/styles/settings.css'
 
@@ -32,6 +34,9 @@ const ASAAS_PANEL = 'https://www.asaas.com/customerConfigIntegrations/index'
 const ASAAS_SANDBOX_PANEL = 'https://sandbox.asaas.com/customerConfigIntegrations/index'
 
 const tokens = shallowRef<McpToken[] | null>(null)
+// Plan (#724): a new ChatGPT/Claude connection is Business, connecting Asaas is
+// Starter; connections already made stay listed and can be revoked.
+const mcp = usePlanFeature('mcp')
 const tokensFailed = ref(false)
 const payments = shallowRef<PaymentSettings | null>(null)
 const paymentsFailed = ref(false)
@@ -80,6 +85,7 @@ async function connect() {
     asaasError.value = t('web.integrations.keyMissing')
     return
   }
+  if (!ensurePlanFeature('charges')) return
   connecting.value = true
   try {
     payments.value = { ...(payments.value ?? { asaasEnabled: true }), ...(await connectAsaas(apiKey.value.trim())), asaasConnected: true }
@@ -88,6 +94,7 @@ async function connect() {
     announce(t('asaasConnectedToast'))
   } catch (error) {
     console.error('integrations: connect failed', error instanceof ApiError ? error.code : 'error')
+    if (handlePlanFeatureError(error)) return
     asaasError.value = asaasText(error)
   } finally {
     connecting.value = false
@@ -111,6 +118,7 @@ async function disconnect() {
 }
 
 function openNew() {
+  if (!ensurePlanFeature('mcp')) return
   newName.value = ''
   newError.value = ''
   dialog.value = 'new'
@@ -130,10 +138,18 @@ async function create() {
     dialog.value = 'url'
     void loadTokens()
   } catch (error) {
+    if (planFeatureRefused(error)) return
     newError.value = error instanceof ApiError && error.status === 403 ? t('integrationsErrorForbidden') : t('integrationsErrorGeneric')
   } finally {
     creating.value = false
   }
+}
+
+/** A 402 PLAN_FEATURE closes the form and opens the plan notice. */
+function planFeatureRefused(error: unknown): boolean {
+  if (!handlePlanFeatureError(error)) return false
+  dialog.value = null
+  return true
 }
 
 async function copyUrl() {
@@ -241,7 +257,7 @@ onMounted(() => {
       <section aria-labelledby="int-ai" class="set-section">
         <div class="set-actions" style="justify-content: space-between">
           <h2 id="int-ai" class="set-h">{{ t('integrationsAiSection') }}</h2>
-          <button type="button" class="btn" data-testid="mcp-new" @click="openNew">+ {{ t('integrationsNew') }}</button>
+          <button type="button" class="btn" data-testid="mcp-new" @click="openNew">+ {{ t('integrationsNew') }}<span v-if="!mcp.allowed" class="plan-badge">· {{ t('planFeatureBadge', { plan: PLAN_NAME[mcp.requiredPlan ?? 'business'] }) }}</span></button>
         </div>
         <LoadingState v-if="!tokens && !tokensFailed" />
         <ErrorState v-else-if="tokensFailed" :retry="loadTokens" />

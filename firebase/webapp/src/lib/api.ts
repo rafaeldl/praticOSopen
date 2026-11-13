@@ -70,6 +70,8 @@ const CODE_MESSAGES: Record<string, MessageKey> = {
   SEFIN_UNAVAILABLE: 'nfseDirectErrorGovUnavailable',
   IMPORT_NOT_FOUND: 'nfseDirectErrorNotFound',
   IMPORT_UNDO_EXPIRED: 'nfseImportErrorUndoExpired',
+  // Plan (#724): screens show PlanFeatureNotice from `details` (lib/plan-features.ts planFeatureRefusal).
+  PLAN_FEATURE: 'web.error.planFeature',
   // Web checkout (docs/WEB_CHECKOUT.md).
   STORE_SUBSCRIPTION_ACTIVE: 'web.error.storeSubscription',
   WEB_SUBSCRIPTION_ACTIVE: 'web.error.webSubscription',
@@ -135,7 +137,7 @@ export interface ApiOptions {
 interface Envelope<T> {
   success?: boolean
   data?: T
-  error?: { code?: unknown; detail?: unknown; details?: unknown }
+  error?: { code?: unknown; detail?: unknown; details?: unknown; feature?: unknown; plan?: unknown; requiredPlan?: unknown }
 }
 
 export function createApi(deps: ApiDeps) {
@@ -172,7 +174,13 @@ export function createApi(deps: ApiDeps) {
       const code = typeof body?.error?.code === 'string' ? body.error.code : 'UNKNOWN'
       const detail = typeof body?.error?.detail === 'string' ? body.error.detail : undefined
       const raw = body?.error?.details
-      const details = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : undefined
+      // PLAN_FEATURE carries feature, plan and requiredPlan next to the code.
+      const details =
+        raw && typeof raw === 'object' && !Array.isArray(raw)
+          ? (raw as Record<string, unknown>)
+          : code === 'PLAN_FEATURE'
+            ? { feature: body?.error?.feature, plan: body?.error?.plan, requiredPlan: body?.error?.requiredPlan }
+            : undefined
       throw new ApiError(code, response.status, CODE_MESSAGES[code] ?? statusMessage(response.status), detail, details)
     }
     return (options.raw ? body : (body?.data ?? body)) as T

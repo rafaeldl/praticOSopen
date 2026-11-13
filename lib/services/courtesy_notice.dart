@@ -33,15 +33,17 @@ class CourtesyNotice {
 }
 
 /// Smallest paid plan that covers what the company uses this month, or null
-/// when Free already does.
-SubscriptionPlan? recommendedPlan(SubscriptionUsage usage, int aiUsed) {
+/// when Free already does. The assistant does not count: its ceilings are
+/// internal and the customer never sees a counter (#726).
+SubscriptionPlan? recommendedPlan(SubscriptionUsage usage, {DateTime? now}) {
   bool fits(int used, int limit) => limit == -1 || used <= limit;
+  final orders = usage.ordersAt(now ?? DateTime.now()).thisMonth;
   bool covers(SubscriptionPlan plan) {
     final limits = SubscriptionLimits.forPlan(plan);
-    return fits(usage.usersActive, limits.users) &&
+    return fits(orders, limits.ordersPerMonth) &&
+        fits(usage.usersActive, limits.users) &&
         fits(usage.photosThisMonth, limits.photosPerMonth) &&
-        fits(usage.formTemplatesActive, limits.formTemplates) &&
-        fits(aiUsed, kAiRequestsPerMonth[plan] ?? 0);
+        fits(usage.formTemplatesActive, limits.formTemplates);
   }
 
   if (covers(SubscriptionPlan.free)) return null;

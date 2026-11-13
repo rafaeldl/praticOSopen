@@ -13,6 +13,7 @@ import {
   getPaymentSettings,
 } from '../../services/asaas/connection.service';
 import { toHttpError } from '../../services/asaas/errors';
+import { ensurePlanFeature } from '../../middleware/plan-limit.middleware';
 
 const router: Router = Router();
 
@@ -52,6 +53,8 @@ router.get('/settings', async (req: AuthenticatedRequest, res: Response) => {
 router.post('/connect', async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!ensureManager(req, res)) return;
+    // Charging customers is Starter (#724); disconnecting never is.
+    if (!(await ensurePlanFeature(res, req.userContext!.companyId, 'charges'))) return;
 
     const validation = validateInput(connectSchema, req.body);
     if (!validation.success) {

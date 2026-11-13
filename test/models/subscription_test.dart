@@ -193,15 +193,18 @@ void main() {
   });
 
   group('effectiveLimits', () {
-    test('uses limits stored by the server', () {
-      const stored = SubscriptionLimits(photosPerMonth: 50, formTemplates: 2, users: 2, pdfWatermark: false);
-      final sub = Subscription(plan: SubscriptionPlan.starter, limits: stored);
-      expect(sub.effectiveLimits(now).photosPerMonth, 50);
+    test('keeps a stored limit more generous than the table', () {
+      const stored = SubscriptionLimits(ordersPerMonth: 80, photosPerMonth: 50, formTemplates: 2, users: 3, pdfWatermark: false);
+      final sub = Subscription(plan: SubscriptionPlan.starter, limits: stored, tableVersion: '2');
+      expect(sub.effectiveLimits(now).ordersPerMonth, 80);
+      expect(sub.effectiveLimits(now).users, 3);
+      // The table is more generous here (no limit): it wins.
+      expect(sub.effectiveLimits(now).photosPerMonth, -1);
     });
 
     test('falls back to the plan defaults', () {
-      final sub = Subscription(plan: SubscriptionPlan.pro);
-      expect(sub.effectiveLimits(now).photosPerMonth, 500);
+      final sub = Subscription(plan: SubscriptionPlan.pro, tableVersion: '2');
+      expect(sub.effectiveLimits(now).ordersPerMonth, 150);
       expect(sub.effectiveLimits(now).users, 5);
     });
 
@@ -212,7 +215,8 @@ void main() {
         expiresAt: now.subtract(const Duration(days: 1)),
       );
       final limits = sub.effectiveLimits(now);
-      expect(limits.photosPerMonth, 30);
+      expect(limits.ordersPerMonth, 10);
+      expect(limits.users, 1);
       expect(limits.pdfWatermark, isTrue);
     });
   });

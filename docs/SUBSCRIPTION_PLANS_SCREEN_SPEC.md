@@ -2,10 +2,35 @@
 
 **Data:** 2026-04-03
 **Autor:** CTO Agent
-**Status:** Em implementacao
+**Status:** Historico. Os valores da secao 8 sao os de abril/2026. A tabela aprovada em 12/11/2026 (epico #721) esta na secao 0 abaixo e em `docs/SUBSCRIPTION.md`; a tela segue #725.
 **Issue:** PRA-12 (subtarefa: PRA-18)
 
 ---
+
+## 0. Tabela aprovada em 12/11/2026 (epico #721)
+
+A tela de planos (app e web, #725) mostra esta tabela, cada plano no formato "tudo do plano anterior, mais", com chave mensal/anual e o texto "Desistiu em 7 dias? Devolvemos o dinheiro" (#728).
+
+| | Gratis | Starter | Pro | Business |
+|---|---|---|---|---|
+| Para quem | Comecando | Autonomo | Equipe pequena | Empresa |
+| Mensal | R$ 0 | R$ 59,90 | R$ 119 | R$ 249 |
+| Anual (paga 10 meses) | — | R$ 599 | R$ 1.190 | R$ 2.490 |
+| OS por mes | 10 | 50 | 150 | 500, depois +R$ 99 a cada 100 |
+| Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
+| CNPJs na nota | — | 1 | 2 | sem limite |
+| Fotos | sem limite | sem limite | sem limite | sem limite |
+| PDF sem a marca PraticOS | — | sim | sim | sim |
+| IA | incluida | incluida | incluida | incluida |
+| Checklists | so os do ramo | proprios | proprios | proprios |
+
+Recursos (cada um inclui o anterior):
+- **Gratis:** OS, clientes, catalogo, agenda, orcamento pelo WhatsApp e link, aprovacao pelo link, financeiro basico, importar dados, celular e computador, IA incluida (sem contador na tela).
+- **Starter:** nota fiscal, PDF e recibo so com a marca da empresa, checklists proprios, cobranca e proxima cobranca.
+- **Pro:** perfis e permissoes da equipe, responsavel e agenda por pessoa, etapas da oficina, Modo TV, contratos, IA no financeiro, relatorio em planilha.
+- **Business:** acoes em lote, ChatGPT/Claude (MCP) e API.
+
+O texto do site para esses planos esta em `firebase/hosting/src/_data/pricing.json` (pt, en, es) e pode servir de base para as strings da tela.
 
 ## 1. Visao Geral
 
@@ -323,6 +348,8 @@ class UpgradePromptModal extends StatelessWidget {
 ---
 
 ## 8. Dados dos Planos
+
+> Valores antigos (abril/2026), substituidos pela secao 0.
 
 ### 8.1 Constantes
 

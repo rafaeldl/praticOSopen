@@ -2019,14 +2019,8 @@
     }
   },
   "orderAssistantErrorDisabled": "O assistente ainda não está liberado para a sua conta.",
-  "orderAssistantErrorQuota": "Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.",
-  "@orderAssistantErrorQuota": {
-    "placeholders": {
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
+  "orderAssistantErrorQuota": "O assistente chegou ao limite deste mês. Dá para continuar preenchendo à mão.",
+  "orderAssistantErrorQuotaDay": "O assistente chegou ao limite de hoje. Amanhã volta; dá para continuar preenchendo à mão.",
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
   "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
   "reportPreviousPeriod": "Período anterior",
@@ -2955,8 +2949,8 @@
       "days": { "type": "int" }
     }
   },
-  "courtesyBannerAiUse": "{used, plural, =1{Neste mês você usou o assistente 1 vez; no Free são {free}.} other{Neste mês você usou o assistente {used} vezes; no Free são {free}.}}",
-  "@courtesyBannerAiUse": {
+  "courtesyBannerOrdersUse": "{used, plural, =1{Neste mês você abriu 1 OS; no Free são {free} por mês.} other{Neste mês você abriu {used} OS; no Free são {free} por mês.}}",
+  "@courtesyBannerOrdersUse": {
     "placeholders": {
       "used": { "type": "int" },
       "free": { "type": "int" }
@@ -3474,5 +3468,44 @@
   "checklistAiFailed": "Não deu para ler a foto agora",
   "checklistAiQuota": "Acabaram as leituras da IA deste mês",
   "checklistAiNothing": "A IA não achou a resposta na foto",
-  "checklistAiView": "Ver"
+  "checklistAiView": "Ver",
+  "planFeatureTitle": "Recurso do plano {plan}",
+  "@planFeatureTitle": {"placeholders": {"plan": {"type": "String"}}},
+  "planFeatureBody": "Para usar, mude para o plano {plan}. O que você já tem continua.",
+  "@planFeatureBody": {"placeholders": {"plan": {"type": "String"}}},
+  "planFeatureAskOwner": "Peça ao dono da empresa para mudar para o plano {plan}.",
+  "@planFeatureAskOwner": {"placeholders": {"plan": {"type": "String"}}},
+  "planFeatureBadge": "Plano {plan}",
+  "@planFeatureBadge": {"placeholders": {"plan": {"type": "String"}}},
+  "planFeatureNfse": "Nota fiscal",
+  "planFeatureBrandedPdf": "PDF sem a marca PraticOS",
+  "planFeatureOwnChecklists": "Checklists próprios",
+  "planFeatureCharges": "Cobrança e lembrete de pagamento",
+  "planFeatureReviewRequest": "Pedir avaliação ao cliente",
+  "planFeatureTeamRoles": "Técnico, gerente e outros perfis",
+  "planFeaturePerPersonAgenda": "Agenda e responsável por pessoa",
+  "planFeatureWorkStages": "Etapas do serviço",
+  "planFeatureTvMode": "Modo TV",
+  "planFeatureContracts": "Contratos",
+  "planFeatureAiFinance": "IA no financeiro",
+  "planFeatureSpreadsheetExport": "Relatório em planilha",
+  "planFeatureBulkActions": "Ações em lote",
+  "planFeatureMcp": "ChatGPT e Claude",
+  "planFeatureApi": "API com chave",
+  "planUsageOrders": "OS este mês",
+  "planUsageTaxIds": "CNPJs na nota fiscal",
+  "planNoticeOrdersNear": "Você já abriu {used} de {limit} OS este mês.",
+  "@planNoticeOrdersNear": {"placeholders": {"used": {"type": "String"}, "limit": {"type": "String"}}},
+  "planNoticeOrdersAtLimit": "Você abriu as {limit} OS do mês. Pode continuar abrindo este mês; se passar de novo no mês que vem, a OS nova espera você mudar de plano.",
+  "@planNoticeOrdersAtLimit": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersGrace": "Este mês passou de {limit} OS e nada foi travado. Se passar de novo no mês que vem, a OS nova espera você mudar de plano.",
+  "@planNoticeOrdersGrace": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersBlocked": "Passou de {limit} OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.",
+  "@planNoticeOrdersBlocked": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticeOrdersContactUs": "Este mês já passou das {limit} OS incluídas no Business.",
+  "@planNoticeOrdersContactUs": {"placeholders": {"limit": {"type": "String"}}},
+  "planNoticePeopleContactUs": "A equipe já passou das {limit} pessoas incluídas no Business.",
+  "@planNoticePeopleContactUs": {"placeholders": {"limit": {"type": "String"}}},
+  "planNextTitle": "O que o {plan} dá a mais",
+  "@planNextTitle": {"placeholders": {"plan": {"type": "String"}}}
 }

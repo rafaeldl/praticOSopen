@@ -13,6 +13,7 @@
  * mounted next to them), so they can change without breaking installed apps.
  */
 
+import { ensurePlanCapacity } from '../../middleware/plan-limit.middleware';
 import { Router, Request, Response } from 'express';
 import { AuthenticatedRequest, Order, OrderStatus } from '../../models/types';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
@@ -252,6 +253,8 @@ router.post('/', route('Failed to create order', async (req, res, companyId) => 
   const ownPrice = [...(validation.data.services ?? []), ...(validation.data.products ?? [])]
     .some((item) => item.value !== undefined || ('total' in item && item.total !== undefined));
   if (ownPrice && !(await can(req, res, 'editPrices'))) return forbidden(res, "Permission 'editPrices' is required");
+  // Orders of the month (soft limit, #723): only a new order; one already open is never stopped.
+  if (!(await ensurePlanCapacity(res, companyId, 'order'))) return;
 
   const { customerId, deviceId, deviceIds, ...orderData } = validation.data;
   const customer = await customerService.getCustomer(companyId, customerId);

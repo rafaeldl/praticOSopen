@@ -10,6 +10,7 @@ import RoleChoice from '@/components/settings/RoleChoice.vue'
 import { t } from '@/i18n'
 import { ApiError } from '@/lib/api'
 import { changeRole, removeMember } from '@/lib/settings/data'
+import { handlePlanFeatureError } from '@/lib/plan-feature-gate'
 import { displayRole, leavesNoAdmin, ROLE_LABEL, type AssignableRole, type Member } from '@/lib/settings/model'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
@@ -56,6 +57,7 @@ async function run(kind: 'role' | 'remove') {
     emit('changed')
   } catch (error) {
     console.error('team: change failed', error)
+    if (handlePlanFeatureError(error)) return
     failed.value = serverText(error, kind === 'remove')
   } finally {
     busy.value = false
@@ -71,7 +73,7 @@ async function run(kind: 'role' | 'remove') {
       </div>
       <div class="layer-body" data-testid="member-dialog">
         <p v-if="failed" class="field-error" role="alert" data-testid="member-error">{{ failed }}</p>
-        <RoleChoice v-model="role" :legend="t('inviteRoleLabel')" name="member-role" />
+        <RoleChoice v-model="role" :legend="t('inviteRoleLabel')" name="member-role" :keep="displayRole(member.role)" />
       </div>
       <div class="layer-foot">
         <button type="button" class="btn btn--ghost set-danger" :disabled="busy" data-testid="member-remove" @click="ask('remove')">{{ t('teamRemoveMember') }}</button>

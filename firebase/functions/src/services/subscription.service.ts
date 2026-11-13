@@ -21,6 +21,7 @@ import {
   type ResolvedSubscriptionState,
 } from './subscription-plans';
 import type { RcSubscriber } from './revenuecat.client';
+import { PLAN_TABLE_CURRENT_VERSION } from './plan-table.generated';
 import { webOriginFor } from './web-billing/web-origin';
 
 export {
@@ -159,18 +160,27 @@ export interface SyncDeps {
 
 export type SyncResult = 'updated' | 'grace_kept' | 'company_not_found';
 
-/** Dotted-path update with the plan fields only; never touches subscription.usage. */
+/** Dotted-path update with the plan fields only; never touches subscription.usage. Limits only on a plan change. */
 export function buildPlanUpdate(
   companyId: string,
   subscriber: RcSubscriber,
   state: ResolvedSubscriptionState,
   now: Date,
+  current?: Subscription,
 ): FieldUpdates {
   const nowIso = now.toISOString();
+  // Limits and the table version are written only when the plan changes (or
+  // the courtesy turns into a purchase): a renewal of the same plan keeps what
+  // was stored, so a subscriber stays on the table it bought (#726) and a
+  // stricter table never takes anything away (effectiveLimits takes the more
+  // generous number).
+  const samePlan = current?.plan === state.plan && current?.limits !== undefined && current?.source !== 'grace';
   return {
     'subscription.plan': state.plan,
     'subscription.status': state.status,
-    'subscription.limits': getPlanLimits(state.plan),
+    ...(samePlan
+      ? {}
+      : { 'subscription.limits': getPlanLimits(state.plan), 'subscription.tableVersion': PLAN_TABLE_CURRENT_VERSION }),
     'subscription.expiresAt': state.expiresAt,
     'subscription.store': state.store,
     'subscription.source': 'store',
@@ -201,7 +211,7 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
     return 'grace_kept';
   }
 
-  await ref.update(buildPlanUpdate(companyId, subscriber, state, now));
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now, current));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
 }

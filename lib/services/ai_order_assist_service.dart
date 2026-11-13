@@ -549,11 +549,14 @@ DateTime? parseDueDate(Object? value) {
 enum AiAssistError { disabled, quotaExceeded, unavailable, other }
 
 class AiOrderAssistException implements Exception {
-  const AiOrderAssistException(this.error, {this.used, this.limit});
+  const AiOrderAssistException(this.error, {this.used, this.limit, this.period});
 
   final AiAssistError error;
   final int? used;
   final int? limit;
+
+  /// Which ceiling was reached on [AiAssistError.quotaExceeded]: 'month' or 'day'.
+  final String? period;
 
   @override
   String toString() => 'AiOrderAssistException($error)';
@@ -730,6 +733,7 @@ AiOrderDraft parseAiOrderAssistResponse(int status, String body) {
         AiAssistError.quotaExceeded,
         used: (details['used'] as num?)?.toInt(),
         limit: (details['limit'] as num?)?.toInt(),
+        period: details['period'] as String?,
       );
     case 'AI_UNAVAILABLE':
       throw const AiOrderAssistException(AiAssistError.unavailable);

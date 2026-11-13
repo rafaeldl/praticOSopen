@@ -385,6 +385,15 @@ describeEmulator('firestore.rules', () => {
       });
     });
 
+    describe('the one switch of the plan limits (config/paidPlans)', () => {
+      it('anyone signed in reads it, nobody writes it, signed out reads nothing', async () => {
+        await env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'config/paidPlans'), { enabled: false }));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(admin(), 'config/paidPlans')));
+        await rut.assertFails(fs.setDoc(fs.doc(admin(), 'config/paidPlans'), { enabled: true }));
+        await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), 'config/paidPlans')));
+      });
+    });
+
     describe('usage-only subscription (map without plan, created by dotted usage updates)', () => {
       const USAGE_ONLY = { usage: { formTemplates: 1, photosThisMonth: 2 } };
 

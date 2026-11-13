@@ -23,7 +23,10 @@ Subscription? _subscription(Map<String, dynamic> given) {
   });
 }
 
-FeatureGateResult _check(Subscription? sub, String resource, int usage, int adding) {
+FeatureGateResult _check(Subscription? sub, Map<String, dynamic> given, DateTime now) {
+  final resource = given['resource'] as String;
+  final usage = given['usage'] as int;
+  final adding = given['adding'] as int;
   if (sub == null) {
     // A null subscription is the Free plan with no usage (Subscription()).
     expect(usage, 0, reason: 'a case without subscription has no usage in the app');
@@ -31,9 +34,15 @@ FeatureGateResult _check(Subscription? sub, String resource, int usage, int addi
     sub.usage
       ..photosThisMonth = usage
       ..formTemplatesActive = usage
-      ..usersActive = usage;
+      ..usersActive = usage
+      ..ordersMonth = orderMonthKey(now)
+      ..ordersThisMonth = usage
+      ..ordersLastMonth = given['lastMonthUsage'] as int? ?? 0;
   }
   switch (resource) {
+    case 'order':
+      expect(adding, 1);
+      return FeatureGateService.canCreateOrder(sub, now: now);
     case 'photo':
       return adding == 1 ? FeatureGateService.canAddPhoto(sub) : FeatureGateService.canAddPhotos(sub, adding);
     case 'formTemplate':
@@ -66,11 +75,26 @@ void main() {
         expect({'watermark': FeatureGateService.shouldShowPdfWatermark(sub)}, want);
         return;
       }
-      final result = _check(sub, given['resource'] as String, given['usage'] as int, given['adding'] as int);
-      expect(
-        {'allowed': result.isAllowed, 'limit': result.limit, 'plan': result.currentPlan.name},
-        want,
-      );
+      if (given['kind'] == 'planInForce') {
+        final inForce = (sub ?? Subscription()).planInForce(DateTime.now());
+        final got = <String, Object?>{
+          'plan': inForce.plan.name,
+          'version': inForce.version,
+          ...inForce.row.toJson(),
+        };
+        expect({for (final key in want.keys) key: got[key]}, want);
+        return;
+      }
+      final result = _check(sub, given, DateTime.now());
+      final got = <String, Object?>{
+        'allowed': result.isAllowed,
+        'limit': result.limit,
+        'plan': result.currentPlan.name,
+        'level': result.level,
+        'grace': result.grace,
+        'contactUs': result.contactUs,
+      };
+      expect({for (final key in want.keys) key: got[key]}, want);
     });
   }
 }

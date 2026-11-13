@@ -18,6 +18,8 @@ import 'package:praticos/services/integration_api_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// Maps an [IntegrationApiException] to a localized, user-visible message.
 ///
@@ -141,6 +143,8 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   }
 
   Future<void> _create() async {
+    // ChatGPT and Claude are Business (#724); connections made stay.
+    if (!ensurePlanFeature(context, PlanFeature.mcp)) return;
     final name = await showCupertinoDialog<String>(
       context: context,
       builder: (_) => const IntegrationNameDialog(),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
@@ -8,6 +9,8 @@ import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// What the invite form collects. [name] is optional; at least one of
 /// [email] and [phone] is required (the invitee is found by e-mail when
@@ -58,7 +61,12 @@ class _InviteFormState extends State<InviteForm> {
       TextEditingController(text: widget.initialEmail);
   late final TextEditingController _phone =
       TextEditingController(text: widget.initialPhone);
-  late RolesType _role = widget.initialRole;
+  /// The initial role, or admin when the plan has no other roles (#724):
+  /// on Free and Starter only owner and admin exist.
+  late RolesType _role = FeatureGateService.featureForRole(widget.initialRole.name) != null &&
+          !planFeatureOf(context, PlanFeature.teamRoles).isAllowed
+      ? RolesType.admin
+      : widget.initialRole;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _contactError;
   bool _busy = false;
@@ -132,6 +140,11 @@ class _InviteFormState extends State<InviteForm> {
   /// five roles are offered, Supervisor included.
   Future<void> _pickRole() async {
     final l10n = context.l10n;
+    final roles = planFeatureOf(context, PlanFeature.teamRoles);
+    String? badge(RolesType role) =>
+        !roles.isAllowed && FeatureGateService.featureForRole(role.name) != null
+            ? l10n.planFeatureBadge((roles.requiredPlan ?? SubscriptionPlan.pro).displayName)
+            : null;
     final picked = await pickOne<RolesType>(
       context,
       title: l10n.inviteRoleQuestion,
@@ -142,11 +155,17 @@ class _InviteFormState extends State<InviteForm> {
             key: ValueKey('role_${role.name}'),
             value: role,
             title: RolePermissions.getRoleLabel(role, l10n),
-            subtitle: RolePermissions.getRoleDescription(role, l10n),
+            subtitle: [RolePermissions.getRoleDescription(role, l10n), badge(role)]
+                .whereType<String>()
+                .join(' · '),
           ),
       ],
     );
-    if (picked != null && mounted) setState(() => _role = picked);
+    if (picked == null || !mounted) return;
+    // Roles beyond admin are Pro (#724).
+    final needs = FeatureGateService.featureForRole(picked.name);
+    if (needs != null && !ensurePlanFeature(context, needs)) return;
+    setState(() => _role = picked);
   }
 
   @override

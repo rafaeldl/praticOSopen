@@ -45,8 +45,6 @@ const reading = ref<'' | 'text' | 'photos' | 'speech'>('')
 const listening = ref(false)
 const note = ref('')
 const usesLeft = ref<number | null>(null)
-/** The month's limit, for "Você já usou os {limit} pedidos" (from the last status or answer). */
-const monthLimit = ref(0)
 const canPhoto = computed(() => can('attachPhotos'))
 /** "Qual Pintura?": the change waiting for the person to pick its line. */
 const asking = shallowRef<{ change: DraftChange; lines: OrderLine[]; resolve: (line: OrderLine | null) => void } | null>(null)
@@ -63,7 +61,6 @@ onMounted(async () => {
     const status = await assistStatus()
     enabled.value = status.enabled
     usesLeft.value = usesLeftOf(status.usage)
-    monthLimit.value = Math.max(0, status.usage?.limit ?? 0)
   } catch {
     enabled.value = false
   }
@@ -110,7 +107,8 @@ function ownToast(message: string, undo?: () => void) {
 
 function errorNote(error: unknown): string {
   if (error instanceof ApiError && error.code === 'AI_DISABLED') return t('orderAssistantErrorDisabled')
-  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota', { limit: monthLimit.value })
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED' && error.details?.period === 'day') return t('orderAssistantErrorQuotaDay')
+  if (error instanceof ApiError && error.code === 'AI_QUOTA_EXCEEDED') return t('orderAssistantErrorQuota')
   return t('orderAssistantErrorUnavailable')
 }
 
@@ -341,7 +339,6 @@ async function run(input: { text?: string; files?: File[]; audio?: { mimeType: s
     const draft = await askAssistant(value, sent, photos, input.audio, { history, context })
     undo.said = value || draft.transcript?.trim() || ''
     usesLeft.value = usesLeftOf(draft.usage)
-    monthLimit.value = Math.max(0, draft.usage?.limit ?? monthLimit.value)
     const { filled, onlyChanges, asks } = await apply(draft, sent, undo)
     holdRemovals(undo)
     history = remember(history, undo.said)

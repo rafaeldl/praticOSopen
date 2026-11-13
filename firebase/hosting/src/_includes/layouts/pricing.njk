@@ -1,0 +1,140 @@
+---
+layout: layouts/base.njk
+pageType: pricing
+pageStyles: [content, pricing]
+---
+{# Hallmark · genre: modern-minimal · macrostructure: Pricing (plan sheet + spec sheet + FAQ) · design-system: design.md
+   Copy in _data/pricing.json. Built only while site.flags.pricingPage is on (precos*.11tydata.js).
+   The monthly/yearly switch is two radios; CSS (:has) swaps the prices, no script. #}
+{% set pr = pricing[langCode] | default(pricing.pt) %}
+{% set termsHref = {pt: 'terms.html', en: 'terms-en.html', es: 'terms-es.html'}[langCode] | default('terms.html') %}
+{% set termsSection = (legal.terms[langCode] | default(legal.terms.pt)).sections[4].title | slugify %}
+
+<div class="pricing">
+<header class="page-head pricing-head">
+    <div class="wrap">
+        <h1>{{ pr.hero.title }}</h1>
+        <p class="lede">{{ pr.hero.lede }}</p>
+        <p class="pricing-head__guarantee">{{ pr.hero.guarantee | safe }}</p>
+    </div>
+</header>
+
+<section class="section section--tight" aria-labelledby="plans-label">
+    <div class="wrap">
+        <h2 class="visually-hidden" id="plans-label">{{ pr.compare.caption }}</h2>
+        <fieldset class="billing">
+            <legend class="label">{{ pr.billing.legend }}</legend>
+            <div class="billing__options">
+                <input type="radio" name="billing" id="billing-monthly" value="monthly" checked>
+                <label for="billing-monthly">{{ pr.billing.monthly }}</label>
+                <input type="radio" name="billing" id="billing-annual" value="annual">
+                <label for="billing-annual">{{ pr.billing.annual }} <span class="billing__hint">{{ pr.billing.annualHint }}</span></label>
+            </div>
+        </fieldset>
+
+        <ol class="plan-sheet" role="list">
+            {% for plan in pr.plans %}
+            <li class="plan plan--{{ plan.id }}">
+                <h3 class="plan__name">{{ plan.name }}</h3>
+                <p class="plan__who">{{ plan.who }}</p>
+                <p class="plan__price price--monthly"><span class="mono">{{ plan.monthly.price }}</span> <span class="plan__period">{{ plan.monthly.period }}</span></p>
+                <p class="plan__price price--annual"><span class="mono">{{ plan.annual.price }}</span> <span class="plan__period">{{ plan.annual.period }}</span>{% if plan.annual.note %}<span class="plan__note">{{ plan.annual.note }}</span>{% endif %}</p>
+                <ul class="plan__limits" role="list">
+                    {% for limit in plan.limits %}<li>{{ limit }}</li>{% endfor %}
+                </ul>
+                <a href="#baixar" class="btn {% if plan.primary %}btn--primary{% else %}btn--secondary{% endif %} plan__cta" data-ga="cta_click" data-ga-detail="pricing_{{ plan.id }}">{{ plan.cta }}</a>
+                <p class="plan__includes">{{ plan.includes }}</p>
+                <ul class="plan__features" role="list">
+                    {% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ol>
+        <p class="pricing-note">{{ pr.note }}</p>
+    </div>
+</section>
+
+<section class="section section--alt" aria-labelledby="garantia">
+    <div class="wrap guarantee">
+        <h2 id="garantia">{{ pr.guarantee.title }}</h2>
+        <div>
+            <p>{{ pr.guarantee.text }}</p>
+            <p><a class="link" href="{{ relPath }}{{ termsHref }}#{{ termsSection }}">{{ pr.guarantee.link }}</a></p>
+        </div>
+    </div>
+</section>
+
+<section class="section" aria-labelledby="limites">
+    <div class="wrap">
+        <div class="section-head">
+            <h2 id="limites">{{ pr.rules.title }}</h2>
+            <p>{{ pr.rules.lede }}</p>
+        </div>
+        <dl class="rules">
+            {% for rule in pr.rules.items %}
+            <div class="rules__item"><dt>{{ rule.title }}</dt><dd>{{ rule.text }}</dd></div>
+            {% endfor %}
+        </dl>
+    </div>
+</section>
+
+<section class="section" aria-labelledby="comparar">
+    <div class="wrap">
+        <div class="section-head"><h2 id="comparar">{{ pr.compare.title }}</h2></div>
+        <div class="spec-scroll" role="region" aria-labelledby="comparar" tabindex="0">
+            <table class="spec">
+                <caption class="visually-hidden">{{ pr.compare.caption }}</caption>
+                <thead>
+                    <tr><th scope="col">{{ pr.compare.rowLabel }}</th>{% for plan in pr.plans %}<th scope="col">{{ plan.name }}</th>{% endfor %}</tr>
+                </thead>
+                <tbody>
+                    {% for row in pr.compare.rows %}
+                    <tr><th scope="row">{{ row.label }}</th>{% for value in row.values %}<td>{{ value }}</td>{% endfor %}</tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="pricing-note">{{ pr.compare.footnote }}</p>
+    </div>
+</section>
+
+<section class="section section--tight" aria-labelledby="contato">
+    <div class="wrap"><div class="contact-row">
+        <div>
+            <h2 id="contato">{{ pr.contact.title }}</h2>
+            <p class="lede">{{ pr.contact.text }}</p>
+        </div>
+        <a class="btn btn--secondary" href="mailto:{{ site.email }}?subject={{ pr.contact.subject | urlencode }}" data-ga="generate_lead" data-ga-detail="pricing_contact">{{ pr.contact.cta }}</a>
+    </div></div>
+</section>
+
+<section class="section" aria-labelledby="perguntas">
+    <div class="wrap">
+        <div class="section-head"><h2 id="perguntas">{{ pr.faq.title }}</h2></div>
+        <div class="qa-list">
+            {% for item in pr.faq.items %}
+            <details class="qa">
+                <summary>{{ item.q }}</summary>
+                <div class="qa__answer"><p>{{ item.a | safe }}</p></div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+</div>
+
+{% include "components/download.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in pr.faq.items %}{
+      "@type": "Question",
+      "name": {{ item.q | dump | safe }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ item.a | striptags | dump | safe }} }
+    }{% if not loop.last %},{% endif %}{% endfor %}
+  ]
+}
+</script>

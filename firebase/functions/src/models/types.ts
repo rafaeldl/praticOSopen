@@ -558,8 +558,9 @@ export type SubscriptionSource = 'store' | 'grace';
 export type SubscriptionStore = 'app_store' | 'play_store' | 'web';
 
 export interface SubscriptionLimits {
+  ordersPerMonth: number;      // -1 = unlimited
   photosPerMonth: number;      // -1 = unlimited
-  formTemplates: number;       // -1 = unlimited
+  formTemplates: number;       // own active checklists; -1 = unlimited
   users: number;               // -1 = unlimited
   pdfWatermark: boolean;
 }
@@ -569,6 +570,12 @@ export interface SubscriptionUsage {
   formTemplatesActive: number;
   usersActive: number;
   usageResetAt: string;        // ISO date
+  /** Orders created in `ordersMonth` (São Paulo calendar), sample orders left out. */
+  ordersThisMonth?: number;
+  /** Month of ordersThisMonth, "YYYY-MM". */
+  ordersMonth?: string;
+  /** Orders of the month before ordersMonth (kept when the month turns). */
+  ordersLastMonth?: number;
 }
 
 export interface Subscription {
@@ -583,6 +590,8 @@ export interface Subscription {
   updatedAt?: string;          // ISO, last server write
   limits: SubscriptionLimits;
   usage: SubscriptionUsage;
+  /** Version of docs/plans/plans.json this subscription follows; missing = the current one (#726). */
+  tableVersion?: string;
 }
 
 // ============================================================================

@@ -27,6 +27,7 @@ import { orderShort } from '@/lib/orders/text'
 import { useRoutePanel } from '@/lib/route-layer'
 import { can, effectiveUseFinancial, reloadCompany, session } from '@/lib/session'
 import { showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import { announce, ui } from '@/lib/ui'
 import '@/styles/contracts.css'
 
@@ -79,13 +80,16 @@ async function load() {
   }
 }
 
+// Plan (#724): a new contract, or turning contracts on, is Pro; the contracts a company has stay.
 function newContract() {
+  if (!ensurePlanFeature('contracts')) return
   ui.newOrderSeed = { repeat: true }
   ui.newOrder = true
 }
 
 async function turnOn() {
   if (turningOn.value) return
+  if (!ensurePlanFeature('contracts')) return
   turningOn.value = true
   turnOnError.value = ''
   try {

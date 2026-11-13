@@ -16,6 +16,11 @@
         "flag": "whatsappBot"
       },
       {
+        "href": "precos.html",
+        "label": "Preços",
+        "flag": "pricingPage"
+      },
+      {
         "href": "docs/",
         "label": "Ajuda"
       }
@@ -45,6 +50,11 @@
         "flag": "whatsappBot"
       },
       {
+        "href": "precos-en.html",
+        "label": "Pricing",
+        "flag": "pricingPage"
+      },
+      {
         "href": "docs/index-en.html",
         "label": "Help"
       }
@@ -72,6 +82,11 @@
         "href": "funcionalidades/whatsapp-bot-es.html",
         "label": "WhatsApp",
         "flag": "whatsappBot"
+      },
+      {
+        "href": "precos-es.html",
+        "label": "Precios",
+        "flag": "pricingPage"
       },
       {
         "href": "docs/index-es.html",

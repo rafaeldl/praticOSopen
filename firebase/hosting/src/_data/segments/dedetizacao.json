@@ -335,7 +335,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. Você usa grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Planos pagos, com mais de tudo isso e com equipe, estão disponíveis no app."
+          "answer": "Para começar, não. Você começa grátis e usa no dia a dia. Quando a equipe ou o movimento crescer, os planos pagos estão no app, e o que cada um inclui aparece na tela Plano."
         },
         {
           "question": "Existe um segmento de dedetização no app?",
@@ -666,7 +666,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. You can use it free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, with more of each and a team, are available in the app."
+          "answer": "Not to get started. You start free and use it day to day. When your team or workload grows, paid plans are in the app, and the Plan screen shows what each one includes."
         },
         {
           "question": "Is there a pest control segment in the app?",
@@ -997,7 +997,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. Lo usas gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y una plantilla de checklist. Los planes pagos, con más de todo eso y con equipo, están disponibles en la app."
+          "answer": "Para empezar, no. Empiezas gratis y lo usas en el día a día. Cuando crezcan el equipo o el trabajo, los planes pagos están en la app, y la pantalla Plan muestra lo que incluye cada uno."
         },
         {
           "question": "¿Hay un segmento de control de plagas en la app?",

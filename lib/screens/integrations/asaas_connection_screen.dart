@@ -24,6 +24,8 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/widgets/plan_feature_notice.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 /// Asaas dashboard page where the user creates an API key.
 const asaasPanelUrl = 'https://www.asaas.com/customerConfigIntegrations/index';
@@ -179,6 +181,8 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
   Future<void> _connect() async {
     final apiKey = _apiKeyController.text.trim();
     if (apiKey.isEmpty || _busy) return;
+    // Charging customers is Starter (#724).
+    if (!ensurePlanFeature(context, PlanFeature.charges)) return;
 
     setState(() => _busy = true);
     try {

@@ -345,6 +345,25 @@
           ]
         },
         {
+          "title": "5. Planos pagos e garantia de 7 dias",
+          "paragraphs": [
+            "O PraticOS tem um plano grátis e planos pagos. O preço, o período (mensal ou anual) e o que cada plano inclui aparecem na tela de planos antes de você assinar. A assinatura é da empresa e renova sozinha ao fim de cada período, até ser cancelada.",
+            "A IA do PraticOS (preencher a OS falando ou por foto, entre outros usos) está incluída em todos os planos, inclusive no grátis, para o uso normal do trabalho. Para manter o serviço estável para todos, podemos limitar usos fora do comum, como automações ou volumes muito acima do trabalho da empresa.",
+            "<strong>Garantia de 7 dias.</strong> Se você assinar um plano pago e desistir em até 7 dias da contratação, pode pedir o valor pago de volta, sem precisar explicar o motivo. Isso também é o direito de arrependimento do Código de Defesa do Consumidor (art. 49) para compras feitas pela internet. Na web e no Android, nós devolvemos. No iPhone e no iPad, a cobrança é da Apple: o pedido vai para ela, e é a Apple que decide a devolução.",
+            "Como pedir a devolução depende de onde você assinou:"
+          ],
+          "list": [
+            "<strong>Pelo PraticOS na web:</strong> peça na tela <strong>Plano</strong> ou pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Devolvemos o valor pelo mesmo meio de pagamento.",
+            "<strong>No Android (Google Play):</strong> peça pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>, informando o e-mail da conta. Nós fazemos o reembolso pelo Google Play, que devolve pelo meio de pagamento da sua conta Google.",
+            "<strong>No iPhone ou iPad (App Store):</strong> a cobrança é feita pela Apple, e só a Apple pode devolver. Peça em <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>, na opção de solicitar reembolso. A decisão e o prazo são da Apple; se precisar, ajudamos pelo e-mail <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>."
+          ],
+          "paragraphsAfter": [
+            "Depois dos 7 dias, você pode cancelar quando quiser: a assinatura continua até o fim do período já pago e não renova. Para cancelar, use os Ajustes do iPhone (seu nome, Assinaturas), o Google Play (Pagamentos e assinaturas) ou a tela Plano na web. Apagar o app não cancela a assinatura.",
+            "Com a devolução ou o cancelamento, a empresa volta ao plano grátis. Nada é apagado: OS, clientes e fotos continuam na conta."
+          ],
+          "flag": "pricingPage"
+        },
+        {
           "title": "5. Dados e Privacidade",
           "paragraphs": [
             "Ao utilizar o PráticOS, você concorda com nossa <a href=\"privacy.html\">Política de Privacidade</a>. Seus dados são armazenados de forma segura e tratados de acordo com a Lei Geral de Proteção de Dados (LGPD)."
@@ -369,7 +388,11 @@
             "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
           ]
         }
-      ]
+      ],
+      "lastUpdatedFlagged": {
+        "flag": "pricingPage",
+        "text": "Última atualização: Novembro de 2026"
+      }
     },
     "en": {
       "title": "Terms of",
@@ -409,6 +432,25 @@
           ]
         },
         {
+          "title": "5. Paid plans and 7-day guarantee",
+          "paragraphs": [
+            "PraticOS has a free plan and paid plans. The price, the billing period (monthly or yearly) and what each plan includes are shown on the plans screen before you subscribe. The subscription belongs to the company and renews automatically at the end of each period until it is cancelled.",
+            "PraticOS AI (filling in work orders by voice or photo, among other uses) is included in every plan, free included, for normal work use. To keep the service stable for everyone, we may limit unusual use, such as automation or volumes far above the company's work.",
+            "<strong>7-day guarantee.</strong> If you subscribe to a paid plan and change your mind within 7 days of subscribing, you can ask for what you paid back, no questions asked. This is also the right of withdrawal under the Brazilian Consumer Protection Code (art. 49) for online purchases. On the web and on Android, we refund you. On iPhone and iPad, Apple charges the subscription: the request goes to Apple, and Apple decides on the refund.",
+            "How to ask for the refund depends on where you subscribed:"
+          ],
+          "list": [
+            "<strong>On PraticOS on the web:</strong> ask on the <strong>Plan</strong> screen or by email at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. We refund through the same payment method.",
+            "<strong>On Android (Google Play):</strong> ask by email at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>, with your account email. We issue the refund through Google Play, which returns it to the payment method on your Google account.",
+            "<strong>On iPhone or iPad (App Store):</strong> Apple charges the subscription, and only Apple can refund it. Ask at <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>, using the option to request a refund. The decision and timing are Apple's; if you need help, email us at <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>."
+          ],
+          "paragraphsAfter": [
+            "After the 7 days, you can cancel at any time: the subscription stays active until the end of the period already paid and does not renew. To cancel, use iPhone Settings (your name, Subscriptions), Google Play (Payments and subscriptions) or the Plan screen on the web. Deleting the app does not cancel the subscription.",
+            "After a refund or cancellation, the company goes back to the free plan. Nothing is deleted: work orders, customers and photos stay in the account."
+          ],
+          "flag": "pricingPage"
+        },
+        {
           "title": "5. Data and Privacy",
           "paragraphs": [
             "By using PraticOS, you agree to our <a href=\"privacy-en.html\">Privacy Policy</a>. Your data is stored securely and processed in accordance with applicable data protection laws."
@@ -433,7 +475,11 @@
             "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
           ]
         }
-      ]
+      ],
+      "lastUpdatedFlagged": {
+        "flag": "pricingPage",
+        "text": "Last updated: November 2026"
+      }
     },
     "es": {
       "title": "Términos de",
@@ -473,6 +519,25 @@
           ]
         },
         {
+          "title": "5. Planes pagos y garantía de 7 días",
+          "paragraphs": [
+            "PraticOS tiene un plan gratis y planes pagos. El precio, el período (mensual o anual) y lo que incluye cada plan aparecen en la pantalla de planes antes de suscribirte. La suscripción es de la empresa y se renueva sola al final de cada período, hasta que se cancele.",
+            "La IA de PraticOS (llenar la orden hablando o con una foto, entre otros usos) está incluida en todos los planes, también en el gratis, para el uso normal del trabajo. Para mantener el servicio estable para todos, podemos limitar usos fuera de lo común, como automatizaciones o volúmenes muy por encima del trabajo de la empresa.",
+            "<strong>Garantía de 7 días.</strong> Si te suscribes a un plan pago y desistes dentro de los 7 días de la contratación, puedes pedir lo pagado de vuelta, sin explicar el motivo. Es también el derecho de arrepentimiento del Código de Defensa del Consumidor de Brasil (art. 49) para compras por internet. En la web y en Android, te devolvemos nosotros. En iPhone y iPad, el cobro es de Apple: el pedido va a Apple, y es Apple quien decide la devolución.",
+            "Cómo pedir la devolución depende de dónde te suscribiste:"
+          ],
+          "list": [
+            "<strong>En PraticOS en la web:</strong> pídela en la pantalla <strong>Plan</strong> o por correo a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>. Devolvemos el dinero por el mismo medio de pago.",
+            "<strong>En Android (Google Play):</strong> pídela por correo a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>, con el correo de tu cuenta. Hacemos el reembolso por Google Play, que lo devuelve al medio de pago de tu cuenta de Google.",
+            "<strong>En iPhone o iPad (App Store):</strong> el cobro lo hace Apple, y solo Apple puede devolverlo. Pídelo en <a href=\"https://reportaproblem.apple.com\" target=\"_blank\" rel=\"noopener\">reportaproblem.apple.com</a>, con la opción de solicitar un reembolso. La decisión y el plazo son de Apple; si necesitas ayuda, escríbenos a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>."
+          ],
+          "paragraphsAfter": [
+            "Después de los 7 días, puedes cancelar cuando quieras: la suscripción sigue hasta el final del período ya pagado y no se renueva. Para cancelar, usa los Ajustes del iPhone (tu nombre, Suscripciones), Google Play (Pagos y suscripciones) o la pantalla Plan en la web. Borrar la app no cancela la suscripción.",
+            "Tras la devolución o la cancelación, la empresa vuelve al plan gratis. No se borra nada: órdenes, clientes y fotos siguen en la cuenta."
+          ],
+          "flag": "pricingPage"
+        },
+        {
           "title": "5. Datos y Privacidad",
           "paragraphs": [
             "Al utilizar PraticOS, usted acepta nuestra <a href=\"privacy-es.html\">Política de Privacidad</a>. Sus datos se almacenan de forma segura y se tratan de acuerdo con las leyes de protección de datos aplicables."
@@ -497,7 +562,11 @@
             "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
           ]
         }
-      ]
+      ],
+      "lastUpdatedFlagged": {
+        "flag": "pricingPage",
+        "text": "Última actualización: Noviembre 2026"
+      }
     }
   },
   "accountDeletion": {

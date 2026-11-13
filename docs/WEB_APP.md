@@ -97,7 +97,7 @@ O papel vem do claim `roles` do token, a mesma fonte das regras do Firestore. `u
 
 Toda rota declara `meta.access` (`tests/access.test.ts` falha sem isso), e cada item do menu carrega a mesma regra (`navigation.ts`).
 
-Onde o web difere do app de propósito (para não deixar uma empresa sem saída): **não aplica limite de plano** (`WEB_PLAN_LIMITS_ENFORCED = false` em `lib/plan-limits.ts`), como o app no navegador; o técnico e o gerente não criam OS (`canCreateOrders`, igual a `canCreateOrder` do app).
+Onde o web difere do app de propósito (para não deixar uma empresa sem saída): os limites e os recursos de cada plano seguem a mesma chave do app e do servidor (`config/paidPlans.enabled`, lida em `lib/plan-limits.ts`; recursos em `lib/plan-features.ts`, ver `docs/PLAN_FEATURES.md`), e a tela Plano mostra o mesmo que a do app (`lib/plan-overview.ts`), mas a compra ainda é só no app; o técnico e o gerente não criam OS (`canCreateOrders`, igual a `canCreateOrder` do app).
 
 ### Entrada
 

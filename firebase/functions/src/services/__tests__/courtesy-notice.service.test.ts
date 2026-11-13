@@ -8,6 +8,7 @@ import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
 import { courtesyMessage, sendCourtesyNotices } from '../courtesy-notice.service';
 import { dueCourtesyNotice, PLAN_LIMITS } from '../subscription-plans';
+import { resetPaidPlansCache } from '../plan-limits.service';
 import type { Subscription } from '../../models/types';
 
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
@@ -61,19 +62,24 @@ describe('dueCourtesyNotice', () => {
 });
 
 describe('courtesyMessage', () => {
-  it('quotes the real use against the Free limit', () => {
-    expect(courtesyMessage(15, 87, 'BR').body).toContain('87 vezes');
-    expect(courtesyMessage(15, 87, 'BR').body).toContain('No Free são 10');
+  it('quotes the work orders of the month against Free', () => {
+    expect(courtesyMessage(15, 23, 'BR').body).toBe('Neste mês você abriu 23 OS. No Free são 10 por mês. Escolha seu plano no app.');
   });
 
-  it('does not mention the assistant when it was not used', () => {
-    expect(courtesyMessage(3, 0, 'BR').body).not.toContain('assistente');
+  it('never mentions the assistant: its ceilings are internal', () => {
+    for (const orders of [0, 23]) {
+      for (const country of ['BR', 'US', 'MX']) {
+        expect(courtesyMessage(3, orders, country).body).not.toMatch(/assistente|assistant|asistente/);
+      }
+    }
+    expect(courtesyMessage(3, 0, 'BR').body).toBe('Depois disso, o app volta para o plano Free. Escolha seu plano no app.');
   });
 
   it('speaks in the singular', () => {
     expect(courtesyMessage(1, 1, 'BR').title).toBe('Sua cortesia do Pro acaba em 1 dia');
-    expect(courtesyMessage(1, 1, 'BR').body).toContain('1 vez ');
-    expect(courtesyMessage(1, 1, 'US').body).toContain('once');
+    expect(courtesyMessage(1, 1, 'BR').body).toContain('abriu 1 OS');
+    expect(courtesyMessage(1, 1, 'US').body).toContain('1 work order this month');
+    expect(courtesyMessage(1, 1, 'MX').body).toContain('1 orden este mes');
     expect(courtesyMessage(1, 1, 'MX').title).toBe('Tu cortesía Pro termina en 1 día');
   });
 
@@ -87,11 +93,14 @@ describe('courtesyMessage', () => {
 });
 
 describe('sendCourtesyNotices', () => {
-  beforeEach(() => fake.reset());
+  beforeEach(() => {
+    fake.reset();
+    resetPaidPlansCache();
+  });
 
   it('leaves the subscription map alone', async () => {
     fake.seed('companies/c1', { subscription: grace() });
-    await sendCourtesyNotices(daysBefore(15), { aiUsed: async () => 0, notify: jest.fn() });
+    await sendCourtesyNotices(daysBefore(15), { notify: jest.fn() });
     const company = await firestoreService.db.collection('companies').doc('c1').get();
     expect(company.get('subscription')).toEqual(grace());
   });
@@ -100,7 +109,7 @@ describe('sendCourtesyNotices', () => {
     fake.seed('companies/c1', { country: 'BR', subscription: grace() });
     fake.seed('companies/c2', { subscription: grace({ source: 'store' }) });
     const notify = jest.fn().mockResolvedValue(undefined);
-    const deps = { aiUsed: async () => 4, notify };
+    const deps = { notify };
 
     await expect(sendCourtesyNotices(daysBefore(15), deps)).resolves.toEqual({ sent: 1, errors: 0 });
     expect(notify).toHaveBeenCalledTimes(1);
@@ -110,14 +119,37 @@ describe('sendCourtesyNotices', () => {
     expect(notify).toHaveBeenCalledTimes(1);
   });
 
+  it('limits on: quotes the work orders the server counted this month', async () => {
+    const usage = { ...grace().usage, ordersMonth: '2026-11', ordersThisMonth: 23 };
+    fake.seed('config/paidPlans', { enabled: true });
+    fake.seed('companies/c1', { country: 'BR', subscription: grace({ usage }) });
+    const notify = jest.fn().mockResolvedValue(undefined);
+
+    await sendCourtesyNotices(daysBefore(15), { notify });
+
+    expect(notify.mock.calls[0][1].body).toContain('abriu 23 OS');
+  });
+
+  it('limits off: Free has no order limit, so no number is said', async () => {
+    const usage = { ...grace().usage, ordersMonth: '2026-11', ordersThisMonth: 23 };
+    fake.seed('companies/c1', { country: 'BR', subscription: grace({ usage }) });
+    const notify = jest.fn().mockResolvedValue(undefined);
+
+    await sendCourtesyNotices(daysBefore(15), { notify });
+
+    const body = notify.mock.calls[0][1].body as string;
+    expect(body).toBe('Depois disso, o app volta para o plano Free. Escolha seu plano no app.');
+    expect(body).not.toMatch(/\d/);
+  });
+
   it('quotes the days really left and records the step', async () => {
     fake.seed('companies/c1', { subscription: grace() });
     const notify = jest.fn().mockResolvedValue(undefined);
 
-    await sendCourtesyNotices(daysBefore(13), { aiUsed: async () => 0, notify });
+    await sendCourtesyNotices(daysBefore(13), { notify });
 
     expect(notify.mock.calls[0][1].title).toBe('Sua cortesia do Pro acaba em 13 dias');
-    await expect(sendCourtesyNotices(daysBefore(12), { aiUsed: async () => 0, notify })).resolves.toEqual({
+    await expect(sendCourtesyNotices(daysBefore(12), { notify })).resolves.toEqual({
       sent: 0,
       errors: 0,
     });
@@ -125,7 +157,7 @@ describe('sendCourtesyNotices', () => {
 
   it('retries a company that failed on the next run', async () => {
     fake.seed('companies/c1', { subscription: grace() });
-    const deps = { aiUsed: jest.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(0), notify: jest.fn() };
+    const deps = { notify: jest.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(undefined) };
 
     await expect(sendCourtesyNotices(daysBefore(15), deps)).resolves.toEqual({ sent: 0, errors: 1 });
     await expect(sendCourtesyNotices(daysBefore(15), deps)).resolves.toEqual({ sent: 1, errors: 0 });

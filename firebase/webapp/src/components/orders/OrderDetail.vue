@@ -56,6 +56,7 @@ import { registerShortcut } from '@/lib/shortcuts'
 import { registerCommand } from '@/lib/commands'
 import { preferredStep, rememberMethod, rememberTransition, suggestedMethod } from '@/lib/orders/suggest'
 import { currentToast, showToast } from '@/lib/toast'
+import { ensurePlanFeature } from '@/lib/plan-feature-gate'
 import { announce, ui } from '@/lib/ui'
 import ChoiceDialog, { type Choice } from './ChoiceDialog.vue'
 import ComboDialog from './ComboDialog.vue'
@@ -785,6 +786,8 @@ async function openDevicePicker(current: { id?: string; name?: string }) {
 }
 
 async function openPicker(kind: 'addItem' | 'customer' | 'device' | 'assignee') {
+  // The responsible per person is Pro (#724), as the app's order screen.
+  if (kind === 'assignee' && !ensurePlanFeature('perPersonAgenda')) return
   try {
     if (kind === 'addItem' && !catalog.value.length) catalog.value = await loadCatalog()
     // "Mais usados" as in the Nova OS (order.item-search.most-used); a failure only hides it.

@@ -616,7 +616,7 @@ export interface OrderAssistDeps {
   llm: LlmClient;
   getSettings(companyId: string): Promise<AiSettings | null>;
   reserve(companyId: string, settings: AiSettings | null): Promise<QuotaReservation>;
-  release(companyId: string, monthKey: string): Promise<void>;
+  release(companyId: string, monthKey: string, dayKey?: string): Promise<void>;
   loadCatalog(companyId: string): Promise<CompanyCatalog>;
   /**
    * Customers that may be the one said: the company's customers (all of them
@@ -860,9 +860,10 @@ export async function runOrderAssist(
 
   const reservation = await deps.reserve(companyId, settings);
   if (!reservation.ok) {
-    throw new OrderAssistError('AI_QUOTA_EXCEEDED', 'Monthly AI limit reached', {
+    throw new OrderAssistError('AI_QUOTA_EXCEEDED', reservation.period === 'day' ? 'Daily AI limit reached' : 'Monthly AI limit reached', {
       used: reservation.used,
       limit: reservation.limit,
+      period: reservation.period,
     });
   }
 
@@ -894,7 +895,7 @@ export async function runOrderAssist(
     draft = guardUserFields(parseLlmDraft(raw), input.context);
   } catch (error) {
     try {
-      await deps.release(companyId, reservation.monthKey);
+      await deps.release(companyId, reservation.monthKey, reservation.dayKey);
     } catch {
       // Best effort: a failed release only costs the user one request.
     }

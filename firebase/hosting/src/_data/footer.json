@@ -9,6 +9,11 @@
           "label": "Como funciona"
         },
         {
+          "href": "precos.html",
+          "label": "Preços",
+          "flag": "pricingPage"
+        },
+        {
           "href": "funcionalidades/nota-fiscal.html",
           "label": "Nota fiscal de serviço",
           "flag": "nfsePage"
@@ -73,6 +78,11 @@
           "label": "How it works"
         },
         {
+          "href": "precos-en.html",
+          "label": "Pricing",
+          "flag": "pricingPage"
+        },
+        {
           "href": "funcionalidades/whatsapp-bot-en.html",
           "label": "WhatsApp assistant",
           "flag": "whatsappBot"
@@ -130,6 +140,11 @@
         {
           "href": "#como-funciona",
           "label": "Cómo funciona"
+        },
+        {
+          "href": "precos-es.html",
+          "label": "Precios",
+          "flag": "pricingPage"
         },
         {
           "href": "funcionalidades/whatsapp-bot-es.html",

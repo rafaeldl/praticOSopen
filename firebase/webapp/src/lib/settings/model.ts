@@ -7,7 +7,7 @@ import { FORMAT_COUNTRIES } from '@/lib/format'
 import type { AppRole, Permission } from '@/lib/permissions'
 import { hasCountryZone } from '@/lib/zone'
 import { whatsappUrl } from '@/lib/share'
-import { dateOf, effectiveLimits, effectivePlan, type PlanId, type SubscriptionLimits } from '@/lib/plan-limits'
+import { PLAN_NAME, checkPlanLimit, dateOf, effectiveLimits, effectivePlan, type PlanId, type SubscriptionLimits } from '@/lib/plan-limits'
 
 // ── Roles ────────────────────────────────────────────────────────────────
 
@@ -234,7 +234,7 @@ export function permissionCell(role: AppRole, permission: Permission, useFinanci
 export type { PlanId }
 
 /** Product names: brand names, not translated (SubscriptionPlanName). */
-export const PLAN_NAME: Record<PlanId, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' }
+export { PLAN_NAME }
 
 type Limits = SubscriptionLimits
 
@@ -246,6 +246,8 @@ export interface PlanSummary {
   expiresAt: Date | null
   usage: { users: number; photos: number; checklists: number }
   limits: Limits
+  /** Passing people does not block (Business): only says it went over what is included. */
+  overageAllowed: boolean
 }
 
 const record = (value: unknown): Record<string, unknown> => (value && typeof value === 'object' ? (value as Record<string, unknown>) : {})
@@ -271,13 +273,13 @@ export function planSummary(subscription: unknown, now: Date): PlanSummary {
     expiresAt,
     usage: { users: num(usage.usersActive, 1), photos: num(usage.photosThisMonth, 0), checklists: num(usage.formTemplatesActive, 0) },
     limits,
+    overageAllowed: checkPlanLimit({ subscription, resource: 'collaborator', usage: limits.users, enforced: true, now }).contactUs,
   }
 }
 
 /**
  * People the plan allows, by the same rule as checklists (forms/model
- * activeLimit): the app applies plan limits only where paid plans can be bought,
- * never in the browser, so here -1 (no limit) unless `enforced`.
+ * activeLimit): -1 (no limit) unless `enforced` (the switch config/paidPlans).
  */
 export function seatLimit(plan: PlanSummary, enforced: boolean): number {
   return enforced ? plan.limits.users : -1
@@ -286,7 +288,7 @@ export function seatLimit(plan: PlanSummary, enforced: boolean): number {
 /** One more invite fits (members and invites that still work count, recounted by the server). */
 export function roomForPerson(plan: PlanSummary, enforced: boolean): boolean {
   const limit = seatLimit(plan, enforced)
-  return limit < 0 || plan.usage.users < limit
+  return limit < 0 || plan.usage.users < limit || plan.overageAllowed
 }
 
 export type UsageLevel = 'unlimited' | 'ok' | 'near' | 'atLimit'

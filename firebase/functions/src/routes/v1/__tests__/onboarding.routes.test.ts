@@ -182,6 +182,8 @@ describe('POST /v1/app/onboarding/seed', () => {
     await post('founder', { withSamples: true, locale: 'pt-BR' });
     const orders = list('companies/new1/orders').map((doc) => doc.data as Record<string, unknown>);
     expect(orders.map((order) => order.payment)).toEqual([null, null, null, null]);
+    // Marked so the orders of the month (#723) leave them out.
+    expect(orders.map((order) => order.isSample)).toEqual([true, true, true, true]);
     expect(list('companies/new1/orders').map((doc) => doc.id).sort()).toEqual(['sample-order-1', 'sample-order-2', 'sample-order-3', 'sample-order-4']);
   });
 

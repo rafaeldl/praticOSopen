@@ -450,6 +450,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Chave única dos limites de plano (docs/PLAN_LIMITS_SERVER.md, #723):
+    // servidor, app e web leem a mesma. Só leitura para quem entrou; quem
+    // grava é o servidor (Admin SDK) ou o console.
+    match /config/paidPlans {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     // NFS-E DIRETA (Emissor Nacional) — spec 2026-11-05-nfse-direta-design §6
     // Certificado A1 cifrado (envelope com Cloud KMS, uma chave por emitente)

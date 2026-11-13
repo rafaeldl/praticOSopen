@@ -19,7 +19,7 @@ export const OUTPUTS = {
 
 const PLANS = ['free', 'starter', 'pro', 'business']
 const INT_FIELDS = ['ordersPerMonth', 'users', 'photosPerMonth', 'formTemplates', 'nfseCnpjs', 'aiPerMonth', 'aiPerDay']
-const BOOL_FIELDS = ['ownChecklists', 'pdfWatermark']
+const BOOL_FIELDS = ['ownChecklists', 'pdfWatermark', 'overageAllowed']
 const FIELDS = [...INT_FIELDS, ...BOOL_FIELDS, 'features']
 
 export function loadPlanTable(repo = REPO) {
@@ -34,6 +34,7 @@ export function validate(table) {
   const problems = []
   if (JSON.stringify(table.plans) !== JSON.stringify(PLANS)) problems.push(`plans must be ${PLANS.join(', ')}`)
   if (!table.versions?.[table.currentVersion]) problems.push(`currentVersion ${table.currentVersion} is not in versions`)
+  if (!table.versions?.[table.legacyVersion]) problems.push(`legacyVersion ${table.legacyVersion} is not in versions`)
   for (const [version, entry] of Object.entries(table.versions ?? {})) {
     for (const plan of PLANS) {
       const row = entry.plans?.[plan]
@@ -51,6 +52,12 @@ export function validate(table) {
       if (row.ownChecklists !== (row.formTemplates !== 0)) problems.push(`${at}: ownChecklists must be false exactly when formTemplates is 0`)
     }
     for (const plan of Object.keys(entry.plans ?? {})) if (!PLANS.includes(plan)) problems.push(`versions.${version}.plans.${plan} is not a plan`)
+    // Each plan has what the one before it has.
+    for (let i = 1; i < PLANS.length; i++) {
+      const before = entry.plans?.[PLANS[i - 1]]?.features ?? []
+      const missing = before.filter((f) => !(entry.plans?.[PLANS[i]]?.features ?? []).includes(f))
+      if (missing.length) problems.push(`versions.${version}.plans.${PLANS[i]}.features lacks ${missing.join(', ')} from ${PLANS[i - 1]}`)
+    }
   }
   return problems
 }
@@ -61,6 +68,41 @@ export function rowsOf(table) {
     Object.entries(table.versions).map(([version, entry]) => [
       version,
       Object.fromEntries(PLANS.map((plan) => [plan, Object.fromEntries(FIELDS.map((field) => [field, entry.plans[plan][field]]))])),
+    ]),
+  )
+}
+
+const moreGenerous = (a, b) => (a === -1 || b === -1 ? -1 : Math.max(a, b))
+
+/**
+ * A subscription never loses what it bought (#726): an older version of the
+ * table is in force as the more generous of it and the current one, field by
+ * field. Numbers: the larger (-1, no limit, wins); pdfWatermark only when
+ * both have it; ownChecklists and overageAllowed when either has it;
+ * features: an old version that lists none had every feature (the table
+ * before #724), so it keeps no list (no gate); else both lists. The current
+ * version is in force as it is.
+ */
+export function mergeRows(old, current) {
+  const row = {}
+  for (const field of INT_FIELDS) row[field] = moreGenerous(old[field], current[field])
+  row.ownChecklists = old.ownChecklists || current.ownChecklists
+  row.pdfWatermark = old.pdfWatermark && current.pdfWatermark
+  row.overageAllowed = old.overageAllowed || current.overageAllowed
+  row.features = old.features.length === 0 ? [] : [...new Set([...current.features, ...old.features])]
+  return Object.fromEntries(FIELDS.map((field) => [field, row[field]]))
+}
+
+/** The rows the code applies, by version: older versions merged with the current one. */
+export function inForceRowsOf(table) {
+  const rows = rowsOf(table)
+  const current = rows[table.currentVersion]
+  return Object.fromEntries(
+    Object.entries(rows).map(([version, plans]) => [
+      version,
+      version === table.currentVersion
+        ? plans
+        : Object.fromEntries(PLANS.map((plan) => [plan, mergeRows(plans[plan], current[plan])])),
     ]),
   )
 }
@@ -87,17 +129,29 @@ ${BOOL_FIELDS.map((f) => `  readonly ${f}: boolean;`).join('\n')}
 /** Version of the table new companies and plan changes get. */
 export const PLAN_TABLE_CURRENT_VERSION = ${JSON.stringify(table.currentVersion)};
 
-/** Every version of the table, by version, then by plan. */
+/**
+ * Version a paid subscription without \`tableVersion\` follows: it was bought
+ * before the current table (#726). Courtesy (source 'grace') and Free follow
+ * the current one.
+ */
+export const PLAN_TABLE_LEGACY_VERSION = ${JSON.stringify(table.legacyVersion)};
+
+/** Every version of the table as approved, by version, then by plan. */
 export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = ${rows};
+
+/**
+ * What the code applies, by version: an older version is the more generous of
+ * it and the current one, field by field (mergeRows in scripts/plan-table.mjs).
+ */
+export const PLAN_TABLES_IN_FORCE: Readonly<Record<string, Readonly<Record<PlanId, PlanRow>>>> = ${JSON.stringify(inForceRowsOf(table), null, 2)};
 `
 }
 
 const dartValue = (value) => (Array.isArray(value) ? `[${value.map((v) => `'${v}'`).join(', ')}]` : String(value))
 
 /** Dart library (app). */
-export function renderDart(table) {
-  const rows = rowsOf(table)
-  const versions = Object.entries(rows)
+function dartTables(rows) {
+  return Object.entries(rows)
     .map(
       ([version, plans]) => `  '${version}': {
 ${PLANS.map(
@@ -108,6 +162,12 @@ ${FIELDS.map((f) => `      ${f}: ${dartValue(plans[plan][f])},`).join('\n')}
   },`,
     )
     .join('\n')
+}
+
+/** Dart library (app). */
+export function renderDart(table) {
+  const versions = dartTables(rowsOf(table))
+  const inForce = dartTables(inForceRowsOf(table))
   return `// ${HEADER}
 // ignore_for_file: type=lint
 
@@ -131,9 +191,21 @@ ${FIELDS.map((f) => `        '${f}': ${f},`).join('\n')}
 /// Version of the table new companies and plan changes get.
 const kPlanTableCurrentVersion = '${table.currentVersion}';
 
-/// Every version of the table, by version, then by plan.
+/// Version a paid subscription without \`tableVersion\` follows: it was
+/// bought before the current table (#726). Courtesy and Free follow the
+/// current one.
+const kPlanTableLegacyVersion = '${table.legacyVersion}';
+
+/// Every version of the table as approved, by version, then by plan.
 const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
 ${versions}
+};
+
+/// What the code applies, by version: an older version is the more generous
+/// of it and the current one, field by field (mergeRows in
+/// scripts/plan-table.mjs).
+const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
+${inForce}
 };
 `
 }

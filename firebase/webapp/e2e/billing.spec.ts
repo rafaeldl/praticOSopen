@@ -41,7 +41,7 @@ test('chave desligada: Plano não mostra compra e diz que só consulta', async (
   await login(page, 'gOwner', 'settings/plan')
   await expect(page.getByTestId('plan-header')).toBeVisible()
   await expect(page.getByTestId('plan-billing')).toHaveCount(0)
-  await expect(page.getByText('Aqui você só consulta o plano.')).toBeVisible()
+  await expect(page.getByTestId('plan-where')).toHaveText('Para mudar de plano, use o app PraticOS no celular, na tela Plano.')
 })
 
 test('quem assina na loja: "use o app", sem botão de compra', async ({ page }) => {
@@ -64,6 +64,8 @@ test('assinar: plano, anual com Pix, garantia de 7 dias e ida para a página do 
   await page.route('https://sandbox.asaas.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>Fatura Asaas (sandbox)</h1>' }))
 
   await login(page, 'gOwner', 'settings/plan')
+  // With the purchase on the web, the "use the app" note goes away.
+  await expect(page.getByTestId('plan-where')).toHaveCount(0)
   await page.getByTestId('plan-billing-buy').click()
   await expect(page.getByRole('heading', { level: 1, name: 'Assinar plano' })).toBeVisible()
   await expect(page.getByTestId('billing-guarantee')).toContainText('Garantia de 7 dias')

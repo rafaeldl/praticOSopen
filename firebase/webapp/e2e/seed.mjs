@@ -464,7 +464,7 @@ async function seedForms() {
   batch.set(db.doc('segments/automotive/forms/seg-final'), final)
   batch.set(db.doc('segments/automotive/forms/seg-import'), importable)
   batch.set(db.doc(`companies/${COMPANY_A}/forms/seg-entrada`), { id: 'seg-entrada', ...entrada, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, ...audit(USERS.owner, 90000) })
-  batch.set(db.doc(`companies/${COMPANY_A}`), { subscription: { plan: 'business', status: 'active' } }, { merge: true })
+  batch.set(db.doc(`companies/${COMPANY_A}`), { subscription: { plan: 'business', status: 'active', tableVersion: '2' } }, { merge: true })
   const companyB = { id: COMPANY_B, name: COMPANIES[COMPANY_B].name }
   batch.set(db.doc(`companies/${COMPANY_B}/forms/b-active`), { id: 'b-active', title: 'Intake', description: null, isActive: true, items: [q('screen', 'Screen ok?', 'boolean')], company: companyB, ...audit(USERS.owner, 90000) })
   batch.set(db.doc(`companies/${COMPANY_B}/forms/b-off`), { id: 'b-off', title: 'Old check', description: null, isActive: false, items: [q('x', 'Anything?', 'text')], company: companyB, ...audit(USERS.owner, 90000) })
@@ -550,8 +550,23 @@ async function seedSettings() {
     {
       useScheduling: true,
       phone: '(11) 3333-4444',
-      // Starter in force: the team at the limit (members are recounted by the server), photos near it.
-      subscription: { plan: 'starter', status: 'active', source: 'store', expiresAt: future, usage: { usersActive: 4, photosThisMonth: 170, formTemplatesActive: 1 } },
+      // Starter in force (table of 2026-11, #725): 45 of 50 orders this month (near the limit, the notice) and
+      // the team at or over its 2 people (the server recounts it). ordersMonth is this month in São Paulo, like the server's counter.
+      subscription: {
+        plan: 'starter',
+        status: 'active',
+        source: 'store',
+        tableVersion: '2',
+        expiresAt: future,
+        usage: {
+          usersActive: 2,
+          photosThisMonth: 170,
+          formTemplatesActive: 1,
+          ordersMonth: new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 7),
+          ordersThisMonth: 45,
+          ordersLastMonth: 12,
+        },
+      },
     },
     { merge: true },
   )

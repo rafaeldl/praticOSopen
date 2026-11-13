@@ -13,6 +13,7 @@ import { formatPhone } from '@/lib/phone'
 import { country, orderName, statusText } from '@/lib/orders/text'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { api, can, effectiveUseFinancial, session } from '@/lib/session'
+import { loadLimitsSwitch, shouldShowPdfWatermark } from '@/lib/plan-limits'
 import { buildOrdersPdf, pdfFileName, type PdfCompany, type PdfImage, type PdfOrderPart, type PdfTexts } from './order-pdf'
 import { buildStatementPdf } from './statement-pdf'
 import type { OpenOrder } from '@/lib/receive/model'
@@ -233,7 +234,9 @@ export async function ordersPdf(ids: readonly string[]): Promise<OrdersPdf> {
     logo: logo as PdfImage | null,
   }
   const texts = pdfTexts()
-  const bytes = await buildOrdersPdf(found, company, texts, { showValues: show, fallbackFont: robotoFallback })
+  // The mark exactly when the app puts it (Free with the plan switch on, #724).
+  const watermark = shouldShowPdfWatermark(companyRaw.subscription, await loadLimitsSwitch(), new Date())
+  const bytes = await buildOrdersPdf(found, company, texts, { showValues: show, fallbackFont: robotoFallback, watermark })
   return {
     blob: new Blob([bytes as BlobPart], { type: 'application/pdf' }),
     fileName: pdfFileName(texts.serviceOrder, found.map((part) => part.order.number)),

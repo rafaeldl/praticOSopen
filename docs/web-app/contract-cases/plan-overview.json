@@ -1,0 +1,746 @@
+{
+  "version": 1,
+  "generatedFrom": "docs/plans/plans.json v2",
+  "rule": "Tela Plano (#725), igual no app e na web. Linhas: OS este mês (usada / limite), pessoas, CNPJs da nota fiscal (só quando o plano tem nota: limite diferente de 0). Limites da linha vêm de effectiveLimits (plan-limits.json); chave desligada: tudo -1 (sem limite) e nenhum aviso. Nível: ok, near (a partir de 80%), atLimit (100%), over (passou), unlimited (-1). Pessoas com limite 1 nunca avisam (o dono sozinho não é limite: empresa nova no Free não vê aviso). Um aviso só, nesta ordem: OS (ordersContactUs no plano que nunca trava, Business; ordersBlocked quando chegou ao limite e o mês anterior também passou, então a OS nova espera; ordersGrace quando passou neste mês e o anterior não; ordersAtLimit; ordersNear), depois pessoas (peopleContactUs no Business acima; peopleAtLimit no limite ou acima). `next` é o plano seguinte na ordem free, starter, pro, business com os recursos que ele dá a mais (features do seguinte menos as do atual, as duas da tabela atual, sem `ai`, que é de todos); null no Business. Sem contador de IA.",
+  "runsIn": [
+    "dart",
+    "web"
+  ],
+  "sourceOfTruth": [
+    "docs/plans/plans.json",
+    "lib/services/plan_overview.dart planOverview",
+    "firebase/webapp/src/lib/plan-overview.ts planOverview"
+  ],
+  "fields": "`orders` são as OS deste mês e do anterior (o runner grava subscription.usage.ordersMonth com o mês de agora). `people` e `taxIds` são contados pela tela (membros mais convites que valem; emissores em companies/{id}/fiscalEmitters). `expiresInDays` grava subscription.expiresAt a tantos dias de agora.",
+  "cases": [
+    {
+      "id": "free-new-company-sees-no-limit",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 1,
+          "lastMonth": 0
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 1,
+            "limit": 10,
+            "level": "ok"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": null,
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-80-percent-of-orders",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 8,
+          "lastMonth": 0
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 8,
+            "limit": 10,
+            "level": "near"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersNear",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-all-orders-used",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 10,
+          "lastMonth": 2
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 10,
+            "limit": 10,
+            "level": "atLimit"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersAtLimit",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-over-first-month-is-grace",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 12,
+          "lastMonth": 4
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 12,
+            "limit": 10,
+            "level": "over"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersGrace",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-over-again-new-order-waits",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 11,
+          "lastMonth": 13
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 11,
+            "limit": 10,
+            "level": "over"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersBlocked",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "free-at-limit-after-an-over-month-waits",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 10,
+          "lastMonth": 13
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 10,
+            "limit": 10,
+            "level": "atLimit"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersBlocked",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "starter-team-full",
+      "given": {
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 5,
+          "lastMonth": 0
+        },
+        "people": 2,
+        "taxIds": 1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 5,
+            "limit": 50,
+            "level": "ok"
+          },
+          {
+            "resource": "people",
+            "used": 2,
+            "limit": 2,
+            "level": "atLimit"
+          },
+          {
+            "resource": "taxIds",
+            "used": 1,
+            "limit": 1,
+            "level": "atLimit"
+          }
+        ],
+        "notice": {
+          "kind": "peopleAtLimit",
+          "resource": "people"
+        },
+        "next": {
+          "plan": "pro",
+          "features": [
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        }
+      }
+    },
+    {
+      "id": "orders-notice-comes-before-people",
+      "given": {
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 45,
+          "lastMonth": 0
+        },
+        "people": 2,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 45,
+            "limit": 50,
+            "level": "near"
+          },
+          {
+            "resource": "people",
+            "used": 2,
+            "limit": 2,
+            "level": "atLimit"
+          },
+          {
+            "resource": "taxIds",
+            "used": 0,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": {
+          "kind": "ordersNear",
+          "resource": "orders"
+        },
+        "next": {
+          "plan": "pro",
+          "features": [
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pro-taxIds-row",
+      "given": {
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 20,
+          "lastMonth": 10
+        },
+        "people": 3,
+        "taxIds": 1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "pro",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 20,
+            "limit": 150,
+            "level": "ok"
+          },
+          {
+            "resource": "people",
+            "used": 3,
+            "limit": 5,
+            "level": "ok"
+          },
+          {
+            "resource": "taxIds",
+            "used": 1,
+            "limit": 2,
+            "level": "ok"
+          }
+        ],
+        "notice": null,
+        "next": {
+          "plan": "business",
+          "features": [
+            "bulkActions",
+            "mcp",
+            "api"
+          ]
+        }
+      }
+    },
+    {
+      "id": "business-over-talks-to-us",
+      "given": {
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 520,
+          "lastMonth": 480
+        },
+        "people": 21,
+        "taxIds": 3,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "business",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 520,
+            "limit": 500,
+            "level": "over"
+          },
+          {
+            "resource": "people",
+            "used": 21,
+            "limit": 20,
+            "level": "over"
+          },
+          {
+            "resource": "taxIds",
+            "used": 3,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": {
+          "kind": "ordersContactUs",
+          "resource": "orders"
+        },
+        "next": null
+      }
+    },
+    {
+      "id": "business-people-over-talks-to-us",
+      "given": {
+        "subscription": {
+          "plan": "business",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 100,
+          "lastMonth": 0
+        },
+        "people": 21,
+        "taxIds": 0,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "business",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 100,
+            "limit": 500,
+            "level": "ok"
+          },
+          {
+            "resource": "people",
+            "used": 21,
+            "limit": 20,
+            "level": "over"
+          },
+          {
+            "resource": "taxIds",
+            "used": 0,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": {
+          "kind": "peopleContactUs",
+          "resource": "people"
+        },
+        "next": null
+      }
+    },
+    {
+      "id": "switch-off-shows-use-without-limits",
+      "given": {
+        "subscription": {
+          "plan": "free",
+          "status": "active"
+        },
+        "orders": {
+          "thisMonth": 30,
+          "lastMonth": 30
+        },
+        "people": 1,
+        "taxIds": 0,
+        "paidPlansEnabled": false
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 30,
+            "limit": -1,
+            "level": "unlimited"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": null,
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "expired-pro-is-free",
+      "given": {
+        "subscription": {
+          "plan": "pro",
+          "status": "active",
+          "tableVersion": "2"
+        },
+        "orders": {
+          "thisMonth": 3,
+          "lastMonth": 0
+        },
+        "people": 1,
+        "taxIds": 1,
+        "paidPlansEnabled": true,
+        "expiresInDays": -1
+      },
+      "expect": {
+        "plan": "free",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 3,
+            "limit": 10,
+            "level": "ok"
+          },
+          {
+            "resource": "people",
+            "used": 1,
+            "limit": 1,
+            "level": "ok"
+          }
+        ],
+        "notice": null,
+        "next": {
+          "plan": "starter",
+          "features": [
+            "nfse",
+            "brandedPdf",
+            "ownChecklists",
+            "charges",
+            "reviewRequest"
+          ]
+        }
+      }
+    },
+    {
+      "id": "table-v1-starter-keeps-orders-unlimited",
+      "given": {
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "tableVersion": "1"
+        },
+        "orders": {
+          "thisMonth": 80,
+          "lastMonth": 70
+        },
+        "people": 2,
+        "taxIds": 1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 80,
+            "limit": -1,
+            "level": "unlimited"
+          },
+          {
+            "resource": "people",
+            "used": 2,
+            "limit": 3,
+            "level": "ok"
+          },
+          {
+            "resource": "taxIds",
+            "used": 1,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": null,
+        "next": {
+          "plan": "pro",
+          "features": [
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        }
+      }
+    },
+    {
+      "id": "old-starter-keeps-3-people",
+      "given": {
+        "subscription": {
+          "plan": "starter",
+          "status": "active",
+          "source": "store"
+        },
+        "orders": {
+          "thisMonth": 80,
+          "lastMonth": 70
+        },
+        "people": 3,
+        "taxIds": 1,
+        "paidPlansEnabled": true
+      },
+      "expect": {
+        "plan": "starter",
+        "rows": [
+          {
+            "resource": "orders",
+            "used": 80,
+            "limit": -1,
+            "level": "unlimited"
+          },
+          {
+            "resource": "people",
+            "used": 3,
+            "limit": 3,
+            "level": "atLimit"
+          },
+          {
+            "resource": "taxIds",
+            "used": 1,
+            "limit": -1,
+            "level": "unlimited"
+          }
+        ],
+        "notice": {
+          "kind": "peopleAtLimit",
+          "resource": "people"
+        },
+        "next": {
+          "plan": "pro",
+          "features": [
+            "teamRoles",
+            "perPersonAgenda",
+            "workStages",
+            "tvMode",
+            "contracts",
+            "aiFinance",
+            "spreadsheetExport"
+          ]
+        }
+      }
+    }
+  ]
+}

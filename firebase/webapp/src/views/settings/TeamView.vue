@@ -16,7 +16,7 @@ import InviteShare from '@/components/settings/InviteShare.vue'
 import MemberDialog from '@/components/settings/MemberDialog.vue'
 import PermissionTable from '@/components/settings/PermissionTable.vue'
 import { locale, t } from '@/i18n'
-import { WEB_PLAN_LIMITS_ENFORCED } from '@/lib/plan-limits'
+import { loadLimitsSwitch, planLimitsEnforced } from '@/lib/plan-limits'
 import { formatNumber } from '@/lib/format'
 import { cancelInvite, listInvites, listMembers, teamContext } from '@/lib/settings/data'
 import {
@@ -63,9 +63,9 @@ const seats = computed(() => {
   return `${t('planUsageTeam')}: ${limit < 0 ? `${used} · ${t('planUsageUnlimited')}` : t('planUsageOf', { used, limit: formatNumber(limit, session.company?.country) })}`
 })
 
-/** The app's rule (lib/plan-limits): no limit in the browser, so this only blocks where limits are enforced. */
+/** Blocks only with the switch on (config/paidPlans, lib/plan-limits), like the server and the app. */
 function startInvite(prefill: TeamInvite | null) {
-  if (plan.value && !roomForPerson(plan.value, WEB_PLAN_LIMITS_ENFORCED)) {
+  if (plan.value && !roomForPerson(plan.value, planLimitsEnforced())) {
     showToast(t('planLimitTeam', { used: plan.value.usage.users, limit: plan.value.limits.users }))
     return
   }
@@ -96,7 +96,7 @@ async function load() {
   failed.value = false
   members.value = null
   try {
-    const [list, pending, context] = await Promise.all([listMembers(), listInvites(), teamContext()])
+    const [list, pending, context] = await Promise.all([listMembers(), listInvites(), teamContext(), loadLimitsSwitch()])
     members.value = list
     invites.value = pending
     ownerId.value = context.ownerId

@@ -14,6 +14,7 @@ class PlanRow {
   final int aiPerDay;
   final bool ownChecklists;
   final bool pdfWatermark;
+  final bool overageAllowed;
   final List<String> features;
 
   const PlanRow({
@@ -26,6 +27,7 @@ class PlanRow {
     required this.aiPerDay,
     required this.ownChecklists,
     required this.pdfWatermark,
+    required this.overageAllowed,
     required this.features,
   });
 
@@ -39,14 +41,20 @@ class PlanRow {
         'aiPerDay': aiPerDay,
         'ownChecklists': ownChecklists,
         'pdfWatermark': pdfWatermark,
+        'overageAllowed': overageAllowed,
         'features': features,
       };
 }
 
 /// Version of the table new companies and plan changes get.
-const kPlanTableCurrentVersion = '1';
+const kPlanTableCurrentVersion = '2';
 
-/// Every version of the table, by version, then by plan.
+/// Version a paid subscription without `tableVersion` follows: it was
+/// bought before the current table (#726). Courtesy and Free follow the
+/// current one.
+const kPlanTableLegacyVersion = '1';
+
+/// Every version of the table as approved, by version, then by plan.
 const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
   '1': {
     SubscriptionPlan.free: PlanRow(
@@ -59,6 +67,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       aiPerDay: -1,
       ownChecklists: true,
       pdfWatermark: true,
+      overageAllowed: false,
       features: [],
     ),
     SubscriptionPlan.starter: PlanRow(
@@ -71,6 +80,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       aiPerDay: -1,
       ownChecklists: true,
       pdfWatermark: false,
+      overageAllowed: false,
       features: [],
     ),
     SubscriptionPlan.pro: PlanRow(
@@ -83,6 +93,7 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       aiPerDay: -1,
       ownChecklists: true,
       pdfWatermark: false,
+      overageAllowed: false,
       features: [],
     ),
     SubscriptionPlan.business: PlanRow(
@@ -95,7 +106,176 @@ const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTables = {
       aiPerDay: -1,
       ownChecklists: true,
       pdfWatermark: false,
+      overageAllowed: false,
       features: [],
+    ),
+  },
+  '2': {
+    SubscriptionPlan.free: PlanRow(
+      ordersPerMonth: 10,
+      users: 1,
+      photosPerMonth: -1,
+      formTemplates: 0,
+      nfseCnpjs: 0,
+      aiPerMonth: 50,
+      aiPerDay: 20,
+      ownChecklists: false,
+      pdfWatermark: true,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp'],
+    ),
+    SubscriptionPlan.starter: PlanRow(
+      ordersPerMonth: 50,
+      users: 2,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: 1,
+      aiPerMonth: 1000,
+      aiPerDay: 200,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest'],
+    ),
+    SubscriptionPlan.pro: PlanRow(
+      ordersPerMonth: 150,
+      users: 5,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: 2,
+      aiPerMonth: 3000,
+      aiPerDay: 200,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
+    ),
+    SubscriptionPlan.business: PlanRow(
+      ordersPerMonth: 500,
+      users: 20,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: -1,
+      aiPerMonth: 6000,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: true,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
+    ),
+  },
+};
+
+/// What the code applies, by version: an older version is the more generous
+/// of it and the current one, field by field (mergeRows in
+/// scripts/plan-table.mjs).
+const Map<String, Map<SubscriptionPlan, PlanRow>> kPlanTablesInForce = {
+  '1': {
+    SubscriptionPlan.free: PlanRow(
+      ordersPerMonth: -1,
+      users: 1,
+      photosPerMonth: -1,
+      formTemplates: 1,
+      nfseCnpjs: 0,
+      aiPerMonth: 50,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: true,
+      overageAllowed: false,
+      features: [],
+    ),
+    SubscriptionPlan.starter: PlanRow(
+      ordersPerMonth: -1,
+      users: 3,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: -1,
+      aiPerMonth: 1000,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: [],
+    ),
+    SubscriptionPlan.pro: PlanRow(
+      ordersPerMonth: -1,
+      users: 5,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: -1,
+      aiPerMonth: 3000,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: [],
+    ),
+    SubscriptionPlan.business: PlanRow(
+      ordersPerMonth: -1,
+      users: -1,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: -1,
+      aiPerMonth: 6000,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: true,
+      features: [],
+    ),
+  },
+  '2': {
+    SubscriptionPlan.free: PlanRow(
+      ordersPerMonth: 10,
+      users: 1,
+      photosPerMonth: -1,
+      formTemplates: 0,
+      nfseCnpjs: 0,
+      aiPerMonth: 50,
+      aiPerDay: 20,
+      ownChecklists: false,
+      pdfWatermark: true,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp'],
+    ),
+    SubscriptionPlan.starter: PlanRow(
+      ordersPerMonth: 50,
+      users: 2,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: 1,
+      aiPerMonth: 1000,
+      aiPerDay: 200,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest'],
+    ),
+    SubscriptionPlan.pro: PlanRow(
+      ordersPerMonth: 150,
+      users: 5,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: 2,
+      aiPerMonth: 3000,
+      aiPerDay: 200,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: false,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport'],
+    ),
+    SubscriptionPlan.business: PlanRow(
+      ordersPerMonth: 500,
+      users: 20,
+      photosPerMonth: -1,
+      formTemplates: -1,
+      nfseCnpjs: -1,
+      aiPerMonth: 6000,
+      aiPerDay: -1,
+      ownChecklists: true,
+      pdfWatermark: false,
+      overageAllowed: true,
+      features: ['orders', 'customers', 'catalog', 'agenda', 'quoteShare', 'linkApproval', 'financeBasic', 'dataImport', 'webApp', 'nfse', 'brandedPdf', 'ownChecklists', 'ai', 'charges', 'reviewRequest', 'teamRoles', 'perPersonAgenda', 'workStages', 'tvMode', 'contracts', 'aiFinance', 'spreadsheetExport', 'bulkActions', 'mcp', 'api'],
     ),
   },
 };

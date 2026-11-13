@@ -14,6 +14,7 @@
  * - GET /bot/orders/:number/details - Get full order details
  */
 
+import { ensurePlanCapacity } from '../../middleware/plan-limit.middleware';
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderProduct, OrderService, OrderStatus } from '../../models/types';
 import { computeOrderTotal } from '../../services/order-items';
@@ -325,6 +326,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         forbidden(res, 'Status not allowed on a new order');
         return;
       }
+      if (!(await ensurePlanCapacity(res, companyId, 'order'))) return;
 
       const orderResult = await orderService.createOrder(
         companyId,

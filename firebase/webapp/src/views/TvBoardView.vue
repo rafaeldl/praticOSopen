@@ -1,9 +1,12 @@
 <script setup lang="ts">
 // Modo TV (#627): the board on a screen in the shop. No menu, no values, no
 // clicks on the cards; big type; updates by itself and keeps the screen awake.
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+// Plan (#724): needs `tvMode` (Pro); without it the screen shows the plan notice.
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { Columns3, Maximize, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
+import PlanFeatureNotice from '@/components/PlanFeatureNotice.vue'
+import { usePlanFeature } from '@/lib/plan-feature-gate'
 import { t } from '@/i18n'
 import { formatTime } from '@/lib/format'
 import { listContext } from '@/lib/orders/data'
@@ -23,6 +26,7 @@ const arrived = ref<Set<OrderStatus>>(new Set())
 const failed = ref(false)
 const canFullscreen = typeof document !== 'undefined' && !!document.fullscreenEnabled
 const full = ref(false)
+const tvMode = usePlanFeature('tvMode')
 
 /**
  * With work stages (docs/WORK_STAGES.md), "Em andamento" shows one column per
@@ -81,6 +85,8 @@ let day = ''
 
 function start() {
   live?.stop()
+  live = null
+  if (!tvMode.value.allowed) return
   failed.value = false
   day = dayStartIso(now.value)
   live = watchTv(
@@ -134,6 +140,18 @@ const clock = setInterval(() => {
   if (dayStartIso(now.value) !== day) start()
 }, 30_000)
 
+// The switch arrives after the first paint: a plan without the TV stops listening.
+watch(
+  () => tvMode.value.allowed,
+  (allowed) => {
+    if (!allowed) {
+      live?.stop()
+      live = null
+    }
+    else if (!live) start()
+  },
+)
+
 onMounted(() => {
   start()
   void keepAwake()
@@ -184,7 +202,8 @@ const flag = (order: Order) => lateText(order, now.value) || (isHeld(order) ? ho
       </div>
     </header>
 
-    <ErrorState v-if="failed" :retry="start" />
+    <PlanFeatureNotice v-if="!tvMode.allowed" class="tv-plan" feature="tvMode" :required-plan="tvMode.requiredPlan" />
+    <ErrorState v-else-if="failed" :retry="start" />
     <div v-else class="tv-board" :style="{ '--tv-cols': shown.length }">
       <section v-for="col in shown" :key="col.key" class="tv-col" :aria-labelledby="`tv-${col.key}`" :data-testid="`tv-col-${col.key}`">
         <h2 :id="`tv-${col.key}`" class="tv-col-head">

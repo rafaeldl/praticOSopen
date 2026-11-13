@@ -8,7 +8,6 @@ import 'package:praticos/l10n/app_localizations_pt.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/menu_navigation/more/plan_screen.dart';
-import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +32,7 @@ Future<void> _pump(WidgetTester tester, Subscription subscription) async {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: PlanScreen(
-          loadAiStatus: () async => AiStatus.off,
+          loadTaxIds: () async => 0,
           hasPermission: (_) => true,
         ),
       ),

@@ -21,6 +21,8 @@ void showFeatureLimitDialog(BuildContext ctx, FeatureGateResult result) {
 
   final String message;
   switch (result.featureType) {
+    case FeatureType.order:
+      message = l10n.featureLimitReached(l10n.orders);
     case FeatureType.photo:
       message = l10n.photoLimitReachedMessage;
     case FeatureType.formTemplate:

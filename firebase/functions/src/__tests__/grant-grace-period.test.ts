@@ -6,7 +6,10 @@ import {
   resolveTarget,
   summarize,
 } from '../../scripts/grant-grace-period';
-import { PLAN_LIMITS } from '../services/subscription-plans';
+import { PLAN_LIMITS, limitsOfRow, planRow } from '../services/subscription-plans';
+
+/** The courtesy keeps the old Pro (owner's decision, #726). */
+const OLD_PRO = limitsOfRow(planRow('pro', '1'));
 
 const NOW = new Date('2026-10-07T12:00:00.000Z');
 const EXPIRES = new Date('2026-12-06T12:00:00.000Z');
@@ -80,7 +83,8 @@ describe('grant-grace-period', () => {
         source: 'grace',
         store: null,
         expiresAt: EXPIRES.toISOString(),
-        limits: PLAN_LIMITS.pro,
+        limits: OLD_PRO,
+        tableVersion: '1',
         updatedAt: NOW.toISOString(),
         usage: { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1 },
       });
@@ -98,7 +102,8 @@ describe('grant-grace-period', () => {
         'subscription.source': 'grace',
         'subscription.store': null,
         'subscription.expiresAt': EXPIRES.toISOString(),
-        'subscription.limits': PLAN_LIMITS.pro,
+        'subscription.limits': OLD_PRO,
+        'subscription.tableVersion': '1',
         'subscription.updatedAt': NOW.toISOString(),
         updatedAt: NOW.toISOString(),
       },
@@ -116,7 +121,8 @@ describe('grant-grace-period', () => {
         'subscription.source': 'grace',
         'subscription.store': null,
         'subscription.expiresAt': EXPIRES.toISOString(),
-        'subscription.limits': PLAN_LIMITS.pro,
+        'subscription.limits': OLD_PRO,
+        'subscription.tableVersion': '1',
         'subscription.updatedAt': NOW.toISOString(),
         updatedAt: NOW.toISOString(),
       },
