@@ -473,6 +473,44 @@ Testes: `services/nfse/__tests__/auto-issue.service.test.ts` (as três regras, i
 
 Fora desta etapa: a oferta na 3ª nota manual do mesmo cliente e "Ligar para todos os clientes com CNPJ".
 
+## Nota de cobrança paga (sem OS)
+
+Nota que sai sozinha quando **uma cobrança é paga**, sem OS por trás, pela NFS-e direta da empresa que recebeu o dinheiro. Primeiro uso: as assinaturas do PraticOS vendidas pela web, com a nota emitida pela Rafsoft no próprio PraticOS em vez do Asaas (`docs/WEB_CHECKOUT.md`, "Nota fiscal das assinaturas"). O pedido é genérico (`charge.source`), para as cobranças Asaas das OS usarem depois.
+
+```
+Webhook de pagamento (conta padrão, sem certificado)
+  → requestChargeInvoice: grava companies/{emissora}/private/nfse/chargeInvoices/{charge.key} (create; o id é a cobrança)
+      → nfseChargeInvoice (onDocumentWritten, conta nfse-api@)
+          → processChargeInvoice: pega o pedido numa transação e chama issueDirectChargeInvoice
+Estorno → requestChargeInvoiceCancel: marca cancel no mesmo documento → nfseChargeInvoice cancela a nota
+nfseDaily → processPendingChargeInvoices: retentativas e cancelamentos pendentes
+```
+
+| Arquivo | O quê |
+|---|---|
+| `services/nfse/charge-invoice.service.ts` | pedido, cancelamento, processamento e varredura diária |
+| `services/nfse/issue.service.ts` | `issueDirectChargeInvoice` (nota sem OS) e `chargeCustomer` (acha ou cria o cliente pelo CPF/CNPJ) |
+| `nfse-api.ts` | `nfseChargeInvoice` (gatilho) e a varredura no `nfseDaily` |
+
+- **A nota**: emitente da decisão 3 (ou o `emitterId` do pedido), serviço e alíquota do emitente, descrição e valor da cobrança, `orderIds: []`, `charge: { key, source, paymentId }`, `auto: true`, autor `{ id: 'system', name: 'PraticOS' }`. O destinatário é o cliente da emissora com o mesmo CPF/CNPJ; se não existe, é criado com nome, CPF/CNPJ e e-mail (sem endereço: a nota vai sem o endereço do tomador, como já acontece quando o endereço está incompleto). A nota aparece na lista de notas e no cliente, como as importadas do portal (que também não têm OS).
+- **Uma nota por cobrança**: o pedido é criado com `create()` (o mesmo pagamento confirmado duas vezes, ou o webhook repetido, acha o documento); o processamento é pego numa transação; a nota trava a cobrança em `private/nfse/charges/{key}` na mesma transação que reserva o número da DPS (`CHARGE_HAS_INVOICE` na segunda vez). Uma execução cortada depois da nota acha a nota em vez de emitir outra.
+- **Governo fora**:
+  - sem resposta ao enviar: a nota fica `creating` e a reconciliação de sempre manda a mesma DPS (mesmo número);
+  - falha depois de reservar o número (ex.: o certificado não abriu): o pedido fica `done` com a nota `creating`, e a reconciliação termina;
+  - falha antes de reservar (cofre fora, limite do dia, certificado vencido, emitente incompleto, NFS-e direta desligada, erro inesperado): o pedido vai para `retry` e a rotina diária tenta de novo, até `MAX_CHARGE_ATTEMPTS` (6) tentativas; aí `failed`;
+  - recusa do governo ou destinatário sem CPF/CNPJ: `failed` na hora (a nota recusada fica na lista com o motivo).
+  - Todo `failed` loga `console.error` com "issue it by hand": é o alerta para emitir à mão.
+- **Estorno** (`requestChargeInvoiceCancel`): nota ainda não emitida → não sai mais (`cancel.status: notNeeded`); emitida → cancelada com o motivo "serviço não prestado" (`serviceNotProvided`); ainda `creating` → espera a reconciliação e a rotina diária cancela. Prefeitura recusou o cancelamento (prazo) → `cancel.status: failed` e `console.error` "cancel it by hand" (cancelar no portal).
+- **Laço do gatilho**: o gatilho é `onDocumentWritten` e as próprias gravações o disparam de novo; não faz nada porque só pega `pending` (as retentativas `retry` são só da rotina diária).
+
+Pedido (`companies/{cid}/private/nfse/chargeInvoices/{key}`, só servidor): `charge`, `payerCompanyId`, `value`, `description`, `recipient { name, taxId, email }`, `emitterId`, `status` (`pending` | `processing` | `retry` | `done` | `failed`), `attempts`, `lastErrorCode`, `invoiceId`, `cancel { status, reason, attempts, lastErrorCode }`.
+
+**Ligar**: o mesmo passo 1 de "Emitir nota sozinha" (`roles/eventarc.eventReceiver` para a `nfse-api@`); sem ele, o pedido sai só na rotina diária. Quem pede a nota é a funcionalidade que usa (hoje só a venda web, com a chave em `config/webCheckout`).
+
+**Ainda não**: nota automática quando a **cobrança Asaas de uma OS** é paga (o `autoIssue: paid` só existe no motor do Asaas). O ponto de extensão é este pedido com outra `source`; ver a issue de proposta.
+
+Testes: `services/nfse/__tests__/charge-invoice.service.test.ts` (pagamento → nota, idempotência, governo fora, recusa, estorno) e `services/web-billing/__tests__/web-billing.service.test.ts` (chave, pedido pelo webhook, estorno).
+
 ## Importação das notas (etapa #569)
 
 Ao enviar o certificado de um CNPJ novo, o app abre "Importar notas": o servidor lê no governo as notas que o CNPJ já emitiu e recebeu, monta uma proposta e só aplica no "Importar". Só dono e admin.

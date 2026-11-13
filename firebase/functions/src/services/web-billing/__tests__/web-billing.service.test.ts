@@ -399,3 +399,100 @@ describe('cancelWebSubscription', () => {
     await expect(cancelWebSubscription('c1', { refund: false }, deps())).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 });
+
+describe('nota of the subscription by PraticOS (config/webCheckout.invoiceSource)', () => {
+  const ASAAS_INVOICE = { municipalServiceId: 'svc_1', municipalServiceName: 'Licenciamento', iss: 2 };
+  const PRATICOS = { enabled: true, invoice: ASAAS_INVOICE, invoiceSource: 'praticos', invoiceIssuerCompanyId: 'issuer' };
+  const REQUEST = 'companies/issuer/private/nfse/chargeInvoices/webBilling-pay_1';
+  const confirmed = { id: 'evt_1', event: 'PAYMENT_CONFIRMED', payment: { id: 'pay_1', subscription: 'sub_1', value: 119.9, dueDate: '2026-11-13' } };
+  const praticosRecord: Partial<WebBillingRecord> = {
+    status: 'pending',
+    invoiceSource: 'praticos',
+    invoiceIssuer: { companyId: 'issuer' },
+    invoiceRecipient: { name: 'Oficina Teste', taxId: '11222333000181', email: 'teste@example.com' },
+  };
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('starts on Asaas: without the key, Asaas issues and nothing is asked of PraticOS', async () => {
+    fake.seed('config/webCheckout', { enabled: true, invoice: ASAAS_INVOICE });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscriptionInvoiceSettings).toHaveBeenCalled();
+    expect(recordOf()).toMatchObject({ invoiceSource: 'asaas', invoiceSettings: 'ok', invoiceIssuer: null });
+
+    await handleBillingEvent(confirmed, d);
+    expect(fake.read(REQUEST)).toBeUndefined();
+  });
+
+  it('praticos, but the issuer has no NFS-e direct on: Asaas keeps issuing (never a sale without a nota)', async () => {
+    fake.seed('config/webCheckout', PRATICOS);
+    fake.seed('companies/issuer/settings/payments', { nfseDirectEnabled: false });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscriptionInvoiceSettings).toHaveBeenCalled();
+    expect(recordOf()).toMatchObject({ invoiceSource: 'asaas' });
+  });
+
+  it('praticos on: no Asaas invoice settings (never two notas), the record keeps issuer and recipient', async () => {
+    fake.seed('config/webCheckout', { ...PRATICOS, invoiceIssuerEmitterId: 'e1' });
+    fake.seed('companies/issuer/settings/payments', { nfseDirectEnabled: true });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscriptionInvoiceSettings).not.toHaveBeenCalled();
+    expect(recordOf()).toMatchObject({
+      invoiceSource: 'praticos',
+      invoiceSettings: 'off',
+      invoiceIssuer: { companyId: 'issuer', emitterId: 'e1' },
+      invoiceRecipient: { name: 'Oficina Teste', taxId: '11222333000181', email: 'teste@example.com' },
+    });
+  });
+
+  it('paid → asks the issuer for the nota of that payment, once (CONFIRMED then RECEIVED)', async () => {
+    seedCompany();
+    seedRecord(praticosRecord);
+    const d = deps();
+    await handleBillingEvent(confirmed, d);
+    await handleBillingEvent({ ...confirmed, id: 'evt_2', event: 'PAYMENT_RECEIVED' }, d);
+    expect(fake.read(REQUEST)).toMatchObject({
+      status: 'pending',
+      charge: { key: 'webBilling-pay_1', source: 'webBilling', paymentId: 'pay_1' },
+      payerCompanyId: 'c1',
+      value: 119.9,
+      description: 'Assinatura do sistema PraticOS, plano Pro (mensal), vencimento 13/11/2026',
+      recipient: { name: 'Oficina Teste', taxId: '11222333000181', email: 'teste@example.com' },
+      emitterId: null,
+    });
+    expect(d.grant).toHaveBeenCalledTimes(2);
+  });
+
+  it('a subscription sold with Asaas notas stays on Asaas after the key changes', async () => {
+    fake.seed('config/webCheckout', PRATICOS);
+    seedCompany();
+    seedRecord({ status: 'pending', invoiceSource: 'asaas', invoiceSettings: 'ok' });
+    await handleBillingEvent(confirmed, deps());
+    expect(fake.read(REQUEST)).toBeUndefined();
+  });
+
+  it('refund → the nota of that payment is canceled; a chargeback keeps it', async () => {
+    seedCompany();
+    seedRecord(praticosRecord);
+    const d = deps();
+    await handleBillingEvent(confirmed, d);
+    // As if the nfse-api had issued it.
+    fake.seed(REQUEST, { ...fake.read(REQUEST)!, status: 'done', invoiceId: 'inv_1' });
+
+    await handleBillingEvent({ ...confirmed, id: 'evt_cb', event: 'PAYMENT_CHARGEBACK_REQUESTED' }, d);
+    expect(fake.read(REQUEST)!.cancel).toBeUndefined();
+
+    await handleBillingEvent({ ...confirmed, id: 'evt_r', event: 'PAYMENT_REFUNDED' }, d);
+    expect(fake.read(REQUEST)).toMatchObject({ cancel: { status: 'pending', reason: 'refund' } });
+  });
+});

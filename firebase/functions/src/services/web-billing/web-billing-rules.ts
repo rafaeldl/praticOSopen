@@ -49,8 +49,41 @@ export interface WebCheckoutConfig {
   yearlyEnabled: boolean;
   /** Payment methods offered per cycle. */
   billingTypes: Record<WebCycle, WebBillingType[]>;
-  /** Rafsoft's NFS-e for each charge; null = no invoice settings (logged). */
+  /** Rafsoft's NFS-e for each charge through Asaas; null = no invoice settings (logged). */
   invoice: WebInvoiceConfig | null;
+  /**
+   * Who issues the NFS-e of a new subscription: 'asaas' (default, the
+   * invoiceSettings above) or 'praticos' (the NFS-e direct of the company
+   * `invoiceIssuer.companyId`). Chosen per subscription at checkout and kept
+   * on the record, so one subscription never gets notas from both.
+   */
+  invoiceSource: WebInvoiceSource;
+  /** The PraticOS company that issues when invoiceSource is 'praticos' (an id: never in the code). */
+  invoiceIssuer: WebInvoiceIssuer | null;
+}
+
+export type WebInvoiceSource = 'asaas' | 'praticos';
+
+export interface WebInvoiceIssuer {
+  companyId: string;
+  /** Emitter of that company; absent = its default. */
+  emitterId?: string;
+}
+
+function parseInvoiceIssuer(data: Record<string, unknown> | null | undefined): WebInvoiceIssuer | null {
+  const text = (value: unknown) => (typeof value === 'string' && value.trim() && !value.includes('/') ? value.trim() : undefined);
+  const companyId = text(data?.invoiceIssuerCompanyId);
+  if (!companyId) return null;
+  const emitterId = text(data?.invoiceIssuerEmitterId);
+  return emitterId ? { companyId, emitterId } : { companyId };
+}
+
+/** Description of the nota of one paid charge (the service line of the NFS-e). */
+export function webInvoiceDescription(plan: WebPlan, cycle: WebCycle, dueDate: string): string {
+  const [year, month, day] = dueDate.split('-');
+  const label = { starter: 'Starter', pro: 'Pro', business: 'Business' }[plan];
+  const period = cycle === 'yearly' ? 'anual' : 'mensal';
+  return `Assinatura do sistema PraticOS, plano ${label} (${period}), vencimento ${day}/${month}/${year}`;
 }
 
 /**
@@ -128,6 +161,8 @@ export function parseWebCheckoutConfig(data: Record<string, unknown> | null | un
     yearlyEnabled: data?.yearlyEnabled === true,
     billingTypes: { monthly: pick('monthly'), yearly: pick('yearly') },
     invoice: parseInvoiceConfig(data?.invoice),
+    invoiceSource: data?.invoiceSource === 'praticos' ? 'praticos' : 'asaas',
+    invoiceIssuer: parseInvoiceIssuer(data),
   };
 }
 
@@ -178,8 +213,14 @@ export interface WebBillingRecord {
   asaasSubscriptionId: string;
   /** Invoice page of the first charge (where the customer pays). */
   checkoutUrl?: string;
-  /** NFS-e settings of the Asaas subscription: ok, failed (logged) or off (no config/webCheckout.invoice). */
+  /** NFS-e settings of the Asaas subscription: ok, failed (logged) or off (no config/webCheckout.invoice, or PraticOS issues). */
   invoiceSettings?: 'ok' | 'failed' | 'off';
+  /** Who issues this subscription's notas (absent on records before it = 'asaas'). */
+  invoiceSource?: WebInvoiceSource;
+  /** When 'praticos': the issuing company (and emitter) chosen at checkout. */
+  invoiceIssuer?: WebInvoiceIssuer | null;
+  /** Recipient (tomador) of the notas, as typed at checkout. */
+  invoiceRecipient?: { name: string; taxId: string; email: string | null } | null;
   createdAt: string;
   createdBy: string;
   /** First confirmed payment: starts the 7-day guarantee. */

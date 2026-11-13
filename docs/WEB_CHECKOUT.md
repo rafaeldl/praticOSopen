@@ -11,7 +11,7 @@ Quem usa o app web (`praticos.app/web`) pode assinar Starter, Pro ou Business se
 3. Quando o Asaas confirma o pagamento, o webhook dá à empresa um **entitlement promocional no RevenueCat** (`appUserID` = `companyId`, entitlement = plano) até o próximo vencimento + 5 dias de folga.
 4. O RevenueCat continua a **única fonte do plano**: `syncCompanySubscription` grava `companies/{id}.subscription` como sempre, agora com `store: 'web'`.
 
-O Asaas emite a NFS-e da Rafsoft a cada cobrança paga. Isso é configurado **por assinatura** (`POST /subscriptions/{id}/invoiceSettings`, emitida `ON_PAYMENT_CONFIRMATION`), não por uma chave da conta: o checkout faz isso logo depois de criar a assinatura, com o serviço e o ISS de `config/webCheckout.invoice` (`municipalServiceName` obrigatório, mais `municipalServiceId` ou `municipalServiceCode`, e `iss` em %). Sem essa configuração a venda segue sem nota (`invoiceSettings: 'off'` no registro e aviso no log); se o Asaas recusar, a venda também segue (`'failed'`, erro no log) e a nota é emitida à mão. O Asaas só aceita a configuração com e-mail, CEP e número do cliente (visto no sandbox), por isso o formulário pede os dois últimos.
+A NFS-e da Rafsoft de cada cobrança paga sai pelo **Asaas** (hoje) ou pela **NFS-e direta do próprio PraticOS** (chave `invoiceSource`, ver "Nota fiscal das assinaturas" abaixo). Pelo Asaas, isso é configurado **por assinatura** (`POST /subscriptions/{id}/invoiceSettings`, emitida `ON_PAYMENT_CONFIRMATION`), não por uma chave da conta: o checkout faz isso logo depois de criar a assinatura, com o serviço e o ISS de `config/webCheckout.invoice` (`municipalServiceName` obrigatório, mais `municipalServiceId` ou `municipalServiceCode`, e `iss` em %). Sem essa configuração a venda segue sem nota (`invoiceSettings: 'off'` no registro e aviso no log); se o Asaas recusar, a venda também segue (`'failed'`, erro no log) e a nota é emitida à mão. O Asaas só aceita a configuração com e-mail, CEP e número do cliente (visto no sandbox), por isso o formulário pede os dois últimos.
 
 ## Arquitetura
 
@@ -53,13 +53,45 @@ Textos `web.billing.*` e `web.error.*` em `src/i18n/web_{pt,en,es}.json`.
 ### Firestore (só servidor; `firestore.rules` já nega `companies/{id}/private/**` e coleções raiz sem regra)
 
 ```
-config/webCheckout                      { enabled, yearlyEnabled, billingTypes: { monthly: [...], yearly: [...] } }
+config/webCheckout                      { enabled, yearlyEnabled, billingTypes: { monthly: [...], yearly: [...] }, invoice,
+                                          invoiceSource, invoiceIssuerCompanyId, invoiceIssuerEmitterId }
 companies/{cid}/private/webBilling      WebBillingRecord (status, plan, cycle, billingType, value, ids do Asaas,
-                                        checkoutUrl, firstPaidAt, paidUntil, nextDueDate, cancelledAt, payments{...})
+                                        checkoutUrl, firstPaidAt, paidUntil, nextDueDate, cancelledAt, payments{...},
+                                        invoiceSource, invoiceIssuer, invoiceRecipient)
+companies/{emissora}/private/nfse/chargeInvoices/webBilling-{paymentId}   pedido da nota pelo PraticOS
 webBillingSubscriptions/{asaasSubId}    { companyId }      (o webhook acha a empresa)
 webBillingEvents/{eventId}              { event, receivedAt } (idempotência)
 companies/{cid}.subscription            store: 'web', source: 'store' (escrito pelo sync, como antes)
 ```
+
+## Nota fiscal das assinaturas: Asaas ou PraticOS
+
+Decisão de 13/11/2026: a nota das assinaturas sai pela NFS-e direta do PraticOS, emitida pela Rafsoft (que já usa o PraticOS e emitiu nota real pela web no Piloto 1), em vez da nota automática do Asaas. Começa no Asaas; a troca é uma chave.
+
+```
+config/webCheckout
+  invoiceSource            'asaas' (padrão) | 'praticos'
+  invoiceIssuerCompanyId   id da empresa PraticOS que emite (a Rafsoft). Só em config, nunca no código
+  invoiceIssuerEmitterId   opcional: o CNPJ (emitente) dessa empresa; sem ele, o padrão dela
+  invoice                  serviço e ISS da nota pelo Asaas (continua valendo para 'asaas')
+```
+
+- **Escolhida na compra, por assinatura.** O checkout grava em `private/webBilling` a origem (`invoiceSource`), a emissora (`invoiceIssuer`) e o tomador (`invoiceRecipient`: nome, CPF/CNPJ e e-mail digitados). Trocar a chave vale para as **assinaturas novas**; as antigas seguem com a origem delas. Assim uma assinatura nunca tem nota pelos dois.
+- **Asaas só sai quando o PraticOS está pronto.** Com `invoiceSource: 'praticos'`, o checkout só deixa de configurar a nota no Asaas se `invoiceIssuerCompanyId` estiver preenchido **e** essa empresa tiver a NFS-e direta ligada (`settings/payments.nfseDirectEnabled`). Faltando qualquer um, a assinatura fica com a nota do Asaas (e loga o aviso). Nunca sai venda sem motor de nota.
+- **Pagamento → nota.** No `PAYMENT_CONFIRMED`/`PAYMENT_RECEIVED` de uma assinatura `praticos`, o webhook grava o pedido da nota na emissora (`requestChargeInvoice`, chave `webBilling-{paymentId}`), antes de dar o plano. A conta `nfse-api@` emite (só ela abre certificado). Descrição: "Assinatura do sistema PraticOS, plano Pro (mensal), vencimento 13/11/2026"; valor do pagamento; serviço e alíquota do emitente da Rafsoft no PraticOS. O tomador vira cliente da Rafsoft (achado pelo CPF/CNPJ, ou criado).
+- **Idempotência por pagamento.** CONFIRMED e depois RECEIVED do mesmo pagamento, ou o webhook repetido, pedem uma vez só (o id do pedido é o pagamento); a emissão trava a cobrança na mesma transação do número da DPS.
+- **Governo fora.** Sem resposta, a nota fica `creating` e a reconciliação de sempre termina. Falha antes do número (cofre, limite do dia, certificado) volta na rotina diária até 6 vezes; depois, `failed` com `console.error` "issue it by hand". Recusa do governo: `failed` na hora, com a nota recusada na lista da Rafsoft.
+- **Estorno.** No `PAYMENT_REFUNDED`, a nota daquele pagamento é cancelada ("serviço não prestado"); se ainda não tinha saído, não sai mais. O estorno da garantia pedido pela tela só cancela a nota quando o `PAYMENT_REFUNDED` chega (o dinheiro voltou de fato, depois da aprovação no painel do Asaas). Chargeback não cancela: a disputa pode ser ganha; se perder, cancelar à mão. Prefeitura recusou o cancelamento (prazo): `console.error` "cancel it by hand" e cancelar no portal.
+
+Detalhes do motor (fila, retentativa, cancelamento) em `docs/NFSE_DIRECT.md`, "Nota de cobrança paga (sem OS)".
+
+### Ligar a nota pelo PraticOS (passo manual, depois do contador)
+
+1. Na Rafsoft, no PraticOS: conferir o emitente (CNPJ, certificado válido, serviço e alíquota combinados com o contador, por exemplo 1.05 licenciamento de software) e **uma série de DPS própria** para as assinaturas (o Asaas usa a 00001). A nota usa o serviço do emitente, e cada CNPJ é um emitente só: se as outras notas da Rafsoft pelo PraticOS precisarem de outro serviço, isso fica em aberto (hoje a folha da OS também usa o serviço do emitente).
+2. Dar à `nfse-api@` o papel `roles/eventarc.eventReceiver` (mesmo passo de "Emitir nota sozinha" em `docs/NFSE_DIRECT.md`), senão a nota só sai na rotina diária.
+3. Gravar `config/webCheckout.invoiceIssuerCompanyId` (id da Rafsoft) e só então `invoiceSource: 'praticos'`. As assinaturas compradas a partir daí têm a nota pelo PraticOS.
+4. Assinaturas antigas com nota pelo Asaas continuam no Asaas. Para trazer uma, apagar a configuração de nota da assinatura no Asaas e gravar no registro `invoiceSource: 'praticos'`, `invoiceIssuer` e `invoiceRecipient` (não há rotina para isso; com a venda desligada, não há nenhuma).
+5. Na primeira venda real, conferir a nota na lista da Rafsoft e o e-mail ao cliente.
 
 ## Fluxo de Dados
 
@@ -165,6 +197,9 @@ O `scripts/web-checkout-sandbox-e2e.ts` cria o cliente e a assinatura, paga no s
 7. **Ligar:** depois da aprovação da Apple, `config/webCheckout.enabled = true` (e `yearlyEnabled` só com o passo 5).
 
 ## Pontos em aberto
+
+- Nota pelo PraticOS: o serviço é o do emitente da Rafsoft (um por CNPJ). Serviço diferente só para as assinaturas pediria serviço por nota no motor.
+- Nota pelo PraticOS: o tomador vai sem endereço (o checkout só tem CEP e número; a NFS-e nacional aceita sem). Se o contador pedir endereço, buscar pelo CEP na emissão.
 
 - A fatura do Asaas mostra no topo os dados cadastrais da conta da Rafsoft: e-mail, telefone e endereço. Antes de ligar, conferir em Minha Conta do Asaas de produção se esses dados são os que o cliente deve ver.
 - Página de pagamento: é a fatura do Asaas (`invoiceUrl`). Com cartão sem dados no checkout, o Asaas guarda o cartão pago na fatura para as próximas cobranças; confirmar no sandbox ponta a ponta (a doc do Asaas não diz explicitamente).

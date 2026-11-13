@@ -5,6 +5,7 @@ import {
   decideBillingAction,
   invoiceSettingsFor,
   parseWebCheckoutConfig,
+  webInvoiceDescription,
   periodEndOf,
   refundEligible,
   saoPauloDate,
@@ -76,7 +77,23 @@ describe('config and offer', () => {
       yearlyEnabled: false,
       billingTypes: { monthly: ['CREDIT_CARD'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
       invoice: null,
+      invoiceSource: 'asaas',
+      invoiceIssuer: null,
     });
+  });
+
+  it('nota by PraticOS only with the exact value; the issuer is an id from config', () => {
+    expect(parseWebCheckoutConfig({ invoiceSource: 'PraticOS' }).invoiceSource).toBe('asaas');
+    const config = parseWebCheckoutConfig({ invoiceSource: 'praticos', invoiceIssuerCompanyId: ' co1 ', invoiceIssuerEmitterId: 'e1' });
+    expect(config.invoiceSource).toBe('praticos');
+    expect(config.invoiceIssuer).toEqual({ companyId: 'co1', emitterId: 'e1' });
+    expect(parseWebCheckoutConfig({ invoiceIssuerCompanyId: 'a/b' }).invoiceIssuer).toBeNull();
+  });
+
+  it('describes the nota of a charge by plan, cycle and due date', () => {
+    expect(webInvoiceDescription('business', 'yearly', '2027-01-05')).toBe(
+      'Assinatura do sistema PraticOS, plano Business (anual), vencimento 05/01/2027',
+    );
   });
 
   it('only true turns it on; unknown methods are dropped', () => {
