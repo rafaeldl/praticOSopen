@@ -77,6 +77,7 @@ describe('config and offer', () => {
     expect(config).toEqual({
       enabled: false,
       companyIds: [],
+      returnUrl: null,
       yearlyEnabled: false,
       billingTypes: { monthly: ['CREDIT_CARD'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
       invoice: null,
@@ -311,5 +312,14 @@ describe('webCheckoutOnFor', () => {
     expect(config.companyIds).toEqual(['c1']);
     expect(webCheckoutOnFor(config, 'c1')).toBe(true);
     expect(webCheckoutOnFor(config, 'c2')).toBe(false);
+  });
+});
+
+describe('returnUrl', () => {
+  it('accepts only an https URL up to 255 characters', () => {
+    expect(parseWebCheckoutConfig({ returnUrl: ' https://praticos.app/web/settings/plan?paid=1 ' }).returnUrl).toBe('https://praticos.app/web/settings/plan?paid=1');
+    expect(parseWebCheckoutConfig({ returnUrl: 'http://praticos.app' }).returnUrl).toBeNull();
+    expect(parseWebCheckoutConfig({ returnUrl: 'javascript:alert(1)' }).returnUrl).toBeNull();
+    expect(parseWebCheckoutConfig({ returnUrl: `https://a.app/${'x'.repeat(260)}` }).returnUrl).toBeNull();
   });
 });

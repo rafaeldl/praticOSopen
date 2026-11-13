@@ -282,6 +282,8 @@ export interface AsaasCreateSubscriptionInput {
   cycle: AsaasSubscriptionCycle;
   description: string;
   externalReference: string;
+  /** Where the invoice page sends the customer after paying (domain must match the Asaas account site). */
+  callback?: { successUrl: string; autoRedirect: boolean };
 }
 
 /**

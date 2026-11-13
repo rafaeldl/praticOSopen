@@ -264,6 +264,7 @@ export async function startCheckout(
       cycle: input.cycle === 'yearly' ? 'YEARLY' : 'MONTHLY',
       description: `PraticOS ${PLAN_LABEL[input.plan]} (${CYCLE_LABEL[input.cycle]})`,
       externalReference: companyId,
+      ...(config.returnUrl ? { callback: { successUrl: config.returnUrl, autoRedirect: true } } : {}),
     });
     const payments = await deps.asaas.listSubscriptionPayments(created.id);
     const first = payments.find((payment) => payment.invoiceUrl);

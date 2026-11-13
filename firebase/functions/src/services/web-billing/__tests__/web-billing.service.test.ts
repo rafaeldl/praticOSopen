@@ -213,6 +213,16 @@ describe('startCheckout', () => {
     expect(d.asaas.createSubscription).toHaveBeenCalledWith(expect.objectContaining({ value: 2499, cycle: 'YEARLY', billingType: 'PIX' }));
   });
 
+  it('sends the customer back to the web after paying when returnUrl is set', async () => {
+    fake.seed('config/webCheckout', { enabled: true, returnUrl: 'https://praticos.app/web/settings/plan?paid=1' });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscription).toHaveBeenCalledWith(
+      expect.objectContaining({ callback: { successUrl: 'https://praticos.app/web/settings/plan?paid=1', autoRedirect: true } }),
+    );
+  });
+
   it('reuses a pending checkout with the same choice, replaces a different one', async () => {
     seedCompany();
     seedRecord({ status: 'pending', checkoutUrl: 'https://sandbox.asaas.com/i/old' });
