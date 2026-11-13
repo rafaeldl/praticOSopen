@@ -17,7 +17,7 @@
  *   day starts again at 0. Also without client rules (Admin SDK only).
  *
  * The ceilings come from the plan table (docs/plans/plans.json): aiPerMonth
- * and aiPerDay of the plan in force (effectivePlan: an expired plan is Free).
+ * and aiPerDay of the plan in force (planInForce: an expired plan is Free of the current table).
  *
  * Every call to the model counts, applied or not (spec 2026-10-09 §4.2). A call
  * that fails before the model answers (our error, model unavailable) is
@@ -28,8 +28,8 @@ import { db, FieldValue } from '../firestore.service';
 import type { SubscriptionPlan } from '../../models/types';
 import { isLlmProvider, type LlmProvider } from './llm.client';
 import { PLAN_IDS } from '../plan-table.generated';
-import { currentPlanRows, planRow, tableVersionOf } from '../subscription-plans';
-import { effectivePlan } from '../plan-limits.service';
+import { currentPlanRows } from '../subscription-plans';
+import { planInForce } from '../plan-limits.service';
 import { checkCompanyPlanFeature, type PlanFeature } from '../plan-features.service';
 
 /** Requests per month by plan (docs/plans/plans.json). -1 = unlimited. */
@@ -83,14 +83,14 @@ const subscriptionOf = (value: unknown): Json | null =>
 export function resolveAiLimit(subscription: unknown, settings: AiSettings | null, now: Date = new Date()): number {
   if (settings && validLimit(settings.monthlyLimit)) return settings.monthlyLimit;
   const sub = subscriptionOf(subscription);
-  return planRow(effectivePlan(sub, now), tableVersionOf(sub)).aiPerMonth;
+  return planInForce(sub, now).row.aiPerMonth;
 }
 
 /** Daily limit: the plan's aiPerDay; none while a pilot override sets the month. */
 export function resolveAiDailyLimit(subscription: unknown, settings: AiSettings | null, now: Date = new Date()): number {
   if (settings && validLimit(settings.monthlyLimit)) return -1;
   const sub = subscriptionOf(subscription);
-  return planRow(effectivePlan(sub, now), tableVersionOf(sub)).aiPerDay;
+  return planInForce(sub, now).row.aiPerDay;
 }
 
 /**
