@@ -13,7 +13,7 @@
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { onRequest } from 'firebase-functions/v2/https';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { bearerAuth } from './middleware/auth.middleware';
 import { resolveCompanyContext } from './middleware/company.middleware';
@@ -27,6 +27,7 @@ import { processPendingKeyDestructions, purgeExpiredCertificates } from './servi
 import { sendCertificateNotices } from './services/nfse/certificate-expiry-notice.service';
 import { reconcileStaleDirectInvoices } from './services/nfse/issue.service';
 import { processDirectAutoIssue, processPendingDirectAutoIssues } from './services/nfse/auto-issue.service';
+import { processChargeInvoice, processPendingChargeInvoices } from './services/nfse/charge-invoice.service';
 import { RESEND_API_KEY } from './services/nfse/invoice-email.service';
 import { syncCompanyMailboxes } from './services/nfse/import.service';
 import { API_CORS_OPTIONS, createAppLimiters, noStore } from './utils/app-rate-limit.utils';
@@ -83,9 +84,10 @@ export const nfseApi = onRequest(
  * (notas made elsewhere, cancellations, received notas), certificate expiry
  * notices, expired certificates (90 days) and pending key destructions.
  */
-export async function runNfseDaily(): Promise<{ autoIssued: number; reconciled: number; read: number; noticed: number; purged: number; destroyed: number }> {
+export async function runNfseDaily(): Promise<{ autoIssued: number; chargeInvoices: number; reconciled: number; read: number; noticed: number; purged: number; destroyed: number }> {
   const companies = await db.collectionGroup('settings').where('nfseDirectEnabled', '==', true).get();
   let autoIssued = 0;
+  let chargeInvoices = 0;
   let reconciled = 0;
   let noticed = 0;
   let read = 0;
@@ -94,13 +96,15 @@ export async function runNfseDaily(): Promise<{ autoIssued: number; reconciled: 
     if (!companyId) continue;
     // Automatic notas the trigger below missed or left halfway (issue #571).
     autoIssued += await processPendingDirectAutoIssues(companyId).catch(() => 0);
+    // Notas of paid charges to retry, or to cancel after a refund (docs/NFSE_DIRECT.md).
+    chargeInvoices += await processPendingChargeInvoices(companyId).catch(() => 0);
     reconciled += await reconcileStaleDirectInvoices(companyId).catch(() => 0);
     read += await syncCompanyMailboxes(companyId).catch(() => 0);
     noticed += (await sendCertificateNotices(companyId, new Date()).catch(() => ({ sent: 0 }))).sent;
   }
   const purged = await purgeExpiredCertificates();
   const destroyed = await processPendingKeyDestructions();
-  return { autoIssued, reconciled, read, noticed, purged, destroyed };
+  return { autoIssued, chargeInvoices, reconciled, read, noticed, purged, destroyed };
 }
 
 export const nfseDaily = onSchedule(
@@ -139,5 +143,30 @@ export const nfseAutoIssue = onDocumentCreated(
   async (event) => {
     const { companyId, orderId } = event.params;
     await processDirectAutoIssue(companyId, orderId);
+  },
+);
+
+/**
+ * Nota of a paid charge (e.g. a PraticOS plan sold on the web): the payment
+ * webhook (api account) only writes
+ * companies/{cid}/private/nfse/chargeInvoices/{chargeKey}; this one issues it,
+ * and cancels it when the request is marked after a refund. Every step is
+ * claimed in a transaction, so the writes of this function (which trigger it
+ * again) do nothing. Retries are left to the daily sweep.
+ */
+export const nfseChargeInvoice = onDocumentWritten(
+  {
+    document: 'companies/{companyId}/private/nfse/chargeInvoices/{requestId}',
+    region: 'southamerica-east1',
+    serviceAccount: NFSE_SERVICE_ACCOUNT,
+    secrets: [RESEND_API_KEY],
+    memory: '512MiB',
+    timeoutSeconds: 120,
+    maxInstances: 10,
+  },
+  async (event) => {
+    if (!event.data?.after?.exists) return;
+    const { companyId, requestId } = event.params;
+    await processChargeInvoice(companyId, requestId);
   },
 );

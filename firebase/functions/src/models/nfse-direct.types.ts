@@ -168,6 +168,18 @@ export interface NfseDirectInvoiceFields {
   lastAttemptAt?: string | null;
   /** Last e-mail of the nota to the customer (issue #611). */
   emailDelivery?: NfseEmailDelivery | null;
+  /** A nota of a paid charge, not of orders (`orderIds` is empty): see charge-invoice.service.ts. */
+  charge?: NfseChargeRef | null;
+}
+
+/** Where a charge nota came from. `webBilling`: a PraticOS plan sold on the web (docs/WEB_CHECKOUT.md). */
+export type NfseChargeSource = 'webBilling';
+
+/** The paid charge behind a nota without orders. `key` is unique per charge (one nota per charge). */
+export interface NfseChargeRef {
+  key: string;
+  source: NfseChargeSource;
+  paymentId: string;
 }
 
 /** Which e-mail: the issued nota or the notice that it was canceled. */

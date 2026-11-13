@@ -30,6 +30,7 @@ import type {
   FiscalEmitter,
   FiscalEmitterPrivate,
   NfseCancelReason,
+  NfseChargeRef,
   NfseRecipient,
 } from '../../models/nfse-direct.types';
 import { fiscalEmitterAggr } from '../../models/nfse-direct.types';
@@ -63,6 +64,8 @@ const emittersRef = (companyId: string) => companyRef(companyId).collection('fis
 const privateNfse = (companyId: string) => companyRef(companyId).collection('private').doc('nfse');
 const emitterPrivateRef = (companyId: string, emitterId: string) => privateNfse(companyId).collection('emitters').doc(emitterId);
 const orderLockRef = (companyId: string, orderId: string) => privateNfse(companyId).collection('orders').doc(orderId);
+/** Like the order lock, for a nota of a paid charge: the active nota of that charge. */
+const chargeLockRef = (companyId: string, chargeKey: string) => privateNfse(companyId).collection('charges').doc(chargeKey);
 /** What the DPS was built from, to send the same one again (server only). */
 const dpsSnapshotRef = (companyId: string, invoiceId: string) => privateNfse(companyId).collection('dps').doc(invoiceId);
 
@@ -485,6 +488,186 @@ export async function issueDirectInvoice(
   return sendDps(companyId, emitter.id, invoiceRef.id, reserved as DirectInvoice, config, deps, customer.id);
 }
 
+// ----------------------------------------------------------------------------
+// Issue for a paid charge (no orders)
+// ----------------------------------------------------------------------------
+
+/** The recipient of a charge nota, as the checkout collected it. */
+export interface ChargeRecipient {
+  name: string;
+  /** CPF or CNPJ (digits, or formatted). */
+  taxId: string;
+  email?: string | null;
+}
+
+export interface IssueChargeInput {
+  charge: NfseChargeRef;
+  value: number;
+  description: string;
+  recipient: ChargeRecipient;
+  /** Emitter to use; absent = the company's default (decision 3, like a nota of orders). */
+  emitterId?: string | null;
+}
+
+/**
+ * The company's customer for a charge nota: the one with this CPF/CNPJ, else
+ * a new one with the name, CPF/CNPJ and e-mail (so the nota shows on the
+ * customer, like any other). Never overwrites what the customer already has.
+ */
+export async function chargeCustomer(companyId: string, recipient: ChargeRecipient, user: UserAggr, now: Date): Promise<CustomerDoc> {
+  const taxId = onlyDigits(recipient.taxId);
+  const customers = companyRef(companyId).collection('customers');
+  const found = await customers.where('taxId', '==', taxId).limit(1).get();
+  if (!found.empty) {
+    const doc = found.docs[0];
+    return { ...(doc.data() as CustomerDoc), id: doc.id };
+  }
+  const name = clean(recipient.name) ?? taxId;
+  const company = (await companyRef(companyId).get()).data();
+  const data = {
+    name,
+    nameLower: name.toLowerCase(),
+    taxId,
+    email: clean(recipient.email),
+    phone: null,
+    address: null,
+    company: { id: companyId, name: (company?.name as string | undefined) ?? null },
+    createdBy: { id: user.id, name: user.name },
+    createdAt: now.toISOString(),
+  };
+  const ref = customers.doc();
+  await ref.set(data);
+  return { ...(data as unknown as CustomerDoc), id: ref.id };
+}
+
+/** The active nota (any status but error/canceled, `creating` included) of a charge, or null. */
+export async function activeChargeInvoiceId(companyId: string, chargeKey: string): Promise<string | null> {
+  const invoiceId = (await chargeLockRef(companyId, chargeKey).get()).data()?.invoiceId as string | undefined;
+  if (!invoiceId) return null;
+  const invoice = (await invoicesRef(companyId).doc(invoiceId).get()).data() as NfseInvoice | undefined;
+  return invoice && isActiveDirectInvoice(invoice) ? invoiceId : null;
+}
+
+/**
+ * Issues one nota for a paid charge (no orders): the emitter of decision 3,
+ * the charge's value and description, the recipient found or created by
+ * CPF/CNPJ. One active nota per charge (`charge.key`, locked in the same
+ * transaction that reserves the DPS number): a second call throws
+ * CHARGE_HAS_INVOICE. Ends like issueDirectInvoice (`authorized`, `creating`
+ * for the reconcile, or NFSE_REFUSED).
+ */
+export async function issueDirectChargeInvoice(
+  companyId: string,
+  input: IssueChargeInput,
+  user: UserAggr,
+  options: IssueOptions = {},
+  override?: Partial<IssueDeps>,
+): Promise<DirectInvoice> {
+  const deps = withDeps(override);
+  await assertDirectEnabled(companyId);
+  const now = deps.now();
+  const today = todayInSaoPaulo(now);
+  const value = Math.round(Number(input.value) * 100) / 100;
+  if (!(value > 0)) throw new NfseServiceError('VALIDATION_ERROR', 'The charge has no value');
+  const taxId = onlyDigits(input.recipient.taxId);
+  if (taxId.length !== 11 && taxId.length !== 14) {
+    throw new NfseServiceError('RECIPIENT_TAX_ID_REQUIRED', 'The recipient needs a CPF or CNPJ');
+  }
+
+  const customer = await chargeCustomer(companyId, input.recipient, user, now);
+  const emitter = await chooseEmitter(companyId, customer, input.emitterId);
+  const problem = emitterProblem(emitter, today);
+  if (problem) {
+    throw new NfseServiceError(problem === 'certificateExpired' ? 'CERT_EXPIRED' : 'EMITTER_NOT_READY', `Emitter cannot issue (${problem})`, {
+      problem,
+      emitterId: emitter.id,
+    });
+  }
+  const recipient: NfseRecipient = {
+    customerId: customer.id,
+    taxId,
+    legalName: clean(customer.legalName) ?? clean(input.recipient.name) ?? clean(customer.name) ?? '',
+    address: customer.fiscalAddress ?? null,
+    email: clean(customer.invoiceEmail) ?? clean(input.recipient.email) ?? clean(customer.email),
+  };
+  if (!recipient.legalName) throw new NfseServiceError('RECIPIENT_TAX_ID_REQUIRED', 'The recipient needs a name');
+
+  // A stale `creating` nota of this charge is settled first, so the lock check sees the truth.
+  const lockedId = (await chargeLockRef(companyId, input.charge.key).get()).data()?.invoiceId as string | undefined;
+  if (lockedId) await reconcileDirectInvoice(companyId, lockedId, deps).catch(() => undefined);
+
+  const description = input.description.trim().slice(0, MAX_DESCRIPTION);
+  const config = await deps.config();
+  const series = String(emitter.dpsSeries);
+  const invoiceRef = invoicesRef(companyId).doc();
+  const createdAt = now.toISOString();
+  const base = {
+    id: invoiceRef.id,
+    status: 'creating' as const,
+    provider: 'direct' as const,
+    source: 'praticos' as const,
+    emitter: fiscalEmitterAggr(emitter),
+    recipient,
+    customer: { id: customer.id, name: customer.name || null },
+    orderIds: [] as string[],
+    orders: [],
+    value,
+    serviceDescription: description,
+    observations: '',
+    effectiveDate: today,
+    municipalServiceName: emitter.service?.name ?? '',
+    charge: input.charge,
+    createdBy: { id: user.id, name: user.name },
+    createdAt,
+    ...(options.auto ? { auto: true } : {}),
+  };
+
+  const reserved = await db.runTransaction(async (tx) => {
+    const counterRef = emitterPrivateRef(companyId, emitter.id);
+    const counter = (await tx.get(counterRef)).data() as Partial<FiscalEmitterPrivate> | undefined;
+    const lock = await tx.get(chargeLockRef(companyId, input.charge.key));
+    const lockedInvoiceId = lock.data()?.invoiceId as string | undefined;
+    if (lockedInvoiceId) {
+      const existing = await tx.get(invoicesRef(companyId).doc(lockedInvoiceId));
+      if (existing.exists && isActiveDirectInvoice(existing.data() as NfseInvoice)) {
+        throw new NfseServiceError('CHARGE_HAS_INVOICE', 'The charge already has an active nota', { invoiceId: lockedInvoiceId });
+      }
+    }
+    const issuedToday = reserveDailySlot(counter, today);
+    const number = Math.max(1, Math.floor(Number(counter?.nextDpsNumber) || 1));
+    const id = dpsId(emitter.cityCode, emitter.taxId, series, number);
+    const invoice = { ...base, dps: { id, series, number } };
+    tx.set(counterRef, { nextDpsNumber: number + 1, issuedOn: today, issuedToday, updatedAt: createdAt }, { merge: true });
+    tx.set(invoiceRef, invoice as unknown as Record<string, unknown>);
+    tx.set(chargeLockRef(companyId, input.charge.key), { invoiceId: invoiceRef.id, updatedAt: createdAt });
+    const snapshot: Omit<DpsInput, 'issuedAt' | 'competenceDate' | 'environment' | 'appVersion'> = {
+      series,
+      number,
+      emitter: {
+        taxId: emitter.taxId,
+        cityCode: emitter.cityCode,
+        municipalRegistration: emitter.municipalRegistration ?? null,
+        regime: emitter.regime,
+        simplesOption: emitter.simplesOption ?? null,
+      },
+      recipient: { taxId: recipient.taxId, legalName: recipient.legalName, address: recipient.address ?? null, email: recipient.email ?? null },
+      service: {
+        nationalCode: emitter.service!.nationalCode,
+        municipalCode: emitter.service?.municipalCode ?? null,
+        nbs: emitter.service?.nbs ?? null,
+        description,
+      },
+      value,
+      simplesTaxRate: emitter.service?.simplesTaxRate ?? null,
+      complementaryInfo: '',
+    };
+    tx.set(dpsSnapshotRef(companyId, invoiceRef.id), { emitterId: emitter.id, dps: snapshot, createdAt });
+    return invoice;
+  });
+
+  return sendDps(companyId, emitter.id, invoiceRef.id, reserved as DirectInvoice, config, deps, customer.id);
+}
+
 async function sendDps(
   companyId: string,
   emitterId: string,
@@ -542,7 +725,7 @@ async function applyIssueResult(
       updatedAt: at,
     };
     await invoicesRef(companyId).doc(invoiceId).update(update);
-    await releaseLocks(companyId, invoiceId, invoice.orderIds);
+    await releaseLocks(companyId, invoiceId, invoice.orderIds, invoice.charge?.key);
     throw new NfseServiceError('NFSE_REFUSED', 'The government refused the nota', { refusal, invoiceId });
   }
 
@@ -573,12 +756,14 @@ async function applyIssueResult(
   return { ...invoice, ...update, ...(emailDelivery ? { emailDelivery } : {}) } as DirectInvoice;
 }
 
-async function releaseLocks(companyId: string, invoiceId: string, orderIds: string[]): Promise<void> {
+async function releaseLocks(companyId: string, invoiceId: string, orderIds: string[], chargeKey?: string | null): Promise<void> {
   await db.runTransaction(async (tx) => {
     const locks = await Promise.all(orderIds.map((id) => tx.get(orderLockRef(companyId, id))));
+    const chargeLock = chargeKey ? await tx.get(chargeLockRef(companyId, chargeKey)) : null;
     locks.forEach((lock, i) => {
       if (lock.data()?.invoiceId === invoiceId) tx.delete(orderLockRef(companyId, orderIds[i]));
     });
+    if (chargeKey && chargeLock?.data()?.invoiceId === invoiceId) tx.delete(chargeLockRef(companyId, chargeKey));
   });
 }
 
@@ -705,7 +890,7 @@ export async function cancelDirectInvoice(
     updatedAt: at,
   };
   await invoicesRef(companyId).doc(invoiceId).update(update);
-  await releaseLocks(companyId, invoiceId, invoice.orderIds ?? []);
+  await releaseLocks(companyId, invoiceId, invoice.orderIds ?? [], invoice.charge?.key);
   await recalcEmitterTotals(companyId, invoice.emitter.id, deps).catch(() => undefined);
   // The PDF now needs the "CANCELADA" watermark (NT 008, item 2.5.1).
   await deps.refreshPdf(companyId, invoiceId);
