@@ -6,7 +6,8 @@ jest.mock('../firestore.service', () =>
 import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
 import { expireSubscriptions, resetMonthlyUsage, syncCompanySubscription } from '../subscription.service';
-import { PLAN_LIMITS } from '../subscription-plans';
+import { PLAN_LIMITS, limitsOfRow, planRow } from '../subscription-plans';
+import { resetPaidPlansCache } from '../plan-limits.service';
 import type { RcSubscriber, RcSubscription } from '../revenuecat.client';
 
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
@@ -43,6 +44,13 @@ function activeSubscriber(plan: 'starter' | 'pro' | 'business', overrides: Parti
   };
 }
 
+/** Existing cases run with the plan switch on (the new table is written). */
+function resetWithPlansOn() {
+  fake.reset();
+  resetPaidPlansCache();
+  fake.seed('config/paidPlans', { enabled: true });
+}
+
 function seedCompany(id: string, subscription?: Record<string, unknown>) {
   fake.seed(`companies/${id}`, { name: `Company ${id}`, ...(subscription ? { subscription } : {}) });
 }
@@ -52,7 +60,7 @@ function subscriptionOf(id: string) {
 }
 
 describe('syncCompanySubscription', () => {
-  beforeEach(() => fake.reset());
+  beforeEach(resetWithPlansOn);
 
   it('returns company_not_found without calling RevenueCat', async () => {
     const fetchSubscriber = jest.fn();
@@ -263,7 +271,7 @@ describe('resetMonthlyUsage', () => {
 });
 
 describe('expireSubscriptions', () => {
-  beforeEach(() => fake.reset());
+  beforeEach(resetWithPlansOn);
 
   it('moves an ended grace period to Free when RevenueCat has no entitlement', async () => {
     seedCompany('c1', { ...GRACE, expiresAt: PAST });
@@ -340,5 +348,40 @@ describe('expireSubscriptions', () => {
     expect(subscriptionOf('c3')).toMatchObject({ plan: 'pro' });
     expect(subscriptionOf('c22')).toMatchObject({ plan: 'free' });
     errorSpy.mockRestore();
+  });
+});
+
+describe('plan switch off: a plan change keeps the legacy table', () => {
+  beforeEach(() => {
+    fake.reset();
+    resetPaidPlansCache();
+  });
+
+  it('a new purchase stores the legacy limits and tableVersion 1', async () => {
+    seedCompany('c1');
+    await syncCompanySubscription('c1', { fetchSubscriber: async () => activeSubscriber('starter'), now: NOW });
+
+    const sub = subscriptionOf('c1');
+    expect(sub?.tableVersion).toBe('1');
+    expect(sub?.limits).toEqual(limitsOfRow(planRow('starter', '1')));
+  });
+
+  it('an expiry to Free stores the legacy Free limits', async () => {
+    seedCompany('c1', { plan: 'pro', status: 'active', source: 'store', store: 'app_store', expiresAt: PAST, limits: PLAN_LIMITS.pro });
+    await expireSubscriptions(NOW, { fetchSubscriber: async () => EMPTY });
+
+    const sub = subscriptionOf('c1');
+    expect(sub?.plan).toBe('free');
+    expect(sub?.tableVersion).toBe('1');
+    expect(sub?.limits).toEqual(limitsOfRow(planRow('free', '1')));
+  });
+
+  it('with the switch on, the same purchase stores the current table', async () => {
+    fake.seed('config/paidPlans', { enabled: true });
+    seedCompany('c1');
+    await syncCompanySubscription('c1', { fetchSubscriber: async () => activeSubscriber('starter'), now: NOW });
+
+    expect(subscriptionOf('c1')?.tableVersion).toBe('2');
+    expect(subscriptionOf('c1')?.limits).toEqual(limitsOfRow(planRow('starter', '2')));
   });
 });

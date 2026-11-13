@@ -367,7 +367,7 @@
   "web.ai.batchAsk": "O que fazer nessas OS?",
   "web.ai.batchPlaceholder": "Ex.: pôr uma revisão em todas",
   "web.ai.batchTooMany": "Escolha até {max} {order} por vez.",
-  "web.ai.batchQuota": "{count, plural, =0{Não há mais pedidos ao assistente neste mês.} =1{Falta 1 pedido ao assistente neste mês: escolha 1 {order}.} other{Faltam # pedidos ao assistente neste mês: escolha até # {order}.}}",
+  "web.ai.batchQuota": "{count, plural, =0{O assistente chegou ao limite deste mês.} other{O assistente está perto do limite deste mês: escolha menos {order}.}}",
   "web.ai.batchUses": "Usa {count} dos {left} pedidos que faltam no mês.",
   "web.ai.batchReading": "Lendo cada OS…",
   "web.ai.batchPrepare": "Preparar",
