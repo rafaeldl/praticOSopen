@@ -24,6 +24,7 @@ import {
   decideBillingAction,
   invoiceSettingsFor,
   parseWebCheckoutConfig,
+  webCheckoutOnFor,
   refundEligible,
   saoPauloDate,
   subscriptionIdOf,
@@ -142,9 +143,10 @@ export async function billingOverview(companyId: string, now: Date = new Date())
     readCompany(companyId),
     readWebBilling(companyId),
   ]);
+  const on = webCheckoutOnFor(config, companyId);
   return {
-    enabled: config.enabled,
-    offer: config.enabled ? webOffer(config) : null,
+    enabled: on,
+    offer: on ? webOffer(config) : null,
     block: checkoutBlock(subscription, record, now, country),
     subscription: record
       ? {
@@ -199,7 +201,7 @@ export async function startCheckout(
 ): Promise<{ checkoutUrl: string }> {
   const now = deps.now?.() ?? new Date();
   const config = await readWebCheckoutConfig();
-  if (!config.enabled) throw new WebBillingError('WEB_CHECKOUT_DISABLED', 403, 'Web checkout is off');
+  if (!webCheckoutOnFor(config, companyId)) throw new WebBillingError('WEB_CHECKOUT_DISABLED', 403, 'Web checkout is off');
   if (input.cycle === 'yearly' && !config.yearlyEnabled) {
     throw new WebBillingError('VALIDATION_ERROR', 400, 'Yearly plans are not on sale on the web');
   }
