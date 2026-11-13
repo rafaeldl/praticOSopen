@@ -2,6 +2,12 @@
 
 Pesquisa de 13/11/2026 para decidir como cobrar os planos pela web (issue #664, PR #738). Só páginas públicas; nenhuma conta foi criada. Taxas mudam: conferir na conta antes de ligar.
 
+## Decisão (13/11/2026)
+
+- **Brasil:** venda na web pelo Asaas (opção A, PR #738).
+- **Fora do Brasil:** por enquanto, sem venda na web. Empresa com país diferente de `BR` vê na web "Fora do Brasil, a assinatura é feita pelo app do PraticOS no celular", com os links da App Store e do Google Play, e compra dentro do app, na loja. O checkout recusa com 409 `OUTSIDE_BRAZIL` (`docs/WEB_CHECKOUT.md`).
+- **Paddle:** fica para quando houver procura de fora.
+
 ## Resumo
 
 **Recomendação: opção A, em duas etapas.**
