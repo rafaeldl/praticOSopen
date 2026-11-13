@@ -185,7 +185,7 @@ describe('plan-overview', () => {
       ...(given.expiresInDays === undefined ? {} : { expiresAt: new Date(now.getTime() + given.expiresInDays * DAY_MS).toISOString() }),
       usage: { ordersMonth: orderMonthKey(now), ordersThisMonth: given.orders.thisMonth, ordersLastMonth: given.orders.lastMonth },
     }
-    const got = planOverview({ subscription, people: given.people, taxIds: given.taxIds, enforced: given.paidPlansEnabled, now })
+    const got = planOverview({ subscription, people: given.people, taxIds: given.taxIds, enforced: given.paidPlansEnabled, now, limitsStartAt: given.limitsStartInDays === undefined ? null : new Date(now.getTime() + given.limitsStartInDays * DAY_MS) })
     expect({
       plan: got.plan,
       rows: got.rows,

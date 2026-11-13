@@ -111,9 +111,11 @@ export const planLimits = (plan: PlanId): SubscriptionLimits => limitsOfRow(curr
  */
 export function tableVersionOf(subscription: unknown): string {
   const sub = subscription && typeof subscription === 'object' ? (subscription as Record<string, unknown>) : {}
-  if (typeof sub.tableVersion === 'string') return sub.tableVersion in PLAN_TABLES_IN_FORCE ? sub.tableVersion : PLAN_TABLE_CURRENT_VERSION
   const paid = typeof sub.plan === 'string' && sub.plan !== 'free' && (PLAN_IDS as readonly string[]).includes(sub.plan)
-  return paid ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION
+  // Free always follows the current table (decision of 2026-11-13).
+  if (!paid) return PLAN_TABLE_CURRENT_VERSION
+  if (typeof sub.tableVersion === 'string') return sub.tableVersion in PLAN_TABLES_IN_FORCE ? sub.tableVersion : PLAN_TABLE_CURRENT_VERSION
+  return PLAN_TABLE_LEGACY_VERSION
 }
 
 const rowOf = (plan: PlanId, version: string): PlanRow => (PLAN_TABLES_IN_FORCE[version] ?? currentPlanRows())[plan] as PlanRow
@@ -188,7 +190,8 @@ function mergeStored(row: SubscriptionLimits, json: Json): SubscriptionLimits {
 /** Subscription.effectiveLimits: the row of its table version merged with the stored limits while the plan is in force; Free of the current table after it expires. */
 export function effectiveLimits(subscription: unknown, now: Date): SubscriptionLimits {
   const { plan, row: inForce } = planInForce(subscription, now)
-  if (plan !== storedPlan(subscription)) return planLimits(plan)
+  // Free is always the current table's row: stored limits never widen it (decision of 2026-11-13).
+  if (plan !== storedPlan(subscription) || plan === 'free') return planLimits(plan)
   const row = limitsOfRow(inForce)
   const limits = record(subscription).limits
   return limits && typeof limits === 'object' && !Array.isArray(limits) ? mergeStored(row, limits as Json) : row

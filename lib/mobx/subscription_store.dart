@@ -87,12 +87,17 @@ abstract class _SubscriptionStore with Store {
 
     try {
       final config = await readPaidPlansConfig();
-      FeatureGateService.paidPlansConfig = config;
-      FeatureGateService.limitsSwitchOn = config.onFor(id);
+      // Another company was bound meanwhile: its own read decides the switch.
+      if (companyId == id) {
+        FeatureGateService.paidPlansConfig = config;
+        FeatureGateService.limitsSwitchOn = config.onFor(id);
+      }
     } catch (e) {
       // Not read: the limits stay off (the server still decides on its writes).
-      FeatureGateService.paidPlansConfig = PaidPlansConfig.off;
-      FeatureGateService.limitsSwitchOn = false;
+      if (companyId == id) {
+        FeatureGateService.paidPlansConfig = PaidPlansConfig.off;
+        FeatureGateService.limitsSwitchOn = false;
+      }
       debugPrint('SubscriptionStore: plan limits switch not read: $e');
     }
 

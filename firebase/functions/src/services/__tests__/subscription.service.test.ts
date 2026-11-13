@@ -7,7 +7,7 @@ import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
 import { expireSubscriptions, resetMonthlyUsage, syncCompanySubscription } from '../subscription.service';
 import { PLAN_LIMITS, limitsOfRow, planRow } from '../subscription-plans';
-import { resetPaidPlansCache } from '../plan-limits.service';
+import { effectiveLimits, resetPaidPlansCache } from '../plan-limits.service';
 import type { RcSubscriber, RcSubscription } from '../revenuecat.client';
 
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
@@ -388,6 +388,23 @@ describe('plan switch off: a plan change keeps the legacy table', () => {
     expect(sub?.plan).toBe('free');
     expect(sub?.tableVersion).toBe('1');
     expect(sub?.limits).toEqual(limitsOfRow(planRow('free', '1')));
+  });
+
+  it('switch on only for the company (companyIds, App Review demo): its purchase stores the current table', async () => {
+    fake.seed('config/paidPlans', { enabled: false, companyIds: ['demo'] });
+    seedCompany('demo');
+    seedCompany('c1');
+    await syncCompanySubscription('demo', { fetchSubscriber: async () => activeSubscriber('starter'), now: NOW });
+    await syncCompanySubscription('c1', { fetchSubscriber: async () => activeSubscriber('starter'), now: NOW });
+
+    expect(subscriptionOf('demo')?.tableVersion).toBe('2');
+    expect(subscriptionOf('c1')?.tableVersion).toBe('1');
+  });
+
+  it('a Free written with the legacy table gets the new Free limits once the switch is on (Free always follows the current table)', async () => {
+    seedCompany('c1', { plan: 'pro', status: 'active', source: 'store', store: 'app_store', expiresAt: PAST, limits: PLAN_LIMITS.pro });
+    await expireSubscriptions(NOW, { fetchSubscriber: async () => EMPTY });
+    expect(effectiveLimits(subscriptionOf('c1') ?? null, NOW).ordersPerMonth).toBe(planRow('free', '2').ordersPerMonth);
   });
 
   it('with the switch on, the same purchase stores the current table', async () => {

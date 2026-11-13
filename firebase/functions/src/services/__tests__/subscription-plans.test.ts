@@ -312,7 +312,9 @@ describe('tableVersionOf (#726)', () => {
 
   it('a written version wins; an unknown one is the current', () => {
     expect(tableVersionOf({ plan: 'starter', tableVersion: '2' })).toBe('2');
-    expect(tableVersionOf({ plan: 'free', tableVersion: '1' })).toBe('1');
+    // Free always follows the current table (decision of 2026-11-13).
+    expect(tableVersionOf({ plan: 'free', tableVersion: '1' })).toBe('2');
+    expect(tableVersionOf({ plan: 'pro', tableVersion: '1' })).toBe('1');
     expect(tableVersionOf({ plan: 'starter', tableVersion: '99' })).toBe('2');
   });
 

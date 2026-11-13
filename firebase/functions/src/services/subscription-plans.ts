@@ -38,11 +38,15 @@ export function currentPlanRows(): Readonly<Record<SubscriptionPlan, PlanRow>> {
 export function tableVersionOf(
   subscription: { tableVersion?: unknown; plan?: unknown; source?: unknown } | null | undefined,
 ): string {
-  const version = subscription?.tableVersion;
-  if (typeof version === 'string') return version in PLAN_TABLES_IN_FORCE ? version : PLAN_TABLE_CURRENT_VERSION;
   const plan = subscription?.plan;
   const paid = typeof plan === 'string' && plan !== 'free' && (PLAN_IDS as readonly string[]).includes(plan);
-  return paid ? PLAN_TABLE_LEGACY_VERSION : PLAN_TABLE_CURRENT_VERSION;
+  // Free always follows the current table (decision of 2026-11-13): the old
+  // Free has nothing to keep, and a Free written with version 1 while the
+  // switch was off must get the new limits when it turns on.
+  if (!paid) return PLAN_TABLE_CURRENT_VERSION;
+  const version = subscription?.tableVersion;
+  if (typeof version === 'string') return version in PLAN_TABLES_IN_FORCE ? version : PLAN_TABLE_CURRENT_VERSION;
+  return PLAN_TABLE_LEGACY_VERSION;
 }
 
 /** Row of a plan in a version of the table (the current one by default). */

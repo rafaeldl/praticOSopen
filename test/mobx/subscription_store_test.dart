@@ -56,6 +56,18 @@ void main() {
     expect(FeatureGateService.limitsSwitchOn, isFalse);
   });
 
+  test('a slow read for a company left behind does not set the switch of the next one', () async {
+    final slow = Completer<PaidPlansConfig>();
+    store.readPaidPlansConfig = () => slow.future;
+    final first = store.bindCompany('demo');
+    store.readPaidPlansConfig = () async => PaidPlansConfig.off;
+    await store.bindCompany('c1');
+    slow.complete(const PaidPlansConfig(companyIds: ['demo']));
+    await first;
+    expect(store.companyId, 'c1');
+    expect(FeatureGateService.limitsSwitchOn, isFalse);
+  });
+
   test('a switch that cannot be read leaves the limits off', () async {
     FeatureGateService.limitsSwitchOn = true;
     store.readPaidPlansConfig = () async => throw StateError('offline');

@@ -125,7 +125,9 @@ export function planInForce(subscription: Json | null | undefined, now: Date): P
  */
 export function effectiveLimits(subscription: Json | null | undefined, now: Date): SubscriptionLimits {
   const { plan, row: planRowInForce } = planInForce(subscription, now);
-  if (plan !== storedPlan(subscription)) return { ...PLAN_LIMITS[plan] };
+  // Free is always the current table's row: stored limits (e.g. -1 written by
+  // the old table) never widen it (decision of 2026-11-13).
+  if (plan !== storedPlan(subscription) || plan === 'free') return { ...PLAN_LIMITS[plan] };
   const row = limitsOfRow(planRowInForce);
   const limits = subscription?.limits;
   if (limits && typeof limits === 'object' && !Array.isArray(limits)) return mergeStored(row, limits as Json);

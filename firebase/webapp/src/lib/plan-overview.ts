@@ -7,6 +7,8 @@
 import { PLAN_TABLES, PLAN_TABLE_CURRENT_VERSION } from '@/generated/plan-table'
 import { currentPlanRows, effectiveLimits, effectivePlan, ordersUsage, PLAN_IDS, storedPlan, tableVersionOf, type PlanId, type PlanRow } from './plan-limits'
 import { isPlanFeature, type PlanFeature } from './plan-features'
+import { paidPlansConfig } from './plan-limits'
+import { lastMonthCounts } from './paid-plans-config'
 
 export type OverviewResource = 'orders' | 'people' | 'taxIds'
 export type OverviewLevel = 'unlimited' | 'ok' | 'near' | 'atLimit' | 'over'
@@ -49,8 +51,10 @@ function rowInForce(subscription: unknown, now: Date): PlanRow {
 }
 
 /** `people` are members plus invites that still work; `taxIds` the fiscal emitters; `enforced` the switch config/paidPlans. */
-export function planOverview(input: { subscription: unknown; people: number; taxIds: number; enforced: boolean; now: Date }): PlanOverview {
+export function planOverview(input: { subscription: unknown; people: number; taxIds: number; enforced: boolean; now: Date; limitsStartAt?: Date | null }): PlanOverview {
   const { subscription, people, taxIds, enforced: on, now } = input
+  // In the month from config/paidPlans.limitsStartAt the month before does not take the grace away (checkPlanLimit).
+  const lastCounts = lastMonthCounts(input.limitsStartAt === undefined ? paidPlansConfig().limitsStartAt : input.limitsStartAt, now)
   const plan = effectivePlan(subscription, now)
   const limits = effectiveLimits(subscription, now)
   const row = rowInForce(subscription, now)
@@ -73,7 +77,7 @@ export function planOverview(input: { subscription: unknown; people: number; tax
     const level = rows[0]!.level
     const overage = row.overageAllowed
     if (level === 'over' && overage) notice = 'ordersContactUs'
-    else if ((level === 'over' || level === 'atLimit') && orders.lastMonth > ordersLimit) notice = 'ordersBlocked'
+    else if ((level === 'over' || level === 'atLimit') && lastCounts && orders.lastMonth > ordersLimit) notice = 'ordersBlocked'
     else if (level === 'over') notice = 'ordersGrace'
     else if (level === 'atLimit') notice = 'ordersAtLimit'
     else if (level === 'near') notice = 'ordersNear'
