@@ -72,10 +72,10 @@ test_rHipMRrqwezbhAuzyWKGLEqwfhP
 |------------|------|-------|-------------|
 | `praticos_starter_monthly` | Starter | R$ 59,90/mes | `starter` |
 | `praticos_starter_annual` | Starter | R$ 599/ano | `starter` |
-| `praticos_pro_monthly` | Pro | R$ 119/mes | `pro` |
-| `praticos_pro_annual` | Pro | R$ 1.190/ano | `pro` |
-| `praticos_business_monthly` | Business | R$ 249/mes | `business` |
-| `praticos_business_annual` | Business | R$ 2.490/ano | `business` |
+| `praticos_pro_monthly` | Pro | R$ 119,90/mes | `pro` |
+| `praticos_pro_annual` | Pro | R$ 1.199/ano | `pro` |
+| `praticos_business_monthly` | Business | R$ 249,90/mes | `business` |
+| `praticos_business_annual` | Business | R$ 2.499/ano | `business` |
 
 Os anuais e o passo a passo dos consoles estao em `docs/STORE_PLANS_SETUP.md`.
 
@@ -221,8 +221,8 @@ await SubscriptionService.instance.restorePurchases();
    - Criar Subscription Group: "PraticOS Plans"
    - Adicionar produtos:
      - `praticos_starter_monthly` - R$ 59,90/mes (anuais em `docs/STORE_PLANS_SETUP.md`)
-     - `praticos_pro_monthly` - R$ 119,00/mes
-     - `praticos_business_monthly` - R$ 249,00/mes
+     - `praticos_pro_monthly` - R$ 119,90/mes
+     - `praticos_business_monthly` - R$ 249,90/mes
    - Configurar localizacoes (pt-BR obrigatorio)
    - Sem trial period: nao ha teste gratis. A garantia de 7 dias e reembolso, nao oferta da loja
 
@@ -245,8 +245,8 @@ await SubscriptionService.instance.restorePurchases();
    - Google Play Console > App > Monetization > Products > Subscriptions
    - Adicionar produtos com MESMOS IDs:
      - `praticos_starter_monthly` - R$ 59,90/mes (anuais em `docs/STORE_PLANS_SETUP.md`)
-     - `praticos_pro_monthly` - R$ 119,00/mes
-     - `praticos_business_monthly` - R$ 249,00/mes
+     - `praticos_pro_monthly` - R$ 119,90/mes
+     - `praticos_business_monthly` - R$ 249,90/mes
    - Configurar base plans (monthly)
    - Sem trial period: nao ha teste gratis. A garantia de 7 dias e reembolso, nao oferta da loja
 

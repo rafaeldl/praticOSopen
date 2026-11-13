@@ -26,10 +26,10 @@ fluxo de `docs/STORE_LISTING.md`.
 |---|---|---|
 | `praticos_starter_monthly` | R$ 59,90 por mês | `starter` |
 | `praticos_starter_annual` | R$ 599 por ano | `starter` |
-| `praticos_pro_monthly` | R$ 119 por mês | `pro` |
-| `praticos_pro_annual` | R$ 1.190 por ano | `pro` |
-| `praticos_business_monthly` | R$ 249 por mês | `business` |
-| `praticos_business_annual` | R$ 2.490 por ano | `business` |
+| `praticos_pro_monthly` | R$ 119,90 por mês | `pro` |
+| `praticos_pro_annual` | R$ 1.199 por ano | `pro` |
+| `praticos_business_monthly` | R$ 249,90 por mês | `business` |
+| `praticos_business_annual` | R$ 2.499 por ano | `business` |
 
 O anual sai pelo preço de 10 meses. Não existe teste grátis em nenhum plano.
 A IA é incluída em todos os planos, inclusive no Grátis: nos textos das
@@ -70,7 +70,7 @@ eles é só de período:
 
 Em cada produto, Preço da assinatura > país base Brasil, com os valores da
 tabela de referência. Deixar a Apple calcular os outros países. Conferir que
-os mensais continuam R$ 59,90, R$ 119 e R$ 249.
+os mensais continuam R$ 59,90, R$ 119,90 e R$ 249,90.
 
 ### 1.4 Nome de exibição e descrição (Localização da App Store)
 
@@ -153,10 +153,10 @@ Criar uma assinatura por plano anual, com o mesmo ID usado na Apple:
 | ID do produto | Plano base | Renovação | Preço Brasil |
 |---|---|---|---|
 | `praticos_starter_annual` | `annual` | Renovação automática, 1 ano | R$ 599,00 |
-| `praticos_pro_annual` | `annual` | Renovação automática, 1 ano | R$ 1.190,00 |
-| `praticos_business_annual` | `annual` | Renovação automática, 1 ano | R$ 2.490,00 |
+| `praticos_pro_annual` | `annual` | Renovação automática, 1 ano | R$ 1.199,00 |
+| `praticos_business_annual` | `annual` | Renovação automática, 1 ano | R$ 2.499,00 |
 
-Nos mensais, conferir o plano base mensal: R$ 59,90, R$ 119,00 e R$ 249,00.
+Nos mensais, conferir o plano base mensal: R$ 59,90, R$ 119,90 e R$ 249,90.
 Outros países: deixar o Google converter. Sem oferta de teste ou introdutória.
 Ativar os planos base.
 
