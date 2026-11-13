@@ -25,8 +25,8 @@ The owner approved a new table on 2026-11-12. It is being rolled out by #722-#72
 | For | Getting started | Solo worker | Small team | Company |
 | Monthly | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
 | Yearly (pays 10 months) | — | R$ 599 | R$ 1.199 | R$ 2.499 |
-| Work orders per month | 10 | 50 | 150 | 500 included, then +R$ 99 per 100 |
-| People | 1 | 2 | 5 | 20, then +R$ 15 each |
+| Work orders per month | 10 | 50 | 150 | 500 included; more: talk to us (no price yet, 2026-11-13) |
+| People | 1 | 2 | 5 | 20; more: talk to us |
 | CNPJs on the service invoice (BR) | — | 1 | 2 | unlimited |
 | Photos | unlimited | unlimited | unlimited | unlimited |
 | AI | included | included | included | included |
@@ -49,7 +49,7 @@ Rules:
 - A new company starts on Free, with no Pro trial.
 - AI is included in every plan (approved 2026-11-12, comment on #729). The customer never sees an AI counter; the ceilings above are internal, and the terms speak of fair use, never "unlimited". Measured use is about 2.5 per work order, so 50/month covers Free's 10 work orders.
 - 7-day guarantee: whoever subscribes and gives up within 7 days can ask for the money back. On the web and Google Play we refund; on the App Store Apple decides (see "7-day guarantee and refunds"). The terms clause and the FAQ answer show only with `flags.pricingPage`, like the pricing page.
-- Current subscribers and the courtesy keep what they have.
+- Current subscribers and the courtesy keep what they have while they stay on the same plan (renewals included). Switching plan, up or down, moves the subscriber to the new table (owner's decision of 2026-11-13): the store webhook and the web checkout both go through `buildPlanUpdate` (`subscription.service.ts`), which writes the new plan's limits and `tableVersion` of the current table. Covered by `subscription.service.test.ts` ("an old subscriber (table 1) who switches plan goes to the new table").
 - App, web and server show and enforce the same thing, from a single table (#722).
 
 ### Current values in code

@@ -16,8 +16,8 @@ A tela de planos (app e web, #725) mostra esta tabela, cada plano no formato "tu
 | Para quem | Comecando | Autonomo | Equipe pequena | Empresa |
 | Mensal | R$ 0 | R$ 59,90 | R$ 119,90 | R$ 249,90 |
 | Anual (paga 10 meses) | — | R$ 599 | R$ 1.199 | R$ 2.499 |
-| OS por mes | 10 | 50 | 150 | 500, depois +R$ 99 a cada 100 |
-| Pessoas | 1 | 2 | 5 | 20, depois +R$ 15 cada |
+| OS por mes | 10 | 50 | 150 | 500, precisa de mais: fale com a gente |
+| Pessoas | 1 | 2 | 5 | 20, precisa de mais: fale com a gente |
 | CNPJs na nota | — | 1 | 2 | sem limite |
 | Fotos | sem limite | sem limite | sem limite | sem limite |
 | PDF sem a marca PraticOS | — | sim | sim | sim |

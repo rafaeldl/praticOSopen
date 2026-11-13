@@ -14,7 +14,6 @@ nada muda para ninguém.
 | Recurso (`features`) | Plano | Onde trava |
 |---|---|---|
 | `charges` | Starter | Servidor: `POST /v1/app/orders/:id/charges`, `POST /v1/app/payments/asaas/connect`. App: abrir "Mandar cobrança", conectar Asaas. Web: idem |
-| `reviewRequest` | Starter | Ainda sem checagem: a avaliação chega pelo link da OS, que é do básico. Fica na tabela para a tela Plano e as lojas |
 | `teamRoles` | Pro | Servidor: convite (`POST /v1/app/invites`) e troca de papel (`PATCH /v1/app/team/members/:id`, `PATCH /v1/company/members/:id`) para gerente, supervisor, consultor ou técnico. App/web: escolha do papel |
 | `perPersonAgenda` | Pro | App/web: filtro "de quem" da agenda e escolha do responsável |
 | `workStages` | Pro | Web: criar etapas (`StagesForm.vue`). App: não cria etapas (só usa as que existem). Servidor: sem rota; a lista grava direto em `companies/{id}` (travar lá pede regra no `firestore.rules`) |

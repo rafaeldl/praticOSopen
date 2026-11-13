@@ -13,7 +13,6 @@ String planFeatureName(AppLocalizations l10n, PlanFeature feature) => switch (fe
       PlanFeature.brandedPdf => l10n.planFeatureBrandedPdf,
       PlanFeature.ownChecklists => l10n.planFeatureOwnChecklists,
       PlanFeature.charges => l10n.planFeatureCharges,
-      PlanFeature.reviewRequest => l10n.planFeatureReviewRequest,
       PlanFeature.teamRoles => l10n.planFeatureTeamRoles,
       PlanFeature.perPersonAgenda => l10n.planFeaturePerPersonAgenda,
       PlanFeature.workStages => l10n.planFeatureWorkStages,

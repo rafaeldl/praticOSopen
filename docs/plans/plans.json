@@ -130,8 +130,7 @@
             "brandedPdf",
             "ownChecklists",
             "ai",
-            "charges",
-            "reviewRequest"
+            "charges"
           ]
         },
         "pro": {
@@ -160,7 +159,6 @@
             "ownChecklists",
             "ai",
             "charges",
-            "reviewRequest",
             "teamRoles",
             "perPersonAgenda",
             "workStages",
@@ -196,7 +194,6 @@
             "ownChecklists",
             "ai",
             "charges",
-            "reviewRequest",
             "teamRoles",
             "perPersonAgenda",
             "workStages",

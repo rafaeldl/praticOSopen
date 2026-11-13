@@ -63,6 +63,7 @@ const COVERED = [
   'order-receive.json',
   'order-totals.json',
   'overdue.json',
+  'paid-plans-config.json', // paid-plans-config.cases.test.ts
   'payment-status.json',
   'payment-transactions.json',
   'phone.json',

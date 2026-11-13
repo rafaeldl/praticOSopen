@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "rule": "config/paidPlans liga os planos (decisão de 13/11/2026). `enabled: true` liga para todas as empresas. `companyIds` (lista de ids) liga só para essas empresas enquanto `enabled` está desligada: é a conta de demonstração da revisão da Apple, e o id fica só no Firestore (o repositório é público). `limitsStartAt` (texto ISO ou Timestamp) é o dia em que os limites começam para as empresas grátis que já existem: o aviso (app, web, push e e-mail) vale nos 15 dias antes dele e só para quem está no Free; no mês que começa nele, o mês anterior não tira a folga das OS (quem já passava do limite ganha um mês). Documento ausente, campo de outro tipo ou id vazio não ligam nada.",
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": [
+    "firebase/functions/src/services/paid-plans-config.ts",
+    "lib/services/paid_plans_config.dart",
+    "firebase/webapp/src/lib/paid-plans-config.ts"
+  ],
+  "fields": "`config` é o documento como está no Firestore (`limitsStartAt` em texto ISO). `kind: switch` confere `paidPlansOnFor(config, companyId)` → `on`. `kind: notice` confere o aviso às empresas grátis em `now` (`isFree` diz se o plano em vigor é Free) → `due` e, quando vale, `daysLeft`. `kind: lastMonthCounts` confere se o mês anterior conta para a folga em `now` → `counts`.",
+  "cases": [
+    { "id": "missing-document-is-off", "given": { "kind": "switch", "config": null, "companyId": "c1" }, "expect": { "on": false } },
+    { "id": "enabled-turns-on-every-company", "given": { "kind": "switch", "config": { "enabled": true }, "companyId": "c1" }, "expect": { "on": true } },
+    { "id": "enabled-must-be-true-not-text", "given": { "kind": "switch", "config": { "enabled": "true" }, "companyId": "c1" }, "expect": { "on": false } },
+    { "id": "listed-company-is-on-with-enabled-off", "given": { "kind": "switch", "config": { "enabled": false, "companyIds": ["demo", "c1"] }, "companyId": "c1" }, "expect": { "on": true } },
+    { "id": "unlisted-company-stays-off", "given": { "kind": "switch", "config": { "enabled": false, "companyIds": ["demo"] }, "companyId": "c1" }, "expect": { "on": false } },
+    { "id": "no-company-is-off-even-with-a-list", "given": { "kind": "switch", "config": { "companyIds": ["demo"] }, "companyId": null }, "expect": { "on": false } },
+    { "id": "company-ids-not-a-list-is-ignored", "given": { "kind": "switch", "config": { "companyIds": "c1" }, "companyId": "c1" }, "expect": { "on": false } },
+
+    { "id": "no-date-no-notice", "given": { "kind": "notice", "config": { "enabled": false }, "isFree": true, "now": "2026-12-01T12:00:00.000Z" }, "expect": { "due": false } },
+    { "id": "notice-not-yet-16-days-before", "given": { "kind": "notice", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "isFree": true, "now": "2026-11-29T02:00:00.000Z" }, "expect": { "due": false } },
+    { "id": "notice-15-days-before", "given": { "kind": "notice", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "isFree": true, "now": "2026-11-30T03:00:00.000Z" }, "expect": { "due": true, "daysLeft": 15 } },
+    { "id": "notice-last-day-rounds-up", "given": { "kind": "notice", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "isFree": true, "now": "2026-12-14T20:00:00.000Z" }, "expect": { "due": true, "daysLeft": 1 } },
+    { "id": "notice-ends-when-the-limits-start", "given": { "kind": "notice", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "isFree": true, "now": "2026-12-15T03:00:00.000Z" }, "expect": { "due": false } },
+    { "id": "notice-only-for-free", "given": { "kind": "notice", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "isFree": false, "now": "2026-12-05T12:00:00.000Z" }, "expect": { "due": false } },
+    { "id": "notice-bad-date-is-no-notice", "given": { "kind": "notice", "config": { "limitsStartAt": "15/12/2026" }, "isFree": true, "now": "2026-12-05T12:00:00.000Z" }, "expect": { "due": false } },
+
+    { "id": "no-date-last-month-counts", "given": { "kind": "lastMonthCounts", "config": {}, "now": "2026-12-20T12:00:00.000Z" }, "expect": { "counts": true } },
+    { "id": "first-month-from-the-start-last-month-does-not-count", "given": { "kind": "lastMonthCounts", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "now": "2027-01-15T02:59:59.000Z" }, "expect": { "counts": false } },
+    { "id": "before-the-start-last-month-does-not-count", "given": { "kind": "lastMonthCounts", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "now": "2026-12-10T12:00:00.000Z" }, "expect": { "counts": false } },
+    { "id": "one-month-after-the-start-last-month-counts", "given": { "kind": "lastMonthCounts", "config": { "limitsStartAt": "2026-12-15T03:00:00.000Z" }, "now": "2027-01-15T03:00:00.000Z" }, "expect": { "counts": true } }
+  ]
+}
