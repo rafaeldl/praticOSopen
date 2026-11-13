@@ -220,11 +220,11 @@ await SubscriptionService.instance.restorePurchases();
    - App Store Connect > App > Subscriptions
    - Criar Subscription Group: "PraticOS Plans"
    - Adicionar produtos:
-     - `praticos_starter_monthly` - R$ 59,00/mes
+     - `praticos_starter_monthly` - R$ 59,90/mes (anuais em `docs/STORE_PLANS_SETUP.md`)
      - `praticos_pro_monthly` - R$ 119,00/mes
      - `praticos_business_monthly` - R$ 249,00/mes
    - Configurar localizacoes (pt-BR obrigatorio)
-   - Configurar trial period: 7 dias
+   - Sem trial period: nao ha teste gratis. A garantia de 7 dias e reembolso, nao oferta da loja
 
 2. **Configurar Shared Secret:**
    - App Store Connect > Users and Access > Keys
@@ -244,11 +244,11 @@ await SubscriptionService.instance.restorePurchases();
 1. **Criar Subscriptions:**
    - Google Play Console > App > Monetization > Products > Subscriptions
    - Adicionar produtos com MESMOS IDs:
-     - `praticos_starter_monthly` - R$ 59,00/mes
+     - `praticos_starter_monthly` - R$ 59,90/mes (anuais em `docs/STORE_PLANS_SETUP.md`)
      - `praticos_pro_monthly` - R$ 119,00/mes
      - `praticos_business_monthly` - R$ 249,00/mes
    - Configurar base plans (monthly)
-   - Configurar trial period: 7 dias
+   - Sem trial period: nao ha teste gratis. A garantia de 7 dias e reembolso, nao oferta da loja
 
 2. **Criar Service Account:**
    - Google Cloud Console > IAM > Service Accounts
@@ -374,7 +374,7 @@ execucao mostra o alerta "RevenueCat" — confira o resumo do workflow antes de 
 - [ ] Customer Center funcional
 - [ ] Webhook recebido e processado
 - [ ] Feature gates aplicados corretamente
-- [ ] Trial de 7 dias
+- [ ] Nenhum produto com teste gratis ou oferta introdutoria
 
 ---
 

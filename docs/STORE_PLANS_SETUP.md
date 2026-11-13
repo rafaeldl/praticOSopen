@@ -12,6 +12,10 @@ cada console.
 Os preços e os produtos anuais podem ser criados antes, desde que não fiquem
 à venda no paywall.
 
+Os lanes de promote (`ios/fastlane/Fastfile` e `android/fastlane/Fastfile`)
+também publicam os textos da ficha. Por isso o PR #730 só pode ser mesclado
+junto com o release que liga os planos novos.
+
 Os textos da ficha (descrição, texto promocional, notas da revisão) estão em
 `ios/fastlane/metadata/` e `android/fastlane/metadata/android/`, e sobem pelo
 fluxo de `docs/STORE_LISTING.md`.
@@ -243,6 +247,7 @@ nunca digitado. Textos em pt, en e es:
   - Nota fiscal de serviço
   - PDF e recibo só com a sua marca
   - Checklists do seu jeito
+  - Pedido de avaliação ao cliente
   - Cobrança ao cliente
 - Pro, "Para equipe pequena". Tudo do Starter, mais:
   - Até 150 OS por mês e 5 pessoas
@@ -270,6 +275,7 @@ nunca digitado. Textos em pt, en e es:
   - Service invoices (Brazil)
   - PDF and receipt with only your brand
   - Your own checklists
+  - Rating requests to customers
   - Payment requests to customers
 - Pro, "For a small team". Everything in Starter, plus:
   - Up to 150 work orders a month and 5 people
@@ -295,6 +301,7 @@ nunca digitado. Textos em pt, en e es:
   - Factura de servicio (Brasil)
   - PDF y recibo solo con tu marca
   - Tus propios checklists
+  - Petición de valoración al cliente
   - Cobros al cliente
 - Pro, "Para un equipo pequeño". Todo lo del Starter, y además:
   - Hasta 150 órdenes al mes y 5 personas
