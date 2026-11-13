@@ -29,7 +29,7 @@
     "softwareItPage": false,
     "nfsePage": true,
     "pricingPage": false,
-    "webSignup": false
+    "webSignup": true
   },
   "webAppUrl": "/web",
   "webSignupUrl": "/web/login?signup=1"
