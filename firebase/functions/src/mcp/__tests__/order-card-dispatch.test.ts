@@ -27,6 +27,7 @@
 jest.mock('../../services/plan-limits.service', () => ({
   ...jest.requireActual('../../services/plan-limits.service'),
   isPaidPlansEnabled: jest.fn().mockResolvedValue(false),
+  isPaidPlansEnabledFor: jest.fn().mockResolvedValue(false),
 }));
 jest.mock('../../services/customer.service');
 jest.mock('../../services/device.service');

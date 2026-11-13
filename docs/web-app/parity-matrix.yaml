@@ -1706,6 +1706,22 @@ rows:
   web_status: todo
   web_exception: {status: proposed, reason: "Só com paidPlansEnabled, falso em kIsWeb; segue a decisão de cobrança na web."}
   note: "Guardado no aparelho, por empresa."
+- id: home.free_limits.view
+  screen: lib/screens/widgets/free_limits_banner.dart
+  route: null
+  action: "Ver aviso de que o plano Grátis passa a ter limite na data marcada"
+  kind: action
+  roles: [owner, admin]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["paidPlansEnabled"]
+  hardware: null
+  data: ["config/paidPlans", "companies/{id}"]
+  web_status: in_progress
+  web_exception: null
+  note: "Só no plano Grátis, nos 15 dias antes de config/paidPlans.limitsStartAt. Na web: FreeLimitsNotice.vue no Início (sem E2E ainda)."
 - id: home.banner.whatsapp
   screen: lib/screens/widgets/whatsapp_setup_banner.dart
   route: null
