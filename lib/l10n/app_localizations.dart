@@ -12791,6 +12791,12 @@ abstract class AppLocalizations {
   /// **'Cobrança e lembrete de pagamento'**
   String get planFeatureCharges;
 
+  /// No description provided for @planFeatureReviewRequest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedir avaliação ao cliente'**
+  String get planFeatureReviewRequest;
+
   /// No description provided for @planFeatureTeamRoles.
   ///
   /// In pt, this message translates to:

@@ -3472,6 +3472,7 @@
   "planFeatureBrandedPdf": "PDF sem a marca PraticOS",
   "planFeatureOwnChecklists": "Checklists próprios",
   "planFeatureCharges": "Cobrança e lembrete de pagamento",
+  "planFeatureReviewRequest": "Pedir avaliação ao cliente",
   "planFeatureTeamRoles": "Técnico, gerente e outros perfis",
   "planFeaturePerPersonAgenda": "Agenda e responsável por pessoa",
   "planFeatureWorkStages": "Etapas do serviço",

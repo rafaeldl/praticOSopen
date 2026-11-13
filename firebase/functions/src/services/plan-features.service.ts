@@ -22,6 +22,7 @@ export type PlanFeature =
   | 'brandedPdf'
   | 'ownChecklists'
   | 'charges'
+  | 'reviewRequest'
   | 'teamRoles'
   | 'perPersonAgenda'
   | 'workStages'

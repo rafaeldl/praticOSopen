@@ -7907,6 +7907,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planFeatureCharges => 'Payment requests and reminders';
 
   @override
+  String get planFeatureReviewRequest => 'Ask the customer for a review';
+
+  @override
   String get planFeatureTeamRoles => 'Technician, manager and other roles';
 
   @override

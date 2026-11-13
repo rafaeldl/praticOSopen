@@ -7928,6 +7928,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planFeatureCharges => 'Cobro y recordatorio de pago';
 
   @override
+  String get planFeatureReviewRequest => 'Pedir una valoración al cliente';
+
+  @override
   String get planFeatureTeamRoles => 'Técnico, gerente y otros perfiles';
 
   @override

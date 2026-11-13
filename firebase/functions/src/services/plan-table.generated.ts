@@ -135,7 +135,8 @@ export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRo
         "brandedPdf",
         "ownChecklists",
         "ai",
-        "charges"
+        "charges",
+        "reviewRequest"
       ]
     },
     "pro": {
@@ -164,6 +165,7 @@ export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRo
         "ownChecklists",
         "ai",
         "charges",
+        "reviewRequest",
         "teamRoles",
         "perPersonAgenda",
         "workStages",
@@ -199,6 +201,7 @@ export const PLAN_TABLES: Readonly<Record<string, Readonly<Record<PlanId, PlanRo
         "ownChecklists",
         "ai",
         "charges",
+        "reviewRequest",
         "teamRoles",
         "perPersonAgenda",
         "workStages",
