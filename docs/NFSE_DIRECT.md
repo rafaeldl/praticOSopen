@@ -507,7 +507,7 @@ Pedido (`companies/{cid}/private/nfse/chargeInvoices/{key}`, só servidor): `cha
 
 **Ligar**: o mesmo passo 1 de "Emitir nota sozinha" (`roles/eventarc.eventReceiver` para a `nfse-api@`); sem ele, o pedido sai só na rotina diária. Quem pede a nota é a funcionalidade que usa (hoje só a venda web, com a chave em `config/webCheckout`).
 
-**Ainda não**: nota automática quando a **cobrança Asaas de uma OS** é paga (o `autoIssue: paid` só existe no motor do Asaas). O ponto de extensão é este pedido com outra `source`; ver a issue de proposta.
+**Ainda não**: nota automática quando a **cobrança Asaas de uma OS** é paga (o `autoIssue: paid` só existe no motor do Asaas). O ponto de extensão é este pedido com outra `source`; issue #744.
 
 Testes: `services/nfse/__tests__/charge-invoice.service.test.ts` (pagamento → nota, idempotência, governo fora, recusa, estorno) e `services/web-billing/__tests__/web-billing.service.test.ts` (chave, pedido pelo webhook, estorno).
 
