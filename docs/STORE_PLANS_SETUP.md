@@ -85,8 +85,8 @@ e o anual do mesmo plano usam a mesma descrição.
 | Starter anual | Starter anual | Para quem trabalha sozinho e emite nota |
 | Pro mensal | Pro mensal | Para equipe pequena: até 5 pessoas |
 | Pro anual | Pro anual | Para equipe pequena: até 5 pessoas |
-| Business mensal | Business mensal | Para empresa: até 20 pessoas |
-| Business anual | Business anual | Para empresa: até 20 pessoas |
+| Business mensal | Business mensal | Para empresa: 20 pessoas incluídas |
+| Business anual | Business anual | Para empresa: 20 pessoas incluídas |
 
 **English (U.S.)**
 
@@ -96,8 +96,8 @@ e o anual do mesmo plano usam a mesma descrição.
 | Starter anual | Starter yearly | For those who work alone and issue invoices |
 | Pro mensal | Pro monthly | For a small team: up to 5 people |
 | Pro anual | Pro yearly | For a small team: up to 5 people |
-| Business mensal | Business monthly | For companies: up to 20 people |
-| Business anual | Business yearly | For companies: up to 20 people |
+| Business mensal | Business monthly | For companies: 20 people included |
+| Business anual | Business yearly | For companies: 20 people included |
 
 **Español (España)**
 
@@ -107,8 +107,8 @@ e o anual do mesmo plano usam a mesma descrição.
 | Starter anual | Starter anual | Para quien trabaja solo y emite factura |
 | Pro mensal | Pro mensual | Para equipo pequeño: hasta 5 personas |
 | Pro anual | Pro anual | Para equipo pequeño: hasta 5 personas |
-| Business mensal | Business mensual | Para empresas: hasta 20 personas |
-| Business anual | Business anual | Para empresas: hasta 20 personas |
+| Business mensal | Business mensual | Para empresas: 20 personas incluidas |
+| Business anual | Business anual | Para empresas: 20 personas incluidas |
 
 Nome de exibição do grupo (Localização do grupo de assinaturas), se pedir:
 `PraticOS` nos três idiomas.
@@ -177,7 +177,7 @@ mesmos textos.
 |---|---|---|
 | Starter | PraticOS Starter | Nota fiscal de serviço · PDF e recibo só com a sua marca · Checklists do seu jeito · Até 50 OS por mês e 2 pessoas |
 | Pro | PraticOS Pro | Tudo do Starter · Até 150 OS por mês e 5 pessoas · Agenda e permissões de cada pessoa · Etapas, painel na TV e contratos |
-| Business | PraticOS Business | Tudo do Pro · Até 500 OS por mês e 20 pessoas · Ações em várias OS de uma vez · Conexão com ChatGPT, Claude e API |
+| Business | PraticOS Business | Tudo do Pro · 20 pessoas e 500 OS/mês incluídas · Ações em várias OS de uma vez · Conexão com ChatGPT, Claude e API |
 
 Descrições: Starter "Para quem trabalha sozinho e emite nota", Pro "Para
 equipe pequena", Business "Para empresa".
@@ -188,7 +188,7 @@ equipe pequena", Business "Para empresa".
 |---|---|---|
 | Starter | PraticOS Starter | Service invoices (Brazil) · PDF and receipt with only your brand · Your own checklists · Up to 50 orders a month and 2 people |
 | Pro | PraticOS Pro | Everything in Starter · Up to 150 orders a month and 5 people · Schedule and roles for each person · Job stages, TV board and contracts |
-| Business | PraticOS Business | Everything in Pro · Up to 500 orders a month, 20 people · Actions on many orders at once · ChatGPT, Claude connection and API |
+| Business | PraticOS Business | Everything in Pro · 20 people, 500 orders/month included · Actions on many orders at once · ChatGPT, Claude connection and API |
 
 Descrições: Starter "For those who work alone and issue invoices", Pro "For a
 small team", Business "For companies".
@@ -199,7 +199,7 @@ small team", Business "For companies".
 |---|---|---|
 | Starter | PraticOS Starter | Factura de servicio (Brasil) · PDF y recibo solo con tu marca · Tus propios checklists · Hasta 50 órdenes al mes y 2 personas |
 | Pro | PraticOS Pro | Todo lo del Starter · Hasta 150 órdenes al mes y 5 personas · Agenda y permisos de cada persona · Etapas, panel en la TV y contratos |
-| Business | PraticOS Business | Todo lo del Pro · Hasta 500 órdenes al mes, 20 personas · Acciones en varias órdenes a la vez · Conexión con ChatGPT, Claude y API |
+| Business | PraticOS Business | Todo lo del Pro · 20 personas y 500 órdenes/mes incluidas · Acciones en varias órdenes a la vez · Conexión con ChatGPT, Claude y API |
 
 Descrições: Starter "Para quien trabaja solo y emite factura", Pro "Para un
 equipo pequeño", Business "Para empresas".
@@ -257,7 +257,7 @@ nunca digitado. Textos em pt, en e es:
   - Contratos
   - IA no financeiro e relatório em planilha
 - Business, "Para empresa". Tudo do Pro, mais:
-  - Até 500 OS por mês e 20 pessoas
+  - 20 pessoas e 500 OS por mês incluídas
   - Ações em várias OS de uma vez
   - Conexão com ChatGPT e Claude
   - API
@@ -285,7 +285,7 @@ nunca digitado. Textos em pt, en e es:
   - Contracts
   - AI in the financial tab and spreadsheet reports
 - Business, "For companies". Everything in Pro, plus:
-  - Up to 500 work orders a month and 20 people
+  - 20 people and 500 work orders a month included
   - Actions on many work orders at once
   - Connection to ChatGPT and Claude
   - API
@@ -311,7 +311,7 @@ nunca digitado. Textos em pt, en e es:
   - Contratos
   - IA en el financiero e informes en hoja de cálculo
 - Business, "Para empresas". Todo lo del Pro, y además:
-  - Hasta 500 órdenes al mes y 20 personas
+  - 20 personas y 500 órdenes al mes incluidas
   - Acciones en varias órdenes a la vez
   - Conexión con ChatGPT y Claude
   - API
