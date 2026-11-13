@@ -9,6 +9,13 @@ All paid features are sold only through In-App Purchase:
 - Paid plans are auto-renewable subscriptions sold through In-App Purchase, each one monthly or yearly: Starter, Pro and Business (subscription group "PraticOS", product IDs praticos_starter_monthly, praticos_starter_annual, praticos_pro_monthly, praticos_pro_annual, praticos_business_monthly, praticos_business_annual).
 - Paid plans cannot be bought anywhere else from the app: the app has no external purchase links or calls to action.
 
+What the demo account shows (new plan limits):
+
+The new plan limits are switched on for the demo account, which is on the Free plan. With it you will see:
+1. On the "Início" (Home) tab, tap the profile button at the top, then "Plano" (Plan). The screen shows the current plan (Free) and what is being used this month, for example "OS este mês" (work orders this month) out of 10, and people on the account out of 1.
+2. When the account gets close to 10 work orders in a month, the app shows a notice with the count. Going over in one month never blocks anything; if it happens again the next month, only the new work order waits for a plan change. Work orders already open always keep working.
+3. Paid features show the plan they belong to and a "Ver planos" (View plans) button that opens the In-App Purchase paywall.
+
 Where to find the paywall:
 1. Sign in with the demo account (steps below).
 2. On the "Início" (Home) tab, tap the profile button at the top.
@@ -23,7 +30,7 @@ The payment features in work orders let the professional record and charge their
 Signing in with the demo account:
 
 1. On the sign-in screen, tap "Já tenho conta com e-mail" (I already have an account with email) below the Apple and Google buttons.
-2. Enter the demo email and password.
+2. Enter the email and password from the Sign-In Information section of this review.
 3. Tap "Entrar" (Sign in).
 
 The demo account has fictional sample data: 6 customers with their vehicles, 8 work orders in every status (quote, approved, in progress, completed), a completed vehicle check-in checklist with photos, and payments in the "Financeiro" tab. All features can be tested with it.

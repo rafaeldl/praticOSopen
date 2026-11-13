@@ -79,7 +79,7 @@ Adicione ao arquivo `ios/fastlane/Appfile`:
 ```ruby
 # Credenciais para App Review
 ENV["FASTLANE_APPLE_DEMO_ACCOUNT_EMAIL"] = "demo@praticos.app"
-ENV["FASTLANE_APPLE_DEMO_ACCOUNT_PASSWORD"] = "Demo@2024!"
+ENV["FASTLANE_APPLE_DEMO_ACCOUNT_PASSWORD"] = "<senha da conta demo, fora do repositório>"
 ```
 
 ### Configuração do Deliver (metadata)
@@ -89,10 +89,9 @@ Crie o arquivo `ios/fastlane/metadata/review_information/demo_user.txt`:
 demo@praticos.app
 ```
 
-Crie o arquivo `ios/fastlane/metadata/review_information/demo_password.txt`:
-```
-Demo@2024!
-```
+A senha **não fica no repositório** (ele é público): preencha só no App Store Connect, em
+App Review > Sign-In Information. O arquivo `demo_password.txt` está no `.gitignore`;
+sem ele, o deliver não mexe na senha que já está no App Store Connect.
 
 Crie o arquivo `ios/fastlane/metadata/review_information/notes.txt`:
 ```

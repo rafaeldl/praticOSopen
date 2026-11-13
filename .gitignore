@@ -73,3 +73,6 @@ backend/bot/workspace/cron/runs/
 
 # Maestro visual tests - screenshots output
 .maestro/screenshots/
+
+# App Review demo password: only in App Store Connect, never in this public repo
+ios/fastlane/metadata/review_information/demo_password.txt

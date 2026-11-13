@@ -142,6 +142,24 @@ Nenhuma oferta introdutória nem teste grátis. A garantia de 7 dias (#728) não
 - O lane `Promote Release` do iOS envia sozinho para revisão e não anexa
   assinatura: anexar à mão no App Store Connect.
 
+### 1.8 Conta demo da revisão
+
+As notas da revisão descrevem o que o revisor vê na conta demo com os planos
+novos ligados: plano Grátis, "OS este mês" de 10 na tela Plano, o aviso perto
+do limite e o "Ver planos". Antes de enviar a versão:
+
+- Ligar a chave dos planos novos só para a empresa da conta demo
+  (`demo-pt@praticos.app`) e deixá-la no plano Grátis.
+- A senha **não fica no repositório**. Ela vai em dois lugares:
+  - App Store Connect > a versão > Informações para a revisão do app >
+    Informações de login (usuário e senha);
+  - segredo `APP_REVIEW_DEMO_PASSWORD` no GitHub (Settings > Secrets and
+    variables > Actions). O lane `promote` (e `release_store` /
+    `store_listing`) usa esse segredo ao subir os metadados e para com erro se
+    ele faltar, porque sem senha o fastlane marcaria "conta demo não
+    necessária". Rodando no seu Mac, basta o arquivo
+    `ios/fastlane/metadata/review_information/demo_password.txt` (fora do git).
+
 ## 2. Google Play Console
 
 Caminho: Play Console > PraticOS > Monetizar > Produtos > Assinaturas.
@@ -247,7 +265,6 @@ nunca digitado. Textos em pt, en e es:
   - Nota fiscal de serviço
   - PDF e recibo só com a sua marca
   - Checklists do seu jeito
-  - Pedido de avaliação ao cliente
   - Cobrança ao cliente
 - Pro, "Para equipe pequena". Tudo do Starter, mais:
   - Até 150 OS por mês e 5 pessoas
@@ -275,7 +292,6 @@ nunca digitado. Textos em pt, en e es:
   - Service invoices (Brazil)
   - PDF and receipt with only your brand
   - Your own checklists
-  - Rating requests to customers
   - Payment requests to customers
 - Pro, "For a small team". Everything in Starter, plus:
   - Up to 150 work orders a month and 5 people
@@ -301,7 +317,6 @@ nunca digitado. Textos em pt, en e es:
   - Factura de servicio (Brasil)
   - PDF y recibo solo con tu marca
   - Tus propios checklists
-  - Petición de valoración al cliente
   - Cobros al cliente
 - Pro, "Para un equipo pequeño". Todo lo del Starter, y además:
   - Hasta 150 órdenes al mes y 5 personas

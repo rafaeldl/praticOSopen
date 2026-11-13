@@ -60,6 +60,21 @@ platform :ios do
   # (9+) encerrar o app de proposito, e uma key de outra plataforma nao
   # funciona. Nesses casos (e sem key) a key nao entra no build: o app sai sem
   # RevenueCat (assinaturas desativadas) e o CI emite um alerta.
+  # Senha da conta demo da revisao da Apple. O repositorio e publico, entao ela
+  # nao fica em metadata/review_information/demo_password.txt (esta no .gitignore).
+  # Sem a senha, o deliver marca "conta demo nao necessaria" no App Store Connect;
+  # por isso, ao subir metadados, a senha vem do segredo APP_REVIEW_DEMO_PASSWORD
+  # (ou do arquivo local) e a lane para se nao houver nenhum dos dois.
+  def ensure_review_demo_password!
+    path = File.expand_path("metadata/review_information/demo_password.txt", __dir__)
+    password = ENV['APP_REVIEW_DEMO_PASSWORD'].to_s.strip
+    if !password.empty?
+      File.write(path, password)
+    elsif !File.exist?(path) || File.read(path).strip.empty?
+      UI.user_error!("APP_REVIEW_DEMO_PASSWORD nao definida: sem ela a revisao da Apple fica sem a conta demo. Defina o segredo ou use skip_metadata:true.")
+    end
+  end
+
   def revenuecat_dart_defines(env_name, expected_prefix)
     key = ENV[env_name].to_s.strip
     return ["--dart-define=#{env_name}=#{key}"] if key.start_with?(expected_prefix)
@@ -235,6 +250,7 @@ platform :ios do
     )
 
     # 🚀 Upload para App Store
+    ensure_review_demo_password! unless skip_metadata
     upload_to_app_store(
       force: true, # Pula confirmação de HTML preview
       skip_screenshots: skip_screenshots,
@@ -253,6 +269,7 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
+    ensure_review_demo_password! unless options[:skip_metadata]
     upload_to_app_store(
       force: true, # Pula confirmação de HTML preview
       skip_binary_upload: true,
@@ -322,6 +339,7 @@ platform :ios do
     # Step 1: Upload metadata and screenshots WITHOUT submitting
     # This allows time for screenshot processing
     UI.message("📤 Uploading metadata and screenshots...")
+    ensure_review_demo_password!
     begin
       upload_to_app_store(
         app_version: app_version,
