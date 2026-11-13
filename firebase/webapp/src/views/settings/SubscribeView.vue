@@ -44,6 +44,8 @@ const method = ref<WebBillingType>('CREDIT_CARD')
 const name = ref('')
 const taxId = ref('')
 const email = ref('')
+const postalCode = ref('')
+const addressNumber = ref('')
 const tried = ref(false)
 const sending = ref(false)
 const sendError = ref('')
@@ -87,6 +89,8 @@ const METHOD_TEXT: Record<WebBillingType, 'web.billing.methodCard' | 'web.billin
 const nameError = computed(() => (tried.value && name.value.trim().length < 2 ? t('web.billing.nameRequired') : ''))
 const taxIdError = computed(() => (tried.value && !isValidTaxId(normalizeTaxId(taxId.value)) ? t('web.billing.taxIdInvalid') : ''))
 const emailError = computed(() => (tried.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) ? t('web.billing.emailInvalid') : ''))
+const postalCodeError = computed(() => (tried.value && postalCode.value.replace(/\D/g, '').length !== 8 ? t('web.billing.postalCodeInvalid') : ''))
+const addressNumberError = computed(() => (tried.value && !addressNumber.value.trim() ? t('web.billing.addressNumberRequired') : ''))
 
 const status = computed(() => {
   const current = sub.value
@@ -123,7 +127,7 @@ async function load() {
 async function pay() {
   tried.value = true
   sendError.value = ''
-  if (nameError.value || taxIdError.value || emailError.value) return
+  if (nameError.value || taxIdError.value || emailError.value || postalCodeError.value || addressNumberError.value) return
   sending.value = true
   try {
     const { checkoutUrl } = await startCheckout({
@@ -133,6 +137,8 @@ async function pay() {
       name: name.value.trim(),
       taxId: normalizeTaxId(taxId.value),
       email: email.value.trim(),
+      postalCode: postalCode.value.replace(/\D/g, ''),
+      addressNumber: addressNumber.value.trim(),
     })
     window.location.assign(checkoutUrl)
   } catch (error) {
@@ -240,6 +246,18 @@ onMounted(load)
             <label class="field-label" for="billing-email">{{ t('web.billing.email') }}</label>
             <input id="billing-email" v-model="email" class="field" type="email" autocomplete="email" :aria-invalid="!!emailError" data-testid="billing-email" />
             <p v-if="emailError" class="field-error" role="alert">{{ emailError }}</p>
+            <div class="billing-address">
+              <div>
+                <label class="field-label" for="billing-cep">{{ t('web.billing.postalCode') }}</label>
+                <input id="billing-cep" v-model="postalCode" class="field" inputmode="numeric" autocomplete="postal-code" maxlength="9" :aria-invalid="!!postalCodeError" data-testid="billing-cep" />
+                <p v-if="postalCodeError" class="field-error" role="alert">{{ postalCodeError }}</p>
+              </div>
+              <div>
+                <label class="field-label" for="billing-number">{{ t('web.billing.addressNumber') }}</label>
+                <input id="billing-number" v-model="addressNumber" class="field" maxlength="20" :aria-invalid="!!addressNumberError" data-testid="billing-number" />
+                <p v-if="addressNumberError" class="field-error" role="alert">{{ addressNumberError }}</p>
+              </div>
+            </div>
             <p class="sub">{{ t('web.billing.invoiceHint') }}</p>
           </fieldset>
 
@@ -288,6 +306,8 @@ onMounted(load)
 .billing-option input, .billing-pill input { flex: none; width: 1.1rem; height: 1.1rem; accent-color: var(--color-accent); }
 .billing-pill { min-height: 2.75rem; }
 .billing-who .field-label { margin-top: 0.4rem; }
+.billing-address { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 8rem); gap: 0 0.75rem; }
+@media (max-width: 420px) { .billing-address { grid-template-columns: minmax(0, 1fr); } }
 .billing-guarantee p { margin: 0; }
 .set-status { margin: 0; font-weight: 600; }
 </style>

@@ -6,12 +6,12 @@ Issue #664, épico de planos #721. **Tudo desligado** até `config/webCheckout.e
 
 Quem usa o app web (`praticos.app/web`) pode assinar Starter, Pro ou Business sem instalar o app:
 
-1. O dono/admin abre **Ajustes → Plano → Assinar um plano**, escolhe plano, mensal ou anual, forma de pagamento (cartão, Pix ou boleto) e os dados da nota.
+1. O dono/admin abre **Ajustes → Plano → Assinar um plano**, escolhe plano, mensal ou anual, forma de pagamento (cartão, Pix ou boleto) e os dados da nota (nome, CPF/CNPJ, e-mail, CEP e número; o Asaas completa o endereço pelo CEP).
 2. O servidor cria o cliente e a **assinatura no Asaas da Rafsoft** (não a conta Asaas do técnico, que cobra a OS) e devolve a página de pagamento do Asaas.
 3. Quando o Asaas confirma o pagamento, o webhook dá à empresa um **entitlement promocional no RevenueCat** (`appUserID` = `companyId`, entitlement = plano) até o próximo vencimento + 5 dias de folga.
 4. O RevenueCat continua a **única fonte do plano**: `syncCompanySubscription` grava `companies/{id}.subscription` como sempre, agora com `store: 'web'`.
 
-O Asaas emite a NFS-e da Rafsoft a cada pagamento (configuração da conta, passo manual).
+O Asaas emite a NFS-e da Rafsoft a cada cobrança paga. Isso é configurado **por assinatura** (`POST /subscriptions/{id}/invoiceSettings`, emitida `ON_PAYMENT_CONFIRMATION`), não por uma chave da conta: o checkout faz isso logo depois de criar a assinatura, com o serviço e o ISS de `config/webCheckout.invoice` (`municipalServiceName` obrigatório, mais `municipalServiceId` ou `municipalServiceCode`, e `iss` em %). Sem essa configuração a venda segue sem nota (`invoiceSettings: 'off'` no registro e aviso no log); se o Asaas recusar, a venda também segue (`'failed'`, erro no log) e a nota é emitida à mão. O Asaas só aceita a configuração com e-mail, CEP e número do cliente (visto no sandbox), por isso o formulário pede os dois últimos.
 
 ## Arquitetura
 
@@ -153,8 +153,12 @@ O `scripts/web-checkout-sandbox-e2e.ts` cria o cliente e a assinatura, paga no s
 ## Passos manuais do dono (antes de ligar)
 
 1. **Segredos (antes do merge, senão o deploy das Functions falha):** `firebase functions:secrets:set ASAAS_BILLING_API_KEY` (chave da conta Asaas da Rafsoft; `$aact_hmlg_` testa no sandbox, `$aact_prod_` é produção) e `ASAAS_BILLING_WEBHOOK_TOKEN` (texto aleatório, o mesmo do passo 4). `REVENUECAT_SECRET_API_KEY` já existe; conferir que a chave `sk_` tem permissão de escrita de entitlements (grant/revoke promocional).
-2. **Estorno pela API no Asaas:** no sandbox, o estorno pedido pela API ficou em `AWAITING_CRITICAL_ACTION_AUTHORIZATION`, porque a conta exige autorização de ação crítica. Até alguém aprovar no painel, o dinheiro não volta e o `PAYMENT_REFUNDED` não chega, mas o plano já caiu para o Free na hora. Em produção, decidir entre aprovar cada estorno no painel ou liberar estornos pela API nas configurações de segurança/integrações do Asaas (por exemplo, com IP fixo). Isso vale para a garantia de 7 dias.
-3. **Conta Asaas da Rafsoft:** conferir taxas; ligar a emissão automática de NFS-e ao receber (serviço, alíquota do ISS, código municipal); e-mails de cobrança ao cliente ligados.
+2. **Estorno pela API no Asaas:** no sandbox, o estorno pedido pela API ficou em `AWAITING_CRITICAL_ACTION_AUTHORIZATION`: a conta trata estorno como evento crítico e pede o Token SMS. Até alguém aprovar no painel, o dinheiro não volta e o `PAYMENT_REFUNDED` não chega, mas o plano já caiu para o Free na hora. Na conta de produção (Integrações → Segurança) não há IP autorizado. Liberar estorno pela API exigiria IP fixo de saída nas Functions (Cloud NAT, com custo). Sem isso, o dono aprova cada estorno da garantia no painel ou no app do Asaas; com poucas vendas, é o caminho mais simples.
+3. **Conta Asaas da Rafsoft (revisada em 13/11 pelo painel):**
+   - **Taxas da conta:** cartão 2,99% + R$ 0,49 (recebe em 32 dias), Pix R$ 1,99, boleto R$ 1,99, NFS-e R$ 0,49; avisos de cobrança a partir de R$ 0,55 cada (o cliente é criado com avisos ligados).
+   - **Nota fiscal:** o serviço cadastrado hoje é "Suporte técnico em informática…" com ISS 2%. Para assinatura de software o usual é **1.05 / 01.05.01 – Licenciamento ou cessão de direito de uso de programas de computação**: decidir com o contador e gravar em `config/webCheckout.invoice` (nome e id do serviço como o Asaas lista, e o ISS).
+   - **Numeração da nota:** o Asaas emite pelo portal nacional, série 00001, próximo DPS 29. O PraticOS também emite notas da Rafsoft direto no governo (Piloto 1). Combinar com o contador uma série só para o Asaas, para os números não se cruzarem.
+   - **Dados da fatura:** conferir os dados comerciais (e-mail, telefone, endereço) que aparecem no topo da fatura.
 4. **Webhook no Asaas da Rafsoft:** URL `https://<api do southamerica-east1>/webhooks/asaas-billing`, token do passo 1, eventos `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `SUBSCRIPTION_DELETED`, `SUBSCRIPTION_INACTIVATED`.
 5. **Produtos anuais nas lojas:** o código mapeia `praticos_{starter,pro,business}_annual`, mas `docs/REVENUECAT_SETUP.md` só lista os mensais em produção. Criar os anuais (App Store + Play + offering do RevenueCat) antes de ligar `yearlyEnabled`.
 6. **Notas de revisão da Apple** (só no dia de ligar): em `ios/fastlane/metadata/review_information/notes.txt` e `ios/fastlane/Deliverfile`, trocar "Paid plans cannot be bought anywhere else…" por "All paid plans are available as In-App Purchase; the app has no external purchase links or calls to action." Revogar em `docs/SUBSCRIPTION.md` as regras "Never add another way to pay for a plan" e "The website shows no prices".

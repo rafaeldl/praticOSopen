@@ -284,6 +284,33 @@ export interface AsaasCreateSubscriptionInput {
   externalReference: string;
 }
 
+/**
+ * POST /subscriptions/{id}/invoiceSettings: the NFS-e Asaas issues for each
+ * charge of the subscription. Without it no invoice is issued (it is per
+ * subscription, not an account switch).
+ */
+export interface AsaasSubscriptionInvoiceSettingsInput {
+  municipalServiceId?: string;
+  municipalServiceCode?: string;
+  municipalServiceName?: string;
+  effectiveDatePeriod: 'ON_PAYMENT_CONFIRMATION';
+  receivedOnly: boolean;
+  deductions: number;
+  updatePayment: boolean;
+  observations?: string;
+  taxes: {
+    retainIss: boolean;
+    iss: number;
+    pis: number;
+    cofins: number;
+    csll: number;
+    inss: number;
+    ir: number;
+    federalServiceTaxCode?: string;
+    nbsCode?: string;
+  };
+}
+
 export interface AsaasSubscription {
   id: string;
   customer: string;

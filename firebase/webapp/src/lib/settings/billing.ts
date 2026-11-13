@@ -46,6 +46,9 @@ export interface CheckoutBody {
   name: string
   taxId: string
   email: string
+  /** CEP (8 digits) and number: Asaas needs the address to issue the NFS-e. */
+  postalCode: string
+  addressNumber: string
 }
 
 export const loadBilling = () => api<WebBillingView>('/v1/app/billing')

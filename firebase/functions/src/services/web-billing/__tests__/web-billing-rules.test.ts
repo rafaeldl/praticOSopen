@@ -3,6 +3,7 @@ import {
   applyWebOrigin,
   checkoutBlock,
   decideBillingAction,
+  invoiceSettingsFor,
   parseWebCheckoutConfig,
   periodEndOf,
   refundEligible,
@@ -74,6 +75,7 @@ describe('config and offer', () => {
       enabled: false,
       yearlyEnabled: false,
       billingTypes: { monthly: ['CREDIT_CARD'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
+      invoice: null,
     });
   });
 
@@ -94,6 +96,36 @@ describe('config and offer', () => {
       { monthly: 249.9, yearly: 2499 },
     ]);
     expect(both.guaranteeDays).toBe(7);
+  });
+
+  it('invoice config: service name with its id or code, and an ISS rate; anything else is off', () => {
+    const name = 'Licenciamento de programas';
+    expect(parseWebCheckoutConfig({}).invoice).toBeNull();
+    expect(parseWebCheckoutConfig({ invoice: { municipalServiceId: 'svc_1', municipalServiceName: name } }).invoice).toBeNull();
+    expect(parseWebCheckoutConfig({ invoice: { municipalServiceId: 'svc_1', iss: 2 } }).invoice).toBeNull();
+    expect(parseWebCheckoutConfig({ invoice: { municipalServiceName: name, iss: 2 } }).invoice).toBeNull();
+    expect(parseWebCheckoutConfig({ invoice: { municipalServiceId: 'svc_1', municipalServiceName: name, iss: 40 } }).invoice).toBeNull();
+    expect(parseWebCheckoutConfig({ invoice: { municipalServiceId: ' svc_1 ', municipalServiceName: name, iss: 2, observations: '' } }).invoice).toEqual({
+      municipalServiceId: 'svc_1',
+      iss: 2,
+      municipalServiceCode: undefined,
+      municipalServiceName: name,
+      federalServiceTaxCode: undefined,
+      nbsCode: undefined,
+      observations: undefined,
+    });
+  });
+
+  it('invoice settings: one NFS-e per paid charge, no retention, only the fields given', () => {
+    expect(invoiceSettingsFor({ municipalServiceCode: '1.05', municipalServiceName: 'Licenciamento', iss: 2, nbsCode: '1.1502' })).toEqual({
+      municipalServiceCode: '1.05',
+      municipalServiceName: 'Licenciamento',
+      effectiveDatePeriod: 'ON_PAYMENT_CONFIRMATION',
+      receivedOnly: true,
+      deductions: 0,
+      updatePayment: false,
+      taxes: { retainIss: false, iss: 2, pis: 0, cofins: 0, csll: 0, inss: 0, ir: 0, nbsCode: '1.1502' },
+    });
   });
 });
 

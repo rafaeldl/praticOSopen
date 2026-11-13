@@ -4,7 +4,7 @@
  * buying in the app (PaywallLauncher.canPurchase).
  *
  * - GET  /         offer (only when config/webCheckout.enabled), guard and the web subscription;
- * - POST /checkout { plan, cycle, billingType, name, taxId, email } → { checkoutUrl };
+ * - POST /checkout { plan, cycle, billingType, name, taxId, email, postalCode, addressNumber } → { checkoutUrl };
  * - POST /cancel   { refund?: boolean } → { status }.
  */
 
@@ -31,6 +31,9 @@ const checkoutSchema = z.object({
   name: z.string().trim().min(2).max(200),
   taxId: z.string().trim().min(11).max(32),
   email: z.string().trim().email().max(200),
+  // Asaas needs the address to issue the NFS-e; it fills street and city from the CEP.
+  postalCode: z.string().trim().min(8).max(10),
+  addressNumber: z.string().trim().min(1).max(20),
 });
 
 const cancelSchema = z.object({ refund: z.boolean().optional() });

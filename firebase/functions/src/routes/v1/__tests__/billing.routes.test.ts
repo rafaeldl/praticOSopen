@@ -15,7 +15,7 @@ import { WebBillingError, billingOverview, cancelWebSubscription, startCheckout 
 import { createBillingRouter } from '../billing.routes';
 
 const DEPS = { marker: 'deps' } as never;
-const BODY = { plan: 'pro', cycle: 'monthly', billingType: 'CREDIT_CARD', name: 'Oficina', taxId: '11222333000181', email: 'a@example.com' };
+const BODY = { plan: 'pro', cycle: 'monthly', billingType: 'CREDIT_CARD', name: 'Oficina', taxId: '11222333000181', email: 'a@example.com', postalCode: '88015-100', addressNumber: '100' };
 
 function app(role: string, deps: unknown = DEPS) {
   const server = express();
@@ -48,6 +48,7 @@ describe('/v1/app/billing', () => {
 
   it('checkout validates the body and passes the company and user', async () => {
     expect((await request(app('owner')).post('/v1/app/billing/checkout').send({ ...BODY, plan: 'free' })).status).toBe(400);
+    expect((await request(app('owner')).post('/v1/app/billing/checkout').send({ ...BODY, postalCode: undefined })).status).toBe(400);
     (startCheckout as jest.Mock).mockResolvedValue({ checkoutUrl: 'https://sandbox.asaas.com/i/1' });
     const res = await request(app('owner')).post('/v1/app/billing/checkout').send(BODY);
     expect(res.body.data).toEqual({ checkoutUrl: 'https://sandbox.asaas.com/i/1' });

@@ -7,6 +7,7 @@
  */
 
 import type { Subscription, SubscriptionPlan, SubscriptionStatus, SubscriptionStore } from '../../models/types';
+import type { AsaasSubscriptionInvoiceSettingsInput } from '../../models/asaas.types';
 import type { RcSubscriber } from '../revenuecat.client';
 import type { ResolvedSubscriptionState } from '../subscription-plans';
 
@@ -48,6 +49,72 @@ export interface WebCheckoutConfig {
   yearlyEnabled: boolean;
   /** Payment methods offered per cycle. */
   billingTypes: Record<WebCycle, WebBillingType[]>;
+  /** Rafsoft's NFS-e for each charge; null = no invoice settings (logged). */
+  invoice: WebInvoiceConfig | null;
+}
+
+/**
+ * config/webCheckout.invoice: the service and ISS of Rafsoft's NFS-e, decided
+ * with the accountant (docs/WEB_CHECKOUT.md). The service is one Asaas lists
+ * for the city (GET /invoices/municipalServices): its name, plus its id or
+ * code. Asaas refuses the settings without the name (seen in the sandbox).
+ */
+export interface WebInvoiceConfig {
+  municipalServiceId?: string;
+  municipalServiceCode?: string;
+  municipalServiceName: string;
+  /** ISS rate in percent (e.g. 2). */
+  iss: number;
+  federalServiceTaxCode?: string;
+  nbsCode?: string;
+  observations?: string;
+}
+
+function parseInvoiceConfig(raw: unknown): WebInvoiceConfig | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const data = raw as Record<string, unknown>;
+  const text = (key: string) => (typeof data[key] === 'string' && (data[key] as string).trim() ? (data[key] as string).trim() : undefined);
+  const iss = typeof data.iss === 'number' && Number.isFinite(data.iss) && data.iss >= 0 && data.iss <= 5 ? data.iss : null;
+  const id = text('municipalServiceId');
+  const code = text('municipalServiceCode');
+  const name = text('municipalServiceName');
+  if (iss === null || !name || (!id && !code)) return null;
+  return {
+    municipalServiceId: id,
+    municipalServiceCode: id ? undefined : code,
+    municipalServiceName: name,
+    iss,
+    federalServiceTaxCode: text('federalServiceTaxCode'),
+    nbsCode: text('nbsCode'),
+    observations: text('observations'),
+  };
+}
+
+/** Body of POST /subscriptions/{id}/invoiceSettings: one NFS-e per paid charge, no retention. */
+export function invoiceSettingsFor(invoice: WebInvoiceConfig): AsaasSubscriptionInvoiceSettingsInput {
+  const defined = <T extends object>(value: T) =>
+    Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
+  return defined({
+    municipalServiceId: invoice.municipalServiceId,
+    municipalServiceCode: invoice.municipalServiceCode,
+    municipalServiceName: invoice.municipalServiceName,
+    effectiveDatePeriod: 'ON_PAYMENT_CONFIRMATION' as const,
+    receivedOnly: true,
+    deductions: 0,
+    updatePayment: false,
+    observations: invoice.observations,
+    taxes: defined({
+      retainIss: false,
+      iss: invoice.iss,
+      pis: 0,
+      cofins: 0,
+      csll: 0,
+      inss: 0,
+      ir: 0,
+      federalServiceTaxCode: invoice.federalServiceTaxCode,
+      nbsCode: invoice.nbsCode,
+    }),
+  });
 }
 
 export function parseWebCheckoutConfig(data: Record<string, unknown> | null | undefined): WebCheckoutConfig {
@@ -60,6 +127,7 @@ export function parseWebCheckoutConfig(data: Record<string, unknown> | null | un
     enabled: data?.enabled === true,
     yearlyEnabled: data?.yearlyEnabled === true,
     billingTypes: { monthly: pick('monthly'), yearly: pick('yearly') },
+    invoice: parseInvoiceConfig(data?.invoice),
   };
 }
 
@@ -110,6 +178,8 @@ export interface WebBillingRecord {
   asaasSubscriptionId: string;
   /** Invoice page of the first charge (where the customer pays). */
   checkoutUrl?: string;
+  /** NFS-e settings of the Asaas subscription: ok, failed (logged) or off (no config/webCheckout.invoice). */
+  invoiceSettings?: 'ok' | 'failed' | 'off';
   createdAt: string;
   createdBy: string;
   /** First confirmed payment: starts the 7-day guarantee. */

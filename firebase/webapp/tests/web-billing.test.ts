@@ -84,7 +84,7 @@ describe('checkout form', () => {
 
   test('calls the billing API', async () => {
     apiMock.mockResolvedValue({ checkoutUrl: 'https://sandbox.asaas.com/i/1' })
-    const body = { plan: 'pro' as const, cycle: 'monthly' as const, billingType: 'CREDIT_CARD' as const, name: 'X', taxId: '11222333000181', email: 'a@b.co' }
+    const body = { plan: 'pro' as const, cycle: 'monthly' as const, billingType: 'CREDIT_CARD' as const, name: 'X', taxId: '11222333000181', email: 'a@b.co', postalCode: '88015100', addressNumber: '100' }
     await startCheckout(body)
     expect(apiMock).toHaveBeenCalledWith('/v1/app/billing/checkout', { method: 'POST', body })
     await cancelBilling(true)

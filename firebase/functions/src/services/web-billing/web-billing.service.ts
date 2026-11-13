@@ -22,6 +22,7 @@ import {
   WEB_PRICES,
   checkoutBlock,
   decideBillingAction,
+  invoiceSettingsFor,
   parseWebCheckoutConfig,
   refundEligible,
   saoPauloDate,
@@ -40,7 +41,9 @@ type BillingAsaasClient = Pick<
   AsaasClient,
   | 'findCustomerByExternalReference'
   | 'createCustomer'
+  | 'updateCustomer'
   | 'createSubscription'
+  | 'createSubscriptionInvoiceSettings'
   | 'listSubscriptionPayments'
   | 'deleteSubscription'
   | 'refundPayment'
@@ -146,6 +149,9 @@ export interface CheckoutInput {
   name: string;
   taxId: string;
   email: string;
+  /** CEP and number: Asaas fills the rest of the address, needed for the NFS-e. */
+  postalCode: string;
+  addressNumber: string;
 }
 
 function asaasError(error: unknown): never {
@@ -178,6 +184,9 @@ export async function startCheckout(
   }
   const taxId = normalizeTaxId(input.taxId);
   if (!isValidTaxId(taxId)) throw new WebBillingError('VALIDATION_ERROR', 400, 'Invalid CPF/CNPJ');
+  const postalCode = input.postalCode.replace(/\D/g, '');
+  const addressNumber = input.addressNumber.trim();
+  if (postalCode.length !== 8 || !addressNumber) throw new WebBillingError('VALIDATION_ERROR', 400, 'Invalid address');
 
   const [{ subscription, country }, record] = await Promise.all([readCompany(companyId), readWebBilling(companyId)]);
   const block = checkoutBlock(subscription, record, now, country);
@@ -202,14 +211,19 @@ export async function startCheckout(
     }
 
     const reference = `praticos-company:${companyId}`;
-    const customer =
+    const contact = { email: input.email.trim(), postalCode, addressNumber };
+    const existing =
       // A sandbox customer id means nothing in production (and the other way round).
       (record?.asaasCustomerId && record.environment === deps.environment ? { id: record.asaasCustomerId } : null) ??
-      (await deps.asaas.findCustomerByExternalReference(reference)) ??
+      (await deps.asaas.findCustomerByExternalReference(reference));
+    // A returning customer gets the e-mail and address typed now: the NFS-e uses them.
+    if (existing) await deps.asaas.updateCustomer(existing.id, contact);
+    const customer =
+      existing ??
       (await deps.asaas.createCustomer({
         name: input.name.trim(),
         cpfCnpj: taxId,
-        email: input.email.trim(),
+        ...contact,
         externalReference: reference,
         // Asaas e-mails the invoices and the Rafsoft NFS-e.
         notificationDisabled: false,
@@ -229,6 +243,26 @@ export async function startCheckout(
     const first = payments.find((payment) => payment.invoiceUrl);
     if (!first) throw new WebBillingError('ASAAS_UNAVAILABLE', 502, 'Asaas did not create the first charge');
 
+    // Rafsoft's NFS-e for each paid charge. Set per subscription in Asaas; a
+    // failure here never blocks the sale (the note can be issued by hand).
+    let invoiceSettings: WebBillingRecord['invoiceSettings'] = 'off';
+    if (config.invoice) {
+      try {
+        await deps.asaas.createSubscriptionInvoiceSettings(created.id, invoiceSettingsFor(config.invoice));
+        invoiceSettings = 'ok';
+      } catch (error) {
+        invoiceSettings = 'failed';
+        console.error('[WebBilling] invoice settings failed', {
+          companyId,
+          subscriptionId: created.id,
+          status: (error as { status?: number }).status ?? null,
+          codes: ((error as { errors?: { code?: string }[] }).errors ?? []).map((e) => e.code),
+        });
+      }
+    } else {
+      console.warn('[WebBilling] config/webCheckout.invoice missing: no NFS-e for this subscription', { companyId });
+    }
+
     const nowIso = now.toISOString();
     const next: WebBillingRecord = {
       status: 'pending',
@@ -240,6 +274,7 @@ export async function startCheckout(
       asaasCustomerId: customer.id,
       asaasSubscriptionId: created.id,
       checkoutUrl: first.invoiceUrl,
+      invoiceSettings,
       createdAt: nowIso,
       createdBy: userId,
       updatedAt: nowIso,

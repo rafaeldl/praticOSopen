@@ -98,9 +98,13 @@ test('assinar: plano, anual com Pix, garantia de 7 dias e ida para a página do 
   await page.getByTestId('billing-taxid').fill('123')
   await page.getByTestId('billing-pay').click()
   await expect(page.getByText('Esse CPF ou CNPJ não está certo.')).toBeVisible()
+  await expect(page.getByText('Esse CEP não está certo.')).toBeVisible()
+  await expect(page.getByText('Falta o número do endereço.')).toBeVisible()
   await page.getByTestId('billing-name').fill('Oficina Gama Ltda')
   await page.getByTestId('billing-taxid').fill('11.222.333/0001-81')
   await page.getByTestId('billing-email').fill('financeiro@example.com')
+  await page.getByTestId('billing-cep').fill('88015-100')
+  await page.getByTestId('billing-number').fill('100')
   await shot(page, '2-assinar-anual-pix')
 
   await page.getByTestId('billing-pay').click()
@@ -112,6 +116,8 @@ test('assinar: plano, anual com Pix, garantia de 7 dias e ida para a página do 
     name: 'Oficina Gama Ltda',
     taxId: '11222333000181',
     email: 'financeiro@example.com',
+    postalCode: '88015100',
+    addressNumber: '100',
   })
 })
 

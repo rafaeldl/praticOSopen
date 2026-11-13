@@ -74,9 +74,13 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
     // Only a test app user, never a real company: refuse one with store purchases.
     const subs = Object.values((await subscriber()).subscriptions ?? {}) as { store?: string }[]
     if (subs.some((s) => (s.store ?? '').toLowerCase() !== 'promotional')) throw new Error(`${COMPANY_W} tem compra de loja`)
+    // NFS-e of the sandbox account: the "Licenciamento" service Asaas lists for its city.
+    const [service] = (await asaas('GET', '/invoices/municipalServices?description=Licenciamento&limit=1')).data ?? []
+    if (!service) throw new Error('sandbox sem serviço municipal de licenciamento')
     await db().doc('config/webCheckout').set({
       enabled: true,
       yearlyEnabled: true,
+      invoice: { municipalServiceId: service.id, municipalServiceName: service.description, iss: 2 },
       // Pix in the monthly plan too, so the sandbox can confirm the payment without a card form.
       billingTypes: { monthly: ['CREDIT_CARD', 'PIX'], yearly: ['PIX', 'BOLETO', 'CREDIT_CARD'] },
     })
@@ -102,6 +106,8 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
     await page.getByTestId('billing-name').fill('Oficina Teste Sandbox')
     await page.getByTestId('billing-taxid').fill('11.222.333/0001-81')
     await page.getByTestId('billing-email').fill('sandbox@example.com')
+    await page.getByTestId('billing-cep').fill('88015-100')
+    await page.getByTestId('billing-number').fill('100')
     await shot(page, 'sandbox-1-checkout')
     await page.getByTestId('billing-pay').click()
     await page.waitForURL(/sandbox\.asaas\.com\/i\//, { timeout: 60_000 })
@@ -113,6 +119,9 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
     const subscriptionId = pending.asaasSubscriptionId as string
     const subscription = await asaas('GET', `/subscriptions/${subscriptionId}`)
     expect(subscription).toMatchObject({ value: 119.9, cycle: 'MONTHLY', billingType: 'PIX', externalReference: COMPANY_W })
+    // Rafsoft's NFS-e is set on the subscription, issued when each charge is paid.
+    expect(pending.invoiceSettings).toBe('ok')
+    expect(await asaas('GET', `/subscriptions/${subscriptionId}/invoiceSettings`)).toMatchObject({ invoiceCreationPeriod: 'ON_PAYMENT_CONFIRMATION' })
 
     // 2. Pay in the sandbox; the webhook grants Pro (promotional) and the sync writes store 'web'.
     const [first] = (await asaas('GET', `/subscriptions/${subscriptionId}/payments`)).data
@@ -154,7 +163,7 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
       const again = await fetch(`${API}/v1/app/billing/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'X-Company-Id': COMPANY_W },
-        body: JSON.stringify({ plan: 'business', cycle: 'monthly', billingType: 'PIX', name: 'Oficina Teste Sandbox', taxId: '11222333000181', email: 'sandbox@example.com' }),
+        body: JSON.stringify({ plan: 'business', cycle: 'monthly', billingType: 'PIX', name: 'Oficina Teste Sandbox', taxId: '11222333000181', email: 'sandbox@example.com', postalCode: '88015100', addressNumber: '100' }),
       })
       expect(again.status).toBe(409)
       expect((await again.json()).error.code).toBe('WEB_SUBSCRIPTION_ACTIVE')
@@ -178,6 +187,7 @@ test.describe('assinatura pela web no sandbox do Asaas', () => {
     expect(await webhook('PAYMENT_REFUNDED', refunded)).toBe('done')
     expect(await webhook('SUBSCRIPTION_DELETED', { ...refunded, subscription: subscriptionId })).not.toBe('duplicate')
     expect(await activeEntitlements()).toEqual([])
-    console.log(`sandbox: assinatura ${subscriptionId}, cobrança ${first.id} ${refunded.status} após o reembolso`)
+    const invoices = (await asaas('GET', `/invoices?payment=${first.id}`)).data ?? []
+    console.log(`sandbox: assinatura ${subscriptionId}, cobrança ${first.id} ${refunded.status} após o reembolso; notas: ${invoices.map((i: { status: string }) => i.status).join(',') || 'nenhuma'}`)
   })
 })

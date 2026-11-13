@@ -6,6 +6,7 @@
 import {
   AsaasAccountInfo,
   AsaasCreateCustomerInput,
+  AsaasSubscriptionInvoiceSettingsInput,
   AsaasCreateInvoiceInput,
   AsaasCreatePaymentInput,
   AsaasCreateWebhookInput,
@@ -152,6 +153,11 @@ export class AsaasClient {
   /** POST /subscriptions without card data: the customer pays on the invoice page. */
   createSubscription(input: AsaasCreateSubscriptionInput): Promise<AsaasSubscription> {
     return this.request<AsaasSubscription>('POST', '/subscriptions', input);
+  }
+
+  /** POST /subscriptions/{id}/invoiceSettings: NFS-e for every charge of the subscription. */
+  createSubscriptionInvoiceSettings(id: string, input: AsaasSubscriptionInvoiceSettingsInput): Promise<unknown> {
+    return this.request<unknown>('POST', `/subscriptions/${encodeURIComponent(id)}/invoiceSettings`, input);
   }
 
   getSubscription(id: string): Promise<AsaasSubscription> {

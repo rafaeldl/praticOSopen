@@ -27,13 +27,17 @@ const INPUT: CheckoutInput = {
   name: 'Oficina Teste',
   taxId: '11.222.333/0001-81',
   email: 'teste@example.com',
+  postalCode: '88015-100',
+  addressNumber: '100',
 };
 
 function deps(overrides: Partial<WebBillingDeps['asaas']> = {}) {
   const asaas = {
     findCustomerByExternalReference: jest.fn().mockResolvedValue(null),
     createCustomer: jest.fn().mockResolvedValue({ id: 'cus_1', name: 'Oficina Teste' }),
+    updateCustomer: jest.fn().mockResolvedValue({ id: 'cus_1' }),
     createSubscription: jest.fn().mockResolvedValue({ id: 'sub_1', status: 'ACTIVE' }),
+    createSubscriptionInvoiceSettings: jest.fn().mockResolvedValue({}),
     listSubscriptionPayments: jest.fn().mockResolvedValue([{ id: 'pay_1', invoiceUrl: 'https://sandbox.asaas.com/i/pay_1' }]),
     deleteSubscription: jest.fn().mockResolvedValue(undefined),
     refundPayment: jest.fn().mockResolvedValue({ id: 'pay_1', status: 'REFUNDED' }),
@@ -147,7 +151,13 @@ describe('startCheckout', () => {
     const d = deps();
     await expect(startCheckout('c1', 'u1', INPUT, d)).resolves.toEqual({ checkoutUrl: 'https://sandbox.asaas.com/i/pay_1' });
     expect(d.asaas.createCustomer).toHaveBeenCalledWith(
-      expect.objectContaining({ cpfCnpj: '11222333000181', externalReference: 'praticos-company:c1', notificationDisabled: false }),
+      expect.objectContaining({
+        cpfCnpj: '11222333000181',
+        externalReference: 'praticos-company:c1',
+        notificationDisabled: false,
+        postalCode: '88015100',
+        addressNumber: '100',
+      }),
     );
     expect(d.asaas.createSubscription).toHaveBeenCalledWith({
       customer: 'cus_1',
@@ -160,6 +170,39 @@ describe('startCheckout', () => {
     });
     expect(recordOf()).toMatchObject({ status: 'pending', plan: 'pro', asaasSubscriptionId: 'sub_1', createdBy: 'u1' });
     expect(fake.read('webBillingSubscriptions/sub_1')).toMatchObject({ companyId: 'c1' });
+  });
+
+  it('sets up the Rafsoft NFS-e on the subscription from config/webCheckout.invoice', async () => {
+    fake.seed('config/webCheckout', { enabled: true, invoice: { municipalServiceId: 'svc_1', municipalServiceName: 'Licenciamento', iss: 2 } });
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscriptionInvoiceSettings).toHaveBeenCalledWith(
+      'sub_1',
+      expect.objectContaining({
+        municipalServiceId: 'svc_1',
+        effectiveDatePeriod: 'ON_PAYMENT_CONFIRMATION',
+        receivedOnly: true,
+        taxes: expect.objectContaining({ iss: 2, retainIss: false }),
+      }),
+    );
+    expect(recordOf()).toMatchObject({ invoiceSettings: 'ok' });
+  });
+
+  it('no invoice config: sells, without NFS-e settings, and says so', async () => {
+    seedCompany();
+    const d = deps();
+    await startCheckout('c1', 'u1', INPUT, d);
+    expect(d.asaas.createSubscriptionInvoiceSettings).not.toHaveBeenCalled();
+    expect(recordOf()).toMatchObject({ status: 'pending', invoiceSettings: 'off' });
+  });
+
+  it('a failure setting up the NFS-e never blocks the sale', async () => {
+    fake.seed('config/webCheckout', { enabled: true, invoice: { municipalServiceId: 'svc_1', municipalServiceName: 'Licenciamento', iss: 2 } });
+    seedCompany();
+    const d = deps({ createSubscriptionInvoiceSettings: jest.fn().mockRejectedValue(Object.assign(new Error('x'), { status: 400 })) });
+    await expect(startCheckout('c1', 'u1', INPUT, d)).resolves.toEqual({ checkoutUrl: 'https://sandbox.asaas.com/i/pay_1' });
+    expect(recordOf()).toMatchObject({ status: 'pending', invoiceSettings: 'failed' });
   });
 
   it('yearly with Pix when on sale', async () => {
@@ -181,7 +224,17 @@ describe('startCheckout', () => {
     await startCheckout('c1', 'u1', { ...INPUT, plan: 'starter' }, other);
     expect(other.asaas.deleteSubscription).toHaveBeenCalledWith('sub_1');
     expect(other.asaas.createCustomer).not.toHaveBeenCalled();
+    // The customer is reused with the e-mail and address typed now (the NFS-e uses them).
+    expect(other.asaas.updateCustomer).toHaveBeenCalledWith('cus_1', { email: 'teste@example.com', postalCode: '88015100', addressNumber: '100' });
     expect(recordOf()).toMatchObject({ plan: 'starter', value: 59.9, asaasSubscriptionId: 'sub_2' });
+  });
+
+  it('CEP with other than 8 digits or no number is refused before Asaas', async () => {
+    seedCompany();
+    const d = deps();
+    await expect(startCheckout('c1', 'u1', { ...INPUT, postalCode: '8801' }, d)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect(startCheckout('c1', 'u1', { ...INPUT, addressNumber: ' ' }, d)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(d.asaas.createCustomer).not.toHaveBeenCalled();
   });
 
   it('Asaas refusing the data is a validation error', async () => {
