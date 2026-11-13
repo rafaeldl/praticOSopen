@@ -413,8 +413,9 @@ export const scheduledContractOrders = onSchedule(
 // ============================================================================
 
 /**
- * Limits new Firebase Auth users per IP (services/signup-guard.service.ts):
- * at most SIGNUP_LIMIT_PER_IP a day from the same IP.
+ * Refuses new Firebase Auth users (services/signup-guard.service.ts): an
+ * e-mail listed in config/signup.blockedEmails, or more than
+ * SIGNUP_LIMIT_PER_IP a day from the same IP.
  *
  * Context: a Google Ads campaign generated bot signups (issue #191). The old
  * e-mail rule (`firstname.NNNN@gmail.com`) was removed: it also refused real
@@ -426,8 +427,19 @@ export const blockSuspiciousSignups = beforeUserCreated(
   { region: 'southamerica-east1' },
   async (event) => {
     const { HttpsError } = await import('firebase-functions/v2/https');
-    const { isSignupRateLimited } = await import('./services/signup-guard.service');
+    const { isEmailBlocked, isSignupRateLimited } = await import('./services/signup-guard.service');
     const ipAddress = event.ipAddress || '';
+
+    let emailBlocked = false;
+    try {
+      emailBlocked = await isEmailBlocked(db as any, event.data?.email || '');
+    } catch (err) {
+      console.error('[blockSuspiciousSignups] Blocked e-mail check error (allowing signup):', err);
+    }
+    if (emailBlocked) {
+      console.warn('[blockSuspiciousSignups] Blocked e-mail (config/signup)', { ip: ipAddress, uid: event.data?.uid });
+      throw new HttpsError('permission-denied', 'Signup not allowed');
+    }
 
     let blocked = false;
     try {

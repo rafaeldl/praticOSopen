@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { FakeFirestore } from '../__tests__/helpers/fake-firestore';
-import { SIGNUP_LIMIT_PER_IP, SIGNUP_WINDOW_MS, isSignupRateLimited, nextSignupWindow } from './signup-guard.service';
+import { SIGNUP_LIMIT_PER_IP, SIGNUP_WINDOW_MS, isEmailBlocked, isSignupRateLimited, nextSignupWindow } from './signup-guard.service';
 
 describe('signup guard', () => {
   test('no e-mail rule: name.year@gmail.com is a real person (joao.1985@gmail.com)', () => {
@@ -46,5 +46,14 @@ describe('signup guard', () => {
     expect(nextSignupWindow(undefined, 10)).toEqual({ blocked: false, next: { count: 1, windowStart: 10 } });
     expect(nextSignupWindow({ count: 19, windowStart: 0 }, 10)).toEqual({ blocked: false, next: { count: 20, windowStart: 0 } });
     expect(nextSignupWindow({ count: 20, windowStart: 0 }, 10)).toEqual({ blocked: true });
+  });
+
+  test('only the e-mails listed in config/signup are refused, one by one', async () => {
+    const db = new FakeFirestore();
+    await expect(isEmailBlocked(db as any, 'joao.1985@gmail.com')).resolves.toBe(false);
+    db.docs.set('config/signup', { blockedEmails: ['Robo.12345@gmail.com'] });
+    await expect(isEmailBlocked(db as any, ' robo.12345@GMAIL.com ')).resolves.toBe(true);
+    await expect(isEmailBlocked(db as any, 'joao.1985@gmail.com')).resolves.toBe(false);
+    await expect(isEmailBlocked(db as any, '')).resolves.toBe(false);
   });
 });

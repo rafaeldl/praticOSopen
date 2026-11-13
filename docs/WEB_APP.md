@@ -168,7 +168,7 @@ O lançamento tem três chaves, nesta ordem:
 
 1. `config/webApp.open = true` (`npm run webapp:access -- --open`): qualquer conta Google ou Apple entra; conta nova cai no primeiro acesso.
 2. `flags.webSignup = true` em `firebase/hosting/src/_data/site.json`: no computador, o botão principal do site vira "Criar conta grátis" e leva a `/web/login?signup=1`; no celular continua levando às lojas. O site decide pelo navegador (`html[data-device]`, `partials/head.njk`; iPad conta como celular).
-3. Conferir o limite de cadastros: `blockSuspiciousSignups` aceita até 20 contas novas por IP por dia (`services/signup-guard.service.ts`), sem regra de formato de e-mail.
+3. Conferir o limite de cadastros: `blockSuspiciousSignups` aceita até 20 contas novas por IP por dia (`services/signup-guard.service.ts`), sem regra de formato de e-mail. Um abusador específico se barra pelo console em `config/signup.blockedEmails` (lista de e-mails em minúsculas; o cliente não lê esse documento).
 
 A entrada (`LoginView`) fala com quem é novo e com quem já usa o app; com `?signup` o título vira "Criar sua conta". Embaixo, os links dos Termos de Uso e da Política de Privacidade no idioma da tela (`lib/legal-links.ts`). O aviso de estatísticas abre a parte "Cookies e estatísticas de uso" da política.
 

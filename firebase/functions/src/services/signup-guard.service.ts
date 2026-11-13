@@ -54,3 +54,20 @@ export async function isSignupRateLimited(db: DbLike, ip: string, now: number = 
     return false;
   });
 }
+
+interface ConfigDbLike {
+  collection(name: string): { doc(id: string): { get(): Promise<{ data(): unknown }> } };
+}
+
+/**
+ * E-mails refused one by one: config/signup.blockedEmails (lower case). Set by
+ * hand in the console to stop a specific abuser; no pattern, so a real
+ * `joao.1985@gmail.com` is never caught by accident. Missing doc: nobody.
+ */
+export async function isEmailBlocked(db: ConfigDbLike, email: string): Promise<boolean> {
+  const normalized = email.toLowerCase().trim();
+  if (!normalized) return false;
+  const snap = await db.collection('config').doc('signup').get();
+  const list = (snap.data() as { blockedEmails?: unknown } | undefined)?.blockedEmails;
+  return Array.isArray(list) && list.some((item) => typeof item === 'string' && item.toLowerCase().trim() === normalized);
+}
