@@ -2,11 +2,12 @@
 // Same doors as the app (lib/screens/login.dart): Google, Apple and "Já tenho
 // conta com e-mail" (password, with "Esqueceu a senha?"). New accounts come
 // from Google or Apple, as in the app.
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import Layer from '@/components/Layer.vue'
-import { t, type MessageKey } from '@/i18n'
+import { locale, t, type MessageKey } from '@/i18n'
+import { legalUrl } from '@/lib/legal-links'
 import { logEmailLoginOpened } from '@/lib/analytics'
 import { emailErrorKey, isSignupBlocked, resetEmailErrorKey } from '@/lib/auth-errors'
 import { SIGNUP_BLOCKED, sendPasswordReset, session, signInWithEmail, signInWithProvider, warmUpSignIn, type ProviderKind } from '@/lib/session'
@@ -15,6 +16,8 @@ import { showToast } from '@/lib/toast'
 
 const route = useRoute()
 const router = useRouter()
+/** From the site's "Criar conta" (?signup): the same doors, said to someone new. */
+const signup = computed(() => route.query.signup !== undefined)
 const showEmail = ref(false)
 /** The app's email_login_opened: who looked for the e-mail way in. */
 function openEmail() {
@@ -124,8 +127,8 @@ onBeforeUnmount(() => window.removeEventListener('pageshow', onPageShow))
     </aside>
     <main class="entry-main">
       <div class="entry-box">
-        <h1 class="page-title" tabindex="-1" data-page-title>{{ t('web.login.title') }}</h1>
-        <p class="muted">{{ t('web.login.sub') }}</p>
+        <h1 class="page-title" tabindex="-1" data-page-title>{{ t(signup ? 'web.login.signupTitle' : 'web.login.title') }}</h1>
+        <p class="muted">{{ t(signup ? 'web.login.signupSub' : 'web.login.sub') }}</p>
         <p v-if="error" class="field-error" role="alert">{{ t(error) }}</p>
         <div class="entry-btns">
           <button type="button" class="btn btn--primary btn--wide" :disabled="busy" @click="withProvider('google')">
@@ -171,9 +174,11 @@ onBeforeUnmount(() => window.removeEventListener('pageshow', onPageShow))
           <button type="button" class="link entry-link" @click="openReset">{{ t('forgotPasswordQuestion') }}</button>
           <p class="sub" data-testid="new-account-hint">{{ t('emailLoginNewAccountHint') }}</p>
         </form>
-        <p class="sub entry-terms">
-          {{ t('byContinuingYouAgree') }}
-          <a class="link" href="/privacy.html" target="_blank" rel="noopener">{{ t('privacyPolicy') }}</a>.
+        <p class="sub entry-terms" data-testid="login-legal">
+          {{ t('web.login.legalBefore') }}
+          <a class="link" :href="legalUrl('terms', locale)" target="_blank" rel="noopener">{{ t('web.login.terms') }}</a>
+          {{ t('web.login.legalAnd') }}
+          <a class="link" :href="legalUrl('privacy', locale)" target="_blank" rel="noopener">{{ t('web.login.privacy') }}</a>.
         </p>
       </div>
     </main>

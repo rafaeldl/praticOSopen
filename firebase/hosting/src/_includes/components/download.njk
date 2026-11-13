@@ -4,9 +4,24 @@
 {% set faqHref = {pt: 'faq.html', en: 'faq-en.html', es: 'faq-es.html'}[langCode] | default('faq.html') %}
 <section class="cta-final" id="baixar">
     <div class="wrap">
+        {% if site.flags.webSignup %}
+        <h2 class="on-desktop">{{ dl.titleWeb }}</h2>
+        <h2 class="on-phone">{{ dl.title }}</h2>
+        {% else %}
         <h2>{{ dl.title }}</h2>
+        {% endif %}
         <p>{{ dl.text }}</p>
-        <div class="cta-final__stores">
+        {% if site.flags.webSignup %}
+        <div class="cta-final__stores on-desktop">
+            <a href="{{ site.webSignupUrl }}" class="btn btn--primary" data-ga="cta_click" data-ga-detail="download_web_signup">{{ dl.signup }}</a>
+        </div>
+        <p class="cta-final__apps on-desktop">
+            <span>{{ dl.appsLead }}</span>
+            <a href="{{ site.appStore }}" target="_blank" rel="noopener" data-ga="cta_click" data-ga-detail="download_app_store_desktop">{{ dl.appStore.name }}</a>
+            <a href="{{ site.playStore }}" target="_blank" rel="noopener" data-ga="cta_click" data-ga-detail="download_play_store_desktop">{{ dl.playStore.name }}</a>
+        </p>
+        {% endif %}
+        <div class="cta-final__stores{% if site.flags.webSignup %} on-phone{% endif %}">
             <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="btn btn--primary" data-ga="cta_click" data-ga-detail="download_app_store">{{ dl.appStore.label }} {{ dl.appStore.name }}</a>
             <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="btn btn--line" data-ga="cta_click" data-ga-detail="download_play_store">{{ dl.playStore.label }} {{ dl.playStore.name }}</a>
         </div>

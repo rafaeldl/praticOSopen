@@ -262,6 +262,18 @@ test('mês: busca só com mais de 10 notas, sem acento e por número da OS; troc
   await expect(page).not.toHaveURL(/q=/)
 })
 
+test('Notas fiscais no menu só com a nota ligada na empresa', async ({ page }) => {
+  await login(page, 'owner')
+  await chooseCompany(page, 'Oficina Alfa')
+  const nav = page.getByRole('navigation', { name: 'Principal' })
+  await expect(nav.getByRole('link', { name: 'Notas fiscais' })).toBeVisible()
+  // Beta Repairs has the nota off: the entry would open an empty screen.
+  await page.getByLabel('Empresa').selectOption({ label: 'Beta Repairs' })
+  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Financeiro' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Notas fiscais' })).toHaveCount(0)
+})
+
 test('nota desligada na empresa: a tela diz, sem rodar para sempre (D23)', async ({ page }) => {
   await login(page, 'owner')
   await chooseCompany(page, 'Beta Repairs')

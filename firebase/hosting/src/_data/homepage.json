@@ -6,6 +6,9 @@
       "lede": "Diga o serviço e a IA preenche cliente, veículo, peças e preços. Depois é só mandar para o cliente aprovar.",
       "ctaAppStore": "Baixar na App Store",
       "ctaPlayStore": "Baixar no Google Play",
+      "ctaSignup": "Criar conta grátis",
+      "ctaGetApp": "Baixar o app",
+      "ctaNote": "Use no computador agora e no celular quando quiser, com a mesma conta.",
       "strip": [
         "Comece grátis",
         "iPhone e Android",
@@ -346,6 +349,7 @@
     },
     "download": {
       "title": "Baixe e abra sua primeira OS hoje.",
+      "titleWeb": "Crie sua conta e abra sua primeira OS hoje.",
       "text": "Comece grátis. Planos pagos disponíveis no app.",
       "appStore": {
         "label": "Baixar na",
@@ -355,6 +359,8 @@
         "label": "Baixar no",
         "name": "Google Play"
       },
+      "signup": "Criar conta grátis",
+      "appsLead": "Ou baixe o app no celular:",
       "contactLead": "Ficou com dúvida?",
       "contactWhatsapp": "Fale com a gente no WhatsApp",
       "contactFaq": "Perguntas frequentes",
@@ -566,6 +572,9 @@
       "lede": "Say the job and AI fills in the customer, vehicle, parts and prices. Then just send it for the customer to approve.",
       "ctaAppStore": "Download on the App Store",
       "ctaPlayStore": "Get it on Google Play",
+      "ctaSignup": "Create free account",
+      "ctaGetApp": "Get the app",
+      "ctaNote": "Use it on your computer now and on your phone whenever you want, with the same account.",
       "strip": [
         "Start free",
         "iPhone and Android",
@@ -905,6 +914,7 @@
     },
     "download": {
       "title": "Download it and open your first order today.",
+      "titleWeb": "Create your account and open your first order today.",
       "text": "Start free. Paid plans available in the app.",
       "appStore": {
         "label": "Download on the",
@@ -914,6 +924,8 @@
         "label": "Get it on",
         "name": "Google Play"
       },
+      "signup": "Create free account",
+      "appsLead": "Or get the phone app:",
       "contactLead": "Questions?",
       "contactWhatsapp": "Talk to us on WhatsApp",
       "contactFaq": "FAQ",
@@ -1063,6 +1075,9 @@
       "lede": "Di el servicio y la IA rellena cliente, vehículo, repuestos y precios. Después solo mándala para que el cliente la apruebe.",
       "ctaAppStore": "Descargar en App Store",
       "ctaPlayStore": "Descargar en Google Play",
+      "ctaSignup": "Crear cuenta gratis",
+      "ctaGetApp": "Descargar la app",
+      "ctaNote": "Úsalo en la computadora ahora y en el celular cuando quieras, con la misma cuenta.",
       "strip": [
         "Empieza gratis",
         "iPhone y Android",
@@ -1402,6 +1417,7 @@
     },
     "download": {
       "title": "Descárgala y abre tu primera orden hoy.",
+      "titleWeb": "Crea tu cuenta y abre tu primera orden hoy.",
       "text": "Empieza gratis. Planes pagos disponibles en la app.",
       "appStore": {
         "label": "Descargar en",
@@ -1411,6 +1427,8 @@
         "label": "Descargar en",
         "name": "Google Play"
       },
+      "signup": "Crear cuenta gratis",
+      "appsLead": "O descarga la app en el celular:",
       "contactLead": "¿Dudas?",
       "contactWhatsapp": "Escríbenos por WhatsApp",
       "contactFaq": "Preguntas frecuentes",

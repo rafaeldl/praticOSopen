@@ -3,7 +3,8 @@
 // with "Recusar" and "Aceitar" of equal weight. Until a "yes" nothing is sent and
 // firebase/analytics is never downloaded (lib/analytics.ts). The answer can be
 // changed in Configurações › Este navegador.
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
+import { cookiesPolicyUrl } from '@/lib/legal-links'
 import { setConsent, startAnalytics } from '@/lib/analytics'
 
 function answer(value: 'granted' | 'denied') {
@@ -16,7 +17,7 @@ function answer(value: 'granted' | 'denied') {
   <section class="consent" role="region" :aria-label="t('web.analytics.title')" data-testid="analytics-consent">
     <p class="consent-text">
       {{ t('web.analytics.body') }}
-      <a class="link" href="/privacy.html" target="_blank" rel="noopener">{{ t('web.analytics.policy') }}</a>
+      <a class="link" :href="cookiesPolicyUrl(locale)" target="_blank" rel="noopener">{{ t('web.analytics.policy') }}</a>
     </p>
     <div class="consent-btns">
       <button type="button" class="btn" data-testid="analytics-deny" @click="answer('denied')">{{ t('web.analytics.deny') }}</button>

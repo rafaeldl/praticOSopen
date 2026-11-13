@@ -10,7 +10,14 @@
             <h1>{{ hero.titleBefore }}
 <span class="hero__mark">{{ hero.titleMark }}</span></h1>
             <p class="hero__lede">{{ hero.lede }}</p>
-            <div class="hero__stores">
+            {% if site.flags.webSignup %}
+            <div class="hero__stores on-desktop">
+                <a href="{{ site.webSignupUrl }}" class="btn btn--primary" data-ga="cta_click" data-ga-detail="hero_web_signup">{{ hero.ctaSignup }}</a>
+                <a href="#baixar" class="btn hero__btn-line" data-ga="cta_click" data-ga-detail="hero_get_app">{{ hero.ctaGetApp }}</a>
+            </div>
+            <p class="hero__note on-desktop">{{ hero.ctaNote }}</p>
+            {% endif %}
+            <div class="hero__stores{% if site.flags.webSignup %} on-phone{% endif %}">
                 <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="btn btn--primary" data-ga="cta_click" data-ga-detail="hero_app_store">{{ hero.ctaAppStore }}</a>
                 <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="btn hero__btn-line" data-ga="cta_click" data-ga-detail="hero_play_store">{{ hero.ctaPlayStore }}</a>
             </div>

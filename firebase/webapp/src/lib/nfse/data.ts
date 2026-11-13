@@ -5,6 +5,7 @@ import { firestoreClient, firestoreLite } from '@/lib/firebase'
 import { api, session } from '@/lib/session'
 import { normalizeOrder, type Order } from '@/lib/orders/model'
 import { ordersPage, type OrderRow } from '@/lib/orders-query'
+import { recordNfseAvailability } from './availability'
 import { invoiceOf, queryUntil, querySince, type Contact, type FiscalInfo, type MunicipalService, type NfseInvoice, type NfseSetup, type Preview, type ServiceSettings } from './model'
 
 export interface NfseSettings {
@@ -25,10 +26,15 @@ export interface NfseSettings {
 /** settings/payments (members read it). A failed read is an error, never "off" (D23 shows nothing forever). */
 export async function nfseSettings(): Promise<NfseSettings> {
   const [db, { doc, getDoc }] = await Promise.all([firestoreLite(), import('firebase/firestore/lite')])
-  const snap = await getDoc(doc(db, 'companies', session.companyId as string, 'settings', 'payments'))
+  const companyId = session.companyId as string
+  const snap = await getDoc(doc(db, 'companies', companyId, 'settings', 'payments'))
   const data = (snap.data() ?? {}) as Record<string, unknown>
-  if (data.nfseDirectEnabled === true) return { available: true, ready: await hasEmitter(), direct: true }
+  if (data.nfseDirectEnabled === true) {
+    recordNfseAvailability(companyId, true)
+    return { available: true, ready: await hasEmitter(), direct: true }
+  }
   const available = data.nfseEnabled === true && data.asaasEnabled === true && data.asaasConnected === true
+  recordNfseAvailability(companyId, available)
   return { available, ready: available && data.nfseReady === true, sandbox: data.asaasEnvironment === 'sandbox' }
 }
 

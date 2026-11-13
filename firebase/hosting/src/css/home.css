@@ -11,6 +11,7 @@
 .hero__lede { font-size: clamp(1.12rem, 1.05rem + 0.3vw, 1.25rem); line-height: 1.45; margin-top: var(--space-md); max-width: 46ch; }
 .hero__stores { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-lg); }
 .hero__btn-line { --btn-fg: var(--color-marker); --btn-border: var(--color-marker); }
+.hero__note { margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-on-navy-2); max-width: 46ch; }
 .hero__btn-line:hover { --btn-bg: var(--color-navy-2); }
 
 .tag { position: absolute; left: var(--space-xs); top: var(--space-xs); background: var(--color-marker); color: var(--color-marker-ink); font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; line-height: 1.1; padding: var(--space-3xs) var(--space-2xs); border-radius: var(--radius-input); max-width: calc(100% - var(--space-lg)); }

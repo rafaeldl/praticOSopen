@@ -18,6 +18,7 @@ import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { can, session } from '@/lib/session'
 import { canOpen, router } from '@/router'
 import { NAV } from '@/navigation'
+import { nfseOnFor } from '@/lib/nfse/availability'
 
 export { GROUPS, groupOf, type Group } from './palette-order'
 import type { Group } from './palette-order'
@@ -68,7 +69,7 @@ const EXTRA_SCREENS: Screen[] = [
 
 /** "Ir para …": every screen this person may open. */
 export function screenCommands(): Command[] {
-  const nav = NAV.map((entry) => ({ path: entry.path, text: t('web.palette.goTo', { screen: t(entry.label) }), icon: entry.icon }))
+  const nav = NAV.filter((entry) => entry.needs !== 'nfse' || nfseOnFor(session.companyId)).map((entry) => ({ path: entry.path, text: t('web.palette.goTo', { screen: t(entry.label) }), icon: entry.icon }))
   const extra = EXTRA_SCREENS.map((screen) => ({
     path: screen.path,
     text: screen.path === '/devices' ? t('web.palette.goTo', { screen: groupLabel('devices') }) : t(screen.label),

@@ -76,6 +76,11 @@
 {% endfor %}
 {% endif %}
 
+{# Phone or computer, before the first paint: the main button leads phones to the
+   stores and computers to the web app (flags.webSignup; .on-phone / .on-desktop in site.css).
+   iPadOS reports a Mac: a touch Mac is an iPad, which has the app. #}
+<script>try{var u=navigator.userAgent;if(/Android|iPhone|iPad|iPod|Mobile/i.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))document.documentElement.dataset.device='phone'}catch(e){}</script>
+
 <!-- Google Analytics 4 + Google Ads Conversion Tracking -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5L7Z0GSM2W"></script>
 <script>

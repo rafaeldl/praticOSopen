@@ -349,6 +349,12 @@ strong, b { font-weight: 600; }
 .cta-final p.cta-final__contact { max-width: none; font-size: var(--text-sm); }
 .cta-final__contact a { color: var(--color-on-navy); }
 @media (max-width: 60rem) { .cta-final__stores .btn { flex: 1 1 100%; } }
+.cta-final p.cta-final__apps { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); margin-top: var(--space-md); font-size: var(--text-sm); max-width: none; }
+.cta-final__apps a { color: var(--color-on-navy); }
+
+/* ---------- Phone or computer (flags.webSignup; html[data-device] set in head.njk) ---------- */
+html[data-device="phone"] .on-desktop { display: none !important; }
+html:not([data-device="phone"]) .on-phone { display: none !important; }
 
 /* ---------- WhatsApp assistant (flagged) ---------- */
 .wa-assistant__grid { display: grid; gap: var(--space-xl); grid-template-columns: minmax(0, 1fr); align-items: center; }

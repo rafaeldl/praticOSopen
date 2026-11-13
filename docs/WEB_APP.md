@@ -162,6 +162,18 @@ npm run webapp:access -- --open --project <projeto>     # abre para todos
 
 `--dry-run` mostra o que mudaria. Sem `--project`, o script recusa, exceto no emulador. O primeiro `--email` cria o documento com `open: false`.
 
+### Abrir para todos
+
+O lançamento tem três chaves, nesta ordem:
+
+1. `config/webApp.open = true` (`npm run webapp:access -- --open`): qualquer conta Google ou Apple entra; conta nova cai no primeiro acesso.
+2. `flags.webSignup = true` em `firebase/hosting/src/_data/site.json`: no computador, o botão principal do site vira "Criar conta grátis" e leva a `/web/login?signup=1`; no celular continua levando às lojas. O site decide pelo navegador (`html[data-device]`, `partials/head.njk`; iPad conta como celular).
+3. Conferir o limite de cadastros: `blockSuspiciousSignups` aceita até 20 contas novas por IP por dia (`services/signup-guard.service.ts`), sem regra de formato de e-mail.
+
+A entrada (`LoginView`) fala com quem é novo e com quem já usa o app; com `?signup` o título vira "Criar sua conta". Embaixo, os links dos Termos de Uso e da Política de Privacidade no idioma da tela (`lib/legal-links.ts`). O aviso de estatísticas abre a parte "Cookies e estatísticas de uso" da política.
+
+"Notas fiscais" só aparece no menu com a nota ligada na empresa (NFS-e direta ou Asaas, `nfseSettings`, guardado em `lib/nfse/availability.ts`); o endereço `/invoices` continua abrindo e dizendo que a nota está desligada.
+
 ### Navegação e histórico
 
 Painel ao lado com o id na URL (`useRoutePanel`, `?order=`, `?customer=`…). Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado. Filtros, abas, mês e período também ficam na URL.

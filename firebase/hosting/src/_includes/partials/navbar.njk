@@ -53,7 +53,8 @@
                 <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
             </button>
             {% if site.flags.webApp %}<a href="{{ site.webAppUrl }}" class="btn btn--secondary btn--sm nav__login" data-ga="select_content" data-ga-detail="navbar_login">{{ nav.login }}</a>{% endif %}
-            <a href="{% if isHomepage %}#baixar{% else %}{{ homeHref }}#baixar{% endif %}" class="btn btn--primary btn--sm nav__cta" data-ga="select_content" data-ga-detail="navbar_cta">{{ nav.cta }}</a>
+            {% if site.flags.webSignup %}<a href="{{ site.webSignupUrl }}" class="btn btn--primary btn--sm nav__cta on-desktop" data-ga="select_content" data-ga-detail="navbar_signup">{{ nav.ctaSignup }}</a>{% endif %}
+            <a href="{% if isHomepage %}#baixar{% else %}{{ homeHref }}#baixar{% endif %}" class="btn btn--primary btn--sm nav__cta{% if site.flags.webSignup %} on-phone{% endif %}" data-ga="select_content" data-ga-detail="navbar_cta">{{ nav.cta }}</a>
             <button class="icon-btn nav-toggle" type="button" aria-label="{{ nav.menu }}" aria-expanded="false" aria-controls="mobile-menu">
                 <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
                 <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
