@@ -111,38 +111,57 @@ curl -X POST ... -d '{"refund":true}' https://<api>/v1/app/billing/cancel
 
 ## Teste ponta a ponta no sandbox
 
-Feito pelo dono (o agente não recebe chaves). Crie o arquivo `~/.praticos-sandbox.env`, **fora do repositório**:
+As chaves ficam em `~/.praticos-sandbox.env`, **fora do repositório** e com permissão 600. Quem roda o teste lê o arquivo só para a memória do processo; nada é gravado nem impresso:
 
 ```bash
-cat > ~/.praticos-sandbox.env <<'EOF'
-ASAAS_BILLING_API_KEY=$aact_hmlg_...        # chave da conta de TESTE (sandbox) da Rafsoft
-REVENUECAT_SECRET_API_KEY=sk_...            # chave secreta de um projeto RevenueCat de teste
-RC_TEST_APP_USER_ID=praticos-web-checkout-e2e
-EOF
+cat > ~/.praticos-sandbox.env <<'EOF2'
+ASAAS_BILLING_API_KEY=$aact_hmlg_...   # conta de TESTE (sandbox) da Rafsoft
+REVENUECAT_SECRET_KEY=sk_...           # chave secreta do RevenueCat (REVENUECAT_SECRET_API_KEY também vale)
+EOF2
 chmod 600 ~/.praticos-sandbox.env
 ```
 
-Depois rode:
+Os dois testes recusam chave que não seja de sandbox (`$aact_hmlg`) ou que não seja `sk_`. No RevenueCat eles só mexem num appUserID de teste. Esse id nunca é de uma empresa real, e o teste recusa um id que tenha compra de loja. No fim, mesmo depois de uma falha, os promocionais de `starter`, `pro` e `business` desse id são revogados.
+
+**Pela tela (o completo)**, com as Functions no emulador e a chave `config/webCheckout` ligada só no emulador:
+
+```bash
+cd firebase/webapp && E2E_BILLING_SANDBOX=1 PW_ARGS=e2e/billing-sandbox.spec.ts npm run e2e
+```
+
+O `e2e/billing-sandbox.spec.ts` faz isto, na empresa `e2e-web-checkout-sandbox`, que é o appUserID do teste:
+
+1. Assina o Pro mensal com Pix pela tela e chega na fatura do sandbox. A assinatura existe no Asaas com valor, ciclo e referência certos.
+2. Paga a fatura no sandbox (`/sandbox/payment/{id}/confirm`). O Asaas não alcança o emulador, então o teste manda ao `/webhooks/asaas-billing` local o evento que ele mandaria, montado com o pagamento real lido do sandbox. O webhook dá o Pro promocional no RevenueCat e a sincronização grava `plan pro`, `store web`. O mesmo evento repetido não estraga nada.
+3. Renova: o sandbox só cria a próxima cobrança perto do vencimento, então o evento do mês seguinte é montado com a data seguinte. O vencimento no RevenueCat anda junto.
+4. Bloqueia a compra dupla: a tela mostra a assinatura em vez do formulário, e a API recusa um segundo checkout (409 `WEB_SUBSCRIPTION_ACTIVE`).
+5. Pede o dinheiro de volta pela tela, dentro dos 7 dias. O Asaas estorna e apaga a assinatura, o promocional é revogado e o plano volta ao Free. Os eventos de estorno e de assinatura apagada que chegam depois não mudam nada.
+
+`BILLING_SHOTS=<pasta>` salva os prints. Precisa de Java 21 ou mais novo para o emulador.
+
+**Só a API (rápido, sem Firestore):**
 
 ```bash
 cd firebase/functions && npm run e2e:web-checkout
 ```
 
-O script (`scripts/web-checkout-sandbox-e2e.ts`) não toca no Firestore. Ele cria o cliente de teste e uma assinatura Pro mensal, paga a primeira cobrança pelo `/sandbox/payment/{id}/confirm` e aplica a regra do webhook. Em seguida concede o promocional no RevenueCat e confere plano `pro` com origem `web`. Por fim estorna, revoga (o plano volta ao Free) e cancela a assinatura. Cada passo imprime OK ou FAIL. Recusa chave que não seja de sandbox (`$aact_hmlg`) ou que não seja `sk_`.
+O `scripts/web-checkout-sandbox-e2e.ts` cria o cliente e a assinatura, paga no sandbox e aplica a regra do webhook. Depois dá e confere o promocional (`pro` com origem `web`), estorna, revoga e cancela. O appUserID padrão é `e2e-web-checkout-script`; dá para trocar com `RC_TEST_APP_USER_ID`.
 
-O fluxo com tela e webhook de verdade (Functions publicadas ou emulador com túnel) fica para depois do passo 3 abaixo: assinar pela web com `config/webCheckout.enabled` ligada só no projeto de teste, pagar a fatura do sandbox com cartão de teste, renovar, deixar atrasar, cancelar e pedir reembolso.
+**O que o sandbox não testa:** a entrega real do webhook pelo Asaas, que precisa das Functions publicadas (passo 3 abaixo), e o cartão salvo para as próximas cobranças.
 
 ## Passos manuais do dono (antes de ligar)
 
-1. **Segredos (antes do merge, senão o deploy das Functions falha):** `firebase functions:secrets:set ASAAS_BILLING_API_KEY` (chave da conta Asaas da Rafsoft; `$aact_hmlg_` testa no sandbox, `$aact_prod_` é produção) e `ASAAS_BILLING_WEBHOOK_TOKEN` (texto aleatório, o mesmo do passo 3). `REVENUECAT_SECRET_API_KEY` já existe; conferir que a chave `sk_` tem permissão de escrita de entitlements (grant/revoke promocional).
-2. **Conta Asaas da Rafsoft:** conferir taxas; ligar a emissão automática de NFS-e ao receber (serviço, alíquota do ISS, código municipal); e-mails de cobrança ao cliente ligados.
-3. **Webhook no Asaas da Rafsoft:** URL `https://<api do southamerica-east1>/webhooks/asaas-billing`, token do passo 1, eventos `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `SUBSCRIPTION_DELETED`, `SUBSCRIPTION_INACTIVATED`.
-4. **Produtos anuais nas lojas:** o código mapeia `praticos_{starter,pro,business}_annual`, mas `docs/REVENUECAT_SETUP.md` só lista os mensais em produção. Criar os anuais (App Store + Play + offering do RevenueCat) antes de ligar `yearlyEnabled`.
-5. **Notas de revisão da Apple** (só no dia de ligar): em `ios/fastlane/metadata/review_information/notes.txt` e `ios/fastlane/Deliverfile`, trocar "Paid plans cannot be bought anywhere else…" por "All paid plans are available as In-App Purchase; the app has no external purchase links or calls to action." Revogar em `docs/SUBSCRIPTION.md` as regras "Never add another way to pay for a plan" e "The website shows no prices".
-6. **Ligar:** depois da aprovação da Apple, `config/webCheckout.enabled = true` (e `yearlyEnabled` só com o passo 4).
+1. **Segredos (antes do merge, senão o deploy das Functions falha):** `firebase functions:secrets:set ASAAS_BILLING_API_KEY` (chave da conta Asaas da Rafsoft; `$aact_hmlg_` testa no sandbox, `$aact_prod_` é produção) e `ASAAS_BILLING_WEBHOOK_TOKEN` (texto aleatório, o mesmo do passo 4). `REVENUECAT_SECRET_API_KEY` já existe; conferir que a chave `sk_` tem permissão de escrita de entitlements (grant/revoke promocional).
+2. **Estorno pela API no Asaas:** no sandbox, o estorno pedido pela API ficou em `AWAITING_CRITICAL_ACTION_AUTHORIZATION`, porque a conta exige autorização de ação crítica. Até alguém aprovar no painel, o dinheiro não volta e o `PAYMENT_REFUNDED` não chega, mas o plano já caiu para o Free na hora. Em produção, decidir entre aprovar cada estorno no painel ou liberar estornos pela API nas configurações de segurança/integrações do Asaas (por exemplo, com IP fixo). Isso vale para a garantia de 7 dias.
+3. **Conta Asaas da Rafsoft:** conferir taxas; ligar a emissão automática de NFS-e ao receber (serviço, alíquota do ISS, código municipal); e-mails de cobrança ao cliente ligados.
+4. **Webhook no Asaas da Rafsoft:** URL `https://<api do southamerica-east1>/webhooks/asaas-billing`, token do passo 1, eventos `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `SUBSCRIPTION_DELETED`, `SUBSCRIPTION_INACTIVATED`.
+5. **Produtos anuais nas lojas:** o código mapeia `praticos_{starter,pro,business}_annual`, mas `docs/REVENUECAT_SETUP.md` só lista os mensais em produção. Criar os anuais (App Store + Play + offering do RevenueCat) antes de ligar `yearlyEnabled`.
+6. **Notas de revisão da Apple** (só no dia de ligar): em `ios/fastlane/metadata/review_information/notes.txt` e `ios/fastlane/Deliverfile`, trocar "Paid plans cannot be bought anywhere else…" por "All paid plans are available as In-App Purchase; the app has no external purchase links or calls to action." Revogar em `docs/SUBSCRIPTION.md` as regras "Never add another way to pay for a plan" e "The website shows no prices".
+7. **Ligar:** depois da aprovação da Apple, `config/webCheckout.enabled = true` (e `yearlyEnabled` só com o passo 5).
 
 ## Pontos em aberto
 
+- A fatura do Asaas mostra no topo os dados cadastrais da conta da Rafsoft: e-mail, telefone e endereço. Antes de ligar, conferir em Minha Conta do Asaas de produção se esses dados são os que o cliente deve ver.
 - Página de pagamento: é a fatura do Asaas (`invoiceUrl`). Com cartão sem dados no checkout, o Asaas guarda o cartão pago na fatura para as próximas cobranças; confirmar no sandbox ponta a ponta (a doc do Asaas não diz explicitamente).
 - O RevenueCat não documenta webhook para grant promocional pela API; por isso o webhook do Asaas chama `syncCompanySubscription` logo depois do grant.
 - Aviso por e-mail quando a compra na loja para a recorrência web: ainda não enviado (fica no log `[WebBilling]`).

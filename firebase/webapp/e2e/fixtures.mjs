@@ -21,6 +21,9 @@ export const COMPANY_P = 'company-paging'
 export const COMPANY_N = 'company-nfse'
 /** Work stages on (docs/WORK_STAGES.md): the board splits Em andamento, so no other board test reads it. */
 export const COMPANY_S = 'company-stages'
+/** Web checkout against the real Asaas sandbox (e2e/billing-sandbox.spec.ts): this id is the
+ * appUserID it touches in RevenueCat, so it must never be a real company's. */
+export const COMPANY_W = 'e2e-web-checkout-sandbox'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -65,6 +68,7 @@ export const USERS = {
   gAdmin: { ...user('g-admin', 'Gil Admin'), roles: { [COMPANY_G]: 'admin' } },
   gManager: { ...user('g-manager', 'Gabi Gerente'), roles: { [COMPANY_G]: 'manager' } },
   gTech: { ...user('g-tech', 'Guto Tecnico'), roles: { [COMPANY_G]: 'technician' } },
+  wOwner: { ...user('w-owner', 'Wanda Dona'), roles: { [COMPANY_W]: 'owner' } },
   // Company team: roles changed and people removed by the team tests.
   tOwner: { ...user('t-owner', 'Tereza Dona'), roles: { [COMPANY_T]: 'owner' } },
   tAdmin: { ...user('t-admin', 'Tadeu Admin'), roles: { [COMPANY_T]: 'admin' } },
@@ -123,6 +127,7 @@ export const COMPANIES = {
   [COMPANY_R]: { name: 'Retoma Sem Ramo', country: 'BR', segment: null, phone: '(48) 3333-4444', owner: USERS.resumer },
   [COMPANY_P]: { name: 'Oficina Paginas', country: 'BR', segment: 'automotive', owner: USERS.pOwner },
   [COMPANY_N]: { name: 'Oficina Nota Direta', country: 'BR', segment: 'automotive', owner: USERS.nOwner },
+  [COMPANY_W]: { name: 'Oficina Teste Sandbox', country: 'BR', segment: 'automotive', owner: USERS.wOwner },
   [COMPANY_S]: {
     name: 'Funilaria Etapas', country: 'BR', segment: 'automotive', owner: USERS.sOwner,
     workStages: [{ id: 'paint', name: 'Pintura', keywords: ['pint'] }, { id: 'polish', name: 'Polimento', keywords: ['polim', 'higien'] }],

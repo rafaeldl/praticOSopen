@@ -6,8 +6,11 @@
  *
  * Reads ~/.praticos-sandbox.env (outside the repo; KEY=value lines):
  *   ASAAS_BILLING_API_KEY      sandbox key of Rafsoft's Asaas test account, must start with $aact_hmlg
- *   REVENUECAT_SECRET_API_KEY  sk_ key of a RevenueCat project used for tests
- *   RC_TEST_APP_USER_ID        optional, app user that receives the promotional (default praticos-web-checkout-e2e)
+ *   REVENUECAT_SECRET_API_KEY  sk_ key of RevenueCat (REVENUECAT_SECRET_KEY also read)
+ *   RC_TEST_APP_USER_ID        optional, app user that receives the promotional (default
+ *                              e2e-web-checkout-script). Never a real company id: the script
+ *                              refuses an app user with any store purchase, and revokes every
+ *                              promotional it may have left at the end, even after a failure.
  *
  * Steps (each prints OK or FAIL):
  *   1. find-or-create the test customer (externalReference praticos-web-checkout-e2e, test CPF)
@@ -56,6 +59,7 @@ function readEnvFile(file: string): Record<string, string> {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 let failures = 0;
+let cleanup: (() => Promise<void>) | null = null;
 function step(name: string, ok: boolean, detail = '') {
   if (!ok) failures++;
   console.log(`${ok ? 'OK  ' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
@@ -64,10 +68,20 @@ function step(name: string, ok: boolean, detail = '') {
 async function main() {
   const env = readEnvFile(ENV_FILE);
   const asaasKey = env.ASAAS_BILLING_API_KEY?.trim();
-  const rcKey = env.REVENUECAT_SECRET_API_KEY?.trim();
-  const appUserId = env.RC_TEST_APP_USER_ID?.trim() || 'praticos-web-checkout-e2e';
+  const rcKey = (env.REVENUECAT_SECRET_API_KEY ?? env.REVENUECAT_SECRET_KEY)?.trim();
+  const appUserId = env.RC_TEST_APP_USER_ID?.trim() || 'e2e-web-checkout-script';
   if (!asaasKey?.startsWith('$aact_hmlg')) throw new Error('ASAAS_BILLING_API_KEY must be a SANDBOX key ($aact_hmlg...)');
   if (!rcKey?.startsWith('sk_')) throw new Error('REVENUECAT_SECRET_API_KEY must be a secret key (sk_...)');
+
+  // Guard: only an app user with no store purchase (a test one) is touched.
+  const before = await fetchSubscriber(appUserId, rcKey);
+  const storeSubs = Object.values(before.subscriptions ?? {}).filter((s) => (s.store ?? '').toLowerCase() !== 'promotional');
+  if (storeSubs.length) throw new Error(`${appUserId} has store purchases: not a test app user`);
+  cleanup = async () => {
+    for (const plan of ['starter', 'pro', 'business'] as const) await revokePromotionals(appUserId, plan, rcKey).catch(() => undefined);
+    const after = resolveSubscriptionState(await fetchSubscriber(appUserId, rcKey), new Date());
+    console.log(`limpeza: promocionais de ${appUserId} revogados, plano ${after.plan}`);
+  };
 
   const asaas = new AsaasClient({ apiKey: asaasKey, environment: 'sandbox' });
   const sandboxPost = async (p: string) => {
@@ -111,6 +125,8 @@ async function main() {
     paid = await asaas.getPayment(first.id);
   }
   step('3. pagamento confirmado no sandbox', PAID.includes(paid.status), paid.status);
+  const afterPay = await asaas.listSubscriptionPayments(subscription.id);
+  console.log(`     cobranças da assinatura depois do 1º pagamento: ${afterPay.map((p) => `${p.dueDate}/${p.status}`).join(', ')}`);
 
   // 4. Webhook rule
   const record: WebBillingRecord = {
@@ -151,6 +167,9 @@ async function main() {
 }
 
 main()
+  .finally(async () => {
+    if (cleanup) await cleanup().catch((error) => console.error('limpeza falhou:', error instanceof Error ? error.message : 'unknown'));
+  })
   .then(() => {
     console.log(failures ? `\n${failures} passo(s) falharam` : '\nTudo certo no sandbox.');
     process.exit(failures ? 1 : 0);

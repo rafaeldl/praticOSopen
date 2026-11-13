@@ -303,10 +303,18 @@ export async function cancelWebSubscription(
       paidUntil: nowIso,
       updatedAt: nowIso,
     };
+    // Each refund is saved as soon as Asaas takes it: a retry after a failure in
+    // the middle does not refund the same charge twice. A charge Asaas no longer
+    // has (404) has nothing to give back.
     for (const [paymentId] of paid) {
-      await deps.asaas.refundPayment(paymentId, 'Garantia de 7 dias do PraticOS');
-      updates[`payments.${paymentId}.status`] = 'refunded';
-      updates[`payments.${paymentId}.refundedAt`] = nowIso;
+      await deps.asaas.refundPayment(paymentId, 'Garantia de 7 dias do PraticOS').catch((error: { status?: number }) => {
+        if (error?.status !== 404) throw error;
+      });
+      await webBillingRef(companyId).update({
+        [`payments.${paymentId}.status`]: 'refunded',
+        [`payments.${paymentId}.refundedAt`]: nowIso,
+        updatedAt: nowIso,
+      });
     }
     await webBillingRef(companyId).update(updates);
     await deps.revoke(companyId, record.plan);
