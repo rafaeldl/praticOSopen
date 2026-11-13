@@ -7,6 +7,8 @@ import { toCents, type OpenOrder } from './model'
 
 export interface StatementItem {
   name: string
+  /** The note typed on the item ("para-choque dianteiro"), when it adds to `name`. */
+  description?: string
   quantity: number
   /** Line total (quantity × unit value). */
   value: number
@@ -27,6 +29,9 @@ export interface StatementOrder {
   open: number
 }
 
+/** "Pintura - para-choque dianteiro", like the order PDF. */
+export const statementItemLabel = (item: StatementItem): string => (item.description ? `${item.name} - ${item.description}` : item.name)
+
 const round = (value: number) => Math.round(value * 100) / 100
 
 /** A full order (read with values). */
@@ -35,7 +40,11 @@ export function statementOrderOf(order: Order): StatementOrder {
     .filter((line) => line.name.trim() || (line.total ?? line.value ?? 0) > 0)
     .map((line) => {
       const quantity = line.kind === 'product' ? (line.quantity ?? 1) : 1
-      return { name: line.name.trim(), quantity, value: line.total ?? (line.value ?? 0) * quantity }
+      const name = line.name.trim()
+      const note = line.description?.trim()
+      const item: StatementItem = { name, quantity, value: line.total ?? (line.value ?? 0) * quantity }
+      if (note && note !== name) item.description = note
+      return item
     })
   const devices = order.devices.map((d) => [d.name?.trim(), d.serial?.trim()].filter(Boolean).join(' · ')).filter(Boolean)
   const firstService = order.lines.find((line) => line.kind === 'service' && line.name.trim())?.name.trim() ?? null

@@ -26,6 +26,7 @@ Order _done() => Order()
   ..services = [
     OrderService()
       ..service = (ServiceAggr()..name = 'Troca de óleo')
+      ..description = 'Óleo 5W30'
       ..value = 150,
   ]
   ..products = [
@@ -86,6 +87,11 @@ void main() {
           ('Pastilha', 1, 250.0),
         ],
       );
+      expect([for (final i in order.items) i.label], [
+        'Troca de óleo - Óleo 5W30',
+        'Filtro',
+        'Pastilha',
+      ]);
       expect(order.device, 'Fiat Uno · ABC-1234');
       expect(order.completed, isTrue);
       expect(order.open, 300);
@@ -149,7 +155,7 @@ void main() {
       expect(first.title, 'OS 182 · 03/10/2026 · Concluído');
       expect(first.device, 'Fiat Uno · ABC-1234');
       expect(first.rows, [
-        ['Troca de óleo', '1', brl(150)],
+        ['Troca de óleo - Óleo 5W30', '1', brl(150)],
         ['Filtro', '2', brl(100)],
         ['Pastilha', '1', brl(250)],
       ]);

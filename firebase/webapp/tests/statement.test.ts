@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { normalizeOrder } from '@/lib/orders/model'
 import { buildStatementPdf, type StatementPdfTexts } from '@/lib/pdf/statement-pdf'
-import { statementLightOf, statementOrderOf, statementText, statementTotal, type StatementTexts } from '@/lib/receive/statement'
+import { statementItemLabel, statementLightOf, statementOrderOf, statementText, statementTotal, type StatementTexts } from '@/lib/receive/statement'
 import { pdfPageCount, pdfText } from './pdf-text'
 
 const money = (value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`
@@ -13,7 +13,7 @@ const done = normalizeOrder(
     number: 182,
     status: 'done',
     devices: [{ id: 'd1', name: 'Fiat Uno', serial: 'ABC-1234' }],
-    services: [{ id: 's1', service: { id: 'cat1', name: 'Troca de óleo' }, value: 150 }],
+    services: [{ id: 's1', service: { id: 'cat1', name: 'Troca de óleo' }, description: 'Óleo 5W30', value: 150 }],
     products: [{ id: 'p1', product: { id: 'cat2', name: 'Filtro' }, value: 50, quantity: 2, total: 100 }],
     total: 230,
     discount: 20,
@@ -42,9 +42,11 @@ describe('statementOrderOf', () => {
   it('services and parts with quantity and line value, device with serial, amounts', () => {
     const order = statementOrderOf(done)
     expect(order.items).toEqual([
-      { name: 'Troca de óleo', quantity: 1, value: 150 },
+      { name: 'Troca de óleo', description: 'Óleo 5W30', quantity: 1, value: 150 },
       { name: 'Filtro', quantity: 2, value: 100 },
     ])
+    expect(order.items.map(statementItemLabel)).toEqual(['Troca de óleo - Óleo 5W30', 'Filtro'])
+    expect(statementOrderOf(running).items[0]).not.toHaveProperty('description')
     expect(order.device).toBe('Fiat Uno · ABC-1234')
     expect(order.completed).toBe(true)
     expect([order.total, order.paid, order.open, order.discount]).toEqual([230, 30, 200, 20])
@@ -109,7 +111,7 @@ describe('buildStatementPdf', () => {
       'OS em aberto de João em 06/11/2026.',
       'OS 182 · 03/10/2026 · Concluído',
       'Fiat Uno · ABC-1234',
-      'Troca de óleo',
+      'Troca de óleo - Óleo 5W30',
       'Filtro',
       'R$ 100,00',
       'Desconto  - R$ 20,00',
