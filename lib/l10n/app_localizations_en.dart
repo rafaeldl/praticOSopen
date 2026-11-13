@@ -7967,12 +7967,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planNoticeOrdersContactUs(String limit) {
-    return 'You went over $limit orders this month. Talk to us to adjust your plan.';
+    return 'This month went over the $limit work orders included in Business.';
   }
 
   @override
   String planNoticePeopleContactUs(String limit) {
-    return 'Your team went over $limit people. Talk to us to adjust your plan.';
+    return 'Your team went over the $limit people included in Business.';
   }
 
   @override

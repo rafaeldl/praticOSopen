@@ -12896,13 +12896,13 @@ abstract class AppLocalizations {
   /// No description provided for @planNoticeOrdersContactUs.
   ///
   /// In pt, this message translates to:
-  /// **'Você passou de {limit} OS este mês. Fale com a gente para ajustar o plano.'**
+  /// **'Este mês já passou das {limit} OS incluídas no Business.'**
   String planNoticeOrdersContactUs(String limit);
 
   /// No description provided for @planNoticePeopleContactUs.
   ///
   /// In pt, this message translates to:
-  /// **'A equipe passou de {limit} pessoas. Fale com a gente para ajustar o plano.'**
+  /// **'A equipe já passou das {limit} pessoas incluídas no Business.'**
   String planNoticePeopleContactUs(String limit);
 
   /// No description provided for @planNextTitle.

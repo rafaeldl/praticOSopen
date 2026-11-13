@@ -90,8 +90,9 @@ regra: `planOverview` em `lib/services/plan_overview.dart` e
 - Nível: quase no limite a partir de 80%, no limite, acima. Pessoas com limite
   1 nunca avisam (empresa nova no Free não vê aviso).
 - Um aviso só, OS antes de pessoas: 80%; 100%; passou neste mês (mês de
-  folga); passou de novo (a OS nova espera mudar de plano); Business acima
-  ("fale com a gente").
+  folga); passou de novo (a OS nova espera mudar de plano); Business acima (só diz
+  que passou do incluído; nada de "fale com a gente" nem compra por fora no
+  app, regra 3.1.1 da Apple; ver #737).
 - "O que o {próximo plano} dá a mais": os recursos do plano seguinte que o
   atual não tem.
 - Chave desligada: os números aparecem sem limite e sem aviso.

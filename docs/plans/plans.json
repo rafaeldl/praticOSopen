@@ -11,7 +11,7 @@
     "aiPerMonth": "Pedidos ao assistente por mês",
     "aiPerDay": "Pedidos ao assistente por dia",
     "features": "Recursos do plano, cada plano inclui os do anterior (#724 aplica)",
-    "overageAllowed": "Passar de OS por mês e de pessoas não trava: só avisa para falar com a gente (Business)"
+    "overageAllowed": "Passar de OS por mês e de pessoas não trava: só avisa que passou do incluído (Business), sem citar compra por fora no app (3.1.1)"
   },
   "plans": [
     "free",

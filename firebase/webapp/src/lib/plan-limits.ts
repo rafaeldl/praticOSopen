@@ -197,7 +197,7 @@ export interface PlanLimitCheck {
   level: UsageLevel
   /** Allowed only because of the month of grace (orders). */
   grace: boolean
-  /** Over the limit on a plan that never blocks (Business): talk to us. */
+  /** Over the limit on a plan that never blocks (Business): only says it went over what is included (no outside purchase in the app, 3.1.1). */
   contactUs: boolean
 }
 

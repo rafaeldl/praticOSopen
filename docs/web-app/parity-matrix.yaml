@@ -11106,7 +11106,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/settings.spec.ts
   web_exception: null
-  note: "#725: app e web mostram o mesmo pela mesma regra (planOverview, contract-cases/plan-overview.json): OS este mês, pessoas e CNPJs da nota (só com nota no plano) contra o plano, um aviso só (80%, 100%, mês de folga, OS nova esperando, fale com a gente) e o que o próximo plano dá a mais. Sem contador de IA. Chave config/paidPlans desligada: números sem limite e sem aviso. Com paidPlansEnabled=false no app, a seção de uso some. Web: sem compra; diz que muda de plano no app (até #664)."
+  note: "#725: app e web mostram o mesmo pela mesma regra (planOverview, contract-cases/plan-overview.json): OS este mês, pessoas e CNPJs da nota (só com nota no plano) contra o plano, um aviso só (80%, 100%, mês de folga, OS nova esperando, Business passou do incluído) e o que o próximo plano dá a mais. Sem contador de IA. Chave config/paidPlans desligada: números sem limite e sem aviso. Com paidPlansEnabled=false no app, a seção de uso some. Web: sem compra; diz que muda de plano no app (até #664)."
 - id: plan.ai-usage
   screen: lib/screens/menu_navigation/more/plan_screen.dart
   route: null

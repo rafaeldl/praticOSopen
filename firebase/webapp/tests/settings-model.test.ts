@@ -211,7 +211,7 @@ describe('review #528', () => {
     expect(seatLimit(plan, true)).toBe(1)
     expect(roomForPerson(plan, true)).toBe(false)
     expect(roomForPerson(planSummary({ plan: 'pro', usage: { usersActive: 4 } }, NOW), true)).toBe(true)
-    // Business past 20 people is not blocked (talk to us).
+    // Business past 20 people is not blocked (only a notice).
     expect(roomForPerson(planSummary({ plan: 'business', usage: { usersActive: 25 } }, NOW), true)).toBe(true)
     expect(planLimitsEnforced()).toBe(false)
   })

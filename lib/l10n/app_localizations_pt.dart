@@ -7972,12 +7972,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String planNoticeOrdersContactUs(String limit) {
-    return 'Você passou de $limit OS este mês. Fale com a gente para ajustar o plano.';
+    return 'Este mês já passou das $limit OS incluídas no Business.';
   }
 
   @override
   String planNoticePeopleContactUs(String limit) {
-    return 'A equipe passou de $limit pessoas. Fale com a gente para ajustar o plano.';
+    return 'A equipe já passou das $limit pessoas incluídas no Business.';
   }
 
   @override

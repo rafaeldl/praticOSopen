@@ -113,9 +113,9 @@ void main() {
     expect(find.text('Passou de 10 OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.'), findsOneWidget);
   });
 
-  testWidgets('Business over: talk to us, no paywall in the notice', (tester) async {
+  testWidgets('Business over: says it went over what is included, no paywall in the notice', (tester) async {
     await _pump(tester, _sub(SubscriptionPlan.business, orders: 510, users: 3), taxIds: 2);
-    expect(find.text('Você passou de 500 OS este mês. Fale com a gente para ajustar o plano.'), findsOneWidget);
+    expect(find.text('Este mês já passou das 500 OS incluídas no Business.'), findsOneWidget);
     expect(find.text('O que o Business dá a mais'), findsNothing);
     expect(find.text('CNPJs na nota fiscal'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);

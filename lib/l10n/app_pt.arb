@@ -3493,9 +3493,9 @@
   "@planNoticeOrdersGrace": {"placeholders": {"limit": {"type": "String"}}},
   "planNoticeOrdersBlocked": "Passou de {limit} OS de novo. As OS abertas continuam normais; a nova espera você mudar de plano.",
   "@planNoticeOrdersBlocked": {"placeholders": {"limit": {"type": "String"}}},
-  "planNoticeOrdersContactUs": "Você passou de {limit} OS este mês. Fale com a gente para ajustar o plano.",
+  "planNoticeOrdersContactUs": "Este mês já passou das {limit} OS incluídas no Business.",
   "@planNoticeOrdersContactUs": {"placeholders": {"limit": {"type": "String"}}},
-  "planNoticePeopleContactUs": "A equipe passou de {limit} pessoas. Fale com a gente para ajustar o plano.",
+  "planNoticePeopleContactUs": "A equipe já passou das {limit} pessoas incluídas no Business.",
   "@planNoticePeopleContactUs": {"placeholders": {"limit": {"type": "String"}}},
   "planNextTitle": "O que o {plan} dá a mais",
   "@planNextTitle": {"placeholders": {"plan": {"type": "String"}}}
