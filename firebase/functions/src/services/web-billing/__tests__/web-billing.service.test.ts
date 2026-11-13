@@ -18,7 +18,7 @@ import type { WebBillingRecord } from '../web-billing-rules';
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
 
 const NOW = new Date('2026-11-13T15:00:00.000Z');
-const LIMITS = { photosPerMonth: -1, formTemplates: -1, users: 5, pdfWatermark: false };
+const LIMITS = { photosPerMonth: -1, formTemplates: -1, users: 5, ordersPerMonth: -1, pdfWatermark: false };
 const USAGE = { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1, usageResetAt: '2026-12-01T00:00:00.000Z' };
 const INPUT: CheckoutInput = {
   plan: 'pro',

@@ -16,7 +16,7 @@ import type { RcSubscriber } from '../../revenuecat.client';
 import type { Subscription } from '../../../models/types';
 
 const NOW = new Date('2026-11-13T15:00:00.000Z');
-const LIMITS = { photosPerMonth: -1, formTemplates: -1, users: 5, pdfWatermark: false };
+const LIMITS = { photosPerMonth: -1, formTemplates: -1, users: 5, ordersPerMonth: -1, pdfWatermark: false };
 const USAGE = { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1, usageResetAt: '2026-12-01T00:00:00.000Z' };
 
 const RECORD: WebBillingRecord = {
