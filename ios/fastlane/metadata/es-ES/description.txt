@@ -39,8 +39,16 @@ A TU MANERA
 • Modo oscuro y texto grande
 • Inicia sesión con Apple, Google o email
 
-PLANES Y SUSCRIPCIONES
-PraticOS es gratuito para empezar. El plan Gratuito tiene límites mensuales de fotos, checklists y uso de la IA. Los planes Starter, Pro y Business aumentan esos límites y son suscripciones mensuales con renovación automática, compradas dentro de la app.
+PLANES
+Empieza gratis, con la IA incluida en todos los planes. Cuando crezca tu trabajo, elige un plan. Cada plan tiene todo lo del anterior, y además:
+• Gratis, para empezar: hasta 10 órdenes al mes, presupuestos por WhatsApp, aprobación por enlace, agenda y financiero.
+• Starter, para quien trabaja solo y emite factura: hasta 50 órdenes al mes y 2 personas, factura de servicio (NFS-e, Brasil), PDF y recibo solo con tu marca, tus propios checklists, petición de valoración y cobros al cliente.
+• Pro, para un equipo pequeño: hasta 150 órdenes al mes y 5 personas, lo que cada uno puede ver y hacer, agenda de cada persona, etapas del trabajo, panel en la TV, contratos, IA en el financiero e informes en hoja de cálculo.
+• Business, para empresas: 20 personas y 500 órdenes al mes incluidas, acciones en varias órdenes a la vez, conexión con ChatGPT y Claude, y API.
+¿Te pasaste del límite un mes? Te avisamos antes y ninguna orden abierta se bloquea.
+
+SUSCRIPCIONES
+Starter, Pro y Business son suscripciones con renovación automática, mensuales o anuales (en el anual pagas 10 meses y usas 12), compradas dentro de la app.
 • El pago se carga a tu cuenta de Apple al confirmar la compra.
 • La suscripción se renueva automáticamente, salvo que se cancele al menos 24 horas antes del final del período actual.
 • Gestiona o cancela tu suscripción en cualquier momento en los ajustes de tu cuenta de la App Store.

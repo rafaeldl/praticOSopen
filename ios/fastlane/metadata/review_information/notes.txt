@@ -3,10 +3,11 @@ IN-APP PURCHASE (GUIDELINE 3.1.1) - PLEASE READ
 PraticOS is a personal work-order tool for independent service professionals (air-conditioning technicians, mechanics, phone repair, cleaning, etc.). There is no business or organization registration in the app: on first launch the user picks their line of work and, optionally, the name their customers will see on work orders. Everything after that is the user's own account.
 
 All paid features are sold only through In-App Purchase:
-- The Free plan has monthly limits on photos, checklist templates and people on the account. Paid plans raise these limits and remove the watermark from PDF work orders.
+- The Free plan includes up to 10 work orders a month, 1 person on the account, the checklists of the chosen line of work and the AI assistant (included in every plan). PDF work orders carry the PraticOS brand.
+- Paid plans raise these limits and add features: Starter (up to 50 work orders a month, 2 people, service invoices, PDFs with only the user's brand, own checklists), Pro (up to 150 work orders a month, 5 people, roles, a schedule per person, job stages, TV board, contracts) and Business (20 people and 500 work orders a month included, bulk actions, ChatGPT/Claude connection and API).
 - Inviting another person to work on the same account ("Equipe") is a paid feature. On the Free plan, tapping "Convidar" shows the plan limit with a "Ver planos" (View plans) button that opens the In-App Purchase plans.
-- Paid plans are auto-renewable monthly subscriptions sold through In-App Purchase: Starter, Pro and Business (subscription group "PraticOS").
-- Paid plans cannot be bought anywhere else from the app: the app has no external purchase links or calls to action, and the website shows no prices.
+- Paid plans are auto-renewable subscriptions sold through In-App Purchase, each one monthly or yearly: Starter, Pro and Business (subscription group "PraticOS", product IDs praticos_starter_monthly, praticos_starter_annual, praticos_pro_monthly, praticos_pro_annual, praticos_business_monthly, praticos_business_annual).
+- Paid plans cannot be bought anywhere else from the app: the app has no external purchase links or calls to action.
 
 Where to find the paywall:
 1. Sign in with the demo account (steps below).

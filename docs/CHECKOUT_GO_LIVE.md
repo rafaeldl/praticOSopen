@@ -66,13 +66,18 @@ gh pr merge 230 --squash --delete-branch
 
 1. Ir em **App > Subscriptions**
 2. Criar Subscription Group: `PraticOS Plans`
-3. Criar 3 produtos:
+3. Criar os 6 produtos:
 
-| Product ID | Nome Exibicao | Preco | Trial |
-|------------|---------------|-------|-------|
-| `praticos_starter_monthly` | Starter | R$ 59,00/mes | 7 dias |
-| `praticos_pro_monthly` | Pro | R$ 119,00/mes | 7 dias |
-| `praticos_business_monthly` | Business | R$ 249,00/mes | 7 dias |
+| Product ID | Plano | Preco | Teste gratis |
+|------------|-------|-------|--------------|
+| `praticos_starter_monthly` | Starter | R$ 59,90/mes | Nao |
+| `praticos_starter_annual` | Starter | R$ 599,00/ano | Nao |
+| `praticos_pro_monthly` | Pro | R$ 119,90/mes | Nao |
+| `praticos_pro_annual` | Pro | R$ 1.199,00/ano | Nao |
+| `praticos_business_monthly` | Business | R$ 249,90/mes | Nao |
+| `praticos_business_annual` | Business | R$ 2.499,00/ano | Nao |
+
+Nomes, descricoes e o restante do passo a passo: `docs/STORE_PLANS_SETUP.md`.
 
 4. Adicionar localizacao pt-BR para cada produto:
    - Nome de exibicao e descricao
@@ -85,13 +90,18 @@ gh pr merge 230 --squash --delete-branch
 **Acesso necessario:** Admin
 
 1. Ir em **Monetization > Products > Subscriptions**
-2. Criar 3 produtos com os **mesmos IDs**:
+2. Criar os 6 produtos com os **mesmos IDs**:
 
-| Product ID | Nome Exibicao | Preco | Trial |
-|------------|---------------|-------|-------|
-| `praticos_starter_monthly` | Starter | R$ 59,00/mes | 7 dias |
-| `praticos_pro_monthly` | Pro | R$ 119,00/mes | 7 dias |
-| `praticos_business_monthly` | Business | R$ 249,00/mes | 7 dias |
+| Product ID | Plano | Preco | Teste gratis |
+|------------|-------|-------|--------------|
+| `praticos_starter_monthly` | Starter | R$ 59,90/mes | Nao |
+| `praticos_starter_annual` | Starter | R$ 599,00/ano | Nao |
+| `praticos_pro_monthly` | Pro | R$ 119,90/mes | Nao |
+| `praticos_pro_annual` | Pro | R$ 1.199,00/ano | Nao |
+| `praticos_business_monthly` | Business | R$ 249,90/mes | Nao |
+| `praticos_business_annual` | Business | R$ 2.499,00/ano | Nao |
+
+Nomes, descricoes e o restante do passo a passo: `docs/STORE_PLANS_SETUP.md`.
 
 3. Criar **Service Account** para RevenueCat:
    - Google Cloud Console > IAM > Service Accounts
