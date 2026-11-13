@@ -27,15 +27,19 @@ import {
   refundEligible,
   saoPauloDate,
   subscriptionIdOf,
+  subscriptionInvoiceDecision,
+  webInvoiceDescription,
   webOffer,
   type BillingWebhookEvent,
   type WebBillingRecord,
   type WebBillingType,
   type WebCheckoutConfig,
   type WebCycle,
+  type WebInvoiceIssuer,
   type WebPlan,
 } from './web-billing-rules';
 import { readWebBilling, webBillingRef } from './web-origin';
+import { requestChargeInvoice, requestChargeInvoiceCancel } from '../nfse/charge-invoice.service';
 
 type BillingAsaasClient = Pick<
   AsaasClient,
@@ -77,6 +81,26 @@ const CYCLE_LABEL: Record<WebCycle, string> = { monthly: 'mensal', yearly: 'anua
 export async function readWebCheckoutConfig(): Promise<WebCheckoutConfig> {
   const snapshot = await db.collection('config').doc('webCheckout').get();
   return parseWebCheckoutConfig(snapshot.exists ? (snapshot.data() as Record<string, unknown>) : null);
+}
+
+/**
+ * The company that issues the notas of a new subscription through PraticOS,
+ * or null for Asaas: only when config/webCheckout says 'praticos', names the
+ * company and that company has the NFS-e direct on. Otherwise the Asaas
+ * invoice settings stay (never a subscription without a nota engine).
+ */
+export async function praticosInvoiceIssuer(config: WebCheckoutConfig): Promise<WebInvoiceIssuer | null> {
+  if (config.invoiceSource !== 'praticos') return null;
+  if (!config.invoiceIssuer) {
+    console.warn('[WebBilling] invoiceSource praticos without invoiceIssuerCompanyId: Asaas issues');
+    return null;
+  }
+  const payments = await db.collection('companies').doc(config.invoiceIssuer.companyId).collection('settings').doc('payments').get();
+  if (payments.get('nfseDirectEnabled') !== true) {
+    console.warn('[WebBilling] invoice issuer without the NFS-e direct on: Asaas issues', { issuer: config.invoiceIssuer.companyId });
+    return null;
+  }
+  return config.invoiceIssuer;
 }
 
 async function readCompany(companyId: string): Promise<{ subscription: Subscription | undefined; country: string | null }> {
@@ -243,10 +267,14 @@ export async function startCheckout(
     const first = payments.find((payment) => payment.invoiceUrl);
     if (!first) throw new WebBillingError('ASAAS_UNAVAILABLE', 502, 'Asaas did not create the first charge');
 
-    // Rafsoft's NFS-e for each paid charge. Set per subscription in Asaas; a
-    // failure here never blocks the sale (the note can be issued by hand).
+    // Rafsoft's NFS-e for each paid charge: by PraticOS (the webhook asks for
+    // it) or set per subscription in Asaas. A failure here never blocks the
+    // sale (the note can be issued by hand).
+    const issuer = await praticosInvoiceIssuer(config);
     let invoiceSettings: WebBillingRecord['invoiceSettings'] = 'off';
-    if (config.invoice) {
+    if (issuer) {
+      // PraticOS issues: no Asaas invoice settings, so never two notas.
+    } else if (config.invoice) {
       try {
         await deps.asaas.createSubscriptionInvoiceSettings(created.id, invoiceSettingsFor(config.invoice));
         invoiceSettings = 'ok';
@@ -275,6 +303,9 @@ export async function startCheckout(
       asaasSubscriptionId: created.id,
       checkoutUrl: first.invoiceUrl,
       invoiceSettings,
+      invoiceSource: issuer ? 'praticos' : 'asaas',
+      invoiceIssuer: issuer,
+      invoiceRecipient: { name: input.name.trim(), taxId, email: input.email.trim() || null },
       createdAt: nowIso,
       createdBy: userId,
       updatedAt: nowIso,
@@ -372,6 +403,67 @@ export async function cancelWebSubscription(
 
 export type BillingEventResult = 'duplicate' | 'ignored' | 'done';
 
+/** Key of the nota of one Asaas payment (one nota per payment). */
+export const webInvoiceChargeKey = (paymentId: string) => `webBilling-${paymentId}`;
+
+/**
+ * A payment of a subscription whose notas PraticOS issues: asks the issuer's
+ * NFS-e direct for the nota (idempotent by payment: CONFIRMED then RECEIVED,
+ * or a webhook retry, ask once). Asaas subscriptions: nothing (Asaas issues).
+ */
+async function requestSubscriptionInvoice(
+  companyId: string,
+  record: WebBillingRecord,
+  action: { paymentId: string; dueDate: string; value: number },
+  now: Date,
+): Promise<void> {
+  if (record.invoiceSource !== 'praticos' || !record.invoiceIssuer?.companyId) return;
+  const ref = webBillingRef(companyId);
+  const country = ((await db.collection('companies').doc(companyId).get()).get('country') as string | undefined) ?? null;
+  if (!record.invoiceRecipient || subscriptionInvoiceDecision(country, record.invoiceRecipient) === 'abroad') {
+    // Outside Brazil: no nota for now. The payment is recorded as such; no error, no retry.
+    await ref.update({ [`payments.${action.paymentId}.invoice`]: 'abroad' });
+    console.log('[WebBilling] subscriber outside Brazil: payment without nota', { companyId, paymentId: action.paymentId });
+    return;
+  }
+  await ref.update({ [`payments.${action.paymentId}.invoice`]: 'requested' });
+  await requestChargeInvoice(
+    record.invoiceIssuer.companyId,
+    {
+      charge: { key: webInvoiceChargeKey(action.paymentId), source: 'webBilling', paymentId: action.paymentId },
+      payerCompanyId: companyId,
+      value: action.value,
+      description: webInvoiceDescription(record.plan, record.cycle, action.dueDate),
+      recipient: record.invoiceRecipient,
+      emitterId: record.invoiceIssuer.emitterId ?? null,
+    },
+    now,
+  );
+}
+
+/**
+ * The money of a payment went back (PAYMENT_REFUNDED): its PraticOS nota is
+ * canceled (or never issued). A chargeback keeps the nota: the dispute may be
+ * won; the owner cancels by hand if it is lost.
+ */
+async function cancelSubscriptionInvoice(
+  companyId: string,
+  record: WebBillingRecord,
+  action: { paymentId: string; reason: 'refund' | 'chargeback' },
+  now: Date,
+): Promise<void> {
+  if (record.invoiceSource !== 'praticos' || !record.invoiceIssuer?.companyId) return;
+  if (action.reason !== 'refund') {
+    console.warn('[WebBilling] chargeback: the PraticOS nota stays (cancel by hand if the dispute is lost)', {
+      companyId,
+      paymentId: action.paymentId,
+    });
+    return;
+  }
+  const result = await requestChargeInvoiceCancel(record.invoiceIssuer.companyId, webInvoiceChargeKey(action.paymentId), now);
+  console.log('[WebBilling] nota cancel after refund', { companyId, paymentId: action.paymentId, result });
+}
+
 const eventDocId = (id: string) => id.replace(/\//g, '_').slice(0, 300);
 
 /**
@@ -419,6 +511,7 @@ export async function handleBillingEvent(event: BillingWebhookEvent, deps: WebBi
         },
         updatedAt: nowIso,
       });
+      await requestSubscriptionInvoice(companyId, record, action, now);
       await deps.grant(companyId, record.plan, Date.parse(paidUntil));
       await deps.sync(companyId);
     } else if (action.kind === 'revoke') {
@@ -437,6 +530,7 @@ export async function handleBillingEvent(event: BillingWebhookEvent, deps: WebBi
         [`payments.${action.paymentId}.refundedAt`]: nowIso,
         updatedAt: nowIso,
       });
+      await cancelSubscriptionInvoice(companyId, record, action, now);
       await deps.revoke(companyId, record.plan);
       await deps.sync(companyId);
     } else if (action.kind === 'markCancelled') {
