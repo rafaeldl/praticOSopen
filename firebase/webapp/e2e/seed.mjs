@@ -541,6 +541,8 @@ async function seedWebAccess() {
     open: false,
     allowedEmailHashes: Object.values(USERS).filter((user) => !user.blocked).map((user) => hash(user.email)),
   })
+  // The e-mail blockSuspiciousSignups refuses (entry.spec, auth.signup.blocked).
+  await db.doc('config/signup').set({ blockedEmails: ['robo.12345@gmail.com'] })
 }
 
 // Fatia 07: the plan, the payments pilot and the team company's invites.

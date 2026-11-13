@@ -28,7 +28,9 @@
     "webApp": true,
     "softwareItPage": false,
     "nfsePage": true,
-    "pricingPage": false
+    "pricingPage": false,
+    "webSignup": false
   },
-  "webAppUrl": "/web"
+  "webAppUrl": "/web",
+  "webSignupUrl": "/web/login?signup=1"
 }

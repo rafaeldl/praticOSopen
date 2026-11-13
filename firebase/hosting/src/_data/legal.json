@@ -4,7 +4,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidade",
       "subtitle": "Saiba como coletamos, usamos e protegemos seus dados",
-      "lastUpdated": "Última atualização: 11 de novembro de 2026",
+      "lastUpdated": "Última atualização: 13 de novembro de 2026",
       "sections": [
         {
           "title": "Introdução",
@@ -71,6 +71,15 @@
           ]
         },
         {
+          "title": "Cookies e estatísticas de uso",
+          "paragraphs": [
+            "<strong>No site (praticos.app):</strong> usamos o Google Analytics e as medições de anúncios do Google Ads e da Meta (Facebook). Elas gravam cookies no seu navegador para contar as páginas visitadas e saber de qual anúncio a pessoa veio. Não recebem o que você cadastra no PraticOS. Você pode bloquear ou apagar esses cookies nas configurações do navegador.",
+            "<strong>No app web (praticos.app/web):</strong> o navegador guarda o seu login e uma cópia dos dados que você abriu, para o app abrir rápido e mostrar a última cópia quando a internet cai. Sem isso o app não funciona. A cópia é apagada quando você sai da conta.",
+            "<strong>Estatísticas de uso do app web:</strong> só são enviadas se você tocar em \"Aceitar\" no aviso de estatísticas. Elas vão para o Google Analytics e contam as telas abertas e os botões tocados, sem nome, telefone nem e-mail. Se você recusar ou não responder, nada é enviado. Dá para mudar a escolha em Configurações.",
+            "<strong>No app do celular:</strong> o Firebase Analytics (Google) conta as telas abertas e os botões tocados, também sem nome, telefone nem e-mail."
+          ]
+        },
+        {
           "title": "Segurança dos Dados",
           "paragraphs": [
             "Implementamos medidas de segurança robustas para proteger suas informações:"
@@ -125,7 +134,7 @@
       "title": "Privacy",
       "titleHighlight": "Policy",
       "subtitle": "Learn how we collect, use, and protect your data",
-      "lastUpdated": "Last updated: November 11, 2026",
+      "lastUpdated": "Last updated: November 13, 2026",
       "sections": [
         {
           "title": "Introduction",
@@ -192,6 +201,15 @@
           ]
         },
         {
+          "title": "Cookies and usage statistics",
+          "paragraphs": [
+            "<strong>On the website (praticos.app):</strong> we use Google Analytics and the ad measurement of Google Ads and Meta (Facebook). They store cookies in your browser to count the pages visited and learn which ad a visitor came from. They do not receive what you register in PraticOS. You can block or delete these cookies in your browser settings.",
+            "<strong>In the web app (praticos.app/web):</strong> the browser keeps your sign-in and a copy of the data you opened, so the app opens fast and shows the last copy when the internet drops. The app does not work without this. The copy is deleted when you sign out.",
+            "<strong>Web app usage statistics:</strong> sent only if you tap \"Accept\" on the statistics notice. They go to Google Analytics and count the screens opened and the buttons tapped, with no name, phone or e-mail. If you decline or do not answer, nothing is sent. You can change your choice in Settings.",
+            "<strong>In the mobile app:</strong> Firebase Analytics (Google) counts the screens opened and the buttons tapped, also with no name, phone or e-mail."
+          ]
+        },
+        {
           "title": "Data Security",
           "paragraphs": [
             "We implement robust security measures to protect your information:"
@@ -217,7 +235,7 @@
       "title": "Política de",
       "titleHighlight": "Privacidad",
       "subtitle": "Conozca cómo recopilamos, usamos y protegemos sus datos",
-      "lastUpdated": "Última actualización: 11 de noviembre de 2026",
+      "lastUpdated": "Última actualización: 13 de noviembre de 2026",
       "sections": [
         {
           "title": "Introducción",
@@ -281,6 +299,15 @@
             "Las facturas leídas del sistema nacional traen datos de tus clientes y proveedores, como nombre o razón social, identificación fiscal y dirección. PraticOS usa esos datos solo para mostrar el historial de facturas y completar tus registros, y tú los revisas antes de aplicarlos.",
             "Puedes borrar el certificado cuando quieras. En hasta 24 horas ya no se puede abrir, ni desde copias de respaldo. También se borra cuando se elimina la cuenta y 90 días después de vencer. La base legal es la ejecución del servicio que contrataste (art. 7, V, de la LGPD), y tu aceptación de los términos del certificado queda registrada con la fecha y la versión.",
             "Detalles en los <a href=\"termo-certificado-es.html\">Términos de uso del certificado digital</a>."
+          ]
+        },
+        {
+          "title": "Cookies y estadísticas de uso",
+          "paragraphs": [
+            "<strong>En el sitio (praticos.app):</strong> usamos Google Analytics y la medición de anuncios de Google Ads y Meta (Facebook). Guardan cookies en su navegador para contar las páginas visitadas y saber de qué anuncio vino la persona. No reciben lo que usted registra en PraticOS. Puede bloquear o borrar esas cookies en la configuración del navegador.",
+            "<strong>En la app web (praticos.app/web):</strong> el navegador guarda su inicio de sesión y una copia de los datos que abrió, para que la app abra rápido y muestre la última copia cuando se cae internet. Sin esto la app no funciona. La copia se borra cuando usted cierra la sesión.",
+            "<strong>Estadísticas de uso de la app web:</strong> solo se envían si usted toca \"Aceptar\" en el aviso de estadísticas. Van a Google Analytics y cuentan las pantallas abiertas y los botones tocados, sin nombre, teléfono ni correo. Si rechaza o no responde, no se envía nada. Puede cambiar la elección en Configuración.",
+            "<strong>En la app del celular:</strong> Firebase Analytics (Google) cuenta las pantallas abiertas y los botones tocados, también sin nombre, teléfono ni correo."
           ]
         },
         {

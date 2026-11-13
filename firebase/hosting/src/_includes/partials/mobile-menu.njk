@@ -40,5 +40,6 @@
             <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         </button>
     </div>
-    <a href="{% if isHomepage %}#baixar{% else %}{{ homeHref }}#baixar{% endif %}" class="btn btn--primary" data-ga="select_content" data-ga-detail="navbar_cta_mobile">{{ nav.cta }}</a>
+    {% if site.flags.webSignup %}<a href="{{ site.webSignupUrl }}" class="btn btn--primary on-desktop" data-ga="select_content" data-ga-detail="navbar_signup_mobile">{{ nav.ctaSignup }}</a>{% endif %}
+    <a href="{% if isHomepage %}#baixar{% else %}{{ homeHref }}#baixar{% endif %}" class="btn btn--primary{% if site.flags.webSignup %} on-phone{% endif %}" data-ga="select_content" data-ga-detail="navbar_cta_mobile">{{ nav.cta }}</a>
 </div>

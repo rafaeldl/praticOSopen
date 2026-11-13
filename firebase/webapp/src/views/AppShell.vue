@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Side navigation on computers, tabs on phones. Same entries, filtered by permission.
-import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, Moon, Plus, Search, Settings, Sun, User, UserPlus } from '@lucide/vue'
 import AppLogo from '@/components/AppLogo.vue'
@@ -14,7 +14,8 @@ import { canOpen, router } from '@/router'
 import { planNotice, watchPlanSwitch } from '@/lib/plan-feature-gate'
 import { ui } from '@/lib/ui'
 import { isDark, toggleTheme } from '@/lib/prefs'
-import { NAV } from '@/navigation'
+import { visibleNav } from '@/navigation'
+import { nfseOnFor } from '@/lib/nfse/availability'
 import { canCreateOrders } from '@/lib/orders/model'
 import { initials } from '@/lib/initials'
 import { acceptOffer, declineOffer, listenToWorker, pushOffer, syncThisBrowser, type ForegroundNotice } from '@/lib/push'
@@ -66,7 +67,18 @@ onBeforeUnmount(() => removeNewOrderKeys.forEach((remove) => remove()))
 const moreOpen = ref(false)
 const online = ref(navigator.onLine)
 
-const entries = computed(() => NAV.filter((entry) => canAny(entry.access.anyOf)))
+const entries = computed(() => visibleNav(canAny, { nfse: nfseOnFor(session.companyId) }))
+// "Notas fiscais" needs the company's nota on: read it once per company, only for who sees the entry.
+watch(
+  () => [session.companyId, can('chargeOrder')] as const,
+  ([companyId, charges]) => {
+    if (!companyId || !charges || nfseOnFor(companyId)) return
+    import('@/lib/nfse/data')
+      .then(({ nfseSettings }) => nfseSettings())
+      .catch((error) => console.warn('nav: nota setting not read', error))
+  },
+  { immediate: true },
+)
 const tabs = computed(() => entries.value.filter((entry) => entry.tab))
 const moreEntries = computed(() => entries.value.filter((entry) => !entry.tab))
 const isCurrent = (path: string) => (path === '/' ? route.path === '/' : route.path.startsWith(path))

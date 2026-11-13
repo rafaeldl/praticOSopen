@@ -13,12 +13,24 @@ const openEmail = async (page: Page) => {
   await page.getByRole('button', { name: 'Já tenho conta com e-mail' }).click()
 }
 
+test('vindo do "Criar conta" do site: a mesma entrada, falando com quem é novo', async ({ page }) => {
+  await page.goto('login?signup=1')
+  await expect(page.getByRole('heading', { level: 1, name: 'Criar sua conta' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuar com Google' })).toBeVisible()
+  await expect(page.getByTestId('login-legal').getByRole('link', { name: 'Termos de Uso' })).toBeVisible()
+})
+
 test('tela de entrada: e-mail validado antes de enviar, senha que se mostra, aviso de conta nova e Política de Privacidade (auth.login.view, auth.login.open-email, auth.email.signin, auth.email.toggle-password, auth.email.new-account-hint, auth.login.privacy)', async ({ page }) => {
   await page.goto('login')
-  await expect(page.getByRole('heading', { level: 1, name: 'Entrar no PraticOS' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Entrar ou criar conta' })).toBeVisible()
+  // Talks to who is new too (launch for everyone), not only to who has the phone app.
+  await expect(page.getByText('Novo no PraticOS? Continue com o Google ou a Apple')).toBeVisible()
   const privacy = page.getByRole('link', { name: 'Política de Privacidade' })
   await expect(privacy).toHaveAttribute('href', '/privacy.html')
   await expect(privacy).toHaveAttribute('target', '_blank')
+  const terms = page.getByTestId('login-legal').getByRole('link', { name: 'Termos de Uso' })
+  await expect(terms).toHaveAttribute('href', '/terms.html')
+  await expect(terms).toHaveAttribute('target', '_blank')
   await page.getByRole('button', { name: 'Já tenho conta com e-mail' }).click()
   await expect(page.getByTestId('new-account-hint')).toBeVisible()
 
@@ -74,7 +86,7 @@ test('cadastro recusado pelo servidor tem frase própria, não a do Google (auth
   test.setTimeout(60_000)
   await page.goto('login')
   await page.getByRole('button', { name: 'Continuar com Google' }).click()
-  // The pattern blockSuspiciousSignups refuses (firebase/functions/src/index.ts).
+  // Listed in config/signup.blockedEmails (seed.mjs): blockSuspiciousSignups refuses it.
   await signInOnEmulatorPage(page, 'robo.12345@gmail.com')
   await expect(page.getByRole('alert')).toHaveText(
     'O cadastro não foi aceito. Se você já tem conta, entre com ela; se não, fale com o suporte do PraticOS.',
